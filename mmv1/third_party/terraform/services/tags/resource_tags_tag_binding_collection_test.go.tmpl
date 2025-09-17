@@ -5,14 +5,19 @@ package tags_test
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"net/url"
 	"regexp"
 	"testing"
 
+	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/envvar"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/services/tags"
 )
 
@@ -61,7 +66,7 @@ func TestAccTagsTagBindingCollection_basic(t *testing.T) {
 				ResourceName:            "google_tags_tag_binding_collection.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"tags"},
 			},
 			// Step 3: Update - modify one tag, remove one tag, add one tag
 			{
@@ -86,6 +91,56 @@ func TestAccTagsTagBindingCollection_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.basic", "tags.%", "0"),
 					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.basic", "active_tags.%", "0"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccTagsTagBindingCollection_destroy(t *testing.T) {
+	t.Parallel()
+
+	orgId := envvar.GetTestOrgFromEnv(t)
+	context := map[string]interface{}{
+		"org_id":                         orgId,
+		"key_a_short":    "tf-test-ka-" + acctest.RandString(t, 6),
+		"val_a_short":    "tf-test-va-" + acctest.RandString(t, 6),
+		"key_b_short":    "tf-test-kb-" + acctest.RandString(t, 6),
+		"val_b_short":    "tf-test-vb-" + acctest.RandString(t, 6),
+		"project_id":                     "tf-test-" + acctest.RandString(t, 10),
+	}
+
+	keyANamespaced := fmt.Sprintf("%s/%s", orgId, context["key_a_short"])
+	keyBNamespaced := fmt.Sprintf("%s/%s", orgId, context["key_b_short"])
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			// Step 1: Create collection with TagA and a separate binding with TagB
+			{
+				Config: testAccTagsTagBindingCollection_destroyStep1(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.test", "tags.%", "1"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.test", "active_tags.%", "2"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.test", fmt.Sprintf("tags.%s", keyANamespaced), context["val_a_short"].(string)),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.test", fmt.Sprintf("active_tags.%s", keyANamespaced), context["val_a_short"].(string)),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.test", fmt.Sprintf("active_tags.%s", keyBNamespaced), context["val_b_short"].(string)),
+					resource.TestMatchResourceAttr("google_tags_tag_binding_collection.test", "id", regexp.MustCompile(fmt.Sprintf("locations/global/tagBindingCollections/.+"))),
+					resource.TestMatchResourceAttr("google_tags_tag_binding_collection.test", "name", regexp.MustCompile(fmt.Sprintf("locations/global/tagBindingCollections/.+"))),
+				),
+			},
+			// Step 2: Destroy the collection resource
+			{
+				Config: testAccTagsTagBindingCollection_destroyStep2(context),
+				Check: resource.ComposeTestCheckFunc(
+					// Collection is deleted from state, so we need a custom check on the API
+					// We check that the "other_binding" binding (TagB) still exists.
+					// This check is implicitly done by Terraform not erroring on the google_tags_tag_binding.other_binding resource.
+
+					// We also need to verify TagA is deleted. This requires a custom API check
+					// within a CheckFunc, as the collection resource is no longer in the state.
+					testAccCheckTagADeleted(t, context),
 				),
 			},
 		},
@@ -292,6 +347,146 @@ resource "google_tags_tag_binding_collection" "basic" {
 `, context)
 }
 
+func testAccTagsTagBindingCollection_destroyStep1(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_project" "project" {
+  provider = google-beta 
+  project_id      = "%{project_id}"
+  name            = "%{project_id}"
+  org_id          = "%{org_id}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_tags_tag_key" "key_a" {
+  provider = google-beta
+  parent = "organizations/%{org_id}"
+  short_name = "%{key_a_short}" 
+}
+resource "google_tags_tag_value" "val_a" {
+  provider = google-beta
+  parent = google_tags_tag_key.key_a.id
+  short_name = "%{val_a_short}"
+}
+resource "google_tags_tag_key" "key_b" {
+  provider = google-beta
+  parent = "organizations/%{org_id}"
+  short_name = "%{key_b_short}"
+}
+resource "google_tags_tag_value" "val_b" {
+  provider = google-beta
+  parent = google_tags_tag_key.key_b.id
+  short_name = "%{val_b_short}"
+}
+
+resource "google_tags_tag_binding" "other_binding" {
+  provider = google-beta 
+  parent    = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
+  tag_value = google_tags_tag_value.val_b.id
+  depends_on = [google_tags_tag_value.val_a, google_tags_tag_value.val_b]
+}
+
+resource "google_tags_tag_binding_collection" "test" {
+  provider = google-beta
+  full_resource_name    = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
+  location  = "global"
+  tags      = {
+    "${google_tags_tag_key.key_a.namespaced_name}" = google_tags_tag_value.val_a.short_name
+  }
+  depends_on = [google_tags_tag_value.val_a, google_tags_tag_value.val_b, google_tags_tag_binding.other_binding]
+}
+`, context)
+}
+
+func testAccTagsTagBindingCollection_destroyStep2(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_project" "project" {
+  provider = google-beta
+  project_id      = "%{project_id}"
+  name            = "%{project_id}"
+  org_id          = "%{org_id}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_tags_tag_key" "key_a" {
+  provider = google-beta
+  parent = "organizations/%{org_id}"
+  short_name = "%{key_a_short}" 
+}
+resource "google_tags_tag_value" "val_a" {
+  provider = google-beta
+  parent = google_tags_tag_key.key_a.id
+  short_name = "%{val_a_short}"
+}
+resource "google_tags_tag_key" "key_b" {
+  provider = google-beta
+  parent = "organizations/%{org_id}"
+  short_name = "%{key_b_short}"
+}
+resource "google_tags_tag_value" "val_b" {
+  provider = google-beta
+  parent = google_tags_tag_key.key_b.id
+  short_name = "%{val_b_short}"
+}
+
+resource "google_tags_tag_binding" "other_binding" {
+  provider = google-beta 
+  parent    = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
+  tag_value = google_tags_tag_value.val_b.id
+  depends_on = [google_tags_tag_value.val_a, google_tags_tag_value.val_b]
+}
+`, context)
+}
+
+func testAccCheckTagADeleted(t *testing.T, contextMap map[string]interface{}) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+		orgId := contextMap["org_id"].(string)
+		keyANamespaced := fmt.Sprintf("%s/%s", orgId, contextMap["key_a_short"])
+
+		var projectNumber string
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type == "google_project" {
+				projectNumber = rs.Primary.Attributes["number"]
+				break
+			}
+		}
+		if projectNumber == "" {
+			return fmt.Errorf("Could not find project number in state")
+		}
+
+		resourceName := fmt.Sprintf("//cloudresourcemanager.googleapis.com/projects/%s", projectNumber)
+		encodedResourceName := url.PathEscape(resourceName)
+		location := "global"
+
+		headers := make(http.Header)
+		apiURL := fmt.Sprintf("%slocations/%s/tagBindingCollections/%s", config.TagsBasePath, location, encodedResourceName)
+
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:  config,
+			Method:  "GET",
+			RawURL:  apiURL,
+			Headers: headers,
+		})
+
+		if err != nil {
+			if dcl.IsNotFound(err) {
+				return nil
+			}
+			return fmt.Errorf("Error reading TagBindingCollection: %s", err)
+		}
+
+		if res != nil && res["tags"] != nil {
+			activeTagsIFace, ok := res["tags"].(map[string]interface{})
+			if ok {
+				if _, exists := activeTagsIFace[keyANamespaced]; exists {
+					return fmt.Errorf("Tag %s should have been removed, but still exists in the collection", keyANamespaced)
+				}
+			}
+		}
+		return nil
+	}
+}
+
 // Unit Tests
 
 func TestResourceTagsTagBindingCollectionImport(t *testing.T) {
@@ -319,11 +514,11 @@ func TestResourceTagsTagBindingCollectionImport(t *testing.T) {
 			ExpectError:   false,
 		},
 		{
-			Name:          "RegionalImportFolder",
-			ImportID:      "locations/us-central1/tagBindingCollections/%2F%2Fcloudresourcemanager.googleapis.com%2Ffolders%2F456",
-			ExpectedID:    "locations/us-central1/tagBindingCollections/%2F%2Fcloudresourcemanager.googleapis.com%2Ffolders%2F456",
-			ExpectedLoc:   "us-central1",
-			ExpectedResourceName:  "//cloudresourcemanager.googleapis.com/folders/456",
+			Name:          "ZonalImportComputeInstance",
+			ImportID:      "locations/us-central1-a/tagBindingCollections/%2F%2Fcompute.googleapis.com/projects%2F123%2Fzones%2Fus-central1-a%2Finstances%2F456",
+			ExpectedID:    "locations/us-central1-a/tagBindingCollections/%2F%2Fcompute.googleapis.com/projects%2F123%2Fzones%2Fus-central1-a%2Finstances%2F456",
+			ExpectedLoc:   "us-central1-a",
+			ExpectedResourceName:  "//compute.googleapis.com/projects/123/zones/us-central1-a/instances/456",
 			ExpectError:   false,
 		},
 		{
@@ -382,7 +577,6 @@ func TestResourceTagsTagBindingCollectionImport(t *testing.T) {
 	}
 }
 
-// TODO: Add more unit tests for Upsert logic, mocking API calls.
-// func TestResourceTagsTagBindingCollectionUpsert_MergeLogic(t *testing.T) { ... }
+// TODO: Add more unit tests for Upsert and Delete logic, mocking API calls.
 
 {{- end }}
