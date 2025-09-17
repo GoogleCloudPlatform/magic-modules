@@ -2,6 +2,7 @@ package workbench_test
 
 import (
 	"testing"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
