@@ -75,7 +75,7 @@ The following arguments are supported:
 
 * `location` -
   (Required)
-  The location of the target resource. Defaults to "global".
+  The location of the target resource. E.g. "global", "us-central1", "us-east2-c".
 
 - - -
 
