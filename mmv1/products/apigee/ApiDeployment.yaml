@@ -68,14 +68,14 @@ update_mask: false
 
 # If true, code for handling long-running operations is generated along with
 # the resource. If false, that code is not generated.
-autogen_async: true
+# autogen_async: true
 # Sets parameters for handling operations returned by the API.
-async:
-  # Overrides which API calls return operations. Default: ['create',
-  # 'update', 'delete']
-  # actions: ['create', 'update', 'delete']
-  operation:
-    base_url: '{{op_id}}'
+# async:
+#   # Overrides which API calls return operations. Default: ['create',
+#   # 'update', 'delete']
+#   actions: ['create', 'update', 'delete']
+#   operation:
+#     base_url: '{{op_id}}'
 
 parameters:
   - name: 'org_id'
