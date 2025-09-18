@@ -95,6 +95,14 @@ examples:
     ignore_read_extra:
       - "project"
     exclude_test: true  # handwritten test required since resource does not support import
+  - name: "vertex_ai_deploy_psc_endpoint_automated"
+    primary_resource_id: "deploy"
+    vars:
+      project: "vertex-ai"
+      publisher_model_name: "publisher_model_name"
+    ignore_read_extra:
+      - "project"
+    exclude_test: true  # handwritten test required since resource does not support import
 parameters:
   - name: location
     type: String
