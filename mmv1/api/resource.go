@@ -14,6 +14,7 @@ package api
 
 import (
 	"bytes"
+	"cmp"
 	"fmt"
 	"log"
 	"maps"
@@ -589,6 +590,14 @@ func (r Resource) AllUserProperties() []*Type {
 	return google.Concat(r.UserProperites(), r.UserParameters())
 }
 
+func (r Resource) SortedUserProperties() []*Type {
+	props := r.AllUserProperties()
+	slices.SortFunc(props, func(a, b *Type) int {
+		return cmp.Compare(a.Name, b.Name)
+	})
+	return props
+}
+
 func (r Resource) RequiredProperties() []*Type {
 	return google.Select(r.AllUserProperties(), func(p *Type) bool {
 		return p.Required
@@ -1102,6 +1111,10 @@ func (r Resource) Updatable() bool {
 // Redefined on Resource to terminate the calls up the parent chain.
 func (r Resource) Lineage() string {
 	return r.Name
+}
+
+func (r Resource) AnsibleName() string {
+	return fmt.Sprintf("gcp_%s_%s", r.ProductMetadata.AnsibleName(), google.Underscore(r.Name))
 }
 
 func (r Resource) TerraformName() string {
