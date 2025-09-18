@@ -51,6 +51,7 @@ jobs:
           path: repo
           fetch-depth: 0
       - name: Merge base branch
+        if: github.event_name == 'pull_request'
         id: pull_request
         run: |
           cd repo
