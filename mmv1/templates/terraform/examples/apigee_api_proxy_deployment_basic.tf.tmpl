@@ -1,0 +1,8 @@
+resource "google_apigee_api_proxy_deployment" "{{$.PrimaryResourceId}}" {
+  org               = "{{index $.Vars "network_name"}}"
+  environment       = "dev"
+  api               = "hello-proxy"
+  revision          = 1
+  override          = true
+  sequenced-rollout = true
+}

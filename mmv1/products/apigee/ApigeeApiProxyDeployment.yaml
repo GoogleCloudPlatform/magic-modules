@@ -22,66 +22,73 @@ references:
 base_url: 'v1/organizations/{{org}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}/deployments'
 self_link: 'v1/organizations/{{org}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}/deployments'
 immutable: true
-create_url: 'v1/organizations/{{org}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}/deployments'
+create:
+  path: 'v1/organizations/{{org}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}/deployments'
+  verb: 'POST'
+  query_params:
+    - name: 'override'
+      param_name: 'override'
+    - name: 'sequenced_rollout'
+      param_name: 'sequencedRollout'
+    - name: 'service_account'
+      param_name: 'serviceAccount'
+delete:
+  path: 'v1/organizations/{{org}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}/deployments'
+  verb: 'DELETE'
+  query_params:
+    - name: 'sequenced_rollout'
+      param_name: 'sequencedRollout'
 autogen_async: false
-custom_flatten: true
-custom_flatten_function: 'flattenApigeeApiProxyDeployment'
 id_format: 'organizations/{{org}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}'
 import_format:
-  - '{{id}}'
+  '{{id}}'
+examples:
+  - name: "apigee_api_proxy_deployment_basic"
+    primary_resource_id: "proxy_deployment_basic"
+    vars:
+      apigee_org: "my-org"
+    skip_test: true
 parameters:
   - name: 'org'
     type: String
     required: true
-    url_param_only: true
-    description: |
-      The Apigee organization ID.
+    description: 'Apigee organization ID.'
   - name: 'environment'
     type: String
     required: true
-    url_param_only: true
-    description: |
-        The Apigee environment name.
+    description: 'Apigee environment name.'
   - name: 'api'
     type: String
     required: true
-    url_param_only: true
-    description: |
-      The Apigee API proxy name.
+    description: 'Apigee API proxy name.'
   - name: 'revision'
     type: Integer
     required: true
-    url_param_only: true
-    description: |
-      The API proxy revision number to deploy.
+    description: 'API proxy revision number to deploy.'
 properties:
   - name: 'override'
     type: Boolean
-    url_param_only: true
-    description: |
-      If true, replaces any currently-deployed revision for this proxy in the target environment.
+    description: 'If true, replaces other deployed revisions of this proxy in the environment.'
+    default_value: false
   - name: 'sequenced_rollout'
     type: Boolean
-    url_param_only: true
-    description: |
-      If true, uses a sequenced rollout for safer traffic switching.
-      Supported by both deploy (POST) and undeploy (DELETE).
+    description: 'If true, enables sequenced rollout for safe traffic switching.'
+    default_value: false
   - name: 'service_account'
     type: String
-    url_param_only: true
-    description: |
-      Optional service account email the deployed proxy runs as. Caller must have `iam.serviceAccounts.actAs` on this SA.
-      (Only used by deploy.)
+    description: 'Optional service account the deployed proxy runs as.'
   - name: 'state'
     type: String
     output: true
-    description: 'Deployment state reported by Apigee, if present.'
+    description: 'Deployment state reported by Apigee.'
   - name: 'basepaths'
     type: Array
     item_type: String
     output: true
-    description: 'Basepaths associated with the deployed proxy, if present.'
+    api_name: 'basePath'
+    description: 'Basepaths associated with the deployed proxy.'
   - name: 'deployed_at'
     type: String
     output: true
-    description: 'RFC3339 timestamp when deployment started, if available.'
+    api_name: 'deployStartTime'
+    description: 'RFC3339 timestamp when deployment started.'
