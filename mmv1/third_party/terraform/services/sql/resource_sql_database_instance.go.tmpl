@@ -2275,6 +2275,10 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
+	instance = &sqladmin.DatabaseInstance{
+		Settings: expandSqlDatabaseInstanceSettings(desiredSetting.([]interface{}), databaseVersion),
+	}
+
 	// Check if the edition is being updated, because patching edition is an atomic operation and can not be
 	// performed with other fields, we first patch edition, tier and data cache config before updating the rest of the fields.
 	if d.HasChange("settings.0.edition") {
@@ -2301,10 +2305,6 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		if err != nil {
 			return err
 		}
-	}
-
-	instance = &sqladmin.DatabaseInstance{
-		Settings: expandSqlDatabaseInstanceSettings(desiredSetting.([]interface{}), databaseVersion),
 	}
 
 	// If there is no change detected in disk size, no need to try and update the disk size, send 0 always
