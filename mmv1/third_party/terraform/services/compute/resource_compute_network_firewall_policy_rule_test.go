@@ -581,6 +581,7 @@ resource "google_compute_network_firewall_policy_rule" "fw_policy_rule1" {
       ip_protocol = "tcp"
       ports       = [80, 8080]
     }
+    dest_network_context      = "NON_INTERNET"
     dest_ip_ranges = ["11.100.0.1/32"]
     dest_fqdns                = []
     dest_region_codes         = []
@@ -645,6 +646,7 @@ resource "google_compute_network_firewall_policy_rule" "fw_policy_rule1" {
       ip_protocol = "udp"
       ports       = [22]
     }
+    dest_network_context      = "INTERNET"
     dest_ip_ranges            = ["11.100.0.1/32", "10.0.0.0/24"]
     dest_fqdns                = ["google.com"]
     dest_region_codes         = ["US"]

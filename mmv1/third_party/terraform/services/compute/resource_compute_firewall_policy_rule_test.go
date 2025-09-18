@@ -288,6 +288,7 @@ resource "google_compute_firewall_policy_rule" "fw_policy_rule" {
       ip_protocol = "tcp"
       ports       = [80, 8080]
     }
+    dest_network_context      = "INTERNET"
     dest_ip_ranges            = ["11.100.0.1/32"]
     dest_fqdns                = ["google.com"]
     dest_region_codes         = ["US"]
@@ -467,6 +468,7 @@ resource "google_compute_firewall_policy_rule" "fw_policy_rule1" {
     dest_region_codes         = []
     dest_threat_intelligences = []
     dest_address_groups       = [google_network_security_address_group.address_group.id]
+    dest_network_context      = "NON_INTERNET"
   }
 }
 `, context)

@@ -40,6 +40,8 @@ timeouts:
 custom_diff:
   - 'tpgresource.DefaultProviderProject'
 custom_code:
+  constants: 'templates/terraform/constants/compute_firewall_policy_rule.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/compute_firewall_policy_rule.go.tmpl'
   post_create: 'templates/terraform/post_create/compute_firewall_policy_rule.go.tmpl'
   post_delete: 'templates/terraform/post_delete/compute_firewall_policy_rule.go.tmpl'
   post_update: 'templates/terraform/post_update/compute_firewall_policy_rule.go.tmpl'
@@ -66,6 +68,16 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
     min_version: beta
+  - name: 'firewall_policy_rule_network_context'
+    primary_resource_id: 'primary'
+    vars:
+      folder: 'folder'
+      fw_policy: 'fw-policy'
+      network: 'network'
+      tag_key: 'tag-key'
+      tag_value: 'tag-value'
+    test_env_vars:
+      org_id: 'ORG_ID'
   - name: 'firewall_policy_rule_secure_tags'
     primary_resource_id: 'primary'
     vars:
@@ -139,11 +151,25 @@ properties:
           - 'INTRA_VPC'
           - 'NON_INTERNET'
           - 'VPC_NETWORKS'
+        conflicts:
+          - match.0.src_network_context
+      - name: 'srcNetworkContext'
+        conflicts:
+          - match.0.src_network_scope
+        type: Enum
+        default_from_api: true
+        description: |
+          Network context of the traffic source.
+        enum_values:
+          - 'UNSPECIFIED'
+          - 'INTERNET'
+          - 'INTRA_VPC'
+          - 'NON_INTERNET'
+          - 'VPC_NETWORKS'
       - name: 'srcNetworks'
         type: Array
         description: |
           Networks of the traffic source. It can be either a full or partial url.
-        min_version: beta
         item_type:
           type: String
       - name: 'destNetworkScope'
@@ -156,6 +182,21 @@ properties:
           - 'INTRA_VPC'
           - 'NON_INTERNET'
           - 'VPC_NETWORKS'
+        conflicts:
+          - match.0.src_network_context
+      - name: 'destNetworkContext'
+        type: Enum
+        default_from_api: true
+        description: |
+          Network context of the traffic destination.
+        enum_values:
+          - 'UNSPECIFIED'
+          - 'INTERNET'
+          - 'INTRA_VPC'
+          - 'NON_INTERNET'
+          - 'VPC_NETWORKS'
+        conflicts:
+          - match.0.src_network_scope
       - name: 'layer4Configs'
         type: Array
         send_empty_value: true

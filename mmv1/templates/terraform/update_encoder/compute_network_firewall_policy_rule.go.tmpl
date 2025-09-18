@@ -1,0 +1,12 @@
+if !d.HasChange("match") {
+  return obj, nil
+}
+oldMatch, newMatch := d.GetChange("match")
+
+err := adjustGlobalNetworkFirewallPolicyRuleNetworkContextFields(obj, oldMatch, newMatch)
+if err != nil {
+  return obj, err
+}
+
+return obj, nil
+

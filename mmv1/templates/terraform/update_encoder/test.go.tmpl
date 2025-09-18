@@ -1,0 +1,76 @@
+log.Printf("AAAAAAAAAAAQAA")
+match := obj["match"].(map[string]interface{})
+	if d.HasChange("match") {
+		oldTestObj, newTestObj := d.GetChange("match")
+		log.Printf("[DEBUG12345] ENCODE12356: scope %s, %s", oldTestObj, newTestObj)
+
+		var oldMonitoredField, newMonitoredField string
+
+		// Extract the nested field value from the old state
+		if oldTestList := oldTestObj.([]interface{}); len(oldTestList) > 0 {
+			if oldTestData := oldTestList[0].(map[string]interface{}); oldTestData != nil {
+				if val, ok := oldTestData["src_network_scope"].(string); ok {
+					oldMonitoredField = val
+				}
+			}
+		}
+
+		// Extract the nested field value from the new state
+		if newTestList := newTestObj.([]interface{}); len(newTestList) > 0 {
+			if newTestData := newTestList[0].(map[string]interface{}); newTestData != nil {
+				if val, ok := newTestData["src_network_scope"].(string); ok {
+					newMonitoredField = val
+				}
+			}
+		}
+
+		srcNetworkScopeChanged := newMonitoredField != oldMonitoredField
+
+		// Extract the nested field value from the old state
+		if oldTestList := oldTestObj.([]interface{}); len(oldTestList) > 0 {
+			if oldTestData := oldTestList[0].(map[string]interface{}); oldTestData != nil {
+				if val, ok := oldTestData["src_network_context"].(string); ok {
+					oldMonitoredField = val
+				}
+			}
+		}
+
+		// Extract the nested field value from the new state
+		if newTestList := newTestObj.([]interface{}); len(newTestList) > 0 {
+			if newTestData := newTestList[0].(map[string]interface{}); newTestData != nil {
+				if val, ok := newTestData["src_network_context"].(string); ok {
+					newMonitoredField = val
+				}
+			}
+		}
+
+		srcNetworkTypeChanged := newMonitoredField != oldMonitoredField
+
+		log.Printf("[DEBUG1234888] ENCODE12356: scope |%s| |%s| %s, %s", srcNetworkScopeChanged, srcNetworkTypeChanged, oldMonitoredField, newMonitoredField)
+
+		if srcNetworkScopeChanged && srcNetworkTypeChanged {
+			return nil, fmt.Errorf("ERROR")
+		}
+
+		if srcNetworkScopeChanged {
+
+			log.Printf("DELETE network_context")
+
+			delete(match, "srcNetworkContext")
+			//log.Printf("MATCH 888 %s", match)
+			//obj["match"] = match
+		}
+		if srcNetworkTypeChanged {
+			//	match := obj["match"].(map[string]interface{})
+			delete(match, "srcNetworkScope")
+			//	obj["match"] = match
+		}
+		if !srcNetworkTypeChanged && !srcNetworkScopeChanged {
+			// scope/type not change - both should have the same value - removing one so request does not have both fields
+			delete(match, "srcNetworkScope")
+		}
+	}
+
+	log.Printf("[999999] 7777: obj %s", obj)
+
+	return obj, nil
