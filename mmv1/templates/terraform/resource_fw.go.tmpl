@@ -74,8 +74,11 @@ import (
 {{- end}}
 
 var (
-	_ resource.Resource              = &{{$.ResourceName}}FWResource{}
-	_ resource.ResourceWithConfigure = &{{$.ResourceName}}FWResource{}
+	_ resource.Resource                = &{{$.ResourceName}}FWResource{}
+	_ resource.ResourceWithConfigure   = &{{$.ResourceName}}FWResource{}
+{{- if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.ExcludeDefaultCdiff)) $.CustomDiff }}
+	_ resource.ResourceWithModifyPlan  = &{{$.ResourceName}}FWResource{}
+{{- end}}
 )
 
 func New{{$.ResourceName}}FWResource() resource.Resource {
@@ -128,6 +131,23 @@ func (r *{{$.ResourceName}}FWResource) Configure(ctx context.Context, req resour
 	r.providerConfig = p
 }
 
+{{- if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.ExcludeDefaultCdiff)) $.CustomDiff }}
+func (r *{{$.ResourceName}}FWResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+{{- if and ($.HasProject) (not $.ExcludeDefaultCdiff) }}
+	fwresource.DefaultProjectModify(ctx, req, resp, r.providerConfig.Project)
+{{- end -}}
+{{if and ($.HasRegion) (not $.ExcludeDefaultCdiff)  }}
+	fwresource.DefaultRegionModify(ctx, req, resp, r.providerConfig.Region)
+{{- end -}}
+{{if and ($.HasZone) (not $.ExcludeDefaultCdiff)  }}
+	fwresource.DefaultZoneModify(ctx, req, resp, r.providerConfig.Zone)
+{{- end }}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+}
+{{- end}}
+
 func (d *{{$.ResourceName}}FWResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "A resource to represent a SQL User object.",
@@ -169,6 +189,13 @@ func (d *{{$.ResourceName}}FWResource) Schema(ctx context.Context, _ resource.Sc
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"timeouts": timeouts.Block(ctx, timeouts.Opts{
+				Create: true,
+				{{- if or $.Updatable $.RootLabels }}
+				Update: true,
+				{{- end }}
+				Delete: true,
+				}),
         },
 	}
 }
@@ -242,9 +269,7 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
     obj["{{ $prop.ApiName -}}"] = {{ $prop.ApiName -}}Prop
 {{- end }}
 
-
-	{{/* TODO default timeouts */}}
-    createTimeout, diags := data.Timeouts.Create(ctx, 20*time.Minute)
+    createTimeout, diags := data.Timeouts.Create(ctx, {{ $.Timeouts.InsertMinutes }}*time.Minute)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -263,7 +288,7 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
 {{- if $.CustomCode.PreCreate }}
     {{ $.CustomTemplate $.CustomCode.PreCreate false -}}
 {{- end}}
-    res := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+    res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.CreateVerb -}}",
         Project: billingProject.ValueString(),
@@ -460,8 +485,7 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
 	}
 {{- end }}
 
-	{{/* TODO default timeouts */}}
-    updateTimeout, diags := data.Timeouts.Update(ctx, 20*time.Minute)
+    updateTimeout, diags := data.Timeouts.Update(ctx, {{ $.Timeouts.UpdateMinutes }}*time.Minute)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -483,7 +507,7 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
 {{- if $.CustomCode.PreUpdate }}
     {{ $.CustomTemplate $.CustomCode.PreUpdate false -}}
 {{- end}}
-    res := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+    res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.UpdateVerb -}}",
         Project: billingProject.ValueString(),
@@ -602,7 +626,7 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
 
 	obj := make(map[string]interface{})
 
-    deleteTimeout, diags := data.Timeouts.Delete(ctx, 20*time.Minute)
+    deleteTimeout, diags := data.Timeouts.Delete(ctx, {{ $.Timeouts.DeleteMinutes }}*time.Minute)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -622,7 +646,7 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
     {{- end }}
 
     log.Printf("[DEBUG] Deleting {{ $.Name }} %q", data.Id.ValueString())
-    res := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+    _, _ := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.DeleteVerb -}}",
         Project: billingProject.ValueString(),
@@ -677,7 +701,28 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
 }
 
 func (r *{{$.ResourceName}}FWResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	patterns := []string{
+		{{- range $id := $.ImportIdFormatsFromResource }}
+		"^{{ format2regex $id }}$",
+		{{- end }}
+	}
+
+	var resourceSchemaResp resource.SchemaResponse
+	r.Schema(ctx, resource.SchemaRequest{}, &resourceSchemaResp)
+	if resourceSchemaResp.Diagnostics.HasError() {
+		resp.Diagnostics.Append(resourceSchemaResp.Diagnostics...)
+		return
+	}
+
+	parsed, diags := fwresource.ParseImportId(ctx, req, resourceSchemaResp.Schema, r.providerConfig, patterns)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	for name, value := range parsed {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root(name), value)...)
+	}
 }
 
 func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.Context, data *{{$.ResourceName}}FWModel, state *tfsdk.State, req interface{}, diag *diag.Diagnostics) {
@@ -727,7 +772,7 @@ func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.C
 {{- if $.CustomCode.PreRead }}
     {{ $.CustomTemplate $.CustomCode.PreRead false -}}
 {{- end}}
-    res := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+    res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.ReadVerb -}}",
         Project: billingProject.ValueString(),

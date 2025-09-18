@@ -147,7 +147,7 @@ func (d *GooglePubsubLiteReservationFWResource) Create(ctx context.Context, req 
 	tflog.Trace(ctx, fmt.Sprintf("[DEBUG] Creating new Reservation: %#v", obj))
 
 	headers := make(http.Header)
-	res := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+	res, _ := fwtransport.SendRequest(fwtransport.SendRequestOptions{
 		Config:    d.providerConfig,
 		Method:    "POST",
 		Project:   billingProject.ValueString(),
@@ -212,7 +212,7 @@ func (d *GooglePubsubLiteReservationFWResource) Read(ctx context.Context, req re
 	}
 
 	headers := make(http.Header)
-	res := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+	res, _ := fwtransport.SendRequest(fwtransport.SendRequestOptions{
 		Config:    d.providerConfig,
 		Method:    "GET",
 		Project:   billingProject.ValueString(),
@@ -301,7 +301,7 @@ func (d *GooglePubsubLiteReservationFWResource) Update(ctx context.Context, req 
 		return
 	}
 
-	res := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+	res, _ := fwtransport.SendRequest(fwtransport.SendRequestOptions{
 		Config:    d.providerConfig,
 		Method:    "PATCH",
 		Project:   billingProject.ValueString(),
@@ -366,7 +366,7 @@ func (d *GooglePubsubLiteReservationFWResource) Delete(ctx context.Context, req 
 	tflog.Trace(ctx, fmt.Sprintf("[DEBUG] Deleting Reservation: %#v", obj))
 
 	headers := make(http.Header)
-	res := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+	res, _ := fwtransport.SendRequest(fwtransport.SendRequestOptions{
 		Config:    d.providerConfig,
 		Method:    "DELETE",
 		Project:   billingProject.ValueString(),
