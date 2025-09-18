@@ -258,6 +258,15 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 					yParts := strings.Split(y, "/")
 					return xParts[len(xParts)-1] == yParts[len(yParts)-1]
 				})),
+				cmp.FilterPath(func(p cmp.Path) bool {
+					// Filter if "parent" field in original asset is an empty string
+					// and then ingore comparing
+					if p.Last().String() == ".Parent" {
+						v1, _ := p.Index(-1).Values()
+						return v1.IsZero()
+					}
+					return false
+				}, cmp.Ignore()),
 			); diff != "" {
 				return fmt.Errorf("differences found between exported asset and roundtrip asset (-want +got):\n%s", diff)
 			}
