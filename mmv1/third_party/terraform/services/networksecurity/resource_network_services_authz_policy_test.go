@@ -241,7 +241,7 @@ resource "google_network_security_authz_policy" "default" {
       }
 
       sources {
-    		# Prefix
+        # Prefix
         principals {
           principal_selector = "CLIENT_CERT_URI_SAN"
           principal {
@@ -322,9 +322,9 @@ resource "google_network_security_authz_policy" "default" {
     to {
       operations {
         methods = ["GET", "PUT", "POST", "HEAD", "PATCH", "DELETE", "OPTIONS"]
-		    header_set {
+        header_set {
           # Prefix
-		      headers {
+          headers {
             name = "PrefixHeader"
             value {
 			        ignore_case = false
@@ -371,8 +371,8 @@ resource "google_network_security_authz_policy" "default" {
           prefix      = "prefix"
         }
 
-    		# Suffix / Ignore case
-		    hosts {
+        # Suffix / Ignore case
+        hosts {
           ignore_case = true
           suffix      = "suffix"
         }
@@ -407,7 +407,7 @@ resource "google_network_security_authz_policy" "default" {
 
       not_operations {
         methods = ["GET", "PUT", "POST", "HEAD", "PATCH", "DELETE", "OPTIONS"]
-		    header_set {
+        header_set {
           # Prefix
           headers {
             name = "PrefixHeader"
@@ -490,7 +490,7 @@ resource "google_network_security_authz_policy" "default" {
         }
       }
     }
-	when = "request.host.endsWith('.example.com')"
+  when = "request.host.endsWith('.example.com')"
   }
 
   labels = {

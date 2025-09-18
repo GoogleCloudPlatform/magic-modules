@@ -180,7 +180,7 @@ properties:
                         - name: 'principal'
                           type: NestedObject
                           description: |
-                            Required. A non-empty string whose value is matched against the principal value based on the principalSelector. 
+                            Required. A non-empty string whose value is matched against the principal value based on the principalSelector.
                             Only exact match can be applied for CLIENT_CERT_URI_SAN, CLIENT_CERT_DNS_NAME_SAN, CLIENT_CERT_COMMON_NAME selectors.
                           properties:
                             - name: 'ignoreCase'
@@ -222,28 +222,28 @@ properties:
                             The input string must match exactly the string specified here.
                             Examples:
                             * abc only matches the value abc.
-                          deprecation_message: '`exact` is deprecated and will be removed in a future major release. Use `principals.principal.exact` instead.'
+                          deprecation_message: '`principals.exact` is deprecated and will be removed in a future major release. Use `principals.principal.exact` instead.'
                         - name: 'prefix'
                           type: String
                           description: |
                             The input string must have the prefix specified here. Note: empty prefix is not allowed, please use regex instead.
                             Examples:
                             * abc matches the value abc.xyz
-                          deprecation_message: '`prefix` is deprecated and will be removed in a future major release. Use `principals.principal.prefix` instead.'
+                          deprecation_message: '`principals.prefix` is deprecated and will be removed in a future major release. Use `principals.principal.prefix` instead.'
                         - name: 'suffix'
                           type: String
                           description: |
                             The input string must have the suffix specified here. Note: empty prefix is not allowed, please use regex instead.
                             Examples:
                             * abc matches the value xyz.abc
-                          deprecation_message: '`suffix` is deprecated and will be removed in a future major release. Use `principals.principal.suffix` instead.'
+                          deprecation_message: '`principals.suffix` is deprecated and will be removed in a future major release. Use `principals.principal.suffix` instead.'
                         - name: 'contains'
                           type: String
                           description: |
                             The input string must have the substring specified here. Note: empty contains match is not allowed, please use regex instead.
                             Examples:
                             * abc matches the value xyz.abc.def
-                          deprecation_message: '`contains` is deprecated and will be removed in a future major release. Use `principals.principal.contains` instead.'
+                          deprecation_message: '`principals.contains` is deprecated and will be removed in a future major release. Use `principals.principal.contains` instead.'
                   - name: 'resources'
                     type: Array
                     description: |
@@ -340,7 +340,7 @@ properties:
                         - name: 'principal'
                           type: NestedObject
                           description: |
-                            Required. A non-empty string whose value is matched against the principal value based on the principalSelector. 
+                            Required. A non-empty string whose value is matched against the principal value based on the principalSelector.
                             Only exact match can be applied for CLIENT_CERT_URI_SAN, CLIENT_CERT_DNS_NAME_SAN, CLIENT_CERT_COMMON_NAME selectors.
                           properties:
                             - name: 'ignoreCase'
@@ -382,28 +382,28 @@ properties:
                             The input string must match exactly the string specified here.
                             Examples:
                             * abc only matches the value abc.
-                          deprecation_message: '`exact` is deprecated and will be removed in a future major release. Use `principals.principal.exact` instead.'
+                          deprecation_message: '`principals.exact` is deprecated and will be removed in a future major release. Use `principals.principal.exact` instead.'
                         - name: 'prefix'
                           type: String
                           description: |
                             The input string must have the prefix specified here. Note: empty prefix is not allowed, please use regex instead.
                             Examples:
                             * abc matches the value abc.xyz
-                          deprecation_message: '`prefix` is deprecated and will be removed in a future major release. Use `principals.principal.prefix` instead.'
+                          deprecation_message: '`principals.prefix` is deprecated and will be removed in a future major release. Use `principals.principal.prefix` instead.'
                         - name: 'suffix'
                           type: String
                           description: |
                             The input string must have the suffix specified here. Note: empty prefix is not allowed, please use regex instead.
                             Examples:
                             * abc matches the value xyz.abc
-                          deprecation_message: '`suffix` is deprecated and will be removed in a future major release. Use `principals.principal.suffix` instead.'
+                          deprecation_message: '`principals.suffix` is deprecated and will be removed in a future major release. Use `principals.principal.suffix` instead.'
                         - name: 'contains'
                           type: String
                           description: |
                             The input string must have the substring specified here. Note: empty contains match is not allowed, please use regex instead.
                             Examples:
                             * abc matches the value xyz.abc.def
-                          deprecation_message: '`contains` is deprecated and will be removed in a future major release. Use `principals.principal.contains` instead.'
+                          deprecation_message: '`principals.contains` is deprecated and will be removed in a future major release. Use `principals.principal.contains` instead.'
                   - name: 'resources'
                     type: Array
                     description: |
