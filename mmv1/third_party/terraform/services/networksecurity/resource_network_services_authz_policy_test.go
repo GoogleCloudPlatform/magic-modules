@@ -163,6 +163,16 @@ resource "google_network_security_authz_policy" "default" {
   http_rules {
     from {
       not_sources {
+        ip_blocks {
+          length = 24
+          prefix = "10.1.5.0"
+        }
+
+        ip_blocks {
+          length = 24
+          prefix = "10.1.6.0"
+        }
+
         # Prefix
         principals {
           principal_selector = "CLIENT_CERT_URI_SAN"
@@ -241,6 +251,16 @@ resource "google_network_security_authz_policy" "default" {
       }
 
       sources {
+        ip_blocks {
+          length = 24
+          prefix = "10.10.5.0"
+        }
+
+        ip_blocks {
+          length = 24
+          prefix = "10.10.6.0"
+        }
+
         # Prefix
         principals {
           principal_selector = "CLIENT_CERT_URI_SAN"
