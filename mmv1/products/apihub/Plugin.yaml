@@ -130,7 +130,7 @@ properties:
   - name: configTemplate
     type: NestedObject
     description: ConfigTemplate represents the configuration template for a plugin.
-    custom_flatten: 'templates/terraform/custom_flatten/apihub_plugin_config_template.go.tmpl'
+    default_from_api: true
     properties:
       - name: authConfigTemplate
         type: NestedObject
