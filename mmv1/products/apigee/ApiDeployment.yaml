@@ -17,8 +17,8 @@ description: |
   Manages a deployment of an API proxy.
 references:
   guides:
-    'QUICKSTART_TITLE': 'QUICKSTART_URL'
-  api: 'API_REFERENCE_URL'
+    'QUICKSTART_TITLE': 'https://cloud.google.com/apigee/docs/api-platform/deploy/ui-deploy-overview'
+  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments'
 base_url: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments'
 self_link: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments'
 import_format:
