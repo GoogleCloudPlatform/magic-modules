@@ -583,43 +583,32 @@ func TestAccPubsubSubscription_javascriptUdfUpdate(t *testing.T) {
 	})
 }
 
-func testAccPubsubSubscription_javascriptUdfSettings(topic, subscription, functionName, code string) string {
-	return fmt.Sprintf(`
-resource "google_pubsub_topic" "foo" {
-  name = "%s"
-}
+func TestGetComputedTopicName(t *testing.T) {
+	type testData struct {
+		project  string
+		topic    string
+		expected string
+	}
 
-resource "google_pubsub_subscription" "foo" {
-  name  = "%s"
-  topic = google_pubsub_topic.foo.id
-  message_transforms {
-    disabled = true
-    javascript_udf {
-      function_name = "%s"
-      code = "%s"
-    }
-  }
-}
-`, topic, subscription, functionName, code)
-}
+	var testCases = []testData{
+		{
+			project:  "my-project",
+			topic:    "my-topic",
+			expected: "projects/my-project/topics/my-topic",
+		},
+		{
+			project:  "my-project",
+			topic:    "projects/another-project/topics/my-topic",
+			expected: "projects/another-project/topics/my-topic",
+		},
+	}
 
-func testAccPubsubSubscription_javascriptUdfSettings_noEnabled(topic, subscription, functionName, code string) string {
-	return fmt.Sprintf(`
-resource "google_pubsub_topic" "foo" {
-  name = "%s"
-}
-
-resource "google_pubsub_subscription" "foo" {
-  name  = "%s"
-  topic = google_pubsub_topic.foo.id
-	message_transforms {
-    javascript_udf {
-      function_name = "%s"
-      code = "%s"
-    }
-  }
-}
-`, topic, subscription, functionName, code)
+	for _, testCase := range testCases {
+		computedTopicName := pubsub.GetComputedTopicName(testCase.project, testCase.topic)
+		if computedTopicName != testCase.expected {
+			t.Fatalf("bad computed topic name: %s' => expected %s", computedTopicName, testCase.expected)
+		}
+	}
 }
 
 func testAccPubsubSubscription_emptyTTL(topic, subscription string) string {
@@ -1000,34 +989,6 @@ resource "google_pubsub_subscription" "foo" {
 `, topic, subscription)
 }
 
-func TestGetComputedTopicName(t *testing.T) {
-	type testData struct {
-		project  string
-		topic    string
-		expected string
-	}
-
-	var testCases = []testData{
-		{
-			project:  "my-project",
-			topic:    "my-topic",
-			expected: "projects/my-project/topics/my-topic",
-		},
-		{
-			project:  "my-project",
-			topic:    "projects/another-project/topics/my-topic",
-			expected: "projects/another-project/topics/my-topic",
-		},
-	}
-
-	for _, testCase := range testCases {
-		computedTopicName := pubsub.GetComputedTopicName(testCase.project, testCase.topic)
-		if computedTopicName != testCase.expected {
-			t.Fatalf("bad computed topic name: %s' => expected %s", computedTopicName, testCase.expected)
-		}
-	}
-}
-
 func testAccCheckPubsubSubscriptionCache404(t *testing.T, subName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
@@ -1060,4 +1021,43 @@ resource "google_pubsub_subscription" "foo" {
   filter = "%s"
 }
 `, topic, subscription, filter)
+}
+
+func testAccPubsubSubscription_javascriptUdfSettings(topic, subscription, functionName, code string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+}
+
+resource "google_pubsub_subscription" "foo" {
+  name  = "%s"
+  topic = google_pubsub_topic.foo.id
+  message_transforms {
+    disabled = true
+    javascript_udf {
+      function_name = "%s"
+      code = "%s"
+    }
+  }
+}
+`, topic, subscription, functionName, code)
+}
+
+func testAccPubsubSubscription_javascriptUdfSettings_noEnabled(topic, subscription, functionName, code string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+}
+
+resource "google_pubsub_subscription" "foo" {
+  name  = "%s"
+  topic = google_pubsub_topic.foo.id
+	message_transforms {
+    javascript_udf {
+      function_name = "%s"
+      code = "%s"
+    }
+  }
+}
+`, topic, subscription, functionName, code)
 }
