@@ -949,3 +949,44 @@ resource "google_bigquery_data_transfer_config" "salesforce_config" {
 }
 `, randomSuffix, randomSuffix)
 }
+
+func testAccBigqueryDataTransferConfig_pub_sub(randomSuffix string) string {
+	return fmt.Sprintf(`
+
+resource "google_bigquery_data_transfer_config" "event_driven_config" {
+  depends_on = [google_project_iam_member.permissions]
+
+  display_name           = "my-event-driven-query"
+  location               = "asia-northeast1"
+  data_source_id         = "scheduled_query"
+  schedule               = "first sunday of quarter 00:00"
+  schedule_options = {
+    event_driven_schedule = google_pubsub_subscription.my_dataset_topic_subscription.id
+  } 
+  destination_dataset_id = google_bigquery_dataset.my_dataset.dataset_id
+  params = {
+    destination_table_name_template = "my_table"
+    write_disposition               = "WRITE_APPEND"
+    query                           = "SELECT name FROM tabl WHERE x = 'y'"
+  }
+}
+
+resource "google_bigquery_dataset" "my_dataset" {
+  depends_on = [google_project_iam_member.permissions]
+
+  dataset_id    = "my_dataset"
+  friendly_name = "foo"
+  description   = "bar"
+  location      = "asia-northeast1"
+}
+
+resource "google_pubsub_topic" "my_dataset_topic" {
+  name = "my_dataset_topic"
+}
+
+resource "google_pubsub_subscription" "my_dataset_topic_subscription" {
+  name  = "my_dataset_topic_subscription"
+  topic = google_pubsub_topic.my_dataset_topic.id
+}
+`, randomSuffix, randomSuffix)
+}
