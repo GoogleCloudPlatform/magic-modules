@@ -45,10 +45,11 @@ examples:
     vars:
       profile_name: 'dialogflow-profile'
   - name: 'dialogflow_conversation_profile_recognition_result_notification'
-    primary_resource_id: 'basic_profile'
+    primary_resource_id: 'recognition_result_notification_profile'
     vars:
       profile_name: 'dialogflow-profile'
-      topic_name: 'dialogflow-profile'
+      topic_name: 'recognition-result-notification'
+      message_format: 'JSON'
 parameters:
   - name: 'location'
     type: String

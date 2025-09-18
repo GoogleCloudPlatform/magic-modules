@@ -6,18 +6,9 @@ resource "google_dialogflow_agent" "basic_agent" {
 resource "google_dialogflow_conversation_profile" "{{$.PrimaryResourceId}}" {
   display_name = "{{index $.Vars "profile_name"}}"
   location = "global"
-  automated_agent_config {
-    agent = "projects/${google_dialogflow_agent.basic_agent.id}/locations/global/agent/environments/draft"
-  }
-  human_agent_assistant_config {
-    message_analysis_config {
-      enable_entity_extraction  = true
-      enable_sentiment_analysis = true
-    }
-  }
   new_recognition_result_notification_config {
     topic = google_pubsub_topic.{{$.PrimaryResourceId}}.id
-    message_format = "JSON"
+    message_format =  "{{index $.Vars "message_format"}}"
   }
 }
 
