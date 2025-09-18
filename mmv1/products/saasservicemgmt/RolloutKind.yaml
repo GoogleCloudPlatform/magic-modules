@@ -78,13 +78,6 @@ properties:
         description: |-
           The maximum percentage of units allowed to fail (0, 100] within a location
           without pausing the rollout.
-  - name: etag
-    type: String
-    description: |-
-      An opaque value that uniquely identifies a version or
-      generation of a resource. It can be used to confirm that the client
-      and server agree on the ordering of a resource being written.
-    output: true
   - name: labels
     type: KeyValueLabels
     description: |-
@@ -103,7 +96,7 @@ properties:
     description: |-
       The strategy used for executing a Rollout. This is a required field.
 
-      There are two supported values strategies which are used to control
+      There are two supported values strategies which are used to control a rollout.
       - "Google.Cloud.Simple.AllAtOnce"
       - "Google.Cloud.Simple.OneLocationAtATime"
 
@@ -148,6 +141,5 @@ properties:
       UPDATE_UNIT_KIND_STRATEGY_ON_START
       UPDATE_UNIT_KIND_STRATEGY_NEVER
     enum_values:
-      - "UPDATE_UNIT_KIND_STRATEGY_UNSPECIFIED"
       - "UPDATE_UNIT_KIND_STRATEGY_ON_START"
       - "UPDATE_UNIT_KIND_STRATEGY_NEVER"
