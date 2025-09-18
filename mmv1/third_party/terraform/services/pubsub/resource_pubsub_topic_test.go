@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccPubsubTopic_update(t *testing.T) {
@@ -340,6 +341,37 @@ func TestAccPubsubTopic_javascriptUdfUpdate(t *testing.T) {
 	})
 }
 
+func TestAccPubsubTopic_tags(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "pubsub-topic-tagkey", nil)
+	context := map[string]interface{}{
+		"topic":    topic,
+		"org":      envvar.GetTestOrgFromEnv(t),
+		"tagKey":   tagKey,
+		"tagValue": acctest.BootstrapSharedTestOrganizationTagValue(t, "pubsub-topic-tagvalue", tagKey),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubTopic_tags(context),
+			},
+			{
+				ResourceName:            "google_pubsub_topic.foo",
+				ImportStateId:           topic,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"tags"},
+			},
+		},
+	})
+}
+
 func testAccPubsubTopic_update(topic, key, value string) string {
 	return fmt.Sprintf(`
 resource "google_pubsub_topic" "foo" {
@@ -631,4 +663,15 @@ resource "google_pubsub_topic" "foo" {
 	}
 }
 	`, topic, functionName, code)
+}
+
+func testAccPubsubTopic_tags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%{topic}"
+  tags = {
+    "%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}
+`, context)
 }

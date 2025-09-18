@@ -611,6 +611,38 @@ func TestGetComputedTopicName(t *testing.T) {
 	}
 }
 
+func TestAccPubsubSubscription_tags(t *testing.T) {
+	t.Parallel()
+
+	subscription := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "pubsub-subscription-tagkey", nil)
+	context := map[string]interface{}{
+		"topic":        fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10)),
+		"subscription": subscription,
+		"org":          envvar.GetTestOrgFromEnv(t),
+		"tagKey":       tagKey,
+		"tagValue":     acctest.BootstrapSharedTestOrganizationTagValue(t, "pubsub-subscription-tagvalue", tagKey),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubSubscription_tags(context),
+			},
+			{
+				ResourceName:            "google_pubsub_subscription.foo",
+				ImportStateId:           subscription,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"tags"},
+			},
+		},
+	})
+}
+
 func testAccPubsubSubscription_emptyTTL(topic, subscription string) string {
 	return fmt.Sprintf(`
 resource "google_pubsub_topic" "foo" {
@@ -1060,4 +1092,21 @@ resource "google_pubsub_subscription" "foo" {
   }
 }
 `, topic, subscription, functionName, code)
+}
+
+func testAccPubsubSubscription_tags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%{topic}"
+}
+
+resource "google_pubsub_subscription" "foo" {
+  name  = "%{subscription}"
+  topic = google_pubsub_topic.foo.id
+
+  tags = {
+    "%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}
+`, context)
 }
