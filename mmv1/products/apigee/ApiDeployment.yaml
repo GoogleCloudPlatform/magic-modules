@@ -77,3 +77,12 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     skip_vcr: true
+    exclude_test: true
+  - name: 'apigee_api_deployment_basic_test'
+    primary_resource_id: 'api_deployment_test'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    skip_vcr: true
+    exclude_docs: true
+
