@@ -240,6 +240,7 @@ resource "google_network_security_security_profile" "foobar" {
 func testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdateEmpty(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_security_security_profile" "default" {
+  provider    = google-beta
   name        = "tf-test-my-security-profile%{random_suffix}"
   parent      = "organizations/%{org_id}"
   description = "my description"
@@ -255,6 +256,7 @@ resource "google_network_security_security_profile" "default" {
 func testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdate1(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_security_security_profile" "default" {
+  provider    = google-beta
   name        = "tf-test-my-security-profile%{random_suffix}"
   parent      = "organizations/%{org_id}"
   description = "my description"
@@ -283,6 +285,7 @@ resource "google_network_security_security_profile" "default" {
 func testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdate2(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_security_security_profile" "default" {
+  provider    = google-beta
   name        = "tf-test-my-security-profile%{random_suffix}"
   parent      = "organizations/%{org_id}"
   description = "my description"
@@ -316,6 +319,7 @@ resource "google_network_security_security_profile" "default" {
 func testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdate3(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_security_security_profile" "default" {
+  provider    = google-beta
   name        = "tf-test-my-security-profile%{random_suffix}"
   parent      = "organizations/%{org_id}"
   description = "my description"
@@ -339,6 +343,7 @@ resource "google_network_security_security_profile" "default" {
 func testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdate4(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_security_security_profile" "default" {
+  provider    = google-beta
   name        = "tf-test-my-security-profile%{random_suffix}"
   parent      = "organizations/%{org_id}"
   description = "my description"
