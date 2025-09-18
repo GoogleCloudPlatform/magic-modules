@@ -616,6 +616,27 @@ func testAccBigqueryDataTransferConfig_salesforce_basic(t *testing.T) {
 	})
 }
 
+func testAccBigqueryDataTransferConfig_pub_sub_basic(t *testing.T) {
+	randomSuffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigqueryDataTransferConfig_pub_sub(randomSuffix),
+			},
+			{
+				ResourceName:            "google_bigquery_data_transfer_config.event_driven_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+		},
+	})
+}
+
 func testAccBigqueryDataTransferConfig_scheduledQuery(random_suffix, random_suffix2, schedule, start_time, end_time, letter string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
