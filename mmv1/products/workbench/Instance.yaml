@@ -109,6 +109,8 @@ examples:
       - 'gce_setup.0.vm_image'
       - 'gce_setup.0.boot_disk.0.disk_type'
       - 'gce_setup.0.data_disks.0.disk_type'
+      - 'gce_setup.0.metadata.version'
+      - 'update_time'
   - name: 'workbench_instance_confidential_compute'
     primary_resource_id: 'instance'
     primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
