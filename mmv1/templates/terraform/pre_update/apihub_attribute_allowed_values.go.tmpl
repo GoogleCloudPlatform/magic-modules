@@ -1,0 +1,46 @@
+// Get the current attribute to check its type and handle allowed_values properly
+// Remove the updateMask query parameter from the URL for GET request
+getUrl := url
+if idx := strings.Index(getUrl, "?"); idx != -1 {
+	getUrl = getUrl[:idx]
+}
+getRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	RawURL:    getUrl,
+	UserAgent: userAgent,
+	Timeout:   d.Timeout(schema.TimeoutRead),
+})
+if err != nil {
+	return fmt.Errorf("Error fetching system attribute for update: %v", err)
+}
+
+// Check data type - ENUM attributes require allowed_values
+dataType := ""
+if dt, ok := getRes["dataType"].(string); ok {
+	dataType = dt
+}
+
+// For ENUM attributes, allowed_values must always be included (even if empty)
+if dataType == "ENUM" {
+	// Get the desired allowed_values from Terraform config (may be nil/empty)
+	desiredAllowedValues := []interface{}{}
+	if av, ok := obj["allowedValues"]; ok && av != nil {
+		desiredAllowedValues = av.([]interface{})
+	}
+	
+	// Use shared function to consolidate allowed values
+	mergedValues := consolidateAllowedValues(d, getRes, desiredAllowedValues)
+	
+	// Always include allowed_values for ENUM attributes (even if empty)
+	// This ensures an empty array is sent when clearing all values
+	obj["allowedValues"] = mergedValues
+}
+
+// Only allowed_values should be updated for system attributes
+// Clear any other fields that might have been included
+for key := range obj {
+	if key != "allowedValues" {
+		delete(obj, key)
+	}
+}

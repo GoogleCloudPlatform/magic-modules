@@ -145,6 +145,7 @@ properties:
           description: Optional. The description of the allowed value.
         - name: immutable
           type: Boolean
+          default_value: false
           description: |-
             Optional. When set to true, the allowed value cannot be updated or deleted
             by the user. It can only be true for System defined attributes.

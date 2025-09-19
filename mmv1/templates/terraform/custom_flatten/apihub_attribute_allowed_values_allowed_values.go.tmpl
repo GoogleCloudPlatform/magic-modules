@@ -1,0 +1,104 @@
+func flattenApihubAttributeAllowedValuesAllowedValues(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	
+	l := v.([]interface{})
+	if len(l) == 0 {
+		return l
+	}
+	
+	// Get configured values from user's Terraform config
+	rawConfigValue := d.Get("allowed_values")
+	configValue, _ := rawConfigValue.([]interface{})
+	
+	// Build a map of configured IDs for quick lookup
+	configuredIds := make(map[string]bool)
+	for _, v := range configValue {
+		if m, ok := v.(map[string]interface{}); ok {
+			if id, ok := m["id"].(string); ok {
+				configuredIds[id] = true
+			}
+		}
+	}
+	
+	// Filter values based on mutability and configuration
+	result := make([]interface{}, 0)
+	
+	for _, raw := range l {
+		if raw == nil {
+			continue
+		}
+		
+		original := raw.(map[string]interface{})
+		
+		// Get the ID of this value
+		valueId := ""
+		if id, ok := original["id"].(string); ok {
+			valueId = id
+		}
+		
+		// Check if this value is immutable
+		isImmutable := false
+		if immutableVal, ok := original["immutable"]; ok {
+			if immutableBool, ok := immutableVal.(bool); ok && immutableBool {
+				isImmutable = true
+			}
+		}
+		
+		// Include value if:
+		// 1. It's mutable (always include mutable values), OR
+		// 2. It's immutable but configured by the user (to prevent diffs)
+		if !isImmutable || configuredIds[valueId] {
+			// Transform the value for state
+			transformed := make(map[string]interface{})
+			
+			if val, ok := original["id"]; ok {
+				transformed["id"] = val
+			}
+			if val, ok := original["displayName"]; ok {
+				transformed["display_name"] = val
+			}
+			if val, ok := original["description"]; ok {
+				transformed["description"] = val
+			}
+			// Don't include immutable field in state
+			
+			result = append(result, transformed)
+		}
+	}
+	
+	// Sort the result to match the order in user's configuration
+	// This prevents diffs from different ordering
+	if len(configValue) > 0 && len(result) > 0 {
+		// Convert to []map[string]interface{} for SortMapsByConfigOrder
+		configMaps := make([]map[string]interface{}, 0, len(configValue))
+		for _, v := range configValue {
+			if m, ok := v.(map[string]interface{}); ok {
+				configMaps = append(configMaps, m)
+			}
+		}
+		
+		resultMaps := make([]map[string]interface{}, 0, len(result))
+		for _, v := range result {
+			if m, ok := v.(map[string]interface{}); ok {
+				resultMaps = append(resultMaps, m)
+			}
+		}
+		
+		sortedMaps, err := tpgresource.SortMapsByConfigOrder(configMaps, resultMaps, "id")
+		if err != nil {
+			log.Printf("[DEBUG] Could not sort allowed values by config order: %s", err)
+			return result
+		}
+		
+		// Convert back to []interface{}
+		sortedResult := make([]interface{}, len(sortedMaps))
+		for i, m := range sortedMaps {
+			sortedResult[i] = m
+		}
+		return sortedResult
+	}
+	
+	return result
+}
