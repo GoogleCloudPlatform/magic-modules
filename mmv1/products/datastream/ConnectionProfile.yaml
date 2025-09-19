@@ -108,6 +108,29 @@ examples:
     primary_resource_id: 'default'
     vars:
       source_connection_profile_id: 'source-profile'
+  - name: 'datastream_connection_profile_mongodb_srv'
+    primary_resource_id: 'default'
+    vars:
+      connection_profile_id: 'source-profile'
+      mongodb_dns_host: 'cluster0.example.mongodb.net'
+      mongodb_username: 'username'
+      mongodb_password: 'password'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    exclude_test: true
+  - name: 'datastream_connection_profile_mongodb_standard'
+    primary_resource_id: 'default'
+    vars:
+      connection_profile_id: 'source-profile'
+      mongodb_dns_host_1: 'cluster0.example.mongodb.net'
+      mongodb_dns_host_2: 'cluster1.example.mongodb.net'
+      mongodb_dns_host_3: 'cluster2.example.mongodb.net'
+      mongodb_replica_set: 'myRepl'
+      mongodb_username: 'username'
+      mongodb_password: 'password'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    exclude_test: true
 parameters:
   - name: 'connectionProfileId'
     type: String
@@ -481,7 +504,7 @@ properties:
       - name: 'replicaSet'
         type: String
         description: |
-          Name of the replica set. Only needed for self hosted replica set type MongoDB cluster. For SRV connection format, this field must be empty. For Standard connection format, this field must be specified.        default_value: 1433
+          Name of the replica set. Only needed for self hosted replica set type MongoDB cluster. For SRV connection format, this field must be empty. For Standard connection format, this field must be specified.
       - name: 'username'
         type: String
         description: |
