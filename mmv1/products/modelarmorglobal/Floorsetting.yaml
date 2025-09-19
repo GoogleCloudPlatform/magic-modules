@@ -70,6 +70,15 @@ parameters:
     immutable: true
     url_param_only: true
     required: true
+virtual_fields:
+  - name: 'deletion_policy'
+    default_value: "DEFAULT"
+    type: String
+    description: |
+      Policy to determine if the configuration should be deleted forcefully.
+      If setting deletion_policy = "FORCE", the armor floorsetting  configuration will be deleted regardless
+      of its nested resources. If set to "DEFAULT", armor floorsetting  configuration  that still have
+      nested resources will return an error. Possible values: DEFAULT, FORCE
 properties:
   - name: name
     type: String
