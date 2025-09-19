@@ -1,0 +1,17 @@
+resource "google_dialogflow_agent" "basic_agent" {
+  display_name = "example_agent"
+  default_language_code = "en-us"
+  time_zone = "America/New_York"
+}
+resource "google_dialogflow_conversation_profile" "{{$.PrimaryResourceId}}" {
+  display_name = "{{index $.Vars "profile_name"}}"
+  location = "global"
+  new_recognition_result_notification_config {
+    topic = google_pubsub_topic.{{$.PrimaryResourceId}}.id
+    message_format =  "{{index $.Vars "message_format"}}"
+  }
+}
+
+resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "topic_name"}}"
+}
