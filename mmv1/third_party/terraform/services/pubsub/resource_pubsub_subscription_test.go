@@ -583,6 +583,34 @@ func TestAccPubsubSubscription_javascriptUdfUpdate(t *testing.T) {
 	})
 }
 
+func TestAccPubsubSubscription_deletionProtection(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+	subscription := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubSubscription_deletionProtection(topic, subscription, true),
+			},
+			{
+				ResourceName:            "google_pubsub_subscription.sub_deletion_protection",
+				ImportStateId:           subscription,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccPubsubSubscription_deletionProtection(topic, subscription, false),
+			},
+		},
+	})
+}
+
 func testAccPubsubSubscription_javascriptUdfSettings(topic, subscription, functionName, code string) string {
 	return fmt.Sprintf(`
 resource "google_pubsub_topic" "foo" {
@@ -1060,4 +1088,19 @@ resource "google_pubsub_subscription" "foo" {
   filter = "%s"
 }
 `, topic, subscription, filter)
+}
+
+func testAccPubsubSubscription_deletionProtection(topic, subscription string, deletionProtection bool) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "topic_deletion_protection" {
+  name = "%s"
+}
+
+resource "google_pubsub_subscription" "sub_deletion_protection" {
+       name = "%s"
+       topic = google_pubsub_topic.topic_deletion_protection.id
+
+       deletion_protection = %t
+}
+       `, topic, subscription, deletionProtection)
 }

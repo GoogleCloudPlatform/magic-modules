@@ -631,3 +631,40 @@ resource "google_pubsub_topic" "foo" {
 }
 	`, topic, functionName, code)
 }
+
+func TestAccPubsubTopic_deletionProtection(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubTopic_deletionProtection(topic, true),
+			},
+			{
+				ResourceName:            "google_pubsub_topic.topic_deletion_protection",
+				ImportStateId:           topic,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccPubsubTopic_deletionProtection(topic, false),
+			},
+		},
+	})
+}
+
+func testAccPubsubTopic_deletionProtection(topic string, deletionProtection bool) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "topic_deletion_protection" {
+	name = "%s"
+
+	deletion_protection = %t
+}
+	`, topic, deletionProtection)
+}

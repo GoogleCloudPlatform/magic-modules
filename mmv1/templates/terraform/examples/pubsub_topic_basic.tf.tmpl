@@ -6,4 +6,6 @@ resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
   }
 
   message_retention_duration = "86600s"
+
+  deletion_protection = false
 }
