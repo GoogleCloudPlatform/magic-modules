@@ -200,7 +200,10 @@ properties:
                 - 'NO_ROOT_SQUASH'
                 - 'ROOT_SQUASH'
                 - 'ALL_SQUASH'
+<<<<<<< HEAD
               default_from_api: true
+=======
+>>>>>>> e4f890fe7 (All squash support (#15115))
             - name: 'anonUid'
               type: Integer
               description: |-
