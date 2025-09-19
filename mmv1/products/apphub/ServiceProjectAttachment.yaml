@@ -38,6 +38,7 @@ async:
     resource_inside_response: true
 custom_code:
   constants: 'templates/terraform/constants/apphub_service_project.go.tmpl'
+include_in_tgc_next_DO_NOT_USE: true
 examples:
   - name: 'service_project_attachment_basic'
     config_path: 'templates/terraform/examples/apphub_service_project_attachment_basic.tf.tmpl'
