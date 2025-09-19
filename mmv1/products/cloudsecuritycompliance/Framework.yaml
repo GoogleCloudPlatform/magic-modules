@@ -21,12 +21,14 @@ create_url: organizations/{{organization}}/locations/{{location}}/frameworks?fra
 update_verb: PATCH
 id_format: organizations/{{organization}}/locations/{{location}}/frameworks/{{framework_id}}
 import_format:
-- organizations/{{organization}}/locations/{{location}}/frameworks/{{framework_id}}
+  - organizations/{{organization}}/locations/{{location}}/frameworks/{{framework_id}}
 examples:
-- name: name_of_example_file
-  primary_resource_id: example
-  vars:
-    resource_name: test-resource
+  - name: "cloudsecuritycompliance_framework_basic"
+    primary_resource_id: example
+    bootstrap_iam:
+      - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
+        role: roles/cloudsecuritycompliance.admin
+
 autogen_async: true
 async:
   operation:
@@ -34,141 +36,141 @@ async:
       insert_minutes: 20
       update_minutes: 20
       delete_minutes: 20
-    base_url: '{{op_id}}'
+    base_url: "{{op_id}}"
   actions:
-  - create
-  - delete
-  - update
+    - create
+    - delete
+    - update
   type: OpAsync
   result:
     resource_inside_response: true
   include_project: false
 autogen_status: RnJhbWV3b3Jr
 parameters:
-- name: organization
-  type: String
-  description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
-  immutable: true
-  url_param_only: true
-  required: true
-- name: location
-  type: String
-  description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
-  immutable: true
-  url_param_only: true
-  required: true
-- name: frameworkId
-  type: String
-  description: |-
-    ID of the framework.
-    This is not the full name of the framework.
-    This is the last part of the full name of the framework.
-  immutable: true
-  url_param_only: true
-  required: true
-properties:
-- name: category
-  type: Array
-  description: The category of the framework.
-  item_type:
+  - name: organization
     type: String
-- name: cloudControlDetails
-  type: Array
-  description: |-
-    The details of the cloud controls directly added without any grouping in
-    the framework.
-  item_type:
-    type: NestedObject
-    properties:
-    - name: majorRevisionId
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: frameworkId
+    type: String
+    description: |-
+      ID of the framework.
+      This is not the full name of the framework.
+      This is the last part of the full name of the framework.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: category
+    type: Array
+    description: The category of the framework.
+    item_type:
       type: String
-      description: Major revision of cloudcontrol
-      required: true
-    - name: name
-      type: String
-      description: |-
-        The name of the CloudControl in the format:
-        “organizations/{organization}/locations/{location}/
-        cloudControls/{cloud-control}”
-      required: true
-    - name: parameters
-      type: Array
-      description: |-
-        Parameters is a key-value pair that is required by the CloudControl. The
-        specification of these parameters will be present in cloudcontrol.Eg: {
-        "name": "location","value": "us-west-1"}.
-      item_type:
-        type: NestedObject
-        properties:
+  - name: cloudControlDetails
+    type: Array
+    description: |-
+      The details of the cloud controls directly added without any grouping in
+      the framework.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: majorRevisionId
+          type: String
+          description: Major revision of cloudcontrol
+          required: true
         - name: name
           type: String
-          description: The name of the parameter.
+          description: |-
+            The name of the CloudControl in the format:
+            “organizations/{organization}/locations/{location}/
+            cloudControls/{cloud-control}”
           required: true
-        - name: parameterValue
-          type: NestedObject
-          description: Possible parameter value types.
-          required: true
-          properties:
-          - name: boolValue
-            type: Boolean
-            description: Represents a boolean value.
-          - name: numberValue
-            type: Double
-            description: Represents a double value.
-          - name: stringListValue
+        - name: parameters
+          type: Array
+          description: |-
+            Parameters is a key-value pair that is required by the CloudControl. The
+            specification of these parameters will be present in cloudcontrol.Eg: {
+            "name": "location","value": "us-west-1"}.
+          item_type:
             type: NestedObject
-            description: A list of strings.
             properties:
-            - name: values
-              type: Array
-              description: The strings in the list.
-              required: true
-              item_type:
+              - name: name
                 type: String
-          - name: stringValue
-            type: String
-            description: Represents a string value.
-- name: description
-  type: String
-  description: The description of the framework. The maximum length is 2000 characters.
-- name: displayName
-  type: String
-  description: Display name of the framework. The maximum length is 200 characters.
-- name: majorRevisionId
-  type: String
-  description: Major revision of the framework incremented in ascending order.
-  output: true
-- name: name
-  type: String
-  description: |-
-    Identifier. The name of the framework.
-    Format:
-    organizations/{organization}/locations/{location}/frameworks/{framework_id}
-  output: true
-  required: true
-- name: supportedCloudProviders
-  type: Array
-  description: cloud providers supported
-  output: true
-  item_type:
+                description: The name of the parameter.
+                required: true
+              - name: parameterValue
+                type: NestedObject
+                description: Possible parameter value types.
+                required: true
+                properties:
+                  - name: boolValue
+                    type: Boolean
+                    description: Represents a boolean value.
+                  - name: numberValue
+                    type: Double
+                    description: Represents a double value.
+                  - name: stringListValue
+                    type: NestedObject
+                    description: A list of strings.
+                    properties:
+                      - name: values
+                        type: Array
+                        description: The strings in the list.
+                        required: true
+                        item_type:
+                          type: String
+                  - name: stringValue
+                    type: String
+                    description: Represents a string value.
+  - name: description
     type: String
-- name: supportedEnforcementModes
-  type: Array
-  description: The supported enforcement modes of the framework.
-  output: true
-  item_type:
+    description: The description of the framework. The maximum length is 2000 characters.
+  - name: displayName
     type: String
-- name: supportedTargetResourceTypes
-  type: Array
-  description: target resource types supported by the Framework.
-  output: true
-  item_type:
+    description: Display name of the framework. The maximum length is 200 characters.
+  - name: majorRevisionId
     type: String
-- name: type
-  type: String
-  description: |-
-    The type of the framework. The default is TYPE_CUSTOM.
-    Possible values:
-    BUILT_IN
-    CUSTOM
-  output: true
+    description: Major revision of the framework incremented in ascending order.
+    output: true
+  - name: name
+    type: String
+    description: |-
+      Identifier. The name of the framework.
+      Format:
+      organizations/{organization}/locations/{location}/frameworks/{framework_id}
+    output: true
+    required: true
+  - name: supportedCloudProviders
+    type: Array
+    description: cloud providers supported
+    output: true
+    item_type:
+      type: String
+  - name: supportedEnforcementModes
+    type: Array
+    description: The supported enforcement modes of the framework.
+    output: true
+    item_type:
+      type: String
+  - name: supportedTargetResourceTypes
+    type: Array
+    description: target resource types supported by the Framework.
+    output: true
+    item_type:
+      type: String
+  - name: type
+    type: String
+    description: |-
+      The type of the framework. The default is TYPE_CUSTOM.
+      Possible values:
+      BUILT_IN
+      CUSTOM
+    output: true
