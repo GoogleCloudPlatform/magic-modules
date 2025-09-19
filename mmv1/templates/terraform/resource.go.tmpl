@@ -722,9 +722,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     {{ $.CustomTemplate $.CustomCode.CustomIdentityRead true -}}
 {{- else }}
 	identity, err := d.Identity()
-	if err != nil {
-		return fmt.Errorf("Error getting identity: %s", err)
-	}
+    if err != nil && identity != nil {
     {{- range $p := $.IdentityProperties }}
     if v, ok := identity.GetOk("{{ underscore $p.Name}}"); ok && v != "" {
         err = identity.Set("{{ underscore $p.Name}}", d.Get("{{ underscore $p.Name}}").(string))
@@ -733,6 +731,9 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
             }     
     }
     {{- end }}
+    } else {
+        fmt.Printf("[DEBUG] identity not set: %s", err)
+    }
 {{- end }}
 {{  end -}}
     return nil
