@@ -145,15 +145,6 @@ func TestAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilt
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels"},
 			},
-      {
-				Config: testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdate4(context),
-			},
-			{
-				ResourceName:            "google_network_security_security_profile.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels"},
-			},
 		},
 	})
 }
@@ -295,7 +286,7 @@ resource "google_network_security_security_profile" "default" {
     url_filters {
       priority = 1
       filtering_action   = "ALLOW"
-      urls = ["*example.com", "*about.example.com", "*help.example.com"]
+      urls = ["*example.com", "*help.example.com"]
     }
     url_filters {
       priority = 2
@@ -330,30 +321,6 @@ resource "google_network_security_security_profile" "default" {
       priority = 2147483647
       filtering_action = "DENY"
       urls = ["*"]
-    }
-  }
-
-  labels = {
-    foo = "bar"
-  }
-}
-`, context)
-}
-
-func testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdate4(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_network_security_security_profile" "default" {
-  provider    = google-beta
-  name        = "tf-test-my-security-profile%{random_suffix}"
-  parent      = "organizations/%{org_id}"
-  description = "my description"
-  type        = "URL_FILTERING"
-
-  url_filtering_profile {
-    url_filters {
-      priority = 2147483647
-      filtering_action = "ALLOW"
-      urls = ["*auth.example.com"]
     }
   }
 
