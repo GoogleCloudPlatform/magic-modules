@@ -1,0 +1,20 @@
+resource "google_datastream_connection_profile" "{{$.PrimaryResourceId}}" {
+    display_name          = "Connection profile MongoDB standard"
+    location              = "us-central1"
+    connection_profile_id = "{{index $.Vars "connection_profile_id"}}"
+
+    mongodb_profile {
+        standard_connection_format {
+          direct_connection = true
+        }
+
+        host_addresses = [
+            "{{index $.Vars "mongodb_dns_host_1"}}",
+            "{{index $.Vars "mongodb_dns_host_2"}}",
+            "{{index $.Vars "mongodb_dns_host_3"}}",
+        ]
+        replica_set    = "{{index $.Vars "mongodb_replica_set"}}"
+        username       = "{{index $.Vars "mongodb_username"}}"
+        password       = "{{index $.Vars "mongodb_password"}}"
+    }
+}
