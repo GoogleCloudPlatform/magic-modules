@@ -2,6 +2,7 @@ package dataprocmetastore_test
 
 import (
 	"fmt"
+	"net/url"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -215,32 +216,75 @@ func testAccCheckMetastoreServiceHasTagBindings(t *testing.T) func(s *terraform.
 
 			config := acctest.GoogleProviderConfig(t)
 
+			// 1. Get the configured tag key and value from the state.
+			var configuredTagValueNamespacedName string
+			var tagKeyNamespacedName, tagValueShortName string
+			for key, val := range rs.Primary.Attributes {
+				if strings.HasPrefix(key, "tags.") && key != "tags.#" {
+					tagKeyNamespacedName = strings.TrimPrefix(key, "tags.")
+					tagValueShortName = val
+					if tagValueShortName != "" {
+						configuredTagValueNamespacedName = fmt.Sprintf("%s/%s", tagKeyNamespacedName, tagValueShortName)
+						break
+					}
+				}
+			}
+
+			if configuredTagValueNamespacedName == "" {
+				return fmt.Errorf("could not find a configured tag value in the state for resource %s", rs.Primary.ID)
+			}
+
+			// Check if placeholders are still present.
+			if strings.Contains(configuredTagValueNamespacedName, "%{") {
+				return fmt.Errorf("tag namespaced name contains unsubstituted variables: %q. Ensure the context map in the test step is populated", configuredTagValueNamespacedName)
+			}
+
+			// 2. Describe the tag value using the namespaced name to get its full resource name.
+			safeNamespacedName := url.QueryEscape(configuredTagValueNamespacedName)
+			describeTagValueURL := fmt.Sprintf("https://cloudresourcemanager.googleapis.com/v3/tagValues/namespaced?name=%s", safeNamespacedName)
+
+			respDescribe, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				RawURL:    describeTagValueURL,
+				UserAgent: config.UserAgent,
+			})
+
+			if err != nil {
+				return fmt.Errorf("error describing tag value using namespaced name %q: %v", configuredTagValueNamespacedName, err)
+			}
+
+			fullTagValueName, ok := respDescribe["name"].(string)
+			if !ok || fullTagValueName == "" {
+				return fmt.Errorf("tag value details (name) not found in response for namespaced name: %q, response: %v", configuredTagValueNamespacedName, respDescribe)
+			}
+
+			// 3. Get the tag bindings from the Dataproc Metastore service.
 			parts := strings.Split(rs.Primary.ID, "/")
 			if len(parts) != 6 {
-				return fmt.Errorf("Invalid resource ID format: %s", rs.Primary.ID)
+				return fmt.Errorf("invalid resource ID format: %s", rs.Primary.ID)
 			}
 			project := parts[1]
 			location := parts[3]
 			service_id := parts[5]
 
 			parentURL := fmt.Sprintf("//metastore.googleapis.com/projects/%s/locations/%s/services/%s", project, location, service_id)
-			url := fmt.Sprintf("https://%s-cloudresourcemanager.googleapis.com/v3/tagBindings?parent=%s", location, parentURL)
-			fmt.Printf("Checking tagBindings for resource: %s at URL: %s\n", rs.Primary.ID, url)
+			listBindingsURL := fmt.Sprintf("https://%s-cloudresourcemanager.googleapis.com/v3/tagBindings?parent=%s", location, url.QueryEscape(parentURL))
 
 			resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
 				Method:    "GET",
-				RawURL:    url,
+				RawURL:    listBindingsURL,
 				UserAgent: config.UserAgent,
 			})
 
 			if err != nil {
-				return fmt.Errorf("Error calling TagBindings API: %v", err)
+				return fmt.Errorf("error calling TagBindings API: %v", err)
 			}
 
 			tagBindingsVal, exists := resp["tagBindings"]
 			if !exists {
-				return fmt.Errorf("Key 'tagBindings' not found in response for resource %s. Response: %v", rs.Primary.ID, resp)
+				tagBindingsVal = []interface{}{}
 			}
 
 			tagBindings, ok := tagBindingsVal.([]interface{})
@@ -248,12 +292,24 @@ func testAccCheckMetastoreServiceHasTagBindings(t *testing.T) func(s *terraform.
 				return fmt.Errorf("'tagBindings' is not a slice in response for resource %s. Response: %v", rs.Primary.ID, resp)
 			}
 
-			// Check if any tag bindings were found.
-			if len(tagBindings) == 0 {
-				return fmt.Errorf("No tag bindings found for resource %s. Response: %v", rs.Primary.ID, resp)
+			// 4. Perform the comparison.
+			foundMatch := false
+			for _, binding := range tagBindings {
+				bindingMap, ok := binding.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				if bindingMap["tagValue"] == fullTagValueName {
+					foundMatch = true
+					break
+				}
 			}
 
-			fmt.Printf("Successfully found %d tag bindings for %s\n", len(tagBindings), rs.Primary.ID)
+			if !foundMatch {
+				return fmt.Errorf("expected tag value %s (from namespaced %q) not found in tag bindings for resource %s. Bindings: %v", fullTagValueName, configuredTagValueNamespacedName, rs.Primary.ID, tagBindings)
+			}
+
+			t.Logf("Successfully found matching tag binding for %s with tagValue %s", rs.Primary.ID, fullTagValueName)
 		}
 
 		return nil
