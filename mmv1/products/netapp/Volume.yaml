@@ -565,9 +565,11 @@ properties:
         description: |
           Required. Name of the user's local source vserver svm to be peered with the destination vserver svm.
       - name: 'peerIpAddresses'
-        type: String
+        type: Array
         description: |
           Required. List of node ip addresses to be peered with.
+        item_type:
+          type: String
       - name: 'clusterLocation'
         type: String
         description: |
