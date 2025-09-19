@@ -138,11 +138,14 @@ The following environment variables are required:
 			return fmt.Errorf("error creating VCR tester: %w", err)
 		}
 
-		if len(args) != 5 {
-			return fmt.Errorf("wrong number of arguments %d, expected 5", len(args))
+		if len(args) < 5 {
+			return fmt.Errorf("wrong number of arguments %d, expected >=5", len(args))
 		}
-
-		return execTestTerraformVCR(args[0], args[1], args[2], args[3], args[4], baseBranch, gh, rnr, ctlr, vt)
+		enableAsyncUploadCassettes := false
+		if len(args) > 5 {
+			enableAsyncUploadCassettes = strings.ToLower(args[5]) == "true"
+		}
+		return execTestTerraformVCR(args[0], args[1], args[2], args[3], args[4], baseBranch, gh, rnr, ctlr, vt, enableAsyncUploadCassettes)
 	},
 }
 
@@ -154,9 +157,14 @@ func listTTVRequiredEnvironmentVariables() string {
 	return result
 }
 
-func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, baseBranch string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester) error {
+func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, baseBranch string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester, enableAsyncUploadCassettes bool) error {
+
 	newBranch := "auto-pr-" + prNumber
 	oldBranch := newBranch + "-old"
+
+	if enableAsyncUploadCassettes {
+		vt.EnableAsyncUploadCassettes(newBranch, provider.Beta)
+	}
 
 	tpgRepo := &source.Repo{
 		Name:   "terraform-provider-google",
@@ -271,8 +279,10 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			testState = "success"
 		}
 
-		if err := vt.UploadCassettes(newBranch, provider.Beta); err != nil {
-			return fmt.Errorf("error uploading cassettes: %w", err)
+		if !enableAsyncUploadCassettes {
+			if err := vt.UploadCassettes(newBranch, provider.Beta); err != nil {
+				return fmt.Errorf("error uploading cassettes: %w", err)
+			}
 		}
 
 		if err := vt.UploadLogs(vcr.UploadLogsOptions{
