@@ -977,7 +977,7 @@ func testAccBigqueryDataTransferConfig_pub_sub(randomSuffix string) string {
 resource "google_bigquery_data_transfer_config" "event_driven_config" {
   depends_on = [google_project_iam_member.permissions]
 
-  display_name           = "my-event-driven-query"
+  display_name           = "my-event-driven-query-%s"
   location               = "asia-northeast1"
   data_source_id         = "scheduled_query"
   schedule               = "first sunday of quarter 00:00"
@@ -995,7 +995,7 @@ resource "google_bigquery_data_transfer_config" "event_driven_config" {
 resource "google_bigquery_dataset" "my_dataset" {
   depends_on = [google_project_iam_member.permissions]
 
-  dataset_id    = "my_dataset"
+  dataset_id    = "my_dataset-%s"
   friendly_name = "foo"
   description   = "bar"
   location      = "asia-northeast1"
