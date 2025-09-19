@@ -371,11 +371,6 @@ properties:
           description: |
               Protocol to mount with.
           output: true
-        - name: 'ipAddress'
-          type: String
-          description: |
-              IP Address.
-          output: true
   - name: 'snapshotPolicy'
     type: NestedObject
     description: |-
