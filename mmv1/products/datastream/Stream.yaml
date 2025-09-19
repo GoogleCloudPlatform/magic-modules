@@ -240,6 +240,13 @@ examples:
       source_connection_profile_id: 'source-profile'
       destination_connection_profile_id: 'destination-profile'
     exclude_test: true
+  - name: 'datastream_stream_mongodb'
+    primary_resource_id: 'default'
+    vars:
+      stream_id: 'mdb-stream'
+      source_connection_profile_id: 'source-profile'
+      destination_connection_profile_id: 'destination-profile'
+    exclude_test: true
 virtual_fields:
   - name: 'desired_state'
     description: |
