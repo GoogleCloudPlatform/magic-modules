@@ -864,14 +864,17 @@ properties:
       - name: privateServiceConnectConfig
         type: NestedObject
         description: The configuration for Private Service Connect (PSC).
+        immutable: true
         properties:
           - name: enablePrivateServiceConnect
             type: Boolean
             description: |-
               Required. If true, expose the IndexEndpoint via private service connect.
             required: true
+            immutable: true
           - name: projectAllowlist
             type: Array
+            immutable: true
             description: |-
               A list of Projects from which the forwarding rule will target the service attachment.
             item_type:
@@ -879,14 +882,16 @@ properties:
           - name: pscAutomationConfigs
             type: NestedObject
             description: PSC config that is used to automatically create PSC endpoints in the user projects.
+            immutable: true
             properties:
               - name: projectId
                 type: String
-                description: |-
-                  Required. Project id used to create forwarding rule.
+                immutable: true
+                description: Required. Project id used to create forwarding rule.
                 required: true
               - name: network
                 type: String
+                immutable: true
                 description: |-
                   Required. The full name of the Google Compute Engine network.
                   Format: projects/{project}/global/networks/{network}.
