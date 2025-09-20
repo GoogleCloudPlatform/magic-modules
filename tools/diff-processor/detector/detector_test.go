@@ -446,3 +446,67 @@ func TestDetectMissingDocsForDatasource(t *testing.T) {
 		})
 	}
 }
+
+func TestDetectMissingAPIs(t *testing.T) {
+	schemaDiff := diff.SchemaDiff{
+		"a_resource": diff.ResourceDiff{
+			ResourceConfig: diff.ResourceConfigDiff{
+				New: &schema.Resource{},
+			},
+		},
+	}
+
+	tests := []struct {
+		name         string
+		fileName     string
+		oldBasePaths map[string]string
+		newBasePaths map[string]string
+		wantAPIs     []string
+		wantError    bool
+	}{
+		{
+			name:      "file not exist",
+			fileName:  "not-exist.tf",
+			wantError: true,
+		},
+		{
+			name:     "no missing apis",
+			fileName: "../testdata/missingapi.tf",
+			oldBasePaths: map[string]string{
+				"key1": "https://accessapproval.googleapis.com/v1/",
+			},
+			newBasePaths: map[string]string{
+				"key1": "https://accessapproval.googleapis.com/v1/",
+				"key2": "https://accesscontextmanager.googleapis.com/v1/",
+			},
+		},
+		{
+			name:     "missing apis",
+			fileName: "../testdata/missingapi.tf",
+			oldBasePaths: map[string]string{
+				"key1": "https://accessapproval.googleapis.com/v1/",
+			},
+			newBasePaths: map[string]string{
+				"key1": "https://accessapproval.googleapis.com/v1/",
+				"key2": "https://random.googleapis.com/v1/",
+			},
+			wantAPIs: []string{
+				"random.googleapis.com",
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := DetectMissingAPIs(schemaDiff, test.oldBasePaths, test.newBasePaths, test.fileName)
+			if test.wantError && err == nil {
+				t.Fatalf("DetectMissingAPIs(%s) got nil error, want error", test.fileName)
+			}
+			if err != nil && !test.wantError {
+				t.Fatalf("DetectMissingAPIs(%s) got error %s", test.fileName, err)
+			}
+			if diff := cmp.Diff(test.wantAPIs, got); diff != "" {
+				t.Errorf("DetectMissingAPIs(%s) got diff(-want, got)\n: %s", test.fileName, diff)
+			}
+		})
+	}
+}
