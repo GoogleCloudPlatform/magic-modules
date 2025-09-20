@@ -4,7 +4,7 @@ description: |-
   Get information about Backup and DR data source references.
 ---
 
-# google_backup_dr_data_source_references
+# google_backup_dr_list_data_source_references
 
 A list of Backup and DR data source references.
 
@@ -14,13 +14,12 @@ See [Provider Versions](https://terraform.io/docs/providers/google/guides/provid
 ## Example Usage
 
 ```hcl
-data "google_backup_dr_data_source_references" "my_sql_data_source_references" {
+data "google_backup_dr_list_data_source_references" "my_data_source_references" {
   location      = "us-central1"
-  resource_type = "sqladmin.googleapis.com/Instance"
 }
 
-output "my_sql_data_source_reference_name" {
-  name = data.google_backup_dr_data_source_references.my_sql_data_source_references.data_source_references[0].name
+output "data_source_reference_name" {
+  name = data.google_backup_dr_list_data_source_references.my_data_source_references.data_source_references[0].name
 }
 ```
 
@@ -29,8 +28,6 @@ output "my_sql_data_source_reference_name" {
 The following arguments are supported:
 
 *   `location`- (Required) The location of the data source references.
-    
-*   `resource_type` - (Required) The resource type to get the data source references for. Examples include, "sqladmin.googleapis.com/Instance" , "compute.googleapis.com/Instance" (right now this service not available for compute Instances , it will be added soon )
     
 *   `project` - (Optional) The ID of the project in which the resource belongs. If it is not provided, the provider project is used.
     
@@ -53,8 +50,8 @@ In addition to the arguments listed above, the following attributes are exported
         
     6.   `last_successful_backup_time`- The last time a successful backup was made.
         
-    7.  `gcp_resource_name`- The GCP resource name for the data source.
+    7.   `gcp_resource_name`- The GCP resource name for the data source.
         
     8.   `resource_type`- The type of the referenced resource.
 
-See [google_backup_dr_data_source_references](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/backup_dr_data_source_references) resource for details of the available attributes.
+See [google_backup_dr_list_data_source_references](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/backup_dr_list_data_source_references) resource for details of the available attributes.
