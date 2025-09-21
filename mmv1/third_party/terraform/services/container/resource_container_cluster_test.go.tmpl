@@ -3677,7 +3677,7 @@ func TestAccContainerCluster_stackType_withSingleStack(t *testing.T) {
 	})
 }
 
-func TestAccContainerCluster_with_PodCIDROverprovisionDisabled(t *testing.T) {
+func TestAccContainerCluster_with_PodCIDROverprovision(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
@@ -3690,7 +3690,7 @@ func TestAccContainerCluster_with_PodCIDROverprovisionDisabled(t *testing.T) {
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_with_PodCIDROverprovisionDisabled(containerNetName, clusterName),
+				Config: testAccContainerCluster_with_PodCIDROverprovision(containerNetName, clusterName, true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "ip_allocation_policy.0.pod_cidr_overprovision_config.0.disabled", "true"),
 				),
@@ -3700,6 +3700,12 @@ func TestAccContainerCluster_with_PodCIDROverprovisionDisabled(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_with_PodCIDROverprovision(containerNetName, clusterName, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "ip_allocation_policy.0.pod_cidr_overprovision_config.0.disabled", "false"),
+				),
 			},
 		},
 	})
@@ -10593,7 +10599,7 @@ resource "google_container_cluster" "with_stack_type" {
 `, containerNetName, clusterName)
 }
 
-func testAccContainerCluster_with_PodCIDROverprovisionDisabled(containerNetName string, clusterName string) string {
+func testAccContainerCluster_with_PodCIDROverprovision(containerNetName string, clusterName string, disabled bool) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
   name                    = "%s"
@@ -10621,12 +10627,12 @@ resource "google_container_cluster" "with_pco_disabled" {
     cluster_ipv4_cidr_block  = "10.1.0.0/16"
     services_ipv4_cidr_block = "10.2.0.0/16"
     pod_cidr_overprovision_config {
-      disabled = true
+      disabled = %t
     }
   }
   deletion_protection = false
 }
-`, containerNetName, clusterName)
+`, containerNetName, clusterName, disabled)
 }
 
 func testAccContainerCluster_withResourceUsageExportConfig(clusterName, datasetId, enableMetering, networkName, subnetworkName string) string {
