@@ -29,6 +29,14 @@ func TestConvertNetworksecurity(t *testing.T) {
 		"./services/networksecurity/testdata",
 		[]string{
 			"server_tls_policy",
-			"backend_authentication_config",
+		})
+}
+
+func TestConvertCertificateManager(t *testing.T) {
+	cai2hclTesting.AssertTestFiles(
+		t,
+		"./services/certificatemanager/testdata",
+		[]string{
+			"certificate",
 		})
 }
