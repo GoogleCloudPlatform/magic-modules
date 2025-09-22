@@ -151,6 +151,7 @@ properties:
               type: String
               description: |-
                  If enabled, the root user (UID = 0) of the specified clients doesn't get mapped to nobody (UID = 65534). This is also known as no_root_squash.
+              default_from_api: true
             - name: 'accessType'
               type: Enum
               description: |
@@ -199,6 +200,7 @@ properties:
                 - 'NO_ROOT_SQUASH'
                 - 'ROOT_SQUASH'
                 - 'ALL_SQUASH'
+              default_from_api: true
             - name: 'anonUid'
               type: Integer
               description: |-
@@ -563,9 +565,11 @@ properties:
         description: |
           Required. Name of the user's local source vserver svm to be peered with the destination vserver svm.
       - name: 'peerIpAddresses'
-        type: String
+        type: Array
         description: |
           Required. List of node ip addresses to be peered with.
+        item_type:
+          type: String
       - name: 'clusterLocation'
         type: String
         description: |
