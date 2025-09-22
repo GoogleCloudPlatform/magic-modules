@@ -58,6 +58,8 @@ examples:
     primary_resource_id: 'default'
     vars:
       name: 'my-pool'
+    # This example doesn't contain the `encryption_spec` field, as testing that
+    # field requires a beta resource
   - name: 'privateca_capool_cmek'
     primary_resource_id: 'default'
     vars:
@@ -70,6 +72,7 @@ examples:
     # Skip test because it depends on a beta resource, but PrivateCA does
     # not have a beta endpoint
     exclude_test: true
+    # This test is meant to test the `encryption_spec` field
   - name: 'privateca_quickstart'
     primary_resource_id: 'default'
     vars:
