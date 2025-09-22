@@ -44,6 +44,7 @@ async:
 custom_code:
   constants: 'templates/terraform/constants/apigee_instance.go.tmpl'
   custom_import: 'templates/terraform/custom_import/apigee_instance.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/apigee_instance.go.tmpl'
 error_retry_predicates:
   - 'transport_tpg.IsApigeeRetryableError'
 exclude_sweeper: true
@@ -226,3 +227,9 @@ properties:
           The statusCode is the only expected/supported filter field. (Ex: statusCode)
           The filter will parse it to the Common Expression Language semantics for expression
           evaluation to build the filter condition. (Ex: "filter": statusCode >= 200 && statusCode < 300 )
+virtual_fields:
+  - name: 'deletionProtection'
+    type: Boolean
+    description: "Optional. If set to true deletion of the instance will fail."
+    # TODO: change to `true` in the next major release (8.0.0)
+    # default_value: true
