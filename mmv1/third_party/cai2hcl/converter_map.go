@@ -25,7 +25,8 @@ var AssetTypeToConverter = map[string]string{
 	resourcemanager.ProjectAssetType:        "google_project",
 	resourcemanager.ProjectBillingAssetType: "google_project",
 
-	networksecurity.ServerTLSPolicyAssetType: "google_network_security_server_tls_policy",
+	networksecurity.ServerTLSPolicyAssetType:             "google_network_security_server_tls_policy",
+	networksecurity.BackendAuthenticationConfigAssetType: "google_network_security_backend_authentication_config",
 
 	certificatemanager.CertificateAssetType: "google_certificate_manager_certificate",
 }
@@ -42,7 +43,8 @@ var ConverterMap = map[string]common.Converter{
 
 	"google_project": resourcemanager.NewProjectConverter(provider),
 
-	"google_network_security_server_tls_policy": networksecurity.NewServerTLSPolicyConverter(provider),
+	"google_network_security_server_tls_policy":             networksecurity.NewServerTLSPolicyConverter(provider),
+	"google_network_security_backend_authentication_config": networksecurity.NewBackendAuthenticationConfigConverter(provider),
 
 	"google_certificate_manager_certificate": certificatemanager.NewCertificateConverter(provider),
 }
