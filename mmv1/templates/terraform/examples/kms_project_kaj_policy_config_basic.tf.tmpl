@@ -1,0 +1,10 @@
+resource "google_kms_project_kaj_policy_config" "{{$.PrimaryResourceId}}" {
+	provider 				= google-beta
+	project 				= "{{index $.TestEnvVars "project_id"}}"
+	default_key_access_justification_policy {
+		allowed_access_reasons = [
+			"CUSTOMER_INITIATED_ACCESS",
+			"GOOGLE_INITIATED_SYSTEM_OPERATION",
+		]
+	}
+}
