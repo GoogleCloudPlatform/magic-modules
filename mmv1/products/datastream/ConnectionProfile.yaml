@@ -108,6 +108,11 @@ examples:
     primary_resource_id: 'default'
     vars:
       source_connection_profile_id: 'source-profile'
+  - name: 'datastream_connection_profile_mongodb'
+    primary_resource_id: 'default'
+    vars:
+      source_connection_profile_id: 'source-profile'
+    exclude_test: true
 parameters:
   - name: 'connectionProfileId'
     type: String
@@ -156,6 +161,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'mongodb_profile'
     properties:
       - name: 'hostname'
         type: String
@@ -202,6 +208,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'mongodb_profile'
     properties:
       - name: 'bucket'
         type: String
@@ -224,6 +231,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'mongodb_profile'
     properties:
       - name: 'hostname'
         type: String
@@ -311,6 +319,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'mongodb_profile'
     properties:
       []
   - name: 'postgresqlProfile'
@@ -325,6 +334,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'mongodb_profile'
     properties:
       - name: 'hostname'
         type: String
@@ -369,6 +379,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'mongodb_profile'
     properties:
       - name: 'domain'
         type: String
@@ -435,6 +446,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'mongodb_profile'
     properties:
       - name: 'hostname'
         type: String
@@ -466,6 +478,136 @@ properties:
         description: |
           Database for the SQL Server connection.
         required: true
+  - name: 'mongodb_profile'
+    type: NestedObject
+    description: 'Configuration for connecting to a MongoDB database.'
+    exactly_one_of:
+      - 'oracle_profile'
+      - 'gcs_profile'
+      - 'mysql_profile'
+      - 'bigquery_profile'
+      - 'postgresql_profile'
+      - 'sql_server_profile'
+      - 'salesforce_profile'
+      - 'mongodb_profile'
+    at_least_one_of:
+      - 'srv_connection_format'
+      - 'standard_connection_format'
+    properties:
+      - name: 'hostAddresses'
+        type: Array
+        description: 'List of host addresses for a MongoDB cluster.'
+        required: true
+        # This 'properties' block defines the structure of each item in the 'hostAddresses' array
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'hostname'
+              type: String
+              description: |
+                Hostname for the connection.
+              required: true
+            - name: 'port'
+              type: Integer
+              description: |
+                Port for the connection.
+      - name: 'replicaSet'
+        type: String
+        description: |
+          Name of the replica set.
+      - name: 'username'
+        type: String
+        description: |
+          Username for the MongoDB connection.
+        required: true
+      - name: 'password'
+        type: String
+        description: |
+          Password for the MongoDB connection. Mutually exclusive with
+          secretManagerStoredPassword.
+        sensitive: true
+      - name: 'secretManagerStoredPassword'
+        type: String
+        description: |
+          A reference to a Secret Manager resource name storing the MongoDB
+          connection password. Mutually exclusive with password.
+      - name: 'sslConfig'
+        type: NestedObject
+        description: |
+          SSL configuration for the MongoDB connection.
+        properties:
+          - name: 'clientKey'
+            type: String
+            description: |
+              PEM-encoded private key associated with the Client Certificate.
+              If this field is used then the 'client_certificate' and the
+              'ca_certificate' fields are mandatory.
+            immutable: true
+            sensitive: true
+          - name: 'clientKeySet'
+            type: Boolean
+            description: |
+              Indicates whether the clientKey field is set.
+            output: true
+          - name: 'clientCertificate'
+            type: String
+            description: |
+              PEM-encoded certificate that will be used by the replica to
+              authenticate against the source database server. If this field
+              is used then the 'clientKey' and the 'caCertificate' fields are
+              mandatory.
+            immutable: true
+            sensitive: true
+          - name: 'clientCertificateSet'
+            type: Boolean
+            description: |
+              Indicates whether the clientCertificate field is set.
+            output: true
+          - name: 'caCertificate'
+            type: String
+            description: |
+              PEM-encoded certificate of the CA that signed the source database
+              server's certificate.
+            immutable: true
+            sensitive: true
+          - name: 'caCertificateSet'
+            type: Boolean
+            description: |
+              Indicates whether the clientKey field is set.
+            output: true
+          - name: 'secretManagerStoredClientKey'
+            type: String
+            description: |
+              A reference to a Secret Manager resource name storing the 
+              PEM-encoded private key. Mutually exclusive with clientKey.
+            immutable: true
+            sensitive: true
+      - name: 'srvConnectionFormat'
+        type: NestedObject
+        description: |
+          Srv connection format. Mutually exclusive with
+          standardConnectionFormat.
+        send_empty_value: true
+        allow_empty_object: true
+        conflicts:
+          - standard_connection_format
+        properties:
+          []
+      - name: 'standardConnectionFormat'
+        type: NestedObject
+        description: |
+          Standard connection format. Mutually exclusive with
+          srvConnectionFormat.
+        send_empty_value: true
+        allow_empty_object: true
+        conflicts:
+          - srv_connection_format
+        properties:
+          - name: 'directConnection'
+            type: Boolean
+            description: |
+              Specifies whether the client connects directly to the
+              host[:port] in the connection URI.
   - name: 'forwardSshConnectivity'
     type: NestedObject
     description: |
