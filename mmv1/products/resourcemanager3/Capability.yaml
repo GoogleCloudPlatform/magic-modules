@@ -21,7 +21,6 @@ references:
   guides:
     'Official Documentation': 'https://cloud.google.com/resource-manager/docs/manage-applications'
   api: 'https://cloud.google.com/resource-manager/reference/rest'
-min_version: beta
 
 import_format:
   - '{{parent}}/capabilities/{{capability_name}}'
@@ -54,7 +53,6 @@ examples:
       display_name: 'my-folder'
     test_env_vars:
       org_id: "ORG_ID"
-    min_version: beta
     external_providers: ["time"]
 
 parameters:

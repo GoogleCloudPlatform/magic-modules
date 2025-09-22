@@ -218,6 +218,7 @@ properties:
       - 'QOS_TYPE_UNSPECIFIED'
       - 'AUTO'
       - 'MANUAL'
+    default_from_api: true
   - name: 'availableThroughputMibps'
     type: Double
     description: |

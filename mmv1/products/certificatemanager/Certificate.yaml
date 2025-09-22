@@ -66,6 +66,7 @@ examples:
       dns_auth_name2: 'dns-auth2'
       dns_auth_subdomain2: 'subdomain2'
       cert_name: 'dns-cert'
+    tgc_skip_test: 'Need to figure out to get the desired cai asset state.'
   - name: 'certificate_manager_google_managed_certificate_issuance_config'
     primary_resource_id: 'default'
     vars:
@@ -73,14 +74,17 @@ examples:
       ca_name: 'ca-authority'
       pool_name: 'ca-pool'
       issuance_config_name: 'issuance-config'
+    tgc_skip_test: 'Need to figure out to get the desired cai asset state.'
   - name: 'certificate_manager_self_managed_certificate'
     primary_resource_id: 'default'
     vars:
       cert_name: 'self-managed-cert'
+    tgc_skip_test: 'Need to figure out to get the desired cai asset state.'
   - name: 'certificate_manager_self_managed_certificate_regional'
     primary_resource_id: 'default'
     vars:
       cert_name: 'self-managed-cert'
+    tgc_skip_test: 'Need to figure out to get the desired cai asset state.'
   - name: 'certificate_manager_google_managed_certificate_issuance_config_all_regions'
     primary_resource_id: 'default'
     vars:
@@ -88,6 +92,7 @@ examples:
       ca_name: 'ca-authority'
       pool_name: 'ca-pool'
       issuance_config_name: 'issuance-config'
+    tgc_skip_test: 'Need to figure out to get the desired cai asset state.'
   - name: 'certificate_manager_google_managed_certificate_dns_all_regions'
     primary_resource_id: 'default'
     vars:
@@ -96,16 +101,19 @@ examples:
       dns_auth_name2: 'dns-auth2'
       dns_auth_subdomain2: 'subdomain2'
       cert_name: 'dns-cert'
+    tgc_skip_test: 'Need to figure out to get the desired cai asset state.'
   - name: 'certificate_manager_google_managed_regional_certificate_dns_auth'
     primary_resource_id: 'default'
     vars:
       dns_auth_name: 'dns-auth'
       dns_auth_subdomain: 'subdomain'
       cert_name: 'dns-cert'
+    tgc_skip_test: 'Need to figure out to get the desired cai asset state.'
   - name: 'certificate_manager_client_auth_certificate'
     primary_resource_id: 'default'
     vars:
       cert_name: 'client-auth-cert'
+    tgc_skip_test: 'Need to figure out to get the desired cai asset state.'
 parameters:
   - name: 'name'
     type: String
