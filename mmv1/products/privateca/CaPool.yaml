@@ -58,11 +58,18 @@ examples:
     primary_resource_id: 'default'
     vars:
       name: 'my-pool'
+  - name: 'privateca_capool_cmek'
+    primary_resource_id: 'default'
+    vars:
+      name: 'my-pool'
       pool_location: 'asia-east1'
       cloud_kms_key: 'projects/keys-project/locations/asia-east1/keyRings/key-ring/cryptoKeys/crypto-key'
     test_vars_overrides:
       'pool_location': '"asia-east1"'
       'cloud_kms_key': 'acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "asia-east1").CryptoKey.Name'
+    # Skip test because it depends on a beta resource, but PrivateCA does
+    # not have a beta endpoint
+    exclude_test: true
   - name: 'privateca_quickstart'
     primary_resource_id: 'default'
     vars:
