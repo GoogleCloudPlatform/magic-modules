@@ -26,7 +26,7 @@ references:
   api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rpc/google.cloud.discoveryengine.v1alpha#dataconnectorservice'
 base_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataConnector'
 self_link: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataConnector'
-create_url: 'projects/{{project}}/locations/{{location}}:setUpDataConnector'
+create_url: 'projects/{{project}}/locations/{{location}}:setUpDataConnectorV2?collectionId={{collection_id}}&collectionDisplayName={{collection_display_name}}'
 update_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataConnector'
 update_verb: 'PATCH'
 update_mask: true
@@ -45,8 +45,6 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-custom_code:
-  post_read: 'templates/terraform/post_read/discoveryengine_dataconnector_use_declared_res.go.tmpl'
 examples:
   - name: 'discoveryengine_dataconnector_jira_basic'
     primary_resource_id: 'jira-basic'
@@ -66,7 +64,6 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-properties:
   - name: 'collectionId'
     type: String
     description: |
@@ -77,207 +74,189 @@ properties:
       This field must conform to [RFC-1034](https://tools.ietf.org/html/rfc1034)
       standard with a length limit of 63 characters. Otherwise, an
       INVALID_ARGUMENT error is returned.
-    ignore_read: true
+    url_param_only: true
+    required: true
+    immutable: true
   - name: 'collectionDisplayName'
     type: String
     description: |
       The display name of the Collection.
       Should be human readable, used to display collections in the Console
       Dashboard. UTF-8 encoded string with limit of 1024 characters.
-    ignore_read: true
-  - name: 'dataConnector'
-    type: NestedObject
+    url_param_only: true
+    required: true
+properties:
+  - name: 'name'
+    type: String
     description: |
-      The DataConnector to initialize in the newly created Collection.
+      The full resource name of the Data Connector.
+      Format: `projects/*/locations/*/collections/*/dataConnector`.
+    output: true
+  - name: 'state'
+    type: String
+    description: |
+      The state of connector. The possible value can be:
+      'STATE_UNSPECIFIED', 'CREATING', 'ACTIVE', 'FAILED', 'RUNNING', 'WARNING',
+      'INITIALIZATION_FAILED', 'UPDATING'.
+    output: true
+  - name: 'dataSource'
+    type: String
+    description: |
+      The name of the data source.
+      Supported values: `salesforce`, `jira`, `confluence`, `bigquery`.
+    required: true
+  - name: 'params'
+    type: KeyValuePairs
+    description: |
+      Params needed to access the source in the format of String-to-String (Key, Value) pairs.
     required: true
     ignore_read: true
-    properties:
-      - name: 'name'
-        type: String
-        description: |
-          The full resource name of the Data Connector.
-          Format: `projects/*/locations/*/collections/*/dataConnector`.
-        output: true
-      - name: 'state'
-        type: String
-        description: |
-          The state of connector. The possible value can be:
-          'STATE_UNSPECIFIED', 'CREATING', 'ACTIVE', 'FAILED', 'RUNNING', 'WARNING',
-          'INITIALIZATION_FAILED', 'UPDATING'.
-        output: true
-      - name: 'dataSource'
-        type: String
-        description: |
-          The name of the data source.
-          Supported values: `salesforce`, `jira`, `confluence`, `bigquery`.
-        required: true
-      - name: 'params'
-        type: KeyValuePairs
-        description: |
-          Params needed to access the source in the format of String-to-String (Key, Value) pairs.
-        required: true
-      - name: 'refreshInterval'
-        type: NestedObject
-        description: |
-          The refresh interval for data sync. If duration is set to 0, the data will
-          be synced in real time. The streaming feature is not supported yet. The
-          minimum is 30 minutes and maximum is 7 days. When the refresh interval is
-          set to the same value as the incremental refresh interval, incremental
-          sync will be disabled.
-        required: true
-        properties:
-          - name: 'seconds'
-            type: Integer
-            description: |
-              Signed seconds of the span of time. Must be from -315,576,000,000
-              to +315,576,000,000 inclusive. Note: these bounds are computed from:
-              60 sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years
-          - name: 'nanos'
-            type: Integer
-            description: |
-              Signed fractions of a second at nanosecond resolution of the span
-              of time. Durations less than one second are represented with a 0
-              `seconds` field and a positive or negative `nanos` field. For durations
-              of one second or more, a non-zero value for the `nanos` field must be
-              of the same sign as the `seconds` field. Must be from -999,999,999
-              to +999,999,999 inclusive.
-      - name: 'entities'
-        type: Array
-        description: |
-          List of entities from the connected data source to ingest.
-        item_type:
-          type: NestedObject
-          properties:
-            - name: 'entityName'
-              type: String
-              description: |
-                The name of the entity. Supported values by data source:
-                * Salesforce: `Lead`, `Opportunity`, `Contact`, `Account`, `Case`, `Contract`, `Campaign`
-                * Jira: project, issue, attachment, comment, worklog
-                * Confluence: `Content`, `Space`
-            - name: 'keyPropertyMappings'
-              type: KeyValuePairs
-              description: |
-                Attributes for indexing.
-                Key: Field name.
-                Value: The key property to map a field to, such as `title`, and
-                `description`. Supported key properties:
-                * `title`: The title for data record. This would be displayed on search
-                  results.
-                * `description`: The description for data record. This would be displayed
-                  on search results.
-            - name: 'dataStore'
-              type: String
-              description: |
-                The full resource name of the associated data store for the source
-                entity.
-                Format: `projects/*/locations/*/collections/*/dataStores/*`.
-                When the connector is initialized by the DataConnectorService.SetUpDataConnector
-                method, a DataStore is automatically created for each source entity.
-              output: true
-            - name: 'params'
-              type: KeyValuePairs
-              description: |
-                The parameters for the entity to facilitate data ingestion.
-      - name: 'create_time'
-        type: Time
-        description: |
-          Timestamp when the DataConnector was created.
-        output: true
-      - name: 'latest_pause_time'
-        type: Time
-        description: |
-          The most recent timestamp when this [DataConnector][] was paused,
-          affecting all functionalities such as data synchronization.
-          Pausing a connector has the following effects:
-            - All functionalities, including data synchronization, are halted.
-            - Any ongoing data synchronization job will be canceled.
-            - No future data synchronization runs will be scheduled nor can be
-          triggered.
-        output: true
-      - name: 'last_sync_time'
-        type: Time
-        description: |
-          For periodic connectors only, the last time a data sync was completed.
-        output: true
-      - name: 'update_time'
-        type: Time
-        description: |
-          Timestamp when the DataConnector was updated.
-        output: true
-      - name: 'errors'
-        type: Array
-        description: |
-          The errors from initialization or from the latest connector run.
-        output: true
-        item_type:
-          type: NestedObject
-          properties:
-            - name: 'code'
-              type: Integer
-              description: |
-                The status code, which should be an enum value of google.rpc.Code.
-              output: true
-            - name: 'message'
-              type: String
-              description: |
-                A developer-facing error message, which should be in English.
-              output: true
-      - name: 'kms_key_name'
-        type: String
-        description: |
-          The KMS key to be used to protect the DataStores managed by this connector.
-          Must be set for requests that need to comply with CMEK Org Policy
-          protections.
-          If this field is set and processed successfully, the DataStores created by
-          this connector will be protected by the KMS key.
-      - name: 'actionState'
-        type: String
-        description: |
-          State of the action connector. This reflects whether the action connector
-          is initializing, active or has encountered errors. The possible value can be:
-          'STATE_UNSPECIFIED', 'CREATING', 'ACTIVE', 'FAILED', 'RUNNING', 'WARNING',
-          'INITIALIZATION_FAILED', 'UPDATING'.
-        output: true
-      - name: 'staticIpEnabled'
-        type: Boolean
-        description: |
-          Whether customer has enabled static IP addresses for this connector.
-      - name: 'staticIpAddresses'
-        type: Array
-        description: |
-          The static IP addresses used by this connector.
-        output: true
-        item_type:
+  - name: 'refreshInterval'
+    type: String
+    description: |
+      The refresh interval for data sync. If duration is set to 0, the data will
+      be synced in real time. The streaming feature is not supported yet. The
+      minimum is 30 minutes and maximum is 7 days. When the refresh interval is
+      set to the same value as the incremental refresh interval, incremental
+      sync will be disabled.
+    required: true
+  - name: 'entities'
+    type: Array
+    description: |
+      List of entities from the connected data source to ingest.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'entityName'
           type: String
-      - name: 'blockingReasons'
-        type: Array
-        description: |
-          User actions that must be completed before the connector can start syncing data.
-          The possible values can be: 'ALLOWLIST_STATIC_IP', 'ALLOWLIST_IN_SERVICE_ATTACHMENT'.
-        output: true
-        item_type:
+          description: |
+            The name of the entity. Supported values by data source:
+            * Salesforce: `Lead`, `Opportunity`, `Contact`, `Account`, `Case`, `Contract`, `Campaign`
+            * Jira: project, issue, attachment, comment, worklog
+            * Confluence: `Content`, `Space`
+        - name: 'keyPropertyMappings'
+          type: KeyValuePairs
+          description: |
+            Attributes for indexing.
+            Key: Field name.
+            Value: The key property to map a field to, such as `title`, and
+            `description`. Supported key properties:
+            * `title`: The title for data record. This would be displayed on search
+              results.
+            * `description`: The description for data record. This would be displayed
+              on search results.
+        - name: 'dataStore'
           type: String
-      - name: 'privateConnectivityProjectId'
-        type: String
-        description: |
-          The tenant project ID associated with private connectivity connectors.
-          This project must be allowlisted by in order for the connector to function.
-        output: true
-      - name: 'connectorType'
-        type: String
-        description: |
-          The type of connector. Each source can only map to one type.
-          For example, salesforce, confluence and jira have THIRD_PARTY connector
-          type. It is not mutable once set by system. The possible value can be:
-          'CONNECTOR_TYPE_UNSPECIFIED', 'THIRD_PARTY', 'GCP_FHIR', 'BIG_QUERY',
-          'GCS', 'GOOGLE_MAIL', 'GOOGLE_CALENDAR', 'GOOGLE_DRIVE',
-          'NATIVE_CLOUD_IDENTITY', 'THIRD_PARTY_FEDERATED', 'THIRD_PARTY_EUA', 'GCNV'.
-        output: true
-      - name: 'realtimeState'
-        type: String
-        description: |
-          The real-time sync state. The possible values can be:
-          'STATE_UNSPECIFIED', 'CREATING', 'ACTIVE', 'FAILED', 'RUNNING', 'WARNING',
-          'INITIALIZATION_FAILED', 'UPDATING'.
-        output: true
+          description: |
+            The full resource name of the associated data store for the source
+            entity.
+            Format: `projects/*/locations/*/collections/*/dataStores/*`.
+            When the connector is initialized by the DataConnectorService.SetUpDataConnector
+            method, a DataStore is automatically created for each source entity.
+          output: true
+        - name: 'params'
+          type: KeyValuePairs
+          description: |
+            The parameters for the entity to facilitate data ingestion.
+  - name: 'create_time'
+    type: Time
+    description: |
+      Timestamp when the DataConnector was created.
+    output: true
+  - name: 'latest_pause_time'
+    type: Time
+    description: |
+      The most recent timestamp when this [DataConnector][] was paused,
+      affecting all functionalities such as data synchronization.
+      Pausing a connector has the following effects:
+        - All functionalities, including data synchronization, are halted.
+        - Any ongoing data synchronization job will be canceled.
+        - No future data synchronization runs will be scheduled nor can be
+      triggered.
+    output: true
+  - name: 'last_sync_time'
+    type: Time
+    description: |
+      For periodic connectors only, the last time a data sync was completed.
+    output: true
+  - name: 'update_time'
+    type: Time
+    description: |
+      Timestamp when the DataConnector was updated.
+    output: true
+  - name: 'errors'
+    type: Array
+    description: |
+      The errors from initialization or from the latest connector run.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'code'
+          type: Integer
+          description: |
+            The status code, which should be an enum value of google.rpc.Code.
+          output: true
+        - name: 'message'
+          type: String
+          description: |
+            A developer-facing error message, which should be in English.
+          output: true
+  - name: 'kms_key_name'
+    type: String
+    description: |
+      The KMS key to be used to protect the DataStores managed by this connector.
+      Must be set for requests that need to comply with CMEK Org Policy
+      protections.
+      If this field is set and processed successfully, the DataStores created by
+      this connector will be protected by the KMS key.
+  - name: 'actionState'
+    type: String
+    description: |
+      State of the action connector. This reflects whether the action connector
+      is initializing, active or has encountered errors. The possible value can be:
+      'STATE_UNSPECIFIED', 'CREATING', 'ACTIVE', 'FAILED', 'RUNNING', 'WARNING',
+      'INITIALIZATION_FAILED', 'UPDATING'.
+    output: true
+  - name: 'staticIpEnabled'
+    type: Boolean
+    description: |
+      Whether customer has enabled static IP addresses for this connector.
+  - name: 'staticIpAddresses'
+    type: Array
+    description: |
+      The static IP addresses used by this connector.
+    output: true
+    item_type:
+      type: String
+  - name: 'blockingReasons'
+    type: Array
+    description: |
+      User actions that must be completed before the connector can start syncing data.
+      The possible values can be: 'ALLOWLIST_STATIC_IP', 'ALLOWLIST_IN_SERVICE_ATTACHMENT'.
+    output: true
+    item_type:
+      type: String
+  - name: 'privateConnectivityProjectId'
+    type: String
+    description: |
+      The tenant project ID associated with private connectivity connectors.
+      This project must be allowlisted by in order for the connector to function.
+    output: true
+  - name: 'connectorType'
+    type: String
+    description: |
+      The type of connector. Each source can only map to one type.
+      For example, salesforce, confluence and jira have THIRD_PARTY connector
+      type. It is not mutable once set by system. The possible value can be:
+      'CONNECTOR_TYPE_UNSPECIFIED', 'THIRD_PARTY', 'GCP_FHIR', 'BIG_QUERY',
+      'GCS', 'GOOGLE_MAIL', 'GOOGLE_CALENDAR', 'GOOGLE_DRIVE',
+      'NATIVE_CLOUD_IDENTITY', 'THIRD_PARTY_FEDERATED', 'THIRD_PARTY_EUA', 'GCNV'.
+    output: true
+  - name: 'realtimeState'
+    type: String
+    description: |
+      The real-time sync state. The possible values can be:
+      'STATE_UNSPECIFIED', 'CREATING', 'ACTIVE', 'FAILED', 'RUNNING', 'WARNING',
+      'INITIALIZATION_FAILED', 'UPDATING'.
+    output: true
