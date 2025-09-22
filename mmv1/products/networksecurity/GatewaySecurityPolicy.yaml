@@ -58,6 +58,7 @@ examples:
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-gateway-security-policy'
+    tgc_skip_test: 'It takes time to fix it.'
   - name: 'network_security_gateway_security_policy_tls_inspection_basic'
     primary_resource_id: 'default'
     vars:
@@ -65,6 +66,7 @@ examples:
       privateca_ca_tls_name: 'my-tls-inspection-policy'
       privateca_ca_pool_name: 'my-basic-ca-pool'
       privateca_certificate_authority_id: 'my-basic-certificate-authority'
+    tgc_skip_test: 'It takes time to fix it.'
 parameters:
   - name: 'name'
     type: String
