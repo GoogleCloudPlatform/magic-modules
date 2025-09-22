@@ -17,7 +17,5 @@ display_name: 'Discovery Engine'
 versions:
   - name: 'ga'
     base_url: 'https://{{location}}-discoveryengine.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://{{location}}-discoveryengine.googleapis.com/v1alpha/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'

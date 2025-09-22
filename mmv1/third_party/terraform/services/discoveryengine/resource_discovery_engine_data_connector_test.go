@@ -18,7 +18,7 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorJiraBasicEx
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorJiraBasicExample_basic(context),
@@ -45,7 +45,6 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorJiraBasicEx
 func testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorJiraBasicExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_discovery_engine_data_connector" "jira-basic" {
-  provider                  = google-beta
   location                  = "global"
   collection_id             = "tf-test-collection-id%{random_suffix}"
   collection_display_name   = "tf-test-dataconnector-jira"
@@ -85,7 +84,6 @@ resource "google_discovery_engine_data_connector" "jira-basic" {
 func testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorJiraBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_discovery_engine_data_connector" "jira-basic" {
-  provider                  = google-beta
   location                  = "global"
   collection_id             = "tf-test-collection-id%{random_suffix}"
   data_connector {
