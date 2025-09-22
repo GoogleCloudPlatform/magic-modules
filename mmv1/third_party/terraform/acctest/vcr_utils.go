@@ -255,10 +255,36 @@ func HandleVCRConfiguration(ctx context.Context, testName string, rndTripper htt
 		diags.AddError("error creating record as new mode", err.Error())
 		return pollInterval, rndTripper, diags
 	}
+
+	// Add a filter for instanceGroupManagers list call
+	// context: https://github.com/hashicorp/terraform-provider-google-beta/pull/10714
+	rec.AddFilter(NewListCallFilter("/instanceGroupManagers"))
+	rec.AddSaveFilter(NewListCallFilter("/instanceGroupManagers"))
+
 	// Defines how VCR will match requests to responses.
 	rec.SetMatcher(NewVcrMatcherFunc(ctx))
 
 	return pollInterval, rec, diags
+}
+
+// NewListCallFilter creates a VCR request filter that ignores
+// list calls for given resources
+func NewListCallFilter(urlSuffix string) func(i *cassette.Interaction) error {
+
+	return func(i *cassette.Interaction) error {
+		// Check if it's a GET request
+		if i.Request.Method != http.MethodGet {
+			return nil
+		}
+
+		// Check if the request url ends with the given suffix
+		if strings.HasSuffix(i.Request.URL, urlSuffix) {
+			// Return an error to skip the given resource list call.
+			return fmt.Errorf("ignoring list call for %s", urlSuffix)
+		}
+
+		return nil
+	}
 }
 
 // NewVcrMatcherFunc returns a function used for matching HTTP requests with data recorded in VCR cassettes
