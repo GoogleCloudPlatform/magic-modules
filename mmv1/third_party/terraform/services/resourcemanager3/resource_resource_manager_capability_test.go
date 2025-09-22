@@ -1,9 +1,8 @@
 package resourcemanager3_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
-	"testing"
 	"regexp"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
@@ -15,14 +14,14 @@ func TestAccResourceManagerCapability_resourceManagerCapabilityExample_basic(t *
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 	folderTFResourceName := "google_folder.folder"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
@@ -41,9 +40,9 @@ func TestAccResourceManagerCapability_resourceManagerCapabilityExample_basic(t *
 				),
 			},
 			{
-				ResourceName:      "google_resource_manager_capability.capability",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_resource_manager_capability.capability",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"capability_name", "parent"},
 			},
 		},
@@ -53,7 +52,6 @@ func TestAccResourceManagerCapability_resourceManagerCapabilityExample_basic(t *
 func testAccResourceManagerCapability_resourceManagerCapabilityExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_folder" "folder" {
-  provider         = google-beta
   display_name     = "my-folder%{random_suffix}"
   parent           = "organizations/%{org_id}"
   deletion_protection = false
@@ -63,14 +61,10 @@ resource "time_sleep" "wait_60s" {
   create_duration = "60s"
 }
 resource "google_resource_manager_capability" "capability" {
-  provider         = google-beta
   value            = true
   parent           = "${google_folder.folder.name}"
   capability_name  = "app-management"
-  depends_on = [time_sleep.wait_60s]
+  depends_on = [time_sleep.wait_60s, google_folder.folder]
 }
 `, context)
 }
-{{- else }}
-// Capability is only in beta version.
-{{- end }}
