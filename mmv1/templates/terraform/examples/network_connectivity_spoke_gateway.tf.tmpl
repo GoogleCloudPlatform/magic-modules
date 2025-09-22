@@ -26,7 +26,7 @@ resource "google_network_connectivity_spoke" "primary" {
   provider = google-beta
   name        = "{{index $.Vars "spoke_name"}}"
   location = "us-central1"
-  description = "A sample spoke with a linked routher appliance instance"
+  description = "A sample spoke of type Gateway"
   labels = {
     label-one = "value-one"
   }

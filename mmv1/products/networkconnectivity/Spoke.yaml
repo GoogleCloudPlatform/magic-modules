@@ -330,7 +330,7 @@ properties:
           type: String
   - name: gateway
     type: NestedObject
-    description: Todo
+    description: Optional. This is a gateway that can apply specialized processing to traffic going through it.
     immutable: true
     min_version: beta
     conflicts:
@@ -342,7 +342,7 @@ properties:
     properties:
       - name: ipRangeReservations
         type: Array
-        description: Todo
+        description: A list of IP ranges that are reserved for this gateway's internal intfrastructure.
         required: true
         immutable: false
         item_type:
@@ -350,11 +350,11 @@ properties:
           properties:
             - name: ipRange
               type: String
-              description: Todo
+              description: A block of IP address ranges used to allocate supporting infrastructure for this gateway—for example, 10.1.2.0/23. The IP address block must be a /23 range. This IP address block must not overlap with subnets in any spoke or peer network that the gateway can communicate with.
               required: true
       - name: capacity
         type: Enum
-        description: todo
+        description: the capacity of the gateway spoke, in Gbps.
         immutable: false
         required: false
         enum_values:
