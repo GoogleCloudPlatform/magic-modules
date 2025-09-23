@@ -110,6 +110,7 @@ examples:
       - 'gce_setup.0.boot_disk.0.disk_type'
       - 'gce_setup.0.data_disks.0.disk_type'
       - 'gce_setup.0.metadata.version'
+      - 'gce_setup.0.metadata.%'
       - 'update_time'
   - name: 'workbench_instance_confidential_compute'
     primary_resource_id: 'instance'
