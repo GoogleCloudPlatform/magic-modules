@@ -578,7 +578,7 @@ properties:
           - name: 'secretManagerStoredClientKey'
             type: String
             description: |
-              A reference to a Secret Manager resource name storing the 
+              A reference to a Secret Manager resource name storing the
               PEM-encoded private key. Mutually exclusive with clientKey.
             immutable: true
             sensitive: true
