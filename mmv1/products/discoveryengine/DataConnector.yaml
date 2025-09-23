@@ -109,8 +109,17 @@ properties:
     type: KeyValuePairs
     description: |
       Params needed to access the source in the format of String-to-String (Key, Value) pairs.
-    required: true
     ignore_read: true
+    exactly_one_of:
+      - params
+      - json_params
+  - name: 'jsonParams'
+    type: String
+    description: |
+      Params needed to access the source in the format of json string.
+    exactly_one_of:
+      - params
+      - json_params
   - name: 'refreshInterval'
     type: String
     description: |
@@ -158,12 +167,12 @@ properties:
           type: KeyValuePairs
           description: |
             The parameters for the entity to facilitate data ingestion.
-  - name: 'create_time'
+  - name: 'createTime'
     type: Time
     description: |
       Timestamp when the DataConnector was created.
     output: true
-  - name: 'latest_pause_time'
+  - name: 'latestPauseTime'
     type: Time
     description: |
       The most recent timestamp when this [DataConnector][] was paused,
@@ -174,12 +183,12 @@ properties:
         - No future data synchronization runs will be scheduled nor can be
       triggered.
     output: true
-  - name: 'last_sync_time'
+  - name: 'lastSyncTime'
     type: Time
     description: |
       For periodic connectors only, the last time a data sync was completed.
     output: true
-  - name: 'update_time'
+  - name: 'updateTime'
     type: Time
     description: |
       Timestamp when the DataConnector was updated.
@@ -202,7 +211,7 @@ properties:
           description: |
             A developer-facing error message, which should be in English.
           output: true
-  - name: 'kms_key_name'
+  - name: 'kmsKeyName'
     type: String
     description: |
       The KMS key to be used to protect the DataStores managed by this connector.
