@@ -86,14 +86,19 @@ func New{{$.ResourceName}}FWResource() resource.Resource {
 }
 
 type {{$.ResourceName}}FWResource struct {
-	{{/*client         *sqladmin.Service*/}}
 	providerConfig *transport_tpg.Config
 }
 
 type {{$.ResourceName}}FWModel struct {
-    {{- range $prop := $.OrderProperties $.AllUserProperties }}
-    {{camelize $prop.Name "upper"}}     types.{{$prop.GetFWType}} `tfsdk:"{{underscore $prop.Name}}"`
-    {{- end }}
+	{{- range $prop := $.OrderProperties $.AllUserProperties }}
+		{{  if .FlattenObject -}}
+      		{{  range $p := .ResourceMetadata.OrderProperties .UserProperties -}}
+	{{ camelize .Name "upper" }} types.{{ .GetFWType }} `tfsdk:"{{ underscore .Name }}"`
+      		{{  end -}}
+    	{{  else }}
+    {{- camelize .Name "upper" }} types.{{ .GetFWType }} `tfsdk:"{{ underscore .Name }}"`
+    	{{- end }}
+	{{- end }}
 	{{ if $.HasProject -}}
 	Project            types.String `tfsdk:"project"`
     {{- end }}
@@ -122,12 +127,6 @@ func (r *{{$.ResourceName}}FWResource) Configure(ctx context.Context, req resour
 		return
 	}
 
-    {{/* TODO non-client equivalent? */}}
-    {{/* 
-	r.client = p.NewSqlAdminClient(p.UserAgent)
-	if resp.Diagnostics.HasError() {
-		return
-	}*/}}
 	r.providerConfig = p
 }
 
@@ -150,8 +149,6 @@ func (r *{{$.ResourceName}}FWResource) ModifyPlan(ctx context.Context, req resou
 
 func (d *{{$.ResourceName}}FWResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "A resource to represent a SQL User object.",
-
 		Attributes: map[string]schema.Attribute{
 {{- range $prop := $.OrderProperties $.AllUserProperties }}
     {{template "SchemaFieldsFW" $prop -}}
@@ -189,6 +186,13 @@ func (d *{{$.ResourceName}}FWResource) Schema(ctx context.Context, _ resource.Sc
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"timeouts": timeouts.Block(ctx, timeouts.Opts{
+				Create: true,
+				{{- if or $.Updatable $.RootLabels }}
+				Update: true,
+				{{- end }}
+				Delete: true,
+				}),
         },
 	}
 }
@@ -262,9 +266,7 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
     obj["{{ $prop.ApiName -}}"] = {{ $prop.ApiName -}}Prop
 {{- end }}
 
-
-	{{/* TODO default timeouts */}}
-    createTimeout, diags := data.Timeouts.Create(ctx, 20*time.Minute)
+    createTimeout, diags := data.Timeouts.Create(ctx, {{ $.Timeouts.InsertMinutes }}*time.Minute)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -480,8 +482,7 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
 	}
 {{- end }}
 
-	{{/* TODO default timeouts */}}
-    updateTimeout, diags := data.Timeouts.Update(ctx, 20*time.Minute)
+    updateTimeout, diags := data.Timeouts.Update(ctx, {{ $.Timeouts.UpdateMinutes }}*time.Minute)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -622,7 +623,7 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
 
 	obj := make(map[string]interface{})
 
-    deleteTimeout, diags := data.Timeouts.Delete(ctx, 20*time.Minute)
+    deleteTimeout, diags := data.Timeouts.Delete(ctx, {{ $.Timeouts.DeleteMinutes }}*time.Minute)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -697,7 +698,28 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
 }
 
 func (r *{{$.ResourceName}}FWResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	patterns := []string{
+		{{- range $id := $.ImportIdFormatsFromResource }}
+		"^{{ format2regex $id }}$",
+		{{- end }}
+	}
+
+	var resourceSchemaResp resource.SchemaResponse
+	r.Schema(ctx, resource.SchemaRequest{}, &resourceSchemaResp)
+	if resourceSchemaResp.Diagnostics.HasError() {
+		resp.Diagnostics.Append(resourceSchemaResp.Diagnostics...)
+		return
+	}
+
+	parsed, diags := fwresource.ParseImportId(ctx, req, resourceSchemaResp.Schema, r.providerConfig, patterns)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	for name, value := range parsed {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root(name), value)...)
+	}
 }
 
 func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.Context, data *{{$.ResourceName}}FWModel, state *tfsdk.State, req interface{}, diag *diag.Diagnostics) {
