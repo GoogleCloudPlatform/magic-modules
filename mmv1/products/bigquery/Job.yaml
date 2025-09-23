@@ -859,6 +859,12 @@ properties:
                 type: String
                 description: 'The ID of the model.'
                 required: true
+      - name: 'reservation'
+        type: String
+        description: |
+          The reservation that job would use. User can specify a reservation to execute the job. If this field is not set, reservation is determined based on the rules defined by the reservation assignments.
+          The expected format is `projects/{project}/locations/{location}/reservations/{reservation}`.
+        required: false
   - name: 'jobReference'
     type: NestedObject
     description: |
