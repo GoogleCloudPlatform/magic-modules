@@ -1930,14 +1930,11 @@ properties:
         type: NestedObject
         description: |
           MongoDB data source objects to avoid backfilling.
-        send_empty_value: true
-        allow_empty_object: true
         properties:
           - type: Array
             name: 'databases'
             description: |
               MongoDB databases in the cluster.
-            send_empty_value: true
             allow_empty_object: true
             item_type:
               type: NestedObject
@@ -1950,7 +1947,6 @@ properties:
                   name: 'collections'
                   description: |
                     Collections in the database.
-                  send_empty_value: true
                   allow_empty_object: true
                   item_type:
                     type: NestedObject
@@ -1963,7 +1959,6 @@ properties:
                         name: 'fields'
                         description: |
                           Fields in the collection.
-                        send_empty_value: true
                         allow_empty_object: true
                         item_type:
                           type: NestedObject
