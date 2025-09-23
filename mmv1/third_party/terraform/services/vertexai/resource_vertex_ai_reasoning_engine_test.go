@@ -10,6 +10,13 @@ import (
 func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineUpdate(t *testing.T) {
 	t.Parallel()
 
+  acctest.BootstrapIamMembers(t, []acctest.IamMember{
+    {
+      Member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com",
+      Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+    },
+  })
+
 	context := map[string]interface{}{
 		"bucket_name":  acctest.TestBucketName(t),
 		"kms_key_name": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name,
@@ -191,12 +198,6 @@ resource "google_project_iam_member" "sa_iam_viewer" {
   member  = google_service_account.service_account.member
 }
 
-resource "google_kms_crypto_key_iam_member" "sa_iam_key_crypter_decrypter" {
-  crypto_key_id = "%{kms_key_name}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
-}
-
 data "google_project" "project" {}
 `, context)
 }
@@ -303,7 +304,6 @@ resource "time_sleep" "wait_5_minutes" {
   create_duration = "5m"
 
   depends_on = [
-    google_kms_crypto_key_iam_member.sa_iam_key_crypter_decrypter,
     google_project_iam_member.sa_iam_ai_platform_user_new,
     google_project_iam_member.sa_iam_object_viewer_new,
     google_project_iam_member.sa_iam_viewer_new,
