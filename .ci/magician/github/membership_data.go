@@ -80,6 +80,9 @@ var (
 		"hao-nan-li": {
 			vacations: []Vacation{},
 		},
+		"malhotrasagar2212": {
+			vacations: []Vacation{},
+		},
 		"melinath": {
 			vacations: []Vacation{
 				{
