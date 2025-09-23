@@ -1243,12 +1243,12 @@ properties:
         send_empty_value: true
         allow_empty_object: true
         exactly_one_of:
-        - 'source_config.0.mysql_source_config'
-        - 'source_config.0.oracle_source_config'
-        - 'source_config.0.postgresql_source_config'
-        - 'source_config.0.sql_server_source_config'
-        - 'source_config.0.salesforce_source_config'
-        - 'source_config.0.mongodb_source_config'
+          - 'source_config.0.mysql_source_config'
+          - 'source_config.0.oracle_source_config'
+          - 'source_config.0.postgresql_source_config'
+          - 'source_config.0.sql_server_source_config'
+          - 'source_config.0.salesforce_source_config'
+          - 'source_config.0.mongodb_source_config'
         properties:
           - name: 'includeObjects'
             type: NestedObject
@@ -1257,45 +1257,45 @@ properties:
             send_empty_value: true
             allow_empty_object: true
             properties:
-            - type: Array
-              name: 'databases'
-              description: |
-                MongoDB databases in the cluster.
-              send_empty_value: true
-              allow_empty_object: true
-              item_type:
-                type: NestedObject
-                properties:
-                  - type: String
-                    name: 'database'
-                    description: |
-                      Database name.
-                  - type: Array
-                    name: 'collections'
-                    description: |
-                      Collections in the database.
-                    send_empty_value: true
-                    allow_empty_object: true
-                    item_type:
-                      type: NestedObject
-                      properties:
-                        - type: String
-                          name: 'collection'
-                          description: |
-                            Collection name.
-                        - type: Array
-                          name: 'fields'
-                          description: |
-                            Fields in the collection.
-                          send_empty_value: true
-                          allow_empty_object: true
-                          item_type:
-                            type: NestedObject
-                            properties:
-                              - type: 'String'
-                                name: 'field'
-                                description: |
-                                  Field name.
+              - type: Array
+                name: 'databases'
+                description: |
+                  MongoDB databases in the cluster.
+                send_empty_value: true
+                allow_empty_object: true
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - type: String
+                      name: 'database'
+                      description: |
+                        Database name.
+                    - type: Array
+                      name: 'collections'
+                      description: |
+                        Collections in the database.
+                      send_empty_value: true
+                      allow_empty_object: true
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - type: String
+                            name: 'collection'
+                            description: |
+                              Collection name.
+                          - type: Array
+                            name: 'fields'
+                            description: |
+                              Fields in the collection.
+                            send_empty_value: true
+                            allow_empty_object: true
+                            item_type:
+                              type: NestedObject
+                              properties:
+                                - type: 'String'
+                                  name: 'field'
+                                  description: |
+                                    Field name.
           - name: 'excludeObjects'
             type: NestedObject
             description: |
@@ -1345,8 +1345,8 @@ properties:
           - name: 'maxConcurrentBackfillTasks'
             type: Integer
             description: |
-              Optional. Maximum number of concurrent backfill tasks. The number 
-              should be non-negative and less than or equal to 50. If not set 
+              Optional. Maximum number of concurrent backfill tasks. The number
+              should be non-negative and less than or equal to 50. If not set
               (or set to 0), the system''s default value is used
   - name: 'destinationConfig'
     type: NestedObject
