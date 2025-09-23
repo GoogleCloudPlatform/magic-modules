@@ -272,7 +272,7 @@ func NewListCallPassthrough(urlSuffix string) func(r *http.Request) bool {
 
 	return func(r *http.Request) bool {
 		// Check if it's a GET request
-		if i.Request.Method != http.MethodGet {
+		if r.Method != http.MethodGet {
 			return false
 		}
 
