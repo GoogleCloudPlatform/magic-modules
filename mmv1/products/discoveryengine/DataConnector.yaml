@@ -85,6 +85,7 @@ parameters:
       Dashboard. UTF-8 encoded string with limit of 1024 characters.
     url_param_only: true
     required: true
+    immutable: true
 properties:
   - name: 'name'
     type: String
@@ -105,6 +106,7 @@ properties:
       The name of the data source.
       Supported values: `salesforce`, `jira`, `confluence`, `bigquery`.
     required: true
+    immutable: true
   - name: 'params'
     type: KeyValuePairs
     description: |
@@ -133,6 +135,7 @@ properties:
     type: Array
     description: |
       List of entities from the connected data source to ingest.
+    immutable: true
     item_type:
       type: NestedObject
       properties:
@@ -219,6 +222,7 @@ properties:
       protections.
       If this field is set and processed successfully, the DataStores created by
       this connector will be protected by the KMS key.
+    immutable: true
   - name: 'actionState'
     type: String
     description: |
@@ -231,6 +235,7 @@ properties:
     type: Boolean
     description: |
       Whether customer has enabled static IP addresses for this connector.
+    immutable: true
   - name: 'staticIpAddresses'
     type: Array
     description: |

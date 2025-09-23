@@ -101,8 +101,9 @@ resource "google_discovery_engine_data_connector" "jira-basic" {
       client_secret         = "%{client_secret}"
       client_id             = "%{client_id}"
       refresh_token         = "fill-in-the-blank"
+      max_qps               = "100"
   }
-  refresh_interval          = "86400s"
+  refresh_interval          = "172800s"
   entities {
       entity_name           = "project"
   }
