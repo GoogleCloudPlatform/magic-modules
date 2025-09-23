@@ -256,10 +256,9 @@ func HandleVCRConfiguration(ctx context.Context, testName string, rndTripper htt
 		return pollInterval, rndTripper, diags
 	}
 
-	// Add a filter for instanceGroupManagers list call
+	// Add a passthrough for instanceGroupManagers list call
 	// context: https://github.com/GoogleCloudPlatform/magic-modules/pull/15086
-	rec.AddFilter(NewListCallFilter("/instanceGroupManagers"))
-	rec.AddSaveFilter(NewListCallFilter("/instanceGroupManagers"))
+	rec.AddPassthrough(NewListCallPassthrough("/instanceGroupManagers"))
 
 	// Defines how VCR will match requests to responses.
 	rec.SetMatcher(NewVcrMatcherFunc(ctx))
@@ -267,23 +266,22 @@ func HandleVCRConfiguration(ctx context.Context, testName string, rndTripper htt
 	return pollInterval, rec, diags
 }
 
-// NewListCallFilter creates a VCR request filter that ignores
+// NewListCallPassthrough creates a VCR passthrough filter that ignores
 // list calls for given resources
-func NewListCallFilter(urlSuffix string) func(i *cassette.Interaction) error {
+func NewListCallPassthrough(urlSuffix string) func(r *http.Request) bool {
 
-	return func(i *cassette.Interaction) error {
+	return func(r *http.Request) bool {
 		// Check if it's a GET request
 		if i.Request.Method != http.MethodGet {
-			return nil
+			return false
 		}
 
-		// Check if the request url ends with the given suffix
-		if strings.HasSuffix(i.Request.URL, urlSuffix) {
-			// Return an error to skip the given resource list call.
-			return fmt.Errorf("ignoring list call for %s", urlSuffix)
+		// Check if the request url path ends with the given suffix
+		if strings.HasSuffix(r.URL.Path, urlSuffix) {
+			return true
 		}
 
-		return nil
+		return false
 	}
 }
 
