@@ -10,12 +10,12 @@ import (
 func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineUpdate(t *testing.T) {
 	t.Parallel()
 
-  acctest.BootstrapIamMembers(t, []acctest.IamMember{
-    {
-      Member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com",
-      Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
-    },
-  })
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
 
 	context := map[string]interface{}{
 		"bucket_name":  acctest.TestBucketName(t),
