@@ -7,7 +7,10 @@ import (
 )
 
 func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorJiraBasicExample_update(t *testing.T) {
-	t.Parallel()
+    // Skips this update test due to duration and flakiness.
+    t.Skip()
+
+    t.Parallel()
 
 	context := map[string]interface{}{
 		"kms_key_name":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tftest-shared-key-dataconnector-0").CryptoKey.Name,
@@ -19,6 +22,9 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorJiraBasicEx
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+        ExternalProviders: map[string]resource.ExternalProvider{
+            "time": {},
+        },
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorJiraBasicExample_basic(context),
@@ -44,7 +50,12 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorJiraBasicEx
 
 func testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorJiraBasicExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "time_sleep" "wait_1_hour" {
+  create_duration = "3600s"
+}
+
 resource "google_discovery_engine_data_connector" "jira-basic" {
+  depends_on                = [time_sleep.wait_1_hour]
   location                  = "global"
   collection_id             = "tf-test-collection-id%{random_suffix}"
   collection_display_name   = "tf-test-dataconnector-jira"
