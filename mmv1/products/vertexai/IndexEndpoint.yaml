@@ -47,17 +47,11 @@ examples:
     primary_resource_id: 'index_endpoint'
     vars:
       network_name: 'network-name'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
-    exclude_docs: true
-  - name: 'vertex_ai_index_endpoint_with_cmek'
-    primary_resource_id: 'index_endpoint'
-    vars:
-      network_name: 'network-name'
       kms_key_name: 'kms-name'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+    exclude_docs: true
   - name: 'vertex_ai_index_endpoint_with_psc'
     primary_resource_id: 'index_endpoint'
   - name: 'vertex_ai_index_endpoint_with_false_psc'
