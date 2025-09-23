@@ -257,7 +257,7 @@ func HandleVCRConfiguration(ctx context.Context, testName string, rndTripper htt
 	}
 
 	// Add a filter for instanceGroupManagers list call
-	// context: https://github.com/hashicorp/terraform-provider-google-beta/pull/10714
+	// context: https://github.com/GoogleCloudPlatform/magic-modules/pull/15086
 	rec.AddFilter(NewListCallFilter("/instanceGroupManagers"))
 	rec.AddSaveFilter(NewListCallFilter("/instanceGroupManagers"))
 
