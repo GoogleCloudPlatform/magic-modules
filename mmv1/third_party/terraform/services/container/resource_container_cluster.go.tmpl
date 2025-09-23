@@ -2437,7 +2437,6 @@ func ResourceContainerCluster() *schema.Resource {
 						"membership_type": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ForceNew:     true,
 							Default:      "MEMBERSHIP_TYPE_UNSPECIFIED",
 							ValidateFunc: validation.StringInSlice([]string{"MEMBERSHIP_TYPE_UNSPECIFIED", "LIGHTWEIGHT"}, false),
 							Description:  `The type of the cluster's fleet membership.`,
