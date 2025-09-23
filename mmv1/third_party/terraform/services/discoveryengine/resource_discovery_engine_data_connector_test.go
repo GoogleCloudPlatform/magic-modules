@@ -7,10 +7,10 @@ import (
 )
 
 func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorJiraBasicExample_update(t *testing.T) {
-    // Skips this update test due to duration and flakiness.
-    t.Skip()
+	// Skips this update test due to duration and flakiness.
+	t.Skip()
 
-    t.Parallel()
+	t.Parallel()
 
 	context := map[string]interface{}{
 		"client_id":     "tf-test-client-id",
@@ -21,9 +21,9 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorJiraBasicEx
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-        ExternalProviders: map[string]resource.ExternalProvider{
-            "time": {},
-        },
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorJiraBasicExample_basic(context),
