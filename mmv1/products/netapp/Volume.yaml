@@ -151,7 +151,6 @@ properties:
               type: String
               description: |-
                  If enabled, the root user (UID = 0) of the specified clients doesn't get mapped to nobody (UID = 65534). This is also known as no_root_squash.
-              default_from_api: true
             - name: 'accessType'
               type: Enum
               description: |
@@ -200,7 +199,6 @@ properties:
                 - 'NO_ROOT_SQUASH'
                 - 'ROOT_SQUASH'
                 - 'ALL_SQUASH'
-              default_from_api: true
             - name: 'anonUid'
               type: Integer
               description: |-
@@ -587,6 +585,27 @@ properties:
         description: |
           Optional. Labels to be added to the replication as the key value pairs.
           An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+      - name: 'replicationSchedule'
+        type: Enum
+        description: |
+          Optional. Replication Schedule for the replication created.
+        enum_values:
+          - 'EVERY_10_MINUTES'
+          - 'HOURLY'
+          - 'DAILY'
+      - name: 'hybridReplicationType'
+        type: Enum
+        description: |
+          Optional. Type of the volume's hybrid replication.
+        enum_values:
+          - 'MIGRATION'
+          - 'CONTINUOUS_REPLICATION'
+          - 'ONPREM_REPLICATION'
+          - 'REVERSE_ONPREM_REPLICATION'
+      - name: 'largeVolumeConstituentCount'
+        type: Integer
+        description: |
+          Optional. Constituent volume count for large volume.
   - name: 'throughputMibps'
     type: Double
     description: |
