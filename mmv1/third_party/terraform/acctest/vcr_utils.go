@@ -257,7 +257,7 @@ func HandleVCRConfiguration(ctx context.Context, testName string, rndTripper htt
 	}
 
 	// Add a passthrough for nodePools and instanceGroupManagers list call
-	// context: 
+	// context:
 	// https://github.com/GoogleCloudPlatform/magic-modules/pull/14175
 	// https://github.com/GoogleCloudPlatform/magic-modules/pull/15086
 	rec.AddPassthrough(NewListCallPassthrough("/nodePools"))
