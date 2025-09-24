@@ -223,32 +223,6 @@ steps:
         - terraform-google-conversion
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
-      id: tpgb-test
-      allowFailure: true
-      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
-      secretEnv: ["GITHUB_TOKEN_MAGIC_MODULES"]
-      waitFor: ["tpgb-head", "tpgb-base"]
-      args:
-        - 'test-tpg'
-      env:
-        - VERSION=beta
-        - COMMIT_SHA=$COMMIT_SHA
-        - PR_NUMBER=$_PR_NUMBER
-
-    - name: 'gcr.io/graphite-docker-images/go-plus'
-      id: tpg-test
-      allowFailure: true
-      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
-      secretEnv: ["GITHUB_TOKEN_MAGIC_MODULES"]
-      waitFor: ["tpg-head", "tpg-base"]
-      args:
-        - 'test-tpg'
-      env:
-        - VERSION=ga
-        - COMMIT_SHA=$COMMIT_SHA
-        - PR_NUMBER=$_PR_NUMBER
-
-    - name: 'gcr.io/graphite-docker-images/go-plus'
       id: gcb-tpg-vcr-test
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS", "GITHUB_TOKEN_MAGIC_MODULES", "GOOGLE_BILLING_ACCOUNT", "GOOGLE_CHRONICLE_INSTANCE_ID", "GOOGLE_CUST_ID", "GOOGLE_IDENTITY_USER", "GOOGLE_MASTER_BILLING_ACCOUNT", "GOOGLE_ORG", "GOOGLE_ORG_2", "GOOGLE_ORG_DOMAIN", "GOOGLE_PROJECT", "GOOGLE_PROJECT_NUMBER", "GOOGLE_SERVICE_ACCOUNT", "SA_KEY", "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION", "GOOGLE_VMWAREENGINE_PROJECT"]
