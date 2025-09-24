@@ -1,6 +1,6 @@
-{{- if ne $.TargetVersionName "ga" }}
-
 package tags_test
+
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"context"
@@ -10,15 +10,14 @@ import (
 	"regexp"
 	"testing"
 
-	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/envvar"
-	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/services/tags"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 )
 
 // Acceptance Tests
@@ -469,7 +468,7 @@ func testAccCheckTagADeleted(t *testing.T, contextMap map[string]interface{}) re
 		})
 
 		if err != nil {
-			if dcl.IsNotFound(err) {
+			if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 				return nil
 			}
 			return fmt.Errorf("Error reading TagBindingCollection: %s", err)

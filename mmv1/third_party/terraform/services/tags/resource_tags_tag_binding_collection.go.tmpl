@@ -1,6 +1,6 @@
-{{- if ne $.TargetVersionName "ga" }}
-
 package tags
+
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"context"
@@ -11,12 +11,11 @@ import (
 	"strings"
 	"time"
 
-	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func ResourceTagsTagBindingCollection() *schema.Resource {
@@ -155,6 +154,7 @@ func resourceTagsTagBindingCollectionUpsert(ctx context.Context, d *schema.Resou
 		mergedTags[k] = v
 	}
 	for k, v := range configuredTags {
+		// This will also overwrite the current bindings with the bindings in terraform config, nullifying any updates done outside of terraform config
 		mergedTags[k] = v
 	}
 
@@ -203,12 +203,7 @@ func resourceTagsTagBindingCollectionDelete(ctx context.Context, d *schema.Resou
 	// Step 1: Read current state
 	currentTags, currentEtag, err := getCurrentTagBindingCollectionState(config, userAgent, location, encodedResourceName)
 	if err != nil {
-		if dcl.IsNotFound(err) {
-			log.Printf("[DEBUG] TagBindingCollection not found for %s during delete, nothing to do.", resourceName)
-			d.SetId("")
-			return nil
-		}
-		return diag.Errorf("Error reading current state for delete: %s", err)
+		return diag.FromErr(transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("TagBindingCollection %q", resourceName)))
 	}
 
 	// Step 2. Get Terraform-managed old tags from state
@@ -229,6 +224,7 @@ func resourceTagsTagBindingCollectionDelete(ctx context.Context, d *schema.Resou
 	for k := range oldTags {
 		// Check if the tag managed by Terraform is actually present on the resource.
 		if _, existsInCurrent := currentTags[k]; existsInCurrent {
+			// This will delete all the bindings managed by terraform, even if such bindings were updated outside of terraform as well
 			delete(finalTags, k)
 			hasTagsToDelete = true
 		}
