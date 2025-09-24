@@ -166,10 +166,13 @@ examples:
     ignore_read_extra:
       - 'etag'
       - 'status.0.state'
+    min_version: beta
     primary_resource_id: 'job'
     vars:
       job_id: 'job_query_reservation'
       reservation_name: 'my-reservation'
+    test_env_vars:
+      project: 'PROJECT_NAME'
 parameters:
 properties:
   - name: 'user_email'

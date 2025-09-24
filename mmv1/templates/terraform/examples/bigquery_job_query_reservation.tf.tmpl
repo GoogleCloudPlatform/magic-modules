@@ -8,6 +8,5 @@ resource "google_bigquery_job" "{{$.PrimaryResourceId}}" {
 
   }
 
-  reservation = "{{index $.Vars "reservation_name"}}"
+  reservation = "projects/{{index $.TestEnvVars "project"}}/locations/US/reservations/{{index $.Vars "reservation_name"}}"
 }
-
