@@ -80,6 +80,9 @@ var (
 		"hao-nan-li": {
 			vacations: []Vacation{},
 		},
+		"malhotrasagar2212": {
+			vacations: []Vacation{},
+		},
 		"melinath": {
 			vacations: []Vacation{
 				{
@@ -162,7 +165,6 @@ var (
 
 	// This is for new team members who are onboarding
 	trustedContributors = map[string]struct{}{
-		"bbasata":           struct{}{},
-		"malhotrasagar2212": struct{}{},
+		"bbasata": struct{}{},
 	}
 )
