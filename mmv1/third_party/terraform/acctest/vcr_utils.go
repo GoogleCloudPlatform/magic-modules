@@ -256,8 +256,11 @@ func HandleVCRConfiguration(ctx context.Context, testName string, rndTripper htt
 		return pollInterval, rndTripper, diags
 	}
 
-	// Add a passthrough for instanceGroupManagers list call
-	// context: https://github.com/GoogleCloudPlatform/magic-modules/pull/15086
+	// Add a passthrough for nodePools and instanceGroupManagers list call
+	// context: 
+	// https://github.com/GoogleCloudPlatform/magic-modules/pull/14175
+	// https://github.com/GoogleCloudPlatform/magic-modules/pull/15086
+	rec.AddPassthrough(NewListCallPassthrough("/nodePools"))
 	rec.AddPassthrough(NewListCallPassthrough("/instanceGroupManagers"))
 
 	// Defines how VCR will match requests to responses.
