@@ -19,26 +19,34 @@ references:
   # TODO: update public doc
   api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rpc/google.cloud.discoveryengine.v1alpha#aclconfigservice'
 base_url: 'projects/{{project}}/locations/{{location}}/licenseConfigs'
-self_link: 'projects/{{project}}/locations/{{location}}/licenseConfigs'
-create_url: 'projects/{{project}}/locations/{{location}}/licenseConfigs'
-update_url: 'projects/{{project}}/locations/{{location}}/licenseConfigs'
+self_link: 'projects/{{project}}/locations/{{location}}/licenseConfigs/{{license_config_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/licenseConfigs?licenseConfigId={{license_config_id}}'
 update_verb: 'PATCH'
 update_mask: true
 exclude_delete: true
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/licenseConfigs'
+  - 'projects/{{project}}/locations/{{location}}/licenseConfigs/{{license_config_id}}'
 timeouts:
   insert_minutes: 5
   update_minutes: 5
 examples:
   - name: 'discoveryengine_licenseconfig_basic'
     primary_resource_id: 'basic'
+    vars:
+      license_config_id: 'license-config-id'
 parameters:
   - name: 'location'
     type: String
     description: |
       The geographic location where the data store should reside. The value can
       only be one of "global", "us" and "eu".
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'licenseConfigId'
+    type: String
+    description: |
+      The unique id of the license config.
     url_param_only: true
     required: true
     immutable: true

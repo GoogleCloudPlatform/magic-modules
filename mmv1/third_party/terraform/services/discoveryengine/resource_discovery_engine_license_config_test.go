@@ -43,10 +43,16 @@ func testAccDiscoveryEngineLicenseConfig_discoveryengineLicenseconfigBasicExampl
 	return acctest.Nprintf(`
 resource "google_discovery_engine_license_config" "basic" {
   location = "global"
-  license_count = 1
+  license_config_id = "tf-test-license-config-id%{random_suffix}"
+  license_count = 50
   subscription_tier = "SUBSCRIPTION_TIER_SEARCH_AND_ASSISTANT"
   start_date {
     year = 2099
+    month = 1
+    day = 1
+  }
+  end_date {
+    year = 2100
     month = 1
     day = 1
   }
@@ -59,10 +65,16 @@ func testAccDiscoveryEngineLicenseConfig_discoveryengineLicenseconfigBasicExampl
 	return acctest.Nprintf(`
 resource "google_discovery_engine_license_config" "basic" {
   location = "global"
-  license_count = 2
+  license_config_id = "tf-test-license-config-id%{random_suffix}"
+  license_count = 51
   subscription_tier = "SUBSCRIPTION_TIER_SEARCH_AND_ASSISTANT"
   start_date {
     year = 2099
+    month = 1
+    day = 1
+  }
+  end_date {
+    year = 2100
     month = 1
     day = 1
   }
