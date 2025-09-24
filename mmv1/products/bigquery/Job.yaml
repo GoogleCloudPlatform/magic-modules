@@ -161,6 +161,15 @@ examples:
       - 'status.0.state'
  # there are a lot of examples for this resource, so omitting some that are similar to others
     exclude_docs: true
+  - name: 'bigquery_job_query_reservation'
+    exclude_docs: true
+    ignore_read_extra:
+      - 'etag'
+      - 'status.0.state'
+    primary_resource_id: 'job'
+    vars:
+      job_id: 'job_query_reservation'
+      reservation_name: 'my-reservation'
 parameters:
 properties:
   - name: 'user_email'
