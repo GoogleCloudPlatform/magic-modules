@@ -45,7 +45,7 @@ properties:
   - name: 'name'
     type: String
     description: |
-      Identifier. The resource name of the key.
+      Identifier. The resource name of the scim tenant.
       Format: `locations/{location}/workforcePools/{workforce_pool}/providers/{workforce_pool_provider}/scimTenants/{scim_tenant}`
     output: true
   - name: 'displayName'
@@ -70,18 +70,18 @@ properties:
       - 'STATE_UNSPECIFIED'
       - 'ACTIVE'
       - 'DELETED'
-  - name: 'scimTenantId'
-    type: String
-    description: |
-      The ID to use for the scim tenant, which becomes the final component of the
-      resource name. This value should be 4-32 characters, and may contain the
-      characters [a-z0-9-].
-    url_param_only: true
-    required: true
-    immutable: true
-    # Uncomment the following lines to add custom validation
-    # validation:
-    #   function: 'ValidateWorkforcePoolProviderId'
+  # - name: 'scimTenantId'
+  #   type: String
+  #   description: |
+  #     The ID to use for the scim tenant, which becomes the final component of the
+  #     resource name. This value should be 4-32 characters, and may contain the
+  #     characters [a-z0-9-].
+  #   url_param_only: true
+  #   required: true
+  #   immutable: true
+  #   # Uncomment the following lines to add custom validation
+  #   # validation:
+  #   #   function: 'ValidateWorkforcePoolProviderId'
   - name: 'baseURI'
     type: String
     description: |
@@ -91,13 +91,6 @@ properties:
       Format:
       https://iamscim.googleapis.com/{version}/{tenant_id}/
     output: true
-  - name: 'parent'
-    type: String
-    description: |
-      The parent to create scim tenant.
-      Format: 'locations/{location}/workforcePools/{workforce_pool}/providers/{provider}'
-    required: true
-    immutable: true
 parameters:
   - name: 'location'
     type: String
@@ -120,10 +113,10 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  # - name: 'scimTenantId'
-  #   type: String
-  #   description: |
-  #     The ID to use for the SCIM tenant, which becomes the final component of the resource name. This value must be 4-32 characters, and may contain the characters [a-z0-9-].
-  #   url_param_only: true
-  #   required: true
-  #   immutable: true
+  - name: 'scimTenantId'
+    type: String
+    description: |
+      The ID to use for the SCIM tenant, which becomes the final component of the resource name. This value must be 4-32 characters, and may contain the characters [a-z0-9-].
+    url_param_only: true
+    required: true
+    immutable: true
