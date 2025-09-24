@@ -13,7 +13,7 @@ resource "google_saas_runtime_unit_kind" "cluster_unit_kind" {
   location = "global"
   unit_kind_id = "{{index $.Vars "cluster_unitkind_name"}}"
   saas = google_saas_runtime_saas.example_saas.id
-  default_release = google_saas_runtime_saas.example_release.id
+  default_release = google_saas_runtime_release.example_release.id
 }
 
 resource "google_saas_runtime_unit_kind" "{{$.PrimaryResourceId}}" {
