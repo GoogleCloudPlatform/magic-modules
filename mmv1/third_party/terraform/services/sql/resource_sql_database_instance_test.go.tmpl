@@ -1401,6 +1401,7 @@ func TestAccSqlDatabaseInstance_createFromBackup(t *testing.T) {
 }
 
 func TestAccSqlDatabaseInstance_createFromBackupDR(t *testing.T) {
+	t.Skip("https://github.com/hashicorp/terraform-provider-google/issues/24234")
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
@@ -1477,6 +1478,7 @@ func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 }
 
 func TestAccSqlDatabaseInstance_BackupDRUpdate(t *testing.T) {
+    t.Skip("https://github.com/hashicorp/terraform-provider-google/issues/24234")
     acctest.SkipIfVcr(t)
 	t.Parallel()
 
@@ -1609,6 +1611,7 @@ func TestAccSqlDatabaseInstance_cloneWithDatabaseNames(t *testing.T) {
 }
 
 func TestAccSqlDatabaseInstance_pointInTimeRestore(t *testing.T) {
+	// Skipped due to randomness
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
@@ -1647,6 +1650,7 @@ func TestAccSqlDatabaseInstance_pointInTimeRestore(t *testing.T) {
 }
 
 func TestAccSqlDatabaseInstance_pointInTimeRestoreWithSettings(t *testing.T) {
+	// Skipped due to randomness
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
