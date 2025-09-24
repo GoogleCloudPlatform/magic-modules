@@ -119,6 +119,7 @@ properties:
     type: String
     description: |
       Params needed to access the source in the format of json string.
+    ignore_read: true
     exactly_one_of:
       - params
       - json_params
