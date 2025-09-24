@@ -1,8 +1,9 @@
 package networksecurity_test
 
 import (
-	cai2hcl_testing "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/cai2hcl/testing"
 	"testing"
+
+	cai2hcl_testing "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/cai2hcl/testing"
 )
 
 func TestBackendAuthenticationConfig(t *testing.T) {
