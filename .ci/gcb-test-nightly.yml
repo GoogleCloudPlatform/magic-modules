@@ -12,7 +12,7 @@ steps:
         - $BUILD_ID
 
 
-timeout: 50000s
+timeout: 60000s
 options:
     machineType: 'N1_HIGHCPU_32'
 
