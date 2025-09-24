@@ -1,0 +1,11 @@
+resource "google_discovery_engine_license_config" "basic" {
+  location = "global"
+  license_count = 1
+  subscription_tier = "SUBSCRIPTION_TIER_EDU"
+  start_date {
+    year = 2099
+    month = 1
+    day = 1
+  }
+  subscription_term = "SUBSCRIPTION_TERM_ONE_YEAR"
+}
