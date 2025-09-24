@@ -14,7 +14,7 @@ import (
 )
 
 func TestAccApigeeApiProxyDeployment_apigeeApiProxyDeploymentBasicExample(t *testing.T) {
-	acctest.SkipIfVcr(t)
+	// acctest.SkipIfVcr(t)
 	t.Parallel()
 	context := map[string]interface{}{
 		"org_id":          envvar.GetTestOrgFromEnv(t),

@@ -77,7 +77,7 @@ properties:
     description: 'Deployment state reported by Apigee.'
   - name: 'basepaths'
     type: Array
-    item_type: 
+    item_type:
       type: String
     output: true
     api_name: 'basePath'
