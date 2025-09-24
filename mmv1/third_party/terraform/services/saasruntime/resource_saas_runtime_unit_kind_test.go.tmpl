@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google-beta/envvar"
 )
 
 func TestAccSaasRuntimeUnitKind_update(t *testing.T) {
@@ -21,6 +22,7 @@ func TestAccSaasRuntimeUnitKind_update(t *testing.T) {
 	})
 
 	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -115,7 +117,7 @@ resource "google_saas_runtime_unit_kind" "cluster_unit_kind" {
   location = "global"
   unit_kind_id = "tf-test-cluster-unitkind%{random_suffix}"
   saas = google_saas_runtime_saas.example_saas.id
-  default_release = google_saas_runtime_release.example_release.id
+  default_release = "projects/%{project}/locations/global/releases/tf-test-example-release%{random_suffix}"
 }
 
 resource "google_saas_runtime_unit_kind" "example" {
