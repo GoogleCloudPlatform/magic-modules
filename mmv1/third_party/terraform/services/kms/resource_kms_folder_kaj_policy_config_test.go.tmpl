@@ -122,11 +122,11 @@ resource "random_id" "project_suffix" {
   byte_length = 4
 }
 
-# Create a project to prepare for a service account.
-resource "google_project" "sa_project" {
+# Create a project for enabling KMS API.
+resource "google_project" "kms_project" {
   provider        = google-beta
-  project_id      = "kaj-sa-project${random_id.project_suffix.hex}"
-  name            = "kaj-sa-project${random_id.project_suffix.hex}"
+  project_id      = "kms-api-project${random_id.project_suffix.hex}"
+  name            = "kms-api-project${random_id.project_suffix.hex}"
   folder_id       = google_folder.kaj_folder.folder_id
   billing_account = "%{billing_account}"
   depends_on      = [google_folder.kaj_folder]
@@ -137,43 +137,15 @@ resource "google_project" "sa_project" {
 resource "google_project_service" "kms_api_service" {
   provider                   = google-beta
   service                    = "cloudkms.googleapis.com"
-  project                    = google_project.sa_project.project_id
+  project                    = google_project.kms_project.project_id
   disable_dependent_services = true
-  depends_on                 = [google_project.sa_project]
+  depends_on                 = [google_project.kms_project]
 }
 
 resource "time_sleep" "wait_enable_service_api" {
 	depends_on	= [google_project_service.kms_api_service]
 	create_duration	= "30s"
 }
-
-# Create KMS Service Agent.
-resource "google_project_service_identity" "kms_service_agent" {
-  provider   = google-beta
-  service    = "cloudkms.googleapis.com"
-  project    = google_project.sa_project.number
-  depends_on = [time_sleep.wait_enable_service_api]
-}
-
-resource "time_sleep" "wait_sa_creation" {
-	depends_on	= [google_project_service_identity.kms_service_agent]
-	create_duration	= "30s"
-}
-
-# Bind KAJ default policy admin role to the newly created service agent.
-resource "google_folder_iam_member" "iam_kaj_policy_config_role" {
-	provider	= google-beta
-	folder		= google_folder.kaj_folder.folder_id
-	role		= "roles/cloudkms.keyAccessJustificationsPolicyConfigAdmin"
-	member		= google_project_service_identity.kms_service_agent.member
-	depends_on	= [time_sleep.wait_sa_creation]
-}
-
-resource "time_sleep" "wait_folder_iam_binding" {
-	depends_on	= [google_folder_iam_member.iam_kaj_policy_config_role]
-	create_duration	= "60s"
-}
-
 # Update folder level KAJ default policy
 resource "google_kms_folder_kaj_policy_config" "example" {
 	provider 				= google-beta
@@ -183,7 +155,7 @@ resource "google_kms_folder_kaj_policy_config" "example" {
 			"CUSTOMER_INITIATED_ACCESS",
 		]
 	}
-	depends_on      = [time_sleep.wait_folder_iam_binding]
+	depends_on      = [time_sleep.wait_enable_service_api]
 }
 `, context)
 }
