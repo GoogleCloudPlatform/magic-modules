@@ -86,14 +86,19 @@ func New{{$.ResourceName}}FWResource() resource.Resource {
 }
 
 type {{$.ResourceName}}FWResource struct {
-	{{/*client         *sqladmin.Service*/}}
 	providerConfig *transport_tpg.Config
 }
 
 type {{$.ResourceName}}FWModel struct {
-    {{- range $prop := $.OrderProperties $.AllUserProperties }}
-    {{camelize $prop.Name "upper"}}     types.{{$prop.GetFWType}} `tfsdk:"{{underscore $prop.Name}}"`
-    {{- end }}
+	{{- range $prop := $.OrderProperties $.AllUserProperties }}
+		{{  if .FlattenObject -}}
+      		{{  range $p := .ResourceMetadata.OrderProperties .UserProperties -}}
+	{{ camelize .Name "upper" }} types.{{ .GetFWType }} `tfsdk:"{{ underscore .Name }}"`
+      		{{  end -}}
+    	{{  else }}
+    {{- camelize .Name "upper" }} types.{{ .GetFWType }} `tfsdk:"{{ underscore .Name }}"`
+    	{{- end }}
+	{{- end }}
 	{{ if $.HasProject -}}
 	Project            types.String `tfsdk:"project"`
     {{- end }}
@@ -122,12 +127,6 @@ func (r *{{$.ResourceName}}FWResource) Configure(ctx context.Context, req resour
 		return
 	}
 
-    {{/* TODO non-client equivalent? */}}
-    {{/* 
-	r.client = p.NewSqlAdminClient(p.UserAgent)
-	if resp.Diagnostics.HasError() {
-		return
-	}*/}}
 	r.providerConfig = p
 }
 
@@ -150,8 +149,6 @@ func (r *{{$.ResourceName}}FWResource) ModifyPlan(ctx context.Context, req resou
 
 func (d *{{$.ResourceName}}FWResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "A resource to represent a SQL User object.",
-
 		Attributes: map[string]schema.Attribute{
 {{- range $prop := $.OrderProperties $.AllUserProperties }}
     {{template "SchemaFieldsFW" $prop -}}

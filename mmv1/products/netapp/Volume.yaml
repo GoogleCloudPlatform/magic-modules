@@ -368,6 +368,11 @@ properties:
           description: |
               Protocol to mount with.
           output: true
+        - name: 'ipAddress'
+          type: String
+          description: |
+              IP Address.
+          output: true
   - name: 'snapshotPolicy'
     type: NestedObject
     description: |-
@@ -542,7 +547,6 @@ properties:
         description: |
           Optional. Flag indicating that the hot tier bypass mode is enabled. Default is false.
           Only applicable to Flex service level.
-        min_version: 'beta'
   - name: 'hybridReplicationParameters'
     type: NestedObject
     description: |-
@@ -565,9 +569,11 @@ properties:
         description: |
           Required. Name of the user's local source vserver svm to be peered with the destination vserver svm.
       - name: 'peerIpAddresses'
-        type: String
+        type: Array
         description: |
           Required. List of node ip addresses to be peered with.
+        item_type:
+          type: String
       - name: 'clusterLocation'
         type: String
         description: |
@@ -586,3 +592,8 @@ properties:
     description: |
       Optional. Custom Performance Total Throughput of the pool (in MiB/s).
     default_from_api: true
+  - name: 'hotTierSizeUsedGib'
+    type: String
+    description: |
+      Total hot tier data rounded down to the nearest GiB used by the volume. This field is only used for flex Service Level
+    output: true
