@@ -108,8 +108,9 @@ properties:
       `projects/123456789/locations/global/mirroringDeploymentGroups/my-dg`.
       See https://google.aip.dev/124.
     immutable: true
-    conflicts:
-      - 'mirroring_deployment_groups'
+    exactly_one_of:
+      - mirroring_deployment_group
+      - mirroring_deployment_groups
   - name: 'mirroringDeploymentGroups'
     type: Array
     description: |-
@@ -121,8 +122,9 @@ properties:
     immutable: true
     item_type:
       type: String
-    conflicts:
-      - 'mirroring_deployment_group'
+    exactly_one_of:
+      - mirroring_deployment_group
+      - mirroring_deployment_groups
   - name: 'state'
     type: String
     description: |-
