@@ -109,7 +109,7 @@ properties:
       See https://google.aip.dev/124.
     immutable: true
     conflicts:
-      - 'mirroringDeploymentGroups'
+      - 'mirroring_deployment_groups'
   - name: 'mirroringDeploymentGroups'
     type: Array
     description: |-
@@ -122,7 +122,7 @@ properties:
     item_type:
       type: String
     conflicts:
-      - 'mirroringDeploymentGroup'
+      - 'mirroring_deployment_group'
   - name: 'state'
     type: String
     description: |-
