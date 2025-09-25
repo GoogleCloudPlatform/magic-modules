@@ -171,7 +171,9 @@ type Type struct {
 
 	Sensitive bool `yaml:"sensitive,omitempty"` // Adds `Sensitive: true` to the schema
 
-	WriteOnly bool `yaml:"write_only,omitempty"` // Adds `WriteOnly: true` to the schema
+	// TODO: remove this field after all references are migrated
+	// see: https://github.com/GoogleCloudPlatform/magic-modules/pull/14933#pullrequestreview-3166578379
+	WriteOnlyLegacy bool `yaml:"write_only_legacy,omitempty"` // Adds `WriteOnlyLegacy: true` to the schema
 
 	// Does not set this value to the returned API value.  Useful for fields
 	// like secrets where the returned API value is not helpful.
@@ -325,6 +327,8 @@ type Type struct {
 
 	// If true, the custom flatten function is not applied during cai2hcl
 	TGCIgnoreTerraformCustomFlatten bool `yaml:"tgc_ignore_terraform_custom_flatten,omitempty"`
+
+	TGCIgnoreRead bool `yaml:"tgc_ignore_read,omitempty"`
 }
 
 const MAX_NAME = 20
@@ -395,11 +399,11 @@ func (t *Type) Validate(rName string) {
 		log.Fatalf("'default_value' and 'default_from_api' cannot be both set in resource %s", rName)
 	}
 
-	if t.WriteOnly && (t.DefaultFromApi || t.Output) {
+	if t.WriteOnlyLegacy && (t.DefaultFromApi || t.Output) {
 		log.Fatalf("Property %s cannot be write_only and default_from_api or output at the same time in resource %s", t.Name, rName)
 	}
 
-	if t.WriteOnly && t.Sensitive {
+	if t.WriteOnlyLegacy && t.Sensitive {
 		log.Fatalf("Property %s cannot be write_only and sensitive at the same time in resource %s", t.Name, rName)
 	}
 
@@ -750,7 +754,7 @@ func (t Type) WriteOnlyProperties() []*Type {
 		}
 	case t.IsA("NestedObject"):
 		props = google.Select(t.UserProperties(), func(p *Type) bool {
-			return p.WriteOnly
+			return p.WriteOnlyLegacy
 		})
 	case t.IsA("Map"):
 		props = google.Reject(t.ValueType.WriteOnlyProperties(), func(p *Type) bool {
@@ -847,7 +851,7 @@ func (t Type) GetFWType() string {
 	case "ResourceRef":
 		return "String"
 	case "NestedObject":
-		return "Nested"
+		return "Object"
 	case "Array":
 		return "List"
 	case "KeyValuePairs":
@@ -1224,8 +1228,8 @@ func (t *Type) IsForceNew() bool {
 		return t.Immutable
 	}
 
-	// WriteOnly fields are never immutable
-	if t.WriteOnly {
+	// WriteOnlyLegacy fields are never immutable
+	if t.WriteOnlyLegacy {
 		return false
 	}
 

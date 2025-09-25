@@ -41,6 +41,7 @@ examples:
       zone: 'ZONE'
     external_providers:
       - "time"
+    min_version: beta
 autogen_async: true
 async:
   operation:
