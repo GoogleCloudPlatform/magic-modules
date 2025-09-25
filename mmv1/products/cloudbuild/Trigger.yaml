@@ -30,7 +30,7 @@ id_format: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/triggers'
 self_link: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
 update_verb: 'PATCH'
-  # import by default only works with old-style self links ending in a name
+# import by default only works with old-style self links ending in a name
 import_format:
   - 'projects/{{project}}/triggers/{{trigger_id}}'
   - 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
@@ -134,6 +134,12 @@ examples:
       'installation_id': '31300675'
       'pat_secret': '"projects/gcb-terraform-creds/secrets/github-pat/versions/latest"'
       'repo_uri': '"https://github.com/gcb-repos-robot/tf-demo.git"'
+  - name: 'cloudbuild_trigger_developer_connect_pull'
+    primary_resource_id: 'developer-connect-trigger-pull'
+  - name: 'cloudbuild_trigger_developer_connect_push'
+    primary_resource_id: 'developer-connect-trigger-push'
+  - name: 'cloudbuild_trigger_developer_connect_push_branch'
+    primary_resource_id: 'dc-trigger-regular-push-branch'
 parameters:
   - name: 'location'
     type: String
@@ -274,6 +280,7 @@ properties:
       - 'webhook_config'
       - 'source_to_build'
       - 'repository_event_config'
+      - 'developer_connect_event_config'
     properties:
       - name: 'repository'
         type: String
@@ -357,6 +364,7 @@ properties:
       - 'webhook_config'
       - 'source_to_build'
       - 'repository_event_config'
+      - 'developer_connect_event_config'
     properties:
       - name: 'uri'
         type: String
@@ -441,6 +449,7 @@ properties:
       - 'webhook_config'
       - 'source_to_build'
       - 'repository_event_config'
+      - 'developer_connect_event_config'
     properties:
       - name: 'projectId'
         type: String
@@ -506,6 +515,7 @@ properties:
       - 'webhook_config'
       - 'source_to_build'
       - 'repository_event_config'
+      - 'developer_connect_event_config'
     properties:
       - name: 'owner'
         type: String
@@ -585,6 +595,7 @@ properties:
       - 'webhook_config'
       - 'source_to_build'
       - 'repository_event_config'
+      - 'developer_connect_event_config'
     properties:
       - name: 'repoSlug'
         type: String
@@ -669,6 +680,7 @@ properties:
       - 'webhook_config'
       - 'source_to_build'
       - 'repository_event_config'
+      - 'developer_connect_event_config'
     properties:
       - name: 'subscription'
         type: String
@@ -705,6 +717,7 @@ properties:
       - 'webhook_config'
       - 'source_to_build'
       - 'repository_event_config'
+      - 'developer_connect_event_config'
     properties:
       - name: 'secret'
         type: String
@@ -1335,3 +1348,70 @@ properties:
 
                     Paths must be absolute and cannot conflict with other volume paths on the same
                     build step or with certain reserved volume paths.
+  - name: 'developerConnectEventConfig'
+    type: NestedObject
+    description: |
+      Configuration for triggers that respond to Developer Connect events.
+    exactly_one_of:
+      - 'pullRequest'
+      - 'push'
+    properties:
+      - name: 'gitRepositoryLink'
+        type: String
+        description: |
+          The Developer Connect Git repository link, formatted as `projects/*/locations/*/connections/*/gitRepositoryLink/*`.
+        required: true
+      - name: 'gitRepositoryLinkType'
+        type: Enum
+        description: |
+          The type of DeveloperConnect GitRepositoryLink.
+        output: true
+        enum_values:
+          - 'GIT_REPOSITORY_LINK_TYPE_UNSPECIFIED'
+          - 'GITHUB'
+          - 'GITHUB_ENTERPRISE'
+          - 'GITLAB'
+          - 'GITLAB_ENTERPRISE'
+          - 'BITBUCKET_DATA_CENTER'
+          - 'BITBUCKET_CLOUD'
+      - name: 'pullRequest'
+        type: NestedObject
+        description: |
+          Filter to match changes in pull requests.
+        properties:
+          - name: 'branch'
+            type: String
+            description: |
+              Regex of branches to match.
+          - name: 'commentControl'
+            type: Enum
+            description: |
+              Configure builds to run whether a repository owner or collaborator need to comment `/gcbrun`.
+            enum_values:
+              - 'COMMENTS_DISABLED'
+              - 'COMMENTS_ENABLED'
+              - 'COMMENTS_ENABLED_FOR_EXTERNAL_CONTRIBUTORS_ONLY'
+          - name: 'invertRegex'
+            type: Boolean
+            description: |
+              If true, branches that do NOT match the git_ref will trigger a build.
+      - name: 'push'
+        type: NestedObject
+        description: |
+          Filter to match changes in refs like branches and tags.
+        exactly_one_of:
+          - 'branch'
+          - 'tag'
+        properties:
+          - name: 'branch'
+            type: String
+            description: |
+              Regex of branches to match.
+          - name: 'tag'
+            type: String
+            description: |
+              Regex of tags to match.
+          - name: 'invertRegex'
+            type: Boolean
+            description: |
+              If true, only trigger a build if the revision regex does NOT match the git_ref regex.

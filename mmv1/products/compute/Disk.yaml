@@ -460,7 +460,6 @@ properties:
       Note: Only supported on hyperdisk skus, disk_encryption_key is required when setting to true
     required: false
     default_from_api: true
-    include_empty_value_in_cai: true
   - name: 'multiWriter'
     type: Boolean
     description: |
