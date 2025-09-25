@@ -14,7 +14,7 @@ resource "google_beyondcorp_security_gateway_application" "{{$.PrimaryResourceId
       }
     }
     proxy_protocol {
-      allowed_client_headers= ["header1"]
+      allowed_client_headers= ["a-header"]
     }
   }
   schema = "API_GATEWAY"
