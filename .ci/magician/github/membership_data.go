@@ -108,7 +108,12 @@ var (
 			},
 		},
 		"ScottSuarez": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 9, 26),
+					endDate:   newDate(2025, 10, 5),
+				},
+			},
 		},
 		"shuyama1": {
 			vacations: []Vacation{
