@@ -200,7 +200,7 @@ func lastNDaysTestFailureMap(pVersion provider.Version, n int, now time.Time, gc
 				if _, ok := testFailuresToday[testName]; !ok {
 					testFailuresToday[testName] = &testFailure{
 						TestName:          testName,
-						AffectedResource:  convertTestNameToResource(testName),
+						AffectedResource:  testInfo.Resource,
 						ErrorMessageLinks: map[provider.Version]string{provider.GA: "", provider.Beta: ""},
 						DebugLogLinks:     map[provider.Version]string{provider.GA: "", provider.Beta: ""},
 						FailureRates:      map[provider.Version]string{provider.GA: "N/A", provider.Beta: "N/A"},
