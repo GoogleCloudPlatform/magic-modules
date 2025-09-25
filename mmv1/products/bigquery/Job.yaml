@@ -876,6 +876,7 @@ properties:
         description: |
           The reservation that job would use. User can specify a reservation to execute the job. If this field is not set, reservation is determined based on the rules defined by the reservation assignments.
           The expected format is `projects/{project}/locations/{location}/reservations/{reservation}`.
+        min_version: beta
   - name: 'jobReference'
     type: NestedObject
     description: |
