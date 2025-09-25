@@ -851,7 +851,7 @@ func (t Type) GetFWType() string {
 	case "ResourceRef":
 		return "String"
 	case "NestedObject":
-		return "Nested"
+		return "Object"
 	case "Array":
 		return "List"
 	case "KeyValuePairs":

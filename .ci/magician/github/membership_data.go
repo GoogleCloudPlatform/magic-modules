@@ -80,6 +80,9 @@ var (
 		"hao-nan-li": {
 			vacations: []Vacation{},
 		},
+		"malhotrasagar2212": {
+			vacations: []Vacation{},
+		},
 		"melinath": {
 			vacations: []Vacation{
 				{
@@ -104,6 +107,10 @@ var (
 				{
 					startDate: newDate(2025, 8, 1),
 					endDate:   newDate(2025, 8, 11),
+				},
+				{
+					startDate: newDate(2025, 9, 23),
+					endDate:   newDate(2025, 9, 29),
 				},
 			},
 		},
@@ -158,7 +165,6 @@ var (
 
 	// This is for new team members who are onboarding
 	trustedContributors = map[string]struct{}{
-		"bbasata":           struct{}{},
-		"malhotrasagar2212": struct{}{},
+		"bbasata": struct{}{},
 	}
 )

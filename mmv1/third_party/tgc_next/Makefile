@@ -1,6 +1,6 @@
 build_dir=bin
 TF_CONFIG_FILE=tf-dev-override.tfrc
-TEST?=$$(go list -e ./... | grep -v github.com/GoogleCloudPlatform/terraform-google-conversion/v6/test)
+TEST?=$$(go list -e ./... | grep -v github.com/GoogleCloudPlatform/terraform-google-conversion/v7/test)
 
 build:
 	GO111MODULE=on go build -o ./${build_dir}/tfplan2cai ./cmd/tfplan2cai
