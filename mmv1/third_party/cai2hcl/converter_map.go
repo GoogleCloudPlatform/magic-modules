@@ -2,7 +2,7 @@ package cai2hcl
 
 import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/cai2hcl/common"
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/cai2hcl/services/certificatemanager"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/cai2hcl/services/certificatemanager"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/cai2hcl/services/compute"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/cai2hcl/services/networksecurity"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/cai2hcl/services/resourcemanager"
