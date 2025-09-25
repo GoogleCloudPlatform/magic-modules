@@ -86,6 +86,10 @@ func DataSourceGoogleCloudBackupDRBackupPlanAssociations() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"create_time": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"data_source": {
 							Type:     schema.TypeString,
 							Computed: true,
