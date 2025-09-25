@@ -2,7 +2,7 @@ resource "google_cloud_run_v2_worker_pool" "{{$.PrimaryResourceId}}" {
   name     = "{{index $.Vars "cloud_run_worker_pool_name"}}"
   location = "us-central1"
   deletion_protection = false
-  launch_stage = "ALPHA"
+  launch_stage = "BETA"
 
   template {
     containers {

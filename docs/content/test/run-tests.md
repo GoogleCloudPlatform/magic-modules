@@ -99,7 +99,7 @@ aliases:
 1. Run acceptance tests for only modified resources. (Full test runs can take over 9 hours.) See [Go's documentation](https://pkg.go.dev/cmd/go#hdr-Testing_flags) for more information about `-run` and other flags.
 
     ```bash
-    make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool'
+    make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool_basic$$'
     ```
 
     To run all tests matching, e.g., `TestAccContainerNodePool*`, omit the trailing `$$`:
