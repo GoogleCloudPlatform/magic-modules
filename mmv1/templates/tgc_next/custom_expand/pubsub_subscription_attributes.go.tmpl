@@ -1,0 +1,22 @@
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	m := make(map[string]string)
+	if v == nil {
+		return m, nil
+	}
+
+	vMap, ok := v.(map[string]interface{})
+	if !ok {
+		return m, fmt.Errorf("non-map v: %v (%T)", v, v)
+	}
+
+	// The default value is present in CAI asset
+	if len(vMap) == 0 {
+		m["x-goog-version"] = "v1"
+		return m, nil
+	}
+
+	for k, val := range vMap {
+		m[k] = val.(string)
+	}
+	return m, nil
+}

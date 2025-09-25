@@ -48,12 +48,16 @@ examples:
       name: 'instance'
       network_name: 'network'
       address_name: 'address'
+    ignore_read_extra:
+      - "update_time"
   - name: 'parallelstore_instance_basic'
     primary_resource_id: 'instance'
     vars:
       name: 'instance'
       network_name: 'network'
       address_name: 'address'
+    ignore_read_extra:
+      - "update_time"
 parameters:
   - name: 'location'
     type: String

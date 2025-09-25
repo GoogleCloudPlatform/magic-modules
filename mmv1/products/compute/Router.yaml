@@ -159,7 +159,7 @@ properties:
 
           This enum field has the one valid value: ALL_SUBNETS
         send_empty_value: true
- # TODO(#324): enum?
+ # TODO: #324 enum?
         item_type:
           type: String
       - name: 'advertisedIpRanges'
@@ -171,7 +171,7 @@ properties:
           ranges will be advertised in addition to any specified groups.
           Leave this field blank to advertise no custom IP ranges.
         send_empty_value: true
-        custom_flatten: 'templates/terraform/custom_flatten/compute_router_range.go.tmpl'
+        is_set: true
         item_type:
           type: NestedObject
           properties:

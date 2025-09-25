@@ -115,6 +115,7 @@ examples:
       backend_bucket_name: 'global-ilb-backend-bucket'
       bucket_name: 'global-ilb-bucket'
     exclude_docs: true
+    skip_vcr: true
 parameters:
 properties:
   - name: 'bucketName'
@@ -273,7 +274,9 @@ properties:
       client when the resource is created.
   - name: 'enableCdn'
     type: Boolean
-    description: 'If true, enable Cloud CDN for this BackendBucket.'
+    description: |
+      If true, enable Cloud CDN for this BackendBucket.
+      Note: This cannot be set to true when loadBalancingScheme is set to INTERNAL_MANAGED.
     include_empty_value_in_cai: true
   - name: 'name'
     type: String
@@ -295,6 +298,23 @@ properties:
     description: |
       The value can only be INTERNAL_MANAGED for cross-region internal layer 7 load balancer.
       If loadBalancingScheme is not specified, the backend bucket can be used by classic global external load balancers, or global application external load balancers, or both.
+      Important: CDN cannot be enabled (enableCdn cannot be set to true) when loadBalancingScheme is set to INTERNAL_MANAGED.
     enum_values:
       - 'INTERNAL_MANAGED'
     send_empty_value: true
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the backend bucket. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        api_name: resourceManagerTags
+        ignore_read: true
+        immutable: true
