@@ -145,30 +145,33 @@ properties:
     type: NestedObject
     description: The view definition.
     properties:
+      - name: 'query'
+        type: String
+        description: |
+          A query that BigQuery executes when the view is referenced.
       - name: 'useLegacySql'
         type: Boolean
         description: |
           Specifies whether to use BigQuery's legacy SQL for this view
-      - name: 'userDefinedFunctionResources'
+      - name: 'foreignDefinitions'
         type: Array
         description: |
-          Describes user-defined function resources used in the query.
+          Foreign view representations.
+        min_version: beta
         item_type:
           type: NestedObject
           properties:
-            - name: 'inlineCode'
+            - name: 'query'
               type: String
               description: |
-                An inline resource that contains code for a user-defined
-                function (UDF). Providing a inline code resource is
-                equivalent to providing a URI for a file containing the
-                same code.
-            # TODO: Convert into cross-product ResourceRef
-            - name: 'resourceUri'
+                The query that defines the view.
+              required: true
+              min_version: beta
+            - name: 'dialect'
               type: String
               description: |
-                A code resource to load from a Google Cloud Storage URI
-                (gs://bucket/path).
+                Represents the dialect of the query.
+              min_version: beta
   - name: 'timePartitioning'
     type: NestedObject
     description: |
