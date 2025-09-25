@@ -69,6 +69,19 @@ examples:
       dataset_name: 'example-dataset'
       fhir_store_name: 'example-fhir-store'
       pubsub_topic: 'fhir-notifications'
+  - name: 'healthcare_fhir_store_consent_config'
+    primary_resource_id: 'default'
+    min_version: "beta"
+    vars:
+      dataset_name: 'example-dataset'
+      fhir_store_name: 'example-fhir-store'
+      pubsub_topic: 'fhir-notifications'
+  - name: 'healthcare_fhir_store_validation_config'
+    primary_resource_id: 'default'
+    vars:
+      dataset_name: 'example-dataset'
+      fhir_store_name: 'example-fhir-store'
+      pubsub_topic: 'fhir-notifications'
 parameters:
   - name: 'dataset'
     type: ResourceRef
@@ -113,6 +126,101 @@ properties:
       - 'DSTU2'
       - 'STU3'
       - 'R4'
+  - name: 'consentConfig'
+    type: NestedObject
+    description: |
+      Specifies whether this store has consent enforcement. Not available for DSTU2 FHIR version due to absence of Consent resources. Not supported for R5 FHIR version.
+    min_version: beta
+    properties:
+      - name: 'version'
+        type: Enum
+        description: |
+          Specifies which consent enforcement version is being used for this FHIR store. This field can only be set once by either [fhirStores.create][] or [fhirStores.patch][]. After that, you must call [fhirStores.applyConsents][] to change the version.
+        required: true
+        enum_values:
+          - 'CONSENT_ENFORCEMENT_VERSION_UNSPECIFIED'
+          - 'V1'
+      - name: 'accessEnforced'
+        type: Boolean
+        description: |
+          The default value is false. If set to true, when accessing FHIR resources, the consent headers will be verified against consents given by patients. See the ConsentEnforcementVersion for the supported consent headers.
+      - name: 'consentHeaderHandling'
+        type: NestedObject
+        description: |
+          Different options to configure the behaviour of the server when handling the X-Consent-Scope header.
+        properties:
+          - name: 'profile'
+            type: Enum
+            description: |
+              Specifies the default server behavior when the header is empty. If not specified, the ScopeProfile.PERMIT_EMPTY_SCOPE option is used.
+            enum_values:
+              - 'SCOPE_PROFILE_UNSPECIFIED'
+              - 'PERMIT_EMPTY_SCOPE'
+              - 'REQUIRED_ON_READ'
+            default_value: "PERMIT_EMPTY_SCOPE"
+      - name: 'accessDeterminationLogConfig'
+        type: NestedObject
+        description: |
+          Specifies how the server logs the consent-aware requests. If not specified, the AccessDeterminationLogConfig.LogLevel.MINIMUM option is used.
+        properties:
+          - name: 'logLevel'
+            type: Enum
+            description: |
+              Controls the amount of detail to include as part of the audit logs.
+            enum_values:
+              - 'LOG_LEVEL_UNSPECIFIED'
+              - 'DISABLED'
+              - 'MINIMUM'
+              - 'VERBOSE'
+            default_value: "MINIMUM"
+      - name: 'enforcedAdminConsents'
+        type: Array
+        description: |
+          The versioned names of the enforced admin Consent resource(s), in the format projects/{projectId}/locations/{location}/datasets/{datasetId}/fhirStores/{fhirStoreId}/fhir/Consent/{resourceId}/_history/{version_id}. For FHIR stores with disableResourceVersioning=true, the format is projects/{projectId}/locations/{location}/datasets/{datasetId}/fhirStores/{fhirStoreId}/fhir/Consent/{resourceId}. This field can only be updated using [fhirStores.applyAdminConsents][].
+        output: true
+        item_type:
+          type: String
+  - name: 'validationConfig'
+    type: NestedObject
+    description: |
+      Configuration for how to validate incoming FHIR resources against configured profiles.
+    properties:
+      - name: 'disableProfileValidation'
+        type: Boolean
+        default_value: false
+        description: |
+          Whether to disable profile validation for this FHIR store. The default value is false. Set this to true to disable checking incoming resources for conformance against structure definitions in this FHIR store.
+      - name: 'enabledImplementationGuides'
+        type: Array
+        description: |
+          A list of implementation guide URLs in this FHIR store that are used to configure the profiles to use for validation.
+          When a URL cannot be resolved (for example, in a type assertion), the server does not return an error.
+          For example, to use the US Core profiles for validation, set enabledImplementationGuides to ["http://hl7.org/fhir/us/core/ImplementationGuide/ig"]. If enabledImplementationGuides is empty or omitted, then incoming resources are only required to conform to the base FHIR profiles. Otherwise, a resource must conform to at least one profile listed in the global property of one of the enabled ImplementationGuides.
+          The Cloud Healthcare API does not currently enforce all of the rules in a StructureDefinition. The following rules are supported:
+          - min/max
+          - minValue/maxValue
+          - maxLength
+          - type
+          - fixed[x]
+          - pattern[x] on simple types
+          - slicing, when using "value" as the discriminator type
+        item_type:
+          type: String
+      - name: 'disableRequiredFieldValidation'
+        type: Boolean
+        default_value: false
+        description: |
+          Whether to disable required fields validation for incoming resources. The default value is false. Set this to true to disable checking incoming resources for conformance against required fields requirement defined in the FHIR specification. This property only affects resource types that do not have profiles configured for them, any rules in enabled implementation guides will still be enforced.
+      - name: 'disableReferenceTypeValidation'
+        type: Boolean
+        default_value: false
+        description: |
+          Whether to disable reference type validation for incoming resources. The default value is false. Set this to true to disable checking incoming resources for conformance against reference type requirement defined in the FHIR specification. This property only affects resource types that do not have profiles configured for them, any rules in enabled implementation guides will still be enforced.
+      - name: 'disableFhirpathValidation'
+        type: Boolean
+        default_value: false
+        description: |
+          Whether to disable FHIRPath validation for incoming resources. The default value is false. Set this to true to disable checking incoming resources for conformance against FHIRPath requirement defined in the FHIR specification. This property only affects resource types that do not have profiles configured for them, any rules in enabled implementation guides will still be enforced.
   - name: 'complexDataTypeReferenceParsing'
     type: Enum
     description: |

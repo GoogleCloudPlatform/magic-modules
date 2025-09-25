@@ -58,6 +58,11 @@ examples:
     primary_resource_id: 'default'
     vars:
       name: 'my-pool'
+      pool_location: 'asia-east1'
+      cloud_kms_key: 'projects/keys-project/locations/asia-east1/keyRings/key-ring/cryptoKeys/crypto-key'
+    test_vars_overrides:
+      'pool_location': '"asia-east1"'
+      'cloud_kms_key': 'acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "asia-east1").CryptoKey.Name'
   - name: 'privateca_quickstart'
     primary_resource_id: 'default'
     vars:
@@ -507,3 +512,17 @@ properties:
 
       An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass":
       "1.3kg", "count": "3" }.
+  - name: 'encryptionSpec'
+    type: NestedObject
+    description: |
+      Used when customer would like to encrypt data at rest. The customer-provided key will be used
+      to encrypt the Subject, SubjectAltNames and PEM-encoded certificate fields. When unspecified,
+      customer data will remain unencrypted.
+    immutable: true
+    properties:
+      - name: 'cloudKmsKey'
+        type: String
+        description: |
+          The resource name for an existing Cloud KMS key in the format
+          `projects/*/locations/*/keyRings/*/cryptoKeys/*`.
+        immutable: true

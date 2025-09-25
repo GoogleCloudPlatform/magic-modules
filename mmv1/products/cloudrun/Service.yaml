@@ -29,6 +29,9 @@ base_url: 'apis/serving.knative.dev/v1/namespaces/{{project}}/services'
 cai_base_url: 'projects/{{project}}/locations/{{location}}/services'
 import_format:
   - 'locations/{{location}}/namespaces/{{project}}/services/{{name}}'
+datasource:
+  generate: true
+  exclude_test: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -556,6 +559,10 @@ properties:
                               Path within the container at which the volume should be mounted.  Must
                               not contain ':'.
                             required: true
+                          - name: 'subPath'
+                            type: String
+                            description: |-
+                              Path within the volume from which the container's volume should be mounted.
                           - name: 'name'
                             type: String
                             description: |-

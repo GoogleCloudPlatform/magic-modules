@@ -222,10 +222,30 @@ properties:
       to a different credential configuration in the config will require an apply to update state.
     url_param_only: true
     properties:
+      - name: 'secretAccessKeyWoVersion'
+        type: Integer
+        url_param_only: true
+        required_with:
+          - 'sensitive_params.0.secretAccessKeyWo'
+        description: |
+          The version of the sensitive params - used to trigger updates of the write-only params. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
       - name: 'secretAccessKey'
         type: String
         description: |
           The Secret Access Key of the AWS account transferring data from.
         sensitive: true
-        write_only: true
-        required: true
+        at_least_one_of:
+          - 'sensitive_params.0.secretAccessKey'
+          - 'sensitive_params.0.secretAccessKeyWo'
+        conflicts:
+          - 'sensitive_params.0.secretAccessKeyWo'
+      - name: 'secretAccessKeyWo' # Wo is convention for write-only properties
+        type: String
+        description: |
+          The Secret Access Key of the AWS account transferring data from.
+        write_only_legacy: true
+        at_least_one_of:
+          - 'sensitive_params.0.secretAccessKeyWo'
+          - 'sensitive_params.0.secretAccessKey'
+        conflicts:
+          - 'sensitive_params.0.secretAccessKey'
