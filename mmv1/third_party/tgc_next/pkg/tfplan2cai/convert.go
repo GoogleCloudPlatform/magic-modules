@@ -6,11 +6,11 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/ancestrymanager"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/resolvers"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/ancestrymanager"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/converters"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/resolvers"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/transport"
 )
 
 // Options struct to avoid updating function signatures all along the pipe.

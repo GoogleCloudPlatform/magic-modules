@@ -327,6 +327,8 @@ type Type struct {
 
 	// If true, the custom flatten function is not applied during cai2hcl
 	TGCIgnoreTerraformCustomFlatten bool `yaml:"tgc_ignore_terraform_custom_flatten,omitempty"`
+
+	TGCIgnoreRead bool `yaml:"tgc_ignore_read,omitempty"`
 }
 
 const MAX_NAME = 20
@@ -849,7 +851,7 @@ func (t Type) GetFWType() string {
 	case "ResourceRef":
 		return "String"
 	case "NestedObject":
-		return "Nested"
+		return "Object"
 	case "Array":
 		return "List"
 	case "KeyValuePairs":
