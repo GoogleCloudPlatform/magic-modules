@@ -1,7 +1,7 @@
 package cai2hcl_test
 
 import (
-	cai2hclTesting "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/cai2hcl/testing"
+	cai2hclTesting "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/cai2hcl/testing"
 	"testing"
 )
 
@@ -29,5 +29,6 @@ func TestConvertNetworksecurity(t *testing.T) {
 		"./services/networksecurity/testdata",
 		[]string{
 			"server_tls_policy",
+			"backend_authentication_config",
 		})
 }
