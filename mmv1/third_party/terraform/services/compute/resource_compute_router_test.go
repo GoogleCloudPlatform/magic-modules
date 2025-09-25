@@ -217,16 +217,16 @@ func TestAccComputeRouter_resourceManagerTags(t *testing.T) {
 
 	suffixName := acctest.RandString(t, 10)
 	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-routers-tagkey", "organizations/"+org, make(map[string]interface{}))
-	sharedTagkey,_ := tagKeyResult["shared_tag_key"]
+	sharedTagkey, _ := tagKeyResult["shared_tag_key"]
 	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-routers-tagvalue", sharedTagkey, org)
 	routerName := fmt.Sprintf("tf-test-router-resource-manager-tags-%s", suffixName)
 	networkName := fmt.Sprintf("tf-test-network-resource-manager-tags-%s-net", suffixName)
 	subnetName := fmt.Sprintf("tf-test-subnet-resource-manager-tags-%s-subnet", suffixName)
 	context := map[string]interface{}{
 		"network_name": networkName,
-		"subnet_name": subnetName,
-		"router_name": routerName,
-		"tag_key_id": tagKeyResult["name"],
+		"subnet_name":  subnetName,
+		"router_name":  routerName,
+		"tag_key_id":   tagKeyResult["name"],
 		"tag_value_id": tagValueResult["name"],
 	}
 
@@ -239,9 +239,9 @@ func TestAccComputeRouter_resourceManagerTags(t *testing.T) {
 				Config: testAccComputeRouter_resourceManagerTags(context),
 			},
 			{
-				ResourceName:      "google_compute_router.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_router.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"params"},
 			},
 		},
