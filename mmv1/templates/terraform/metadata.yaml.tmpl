@@ -19,6 +19,9 @@ fields:
     {{- if and (ne $p.MetadataLineage $p.MetadataApiLineage) (not $p.ProviderOnly) }}
     api_field: '{{ $p.MetadataApiLineage }}'
     {{- end }}
+    {{- if $p.IsJsonField }}
+    json: true
+    {{- end }}
     {{- if $p.ProviderOnly }}
     provider_only: true
     {{- end }}

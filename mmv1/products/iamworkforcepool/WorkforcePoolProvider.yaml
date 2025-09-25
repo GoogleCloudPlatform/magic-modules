@@ -114,6 +114,26 @@ examples:
     ignore_read_extra:
       - 'oidc.0.client_secret.0.value.0.plain_text'
       - 'extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text'
+  - name: 'iam_workforce_pool_provider_extended_attributes_oauth2_config_client_basic'
+    primary_resource_id: 'example'
+    vars:
+      workforce_pool_id: 'example-pool'
+      provider_id: 'example-prvdr'
+    test_env_vars:
+      org_id: 'ORG_ID'
+    ignore_read_extra:
+      - 'oidc.0.client_secret.0.value.0.plain_text'
+      - 'extended_attributes_oauth2_client.0.client_secret.0.value.0.plain_text'
+  - name: 'iam_workforce_pool_provider_extended_attributes_oauth2_config_client_full'
+    primary_resource_id: 'example'
+    vars:
+      workforce_pool_id: 'example-pool'
+      provider_id: 'example-prvdr'
+    test_env_vars:
+      org_id: 'ORG_ID'
+    ignore_read_extra:
+      - 'oidc.0.client_secret.0.value.0.plain_text'
+      - 'extended_attributes_oauth2_client.0.client_secret.0.value.0.plain_text'
 parameters:
 properties:
   - name: 'location'
@@ -459,5 +479,80 @@ properties:
             type: String
             description: |
               The filter used to request specific records from IdP. In case of attributes type as AZURE_AD_GROUPS_MAIL and AZURE_AD_GROUPS_ID, it represents the
+              filter used to request specific groups for users from IdP. By default, all of the groups associated with the user are fetched. The
+              groups should be security enabled. See https://learn.microsoft.com/en-us/graph/search-query-parameter for more details.
+  - name: 'extendedAttributesOauth2Client'
+    type: NestedObject
+    description: |
+      The configuration for OAuth 2.0 client used to get the extended group
+      memberships for user identities. Only the `AZURE_AD_GROUPS_ID` attribute
+      type is supported. Extended groups supports a subset of Google Cloud
+      services. When the user accesses these services, extended group memberships
+      override the mapped `google.groups` attribute. Extended group memberships
+      cannot be used in attribute mapping or attribute condition expressions.
+
+      To keep extended group memberships up to date, extended groups are
+      retrieved when the user signs in and at regular intervals during the user's
+      active session. Each user identity in the workforce identity pool must map
+      to a unique Microsoft Entra ID user.
+    properties:
+      - name: 'issuerUri'
+        type: String
+        description: |
+          The OIDC identity provider's issuer URI. Must be a valid URI using the `https` scheme. Required to get the OIDC discovery document.
+        required: true
+      - name: 'clientId'
+        type: String
+        description: |
+          The OAuth 2.0 client ID for retrieving extended attributes from the identity provider. Required to get the Access Token using client credentials grant flow.
+        required: true
+      - name: 'clientSecret'
+        type: NestedObject
+        description: |
+          The OAuth 2.0 client secret for retrieving extended attributes from the identity provider. Required to get the Access Token using client credentials grant flow.
+        required: true
+        properties:
+          - name: 'value'
+            type: NestedObject
+            description: |
+              The value of the client secret.
+            custom_flatten: 'templates/terraform/custom_flatten/iam_workforce_pool_provider_extended_attributes_oauth2_config_client_secret_value.go.tmpl'
+            properties:
+              - name: 'plainText'
+                type: String
+                description: |
+                  The plain text of the client secret value.
+                required: true
+                validation:
+                  function: 'validation.StringIsNotEmpty'
+              - name: 'thumbprint'
+                type: String
+                description: |
+                  A thumbprint to represent the current client secret value.
+                output: true
+      - name: 'attributesType'
+        type: Enum
+        description: |
+          Represents the IdP and type of claims that should be fetched.
+          * AZURE_AD_GROUPS_ID:  Used to get the user's group claims from the Azure AD identity provider
+          using configuration provided in ExtendedAttributesOAuth2Client and `id`
+          property of the `microsoft.graph.group` object is used for claim mapping. See
+          https://learn.microsoft.com/en-us/graph/api/resources/group?view=graph-rest-1.0#properties
+          for more details on `microsoft.graph.group` properties. The
+          group IDs obtained from Azure AD are present in `assertion.groups` for
+          OIDC providers and `assertion.attributes.groups` for SAML providers for
+          attribute mapping.
+        required: true
+        enum_values:
+          - 'AZURE_AD_GROUPS_ID'
+      - name: 'queryParameters'
+        type: NestedObject
+        description: |
+          Represents the parameters to control which claims are fetched from an IdP.
+        properties:
+          - name: 'filter'
+            type: String
+            description: |
+              The filter used to request specific records from IdP. In case of attributes type as AZURE_AD_GROUPS_ID, it represents the
               filter used to request specific groups for users from IdP. By default, all of the groups associated with the user are fetched. The
               groups should be security enabled. See https://learn.microsoft.com/en-us/graph/search-query-parameter for more details.

@@ -204,7 +204,7 @@ func newRuntimeconfigVariableFromResourceData(d *schema.ResourceData, project st
 	text := d.Get("text")
 	value := d.Get("value")
 
-	// TODO(selmanj) here we assume it's a simple name, not a full name. Should probably support full name as well
+	// TODO here we assume it's a simple name, not a full name. Should probably support full name as well
 	parent = d.Get("parent").(string)
 	name := d.Get("name").(string)
 

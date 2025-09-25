@@ -67,6 +67,9 @@ examples:
     primary_resource_id: "my-encryption-spec"
     min_version: "beta"
     exclude_import_test: true
+    # The test resulted in an increasing number of CMEK DBs
+    # which we don't have ways to handle db deletion for deleted cmek projects.
+    exclude_test: true
     vars:
       project_id: 'my-proj'
       kms_keyring: 'my-keyring'

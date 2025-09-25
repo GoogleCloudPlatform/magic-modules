@@ -12,7 +12,5 @@ resource "google_secure_source_manager_repository" "{{$.PrimaryResourceId}}" {
     instance = google_secure_source_manager_instance.instance.name
 
     # Prevent accidental deletions.
-    lifecycle {
-      prevent_destroy = "{{index $.Vars "prevent_destroy"}}"
-    }
+    deletion_policy = "{{index $.Vars "deletion_policy"}}"
 }
