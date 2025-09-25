@@ -256,7 +256,7 @@ func TestMetadataLineage(t *testing.T) {
 	}
 }
 
-func TestMetadataApiLineage(t *testing.T) {
+func TestMetadataDefaultLineage(t *testing.T) {
 	t.Parallel()
 
 	root := Type{
@@ -315,6 +315,87 @@ func TestMetadataApiLineage(t *testing.T) {
 			description: "array of objects",
 			obj:         *root.Properties[0].Properties[0].ItemType.Properties[0],
 			expected:    "root.foo.bars.foo_bar",
+		},
+		{
+			description: "with api name",
+			obj:         *root.Properties[1],
+			expected:    "root.bazbaz",
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+
+			got := tc.obj.MetadataDefaultLineage()
+			if got != tc.expected {
+				t.Errorf("expected %q to be %q", got, tc.expected)
+			}
+		})
+	}
+}
+
+func TestMetadataApiLineage(t *testing.T) {
+	t.Parallel()
+
+	root := Type{
+		Name: "root",
+		Type: "NestedObject",
+		Properties: []*Type{
+			{
+				Name: "foo",
+				Type: "NestedObject",
+				Properties: []*Type{
+					{
+						Name: "bars",
+						Type: "Array",
+						ItemType: &Type{
+							Type: "NestedObject",
+							Properties: []*Type{
+								{
+									Name: "fooBar",
+									Type: "String",
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				Name:    "baz",
+				ApiName: "bazbaz",
+				Type:    "String",
+			},
+		},
+	}
+	root.SetDefault(&Resource{})
+
+	cases := []struct {
+		description string
+		obj         Type
+		expected    string
+	}{
+		{
+			description: "root type",
+			obj:         root,
+			expected:    "root",
+		},
+		{
+			description: "sub type",
+			obj:         *root.Properties[0],
+			expected:    "root.foo",
+		},
+		{
+			description: "array",
+			obj:         *root.Properties[0].Properties[0],
+			expected:    "root.foo.bars",
+		},
+		{
+			description: "array of objects",
+			obj:         *root.Properties[0].Properties[0].ItemType.Properties[0],
+			expected:    "root.foo.bars.fooBar",
 		},
 		{
 			description: "with api name",
