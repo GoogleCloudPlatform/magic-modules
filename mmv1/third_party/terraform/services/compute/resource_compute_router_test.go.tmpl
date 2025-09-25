@@ -211,8 +211,6 @@ func TestAccComputeRouter_addAndUpdateIdentifierRangeBgp(t *testing.T) {
 	})
 }
 
-
-{{- if ne $.TargetVersionName "ga" }}
 func TestAccComputeRouter_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 	org := envvar.GetTestOrgFromEnv(t)
@@ -249,7 +247,6 @@ func TestAccComputeRouter_resourceManagerTags(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func testAccComputeRouterBasic(routerName, resourceRegion string) string {
 	return fmt.Sprintf(`
@@ -428,8 +425,6 @@ resource "google_compute_router" "foobar" {
 `, routerName, routerName)
 }
 
-
-{{- if ne $.TargetVersionName "ga" }}
 func testAccComputeRouter_resourceManagerTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 		resource "google_compute_network" "foobar" {
@@ -461,4 +456,3 @@ func testAccComputeRouter_resourceManagerTags(context map[string]interface{}) st
 		}
 		`, context)
 }
-{{- end }}
