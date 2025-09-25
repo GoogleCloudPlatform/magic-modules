@@ -41,17 +41,33 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+include_in_tgc_next_DO_NOT_USE: true
 examples:
   - name: "clouddeploy_deploy_policy_basic"
     primary_resource_id: "b-deploy-policy"
     vars:
       policy: "cd-policy"
       delivery_pipeline: "cd-pipeline"
+    tgc_test_ignore_extra: # These values have 0 value in TF config
+      - rules.rollout_restriction.time_windows.weekly_windows.end_time.minutes
+      - rules.rollout_restriction.time_windows.weekly_windows.start_time.hours
+      - rules.rollout_restriction.time_windows.weekly_windows.start_time.minutes
   - name: "clouddeploy_deploy_policy_full"
     primary_resource_id: "f-deploy-policy"
     vars:
       policy: "cd-policy"
       delivery_pipeline: "cd-pipeline"
+    tgc_test_ignore_extra: # These values have 0 value in TF config
+      - rules.0.rollout_restriction.time_windows.one_time_windows.end_time.minutes
+      - rules.0.rollout_restriction.time_windows.one_time_windows.start_time.hours
+      - rules.0.rollout_restriction.time_windows.one_time_windows.start_time.minutes
+      - rules.0.rollout_restriction.time_windows.weekly_windows.end_time.minutes
+      - rules.0.rollout_restriction.time_windows.weekly_windows.end_time.nanos
+      - rules.0.rollout_restriction.time_windows.weekly_windows.end_time.seconds
+      - rules.0.rollout_restriction.time_windows.weekly_windows.start_time.minutes
+      - rules.1.rollout_restriction.time_windows.weekly_windows.end_time.minutes
+      - rules.1.rollout_restriction.time_windows.weekly_windows.start_time.hours
+      - rules.1.rollout_restriction.time_windows.weekly_windows.start_time.minutes
 parameters:
   - name: "location"
     type: String
@@ -87,6 +103,7 @@ properties:
   - name: "labels"
     type: KeyValueLabels
     description: "Labels are attributes that can be set and used by both the user and by Cloud Deploy. Labels must meet the following constraints: * Keys and values can contain only lowercase letters, numeric characters, underscores, and dashes. * All characters must use UTF-8 encoding, and international characters are allowed. * Keys must start with a lowercase letter or international character. * Each resource is limited to a maximum of 64 labels. Both keys and values are additionally constrained to be <= 63 characters."
+    is_missing_in_cai: true
   - name: "etag"
     type: String
     description: "The weak etag of the `DeployPolicy` resource. This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding."
