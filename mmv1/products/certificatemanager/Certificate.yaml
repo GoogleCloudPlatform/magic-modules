@@ -28,6 +28,7 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+include_in_tgc_next_DO_NOT_USE: true
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
@@ -38,6 +39,8 @@ async:
     resource_inside_response: false
 custom_code:
   constants: 'templates/terraform/constants/cert_manager.tmpl'
+  tgc_encoder: 'templates/tgc_next/encoders/certificatemanager_certificate.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/certificatemanager_certificate.go.tmpl'
 schema_version: 1
 state_upgraders: true
 sweeper:
@@ -50,7 +53,7 @@ sweeper:
     - region: "us-west1"
   dependencies:
     - "google_compute_region_target_https_proxy"
-    # - "google_network_security_backend_authentication_config" (beta only)
+    - "google_network_security_backend_authentication_config"
     - "google_network_services_gateway"
     - "google_compute_target_https_proxy"
     - "google_compute_network"
@@ -63,6 +66,7 @@ examples:
       dns_auth_name2: 'dns-auth2'
       dns_auth_subdomain2: 'subdomain2'
       cert_name: 'dns-cert'
+    tgc_skip_test: 'Need to figure out to get the desired cai asset state.'
   - name: 'certificate_manager_google_managed_certificate_issuance_config'
     primary_resource_id: 'default'
     vars:
@@ -70,14 +74,17 @@ examples:
       ca_name: 'ca-authority'
       pool_name: 'ca-pool'
       issuance_config_name: 'issuance-config'
+    tgc_skip_test: 'Need to figure out to get the desired cai asset state.'
   - name: 'certificate_manager_self_managed_certificate'
     primary_resource_id: 'default'
     vars:
       cert_name: 'self-managed-cert'
+    tgc_skip_test: 'Need to figure out to get the desired cai asset state.'
   - name: 'certificate_manager_self_managed_certificate_regional'
     primary_resource_id: 'default'
     vars:
       cert_name: 'self-managed-cert'
+    tgc_skip_test: 'Need to figure out to get the desired cai asset state.'
   - name: 'certificate_manager_google_managed_certificate_issuance_config_all_regions'
     primary_resource_id: 'default'
     vars:
@@ -85,6 +92,7 @@ examples:
       ca_name: 'ca-authority'
       pool_name: 'ca-pool'
       issuance_config_name: 'issuance-config'
+    tgc_skip_test: 'Need to figure out to get the desired cai asset state.'
   - name: 'certificate_manager_google_managed_certificate_dns_all_regions'
     primary_resource_id: 'default'
     vars:
@@ -93,16 +101,19 @@ examples:
       dns_auth_name2: 'dns-auth2'
       dns_auth_subdomain2: 'subdomain2'
       cert_name: 'dns-cert'
+    tgc_skip_test: 'Need to figure out to get the desired cai asset state.'
   - name: 'certificate_manager_google_managed_regional_certificate_dns_auth'
     primary_resource_id: 'default'
     vars:
       dns_auth_name: 'dns-auth'
       dns_auth_subdomain: 'subdomain'
       cert_name: 'dns-cert'
+    tgc_skip_test: 'Need to figure out to get the desired cai asset state.'
   - name: 'certificate_manager_client_auth_certificate'
     primary_resource_id: 'default'
     vars:
       cert_name: 'client-auth-cert'
+    tgc_skip_test: 'Need to figure out to get the desired cai asset state.'
 parameters:
   - name: 'name'
     type: String
@@ -174,6 +185,7 @@ properties:
           Leaf certificate comes first, followed by intermediate ones if any.
         immutable: true
         sensitive: true
+        is_missing_in_cai: true
         exactly_one_of:
           - 'self_managed.0.certificate_pem'
           - 'self_managed.0.pem_certificate'
@@ -184,6 +196,7 @@ properties:
           The private key of the leaf certificate in PEM-encoded form.
         immutable: true
         sensitive: true
+        is_missing_in_cai: true
         exactly_one_of:
           - 'self_managed.0.private_key_pem'
           - 'self_managed.0.pem_private_key'
@@ -204,6 +217,7 @@ properties:
           The private key of the leaf certificate in PEM-encoded form.
         immutable: true
         sensitive: true
+        is_missing_in_cai: true
         exactly_one_of:
           - 'self_managed.0.private_key_pem'
           - 'self_managed.0.pem_private_key'

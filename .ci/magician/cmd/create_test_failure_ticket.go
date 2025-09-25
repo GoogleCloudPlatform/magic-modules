@@ -268,7 +268,7 @@ func getTestInfoList(pVersion provider.Version, date time.Time, gcs Cloudstorage
 	objectName := fmt.Sprintf("test-metadata/%s/%s", pVersion.String(), testStatusFileName)
 
 	var testInfoList []TestInfo
-	err := gcs.DownloadFile(NightlyDataBucket, objectName, testStatusFileName)
+	err := gcs.DownloadFile(nightlyDataBucket, objectName, testStatusFileName)
 	if err != nil {
 		return testInfoList, err
 	}
@@ -506,13 +506,13 @@ func storeErrorMessage(pVersion provider.Version, gcs CloudstorageClient, errorM
 
 	// upload file to GCS
 	objectName := fmt.Sprintf("test-errors/%s/%s/%s", pVersion.String(), date, fileName)
-	err = gcs.WriteToGCSBucket(NightlyDataBucket, objectName, fileName)
+	err = gcs.WriteToGCSBucket(nightlyDataBucket, objectName, fileName)
 	if err != nil {
 		return "", fmt.Errorf("failed to upload error message file %s to GCS bucket: %w", objectName, err)
 	}
 
 	// compute object view path
-	link := fmt.Sprintf("https://storage.cloud.google.com/%s/%s", NightlyDataBucket, objectName)
+	link := fmt.Sprintf("https://storage.cloud.google.com/%s/%s", nightlyDataBucket, objectName)
 	return link, nil
 }
 
@@ -521,7 +521,7 @@ func init() {
 }
 
 var (
-	// TODO(shuyama1): add all mismatch resource names
+	// TODO: add all mismatch resource names
 	resourceNameConverter = map[string]string{
 		"google_iam3_projects_policy_binding":        "google_iam_projects_policy_binding",
 		"google_iam3_organizations_policy_binding":   "google_iam_organizations_policy_binding",

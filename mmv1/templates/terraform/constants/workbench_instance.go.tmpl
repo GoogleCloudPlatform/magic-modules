@@ -1,30 +1,22 @@
-var WorkbenchInstanceProvidedLabels = []string{
-	"consumer-project-id",
-	"consumer-project-number",
-	"notebooks-product",
-	"resource-name",
-}
-
-func WorkbenchInstanceLabelsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	// Suppress diffs for the labels
-	for _, label := range WorkbenchInstanceProvidedLabels {
-		if strings.Contains(k, label) && new == "" {
-			return true
-		}
-	}
-
-	// Let diff be determined by labels (above)
-	if strings.Contains(k, "labels.%") {
-		return true
-	}
-
-	// For other keys, don't suppress diff.
-	return false
-}
-
-
 var WorkbenchInstanceSettableUnmodifiableDefaultMetadata = []string{
-	    "serial-port-logging-enable",
+	"install-monitoring-agent",
+	"serial-port-logging-enable",
+	"report-notebook-metrics",
+}
+
+var WorkbenchInstanceEUCProvidedAdditionalMetadata = []string{
+	"enable-oslogin",
+	"disable-ssh",
+	"ssh-keys",
+	"block-project-ssh-keys",
+	"post-startup-script",
+	"post-startup-script-behavior",
+	"startup-script",
+	"startup-script-url",
+	"gce-container-declaration",
+	"gce-software-declaration",
+	"serial-port-enable",
+	"euc-enabled",
 }
 
 var WorkbenchInstanceProvidedMetadata = []string{
@@ -45,13 +37,13 @@ var WorkbenchInstanceProvidedMetadata = []string{
     "dataproc-region",
     "dataproc-service-account",
     "disable-check-xsrf",
+    "enable-euc",
     "framework",
     "generate-diagnostics-bucket",
     "generate-diagnostics-file",
     "generate-diagnostics-options",
     "google-logging-enabled",
     "image-url",
-    "install-monitoring-agent",
     "install-nvidia-driver",
     "installed-extensions",
     "instance-region",
@@ -68,7 +60,6 @@ var WorkbenchInstanceProvidedMetadata = []string{
     "proxy-user-mail",
     "report-container-health",
     "report-event-url",
-    "report-notebook-metrics",
     "report-system-health",
     "report-system-status",
     "resource-url",
@@ -94,6 +85,14 @@ func WorkbenchInstanceMetadataDiffSuppress(k, old, new string, d *schema.Resourc
 	for _, metadata := range WorkbenchInstanceProvidedMetadata {
 		if key == metadata {
 			return true
+		}
+	}
+	
+	if d.Get("enable_managed_euc").(bool){
+		for _, metadata := range WorkbenchInstanceEUCProvidedAdditionalMetadata {
+			if key == metadata {
+				return true
+			}
 		}
 	}
 

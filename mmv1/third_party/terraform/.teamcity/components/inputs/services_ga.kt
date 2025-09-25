@@ -111,6 +111,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Bigquerydatapolicy",
         "path" to "./google/services/bigquerydatapolicy"
     ),
+    "bigquerydatapolicyv2" to mapOf(
+        "name" to "bigquerydatapolicyv2",
+        "displayName" to "Bigquerydatapolicyv2",
+        "path" to "./google/services/bigquerydatapolicyv2"
+    ),
     "bigquerydatatransfer" to mapOf(
         "name" to "bigquerydatatransfer",
         "displayName" to "Bigquerydatatransfer",
@@ -559,7 +564,12 @@ var ServicesListGa = mapOf(
     "modelarmor" to mapOf(
         "name" to "modelarmor",
         "displayName" to "ModelArmor",
-        "path" to "./googleservices/modelarmor"
+        "path" to "./google/services/modelarmor"
+    ),
+    "modelarmorglobal" to mapOf(
+        "name" to "modelarmorglobal",
+        "displayName" to "ModelArmorGlobal",
+        "path" to "./google/services/modelarmorglobal"
     ),
     "monitoring" to mapOf(
         "name" to "monitoring",
@@ -686,6 +696,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Runtimeconfig",
         "path" to "./google/services/runtimeconfig"
     ),
+    "saasruntime" to mapOf(
+        "name" to "saasruntime",
+        "displayName" to "SaaS Runtime",
+        "path" to "./google/services/saasruntime"
+    ),
     "secretmanager" to mapOf(
         "name" to "secretmanager",
         "displayName" to "Secretmanager",
@@ -800,11 +815,6 @@ var ServicesListGa = mapOf(
         "name" to "tags",
         "displayName" to "Tags",
         "path" to "./google/services/tags"
-    ),
-    "tpu" to mapOf(
-        "name" to "tpu",
-        "displayName" to "Tpu",
-        "path" to "./google/services/tpu"
     ),
     "tpuv2" to mapOf(
         "name" to "tpuv2",
