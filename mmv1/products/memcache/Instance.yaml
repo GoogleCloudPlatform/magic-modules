@@ -336,7 +336,7 @@ properties:
 virtual_fields:
   - name: 'deletion_protection'
     description: |
-      Whether Terraform will be prevented from destroying the instance. Defaults to true.
+      Whether Terraform will be prevented from destroying the instance.
       When a `terraform destroy` or `terraform apply` would delete the instance,
       the command will fail if this field is not set to false in Terraform state.
       When the field is set to true or unset in Terraform state, a `terraform apply`
