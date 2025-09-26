@@ -215,7 +215,7 @@ properties:
                           type: Boolean
                           description: |
                             If true, indicates the exact/prefix/suffix/contains matching should be case insensitive. For example, the matcher data will match both input string Data and data if set to true.
-                          deprecation_message: '`ignore_case` is deprecated and will be removed in a future major release. Use `principals.principal.ignore_case` instead.'
+                          deprecation_message: '`principals.ignore_case` is deprecated and will be removed in a future major release. Use `principals.principal.ignore_case` instead.'
                         - name: 'exact'
                           type: String
                           description: |
@@ -375,7 +375,7 @@ properties:
                           type: Boolean
                           description: |
                             If true, indicates the exact/prefix/suffix/contains matching should be case insensitive. For example, the matcher data will match both input string Data and data if set to true.
-                          deprecation_message: '`ignore_case` is deprecated and will be removed in a future major release. Use `principals.principal.ignore_case` instead.'
+                          deprecation_message: '`principals.ignore_case` is deprecated and will be removed in a future major release. Use `principals.principal.ignore_case` instead.'
                         - name: 'exact'
                           type: String
                           description: |
