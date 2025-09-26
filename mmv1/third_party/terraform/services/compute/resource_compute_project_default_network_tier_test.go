@@ -79,10 +79,15 @@ resource "google_project_service" "compute" {
   service = "compute.googleapis.com"
 }
 
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_project_service.compute]
+}
+
 resource "google_compute_project_default_network_tier" "fizzbuzz" {
   project      = google_project.project.project_id
   network_tier = "PREMIUM"
-  depends_on   = [google_project_service.compute]
+  depends_on   = [time_sleep.wait_120_seconds]
 }
 `, projectID, projectID, org, billing)
 }
@@ -102,10 +107,15 @@ resource "google_project_service" "compute" {
   service = "compute.googleapis.com"
 }
 
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_project_service.compute]
+}
+
 resource "google_compute_project_default_network_tier" "fizzbuzz" {
   project      = google_project.project.project_id
   network_tier = "STANDARD"
-  depends_on   = [google_project_service.compute]
+  depends_on   = [time_sleep.wait_120_seconds]
 }
 `, projectID, projectID, org, billing)
 }
