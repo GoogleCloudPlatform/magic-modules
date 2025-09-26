@@ -52,6 +52,8 @@ custom_code:
   post_update: 'templates/terraform/post_create/sleep_1_min.go.tmpl'
 examples:
   - name: 'kms_folder_kaj_policy_config_basic'
+    # random external provider
+    skip_vcr: true
     primary_resource_id: "example"
     min_version: 'beta'
     vars:
