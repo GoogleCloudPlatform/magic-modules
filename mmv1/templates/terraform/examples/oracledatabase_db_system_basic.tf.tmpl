@@ -21,6 +21,7 @@ resource "google_oracle_database_db_system" "{{$.PrimaryResourceId}}"{
             database {
                 admin_password = "ABcde_1#234"
                 database_id = "{{index $.Vars "database_id"}}"
+                db_name = "db"
             }
         }
     }
