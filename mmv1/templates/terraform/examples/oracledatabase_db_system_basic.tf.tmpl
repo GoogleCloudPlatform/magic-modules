@@ -1,6 +1,6 @@
 resource "google_oracle_database_db_system" "{{$.PrimaryResourceId}}"{
     db_system_id = "{{index $.Vars "db_system_id"}}"
-    display_name = "{{index $.Vars "cloud_vm_cluster_id"}} displayname"
+    display_name = "{{index $.Vars "db_system_id"}} displayname"
     location = "europe_west2"
     project = "{{index $.Vars "project"}}"
     odb_network = "{{index $.Vars "odb_network"}}"
