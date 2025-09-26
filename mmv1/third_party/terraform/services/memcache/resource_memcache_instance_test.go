@@ -1,16 +1,16 @@
 package memcache_test
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
-	memcache "cloud.google.com/go/memcache/apiv1"
-	memcachepb "cloud.google.com/go/memcache/apiv1/memcachepb"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"net/url"
+	"strings"
 )
 
 func TestAccMemcacheInstance_update(t *testing.T) {
@@ -105,112 +105,163 @@ data "google_compute_network" "memcache_network" {
 
 func TestAccMemcacheInstance_tags(t *testing.T) {
 	t.Parallel()
-	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "memcache-instances-tagkey", map[string]interface{}{})
-	tagValue := acctest.BootstrapSharedTestOrganizationTagValue(t, "memcache-instances-tagvalue", tagKey)
-
-	testContext := map[string]interface{}{
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "memcache-inst-tagkey", map[string]interface{}{})
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
 		"org":           envvar.GetTestOrgFromEnv(t),
 		"tagKey":        tagKey,
-		"tagValue":      tagValue,
-		"random_suffix": acctest.RandString(t, 10),
+		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "memcache-inst-tagvalue", tagKey),
+		"region":        "us-central1",
 	}
-	resourceName := "google_memcache_instance.test"
-
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckMemcacheInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMemcacheInstanceTags(testContext),
+				Config: testAccMemcacheInstanceTags(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkMemcacheInstanceTags(resourceName, testContext),
+					resource.TestCheckResourceAttrSet("google_memcache_instance.default", "tags.%"),
+					testAccCheckMemcacheInstanceHasTagBindings(t),
 				),
 			},
 			{
-				ResourceName:            resourceName,
+				ResourceName:            "google_memcache_instance.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"tags"},
+				ImportStateVerifyIgnore: []string{"name", "region", "labels", "tags"},
 			},
 		},
 	})
 }
 
-func testAccMemcacheInstanceTags(testContext map[string]interface{}) string {
+func testAccCheckMemcacheInstanceHasTagBindings(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_memcache_instance" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+
+			var configuredTagValueNamespacedName string
+			var tagKeyNamespacedName, tagValueShortName string
+			for key, val := range rs.Primary.Attributes {
+				if strings.HasPrefix(key, "tags.") && key != "tags.#" {
+					tagKeyNamespacedName = strings.TrimPrefix(key, "tags.")
+					tagValueShortName = val
+					if tagValueShortName != "" {
+						configuredTagValueNamespacedName = fmt.Sprintf("%s/%s", tagKeyNamespacedName, tagValueShortName)
+						break
+					}
+				}
+			}
+
+			if configuredTagValueNamespacedName == "" {
+				return fmt.Errorf("could not find a configured tag value in the state for resource %s", rs.Primary.ID)
+			}
+
+			if strings.Contains(configuredTagValueNamespacedName, "%{") {
+				return fmt.Errorf("tag namespaced name contains unsubstituted variables: %q. Ensure the context map in the test step is populated", configuredTagValueNamespacedName)
+			}
+
+			safeNamespacedName := url.QueryEscape(configuredTagValueNamespacedName)
+			describeTagValueURL := fmt.Sprintf("https://cloudresourcemanager.googleapis.com/v3/tagValues/namespaced?name=%s", safeNamespacedName)
+
+			respDescribe, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				RawURL:    describeTagValueURL,
+				UserAgent: config.UserAgent,
+			})
+
+			if err != nil {
+				return fmt.Errorf("error describing tag value using namespaced name %q: %v", configuredTagValueNamespacedName, err)
+			}
+
+			fullTagValueName, ok := respDescribe["name"].(string)
+			if !ok || fullTagValueName == "" {
+				return fmt.Errorf("tag value details (name) not found in response for namespaced name: %q, response: %v", configuredTagValueNamespacedName, respDescribe)
+			}
+
+			parts := strings.Split(rs.Primary.ID, "/")
+			if len(parts) != 6 {
+				return fmt.Errorf("invalid resource ID format: %s", rs.Primary.ID)
+			}
+			project := parts[1]
+			location := parts[3] // This is the region
+			instance_id := parts[5]
+
+			parentURL := fmt.Sprintf("//memcache.googleapis.com/projects/%s/locations/%s/instances/%s", project, location, instance_id)
+			listBindingsURL := fmt.Sprintf("https://%s-cloudresourcemanager.googleapis.com/v3/tagBindings?parent=%s", location, url.QueryEscape(parentURL))
+
+			resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				RawURL:    listBindingsURL,
+				UserAgent: config.UserAgent,
+			})
+
+			if err != nil {
+				return fmt.Errorf("error calling TagBindings API: %v", err)
+			}
+
+			tagBindingsVal, exists := resp["tagBindings"]
+			if !exists {
+				tagBindingsVal = []interface{}{}
+			}
+
+			tagBindings, ok := tagBindingsVal.([]interface{})
+			if !ok {
+				return fmt.Errorf("'tagBindings' is not a slice in response for resource %s. Response: %v", rs.Primary.ID, resp)
+			}
+
+			foundMatch := false
+			for _, binding := range tagBindings {
+				bindingMap, ok := binding.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				if bindingMap["tagValue"] == fullTagValueName {
+					foundMatch = true
+					break
+				}
+			}
+
+			if !foundMatch {
+				return fmt.Errorf("expected tag value %s (from namespaced %q) not found in tag bindings for resource %s. Bindings: %v", fullTagValueName, configuredTagValueNamespacedName, rs.Primary.ID, tagBindings)
+			}
+
+			t.Logf("Successfully found matching tag binding for %s with tagValue %s", rs.Primary.ID, fullTagValueName)
+		}
+
+		return nil
+	}
+}
+
+func testAccMemcacheInstanceTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-	provider "google" {
+provider "google" {
   project                 = "kshitij-memcached-test"
   user_project_override   = true
 }
-	resource "google_memcache_instance" "test" {
-	  name = "tf-test-instance-%{random_suffix}"
-	  node_count = 1
-	  region = "us-central1"
-	  node_config {
-	    cpu_count = 1
-	    memory_size_mb = 1024
-	  }
-	  tags = {
-	    "%{org}/%{tagKey}" = "%{tagValue}"
-	  }
-	}`, testContext)
-}
 
-// This function gets the instance via the Memcache API and inspects its tags.
-func checkMemcacheInstanceTags(resourceName string, testContext map[string]interface{}) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("Resource not found: %s", resourceName)
-		}
-
-		// Get resource attributes from state
-		project := rs.Primary.Attributes["project"]
-		location := rs.Primary.Attributes["region"]
-		instanceName := rs.Primary.Attributes["name"]
-
-		// Construct the expected full tag key
-		expectedTagKey := fmt.Sprintf("%s/%s", testContext["org"], testContext["tagKey"])
-		expectedTagValue := fmt.Sprintf("%s", testContext["tagValue"])
-
-		// This `ctx` variable is now a `context.Context` object
-		ctx := context.Background()
-
-		// Create a Memcache client
-		memcacheClient, err := memcache.NewCloudMemcacheClient(ctx)
-		if err != nil {
-			return fmt.Errorf("failed to create memcache client: %v", err)
-		}
-		defer memcacheClient.Close()
-
-		// Construct the request to get the instance details
-		req := &memcachepb.GetInstanceRequest{
-			Name: fmt.Sprintf("projects/%s/locations/%s/instances/%s", project, location, instanceName),
-		}
-
-		// Get the Memcache instance
-		instance, err := memcacheClient.GetInstance(ctx, req)
-		if err != nil {
-			return fmt.Errorf("failed to get memcache instance '%s': %v", req.Name, err)
-		}
-
-		// Check the instance's labels for the expected tag
-		// In the Memcache API, tags are represented as labels.
-		labels := instance.GetLabels()
-		if labels == nil {
-			return fmt.Errorf("expected labels not found on instance '%s'", req.Name)
-		}
-
-		if actualValue, ok := labels[expectedTagKey]; ok {
-			if actualValue == expectedTagValue {
-				// The tag was found with the correct value. Success!
-				return nil
-			}
-			return fmt.Errorf("tag key '%s' found with incorrect value. Expected: %s, Got: %s", expectedTagKey, expectedTagValue, actualValue)
-		}
-
-		// If we reach here, the tag key was not found.
-		return fmt.Errorf("expected tag key '%s' not found on instance '%s'", expectedTagKey, req.Name)
-	}
+resource "google_memcache_instance" "default" {
+  name          = "tf-test-my-memcache-%{random_suffix}"
+  region        =  "us-central1"
+  node_count    = 1
+  node_config {
+    cpu_count   = 1
+    memory_size_mb = 1024
+  }
+  labels = {
+    env = "test"
+  }
+  tags = {
+    "%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}`, context)
 }
