@@ -1,6 +1,6 @@
 package sql
 
-import
+import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -11,7 +11,6 @@ import
 func DataSourceSqlDatabaseInstanceLatestRecoveryTime() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceSqlDatabaseInstanceLatestRecoveryTimeRead,
-
 		Schema: map[string]*schema.Schema{
 			"instance": {
 				Type:             schema.TypeString,
@@ -44,7 +43,6 @@ func dataSourceSqlDatabaseInstanceLatestRecoveryTimeRead(d *schema.ResourceData,
 	if err != nil {
 		return err
 	}
-
 	fv, err := tpgresource.ParseProjectFieldValue("instances", d.Get("instance").(string), "project", d, config, false)
 	if err != nil {
 		return err
@@ -64,34 +62,12 @@ func dataSourceSqlDatabaseInstanceLatestRecoveryTimeRead(d *schema.ResourceData,
 	if err != nil {
 		return err
 	}
-
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
-
 	if err := d.Set("latest_recovery_time", latestRecoveryTime.LatestRecoveryTime); err != nil {
 		return fmt.Errorf("Error setting latest_recovery_time: %s", err)
 	}
-
-	if err := d.Set("source_instance_deletion_time", deletionTime); err != nil {
-		return fmt.Errorf("Error setting source_instance_deletion_time: %s", err)
-	}
-
 	d.SetId(fmt.Sprintf("projects/%s/instance/%s", project, instance))
 	return nil
-}
-(fmt.Sprintf("projects/%s/instance/%s", project, instance))
-        return nil
-}mt.Sprintf("projects/%s/instance/%s", project, instance))
-        return nil
-}mt.Sprintf("projects/%s/instance/%s", project, instance))
-        return nil
-}mt.Sprintf("projects/%s/instance/%s", project, instance))
-        return nil
-}mt.Sprintf("projects/%s/instance/%s", project, instance))
-        return nil
-}mt.Sprintf("projects/%s/instance/%s", project, instance))
-        return nil
-}t.Sprintf("projects/%s/instance/%s", project, instance))
-        return nil
 }
