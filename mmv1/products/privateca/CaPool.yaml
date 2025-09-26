@@ -58,21 +58,11 @@ examples:
     primary_resource_id: 'default'
     vars:
       name: 'my-pool'
-    # This example doesn't contain the `encryption_spec` field, as testing that
-    # field requires a beta resource
-  - name: 'privateca_capool_cmek'
-    primary_resource_id: 'default'
-    vars:
-      name: 'my-pool'
-      pool_location: 'asia-east1'
-      cloud_kms_key: 'projects/keys-project/locations/asia-east1/keyRings/key-ring/cryptoKeys/crypto-key'
+      cloud_kms_key: 'projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key'
     test_vars_overrides:
-      'pool_location': '"asia-east1"'
-      'cloud_kms_key': 'acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "asia-east1").CryptoKey.Name'
-    # Skip test because it depends on a beta resource, but PrivateCA does
-    # not have a beta endpoint
-    exclude_test: true
-    # This test is meant to test the `encryption_spec` field
+      'cloud_kms_key': 'acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "us-central1").CryptoKey.Name'
+    # Test requires a beta-only resource
+    min_version: beta
   - name: 'privateca_quickstart'
     primary_resource_id: 'default'
     vars:
