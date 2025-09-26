@@ -20,8 +20,8 @@ resource "google_oracle_database_db_system" "{{$.PrimaryResourceId}}"{
         db_home {
             db_version = "19.0.0.0"
             database {
-                admin_password = "ABcde_1#234",
-                database_id = "{{index $.Vars "database_id"}}",
+                admin_password = "ABcde_1#234"
+                database_id = "{{index $.Vars "database_id"}}"
             }
         }
     }
