@@ -17,7 +17,7 @@ resource "google_oracle_database_db_system" "{{$.PrimaryResourceId}}"{
         initial_data_storage_size_gb = "256"
         database_edition = "STANDARD_EDITION"
         license_model = "LICENSE_INCLUDED"
-        private_ip = 10.1.2.127"
+        private_ip = "10.1.2.127"
         db_home {
             db_version = "19.0.0.0"
             database {
