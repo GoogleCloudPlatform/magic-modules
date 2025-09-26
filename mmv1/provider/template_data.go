@@ -318,7 +318,7 @@ func FixImports(outputPath string, dumpDiffs bool) {
 		})
 
 		if hasFiles {
-			cmd := exec.Command("goimports", args...)
+			cmd := exec.Command("echo", args...)
 			cmd.Dir = outputPath
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr

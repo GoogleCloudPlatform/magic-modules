@@ -22,10 +22,26 @@ import (
   "encoding/json"
   "errors"
   "fmt"
+  "log"
+  "strings"
   "time"
 
   "{{ $.ImportPath }}/tpgresource"
   transport_tpg "{{ $.ImportPath }}/transport"
+
+  "google.golang.org/api/googleapi"
+)
+
+var (
+  _ = json.Marshal
+  _ = errors.New
+  _ = fmt.Sprintf
+  _ = log.Print
+  _ = strings.Trim
+  _ = time.Now
+  _ = tpgresource.SetLabels
+  _ = transport_tpg.Config{}
+  _ = googleapi.Error{}
 )
 
 type {{ $.ProductMetadata.Name }}OperationWaiter struct {
