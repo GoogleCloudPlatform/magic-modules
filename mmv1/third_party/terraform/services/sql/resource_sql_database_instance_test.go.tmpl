@@ -1610,6 +1610,38 @@ func TestAccSqlDatabaseInstance_cloneWithDatabaseNames(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_cloneWithSourceInstanceDeletionTimestamp(t *testing.T) {
+	// Sqladmin client
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	project := envvar.GetTestProjectFromEnv()
+
+	context := map[string]interface{}{
+		"random_suffix":    acctest.RandString(t, 10),
+		"source_db_name":   "source-instance-" + acctest.RandString(t, 6),
+		"clone_db_name":    "clone-instance-" + acctest.RandString(t, 6),
+		"project" : project,
+		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+			// On non-deleted instance should return error containing both instance name and deletion time
+				Config: testAccSqlDatabaseInstance_cloneWithSourceInstanceDeletionTimestamp(context),
+				ExpectError: regexp.MustCompile(`.*No backups found for instance.* and deletion time seconds: .*`),
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_pointInTimeRestore(t *testing.T) {
 	// Skipped due to randomness
 	acctest.SkipIfVcr(t)
@@ -1683,6 +1715,7 @@ func TestAccSqlDatabaseInstance_pointInTimeRestoreWithSettings(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection", "point_in_time_restore_context"},
+
 			},
 		},
 	})
@@ -6984,6 +7017,34 @@ resource "google_sql_database_instance" "instance" {
     source_instance_name = data.google_sql_backup_run.backup.instance
     point_in_time = data.google_sql_backup_run.backup.start_time
 	preferred_zone = "us-central1-b"
+  }
+
+  deletion_protection = false
+
+  // Ignore changes, since the most recent backup may change during the test
+  lifecycle{
+	ignore_changes = [clone[0].point_in_time]
+  }
+}
+
+data "google_sql_backup_run" "backup" {
+	instance = "%{original_db_name}"
+	most_recent = true
+}
+`, context)
+}
+
+func testAccSqlDatabaseInstance_cloneWithSourceInstanceDeletionTimestamp(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_sql_database_instance" "instance" {
+  name             = "tf-test-%{random_suffix}"
+  database_version = "POSTGRES_11"
+  region           = "us-central1"
+
+  clone {
+    source_instance_name = data.google_sql_backup_run.backup.instance
+    point_in_time = data.google_sql_backup_run.backup.start_time
+    source_instance_deletion_time = data.google_sql_backup_run.backup.start_time
   }
 
   deletion_protection = false
