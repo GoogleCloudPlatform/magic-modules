@@ -17,7 +17,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -127,6 +126,41 @@ var (
 	}
 )
 
+func diskSizeCutomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	key := "settings.0.disk_size"
+
+	old, new := d.GetChange(key)
+	// It's okay to remove size entirely.
+	if old == nil || new == nil {
+		return nil
+	}
+	autoResizeI, exists := d.GetOkExists("settings.0.disk_autoresize")
+	autoResize := !exists || autoResizeI.(bool)
+
+	if old.(int) <= new.(int) {
+		// If a resize up, always allow it - keep the diff.
+		return nil
+	}
+
+	if autoResize {
+		// Allow having disk size larger in the state than in config if auto resize is enabled.
+		// Delete the diff.
+		err := d.Clear(key)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	// If we are here, we are trying to shrink the disk with auto resize disabled and no ignore changes on disk size.
+	// This will force a new resource.
+	if err := d.ForceNew(key); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func ResourceSqlDatabaseInstance() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceSqlDatabaseInstanceCreate,
@@ -145,7 +179,7 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
-			customdiff.ForceNewIfChange("settings.0.disk_size", compute.IsDiskShrinkage),
+			diskSizeCutomizeDiff,
 			customdiff.ForceNewIf("master_instance_name", func(_ context.Context, d *schema.ResourceDiff, meta interface{}) bool {
 				// If we set master but this is not the new master of a switchover, require replacement and warn user.
 				return !isSwitchoverFromOldPrimarySide(d)
@@ -172,11 +206,17 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 				Optional:    true,
 				Description: `Used to block Terraform from deleting a SQL Instance. Defaults to true.`,
 			},
+			"final_backup_description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `The description of final backup if instance enable create final backup during instance deletion. `,
+
+			},
 			"settings": {
 				Type:         schema.TypeList,
 				Optional:     true,
 				Computed:     true,
-				AtLeastOneOf: []string{"settings", "clone"},
+				AtLeastOneOf: []string{"settings", "clone", "point_in_time_restore_context"},
 				MaxItems:     1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -792,6 +832,28 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Optional:    true,
 							Description: `When this parameter is set to true, Cloud SQL retains backups of the instance even after the instance is deleted. The ON_DEMAND backup will be retained until customer deletes the backup or the project. The AUTOMATED backup will be retained based on the backups retention setting.`,
 						},
+						"final_backup_config": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:         schema.TypeBool,
+										Optional:     true,
+										Description:  `When this parameter is set to true, the final backup is enabled for the instance`,
+									},
+									"retention_days": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										ValidateFunc: validation.IntBetween(1, 36135),
+										Description:  `The number of days to retain the final backup after the instance deletion. The valid range is between 1 and 365. For instances managed by BackupDR, the valid range is between 1 day and 99 years. The final backup will be purged at (time_of_instance_deletion + retention_days).`,
+									},
+								},
+							},
+							Description: `Config used to determine the final backup settings for the instance`,
+
+						},
 					},
 				},
 				Description: `The settings to use for the database. The configuration is detailed below.`,
@@ -1155,7 +1217,7 @@ API (for read pools, effective_availability_type may differ from availability_ty
 				Type:         schema.TypeList,
 				Optional:     true,
 				Computed:     false,
-				AtLeastOneOf: []string{"settings", "clone"},
+				AtLeastOneOf: []string{"settings", "clone", "point_in_time_restore_context"},
 				Description:  `Configuration for creating a new instance as a clone of another instance.`,
 				MaxItems:     1,
 				Elem: &schema.Resource{
@@ -1188,6 +1250,44 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: `The name of the allocated ip range for the private ip CloudSQL instance. For example: "google-managed-services-default". If set, the cloned instance ip will be created in the allocated range. The range name must comply with [RFC 1035](https://tools.ietf.org/html/rfc1035). Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.`,
+						},
+					},
+				},
+			},
+			"point_in_time_restore_context": {
+				Type:         schema.TypeList,
+				Optional:     true,
+				Computed:     false,
+				AtLeastOneOf: []string{"settings", "clone", "point_in_time_restore_context"},
+				Description:  `Configuration for creating a new instance using point-in-time-restore from backupdr backup.`,
+				MaxItems:     1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"datasource": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: `The Google Cloud Backup and Disaster Recovery Datasource URI. For example: "projects/my-project/locations/us-central1/datasources/my-datasource".`,
+						},
+						"point_in_time": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							DiffSuppressFunc: tpgresource.TimestampDiffSuppress(time.RFC3339Nano),
+							Description:      `The date and time to which you want to restore the instance.`,
+						},
+						"preferred_zone": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `Point-in-time recovery of an instance to the specified zone. If no zone is specified, then clone to the same primary zone as the source instance.`,
+						},
+						"allocated_ip_range": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `The name of the allocated IP range for the internal IP Cloud SQL instance. For example: "google-managed-services-default". If you set this, then Cloud SQL creates the IP address for the cloned instance in the allocated range. This range must comply with [RFC 1035](https://tools.ietf.org/html/rfc1035) standards. Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.`,
+						},
+						"target_instance": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `The name of the target instance to restore to.`,
 						},
 					},
 				},
@@ -1284,6 +1384,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	cloneContext, cloneSource := expandCloneContext(d.Get("clone").([]interface{}))
+	pointInTimeRestoreContext := expandPointInTimeRestoreContext(d.Get("point_in_time_restore_context").([]interface{}))
 
 	s, ok := d.GetOk("settings")
 	desiredSettings := expandSqlDatabaseInstanceSettings(s.([]interface{}), databaseVersion)
@@ -1337,6 +1438,9 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 				cloneContext.DestinationInstanceName = name
 				clodeReq := sqladmin.InstancesCloneRequest{CloneContext: cloneContext}
 				op, operr = config.NewSqlAdminClient(userAgent).Instances.Clone(project, cloneSource, &clodeReq).Do()
+			} else if pointInTimeRestoreContext != nil {
+				parent := fmt.Sprintf("projects/%s", project)
+				op, operr = config.NewSqlAdminClient(userAgent).Instances.PointInTimeRestore(parent, pointInTimeRestoreContext).Do()
 			} else {
 				op, operr = config.NewSqlAdminClient(userAgent).Instances.Insert(project, instance).Do()
 			}
@@ -1423,8 +1527,8 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 
 	// Refresh settings from read as they may have defaulted from the API
 	s = d.Get("settings")
-	// If we've created an instance as a clone, we need to update it to set any user defined settings
-	if len(s.([]interface{})) != 0 && cloneContext != nil && desiredSettings != nil {
+	// If we've created an instance as a clone or pitr, we need to update it to set any user defined settings
+	if len(s.([]interface{})) != 0 && (cloneContext != nil || pointInTimeRestoreContext != nil) && desiredSettings != nil {
 		instanceUpdate := &sqladmin.DatabaseInstance{
 			Settings: desiredSettings,
 		}
@@ -1507,6 +1611,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		EnableGoogleMlIntegration:     _settings["enable_google_ml_integration"].(bool),
 		EnableDataplexIntegration:     _settings["enable_dataplex_integration"].(bool),
 		RetainBackupsOnDelete:         _settings["retain_backups_on_delete"].(bool),
+		FinalBackupConfig:			   expandFinalBackupConfig(_settings["final_backup_config"].([]interface{})),
 		UserLabels:                    tpgresource.ConvertStringMap(_settings["user_labels"].(map[string]interface{})),
 		BackupConfiguration:           expandBackupConfiguration(_settings["backup_configuration"].([]interface{})),
 		DatabaseFlags:                 expandDatabaseFlags(_settings["database_flags"].(*schema.Set).List()),
@@ -1746,6 +1851,19 @@ func expandBackupConfiguration(configured []interface{}) *sqladmin.BackupConfigu
 		TransactionLogRetentionDays: int64(_backupConfiguration["transaction_log_retention_days"].(int)),
 		PointInTimeRecoveryEnabled:  _backupConfiguration["point_in_time_recovery_enabled"].(bool),
 		ForceSendFields:             []string{"BinaryLogEnabled", "Enabled", "PointInTimeRecoveryEnabled"},
+	}
+}
+
+func expandFinalBackupConfig(configured []interface{}) *sqladmin.FinalBackupConfig{
+	if len(configured) == 0 || configured[0] == nil {
+		return nil
+	}
+
+	_finalBackupConfig := configured[0].(map[string]interface{})
+	return &sqladmin.FinalBackupConfig{
+		Enabled: _finalBackupConfig["enabled"].(bool),
+		RetentionDays: int64(_finalBackupConfig["retention_days"].(int)),
+		ForceSendFields:             []string{"Enabled"},
 	}
 }
 
@@ -2227,10 +2345,27 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
-	s := d.Get("settings")
 	instance = &sqladmin.DatabaseInstance{
 		Settings: expandSqlDatabaseInstanceSettings(desiredSetting.([]interface{}), databaseVersion),
 	}
+
+	// If there is no change detected in disk size, no need to try and update the disk size, send 0 always
+	instance.Settings.DataDiskSizeGb = 0
+	if d.HasChange("settings.0.disk_size") {
+		autoResize := true
+		_, autoResizeI := d.GetChange("settings.0.disk_autoresize")
+		if autoResizeI != nil {
+			autoResize = autoResizeI.(bool)
+		}
+		oldDiskSizeI, newDiskSizeI := d.GetChange("settings.0.disk_size")
+		if !autoResize || newDiskSizeI.(int) > oldDiskSizeI.(int) {
+			// If auto resize is not enabled - set the disk size as requested, even if it's a decrease - let it fail.
+			// Otherwise, allow increasing even if auto resize is enabled.
+			instance.Settings.DataDiskSizeGb = int64(newDiskSizeI.(int))
+		}
+	}
+
+	s := d.Get("settings")
 	_settings := s.([]interface{})[0].(map[string]interface{})
 	// Instance.Patch operation on completion updates the settings proto version by +8. As terraform does not know this it tries
 	// to make an update call with the proto version before patch and fails. To resolve this issue we update the setting version
@@ -2377,9 +2512,13 @@ func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{})
 	}
 
 	var op *sqladmin.Operation
+	finalBackupDescription := ""
+	if v, ok := d.GetOk("finalBackupDescription"); ok {
+		finalBackupDescription = v.(string)
+	}
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (rerr error) {
-			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Delete(project, d.Get("name").(string)).Do()
+			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Delete(project, d.Get("name").(string)).FinalBackupDescription(finalBackupDescription).Do()
 			if rerr != nil {
 				return rerr
 			}
@@ -2443,6 +2582,7 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 		"time_zone":                        settings.TimeZone,
 		"deletion_protection_enabled":      settings.DeletionProtectionEnabled,
 		"retain_backups_on_delete":         settings.RetainBackupsOnDelete,
+		"final_backup_config": settings.FinalBackupConfig,
 	}
 
 	if data["availability_type"] == "" {
@@ -2471,6 +2611,10 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 
 	if settings.BackupConfiguration != nil {
 		data["backup_configuration"] = flattenBackupConfiguration(settings.BackupConfiguration)
+	}
+
+	if settings.FinalBackupConfig != nil {
+		data["final_backup_config"] = flattenFinalBackupConfig(settings.FinalBackupConfig)
 	}
 
 	if settings.DatabaseFlags != nil {
@@ -2552,6 +2696,15 @@ func flattenBackupConfiguration(backupConfiguration *sqladmin.BackupConfiguratio
 		"point_in_time_recovery_enabled": backupConfiguration.PointInTimeRecoveryEnabled,
 		"backup_retention_settings":      flattenBackupRetentionSettings(backupConfiguration.BackupRetentionSettings),
 		"transaction_log_retention_days": backupConfiguration.TransactionLogRetentionDays,
+	}
+
+	return []map[string]interface{}{data}
+}
+
+func flattenFinalBackupConfig(finalBackupConfig *sqladmin.FinalBackupConfig) []map[string]interface{} {
+	data := map[string]interface{}{
+		"enabled":             finalBackupConfig.Enabled,
+		"retention_days":                        finalBackupConfig.RetentionDays,
 	}
 
 	return []map[string]interface{}{data}
@@ -2968,6 +3121,47 @@ func sqlDatabaseInstanceRestoreFromBackup(d *schema.ResourceData, config *transp
 	}
 
 	err = SqlAdminOperationWaitTime(config, op, project, "Restore Backup", userAgent, d.Timeout(schema.TimeoutUpdate))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func expandPointInTimeRestoreContext(configured []interface{}) *sqladmin.PointInTimeRestoreContext {
+	if len(configured) == 0 || configured[0] == nil {
+		return nil
+	}
+
+	_pitrc := configured[0].(map[string]interface{})
+	return &sqladmin.PointInTimeRestoreContext{
+		PointInTime: _pitrc["point_in_time"].(string),
+		PreferredZone:  _pitrc["preferred_zone"].(string),
+		Datasource:     _pitrc["datasource"].(string),
+		AllocatedIpRange: _pitrc["allocated_ip_range"].(string),
+		TargetInstance: _pitrc["target_instance"].(string),
+	}
+}
+
+func sqlDatabaseInstancePointInTimeRestore(d *schema.ResourceData, config *transport_tpg.Config, userAgent, project, instanceId string, r interface{}) error {
+	log.Printf("[DEBUG] Initiating GCBDR managed SQL database instance backup point in time restore")
+	pointInTimeRestoreContext := r.([]interface{})
+	parent := fmt.Sprintf("projects/%s", project)
+
+	var op *sqladmin.Operation
+	err := transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() (operr error) {
+			op, operr = config.NewSqlAdminClient(userAgent).Instances.PointInTimeRestore(parent, expandPointInTimeRestoreContext(pointInTimeRestoreContext)).Do()
+			return operr
+		},
+		Timeout:              d.Timeout(schema.TimeoutUpdate),
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+	})
+	if err != nil {
+		return fmt.Errorf("Error, failed to point in restore an instance %s: %s", instanceId, err)
+	}
+
+	err = SqlAdminOperationWaitTime(config, op, project, "Point in Time Restore", userAgent, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err
 	}
