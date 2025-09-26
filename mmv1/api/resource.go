@@ -616,7 +616,7 @@ func (r Resource) SensitiveProps() []*Type {
 func (r Resource) WriteOnlyProps() []*Type {
 	props := r.AllNestedProperties(r.RootProperties())
 	return google.Select(props, func(p *Type) bool {
-		return p.WriteOnlyLegacy
+		return p.WriteOnlyLegacy || p.WriteOnly
 	})
 }
 
@@ -748,14 +748,100 @@ func (r Resource) GetIdentity() []*Type {
 	})
 }
 
-func (r *Resource) AddLabelsRelatedFields(props []*Type, parent *Type) []*Type {
+func deduplicateSliceOfStrings(slice []string) []string {
+	seen := make(map[string]bool, len(slice))
+	result := make([]string, 0, len(slice))
+
+	for _, str := range slice {
+		if !seen[str] {
+			seen[str] = true
+			result = append(result, str)
+		}
+	}
+
+	return result
+}
+
+func buildWriteOnlyField(name string, versionFieldName string, originalField *Type) *Type {
+	description := fmt.Sprintf("%s Note: This property is write-only and will not be read from the API. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", originalField.Description)
+	originalFieldLineage := originalField.TerraformLineage()
+	fieldPathCurrentField := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(name))
+	requiredWith := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(versionFieldName))
+
+	apiName := originalField.ApiName
+	if apiName == "" {
+		apiName = originalField.Name
+	}
+
+	options := []func(*Type){
+		propertyWithType("String"),
+		propertyWithRequired(false),
+		propertyWithDescription(description),
+		propertyWithWriteOnly(true),
+		propertyWithApiName(apiName),
+		propertyWithIgnoreRead(true),
+		propertyWithRequiredWith([]string{requiredWith}),
+	}
+
+	if originalField.Required {
+		originalField.Required = false
+		exactlyOneOf := append(originalField.ExactlyOneOf, originalFieldLineage, fieldPathCurrentField)
+		options = append(options, propertyWithExactlyOneOf(deduplicateSliceOfStrings(exactlyOneOf)))
+		originalField.ExactlyOneOf = deduplicateSliceOfStrings(exactlyOneOf)
+	} else {
+		conflicts := append(originalField.Conflicts, originalFieldLineage)
+		options = append(options, propertyWithConflicts(deduplicateSliceOfStrings(conflicts)))
+	}
+
+	if len(originalField.AtLeastOneOf) > 0 {
+		atLeastOneOf := append(originalField.AtLeastOneOf, originalFieldLineage, fieldPathCurrentField)
+		options = append(options, propertyWithAtLeastOneOf(deduplicateSliceOfStrings(atLeastOneOf)))
+	}
+
+	return NewProperty(name, originalField.ApiName, options)
+}
+
+func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField *Type) *Type {
+	description := fmt.Sprintf("Triggers update of %s write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", google.Underscore(writeOnlyField.Name))
+	requiredWith := strings.ReplaceAll(originalField.TerraformLineage(), google.Underscore(originalField.Name), google.Underscore(writeOnlyField.Name))
+
+	options := []func(*Type){
+		propertyWithType("Int"),
+		propertyWithImmutable(originalField.IsForceNew()),
+		propertyWithDescription(description),
+		propertyWithRequiredWith([]string{requiredWith}),
+		propertyWithClientSide(true),
+	}
+
+	return NewProperty(name, name, options)
+}
+
+func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type) []*Type {
+	propWithWoConfigured.WriteOnly = false
+	if len(propWithWoConfigured.RequiredWith) > 0 {
+		log.Fatalf("WriteOnly property '%s' in resource '%s' cannot have RequiredWith set. This combination is not supported.", propWithWoConfigured.Name, r.Name)
+	}
+	woFieldName := fmt.Sprintf("%sWo", propWithWoConfigured.Name)
+	woVersionFieldName := fmt.Sprintf("%sVersion", woFieldName)
+	writeOnlyField := buildWriteOnlyField(woFieldName, woVersionFieldName, propWithWoConfigured)
+	writeOnlyVersionField := buildWriteOnlyVersionField(woVersionFieldName, propWithWoConfigured, writeOnlyField)
+	props = append(props, writeOnlyField, writeOnlyVersionField)
+	return props
+}
+
+// AddExtraFields processes properties and adds supplementary fields based on property types.
+// It handles write-only properties, labels, and annotations.
+func (r *Resource) AddExtraFields(props []*Type, parent *Type) []*Type {
 	for _, p := range props {
+		if p.WriteOnly && !strings.HasSuffix(p.Name, "Wo") {
+			props = r.addWriteOnlyFields(props, p)
+		}
 		if p.IsA("KeyValueLabels") {
 			props = r.addLabelsFields(props, parent, p)
 		} else if p.IsA("KeyValueAnnotations") {
 			props = r.addAnnotationsFields(props, parent, p)
 		} else if p.IsA("NestedObject") && len(p.AllProperties()) > 0 {
-			p.Properties = r.AddLabelsRelatedFields(p.AllProperties(), p)
+			p.Properties = r.AddExtraFields(p.AllProperties(), p)
 		}
 	}
 	return props
