@@ -1638,6 +1638,7 @@ func TestAccSqlDatabaseInstance_cloneWithSourceInstanceDeletionTime(t *testing.T
 	})
 }
 
+<<<<<<< HEAD
 func TestAccSqlDatabaseInstance_pointInTimeRestore(t *testing.T) {
 	// Skipped due to randomness
 	acctest.SkipIfVcr(t)
@@ -1718,6 +1719,8 @@ func TestAccSqlDatabaseInstance_pointInTimeRestoreWithSettings(t *testing.T) {
 	})
 }
 
+=======
+>>>>>>> 740fc7b7097635504ed769d5343e5a0dc41b7ba1
 func testAccSqlDatabaseInstanceDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
@@ -7060,6 +7063,7 @@ data "google_sql_backup_run" "backup" {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 func testAccSqlDatabaseInstance_pointInTimeRestoreContext(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 // Create service account
@@ -7294,6 +7298,8 @@ resource "google_sql_database_instance" "instance" {
 
   deletion_protection 	= false
 =======
+=======
+>>>>>>> 740fc7b7097635504ed769d5343e5a0dc41b7ba1
 func testAccSqlDatabaseInstance_cloneWithSourceInstanceDeletionTime(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_sql_database_instance" "instance" {
@@ -7318,7 +7324,10 @@ resource "google_sql_database_instance" "instance" {
 data "google_sql_backup_run" "backup" {
 	instance = "%{original_db_name}"
 	most_recent = true
+<<<<<<< HEAD
 >>>>>>> 67a9dbe8b (adding source_instance_deletion_time to google_sql_database_instance)
+=======
+>>>>>>> 740fc7b7097635504ed769d5343e5a0dc41b7ba1
 }
 `, context)
 }
