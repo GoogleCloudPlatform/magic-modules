@@ -171,7 +171,14 @@ type Type struct {
 
 	Sensitive bool `yaml:"sensitive,omitempty"` // Adds `Sensitive: true` to the schema
 
-	WriteOnly bool `yaml:"write_only,omitempty"` // Adds `WriteOnly: true` to the schema
+	// If true, write-only arguments will be automatically generated for this field.
+	// (`[field_name]_wo` and `[field_name]_wo_version`).
+	// For more information, see: https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments
+	WriteOnly bool `yaml:"write_only,omitempty"`
+
+	// TODO: remove this field after all references are migrated
+	// see: https://github.com/GoogleCloudPlatform/magic-modules/pull/14933#pullrequestreview-3166578379
+	WriteOnlyLegacy bool `yaml:"write_only_legacy,omitempty"` // Adds `WriteOnlyLegacy: true` to the schema
 
 	// Does not set this value to the returned API value.  Useful for fields
 	// like secrets where the returned API value is not helpful.
@@ -325,6 +332,8 @@ type Type struct {
 
 	// If true, the custom flatten function is not applied during cai2hcl
 	TGCIgnoreTerraformCustomFlatten bool `yaml:"tgc_ignore_terraform_custom_flatten,omitempty"`
+
+	TGCIgnoreRead bool `yaml:"tgc_ignore_read,omitempty"`
 }
 
 const MAX_NAME = 20
@@ -395,11 +404,11 @@ func (t *Type) Validate(rName string) {
 		log.Fatalf("'default_value' and 'default_from_api' cannot be both set in resource %s", rName)
 	}
 
-	if t.WriteOnly && (t.DefaultFromApi || t.Output) {
+	if (t.WriteOnlyLegacy || t.WriteOnly) && (t.DefaultFromApi || t.Output) {
 		log.Fatalf("Property %s cannot be write_only and default_from_api or output at the same time in resource %s", t.Name, rName)
 	}
 
-	if t.WriteOnly && t.Sensitive {
+	if (t.WriteOnlyLegacy || t.WriteOnly) && t.Sensitive {
 		log.Fatalf("Property %s cannot be write_only and sensitive at the same time in resource %s", t.Name, rName)
 	}
 
@@ -750,7 +759,7 @@ func (t Type) WriteOnlyProperties() []*Type {
 		}
 	case t.IsA("NestedObject"):
 		props = google.Select(t.UserProperties(), func(p *Type) bool {
-			return p.WriteOnly
+			return p.WriteOnlyLegacy || p.WriteOnly
 		})
 	case t.IsA("Map"):
 		props = google.Reject(t.ValueType.WriteOnlyProperties(), func(p *Type) bool {
@@ -847,7 +856,7 @@ func (t Type) GetFWType() string {
 	case "ResourceRef":
 		return "String"
 	case "NestedObject":
-		return "Nested"
+		return "Object"
 	case "Array":
 		return "List"
 	case "KeyValuePairs":
@@ -1069,6 +1078,54 @@ func propertyWithIgnoreWrite(ignoreWrite bool) func(*Type) {
 	}
 }
 
+func propertyWithRequired(required bool) func(*Type) {
+	return func(p *Type) {
+		p.Required = required
+	}
+}
+
+func propertyWithWriteOnly(writeOnly bool) func(*Type) {
+	return func(p *Type) {
+		p.WriteOnly = writeOnly
+	}
+}
+
+func propertyWithIgnoreRead(ignoreRead bool) func(*Type) {
+	return func(p *Type) {
+		p.IgnoreRead = ignoreRead
+	}
+}
+
+func propertyWithConflicts(conflicts []string) func(*Type) {
+	return func(p *Type) {
+		p.Conflicts = conflicts
+	}
+}
+
+func propertyWithRequiredWith(requiredWith []string) func(*Type) {
+	return func(p *Type) {
+		p.RequiredWith = requiredWith
+	}
+}
+
+func propertyWithExactlyOneOf(exactlyOneOf []string) func(*Type) {
+	return func(p *Type) {
+		p.ExactlyOneOf = exactlyOneOf
+	}
+}
+
+func propertyWithAtLeastOneOf(atLeastOneOf []string) func(*Type) {
+	return func(p *Type) {
+		p.AtLeastOneOf = atLeastOneOf
+	}
+}
+
+func propertyWithApiName(apiName string) func(*Type) {
+	return func(p *Type) {
+		p.ApiName = apiName
+	}
+}
+
 func (t *Type) validateLabelsField() {
 	productName := t.ResourceMetadata.ProductMetadata.Name
 	resourceName := t.ResourceMetadata.Name
@@ -1224,8 +1281,8 @@ func (t *Type) IsForceNew() bool {
 		return t.Immutable
 	}
 
-	// WriteOnly fields are never immutable
-	if t.WriteOnly {
+	// WriteOnlyLegacy fields are never immutable
+	if t.WriteOnlyLegacy || t.WriteOnly {
 		return false
 	}
 
