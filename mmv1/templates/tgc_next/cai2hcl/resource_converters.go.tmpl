@@ -43,16 +43,16 @@ var provider *schema.Provider = tpg_provider.Provider()
 // ConverterMap is a collection of converters instances, indexed by cai asset type.
 var ConverterMap = map[string]map[string]models.Cai2hclConverter{
 	// ####### START handwritten resources ###########
-	resourcemanager.ProjectAssetType: {
+	"cloudresourcemanager.googleapis.com/Project": {
 		"Default": resourcemanager.NewProjectCai2hclConverter(provider),
 	},
-	compute.ComputeInstanceAssetType: {
+	"compute.googleapis.com/Instance": {
 		"Default": compute.NewComputeInstanceCai2hclConverter(provider),
 	},
 	// ####### END handwritten resources ###########
 
-	{{- range $resourceType, $resources := $.ResourcesByCaiResourceType}}
-	{{ $resourceType }}AssetType: {
+	{{- range $caiResourceType, $resources := $.ResourcesByCaiResourceType}}
+	"{{ $caiResourceType }}": {
 	{{- range $object := $resources }}
 		"{{ $object.AliasName }}": {{ $object.ServiceName }}.New{{ $object.ResourceName -}}Cai2hclConverter(provider),
 	{{- end }}
