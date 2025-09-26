@@ -152,11 +152,11 @@ properties:
                       type: NestedObject
                       properties:
                         - name: 'prefix'
-                          type: Integer
+                          type: String
                           description: The address prefix.
                           required: true
                         - name: 'length'
-                          type: String
+                          type: Integer
                           description: The length of the address range.
                           required: true
                   - name: 'principals'
@@ -312,11 +312,11 @@ properties:
                       type: NestedObject
                       properties:
                         - name: 'prefix'
-                          type: Integer
+                          type: String
                           description: The address prefix.
                           required: true
                         - name: 'length'
-                          type: String
+                          type: Integer
                           description: The length of the address range.
                           required: true
                   - name: 'principals'

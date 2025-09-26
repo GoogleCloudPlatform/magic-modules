@@ -173,44 +173,6 @@ resource "google_network_security_authz_policy" "default" {
           prefix = "10.1.6.0"
         }
 
-        # Prefix
-        principals {
-          principal_selector = "CLIENT_CERT_URI_SAN"
-          principal {
-            ignore_case = false
-            prefix      = "prefix"
-          }
-        }
-
-        resources {
-          iam_service_account {
-            ignore_case = false
-            prefix      = "prefix"
-          }
-          tag_value_id_set {
-            ids = ["1"]
-          }
-        }
-
-        # Suffix / Ignore case
-        principals {
-          principal_selector = "CLIENT_CERT_URI_SAN"
-          principal {
-            ignore_case = true
-            suffix      = "suffix"
-          }
-        }
-
-        resources {
-          iam_service_account {
-            ignore_case = true
-            suffix      = "suffix"
-          }
-          tag_value_id_set {
-            ids = ["2"]
-          }
-        }
-
         # Exact
         principals {
           principal_selector = "CLIENT_CERT_URI_SAN"
@@ -227,25 +189,6 @@ resource "google_network_security_authz_policy" "default" {
           }
           tag_value_id_set {
             ids = ["3"]
-          }
-        }
-
-        # Contains / Ignore case
-        principals {
-          principal_selector = "CLIENT_CERT_URI_SAN"
-          principal {
-            ignore_case = true
-            contains    = "contains"
-          }
-        }
-
-        resources {
-          iam_service_account {
-            ignore_case = true
-            contains    = "contains"
-          }
-          tag_value_id_set {
-            ids = ["4"]
           }
         }
       }
@@ -261,44 +204,6 @@ resource "google_network_security_authz_policy" "default" {
           prefix = "10.10.6.0"
         }
 
-        # Prefix
-        principals {
-          principal_selector = "CLIENT_CERT_URI_SAN"
-          principal {
-            ignore_case = false
-            prefix      = "prefix"
-          }
-        }
-
-        resources {
-          iam_service_account {
-            ignore_case = false
-          	prefix      = "prefix"
-          }
-          tag_value_id_set {
-            ids = ["1"]
-          }
-        }
-
-        # Suffix / Ignore case
-        principals {
-          principal_selector = "CLIENT_CERT_URI_SAN"
-          principal {
-            ignore_case = true
-            suffix      = "suffix"
-          }
-        }
-
-        resources {
-          iam_service_account {
-            ignore_case = true
-            suffix      = "suffix"
-          }
-          tag_value_id_set {
-            ids = ["2"]
-          }
-        }
-
         # Exact
         principals {
           principal_selector = "CLIENT_CERT_URI_SAN"
@@ -317,38 +222,19 @@ resource "google_network_security_authz_policy" "default" {
             ids = ["3"]
           }
         }
-
-        # Contains / Ignore case
-        principals {
-          principal_selector = "CLIENT_CERT_URI_SAN"
-          principal {
-            contains    = "contains"
-            ignore_case = true
-          }
-        }
-
-        resources {
-          iam_service_account {
-            contains    = "contains"
-            ignore_case = true
-          }
-          tag_value_id_set {
-            ids = ["4"]
-          }
-        }
       }
     }
 
     to {
       operations {
-        methods = ["GET", "PUT", "POST", "HEAD", "PATCH", "DELETE", "OPTIONS"]
+        methods = ["GET", "PUT", "POST", "HEAD", "PATCH"]
         header_set {
           # Prefix
           headers {
             name = "PrefixHeader"
             value {
 			        ignore_case = false
-			       prefix      = "prefix"
+			        prefix      = "prefix"
             }
           }
 
@@ -426,7 +312,7 @@ resource "google_network_security_authz_policy" "default" {
       }
 
       not_operations {
-        methods = ["GET", "PUT", "POST", "HEAD", "PATCH", "DELETE", "OPTIONS"]
+        methods = ["GET", "PUT", "POST", "HEAD", "PATCH"]
         header_set {
           # Prefix
           headers {
@@ -510,7 +396,8 @@ resource "google_network_security_authz_policy" "default" {
         }
       }
     }
-  when = "request.host.endsWith('.example.com')"
+
+    when = "request.host.endsWith('.example.com')"
   }
 
   labels = {
