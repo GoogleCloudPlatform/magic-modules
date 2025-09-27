@@ -66,6 +66,10 @@ examples:
     primary_resource_id: 'region-sec-policy-with-rules'
     vars:
       sec_policy_name: 'my-sec-policy-with-rules'
+  - name: 'region_security_policy_with_advanced_options'
+    primary_resource_id: 'region-sec-policy-with-rules'
+    vars:
+      sec_policy_name: 'my-sec-policy-with-rules'
 parameters:
   - name: 'region'
     type: ResourceRef
