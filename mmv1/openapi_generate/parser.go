@@ -378,6 +378,12 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 			break
 		}
 
+		if field.Name == "annotations" {
+			// Standard annotations implementation
+			field.Type = "KeyValueAnnotations"
+			break
+		}
+
 		if obj.Value.AdditionalProperties.Schema != nil && obj.Value.AdditionalProperties.Schema.Value.Type.Is("string") {
 			// AdditionalProperties with type string is a string -> string map
 			field.Type = "KeyValuePairs"
