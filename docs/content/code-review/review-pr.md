@@ -39,9 +39,9 @@ The following types of PRs may require additional scrutiny and/or multiple revie
    1. all resources in the acceptance tests have a `tf-test` or `tf_test` prefix in their primary id field.
    1. all handwritten test Config steps include import steps following them
    1. all related tests pass in GA for features promoted from beta to GA.
-      {{< hint info >}}Note:
-      Presubmit VCR tests do not run in GA. Manual testing is required for promoted GA features.
-      {{< /hint >}}
+      > [!NOTE]
+      > Note:
+      > Presubmit VCR tests do not run in GA. Manual testing is required for promoted GA features.
    1. newly added or modified diff suppress functions are tested in at least one unit test.
    1. the linked issue (if any) is covered by at least one test that reproduces the issue
       * for example - a bugfix should test the bug (or explain why it's not feasible to do so in the description, including manual results when possible) and an enhancement should test the new behaviour(s).
@@ -50,9 +50,9 @@ The following types of PRs may require additional scrutiny and/or multiple revie
       * terraform-provider-google-build-and-unit-tests
       * terraform-provider-google-beta-build-and-unit-tests
       * VCR-test
-      {{< hint info >}}Note:
-      Some acceptance tests may be skipped in VCR and manual testing is required.
-      {{< /hint >}}
+      > [!NOTE]
+      > Note:
+      > Some acceptance tests may be skipped in VCR and manual testing is required.
    1. a significant number of preexisting tests have not been modified. Changing old tests often indicates a change is backwards incompatible.
 1. Check documentation to ensure
    1. resource-level and field-level documentation are generated correctly for MMv1-based resource

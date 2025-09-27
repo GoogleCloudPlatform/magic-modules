@@ -5,9 +5,8 @@ weight: 20
 
 # Deletion behaviors
 
-{{< hint info >}}
-**Note:** This page covers best practices guidance for the Terraform provider for Google Cloud, which is used to ensure a consistent UX for Terraform users across providers or GCP users across the Google provider. Generally, this guidance should be followed and exceptions should be clearly demarcated / discussed.
-{{< /hint >}}
+> [!NOTE]
+> **Note:** This page covers best practices guidance for the Terraform provider for Google Cloud, which is used to ensure a consistent UX for Terraform users across providers or GCP users across the Google provider. Generally, this guidance should be followed and exceptions should be clearly demarcated / discussed.
 
 ## Mitigating data loss risk via deletion_protection {#deletion_protection}
 
@@ -26,9 +25,8 @@ Resources that do not have a significant risk of unrecoverable data loss or simi
 
 See [Client-side fields]({{< ref "/develop/client-side-fields" >}}) for information about adding `deletion_protection` fields.
 
-{{< hint info >}}
-**Note:** The previous best practice was a field called `force_delete` that defaulted to `false`. This is still present on some resources for backwards-compatibility reasons, but `deletion_protection` is preferred going forward.
-{{< /hint >}}
+> [!NOTE]
+> **Note:** The previous best practice was a field called `force_delete` that defaulted to `false`. This is still present on some resources for backwards-compatibility reasons, but `deletion_protection` is preferred going forward.
 
 ## Deletion policy {#deletion_policy}
 

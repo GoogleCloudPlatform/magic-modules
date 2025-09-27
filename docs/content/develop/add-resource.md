@@ -45,7 +45,7 @@ For more information about types of resources and the generation process overall
 
 ## Add a resource
 
-{{< tabs "resource" >}}
+{{% tabs "resource" %}}
 {{< tab "MMv1" >}}
 1. Using an editor of your choice, in the appropriate [product folder]({{<ref "/#mmv1" >}}), create a file called `RESOURCE_NAME.yaml`. Replace `RESOURCE_NAME` with the name of the API resource you are adding support for. For example, a configuration file for [NatAddress](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses) would be called `NatAddress.yaml`.
 2. Copy the following template into the new file:
@@ -172,7 +172,7 @@ For more information about types of resources and the generation process overall
     - [Add IAM support]({{<ref "/develop/add-iam-support" >}})
 7. Delete the MMv1 configuration file.
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 ## What's next?
 
