@@ -24,7 +24,7 @@ mkdir testlog/debug_log
 
 export GOOGLE_REGION=us-central1
 export GOOGLE_ZONE=us-central1-a
-export ACCTEST_PARALLELISM=16
+export ACCTEST_PARALLELISM=12
 export GOOGLE_CREDENTIALS=$SA_KEY
 export GOOGLE_APPLICATION_CREDENTIALS=$local_path/sa_key.json
 export GOOGLE_TEST_DIRECTORY=$(go list ./... | grep -v github.com/hashicorp/terraform-provider-google-beta/scripts)
