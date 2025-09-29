@@ -6868,7 +6868,7 @@ func TestAccContainerCluster_withCpuCfsQuotaPool(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withCpuCfsQuotaPool(clusterName, npName, networkName, subnetworkName,
+				Config: testAccContainerCluster_withCpuCfsQuotaPool(clusterName, npName, networkName, subnetworkName),
 			},
 			{
 				ResourceName:            "google_container_cluster.with_kubelet_config",
