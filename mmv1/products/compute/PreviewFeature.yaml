@@ -49,6 +49,7 @@ async:
 examples:
   - name: 'preview_feature_basic'
     primary_resource_id: 'gce_preview_feature'
+    min_version: 'beta'
 
 parameters:
   - name: 'name'
