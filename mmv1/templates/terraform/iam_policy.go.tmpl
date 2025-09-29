@@ -235,7 +235,7 @@ func (u *{{ $.ResourceName }}IamUpdater) GetResourceIamPolicy() (*cloudresourcem
 {{- end }}
 	})
 	if err != nil {
-		return nil, fmt.Errorf(fmt.Sprintf("Error retrieving IAM policy for %s: %w", u.DescribeResource()), err)
+		return nil, fmt.Errorf("Error retrieving IAM policy for %s: %w", u.DescribeResource(), err)
 	}
 
 	out := &cloudresourcemanager.Policy{}
@@ -299,7 +299,7 @@ func (u *{{ $.ResourceName }}IamUpdater) SetResourceIamPolicy(policy *cloudresou
 {{- end }}
 	})
 	if err != nil {
-		return fmt.Errorf(fmt.Sprintf("Error setting IAM policy for %s: %w", u.DescribeResource()), err)
+		return fmt.Errorf("Error setting IAM policy for %s: %w", u.DescribeResource(), err)
 	}
 
 	return nil
