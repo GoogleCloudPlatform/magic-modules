@@ -232,7 +232,7 @@ func TestAccComputeRouter_resourceManagerTags(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRouterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -428,20 +428,17 @@ resource "google_compute_router" "foobar" {
 func testAccComputeRouter_resourceManagerTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 		resource "google_compute_network" "foobar" {
-		provider				= google-beta
 		name                    = "%{network_name}"
 		auto_create_subnetworks = false
 		}
 
 		resource "google_compute_subnetwork" "foobar" {
-		provider                = google-beta
 		name          = "%{subnet_name}"
 		network       = google_compute_network.foobar.self_link
 		ip_cidr_range = "10.0.0.0/16"
 		}
 
 		resource "google_compute_router" "foobar" {
-		provider                = google-beta
 		name    = "%{router_name}"
 		region  = google_compute_subnetwork.foobar.region
 		network = google_compute_network.foobar.name
