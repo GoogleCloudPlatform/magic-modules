@@ -15123,7 +15123,7 @@ resource "google_container_cluster" "with_kubelet_config" {
     }
   }
 }
-`, clusterName, networkName, subnetworkName, npName)
+`, clusterName, networkName, subnetworkName, npName, npName)
 }
 
 func testAccContainerCluster_withCpuCfsQuotaPool2(clusterName, npName, networkName, subnetworkName string) string {
@@ -15155,5 +15155,5 @@ resource "google_container_cluster" "with_kubelet_config" {
     }
   }
 }
-`, clusterName, networkName, subnetworkName, npName)
+`, clusterName, networkName, subnetworkName, npName, npName)
 }
