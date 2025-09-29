@@ -6,9 +6,9 @@ To view locally:
    [Go](https://go.dev/doc/install), and [Dart Sass](https://gohugo.io/hugo-pipes/transpile-sass-to-css/#dart-sass).
    You require these prerequisites for installing Hugo.
 
-1. Install Hugo v0.136.5:
+1. Install Hugo v0.150.0:
    ```bash
-   CGO_ENABLED=1 go install -tags extended github.com/gohugoio/hugo@v0.136.5
+   CGO_ENABLED=1 go install -tags extended github.com/gohugoio/hugo@v0.150.0
    ```
 
 1. Restart your terminal.
