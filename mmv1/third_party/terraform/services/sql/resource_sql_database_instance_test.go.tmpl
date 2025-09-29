@@ -3412,6 +3412,79 @@ func TestAccSqlDatabaseInstance_MysqlReadPoolEnableDisableSuccess(t *testing.T) 
 	})
 }
 
+// Read pool for MySQL. Enable and disable read pool auto scale
+func TestAccSqlDatabaseInstance_MysqlReadPoolAutoScaleEnableDisableSuccess(t *testing.T) {
+        t.Parallel()
+        primaryName := "tf-test-mysql-readpool-primary-" + acctest.RandString(t, 10)
+        readPoolName := "tf-test-mysql-readpool-" + acctest.RandString(t, 10)
+        project := envvar.GetTestProjectFromEnv()
+        acctest.VcrTest(t, resource.TestCase{
+                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+                ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+                CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+                Steps: []resource.TestStep{
+                        {
+                                Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
+                                        DatabaseType: "MYSQL_8_0",
+                                        ReplicaName:  readPoolName,
+                                }),
+                        },
+                        {
+                                ResourceName:            "google_sql_database_instance.original-primary",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                                ImportStateVerifyIgnore: []string{"deletion_protection"},
+                        },
+                        {
+                                ResourceName:            "google_sql_database_instance.original-read-pool",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                                ImportStateVerifyIgnore: []string{"deletion_protection"},
+                        },
+                        // Enable auto scale
+                        {
+                                Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
+                                        DatabaseType: "MYSQL_8_0",
+                                        ReplicaName:  readPoolName,
+					AutoScaleEnabled: true,
+                                }),
+                        },
+                        {
+                                ResourceName:            "google_sql_database_instance.original-primary",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                                ImportStateVerifyIgnore: []string{"deletion_protection"},
+                        },
+                        {
+                                ResourceName:            "google_sql_database_instance.original-read-pool",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                                ImportStateVerifyIgnore: []string{"deletion_protection"},
+                        },
+                        // Disable auto scale
+                        {
+                                Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
+                                        DatabaseType: "MYSQL_8_0",
+                                        ReplicaName:  readPoolName,
+                                        AutoScaleEnabled: true,
+                                }),
+                        },
+                        {
+                                ResourceName:            "google_sql_database_instance.original-primary",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                                ImportStateVerifyIgnore: []string{"deletion_protection"},
+                        },
+                        {
+                                ResourceName:            "google_sql_database_instance.original-read-pool",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                                ImportStateVerifyIgnore: []string{"deletion_protection"},
+                        },
+                },
+        })
+}
+
 func TestAccSqlDatabaseInstance_updateSslOptionsForPostgreSQL(t *testing.T) {
 	t.Parallel()
 
@@ -5264,6 +5337,9 @@ type ReadPoolConfig struct {
 	// ReplicaMachineType gives the machine type of the read pool nodes
 	// or read replica. It defaults to db-perf-optimized-N-2.
 	ReplicaMachineType string
+	// AutoScaleEnabled indicates if auto scaling should be enabled on
+	// the read pool.
+	AutoScaleEnabled bool
 }
 
 func testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName string, rpconfig ReadPoolConfig) string {
@@ -5287,7 +5363,27 @@ func testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName 
 	} else if strings.HasPrefix(rpconfig.DatabaseType, "POSTGRES") {
 		primaryTxnLogs = "point_in_time_recovery_enabled = true\n"
 	}
-	
+	autoScaleConfigStr := ""
+	if rpconfig.AutoScaleEnabled {
+		minNodeCount := 1
+		maxNodeCount := 5
+		coolDownSeconds := 180
+		autoScaleConfigStr = fmt.Sprintf(`
+read_pool_auto_scale_config {
+	enabled = true
+	min_node_count = "%s"
+	max_node_count = "%s"
+	target_metrics {
+		metric = "AVERAGE_CPU_UTILIZATION"
+		target_value = 0.5
+	}
+	scale_in_cooldown_seconds = "%s"
+	scale_out_cooldown_seconds = "%s"
+	disable_scale_in = true
+}
+`, minNodeCount, maxNodeCount, cooldownSeconds, cooldownSeconds)
+	}
+
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "original-primary" {
   project             = "%s"
@@ -5320,9 +5416,10 @@ resource "google_sql_database_instance" "original-read-pool" {
   settings {
     tier              = "%s"
     edition           = "ENTERPRISE_PLUS"
+    "%s"
   }
 }
-`, project, primaryName, rpconfig.DatabaseType, primaryTxnLogs, project, rpconfig.ReplicaName, rpconfig.DatabaseType, rpconfig.InstanceType, nodeCountStr, rpconfig.ReplicaMachineType)
+`, project, primaryName, rpconfig.DatabaseType, primaryTxnLogs, project, rpconfig.ReplicaName, rpconfig.DatabaseType, rpconfig.InstanceType, nodeCountStr, rpconfig.ReplicaMachineType, autoScaleConfigStr)
 }
 
 func testAccSqlDatabaseInstance_basicInstanceForPsc(instanceName string, projectId string, orgId string, billingAccount string) string {
