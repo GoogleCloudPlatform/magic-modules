@@ -1,106 +1,67 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Reference on Magic Modules</title><link>https://googlecloudplatform.github.io/magic-modules/reference/</link><description>Recent content in Reference on Magic Modules</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://googlecloudplatform.github.io/magic-modules/reference/index.xml" rel="self" type="application/rss+xml"/><item><title>MMv1 resource reference</title><link>https://googlecloudplatform.github.io/magic-modules/reference/resource/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/resource/</guid><description>&lt;h1 id="mmv1-resource-reference">
- MMv1 resource reference
- &lt;a class="anchor" href="#mmv1-resource-reference">#&lt;/a>
-&lt;/h1>
-&lt;p>This page documents commonly-used properties for resources. For a full list of
-available properties, see &lt;a href="https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource.go">resource.go ↗&lt;/a>.&lt;/p>
-&lt;h2 id="basic">
- Basic
- &lt;a class="anchor" href="#basic">#&lt;/a>
-&lt;/h2>
-&lt;h3 id="name">
- &lt;code>name&lt;/code>
- &lt;a class="anchor" href="#name">#&lt;/a>
-&lt;/h3>
-&lt;p>API resource name.&lt;/p>
-&lt;h3 id="description">
- &lt;code>description&lt;/code>
- &lt;a class="anchor" href="#description">#&lt;/a>
-&lt;/h3>
-&lt;p>Resource description. Used in documentation.&lt;/p>
-&lt;p>Example:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">description&lt;/span>: |&lt;span style="color:#e6db74">
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> This is a multi-line description
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> of a resource. All multi-line descriptions must follow
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> this format of using a vertical bar followed by a line-break,
-&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> with the remaining description being indented.&lt;/span> 
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="references">
- &lt;code>references&lt;/code>
- &lt;a class="anchor" href="#references">#&lt;/a>
-&lt;/h3>
-&lt;p>Links to reference documentation for a resource. Contains two attributes:&lt;/p></description></item><item><title>MMv1 field reference</title><link>https://googlecloudplatform.github.io/magic-modules/reference/field/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/field/</guid><description>&lt;h1 id="mmv1-field-reference">
- MMv1 field reference
- &lt;a class="anchor" href="#mmv1-field-reference">#&lt;/a>
-&lt;/h1>
-&lt;p>This page documents commonly-used properties for fields. For a full list of
-available properties, see &lt;a href="https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/type.go">type.go ↗&lt;/a>.&lt;/p>
-&lt;h2 id="shared-properties">
- Shared properties
- &lt;a class="anchor" href="#shared-properties">#&lt;/a>
-&lt;/h2>
-&lt;h3 id="name">
- &lt;code>name&lt;/code>
- &lt;a class="anchor" href="#name">#&lt;/a>
-&lt;/h3>
-&lt;p>Specifies the name of the field within Terraform. By default this will also
-be the key for the field in the API request message, if a separate &lt;code>api_name&lt;/code>
-is not declared using the corresponding property.&lt;/p>
-&lt;h3 id="type">
- &lt;code>type&lt;/code>
- &lt;a class="anchor" href="#type">#&lt;/a>
-&lt;/h3>
-&lt;p>Sets the expected data type of the field. All valid types are declared &lt;a href="https://github.com/GoogleCloudPlatform/magic-modules/blob/d7777055cb7618648725abd16d3b05e5c138fc56/mmv1/api/type.go#L673">here&lt;/a>.&lt;/p></description></item><item><title>make commands</title><link>https://googlecloudplatform.github.io/magic-modules/reference/make-commands/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/make-commands/</guid><description>&lt;h1 id="make-commands-reference">
- &lt;code>make&lt;/code> commands reference
- &lt;a class="anchor" href="#make-commands-reference">#&lt;/a>
-&lt;/h1>
-&lt;h2 id="magic-modules">
- &lt;code>magic-modules&lt;/code>
- &lt;a class="anchor" href="#magic-modules">#&lt;/a>
-&lt;/h2>
-&lt;h3 id="make--make-provider">
- &lt;code>make&lt;/code> / &lt;code>make provider&lt;/code>
- &lt;a class="anchor" href="#make--make-provider">#&lt;/a>
-&lt;/h3>
-&lt;p>Generates the code for the downstream &lt;code>google&lt;/code> and &lt;code>google-beta&lt;/code> providers
-into the &lt;code>OUTPUT_PATH&lt;/code>, overriding and deleting any local changes.&lt;/p>
-&lt;blockquote class="book-hint info">
- &lt;strong>Note:&lt;/strong> Generation works best if the downstream provider has a commit checked out corresponding to the latest &lt;code>main&lt;/code> branch commit that is present in your &lt;code>magic-modules&lt;/code> working branch. This can generally be identified based on matching commit messages.
-&lt;/blockquote>
-
-&lt;p>Examples:&lt;/p></description></item><item><title>MMv1 metadata reference</title><link>https://googlecloudplatform.github.io/magic-modules/reference/metadata/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/metadata/</guid><description>&lt;h1 id="mmv1-metadata-reference">
- MMv1 metadata reference
- &lt;a class="anchor" href="#mmv1-metadata-reference">#&lt;/a>
-&lt;/h1>
-&lt;p>This page documents all properties for metadata. Metadata does not impact the provider itself, but is used by Google internally for coverage metrics.&lt;/p>
-&lt;h2 id="required">
- Required
- &lt;a class="anchor" href="#required">#&lt;/a>
-&lt;/h2>
-&lt;h3 id="resource">
- &lt;code>resource&lt;/code>
- &lt;a class="anchor" href="#resource">#&lt;/a>
-&lt;/h3>
-&lt;p>The name of the Terraform resource e.g., &amp;ldquo;google_cloudfunctions2_function&amp;rdquo;.&lt;/p>
-&lt;h3 id="generation_type">
- &lt;code>generation_type&lt;/code>
- &lt;a class="anchor" href="#generation_type">#&lt;/a>
-&lt;/h3>
-&lt;p>The generation method used to create the Terraform resource e.g., &amp;ldquo;mmv1&amp;rdquo;, &amp;ldquo;dcl&amp;rdquo;, &amp;ldquo;handwritten&amp;rdquo;.&lt;/p>
-&lt;h2 id="optional">
- Optional
- &lt;a class="anchor" href="#optional">#&lt;/a>
-&lt;/h2>
-&lt;h3 id="api_service_name">
- &lt;code>api_service_name&lt;/code>
- &lt;a class="anchor" href="#api_service_name">#&lt;/a>
-&lt;/h3>
-&lt;p>The base name of the API used for this resource e.g., &amp;ldquo;cloudfunctions.googleapis.com&amp;rdquo;.&lt;/p></description></item><item><title>Ruby to Go Migration</title><link>https://googlecloudplatform.github.io/magic-modules/reference/ruby-go-changes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/ruby-go-changes/</guid><description>&lt;h1 id="what-has-changed-in-the-mmv1-go-migration">
- What has changed in the MMv1 Go migration
- &lt;a class="anchor" href="#what-has-changed-in-the-mmv1-go-migration">#&lt;/a>
-&lt;/h1>
-&lt;p>The Magic Modules code generator has been rewritten from Ruby to Go. For experienced contributors, this reference document lists what the expected changes are to the previous development workflow in Ruby.&lt;/p>
-&lt;h2 id="yaml-changes">
- YAML changes
- &lt;a class="anchor" href="#yaml-changes">#&lt;/a>
-&lt;/h2>
-&lt;p>&lt;code>.yaml&lt;/code> files within &lt;code>mmv1/products&lt;/code> have had adjustments to the attribute typing. The initial Ruby lines &lt;code>!ruby/object:Api::Type::&amp;lt;TYPE&amp;gt;&lt;/code> have been removed and replaced with a simpler &lt;code>type: &amp;lt;TYPE&amp;gt;&lt;/code> line.&lt;/p></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Reference on Magic Modules</title><link>https://googlecloudplatform.github.io/magic-modules/reference/</link><description>Recent content in Reference on Magic Modules</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://googlecloudplatform.github.io/magic-modules/reference/index.xml" rel="self" type="application/rss+xml"/><item><title>MMv1 resource reference</title><link>https://googlecloudplatform.github.io/magic-modules/reference/resource/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/resource/</guid><description>&lt;h1 id="mmv1-resource-reference"&gt;MMv1 resource reference&lt;a class="anchor" href="#mmv1-resource-reference"&gt;#&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;This page documents commonly-used properties for resources. For a full list of
+available properties, see &lt;a href="https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource.go"&gt;resource.go ↗&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id="basic"&gt;Basic&lt;a class="anchor" href="#basic"&gt;#&lt;/a&gt;&lt;/h2&gt;
+&lt;h3 id="name"&gt;&lt;code&gt;name&lt;/code&gt;&lt;a class="anchor" href="#name"&gt;#&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;API resource name.&lt;/p&gt;
+&lt;h3 id="description"&gt;&lt;code&gt;description&lt;/code&gt;&lt;a class="anchor" href="#description"&gt;#&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;Resource description. Used in documentation.&lt;/p&gt;
+&lt;p&gt;Example:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#ff6ac1"&gt;description&lt;/span&gt;: |&lt;span style="color:#5af78e"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#5af78e"&gt; This is a multi-line description
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#5af78e"&gt; of a resource. All multi-line descriptions must follow
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#5af78e"&gt; this format of using a vertical bar followed by a line-break,
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#5af78e"&gt; with the remaining description being indented.&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="references"&gt;&lt;code&gt;references&lt;/code&gt;&lt;a class="anchor" href="#references"&gt;#&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;Links to reference documentation for a resource. Contains two attributes:&lt;/p&gt;</description></item><item><title>MMv1 field reference</title><link>https://googlecloudplatform.github.io/magic-modules/reference/field/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/field/</guid><description>&lt;h1 id="mmv1-field-reference"&gt;MMv1 field reference&lt;a class="anchor" href="#mmv1-field-reference"&gt;#&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;This page documents commonly-used properties for fields. For a full list of
+available properties, see &lt;a href="https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/type.go"&gt;type.go ↗&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id="shared-properties"&gt;Shared properties&lt;a class="anchor" href="#shared-properties"&gt;#&lt;/a&gt;&lt;/h2&gt;
+&lt;h3 id="name"&gt;&lt;code&gt;name&lt;/code&gt;&lt;a class="anchor" href="#name"&gt;#&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;Specifies the name of the field within Terraform. By default this will also
+be the key for the field in the API request message, if a separate &lt;code&gt;api_name&lt;/code&gt;
+is not declared using the corresponding property.&lt;/p&gt;
+&lt;h3 id="type"&gt;&lt;code&gt;type&lt;/code&gt;&lt;a class="anchor" href="#type"&gt;#&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;Sets the expected data type of the field. All valid types are declared &lt;a href="https://github.com/GoogleCloudPlatform/magic-modules/blob/d7777055cb7618648725abd16d3b05e5c138fc56/mmv1/api/type.go#L673"&gt;here&lt;/a&gt;.&lt;/p&gt;</description></item><item><title>make commands</title><link>https://googlecloudplatform.github.io/magic-modules/reference/make-commands/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/make-commands/</guid><description>&lt;h1 id="make-commands-reference"&gt;&lt;code&gt;make&lt;/code&gt; commands reference&lt;a class="anchor" href="#make-commands-reference"&gt;#&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="magic-modules"&gt;&lt;code&gt;magic-modules&lt;/code&gt;&lt;a class="anchor" href="#magic-modules"&gt;#&lt;/a&gt;&lt;/h2&gt;
+&lt;h3 id="make--make-provider"&gt;&lt;code&gt;make&lt;/code&gt; / &lt;code&gt;make provider&lt;/code&gt;&lt;a class="anchor" href="#make--make-provider"&gt;#&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;Generates the code for the downstream &lt;code&gt;google&lt;/code&gt; and &lt;code&gt;google-beta&lt;/code&gt; providers
+into the &lt;code&gt;OUTPUT_PATH&lt;/code&gt;, overriding and deleting any local changes.&lt;/p&gt;
+&lt;blockquote class='book-hint note'&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; Generation works best if the downstream provider has a commit checked out corresponding to the latest &lt;code&gt;main&lt;/code&gt; branch commit that is present in your &lt;code&gt;magic-modules&lt;/code&gt; working branch. This can generally be identified based on matching commit messages.&lt;/p&gt;&lt;/blockquote&gt;&lt;p&gt;Examples:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;make provider &lt;span style="color:#ff5c57"&gt;VERSION&lt;/span&gt;&lt;span style="color:#ff6ac1"&gt;=&lt;/span&gt;ga &lt;span style="color:#ff5c57"&gt;OUTPUT_PATH&lt;/span&gt;&lt;span style="color:#ff6ac1"&gt;=&lt;/span&gt;&lt;span style="color:#5af78e"&gt;&amp;#34;&lt;/span&gt;&lt;span style="color:#ff5c57"&gt;$GOPATH&lt;/span&gt;&lt;span style="color:#5af78e"&gt;/src/github.com/hashicorp/terraform-provider-google&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;make provider &lt;span style="color:#ff5c57"&gt;VERSION&lt;/span&gt;&lt;span style="color:#ff6ac1"&gt;=&lt;/span&gt;beta &lt;span style="color:#ff5c57"&gt;OUTPUT_PATH&lt;/span&gt;&lt;span style="color:#ff6ac1"&gt;=&lt;/span&gt;&lt;span style="color:#5af78e"&gt;&amp;#34;&lt;/span&gt;&lt;span style="color:#ff5c57"&gt;$GOPATH&lt;/span&gt;&lt;span style="color:#5af78e"&gt;/src/github.com/hashicorp/terraform-provider-google-beta&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#78787e"&gt;# Only generate a specific product (plus all common files)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;make provider &lt;span style="color:#ff5c57"&gt;VERSION&lt;/span&gt;&lt;span style="color:#ff6ac1"&gt;=&lt;/span&gt;ga &lt;span style="color:#ff5c57"&gt;OUTPUT_PATH&lt;/span&gt;&lt;span style="color:#ff6ac1"&gt;=&lt;/span&gt;&lt;span style="color:#5af78e"&gt;&amp;#34;&lt;/span&gt;&lt;span style="color:#ff5c57"&gt;$GOPATH&lt;/span&gt;&lt;span style="color:#5af78e"&gt;/src/github.com/hashicorp/terraform-provider-google&amp;#34;&lt;/span&gt; &lt;span style="color:#ff5c57"&gt;PRODUCT&lt;/span&gt;&lt;span style="color:#ff6ac1"&gt;=&lt;/span&gt;pubsub
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#78787e"&gt;# Only generate only a specific resources for a product&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;make provider &lt;span style="color:#ff5c57"&gt;VERSION&lt;/span&gt;&lt;span style="color:#ff6ac1"&gt;=&lt;/span&gt;ga &lt;span style="color:#ff5c57"&gt;OUTPUT_PATH&lt;/span&gt;&lt;span style="color:#ff6ac1"&gt;=&lt;/span&gt;&lt;span style="color:#5af78e"&gt;&amp;#34;&lt;/span&gt;&lt;span style="color:#ff5c57"&gt;$GOPATH&lt;/span&gt;&lt;span style="color:#5af78e"&gt;/src/github.com/hashicorp/terraform-provider-google&amp;#34;&lt;/span&gt; &lt;span style="color:#ff5c57"&gt;PRODUCT&lt;/span&gt;&lt;span style="color:#ff6ac1"&gt;=&lt;/span&gt;pubsub &lt;span style="color:#ff5c57"&gt;RESOURCE&lt;/span&gt;&lt;span style="color:#ff6ac1"&gt;=&lt;/span&gt;Topic
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#78787e"&gt;# Only generate common files, including all third_party code&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;make provider &lt;span style="color:#ff5c57"&gt;VERSION&lt;/span&gt;&lt;span style="color:#ff6ac1"&gt;=&lt;/span&gt;ga &lt;span style="color:#ff5c57"&gt;OUTPUT_PATH&lt;/span&gt;&lt;span style="color:#ff6ac1"&gt;=&lt;/span&gt;&lt;span style="color:#5af78e"&gt;&amp;#34;&lt;/span&gt;&lt;span style="color:#ff5c57"&gt;$GOPATH&lt;/span&gt;&lt;span style="color:#5af78e"&gt;/src/github.com/hashicorp/terraform-provider-google&amp;#34;&lt;/span&gt; &lt;span style="color:#ff5c57"&gt;PRODUCT&lt;/span&gt;&lt;span style="color:#ff6ac1"&gt;=&lt;/span&gt;doesnotexist&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id="arguments"&gt;Arguments&lt;a class="anchor" href="#arguments"&gt;#&lt;/a&gt;&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;OUTPUT_PATH&lt;/code&gt;: Required. The location you are generating provider code into.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;VERSION&lt;/code&gt;: Required. The version of the provider you are building into. Valid values are &lt;code&gt;ga&lt;/code&gt; and &lt;code&gt;beta&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;PRODUCT&lt;/code&gt;: Limits generations to the specified folder within &lt;code&gt;mmv1/products&lt;/code&gt; or &lt;code&gt;tpgtools/api&lt;/code&gt;. Handwritten files from &lt;code&gt;mmv1/third_party/terraform&lt;/code&gt; are always generated into the downstream regardless of this setting, so you can provide a non-existent product name to generate only handwritten code. Required if &lt;code&gt;RESOURCE&lt;/code&gt; is specified. &lt;strong&gt;Using &lt;code&gt;PRODUCT&lt;/code&gt; skips the pre-generation cleanup step. This is considered advanced usage; recommend running a full, clean build (&lt;code&gt;make provider&lt;/code&gt; without &lt;code&gt;PRODUCT&lt;/code&gt;) beforehand if repositories may be out of sync.&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;SKIP_CLEAN&lt;/code&gt;: If set to &lt;code&gt;true&lt;/code&gt;, skips the default pre-generation cleanup of &lt;code&gt;OUTPUT_PATH&lt;/code&gt; during a full provider build. Has no effect if &lt;code&gt;PRODUCT&lt;/code&gt; is specified (as cleanup is already skipped). Example: &lt;code&gt;make provider VERSION=ga OUTPUT_PATH=... SKIP_CLEAN=true&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;RESOURCE&lt;/code&gt;: Limits generation to the specified resource within a particular product. For &lt;code&gt;mmv1&lt;/code&gt; resources, matches the resource&amp;rsquo;s &lt;code&gt;name&lt;/code&gt; field (set in its configuration file).For &lt;code&gt;tpgtools&lt;/code&gt; resources, matches the terraform resource name.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ENGINE&lt;/code&gt;: Modifies &lt;code&gt;make provider&lt;/code&gt; to only generate code using the specified engine. Valid values are &lt;code&gt;mmv1&lt;/code&gt; or &lt;code&gt;tpgtools&lt;/code&gt;. (Providing &lt;code&gt;tpgtools&lt;/code&gt; will still generate any prerequisite mmv1 files required for tpgtools.)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="cleaning-up-old-files"&gt;Cleaning up old files&lt;a class="anchor" href="#cleaning-up-old-files"&gt;#&lt;/a&gt;&lt;/h4&gt;
+&lt;p&gt;Magic Modules will only generate on top of whatever is in the downstream repository. This means that, from time
+to time, you may end up with stale files or changes in your downstream that cause compilation or tests to fail.&lt;/p&gt;</description></item><item><title>MMv1 metadata reference</title><link>https://googlecloudplatform.github.io/magic-modules/reference/metadata/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/metadata/</guid><description>&lt;h1 id="mmv1-metadata-reference"&gt;MMv1 metadata reference&lt;a class="anchor" href="#mmv1-metadata-reference"&gt;#&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;This page documents all properties for metadata. Metadata does not impact the provider itself, but is used by Google internally for coverage metrics.&lt;/p&gt;
+&lt;h2 id="required"&gt;Required&lt;a class="anchor" href="#required"&gt;#&lt;/a&gt;&lt;/h2&gt;
+&lt;h3 id="resource"&gt;&lt;code&gt;resource&lt;/code&gt;&lt;a class="anchor" href="#resource"&gt;#&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;The name of the Terraform resource e.g., &amp;ldquo;google_cloudfunctions2_function&amp;rdquo;.&lt;/p&gt;
+&lt;h3 id="generation_type"&gt;&lt;code&gt;generation_type&lt;/code&gt;&lt;a class="anchor" href="#generation_type"&gt;#&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;The generation method used to create the Terraform resource e.g., &amp;ldquo;mmv1&amp;rdquo;, &amp;ldquo;dcl&amp;rdquo;, &amp;ldquo;handwritten&amp;rdquo;.&lt;/p&gt;
+&lt;h2 id="optional"&gt;Optional&lt;a class="anchor" href="#optional"&gt;#&lt;/a&gt;&lt;/h2&gt;
+&lt;h3 id="api_service_name"&gt;&lt;code&gt;api_service_name&lt;/code&gt;&lt;a class="anchor" href="#api_service_name"&gt;#&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;The base name of the API used for this resource e.g., &amp;ldquo;cloudfunctions.googleapis.com&amp;rdquo;.&lt;/p&gt;
+&lt;h3 id="api_version"&gt;&lt;code&gt;api_version&lt;/code&gt;&lt;a class="anchor" href="#api_version"&gt;#&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;The version of the API used for this resource e.g., &amp;ldquo;v2&amp;rdquo;.&lt;/p&gt;</description></item><item><title>Ruby to Go Migration</title><link>https://googlecloudplatform.github.io/magic-modules/reference/ruby-go-changes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/ruby-go-changes/</guid><description>&lt;h1 id="what-has-changed-in-the-mmv1-go-migration"&gt;What has changed in the MMv1 Go migration&lt;a class="anchor" href="#what-has-changed-in-the-mmv1-go-migration"&gt;#&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;The Magic Modules code generator has been rewritten from Ruby to Go. For experienced contributors, this reference document lists what the expected changes are to the previous development workflow in Ruby.&lt;/p&gt;
+&lt;h2 id="yaml-changes"&gt;YAML changes&lt;a class="anchor" href="#yaml-changes"&gt;#&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;.yaml&lt;/code&gt; files within &lt;code&gt;mmv1/products&lt;/code&gt; have had adjustments to the attribute typing. The initial Ruby lines &lt;code&gt;!ruby/object:Api::Type::&amp;lt;TYPE&amp;gt;&lt;/code&gt; have been removed and replaced with a simpler &lt;code&gt;type: &amp;lt;TYPE&amp;gt;&lt;/code&gt; line.&lt;/p&gt;
+&lt;p&gt;Old Ruby YAML&lt;/p&gt;</description></item></channel></rss>

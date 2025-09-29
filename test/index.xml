@@ -1,51 +1,37 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Test on Magic Modules</title><link>https://googlecloudplatform.github.io/magic-modules/test/</link><description>Recent content in Test on Magic Modules</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://googlecloudplatform.github.io/magic-modules/test/index.xml" rel="self" type="application/rss+xml"/><item><title>Add resource tests</title><link>https://googlecloudplatform.github.io/magic-modules/test/test/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/test/test/</guid><description>&lt;h1 id="add-resource-tests">
- Add resource tests
- &lt;a class="anchor" href="#add-resource-tests">#&lt;/a>
-&lt;/h1>
-&lt;p>This page describes how to add tests to a new resource in the &lt;code>google&lt;/code> or &lt;code>google-beta&lt;/code> Terraform provider.&lt;/p>
-&lt;p>The providers have two basic types of tests:&lt;/p>
-&lt;ul>
-&lt;li>Unit tests: test specific functions thoroughly. Unit tests do not interact with GCP APIs.&lt;/li>
-&lt;li>Acceptance tests (aka VCR tests, or create and update tests): test that resources interact as expected with the APIs. Acceptance tests interact with GCP APIs, but should only test the provider&amp;rsquo;s behavior in constructing the API requests and parsing the responses.&lt;/li>
-&lt;/ul>
-&lt;p>Acceptance tests are also called &amp;ldquo;VCR tests&amp;rdquo; because they use &lt;a href="https://github.com/dnaeon/go-vcr">&lt;code>go-vcr&lt;/code>&lt;/a> to record and play back HTTP requests. This allows tests to run more quickly on PRs because the resources don&amp;rsquo;t actually need to be created, updated, or destroyed by the live API.&lt;/p></description></item><item><title>Run tests</title><link>https://googlecloudplatform.github.io/magic-modules/test/run-tests/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/test/run-tests/</guid><description>&lt;h1 id="run-tests">
- Run tests
- &lt;a class="anchor" href="#run-tests">#&lt;/a>
-&lt;/h1>
-&lt;h2 id="before-you-begin">
- Before you begin
- &lt;a class="anchor" href="#before-you-begin">#&lt;/a>
-&lt;/h2>
-&lt;p>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/generate-providers/">Generate the modified provider(s)&lt;/a>&lt;/p>
-&lt;ol>
-&lt;li>
-&lt;p>Set up application default credentials for Terraform&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>gcloud auth application-default login
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>export GOOGLE_USE_DEFAULT_CREDENTIALS&lt;span style="color:#f92672">=&lt;/span>true
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
-&lt;li>
-&lt;p>Set the following environment variables:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>export GOOGLE_PROJECT&lt;span style="color:#f92672">=&lt;/span>PROJECT_ID
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>export GOOGLE_REGION&lt;span style="color:#f92672">=&lt;/span>us-central1
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>export GOOGLE_ZONE&lt;span style="color:#f92672">=&lt;/span>us-central1-a
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Replace &lt;code>PROJECT_ID&lt;/code> with the ID of the Google Cloud project you are using for testing.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Optional: Some tests may require additional variables to be set, such as:&lt;/p>
-&lt;pre tabindex="0">&lt;code>GOOGLE_ORG
-GOOGLE_BILLING_ACCOUNT
-&lt;/code>&lt;/pre>&lt;/li>
-&lt;/ol>
-&lt;h2 id="run-automated-tests">
- Run automated tests
- &lt;a class="anchor" href="#run-automated-tests">#&lt;/a>
-&lt;/h2>
-
-
-
-
-&lt;div class="book-tabs">&lt;input type="radio" class="toggle" name="tabs-version" id="tabs-version-0" checked="checked" />
- &lt;label for="tabs-version-0">GA Provider&lt;/label>
- &lt;div class="book-tabs-content markdown-inner">&lt;ol>
-&lt;li>
-&lt;p>Run unit tests and linters&lt;/p></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Test on Magic Modules</title><link>https://googlecloudplatform.github.io/magic-modules/test/</link><description>Recent content in Test on Magic Modules</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://googlecloudplatform.github.io/magic-modules/test/index.xml" rel="self" type="application/rss+xml"/><item><title>Add resource tests</title><link>https://googlecloudplatform.github.io/magic-modules/test/test/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/test/test/</guid><description>&lt;h1 id="add-resource-tests"&gt;Add resource tests&lt;a class="anchor" href="#add-resource-tests"&gt;#&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;This page describes how to add tests to a new resource in the &lt;code&gt;google&lt;/code&gt; or &lt;code&gt;google-beta&lt;/code&gt; Terraform provider.&lt;/p&gt;
+&lt;p&gt;The providers have two basic types of tests:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Unit tests: test specific functions thoroughly. Unit tests do not interact with GCP APIs.&lt;/li&gt;
+&lt;li&gt;Acceptance tests (aka VCR tests, or create and update tests): test that resources interact as expected with the APIs. Acceptance tests interact with GCP APIs, but should only test the provider&amp;rsquo;s behavior in constructing the API requests and parsing the responses.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Acceptance tests are also called &amp;ldquo;VCR tests&amp;rdquo; because they use &lt;a href="https://github.com/dnaeon/go-vcr"&gt;&lt;code&gt;go-vcr&lt;/code&gt;&lt;/a&gt; to record and play back HTTP requests. This allows tests to run more quickly on PRs because the resources don&amp;rsquo;t actually need to be created, updated, or destroyed by the live API.&lt;/p&gt;</description></item><item><title>Run tests</title><link>https://googlecloudplatform.github.io/magic-modules/test/run-tests/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/test/run-tests/</guid><description>&lt;h1 id="run-tests"&gt;Run tests&lt;a class="anchor" href="#run-tests"&gt;#&lt;/a&gt;&lt;/h1&gt;
+&lt;h2 id="before-you-begin"&gt;Before you begin&lt;a class="anchor" href="#before-you-begin"&gt;#&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/generate-providers/"&gt;Generate the modified provider(s)&lt;/a&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Set up application default credentials for Terraform&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;gcloud auth application-default login
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#ff5c57"&gt;export&lt;/span&gt; &lt;span style="color:#ff5c57"&gt;GOOGLE_USE_DEFAULT_CREDENTIALS&lt;/span&gt;&lt;span style="color:#ff6ac1"&gt;=&lt;/span&gt;true&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Set the following environment variables:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#ff5c57"&gt;export&lt;/span&gt; &lt;span style="color:#ff5c57"&gt;GOOGLE_PROJECT&lt;/span&gt;&lt;span style="color:#ff6ac1"&gt;=&lt;/span&gt;PROJECT_ID
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#ff5c57"&gt;export&lt;/span&gt; &lt;span style="color:#ff5c57"&gt;GOOGLE_REGION&lt;/span&gt;&lt;span style="color:#ff6ac1"&gt;=&lt;/span&gt;us-central1
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#ff5c57"&gt;export&lt;/span&gt; &lt;span style="color:#ff5c57"&gt;GOOGLE_ZONE&lt;/span&gt;&lt;span style="color:#ff6ac1"&gt;=&lt;/span&gt;us-central1-a&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Replace &lt;code&gt;PROJECT_ID&lt;/code&gt; with the ID of the Google Cloud project you are using for testing.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Optional: Some tests may require additional variables to be set, such as:&lt;/p&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;GOOGLE_ORG
+GOOGLE_BILLING_ACCOUNT&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="run-automated-tests"&gt;Run automated tests&lt;a class="anchor" href="#run-automated-tests"&gt;#&lt;/a&gt;&lt;/h2&gt;
+&lt;div class="book-tabs"&gt;
+&lt;input type="radio" class="toggle" name="tabs-version" id="tabs-version-0" checked="checked" /&gt;&lt;label for="tabs-version-0"&gt;GA Provider&lt;/label&gt;&lt;div class="book-tabs-content markdown-inner"&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Run unit tests and linters&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#e2e4e5;background-color:#282a36;-moz-tab-size:2;-o-tab-size:2;tab-size:2;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#ff5c57"&gt;cd&lt;/span&gt; &lt;span style="color:#ff5c57"&gt;$GOPATH&lt;/span&gt;/src/github.com/hashicorp/terraform-provider-google
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;make &lt;span style="color:#ff5c57"&gt;test&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;make lint&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Run acceptance tests for only modified resources. (Full test runs can take over 9 hours.) See &lt;a href="https://pkg.go.dev/cmd/go#hdr-Testing_flags"&gt;Go&amp;rsquo;s documentation&lt;/a&gt; for more information about &lt;code&gt;-run&lt;/code&gt; and other flags.&lt;/p&gt;</description></item></channel></rss>
