@@ -97,6 +97,8 @@ var vcrCassetteUpdateCmd = &cobra.Command{
 
 		buildID := args[0]
 
+		fmt.Println("Running from vcr_nightly_skip_gke branch")
+
 		rnr, err := exec.NewRunner()
 		if err != nil {
 			return fmt.Errorf("error creating Runner: %w", err)
