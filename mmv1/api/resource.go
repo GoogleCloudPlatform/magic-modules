@@ -818,6 +818,7 @@ func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField
 
 func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type) []*Type {
 	propWithWoConfigured.WriteOnly = false
+	propWithWoConfigured.Sensitive = true
 	if len(propWithWoConfigured.RequiredWith) > 0 {
 		log.Fatalf("WriteOnly property '%s' in resource '%s' cannot have RequiredWith set. This combination is not supported.", propWithWoConfigured.Name, r.Name)
 	}
@@ -1991,9 +1992,8 @@ func (r Resource) DefineAssetTypeForResourceInProduct() bool {
 	return true
 }
 
-// Gets the Cai asset name template, which could include version
-// For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
-func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
+// Gets the Cai asset name format
+func (r Resource) GetCaiAssetNameFormat() string {
 	caiBaseUrl := ""
 	caiId := ""
 	if r.CaiIdentity != "" {
@@ -2019,7 +2019,13 @@ func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
 			caiBaseUrl = fmt.Sprintf("%s/%s", r.BaseUrl, caiIdTemplate)
 		}
 	}
-	return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, caiBaseUrl)
+	return caiBaseUrl
+}
+
+// Gets the Cai asset name template, which could include version
+// For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
+func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
+	return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, r.GetCaiAssetNameFormat())
 }
 
 // Guesses the identifier of the resource, as "name" is not always the identifier
