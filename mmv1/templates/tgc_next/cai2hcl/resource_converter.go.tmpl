@@ -17,11 +17,13 @@
 package {{ lower $.ProductMetadata.Name }}
 
 import (
+	"fmt"
+	"reflect"
+	"strings"
+
 {{/* We list all the v2 imports here and unstable imports, because we run 'goimports' to guess the correct
      set of imports, which will never guess the major version correctly. */ -}}
-	"github.com/apparentlymart/go-cidr/cidr"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
@@ -30,8 +32,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"google.golang.org/api/bigtableadmin/v2"
-	"google.golang.org/api/googleapi"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/converters/utils"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/models"
@@ -41,6 +41,28 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
+
+	"google.golang.org/api/googleapi"
+)
+
+var (
+    _ = fmt.Sprintf
+    _ = reflect.ValueOf
+    _ = strings.Trim
+    _ = diag.Diagnostic{}
+    _ = customdiff.All
+    _ = id.UniqueId
+    _ = logging.LogLevel
+    _ = retry.Retry
+    _ = schema.Noop
+    _ = structure.ExpandJsonFromString
+    _ = validation.All
+    _ = terraform.State{}
+    _ = tgcresource.RemoveTerraformAttributionLabel
+    _ = tpgresource.SetLabels
+    _ = transport_tpg.Config{}
+    _ = verify.ProjectRegex
+    _ = googleapi.Error{}
 )
 
 {{- $caiProductBaseUrl := $.CaiProductBaseUrl }}
