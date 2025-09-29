@@ -433,57 +433,21 @@ func TestAccRedisInstance_deletionprotection(t *testing.T) {
 				ExpectError: regexp.MustCompile("deletion_protection"),
 			},
 			{
-				Config: testAccRedisInstance_deletionprotectionFalse(name, "us-central1", true),
+				Config: testAccRedisInstance_deletionprotection(name, "us-central1", false),
 			},
 		},
 	})
 }
 
-func testAccRedisInstance_deletionprotection(name string, region string, preventDestroy bool) string {
-	lifecycleBlock := ""
-	if preventDestroy {
-		lifecycleBlock = `
-		lifecycle {
-			prevent_destroy = false
-		}`
-	}
+func testAccRedisInstance_deletionprotection(name string, region string, deletionProtection bool) string {
 	return fmt.Sprintf(`
 resource "google_redis_instance" "test" {
   name           = "%s"
   region       = "%s"
-  display_name   = "pre-update"
+  display_name   = "tf-test-instance"
   memory_size_gb = 1
-  deletion_protection = true
-	%s
-  labels = {
-    my_key    = "my_val"
-    other_key = "other_val"
-  }
-  redis_configs = {
-    maxmemory-policy       = "allkeys-lru"
-    notify-keyspace-events = "KEA"
-  }
-  redis_version = "REDIS_4_0"
-}
-`, name, region, lifecycleBlock)
-}
+  deletion_protection = %t
 
-func testAccRedisInstance_deletionprotectionFalse(name string, region string, preventDestroy bool) string {
-	lifecycleBlock := ""
-	if preventDestroy {
-		lifecycleBlock = `
-		lifecycle {
-			prevent_destroy = false
-		}`
-	}
-	return fmt.Sprintf(`
-resource "google_redis_instance" "test" {
-  name           = "%s"
-  region       = "%s"
-  display_name   = "pre-update"
-  memory_size_gb = 1
-  deletion_protection = false
-	%s
   labels = {
     my_key    = "my_val"
     other_key = "other_val"
@@ -494,5 +458,5 @@ resource "google_redis_instance" "test" {
   }
   redis_version = "REDIS_4_0"
 }
-`, name, region, lifecycleBlock)
+`, name, region, deletionProtection)
 }
