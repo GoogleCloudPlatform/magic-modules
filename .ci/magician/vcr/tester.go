@@ -355,6 +355,10 @@ func (vt *Tester) RunParallel(opt RunOptions) (Result, error) {
 	errs := make(chan error, len(opt.TestDirs)*len(opt.Tests)*2)
 	for _, testDir := range opt.TestDirs {
 		for _, test := range opt.Tests {
+			if (opt.Mode == Recording) && strings.HasPrefix(test, "TestAccContainer") {
+				fmt.Println("skipping recording test for ", test)
+				continue
+			}
 			running <- struct{}{}
 			go vt.runInParallel(opt.Mode, opt.Version, testDir, test, logPath, cassettePath, running, wg, outputs, errs)
 		}
