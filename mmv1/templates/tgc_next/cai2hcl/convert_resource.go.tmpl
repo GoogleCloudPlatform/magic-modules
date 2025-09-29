@@ -42,7 +42,7 @@ func ConvertResource(asset caiasset.Asset) ([]*models.TerraformResourceBlock, er
 		switch asset.Type {
 {{- range $resourceType, $resources := $.ResourcesByCaiResourceType}}
 	{{- if gt (len $resources) 1 }}
-		case {{ $resourceType }}AssetType:
+		case "{{ $resourceType }}":
 		{{- range $i, $object := $resources }}
 			{{- if eq $i 0 }}
 			if strings.Contains(asset.Name, "{{$object.IdentityParam}}") {
