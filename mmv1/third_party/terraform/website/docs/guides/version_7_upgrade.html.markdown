@@ -329,16 +329,3 @@ A state upgrader will automatically migrate the `topic` field's format in your T
 ### `metadata`, and `metadata.config` are now required.
 
 `metadata`, and `metadata.config` are now required. These fields were already required for resource functionality, so no change is necessary to existing configurations.
-
-## Resource: `google_redis_instance`
-
-### Instance deletion now prevented by default with `deletion_protection`
-
-The field `deletion_protection` has been added with a default value of `true`. This field prevents
-Terraform from destroying or recreating the Instance. In 7.0.0, existing instances will have 
-`deletion_protection` set to `true` during the next refresh unless otherwise set in configuration.
-
-**`deletion_protection` does NOT prevent deletion outside of Terraform.**
-
-To disable deletion protection, explicitly set this field to `false` in configuration
-and then run `terraform apply` to apply the change.
