@@ -178,7 +178,6 @@ properties:
     required: true
     ignore_read: true
     write_only: true
-    sensitive: true
   - name: 'sharedSecretHash'
     type: String
     description: |
