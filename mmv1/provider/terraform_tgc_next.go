@@ -344,7 +344,7 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 			}
 			tgc.ResourcesForVersion = append(tgc.ResourcesForVersion, resourceIdentifier)
 
-			caiResourceType := fmt.Sprintf("%s.%s", service, object.CaiResourceType())
+			caiResourceType := object.CaiAssetType()
 			if _, ok := resourcesByCaiResourceType[caiResourceType]; !ok {
 				resourcesByCaiResourceType[caiResourceType] = make([]ResourceIdentifier, 0)
 			}
