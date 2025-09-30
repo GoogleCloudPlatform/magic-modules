@@ -42,6 +42,7 @@ async:
 custom_code:
   constants: 'templates/terraform/constants/datastream_connection_profile.go.tmpl'
   pre_create: 'templates/terraform/pre_create/datastream_connection_profile.go.tmpl'
+  encoder: 'templates/terraform/encoders/datastream_connection_profile.go.tmpl'
 examples:
   - name: 'datastream_connection_profile_basic'
     primary_resource_id: 'default'
@@ -506,7 +507,17 @@ properties:
         description: |
           List of host addresses for a MongoDB cluster. For SRV connection format, this list must contain exactly one DNS host without a port. For Standard connection format, this list must contain all the required hosts in the cluster with their respective ports.
         item_type:
-          type: String
+          type: NestedObject
+          properties:
+            - name: 'hostname'
+              type: String
+              required: true
+              description: |
+                Hostname for the connection.
+            - name: 'port'
+              type: Integer
+              description: |
+                Port for the connection.
         required: true
       - name: 'replicaSet'
         type: String
@@ -578,6 +589,7 @@ properties:
         type: NestedObject
         description: |
           Srv connection format.
+        ignore_read: true
         properties: []
       - name: 'standardConnectionFormat'
         type: NestedObject
