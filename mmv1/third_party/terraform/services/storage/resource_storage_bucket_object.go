@@ -8,6 +8,8 @@ import (
 	"io"
 	"log"
 	"os"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-cty/cty"
@@ -25,6 +27,17 @@ import (
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/storage/v1"
 )
+
+func validateObjectName(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	value = strings.TrimSpace(value)
+	// checks if path not end with "/"
+	regex, err := regexp.Compile("/+$")
+	if err == nil && len(value) > 0 && regex.Match([]byte(value)) {
+		errors = append(errors, fmt.Errorf("%q cannot end with /", k))
+	}
+	return
+}
 
 func ResourceStorageBucketObject() *schema.Resource {
 	return &schema.Resource{
@@ -49,10 +62,11 @@ func ResourceStorageBucketObject() *schema.Resource {
 			},
 
 			"name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: `The name of the object. If you're interpolating the name of this object, see output_name instead.`,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validateObjectName,
+				Description:  `The name of the object. If you're interpolating the name of this object, see output_name instead.`,
 			},
 
 			"cache_control": {
