@@ -467,6 +467,17 @@ properties:
         description: |-
           The description of the remote source.
         immutable: true
+      - name: 'remoteType'
+        type: Enum
+        description: |-
+          The type of remote repository.
+        immutable: true
+        default_value: "NATIVE"
+        enum_values:
+          - 'NATIVE'
+          - 'CACHE_LAYER'
+          - 'MIRROR'
+          - 'SHARED_CACHE'
       - name: 'aptRepository'
         type: NestedObject
         description: |-
