@@ -179,6 +179,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'mongodb_profile'
     properties:
       - name: 'hostname'
         type: String
@@ -225,6 +226,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'mongodb_profile'
     properties:
       - name: 'bucket'
         type: String
@@ -247,6 +249,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'mongodb_profile'
     properties:
       - name: 'hostname'
         type: String
@@ -334,6 +337,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'mongodb_profile'
     properties:
       []
   - name: 'postgresqlProfile'
@@ -348,6 +352,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'mongodb_profile'
     properties:
       - name: 'hostname'
         type: String
@@ -392,6 +397,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'mongodb_profile'
     properties:
       - name: 'domain'
         type: String
@@ -458,6 +464,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'mongodb_profile'
     properties:
       - name: 'hostname'
         type: String
