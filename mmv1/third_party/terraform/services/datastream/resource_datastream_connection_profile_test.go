@@ -511,3 +511,51 @@ EOT
 }
 `, context)
 }
+
+func TestAccDatastreamConnectionProfile_datastreamConnectionProfileMongodbSrv(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"deletion_protection": false,
+		"random_suffix":       acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDatastreamConnectionProfileDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDatastreamConnectionProfile_datastreamConnectionProfileMongodbSrv(context),
+			},
+			{
+				ResourceName:            "google_datastream_connection_profile.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"connection_profile_id", "create_without_validation", "labels", "location", "mongodb_profile.0.srv_connection_format", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccDatastreamConnectionProfile_datastreamConnectionProfileMongodbSrv(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_datastream_connection_profile" "default" {
+    display_name              = "Connection profile MongoDB SRV"
+    location                  = "us-central1"
+    connection_profile_id     = "tf-test-source-profile%{random_suffix}"
+    create_without_validation = true
+
+    mongodb_profile {
+        srv_connection_format {}
+
+        host_addresses {
+          hostname = "example.mongodb.com%{random_suffix}"
+        }
+        
+        username       = "username%{random_suffix}"
+        password       = "password%{random_suffix}"
+    }
+}
+`, context)
+}

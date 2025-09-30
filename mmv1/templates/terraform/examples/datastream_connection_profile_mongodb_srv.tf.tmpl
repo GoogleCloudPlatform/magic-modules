@@ -1,14 +1,15 @@
 resource "google_datastream_connection_profile" "{{$.PrimaryResourceId}}" {
-    display_name          = "Connection profile MongoDB SRV"
-    location              = "us-central1"
-    connection_profile_id = "{{index $.Vars "connection_profile_id"}}"
+    display_name              = "Connection profile MongoDB SRV"
+    location                  = "us-central1"
+    connection_profile_id     = "{{index $.Vars "connection_profile_id"}}"
 
     mongodb_profile {
         srv_connection_format {}
 
-        host_addresses = [
-            "{{index $.Vars "mongodb_dns_host"}}"
-        ]
+        host_addresses {
+          hostname = "{{index $.Vars "mongodb_dns_host"}}"
+        }
+        
         username       = "{{index $.Vars "mongodb_username"}}"
         password       = "{{index $.Vars "mongodb_password"}}"
     }
