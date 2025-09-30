@@ -42,7 +42,7 @@ resource "google_vertex_ai_index" "index" {
 }
 
 resource "google_vertex_ai_index_endpoint" "vertex_endpoint" {
-  display_name            = "sample-endpoint"
+  display_name            = "{{index $.Vars "endpoint_name"}}"
   description             = "A sample vertex endpoint"
   region                  = "us-central1"
   public_endpoint_enabled = true

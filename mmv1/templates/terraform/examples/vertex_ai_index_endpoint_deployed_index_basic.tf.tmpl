@@ -46,7 +46,7 @@ resource "google_vertex_ai_index" "index" {
 }
 
 resource "google_vertex_ai_index_endpoint" "vertex_index_endpoint_deployed" {
-  display_name = "sample-endpoint"
+  display_name = "{{index $.Vars "endpoint_name"}}"
   description  = "A sample vertex endpoint"
   region       = "us-central1"
   network      = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.vertex_network.name}"

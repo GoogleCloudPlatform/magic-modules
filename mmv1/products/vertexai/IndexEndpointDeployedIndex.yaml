@@ -85,6 +85,7 @@ examples:
     primary_resource_id: 'dedicated_resources'
     vars:
       display_name_index: 'test-index'
+      endpoint_name: 'sample-endpoint'
       bucket_name: 'bucket-name'
       display_name: 'vertex-deployed-index'
       deployed_index_id: 'deployed_index_id'
@@ -93,6 +94,7 @@ examples:
     primary_resource_id: 'automatic_resources'
     vars:
       display_name_index: 'test-index'
+      endpoint_name: 'sample-endpoint'
       bucket_name: 'bucket-name'
       display_name: 'vertex-deployed-index'
       deployed_index_id: 'deployed_index_id'
