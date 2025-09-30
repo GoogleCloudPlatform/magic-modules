@@ -1519,7 +1519,10 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 
 		if vNC := rawConfigNPRoot.GetAttr("node_config"); vNC.LengthInt() > 0 {
 			if vKC := vNC.Index(cty.NumberIntVal(0)).GetAttr("kubelet_config"); vKC.LengthInt() > 0 {
-				if v := vKC.Index(cty.NumberIntVal(0)).GetAttr("cpu_cfs_quota"); v != cty.NullVal(cty.Bool) && v.False() {
+				v := vKC.Index(cty.NumberIntVal(0)).GetAttr("cpu_cfs_quota");
+				if v == cty.NullVal(cty.Bool) {
+				    nc.KubeletConfig.CpuCfsQuota = true
+				} else if v.False() { // force-send explicit false to API
 					nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "CpuCfsQuota")
 				}
 			}
