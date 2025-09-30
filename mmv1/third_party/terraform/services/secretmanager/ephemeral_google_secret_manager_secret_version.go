@@ -160,10 +160,8 @@ func (p *googleEphemeralSecretManagerSecretVersion) Open(ctx context.Context, re
 	// This check seems counterintuitive, but read docs on the `google_secret_manager_secret_version` resource.
 	// It states: "If set to 'true', the secret data is expected to be base64-encoded string and would be sent as is."
 	payload := accessResp["payload"].(map[string]interface{})
-	var payloadData string
-	if data.IsSecretDataBase64.ValueBool() {
-		payloadData = payload["data"].(string)
-	} else {
+	payloadData := payload["data"].(string)
+	if !data.IsSecretDataBase64.ValueBool() {
 		decoded, err := base64.StdEncoding.DecodeString(payload["data"].(string))
 		if err != nil {
 			resp.Diagnostics.AddError("Error decoding secret data", err.Error())
