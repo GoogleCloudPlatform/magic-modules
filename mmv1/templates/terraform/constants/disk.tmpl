@@ -1,5 +1,7 @@
 import "errors"
 
+var _ = errors.New
+
 {{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
 // diffsuppress for hyperdisk provisioned_iops
 func hyperDiskIopsUpdateDiffSuppress(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {

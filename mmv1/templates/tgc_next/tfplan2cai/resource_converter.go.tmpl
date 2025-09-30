@@ -24,8 +24,6 @@ import (
   "strconv"
   "strings"
 
-{{/* We list all the v2 imports here and unstable imports, because we run 'goimports' to guess the correct
-     set of imports, which will never guess the major version correctly. */ -}}
   "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
@@ -64,7 +62,7 @@ var (
     _ = validation.All
     _ = terraform.State{}
     _ = tgcresource.RemoveTerraformAttributionLabel
-    _ = tpgresource.SetLabels
+    _ = tpgresource.GetRegion
     _ = transport_tpg.Config{}
     _ = verify.ProjectRegex
     _ = googleapi.Error{}

@@ -2,3 +2,8 @@ import (
     "runtime"
     "github.com/gammazero/workerpool"
 )
+
+var (
+    _ = runtime.GOARCH
+    _ = workerpool.New
+)
