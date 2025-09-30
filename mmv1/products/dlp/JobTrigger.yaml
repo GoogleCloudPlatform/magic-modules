@@ -729,7 +729,7 @@ properties:
                   send_empty_value: true
                   allow_empty_object: true
                   properties:
- # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/InspectConfig#SurrogateType
+                    # Meant to be an empty object with no properties - see here : https://cloud.google.com/dlp/docs/reference/rest/v2/InspectConfig#SurrogateType
                     []
       - name: 'storageConfig'
         type: NestedObject
@@ -1085,7 +1085,6 @@ properties:
                       type: NestedObject
                       description: |
                         Information on the location of the target BigQuery Table.
-                      required: true
                       properties:
                         - name: 'projectId'
                           type: String
@@ -1102,6 +1101,22 @@ properties:
                           description: |
                             Name of the table. If is not set a new one will be generated for you with the following format:
                             `dlp_googleapis_yyyy_mm_dd_[dlp_job_id]`. Pacific timezone will be used for generating the date details.
+                    - name: 'storagePath'
+                      type: NestedObject
+                      description: |
+                        Store findings in an existing Cloud Storage bucket. Files will be generated with the job ID and file part number
+                        as the filename, and will contain findings in textproto format as SaveToGcsFindingsOutput. The file name will use
+                        the naming convention <job_id>-<shard_number>, for example: my-job-id-2.
+
+                        Supported for InspectJobs. The bucket must not be the same as the bucket being inspected. If storing findings to
+                        Cloud Storage, the output schema field should not be set. If set, it will be ignored.
+                      properties:
+                        - name: 'path'
+                          type: String
+                          description: |
+                            A URL representing a file or path (no wildcards) in Cloud Storage.
+                            Example: `gs://[BUCKET_NAME]/dictionary.txt`
+                          required: true
                     - name: 'outputSchema'
                       type: Enum
                       description: |
