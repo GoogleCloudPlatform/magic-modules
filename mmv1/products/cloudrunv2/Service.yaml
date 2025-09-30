@@ -359,7 +359,6 @@ properties:
     type: Boolean
     description: |-
       Disables public resolution of the default URI of this service.
-    min_version: 'beta'
   - name: 'template'
     type: NestedObject
     description: |
