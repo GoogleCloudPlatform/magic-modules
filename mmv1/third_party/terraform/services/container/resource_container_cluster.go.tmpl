@@ -2453,7 +2453,7 @@ func ResourceContainerCluster() *schema.Resource {
 						"membership_type": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ValidateFunc: validation.StringInSlice([]string{"MEMBERSHIP_TYPE_UNSPECIFIED", "LIGHTWEIGHT"}, false),
+							ValidateFunc: validation.StringInSlice([]string{"LIGHTWEIGHT"}, false),
 							Description:  `The type of the cluster's fleet membership.`,
 							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("MEMBERSHIP_TYPE_UNSPECIFIED"),
 						},
