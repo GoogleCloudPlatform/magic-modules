@@ -31,7 +31,7 @@ import (
 func validateObjectName(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 	value = strings.TrimSpace(value)
-	// checks if path not ending with "/"
+	// check if path not ending with "/"
 	regex, err := regexp.Compile("/+$")
 	if err == nil && len(value) > 0 && regex.Match([]byte(value)) {
 		errors = append(errors, fmt.Errorf("%q cannot end with /", k))
