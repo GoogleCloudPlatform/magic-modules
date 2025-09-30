@@ -112,7 +112,7 @@ func TestAccMemcacheInstance_deletionprotection(t *testing.T) {
 		CheckDestroy:             testAccCheckMemcacheInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMemcacheInstance_deletionprotection(prefix, name, network, "us-central1"),
+				Config: testAccMemcacheInstanceConfig(prefix, name, network, "us-central1", true), // deletion_protection = true
 			},
 			{
 				ResourceName:            "google_memcache_instance.test",
@@ -121,11 +121,11 @@ func TestAccMemcacheInstance_deletionprotection(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"reserved_ip_range_id", "deletion_protection"},
 			},
 			{
-				Config:      testAccMemcacheInstance_deletionprotection(prefix, name, network, "us-west2"),
+				Config:      testAccMemcacheInstanceConfig(prefix, name, network, "us-west2", true), // deletion_protection = true
 				ExpectError: regexp.MustCompile("deletion_protection"),
 			},
 			{
-				Config: testAccMemcacheInstance_deletionprotectionFalse(prefix, name, network, "us-central1"),
+				Config: testAccMemcacheInstanceConfig(prefix, name, network, "us-central1", false), // deletion_protection = false
 			},
 			{
 				ResourceName:            "google_memcache_instance.test",
@@ -137,13 +137,13 @@ func TestAccMemcacheInstance_deletionprotection(t *testing.T) {
 	})
 }
 
-func testAccMemcacheInstance_deletionprotection(prefix, name, network, region string) string {
+func testAccMemcacheInstanceConfig(prefix, name, network, region string, deletionProtection bool) string {
 	return fmt.Sprintf(`
 resource "google_memcache_instance" "test" {
   name = "%s"
   region = "%s"
   authorized_network = data.google_compute_network.memcache_network.id
-  deletion_protection = true
+  deletion_protection = %t
   node_config {
     cpu_count      = 1
     memory_size_mb = 1024
@@ -160,31 +160,5 @@ resource "google_memcache_instance" "test" {
 data "google_compute_network" "memcache_network" {
   name = "%s"
 }
-`, name, region, network)
-}
-
-func testAccMemcacheInstance_deletionprotectionFalse(prefix, name, network, region string) string {
-	return fmt.Sprintf(`
-resource "google_memcache_instance" "test" {
-  name = "%s"
-  region = "%s"
-  authorized_network = data.google_compute_network.memcache_network.id
-  deletion_protection = false
-  node_config {
-    cpu_count      = 1
-    memory_size_mb = 1024
-  }
-  node_count = 1
-  memcache_parameters {
-    params = {
-      "listen-backlog" = "2048"
-      "max-item-size" = "8388608"
-    }
-  }
-  reserved_ip_range_id = ["tf-bootstrap-addr-memcache-instance-update-1"]
-}
-data "google_compute_network" "memcache_network" {
-  name = "%s"
-}
-`, name, region, network)
+`, name, region, deletionProtection, network)
 }
