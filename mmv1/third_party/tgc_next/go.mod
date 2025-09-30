@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/terraform-google-conversion/v6
+module github.com/GoogleCloudPlatform/terraform-google-conversion/v7
 
 go 1.23.0
 

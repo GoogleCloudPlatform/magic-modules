@@ -78,7 +78,8 @@ mmv1:
 tpgtools: serialize
 	@echo "Executing tpgtools build for $(OUTPUT_PATH)";
 	@cd tpgtools;\
-		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
+		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile); \
+		rm serialization.go
 
 clean-provider: check_safe_build
 	@if [ -n "$(PRODUCT)" ]; then \
