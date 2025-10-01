@@ -125,15 +125,6 @@ func testAccApigeeEnvironmentApiRevisionDeployment_apigeeEnvironmentApiRevisionD
 		display_name = "dev"
 		description  = "terraform test env"
 		depends_on   = [time_sleep.wait_after_org]
-
-	}
-
-	resource "google_apigee_environment" "env" {
-		org_id       = google_apigee_organization.apigee_org.id
-		name         = "dev"
-		display_name = "dev"
-		description  = "terraform test env"
-
 	}
 
 	resource "google_apigee_instance" "apigee_ins" {
