@@ -275,8 +275,6 @@ resource "google_datastream_stream" "gtid" {
 }
 
 func TestAccDatastreamStream_mongoDb(t *testing.T) {
-	// this test uses the random provider
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -286,10 +284,7 @@ func TestAccDatastreamStream_mongoDb(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-		},
-		CheckDestroy: testAccCheckDatastreamStreamDestroyProducer(t),
+		CheckDestroy:             testAccCheckDatastreamStreamDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDatastreamStream_mongoDbBasicExample(context),
