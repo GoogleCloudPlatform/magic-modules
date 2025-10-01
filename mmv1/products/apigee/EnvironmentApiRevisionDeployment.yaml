@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'ApiProxyDeployment'
+name: 'EnvironmentApiRevisionDeployment'
 description: |
   Deploys a specific Apigee API Proxy revision to a given Apigee environment.
 references:
@@ -30,7 +30,7 @@ import_format:
   - 'organizations/{{org}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}'
   - '{{id}}'
 examples:
-  - name: "apigee_api_proxy_deployment_basic"
+  - name: "apigee_environment_api_revision_deployment_basic"
     primary_resource_id: "proxy_deployment_basic"
     vars:
       apigee_org: "my-org"
@@ -82,8 +82,7 @@ properties:
     output: true
     api_name: 'basePath'
     description: 'Basepaths associated with the deployed proxy.'
-  - name: 'deployed_at'
+  - name: 'deployStartTime'
     type: String
     output: true
-    api_name: 'deployStartTime'
     description: 'RFC3339 timestamp when deployment started.'
