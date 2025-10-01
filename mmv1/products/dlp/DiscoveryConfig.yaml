@@ -256,6 +256,7 @@ properties:
                           - 'SENSITIVITY_LOW'
                           - 'SENSITIVITY_MODERATE'
                           - 'SENSITIVITY_HIGH'
+                          - 'SENSITIVITY_UNKNOWN'
             - name: 'profileGenerationsToTag'
               type: Array
               description: The profile generations for which the tag should be attached to resources. If you attach a tag to only new profiles, then if the sensitivity score of a profile subsequently changes, its tag doesn't change. By default, this field includes only new profiles. To include both new and updated profiles for tagging, this field should explicitly include both `PROFILE_GENERATION_NEW` and `PROFILE_GENERATION_UPDATE`.
