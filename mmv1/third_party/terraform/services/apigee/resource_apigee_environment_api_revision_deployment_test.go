@@ -124,7 +124,7 @@ func testAccApigeeEnvironmentApiRevisionDeployment_apigeeEnvironmentApiRevisionD
 		name         = "dev"
 		display_name = "dev"
 		description  = "terraform test env"
-		depends_on   - [time_sleep.wait_after_org"]
+		depends_on   = [time_sleep.wait_after_org"]
 
 	}
 
@@ -245,7 +245,7 @@ func testAccApigeeEnvironmentApiRevisionDeployment_apigeeEnvironmentApiRevisionD
 		name         = "dev"
 		display_name = "dev"
 		description  = "terraform test env"
-		depends_on   - [time_sleep.wait_after_org"]
+		depends_on   = [time_sleep.wait_after_org"]
 
 	}
 
