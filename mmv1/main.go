@@ -266,6 +266,7 @@ func GenerateProduct(version, providerName, productName, outputPath string, prod
 				overrideResource := &api.Resource{}
 				api.Compile(overrideYamlPath, overrideResource, overrideDirectory)
 				api.Merge(reflect.ValueOf(resource), reflect.ValueOf(*overrideResource))
+				resource.SourceYamlFile = baseResourcePath
 			} else {
 				api.Compile(overrideYamlPath, resource, overrideDirectory)
 			}
