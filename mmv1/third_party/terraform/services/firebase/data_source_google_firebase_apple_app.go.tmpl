@@ -21,6 +21,7 @@ func DataSourceGoogleFirebaseAppleApp() *schema.Resource {
         return &schema.Resource{
                 Read:   dataSourceGoogleFirebaseAppleAppRead,
                 Schema: dsSchema,
+                Identity: ResourceFirebaseAppleApp().Identity,
         }
 }
 

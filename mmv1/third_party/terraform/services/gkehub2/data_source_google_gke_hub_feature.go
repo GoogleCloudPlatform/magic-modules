@@ -15,8 +15,9 @@ func DataSourceGoogleGkeHubFeature() *schema.Resource {
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "name")
 
 	return &schema.Resource{
-		Read:   dataSourceGoogleGkeHubFeatureRead,
-		Schema: dsSchema,
+		Read:     dataSourceGoogleGkeHubFeatureRead,
+		Schema:   dsSchema,
+		Identity: ResourceGKEHub2Feature().Identity,
 	}
 }
 
