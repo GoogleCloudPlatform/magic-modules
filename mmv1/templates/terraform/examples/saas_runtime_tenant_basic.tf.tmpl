@@ -11,6 +11,7 @@ resource "google_saas_runtime_saas" "example_saas" {
 resource "google_saas_runtime_tenant" "{{$.PrimaryResourceId}}" {
   provider = google-beta
   location = "global"
+  tenant_id = "{{index $.Vars "tenant_name"}}"
   saas = google_saas_runtime_saas.example_saas.id
   consumer_resource = "//compute.googleapis.com/projects/example-project/zones/us-central1-a/instances/example-instance"
 }

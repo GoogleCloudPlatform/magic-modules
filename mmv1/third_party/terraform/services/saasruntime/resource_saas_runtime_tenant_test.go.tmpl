@@ -72,6 +72,7 @@ resource "google_saas_runtime_saas" "example_saas" {
 resource "google_saas_runtime_tenant" "example" {
   provider = google-beta
   location = "global"
+  tenant_id = "tf-test-example-tenant%{random_suffix}"
   saas = google_saas_runtime_saas.example_saas.id
   consumer_resource = "//compute.googleapis.com/projects/example-project/zones/us-central1-a/instances/example-instance"
 }
@@ -93,6 +94,7 @@ resource "google_saas_runtime_saas" "example_saas" {
 resource "google_saas_runtime_tenant" "example" {
   provider = google-beta
   location = "global"
+  tenant_id = "tf-test-example-tenant%{random_suffix}"
   saas = google_saas_runtime_saas.example_saas.id
   consumer_resource = "//compute.googleapis.com/projects/example-project/zones/us-central1-a/instances/example-instance"
   labels = {
