@@ -354,7 +354,7 @@ func (tgc TerraformGoogleConversionNext) addExamplesFromHandwrittenTests(object 
 	examples := make([]resource.Examples, len(matches))
 	for i, match := range matches {
 		if len(match) == 2 {
-			if _, ok := handwrittenTestNamesInYAML[match[1]]; ok {
+			if _, ok := handwrittenTestNamesInYAML[string(match[1])]; ok {
 				continue
 			}
 			examples[i] = resource.Examples{
