@@ -1,5 +1,5 @@
 resource "google_apigee_environment_api_revision_deployment" "{{$.PrimaryResourceId}}" {
-  org               = "{{index $.Vars "apigee_org"}}"
+  org_id            = "{{index $.Vars "apigee_org"}}"
   environment       = "dev"
   api               = "hello-proxy"
   revision          = 1

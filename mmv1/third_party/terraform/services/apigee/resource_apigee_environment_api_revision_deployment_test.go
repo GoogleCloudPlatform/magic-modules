@@ -113,6 +113,20 @@ func testAccApigeeEnvironmentApiRevisionDeployment_apigeeEnvironmentApiRevisionD
 		authorized_network = google_compute_network.apigee_network.id
 		depends_on         = [google_service_networking_connection.apigee_vpc_connection]
 	}
+  
+	resource "time_sleep" "wait_after_org" {
+		create_duration = "300s"
+		depends_on      = [google_apigee_organization.apigee_org]
+	}
+
+	resource "google_apigee_environment" "env" {
+		org_id       = google_apigee_organization.apigee_org.id
+		name         = "dev"
+		display_name = "dev"
+		description  = "terraform test env"
+		depends_on   - [time_sleep.wait_after_org"]
+
+	}
 
 	resource "google_apigee_environment" "env" {
 		org_id       = google_apigee_organization.apigee_org.id
@@ -149,7 +163,7 @@ func testAccApigeeEnvironmentApiRevisionDeployment_apigeeEnvironmentApiRevisionD
 	}
 
 	resource "google_apigee_environment_api_revision_deployment" "deploy" {
-		org   = google_project.project.project_id
+		org_id   = google_project.project.project_id
 		environment       = google_apigee_environment.env.name
 		api               = google_apigee_api.proxy.name
 		revision          = 1
@@ -220,12 +234,18 @@ func testAccApigeeEnvironmentApiRevisionDeployment_apigeeEnvironmentApiRevisionD
 		authorized_network = google_compute_network.apigee_network.id
 		depends_on         = [google_service_networking_connection.apigee_vpc_connection]
 	}
+    
+	resource "time_sleep" "wait_after_org" {
+		create_duration = "300s"
+		depends_on      = [google_apigee_organization.apigee_org]
+	}
 
 	resource "google_apigee_environment" "env" {
 		org_id       = google_apigee_organization.apigee_org.id
 		name         = "dev"
 		display_name = "dev"
 		description  = "terraform test env"
+		depends_on   - [time_sleep.wait_after_org"]
 
 	}
 
@@ -256,7 +276,7 @@ func testAccApigeeEnvironmentApiRevisionDeployment_apigeeEnvironmentApiRevisionD
 	}
 
 	resource "google_apigee_environment_api_revision_deployment" "deploy" {
-		org   = google_project.project.project_id
+		org_id   = google_project.project.project_id
 		environment       = google_apigee_environment.env.name
 		api               = google_apigee_api.proxy.name
 		revision          = 2
@@ -270,7 +290,7 @@ func testAccApigeeEnvironmentApiRevisionDeployment_apigeeEnvironmentApiRevisionD
 func testAccCheckApigeeEnvironmentApiRevisionDeploymentDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {
-			if rs.Type != "google_apigee_api_proxy_deployment" {
+			if rs.Type != "google_apigee_environment_api_revision_deployment" {
 				continue
 			}
 			if strings.HasPrefix(name, "data.") {
@@ -279,7 +299,7 @@ func testAccCheckApigeeEnvironmentApiRevisionDeploymentDestroyProducer(t *testin
 			config := acctest.GoogleProviderConfig(t)
 
 			url, err := tpgresource.ReplaceVarsForTest(config, rs,
-				"{{ApigeeBasePath}}organizations/{{org}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}/deployments")
+				"{{ApigeeBasePath}}organizations/{{org_id}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}/deployments")
 			if err != nil {
 				return err
 			}
