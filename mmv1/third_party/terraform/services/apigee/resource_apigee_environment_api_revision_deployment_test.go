@@ -149,7 +149,7 @@ func testAccApigeeEnvironmentApiRevisionDeployment_apigeeEnvironmentApiRevisionD
 	}
 
 	resource "google_apigee_environment_api_revision_deployment" "deploy" {
-		org   = "hc-terraform-testing"
+		org   = google_project.project.project_id
 		environment       = google_apigee_environment.env.name
 		api               = google_apigee_api.proxy.name
 		revision          = 1
@@ -256,7 +256,7 @@ func testAccApigeeEnvironmentApiRevisionDeployment_apigeeEnvironmentApiRevisionD
 	}
 
 	resource "google_apigee_environment_api_revision_deployment" "deploy" {
-		org   = "hc-terraform-testing"
+		org   = google_project.project.project_id
 		environment       = google_apigee_environment.env.name
 		api               = google_apigee_api.proxy.name
 		revision          = 2
