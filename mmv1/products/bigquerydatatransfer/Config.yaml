@@ -74,7 +74,7 @@ examples:
       dataset_id: 'my_dataset'
       topic_name: 'my_dataset_topic'
       subscription_name: 'my_dataset_topic_subscription'
-    exclude_test: true
+    exclude_test: true # test skipped because this resources uses handwritten tests
 parameters:
   - name: 'location'
     type: String
