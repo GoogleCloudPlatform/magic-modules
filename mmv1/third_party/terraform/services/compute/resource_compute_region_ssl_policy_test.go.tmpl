@@ -291,7 +291,7 @@ resource "google_compute_region_ssl_policy" "update" {
 `, resourceName)
 }
 
-func testAccComputeSslUpdate4(resourceName string) string {
+func testAccComputeRegionSslUpdate4(resourceName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_ssl_policy" "update" {
   name            = "%s"
@@ -302,7 +302,7 @@ resource "google_compute_ssl_policy" "update" {
 `, resourceName)
 }
 
-func testAccComputeSslUpdate5(resourceName string) string {
+func testAccComputeRegionSslUpdate5(resourceName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_ssl_policy" "update" {
   name            = "%s"
