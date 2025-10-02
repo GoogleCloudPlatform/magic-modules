@@ -59,6 +59,12 @@ examples:
     vars:
       resource_name: 'my-lb-policy'
       backend_name: 'my-lb-backend'
+  - name: 'network_services_service_lb_policies_beta'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-lb-policy'
+      backend_name: 'my-lb-backend'
 parameters:
   - name: 'name'
     type: String
