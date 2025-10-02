@@ -1662,6 +1662,8 @@ linux_node_config {
 
 * `project` - (Optional) The name of the Fleet host project where this cluster will be registered.
 
+* `membership_type` - (Optional) Sets the membership type of the cluster.  Available options are `LIGHTWEIGHT` and `MEMBERSHIP_TYPE_UNSPECIFIED`.
+
 <a name="nested_workload_alts_config"></a>The `workload_alts_config` block supports:
 
 * `enable_alts` - (Required) Whether the alts handshaker should be enabled or not for direct-path. Requires Workload Identity ([workloadPool]((#nested_workload_identity_config)) must be non-empty).
