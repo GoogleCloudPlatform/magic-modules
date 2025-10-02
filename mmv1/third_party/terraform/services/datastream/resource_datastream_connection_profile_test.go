@@ -228,7 +228,7 @@ resource "google_datastream_connection_profile" "mongodb_con_profile" {
         }
         replica_set = "rs0"
         username = "user"
-        password = "pass"
+        secret_manager_stored_password = "/path/to/password"
         ssl_config {
 					ca_certificate                   = "xxx"
 					client_certificate               = "xxx"

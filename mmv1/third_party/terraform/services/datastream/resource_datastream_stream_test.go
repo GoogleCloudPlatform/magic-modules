@@ -376,6 +376,9 @@ resource "google_datastream_stream" "default" {
                     database = "test"
                     collections {
                         collection = "orders"
+												fields {
+                            field = "name"
+                        }
                     }
                     collections {
                         collection = "users"
@@ -409,7 +412,19 @@ resource "google_datastream_stream" "default" {
         }
     }
 
-    backfill_none {}
+    backfill_all {
+			  mongodb_excluded_objects {
+          databases {
+            collections {
+						  collection = orders
+						  fields {
+							  field = "name"
+              }
+					  }
+					 database = test
+				}
+    }
+  }
 }
 `, context)
 }
