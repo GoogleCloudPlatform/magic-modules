@@ -122,6 +122,12 @@ examples:
     vars:
       backend_service_name: 'backend-service'
       neg_name: 'network-endpoint'
+  - name: 'backend_service_in_flight'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
   - name: 'backend_service_external_managed'
     primary_resource_id: 'default'
     vars:
@@ -195,6 +201,7 @@ properties:
             - 'RATE'
             - 'CONNECTION'
             - 'CUSTOM_METRICS'
+            - 'IN_FLIGHT'
         - name: 'capacityScaler'
           type: Double
           description: |
