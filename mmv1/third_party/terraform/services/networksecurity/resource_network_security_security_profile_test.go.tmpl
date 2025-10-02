@@ -116,7 +116,7 @@ func TestAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilt
 				ResourceName:            "google_network_security_security_profile.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels, "url_filtering_profile.0.url_filters"},
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels", "url_filtering_profile.0.url_filters"},
 			},
 			{
 				Config: testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdate1(context),
@@ -125,7 +125,7 @@ func TestAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilt
 				ResourceName:            "google_network_security_security_profile.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels, "url_filtering_profile.0.url_filters"},
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels", "url_filtering_profile.0.url_filters"},
 			},
 			{
 				Config: testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdate2(context),
@@ -134,7 +134,7 @@ func TestAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilt
 				ResourceName:            "google_network_security_security_profile.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels, "url_filtering_profile.0.url_filters"},
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels", "url_filtering_profile.0.url_filters"},
 			},
 			{
 				Config: testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdateDefault(context),
