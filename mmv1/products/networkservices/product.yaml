@@ -16,7 +16,7 @@ name: 'NetworkServices'
 display_name: 'Network Services'
 versions:
   - name: 'beta'
-    base_url: 'https://networkservices.googleapis.com/v1/'
+    base_url: 'https://networkservices.googleapis.com/v1beta1/'
   - name: 'ga'
     base_url: 'https://networkservices.googleapis.com/v1/'
 scopes:
