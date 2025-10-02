@@ -33,6 +33,7 @@ import_format:
   - '{{parent}}/locations/{{location}}/floorSetting'
 custom_code:
   custom_import: 'templates/terraform/custom_import/modelarmorglobal_floorsetting.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/clear_modelarmorglobal_floorsetting.go.tmpl'
   post_create: 'templates/terraform/post_create/modelarmor_floorsetting_sleep.go.tmpl'
   post_update: 'templates/terraform/post_create/modelarmor_floorsetting_sleep.go.tmpl'
 examples:
