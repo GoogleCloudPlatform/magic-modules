@@ -116,7 +116,7 @@ func TestAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilt
 				ResourceName:            "google_network_security_security_profile.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels, "url_filtering_profile.0.url_filters"},
 			},
 			{
 				Config: testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdate1(context),
@@ -125,7 +125,7 @@ func TestAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilt
 				ResourceName:            "google_network_security_security_profile.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels, "url_filtering_profile.0.url_filters"},
 			},
 			{
 				Config: testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdate2(context),
@@ -134,16 +134,25 @@ func TestAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilt
 				ResourceName:            "google_network_security_security_profile.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels, "url_filtering_profile.0.url_filters"},
 			},
 			{
-				Config: testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdate3(context),
+				Config: testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdateDefault(context),
 			},
 			{
 				ResourceName:            "google_network_security_security_profile.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels", "url_filtering_profile.0.url_filters"},
+			},
+      			{
+				Config: testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdateEmpty(context),
+			},
+			{
+				ResourceName:            "google_network_security_security_profile.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels", "url_filtering_profile.0.url_filters"},
 			},
 		},
 	})
@@ -259,11 +268,6 @@ resource "google_network_security_security_profile" "default" {
       filtering_action   = "ALLOW"
       urls = ["*example.com", "*about.example.com", "*help.example.com"]
     }
-    url_filters {
-      priority = 2147483647
-      filtering_action = "DENY"
-      urls = ["*"]
-    }
   }
 
   labels = {
@@ -293,11 +297,6 @@ resource "google_network_security_security_profile" "default" {
       filtering_action   = "DENY"
       urls = ["*restricted.example.com"]
     }
-    url_filters {
-      priority = 2147483647
-      filtering_action = "DENY"
-      urls = ["*"]
-    }
   }
 
   labels = {
@@ -307,7 +306,7 @@ resource "google_network_security_security_profile" "default" {
 `, context)
 }
 
-func testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdate3(context map[string]interface{}) string {
+func testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdateDefault(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_security_security_profile" "default" {
   provider    = google-beta

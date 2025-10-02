@@ -16,11 +16,6 @@ resource "google_network_security_security_profile" "{{$.PrimaryResourceId}}" {
       filtering_action   = "DENY"
       urls = ["*restricted.example.com"]
     }
-    url_filters {
-      priority = 2147483647
-      filtering_action = "DENY"
-      urls = ["*"]
-    }
   }
 
   labels = {

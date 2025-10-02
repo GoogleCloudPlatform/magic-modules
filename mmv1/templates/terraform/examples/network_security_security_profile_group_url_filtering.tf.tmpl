@@ -22,11 +22,6 @@ resource "google_network_security_security_profile" "security_profile" {
       filtering_action   = "ALLOW"
       urls = ["*example.com", "*about.example.com", "*help.example.com"]
     }
-    url_filters {
-      priority = 2147483647
-      filtering_action = "DENY"
-      urls = ["*"]
-    }
   }
   parent = "organizations/{{index $.TestEnvVars "org_id"}}"
 }

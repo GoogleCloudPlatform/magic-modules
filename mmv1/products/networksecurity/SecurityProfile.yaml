@@ -237,6 +237,7 @@ properties:
     min_version: 'beta'
     type: NestedObject
     description: The url filtering configuration for the security profile.
+    custom_flatten: 'templates/terraform/custom_flatten/network_security_security_profile_url_filters_flatten.go.tmpl'
     properties:
       - name: 'urlFilters'
         type: Array
