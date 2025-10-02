@@ -1,247 +1,140 @@
 package iamworkforcepool_test
 
 import (
-	"fmt"
-	"regexp"
 	"testing"
-	"strings"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccIAMWorkforcePoolProviderScimTenant_basic(t *testing.T) {
+func TestAccIAMWorkforcePoolWorkforcePoolProviderScimTenant_update(t *testing.T) {
 	t.Parallel()
-	random_suffix := acctest.RandString(t, 10)
+
 	context := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"random_suffix": random_suffix,
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	resource.Test(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckIAMWorkforcePoolWorkforcePoolProviderScimTenantDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIAMWorkforcePoolProviderScimTenant_basic(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_iam_workforce_pool_provider_scim_tenant.default", "name"),
-					resource.TestCheckResourceAttrSet("google_iam_workforce_pool_provider_scim_tenant.default", "base_uri"),
-				),
+				Config: testAccIAMWorkforcePoolWorkforcePoolProviderScimTenant_full(context),
 			},
 			{
-				ResourceName:      "google_iam_workforce_pool_provider_scim_tenant.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_iam_workforce_pool_provider_scim_tenant.scim_tenant",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"state"},
+			},
+			{
+				Config: testAccIAMWorkforcePoolWorkforcePoolProviderScimTenant_update(context),
+			},
+			{
+				ResourceName:            "google_iam_workforce_pool_provider_scim_tenant.scim_tenant",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"state"},
 			},
 		},
 	})
 }
 
-func testAccIAMWorkforcePoolProviderScimTenant_basic(context map[string]interface{}) string {
-	return fmt.Sprintf(`resource "c" "default" {
-		location                = "us-central1"
-		workforce_pool_id       = "test-pool-%s"
-		workforce_pool_provider_id = "test-provider-%s"
-		display_name            = "Test SCIM Tenant"
-		description             = "Test description"
-		scim_tenant_id          = "scim-tenant-%s"
-	}
-	`, context["random_suffix"], context["random_suffix"], context["random_suffix"])
+func testAccIAMWorkforcePoolWorkforcePoolProviderScimTenant_full(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_iam_workforce_pool" "pool" {
+  workforce_pool_id = "tf-test-example-pool%{random_suffix}"
+  parent            = "organizations/%{org_id}"
+  location          = "global"
 }
 
-func TestAccIAMWorkforcePoolProviderScimTenant_allFields(t *testing.T) {
-	t.Parallel()
-	random_suffix := acctest.RandString(t, 10)
-	context := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"random_suffix": random_suffix,
-	}
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccIAMWorkforcePoolProviderScimTenant_allFields(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_iam_workforce_pool_provider_scim_tenant.default", "name"),
-					resource.TestCheckResourceAttrSet("google_iam_workforce_pool_provider_scim_tenant.default", "base_uri"),
-					resource.TestCheckResourceAttr("google_iam_workforce_pool_provider_scim_tenant.default", "display_name", "Test SCIM Tenant"),
-					resource.TestCheckResourceAttr("google_iam_workforce_pool_provider_scim_tenant.default", "description", "Test description"),
-					resource.TestCheckResourceAttr("google_iam_workforce_pool_provider_scim_tenant.default", "state", "ACTIVE"),
-				),
-			},
-			{
-				ResourceName:      "google_iam_workforce_pool_provider_scim_tenant.default",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
+resource "google_iam_workforce_pool_provider" "provider" {
+    workforce_pool_id    = google_iam_workforce_pool.pool.workforce_pool_id
+    location            = "global"
+    provider_id = "tf-test-provider-%{random_suffix}"
+    attribute_mapping   = {
+    "google.subject"  = "assertion.sub"
+  }
+  oidc {
+    issuer_uri        = "https://accounts.thirdparty.com"
+    client_id         = "client-id"
+    client_secret {
+      value {
+        plain_text = "client-secret"
+      }
+    }
+    web_sso_config {
+      response_type             = "CODE"
+      assertion_claims_behavior = "MERGE_USER_INFO_OVER_ID_TOKEN_CLAIMS"
+      additional_scopes         = ["groups", "roles"]
+    }
+  }
+  display_name        = "Display name"
+  description         = "A sample OIDC workforce pool provider."
+  disabled            = false
+  attribute_condition = "true"
 }
 
-func testAccIAMWorkforcePoolProviderScimTenant_allFields(context map[string]interface{}) string {
-	return fmt.Sprintf(`resource "google_iam_workforce_pool_provider_scim_tenant" "default" {
-		location                = "us-central1"
-		workforce_pool_id       = "test-pool-%s"
-		workforce_pool_provider_id = "test-provider-%s"
-		display_name            = "Test SCIM Tenant"
-		description             = "Test description"
-		state                   = "ACTIVE"
-		scim_tenant_id          = "scim-tenant-%s"
-	}
-	`, context["random_suffix"], context["random_suffix"], context["random_suffix"])
+resource "google_iam_workforce_pool_provider_scim_tenant" "scim_tenant" {
+  location            = "global"
+  workforce_pool_id   = google_iam_workforce_pool.pool.workforce_pool_id
+  provider_id         = google_iam_workforce_pool_provider.provider.provider_id
+  scim_tenant_id      = "example-scim-tenant"
+  display_name        = "Example SCIM Tenant"
+  description         = "A basic SCIM tenant for IAM Workforce Pool Provider"
+  # state is output only, not settable
+}
+  
+`, context)
 }
 
-func TestAccIAMWorkforcePoolProviderScimTenant_stateEnum(t *testing.T) {
-	t.Parallel()
-	enums := []string{"STATE_UNSPECIFIED", "ACTIVE", "DELETED"}
-	for _, state := range enums {
-		random_suffix := acctest.RandString(t, 10)
-		context := map[string]interface{}{
-			"org_id":        envvar.GetTestOrgFromEnv(t),
-			"random_suffix": random_suffix,
-			"state":         state,
-		}
-		resource.Test(t, resource.TestCase{
-			PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-			ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-			Steps: []resource.TestStep{
-				{
-					Config: testAccIAMWorkforcePoolProviderScimTenant_stateEnum(context),
-					Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr("google_iam_workforce_pool_provider_scim_tenant.default", "state", state),
-					),
-				},
-			},
-		})
-	}
+func testAccIAMWorkforcePoolWorkforcePoolProviderScimTenant_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_iam_workforce_pool" "pool" {
+  workforce_pool_id = "tf-test-example-pool%{random_suffix}"
+  parent            = "organizations/%{org_id}"
+  location          = "global"
 }
 
-func testAccIAMWorkforcePoolProviderScimTenant_stateEnum(context map[string]interface{}) string {
-	return fmt.Sprintf(`resource "google_iam_workforce_pool_provider_scim_tenant" "default" {
-		location                = "us-central1"
-		workforce_pool_id       = "test-pool-%s"
-		workforce_pool_provider_id = "test-provider-%s"
-		display_name            = "Test SCIM Tenant"
-		description             = "Test description"
-		state                   = "%s"
-		scim_tenant_id          = "scim-tenant-%s"
-	}
-	`, context["random_suffix"], context["random_suffix"], context["state"], context["random_suffix"])
+resource "google_iam_workforce_pool_provider" "provider" {
+    workforce_pool_id    = google_iam_workforce_pool.pool.workforce_pool_id
+    location            = "global"
+    provider_id = "tf-test-provider-%{random_suffix}"
+    attribute_mapping   = {
+    "google.subject"  = "assertion.sub"
+  }
+  oidc {
+    issuer_uri        = "https://accounts.thirdparty.com"
+    client_id         = "client-id"
+    client_secret {
+      value {
+        plain_text = "client-secret"
+      }
+    }
+    web_sso_config {
+      response_type             = "CODE"
+      assertion_claims_behavior = "MERGE_USER_INFO_OVER_ID_TOKEN_CLAIMS"
+      additional_scopes         = ["groups", "roles"]
+    }
+  }
+  display_name        = "Display name"
+  description         = "A sample OIDC workforce pool provider."
+  disabled            = false
+  attribute_condition = "true"
 }
 
-func TestAccIAMWorkforcePoolProviderScimTenant_invalidScimTenantId(t *testing.T) {
-	t.Parallel()
-	invalidIds := []string{"abc", strings.Repeat("a", 33), "invalid!id", ""}
-	for _, id := range invalidIds {
-		random_suffix := acctest.RandString(t, 10)
-		context := map[string]interface{}{
-			"org_id":        envvar.GetTestOrgFromEnv(t),
-			"random_suffix": random_suffix,
-			"scim_tenant_id": id,
-		}
-		resource.Test(t, resource.TestCase{
-			PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-			ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-			Steps: []resource.TestStep{
-				{
-					Config: testAccIAMWorkforcePoolProviderScimTenant_invalidScimTenantId(context),
-					ExpectError: regexp.MustCompile("(?i)scim_tenant_id"),
-				},
-			},
-		})
-	}
+resource "google_iam_workforce_pool_provider_scim_tenant" "scim_tenant" {
+  location            = "global"
+  workforce_pool_id   = google_iam_workforce_pool.pool.workforce_pool_id
+  provider_id = google_iam_workforce_pool_provider.provider.provider_id
+  scim_tenant_id      = "example-scim-tenant"
+  display_name        = "Example SCIM Tenant - Updated"
+  description         = "A basic SCIM tenant for IAM Workforce Pool Provider - Updated"
+  # state is output only, not settable
 }
-
-func testAccIAMWorkforcePoolProviderScimTenant_invalidScimTenantId(context map[string]interface{}) string {
-	return fmt.Sprintf(`resource "google_iam_workforce_pool_provider_scim_tenant" "default" {
-		location                = "us-central1"
-		workforce_pool_id       = "test-pool-%s"
-		workforce_pool_provider_id = "test-provider-%s"
-		display_name            = "Test SCIM Tenant"
-		description             = "Test description"
-		state                   = "ACTIVE"
-		scim_tenant_id          = "%s"
-	}
-	`, context["random_suffix"], context["random_suffix"], context["scim_tenant_id"])
-}
-
-func TestAccIAMWorkforcePoolProviderScimTenant_updateFields(t *testing.T) {
-	t.Parallel()
-	random_suffix := acctest.RandString(t, 10)
-	context := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"random_suffix": random_suffix,
-	}
-	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccIAMWorkforcePoolProviderScimTenant_allFields(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_iam_workforce_pool_provider_scim_tenant.default", "display_name", "Test SCIM Tenant"),
-					resource.TestCheckResourceAttr("google_iam_workforce_pool_provider_scim_tenant.default", "description", "Test description"),
-				),
-			},
-			{
-				Config: testAccIAMWorkforcePoolProviderScimTenant_updateFields(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_iam_workforce_pool_provider_scim_tenant.default", "display_name", "Updated SCIM Tenant"),
-					resource.TestCheckResourceAttr("google_iam_workforce_pool_provider_scim_tenant.default", "description", "Updated description"),
-					resource.TestCheckResourceAttr("google_iam_workforce_pool_provider_scim_tenant.default", "state", "DELETED"),
-				),
-			},
-		},
-	})
-}
-
-func testAccIAMWorkforcePoolProviderScimTenant_updateFields(context map[string]interface{}) string {
-	return fmt.Sprintf(`resource "google_iam_workforce_pool_provider_scim_tenant" "default" {
-		location                = "us-central1"
-		workforce_pool_id       = "test-pool-%s"
-		workforce_pool_provider_id = "test-provider-%s"
-		display_name            = "Updated SCIM Tenant"
-		description             = "Updated description"
-		state                   = "DELETED"
-		scim_tenant_id          = "scim-tenant-%s"
-	}
-	`, context["random_suffix"], context["random_suffix"], context["random_suffix"])
-}
-
-func TestAccIAMWorkforcePoolProviderScimTenant_immutableFields(t *testing.T) {
-	t.Parallel()
-	random_suffix := acctest.RandString(t, 10)
-	context := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"random_suffix": random_suffix,
-	}
-	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccIAMWorkforcePoolProviderScimTenant_allFields(context),
-			},
-			{
-				Config: testAccIAMWorkforcePoolProviderScimTenant_immutableFields(context),
-				ExpectError: regexp.MustCompile("(?i)cannot update immutable field"),
-			},
-		},
-	})
-}
-
-func testAccIAMWorkforcePoolProviderScimTenant_immutableFields(context map[string]interface{}) string {
-	return fmt.Sprintf(`resource "google_iam_workforce_pool_provider_scim_tenant" "default" {
-		location                = "europe-west1" // attempt to change immutable field
-		workforce_pool_id       = "test-pool-%s"
-		workforce_pool_provider_id = "test-provider-%s"
-		display_name            = "Test SCIM Tenant"
-		description             = "Test description"
-		state                   = "ACTIVE"
-		scim_tenant_id          = "scim-tenant-%s"
-	}
-	`, context["random_suffix"], context["random_suffix"], context["random_suffix"])
+`, context)
 }
