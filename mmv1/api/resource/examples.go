@@ -46,6 +46,10 @@ type Examples struct {
 	// }
 	PrimaryResourceId string `yaml:"primary_resource_id"`
 
+	// The name of the primary resource for use in IAM tests. IAM tests need
+	// a reference to the primary resource to create IAM policies for
+	PrimaryResourceName string `yaml:"primary_resource_name,omitempty"`
+
 	// Optional resource type of the "primary" resource. Used in import tests.
 	// If set, this will override the default resource type implied from the
 	// object parent
