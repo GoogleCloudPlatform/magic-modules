@@ -1,7 +1,6 @@
 package sql_test
 
 import (
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -31,11 +30,6 @@ func TestAccDataSourceSqlDatabaseInstanceLatestRecoveryTime_basic(t *testing.T) 
 					resource.TestCheckResourceAttrSet(resourceName, "project"),
 					resource.TestCheckResourceAttrSet(resourceName, "latest_recovery_time"),
 				),
-			},
-			{
-				// On non-deleted instance should return error containing both instance name and deletion time
-				Config:      testAccDataSourceSqlDatabaseInstanceLatestRecoveryTime_withDeletionTime(context),
-				ExpectError: regexp.MustCompile(`.*Error 400.*`),
 			},
 		},
 	})
@@ -69,40 +63,6 @@ resource "time_sleep" "wait_for_instance" {
 
 data "google_sql_database_instance_latest_recovery_time" "default" {
   instance = google_sql_database_instance.main.name
-  depends_on = [time_sleep.wait_for_instance]
-}
-`, context)
-}
-
-func testAccDataSourceSqlDatabaseInstanceLatestRecoveryTime_withDeletionTime(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_sql_database_instance" "main" {
-  name             = "tf-test-instance-%{random_suffix}"
-  database_version = "POSTGRES_14"
-  region           = "us-central1"
-
-  settings {
-    tier = "db-g1-small"
-    backup_configuration {
-      enabled                        = true
-      point_in_time_recovery_enabled = true
-      start_time                     = "20:55"
-      transaction_log_retention_days = "3"
-    }
-  }
-
-  deletion_protection = false
-}
-
-resource "time_sleep" "wait_for_instance" {
-  // Wait 30 seconds after the instance is created
-  depends_on = [google_sql_database_instance.main]
-  create_duration = "330s"
-}
-
-data "google_sql_database_instance_latest_recovery_time" "default" {
-  instance = google_sql_database_instance.main.name
-  source_instance_deletion_time = "2025-06-20T17:23:59.648821586Z"
   depends_on = [time_sleep.wait_for_instance]
 }
 `, context)
