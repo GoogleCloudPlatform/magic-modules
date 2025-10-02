@@ -39,6 +39,7 @@ async:
   result:
     resource_inside_response: true
 custom_code:
+include_in_tgc_next_DO_NOT_USE: true
 error_abort_predicates:
 
   - 'transport_tpg.Is429QuotaError'

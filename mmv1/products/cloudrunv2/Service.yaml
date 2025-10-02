@@ -359,7 +359,6 @@ properties:
     type: Boolean
     description: |-
       Disables public resolution of the default URI of this service.
-    min_version: 'beta'
   - name: 'template'
     type: NestedObject
     description: |
@@ -929,7 +928,6 @@ properties:
                   description: If true, mount the GCS bucket as read-only
                   required: false
                 - name: 'mountOptions'
-                  min_version: 'beta'
                   type: Array
                   description: |
                     A list of flags to pass to the gcsfuse command for configuring this volume.
