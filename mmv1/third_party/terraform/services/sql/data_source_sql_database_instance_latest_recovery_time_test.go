@@ -16,6 +16,12 @@ func TestAccDataSourceSqlDatabaseInstanceLatestRecoveryTime_basic(t *testing.T) 
 	}
 	resourceName := "data.google_sql_database_instance_latest_recovery_time.default"
 
+	expectedError := regexp.MustCompile(`.*No backups found for instance.* and deletion time seconds: .*`)
+
+	if acctest.IsVcrEnabled() {
+		expectedError = regexp.MustCompile(`.*Error 400.*`)
+	}
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -35,7 +41,7 @@ func TestAccDataSourceSqlDatabaseInstanceLatestRecoveryTime_basic(t *testing.T) 
 			{
 				// On non-deleted instance should return error containing both instance name and deletion time
 				Config:      testAccDataSourceSqlDatabaseInstanceLatestRecoveryTime_withDeletionTime(context),
-				ExpectError: regexp.MustCompile(`.*No backups found for instance.* and deletion time seconds: .*`),
+				ExpectError: expectedError,
 			},
 		},
 	})
