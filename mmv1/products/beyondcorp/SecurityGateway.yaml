@@ -33,7 +33,6 @@ iam_policy:
 examples:
   - name: beyondcorp_security_gateway_basic
     primary_resource_id: example
-    primary_resource_name: 'fmt.Sprintf("default%s", context["random_suffix"])'
     region_override: 'global'
     vars:
       security_gateway_name: default
