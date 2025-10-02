@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -15,6 +16,12 @@ func TestAccDataSourceSqlDatabaseInstanceLatestRecoveryTime_basic(t *testing.T) 
 		"random_suffix": acctest.RandString(t, 10),
 	}
 	resourceName := "data.google_sql_database_instance_latest_recovery_time.default"
+
+	expectedError := regexp.MustCompile(`.*No backups found for instance.* and deletion time seconds: .*`)
+
+	if acctest.IsVcrEnabled() {
+		expectedError = regexp.MustCompile(`.*Error 400.*`)
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -35,7 +42,7 @@ func TestAccDataSourceSqlDatabaseInstanceLatestRecoveryTime_basic(t *testing.T) 
 			{
 				// On non-deleted instance should return error containing both instance name and deletion time
 				Config:      testAccDataSourceSqlDatabaseInstanceLatestRecoveryTime_withDeletionTime(context),
-				ExpectError: regexp.MustCompile(`.*No backups found for instance.* and deletion time seconds: .*`),
+				ExpectError: expectedError,
 			},
 		},
 	})
