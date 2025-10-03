@@ -131,9 +131,56 @@ var (
 		"settings.0.read_pool_auto_scale_config.0.max_node_count",
 		"settings.0.read_pool_auto_scale_config.0.target_metrics",
 		"settings.0.read_pool_auto_scale_config.0.disable_scale_in",
+		"settings.0.read_pool_auto_scale_config.0.scale_in_cooldown_seconds",
+		"settings.0.read_pool_auto_scale_config.0.scale_out_cooldown_seconds",
+
 	}
 )
 
+func nodeCountCustomDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	autoScaleEnabled := d.Get("settings.0.read_pool_auto_scale_config.0.enabled").(bool)
+
+	if !autoScaleEnabled {
+		// Keep the diff
+		return nil
+	}
+
+	currentNodeCountI, _ := d.GetChange("node_count")
+	currentNodeCount := currentNodeCountI.(int)
+	minNodeCount := d.Get("settings.0.read_pool_auto_scale_config.0.min_node_count").(int)
+	maxNodeCount := d.Get("settings.0.read_pool_auto_scale_config.0.max_node_count").(int)
+	if currentNodeCount < minNodeCount {
+		// Node count will only be less than min node count if min node count is being increased.
+		// Set node count to be new min node count.
+		return d.SetNew("node_count", minNodeCount)
+	}
+	if currentNodeCount > maxNodeCount {
+		// Node count will only be greater than max node count if max node count is being descreased.
+		// Set node count to be new max node count.
+		return d.SetNew("node_count", maxNodeCount)
+	}
+
+	// Otherwise when autoscaling is enabled, ignore the node count in config.
+	return d.Clear("node_count")
+}
+
+func autoScaleConfigCustomDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	autoScaleEnabled := d.Get("settings.0.read_pool_auto_scale_config.0.enabled").(bool)
+	if !autoScaleEnabled {
+        // If enabled is false, remove the entire 'autoscale' block from the plan.
+        // Get the current plan for the entire 'settings' block.
+		settingsList := d.Get("settings").([]interface{})
+		if len(settingsList) > 0 {
+    		settings := settingsList[0].(map[string]interface{})
+			settings["read_pool_auto_scale_config"] = nil
+			if err := d.SetNew("settings", []interface{}{settings}); err != nil {
+				return err
+			}
+		}
+    }
+    return nil
+}
+ 
 func diskSizeCutomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	key := "settings.0.disk_size"
 
@@ -198,6 +245,8 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 			customdiff.IfValueChange("instance_type", isReplicaPromoteRequested, checkPromoteConfigurationsAndUpdateDiff),
 			privateNetworkCustomizeDiff,
 			pitrSupportDbCustomizeDiff,
+			nodeCountCustomDiff,
+			//autoScaleConfigCustomDiff,
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -861,23 +910,23 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							},
 							Description: `Config used to determine the final backup settings for the instance`,
 						},
-                                                "read_pool_auto_scale_config": {
-                                                        Type:     schema.TypeList,
-                                                        Optional: true,
-                                                        Computed: true,
-							    MaxItems: 1,
-                                                        Elem: &schema.Resource{
-                                                                Schema: map[string]*schema.Schema{
-                                                                        "enabled": {
-                                                                                Type:         schema.TypeBool,
-                                                                                Optional:     true,
+                        "read_pool_auto_scale_config": {
+                            Type:     schema.TypeList,
+                            Optional: true,
+                            Computed: true,
+							MaxItems: 1,
+                            Elem: &schema.Resource{
+                                Schema: map[string]*schema.Schema{
+                                    "enabled": {
+                                        Type:         schema.TypeBool,
+                                        Optional:     true,
+										Default: 	  false,
 										AtLeastOneOf: readPoolAutoScaleConfigKeys,
 										Description:  `True if Read Pool Auto Scale is enabled.`,
 									},
 									"max_node_count": {
 										Type:         schema.TypeInt,
 										Optional:     true,
-										Default:      20,
 										ValidateFunc: validation.IntBetween(1, 20),
 										AtLeastOneOf: readPoolAutoScaleConfigKeys,
 										Description:  `Maximum number of nodes in the read pool.`,
@@ -885,7 +934,6 @@ API (for read pools, effective_availability_type may differ from availability_ty
 									"min_node_count": {
 										Type:         schema.TypeInt,
 										Optional:     true,
-										Default:      2,
 										ValidateFunc: validation.IntBetween(1, 20),
 										AtLeastOneOf: readPoolAutoScaleConfigKeys,
 										Description:  `Minimum number of nodes in the read pool.`,
@@ -913,9 +961,20 @@ API (for read pools, effective_availability_type may differ from availability_ty
 									"disable_scale_in": {
 										Type:         schema.TypeBool,
 										Optional:     true,
-										Default:      false,
 										AtLeastOneOf: readPoolAutoScaleConfigKeys,
 										Description:  `True if auto scale in is disabled.`,
+									},
+									"scale_in_cooldown_seconds": {
+										Type:         schema.TypeInt,
+                                        Optional:     true,
+                                        AtLeastOneOf: readPoolAutoScaleConfigKeys,
+                                        Description:  `The cooldown period for scale in operations.`,
+                                    },
+									"scale_out_cooldown_seconds": {
+                                        Type:         schema.TypeInt,
+                                        Optional:     true,
+                                        AtLeastOneOf: readPoolAutoScaleConfigKeys,
+                                        Description:  `The cooldown period for scale out operations.`,
 									},
 								},
 							},
@@ -1039,9 +1098,8 @@ API (for read pools, effective_availability_type may differ from availability_ty
 				Type:             schema.TypeInt,
 				Computed:         true,
 				Optional:         true,
-				Description:      `For a read pool instance, the number of nodes in the read pool.`,
+				Description:      `For a read pool instance, the number of nodes in the read pool. For read pools with auto scaling enabled, this field is read only.`,
 			},
-
 			"replica_configuration": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -1473,7 +1531,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		instance.InstanceType = d.Get("instance_type").(string)
 	}
 
-	if _, ok := d.GetOk("node_count"); ok {
+	if _, ok := d.GetOk("node_count"); ok {		
 		instance.NodeCount = int64(d.Get("node_count").(int))
 	}
 
@@ -2071,14 +2129,17 @@ func expandReadPoolAutoScaleConfig(configured []interface{}) *sqladmin.ReadPoolA
 	}
 
 	_readPoolAutoScaleConfig := configured[0].(map[string]interface{})
+	if !_readPoolAutoScaleConfig["enabled"].(bool) {
+		return nil
+	}
 	return &sqladmin.ReadPoolAutoScaleConfig{
 		Enabled: _readPoolAutoScaleConfig["enabled"].(bool),
 		MaxNodeCount: int64(_readPoolAutoScaleConfig["max_node_count"].(int)),
 		MinNodeCount: int64(_readPoolAutoScaleConfig["min_node_count"].(int)),
 		TargetMetrics: expandTargetMetrics(_readPoolAutoScaleConfig["target_metrics"].(*schema.Set).List()),
                 DisableScaleIn: _readPoolAutoScaleConfig["disable_scale_in"].(bool),
-
-
+		ScaleInCooldownSeconds: int64(_readPoolAutoScaleConfig["scale_in_cooldown_seconds"].(int)),
+		ScaleOutCooldownSeconds: int64(_readPoolAutoScaleConfig["scale_out_cooldown_seconds"].(int)),
 	}
 
 }
@@ -2461,6 +2522,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
+
 	instance = &sqladmin.DatabaseInstance{
 		Settings: expandSqlDatabaseInstanceSettings(desiredSetting.([]interface{}), databaseVersion),
 	}
@@ -2759,6 +2821,12 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 
 	if settings.ReadPoolAutoScaleConfig != nil {
 		data["read_pool_auto_scale_config"] = flattenReadPoolAutoScaleConfig(settings.ReadPoolAutoScaleConfig)
+	} else {
+		data["read_pool_auto_scale_config"] = []map[string]interface{}{
+			{
+				"enabled": false,
+			},
+		}
 	}
 
 	data["disk_autoresize"] = settings.StorageAutoResize
@@ -3165,6 +3233,8 @@ func flattenReadPoolAutoScaleConfig(readPoolAutoScaleConfig *sqladmin.ReadPoolAu
 		"max_node_count": readPoolAutoScaleConfig.MaxNodeCount,
 		"target_metrics":   flattenTargetMetrics(readPoolAutoScaleConfig.TargetMetrics),
 		"disable_scale_in":  readPoolAutoScaleConfig.DisableScaleIn,
+		"scale_in_cooldown_seconds": readPoolAutoScaleConfig.ScaleInCooldownSeconds,
+                "scale_out_cooldown_seconds": readPoolAutoScaleConfig.ScaleOutCooldownSeconds,
 	}
 
 	return []map[string]interface{}{data}
