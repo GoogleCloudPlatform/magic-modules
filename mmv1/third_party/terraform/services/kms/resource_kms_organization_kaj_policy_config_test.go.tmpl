@@ -74,9 +74,6 @@ resource "google_kms_organization_kaj_policy_config" "example" {
 	provider 				= google-beta
 	organization 				= "%{org_id}"
 	default_key_access_justification_policy {
-		allowed_access_reasons = [
-			"CUSTOMER_INITIATED_ACCESS",
-		]
 	}
 }
 `, context)
