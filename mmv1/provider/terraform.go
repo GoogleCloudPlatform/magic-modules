@@ -159,16 +159,48 @@ func (t *Terraform) GenerateResourceMetadata(object api.Resource, templateData T
 }
 
 func (t *Terraform) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
-	eligibleExample := false
-	for _, example := range object.Examples {
-		if !example.ExcludeTest {
-			if object.ProductMetadata.VersionObjOrClosest(t.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
-				eligibleExample = true
+	////////////////////////////////
+	// Remove after sample conversion
+
+	if object.Samples != nil && object.Examples != nil{
+		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
+	}
+
+	if object.Samples == nil {
+		eligibleExample := false
+		for _, example := range object.Examples {
+			if !example.ExcludeTest {
+				if object.ProductMetadata.VersionObjOrClosest(t.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
+					eligibleExample = true
+					break
+				}
+			}
+		}
+		if !eligibleExample {
+			return
+		}
+
+		productName := t.Product.ApiName
+		targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
+		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+			log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+		}
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_test.go", t.ResourceGoFilename(object)))
+		templateData.GenerateTestFile(targetFilePath, object)
+		return
+	}
+	////////////////////////////////
+
+	eligibleSample := false
+	for _, sample := range object.Samples {
+		if !sample.ExcludeTest {
+			if object.ProductMetadata.VersionObjOrClosest(t.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
+				eligibleSample = true
 				break
 			}
 		}
 	}
-	if !eligibleExample {
+	if !eligibleSample {
 		return
 	}
 
@@ -177,16 +209,8 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_test.go", t.ResourceGoFilename(object)))
-	templateData.GenerateTestFile(targetFilePath, object)
-	if object.Samples != nil {
-		// if object.Examples != nil {
-		// 	log.Fatalf("Both Samples and Examples block exist in %v", productName)
-		// }
-		targetNewFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_test.go", t.ResourceGoFilename(object)))
-		templateData.GenerateNewTestFile(targetNewFilePath, object)
-	}
-
+	targetNewFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_test.go", t.ResourceGoFilename(object)))
+	templateData.GenerateTestFileSample(targetNewFilePath, object)
 }
 
 func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData TemplateData, outputFolder string) {
@@ -277,13 +301,34 @@ func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData Template
 		templateData.GenerateIamPolicyFile(targetFilePath, object)
 
 		// Only generate test if testable examples exist.
+		samples := google.Reject(object.Samples, func(s resource.Sample) bool {
+			return s.ExcludeTest
+		})
+        ////////////////////////////////
+	    // Remove after sample conversion
 		examples := google.Reject(object.Examples, func(e resource.Examples) bool {
 			return e.ExcludeTest
 		})
+
+		// fmt.Println("??????????????????????????????????????///////////////////////////////////")
+		// fmt.Println("examples #", len(examples))
+		// fmt.Println("samples #", len(samples))
+
+		if len(examples) != 0 && len(samples) != 0 {
+			log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
+		}
+
 		if len(examples) != 0 {
 			targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s_generated_test.go", t.ResourceGoFilename(object)))
 			templateData.GenerateIamPolicyTestFile(targetFilePath, object)
 		}
+		////////////////////////////////
+		if len(samples) != 0 {
+			targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s_generated_test.go", t.ResourceGoFilename(object)))
+			templateData.GenerateIamPolicyTestFileSample(targetFilePath, object)
+		}
+
+
 	}
 	if generateDocs {
 		t.GenerateIamDocumentation(object, templateData, outputFolder, generateCode, generateDocs)
