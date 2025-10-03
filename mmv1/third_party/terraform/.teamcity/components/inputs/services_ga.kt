@@ -609,7 +609,7 @@ var ServicesListGa = mapOf(
     "observability" to mapOf(
         "name" to "observability",
         "displayName" to "Observability",
-        "path", to "./google/services/observability"
+        "path" to "./google/services/observability"
     ),
     "oracledatabase" to mapOf(
         "name" to "oracledatabase",
