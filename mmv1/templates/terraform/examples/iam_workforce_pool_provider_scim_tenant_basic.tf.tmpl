@@ -6,8 +6,8 @@ resource "google_iam_workforce_pool" "pool" {
 
 resource "google_iam_workforce_pool_provider" "provider" {
     location = "global"
-    workforce_pool_id = "workforce-pool-id"
-    provider_id       = "scim-provider-id"
+    workforce_pool_id = google_iam_workforce_pool.pool.workforce_pool_id
+    provider_id = "{{index $.Vars "provider_id"}}"
     attribute_mapping   = {
     "google.subject"  = "assertion.sub"
     }
