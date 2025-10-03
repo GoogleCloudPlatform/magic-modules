@@ -45,18 +45,21 @@ examples:
   - name: 'network_management_connectivity_test_instances'
     primary_resource_id: 'instance-test'
     vars:
+      connectivity_test_name: 'conn-test-instances'
       network_name: 'conn-test-net'
       source_instance: 'source-vm'
       dest_instance: 'dest-vm'
   - name: 'network_management_connectivity_test_addresses'
     primary_resource_id: 'address-test'
     vars:
+      connectivity_test_name: 'conn-test-addresses'
       network: 'connectivity-vpc'
       source_addr: 'src-addr'
       dest_addr: 'dest-addr'
   - name: 'network_management_connectivity_test_endpoints'
     primary_resource_id: 'endpoints-test'
     vars:
+      connectivity_test_name: 'conn-test-endpoints'
 parameters:
 properties:
   - name: 'name'
