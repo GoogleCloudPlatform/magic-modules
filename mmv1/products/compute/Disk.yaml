@@ -347,6 +347,9 @@ properties:
     default_from_api: true
     update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}/resize'
     update_verb: 'POST'
+  - name: 'goVersion'
+    type: String
+    send_empty_value: true
   - name: 'users'
     type: Array
     description: |
