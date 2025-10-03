@@ -38,6 +38,9 @@ custom_code:
   pre_create: 'templates/terraform/pre_create/cloud_asset_feed.go.tmpl'
   post_create: 'templates/terraform/post_create/cloud_asset_feed.go.tmpl'
   custom_import: 'templates/terraform/custom_import/cloud_asset_feed.go.tmpl'
+include_in_tgc_next_DO_NOT_USE: true
+cai_base_url: 'projects/{{project}}/feeds'
+tgc_ignore_terraform_encoder: true
 examples:
   - name: 'cloud_asset_project_feed'
     primary_resource_id: 'project_feed'

@@ -38,6 +38,7 @@ async:
     resource_inside_response: true
 custom_code:
   constants: 'templates/terraform/constants/apphub_service_project.go.tmpl'
+include_in_tgc_next_DO_NOT_USE: true
 examples:
   - name: 'service_project_attachment_basic'
     config_path: 'templates/terraform/examples/apphub_service_project_attachment_basic.tf.tmpl'
@@ -57,6 +58,10 @@ examples:
       org_id: 'ORG_ID'
       host_project: 'PROJECT_NAME'
     external_providers: ["random", "time"]
+    tgc_test_ignore_extra:
+      # This field is not converted from cai2hcl, as this field is not useful.
+      # The diff_suppress_func suppresses the diff for this field for all of cases, then this field is not in terraform plan
+      - 'service_project'
 parameters:
   - name: 'serviceProjectAttachmentId'
     type: String

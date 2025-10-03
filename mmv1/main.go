@@ -195,7 +195,7 @@ func GenerateProduct(version, providerName, productName, outputPath string, prod
 			overrideApiProduct := &api.Product{}
 			api.Compile(productOverridePath, overrideApiProduct, overrideDirectory)
 
-			api.Merge(reflect.ValueOf(productApi), reflect.ValueOf(*overrideApiProduct))
+			api.Merge(reflect.ValueOf(productApi), reflect.ValueOf(*overrideApiProduct), version)
 		} else {
 			api.Compile(productOverridePath, productApi, overrideDirectory)
 		}
@@ -235,7 +235,10 @@ func GenerateProduct(version, providerName, productName, outputPath string, prod
 		resource.SourceYamlFile = resourceYamlPath
 
 		resource.TargetVersionName = version
-		resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil, "")
+		// SetDefault before AddExtraFields to ensure relevant metadata is available on existing fields
+		resource.SetDefault(productApi)
+		resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
+		// SetDefault after AddExtraFields to ensure relevant metadata is available for the newly generated fields
 		resource.SetDefault(productApi)
 		resource.Validate()
 		resources = append(resources, resource)
@@ -262,13 +265,17 @@ func GenerateProduct(version, providerName, productName, outputPath string, prod
 				api.Compile(baseResourcePath, resource, overrideDirectory)
 				overrideResource := &api.Resource{}
 				api.Compile(overrideYamlPath, overrideResource, overrideDirectory)
-				api.Merge(reflect.ValueOf(resource), reflect.ValueOf(*overrideResource))
+				api.Merge(reflect.ValueOf(resource), reflect.ValueOf(*overrideResource), version)
+				resource.SourceYamlFile = baseResourcePath
 			} else {
 				api.Compile(overrideYamlPath, resource, overrideDirectory)
 			}
 
 			resource.TargetVersionName = version
-			resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil, "")
+			// SetDefault before AddExtraFields to ensure relevant metadata is available on existing fields
+			resource.SetDefault(productApi)
+			resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
+			// SetDefault after AddExtraFields to ensure relevant metadata is available for the newly generated fields
 			resource.SetDefault(productApi)
 			resource.Validate()
 			resources = append(resources, resource)

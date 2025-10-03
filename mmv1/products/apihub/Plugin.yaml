@@ -130,6 +130,7 @@ properties:
   - name: configTemplate
     type: NestedObject
     description: ConfigTemplate represents the configuration template for a plugin.
+    default_from_api: true
     properties:
       - name: authConfigTemplate
         type: NestedObject

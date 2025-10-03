@@ -67,6 +67,8 @@ examples:
     primary_resource_id: 'default'
     vars:
       alloydb_cluster_name: 'alloydb-cluster'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'alloydb_cluster_before_upgrade'
     primary_resource_id: 'default'
     vars:
@@ -75,6 +77,8 @@ examples:
       network_name: 'alloydb-network'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "alloydb-1")'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'alloydb_cluster_after_upgrade'
     primary_resource_id: 'default'
     vars:
@@ -83,10 +87,14 @@ examples:
       network_name: 'alloydb-network'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "alloydb-1")'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'alloydb_cluster_full'
     primary_resource_id: 'full'
     vars:
       alloydb_cluster_name: 'alloydb-cluster-full'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'alloydb_cluster_restore'
     primary_resource_id: 'source'
     vars:
@@ -99,6 +107,7 @@ examples:
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "alloydb-instance-basic")'
     ignore_read_extra:
+      - 'deletion_protection'
       - 'reconciling'
       - 'update_time'
     exclude_test: true
@@ -108,6 +117,8 @@ examples:
       alloydb_primary_cluster_name: 'alloydb-primary-cluster'
       alloydb_primary_instance_name: 'alloydb-primary-instance'
       alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
+    ignore_read_extra:
+      - 'deletion_protection'
     exclude_test: true
   - name: 'alloydb_secondary_cluster_basic_test'
     primary_resource_id: 'secondary'
@@ -118,6 +129,8 @@ examples:
       network_name: 'alloydb-network'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
+    ignore_read_extra:
+      - 'deletion_protection'
     exclude_docs: true
 virtual_fields:
   - name: 'deletion_policy'
@@ -128,6 +141,14 @@ virtual_fields:
       Possible values: DEFAULT, FORCE
     type: String
     default_value: "DEFAULT"
+  - name: 'deletion_protection'
+    description: |
+      Whether Terraform will be prevented from destroying the cluster.
+      When the field is set to true or unset in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the cluster will fail.
+      When the field is set to false, deleting the cluster is allowed.
+    type: Boolean
+    default_value: true
   - name: 'skip_await_major_version_upgrade'
     type: Boolean
     default_value: true
@@ -303,7 +324,6 @@ properties:
       Initial user to setup during cluster creation.
     ignore_read: true
     custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_input_user_flatten.go.tmpl'
-    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/alloydb_cluster_input_user_flatten.go.tmpl'
     properties:
       - name: 'user'
         type: String

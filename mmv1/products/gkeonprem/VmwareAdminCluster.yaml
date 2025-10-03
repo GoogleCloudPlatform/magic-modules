@@ -699,3 +699,16 @@ properties:
       - type: String
         name: 'caCert'
         description: The CA certificate public key for private registry.
+  - type: NestedObject
+    name: proxy
+    description: Configuration for proxy.
+    properties:
+      - type: String
+        name: 'url'
+        required: true
+        description: The proxy url.
+      - type: String
+        name: 'noProxy'
+        description: |
+          A comma-separated list of IP addresses, IP address ranges,
+          host names, and domain names that should not go through the proxy server.
