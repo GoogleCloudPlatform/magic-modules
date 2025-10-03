@@ -163,23 +163,6 @@ func nodeCountCustomDiff(ctx context.Context, d *schema.ResourceDiff, meta inter
 	// Otherwise when autoscaling is enabled, ignore the node count in config.
 	return d.Clear("node_count")
 }
-
-func autoScaleConfigCustomDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	autoScaleEnabled := d.Get("settings.0.read_pool_auto_scale_config.0.enabled").(bool)
-	if !autoScaleEnabled {
-        // If enabled is false, remove the entire 'autoscale' block from the plan.
-        // Get the current plan for the entire 'settings' block.
-		settingsList := d.Get("settings").([]interface{})
-		if len(settingsList) > 0 {
-    		settings := settingsList[0].(map[string]interface{})
-			settings["read_pool_auto_scale_config"] = nil
-			if err := d.SetNew("settings", []interface{}{settings}); err != nil {
-				return err
-			}
-		}
-    }
-    return nil
-}
  
 func diskSizeCutomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	key := "settings.0.disk_size"
@@ -246,7 +229,6 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 			privateNetworkCustomizeDiff,
 			pitrSupportDbCustomizeDiff,
 			nodeCountCustomDiff,
-			//autoScaleConfigCustomDiff,
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -929,14 +911,14 @@ API (for read pools, effective_availability_type may differ from availability_ty
 										Optional:     true,
 										ValidateFunc: validation.IntBetween(1, 20),
 										AtLeastOneOf: readPoolAutoScaleConfigKeys,
-										Description:  `Maximum number of nodes in the read pool.`,
+										Description:  `Maximum number of nodes in the read pool. If set to lower than current node count, node count will be updated.`,
 									},
 									"min_node_count": {
 										Type:         schema.TypeInt,
 										Optional:     true,
 										ValidateFunc: validation.IntBetween(1, 20),
 										AtLeastOneOf: readPoolAutoScaleConfigKeys,
-										Description:  `Minimum number of nodes in the read pool.`,
+										Description:  `Minimum number of nodes in the read pool. If set to higher than current node count, node count will be updated.`,
 									},
 									"target_metrics": {
 										Type:         schema.TypeSet,
@@ -1376,12 +1358,6 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Optional:    true,
 							Description: `The name of the allocated ip range for the private ip CloudSQL instance. For example: "google-managed-services-default". If set, the cloned instance ip will be created in the allocated range. The range name must comply with [RFC 1035](https://tools.ietf.org/html/rfc1035). Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.`,
 						},
-						"source_instance_deletion_time": {
-							Type:             schema.TypeString,
-							Optional:         true,
-							DiffSuppressFunc: tpgresource.TimestampDiffSuppress(time.RFC3339Nano),
-							Description:      `The timestamp of when the source instance was deleted for a clone from a deleted instance.`,
-						},
 					},
 				},
 			},
@@ -1807,7 +1783,6 @@ func expandCloneContext(configured []interface{}) (*sqladmin.CloneContext, strin
 		PreferredZone:    _cloneConfiguration["preferred_zone"].(string),
 		DatabaseNames:    databaseNames,
 		AllocatedIpRange: _cloneConfiguration["allocated_ip_range"].(string),
-		SourceInstanceDeletionTime: _cloneConfiguration["source_instance_deletion_time"].(string),
 	}, _cloneConfiguration["source_instance_name"].(string)
 }
 
