@@ -65,7 +65,6 @@ sweeper:
 examples:
   - name: 'cloudfunctions2_basic'
     primary_resource_id: 'function'
-    primary_resource_name: 'fmt.Sprintf("tf-test-function-v2%s", context["random_suffix"])'
     vars:
       function: 'function-v2'
       bucket_name: 'gcf-source'
@@ -157,7 +156,6 @@ examples:
       - 'build_config.0.source.0.storage_source.0.bucket'
   - name: 'cloudfunctions2_basic_builder'
     primary_resource_id: 'function'
-    primary_resource_name: 'fmt.Sprintf("tf-test-function-v2%s", context["random_suffix"])'
     vars:
       function: 'function-v2'
       bucket_name: 'gcf-source'

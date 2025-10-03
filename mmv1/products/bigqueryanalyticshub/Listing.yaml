@@ -47,7 +47,6 @@ exclude_sweeper: true
 examples:
   - name: 'bigquery_analyticshub_listing_basic'
     primary_resource_id: 'listing'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
     region_override: 'US'
     vars:
       data_exchange_id: 'my_data_exchange'
@@ -55,7 +54,6 @@ examples:
       desc: 'example data exchange'
   - name: 'bigquery_analyticshub_listing_restricted'
     primary_resource_id: 'listing'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
     region_override: 'US'
     vars:
       data_exchange_id: 'my_data_exchange'
@@ -63,7 +61,6 @@ examples:
       desc: 'example data exchange'
   - name: 'bigquery_analyticshub_listing_dcr'
     primary_resource_id: 'listing'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
     region_override: 'US'
     vars:
       data_exchange_id: 'dcr_data_exchange'
@@ -71,7 +68,6 @@ examples:
       desc: 'example dcr data exchange'
   - name: 'bigquery_analyticshub_listing_log_linked_dataset_query_user'
     primary_resource_id: 'listing'
-    primary_resource_name: 'fmt.Sprintf("tf_test_log_email_de%s", context["random_suffix"]),fmt.Sprintf("tf_test_log_email_listing%s", context["random_suffix"])'
     region_override: 'US'
     vars:
       data_exchange_id: 'tf_test_log_email_de'
@@ -80,7 +76,6 @@ examples:
       description: 'Example for log email test'
   - name: 'bigquery_analyticshub_listing_pubsub'
     primary_resource_id: 'listing'
-    primary_resource_name: 'fmt.Sprintf("tf_test_pubsub_de%s", context["random_suffix"]),fmt.Sprintf("tf_test_listing%s", context["random_suffix"])'
     region_override: 'US'
     vars:
       data_exchange_id: 'tf_test_pubsub_data_exchange'
@@ -89,7 +84,6 @@ examples:
       description: 'Example for pubsub topic source'
   - name: 'bigquery_analyticshub_listing_dcr_routine'
     primary_resource_id: 'listing'
-    primary_resource_name: 'fmt.Sprintf("tf_test_pubsub_de%s", context["random_suffix"]),fmt.Sprintf("tf_test_listing%s", context["random_suffix"])'
     region_override: 'US'
     min_version: beta
     vars:
@@ -100,7 +94,6 @@ examples:
       desc: 'Example for listing with routine'
   - name: 'bigquery_analyticshub_public_listing'
     primary_resource_id: 'listing'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
     region_override: 'US'
     vars:
       data_exchange_id: 'my_data_exchange'
@@ -108,7 +101,6 @@ examples:
       desc: 'example public listing'
   - name: 'bigquery_analyticshub_listing_marketplace'
     primary_resource_id: 'listing'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
     region_override: 'us'
     vars:
       data_exchange_id: 'my_data_exchange'

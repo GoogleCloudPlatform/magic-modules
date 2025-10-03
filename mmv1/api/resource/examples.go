@@ -144,10 +144,6 @@ type Examples struct {
 	// Whether to skip import tests for this example
 	ExcludeImportTest bool `yaml:"exclude_import_test,omitempty"`
 
-	// The name of the primary resource for use in IAM tests. IAM tests need
-	// a reference to the primary resource to create IAM policies for
-	PrimaryResourceName string `yaml:"primary_resource_name,omitempty"`
-
 	// The name of the location/region override for use in IAM tests. IAM
 	// tests may need this if the location is not inherited on the resource
 	// for one reason or another

@@ -48,7 +48,6 @@ custom_code:
 examples:
   - name: 'dataproc_metastore_federation_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])'
     vars:
       federation_id: 'metastore-fed'
       service_id: 'metastore-service'
@@ -56,7 +55,6 @@ examples:
       - 'deletion_protection'
   - name: 'dataproc_metastore_federation_bigquery'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])'
     vars:
       federation_id: 'metastore-fed'
       service_id: 'metastore-service'

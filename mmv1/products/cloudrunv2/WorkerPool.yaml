@@ -53,7 +53,6 @@ taint_resource_on_failed_create: true
 examples:
   - name: 'cloudrunv2_worker_pool_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-worker-pool%s", context["random_suffix"])'
     vars:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
     ignore_read_extra:
@@ -66,7 +65,6 @@ examples:
       - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_sql'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])'
     vars:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
       secret_id: 'secret-1'
@@ -80,21 +78,18 @@ examples:
       - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_directvpc'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])'
     vars:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_gpu'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])'
     vars:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_secret'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])'
     vars:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
       secret_id: 'secret-1'
@@ -102,14 +97,12 @@ examples:
       - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_multicontainer'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-worker-pool%s", context["random_suffix"])'
     vars:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_mount_gcs'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-worker-pool-%s", context["random_suffix"])'
     vars:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
     ignore_read_extra:
@@ -118,7 +111,6 @@ examples:
     skip_vcr: true
   - name: 'cloudrunv2_worker_pool_mount_nfs'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-worker-pool-%s", context["random_suffix"])'
     vars:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
     ignore_read_extra:
@@ -127,14 +119,12 @@ examples:
     skip_vcr: true
   - name: 'cloudrunv2_worker_pool_custom_audiences'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-worker-pool-%s", context["random_suffix"])'
     vars:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_startup_liveness_probe'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])'
     vars:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
       vpc_access_connector_name: 'wp-connector'

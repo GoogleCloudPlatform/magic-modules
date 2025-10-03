@@ -39,7 +39,6 @@ custom_code:
 examples:
   - name: 'dataproc_metastore_service_table_iam'
     primary_resource_id: 'dpms_service'
-    primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv-%s", context["random_suffix"]), "testdb", "testtbl"'
 parameters:
 properties:
   - name: 'name'
