@@ -46,15 +46,10 @@ async:
   result:
     resource_inside_response: true
 examples:
-  - name: 'discoveryengine_dataconnector_jira_basic'
-    primary_resource_id: 'jira-basic'
+  - name: 'discoveryengine_dataconnector_servicenow_basic'
+    primary_resource_id: 'servicenow-basic'
     vars:
       collection_id: 'collection-id'
-      client_id: 'client-id'
-      client_secret: 'client-secret'
-    test_vars_overrides:
-      client_id: '"tf-test-client-id"'
-      client_secret: '"tf-test-client-secret"'
 parameters:
   - name: 'location'
     type: String
@@ -275,3 +270,36 @@ properties:
       'STATE_UNSPECIFIED', 'CREATING', 'ACTIVE', 'FAILED', 'RUNNING', 'WARNING',
       'INITIALIZATION_FAILED', 'UPDATING'.
     output: true
+  - name: 'connectorModes'
+    type: Array
+    description: |
+      The modes enabled for this connector. The possible value can be:
+      'CONNECTOR_MODE_UNSPECIFIED', 'DATA_INGESTION', 'ACTIONS', 'FEDERATED'
+      'EUA', 'FEDERATED_AND_EUA'.
+    item_type:
+      type: String
+  - name: 'syncMode'
+    type: String
+    description: |
+      The data synchronization mode supported by the data connector. The possible value can be:
+      'UNSPECIFIED', 'PERIODIC', 'STREAMING'.
+    ignore_read: true
+  - name: 'incrementalRefreshInterval'
+    type: String
+    description: |
+      The refresh interval specifically for incremental data syncs. If unset,
+      incremental syncs will use the default from env, set to 3hrs.
+      The minimum is 30 minutes and maximum is 7 days. Applicable to only 3P
+      connectors. When the refresh interval is
+      set to the same value as the incremental refresh interval, incremental
+      sync will be disabled.
+  - name: 'autoRunDisabled'
+    type: Boolean
+    description: |
+      Indicates whether full syncs are paused for this connector
+    ignore_read: true
+  - name: 'incrementalSyncDisabled'
+    type: Boolean
+    description: |
+      Indicates whether incremental syncs are paused for this connector.
+    ignore_read: true
