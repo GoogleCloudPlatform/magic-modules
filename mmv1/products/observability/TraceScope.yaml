@@ -75,7 +75,7 @@ properties:
       A trace scope can include a maximum of 20 projects.
     required: true
     item_type:
-    type: String
+      type: String
   - name: updateTime
     type: String
     description: The last update timestamp of the trace scope.
