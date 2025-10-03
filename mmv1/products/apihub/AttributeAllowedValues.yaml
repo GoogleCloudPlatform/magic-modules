@@ -19,7 +19,7 @@ description: |-
   immutable values are automatically preserved and cannot be modified or removed.
 references:
   guides:
-    "Manage attributes": "https://cloud.google.com/apigee/docs/api-hub/manage-attributes"
+    "Manage attributes": "https://cloud.google.com/apigee/docs/apihub/manage-attributes"
   api: "https://cloud.google.com/apigee/docs/reference/apis/apihub/rest/v1/projects.locations.attributes"
 base_url: projects/{{project}}/locations/{{location}}/attributes
 self_link: projects/{{project}}/locations/{{location}}/attributes/{{attribute_id}}
