@@ -11,7 +11,7 @@
 //     changes will be clobbered when the file is regenerated.
 //
 //     Please read more about how to change this file in
-//     .github/CONTRIBUTING.md.
+//     .github/CONTRIBUTING.md. test
 //
 // ----------------------------------------------------------------------------
 
@@ -37,45 +37,93 @@ import (
 	transport_tpg "{{ $.ImportPath  }}/transport"
 )
 
-{{ range $e := $.Res.TestSamples }}
-func TestAcc{{ $e.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T) {
+{{ range $s := $.Res.TestSamples }}
+func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T) {
+	{{- if $s.SkipTest }}
+	t.Skip("{{$s.SkipTest}}")
+	{{- end }}
+
+	{{- if $s.SkipVcr }}
+	acctest.SkipIfVcr(t)
+	{{- end }}
 	t.Parallel()
 
-	context := map[string]interface{}{
+	{{- if $s.BootstrapIam }}
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	{{- range $iam := $s.BootstrapIam }}
+		{
+			Member: "{{$iam.Member}}",
+			Role:   "{{$iam.Role}}",
+		},
+	{{- end}}
+	})
+	{{- end }}
 
+	{{- range $i, $st := $s.TestSteps }}
+	{{- if eq $i 0 }}
+	
+	context := map[string]interface{}{
+	{{- else }}
+	context_{{ $i }} := map[string]interface{}{
+	{{- end }}
+		{{- template "EnvVarContext" dict "TestEnvVars" $st.TestEnvVars "HasNewLine" false}}
+		{{- range $varKey, $varVal := $st.TestVarsOverrides }}
+		"{{$varKey}}": {{$varVal}},
+		{{- end }}
 		"random_suffix": acctest.RandString(t, 10),
-	}
+		}
+	{{- end }}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+	{{- if $.Res.VersionedProvider $s.MinVersion }}
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+	{{- else }}
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+	{{- end }}
+	{{- if $s.ExternalProviders }}
+		ExternalProviders: map[string]resource.ExternalProvider{
+		{{- range $provider := $s.ExternalProviders }}
+			"{{$provider}}": {},
+		{{- end }}
+		},
+	{{- end }}
 		CheckDestroy: testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t),
 		Steps: []resource.TestStep{
-		{{ range $s := $e.Steps }}
+		{{- range $i, $st := $s.TestSteps }}
 			{
-				Config: testAcc{{ $s.TestStepSlug $.Res.ProductMetadata.Name $.Res.Name }}(context),
+			{{- if eq $i 0 }}
+			 Config: testAcc{{ $st.TestStepSlug $.Res.ProductMetadata.Name $.Res.Name }}(context),
+			{{- else }}
+			 Config: testAcc{{ $st.TestStepSlug $.Res.ProductMetadata.Name $.Res.Name }}(context_{{ $i }}),
+			{{- end }}
 			},
+			{{- if not $st.ExcludeImportTest }}
 			{
-				ResourceName:      "{{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}",
+				ResourceName:      "{{ $s.ResourceType $.Res.TerraformName }}.{{ $s.PrimaryResourceId }}",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{},
+			{{- if $.Res.IgnoreReadPropertiesStepToString $st }}
+				ImportStateVerifyIgnore: {{ $.Res.IgnoreReadPropertiesStepToString $st }},
 			},
-	  {{ end }}
+			{{- end }}
+			{{- end }}
+	  {{- end }}
 		},
 	})
 }
 
-{{ end }}
-
-{{ range $e := $.Res.TestSteps }}
-
-func testAcc{{ $e.TestStepSlug $.Res.ProductMetadata.Name $.Res.Name }}(context map[string]interface{}) string {
+{{ range $st := $s.NewConfigFuncs }}
+func testAcc{{ $st.TestStepSlug $.Res.ProductMetadata.Name $.Res.Name }}(context map[string]interface{}) string {
   return acctest.Nprintf(`
+{{ $st.TestHCLText -}}
 `, context)
 }
+{{ end }}
+
 
 {{ end }}
+
 
 {{ if not $.Res.ExcludeDelete }}
 func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *terraform.State) error {
