@@ -43,7 +43,7 @@ func TestAcc{{ $.ResourceName }}IamBindingGenerated(t *testing.T) {
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_binding.foo",
-				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("foo")
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -55,7 +55,7 @@ func TestAcc{{ $.ResourceName }}IamBindingGenerated(t *testing.T) {
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_binding.foo",
-				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("foo")
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -90,7 +90,7 @@ func TestAcc{{ $.ResourceName }}IamMemberGenerated(t *testing.T) {
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_member.foo",
-				ImportStateIdFunc: generate{{ $.ResourceName }}IAMMemberStateID("foo")
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMMemberStateID("foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -654,7 +654,7 @@ func generate{{ $.ResourceName }}IAMPolicyStateID(iamResourceName string) func (
 		}
 		fmt.Printf("raw state %s", rawState)
 		var values []string
-		for _, param := range {{ $.IamResourceParams }} {
+		for _, param := range {{ printf "%#v" $.IamResourceParams }} {
 			values = append(values, rawState[param])
 		}
 		return strings.Join(values, " "), nil
@@ -674,7 +674,7 @@ func generate{{ $.ResourceName }}IAMBindingStateID(iamResourceName string) func 
 		}
 		fmt.Printf("raw state %s", rawState)
 		var values []string
-		for _, param := range {{ $.IamResourceParams }} {
+		for _, param := range {{ printf "%#v" $.IamResourceParams }} {
 			values = append(values, rawState[param])
 		}
 		values = append(values, rawState["role"])
@@ -695,7 +695,7 @@ func generate{{ $.ResourceName }}IAMMemberStateID(iamResourceName string) func (
 		}
 		fmt.Printf("raw state %s", rawState)
 		var values []string
-		for _, param := range {{ $.IamResourceParams }} {
+		for _, param := range {{ printf "%#v" $.IamResourceParams }} {
 			values = append(values, rawState[param])
 		}
 		values = append(values, rawState["role"])
