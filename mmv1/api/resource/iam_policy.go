@@ -88,6 +88,13 @@ type IamPolicy struct {
 	// config with the test/example attributes of the IAM resource.
 	ExampleConfigBody string `yaml:"example_config_body"`
 
+	// Some resources (IAP) use fields named differently from the parent resource.
+	// We need to use the parent's attributes to create an IAM policy, but they may not be
+	// named as the IAM resource expects.
+	// This allows us to specify a file (relative to MM root) containing a partial terraform
+	// config with the test/example attributes of the IAM resource.
+	SampleConfigBody string `yaml:"sample_config_body"`
+
 	// How the API supports IAM conditions
 	IamConditionsRequestType string `yaml:"iam_conditions_request_type"`
 
@@ -129,6 +136,7 @@ func (p *IamPolicy) UnmarshalYAML(unmarshal func(any) error) error {
 	p.AllowedIamRole = "roles/viewer"
 	p.ParentResourceAttribute = "id"
 	p.ExampleConfigBody = "templates/terraform/iam/iam_attributes.go.tmpl"
+	p.SampleConfigBody = "templates/terraform/iam/iam_attributes_sample.go.tmpl"
 	p.SubstituteZoneValue = true
 
 	type iamPolicyAlias IamPolicy

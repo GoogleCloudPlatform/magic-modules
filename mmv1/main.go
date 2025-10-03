@@ -233,6 +233,7 @@ func GenerateProduct(version, providerName, productName, outputPath string, prod
 		resource := &api.Resource{}
 		api.Compile(resourceYamlPath, resource, overrideDirectory)
 		resource.SourceYamlFile = resourceYamlPath
+		// resource.TestSampleSetUp()
 
 		resource.TargetVersionName = version
 		// SetDefault before AddExtraFields to ensure relevant metadata is available on existing fields
@@ -240,6 +241,8 @@ func GenerateProduct(version, providerName, productName, outputPath string, prod
 		resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
 		// SetDefault after AddExtraFields to ensure relevant metadata is available for the newly generated fields
 		resource.SetDefault(productApi)
+		resource.TestSampleSetUp()
+		
 		resource.Validate()
 		resources = append(resources, resource)
 	}
