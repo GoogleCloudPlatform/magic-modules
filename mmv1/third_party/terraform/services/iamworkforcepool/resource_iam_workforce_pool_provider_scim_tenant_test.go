@@ -53,15 +53,15 @@ resource "google_iam_workforce_pool" "pool" {
 }
 
 resource "google_iam_workforce_pool_provider" "provider" {
-    workforce_pool_id    = google_iam_workforce_pool.pool.workforce_pool_id
-    location            = "global"
-    provider_id = "tf-test-provider-%{random_suffix}"
-    attribute_mapping   = {
-    "google.subject"  = "assertion.sub"
+  workforce_pool_id = google_iam_workforce_pool.pool.workforce_pool_id
+  location          = "global"
+  provider_id       = "tf-test-provider-%{random_suffix}"
+  attribute_mapping = {
+    "google.subject" = "assertion.sub"
   }
   oidc {
-    issuer_uri        = "https://accounts.thirdparty.com"
-    client_id         = "client-id"
+    issuer_uri = "https://accounts.thirdparty.com"
+    client_id  = "client-id"
     client_secret {
       value {
         plain_text = "client-secret"
@@ -80,15 +80,15 @@ resource "google_iam_workforce_pool_provider" "provider" {
 }
 
 resource "google_iam_workforce_pool_provider_scim_tenant" "scim_tenant" {
-  location            = "global"
-  workforce_pool_id   = google_iam_workforce_pool.pool.workforce_pool_id
-  provider_id         = google_iam_workforce_pool_provider.provider.provider_id
-  scim_tenant_id      = "example-scim-tenant"
-  display_name        = "Example SCIM Tenant"
-  description         = "A basic SCIM tenant for IAM Workforce Pool Provider"
+  location          = "global"
+  workforce_pool_id = google_iam_workforce_pool.pool.workforce_pool_id
+  provider_id       = google_iam_workforce_pool_provider.provider.provider_id
+  scim_tenant_id    = "example-scim-tenant"
+  display_name      = "Example SCIM Tenant"
+  description       = "A basic SCIM tenant for IAM Workforce Pool Provider"
   # state is output only, not settable
 }
-  
+
 `, context)
 }
 
@@ -101,15 +101,15 @@ resource "google_iam_workforce_pool" "pool" {
 }
 
 resource "google_iam_workforce_pool_provider" "provider" {
-    workforce_pool_id    = google_iam_workforce_pool.pool.workforce_pool_id
-    location            = "global"
-    provider_id = "tf-test-provider-%{random_suffix}"
-    attribute_mapping   = {
-    "google.subject"  = "assertion.sub"
+  workforce_pool_id = google_iam_workforce_pool.pool.workforce_pool_id
+  location          = "global"
+  provider_id       = "tf-test-provider-%{random_suffix}"
+  attribute_mapping = {
+    "google.subject" = "assertion.sub"
   }
   oidc {
-    issuer_uri        = "https://accounts.thirdparty.com"
-    client_id         = "client-id"
+    issuer_uri = "https://accounts.thirdparty.com"
+    client_id  = "client-id"
     client_secret {
       value {
         plain_text = "client-secret"
@@ -128,12 +128,12 @@ resource "google_iam_workforce_pool_provider" "provider" {
 }
 
 resource "google_iam_workforce_pool_provider_scim_tenant" "scim_tenant" {
-  location            = "global"
-  workforce_pool_id   = google_iam_workforce_pool.pool.workforce_pool_id
-  provider_id = google_iam_workforce_pool_provider.provider.provider_id
-  scim_tenant_id      = "example-scim-tenant"
-  display_name        = "Example SCIM Tenant - Updated"
-  description         = "A basic SCIM tenant for IAM Workforce Pool Provider - Updated"
+  location          = "global"
+  workforce_pool_id = google_iam_workforce_pool.pool.workforce_pool_id
+  provider_id       = google_iam_workforce_pool_provider.provider.provider_id
+  scim_tenant_id    = "example-scim-tenant"
+  display_name      = "Example SCIM Tenant - Updated"
+  description       = "A basic SCIM tenant for IAM Workforce Pool Provider - Updated"
   # state is output only, not settable
 }
 `, context)
