@@ -5,7 +5,7 @@ resource "google_iam_workforce_pool" "pool" {
 }
 
 resource "google_iam_workforce_pool_provider" "provider" {
-    location = global
+    location = "global"
     workforce_pool_id = "workforce-pool-id"
     provider_id       = "scim-provider-id"
     attribute_mapping   = {
