@@ -22,61 +22,61 @@ create_url: projects/{{project}}/locations/{{location}}/traceScopes?traceScopeId
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/traceScopes/{{trace_scope_id}}
 import_format:
-- projects/{{project}}/locations/{{location}}/traceScopes/{{trace_scope_id}}
+  - projects/{{project}}/locations/{{location}}/traceScopes/{{trace_scope_id}}
 examples:
-- name: observability_trace_scope_basic
-  primary_resource_id: observability_trace_scope
-  vars:
-    trace_scope_id: test-scope
+  - name: observability_trace_scope_basic
+    primary_resource_id: observability_trace_scope
+    vars:
+      trace_scope_id: test-scope
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 parameters:
-- name: location
-  type: String
-  description: GCP region the TraceScope is stored in. Only `global` is supported.
-  immutable: true
-  url_param_only: true
-  required: true
-- name: traceScopeId
-  type: String
-  description: A client-assigned identifier for the trace scope.
-  immutable: true
-  url_param_only: true
-  required: true
-properties:
-- name: createTime
-  type: String
-  description: The creation timestamp of the trace scope.
-  output: true
-- name: description
-  type: String
-  description: |-
-    Describes this trace scope.
-
-    The maximum length of the description is 8000 characters.
-- name: name
-  type: String
-  description: |-
-    Identifier. The resource name of the trace scope.
-
-    For example:
-
-    projects/my-project/locations/global/traceScopes/my-trace-scope
-  output: true
-- name: resourceNames
-  type: Array
-  description: |-
-    Names of the projects that are included in this trace scope.
-
-    *  `projects/[PROJECT_ID]`
-
-    A trace scope can include a maximum of 20 projects.
-  required: true
-  item_type:
+  - name: location
     type: String
-- name: updateTime
-  type: String
-  description: The last update timestamp of the trace scope.
-  output: true
+    description: GCP region the TraceScope is stored in. Only `global` is supported.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: traceScopeId
+    type: String
+    description: A client-assigned identifier for the trace scope.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: createTime
+    type: String
+    description: The creation timestamp of the trace scope.
+    output: true
+  - name: description
+    type: String
+    description: |-
+      Describes this trace scope.
+
+      The maximum length of the description is 8000 characters.
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the trace scope.
+
+      For example:
+
+      projects/my-project/locations/global/traceScopes/my-trace-scope
+    output: true
+  - name: resourceNames
+    type: Array
+    description: |-
+      Names of the projects that are included in this trace scope.
+
+      *  `projects/[PROJECT_ID]`
+
+      A trace scope can include a maximum of 20 projects.
+    required: true
+    item_type:
+    type: String
+  - name: updateTime
+    type: String
+    description: The last update timestamp of the trace scope.
+    output: true

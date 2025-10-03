@@ -15,11 +15,11 @@
 name: Observability
 display_name: Observability
 scopes:
-- https://www.googleapis.com/auth/cloud-platform
+  - https://www.googleapis.com/auth/cloud-platform
 versions:
-- base_url: https://observability.googleapis.com/v1/
-  name: 'ga'
-- base_url: https://observability.googleapis.com/v1/
-  name: 'beta'
+  - base_url: https://observability.googleapis.com/v1/
+    name: 'ga'
+  - base_url: https://observability.googleapis.com/v1/
+    name: 'beta'
 caibaseurl: ""
 resourceswithcaiassettype: {}
