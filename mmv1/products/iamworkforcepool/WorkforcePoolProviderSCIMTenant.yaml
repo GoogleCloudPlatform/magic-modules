@@ -44,17 +44,9 @@ update_mask: true
 timeouts:
   insert_minutes: 20
   delete_minutes: 20
-# autogen_async: true
-# async:
-#   actions: []
-#   type: 'OpAsync'
-#   operation:
-#     base_url: '{{op_id}}'
-#   result:
-#     resource_inside_response: false
 custom_code:
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
-
+  post_create: 'templates/terraform/post_create/sleep.go.tmpl'
 examples:
   - name: 'iam_workforce_pool_provider_scim_tenant_basic'
     primary_resource_id: "example"
