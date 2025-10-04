@@ -478,7 +478,7 @@ properties:
         description: |
           Database for the SQL Server connection.
         required: true
-  - name: 'mongodb_profile'
+  - name: 'mongodbProfile'
     type: NestedObject
     description: 'Configuration for connecting to a MongoDB database.'
     exactly_one_of:
