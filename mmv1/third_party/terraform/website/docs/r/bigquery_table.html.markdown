@@ -422,7 +422,7 @@ The following arguments are supported:
 
 <a name="nested_view"></a>The `view` block supports:
 
-* `query` - (Required) A query that BigQuery executes when the view is referenced.
+* `query` - (Optional) A query that BigQuery executes when the view is referenced.
 
 * `use_legacy_sql` - (Optional) Specifies whether to use BigQuery's legacy SQL for this view.
     If set to `false`, the view will use BigQuery's standard SQL. If set to
@@ -431,6 +431,21 @@ The following arguments are supported:
     according to the [API documentation](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#ViewDefinition).
     -> **Note**: Starting in provider version `7.0.0`, no default value is
     provided for this field unless explicitly set in the configuration.
+
+* `forein_definitions` - (Optional, [Beta]
+(https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  Foreign view representations.
+  Structure is [documented below](#nested_foreign_definitions).
+
+<a name="nested_foreign_definitions"></a>The `forein_definitions` block supports:
+
+* `query` - (Required, [Beta]
+(https://terraform.io/docs/providers/google/guides/provider_versions.html))
+   The query that defines the view.
+
+* `dialect` - (Optional, [Beta]
+(https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  Represents the dialect of the query.
 
 <a name="nested_materialized_view"></a>The `materialized_view` block supports:
 
