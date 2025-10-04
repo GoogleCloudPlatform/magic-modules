@@ -1261,10 +1261,10 @@ properties:
                 name: 'databases'
                 description: |
                   MongoDB databases in the cluster.
-                send_empty_value: true
-                allow_empty_object: true
                 item_type:
                   type: NestedObject
+                  send_empty_value: true
+                  allow_empty_object: true
                   properties:
                     - type: String
                       name: 'database'
@@ -1274,10 +1274,10 @@ properties:
                       name: 'collections'
                       description: |
                         Collections in the database.
-                      send_empty_value: true
-                      allow_empty_object: true
                       item_type:
                         type: NestedObject
+                        send_empty_value: true
+                        allow_empty_object: true
                         properties:
                           - type: String
                             name: 'collection'
@@ -1287,8 +1287,6 @@ properties:
                             name: 'fields'
                             description: |
                               Fields in the collection.
-                            send_empty_value: true
-                            allow_empty_object: true
                             item_type:
                               type: NestedObject
                               properties:
@@ -1307,10 +1305,10 @@ properties:
                 name: 'databases'
                 description: |
                   MongoDB databases in the cluster.
-                send_empty_value: true
-                allow_empty_object: true
                 item_type:
                   type: NestedObject
+                  send_empty_value: true
+                  allow_empty_object: true
                   properties:
                     - type: String
                       name: 'database'
@@ -1320,10 +1318,10 @@ properties:
                       name: 'collections'
                       description: |
                         Collections in the database.
-                      send_empty_value: true
-                      allow_empty_object: true
                       item_type:
                         type: NestedObject
+                        send_empty_value: true
+                        allow_empty_object: true
                         properties:
                           - type: String
                             name: 'collection'
@@ -1333,8 +1331,6 @@ properties:
                             name: 'fields'
                             description: |
                               Fields in the collection.
-                            send_empty_value: true
-                            allow_empty_object: true
                             item_type:
                               type: NestedObject
                               properties:
@@ -1935,31 +1931,34 @@ properties:
             name: 'databases'
             description: |
               MongoDB databases in the cluster.
-            allow_empty_object: true
+            required: true
+            min_size: 1
             item_type:
               type: NestedObject
               properties:
                 - type: String
                   name: 'database'
+                  required: true
                   description: |
                     Database name.
                 - type: Array
                   name: 'collections'
+                  min_size: 1
                   description: |
                     Collections in the database.
-                  allow_empty_object: true
                   item_type:
                     type: NestedObject
                     properties:
                       - type: String
                         name: 'collection'
+                        required: true
                         description: |
                           Collection name.
                       - type: Array
                         name: 'fields'
+                        min_size: 1
                         description: |
                           Fields in the collection.
-                        allow_empty_object: true
                         item_type:
                           type: NestedObject
                           properties:

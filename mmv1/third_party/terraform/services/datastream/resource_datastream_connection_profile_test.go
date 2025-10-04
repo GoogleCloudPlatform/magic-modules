@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -76,6 +77,11 @@ func TestAccDatastreamConnectionProfile_update(t *testing.T) {
 			},
 			{
 				Config: testAccDatastreamConnectionProfile_mongodbUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_datastream_connection_profile.mongodb_con_profile", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_datastream_connection_profile.mongodb_con_profile",
