@@ -84,70 +84,70 @@ func TestParseHCLBytes(t *testing.T) {
 	cases := []struct {
 		name      string
 		hcl       string
-		exp       map[string]map[string]struct{}
+		exp       map[string]map[string]any
 		expectErr bool
 	}{
 		{
 			name: "basic",
 			hcl:  basicHCL,
-			exp: map[string]map[string]struct{}{
+			exp: map[string]map[string]any{
 				"google_project_service.project": {
-					"service": {},
+					"service": "iam.googleapis.com",
 				},
 			},
 		},
 		{
 			name: "nested blocks",
 			hcl:  nestedBlocksHCL,
-			exp: map[string]map[string]struct{}{
+			exp: map[string]map[string]any{
 				"google_storage_bucket.bucket": {
-					"name":                         {},
-					"location":                     {},
-					"force_destroy":                {},
-					"lifecycle_rule.action.type":   {},
-					"lifecycle_rule.condition.age": {},
+					"name":                         "my-bucket",
+					"location":                     "US",
+					"force_destroy":                true,
+					"lifecycle_rule.action.type":   "Delete",
+					"lifecycle_rule.condition.age": "30",
 				},
 			},
 		},
 		{
 			name: "multiple resources",
 			hcl:  multipleResourcesHCL,
-			exp: map[string]map[string]struct{}{
+			exp: map[string]map[string]any{
 				"google_project_service.project": {
-					"service": {},
+					"service": "iam.googleapis.com",
 				},
 				"google_storage_bucket.bucket": {
-					"name": {},
+					"name": "my-bucket",
 				},
 			},
 		},
 		{
 			name: "resource with a list of nested objects",
 			hcl:  listOfNestedObjectsHCL,
-			exp: map[string]map[string]struct{}{
+			exp: map[string]map[string]any{
 				"google_compute_firewall.default": {
-					"allow.0.ports":    {}, // "ports" appears in first element due to sorting
-					"allow.0.protocol": {},
-					"allow.1.protocol": {},
-					"name":             {},
-					"network":          {},
-					"source_tags":      {},
+					"allow.0.ports":    "80,8080,1000-2000", // "ports" appears in first element due to sorting
+					"allow.0.protocol": "tcp",
+					"allow.1.protocol": "icmp",
+					"name":             "test-firewall",
+					"network":          "google_compute_network.default.name",
+					"source_tags":      "web",
 				},
 			},
 		},
 		{
 			name: "resource with a list of multi-level nested objects",
 			hcl:  listOfMultiLevelNestedObjectsHCL,
-			exp: map[string]map[string]struct{}{
+			exp: map[string]map[string]any{
 				"google_compute_firewall.default": {
-					"allow.0.a_second_level.0.a": {},
-					"allow.0.a_second_level.1.b": {},
-					"allow.0.protocol":           {},
-					"allow.1.ports":              {},
-					"allow.1.protocol":           {},
-					"name":                       {},
-					"network":                    {},
-					"source_tags":                {},
+					"allow.0.a_second_level.0.a": false,
+					"allow.0.a_second_level.1.b": true,
+					"allow.0.protocol":           "icmp",
+					"allow.1.ports":              "80,8080,1000-2000",
+					"allow.1.protocol":           "tcp",
+					"name":                       "test-firewall",
+					"network":                    "google_compute_network.default.name",
+					"source_tags":                "web",
 				},
 			},
 		},
