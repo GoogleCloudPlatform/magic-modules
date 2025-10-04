@@ -27,8 +27,6 @@ create_url: '{{parent}}/locations/{{location}}/floorSetting'
 create_verb: 'PATCH'
 update_url: '{{parent}}/locations/{{location}}/floorSetting'
 update_verb: 'PATCH'
-# This is a singleton resource that cannot be deleted, so skip delete.
-exclude_delete: true
 import_format:
   - '{{parent}}/locations/{{location}}/floorSetting'
 custom_code:
