@@ -19,38 +19,56 @@
 package {{ lower $.ProductMetadata.Name }}
 
 import (
-
     "fmt"
     "log"
     "net/http"
     "reflect"
-{{- if $.SupportsIndirectUserProjectOverride }}
     "regexp"
-{{- end }}
-{{- if or (and (not $.Immutable) ($.UpdateMask)) $.LegacyLongFormProject }}
     "strings"
-{{- end }}
     "time"
 
-{{/*     # We list all the v2 imports here, because we run 'goimports' to guess the correct */}}
-{{/*     # set of imports, which will never guess the major version correctly. */}}
-    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+    "github.com/hashicorp/errwrap"
+    "github.com/hashicorp/go-cty/cty"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
     "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-    "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
-    "github.com/hashicorp/go-cty/cty"
 
     "{{ $.ImportPath }}/tpgresource"
     transport_tpg "{{ $.ImportPath }}/transport"
     "{{ $.ImportPath }}/verify"
 
-{{ if $.FlattenedProperties }}
     "google.golang.org/api/googleapi"
-{{- end}}
+)
+
+var (
+    _ = fmt.Sprintf
+    _ = log.Print
+    _ = http.Get
+    _ = reflect.ValueOf
+    _ = regexp.Match
+    _ = strings.Trim
+    _ = time.Now
+    _ = errwrap.Wrap
+    _ = cty.BoolVal
+    _ = diag.Diagnostic{}
+    _ = customdiff.All
+    _ = id.UniqueId
+    _ = logging.LogLevel
+    _ = retry.Retry
+    _ = schema.Noop
+    _ = validation.All
+    _ = structure.ExpandJsonFromString
+    _ = terraform.State{}
+    _ = tpgresource.SetLabels
+    _ = transport_tpg.Config{}
+    _ = verify.ValidateEnum
+    _ = googleapi.Error{}
 )
 
 func DataSource{{ .ResourceName -}}() *schema.Resource {
