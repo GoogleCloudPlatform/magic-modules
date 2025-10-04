@@ -616,7 +616,7 @@ func testAccBigqueryDataTransferConfig_salesforce_basic(t *testing.T) {
 	})
 }
 
-func testAccBigqueryDataTransferConfig_pub_sub_basic(t *testing.T) {
+func TestAccBigqueryDataTransferConfig_pub_sub_basic(t *testing.T) {
 	randomSuffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -981,9 +981,11 @@ resource "google_bigquery_data_transfer_config" "event_driven_config" {
   location               = "asia-northeast1"
   data_source_id         = "scheduled_query"
   schedule               = "first sunday of quarter 00:00"
-  schedule_options = {
-    event_driven_schedule = google_pubsub_subscription.my_dataset_topic_subscription.id
-  } 
+  schedule_options {
+    event_driven_schedule {
+      pubsub_subscription = google_pubsub_subscription.my_dataset_topic_subscription.id
+    }
+  }
   destination_dataset_id = google_bigquery_dataset.my_dataset.dataset_id
   params = {
     destination_table_name_template = "my_table"
