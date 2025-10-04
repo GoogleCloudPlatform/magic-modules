@@ -616,6 +616,27 @@ func testAccBigqueryDataTransferConfig_salesforce_basic(t *testing.T) {
 	})
 }
 
+func TestAccBigqueryDataTransferConfig_pub_sub_basic(t *testing.T) {
+	randomSuffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigqueryDataTransferConfig_pub_sub(randomSuffix),
+			},
+			{
+				ResourceName:            "google_bigquery_data_transfer_config.event_driven_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+		},
+	})
+}
+
 func testAccBigqueryDataTransferConfig_scheduledQuery(random_suffix, random_suffix2, schedule, start_time, end_time, letter string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
@@ -946,6 +967,49 @@ resource "google_bigquery_data_transfer_config" "salesforce_config" {
     "connector.authentication.oauth.myDomain"     = "MyDomain"
     "assets"                                      = "[\"asset-a\",\"asset-b\"]"
   }
+}
+`, randomSuffix, randomSuffix)
+}
+
+func testAccBigqueryDataTransferConfig_pub_sub(randomSuffix string) string {
+	return fmt.Sprintf(`
+
+resource "google_bigquery_data_transfer_config" "event_driven_config" {
+  depends_on = [google_project_iam_member.permissions]
+
+  display_name           = "my-event-driven-query-%s"
+  location               = "asia-northeast1"
+  data_source_id         = "scheduled_query"
+  schedule               = "first sunday of quarter 00:00"
+  schedule_options {
+    event_driven_schedule {
+      pubsub_subscription = google_pubsub_subscription.my_dataset_topic_subscription.id
+    }
+  }
+  destination_dataset_id = google_bigquery_dataset.my_dataset.dataset_id
+  params = {
+    destination_table_name_template = "my_table"
+    write_disposition               = "WRITE_APPEND"
+    query                           = "SELECT name FROM tabl WHERE x = 'y'"
+  }
+}
+
+resource "google_bigquery_dataset" "my_dataset" {
+  depends_on = [google_project_iam_member.permissions]
+
+  dataset_id    = "my_dataset-%s"
+  friendly_name = "foo"
+  description   = "bar"
+  location      = "asia-northeast1"
+}
+
+resource "google_pubsub_topic" "my_dataset_topic" {
+  name = "my_dataset_topic"
+}
+
+resource "google_pubsub_subscription" "my_dataset_topic_subscription" {
+  name  = "my_dataset_topic_subscription"
+  topic = google_pubsub_topic.my_dataset_topic.id
 }
 `, randomSuffix, randomSuffix)
 }
