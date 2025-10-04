@@ -1,6 +1,6 @@
 if d.Get("deletion_policy") == "FORCE" {
     obj := make(map[string]interface{})
-    obj["enableFloorSettingEnforcement"] = false # override the floor setting
+    obj["enableFloorSettingEnforcement"] = false 
 
     url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}parent{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/floorSetting")
     if err != nil {
