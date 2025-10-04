@@ -29,6 +29,7 @@ func TestAccTags(t *testing.T) {
 		"tagValueBasic":                        testAccTagsTagValue_tagValueBasic,
 		"tagValueUpdate":                       testAccTagsTagValue_tagValueUpdate,
 		"tagBindingBasic":                      testAccTagsTagBinding_tagBindingBasic,
+		"tagBindingNamespaced":                 testAccTagsTagBinding_tagBindingNamespaced,
 		"tagValueIamBinding":                   testAccTagsTagValueIamBinding,
 		"tagValueIamMember":                    testAccTagsTagValueIamMember,
 		"tagValueIamPolicy":                    testAccTagsTagValueIamPolicy,
@@ -402,6 +403,30 @@ func testAccTagsTagBinding_tagBindingBasic(t *testing.T) {
 	})
 }
 
+func testAccTagsTagBinding_tagBindingNamespaced(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"project_id":    "tf-test-" + acctest.RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+		},
+		CheckDestroy: testAccCheckTagsTagBindingDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTagsTagBinding_tagBindingNamespacedExample(context),
+			},
+		},
+	})
+}
+
 func testAccTagsTagBinding_tagBindingBasicExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_project" "project" {
@@ -426,6 +451,34 @@ resource "google_tags_tag_value" "value" {
 resource "google_tags_tag_binding" "binding" {
 	parent    = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
 	tag_value = google_tags_tag_value.value.id
+}
+`, context)
+}
+
+func testAccTagsTagBinding_tagBindingNamespacedExample(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_project" "project" {
+	project_id = "%{project_id}"
+	name       = "%{project_id}"
+	org_id     = "%{org_id}"
+	deletion_policy = "DELETE"
+}
+
+resource "google_tags_tag_key" "key" {
+	parent = "organizations/%{org_id}"
+	short_name = "keyname%{random_suffix}"
+	description = "For a certain set of resources."
+}
+
+resource "google_tags_tag_value" "value" {
+	parent      = google_tags_tag_key.key.id
+	short_name  = "foo%{random_suffix}"
+	description = "For foo%{random_suffix} resources."
+}
+
+resource "google_tags_tag_binding" "{{$.PrimaryResourceId}}" {
+  parent    = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
+  tag_value_namespaced_name = "${google_tags_tag_key.key.parent}/${google_tags_tag_key.key.short_name}/${google_tags_tag_value.value.short_name}"
 }
 `, context)
 }
