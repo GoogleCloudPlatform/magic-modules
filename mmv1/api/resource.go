@@ -387,9 +387,8 @@ type TGCResource struct {
 	TGCIgnoreTerraformEncoder bool `yaml:"tgc_ignore_terraform_encoder,omitempty"`
 
 	// [Optional] The parameter that uniquely identifies the resource.
-	// Generally, it's safe to leave empty, in which case it defaults to `name`.
-	// Other values are normally useful in cases where an object has a parent
-	// and is identified by some non-name value, such as an ip+port pair.
+	// Generally, it shouldn't be set when the identity can be decided.
+	// Otherswise, it should be set.
 	CaiIdentity string `yaml:"cai_identity,omitempty"`
 }
 
@@ -617,7 +616,7 @@ func (r Resource) SensitiveProps() []*Type {
 func (r Resource) WriteOnlyProps() []*Type {
 	props := r.AllNestedProperties(r.RootProperties())
 	return google.Select(props, func(p *Type) bool {
-		return p.WriteOnlyLegacy
+		return p.WriteOnlyLegacy || p.WriteOnly
 	})
 }
 
@@ -749,14 +748,101 @@ func (r Resource) GetIdentity() []*Type {
 	})
 }
 
-func (r *Resource) AddLabelsRelatedFields(props []*Type, parent *Type) []*Type {
+func deduplicateSliceOfStrings(slice []string) []string {
+	seen := make(map[string]bool, len(slice))
+	result := make([]string, 0, len(slice))
+
+	for _, str := range slice {
+		if !seen[str] {
+			seen[str] = true
+			result = append(result, str)
+		}
+	}
+
+	return result
+}
+
+func buildWriteOnlyField(name string, versionFieldName string, originalField *Type) *Type {
+	description := fmt.Sprintf("%s Note: This property is write-only and will not be read from the API. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", originalField.Description)
+	originalFieldLineage := originalField.TerraformLineage()
+	fieldPathCurrentField := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(name))
+	requiredWith := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(versionFieldName))
+
+	apiName := originalField.ApiName
+	if apiName == "" {
+		apiName = originalField.Name
+	}
+
+	options := []func(*Type){
+		propertyWithType("String"),
+		propertyWithRequired(false),
+		propertyWithDescription(description),
+		propertyWithWriteOnly(true),
+		propertyWithApiName(apiName),
+		propertyWithIgnoreRead(true),
+		propertyWithRequiredWith([]string{requiredWith}),
+	}
+
+	if originalField.Required {
+		originalField.Required = false
+		exactlyOneOf := append(originalField.ExactlyOneOf, originalFieldLineage, fieldPathCurrentField)
+		options = append(options, propertyWithExactlyOneOf(deduplicateSliceOfStrings(exactlyOneOf)))
+		originalField.ExactlyOneOf = deduplicateSliceOfStrings(exactlyOneOf)
+	} else {
+		conflicts := append(originalField.Conflicts, originalFieldLineage)
+		options = append(options, propertyWithConflicts(deduplicateSliceOfStrings(conflicts)))
+	}
+
+	if len(originalField.AtLeastOneOf) > 0 {
+		atLeastOneOf := append(originalField.AtLeastOneOf, originalFieldLineage, fieldPathCurrentField)
+		options = append(options, propertyWithAtLeastOneOf(deduplicateSliceOfStrings(atLeastOneOf)))
+	}
+
+	return NewProperty(name, originalField.ApiName, options)
+}
+
+func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField *Type) *Type {
+	description := fmt.Sprintf("Triggers update of %s write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", google.Underscore(writeOnlyField.Name))
+	requiredWith := strings.ReplaceAll(originalField.TerraformLineage(), google.Underscore(originalField.Name), google.Underscore(writeOnlyField.Name))
+
+	options := []func(*Type){
+		propertyWithType("Int"),
+		propertyWithImmutable(originalField.IsForceNew()),
+		propertyWithDescription(description),
+		propertyWithRequiredWith([]string{requiredWith}),
+		propertyWithClientSide(true),
+	}
+
+	return NewProperty(name, name, options)
+}
+
+func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type) []*Type {
+	propWithWoConfigured.WriteOnly = false
+	propWithWoConfigured.Sensitive = true
+	if len(propWithWoConfigured.RequiredWith) > 0 {
+		log.Fatalf("WriteOnly property '%s' in resource '%s' cannot have RequiredWith set. This combination is not supported.", propWithWoConfigured.Name, r.Name)
+	}
+	woFieldName := fmt.Sprintf("%sWo", propWithWoConfigured.Name)
+	woVersionFieldName := fmt.Sprintf("%sVersion", woFieldName)
+	writeOnlyField := buildWriteOnlyField(woFieldName, woVersionFieldName, propWithWoConfigured)
+	writeOnlyVersionField := buildWriteOnlyVersionField(woVersionFieldName, propWithWoConfigured, writeOnlyField)
+	props = append(props, writeOnlyField, writeOnlyVersionField)
+	return props
+}
+
+// AddExtraFields processes properties and adds supplementary fields based on property types.
+// It handles write-only properties, labels, and annotations.
+func (r *Resource) AddExtraFields(props []*Type, parent *Type) []*Type {
 	for _, p := range props {
+		if p.WriteOnly && !strings.HasSuffix(p.Name, "Wo") {
+			props = r.addWriteOnlyFields(props, p)
+		}
 		if p.IsA("KeyValueLabels") {
 			props = r.addLabelsFields(props, parent, p)
 		} else if p.IsA("KeyValueAnnotations") {
 			props = r.addAnnotationsFields(props, parent, p)
 		} else if p.IsA("NestedObject") && len(p.AllProperties()) > 0 {
-			p.Properties = r.AddLabelsRelatedFields(p.AllProperties(), p)
+			p.Properties = r.AddExtraFields(p.AllProperties(), p)
 		}
 	}
 	return props
@@ -1906,24 +1992,79 @@ func (r Resource) DefineAssetTypeForResourceInProduct() bool {
 	return true
 }
 
-// Gets the Cai asset name template, which could include version
-// For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
-func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
+// Gets the Cai asset name format
+func (r Resource) GetCaiAssetNameFormat() string {
 	caiBaseUrl := ""
-	caiId := "name"
+	caiId := ""
 	if r.CaiIdentity != "" {
 		caiId = r.CaiIdentity
+	} else {
+		caiId = r.getCaiId()
 	}
+	caiIdTemplate := fmt.Sprintf("{{%s}}", caiId)
 	if r.CaiBaseUrl != "" {
-		caiBaseUrl = fmt.Sprintf("%s/{{%s}}", r.CaiBaseUrl, caiId)
+		if caiId == "" || strings.Contains(r.CaiBaseUrl, caiIdTemplate) {
+			caiBaseUrl = r.CaiBaseUrl
+		} else {
+			caiBaseUrl = fmt.Sprintf("%s/%s", r.CaiBaseUrl, caiIdTemplate)
+		}
 	}
 	if caiBaseUrl == "" {
 		caiBaseUrl = r.SelfLink
 	}
 	if caiBaseUrl == "" {
-		caiBaseUrl = fmt.Sprintf("%s/{{%s}}", r.BaseUrl, caiId)
+		if caiId == "" || strings.Contains(r.BaseUrl, caiIdTemplate) {
+			caiBaseUrl = r.BaseUrl
+		} else {
+			caiBaseUrl = fmt.Sprintf("%s/%s", r.BaseUrl, caiIdTemplate)
+		}
 	}
-	return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, caiBaseUrl)
+	return caiBaseUrl
+}
+
+// Gets the Cai asset name template, which could include version
+// For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
+func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
+	return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, r.GetCaiAssetNameFormat())
+}
+
+// Guesses the identifier of the resource, as "name" is not always the identifier
+// For example, the cai identifier is feed_id in google_cloud_asset_folder_feed
+func (r Resource) getCaiId() string {
+	for _, p := range r.AllUserProperties() {
+		if p.Name == "name" && !p.Output {
+			return "name"
+		}
+	}
+
+	// Get the last identifier extracted from selfLink
+	id := r.getCandidateCaiId(r.SelfLink)
+	if id != "" {
+		return id
+	}
+
+	// Get the last identifier extracted from createUrl
+	id = r.getCandidateCaiId(r.CreateUrl)
+	if id != "" {
+		return id
+	}
+
+	return ""
+}
+
+// Extracts the last identifier from the url, if it is not computed,
+// then it is the candidate identifier
+func (r Resource) getCandidateCaiId(url string) string {
+	identifiers := r.ExtractIdentifiers(url)
+	if len(identifiers) > 0 {
+		id := identifiers[len(identifiers)-1]
+		for _, p := range r.AllUserProperties() {
+			if google.Underscore(p.Name) == id && !p.Output {
+				return id
+			}
+		}
+	}
+	return ""
 }
 
 // Gets the Cai asset name template, which doesn't include version
@@ -2153,6 +2294,11 @@ func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string
 			props = append(props, google.Underscore(tp.Name))
 		} else if tp.IsMissingInCai {
 			props = append(props, tp.MetadataLineage())
+		} else if tp.IgnoreRead {
+			if tp.Sensitive || tp.Name == "tags" {
+				// TODO: handle tags conversion, which are separate Cai assets with resources.
+				props = append(props, tp.MetadataLineage())
+			}
 		}
 	}
 	props = append(props, e.TGCTestIgnoreExtra...)

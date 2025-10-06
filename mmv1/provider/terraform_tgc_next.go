@@ -23,6 +23,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -53,10 +54,12 @@ type TerraformGoogleConversionNext struct {
 }
 
 type ResourceIdentifier struct {
-	ServiceName   string
-	TerraformName string
-	ResourceName  string
-	AliasName     string // It can be "Default" or the same with ResourceName
+	ServiceName        string
+	TerraformName      string
+	ResourceName       string
+	AliasName          string // It can be "Default" or the same with ResourceName
+	CaiAssetNameFormat string
+	IdentityParam      string
 }
 
 func NewTerraformGoogleConversionNext(product *api.Product, versionName string, startTime time.Time) TerraformGoogleConversionNext {
@@ -170,6 +173,7 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 
 		// cai2hcl
 		"pkg/cai2hcl/converters/resource_converters.go": "templates/tgc_next/cai2hcl/resource_converters.go.tmpl",
+		"pkg/cai2hcl/converters/convert_resource.go":    "templates/tgc_next/cai2hcl/convert_resource.go.tmpl",
 	}
 
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
@@ -337,14 +341,15 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 			tgc.ResourceCount++
 
 			resourceIdentifier := ResourceIdentifier{
-				ServiceName:   service,
-				TerraformName: object.TerraformName(),
-				ResourceName:  object.ResourceName(),
-				AliasName:     object.ResourceName(),
+				ServiceName:        service,
+				TerraformName:      object.TerraformName(),
+				ResourceName:       object.ResourceName(),
+				AliasName:          object.ResourceName(),
+				CaiAssetNameFormat: object.GetCaiAssetNameFormat(),
 			}
 			tgc.ResourcesForVersion = append(tgc.ResourcesForVersion, resourceIdentifier)
 
-			caiResourceType := fmt.Sprintf("%s.%s", service, object.CaiResourceType())
+			caiResourceType := object.CaiAssetType()
 			if _, ok := resourcesByCaiResourceType[caiResourceType]; !ok {
 				resourcesByCaiResourceType[caiResourceType] = make([]ResourceIdentifier, 0)
 			}
@@ -360,9 +365,75 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 				tgc.ResourcesByCaiResourceType[caiResourceType] = []ResourceIdentifier{resourceIdentifier}
 			}
 		} else {
-			tgc.ResourcesByCaiResourceType[caiResourceType] = resources
+			tgc.ResourcesByCaiResourceType[caiResourceType] = FindIdentityParams(resources)
 		}
 	}
+}
+
+// Analyzes a list of CAI asset names and finds the single path segment
+// (by index) that contains different values across all names.
+// Example:
+// "folders/{{folder}}/feeds/{{feed_id}}" -> folders
+// "organizations/{{org_id}}/feeds/{{feed_id}} -> organizations
+// "projects/{{project}}/feeds/{{feed_id}}" -> projects
+func FindIdentityParams(rids []ResourceIdentifier) []ResourceIdentifier {
+	segmentsList := make([][]string, len(rids))
+	for i, rid := range rids {
+		urlPath := rid.CaiAssetNameFormat
+		urlPath = strings.Trim(urlPath, "/")
+
+		processedURL := regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(urlPath, "")
+		segments := strings.Split(processedURL, "/")
+		var cleanSegments []string
+		for _, seg := range segments {
+			if seg != "" {
+				cleanSegments = append(cleanSegments, seg)
+			}
+		}
+
+		segmentsList[i] = cleanSegments
+	}
+
+	if len(segmentsList[0]) == 0 {
+		return rids
+	}
+	expectedLength := len(segmentsList[0])
+
+	for i := 1; i < len(segmentsList); i++ {
+		if len(segmentsList[i]) != expectedLength {
+			return rids
+		}
+	}
+
+	varyingIndex := -1
+
+	for i := 0; i < expectedLength; i++ {
+		referenceSegment := segmentsList[0][i]
+		isVarying := false
+
+		for j := 1; j < len(segmentsList); j++ {
+			if segmentsList[j][i] != referenceSegment {
+				isVarying = true
+				break
+			}
+		}
+
+		if isVarying {
+			if varyingIndex != -1 {
+				return rids
+			}
+			varyingIndex = i
+		}
+	}
+
+	if varyingIndex != -1 {
+		for i, segments := range segmentsList {
+			rids[i].IdentityParam = segments[varyingIndex]
+		}
+		return rids
+	}
+
+	return rids
 }
 
 type TgcWithProducts struct {

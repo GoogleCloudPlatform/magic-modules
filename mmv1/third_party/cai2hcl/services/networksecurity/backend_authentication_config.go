@@ -3,10 +3,10 @@ package networksecurity
 import (
 	"errors"
 	"fmt"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/cai2hcl/common"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/caiasset"
+
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/cai2hcl/common"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/caiasset"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	netsecapi "google.golang.org/api/networksecurity/v1"
 )
 
 // BackendAuthenticationConfigAssetType is the CAI asset type name.
@@ -75,20 +75,16 @@ func (c *BackendAuthenticationConfigConverter) convertResourceData(asset *caiass
 func flattenBackendAuthenticationConfig(resource *caiasset.AssetResource) (map[string]any, error) {
 	result := make(map[string]any)
 
-	var backendAuthenticationConfig *netsecapi.BackendAuthenticationConfig
-	if err := common.DecodeJSON(resource.Data, &backendAuthenticationConfig); err != nil {
-		return nil, err
-	}
+	resourceData := resource.Data
 
-	result["name"] = flattenName(backendAuthenticationConfig.Name)
-	result["labels"] = backendAuthenticationConfig.Labels
-	result["description"] = backendAuthenticationConfig.Description
-	result["client_certificate"] = backendAuthenticationConfig.ClientCertificate
-	result["trust_config"] = backendAuthenticationConfig.TrustConfig
-	result["well_known_roots"] = backendAuthenticationConfig.WellKnownRoots
-	result["project"] = flattenProjectName(backendAuthenticationConfig.Name)
-
-	result["location"] = resource.Location
+	result["name"] = flattenName(resourceData["name"].(string))
+	result["labels"] = resourceData["labels"]
+	result["description"] = resourceData["description"]
+	result["client_certificate"] = resourceData["clientCertificate"]
+	result["trust_config"] = resourceData["trustConfig"]
+	result["well_known_roots"] = resourceData["wellKnownRoots"]
+	result["project"] = flattenProjectName(resourceData["name"].(string))
+	result["location"] = flattenLocation(resourceData["name"].(string))
 
 	return result, nil
 }

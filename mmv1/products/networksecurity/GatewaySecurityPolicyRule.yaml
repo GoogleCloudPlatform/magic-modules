@@ -31,6 +31,7 @@ timeouts:
   insert_minutes: 30
   update_minutes: 30
   delete_minutes: 30
+include_in_tgc_next_DO_NOT_USE: true
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
@@ -55,6 +56,8 @@ examples:
     vars:
       gateway_security_policy_id: 'my-gateway-security-policy'
       resource_name: 'my-gateway-security-policy-rule'
+    tgc_test_ignore_extra:
+      - 'tls_inspection_enabled' # Ignore its false value in Terraform configuration
 parameters:
   - name: 'name'
     type: String
