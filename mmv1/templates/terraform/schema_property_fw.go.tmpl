@@ -74,7 +74,7 @@
     {{- end -}}
   {{- else -}}
 "{{underscore .Name -}}": schema.{{.GetFWType}}Attribute{
-    {{- if eq .GetFWType "List" -}}
+  {{- if eq .GetFWType "List" -}}
   ElementType: {{ if or (eq .ItemType.Type "Enum") (eq .ItemType.Type "ResourceRef") }}types.StringType{{ else }}types.{{ .ItemType.GetFWType }}Type{{ end }},
     {{- else if eq .GetFWType "Set" -}}
   ElementType: {{ if or (eq .ItemType.Type "Enum") (eq .ItemType.Type "ResourceRef") }}types.StringType{{ else }}types.{{ .ItemType.GetFWType }}Type{{ end }},
