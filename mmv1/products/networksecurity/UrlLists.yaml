@@ -51,12 +51,10 @@ examples:
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-url-lists'
-    tgc_skip_test: 'It takes time to fix it.'
   - name: 'network_security_url_lists_advanced'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-url-lists'
-    tgc_skip_test: 'It takes time to fix it.'
 parameters:
   - name: 'name'
     type: String
