@@ -39,11 +39,6 @@ examples:
       entry_group_id: 'my_entry_group_basic'
       source_entry_id: 'source_entry_basic'
       target_entry_id: 'target_entry_basic'
-    resource_creation_order:
-      - 'google_dataplex_entry_group.entry-group-basic'
-      - 'google_dataplex_entry_type.entry-type-basic'
-      - 'google_dataplex_entry.source'
-      - 'google_dataplex_entry.target'
   # - name: 'dataplex_entry_link_full'
   #   primary_resource_id: 'full_entry_link'
   #   vars:
