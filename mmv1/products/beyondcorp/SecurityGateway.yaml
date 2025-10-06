@@ -171,7 +171,6 @@ properties:
                 type: Enum
                 description: The output type of the delegated user info.
                 enum_values:
-                  - 'OUTPUT_TYPE_UNSPECIFIED'
                   - 'PROTOBUF'
                   - 'JSON'
                   - 'NONE'
@@ -183,7 +182,6 @@ properties:
                 type: Enum
                 description: The output type of the delegated group info.
                 enum_values:
-                  - 'OUTPUT_TYPE_UNSPECIFIED'
                   - 'PROTOBUF'
                   - 'JSON'
                   - 'NONE'
@@ -195,7 +193,6 @@ properties:
                 type: Enum
                 description: The output type of the delegated device info.
                 enum_values:
-                  - 'OUTPUT_TYPE_UNSPECIFIED'
                   - 'PROTOBUF'
                   - 'JSON'
                   - 'NONE'
@@ -203,7 +200,6 @@ properties:
             type: Enum
             description: Default output type for all enabled headers.
             enum_values:
-              - 'OUTPUT_TYPE_UNSPECIFIED'
               - 'PROTOBUF'
               - 'JSON'
               - 'NONE'
@@ -219,7 +215,6 @@ properties:
         type: Enum
         description: Gateway identity configuration.
         enum_values:
-          - 'GATEWAY_IDENTITY_UNSPECIFIED'
           - 'RESOURCE_NAME'
       - name: clientIp
         type: Boolean
