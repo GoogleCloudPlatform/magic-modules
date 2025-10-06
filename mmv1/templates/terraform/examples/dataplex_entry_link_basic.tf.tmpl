@@ -5,14 +5,14 @@ resource "google_dataplex_entry_group" "entry-group-basic" {
 
 resource "google_dataplex_entry_type "entry-type-basic" {
   location = "us-central1"
-  entry_group_id = "{{index $.Vars "entry_type_id"}}"
+  entry_type_id = "{{index $.Vars "entry_type_id"}}"
 }
 
 resource "google_dataplex_entry" "source" {
   location = "us-central1"
-  entry_group_id = "@bigquery"
+  entry_group_id = "{{index $.Vars "entry_group_id"}}"
   entry_id = "{{index $.Vars "source_entry_id"}}"
-  entry_type = "projects/655216118709/locations/global/entryTypes/bigquery-table"
+  entry_type = "projects/655216118709/locations/global/entryTypes/${google_dataplex_entry_type.entry-type-basic.entry_type_id}"
 }
 
 resource "google_dataplex_entry" "target" {
@@ -24,7 +24,7 @@ resource "google_dataplex_entry" "target" {
 
 resource "google_dataplex_entry_link" "basic_entry_link" {
   location = "us-central1"
-  entry_group_id = "@bigquery"
+  entry_group_id = "{{index $.Vars "entry_group_id"}}"
   entry_link_id = "{{index $.Vars "entry_link_id"}}"
 
   entry_link_type = "projects/655216118709/locations/global/entryLinkTypes/defintion"
