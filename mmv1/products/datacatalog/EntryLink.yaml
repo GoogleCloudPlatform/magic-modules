@@ -37,6 +37,7 @@ examples:
     vars:
       entry_link_id: 'my_entry_link_basic'
       entry_group_id: 'my_entry_group_basic'
+      entry_type_id: 'my_entry_type_basic'
       source_entry_id: 'source_entry_basic'
       target_entry_id: 'target_entry_basic'
   # - name: 'dataplex_entry_link_full'
