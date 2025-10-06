@@ -48,64 +48,80 @@ iam_policy:
     - '{{name}}'
 custom_code:
   custom_import: 'templates/terraform/custom_import/apigee_environment.go.tmpl'
-examples:
-  - name: 'apigee_environment_basic'
-    vars:
-      environment_name: 'my-environment'
+samples:
+  - name: apigee_environment_basic
+    primary_resource_id: ""
     exclude_test: true
-      # This is a more verbose version of the above that creates all
-      # the resources needed for the acceptance test.
-  - name: 'apigee_environment_basic_test'
-    primary_resource_id: 'apigee_environment'
-    primary_resource_name: 'fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]), fmt.Sprintf("tf-test%s", context["random_suffix"])'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-      # Resource creation race
+    steps:
+    - name: apigee_environment_basic
+      prefixed_vars:
+        environment_name: my-environment
+  - name: apigee_environment_basic_test
     skip_vcr: true
-    external_providers: ["time"]
-  - name: 'apigee_environment_basic_deployment_apiproxy_type_test'
-    primary_resource_id: 'apigee_environment'
-    primary_resource_name: 'fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]), fmt.Sprintf("tf-test%s", context["random_suffix"])'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-      # Resource creation race
+    external_providers:
+    - time
+    primary_resource_id: apigee_environment
+    primary_resource_name: fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test%s", context["random_suffix"])
+    steps:
+    - name: apigee_environment_basic_test
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
+  - name: apigee_environment_basic_deployment_apiproxy_type_test
     skip_vcr: true
-    external_providers: ["time"]
-  - name: 'apigee_environment_basic_properties_test'
-    primary_resource_id: 'apigee_environment'
-    primary_resource_name: 'fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]), fmt.Sprintf("tf-test%s", context["random_suffix"])'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-    # Resource creation race
+    external_providers:
+    - time
+    primary_resource_id: apigee_environment
+    primary_resource_name: fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test%s", context["random_suffix"])
+    steps:
+    - name: apigee_environment_basic_deployment_apiproxy_type_test
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
+  - name: apigee_environment_basic_properties_test
     skip_vcr: true
-    external_providers: ["time"]
-  - name: 'apigee_environment_patch_update_test'
-    primary_resource_id: 'apigee_environment'
-    primary_resource_name: 'fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]), fmt.Sprintf("tf-test%s", context["random_suffix"])'
-    min_version: 'beta'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-      # Resource creation race
+    external_providers:
+    - time
+    primary_resource_id: apigee_environment
+    primary_resource_name: fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test%s", context["random_suffix"])
+    steps:
+    - name: apigee_environment_basic_properties_test
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
+  - name: apigee_environment_patch_update_test
     skip_vcr: true
-    external_providers: ["time"]
-  - name: 'apigee_environment_client_ip_resolution_config_test'
-    primary_resource_id: 'apigee_environment'
-    primary_resource_name: 'fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]), fmt.Sprintf("tf-test%s", context["random_suffix"])'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-      # Resource creation race
+    external_providers:
+    - time
+    min_version: beta
+    primary_resource_id: apigee_environment
+    primary_resource_name: fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test%s", context["random_suffix"])
+    steps:
+    - name: apigee_environment_patch_update_test
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
+  - name: apigee_environment_client_ip_resolution_config_test
     skip_vcr: true
-    external_providers: ["time"]
+    external_providers:
+    - time
+    primary_resource_id: apigee_environment
+    primary_resource_name: fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test%s", context["random_suffix"])
+    steps:
+    - name: apigee_environment_client_ip_resolution_config_test
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
 parameters:
   - name: 'orgId'
     type: String

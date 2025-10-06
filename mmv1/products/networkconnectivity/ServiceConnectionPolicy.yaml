@@ -53,16 +53,18 @@ sweeper:
     - region: "us-central1"
     - region: "us-east1"
     - region: "europe-west1"
-examples:
-  - name: 'network_connectivity_policy_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-network-connectivity-policy'
-      producer_network_name: 'producer-net'
-      producer_subnetwork_name: 'producer-subnet'
-      service_class_name: 'my-basic-service-class'
-    test_vars_overrides:
-      'service_class_name': '"gcp-memorystore-redis"'
+samples:
+  - name: network_connectivity_policy_basic
+    primary_resource_id: default
+    steps:
+    - name: network_connectivity_policy_basic
+      prefixed_vars:
+        producer_network_name: producer-net
+        producer_subnetwork_name: producer-subnet
+        resource_name: my-network-connectivity-policy
+        service_class_name: my-basic-service-class
+      test_vars_overrides:
+        service_class_name: '"gcp-memorystore-redis"'
 parameters:
   - name: 'name'
     type: String

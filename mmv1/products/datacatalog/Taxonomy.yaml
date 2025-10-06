@@ -44,12 +44,14 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/data_catalog_taxonomy.go.tmpl'
 sweeper:
   identifier_field: displayName
-examples:
-  - name: 'data_catalog_taxonomy_basic'
-    primary_resource_id: 'basic_taxonomy'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_taxonomy%s", context["random_suffix"])'
-    vars:
-      display_name: 'my_taxonomy'
+samples:
+  - name: data_catalog_taxonomy_basic
+    primary_resource_id: basic_taxonomy
+    primary_resource_name: fmt.Sprintf("tf_test_my_taxonomy%s", context["random_suffix"])
+    steps:
+    - name: data_catalog_taxonomy_basic
+      prefixed_vars:
+        display_name: my_taxonomy
 parameters:
   - name: 'region'
     type: String

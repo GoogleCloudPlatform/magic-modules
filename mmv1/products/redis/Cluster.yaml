@@ -126,91 +126,103 @@ sweeper:
     - region: "us-central1"
     - region: "us-east1"
     - region: "europe-west1"
-examples:
-  - name: 'redis_cluster_ha'
-    primary_resource_id: 'cluster-ha'
-    vars:
-      cluster_name: 'ha-cluster'
-      policy_name: 'my-policy'
-      subnet_name: 'my-subnet'
-      network_name: 'my-network'
-      deletion_protection_enabled: 'true'
-    test_vars_overrides:
-      'deletion_protection_enabled': 'false'
-    oics_vars_overrides:
-      'deletion_protection_enabled': 'false'
-  - name: 'redis_cluster_ha_single_zone'
-    primary_resource_id: 'cluster-ha-single-zone'
-    vars:
-      cluster_name: 'ha-cluster-single-zone'
-      policy_name: 'my-policy'
-      subnet_name: 'my-subnet'
-      network_name: 'my-network'
-      deletion_protection_enabled: 'true'
-    test_vars_overrides:
-      'deletion_protection_enabled': 'false'
-    oics_vars_overrides:
-      'deletion_protection_enabled': 'false'
-  - name: 'redis_cluster_secondary'
-    primary_resource_id: 'secondary_cluster'
-    vars:
-      primary_cluster_name: 'my-primary-cluster'
-      primary_cluster_deletion_protection_enabled: 'true'
-      primary_cluster_policy_name: 'mypolicy-primary-cluster'
-      primary_cluster_subnet_name: 'mysubnet-primary-cluster'
-      secondary_cluster_name: 'my-secondary-cluster'
-      secondary_cluster_deletion_protection_enabled: 'true'
-      secondary_cluster_policy_name: 'mypolicy-secondary-cluster'
-      secondary_cluster_subnet_name: 'mysubnet-secondary-cluster'
-      network_name: 'mynetwork'
-    test_vars_overrides:
-      'primary_cluster_deletion_protection_enabled': 'false'
-      'secondary_cluster_deletion_protection_enabled': 'false'
-    oics_vars_overrides:
-      'primary_cluster_deletion_protection_enabled': 'false'
-      'secondary_cluster_deletion_protection_enabled': 'false'
-  - name: "redis_cluster_rdb"
-    primary_resource_id: "cluster-rdb"
-    vars:
-      cluster_name: "rdb-cluster"
-      policy_name: "my-policy"
-      subnet_name: "my-subnet"
-      network_name: "my-network"
-      deletion_protection_enabled: 'true'
-    test_vars_overrides:
-      'deletion_protection_enabled': 'false'
-    oics_vars_overrides:
-      'deletion_protection_enabled': 'false'
-  - name: "redis_cluster_aof"
-    primary_resource_id: "cluster-aof"
-    vars:
-      cluster_name: "aof-cluster"
-      policy_name: "my-policy"
-      subnet_name: "my-subnet"
-      network_name: "my-network"
-      deletion_protection_enabled: 'true'
-    test_vars_overrides:
-      'deletion_protection_enabled': 'false'
-    oics_vars_overrides:
-      'deletion_protection_enabled': 'false'
-  - name: "redis_cluster_cmek"
-    primary_resource_id: "cluster-cmek"
+samples:
+  - name: redis_cluster_ha
+    primary_resource_id: cluster-ha
+    steps:
+    - name: redis_cluster_ha
+      prefixed_vars:
+        cluster_name: ha-cluster
+        deletion_protection_enabled: "true"
+        network_name: my-network
+        policy_name: my-policy
+        subnet_name: my-subnet
+      test_vars_overrides:
+        deletion_protection_enabled: "false"
+      oics_vars_overrides:
+        deletion_protection_enabled: "false"
+  - name: redis_cluster_ha_single_zone
+    primary_resource_id: cluster-ha-single-zone
+    steps:
+    - name: redis_cluster_ha_single_zone
+      prefixed_vars:
+        cluster_name: ha-cluster-single-zone
+        deletion_protection_enabled: "true"
+        network_name: my-network
+        policy_name: my-policy
+        subnet_name: my-subnet
+      test_vars_overrides:
+        deletion_protection_enabled: "false"
+      oics_vars_overrides:
+        deletion_protection_enabled: "false"
+  - name: redis_cluster_secondary
+    primary_resource_id: secondary_cluster
+    steps:
+    - name: redis_cluster_secondary
+      prefixed_vars:
+        network_name: mynetwork
+        primary_cluster_deletion_protection_enabled: "true"
+        primary_cluster_name: my-primary-cluster
+        primary_cluster_policy_name: mypolicy-primary-cluster
+        primary_cluster_subnet_name: mysubnet-primary-cluster
+        secondary_cluster_deletion_protection_enabled: "true"
+        secondary_cluster_name: my-secondary-cluster
+        secondary_cluster_policy_name: mypolicy-secondary-cluster
+        secondary_cluster_subnet_name: mysubnet-secondary-cluster
+      test_vars_overrides:
+        primary_cluster_deletion_protection_enabled: "false"
+        secondary_cluster_deletion_protection_enabled: "false"
+      oics_vars_overrides:
+        primary_cluster_deletion_protection_enabled: "false"
+        secondary_cluster_deletion_protection_enabled: "false"
+  - name: redis_cluster_rdb
+    primary_resource_id: cluster-rdb
+    steps:
+    - name: redis_cluster_rdb
+      prefixed_vars:
+        cluster_name: rdb-cluster
+        deletion_protection_enabled: "true"
+        network_name: my-network
+        policy_name: my-policy
+        subnet_name: my-subnet
+      test_vars_overrides:
+        deletion_protection_enabled: "false"
+      oics_vars_overrides:
+        deletion_protection_enabled: "false"
+  - name: redis_cluster_aof
+    primary_resource_id: cluster-aof
+    steps:
+    - name: redis_cluster_aof
+      prefixed_vars:
+        cluster_name: aof-cluster
+        deletion_protection_enabled: "true"
+        network_name: my-network
+        policy_name: my-policy
+        subnet_name: my-subnet
+      test_vars_overrides:
+        deletion_protection_enabled: "false"
+      oics_vars_overrides:
+        deletion_protection_enabled: "false"
+  - name: redis_cluster_cmek
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@cloud-redis.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-    vars:
-      cluster_name: "cmek-cluster"
-      policy_name: "my-policy"
-      subnet_name: "my-subnet"
-      network_name: "my-network"
-      kms_key_name: "my-key"
-      kms_ring_name: "my-key-ring"
-      deletion_protection_enabled: 'true'
-    test_vars_overrides:
-      'deletion_protection_enabled': 'false'
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-    oics_vars_overrides:
-      'deletion_protection_enabled': 'false'
+    - member: serviceAccount:service-{project_number}@cloud-redis.iam.gserviceaccount.com
+      role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    primary_resource_id: cluster-cmek
+    steps:
+    - name: redis_cluster_cmek
+      prefixed_vars:
+        cluster_name: cmek-cluster
+        deletion_protection_enabled: "true"
+        kms_key_name: my-key
+        kms_ring_name: my-key-ring
+        network_name: my-network
+        policy_name: my-policy
+        subnet_name: my-subnet
+      test_vars_overrides:
+        deletion_protection_enabled: "false"
+        kms_key_name: acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+      oics_vars_overrides:
+        deletion_protection_enabled: "false"
 parameters:
   - name: 'name'
     type: String

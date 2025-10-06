@@ -46,12 +46,14 @@ async:
 custom_code:
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
-examples:
-  - name: 'netapp_backup_vault'
-    primary_resource_id: 'test_backup_vault'
-    vars:
-      backup_vault_name: 'test-backup-vault'
+samples:
+  - name: netapp_backup_vault
+    primary_resource_id: test_backup_vault
     exclude_test: true
+    steps:
+    - name: netapp_backup_vault
+      prefixed_vars:
+        backup_vault_name: test-backup-vault
 parameters:
   - name: 'location'
     type: String

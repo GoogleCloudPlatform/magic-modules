@@ -62,247 +62,261 @@ sweeper:
     - region: "us-central1"
     - region: "europe-west6"
     - region: "us-west1"
-examples:
-  - name: 'cloudfunctions2_basic'
-    primary_resource_id: 'function'
-    primary_resource_name: 'fmt.Sprintf("tf-test-function-v2%s", context["random_suffix"])'
-    vars:
-      function: 'function-v2'
-      bucket_name: 'gcf-source'
-      zip_path: 'function-source.zip'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'location': '"us-central1"'
-      'zip_path': '"./test-fixtures/function-source.zip"'
-        # ignore these fields during import step
-    ignore_read_extra:
-      - 'build_config.0.source.0.storage_source.0.object'
-      - 'build_config.0.source.0.storage_source.0.bucket'
-  - name: 'cloudfunctions2_full'
-    primary_resource_id: 'function'
-    vars:
-      bucket_name: 'gcf-source'
-      service_account: 'gcf-sa'
-      topic: 'functions2-topic'
-      function: 'gcf-function'
-      zip_path: 'function-source.zip'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'zip_path': '"./test-fixtures/function-source-pubsub.zip"'
-      'primary_resource_id': '"terraform-test"'
-      'location': '"us-central1"'
-        # ignore these fields during import step
-    ignore_read_extra:
-      - 'build_config.0.source.0.storage_source.0.object'
-      - 'build_config.0.source.0.storage_source.0.bucket'
-  - name: 'cloudfunctions2_scheduler_auth'
-    primary_resource_id: 'function'
-    vars:
-      bucket_name: 'gcf-source'
-      service_account: 'gcf-sa'
-      function: 'gcf-function'
-      zip_path: 'function-source.zip'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'primary_resource_id': '"terraform-test"'
-      'location': '"us-central1"'
-      'zip_path': '"./test-fixtures/function-source.zip"'
-        # ignore these fields during import step
-    ignore_read_extra:
-      - 'build_config.0.source.0.storage_source.0.object'
-      - 'build_config.0.source.0.storage_source.0.bucket'
+samples:
+  - name: cloudfunctions2_basic
+    primary_resource_id: function
+    primary_resource_name: fmt.Sprintf("tf-test-function-v2%s", context["random_suffix"])
+    steps:
+    - name: cloudfunctions2_basic
+      prefixed_vars:
+        bucket_name: gcf-source
+        function: function-v2
+        zip_path: function-source.zip
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        location: '"us-central1"'
+        zip_path: '"./test-fixtures/function-source.zip"'
+      ignore_read_extra:
+      - build_config.0.source.0.storage_source.0.object
+      - build_config.0.source.0.storage_source.0.bucket
+  - name: cloudfunctions2_full
+    primary_resource_id: function
+    steps:
+    - name: cloudfunctions2_full
+      prefixed_vars:
+        bucket_name: gcf-source
+        function: gcf-function
+        service_account: gcf-sa
+        topic: functions2-topic
+        zip_path: function-source.zip
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        location: '"us-central1"'
+        primary_resource_id: '"terraform-test"'
+        zip_path: '"./test-fixtures/function-source-pubsub.zip"'
+      ignore_read_extra:
+      - build_config.0.source.0.storage_source.0.object
+      - build_config.0.source.0.storage_source.0.bucket
+  - name: cloudfunctions2_scheduler_auth
+    primary_resource_id: function
     exclude_test: true
-  - name: 'cloudfunctions2_basic_gcs'
-    primary_resource_id: 'function'
+    steps:
+    - name: cloudfunctions2_scheduler_auth
+      prefixed_vars:
+        bucket_name: gcf-source
+        function: gcf-function
+        service_account: gcf-sa
+        zip_path: function-source.zip
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        location: '"us-central1"'
+        primary_resource_id: '"terraform-test"'
+        zip_path: '"./test-fixtures/function-source.zip"'
+      ignore_read_extra:
+      - build_config.0.source.0.storage_source.0.object
+      - build_config.0.source.0.storage_source.0.bucket
+  - name: cloudfunctions2_basic_gcs
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-    vars:
-      bucket_name_source: 'gcf-source-bucket'
-      bucket_name_trigger: 'gcf-trigger-bucket'
-      service_account: 'gcf-sa'
-      function_name: 'gcf-function'
-      zip_path: 'function-source.zip'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'zip_path': '"./test-fixtures/function-source-eventarc-gcs.zip"'
-      'primary_resource_id': '"terraform-test"'
-        # ignore these fields during import step
-    ignore_read_extra:
-      - 'build_config.0.source.0.storage_source.0.object'
-      - 'build_config.0.source.0.storage_source.0.bucket'
-  - name: 'cloudfunctions2_basic_auditlogs'
-    primary_resource_id: 'function'
+    - member: serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com
+      role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    primary_resource_id: function
+    steps:
+    - name: cloudfunctions2_basic_gcs
+      prefixed_vars:
+        bucket_name_source: gcf-source-bucket
+        bucket_name_trigger: gcf-trigger-bucket
+        function_name: gcf-function
+        service_account: gcf-sa
+        zip_path: function-source.zip
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        primary_resource_id: '"terraform-test"'
+        zip_path: '"./test-fixtures/function-source-eventarc-gcs.zip"'
+      ignore_read_extra:
+      - build_config.0.source.0.storage_source.0.object
+      - build_config.0.source.0.storage_source.0.bucket
+  - name: cloudfunctions2_basic_auditlogs
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-    vars:
-      bucket_name_source: 'gcf-source-bucket'
-      bucket_name_auditlogs: 'gcf-auditlog-bucket'
-      service_account: 'gcf-sa'
-      function_name: 'gcf-function'
-      zip_path: 'function-source.zip'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'zip_path': '"./test-fixtures/function-source-eventarc-gcs.zip"'
-      'primary_resource_id': '"terraform-test"'
-        # ignore these fields during import step
-    ignore_read_extra:
-      - 'build_config.0.source.0.storage_source.0.object'
-      - 'build_config.0.source.0.storage_source.0.bucket'
-  - name: 'cloudfunctions2_basic_builder'
-    primary_resource_id: 'function'
-    primary_resource_name: 'fmt.Sprintf("tf-test-function-v2%s", context["random_suffix"])'
-    vars:
-      function: 'function-v2'
-      bucket_name: 'gcf-source'
-      zip_path: 'function-source.zip'
-      service_account: 'gcf-sa'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'location': '"us-central1"'
-      'zip_path': '"./test-fixtures/function-source.zip"'
-        # ignore these fields during import step
-    ignore_read_extra:
-      - 'build_config.0.source.0.storage_source.0.object'
-      - 'build_config.0.source.0.storage_source.0.bucket'
-    external_providers: ["random", "time"]
-  - name: 'cloudfunctions2_secret_env'
-    primary_resource_id: 'function'
+    - member: serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com
+      role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    primary_resource_id: function
+    steps:
+    - name: cloudfunctions2_basic_auditlogs
+      prefixed_vars:
+        bucket_name_auditlogs: gcf-auditlog-bucket
+        bucket_name_source: gcf-source-bucket
+        function_name: gcf-function
+        service_account: gcf-sa
+        zip_path: function-source.zip
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        primary_resource_id: '"terraform-test"'
+        zip_path: '"./test-fixtures/function-source-eventarc-gcs.zip"'
+      ignore_read_extra:
+      - build_config.0.source.0.storage_source.0.object
+      - build_config.0.source.0.storage_source.0.bucket
+  - name: cloudfunctions2_basic_builder
+    external_providers:
+    - random
+    - time
+    primary_resource_id: function
+    primary_resource_name: fmt.Sprintf("tf-test-function-v2%s", context["random_suffix"])
+    steps:
+    - name: cloudfunctions2_basic_builder
+      prefixed_vars:
+        bucket_name: gcf-source
+        function: function-v2
+        service_account: gcf-sa
+        zip_path: function-source.zip
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        location: '"us-central1"'
+        zip_path: '"./test-fixtures/function-source.zip"'
+      ignore_read_extra:
+      - build_config.0.source.0.storage_source.0.object
+      - build_config.0.source.0.storage_source.0.bucket
+  - name: cloudfunctions2_secret_env
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-    vars:
-      function: 'function-secret'
-      bucket_name: 'gcf-source'
-      zip_path: 'function-source.zip'
-      secret: 'secret'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'location': '"us-central1"'
-      'zip_path': '"./test-fixtures/function-source.zip"'
-        # ignore these fields during import step
-    ignore_read_extra:
-      - 'build_config.0.source.0.storage_source.0.object'
-      - 'build_config.0.source.0.storage_source.0.bucket'
-  - name: 'cloudfunctions2_secret_volume'
-    primary_resource_id: 'function'
+    - member: serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com
+      role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    primary_resource_id: function
+    steps:
+    - name: cloudfunctions2_secret_env
+      prefixed_vars:
+        bucket_name: gcf-source
+        function: function-secret
+        secret: secret
+        zip_path: function-source.zip
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        location: '"us-central1"'
+        zip_path: '"./test-fixtures/function-source.zip"'
+      ignore_read_extra:
+      - build_config.0.source.0.storage_source.0.object
+      - build_config.0.source.0.storage_source.0.bucket
+  - name: cloudfunctions2_secret_volume
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-    vars:
-      function: 'function-secret'
-      bucket_name: 'gcf-source'
-      zip_path: 'function-source.zip'
-      secret: 'secret'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'location': '"us-central1"'
-      'zip_path': '"./test-fixtures/function-source.zip"'
-        # ignore these fields during import step
-    ignore_read_extra:
-      - 'build_config.0.source.0.storage_source.0.object'
-      - 'build_config.0.source.0.storage_source.0.bucket'
-  - name: 'cloudfunctions2_private_workerpool'
-    primary_resource_id: 'function'
-    vars:
-      function: 'function-workerpool'
-      bucket_name: 'gcf-source'
-      zip_path: 'function-source.zip'
-      pool: 'workerpool'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'location': '"us-central1"'
-      'zip_path': '"./test-fixtures/function-source.zip"'
-        # ignore these fields during import step
-    ignore_read_extra:
-      - 'build_config.0.source.0.storage_source.0.object'
-      - 'build_config.0.source.0.storage_source.0.bucket'
-  - name: 'cloudfunctions2_cmek'
-    primary_resource_id: 'function'
-    min_version: 'beta'
-    vars:
-      function: 'function-cmek'
-      bucket_name: 'gcf-source'
-      zip_path: 'function-source.zip'
-      kms_service_name: 'cloudkms.googleapis.com'
-      cmek-repo: 'cmek-repo'
-      unencoded-ar-repo: 'ar-repo'
-      kms_key_name: 'cmek-key'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-      'location': '"us-central1"'
-      'zip_path': '"./test-fixtures/function-source.zip"'
-    # ignore these fields during import step
-    ignore_read_extra:
-      - 'build_config.0.source.0.storage_source.0.object'
-      - 'build_config.0.source.0.storage_source.0.bucket'
- # the example file is written in a repetitive way to help acc tests, so exclude
-    exclude_docs: true
+    - member: serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com
+      role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    primary_resource_id: function
+    steps:
+    - name: cloudfunctions2_secret_volume
+      prefixed_vars:
+        bucket_name: gcf-source
+        function: function-secret
+        secret: secret
+        zip_path: function-source.zip
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        location: '"us-central1"'
+        zip_path: '"./test-fixtures/function-source.zip"'
+      ignore_read_extra:
+      - build_config.0.source.0.storage_source.0.object
+      - build_config.0.source.0.storage_source.0.bucket
+  - name: cloudfunctions2_private_workerpool
+    primary_resource_id: function
+    steps:
+    - name: cloudfunctions2_private_workerpool
+      prefixed_vars:
+        bucket_name: gcf-source
+        function: function-workerpool
+        pool: workerpool
+        zip_path: function-source.zip
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        location: '"us-central1"'
+        zip_path: '"./test-fixtures/function-source.zip"'
+      ignore_read_extra:
+      - build_config.0.source.0.storage_source.0.object
+      - build_config.0.source.0.storage_source.0.bucket
+  - name: cloudfunctions2_cmek
     skip_vcr: true
-  - name: 'cloudfunctions2_cmek_docs'
-    primary_resource_id: 'function'
-    min_version: 'beta'
-    vars:
-      function: 'function-cmek'
-      bucket_name: 'gcf-source'
-      zip_path: 'function-source.zip'
-      kms_service_name: 'cloudkms.googleapis.com'
-      cmek-repo: 'cmek-repo'
-      unencoded-ar-repo: 'ar-repo'
-      kms_key_name: 'cmek-key'
-      project: 'my-project-name'
- # this example file will cause IAM conflicts between tests if used to make a test
+    min_version: beta
+    primary_resource_id: function
+    steps:
+    - name: cloudfunctions2_cmek
+      prefixed_vars:
+        bucket_name: gcf-source
+        cmek-repo: cmek-repo
+        function: function-cmek
+        kms_key_name: cmek-key
+        kms_service_name: cloudkms.googleapis.com
+        unencoded-ar-repo: ar-repo
+        zip_path: function-source.zip
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        kms_key_name: acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+        location: '"us-central1"'
+        zip_path: '"./test-fixtures/function-source.zip"'
+      ignore_read_extra:
+      - build_config.0.source.0.storage_source.0.object
+      - build_config.0.source.0.storage_source.0.bucket
+      exclude_docs: true
+  - name: cloudfunctions2_cmek_docs
+    min_version: beta
+    primary_resource_id: function
     exclude_test: true
-  - name: 'cloudfunctions2_automatic_base_image_update'
-    primary_resource_id: 'function'
-    min_version: 'beta'
-    vars:
-      bucket_name: 'gcf-source'
-      service_account: 'gcf-sa'
-      topic: 'functions2-topic'
-      function: 'gcf-function'
-      zip_path: 'function-source.zip'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'zip_path': '"./test-fixtures/function-source-pubsub.zip"'
-      'primary_resource_id': '"terraform-test"'
-      'location': '"europe-west6"'
-        # ignore these fields during import step
-    ignore_read_extra:
-      - 'build_config.0.source.0.storage_source.0.object'
-      - 'build_config.0.source.0.storage_source.0.bucket'
-  - name: 'cloudfunctions2_on_deploy_base_image_update'
-    primary_resource_id: 'function'
-    min_version: 'beta'
-    vars:
-      bucket_name: 'gcf-source'
-      service_account: 'gcf-sa'
-      topic: 'functions2-topic'
-      function: 'gcf-function'
-      zip_path: 'function-source.zip'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'zip_path': '"./test-fixtures/function-source-pubsub.zip"'
-      'primary_resource_id': '"terraform-test"'
-      'location': '"europe-west6"'
-        # ignore these fields during import step
-    ignore_read_extra:
-      - 'build_config.0.source.0.storage_source.0.object'
-      - 'build_config.0.source.0.storage_source.0.bucket'
+    steps:
+    - name: cloudfunctions2_cmek_docs
+      prefixed_vars:
+        bucket_name: gcf-source
+        cmek-repo: cmek-repo
+        function: function-cmek
+        kms_key_name: cmek-key
+        kms_service_name: cloudkms.googleapis.com
+        project: my-project-name
+        unencoded-ar-repo: ar-repo
+        zip_path: function-source.zip
+  - name: cloudfunctions2_automatic_base_image_update
+    min_version: beta
+    primary_resource_id: function
+    steps:
+    - name: cloudfunctions2_automatic_base_image_update
+      prefixed_vars:
+        bucket_name: gcf-source
+        function: gcf-function
+        service_account: gcf-sa
+        topic: functions2-topic
+        zip_path: function-source.zip
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        location: '"europe-west6"'
+        primary_resource_id: '"terraform-test"'
+        zip_path: '"./test-fixtures/function-source-pubsub.zip"'
+      ignore_read_extra:
+      - build_config.0.source.0.storage_source.0.object
+      - build_config.0.source.0.storage_source.0.bucket
+  - name: cloudfunctions2_on_deploy_base_image_update
+    min_version: beta
+    primary_resource_id: function
+    steps:
+    - name: cloudfunctions2_on_deploy_base_image_update
+      prefixed_vars:
+        bucket_name: gcf-source
+        function: gcf-function
+        service_account: gcf-sa
+        topic: functions2-topic
+        zip_path: function-source.zip
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        location: '"europe-west6"'
+        primary_resource_id: '"terraform-test"'
+        zip_path: '"./test-fixtures/function-source-pubsub.zip"'
+      ignore_read_extra:
+      - build_config.0.source.0.storage_source.0.object
+      - build_config.0.source.0.storage_source.0.bucket
 parameters:
   - name: 'location'
     type: String

@@ -38,11 +38,13 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/dialogflowcx_set_location_skip_default_obj.go.tmpl'
   custom_import: 'templates/terraform/custom_import/dialogflowcx_generator.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'dialogflowcx_generator_basic'
-    primary_resource_id: 'generator'
-    vars:
-      agent_name: 'dialogflowcx-agent-fucntion'
+samples:
+  - name: dialogflowcx_generator_basic
+    primary_resource_id: generator
+    steps:
+    - name: dialogflowcx_generator_basic
+      prefixed_vars:
+        agent_name: dialogflowcx-agent-fucntion
 parameters:
   - name: 'parent'
     type: String

@@ -45,11 +45,13 @@ async:
     resource_inside_response: false
 custom_code:
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
-examples:
-  - name: 'app_engine_service_network_settings'
-    primary_resource_id: 'internalapp'
-    vars:
-      bucket_name: 'appengine-static-content'
+samples:
+  - name: app_engine_service_network_settings
+    primary_resource_id: internalapp
+    steps:
+    - name: app_engine_service_network_settings
+      prefixed_vars:
+        bucket_name: appengine-static-content
 parameters:
 properties:
   - name: 'service'

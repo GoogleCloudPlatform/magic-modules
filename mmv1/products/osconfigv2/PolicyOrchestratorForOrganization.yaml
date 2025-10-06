@@ -28,23 +28,25 @@ update_verb: PATCH
 id_format: organizations/{{organization_id}}/locations/global/policyOrchestrators/{{policy_orchestrator_id}}
 import_format:
   - organizations/{{organization_id}}/locations/global/policyOrchestrators/{{policy_orchestrator_id}}
-examples:
+samples:
   - name: osconfigv2_policy_orchestrator_for_organization_basic
-    primary_resource_id: policy_orchestrator_for_organization
     bootstrap_iam:
-      - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
-        role: "roles/osconfig.serviceAgent"
-      - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig-rollout.iam.gserviceaccount.com"
-        role: "roles/osconfig.rolloutServiceAgent"
-      - member: "serviceAccount:service-org-{organization_id}@gcp-sa-progrollout.iam.gserviceaccount.com"
-        role: "roles/progressiverollout.serviceAgent"
-    vars:
-      policy_orchestrator_id: po-org
-      orchestrated_resource_id: test-orchestrated-resource-org
-      os_policy_id: test-os-policy-org
-    test_env_vars:
-      org_id: ORG_TARGET
-      zone: 'ZONE'
+    - member: serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com
+      role: roles/osconfig.serviceAgent
+    - member: serviceAccount:service-org-{organization_id}@gcp-sa-osconfig-rollout.iam.gserviceaccount.com
+      role: roles/osconfig.rolloutServiceAgent
+    - member: serviceAccount:service-org-{organization_id}@gcp-sa-progrollout.iam.gserviceaccount.com
+      role: roles/progressiverollout.serviceAgent
+    primary_resource_id: policy_orchestrator_for_organization
+    steps:
+    - name: osconfigv2_policy_orchestrator_for_organization_basic
+      prefixed_vars:
+        orchestrated_resource_id: test-orchestrated-resource-org
+        os_policy_id: test-os-policy-org
+        policy_orchestrator_id: po-org
+      test_env_vars:
+        org_id: ORG_TARGET
+        zone: ZONE
 autogen_async: true
 async:
   operation:

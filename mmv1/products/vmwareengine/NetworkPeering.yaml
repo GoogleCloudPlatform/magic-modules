@@ -38,19 +38,23 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'vmware_engine_network_peering_ven'
-    primary_resource_id: 'vmw-engine-network-peering'
-    vars:
-      name: 'sample-network-peering'
-    test_env_vars:
-      region: 'REGION'
-  - name: 'vmware_engine_network_peering_standard'
-    primary_resource_id: 'vmw-engine-network-peering'
-    vars:
-      name: 'sample-network-peering'
-    test_env_vars:
-      region: 'REGION'
+samples:
+  - name: vmware_engine_network_peering_ven
+    primary_resource_id: vmw-engine-network-peering
+    steps:
+    - name: vmware_engine_network_peering_ven
+      prefixed_vars:
+        name: sample-network-peering
+      test_env_vars:
+        region: REGION
+  - name: vmware_engine_network_peering_standard
+    primary_resource_id: vmw-engine-network-peering
+    steps:
+    - name: vmware_engine_network_peering_standard
+      prefixed_vars:
+        name: sample-network-peering
+      test_env_vars:
+        region: REGION
 parameters:
   - name: 'name'
     type: String

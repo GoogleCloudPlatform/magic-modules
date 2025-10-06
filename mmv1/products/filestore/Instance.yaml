@@ -54,25 +54,32 @@ sweeper:
     - region: "us-central1"
     - region: "us-east1"
     - region: "us-west1"
-examples:
-  - name: 'filestore_instance_basic'
-    primary_resource_id: 'instance'
-    vars:
-      instance_name: 'test-instance'
-  - name: 'filestore_instance_full'
-    primary_resource_id: 'instance'
-    vars:
-      instance_name: 'test-instance'
-  - name: 'filestore_instance_protocol'
-    primary_resource_id: 'instance'
-    vars:
-      instance_name: 'test-instance'
-  - name: 'filestore_instance_enterprise'
-    primary_resource_id: 'instance'
-    vars:
-      instance_name: 'test-instance'
-    # https://github.com/GoogleCloudPlatform/magic-modules/pull/5875#discussion_r844285335
+samples:
+  - name: filestore_instance_basic
+    primary_resource_id: instance
+    steps:
+    - name: filestore_instance_basic
+      prefixed_vars:
+        instance_name: test-instance
+  - name: filestore_instance_full
+    primary_resource_id: instance
+    steps:
+    - name: filestore_instance_full
+      prefixed_vars:
+        instance_name: test-instance
+  - name: filestore_instance_protocol
+    primary_resource_id: instance
+    steps:
+    - name: filestore_instance_protocol
+      prefixed_vars:
+        instance_name: test-instance
+  - name: filestore_instance_enterprise
+    primary_resource_id: instance
     exclude_test: true
+    steps:
+    - name: filestore_instance_enterprise
+      prefixed_vars:
+        instance_name: test-instance
 parameters:
   - name: 'zone'
     type: String

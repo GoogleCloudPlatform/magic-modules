@@ -42,57 +42,77 @@ custom_code:
   constants: 'templates/terraform/constants/iam_workload_identity_pool_provider.go.tmpl'
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/iam_workload_identity_pool_provider.go.tmpl'
-examples:
-  - name: 'iam_workload_identity_pool_provider_aws_basic'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_provider_id: 'example-prvdr'
-  - name: 'iam_workload_identity_pool_provider_aws_full'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_provider_id: 'example-prvdr'
-  - name: 'iam_workload_identity_pool_provider_github_actions'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_provider_id: 'example-prvdr'
-  - name: 'iam_workload_identity_pool_provider_oidc_basic'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_provider_id: 'example-prvdr'
-  - name: 'iam_workload_identity_pool_provider_oidc_full'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_provider_id: 'example-prvdr'
-  - name: 'iam_workload_identity_pool_provider_saml_basic'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_provider_id: 'example-prvdr'
-  - name: 'iam_workload_identity_pool_provider_saml_full'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_provider_id: 'example-prvdr'
-  - name: 'iam_workload_identity_pool_provider_oidc_upload_key'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_provider_id: 'example-prvdr'
-  - name: 'iam_workload_identity_pool_provider_x509_basic'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_provider_id: 'example-prvdr'
-  - name: 'iam_workload_identity_pool_provider_x509_full'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_provider_id: 'example-prvdr'
+samples:
+  - name: iam_workload_identity_pool_provider_aws_basic
+    primary_resource_id: example
+    steps:
+    - name: iam_workload_identity_pool_provider_aws_basic
+      prefixed_vars:
+        workload_identity_pool_id: example-pool
+        workload_identity_pool_provider_id: example-prvdr
+  - name: iam_workload_identity_pool_provider_aws_full
+    primary_resource_id: example
+    steps:
+    - name: iam_workload_identity_pool_provider_aws_full
+      prefixed_vars:
+        workload_identity_pool_id: example-pool
+        workload_identity_pool_provider_id: example-prvdr
+  - name: iam_workload_identity_pool_provider_github_actions
+    primary_resource_id: example
+    steps:
+    - name: iam_workload_identity_pool_provider_github_actions
+      prefixed_vars:
+        workload_identity_pool_id: example-pool
+        workload_identity_pool_provider_id: example-prvdr
+  - name: iam_workload_identity_pool_provider_oidc_basic
+    primary_resource_id: example
+    steps:
+    - name: iam_workload_identity_pool_provider_oidc_basic
+      prefixed_vars:
+        workload_identity_pool_id: example-pool
+        workload_identity_pool_provider_id: example-prvdr
+  - name: iam_workload_identity_pool_provider_oidc_full
+    primary_resource_id: example
+    steps:
+    - name: iam_workload_identity_pool_provider_oidc_full
+      prefixed_vars:
+        workload_identity_pool_id: example-pool
+        workload_identity_pool_provider_id: example-prvdr
+  - name: iam_workload_identity_pool_provider_saml_basic
+    primary_resource_id: example
+    steps:
+    - name: iam_workload_identity_pool_provider_saml_basic
+      prefixed_vars:
+        workload_identity_pool_id: example-pool
+        workload_identity_pool_provider_id: example-prvdr
+  - name: iam_workload_identity_pool_provider_saml_full
+    primary_resource_id: example
+    steps:
+    - name: iam_workload_identity_pool_provider_saml_full
+      prefixed_vars:
+        workload_identity_pool_id: example-pool
+        workload_identity_pool_provider_id: example-prvdr
+  - name: iam_workload_identity_pool_provider_oidc_upload_key
+    primary_resource_id: example
+    steps:
+    - name: iam_workload_identity_pool_provider_oidc_upload_key
+      prefixed_vars:
+        workload_identity_pool_id: example-pool
+        workload_identity_pool_provider_id: example-prvdr
+  - name: iam_workload_identity_pool_provider_x509_basic
+    primary_resource_id: example
+    steps:
+    - name: iam_workload_identity_pool_provider_x509_basic
+      prefixed_vars:
+        workload_identity_pool_id: example-pool
+        workload_identity_pool_provider_id: example-prvdr
+  - name: iam_workload_identity_pool_provider_x509_full
+    primary_resource_id: example
+    steps:
+    - name: iam_workload_identity_pool_provider_x509_full
+      prefixed_vars:
+        workload_identity_pool_id: example-pool
+        workload_identity_pool_provider_id: example-prvdr
 parameters:
 properties:
   - name: 'workloadIdentityPoolId'

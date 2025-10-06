@@ -41,20 +41,24 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-examples:
-  - name: 'vertex_ai_feature_group_feature'
-    primary_resource_id: 'feature_group_feature'
-    vars:
-      job_id: 'job_load'
-      name: 'example_feature'
-      feature_group_name: 'example_feature_group'
-  - name: 'vertex_ai_feature_group_feature_with_version_column_name'
-    primary_resource_id: 'feature_group_feature'
-    vars:
-      job_id: 'job_load'
-      name: 'example_feature'
-      feature_group_name: 'example_feature_group'
-    exclude_docs: true
+samples:
+  - name: vertex_ai_feature_group_feature
+    primary_resource_id: feature_group_feature
+    steps:
+    - name: vertex_ai_feature_group_feature
+      prefixed_vars:
+        feature_group_name: example_feature_group
+        job_id: job_load
+        name: example_feature
+  - name: vertex_ai_feature_group_feature_with_version_column_name
+    primary_resource_id: feature_group_feature
+    steps:
+    - name: vertex_ai_feature_group_feature_with_version_column_name
+      prefixed_vars:
+        feature_group_name: example_feature_group
+        job_id: job_load
+        name: example_feature
+      exclude_docs: true
 parameters:
   - name: 'featureGroup'
     type: String

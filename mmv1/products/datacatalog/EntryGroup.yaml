@@ -47,17 +47,21 @@ iam_policy:
     - '{{entry_group}}'
 custom_code:
   custom_import: 'templates/terraform/custom_import/data_catalog_entry_group.go.tmpl'
-examples:
-  - name: 'data_catalog_entry_group_basic'
-    primary_resource_id: 'basic_entry_group'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_group%s", context["random_suffix"])'
-    vars:
-      entry_group_id: 'my_group'
-  - name: 'data_catalog_entry_group_full'
-    primary_resource_id: 'basic_entry_group'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_group%s", context["random_suffix"])'
-    vars:
-      entry_group_id: 'my_group'
+samples:
+  - name: data_catalog_entry_group_basic
+    primary_resource_id: basic_entry_group
+    primary_resource_name: fmt.Sprintf("tf_test_my_group%s", context["random_suffix"])
+    steps:
+    - name: data_catalog_entry_group_basic
+      prefixed_vars:
+        entry_group_id: my_group
+  - name: data_catalog_entry_group_full
+    primary_resource_id: basic_entry_group
+    primary_resource_name: fmt.Sprintf("tf_test_my_group%s", context["random_suffix"])
+    steps:
+    - name: data_catalog_entry_group_full
+      prefixed_vars:
+        entry_group_id: my_group
 parameters:
   - name: 'region'
     type: String

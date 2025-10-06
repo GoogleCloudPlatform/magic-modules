@@ -25,16 +25,18 @@ id_format: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{c
 import_format:
   - projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index}}/repositoryGroups/{{repository_group_id}}
 mutex: 'projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index}}'
-examples:
-  - name: "gemini_repository_group_basic"
-    primary_resource_id: "example"
-    vars:
-      repository_group_id: "example-repository-group"
-      git_repository_link_id: 'example-git-repository-link-id'
-      cri_id: "cri-example"
-      repository_resource: "projects/example-project/locations/us-central1/connections/example-connection/gitRepositoryLinks/example-repo"
-      connection_id: "example-connection-id"
+samples:
+  - name: gemini_repository_group_basic
+    primary_resource_id: example
     exclude_test: true
+    steps:
+    - name: gemini_repository_group_basic
+      prefixed_vars:
+        connection_id: example-connection-id
+        cri_id: cri-example
+        git_repository_link_id: example-git-repository-link-id
+        repository_group_id: example-repository-group
+        repository_resource: projects/example-project/locations/us-central1/connections/example-connection/gitRepositoryLinks/example-repo
 timeouts:
   insert_minutes: 30
   update_minutes: 30

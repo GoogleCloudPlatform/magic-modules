@@ -56,29 +56,32 @@ custom_code:
   constants: 'templates/terraform/constants/iam_workload_identity_pool.go.tmpl'
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/iam_workload_identity_pool.go.tmpl'
-examples:
-  - name: 'iam_workload_identity_pool_basic'
-    primary_resource_id: 'example'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-example-pool%s", context["random_suffix"])'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-  - name: 'iam_workload_identity_pool_full_federation_only_mode'
-    primary_resource_id: 'example'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-example-pool%s", context["random_suffix"])'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-    min_version: beta
+samples:
+  - name: iam_workload_identity_pool_basic
+    primary_resource_id: example
+    primary_resource_name: fmt.Sprintf("tf-test-example-pool%s", context["random_suffix"])
+    steps:
+    - name: iam_workload_identity_pool_basic
+      prefixed_vars:
+        workload_identity_pool_id: example-pool
+  - name: iam_workload_identity_pool_full_federation_only_mode
     external_providers:
-      - 'random'
-  - name: 'iam_workload_identity_pool_full_trust_domain_mode'
-    primary_resource_id: 'example'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-example-pool%s", context["random_suffix"])'
-    vars:
-      workload_identity_pool_id: 'example-pool'
+    - random
     min_version: beta
+    primary_resource_id: example
+    primary_resource_name: fmt.Sprintf("tf-test-example-pool%s", context["random_suffix"])
+    steps:
+    - name: iam_workload_identity_pool_full_federation_only_mode
+      prefixed_vars:
+        workload_identity_pool_id: example-pool
+  - name: iam_workload_identity_pool_full_trust_domain_mode
+    min_version: beta
+    primary_resource_id: example
+    primary_resource_name: fmt.Sprintf("tf-test-example-pool%s", context["random_suffix"])
+    steps:
+    - name: iam_workload_identity_pool_full_trust_domain_mode
+      prefixed_vars:
+        workload_identity_pool_id: example-pool
 parameters:
 properties:
   - name: 'workloadIdentityPoolId'

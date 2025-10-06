@@ -33,16 +33,18 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'dataform_repository_release_config'
-    primary_resource_id: 'release'
-    min_version: 'beta'
-    vars:
-      release_name: 'my_release'
-      git_repository_name: 'my/repository'
-      dataform_repository_name: 'dataform_repository'
-      data: 'secret-data'
-      secret_name: 'my_secret'
+samples:
+  - name: dataform_repository_release_config
+    min_version: beta
+    primary_resource_id: release
+    steps:
+    - name: dataform_repository_release_config
+      prefixed_vars:
+        data: secret-data
+        dataform_repository_name: dataform_repository
+        git_repository_name: my/repository
+        release_name: my_release
+        secret_name: my_secret
 parameters:
   - name: 'region'
     type: String

@@ -43,18 +43,22 @@ async:
     resource_inside_response: false
 custom_code:
   custom_delete: 'templates/terraform/custom_delete/only_remove_from_state.go.tmpl'
-examples:
-  - name: 'compute_project_cloud_armor_tier_basic'
-    primary_resource_id: 'cloud_armor_tier_config'
+samples:
+  - name: compute_project_cloud_armor_tier_basic
+    primary_resource_id: cloud_armor_tier_config
     exclude_test: true
-  - name: 'compute_project_cloud_armor_tier_project_set'
-    primary_resource_id: 'cloud_armor_tier_config'
-    vars:
-      project_id: 'your_project_id'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
+    steps:
+    - name: compute_project_cloud_armor_tier_basic
+  - name: compute_project_cloud_armor_tier_project_set
+    primary_resource_id: cloud_armor_tier_config
     exclude_test: true
+    steps:
+    - name: compute_project_cloud_armor_tier_project_set
+      prefixed_vars:
+        project_id: your_project_id
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
 parameters:
 properties:
   - name: 'cloudArmorTier'

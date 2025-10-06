@@ -32,24 +32,29 @@ async:
 sweeper:
   url_substitutions:
     - region: "global"
-examples:
-  - name: 'network_security_backend_authentication_config_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-backend-authentication-config'
-  - name: 'network_security_backend_authentication_config_full'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-backend-authentication-config'
-      certificate_name: 'my-certificate'
-      trust_config_name: 'my-trust-config'
-  - name: 'backend_service_tls_settings'
-    primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
-      authentication_name: 'authentication'
-
+samples:
+  - name: network_security_backend_authentication_config_basic
+    primary_resource_id: default
+    steps:
+    - name: network_security_backend_authentication_config_basic
+      prefixed_vars:
+        resource_name: my-backend-authentication-config
+  - name: network_security_backend_authentication_config_full
+    primary_resource_id: default
+    steps:
+    - name: network_security_backend_authentication_config_full
+      prefixed_vars:
+        certificate_name: my-certificate
+        resource_name: my-backend-authentication-config
+        trust_config_name: my-trust-config
+  - name: backend_service_tls_settings
+    primary_resource_id: default
+    steps:
+    - name: backend_service_tls_settings
+      prefixed_vars:
+        authentication_name: authentication
+        backend_service_name: backend-service
+        health_check_name: health-check
 parameters:
   - name: 'name'
     type: String

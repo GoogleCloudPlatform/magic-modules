@@ -42,72 +42,86 @@ async:
 custom_code:
   constants: 'templates/terraform/constants/datastream_connection_profile.go.tmpl'
   pre_create: 'templates/terraform/pre_create/datastream_connection_profile.go.tmpl'
-examples:
-  - name: 'datastream_connection_profile_basic'
-    primary_resource_id: 'default'
-    vars:
-      connection_profile_id: 'my-profile'
-  - name: 'datastream_connection_profile_postgresql_private_connection'
-    primary_resource_id: 'default'
-    vars:
-      private_connection_id: 'my-connection'
-      connection_profile_id: 'my-profile'
-      network_name: 'my-network'
-      subnetwork_name: 'my-subnetwork'
-      database_instance_name: 'my-instance'
-      deletion_protection: 'true'
-      nat_vm_name: 'nat-vm'
-      nat_vm_ip_name: 'nat-vm-ip'
-      ingress_firewall_name: 'ingress-rule'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    external_providers: ["random", "time"]
-    # Random provider
+samples:
+  - name: datastream_connection_profile_basic
+    primary_resource_id: default
+    steps:
+    - name: datastream_connection_profile_basic
+      prefixed_vars:
+        connection_profile_id: my-profile
+  - name: datastream_connection_profile_postgresql_private_connection
     skip_vcr: true
-    ignore_read_extra:
-      - 'postgresql_profile.0.password'
-  - name: 'datastream_connection_profile_full'
-    primary_resource_id: 'default'
-    vars:
-      connection_profile_id: 'my-profile'
-      # Workaround for https://github.com/hashicorp/terraform-provider-google/issues/12410
-    ignore_read_extra:
-      - 'forward_ssh_connectivity.0.password'
-  - name: 'datastream_connection_profile_postgres'
-    primary_resource_id: 'default'
-    vars:
-      connection_profile_id: 'my-profile'
-      database_instance_name: 'my-instance'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
+    external_providers:
+    - random
+    - time
+    primary_resource_id: default
+    steps:
+    - name: datastream_connection_profile_postgresql_private_connection
+      prefixed_vars:
+        connection_profile_id: my-profile
+        database_instance_name: my-instance
+        deletion_protection: "true"
+        ingress_firewall_name: ingress-rule
+        nat_vm_ip_name: nat-vm-ip
+        nat_vm_name: nat-vm
+        network_name: my-network
+        private_connection_id: my-connection
+        subnetwork_name: my-subnetwork
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
+      ignore_read_extra:
+      - postgresql_profile.0.password
+  - name: datastream_connection_profile_full
+    primary_resource_id: default
+    steps:
+    - name: datastream_connection_profile_full
+      prefixed_vars:
+        connection_profile_id: my-profile
+      ignore_read_extra:
+      - forward_ssh_connectivity.0.password
+  - name: datastream_connection_profile_postgres
+    primary_resource_id: default
     exclude_test: true
-  - name: 'datastream_connection_profile_sql_server'
-    primary_resource_id: 'default'
-    vars:
-      database_name: 'db'
-      database_password: 'password'
-      database_user: 'user'
-      deletion_protection: 'true'
-      source_connection_profile_id: 'source-profile'
-      sql_server_name: 'sql-server'
-      sql_server_root_password: 'root-password'
-    test_vars_overrides:
-      'deletion_protection': 'false'
+    steps:
+    - name: datastream_connection_profile_postgres
+      prefixed_vars:
+        connection_profile_id: my-profile
+        database_instance_name: my-instance
+        deletion_protection: "true"
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: datastream_connection_profile_sql_server
+    primary_resource_id: default
     exclude_test: true
-  - name: 'datastream_connection_profile_salesforce'
-    primary_resource_id: 'default'
-    vars:
-      source_connection_profile_id: 'source-profile'
+    steps:
+    - name: datastream_connection_profile_sql_server
+      prefixed_vars:
+        database_name: db
+        database_password: password
+        database_user: user
+        deletion_protection: "true"
+        source_connection_profile_id: source-profile
+        sql_server_name: sql-server
+        sql_server_root_password: root-password
+      test_vars_overrides:
+        deletion_protection: "false"
+  - name: datastream_connection_profile_salesforce
+    primary_resource_id: default
     exclude_test: true
-  - name: 'datastream_connection_profile_postgres_secret_manager'
-    primary_resource_id: 'default'
-    vars:
-      source_connection_profile_id: 'source-profile'
+    steps:
+    - name: datastream_connection_profile_salesforce
+      prefixed_vars:
+        source_connection_profile_id: source-profile
+  - name: datastream_connection_profile_postgres_secret_manager
+    primary_resource_id: default
+    steps:
+    - name: datastream_connection_profile_postgres_secret_manager
+      prefixed_vars:
+        source_connection_profile_id: source-profile
 parameters:
   - name: 'connectionProfileId'
     type: String

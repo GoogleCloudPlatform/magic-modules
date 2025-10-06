@@ -56,21 +56,22 @@ custom_code:
 error_retry_predicates:
 
   - 'transport_tpg.IsAppEngineRetryableError'
-examples:
-  - name: 'app_engine_flexible_app_version'
-    primary_resource_id: 'myapp_v1'
-    vars:
-      bucket_name: 'appengine-static-content'
-      project: 'appeng-flex'
-      account_id: 'my-account'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    ignore_read_extra:
-      - 'noop_on_destroy'
-      - 'deployment.0.zip'
-    # https://github.com/hashicorp/terraform-provider-google/issues/19040
+samples:
+  - name: app_engine_flexible_app_version
+    primary_resource_id: myapp_v1
     exclude_test: true
+    steps:
+    - name: app_engine_flexible_app_version
+      prefixed_vars:
+        account_id: my-account
+        bucket_name: appengine-static-content
+        project: appeng-flex
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      ignore_read_extra:
+      - noop_on_destroy
+      - deployment.0.zip
 virtual_fields:
   - name: 'noop_on_destroy'
     description: |

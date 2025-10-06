@@ -53,65 +53,75 @@ custom_code:
 # Skipping the sweeper because instances will be deleted during cluster sweeps
 exclude_sweeper: true
 include_in_tgc_next_DO_NOT_USE: true
-examples:
-  - name: 'alloydb_instance_basic'
-    primary_resource_id: 'default'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_instance_name: 'alloydb-instance'
-      network_name: 'alloydb-network'
-    ignore_read_extra:
-      - 'reconciling'
-      - 'update_time'
+samples:
+  - name: alloydb_instance_basic
+    primary_resource_id: default
     exclude_test: true
-  - name: 'alloydb_secondary_instance_basic'
-    primary_resource_id: 'secondary'
-    vars:
-      alloydb_primary_cluster_name: 'alloydb-primary-cluster'
-      alloydb_primary_instance_name: 'alloydb-primary-instance'
-      alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
-      alloydb_secondary_instance_name: 'alloydb-secondary-instance'
-      network_name: 'alloydb-secondary-network'
-    ignore_read_extra:
-      - 'reconciling'
-      - 'update_time'
+    steps:
+    - name: alloydb_instance_basic
+      prefixed_vars:
+        alloydb_cluster_name: alloydb-cluster
+        alloydb_instance_name: alloydb-instance
+        network_name: alloydb-network
+      ignore_read_extra:
+      - reconciling
+      - update_time
+  - name: alloydb_secondary_instance_basic
+    primary_resource_id: secondary
     exclude_test: true
-  - name: 'alloydb_instance_basic_test'
-    primary_resource_id: 'default'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_instance_name: 'alloydb-instance'
-      network_name: 'alloydb-network'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
-    ignore_read_extra:
-      - 'reconciling'
-      - 'update_time'
-    exclude_docs: true
-  - name: 'alloydb_secondary_instance_basic_test'
-    primary_resource_id: 'secondary'
-    vars:
-      alloydb_primary_cluster_name: 'alloydb-primary-cluster'
-      alloydb_primary_instance_name: 'alloydb-primary-instance'
-      alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
-      alloydb_secondary_instance_name: 'alloydb-secondary-instance'
-      network_name: 'alloydb-secondary-network'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
-    ignore_read_extra:
-      - 'reconciling'
-      - 'update_time'
-    exclude_docs: true
-  - name: 'alloydb_instance_psc_test'
-    primary_resource_id: 'default'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_instance_name: 'alloydb-instance'
-      network_name: 'alloydb-network'
-    ignore_read_extra:
-      - 'reconciling'
-      - 'update_time'
-    exclude_docs: true
+    steps:
+    - name: alloydb_secondary_instance_basic
+      prefixed_vars:
+        alloydb_primary_cluster_name: alloydb-primary-cluster
+        alloydb_primary_instance_name: alloydb-primary-instance
+        alloydb_secondary_cluster_name: alloydb-secondary-cluster
+        alloydb_secondary_instance_name: alloydb-secondary-instance
+        network_name: alloydb-secondary-network
+      ignore_read_extra:
+      - reconciling
+      - update_time
+  - name: alloydb_instance_basic_test
+    primary_resource_id: default
+    steps:
+    - name: alloydb_instance_basic_test
+      prefixed_vars:
+        alloydb_cluster_name: alloydb-cluster
+        alloydb_instance_name: alloydb-instance
+        network_name: alloydb-network
+      test_vars_overrides:
+        network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")
+      ignore_read_extra:
+      - reconciling
+      - update_time
+      exclude_docs: true
+  - name: alloydb_secondary_instance_basic_test
+    primary_resource_id: secondary
+    steps:
+    - name: alloydb_secondary_instance_basic_test
+      prefixed_vars:
+        alloydb_primary_cluster_name: alloydb-primary-cluster
+        alloydb_primary_instance_name: alloydb-primary-instance
+        alloydb_secondary_cluster_name: alloydb-secondary-cluster
+        alloydb_secondary_instance_name: alloydb-secondary-instance
+        network_name: alloydb-secondary-network
+      test_vars_overrides:
+        network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")
+      ignore_read_extra:
+      - reconciling
+      - update_time
+      exclude_docs: true
+  - name: alloydb_instance_psc_test
+    primary_resource_id: default
+    steps:
+    - name: alloydb_instance_psc_test
+      prefixed_vars:
+        alloydb_cluster_name: alloydb-cluster
+        alloydb_instance_name: alloydb-instance
+        network_name: alloydb-network
+      ignore_read_extra:
+      - reconciling
+      - update_time
+      exclude_docs: true
 parameters:
   - name: 'cluster'
     type: ResourceRef

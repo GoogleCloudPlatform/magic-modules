@@ -40,18 +40,22 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'scc_organization_big_query_export_config_basic'
-    primary_resource_id: 'custom_big_query_export_config'
-    vars:
-      big_query_export_id: 'my-export'
-      dataset_id: 'my-dataset'
-      name: 'my-export'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      project: 'PROJECT_NAME'
-    external_providers: ["random", "time"]
+samples:
+  - name: scc_organization_big_query_export_config_basic
+    external_providers:
+    - random
+    - time
+    primary_resource_id: custom_big_query_export_config
     exclude_test: true
+    steps:
+    - name: scc_organization_big_query_export_config_basic
+      prefixed_vars:
+        big_query_export_id: my-export
+        dataset_id: my-dataset
+        name: my-export
+      test_env_vars:
+        org_id: ORG_ID
+        project: PROJECT_NAME
 parameters:
   - name: 'organization'
     type: String

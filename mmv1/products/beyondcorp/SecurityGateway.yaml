@@ -30,13 +30,15 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/{{location}}/securityGateways/{{security_gateway_id}}'
     - '{{security_gateway_id}}'
-examples:
+samples:
   - name: beyondcorp_security_gateway_basic
     primary_resource_id: example
-    primary_resource_name: 'fmt.Sprintf("default%s", context["random_suffix"])'
-    region_override: 'global'
-    vars:
-      security_gateway_name: default
+    primary_resource_name: fmt.Sprintf("default%s", context["random_suffix"])
+    steps:
+    - name: beyondcorp_security_gateway_basic
+      prefixed_vars:
+        security_gateway_name: default
+    region_override: global
 autogen_async: true
 async:
   operation:

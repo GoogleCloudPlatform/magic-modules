@@ -36,26 +36,30 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
-examples:
-  - name: 'network_attachment_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'basic-network-attachment'
-      network_name: 'basic-network'
-      subnetwork_name: 'basic-subnetwork'
-      accepted_producer_project_name: 'prj-accepted'
-      rejected_producer_project_name: 'prj-rejected'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-  - name: 'network_attachment_instance_usage'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      resource_name: 'basic-network-attachment'
-      network_name: 'basic-network'
-      subnetwork_name: 'basic-subnetwork'
-      instance_name: 'basic-instance'
+samples:
+  - name: network_attachment_basic
+    primary_resource_id: default
+    steps:
+    - name: network_attachment_basic
+      prefixed_vars:
+        accepted_producer_project_name: prj-accepted
+        network_name: basic-network
+        rejected_producer_project_name: prj-rejected
+        resource_name: basic-network-attachment
+        subnetwork_name: basic-subnetwork
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+  - name: network_attachment_instance_usage
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: network_attachment_instance_usage
+      prefixed_vars:
+        instance_name: basic-instance
+        network_name: basic-network
+        resource_name: basic-network-attachment
+        subnetwork_name: basic-subnetwork
 parameters:
   - name: 'name'
     type: String

@@ -68,22 +68,27 @@ custom_code:
   pre_update: 'templates/terraform/pre_update/netapp_storagepool.go.tmpl'
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
-examples:
-  - name: 'Storage_pool_create'
-    primary_resource_id: 'test_pool'
-    vars:
-      pool_name: 'test-pool'
-      network_name: 'test-network'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
-    exclude_docs: true
-  - name: 'Storage_pool_create_doc'
-    primary_resource_id: 'test_pool'
-    vars:
-      pool_name: 'test-pool'
-      network_name: 'test-network'
-      global_name: 'test-address'
+samples:
+  - name: Storage_pool_create
+    primary_resource_id: test_pool
+    steps:
+    - name: Storage_pool_create
+      prefixed_vars:
+        network_name: test-network
+        pool_name: test-pool
+      test_vars_overrides:
+        network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3",
+          acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))
+      exclude_docs: true
+  - name: Storage_pool_create_doc
+    primary_resource_id: test_pool
     exclude_test: true
+    steps:
+    - name: Storage_pool_create_doc
+      prefixed_vars:
+        global_name: test-address
+        network_name: test-network
+        pool_name: test-pool
 parameters:
   - name: 'location'
     type: String

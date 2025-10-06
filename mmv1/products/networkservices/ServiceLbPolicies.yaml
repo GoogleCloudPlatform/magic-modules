@@ -49,16 +49,20 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "global"
-examples:
-  - name: 'network_services_service_lb_policies_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-lb-policy'
-  - name: 'network_services_service_lb_policies_advanced'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-lb-policy'
-      backend_name: 'my-lb-backend'
+samples:
+  - name: network_services_service_lb_policies_basic
+    primary_resource_id: default
+    steps:
+    - name: network_services_service_lb_policies_basic
+      prefixed_vars:
+        resource_name: my-lb-policy
+  - name: network_services_service_lb_policies_advanced
+    primary_resource_id: default
+    steps:
+    - name: network_services_service_lb_policies_advanced
+      prefixed_vars:
+        backend_name: my-lb-backend
+        resource_name: my-lb-policy
 parameters:
   - name: 'name'
     type: String

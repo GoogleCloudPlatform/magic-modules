@@ -37,23 +37,31 @@ custom_code:
   pre_delete: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
   custom_import: 'templates/terraform/custom_import/dialogflowcx_webhook.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'dialogflowcx_webhook_standard'
-    primary_resource_id: 'standard_webhook'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-  - name: 'dialogflowcx_webhook_flexible'
-    primary_resource_id: 'flexible_webhook'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-  - name: 'dialogflowcx_webhook_service_directory_standard'
-    primary_resource_id: 'standard_webhook'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-  - name: 'dialogflowcx_webhook_service_directory_flexible'
-    primary_resource_id: 'flexible_webhook'
-    vars:
-      agent_name: 'dialogflowcx-agent'
+samples:
+  - name: dialogflowcx_webhook_standard
+    primary_resource_id: standard_webhook
+    steps:
+    - name: dialogflowcx_webhook_standard
+      prefixed_vars:
+        agent_name: dialogflowcx-agent
+  - name: dialogflowcx_webhook_flexible
+    primary_resource_id: flexible_webhook
+    steps:
+    - name: dialogflowcx_webhook_flexible
+      prefixed_vars:
+        agent_name: dialogflowcx-agent
+  - name: dialogflowcx_webhook_service_directory_standard
+    primary_resource_id: standard_webhook
+    steps:
+    - name: dialogflowcx_webhook_service_directory_standard
+      prefixed_vars:
+        agent_name: dialogflowcx-agent
+  - name: dialogflowcx_webhook_service_directory_flexible
+    primary_resource_id: flexible_webhook
+    steps:
+    - name: dialogflowcx_webhook_service_directory_flexible
+      prefixed_vars:
+        agent_name: dialogflowcx-agent
 parameters:
   - name: 'parent'
     type: String

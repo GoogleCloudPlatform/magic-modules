@@ -33,52 +33,68 @@ import_format:
 custom_code:
   custom_import: 'templates/terraform/custom_import/set_id_name_with_slashes.go.tmpl'
 collection_url_key: 'sessionTemplates'
-examples:
-  - name: 'dataproc_session_templates_jupyter'
-    primary_resource_id: 'example_session_templates_jupyter'
-    primary_resource_name: 'fmt.Sprintf("projects/%s/locations/%s/sessionTemplates/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), fmt.Sprintf("tf-test-session-templates-jupyter%s", context["random_suffix"]))'
-    vars:
-      name: 'jupyter-session-template'
-      subnetwork_name: 'default'
-      prevent_destroy: 'true'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-    test_vars_overrides:
-      'subnetwork_name': 'acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "jupyer-session-test-network", "jupyter-session-test-subnetwork")'
-      'prevent_destroy': 'false'
-    ignore_read_extra:
-      - 'runtime_config.0.properties'
-  - name: 'dataproc_session_templates_jupyter_full'
-    primary_resource_id: 'dataproc_session_templates_jupyter_full'
-    primary_resource_name: 'fmt.Sprintf("projects/%s/locations/%s/sessionTemplates/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), fmt.Sprintf("tf-test-session-templates-jupyter%s", context["random_suffix"]))'
-    vars:
-      name: 'jupyter-session-template'
-      subnetwork_name: 'default'
-      prevent_destroy: 'true'
-      kms_key_name: 'example-key'
-      bucket_name: 'dataproc-bucket'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-    test_vars_overrides:
-      'subnetwork_name': 'acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "jupyer-session-test-network", "jupyter-session-test-subnetwork")'
-      'prevent_destroy': 'false'
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-dataproc-session-template-key1").CryptoKey.Name'
-    ignore_read_extra:
-      - 'runtime_config.0.properties'
-  - name: 'dataproc_session_templates_spark_connect'
-    primary_resource_id: 'example_session_templates_spark_connect'
-    primary_resource_name: 'fmt.Sprintf("projects/%s/locations/%s/sessionTemplates/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), fmt.Sprintf("tf-test-session-templates-jupyter%s", context["random_suffix"]))'
-    vars:
-      name: 'sc-session-template'
-      subnetwork_name: 'default'
-      prevent_destroy: 'true'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-    test_vars_overrides:
-      'subnetwork_name': 'acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "spark-connect-session-test-network", "spark-connect-session-test-subnetwork")'
-      'prevent_destroy': 'false'
-    ignore_read_extra:
-      - 'runtime_config.0.properties'
+samples:
+  - name: dataproc_session_templates_jupyter
+    primary_resource_id: example_session_templates_jupyter
+    primary_resource_name: fmt.Sprintf("projects/%s/locations/%s/sessionTemplates/%s",
+      envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), fmt.Sprintf("tf-test-session-templates-jupyter%s",
+      context["random_suffix"]))
+    steps:
+    - name: dataproc_session_templates_jupyter
+      prefixed_vars:
+        name: jupyter-session-template
+        prevent_destroy: "true"
+        subnetwork_name: default
+      test_env_vars:
+        project_name: PROJECT_NAME
+      test_vars_overrides:
+        prevent_destroy: "false"
+        subnetwork_name: acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "jupyer-session-test-network",
+          "jupyter-session-test-subnetwork")
+      ignore_read_extra:
+      - runtime_config.0.properties
+  - name: dataproc_session_templates_jupyter_full
+    primary_resource_id: dataproc_session_templates_jupyter_full
+    primary_resource_name: fmt.Sprintf("projects/%s/locations/%s/sessionTemplates/%s",
+      envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), fmt.Sprintf("tf-test-session-templates-jupyter%s",
+      context["random_suffix"]))
+    steps:
+    - name: dataproc_session_templates_jupyter_full
+      prefixed_vars:
+        bucket_name: dataproc-bucket
+        kms_key_name: example-key
+        name: jupyter-session-template
+        prevent_destroy: "true"
+        subnetwork_name: default
+      test_env_vars:
+        project_name: PROJECT_NAME
+      test_vars_overrides:
+        kms_key_name: acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT",
+          "us-central1", "tf-bootstrap-dataproc-session-template-key1").CryptoKey.Name
+        prevent_destroy: "false"
+        subnetwork_name: acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "jupyer-session-test-network",
+          "jupyter-session-test-subnetwork")
+      ignore_read_extra:
+      - runtime_config.0.properties
+  - name: dataproc_session_templates_spark_connect
+    primary_resource_id: example_session_templates_spark_connect
+    primary_resource_name: fmt.Sprintf("projects/%s/locations/%s/sessionTemplates/%s",
+      envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), fmt.Sprintf("tf-test-session-templates-jupyter%s",
+      context["random_suffix"]))
+    steps:
+    - name: dataproc_session_templates_spark_connect
+      prefixed_vars:
+        name: sc-session-template
+        prevent_destroy: "true"
+        subnetwork_name: default
+      test_env_vars:
+        project_name: PROJECT_NAME
+      test_vars_overrides:
+        prevent_destroy: "false"
+        subnetwork_name: acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "spark-connect-session-test-network",
+          "spark-connect-session-test-subnetwork")
+      ignore_read_extra:
+      - runtime_config.0.properties
 parameters:
   - name: 'location'
     type: String

@@ -39,12 +39,14 @@ iam_policy:
   iam_conditions_request_type: 'QUERY_PARAM'
   example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
-examples:
-  - name: 'instance_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
-    vars:
-      instance_name: 'my-instance'
+samples:
+  - name: instance_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])
+    steps:
+    - name: instance_basic
+      prefixed_vars:
+        instance_name: my-instance
 parameters:
   - name: 'zone'
     type: ResourceRef

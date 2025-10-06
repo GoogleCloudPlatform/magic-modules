@@ -45,11 +45,13 @@ async:
 custom_code:
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
-examples:
-  - name: 'netapp_active_directory_full'
-    primary_resource_id: 'test_active_directory_full'
-    vars:
-      active_directory_full_name: 'test-active-directory-full'
+samples:
+  - name: netapp_active_directory_full
+    primary_resource_id: test_active_directory_full
+    steps:
+    - name: netapp_active_directory_full
+      prefixed_vars:
+        active_directory_full_name: test-active-directory-full
 parameters:
   - name: 'location'
     type: String

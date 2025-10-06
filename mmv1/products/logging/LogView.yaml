@@ -51,18 +51,22 @@ custom_code:
   pre_read: 'templates/terraform/pre_read/logging_log_view.go.tmpl'
 # Skipping sweeper since this is a child resource.
 exclude_sweeper: true
-examples:
-  - name: 'logging_log_view_basic'
-    primary_resource_id: 'logging_log_view'
-    vars:
-      log_view_name: 'my-view'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'logging_log_view_long_name'
-    primary_resource_id: 'logging_log_view'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    exclude_docs: true
+samples:
+  - name: logging_log_view_basic
+    primary_resource_id: logging_log_view
+    steps:
+    - name: logging_log_view_basic
+      prefixed_vars:
+        log_view_name: my-view
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: logging_log_view_long_name
+    primary_resource_id: logging_log_view
+    steps:
+    - name: logging_log_view_long_name
+      test_env_vars:
+        project: PROJECT_NAME
+      exclude_docs: true
 parameters:
   - name: 'parent'
     type: String

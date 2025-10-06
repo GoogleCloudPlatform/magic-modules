@@ -43,14 +43,16 @@ supports_indirect_user_project_override: true
 include_in_tgc_next_DO_NOT_USE: true
 cai_base_url: 'organizations/{{org_id}}/feeds'
 tgc_ignore_terraform_encoder: true
-examples:
-  - name: 'cloud_asset_organization_feed'
-    primary_resource_id: 'organization_feed'
-    vars:
-      feed_id: 'network-updates'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
+samples:
+  - name: cloud_asset_organization_feed
+    primary_resource_id: organization_feed
+    steps:
+    - name: cloud_asset_organization_feed
+      prefixed_vars:
+        feed_id: network-updates
+      test_env_vars:
+        org_id: ORG_ID
+        project: PROJECT_NAME
 parameters:
   - name: 'org_id'
     type: String

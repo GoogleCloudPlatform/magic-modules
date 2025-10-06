@@ -41,35 +41,43 @@ custom_code:
   constants: 'templates/terraform/constants/interconnect_attachment.go.tmpl'
   post_create: 'templates/terraform/post_create/interconnect_attachment.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/interconnect_attachment.go.tmpl'
-examples:
-  - name: 'interconnect_attachment_basic'
-    primary_resource_id: 'on_prem'
-    vars:
-      interconnect_attachment_name: 'on-prem-attachment'
-      router_name: 'router-1'
-      network_name: 'network-1'
-  - name: 'interconnect_attachment_dedicated'
-    primary_resource_id: 'on_prem'
-    vars:
-      interconnect_name: 'interconenct-1'
-      interconnect_attachment_name: 'on-prem-attachment'
-      router_name: 'router-1'
-      network_name: 'network-1'
-    exclude_docs: true
-  - name: 'compute_interconnect_attachment_ipsec_encryption'
-    primary_resource_id: 'ipsec-encrypted-interconnect-attachment'
-    vars:
-      interconnect_attachment_name: 'test-interconnect-attachment'
-      address_name: 'test-address'
-      router_name: 'test-router'
-      network_name: 'test-network'
-  - name: 'compute_interconnect_attachment_custom_ranges'
-    primary_resource_id: 'custom-ranges-interconnect-attachment'
-    vars:
-      interconnect_attachment_name: 'test-custom-ranges-interconnect-attachment'
-      router_name: 'test-router'
-      network_name: 'test-network'
+samples:
+  - name: interconnect_attachment_basic
+    primary_resource_id: on_prem
+    steps:
+    - name: interconnect_attachment_basic
+      prefixed_vars:
+        interconnect_attachment_name: on-prem-attachment
+        network_name: network-1
+        router_name: router-1
+  - name: interconnect_attachment_dedicated
+    primary_resource_id: on_prem
+    steps:
+    - name: interconnect_attachment_dedicated
+      prefixed_vars:
+        interconnect_attachment_name: on-prem-attachment
+        interconnect_name: interconenct-1
+        network_name: network-1
+        router_name: router-1
+      exclude_docs: true
+  - name: compute_interconnect_attachment_ipsec_encryption
+    primary_resource_id: ipsec-encrypted-interconnect-attachment
+    steps:
+    - name: compute_interconnect_attachment_ipsec_encryption
+      prefixed_vars:
+        address_name: test-address
+        interconnect_attachment_name: test-interconnect-attachment
+        network_name: test-network
+        router_name: test-router
+  - name: compute_interconnect_attachment_custom_ranges
     min_version: beta
+    primary_resource_id: custom-ranges-interconnect-attachment
+    steps:
+    - name: compute_interconnect_attachment_custom_ranges
+      prefixed_vars:
+        interconnect_attachment_name: test-custom-ranges-interconnect-attachment
+        network_name: test-network
+        router_name: test-router
 parameters:
   - name: 'region'
     type: ResourceRef

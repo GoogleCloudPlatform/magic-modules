@@ -45,46 +45,56 @@ sweeper:
   url_substitutions:
     - parent: "organizations/${ORG_ID}"
       region: "global"
-examples:
-  - name: 'network_security_security_profile_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-security-profile'
-    test_env_vars:
-      org_id: 'ORG_ID'
-  - name: 'network_security_security_profile_overrides'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-security-profile'
-    test_env_vars:
-      org_id: 'ORG_ID'
-  - name: 'network_security_security_profile_mirroring'
-    min_version: 'beta'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-security-profile'
-      network_name: 'my-network'
-      deployment_group_id: 'my-dg'
-      endpoint_group_id: 'my-eg'
-    test_env_vars:
-      org_id: 'ORG_ID'
-  - name: 'network_security_security_profile_intercept'
-    min_version: 'beta'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-security-profile'
-      network_name: 'my-network'
-      deployment_group_id: 'my-dg'
-      endpoint_group_id: 'my-eg'
-    test_env_vars:
-      org_id: 'ORG_ID'
-  - name: 'network_security_security_profile_url_filtering'
-    min_version: 'beta'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-security-profile'
-    test_env_vars:
-      org_id: 'ORG_ID'
+samples:
+  - name: network_security_security_profile_basic
+    primary_resource_id: default
+    steps:
+    - name: network_security_security_profile_basic
+      prefixed_vars:
+        resource_name: my-security-profile
+      test_env_vars:
+        org_id: ORG_ID
+  - name: network_security_security_profile_overrides
+    primary_resource_id: default
+    steps:
+    - name: network_security_security_profile_overrides
+      prefixed_vars:
+        resource_name: my-security-profile
+      test_env_vars:
+        org_id: ORG_ID
+  - name: network_security_security_profile_mirroring
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: network_security_security_profile_mirroring
+      prefixed_vars:
+        deployment_group_id: my-dg
+        endpoint_group_id: my-eg
+        network_name: my-network
+        resource_name: my-security-profile
+      test_env_vars:
+        org_id: ORG_ID
+  - name: network_security_security_profile_intercept
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: network_security_security_profile_intercept
+      prefixed_vars:
+        deployment_group_id: my-dg
+        endpoint_group_id: my-eg
+        network_name: my-network
+        resource_name: my-security-profile
+      test_env_vars:
+        org_id: ORG_ID
+  - name: network_security_security_profile_url_filtering
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: network_security_security_profile_url_filtering
+      prefixed_vars:
+        resource_name: my-security-profile
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
   - name: 'name'
     type: String

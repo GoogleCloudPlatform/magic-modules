@@ -53,24 +53,28 @@ iam_policy:
     - '{{region}}/{{gateway}}'
     - '{{gateway}}'
 custom_code:
-examples:
-  - name: 'apigateway_gateway_basic'
-    primary_resource_id: 'api_gw'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-gateway%s", context["random_suffix"])'
-    min_version: 'beta'
-    vars:
-      api_id: 'my-api'
-      config_id: 'my-config'
-      gateway_id: 'my-gateway'
-  - name: 'apigateway_gateway_full'
-    primary_resource_id: 'api_gw'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-gateway%s", context["random_suffix"])'
-    min_version: 'beta'
-    vars:
-      api_id: 'my-api'
-      config_id: 'my-config'
-      gateway_id: 'my-gateway'
-    exclude_docs: true
+samples:
+  - name: apigateway_gateway_basic
+    min_version: beta
+    primary_resource_id: api_gw
+    primary_resource_name: fmt.Sprintf("tf-test-my-gateway%s", context["random_suffix"])
+    steps:
+    - name: apigateway_gateway_basic
+      prefixed_vars:
+        api_id: my-api
+        config_id: my-config
+        gateway_id: my-gateway
+  - name: apigateway_gateway_full
+    min_version: beta
+    primary_resource_id: api_gw
+    primary_resource_name: fmt.Sprintf("tf-test-my-gateway%s", context["random_suffix"])
+    steps:
+    - name: apigateway_gateway_full
+      prefixed_vars:
+        api_id: my-api
+        config_id: my-config
+        gateway_id: my-gateway
+      exclude_docs: true
 parameters:
   - name: 'region'
     type: String

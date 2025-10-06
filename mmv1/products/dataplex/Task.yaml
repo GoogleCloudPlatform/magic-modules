@@ -55,22 +55,31 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/tasks/{{task_id}}'
     - '{{task_id}}'
 custom_code:
-examples:
-  - name: 'dataplex_task_basic'
-    primary_resource_id: 'example'
-    primary_resource_name: 'fmt.Sprintf("tf-test-lake%s", context["random_suffix"]), fmt.Sprintf("tf-test-task%s", context["random_suffix"])'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-  - name: 'dataplex_task_spark'
-    primary_resource_id: 'example_spark'
-    primary_resource_name: 'fmt.Sprintf("tf-test-lake%s", context["random_suffix"]), fmt.Sprintf("tf-test-task%s", context["random_suffix"])'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-  - name: 'dataplex_task_notebook'
-    primary_resource_id: 'example_notebook'
-    primary_resource_name: 'fmt.Sprintf("tf-test-lake%s", context["random_suffix"]), fmt.Sprintf("tf-test-task%s", context["random_suffix"])'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
+samples:
+  - name: dataplex_task_basic
+    primary_resource_id: example
+    primary_resource_name: fmt.Sprintf("tf-test-lake%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test-task%s", context["random_suffix"])
+    steps:
+    - name: dataplex_task_basic
+      test_env_vars:
+        project_name: PROJECT_NAME
+  - name: dataplex_task_spark
+    primary_resource_id: example_spark
+    primary_resource_name: fmt.Sprintf("tf-test-lake%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test-task%s", context["random_suffix"])
+    steps:
+    - name: dataplex_task_spark
+      test_env_vars:
+        project_name: PROJECT_NAME
+  - name: dataplex_task_notebook
+    primary_resource_id: example_notebook
+    primary_resource_name: fmt.Sprintf("tf-test-lake%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test-task%s", context["random_suffix"])
+    steps:
+    - name: dataplex_task_notebook
+      test_env_vars:
+        project_name: PROJECT_NAME
 parameters:
   - name: 'location'
     type: String

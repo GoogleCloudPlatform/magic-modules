@@ -44,15 +44,17 @@ iam_policy:
     - 'projects/{{project}}/locations/{{region}}/featureGroups/{{name}}'
   min_version: 'beta'
 custom_code:
-examples:
-  - name: 'vertex_ai_feature_group'
-    primary_resource_id: 'feature_group'
-    primary_resource_name: 'fmt.Sprintf("tf_test_example_feature_group%s", context["random_suffix"])'
-    vars:
-      job_id: 'job_load'
-      feature_group_name: 'example_feature_group'
-    ignore_read_extra:
-      - 'description'
+samples:
+  - name: vertex_ai_feature_group
+    primary_resource_id: feature_group
+    primary_resource_name: fmt.Sprintf("tf_test_example_feature_group%s", context["random_suffix"])
+    steps:
+    - name: vertex_ai_feature_group
+      prefixed_vars:
+        feature_group_name: example_feature_group
+        job_id: job_load
+      ignore_read_extra:
+      - description
 parameters:
   - name: 'region'
     type: String

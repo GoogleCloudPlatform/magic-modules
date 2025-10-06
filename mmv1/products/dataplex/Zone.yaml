@@ -32,12 +32,15 @@ iam_policy:
     - '{{name}}'
   substitute_zone_value: false
 custom_code:
-examples:
-  - name: 'dataplex_zone_primary'
-    primary_resource_id: 'example'
-    primary_resource_name: 'fmt.Sprintf("tf-test-lake%s", context["random_suffix"]), fmt.Sprintf("tf-test-zone%s", context["random_suffix"])'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
+samples:
+  - name: dataplex_zone_primary
+    primary_resource_id: example
+    primary_resource_name: fmt.Sprintf("tf-test-lake%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test-zone%s", context["random_suffix"])
+    steps:
+    - name: dataplex_zone_primary
+      test_env_vars:
+        project_name: PROJECT_NAME
 parameters:
 properties:
   - name: 'name'

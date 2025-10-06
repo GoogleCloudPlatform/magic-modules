@@ -40,21 +40,25 @@ custom_code:
   custom_delete: 'templates/terraform/custom_delete/clear_folder_access_approval_settings.go.tmpl'
   post_create: 'templates/terraform/post_create/sleep_5_min.go.tmpl'
   post_update: 'templates/terraform/post_create/sleep_5_min.go.tmpl'
-examples:
-  - name: 'folder_access_approval_full'
-    primary_resource_id: 'folder_access_approval'
-    vars:
-      folder_name: 'my-folder'
-    test_env_vars:
-      org_id: 'ORG_ID'
+samples:
+  - name: folder_access_approval_full
+    primary_resource_id: folder_access_approval
     exclude_test: true
-  - name: 'folder_access_approval_active_key_version'
-    primary_resource_id: 'folder_access_approval'
-    vars:
-      folder_name: 'my-folder'
-    test_env_vars:
-      org_id: 'ORG_ID'
+    steps:
+    - name: folder_access_approval_full
+      prefixed_vars:
+        folder_name: my-folder
+      test_env_vars:
+        org_id: ORG_ID
+  - name: folder_access_approval_active_key_version
+    primary_resource_id: folder_access_approval
     exclude_test: true
+    steps:
+    - name: folder_access_approval_active_key_version
+      prefixed_vars:
+        folder_name: my-folder
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
   - name: 'folder_id'
     type: String

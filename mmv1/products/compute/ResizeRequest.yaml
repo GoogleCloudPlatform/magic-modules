@@ -53,11 +53,13 @@ async:
 custom_code:
   custom_delete: 'templates/terraform/custom_delete/compute_mig_resize_request_delete.go.tmpl'
 # Examples for testing
-examples:
-  - name: 'compute_mig_resize_request'
-    primary_resource_id: 'a3_resize_request'
-    vars:
-      resize_request_name: 'a3-dws'
+samples:
+  - name: compute_mig_resize_request
+    primary_resource_id: a3_resize_request
+    steps:
+    - name: compute_mig_resize_request
+      prefixed_vars:
+        resize_request_name: a3-dws
 # Resize request parameters injected via URL
 parameters:
   - name: 'zone'

@@ -39,17 +39,19 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "global"
-examples:
-  - name: 'scc_v2_project_notification_config_basic'
-    primary_resource_id: 'custom_notification_config'
-    vars:
-      topic_name: 'my-topic'
-      config_id: 'my-config'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'location'
-      - 'project'
+samples:
+  - name: scc_v2_project_notification_config_basic
+    primary_resource_id: custom_notification_config
+    steps:
+    - name: scc_v2_project_notification_config_basic
+      prefixed_vars:
+        config_id: my-config
+        topic_name: my-topic
+      test_env_vars:
+        project: PROJECT_NAME
+      ignore_read_extra:
+      - location
+      - project
 parameters:
   - name: 'configId'
     type: String

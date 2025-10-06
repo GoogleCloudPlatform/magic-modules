@@ -38,53 +38,51 @@ iam_policy:
   min_version: 'beta'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/dataform_repository.go.tmpl'
-examples:
-  - name: 'dataform_repository'
-    primary_resource_id: 'dataform_repository'
-    primary_resource_name: 'fmt.Sprintf("tf_test_dataform_repository%s", context["random_suffix"])'
-    min_version: 'beta'
-    vars:
-      dataform_repository_name: 'dataform_repository'
-      data: 'secret-data'
-      secret_name: 'my-secret'
-      key_ring_name: 'example-key-ring'
-      crypto_key_name: 'example-crypto-key-name'
-    # This example is used in the docs to address this issue
-    # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
+samples:
+  - name: dataform_repository
+    min_version: beta
+    primary_resource_id: dataform_repository
+    primary_resource_name: fmt.Sprintf("tf_test_dataform_repository%s", context["random_suffix"])
     exclude_test: true
-    ignore_read_extra:
-      - 'deletion_policy'
-    exclude_import_test: true
-  - name: 'dataform_repository_with_cloudsource_repo'
-    primary_resource_id: 'dataform_repository'
-    primary_resource_name: 'fmt.Sprintf("tf_test_dataform_repository%s", context["random_suffix"])'
-    min_version: 'beta'
-    vars:
-      git_repository_name: 'my/repository'
-      dataform_repository_name: 'dataform_repository'
-      data: 'secret-data'
-      secret_name: 'my-secret'
-      key_ring_name: 'example-key-ring'
-      crypto_key_name: 'example-crypto-key-name'
-    # Although the Terraform config can be applied without error, the connection between Dataform and the SourceRepo aren't yet functional
-    # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
-    # See : https://issuetracker.google.com/issues/287850319
-    exclude_docs: true
-    ignore_read_extra:
-      - 'deletion_policy'
-    exclude_import_test: true
-  - name: 'dataform_repository_with_cloudsource_repo_and_ssh'
-    primary_resource_id: 'dataform_repository'
-    min_version: 'beta'
-    vars:
-      git_repository_name: 'my/repository'
-      dataform_repository_name: 'dataform_repository'
-      data: 'secret-data'
-      secret_name: 'my-secret'
-    # Although the Terraform config can be applied without error, the connection between Dataform and the SourceRepo aren't yet functional
-    # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
-    # See : https://issuetracker.google.com/issues/287850319
-    exclude_docs: true
+    steps:
+    - name: dataform_repository
+      prefixed_vars:
+        crypto_key_name: example-crypto-key-name
+        data: secret-data
+        dataform_repository_name: dataform_repository
+        key_ring_name: example-key-ring
+        secret_name: my-secret
+      ignore_read_extra:
+      - deletion_policy
+      exclude_import_test: true
+  - name: dataform_repository_with_cloudsource_repo
+    min_version: beta
+    primary_resource_id: dataform_repository
+    primary_resource_name: fmt.Sprintf("tf_test_dataform_repository%s", context["random_suffix"])
+    steps:
+    - name: dataform_repository_with_cloudsource_repo
+      prefixed_vars:
+        crypto_key_name: example-crypto-key-name
+        data: secret-data
+        dataform_repository_name: dataform_repository
+        git_repository_name: my/repository
+        key_ring_name: example-key-ring
+        secret_name: my-secret
+      ignore_read_extra:
+      - deletion_policy
+      exclude_import_test: true
+      exclude_docs: true
+  - name: dataform_repository_with_cloudsource_repo_and_ssh
+    min_version: beta
+    primary_resource_id: dataform_repository
+    steps:
+    - name: dataform_repository_with_cloudsource_repo_and_ssh
+      prefixed_vars:
+        data: secret-data
+        dataform_repository_name: dataform_repository
+        git_repository_name: my/repository
+        secret_name: my-secret
+      exclude_docs: true
 virtual_fields:
   - name: 'deletion_policy'
     type: Enum

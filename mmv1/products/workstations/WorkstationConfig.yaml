@@ -55,70 +55,89 @@ iam_policy:
     - '{{workstation_config_id}}'
   min_version: 'beta'
 custom_code:
-examples:
-  - name: 'workstation_config_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workstation-cluster%s", context["random_suffix"]), fmt.Sprintf("tf-test-workstation-config%s", context["random_suffix"])'
-    min_version: 'beta'
-    vars:
-      workstation_cluster_name: 'workstation-cluster'
-      workstation_config_name: 'workstation-config'
-      key_short_name: 'keyname'
-      value_short_name: 'valuename'
-      org_id: '123456789'
-    test_vars_overrides:
-      'key_short_name': '"tf-test-key-" + acctest.RandString(t, 10)'
-      'value_short_name': '"tf-test-value-" + acctest.RandString(t, 10)'
-      'org_id': 'envvar.GetTestOrgFromEnv(t)'
-  - name: 'workstation_config_container'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      workstation_cluster_name: 'workstation-cluster'
-      workstation_config_name: 'workstation-config'
-  - name: 'workstation_config_persistent_directories'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      workstation_cluster_name: 'workstation-cluster'
-      workstation_config_name: 'workstation-config'
-  - name: 'workstation_config_source_snapshot'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      workstation_cluster_name: 'workstation-cluster'
-      workstation_config_name: 'workstation-config'
-  - name: 'workstation_config_shielded_instance_config'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      workstation_cluster_name: 'workstation-cluster'
-      workstation_config_name: 'workstation-config'
-  - name: 'workstation_config_accelerators'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      workstation_cluster_name: 'workstation-cluster'
-      workstation_config_name: 'workstation-config'
-  - name: 'workstation_config_boost'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      workstation_cluster_name: 'workstation-cluster'
-      workstation_config_name: 'workstation-config'
-  - name: 'workstation_config_encryption_key'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      account_id: 'my-account'
-      workstation_cluster_name: 'workstation-cluster'
-      workstation_config_name: 'workstation-config'
-  - name: 'workstation_config_allowed_ports'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      workstation_cluster_name: 'workstation-cluster'
-      workstation_config_name: 'workstation-config'
+samples:
+  - name: workstation_config_basic
+    min_version: beta
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-workstation-cluster%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test-workstation-config%s", context["random_suffix"])
+    steps:
+    - name: workstation_config_basic
+      prefixed_vars:
+        key_short_name: keyname
+        org_id: "123456789"
+        value_short_name: valuename
+        workstation_cluster_name: workstation-cluster
+        workstation_config_name: workstation-config
+      test_vars_overrides:
+        key_short_name: '"tf-test-key-" + acctest.RandString(t, 10)'
+        org_id: envvar.GetTestOrgFromEnv(t)
+        value_short_name: '"tf-test-value-" + acctest.RandString(t, 10)'
+  - name: workstation_config_container
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: workstation_config_container
+      prefixed_vars:
+        workstation_cluster_name: workstation-cluster
+        workstation_config_name: workstation-config
+  - name: workstation_config_persistent_directories
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: workstation_config_persistent_directories
+      prefixed_vars:
+        workstation_cluster_name: workstation-cluster
+        workstation_config_name: workstation-config
+  - name: workstation_config_source_snapshot
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: workstation_config_source_snapshot
+      prefixed_vars:
+        workstation_cluster_name: workstation-cluster
+        workstation_config_name: workstation-config
+  - name: workstation_config_shielded_instance_config
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: workstation_config_shielded_instance_config
+      prefixed_vars:
+        workstation_cluster_name: workstation-cluster
+        workstation_config_name: workstation-config
+  - name: workstation_config_accelerators
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: workstation_config_accelerators
+      prefixed_vars:
+        workstation_cluster_name: workstation-cluster
+        workstation_config_name: workstation-config
+  - name: workstation_config_boost
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: workstation_config_boost
+      prefixed_vars:
+        workstation_cluster_name: workstation-cluster
+        workstation_config_name: workstation-config
+  - name: workstation_config_encryption_key
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: workstation_config_encryption_key
+      prefixed_vars:
+        account_id: my-account
+        workstation_cluster_name: workstation-cluster
+        workstation_config_name: workstation-config
+  - name: workstation_config_allowed_ports
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: workstation_config_allowed_ports
+      prefixed_vars:
+        workstation_cluster_name: workstation-cluster
+        workstation_config_name: workstation-config
 parameters:
   - name: 'workstationConfigId'
     type: String

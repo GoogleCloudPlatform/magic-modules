@@ -47,18 +47,22 @@ custom_code:
   extra_schema_entry: templates/terraform/extra_schema_entry/source_repo_repository.tmpl
   custom_create: templates/terraform/custom_create/source_repo_repository.go.tmpl
 exclude_tgc: true
-examples:
-  - name: 'sourcerepo_repository_basic'
-    primary_resource_id: 'my-repo'
-    primary_resource_name: 'fmt.Sprintf("my/repository%s", context["random_suffix"])'
-    vars:
-      repository_name: 'my/repository'
-  - name: 'sourcerepo_repository_full'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_name: 'my-repository'
-      account_id: 'my-account'
-      topic_name: 'my-topic'
+samples:
+  - name: sourcerepo_repository_basic
+    primary_resource_id: my-repo
+    primary_resource_name: fmt.Sprintf("my/repository%s", context["random_suffix"])
+    steps:
+    - name: sourcerepo_repository_basic
+      prefixed_vars:
+        repository_name: my/repository
+  - name: sourcerepo_repository_full
+    primary_resource_id: my-repo
+    steps:
+    - name: sourcerepo_repository_full
+      prefixed_vars:
+        account_id: my-account
+        repository_name: my-repository
+        topic_name: my-topic
 parameters:
 properties:
   - name: 'name'

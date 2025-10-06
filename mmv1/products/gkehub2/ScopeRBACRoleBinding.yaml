@@ -45,18 +45,24 @@ async:
 custom_code:
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
-examples:
-  - name: 'gkehub_scope_rbac_role_binding_basic'
-    primary_resource_id: 'scope_rbac_role_binding'
-    primary_resource_name: 'fmt.Sprintf(\"tf-test-scope%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-rbac-role-binding%s\", context[\"random_suffix\"])'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'gkehub_scope_rbac_custom_role_binding_basic'
-    primary_resource_id: 'scope_rbac_role_binding'
-    primary_resource_name: 'fmt.Sprintf(\"tf-test-scope%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-custom-rbac-role-binding%s\", context[\"random_suffix\"])'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: gkehub_scope_rbac_role_binding_basic
+    primary_resource_id: scope_rbac_role_binding
+    primary_resource_name: fmt.Sprintf(\"tf-test-scope%s\", context[\"random_suffix\"]),
+      fmt.Sprintf(\"tf-test-rbac-role-binding%s\", context[\"random_suffix\"])
+    steps:
+    - name: gkehub_scope_rbac_role_binding_basic
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: gkehub_scope_rbac_custom_role_binding_basic
+    primary_resource_id: scope_rbac_role_binding
+    primary_resource_name: fmt.Sprintf(\"tf-test-scope%s\", context[\"random_suffix\"]),
+      fmt.Sprintf(\"tf-test-custom-rbac-role-binding%s\", context[\"random_suffix\"])
     exclude_test: true
+    steps:
+    - name: gkehub_scope_rbac_custom_role_binding_basic
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
   - name: 'scope_id'
     type: String

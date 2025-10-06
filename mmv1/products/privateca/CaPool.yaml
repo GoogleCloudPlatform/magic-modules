@@ -48,28 +48,34 @@ iam_policy:
   iam_conditions_request_type: 'QUERY_PARAM_NESTED'
   example_config_body: 'templates/terraform/iam/example_config_body/privateca_ca_pool.tf.tmpl'
 custom_code:
-examples:
-  - name: 'privateca_capool_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-pool%s", context["random_suffix"])'
-    vars:
-      name: 'my-pool'
-  - name: 'privateca_capool_all_fields'
-    primary_resource_id: 'default'
-    vars:
-      name: 'my-pool'
-      cloud_kms_key: 'projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key'
-    test_vars_overrides:
-      'cloud_kms_key': 'acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "us-central1").CryptoKey.Name'
-    # Test requires a beta-only resource
+samples:
+  - name: privateca_capool_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-my-pool%s", context["random_suffix"])
+    steps:
+    - name: privateca_capool_basic
+      prefixed_vars:
+        name: my-pool
+  - name: privateca_capool_all_fields
     min_version: beta
-  - name: 'privateca_quickstart'
-    primary_resource_id: 'default'
-    vars:
-      my_ca_pool: 'my-ca-pool'
-      my_certificate: 'my-certificate'
+    primary_resource_id: default
+    steps:
+    - name: privateca_capool_all_fields
+      prefixed_vars:
+        cloud_kms_key: projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key
+        name: my-pool
+      test_vars_overrides:
+        cloud_kms_key: acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT",
+          "us-central1").CryptoKey.Name
+  - name: privateca_quickstart
+    primary_resource_id: default
     exclude_test: true
-    exclude_docs: true
+    steps:
+    - name: privateca_quickstart
+      prefixed_vars:
+        my_ca_pool: my-ca-pool
+        my_certificate: my-certificate
+      exclude_docs: true
 parameters:
   - name: 'location'
     type: String

@@ -56,59 +56,85 @@ custom_code:
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
 legacy_long_form_project: true
-examples:
-  - name: 'gkehub_feature_multi_cluster_ingress'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("multiclusteringress")'
+samples:
+  - name: gkehub_feature_multi_cluster_ingress
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprint("multiclusteringress")
     exclude_test: true
-  - name: 'gkehub_feature_multi_cluster_service_discovery'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("multiclusterservicediscovery")'
+    steps:
+    - name: gkehub_feature_multi_cluster_ingress
+  - name: gkehub_feature_multi_cluster_service_discovery
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprint("multiclusterservicediscovery")
     exclude_test: true
-  - name: 'gkehub_feature_anthos_service_mesh'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("servicemesh")'
+    steps:
+    - name: gkehub_feature_multi_cluster_service_discovery
+  - name: gkehub_feature_anthos_service_mesh
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprint("servicemesh")
     exclude_test: true
-  - name: 'enable_fleet_observability_for_default_logs_with_COPY'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("fleetobservability")'
+    steps:
+    - name: gkehub_feature_anthos_service_mesh
+  - name: enable_fleet_observability_for_default_logs_with_COPY
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprint("fleetobservability")
     exclude_test: true
-  - name: 'enable_fleet_observability_for_scope_logs_with_MOVE'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("fleetobservability")'
+    steps:
+    - name: enable_fleet_observability_for_default_logs_with_COPY
+  - name: enable_fleet_observability_for_scope_logs_with_MOVE
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprint("fleetobservability")
     exclude_test: true
-  - name: 'enable_fleet_observability_for_both_default_and_scope_logs'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("fleetobservability")'
+    steps:
+    - name: enable_fleet_observability_for_scope_logs_with_MOVE
+  - name: enable_fleet_observability_for_both_default_and_scope_logs
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprint("fleetobservability")
     exclude_test: true
-  - name: 'enable_fleet_default_member_config_service_mesh'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprintf("servicemesh")'
+    steps:
+    - name: enable_fleet_observability_for_both_default_and_scope_logs
+  - name: enable_fleet_default_member_config_service_mesh
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprintf("servicemesh")
     exclude_test: true
-  - name: 'enable_fleet_default_member_config_configmanagement'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprintf("configmanagement")'
+    steps:
+    - name: enable_fleet_default_member_config_service_mesh
+  - name: enable_fleet_default_member_config_configmanagement
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprintf("configmanagement")
     exclude_test: true
-  - name: 'enable_fleet_default_member_config_policycontroller'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprintf("policycontroller")'
+    steps:
+    - name: enable_fleet_default_member_config_configmanagement
+  - name: enable_fleet_default_member_config_policycontroller
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprintf("policycontroller")
     exclude_test: true
-  - name: 'enable_fleet_default_member_config_policycontroller_full'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprintf("policycontroller")'
+    steps:
+    - name: enable_fleet_default_member_config_policycontroller
+  - name: enable_fleet_default_member_config_policycontroller_full
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprintf("policycontroller")
     exclude_test: true
-  - name: 'enable_fleet_default_member_config_policycontroller_minimal'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprintf("policycontroller")'
+    steps:
+    - name: enable_fleet_default_member_config_policycontroller_full
+  - name: enable_fleet_default_member_config_policycontroller_minimal
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprintf("policycontroller")
     exclude_test: true
-  - name: 'gkehub_feature_clusterupgrade'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("clusterupgrade")'
+    steps:
+    - name: enable_fleet_default_member_config_policycontroller_minimal
+  - name: gkehub_feature_clusterupgrade
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprint("clusterupgrade")
     exclude_test: true
-  - name: 'gkehub_feature_rbacrolebinding_actuation'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("rbacrolebindingactuation")'
+    steps:
+    - name: gkehub_feature_clusterupgrade
+  - name: gkehub_feature_rbacrolebinding_actuation
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprint("rbacrolebindingactuation")
     exclude_test: true
+    steps:
+    - name: gkehub_feature_rbacrolebinding_actuation
 parameters:
   - name: 'location'
     type: String

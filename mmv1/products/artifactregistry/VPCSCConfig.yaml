@@ -46,11 +46,12 @@ async:
     resource_inside_response: false
 custom_code:
   encoder: 'templates/terraform/encoders/location_from_region.go.tmpl'
-examples:
-  - name: 'artifact_registry_vpcsc_config'
-    primary_resource_id: 'my-config'
-    # Requires VPC SC Policy configured on organization
+samples:
+  - name: artifact_registry_vpcsc_config
+    primary_resource_id: my-config
     exclude_test: true
+    steps:
+    - name: artifact_registry_vpcsc_config
 parameters:
   - name: 'location'
     type: String

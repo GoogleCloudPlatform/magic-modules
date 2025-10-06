@@ -31,12 +31,14 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/lakes/{{name}}'
     - '{{name}}'
 custom_code:
-examples:
-  - name: 'dataplex_lake_primary'
-    primary_resource_id: 'example'
-    primary_resource_name: 'fmt.Sprintf("tf-test-lake%s", context["random_suffix"])'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
+samples:
+  - name: dataplex_lake_primary
+    primary_resource_id: example
+    primary_resource_name: fmt.Sprintf("tf-test-lake%s", context["random_suffix"])
+    steps:
+    - name: dataplex_lake_primary
+      test_env_vars:
+        project_name: PROJECT_NAME
 parameters:
 properties:
   - name: 'name'

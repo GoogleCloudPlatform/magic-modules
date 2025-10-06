@@ -54,52 +54,61 @@ custom_code:
 exclude_sweeper: true
 schema_version: 1
 state_upgraders: true
-examples:
-  - name: 'gkehub_membership_regional'
-    primary_resource_id: 'membership'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
-    vars:
-      name: 'basic'
-      cluster_name: 'basic-cluster'
-      network_name: 'default'
-      subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      location: 'REGION'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-  - name: 'gkehub_membership_basic'
-    primary_resource_id: 'membership'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
-    vars:
-      name: 'basic'
-      cluster_name: 'basic-cluster'
-      deletion_protection: 'true'
-      network_name: 'default'
-      subnetwork_name: 'default'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkehub_membership_issuer'
-    primary_resource_id: 'membership'
-    vars:
-      name: 'basic'
-      cluster_name: 'basic-cluster'
-      deletion_protection: 'true'
-      network_name: 'default'
-      subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
+samples:
+  - name: gkehub_membership_regional
+    primary_resource_id: membership
+    primary_resource_name: fmt.Sprintf("basic%s", context["random_suffix"])
+    steps:
+    - name: gkehub_membership_regional
+      prefixed_vars:
+        cluster_name: basic-cluster
+        name: basic
+        network_name: default
+        subnetwork_name: default
+      test_env_vars:
+        location: REGION
+        project: PROJECT_NAME
+      test_vars_overrides:
+        network_name: acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+        subnetwork_name: acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t,
+          "gke-cluster"))
+  - name: gkehub_membership_basic
+    primary_resource_id: membership
+    primary_resource_name: fmt.Sprintf("basic%s", context["random_suffix"])
+    steps:
+    - name: gkehub_membership_basic
+      prefixed_vars:
+        cluster_name: basic-cluster
+        deletion_protection: "true"
+        name: basic
+        network_name: default
+        subnetwork_name: default
+      test_vars_overrides:
+        deletion_protection: "false"
+        network_name: acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+        subnetwork_name: acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t,
+          "gke-cluster"))
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: gkehub_membership_issuer
+    primary_resource_id: membership
+    steps:
+    - name: gkehub_membership_issuer
+      prefixed_vars:
+        cluster_name: basic-cluster
+        deletion_protection: "true"
+        name: basic
+        network_name: default
+        subnetwork_name: default
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        deletion_protection: "false"
+        network_name: acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+        subnetwork_name: acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t,
+          "gke-cluster"))
+      oics_vars_overrides:
+        deletion_protection: "false"
 parameters:
   - name: 'location'
     type: String

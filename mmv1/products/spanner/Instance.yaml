@@ -48,19 +48,22 @@ custom_code:
   post_create: 'templates/terraform/post_create/sleep.go.tmpl'
   pre_update: 'templates/terraform/pre_update/spanner_instance.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/spanner_instance.go.tmpl'
-examples:
-  - name: 'spanner_instance_basic'
-    primary_resource_id: 'example'
-      # Randomness
+samples:
+  - name: spanner_instance_basic
     skip_vcr: true
-  - name: 'spanner_instance_processing_units'
-    primary_resource_id: 'example'
-      # Randomness
+    primary_resource_id: example
+    steps:
+    - name: spanner_instance_basic
+  - name: spanner_instance_processing_units
     skip_vcr: true
-  - name: 'spanner_instance_multi_regional'
-    primary_resource_id: 'example'
-      # Randomness
+    primary_resource_id: example
+    steps:
+    - name: spanner_instance_processing_units
+  - name: spanner_instance_multi_regional
     skip_vcr: true
+    primary_resource_id: example
+    steps:
+    - name: spanner_instance_multi_regional
 virtual_fields:
   - name: 'force_destroy'
     description: |

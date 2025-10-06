@@ -52,17 +52,19 @@ custom_code:
   post_update: 'templates/terraform/post_update/tagtemplate_fields.go.tmpl'
   custom_import: 'templates/terraform/custom_import/data_catalog_tag_template.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'data_catalog_tag_template_basic'
-    primary_resource_id: 'basic_tag_template'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_template%s", context["random_suffix"])'
-    vars:
-      tag_template_id: 'my_template'
-      force_delete: 'false'
-    test_vars_overrides:
-      'force_delete': 'true'
-    oics_vars_overrides:
-      'force_delete': 'true'
+samples:
+  - name: data_catalog_tag_template_basic
+    primary_resource_id: basic_tag_template
+    primary_resource_name: fmt.Sprintf("tf_test_my_template%s", context["random_suffix"])
+    steps:
+    - name: data_catalog_tag_template_basic
+      prefixed_vars:
+        force_delete: "false"
+        tag_template_id: my_template
+      test_vars_overrides:
+        force_delete: "true"
+      oics_vars_overrides:
+        force_delete: "true"
 parameters:
   - name: 'region'
     type: String

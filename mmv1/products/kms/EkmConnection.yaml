@@ -45,12 +45,14 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/{{location}}/ekmConnections/{{name}}'
 custom_code:
-examples:
-  - name: 'kms_ekm_connection_basic'
-    primary_resource_id: 'example-ekmconnection'
-    vars:
-      ekmconnection_name: 'ekmconnection_example'
+samples:
+  - name: kms_ekm_connection_basic
+    primary_resource_id: example-ekmconnection
     exclude_test: true
+    steps:
+    - name: kms_ekm_connection_basic
+      prefixed_vars:
+        ekmconnection_name: ekmconnection_example
 parameters:
   - name: 'location'
     type: String

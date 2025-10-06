@@ -38,16 +38,18 @@ iam_policy:
   example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
 exclude_tgc: true
-examples:
-  - name: 'forwarding_rule_service_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-forwarding-rule-service%s", context["random_suffix"])'
-    vars:
-      forwarding_rule_service_name: 'forwarding-rule-service'
-      target_http_proxy_name: 'target-http-proxy-name'
-      url_map_name: 'url-map-name'
-      backend_service_name: 'backend-service-name'
-      health_check_name: 'health-check-name'
+samples:
+  - name: forwarding_rule_service_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-forwarding-rule-service%s", context["random_suffix"])
+    steps:
+    - name: forwarding_rule_service_basic
+      prefixed_vars:
+        backend_service_name: backend-service-name
+        forwarding_rule_service_name: forwarding-rule-service
+        health_check_name: health-check-name
+        target_http_proxy_name: target-http-proxy-name
+        url_map_name: url-map-name
 parameters:
 properties:
   - name: 'name'

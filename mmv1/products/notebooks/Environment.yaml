@@ -38,11 +38,13 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "us-west1-a"
-examples:
-  - name: 'notebook_environment_basic'
-    primary_resource_id: 'environment'
-    vars:
-      environment_name: 'notebooks-environment'
+samples:
+  - name: notebook_environment_basic
+    primary_resource_id: environment
+    steps:
+    - name: notebook_environment_basic
+      prefixed_vars:
+        environment_name: notebooks-environment
 parameters:
 properties:
   - name: 'name'

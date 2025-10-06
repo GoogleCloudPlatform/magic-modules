@@ -58,75 +58,89 @@ sweeper:
     - region: "us-west1-a"
 custom_diff:
   - 'workbenchMetadataCustomizeDiff'
-examples:
-  - name: 'workbench_instance_basic'
-    primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
-    region_override: 'us-west1-a'
-    vars:
-      instance_name: 'workbench-instance'
-  - name: 'workbench_instance_basic_container'
-    primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
-    region_override: 'us-west1-a'
-    vars:
-      instance_name: 'workbench-instance'
-  - name: 'workbench_instance_basic_gpu'
-    primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
-    region_override: 'us-west1-a'
-    vars:
-      instance_name: 'workbench-instance'
-      reservation_name: 'wbi-reservation'
-    ignore_read_extra:
-      - 'gce_setup.0.vm_image'
-  - name: 'workbench_instance_labels_stopped'
-    primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
-    region_override: 'us-west1-a'
-    vars:
-      instance_name: 'workbench-instance'
-      network_name: 'wbi-test-default'
-    test_env_vars:
-      service_account: 'SERVICE_ACCT'
-    ignore_read_extra:
-      - 'desired_state'
-  - name: 'workbench_instance_full'
-    primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
-    region_override: 'us-west1-a'
-    vars:
-      instance_name: 'workbench-instance'
-      network_name: 'wbi-test-default'
-      reservation_name: 'wbi-reservation'
-      key_name: 'my-crypto-key'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-      service_account: 'SERVICE_ACCT'
-    test_vars_overrides:
-      'key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-    ignore_read_extra:
-      - 'gce_setup.0.vm_image'
-      - 'gce_setup.0.boot_disk.0.disk_type'
-      - 'gce_setup.0.data_disks.0.disk_type'
-      - 'gce_setup.0.metadata.version'
-      - 'gce_setup.0.metadata.%'
-      - 'update_time'
-  - name: 'workbench_instance_confidential_compute'
-    primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
-    region_override: 'us-west1-a'
-    vars:
-      instance_name: 'workbench-instance'
-  - name: 'workbench_instance_euc'
-    primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
-    region_override: 'us-west1-a'
-    vars:
-      instance_name: 'workbench-instance'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-      project_number: 'PROJECT_NUMBER'
+samples:
+  - name: workbench_instance_basic
+    primary_resource_id: instance
+    primary_resource_name: fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])
+    steps:
+    - name: workbench_instance_basic
+      prefixed_vars:
+        instance_name: workbench-instance
+    region_override: us-west1-a
+  - name: workbench_instance_basic_container
+    primary_resource_id: instance
+    primary_resource_name: fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])
+    steps:
+    - name: workbench_instance_basic_container
+      prefixed_vars:
+        instance_name: workbench-instance
+    region_override: us-west1-a
+  - name: workbench_instance_basic_gpu
+    primary_resource_id: instance
+    primary_resource_name: fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])
+    steps:
+    - name: workbench_instance_basic_gpu
+      prefixed_vars:
+        instance_name: workbench-instance
+        reservation_name: wbi-reservation
+      ignore_read_extra:
+      - gce_setup.0.vm_image
+    region_override: us-west1-a
+  - name: workbench_instance_labels_stopped
+    primary_resource_id: instance
+    primary_resource_name: fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])
+    steps:
+    - name: workbench_instance_labels_stopped
+      prefixed_vars:
+        instance_name: workbench-instance
+        network_name: wbi-test-default
+      test_env_vars:
+        service_account: SERVICE_ACCT
+      ignore_read_extra:
+      - desired_state
+    region_override: us-west1-a
+  - name: workbench_instance_full
+    primary_resource_id: instance
+    primary_resource_name: fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])
+    steps:
+    - name: workbench_instance_full
+      prefixed_vars:
+        instance_name: workbench-instance
+        key_name: my-crypto-key
+        network_name: wbi-test-default
+        reservation_name: wbi-reservation
+      test_env_vars:
+        project_id: PROJECT_NAME
+        service_account: SERVICE_ACCT
+      test_vars_overrides:
+        key_name: acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+      ignore_read_extra:
+      - gce_setup.0.vm_image
+      - gce_setup.0.boot_disk.0.disk_type
+      - gce_setup.0.data_disks.0.disk_type
+      - gce_setup.0.metadata.version
+      - gce_setup.0.metadata.%
+      - update_time
+    region_override: us-west1-a
+  - name: workbench_instance_confidential_compute
+    primary_resource_id: instance
+    primary_resource_name: fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])
+    steps:
+    - name: workbench_instance_confidential_compute
+      prefixed_vars:
+        instance_name: workbench-instance
+    region_override: us-west1-a
+  - name: workbench_instance_euc
+    primary_resource_id: instance
+    primary_resource_name: fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])
+    steps:
+    - name: workbench_instance_euc
+      prefixed_vars:
+        instance_name: workbench-instance
+      test_env_vars:
+        project_id: PROJECT_NAME
+        project_number: PROJECT_NUMBER
+    region_override: us-west1-a
 virtual_fields:
   - name: 'desired_state'
     description: |

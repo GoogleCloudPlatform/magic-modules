@@ -44,13 +44,15 @@ async:
 custom_code:
 schema_version: 1
 state_upgraders: true
-examples:
-  - name: 'network_services_service_binding_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-service-binding'
-      namespace_id: 'my-namespace'
-      service_id: 'my-service'
+samples:
+  - name: network_services_service_binding_basic
+    primary_resource_id: default
+    steps:
+    - name: network_services_service_binding_basic
+      prefixed_vars:
+        namespace_id: my-namespace
+        resource_name: my-service-binding
+        service_id: my-service
 parameters:
   - name: 'name'
     type: String

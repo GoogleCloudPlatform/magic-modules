@@ -58,104 +58,138 @@ custom_code:
   post_update: 'templates/terraform/post_create/compute_backend_service_security_policy.go.tmpl'
   tgc_decoder: 'templates/tgc_next/decoders/compute_backend_service.go.tmpl'
 schema_version: 1
-examples:
-  - name: 'backend_service_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-backend-service%s", context["random_suffix"])'
-    vars:
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'health-check'
-  - name: 'backend_service_external_iap'
-    primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'tf-test-backend-service-external'
-  - name: 'backend_service_cache_simple'
-    primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'health-check'
-  - name: 'backend_service_cache_include_http_headers'
-    primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-  - name: 'backend_service_cache_include_named_cookies'
-    primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-  - name: 'backend_service_cache'
-    primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'health-check'
-  - name: 'backend_service_cache_bypass_cache_on_request_headers'
-    primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'health-check'
-  - name: 'backend_service_traffic_director_round_robin'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
+samples:
+  - name: backend_service_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-backend-service%s", context["random_suffix"])
+    steps:
+    - name: backend_service_basic
+      prefixed_vars:
+        backend_service_name: backend-service
+        http_health_check_name: health-check
+  - name: backend_service_external_iap
+    primary_resource_id: default
+    steps:
+    - name: backend_service_external_iap
+      prefixed_vars:
+        backend_service_name: tf-test-backend-service-external
+  - name: backend_service_cache_simple
+    primary_resource_id: default
+    steps:
+    - name: backend_service_cache_simple
+      prefixed_vars:
+        backend_service_name: backend-service
+        http_health_check_name: health-check
+  - name: backend_service_cache_include_http_headers
+    primary_resource_id: default
+    steps:
+    - name: backend_service_cache_include_http_headers
+      prefixed_vars:
+        backend_service_name: backend-service
+  - name: backend_service_cache_include_named_cookies
+    primary_resource_id: default
+    steps:
+    - name: backend_service_cache_include_named_cookies
+      prefixed_vars:
+        backend_service_name: backend-service
+  - name: backend_service_cache
+    primary_resource_id: default
+    steps:
+    - name: backend_service_cache
+      prefixed_vars:
+        backend_service_name: backend-service
+        http_health_check_name: health-check
+  - name: backend_service_cache_bypass_cache_on_request_headers
+    primary_resource_id: default
+    steps:
+    - name: backend_service_cache_bypass_cache_on_request_headers
+      prefixed_vars:
+        backend_service_name: backend-service
+        http_health_check_name: health-check
+  - name: backend_service_traffic_director_round_robin
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: backend_service_traffic_director_round_robin
+      prefixed_vars:
+        backend_service_name: backend-service
+        health_check_name: health-check
     tgc_test_ignore_in_asset:
-      - 'RESOURCE.enableCDN' # It has false value in CAI asset
-  - name: 'backend_service_traffic_director_ring_hash'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
+    - RESOURCE.enableCDN
+  - name: backend_service_traffic_director_ring_hash
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: backend_service_traffic_director_ring_hash
+      prefixed_vars:
+        backend_service_name: backend-service
+        health_check_name: health-check
     tgc_test_ignore_extra:
-      - outlier_detection.enforcing_consecutive_gateway_failure # Ignore the 0 value in config
+    - outlier_detection.enforcing_consecutive_gateway_failure
     tgc_test_ignore_in_asset:
-      - 'RESOURCE.enableCDN' # It has false value in CAI asset
-  - name: 'backend_service_stateful_session_affinity'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
-  - name: 'backend_service_network_endpoint'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      backend_service_name: 'backend-service'
-      neg_name: 'network-endpoint'
-  - name: 'backend_service_external_managed'
-    primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
-  - name: 'backend_service_ip_address_selection_policy'
-    primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-  - name: 'backend_service_custom_metrics'
-    primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      default_neg_name: 'network-endpoint'
-      health_check_name: 'health-check'
-      network_name: 'network'
-  - name: 'backend_service_tls_settings'
-    primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
-      authentication_name: 'authentication'
-  - name: 'backend_service_dynamic_backends'
-    primary_resource_id: 'default'
-    vars:
-      url_map_name: 'url_map'
+    - RESOURCE.enableCDN
+  - name: backend_service_stateful_session_affinity
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: backend_service_stateful_session_affinity
+      prefixed_vars:
+        backend_service_name: backend-service
+        health_check_name: health-check
+  - name: backend_service_network_endpoint
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: backend_service_network_endpoint
+      prefixed_vars:
+        backend_service_name: backend-service
+        neg_name: network-endpoint
+  - name: backend_service_external_managed
+    primary_resource_id: default
+    steps:
+    - name: backend_service_external_managed
+      prefixed_vars:
+        backend_service_name: backend-service
+        health_check_name: health-check
+  - name: backend_service_ip_address_selection_policy
+    primary_resource_id: default
+    steps:
+    - name: backend_service_ip_address_selection_policy
+      prefixed_vars:
+        backend_service_name: backend-service
+  - name: backend_service_custom_metrics
+    primary_resource_id: default
+    steps:
+    - name: backend_service_custom_metrics
+      prefixed_vars:
+        backend_service_name: backend-service
+        default_neg_name: network-endpoint
+        health_check_name: health-check
+        network_name: network
+  - name: backend_service_tls_settings
+    primary_resource_id: default
+    steps:
+    - name: backend_service_tls_settings
+      prefixed_vars:
+        authentication_name: authentication
+        backend_service_name: backend-service
+        health_check_name: health-check
+  - name: backend_service_dynamic_backends
+    primary_resource_id: default
     exclude_test: true
-  - name: 'backend_service_dynamic_forwarding'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      backend_service_name: 'backend-service'
+    steps:
+    - name: backend_service_dynamic_backends
+      prefixed_vars:
+        url_map_name: url_map
+  - name: backend_service_dynamic_forwarding
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: backend_service_dynamic_forwarding
+      prefixed_vars:
+        backend_service_name: backend-service
     tgc_test_ignore_in_asset:
-      - 'RESOURCE.enableCDN' # It has false value in CAI asset
+    - RESOURCE.enableCDN
 parameters:
 properties:
   - name: 'affinityCookieTtlSec'

@@ -46,67 +46,67 @@ async:
     resource_inside_response: true
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/oracledatabase_cloud_vmcluster.go.tmpl'
-examples:
-  - name: 'oracledatabase_cloud_vmcluster_basic'
-    primary_resource_id: 'my_vmcluster'
-    vars:
-      project: 'my-project'
-      cloud_vm_cluster_id: 'my-instance'
-      cloud_exadata_infrastructure_id: 'my-exadata'
-      deletion_protection: 'true'
-    ignore_read_extra:
-      - 'deletion_protection'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'project': '"oci-terraform-testing-prod"'
-      # ofake- prefix is needed to create a dummy resource for testing purposes only
-      # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
-      # As a result these resources are not sweepable
-      # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-      cloud_vm_cluster_id: 'fmt.Sprintf("ofake-tf-test-vmcluster-basic-%s", acctest.RandString(t, 10))'
-      cloud_exadata_infrastructure_id: 'fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-basic-%s", acctest.RandString(t, 10))'
-  - name: 'oracledatabase_cloud_vmcluster_odbnetwork'
-    primary_resource_id: 'my_vmcluster'
-    vars:
-      project: 'my-project'
-      cloud_vm_cluster_id: 'my-instance'
-      cloud_exadata_infrastructure_id: 'my-exadata'
-      odb_network: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork'
-      odb_subnet: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet'
-      backup_odb_subnet: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-backup-odbsubnet'
-      deletion_protection: 'true'
-    ignore_read_extra:
-      - 'deletion_protection'
-    test_vars_overrides:
-      deletion_protection: 'false'
-      project: '"oci-terraform-testing-prod"'
-      # ofake- prefix is needed to create a dummy resource for testing purposes only
-      # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
-      # As a result these resources are not sweepable
-      # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-      cloud_vm_cluster_id: 'fmt.Sprintf("ofake-tf-test-vmcluster-odbnetwork-%s", acctest.RandString(t, 10))'
-      cloud_exadata_infrastructure_id: 'fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-odbnetwork-%s", acctest.RandString(t, 10))'
-      odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
-      odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
-      backup_odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-backup-odbsubnet"'
-  - name: 'oracledatabase_cloud_vmcluster_full'
-    primary_resource_id: 'my_vmcluster'
-    vars:
-      project: 'my-project'
-      cloud_vm_cluster_id: 'my-instance'
-      cloud_exadata_infrastructure_id: 'my-exadata'
-      deletion_protection: 'true'
-    ignore_read_extra:
-      - 'deletion_protection'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'project': '"oci-terraform-testing-prod"'
-      # ofake- prefix is needed to create a dummy resource for testing purposes only
-      # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
-      # As a result these resources are not sweepable
-      # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-      cloud_vm_cluster_id: 'fmt.Sprintf("ofake-tf-test-vmcluster-full-%s", acctest.RandString(t, 10))'
-      cloud_exadata_infrastructure_id: 'fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-full-%s", acctest.RandString(t, 10))'
+samples:
+  - name: oracledatabase_cloud_vmcluster_basic
+    primary_resource_id: my_vmcluster
+    steps:
+    - name: oracledatabase_cloud_vmcluster_basic
+      prefixed_vars:
+        cloud_exadata_infrastructure_id: my-exadata
+        cloud_vm_cluster_id: my-instance
+        deletion_protection: "true"
+        project: my-project
+      test_vars_overrides:
+        cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-basic-%s",
+          acctest.RandString(t, 10))
+        cloud_vm_cluster_id: fmt.Sprintf("ofake-tf-test-vmcluster-basic-%s", acctest.RandString(t,
+          10))
+        deletion_protection: "false"
+        project: '"oci-terraform-testing-prod"'
+      ignore_read_extra:
+      - deletion_protection
+  - name: oracledatabase_cloud_vmcluster_odbnetwork
+    primary_resource_id: my_vmcluster
+    steps:
+    - name: oracledatabase_cloud_vmcluster_odbnetwork
+      prefixed_vars:
+        backup_odb_subnet: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-backup-odbsubnet
+        cloud_exadata_infrastructure_id: my-exadata
+        cloud_vm_cluster_id: my-instance
+        deletion_protection: "true"
+        odb_network: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork
+        odb_subnet: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet
+        project: my-project
+      test_vars_overrides:
+        backup_odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-backup-odbsubnet"'
+        cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-odbnetwork-%s",
+          acctest.RandString(t, 10))
+        cloud_vm_cluster_id: fmt.Sprintf("ofake-tf-test-vmcluster-odbnetwork-%s", acctest.RandString(t,
+          10))
+        deletion_protection: "false"
+        odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
+        odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+        project: '"oci-terraform-testing-prod"'
+      ignore_read_extra:
+      - deletion_protection
+  - name: oracledatabase_cloud_vmcluster_full
+    primary_resource_id: my_vmcluster
+    steps:
+    - name: oracledatabase_cloud_vmcluster_full
+      prefixed_vars:
+        cloud_exadata_infrastructure_id: my-exadata
+        cloud_vm_cluster_id: my-instance
+        deletion_protection: "true"
+        project: my-project
+      test_vars_overrides:
+        cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-full-%s",
+          acctest.RandString(t, 10))
+        cloud_vm_cluster_id: fmt.Sprintf("ofake-tf-test-vmcluster-full-%s", acctest.RandString(t,
+          10))
+        deletion_protection: "false"
+        project: '"oci-terraform-testing-prod"'
+      ignore_read_extra:
+      - deletion_protection
 virtual_fields:
   - name: 'deletion_protection'
     type: Boolean

@@ -42,20 +42,24 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}'
     - '{{data_policy_id}}'
 custom_code:
-examples:
-  - name: 'bigquery_datapolicy_data_policy_basic'
-    primary_resource_id: 'data_policy'
-    primary_resource_name: 'fmt.Sprintf("tf_test_data_policy%s", context["random_suffix"])'
-    vars:
-      data_policy_id: 'data_policy'
-      taxonomy: 'taxonomy'
-  - name: 'bigquery_datapolicy_data_policy_routine'
-    primary_resource_id: 'data_policy'
-    primary_resource_name: 'fmt.Sprintf("tf_test_data_policy%s", context["random_suffix"])'
-    vars:
-      data_policy_id: 'data_policy'
-      taxonomy: 'taxonomy'
-      dataset_id: 'dataset_id'
+samples:
+  - name: bigquery_datapolicy_data_policy_basic
+    primary_resource_id: data_policy
+    primary_resource_name: fmt.Sprintf("tf_test_data_policy%s", context["random_suffix"])
+    steps:
+    - name: bigquery_datapolicy_data_policy_basic
+      prefixed_vars:
+        data_policy_id: data_policy
+        taxonomy: taxonomy
+  - name: bigquery_datapolicy_data_policy_routine
+    primary_resource_id: data_policy
+    primary_resource_name: fmt.Sprintf("tf_test_data_policy%s", context["random_suffix"])
+    steps:
+    - name: bigquery_datapolicy_data_policy_routine
+      prefixed_vars:
+        data_policy_id: data_policy
+        dataset_id: dataset_id
+        taxonomy: taxonomy
 parameters:
 properties:
   - name: 'name'

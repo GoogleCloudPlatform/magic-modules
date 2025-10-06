@@ -57,20 +57,21 @@ nested_query:
   modify_by_patch: true
 custom_code:
   encoder: 'templates/terraform/encoders/normalize_group.go.tmpl'
-examples:
-  - name: 'instance_group_named_port_gke'
-    primary_resource_id: 'my_port'
-    vars:
-      network_name: 'container-network'
-      subnetwork_name: 'container-subnetwork'
-      gke_cluster_name: 'my-cluster'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-      # Multiple fine-grained resources
+samples:
+  - name: instance_group_named_port_gke
     skip_vcr: true
+    primary_resource_id: my_port
+    steps:
+    - name: instance_group_named_port_gke
+      prefixed_vars:
+        deletion_protection: "true"
+        gke_cluster_name: my-cluster
+        network_name: container-network
+        subnetwork_name: container-subnetwork
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
 parameters:
   - name: 'group'
     type: ResourceRef

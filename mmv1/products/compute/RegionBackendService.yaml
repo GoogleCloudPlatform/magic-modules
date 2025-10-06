@@ -62,101 +62,133 @@ sweeper:
     - region: "europe-west4"
     - region: "europe-west1"
     - region: "us-west1"
-examples:
-  - name: 'region_backend_service_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-region-service%s", context["random_suffix"])'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
-  - name: 'region_backend_service_external_iap'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'tf-test-region-service-external'
-  - name: 'region_backend_service_cache'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
-  - name: 'region_backend_service_ilb_round_robin'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
-  - name: 'region_backend_service_external'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
-  - name: 'region_backend_service_external_weighted'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
-  - name: 'region_backend_service_ilb_ring_hash'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
-  - name: 'region_backend_service_ilb_stateful_session_affinity'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
-  - name: 'region_backend_service_balancing_mode'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      rigm_name: 'rbs-rigm'
-      region_health_check_name: 'rbs-health-check'
-      network_name: 'rbs-net'
-  - name: 'region_backend_service_connection_tracking'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
-  - name: 'region_backend_service_ip_address_selection_policy'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'rbs-health-check'
-  - name: 'region_backend_service_ilb_custom_metrics'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      default_neg_name: 'network-endpoint'
-      health_check_name: 'rbs-health-check'
-      network_name: 'network'
-  - name: 'region_backend_service_dynamic_backend_count'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'health-check'
-      instance_group_name: 'instance_group'
-      network_name: 'network'
+samples:
+  - name: region_backend_service_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-region-service%s", context["random_suffix"])
+    steps:
+    - name: region_backend_service_basic
+      prefixed_vars:
+        health_check_name: rbs-health-check
+        region_backend_service_name: region-service
+  - name: region_backend_service_external_iap
+    primary_resource_id: default
+    steps:
+    - name: region_backend_service_external_iap
+      prefixed_vars:
+        region_backend_service_name: tf-test-region-service-external
+  - name: region_backend_service_cache
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: region_backend_service_cache
+      prefixed_vars:
+        health_check_name: rbs-health-check
+        region_backend_service_name: region-service
+  - name: region_backend_service_ilb_round_robin
+    primary_resource_id: default
+    steps:
+    - name: region_backend_service_ilb_round_robin
+      prefixed_vars:
+        health_check_name: rbs-health-check
+        region_backend_service_name: region-service
+  - name: region_backend_service_external
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: region_backend_service_external
+      prefixed_vars:
+        health_check_name: rbs-health-check
+        region_backend_service_name: region-service
+  - name: region_backend_service_external_weighted
+    primary_resource_id: default
+    steps:
+    - name: region_backend_service_external_weighted
+      prefixed_vars:
+        health_check_name: rbs-health-check
+        region_backend_service_name: region-service
+  - name: region_backend_service_ilb_ring_hash
+    primary_resource_id: default
+    steps:
+    - name: region_backend_service_ilb_ring_hash
+      prefixed_vars:
+        health_check_name: rbs-health-check
+        region_backend_service_name: region-service
+  - name: region_backend_service_ilb_stateful_session_affinity
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: region_backend_service_ilb_stateful_session_affinity
+      prefixed_vars:
+        health_check_name: rbs-health-check
+        region_backend_service_name: region-service
+  - name: region_backend_service_balancing_mode
+    primary_resource_id: default
+    steps:
+    - name: region_backend_service_balancing_mode
+      prefixed_vars:
+        network_name: rbs-net
+        region_backend_service_name: region-service
+        region_health_check_name: rbs-health-check
+        rigm_name: rbs-rigm
+  - name: region_backend_service_connection_tracking
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: region_backend_service_connection_tracking
+      prefixed_vars:
+        health_check_name: rbs-health-check
+        region_backend_service_name: region-service
+  - name: region_backend_service_ip_address_selection_policy
+    primary_resource_id: default
+    steps:
+    - name: region_backend_service_ip_address_selection_policy
+      prefixed_vars:
+        health_check_name: rbs-health-check
+        region_backend_service_name: region-service
+  - name: region_backend_service_ilb_custom_metrics
+    primary_resource_id: default
+    steps:
+    - name: region_backend_service_ilb_custom_metrics
+      prefixed_vars:
+        default_neg_name: network-endpoint
+        health_check_name: rbs-health-check
+        network_name: network
+        region_backend_service_name: region-service
+  - name: region_backend_service_dynamic_backend_count
+    primary_resource_id: default
     exclude_test: true
-  - name: 'region_backend_service_dynamic_forwarding'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      region_backend_service_name: 'region-service'
-  - name: 'region_backend_service_ha_policy'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      network_name: 'rbs-net'
-  - name: 'region_backend_service_ha_policy_manual_leader'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      network_name: 'rbs-net'
-      subnetwork_name: 'rbs-subnet'
-      instance_name: 'rbs-instance'
-      neg_name: 'rbs-neg'
+    steps:
+    - name: region_backend_service_dynamic_backend_count
+      prefixed_vars:
+        health_check_name: health-check
+        instance_group_name: instance_group
+        network_name: network
+        region_backend_service_name: region-service
+  - name: region_backend_service_dynamic_forwarding
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: region_backend_service_dynamic_forwarding
+      prefixed_vars:
+        region_backend_service_name: region-service
+  - name: region_backend_service_ha_policy
+    primary_resource_id: default
+    steps:
+    - name: region_backend_service_ha_policy
+      prefixed_vars:
+        network_name: rbs-net
+        region_backend_service_name: region-service
+  - name: region_backend_service_ha_policy_manual_leader
+    primary_resource_id: default
+    steps:
+    - name: region_backend_service_ha_policy_manual_leader
+      prefixed_vars:
+        instance_name: rbs-instance
+        neg_name: rbs-neg
+        network_name: rbs-net
+        region_backend_service_name: region-service
+        subnetwork_name: rbs-subnet
 parameters:
   - name: 'region'
     type: ResourceRef

@@ -49,57 +49,67 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "us-central1"
-examples:
-  - name: 'data_fusion_instance_basic'
-    primary_resource_id: 'basic_instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
-    vars:
-      instance_name: 'my-instance'
-      prober_test_run: ''
-    test_vars_overrides:
-      # Mark for testing to avoid service networking connection usage that is not cleaned up
-      'prober_test_run': '`options = { prober_test_run = "true" }`'
-  - name: 'data_fusion_instance_full'
-    primary_resource_id: 'extended_instance'
-    vars:
-      instance_name: 'my-instance'
-      ip_alloc: 'datafusion-ip-alloc'
-      network_name: 'datafusion-full-network'
-      prober_test_run: ''
-    test_vars_overrides:
-      # Mark for testing to avoid service networking connection usage that is not cleaned up
-      'prober_test_run': '`options = { prober_test_run = "true" }`'
-  - name: 'data_fusion_instance_psc'
-    primary_resource_id: 'psc_instance'
-    vars:
-      instance_name: 'psc-instance'
-      network_name: 'datafusion-psc-network'
-      subnet_name: 'datafusion-psc-subnet'
-      attachment_name: 'datafusion-psc-attachment'
-      prober_test_run: ''
-    test_vars_overrides:
-      # Mark for testing to avoid service networking connection usage that is not cleaned up
-      'prober_test_run': '`options = { prober_test_run = "true" }`'
-  - name: 'data_fusion_instance_cmek'
-    primary_resource_id: 'cmek'
-    vars:
-      instance_name: 'my-instance'
-  - name: 'data_fusion_instance_enterprise'
-    primary_resource_id: 'enterprise_instance'
-    vars:
-      instance_name: 'my-instance'
-      prober_test_run: ''
-    test_vars_overrides:
-      # Mark for testing to avoid service networking connection usage that is not cleaned up
-      'prober_test_run': '`options = { prober_test_run = "true" }`'
-  - name: 'data_fusion_instance_event'
-    primary_resource_id: 'event'
-    vars:
-      instance_name: 'my-instance'
-  - name: 'data_fusion_instance_zone'
-    primary_resource_id: 'zone'
-    vars:
-      instance_name: 'my-instance'
+samples:
+  - name: data_fusion_instance_basic
+    primary_resource_id: basic_instance
+    primary_resource_name: fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])
+    steps:
+    - name: data_fusion_instance_basic
+      prefixed_vars:
+        instance_name: my-instance
+        prober_test_run: ""
+      test_vars_overrides:
+        prober_test_run: '`options = { prober_test_run = "true" }`'
+  - name: data_fusion_instance_full
+    primary_resource_id: extended_instance
+    steps:
+    - name: data_fusion_instance_full
+      prefixed_vars:
+        instance_name: my-instance
+        ip_alloc: datafusion-ip-alloc
+        network_name: datafusion-full-network
+        prober_test_run: ""
+      test_vars_overrides:
+        prober_test_run: '`options = { prober_test_run = "true" }`'
+  - name: data_fusion_instance_psc
+    primary_resource_id: psc_instance
+    steps:
+    - name: data_fusion_instance_psc
+      prefixed_vars:
+        attachment_name: datafusion-psc-attachment
+        instance_name: psc-instance
+        network_name: datafusion-psc-network
+        prober_test_run: ""
+        subnet_name: datafusion-psc-subnet
+      test_vars_overrides:
+        prober_test_run: '`options = { prober_test_run = "true" }`'
+  - name: data_fusion_instance_cmek
+    primary_resource_id: cmek
+    steps:
+    - name: data_fusion_instance_cmek
+      prefixed_vars:
+        instance_name: my-instance
+  - name: data_fusion_instance_enterprise
+    primary_resource_id: enterprise_instance
+    steps:
+    - name: data_fusion_instance_enterprise
+      prefixed_vars:
+        instance_name: my-instance
+        prober_test_run: ""
+      test_vars_overrides:
+        prober_test_run: '`options = { prober_test_run = "true" }`'
+  - name: data_fusion_instance_event
+    primary_resource_id: event
+    steps:
+    - name: data_fusion_instance_event
+      prefixed_vars:
+        instance_name: my-instance
+  - name: data_fusion_instance_zone
+    primary_resource_id: zone
+    steps:
+    - name: data_fusion_instance_zone
+      prefixed_vars:
+        instance_name: my-instance
 parameters:
   - name: 'region'
     type: String

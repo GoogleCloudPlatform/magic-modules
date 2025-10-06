@@ -31,13 +31,15 @@ timeouts:
   delete_minutes: 20
 custom_code:
   encoder: 'templates/terraform/encoders/pubsub_lite.tmpl'
-examples:
-  - name: 'pubsub_lite_topic_basic'
-    primary_resource_id: 'example'
-    primary_resource_name: 'fmt.Sprintf("tf-test-example-topic%s", context["random_suffix"])'
-    vars:
-      reservation_name: 'example-reservation'
-      topic_name: 'example-topic'
+samples:
+  - name: pubsub_lite_topic_basic
+    primary_resource_id: example
+    primary_resource_name: fmt.Sprintf("tf-test-example-topic%s", context["random_suffix"])
+    steps:
+    - name: pubsub_lite_topic_basic
+      prefixed_vars:
+        reservation_name: example-reservation
+        topic_name: example-topic
 parameters:
   - name: 'region'
     type: String

@@ -51,27 +51,35 @@ iam_policy:
     - '{{name}}'
 custom_code:
 include_in_tgc_next_DO_NOT_USE: true
-examples:
-  - name: 'clouddeploy_custom_target_type_basic'
-    primary_resource_id: 'custom-target-type'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-custom-target-type%s", context["random_suffix"])'
-    vars:
-      custom_target_type_name: 'my-custom-target-type'
-  - name: 'clouddeploy_custom_target_type_git_skaffold_modules'
-    primary_resource_id: 'custom-target-type'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-custom-target-type%s", context["random_suffix"])'
-    vars:
-      custom_target_type_name: 'my-custom-target-type'
-  - name: 'clouddeploy_custom_target_type_gcs_skaffold_modules'
-    primary_resource_id: 'custom-target-type'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-custom-target-type%s", context["random_suffix"])'
-    vars:
-      custom_target_type_name: 'my-custom-target-type'
-  - name: 'clouddeploy_custom_target_type_gcb_repo_skaffold_modules'
-    primary_resource_id: 'custom-target-type'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-custom-target-type%s", context["random_suffix"])'
-    vars:
-      custom_target_type_name: 'my-custom-target-type'
+samples:
+  - name: clouddeploy_custom_target_type_basic
+    primary_resource_id: custom-target-type
+    primary_resource_name: fmt.Sprintf("tf-test-my-custom-target-type%s", context["random_suffix"])
+    steps:
+    - name: clouddeploy_custom_target_type_basic
+      prefixed_vars:
+        custom_target_type_name: my-custom-target-type
+  - name: clouddeploy_custom_target_type_git_skaffold_modules
+    primary_resource_id: custom-target-type
+    primary_resource_name: fmt.Sprintf("tf-test-my-custom-target-type%s", context["random_suffix"])
+    steps:
+    - name: clouddeploy_custom_target_type_git_skaffold_modules
+      prefixed_vars:
+        custom_target_type_name: my-custom-target-type
+  - name: clouddeploy_custom_target_type_gcs_skaffold_modules
+    primary_resource_id: custom-target-type
+    primary_resource_name: fmt.Sprintf("tf-test-my-custom-target-type%s", context["random_suffix"])
+    steps:
+    - name: clouddeploy_custom_target_type_gcs_skaffold_modules
+      prefixed_vars:
+        custom_target_type_name: my-custom-target-type
+  - name: clouddeploy_custom_target_type_gcb_repo_skaffold_modules
+    primary_resource_id: custom-target-type
+    primary_resource_name: fmt.Sprintf("tf-test-my-custom-target-type%s", context["random_suffix"])
+    steps:
+    - name: clouddeploy_custom_target_type_gcb_repo_skaffold_modules
+      prefixed_vars:
+        custom_target_type_name: my-custom-target-type
 parameters:
   - name: 'location'
     type: String

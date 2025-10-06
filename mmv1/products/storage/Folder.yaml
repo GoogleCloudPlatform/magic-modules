@@ -27,13 +27,15 @@ exclude_sweeper: true
 import_format:
   - '{{bucket}}/folders/{{%name}}'
   - '{{bucket}}/{{%name}}'
-examples:
-  - name: 'storage_folder_basic'
-    primary_resource_id: 'folder'
-    vars:
-      bucket_name: 'my-bucket'
-    ignore_read_extra:
-      - 'force_destroy'
+samples:
+  - name: storage_folder_basic
+    primary_resource_id: folder
+    steps:
+    - name: storage_folder_basic
+      prefixed_vars:
+        bucket_name: my-bucket
+      ignore_read_extra:
+      - force_destroy
 description: |
   A Google Cloud Storage Folder.
 

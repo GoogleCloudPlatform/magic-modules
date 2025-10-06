@@ -37,89 +37,117 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/dlp_import.go.tmpl'
 # Skip sweeper due to non-standard URL
 exclude_sweeper: true
-examples:
-  - name: 'dlp_job_trigger_basic'
-    primary_resource_id: 'basic'
-    vars:
-      trigger: 'trigger'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_job_trigger_bigquery_row_limit'
-    primary_resource_id: 'bigquery_row_limit'
-    vars:
-      trigger: 'trigger'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_job_trigger_bigquery_row_limit_percentage'
-    primary_resource_id: 'bigquery_row_limit_percentage'
-    vars:
-      trigger: 'trigger'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_job_trigger_data_catalog_output'
-    primary_resource_id: 'data_catalog_output'
-    vars:
-      trigger: 'trigger'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    exclude_docs: true
-  - name: 'dlp_job_trigger_scc_output'
-    primary_resource_id: 'scc_output'
-    vars:
-      trigger: 'trigger'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    exclude_docs: true
-  - name: 'dlp_job_trigger_job_notification_emails'
-    primary_resource_id: 'job_notification_emails'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_job_trigger_deidentify'
-    primary_resource_id: 'deidentify'
-    vars:
-      name: 'tf_test'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'name': '"tf_test_" + acctest.RandString(t, 10)'
-  - name: 'dlp_job_trigger_hybrid'
-    primary_resource_id: 'hybrid_trigger'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_job_trigger_inspect'
-    primary_resource_id: 'inspect'
-    vars:
-      trigger: 'trigger'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_job_trigger_publish_to_stackdriver'
-    primary_resource_id: 'publish_to_stackdriver'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_job_trigger_with_id'
-    primary_resource_id: 'with_trigger_id'
-    vars:
-      name: 'id-'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_job_trigger_multiple_actions'
-    primary_resource_id: 'basic'
-    vars:
-      trigger: 'trigger'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_job_trigger_cloud_storage_optional_timespan_autopopulation'
-    primary_resource_id: 'basic'
-    vars:
-      trigger: 'trigger'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_job_trigger_timespan_config_big_query'
-    primary_resource_id: 'timespan_config_big_query'
-    vars:
-      trigger: 'trigger'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: dlp_job_trigger_basic
+    primary_resource_id: basic
+    steps:
+    - name: dlp_job_trigger_basic
+      prefixed_vars:
+        trigger: trigger
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: dlp_job_trigger_bigquery_row_limit
+    primary_resource_id: bigquery_row_limit
+    steps:
+    - name: dlp_job_trigger_bigquery_row_limit
+      prefixed_vars:
+        trigger: trigger
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: dlp_job_trigger_bigquery_row_limit_percentage
+    primary_resource_id: bigquery_row_limit_percentage
+    steps:
+    - name: dlp_job_trigger_bigquery_row_limit_percentage
+      prefixed_vars:
+        trigger: trigger
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: dlp_job_trigger_data_catalog_output
+    primary_resource_id: data_catalog_output
+    steps:
+    - name: dlp_job_trigger_data_catalog_output
+      prefixed_vars:
+        trigger: trigger
+      test_env_vars:
+        project: PROJECT_NAME
+      exclude_docs: true
+  - name: dlp_job_trigger_scc_output
+    primary_resource_id: scc_output
+    steps:
+    - name: dlp_job_trigger_scc_output
+      prefixed_vars:
+        trigger: trigger
+      test_env_vars:
+        project: PROJECT_NAME
+      exclude_docs: true
+  - name: dlp_job_trigger_job_notification_emails
+    primary_resource_id: job_notification_emails
+    steps:
+    - name: dlp_job_trigger_job_notification_emails
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: dlp_job_trigger_deidentify
+    primary_resource_id: deidentify
+    steps:
+    - name: dlp_job_trigger_deidentify
+      prefixed_vars:
+        name: tf_test
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        name: '"tf_test_" + acctest.RandString(t, 10)'
+  - name: dlp_job_trigger_hybrid
+    primary_resource_id: hybrid_trigger
+    steps:
+    - name: dlp_job_trigger_hybrid
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: dlp_job_trigger_inspect
+    primary_resource_id: inspect
+    steps:
+    - name: dlp_job_trigger_inspect
+      prefixed_vars:
+        trigger: trigger
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: dlp_job_trigger_publish_to_stackdriver
+    primary_resource_id: publish_to_stackdriver
+    steps:
+    - name: dlp_job_trigger_publish_to_stackdriver
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: dlp_job_trigger_with_id
+    primary_resource_id: with_trigger_id
+    steps:
+    - name: dlp_job_trigger_with_id
+      prefixed_vars:
+        name: id-
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: dlp_job_trigger_multiple_actions
+    primary_resource_id: basic
+    steps:
+    - name: dlp_job_trigger_multiple_actions
+      prefixed_vars:
+        trigger: trigger
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: dlp_job_trigger_cloud_storage_optional_timespan_autopopulation
+    primary_resource_id: basic
+    steps:
+    - name: dlp_job_trigger_cloud_storage_optional_timespan_autopopulation
+      prefixed_vars:
+        trigger: trigger
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: dlp_job_trigger_timespan_config_big_query
+    primary_resource_id: timespan_config_big_query
+    steps:
+    - name: dlp_job_trigger_timespan_config_big_query
+      prefixed_vars:
+        trigger: trigger
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
   - name: 'parent'
     type: String

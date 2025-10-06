@@ -48,25 +48,29 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/workflows_workflow.go.tmpl'
 schema_version: 1
 state_upgraders: true
-examples:
-  - name: 'workflow_basic'
-    primary_resource_id: 'example'
-    vars:
-      name: 'workflow'
-      account_id: 'my-account'
-    exclude_import_test: true
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'workflow_tags'
-    primary_resource_id: 'example'
-    vars:
-      name: 'workflow'
-      account_id: 'my-account'
-      tag_key: 'tag_key'
-      tag_value: 'tag_value'
-    exclude_import_test: true
-    ignore_read_extra:
-      - 'deletion_protection'
+samples:
+  - name: workflow_basic
+    primary_resource_id: example
+    steps:
+    - name: workflow_basic
+      prefixed_vars:
+        account_id: my-account
+        name: workflow
+      ignore_read_extra:
+      - deletion_protection
+      exclude_import_test: true
+  - name: workflow_tags
+    primary_resource_id: example
+    steps:
+    - name: workflow_tags
+      prefixed_vars:
+        account_id: my-account
+        name: workflow
+        tag_key: tag_key
+        tag_value: tag_value
+      ignore_read_extra:
+      - deletion_protection
+      exclude_import_test: true
 virtual_fields:
   - name: 'deletion_protection'
     description: |

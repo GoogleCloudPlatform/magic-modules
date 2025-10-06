@@ -34,45 +34,51 @@ import_format:
   - 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs/{{notebook_execution_job_id}}'
 custom_code:
   post_create: 'templates/terraform/post_create/colab_notebook_execution.go.tmpl'
-examples:
-  - name: 'colab_notebook_execution_basic'
-    primary_resource_id: 'notebook-execution'
-    vars:
-      runtime_template_name: 'runtime-template-name'
-      bucket: 'my_bucket'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-      service_account: 'SERVICE_ACCT'
-    ignore_read_extra:
+samples:
+  - name: colab_notebook_execution_basic
+    primary_resource_id: notebook-execution
+    steps:
+    - name: colab_notebook_execution_basic
+      prefixed_vars:
+        bucket: my_bucket
+        runtime_template_name: runtime-template-name
+      test_env_vars:
+        project_id: PROJECT_NAME
+        service_account: SERVICE_ACCT
+      ignore_read_extra:
       - direct_notebook_source.0.content
-  - name: 'colab_notebook_execution_full'
+  - name: colab_notebook_execution_full
     min_version: beta
-    primary_resource_id: 'notebook-execution'
-    vars:
-      notebook_execution_job_id: 'colab-notebook-execution'
-      runtime_template_name: 'runtime-template-name'
-      bucket: 'my_bucket'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-      service_account: 'SERVICE_ACCT'
-  - name: 'colab_notebook_execution_dataform'
-    min_version: beta
-    primary_resource_id: 'notebook-execution'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-notebook-execution%s", context["random_suffix"])'
+    primary_resource_id: notebook-execution
+    steps:
+    - name: colab_notebook_execution_full
+      prefixed_vars:
+        bucket: my_bucket
+        notebook_execution_job_id: colab-notebook-execution
+        runtime_template_name: runtime-template-name
+      test_env_vars:
+        project_id: PROJECT_NAME
+        service_account: SERVICE_ACCT
+  - name: colab_notebook_execution_dataform
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-dataform.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-    vars:
-      secret: 'secret'
-      dataform_repository: 'dataform-repository'
-      runtime_template_name: 'runtime-template-name'
-      bucket: 'my_bucket'
-      key_name: 'my-crypto-key'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-      service_account: 'SERVICE_ACCT'
-    test_vars_overrides:
-      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+    - member: serviceAccount:service-{project_number}@gcp-sa-dataform.iam.gserviceaccount.com
+      role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    min_version: beta
+    primary_resource_id: notebook-execution
+    primary_resource_name: fmt.Sprintf("tf-test-colab-notebook-execution%s", context["random_suffix"])
+    steps:
+    - name: colab_notebook_execution_dataform
+      prefixed_vars:
+        bucket: my_bucket
+        dataform_repository: dataform-repository
+        key_name: my-crypto-key
+        runtime_template_name: runtime-template-name
+        secret: secret
+      test_env_vars:
+        project_id: PROJECT_NAME
+        service_account: SERVICE_ACCT
+      test_vars_overrides:
+        key_name: acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
 parameters:
   - name: 'location'
     type: String

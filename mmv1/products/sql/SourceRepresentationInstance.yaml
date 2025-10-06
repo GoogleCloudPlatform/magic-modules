@@ -43,19 +43,23 @@ sweeper:
     field: 'settings.deletionProtectionEnabled'
     value: 'false'
     include_full_resource: true
-examples:
-  - name: 'sql_source_representation_instance_basic'
-    primary_resource_id: 'instance'
-    vars:
-      name: 'my-instance'
-    ignore_read_extra:
-      - 'password'
-  - name: 'sql_source_representation_instance_postgres'
-    primary_resource_id: 'instance'
-    vars:
-      name: 'my-instance'
-    ignore_read_extra:
-      - 'password'
+samples:
+  - name: sql_source_representation_instance_basic
+    primary_resource_id: instance
+    steps:
+    - name: sql_source_representation_instance_basic
+      prefixed_vars:
+        name: my-instance
+      ignore_read_extra:
+      - password
+  - name: sql_source_representation_instance_postgres
+    primary_resource_id: instance
+    steps:
+    - name: sql_source_representation_instance_postgres
+      prefixed_vars:
+        name: my-instance
+      ignore_read_extra:
+      - password
 parameters:
 properties:
   - name: 'name'

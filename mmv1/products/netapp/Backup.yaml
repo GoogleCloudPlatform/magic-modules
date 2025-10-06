@@ -60,17 +60,20 @@ async:
 custom_code:
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
-examples:
-  - name: 'netapp_backup'
-    primary_resource_id: 'test_backup'
-    vars:
-      pool_name: 'backup-pool'
-      volume_name: 'backup-volume'
-      backup_vault_name: 'backup-vault'
-      backup_name: 'test-backup'
-      network_name: 'network'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+samples:
+  - name: netapp_backup
+    primary_resource_id: test_backup
+    steps:
+    - name: netapp_backup
+      prefixed_vars:
+        backup_name: test-backup
+        backup_vault_name: backup-vault
+        network_name: network
+        pool_name: backup-pool
+        volume_name: backup-volume
+      test_vars_overrides:
+        network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3",
+          acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))
 parameters:
   - name: 'location'
     type: String

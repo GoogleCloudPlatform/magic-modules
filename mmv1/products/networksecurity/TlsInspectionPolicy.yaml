@@ -45,21 +45,25 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'network_security_tls_inspection_policy_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-tls-inspection-policy'
-      privateca_ca_pool_name: 'my-basic-ca-pool'
-      privateca_certificate_authority_id: 'my-basic-certificate-authority'
-  - name: 'network_security_tls_inspection_policy_custom'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      resource_name: 'my-tls-inspection-policy'
-      privateca_ca_pool_name: 'my-basic-ca-pool'
-      privateca_certificate_authority_id: 'my-basic-certificate-authority'
-      trust_config_name: 'my-trust-config'
+samples:
+  - name: network_security_tls_inspection_policy_basic
+    primary_resource_id: default
+    steps:
+    - name: network_security_tls_inspection_policy_basic
+      prefixed_vars:
+        privateca_ca_pool_name: my-basic-ca-pool
+        privateca_certificate_authority_id: my-basic-certificate-authority
+        resource_name: my-tls-inspection-policy
+  - name: network_security_tls_inspection_policy_custom
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: network_security_tls_inspection_policy_custom
+      prefixed_vars:
+        privateca_ca_pool_name: my-basic-ca-pool
+        privateca_certificate_authority_id: my-basic-certificate-authority
+        resource_name: my-tls-inspection-policy
+        trust_config_name: my-trust-config
 parameters:
   - name: 'name'
     type: String

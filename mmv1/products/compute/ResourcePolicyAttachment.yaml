@@ -51,12 +51,14 @@ custom_code:
   encoder: 'templates/terraform/encoders/compute_resource_policy_attachment.go.tmpl'
   decoder: 'templates/terraform/decoders/compute_resource_policy_attachment.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/compute_resource_policy_attachment.go.tmpl'
-examples:
-  - name: 'compute_resource_policy_attachment_basic'
-    primary_resource_id: 'attachment'
-    vars:
-      instance_name: 'my-instance'
-      policy_name: 'my-resource-policy'
+samples:
+  - name: compute_resource_policy_attachment_basic
+    primary_resource_id: attachment
+    steps:
+    - name: compute_resource_policy_attachment_basic
+      prefixed_vars:
+        instance_name: my-instance
+        policy_name: my-resource-policy
 parameters:
   - name: 'instance'
     type: ResourceRef

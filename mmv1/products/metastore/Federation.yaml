@@ -45,21 +45,25 @@ iam_policy:
     - '{{federation_id}}'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/metastore_federation.go.tmpl'
-examples:
-  - name: 'dataproc_metastore_federation_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])'
-    vars:
-      federation_id: 'metastore-fed'
-      service_id: 'metastore-service'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'dataproc_metastore_federation_bigquery'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])'
-    vars:
-      federation_id: 'metastore-fed'
-      service_id: 'metastore-service'
+samples:
+  - name: dataproc_metastore_federation_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])
+    steps:
+    - name: dataproc_metastore_federation_basic
+      prefixed_vars:
+        federation_id: metastore-fed
+        service_id: metastore-service
+      ignore_read_extra:
+      - deletion_protection
+  - name: dataproc_metastore_federation_bigquery
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])
+    steps:
+    - name: dataproc_metastore_federation_bigquery
+      prefixed_vars:
+        federation_id: metastore-fed
+        service_id: metastore-service
 virtual_fields:
   - name: 'deletion_protection'
     description: |

@@ -49,13 +49,15 @@ custom_code:
   constants: 'templates/terraform/constants/posture.go.tmpl'
 custom_diff:
   - 'revisionIdCustomizeDiff'
-examples:
-  - name: 'securityposture_posture_basic'
-    primary_resource_id: 'posture1'
-    vars:
-      posture_id: 'posture_example'
-    test_env_vars:
-      org_id: 'ORG_TARGET'
+samples:
+  - name: securityposture_posture_basic
+    primary_resource_id: posture1
+    steps:
+    - name: securityposture_posture_basic
+      prefixed_vars:
+        posture_id: posture_example
+      test_env_vars:
+        org_id: ORG_TARGET
 parameters:
   - name: 'parent'
     type: String

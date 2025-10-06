@@ -34,33 +34,39 @@ custom_code:
   post_create: 'templates/terraform/post_create/colab_runtime.go.tmpl'
   custom_update: 'templates/terraform/custom_update/colab_runtime.go.tmpl'
   constants: 'templates/terraform/constants/colab_runtime.go.tmpl'
-examples:
-  - name: 'colab_runtime_basic'
-    primary_resource_id: 'runtime'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime%s", context["random_suffix"])'
-    region_override: 'us-central1'
-    vars:
-      runtime_name: 'colab-runtime'
-  - name: 'colab_runtime_stopped'
-    primary_resource_id: 'runtime'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime%s", context["random_suffix"])'
-    region_override: 'us-central1'
-    vars:
-      runtime_name: 'colab-runtime'
-    ignore_read_extra:
-      - 'desired_state'
-  - name: 'colab_runtime_full'
-    primary_resource_id: 'runtime'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime%s", context["random_suffix"])'
-    region_override: 'us-central1'
-    vars:
-      runtime_name: 'colab-runtime'
-      key_name: 'my-crypto-key'
-    test_vars_overrides:
-      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-    ignore_read_extra:
-      - 'desired_state'
-      - 'auto_upgrade'
+samples:
+  - name: colab_runtime_basic
+    primary_resource_id: runtime
+    primary_resource_name: fmt.Sprintf("tf-test-colab-runtime%s", context["random_suffix"])
+    steps:
+    - name: colab_runtime_basic
+      prefixed_vars:
+        runtime_name: colab-runtime
+    region_override: us-central1
+  - name: colab_runtime_stopped
+    primary_resource_id: runtime
+    primary_resource_name: fmt.Sprintf("tf-test-colab-runtime%s", context["random_suffix"])
+    steps:
+    - name: colab_runtime_stopped
+      prefixed_vars:
+        runtime_name: colab-runtime
+      ignore_read_extra:
+      - desired_state
+    region_override: us-central1
+  - name: colab_runtime_full
+    primary_resource_id: runtime
+    primary_resource_name: fmt.Sprintf("tf-test-colab-runtime%s", context["random_suffix"])
+    steps:
+    - name: colab_runtime_full
+      prefixed_vars:
+        key_name: my-crypto-key
+        runtime_name: colab-runtime
+      test_vars_overrides:
+        key_name: acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+      ignore_read_extra:
+      - desired_state
+      - auto_upgrade
+    region_override: us-central1
 virtual_fields:
   - name: 'desired_state'
     description: |

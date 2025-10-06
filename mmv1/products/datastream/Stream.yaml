@@ -48,198 +48,229 @@ custom_code:
   post_import: 'templates/terraform/post_import/datastream_stream.go.tmpl'
 custom_diff:
   - 'resourceDatastreamStreamCustomDiff'
-examples:
-  - name: 'datastream_stream_basic'
-    primary_resource_id: 'default'
-    vars:
-      stream_id: 'my-stream'
-      private_connection_id: 'my-connection'
-      network_name: 'my-network'
-      source_connection_profile_id: 'source-profile'
-      database_instance_name: 'my-instance'
-      deletion_protection: 'true'
-      bucket_name: 'my-bucket'
-      destination_connection_profile_id: 'destination-profile'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    external_providers: ["random", "time"]
-    exclude_docs: true
-      # Random provider
+samples:
+  - name: datastream_stream_basic
     skip_vcr: true
-  - name: 'datastream_stream_full'
-    primary_resource_id: 'default'
-    vars:
-      stream_id: 'my-stream'
-      private_connection_id: 'my-connection'
-      network_name: 'my-network'
-      source_connection_profile_id: 'source-profile'
-      database_instance_name: 'my-instance'
-      deletion_protection: 'true'
-      bucket_name: 'my-bucket'
-      destination_connection_profile_id: 'destination-profile'
-      stream_cmek: 'kms-name'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'stream_cmek': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    external_providers: ["random", "time"]
-      # Random provider
+    external_providers:
+    - random
+    - time
+    primary_resource_id: default
+    steps:
+    - name: datastream_stream_basic
+      prefixed_vars:
+        bucket_name: my-bucket
+        database_instance_name: my-instance
+        deletion_protection: "true"
+        destination_connection_profile_id: destination-profile
+        network_name: my-network
+        private_connection_id: my-connection
+        source_connection_profile_id: source-profile
+        stream_id: my-stream
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
+      exclude_docs: true
+  - name: datastream_stream_full
     skip_vcr: true
-  - name: 'datastream_stream_postgresql'
-    primary_resource_id: 'default'
-    vars:
-      stream_id: 'my-stream'
-      source_connection_profile_id: 'source-profile'
-      destination_connection_profile_id: 'destination-profile'
+    external_providers:
+    - random
+    - time
+    primary_resource_id: default
+    steps:
+    - name: datastream_stream_full
+      prefixed_vars:
+        bucket_name: my-bucket
+        database_instance_name: my-instance
+        deletion_protection: "true"
+        destination_connection_profile_id: destination-profile
+        network_name: my-network
+        private_connection_id: my-connection
+        source_connection_profile_id: source-profile
+        stream_cmek: kms-name
+        stream_id: my-stream
+      test_vars_overrides:
+        deletion_protection: "false"
+        stream_cmek: acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: datastream_stream_postgresql
+    primary_resource_id: default
     exclude_test: true
-  - name: 'datastream_stream_oracle'
-    primary_resource_id: 'default'
-    vars:
-      stream_id: 'my-stream'
-      source_connection_profile_id: 'source-profile'
-      destination_connection_profile_id: 'destination-profile'
+    steps:
+    - name: datastream_stream_postgresql
+      prefixed_vars:
+        destination_connection_profile_id: destination-profile
+        source_connection_profile_id: source-profile
+        stream_id: my-stream
+  - name: datastream_stream_oracle
+    primary_resource_id: default
     exclude_test: true
-  - name: 'datastream_stream_sql_server'
-    primary_resource_id: 'default'
-    vars:
-      database_name: 'db'
-      database_password: 'password'
-      database_user: 'user'
-      deletion_protection: 'true'
-      destination_connection_profile_id: 'destination-profile'
-      source_connection_profile_id: 'source-profile'
-      sql_server_name: 'sql-server'
-      sql_server_root_password: 'root-password'
-      stream_id: 'stream'
-    test_vars_overrides:
-      'deletion_protection': 'false'
+    steps:
+    - name: datastream_stream_oracle
+      prefixed_vars:
+        destination_connection_profile_id: destination-profile
+        source_connection_profile_id: source-profile
+        stream_id: my-stream
+  - name: datastream_stream_sql_server
+    primary_resource_id: default
     exclude_test: true
-  - name: 'datastream_stream_sql_server_change_tables'
-    primary_resource_id: 'default'
-    vars:
-      database_name: 'db'
-      database_password: 'password'
-      database_user: 'user'
-      deletion_protection: 'true'
-      destination_connection_profile_id: 'destination-profile'
-      source_connection_profile_id: 'source-profile'
-      sql_server_name: 'sql-server'
-      sql_server_root_password: 'root-password'
-      stream_id: 'stream'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    # Requires SQLServer Configuration
+    steps:
+    - name: datastream_stream_sql_server
+      prefixed_vars:
+        database_name: db
+        database_password: password
+        database_user: user
+        deletion_protection: "true"
+        destination_connection_profile_id: destination-profile
+        source_connection_profile_id: source-profile
+        sql_server_name: sql-server
+        sql_server_root_password: root-password
+        stream_id: stream
+      test_vars_overrides:
+        deletion_protection: "false"
+  - name: datastream_stream_sql_server_change_tables
+    primary_resource_id: default
     exclude_test: true
-  - name: 'datastream_stream_mysql_gtid'
-    primary_resource_id: 'default'
-    vars:
-      database_name: 'db'
-      database_password: 'password'
-      database_user: 'user'
-      deletion_protection: 'true'
-      destination_connection_profile_id: 'destination-profile'
-      source_connection_profile_id: 'source-profile'
-      mysql_name: 'mysql'
-      mysql_root_password: 'root-password'
-      stream_id: 'stream'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    # Requires MySQL Configuration
+    steps:
+    - name: datastream_stream_sql_server_change_tables
+      prefixed_vars:
+        database_name: db
+        database_password: password
+        database_user: user
+        deletion_protection: "true"
+        destination_connection_profile_id: destination-profile
+        source_connection_profile_id: source-profile
+        sql_server_name: sql-server
+        sql_server_root_password: root-password
+        stream_id: stream
+      test_vars_overrides:
+        deletion_protection: "false"
+  - name: datastream_stream_mysql_gtid
+    primary_resource_id: default
     exclude_test: true
-  - name: 'datastream_stream_postgresql_bigquery_dataset_id'
-    primary_resource_id: 'default'
-    vars:
-      dataset_id: 'postgres'
-      stream_id: 'postgres-bigquery'
-      dest_connection_profile_id: 'dest-profile'
-      instance_name: 'instance-name'
-      sql_user_name: 'my-user'
-      source_connection_profile_id: 'source-profile'
-    external_providers: ["random", "time"]
-    # Random provider
+    steps:
+    - name: datastream_stream_mysql_gtid
+      prefixed_vars:
+        database_name: db
+        database_password: password
+        database_user: user
+        deletion_protection: "true"
+        destination_connection_profile_id: destination-profile
+        mysql_name: mysql
+        mysql_root_password: root-password
+        source_connection_profile_id: source-profile
+        stream_id: stream
+      test_vars_overrides:
+        deletion_protection: "false"
+  - name: datastream_stream_postgresql_bigquery_dataset_id
     skip_vcr: true
-  - name: 'datastream_stream_bigquery'
-    primary_resource_id: 'default'
-    vars:
-      stream_id: 'my-stream'
-      private_connection_id: 'my-connection'
-      network_name: 'my-network'
-      source_connection_profile_id: 'source-profile'
-      database_instance_name: 'my-instance'
-      deletion_protection: 'true'
-      destination_connection_profile_id: 'destination-profile'
-      bigquery_destination_table_kms_key_name: 'bigquery-kms-name'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'bigquery_destination_table_kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    external_providers: ["random", "time"]
-      # Random provider
+    external_providers:
+    - random
+    - time
+    primary_resource_id: default
+    steps:
+    - name: datastream_stream_postgresql_bigquery_dataset_id
+      prefixed_vars:
+        dataset_id: postgres
+        dest_connection_profile_id: dest-profile
+        instance_name: instance-name
+        source_connection_profile_id: source-profile
+        sql_user_name: my-user
+        stream_id: postgres-bigquery
+  - name: datastream_stream_bigquery
     skip_vcr: true
-  - name: 'datastream_stream_bigquery_cross_project_source_hierachy'
-    primary_resource_id: 'default'
-    vars:
-      stream_id: 'my-stream'
-      private_connection_id: 'my-connection'
-      network_name: 'my-network'
-      source_connection_profile_id: 'source-profile'
-      database_instance_name: 'my-instance'
-      deletion_protection: 'true'
-      destination_connection_profile_id: 'destination-profile'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    external_providers: ["random", "time"]
-      # Random provider
+    external_providers:
+    - random
+    - time
+    primary_resource_id: default
+    steps:
+    - name: datastream_stream_bigquery
+      prefixed_vars:
+        bigquery_destination_table_kms_key_name: bigquery-kms-name
+        database_instance_name: my-instance
+        deletion_protection: "true"
+        destination_connection_profile_id: destination-profile
+        network_name: my-network
+        private_connection_id: my-connection
+        source_connection_profile_id: source-profile
+        stream_id: my-stream
+      test_vars_overrides:
+        bigquery_destination_table_kms_key_name: acctest.BootstrapKMSKeyInLocation(t,
+          "us-central1").CryptoKey.Name
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: datastream_stream_bigquery_cross_project_source_hierachy
     skip_vcr: true
-  - name: 'datastream_stream_bigquery_append_only'
-    primary_resource_id: 'default'
-    vars:
-      stream_id: 'my-stream'
-      private_connection_id: 'my-connection'
-      network_name: 'my-network'
-      source_connection_profile_id: 'source-profile'
-      database_instance_name: 'my-instance'
-      deletion_protection: 'true'
-      destination_connection_profile_id: 'destination-profile'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    external_providers: ["random", "time"]
-      # Random provider
+    external_providers:
+    - random
+    - time
+    primary_resource_id: default
+    steps:
+    - name: datastream_stream_bigquery_cross_project_source_hierachy
+      prefixed_vars:
+        database_instance_name: my-instance
+        deletion_protection: "true"
+        destination_connection_profile_id: destination-profile
+        network_name: my-network
+        private_connection_id: my-connection
+        source_connection_profile_id: source-profile
+        stream_id: my-stream
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: datastream_stream_bigquery_append_only
     skip_vcr: true
-  - name: 'datastream_stream_bigquery_blmt'
-    primary_resource_id: 'default'
-    vars:
-      stream_id: 'blmt-stream'
-      database_instance_name: 'blmt-instance'
-      deletion_protection: 'true'
-      source_connection_profile_id: 'blmt-source-profile'
-      destination_connection_profile_id: 'blmt-destination-profile'
-      blmt_bucket_name: 'blmt-bucket'
-      blmt_connection_id: 'blmt-connection'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    external_providers: ["random"]
+    external_providers:
+    - random
+    - time
+    primary_resource_id: default
+    steps:
+    - name: datastream_stream_bigquery_append_only
+      prefixed_vars:
+        database_instance_name: my-instance
+        deletion_protection: "true"
+        destination_connection_profile_id: destination-profile
+        network_name: my-network
+        private_connection_id: my-connection
+        source_connection_profile_id: source-profile
+        stream_id: my-stream
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: datastream_stream_bigquery_blmt
     skip_vcr: true
-    # Involves complex dependency creation, which makes it impractical in this context
+    external_providers:
+    - random
+    primary_resource_id: default
     exclude_test: true
-  - name: 'datastream_stream_salesforce'
-    primary_resource_id: 'default'
-    vars:
-      stream_id: 'sf-stream'
-      source_connection_profile_id: 'source-profile'
-      destination_connection_profile_id: 'destination-profile'
+    steps:
+    - name: datastream_stream_bigquery_blmt
+      prefixed_vars:
+        blmt_bucket_name: blmt-bucket
+        blmt_connection_id: blmt-connection
+        database_instance_name: blmt-instance
+        deletion_protection: "true"
+        destination_connection_profile_id: blmt-destination-profile
+        source_connection_profile_id: blmt-source-profile
+        stream_id: blmt-stream
+      test_vars_overrides:
+        deletion_protection: "false"
+  - name: datastream_stream_salesforce
+    primary_resource_id: default
     exclude_test: true
+    steps:
+    - name: datastream_stream_salesforce
+      prefixed_vars:
+        destination_connection_profile_id: destination-profile
+        source_connection_profile_id: source-profile
+        stream_id: sf-stream
 virtual_fields:
   - name: 'desired_state'
     description: |

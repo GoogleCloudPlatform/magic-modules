@@ -38,54 +38,61 @@ custom_code:
   constants: 'templates/terraform/constants/colab_schedule.go.tmpl'
 sweeper:
   identifier_field: 'displayName'
-examples:
-  - name: 'colab_schedule_basic'
-    primary_resource_id: 'schedule'
-    vars:
-      display_name: 'basic-schedule'
-      bucket: 'my_bucket'
-      runtime_template_name: 'runtime-template'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-      location: 'REGION'
-      service_account: 'SERVICE_ACCT'
-  - name: 'colab_schedule_paused'
-    primary_resource_id: 'schedule'
-    vars:
-      display_name: 'paused-schedule'
-      bucket: 'my_bucket'
-      runtime_template_name: 'runtime-template'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-      location: 'REGION'
-      service_account: 'SERVICE_ACCT'
-    ignore_read_extra:
+samples:
+  - name: colab_schedule_basic
+    primary_resource_id: schedule
+    steps:
+    - name: colab_schedule_basic
+      prefixed_vars:
+        bucket: my_bucket
+        display_name: basic-schedule
+        runtime_template_name: runtime-template
+      test_env_vars:
+        location: REGION
+        project_id: PROJECT_NAME
+        service_account: SERVICE_ACCT
+  - name: colab_schedule_paused
+    primary_resource_id: schedule
+    steps:
+    - name: colab_schedule_paused
+      prefixed_vars:
+        bucket: my_bucket
+        display_name: paused-schedule
+        runtime_template_name: runtime-template
+      test_env_vars:
+        location: REGION
+        project_id: PROJECT_NAME
+        service_account: SERVICE_ACCT
+      ignore_read_extra:
       - desired_state
-  - name: 'colab_schedule_full'
-    min_version: "beta"
-    primary_resource_id: 'schedule'
+  - name: colab_schedule_full
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-dataform.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-    vars:
-      display_name: 'full-schedule'
-      bucket: 'my_bucket'
-      network_name: 'colab-test-default'
-      runtime_template_name: 'runtime-template'
-      secret: 'secret'
-      dataform_repository: 'dataform-repository'
-      start_time: '2014-10-02T15:01:23Z'
-      end_time: '2014-10-10T15:01:23Z'
-      key_name: 'my-key'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-      location: 'REGION'
-      service_account: 'SERVICE_ACCT'
-    test_vars_overrides:
-      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-      # Tests use a (relatively static) future date so that VCR cassettes can stay valid for a long time
-      start_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 1).Format(time.RFC3339)'
-      end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339)'
+    - member: serviceAccount:service-{project_number}@gcp-sa-dataform.iam.gserviceaccount.com
+      role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    min_version: beta
+    primary_resource_id: schedule
+    steps:
+    - name: colab_schedule_full
+      prefixed_vars:
+        bucket: my_bucket
+        dataform_repository: dataform-repository
+        display_name: full-schedule
+        end_time: "2014-10-10T15:01:23Z"
+        key_name: my-key
+        network_name: colab-test-default
+        runtime_template_name: runtime-template
+        secret: secret
+        start_time: "2014-10-02T15:01:23Z"
+      test_env_vars:
+        location: REGION
+        project_id: PROJECT_NAME
+        service_account: SERVICE_ACCT
+      test_vars_overrides:
+        end_time: time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0,
+          0, 10).Format(time.RFC3339)
+        key_name: acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+        start_time: time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0,
+          0, 1).Format(time.RFC3339)
 virtual_fields:
   - name: 'desired_state'
     description: |

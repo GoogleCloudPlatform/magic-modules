@@ -41,19 +41,20 @@ async:
 custom_code:
   custom_import: 'templates/terraform/custom_import/set_id_name_with_slashes.go.tmpl'
 exclude_tgc: true
-examples:
-  - name: 'access_context_manager_gcp_user_access_binding_basic'
-    primary_resource_id: 'gcp_user_access_binding'
-    vars:
-      group_id: 'my-identity-group'
-      access_level_id: 'access_level_id_for_user_access_binding'
-      access_level_name: 'chromeos_no_lock'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      org_domain: 'ORG_DOMAIN'
-      cust_id: 'CUST_ID'
-    # Has a handwritten test due to AccessPolicy-related tests needing to run synchronously
+samples:
+  - name: access_context_manager_gcp_user_access_binding_basic
+    primary_resource_id: gcp_user_access_binding
     exclude_test: true
+    steps:
+    - name: access_context_manager_gcp_user_access_binding_basic
+      prefixed_vars:
+        access_level_id: access_level_id_for_user_access_binding
+        access_level_name: chromeos_no_lock
+        group_id: my-identity-group
+      test_env_vars:
+        cust_id: CUST_ID
+        org_domain: ORG_DOMAIN
+        org_id: ORG_ID
 parameters:
   # Parent is a path parameter that _cannot_ be read or sent in the request at all.
   # This must be done at the provider level.

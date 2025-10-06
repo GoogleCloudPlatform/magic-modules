@@ -30,29 +30,37 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-examples:
-  - name: 'parameter_config_basic'
-    primary_resource_id: 'parameter-basic'
-    vars:
-      parameter_id: 'parameter'
-  - name: 'parameter_with_format'
-    primary_resource_id: 'parameter-with-format'
-    vars:
-      parameter_id: 'parameter'
-  - name: 'parameter_with_labels'
-    primary_resource_id: 'parameter-with-labels'
-    vars:
-      parameter_id: 'parameter'
-  - name: 'parameter_with_kms_key'
-    primary_resource_id: 'parameter-with-kms-key'
-    vars:
-      parameter_id: 'parameter'
-      kms_key: 'kms-key'
-    test_vars_overrides:
-      'kms_key': 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
+samples:
+  - name: parameter_config_basic
+    primary_resource_id: parameter-basic
+    steps:
+    - name: parameter_config_basic
+      prefixed_vars:
+        parameter_id: parameter
+  - name: parameter_with_format
+    primary_resource_id: parameter-with-format
+    steps:
+    - name: parameter_with_format
+      prefixed_vars:
+        parameter_id: parameter
+  - name: parameter_with_labels
+    primary_resource_id: parameter-with-labels
+    steps:
+    - name: parameter_with_labels
+      prefixed_vars:
+        parameter_id: parameter
+  - name: parameter_with_kms_key
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+    - member: serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com
+      role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    primary_resource_id: parameter-with-kms-key
+    steps:
+    - name: parameter_with_kms_key
+      prefixed_vars:
+        kms_key: kms-key
+        parameter_id: parameter
+      test_vars_overrides:
+        kms_key: acctest.BootstrapKMSKey(t).CryptoKey.Name
 parameters:
   - name: 'parameterId'
     type: String

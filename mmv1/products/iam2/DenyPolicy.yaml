@@ -39,16 +39,18 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'iam_deny_policy_basic'
-    primary_resource_id: 'example'
-    vars:
-      policy_name: 'my-deny-policy'
-      account_id: 'svc-acc'
-      project_name: 'my-project'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
+samples:
+  - name: iam_deny_policy_basic
+    primary_resource_id: example
+    steps:
+    - name: iam_deny_policy_basic
+      prefixed_vars:
+        account_id: svc-acc
+        policy_name: my-deny-policy
+        project_name: my-project
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
 parameters:
 properties:
   - name: 'name'

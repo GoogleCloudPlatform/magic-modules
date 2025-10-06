@@ -47,87 +47,105 @@ collection_url_key: 'batches'
 custom_code:
   constants: 'templates/terraform/constants/cloud_dataproc_batch.go.tmpl'
   decoder: 'templates/terraform/decoders/cloud_dataproc_batch.go.tmpl'
-examples:
-  - name: 'dataproc_batch_spark'
-    primary_resource_id: 'example_batch_spark'
-    primary_resource_name: 'fmt.Sprintf("tf-test-spark-batch%s", context["random_suffix"])'
-    vars:
-      subnetwork_name: 'default'
-      prevent_destroy: 'true'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-    test_vars_overrides:
-      'subnetwork_name': 'acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-spark-test-network", "dataproc-spark-test-subnetwork")'
-      'prevent_destroy': 'false'
-    ignore_read_extra:
-      - 'runtime_config.0.properties'
-  - name: 'dataproc_batch_spark_full'
-    primary_resource_id: 'example_batch_spark'
-    primary_resource_name: 'fmt.Sprintf("tf-test-spark-batch%s", context["random_suffix"])'
-    vars:
-      dataproc_batch: 'dataproc-batch'
-      prevent_destroy: 'true'
-      kms_key_name: 'example-key'
-      bucket_name: 'dataproc-bucket'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-    test_vars_overrides:
-      'prevent_destroy': 'false'
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-dataproc-batch-key1").CryptoKey.Name'
-    ignore_read_extra:
-      - 'runtime_config.0.properties'
-  - name: 'dataproc_batch_sparksql'
-    primary_resource_id: 'example_batch_sparsql'
-    primary_resource_name: 'fmt.Sprintf("tf-test-spark-batch%s", context["random_suffix"])'
-    vars:
-      subnetwork_name: 'default'
-      prevent_destroy: 'true'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-    test_vars_overrides:
-      'subnetwork_name': 'acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-sparksql-test-network", "dataproc-sparksql-test-subnetwork")'
-      'prevent_destroy': 'false'
-    ignore_read_extra:
-      - 'runtime_config.0.properties'
-  - name: 'dataproc_batch_pyspark'
-    primary_resource_id: 'example_batch_pyspark'
-    primary_resource_name: 'fmt.Sprintf("tf-test-spark-batch%s", context["random_suffix"])'
-    vars:
-      subnetwork_name: 'default'
-      prevent_destroy: 'true'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-    test_vars_overrides:
-      'subnetwork_name': 'acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-pyspark-test-network", "dataproc-pyspark-test-subnetwork")'
-      'prevent_destroy': 'false'
-    ignore_read_extra:
-      - 'runtime_config.0.properties'
-  - name: 'dataproc_batch_sparkr'
-    primary_resource_id: 'example_batch_sparkr'
-    primary_resource_name: 'fmt.Sprintf("tf-test-spark-batch%s", context["random_suffix"])'
-    vars:
-      subnetwork_name: 'default'
-      prevent_destroy: 'true'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-    test_vars_overrides:
-      'subnetwork_name': 'acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-pyspark-test-network", "dataproc-pyspark-test-subnetwork")'
-      'prevent_destroy': 'false'
-    ignore_read_extra:
-      - 'runtime_config.0.properties'
-  - name: 'dataproc_batch_autotuning'
-    primary_resource_id: 'example_batch_autotuning'
-    primary_resource_name: 'fmt.Sprintf("tf-test-batch-autotuning%s", context["random_suffix"])'
-    vars:
-      subnetwork_name: 'default'
-      prevent_destroy: 'true'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-    test_vars_overrides:
-      'subnetwork_name': 'acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-autotuning-test-network", "dataproc-autotuning-test-subnetwork")'
-      'prevent_destroy': 'false'
-    ignore_read_extra:
-      - 'runtime_config.0.properties'
+samples:
+  - name: dataproc_batch_spark
+    primary_resource_id: example_batch_spark
+    primary_resource_name: fmt.Sprintf("tf-test-spark-batch%s", context["random_suffix"])
+    steps:
+    - name: dataproc_batch_spark
+      prefixed_vars:
+        prevent_destroy: "true"
+        subnetwork_name: default
+      test_env_vars:
+        project_name: PROJECT_NAME
+      test_vars_overrides:
+        prevent_destroy: "false"
+        subnetwork_name: acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-spark-test-network",
+          "dataproc-spark-test-subnetwork")
+      ignore_read_extra:
+      - runtime_config.0.properties
+  - name: dataproc_batch_spark_full
+    primary_resource_id: example_batch_spark
+    primary_resource_name: fmt.Sprintf("tf-test-spark-batch%s", context["random_suffix"])
+    steps:
+    - name: dataproc_batch_spark_full
+      prefixed_vars:
+        bucket_name: dataproc-bucket
+        dataproc_batch: dataproc-batch
+        kms_key_name: example-key
+        prevent_destroy: "true"
+      test_env_vars:
+        project_name: PROJECT_NAME
+      test_vars_overrides:
+        kms_key_name: acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT",
+          "us-central1", "tf-bootstrap-dataproc-batch-key1").CryptoKey.Name
+        prevent_destroy: "false"
+      ignore_read_extra:
+      - runtime_config.0.properties
+  - name: dataproc_batch_sparksql
+    primary_resource_id: example_batch_sparsql
+    primary_resource_name: fmt.Sprintf("tf-test-spark-batch%s", context["random_suffix"])
+    steps:
+    - name: dataproc_batch_sparksql
+      prefixed_vars:
+        prevent_destroy: "true"
+        subnetwork_name: default
+      test_env_vars:
+        project_name: PROJECT_NAME
+      test_vars_overrides:
+        prevent_destroy: "false"
+        subnetwork_name: acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-sparksql-test-network",
+          "dataproc-sparksql-test-subnetwork")
+      ignore_read_extra:
+      - runtime_config.0.properties
+  - name: dataproc_batch_pyspark
+    primary_resource_id: example_batch_pyspark
+    primary_resource_name: fmt.Sprintf("tf-test-spark-batch%s", context["random_suffix"])
+    steps:
+    - name: dataproc_batch_pyspark
+      prefixed_vars:
+        prevent_destroy: "true"
+        subnetwork_name: default
+      test_env_vars:
+        project_name: PROJECT_NAME
+      test_vars_overrides:
+        prevent_destroy: "false"
+        subnetwork_name: acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-pyspark-test-network",
+          "dataproc-pyspark-test-subnetwork")
+      ignore_read_extra:
+      - runtime_config.0.properties
+  - name: dataproc_batch_sparkr
+    primary_resource_id: example_batch_sparkr
+    primary_resource_name: fmt.Sprintf("tf-test-spark-batch%s", context["random_suffix"])
+    steps:
+    - name: dataproc_batch_sparkr
+      prefixed_vars:
+        prevent_destroy: "true"
+        subnetwork_name: default
+      test_env_vars:
+        project_name: PROJECT_NAME
+      test_vars_overrides:
+        prevent_destroy: "false"
+        subnetwork_name: acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-pyspark-test-network",
+          "dataproc-pyspark-test-subnetwork")
+      ignore_read_extra:
+      - runtime_config.0.properties
+  - name: dataproc_batch_autotuning
+    primary_resource_id: example_batch_autotuning
+    primary_resource_name: fmt.Sprintf("tf-test-batch-autotuning%s", context["random_suffix"])
+    steps:
+    - name: dataproc_batch_autotuning
+      prefixed_vars:
+        prevent_destroy: "true"
+        subnetwork_name: default
+      test_env_vars:
+        project_name: PROJECT_NAME
+      test_vars_overrides:
+        prevent_destroy: "false"
+        subnetwork_name: acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-autotuning-test-network",
+          "dataproc-autotuning-test-subnetwork")
+      ignore_read_extra:
+      - runtime_config.0.properties
 parameters:
   - name: 'location'
     type: String

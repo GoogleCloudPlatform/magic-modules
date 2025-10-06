@@ -28,12 +28,14 @@ id_format: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{c
 import_format:
   - projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}
 mutex: 'projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}'
-examples:
-  - name: "gemini_code_repository_index_basic"
-    primary_resource_id: "example"
-    test_vars_overrides:
-      cri_id: '"cri-example"'
+samples:
+  - name: gemini_code_repository_index_basic
+    primary_resource_id: example
     exclude_test: true
+    steps:
+    - name: gemini_code_repository_index_basic
+      test_vars_overrides:
+        cri_id: '"cri-example"'
 timeouts:
   insert_minutes: 90
   update_minutes: 90

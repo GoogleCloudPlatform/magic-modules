@@ -63,54 +63,64 @@ sweeper:
   url_substitutions:
     - region: "us-central1-a"
     - region: "us-west1-a"
-examples:
-  - name: 'notebook_instance_basic'
-    primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-notebooks-instance%s", context["random_suffix"])'
-    region_override: 'us-west1-a'
-    vars:
-      instance_name: 'notebooks-instance'
-    ignore_read_extra:
-      - 'update_time'
-  - name: 'notebook_instance_basic_stopped'
-    primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-notebooks-instance%s", context["random_suffix"])'
-    region_override: 'us-west1-a'
-    vars:
-      instance_name: 'notebooks-instance'
-    ignore_read_extra:
-      - 'desired_state'
-      - 'update_time'
+samples:
+  - name: notebook_instance_basic
+    primary_resource_id: instance
+    primary_resource_name: fmt.Sprintf("tf-test-notebooks-instance%s", context["random_suffix"])
+    steps:
+    - name: notebook_instance_basic
+      prefixed_vars:
+        instance_name: notebooks-instance
+      ignore_read_extra:
+      - update_time
+    region_override: us-west1-a
+  - name: notebook_instance_basic_stopped
     skip_test: https://github.com/hashicorp/terraform-provider-google/issues/17593#issuecomment-2888583933
-  - name: 'notebook_instance_basic_container'
-    primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-notebooks-instance%s", context["random_suffix"])'
-    region_override: 'us-west1-a'
-    vars:
-      instance_name: 'notebooks-instance'
-    ignore_read_extra:
-      - 'update_time'
-  - name: 'notebook_instance_basic_gpu'
-    primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-notebooks-instance%s", context["random_suffix"])'
-    region_override: 'us-west1-a'
-    vars:
-      instance_name: 'notebooks-instance'
-    ignore_read_extra:
-      - 'update_time'
-  - name: 'notebook_instance_full'
-    primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-notebooks-instance%s", context["random_suffix"])'
-    region_override: 'us-west1-a'
-    vars:
-      instance_name: 'notebooks-instance'
-      key_name: 'my-crypto-key'
-    test_env_vars:
-      service_account: 'SERVICE_ACCT'
-    test_vars_overrides:
-      'key_name': 'acctest.BootstrapKMSKeyInLocation(t, "global").CryptoKey.Name'
-    ignore_read_extra:
-      - 'update_time'
+    primary_resource_id: instance
+    primary_resource_name: fmt.Sprintf("tf-test-notebooks-instance%s", context["random_suffix"])
+    steps:
+    - name: notebook_instance_basic_stopped
+      prefixed_vars:
+        instance_name: notebooks-instance
+      ignore_read_extra:
+      - desired_state
+      - update_time
+    region_override: us-west1-a
+  - name: notebook_instance_basic_container
+    primary_resource_id: instance
+    primary_resource_name: fmt.Sprintf("tf-test-notebooks-instance%s", context["random_suffix"])
+    steps:
+    - name: notebook_instance_basic_container
+      prefixed_vars:
+        instance_name: notebooks-instance
+      ignore_read_extra:
+      - update_time
+    region_override: us-west1-a
+  - name: notebook_instance_basic_gpu
+    primary_resource_id: instance
+    primary_resource_name: fmt.Sprintf("tf-test-notebooks-instance%s", context["random_suffix"])
+    steps:
+    - name: notebook_instance_basic_gpu
+      prefixed_vars:
+        instance_name: notebooks-instance
+      ignore_read_extra:
+      - update_time
+    region_override: us-west1-a
+  - name: notebook_instance_full
+    primary_resource_id: instance
+    primary_resource_name: fmt.Sprintf("tf-test-notebooks-instance%s", context["random_suffix"])
+    steps:
+    - name: notebook_instance_full
+      prefixed_vars:
+        instance_name: notebooks-instance
+        key_name: my-crypto-key
+      test_env_vars:
+        service_account: SERVICE_ACCT
+      test_vars_overrides:
+        key_name: acctest.BootstrapKMSKeyInLocation(t, "global").CryptoKey.Name
+      ignore_read_extra:
+      - update_time
+    region_override: us-west1-a
 virtual_fields:
   - name: 'desired_state'
     description: |

@@ -40,16 +40,22 @@ id_format: '{{env_id}}'
 custom_code:
   custom_import: 'templates/terraform/custom_import/apigee_env_addons.go.tmpl'
   decoder: 'templates/terraform/decoders/apigee_env_addons.go.tmpl'
-examples:
-  - name: 'apigee_env_addons_analytics_test'
-    primary_resource_id: 'apigee_org_addons'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-    external_providers: ["time"]
-  - name: 'apigee_env_addons_enable_analytics'
+samples:
+  - name: apigee_env_addons_analytics_test
+    external_providers:
+    - time
+    primary_resource_id: apigee_org_addons
+    steps:
+    - name: apigee_env_addons_analytics_test
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
+  - name: apigee_env_addons_enable_analytics
+    primary_resource_id: ""
     exclude_test: true
+    steps:
+    - name: apigee_env_addons_enable_analytics
 parameters:
   - name: 'envId'
     type: String

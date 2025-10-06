@@ -42,16 +42,18 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'logging_folder_settings_all'
-    primary_resource_id: 'example'
-    vars:
-      key_name: 'kms-key'
-      folder_name: 'folder-name'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    test_vars_overrides:
-      'key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+samples:
+  - name: logging_folder_settings_all
+    primary_resource_id: example
+    steps:
+    - name: logging_folder_settings_all
+      prefixed_vars:
+        folder_name: folder-name
+        key_name: kms-key
+      test_env_vars:
+        org_id: ORG_ID
+      test_vars_overrides:
+        key_name: acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
 parameters:
   - name: 'folder'
     type: String

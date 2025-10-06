@@ -53,69 +53,89 @@ custom_code:
   encoder: 'templates/terraform/encoders/compute_backend_bucket.go.tmpl'
   post_create: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.tmpl'
   post_update: 'templates/terraform/post_create/compute_backend_bucket_security_policy.go.tmpl'
-examples:
-  - name: 'backend_bucket_basic'
-    primary_resource_id: 'image_backend'
-    primary_resource_name: 'fmt.Sprintf("tf-test-image-backend-bucket%s", context["random_suffix"])'
-    vars:
-      backend_bucket_name: 'image-backend-bucket'
-      bucket_name: 'image-store-bucket'
-    tgc_test_ignore_in_asset: ['RESOURCE.cdnPolicy.signedUrlCacheMaxAgeSec']
-  - name: 'backend_bucket_full'
-    primary_resource_id: 'image_backend_full'
-    vars:
-      backend_bucket_name: 'image-backend-bucket-full'
-      bucket_name: 'image-store-bucket-full'
-    exclude_docs: true
-  - name: 'backend_bucket_security_policy'
-    primary_resource_id: 'image_backend'
-    vars:
-      backend_bucket_name: 'image-backend-bucket'
-      bucket_name: 'image-store-bucket'
-    tgc_test_ignore_in_asset: ['RESOURCE.cdnPolicy.signedUrlCacheMaxAgeSec']
-  - name: 'backend_bucket_query_string_whitelist'
-    primary_resource_id: 'image_backend'
-    vars:
-      backend_bucket_name: 'image-backend-bucket'
-  - name: 'backend_bucket_include_http_headers'
-    primary_resource_id: 'image_backend'
-    vars:
-      backend_bucket_name: 'image-backend-bucket'
-  - name: 'external_cdn_lb_with_backend_bucket'
-    primary_resource_id: 'default'
-    vars:
-      my_bucket: 'my-bucket'
-      index_page: 'index-page'
-      404_page: '404-page'
-      test_object: 'test-object'
-      example_ip: 'example-ip'
-      http_lb_forwarding_rule: 'http-lb-forwarding-rule'
-      http_lb_proxy: 'http-lb-proxy'
-      http_lb: 'http-lb'
-      cat_backend_bucket: 'cat-backend-bucket'
-    exclude_docs: true
-  - name: 'backend_bucket_bypass_cache'
-    primary_resource_id: 'image_backend'
-    vars:
-      backend_bucket_name: 'image-backend-bucket'
-      bucket_name: 'image-store-bucket'
-    exclude_docs: true
-  - name: 'backend_bucket_coalescing'
-    primary_resource_id: 'image_backend'
-    vars:
-      backend_bucket_name: 'image-backend-bucket'
-      bucket_name: 'image-store-bucket'
-    exclude_docs: true
-  - name: 'backend_bucket_global_ilb'
-    primary_resource_id: 'global-ilb-backend'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    vars:
-      backend_bucket_name: 'global-ilb-backend-bucket'
-      bucket_name: 'global-ilb-bucket'
-    exclude_docs: true
+samples:
+  - name: backend_bucket_basic
+    primary_resource_id: image_backend
+    primary_resource_name: fmt.Sprintf("tf-test-image-backend-bucket%s", context["random_suffix"])
+    steps:
+    - name: backend_bucket_basic
+      prefixed_vars:
+        backend_bucket_name: image-backend-bucket
+        bucket_name: image-store-bucket
+    tgc_test_ignore_in_asset:
+    - RESOURCE.cdnPolicy.signedUrlCacheMaxAgeSec
+  - name: backend_bucket_full
+    primary_resource_id: image_backend_full
+    steps:
+    - name: backend_bucket_full
+      prefixed_vars:
+        backend_bucket_name: image-backend-bucket-full
+        bucket_name: image-store-bucket-full
+      exclude_docs: true
+  - name: backend_bucket_security_policy
+    primary_resource_id: image_backend
+    steps:
+    - name: backend_bucket_security_policy
+      prefixed_vars:
+        backend_bucket_name: image-backend-bucket
+        bucket_name: image-store-bucket
+    tgc_test_ignore_in_asset:
+    - RESOURCE.cdnPolicy.signedUrlCacheMaxAgeSec
+  - name: backend_bucket_query_string_whitelist
+    primary_resource_id: image_backend
+    steps:
+    - name: backend_bucket_query_string_whitelist
+      prefixed_vars:
+        backend_bucket_name: image-backend-bucket
+  - name: backend_bucket_include_http_headers
+    primary_resource_id: image_backend
+    steps:
+    - name: backend_bucket_include_http_headers
+      prefixed_vars:
+        backend_bucket_name: image-backend-bucket
+  - name: external_cdn_lb_with_backend_bucket
+    primary_resource_id: default
+    steps:
+    - name: external_cdn_lb_with_backend_bucket
+      prefixed_vars:
+        404_page: 404-page
+        cat_backend_bucket: cat-backend-bucket
+        example_ip: example-ip
+        http_lb: http-lb
+        http_lb_forwarding_rule: http-lb-forwarding-rule
+        http_lb_proxy: http-lb-proxy
+        index_page: index-page
+        my_bucket: my-bucket
+        test_object: test-object
+      exclude_docs: true
+  - name: backend_bucket_bypass_cache
+    primary_resource_id: image_backend
+    steps:
+    - name: backend_bucket_bypass_cache
+      prefixed_vars:
+        backend_bucket_name: image-backend-bucket
+        bucket_name: image-store-bucket
+      exclude_docs: true
+  - name: backend_bucket_coalescing
+    primary_resource_id: image_backend
+    steps:
+    - name: backend_bucket_coalescing
+      prefixed_vars:
+        backend_bucket_name: image-backend-bucket
+        bucket_name: image-store-bucket
+      exclude_docs: true
+  - name: backend_bucket_global_ilb
     skip_vcr: true
+    primary_resource_id: global-ilb-backend
+    steps:
+    - name: backend_bucket_global_ilb
+      prefixed_vars:
+        backend_bucket_name: global-ilb-backend-bucket
+        bucket_name: global-ilb-bucket
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
 parameters:
 properties:
   - name: 'bucketName'

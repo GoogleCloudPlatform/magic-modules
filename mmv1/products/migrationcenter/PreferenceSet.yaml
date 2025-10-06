@@ -41,15 +41,19 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-examples:
-  - name: 'preference_set_basic'
-    primary_resource_id: 'default'
-    vars:
-      set_name: 'preference-set-test'
-  - name: 'preference_set_full'
-    primary_resource_id: 'default'
-    vars:
-      set_name: 'preference-set-test'
+samples:
+  - name: preference_set_basic
+    primary_resource_id: default
+    steps:
+    - name: preference_set_basic
+      prefixed_vars:
+        set_name: preference-set-test
+  - name: preference_set_full
+    primary_resource_id: default
+    steps:
+    - name: preference_set_full
+      prefixed_vars:
+        set_name: preference-set-test
 parameters:
   - name: 'location'
     type: String

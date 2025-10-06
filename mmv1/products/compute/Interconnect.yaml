@@ -39,21 +39,25 @@ async:
 custom_code:
   constants: 'templates/terraform/constants/interconnect.go.tmpl'
   post_create: 'templates/terraform/post_create/labels.tmpl'
-examples:
-  - name: 'compute_interconnect_basic'
-    primary_resource_id: 'example-interconnect'
-    vars:
-      interconnect_name: 'example-interconnect'
-      customer_name: 'example_customer'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
+samples:
+  - name: compute_interconnect_basic
+    primary_resource_id: example-interconnect
     exclude_test: true
-  - name: 'compute_interconnect_basic_test'
-    primary_resource_id: 'example-interconnect'
-    vars:
-      interconnect_name: 'example-interconnect'
-    exclude_docs: true
+    steps:
+    - name: compute_interconnect_basic
+      prefixed_vars:
+        customer_name: example_customer
+        deletion_protection: "true"
+        interconnect_name: example-interconnect
+      test_vars_overrides:
+        deletion_protection: "false"
+  - name: compute_interconnect_basic_test
+    primary_resource_id: example-interconnect
+    steps:
+    - name: compute_interconnect_basic_test
+      prefixed_vars:
+        interconnect_name: example-interconnect
+      exclude_docs: true
 parameters:
 properties:
   - name: 'description'

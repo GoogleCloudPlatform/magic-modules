@@ -36,33 +36,42 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-examples:
-  - name: 'vertex_ai_index_endpoint'
-    primary_resource_id: 'index_endpoint'
-    vars:
-      address_name: 'address-name'
-      network_name: 'network-name'
+samples:
+  - name: vertex_ai_index_endpoint
+    primary_resource_id: index_endpoint
     exclude_test: true
-  - name: 'vertex_ai_index_endpoint_test'
-    primary_resource_id: 'index_endpoint'
-    vars:
-      network_name: 'network-name'
-      kms_key_name: 'kms-name'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-    exclude_docs: true
-  - name: 'vertex_ai_index_endpoint_with_psc'
-    primary_resource_id: 'index_endpoint'
-  - name: 'vertex_ai_index_endpoint_with_false_psc'
-    primary_resource_id: 'index_endpoint'
-    # It's not distinguishable if the psc is false or not set, so we need to skip the test.
-    exclude_import_test: true
-    exclude_docs: true
-  - name: 'vertex_ai_index_endpoint_with_public_endpoint'
-    primary_resource_id: 'index_endpoint'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "vertex-ai-index-endpoint")'
+    steps:
+    - name: vertex_ai_index_endpoint
+      prefixed_vars:
+        address_name: address-name
+        network_name: network-name
+  - name: vertex_ai_index_endpoint_test
+    primary_resource_id: index_endpoint
+    steps:
+    - name: vertex_ai_index_endpoint_test
+      prefixed_vars:
+        kms_key_name: kms-name
+        network_name: network-name
+      test_vars_overrides:
+        kms_key_name: acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+        network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")
+      exclude_docs: true
+  - name: vertex_ai_index_endpoint_with_psc
+    primary_resource_id: index_endpoint
+    steps:
+    - name: vertex_ai_index_endpoint_with_psc
+  - name: vertex_ai_index_endpoint_with_false_psc
+    primary_resource_id: index_endpoint
+    steps:
+    - name: vertex_ai_index_endpoint_with_false_psc
+      exclude_import_test: true
+      exclude_docs: true
+  - name: vertex_ai_index_endpoint_with_public_endpoint
+    primary_resource_id: index_endpoint
+    steps:
+    - name: vertex_ai_index_endpoint_with_public_endpoint
+      test_vars_overrides:
+        network_name: acctest.BootstrapSharedTestNetwork(t, "vertex-ai-index-endpoint")
 parameters:
   - name: 'region'
     type: String

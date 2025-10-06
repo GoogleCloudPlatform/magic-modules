@@ -45,9 +45,11 @@ custom_code:
   pre_update: 'templates/terraform/pre_create/compute_instance_settings_fingerprint.go.tmpl'
   custom_delete: 'templates/terraform/custom_delete/clear_instance_settings.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
-examples:
-  - name: 'instance_settings_basic'
-    primary_resource_id: 'gce_instance_settings'
+samples:
+  - name: instance_settings_basic
+    primary_resource_id: gce_instance_settings
+    steps:
+    - name: instance_settings_basic
 parameters:
   - name: 'zone'
     type: ResourceRef

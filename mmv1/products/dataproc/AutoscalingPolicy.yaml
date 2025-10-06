@@ -37,17 +37,21 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}'
     - '{{policy_id}}'
 custom_code:
-examples:
-  - name: 'dataproc_autoscaling_policy_basic'
-    primary_resource_id: 'basic'
-    primary_resource_name: 'fmt.Sprintf("tf-test-dataproc-policy%s", context["random_suffix"])'
-    vars:
-      name: 'dataproc-policy'
-    exclude_docs: true
-  - name: 'dataproc_autoscaling_policy'
-    primary_resource_id: 'asp'
-    vars:
-      name: 'dataproc-policy'
+samples:
+  - name: dataproc_autoscaling_policy_basic
+    primary_resource_id: basic
+    primary_resource_name: fmt.Sprintf("tf-test-dataproc-policy%s", context["random_suffix"])
+    steps:
+    - name: dataproc_autoscaling_policy_basic
+      prefixed_vars:
+        name: dataproc-policy
+      exclude_docs: true
+  - name: dataproc_autoscaling_policy
+    primary_resource_id: asp
+    steps:
+    - name: dataproc_autoscaling_policy
+      prefixed_vars:
+        name: dataproc-policy
 parameters:
   - name: 'location'
     type: String

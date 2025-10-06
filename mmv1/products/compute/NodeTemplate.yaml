@@ -39,23 +39,31 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
-examples:
-  - name: 'node_template_basic'
-    primary_resource_id: 'template'
-    vars:
-      template_name: 'soletenant-tmpl'
-  - name: 'node_template_server_binding'
-    primary_resource_id: 'template'
-    vars:
-      template_name: 'soletenant-with-licenses'
-  - name: 'node_template_accelerators'
-    primary_resource_id: 'template'
-    vars:
-      template_name: 'soletenant-with-accelerators'
-  - name: 'node_template_disks'
-    primary_resource_id: 'template'
-    vars:
-      template_name: 'soletenant-with-disks'
+samples:
+  - name: node_template_basic
+    primary_resource_id: template
+    steps:
+    - name: node_template_basic
+      prefixed_vars:
+        template_name: soletenant-tmpl
+  - name: node_template_server_binding
+    primary_resource_id: template
+    steps:
+    - name: node_template_server_binding
+      prefixed_vars:
+        template_name: soletenant-with-licenses
+  - name: node_template_accelerators
+    primary_resource_id: template
+    steps:
+    - name: node_template_accelerators
+      prefixed_vars:
+        template_name: soletenant-with-accelerators
+  - name: node_template_disks
+    primary_resource_id: template
+    steps:
+    - name: node_template_disks
+      prefixed_vars:
+        template_name: soletenant-with-disks
 parameters:
   - name: 'region'
     type: ResourceRef

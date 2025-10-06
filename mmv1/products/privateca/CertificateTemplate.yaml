@@ -46,17 +46,21 @@ iam_policy:
   example_config_body: 'templates/terraform/iam/example_config_body/privateca_certificate_template.tf.tmpl'
 custom_code:
 legacy_long_form_project: true
-examples:
-  - name: 'privateca_template_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-template%s", context["random_suffix"])'
-    vars:
-      name: 'my-template'
-  - name: 'privateca_template_zero_max_issuer_path_length_null_ca'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-template%s", context["random_suffix"])'
-    vars:
-      name: 'my-template'
+samples:
+  - name: privateca_template_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-my-template%s", context["random_suffix"])
+    steps:
+    - name: privateca_template_basic
+      prefixed_vars:
+        name: my-template
+  - name: privateca_template_zero_max_issuer_path_length_null_ca
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-my-template%s", context["random_suffix"])
+    steps:
+    - name: privateca_template_zero_max_issuer_path_length_null_ca
+      prefixed_vars:
+        name: my-template
 parameters:
 properties:
   - name: 'name'

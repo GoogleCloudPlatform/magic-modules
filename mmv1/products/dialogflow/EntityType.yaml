@@ -34,12 +34,14 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project.go.tmpl'
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
-examples:
-  - name: 'dialogflow_entity_type_basic'
-    primary_resource_id: 'basic_entity_type'
-    vars:
-      entity_type_name: 'basic-entity-type'
+samples:
+  - name: dialogflow_entity_type_basic
+    primary_resource_id: basic_entity_type
     exclude_test: true
+    steps:
+    - name: dialogflow_entity_type_basic
+      prefixed_vars:
+        entity_type_name: basic-entity-type
 parameters:
 properties:
   - name: 'name'

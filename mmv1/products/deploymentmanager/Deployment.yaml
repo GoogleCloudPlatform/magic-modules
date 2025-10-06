@@ -61,19 +61,23 @@ custom_code:
   post_create_failure: 'templates/terraform/post_create_failure/delete_on_failure.go.tmpl'
 custom_diff:
   - 'customDiffDeploymentManagerDeployment'
-examples:
-  - name: 'deployment_manager_deployment_basic'
-    primary_resource_id: 'deployment'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-deployment-%s", context["random_suffix"])'
-    vars:
-      deployment_name: 'my-deployment'
+samples:
+  - name: deployment_manager_deployment_basic
+    primary_resource_id: deployment
+    primary_resource_name: fmt.Sprintf("tf-test-my-deployment-%s", context["random_suffix"])
     exclude_test: true
-  - name: 'deployment_manager_deployment_imports'
-    primary_resource_id: 'deployment'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-deployment-%s", context["random_suffix"])'
-    vars:
-      deployment_name: 'my-deployment'
+    steps:
+    - name: deployment_manager_deployment_basic
+      prefixed_vars:
+        deployment_name: my-deployment
+  - name: deployment_manager_deployment_imports
+    primary_resource_id: deployment
+    primary_resource_name: fmt.Sprintf("tf-test-my-deployment-%s", context["random_suffix"])
     exclude_test: true
+    steps:
+    - name: deployment_manager_deployment_imports
+      prefixed_vars:
+        deployment_name: my-deployment
 parameters:
   # These properties are query parameters given on create/update/delete.
   # They should be tracked and updatable.

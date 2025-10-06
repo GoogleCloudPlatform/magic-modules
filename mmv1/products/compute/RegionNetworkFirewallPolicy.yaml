@@ -33,16 +33,20 @@ async:
     resource_inside_response: false
 custom_code:
 legacy_long_form_project: true
-examples:
-  - name: 'region_network_firewall_policy_full'
-    primary_resource_id: 'policy'
-    vars:
-      policy_name: 'tf-test-policy'
-  - name: 'region_network_firewall_policy_roce'
-    primary_resource_id: 'policy'
+samples:
+  - name: region_network_firewall_policy_full
+    primary_resource_id: policy
+    steps:
+    - name: region_network_firewall_policy_full
+      prefixed_vars:
+        policy_name: tf-test-policy
+  - name: region_network_firewall_policy_roce
     min_version: beta
-    vars:
-      policy_name: 'rnf-policy'
+    primary_resource_id: policy
+    steps:
+    - name: region_network_firewall_policy_roce
+      prefixed_vars:
+        policy_name: rnf-policy
 parameters:
   - name: 'region'
     type: String

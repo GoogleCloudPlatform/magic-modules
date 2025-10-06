@@ -56,18 +56,21 @@ custom_code:
 # Using a handwritten sweeper because of pre_delete.
 exclude_sweeper: true
 include_in_tgc_next_DO_NOT_USE: true
-examples:
-  - name: 'kms_autokey_config_all'
-    primary_resource_id: 'example-autokeyconfig'
-    # test depends upon google_project_service_identity service which is still in beta, so we need to keep test limited to beta
-    min_version: 'beta'
-    vars:
-      folder_name: 'my-folder'
-      key_project_name: 'key-proj'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    external_providers: ["random", "time"]
+samples:
+  - name: kms_autokey_config_all
+    external_providers:
+    - random
+    - time
+    min_version: beta
+    primary_resource_id: example-autokeyconfig
+    steps:
+    - name: kms_autokey_config_all
+      prefixed_vars:
+        folder_name: my-folder
+        key_project_name: key-proj
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
 parameters:
   - name: 'folder'
     type: String

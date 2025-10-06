@@ -42,12 +42,14 @@ custom_code:
   post_update: 'templates/terraform/post_create/org_security_policy_rule.go.tmpl'
     # TODO: Remove once b/154369201 is closed.
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
-examples:
-  - name: 'organization_security_policy_rule_basic'
-    primary_resource_id: 'policy'
-    min_version: 'beta'
-    test_env_vars:
-      org_id: 'ORG_ID'
+samples:
+  - name: organization_security_policy_rule_basic
+    min_version: beta
+    primary_resource_id: policy
+    steps:
+    - name: organization_security_policy_rule_basic
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
   - name: 'policyId'
     type: String

@@ -38,20 +38,22 @@ timeouts:
 identity:
   - debugTokenId
 custom_code:
-examples:
-  - name: 'firebase_app_check_debug_token_basic'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      display_name: 'Debug Token'
-      token: '00000000-AAAA-BBBB-CCCC-000000000000'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      # Don't add prefix. This string is a random UUID4
-      'token': '"5E728315-E121-467F-BCA1-1FE71130BB98"'
-    # Need the time_sleep resource
-    external_providers: ["random", "time"]
+samples:
+  - name: firebase_app_check_debug_token_basic
+    external_providers:
+    - random
+    - time
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: firebase_app_check_debug_token_basic
+      prefixed_vars:
+        display_name: Debug Token
+        token: 00000000-AAAA-BBBB-CCCC-000000000000
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        token: '"5E728315-E121-467F-BCA1-1FE71130BB98"'
 parameters:
   - name: 'app_id'
     type: String

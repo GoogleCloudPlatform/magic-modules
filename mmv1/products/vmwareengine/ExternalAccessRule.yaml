@@ -43,30 +43,32 @@ async:
 custom_code:
 # There is a handwritten sweeper that provides a list of locations to sweep
 exclude_sweeper: true
-examples:
-  - name: 'vmware_engine_external_access_rule_basic'
-    primary_resource_id: 'vmw-engine-external-access-rule'
-    vars:
-      name: 'sample-external-access-rule'
-      network_id: 'sample-nw'
-      network_policy_id: 'sample-np'
-    test_env_vars:
-      region: 'REGION'
- # update tests will take care of create and update. The test id dependent on PC creation, which is expensive and requires node reservation.
+samples:
+  - name: vmware_engine_external_access_rule_basic
+    primary_resource_id: vmw-engine-external-access-rule
     exclude_test: true
-  - name: 'vmware_engine_external_access_rule_full'
-    primary_resource_id: 'vmw-engine-external-access-rule'
-    vars:
-      name: 'sample-external-access-rule'
-      network_id: 'sample-nw'
-      network_policy_id: 'sample-np'
-      private_cloud_id: 'sample-pc'
-      management_cluster_id: 'sample-mgmt-cluster'
-      external_address_id: 'sample-ea'
-    test_env_vars:
-      region: 'REGION'
- # update tests will take care of create and update. The test id dependent on PC creation, which is expensive and requires node reservation.
+    steps:
+    - name: vmware_engine_external_access_rule_basic
+      prefixed_vars:
+        name: sample-external-access-rule
+        network_id: sample-nw
+        network_policy_id: sample-np
+      test_env_vars:
+        region: REGION
+  - name: vmware_engine_external_access_rule_full
+    primary_resource_id: vmw-engine-external-access-rule
     exclude_test: true
+    steps:
+    - name: vmware_engine_external_access_rule_full
+      prefixed_vars:
+        external_address_id: sample-ea
+        management_cluster_id: sample-mgmt-cluster
+        name: sample-external-access-rule
+        network_id: sample-nw
+        network_policy_id: sample-np
+        private_cloud_id: sample-pc
+      test_env_vars:
+        region: REGION
 parameters:
   - name: 'parent'
     type: String

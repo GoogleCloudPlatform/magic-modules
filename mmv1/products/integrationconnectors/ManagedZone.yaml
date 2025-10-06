@@ -42,16 +42,17 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-examples:
-  - name: 'integration_connectors_managed_zone'
-    primary_resource_id: 'testmanagedzone'
-    vars:
-      managed_zone_name: 'test'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-      # Resource creation race
+samples:
+  - name: integration_connectors_managed_zone
     skip_vcr: true
+    primary_resource_id: testmanagedzone
+    steps:
+    - name: integration_connectors_managed_zone
+      prefixed_vars:
+        managed_zone_name: test
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
 parameters:
   - name: 'name'
     type: String

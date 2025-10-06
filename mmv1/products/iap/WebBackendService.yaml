@@ -38,13 +38,15 @@ iam_policy:
   example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
 exclude_tgc: true
-examples:
-  - name: 'backend_service_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-backend-service%s", context["random_suffix"])'
-    vars:
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'health-check'
+samples:
+  - name: backend_service_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-backend-service%s", context["random_suffix"])
+    steps:
+    - name: backend_service_basic
+      prefixed_vars:
+        backend_service_name: backend-service
+        http_health_check_name: health-check
 parameters:
 properties:
   - name: 'name'

@@ -56,43 +56,51 @@ sweeper:
     - region: "us-south1"
     - region: "us-west1"
     - region: "us-west2"
-examples:
-  - name: 'network_services_gateway_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-gateway'
-  - name: 'network_services_gateway_advanced'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-gateway'
-  - name: 'network_services_gateway_secure_web_proxy'
-    primary_resource_id: 'default'
-    vars:
-      certificate_name: 'my-certificate'
-      network_name: 'my-network'
-      subnetwork_name: 'my-subnetwork-name'
-      proxy_only_subnetwork_name: 'my-proxy-only-subnetwork'
-      policy_name: 'my-policy-name'
-      policy_rule_name: 'my-policyrule-name'
-      gateway_name_1: 'my-gateway1'
-      scope_1: 'my-default-scope1'
-    ignore_read_extra:
-      - 'delete_swg_autogen_router_on_destroy'
-  - name: 'network_services_gateway_multiple_swp_same_network'
-    primary_resource_id: 'default'
-    vars:
-      certificate_name: 'my-certificate'
-      network_name: 'my-network'
-      subnetwork_name: 'my-subnetwork-name'
-      proxy_only_subnetwork_name: 'my-proxy-only-subnetwork'
-      policy_name: 'my-policy-name'
-      policy_rule_name: 'my-policyrule-name'
-      gateway_name_1: 'my-gateway1'
-      gateway_name_2: 'my-gateway2'
-      scope_1: 'my-default-scope1'
-      scope_2: 'my-default-scope2'
-    ignore_read_extra:
-      - 'delete_swg_autogen_router_on_destroy'
+samples:
+  - name: network_services_gateway_basic
+    primary_resource_id: default
+    steps:
+    - name: network_services_gateway_basic
+      prefixed_vars:
+        resource_name: my-gateway
+  - name: network_services_gateway_advanced
+    primary_resource_id: default
+    steps:
+    - name: network_services_gateway_advanced
+      prefixed_vars:
+        resource_name: my-gateway
+  - name: network_services_gateway_secure_web_proxy
+    primary_resource_id: default
+    steps:
+    - name: network_services_gateway_secure_web_proxy
+      prefixed_vars:
+        certificate_name: my-certificate
+        gateway_name_1: my-gateway1
+        network_name: my-network
+        policy_name: my-policy-name
+        policy_rule_name: my-policyrule-name
+        proxy_only_subnetwork_name: my-proxy-only-subnetwork
+        scope_1: my-default-scope1
+        subnetwork_name: my-subnetwork-name
+      ignore_read_extra:
+      - delete_swg_autogen_router_on_destroy
+  - name: network_services_gateway_multiple_swp_same_network
+    primary_resource_id: default
+    steps:
+    - name: network_services_gateway_multiple_swp_same_network
+      prefixed_vars:
+        certificate_name: my-certificate
+        gateway_name_1: my-gateway1
+        gateway_name_2: my-gateway2
+        network_name: my-network
+        policy_name: my-policy-name
+        policy_rule_name: my-policyrule-name
+        proxy_only_subnetwork_name: my-proxy-only-subnetwork
+        scope_1: my-default-scope1
+        scope_2: my-default-scope2
+        subnetwork_name: my-subnetwork-name
+      ignore_read_extra:
+      - delete_swg_autogen_router_on_destroy
 virtual_fields:
   - name: 'delete_swg_autogen_router_on_destroy'
     description: |

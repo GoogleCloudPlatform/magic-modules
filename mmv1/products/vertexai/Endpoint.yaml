@@ -49,25 +49,30 @@ iam_policy:
     - '{{name}}'
   min_version: 'beta'
 custom_code:
-examples:
-  - name: 'vertex_ai_endpoint_network'
-    primary_resource_id: 'endpoint'
-    vars:
-      name: 'vertex_ai_endpoint'
-      project: 'vertex-ai'
-      endpoint_name: 'endpoint-name'
-      address_name: 'address-name'
-      kms_key_name: 'kms-name'
-      network_name: 'network-name'
-      dataset_id: 'some_dataset'
-      # Test is covered by handwritten test to include an update.
+samples:
+  - name: vertex_ai_endpoint_network
+    primary_resource_id: endpoint
     exclude_test: true
-  - name: 'vertex_ai_endpoint_private_service_connect'
-    primary_resource_id: 'endpoint'
-    primary_resource_name: 'fmt.Sprintf("endpoint-name%s", context["random_suffix"])'
-  - name: 'vertex_ai_endpoint_dedicated_endpoint'
-    primary_resource_id: 'endpoint'
-    primary_resource_name: 'fmt.Sprintf("endpoint-name%s", context["random_suffix"])'
+    steps:
+    - name: vertex_ai_endpoint_network
+      prefixed_vars:
+        address_name: address-name
+        dataset_id: some_dataset
+        endpoint_name: endpoint-name
+        kms_key_name: kms-name
+        name: vertex_ai_endpoint
+        network_name: network-name
+        project: vertex-ai
+  - name: vertex_ai_endpoint_private_service_connect
+    primary_resource_id: endpoint
+    primary_resource_name: fmt.Sprintf("endpoint-name%s", context["random_suffix"])
+    steps:
+    - name: vertex_ai_endpoint_private_service_connect
+  - name: vertex_ai_endpoint_dedicated_endpoint
+    primary_resource_id: endpoint
+    primary_resource_name: fmt.Sprintf("endpoint-name%s", context["random_suffix"])
+    steps:
+    - name: vertex_ai_endpoint_dedicated_endpoint
 parameters:
   - name: 'location'
     type: String

@@ -46,16 +46,20 @@ iam_policy:
 custom_code:
   encoder: 'templates/terraform/encoders/containeranalysis_attestation_field_name.go.tmpl'
   decoder: 'templates/terraform/decoders/containeranalysis_attestation_field_name.go.tmpl'
-examples:
-  - name: 'container_analysis_note_basic'
-    primary_resource_id: 'note'
-    primary_resource_name: 'fmt.Sprintf("tf-test-attestor-note%s", context["random_suffix"])'
-    vars:
-      note_name: 'attestor-note'
-  - name: 'container_analysis_note_attestation_full'
-    primary_resource_id: 'note'
-    vars:
-      note_name: 'attestor-note'
+samples:
+  - name: container_analysis_note_basic
+    primary_resource_id: note
+    primary_resource_name: fmt.Sprintf("tf-test-attestor-note%s", context["random_suffix"])
+    steps:
+    - name: container_analysis_note_basic
+      prefixed_vars:
+        note_name: attestor-note
+  - name: container_analysis_note_attestation_full
+    primary_resource_id: note
+    steps:
+    - name: container_analysis_note_attestation_full
+      prefixed_vars:
+        note_name: attestor-note
 parameters:
 properties:
   - name: 'name'

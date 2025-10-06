@@ -37,18 +37,22 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'scc_v2_folder_mute_config_basic'
-    primary_resource_id: 'default'
-    vars:
-      mute_config_id: 'my-config'
-      folder_display_name: 'folder-name'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    test_vars_overrides:
-      'sleep': 'true'
-    external_providers: ["random", "time"]
+samples:
+  - name: scc_v2_folder_mute_config_basic
+    external_providers:
+    - random
+    - time
+    primary_resource_id: default
     exclude_test: true
+    steps:
+    - name: scc_v2_folder_mute_config_basic
+      prefixed_vars:
+        folder_display_name: folder-name
+        mute_config_id: my-config
+      test_env_vars:
+        org_id: ORG_ID
+      test_vars_overrides:
+        sleep: "true"
 parameters:
   - name: 'folder'
     type: String

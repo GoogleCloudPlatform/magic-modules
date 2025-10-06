@@ -35,21 +35,25 @@ iam_policy:
 custom_code:
   constants: 'templates/terraform/constants/binaryauthorization_attestor.go.tmpl'
 include_in_tgc_next_DO_NOT_USE: true
-examples:
-  - name: 'binary_authorization_attestor_basic'
-    primary_resource_id: 'attestor'
-    primary_resource_name: 'fmt.Sprintf("tf-test-test-attestor%s", context["random_suffix"])'
-    vars:
-      attestor_name: 'test-attestor'
-      note_name: 'test-attestor-note'
-  - name: 'binary_authorization_attestor_kms'
-    primary_resource_id: 'attestor'
-    vars:
-      attestor_name: 'test-attestor'
-      note_name: 'test-attestor-note'
-      key_name: 'test-attestor-key'
-      keyring_name: 'test-attestor-key-ring'
+samples:
+  - name: binary_authorization_attestor_basic
+    primary_resource_id: attestor
+    primary_resource_name: fmt.Sprintf("tf-test-test-attestor%s", context["random_suffix"])
+    steps:
+    - name: binary_authorization_attestor_basic
+      prefixed_vars:
+        attestor_name: test-attestor
+        note_name: test-attestor-note
+  - name: binary_authorization_attestor_kms
+    primary_resource_id: attestor
     exclude_test: true
+    steps:
+    - name: binary_authorization_attestor_kms
+      prefixed_vars:
+        attestor_name: test-attestor
+        key_name: test-attestor-key
+        keyring_name: test-attestor-key-ring
+        note_name: test-attestor-note
 parameters:
 properties:
   - name: 'name'

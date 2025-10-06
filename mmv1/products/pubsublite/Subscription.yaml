@@ -32,12 +32,14 @@ timeouts:
   delete_minutes: 20
 custom_code:
   encoder: 'templates/terraform/encoders/pubsub_lite.tmpl'
-examples:
-  - name: 'pubsub_lite_subscription_basic'
-    primary_resource_id: 'example'
-    vars:
-      topic_name: 'example-topic'
-      subscription_name: 'example-subscription'
+samples:
+  - name: pubsub_lite_subscription_basic
+    primary_resource_id: example
+    steps:
+    - name: pubsub_lite_subscription_basic
+      prefixed_vars:
+        subscription_name: example-subscription
+        topic_name: example-topic
 parameters:
   - name: 'region'
     type: String

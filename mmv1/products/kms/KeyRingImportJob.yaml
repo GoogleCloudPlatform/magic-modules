@@ -42,13 +42,15 @@ timeouts:
   delete_minutes: 20
 custom_code:
   custom_import: 'templates/terraform/custom_import/kms_key_ring_import_job.go.tmpl'
-examples:
-  - name: 'kms_key_ring_import_job'
-    primary_resource_id: 'import-job'
-    vars:
-      keyring: 'keyring-example'
-      cryptokey: 'cryptokey-example'
+samples:
+  - name: kms_key_ring_import_job
+    primary_resource_id: import-job
     exclude_test: true
+    steps:
+    - name: kms_key_ring_import_job
+      prefixed_vars:
+        cryptokey: cryptokey-example
+        keyring: keyring-example
 parameters:
   - name: 'keyRing'
     type: String

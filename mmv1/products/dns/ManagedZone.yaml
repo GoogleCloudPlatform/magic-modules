@@ -40,85 +40,107 @@ iam_policy:
 custom_code:
   update_encoder: 'templates/terraform/update_encoder/managed_dns_zone.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/managed_dns_zone.go.tmpl'
-examples:
-  - name: 'dns_managed_zone_quickstart'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-example-zone-googlecloudexample%s", context["random_suffix"])'
-    vars:
-      dns_compute_instance: 'dns-compute-instance'
-      allow_http_traffic: 'allow-http-traffic'
-      example_zone_googlecloudexample: 'example-zone-googlecloudexample'
-      dns_name: 'googlecloudexample.net.'
-    test_vars_overrides:
-      'dns_name': '"m-z.gcp.tfacc.hashicorptest.com."'
-    ignore_read_extra:
-      - 'force_destroy'
-    exclude_docs: true
-  - name: 'dns_record_set_basic'
-    primary_resource_id: 'parent-zone'
-    vars:
-      sample_zone: 'sample-zone'
-    exclude_docs: true
-  - name: 'dns_managed_zone_basic'
-    primary_resource_id: 'example-zone'
-    external_providers: ["random", "time"]
-      # Randomness from random provider
+samples:
+  - name: dns_managed_zone_quickstart
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-example-zone-googlecloudexample%s",
+      context["random_suffix"])
+    steps:
+    - name: dns_managed_zone_quickstart
+      prefixed_vars:
+        allow_http_traffic: allow-http-traffic
+        dns_compute_instance: dns-compute-instance
+        dns_name: googlecloudexample.net.
+        example_zone_googlecloudexample: example-zone-googlecloudexample
+      test_vars_overrides:
+        dns_name: '"m-z.gcp.tfacc.hashicorptest.com."'
+      ignore_read_extra:
+      - force_destroy
+      exclude_docs: true
+  - name: dns_record_set_basic
+    primary_resource_id: parent-zone
+    steps:
+    - name: dns_record_set_basic
+      prefixed_vars:
+        sample_zone: sample-zone
+      exclude_docs: true
+  - name: dns_managed_zone_basic
     skip_vcr: true
-  - name: 'dns_managed_zone_private'
-    primary_resource_id: 'private-zone'
-    vars:
-      zone_name: 'private-zone'
-      network_1_name: 'network-1'
-      network_2_name: 'network-2'
-  - name: 'dns_managed_zone_private_multiproject'
-    primary_resource_id: 'private-zone'
-    vars:
-      zone_name: 'private-zone'
-      network_1_name: 'network-1'
-      network_2_name: 'network-2'
-      project_1_name: 'project-1'
-      project_2_name: 'project-2'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-  - name: 'dns_managed_zone_private_forwarding'
-    primary_resource_id: 'private-zone'
-    vars:
-      zone_name: 'private-zone'
-      network_1_name: 'network-1'
-      network_2_name: 'network-2'
+    external_providers:
+    - random
+    - time
+    primary_resource_id: example-zone
+    steps:
+    - name: dns_managed_zone_basic
+  - name: dns_managed_zone_private
+    primary_resource_id: private-zone
+    steps:
+    - name: dns_managed_zone_private
+      prefixed_vars:
+        network_1_name: network-1
+        network_2_name: network-2
+        zone_name: private-zone
+  - name: dns_managed_zone_private_multiproject
+    primary_resource_id: private-zone
+    steps:
+    - name: dns_managed_zone_private_multiproject
+      prefixed_vars:
+        network_1_name: network-1
+        network_2_name: network-2
+        project_1_name: project-1
+        project_2_name: project-2
+        zone_name: private-zone
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
+  - name: dns_managed_zone_private_forwarding
+    primary_resource_id: private-zone
     exclude_test: true
-  - name: 'dns_managed_zone_private_gke'
-    primary_resource_id: 'private-zone-gke'
-    vars:
-      zone_name: 'private-zone'
-      network_1_name: 'network-1'
-      cluster_1_name: 'cluster-1'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'dns_managed_zone_private_peering'
-    primary_resource_id: 'peering-zone'
-    vars:
-      zone_name: 'peering-zone'
-      network_source_name: 'network-source'
-      network_target_name: 'network-target'
-  - name: 'dns_managed_zone_service_directory'
-    primary_resource_id: 'sd-zone'
-    min_version: 'beta'
-    vars:
-      zone_name: 'peering-zone'
-      network_name: 'network'
-  - name: 'dns_managed_zone_cloud_logging'
-    primary_resource_id: 'cloud-logging-enabled-zone'
-    vars:
-      zone_name: 'cloud-logging-enabled-zone'
-      dns_name: 'services.example.com.'
-    test_vars_overrides:
-      'dns_name': '"services.example.com-" + acctest.RandString(t, 10) + "."'
+    steps:
+    - name: dns_managed_zone_private_forwarding
+      prefixed_vars:
+        network_1_name: network-1
+        network_2_name: network-2
+        zone_name: private-zone
+  - name: dns_managed_zone_private_gke
+    primary_resource_id: private-zone-gke
+    steps:
+    - name: dns_managed_zone_private_gke
+      prefixed_vars:
+        cluster_1_name: cluster-1
+        deletion_protection: "true"
+        network_1_name: network-1
+        zone_name: private-zone
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: dns_managed_zone_private_peering
+    primary_resource_id: peering-zone
+    steps:
+    - name: dns_managed_zone_private_peering
+      prefixed_vars:
+        network_source_name: network-source
+        network_target_name: network-target
+        zone_name: peering-zone
+  - name: dns_managed_zone_service_directory
+    min_version: beta
+    primary_resource_id: sd-zone
+    steps:
+    - name: dns_managed_zone_service_directory
+      prefixed_vars:
+        network_name: network
+        zone_name: peering-zone
+  - name: dns_managed_zone_cloud_logging
+    primary_resource_id: cloud-logging-enabled-zone
+    steps:
+    - name: dns_managed_zone_cloud_logging
+      prefixed_vars:
+        dns_name: services.example.com.
+        zone_name: cloud-logging-enabled-zone
+      test_vars_overrides:
+        dns_name: '"services.example.com-" + acctest.RandString(t, 10) + "."'
 virtual_fields:
   - name: 'force_destroy'
     description: 'Set this true to delete all records in the zone.'

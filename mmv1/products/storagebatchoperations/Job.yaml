@@ -36,15 +36,17 @@ description: |
   Storage Batch Operations (SBO) is a Cloud Storage management feature that offers a
   seamless experience to perform single batch operations on millions of GCS objects in a
   serverless manner.
-examples:
-  - name: 'storage_batch_operations'
-    config_path: 'templates/terraform/examples/storage_batch_operations_job.tf.tmpl'
-    primary_resource_id: 'tf-job'
-    vars:
-      bucket_name: 'tf-sample-bucket'
-      job_id: 'tf-job'
-    ignore_read_extra:
-      - 'delete_protection'
+samples:
+  - name: storage_batch_operations
+    primary_resource_id: tf-job
+    steps:
+    - name: storage_batch_operations
+      config_path: templates/terraform/examples/storage_batch_operations_job.tf.tmpl
+      prefixed_vars:
+        bucket_name: tf-sample-bucket
+        job_id: tf-job
+      ignore_read_extra:
+      - delete_protection
 custom_code:
   custom_update: 'templates/terraform/custom_update/storage_batch_operations_job.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/storage_batch_operations_job.go.tmpl'

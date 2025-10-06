@@ -30,25 +30,33 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'transcoder_job_template_basic'
-    primary_resource_id: 'default'
-    vars:
-      job_template_id: 'example-job-template'
-  - name: 'transcoder_job_template_overlays'
-    primary_resource_id: 'default'
-    vars:
-      job_template_id: 'example-job-template'
-  - name: 'transcoder_job_template_encryptions'
-    primary_resource_id: 'default'
-    vars:
-      job_template_id: 'example-job-template'
-      secret_manager_secret_id: 'transcoder-encryption-key'
-  - name: 'transcoder_job_template_pubsub'
-    primary_resource_id: 'default'
-    vars:
-      job_template_id: 'example-job-template'
-      pub_sub_topic_name: 'transcoder-notifications'
+samples:
+  - name: transcoder_job_template_basic
+    primary_resource_id: default
+    steps:
+    - name: transcoder_job_template_basic
+      prefixed_vars:
+        job_template_id: example-job-template
+  - name: transcoder_job_template_overlays
+    primary_resource_id: default
+    steps:
+    - name: transcoder_job_template_overlays
+      prefixed_vars:
+        job_template_id: example-job-template
+  - name: transcoder_job_template_encryptions
+    primary_resource_id: default
+    steps:
+    - name: transcoder_job_template_encryptions
+      prefixed_vars:
+        job_template_id: example-job-template
+        secret_manager_secret_id: transcoder-encryption-key
+  - name: transcoder_job_template_pubsub
+    primary_resource_id: default
+    steps:
+    - name: transcoder_job_template_pubsub
+      prefixed_vars:
+        job_template_id: example-job-template
+        pub_sub_topic_name: transcoder-notifications
 parameters:
   - name: 'jobTemplateId'
     type: String

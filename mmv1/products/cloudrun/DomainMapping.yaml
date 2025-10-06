@@ -49,13 +49,15 @@ error_retry_predicates:
   - 'transport_tpg.IsCloudRunCreationConflict'
 schema_version: 1
 state_upgraders: true
-examples:
-  - name: 'cloud_run_domain_mapping_basic'
-    primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-srv'
-    test_env_vars:
-      namespace: 'PROJECT_NAME'
+samples:
+  - name: cloud_run_domain_mapping_basic
+    primary_resource_id: default
+    steps:
+    - name: cloud_run_domain_mapping_basic
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-srv
+      test_env_vars:
+        namespace: PROJECT_NAME
 parameters:
   - name: 'location'
     type: String

@@ -42,15 +42,17 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'apigee_control_plane_access_basic_test'
-    primary_resource_id: 'apigee_control_plane_access'
-    vars:
-      account_id: 'my-account'
-      project_id: 'my-project'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
+samples:
+  - name: apigee_control_plane_access_basic_test
+    primary_resource_id: apigee_control_plane_access
+    steps:
+    - name: apigee_control_plane_access_basic_test
+      prefixed_vars:
+        account_id: my-account
+        project_id: my-project
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
 parameters:
   - name: 'name'
     type: String

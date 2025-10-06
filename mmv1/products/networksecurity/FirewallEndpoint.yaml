@@ -50,16 +50,17 @@ async:
     resource_inside_response: false
   include_project: true
 custom_code:
-examples:
-  - name: 'network_security_firewall_endpoint_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-firewall-endpoint'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      project: 'PROJECT_NAME'
- # update tests will take care of create and update. Firewall endpoint creation is too long.
+samples:
+  - name: network_security_firewall_endpoint_basic
+    primary_resource_id: default
     exclude_test: true
+    steps:
+    - name: network_security_firewall_endpoint_basic
+      prefixed_vars:
+        resource_name: my-firewall-endpoint
+      test_env_vars:
+        org_id: ORG_ID
+        project: PROJECT_NAME
 parameters:
   - name: 'name'
     type: String

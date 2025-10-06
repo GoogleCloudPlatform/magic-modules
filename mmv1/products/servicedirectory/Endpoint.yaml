@@ -35,22 +35,26 @@ timeouts:
 custom_code:
   custom_import: 'templates/terraform/custom_import/service_directory_endpoint.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'service_directory_endpoint_basic'
-    primary_resource_id: 'example'
-    min_version: 'beta'
-    vars:
-      service_id: 'example-service'
-      namespace_id: 'example-namespace'
-      endpoint_id: 'example-endpoint'
-  - name: 'service_directory_endpoint_with_network'
-    primary_resource_id: 'example'
-    min_version: 'beta'
-    vars:
-      service_id: 'example-service'
-      namespace_id: 'example-namespace'
-      endpoint_id: 'example-endpoint'
-      network_name: 'example-network'
+samples:
+  - name: service_directory_endpoint_basic
+    min_version: beta
+    primary_resource_id: example
+    steps:
+    - name: service_directory_endpoint_basic
+      prefixed_vars:
+        endpoint_id: example-endpoint
+        namespace_id: example-namespace
+        service_id: example-service
+  - name: service_directory_endpoint_with_network
+    min_version: beta
+    primary_resource_id: example
+    steps:
+    - name: service_directory_endpoint_with_network
+      prefixed_vars:
+        endpoint_id: example-endpoint
+        namespace_id: example-namespace
+        network_name: example-network
+        service_id: example-service
 parameters:
   - name: 'service'
     type: String

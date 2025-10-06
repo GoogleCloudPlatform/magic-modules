@@ -47,24 +47,30 @@ custom_code:
   constants: 'templates/terraform/constants/containerattached_cluster_diff.go.tmpl'
   pre_update: 'templates/terraform/pre_update/containerattached_update.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/container_attached_deletion_policy.go.tmpl'
-examples:
-  - name: 'container_attached_cluster_basic'
-    primary_resource_id: 'primary'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
-    vars:
-      name: 'basic'
-  - name: 'container_attached_cluster_full'
-    primary_resource_id: 'primary'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
-    vars:
-      name: 'basic'
-  - name: 'container_attached_cluster_ignore_errors'
-    primary_resource_id: 'primary'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
-    vars:
-      name: 'basic'
-    ignore_read_extra:
-      - 'deletion_policy'
+samples:
+  - name: container_attached_cluster_basic
+    primary_resource_id: primary
+    primary_resource_name: fmt.Sprintf("basic%s", context["random_suffix"])
+    steps:
+    - name: container_attached_cluster_basic
+      prefixed_vars:
+        name: basic
+  - name: container_attached_cluster_full
+    primary_resource_id: primary
+    primary_resource_name: fmt.Sprintf("basic%s", context["random_suffix"])
+    steps:
+    - name: container_attached_cluster_full
+      prefixed_vars:
+        name: basic
+  - name: container_attached_cluster_ignore_errors
+    primary_resource_id: primary
+    primary_resource_name: fmt.Sprintf("basic%s", context["random_suffix"])
+    steps:
+    - name: container_attached_cluster_ignore_errors
+      prefixed_vars:
+        name: basic
+      ignore_read_extra:
+      - deletion_policy
 virtual_fields:
   - name: 'deletion_policy'
     description: 'Policy to determine what flags to send on delete. Possible values: DELETE, DELETE_IGNORE_ERRORS'

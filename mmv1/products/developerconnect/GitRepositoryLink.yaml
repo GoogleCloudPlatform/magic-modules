@@ -39,17 +39,20 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-examples:
-  # These tests depend on secrets stored in a separate project, so we prefer not
-  # to show them in the docs.
-  - name: 'developer_connect_git_repository_link_github'
-    primary_resource_id: 'primary'
-    vars:
-      connection_name: 'my-connection'
-      git_repository_link_name: 'my-repository'
-    exclude_docs: true
-  - name: 'developer_connect_git_repository_link_github_doc'
+samples:
+  - name: developer_connect_git_repository_link_github
+    primary_resource_id: primary
+    steps:
+    - name: developer_connect_git_repository_link_github
+      prefixed_vars:
+        connection_name: my-connection
+        git_repository_link_name: my-repository
+      exclude_docs: true
+  - name: developer_connect_git_repository_link_github_doc
+    primary_resource_id: ""
     exclude_test: true
+    steps:
+    - name: developer_connect_git_repository_link_github_doc
 parameters:
   - name: 'location'
     type: String

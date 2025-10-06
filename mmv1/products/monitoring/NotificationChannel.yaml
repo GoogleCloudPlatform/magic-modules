@@ -58,17 +58,20 @@ custom_diff:
 error_retry_predicates:
 
   - 'transport_tpg.IsMonitoringConcurrentEditError'
-examples:
-  - name: 'notification_channel_basic'
-    primary_resource_id: 'basic'
-    vars:
-      display_name: 'Test Notification Channel'
-  - name: 'notification_channel_sensitive'
-    primary_resource_id: 'default'
-    vars:
-      display_name: 'Sensitive Notification Channel test'
-      # sensitive labels will fail the import verification step.
+samples:
+  - name: notification_channel_basic
+    primary_resource_id: basic
+    steps:
+    - name: notification_channel_basic
+      prefixed_vars:
+        display_name: Test Notification Channel
+  - name: notification_channel_sensitive
+    primary_resource_id: default
     exclude_test: true
+    steps:
+    - name: notification_channel_sensitive
+      prefixed_vars:
+        display_name: Sensitive Notification Channel test
 virtual_fields:
   - name: 'force_delete'
     description: |

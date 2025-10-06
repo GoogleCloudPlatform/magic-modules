@@ -37,22 +37,26 @@ custom_code:
 error_retry_predicates:
 
   - 'transport_tpg.HealthcareDatasetNotInitialized'
-examples:
-  - name: 'healthcare_dataset_basic'
-    primary_resource_id: 'default'
-    vars:
-      dataset_name: 'example-dataset'
-      location: 'us-central1'
-      time_zone: 'America/New_York'
-  - name: 'healthcare_dataset_cmek'
-    primary_resource_id: 'default'
+samples:
+  - name: healthcare_dataset_basic
+    primary_resource_id: default
+    steps:
+    - name: healthcare_dataset_basic
+      prefixed_vars:
+        dataset_name: example-dataset
+        location: us-central1
+        time_zone: America/New_York
+  - name: healthcare_dataset_cmek
+    primary_resource_id: default
     exclude_test: true
-    vars:
-      dataset_name: 'example-dataset'
-      location: 'us-central1'
-      time_zone: 'America/New_York'
-      key_name: 'example-key'
-      keyring_name: 'example-keyring'
+    steps:
+    - name: healthcare_dataset_cmek
+      prefixed_vars:
+        dataset_name: example-dataset
+        key_name: example-key
+        keyring_name: example-keyring
+        location: us-central1
+        time_zone: America/New_York
 parameters:
   - name: 'location'
     type: String

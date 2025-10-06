@@ -63,20 +63,24 @@ custom_code:
 sweeper:
   url_substitutions:
     - zone: "us-central1-a"
-examples:
-  - name: 'snapshot_basic'
-    primary_resource_id: 'snapshot'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-snapshot%s", context["random_suffix"])'
-    vars:
-      snapshot_name: 'my-snapshot'
-      disk_name: 'debian-disk'
-  - name: 'snapshot_chainname'
-    primary_resource_id: 'snapshot'
-    primary_resource_name: 'fmt.Sprintf("tf-test-snapshot-chainname%s", context["random_suffix"])'
-    vars:
-      snapshot_name: 'my-snapshot'
-      disk_name: 'debian-disk'
-      chain_name: 'snapshot-chain'
+samples:
+  - name: snapshot_basic
+    primary_resource_id: snapshot
+    primary_resource_name: fmt.Sprintf("tf-test-my-snapshot%s", context["random_suffix"])
+    steps:
+    - name: snapshot_basic
+      prefixed_vars:
+        disk_name: debian-disk
+        snapshot_name: my-snapshot
+  - name: snapshot_chainname
+    primary_resource_id: snapshot
+    primary_resource_name: fmt.Sprintf("tf-test-snapshot-chainname%s", context["random_suffix"])
+    steps:
+    - name: snapshot_chainname
+      prefixed_vars:
+        chain_name: snapshot-chain
+        disk_name: debian-disk
+        snapshot_name: my-snapshot
 parameters:
   - name: 'sourceDisk'
     type: ResourceRef

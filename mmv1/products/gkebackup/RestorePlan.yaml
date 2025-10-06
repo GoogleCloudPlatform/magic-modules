@@ -45,143 +45,170 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/restorePlans/{{name}}'
     - '{{name}}'
 custom_code:
-examples:
-  - name: 'gkebackup_restoreplan_all_namespaces'
-    primary_resource_id: 'all_ns'
-    primary_resource_name: 'fmt.Sprintf("tf-test-restore-all-ns%s", context["random_suffix"])'
-    vars:
-      name: 'restore-all-ns'
-      network_name: 'default'
-      subnetwork_name: 'default'
-      deletion_protection: 'true'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_restoreplan_rollback_namespace'
-    primary_resource_id: 'rollback_ns'
-    vars:
-      name: 'rollback-ns'
-      network_name: 'default'
-      subnetwork_name: 'default'
-      deletion_protection: 'true'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_restoreplan_protected_application'
-    primary_resource_id: 'rollback_app'
-    vars:
-      name: 'rollback-app'
-      network_name: 'default'
-      subnetwork_name: 'default'
-      deletion_protection: 'true'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_restoreplan_all_cluster_resources'
-    primary_resource_id: 'all_cluster_resources'
-    vars:
-      name: 'all-groupkinds'
-      network_name: 'default'
-      subnetwork_name: 'default'
-      deletion_protection: 'true'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_restoreplan_rename_namespace'
-    primary_resource_id: 'rename_ns'
-    vars:
-      name: 'rename-ns'
-      network_name: 'default'
-      subnetwork_name: 'default'
-      deletion_protection: 'true'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_restoreplan_second_transformation'
-    primary_resource_id: 'transform_rule'
-    vars:
-      name: 'transform-rule'
-      network_name: 'default'
-      subnetwork_name: 'default'
-      deletion_protection: 'true'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_restoreplan_gitops_mode'
-    primary_resource_id: 'gitops_mode'
-    vars:
-      name: 'gitops-mode'
-      network_name: 'default'
-      subnetwork_name: 'default'
-      deletion_protection: 'true'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_restoreplan_restore_order'
-    primary_resource_id: 'restore_order'
-    vars:
-      name: 'restore-order'
-      network_name: 'default'
-      subnetwork_name: 'default'
-      deletion_protection: 'true'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_restoreplan_volume_res'
-    primary_resource_id: 'volume_res'
-    vars:
-      name: 'volume-res'
-      network_name: 'default'
-      subnetwork_name: 'default'
-      deletion_protection: 'true'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
+samples:
+  - name: gkebackup_restoreplan_all_namespaces
+    primary_resource_id: all_ns
+    primary_resource_name: fmt.Sprintf("tf-test-restore-all-ns%s", context["random_suffix"])
+    steps:
+    - name: gkebackup_restoreplan_all_namespaces
+      prefixed_vars:
+        deletion_protection: "true"
+        name: restore-all-ns
+        network_name: default
+        subnetwork_name: default
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        deletion_protection: "false"
+        network_name: acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+        subnetwork_name: acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t,
+          "gke-cluster"))
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: gkebackup_restoreplan_rollback_namespace
+    primary_resource_id: rollback_ns
+    steps:
+    - name: gkebackup_restoreplan_rollback_namespace
+      prefixed_vars:
+        deletion_protection: "true"
+        name: rollback-ns
+        network_name: default
+        subnetwork_name: default
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        deletion_protection: "false"
+        network_name: acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+        subnetwork_name: acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t,
+          "gke-cluster"))
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: gkebackup_restoreplan_protected_application
+    primary_resource_id: rollback_app
+    steps:
+    - name: gkebackup_restoreplan_protected_application
+      prefixed_vars:
+        deletion_protection: "true"
+        name: rollback-app
+        network_name: default
+        subnetwork_name: default
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        deletion_protection: "false"
+        network_name: acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+        subnetwork_name: acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t,
+          "gke-cluster"))
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: gkebackup_restoreplan_all_cluster_resources
+    primary_resource_id: all_cluster_resources
+    steps:
+    - name: gkebackup_restoreplan_all_cluster_resources
+      prefixed_vars:
+        deletion_protection: "true"
+        name: all-groupkinds
+        network_name: default
+        subnetwork_name: default
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        deletion_protection: "false"
+        network_name: acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+        subnetwork_name: acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t,
+          "gke-cluster"))
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: gkebackup_restoreplan_rename_namespace
+    primary_resource_id: rename_ns
+    steps:
+    - name: gkebackup_restoreplan_rename_namespace
+      prefixed_vars:
+        deletion_protection: "true"
+        name: rename-ns
+        network_name: default
+        subnetwork_name: default
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        deletion_protection: "false"
+        network_name: acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+        subnetwork_name: acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t,
+          "gke-cluster"))
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: gkebackup_restoreplan_second_transformation
+    primary_resource_id: transform_rule
+    steps:
+    - name: gkebackup_restoreplan_second_transformation
+      prefixed_vars:
+        deletion_protection: "true"
+        name: transform-rule
+        network_name: default
+        subnetwork_name: default
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        deletion_protection: "false"
+        network_name: acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+        subnetwork_name: acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t,
+          "gke-cluster"))
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: gkebackup_restoreplan_gitops_mode
+    primary_resource_id: gitops_mode
+    steps:
+    - name: gkebackup_restoreplan_gitops_mode
+      prefixed_vars:
+        deletion_protection: "true"
+        name: gitops-mode
+        network_name: default
+        subnetwork_name: default
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        deletion_protection: "false"
+        network_name: acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+        subnetwork_name: acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t,
+          "gke-cluster"))
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: gkebackup_restoreplan_restore_order
+    primary_resource_id: restore_order
+    steps:
+    - name: gkebackup_restoreplan_restore_order
+      prefixed_vars:
+        deletion_protection: "true"
+        name: restore-order
+        network_name: default
+        subnetwork_name: default
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        deletion_protection: "false"
+        network_name: acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+        subnetwork_name: acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t,
+          "gke-cluster"))
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: gkebackup_restoreplan_volume_res
+    primary_resource_id: volume_res
+    steps:
+    - name: gkebackup_restoreplan_volume_res
+      prefixed_vars:
+        deletion_protection: "true"
+        name: volume-res
+        network_name: default
+        subnetwork_name: default
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        deletion_protection: "false"
+        network_name: acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+        subnetwork_name: acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t,
+          "gke-cluster"))
+      oics_vars_overrides:
+        deletion_protection: "false"
 parameters:
   - name: 'location'
     type: String

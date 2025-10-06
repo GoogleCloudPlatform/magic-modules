@@ -45,71 +45,83 @@ sweeper:
     - region: "us-central1"
     - region: "europe-west4"
     - region: "us-east1"
-examples:
-  - name: 'service_attachment_basic'
-    primary_resource_id: 'psc_ilb_service_attachment'
-    vars:
-      service_attachment_name: 'my-psc-ilb'
-      network_name: 'psc-ilb-network'
-      nat_subnetwork_name: 'psc-ilb-nat'
-      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
-      producer_health_check_name: 'producer-service-health-check'
-      producer_service_name: 'producer-service'
-      producer_forwarding_rule_name: 'producer-forwarding-rule'
-      consumer_address_name: 'psc-ilb-consumer-address'
-      consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
-  - name: 'service_attachment_explicit_projects'
-    primary_resource_id: 'psc_ilb_service_attachment'
-    vars:
-      service_attachment_name: 'my-psc-ilb'
-      network_name: 'psc-ilb-network'
-      nat_subnetwork_name: 'psc-ilb-nat'
-      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
-      producer_health_check_name: 'producer-service-health-check'
-      producer_service_name: 'producer-service'
-      producer_forwarding_rule_name: 'producer-forwarding-rule'
-      consumer_address_name: 'psc-ilb-consumer-address'
-      consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
-  - name: 'service_attachment_explicit_networks'
-    primary_resource_id: 'psc_ilb_service_attachment'
-    vars:
-      service_attachment_name: 'my-psc-ilb'
-      network_name: 'psc-ilb-network'
-      nat_subnetwork_name: 'psc-ilb-nat'
-      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
-      producer_health_check_name: 'producer-service-health-check'
-      producer_service_name: 'producer-service'
-      producer_forwarding_rule_name: 'producer-forwarding-rule'
-      consumer_network_name: 'psc-ilb-consumer-network'
-      consumer_address_name: 'psc-ilb-consumer-address'
-      consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
-  - name: 'service_attachment_reconcile_connections'
-    primary_resource_id: 'psc_ilb_service_attachment'
-    vars:
-      service_attachment_name: 'my-psc-ilb'
-      network_name: 'psc-ilb-network'
-      nat_subnetwork_name: 'psc-ilb-nat'
-      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
-      producer_health_check_name: 'producer-service-health-check'
-      producer_service_name: 'producer-service'
-      producer_forwarding_rule_name: 'producer-forwarding-rule'
-      consumer_address_name: 'psc-ilb-consumer-address'
-      consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
-  - name: 'service_attachment_tunneling_config'
-    primary_resource_id: 'psc_ilb_service_attachment'
+samples:
+  - name: service_attachment_basic
+    primary_resource_id: psc_ilb_service_attachment
+    steps:
+    - name: service_attachment_basic
+      prefixed_vars:
+        consumer_address_name: psc-ilb-consumer-address
+        consumer_forwarding_rule_name: psc-ilb-consumer-forwarding-rule
+        nat_subnetwork_name: psc-ilb-nat
+        network_name: psc-ilb-network
+        producer_forwarding_rule_name: producer-forwarding-rule
+        producer_health_check_name: producer-service-health-check
+        producer_service_name: producer-service
+        producer_subnetwork_name: psc-ilb-producer-subnetwork
+        service_attachment_name: my-psc-ilb
+  - name: service_attachment_explicit_projects
+    primary_resource_id: psc_ilb_service_attachment
+    steps:
+    - name: service_attachment_explicit_projects
+      prefixed_vars:
+        consumer_address_name: psc-ilb-consumer-address
+        consumer_forwarding_rule_name: psc-ilb-consumer-forwarding-rule
+        nat_subnetwork_name: psc-ilb-nat
+        network_name: psc-ilb-network
+        producer_forwarding_rule_name: producer-forwarding-rule
+        producer_health_check_name: producer-service-health-check
+        producer_service_name: producer-service
+        producer_subnetwork_name: psc-ilb-producer-subnetwork
+        service_attachment_name: my-psc-ilb
+  - name: service_attachment_explicit_networks
+    primary_resource_id: psc_ilb_service_attachment
+    steps:
+    - name: service_attachment_explicit_networks
+      prefixed_vars:
+        consumer_address_name: psc-ilb-consumer-address
+        consumer_forwarding_rule_name: psc-ilb-consumer-forwarding-rule
+        consumer_network_name: psc-ilb-consumer-network
+        nat_subnetwork_name: psc-ilb-nat
+        network_name: psc-ilb-network
+        producer_forwarding_rule_name: producer-forwarding-rule
+        producer_health_check_name: producer-service-health-check
+        producer_service_name: producer-service
+        producer_subnetwork_name: psc-ilb-producer-subnetwork
+        service_attachment_name: my-psc-ilb
+  - name: service_attachment_reconcile_connections
+    primary_resource_id: psc_ilb_service_attachment
+    steps:
+    - name: service_attachment_reconcile_connections
+      prefixed_vars:
+        consumer_address_name: psc-ilb-consumer-address
+        consumer_forwarding_rule_name: psc-ilb-consumer-forwarding-rule
+        nat_subnetwork_name: psc-ilb-nat
+        network_name: psc-ilb-network
+        producer_forwarding_rule_name: producer-forwarding-rule
+        producer_health_check_name: producer-service-health-check
+        producer_service_name: producer-service
+        producer_subnetwork_name: psc-ilb-producer-subnetwork
+        service_attachment_name: my-psc-ilb
+  - name: service_attachment_tunneling_config
     min_version: beta
-    vars:
-      service_attachment_name: 'my-psc-ilb'
-      network_name: 'psc-ilb-network'
-      nat_subnetwork_name: 'psc-ilb-nat'
-      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
-      producer_health_check_name: 'producer-service-health-check'
-      producer_service_name: 'producer-service'
-      producer_forwarding_rule_name: 'producer-forwarding-rule'
-  - name: 'service_attachment_cross_region_ilb'
-    primary_resource_id: 'psc_ilb_service_attachment'
-    vars:
-      name: 'sa'
+    primary_resource_id: psc_ilb_service_attachment
+    steps:
+    - name: service_attachment_tunneling_config
+      prefixed_vars:
+        nat_subnetwork_name: psc-ilb-nat
+        network_name: psc-ilb-network
+        producer_forwarding_rule_name: producer-forwarding-rule
+        producer_health_check_name: producer-service-health-check
+        producer_service_name: producer-service
+        producer_subnetwork_name: psc-ilb-producer-subnetwork
+        service_attachment_name: my-psc-ilb
+  - name: service_attachment_cross_region_ilb
+    primary_resource_id: psc_ilb_service_attachment
+    steps:
+    - name: service_attachment_cross_region_ilb
+      prefixed_vars:
+        name: sa
 parameters:
   - name: 'region'
     type: ResourceRef

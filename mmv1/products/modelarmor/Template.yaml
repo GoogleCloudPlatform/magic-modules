@@ -24,54 +24,64 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/templates/{{template_id}}
-examples:
-  - name: 'modelarmor_template_basic'
-    primary_resource_id: 'template-basic'
-    test_vars_overrides:
-      templateId: '"modelarmor1"'
-      location: '"us-central1"'
-  - name: 'modelarmor_template_filter_config'
-    primary_resource_id: 'template-filter-config'
-    test_vars_overrides:
-      templateId: '"modelarmor2"'
-      location: '"us-central1"'
-      filter_config_rai_settings_rai_filters_0_filter_type: '"HATE_SPEECH"'
-      filter_config_rai_settings_rai_filters_0_confidence_level: '"HIGH"'
-      sdp_settings_config_type: '"basic_config"'
-      filter_config_sdp_settings_basic_config_filter_enforcement: '"ENABLED"'
-      filter_config_pi_and_jailbreak_filter_settings_filter_enforcement: '"ENABLED"'
-      filter_config_pi_and_jailbreak_filter_settings_confidence_level: '"MEDIUM_AND_ABOVE"'
-      filter_config_malicious_uri_filter_settings_filter_enforcement: '"ENABLED"'
-      template_metadata_multi_language_detection_enable_multi_language_detection: false
-  - name: 'modelarmor_template_template_metadata'
-    primary_resource_id: 'template-template-metadata'
-    test_vars_overrides:
-      templateId: '"modelarmor3"'
-      location: '"us-central1"'
-      filter_config_rai_settings_rai_filters_0_filter_type: '"HARASSMENT"'
-      filter_config_rai_settings_rai_filters_0_confidence_level: '"MEDIUM_AND_ABOVE"'
-      template_metadata_log_template_operations: true
-      template_metadata_log_sanitize_operations: false
-      template_metadata_multi_language_detection_enable_multi_language_detection: true
-      template_metadata_ignore_partial_invocation_failures: false
-      template_metadata_custom_llm_response_safety_error_message: '"This is a custom error message for LLM response"'
-      template_metadata_custom_prompt_safety_error_code: 400
-      template_metadata_custom_prompt_safety_error_message: '"This is a custom error message for prompt"'
-      template_metadata_custom_llm_response_safety_error_code: 401
-      template_metadata_enforcement_type: '"INSPECT_ONLY"'
-  - name: 'modelarmor_template_label'
-    primary_resource_id: 'template-label-advanced-config'
-    test_vars_overrides:
-      templateId: '"modelarmor4"'
-      location: '"us-central1"'
-      label_test_label: '"template-test-label"'
-      filter_config_rai_settings_rai_filters_0_filter_type: '"DANGEROUS"'
-      filter_config_rai_settings_rai_filters_0_confidence_level: '"MEDIUM_AND_ABOVE"'
-      sdp_settings_config_type: '"advanced_config"'
-      filter_config_sdp_settings_advanced_config_inspect_template: '"projects/llm-firewall-demo/locations/us-central1/inspectTemplates/t3"'
-      filter_config_sdp_settings_advanced_config_deidentify_template: '"projects/llm-firewall-demo/locations/us-central1/deidentifyTemplates/t2"'
-      filter_config_sdp_settings_basic_config_filter_enforcement: '"ENABLED"'
-      template_metadata_multi_language_detection_enable_multi_language_detection: false
+samples:
+  - name: modelarmor_template_basic
+    primary_resource_id: template-basic
+    steps:
+    - name: modelarmor_template_basic
+      test_vars_overrides:
+        location: '"us-central1"'
+        templateId: '"modelarmor1"'
+  - name: modelarmor_template_filter_config
+    primary_resource_id: template-filter-config
+    steps:
+    - name: modelarmor_template_filter_config
+      test_vars_overrides:
+        filter_config_malicious_uri_filter_settings_filter_enforcement: '"ENABLED"'
+        filter_config_pi_and_jailbreak_filter_settings_confidence_level: '"MEDIUM_AND_ABOVE"'
+        filter_config_pi_and_jailbreak_filter_settings_filter_enforcement: '"ENABLED"'
+        filter_config_rai_settings_rai_filters_0_confidence_level: '"HIGH"'
+        filter_config_rai_settings_rai_filters_0_filter_type: '"HATE_SPEECH"'
+        filter_config_sdp_settings_basic_config_filter_enforcement: '"ENABLED"'
+        location: '"us-central1"'
+        sdp_settings_config_type: '"basic_config"'
+        template_metadata_multi_language_detection_enable_multi_language_detection: "false"
+        templateId: '"modelarmor2"'
+  - name: modelarmor_template_template_metadata
+    primary_resource_id: template-template-metadata
+    steps:
+    - name: modelarmor_template_template_metadata
+      test_vars_overrides:
+        filter_config_rai_settings_rai_filters_0_confidence_level: '"MEDIUM_AND_ABOVE"'
+        filter_config_rai_settings_rai_filters_0_filter_type: '"HARASSMENT"'
+        location: '"us-central1"'
+        template_metadata_custom_llm_response_safety_error_code: "401"
+        template_metadata_custom_llm_response_safety_error_message: '"This is a custom
+          error message for LLM response"'
+        template_metadata_custom_prompt_safety_error_code: "400"
+        template_metadata_custom_prompt_safety_error_message: '"This is a custom error
+          message for prompt"'
+        template_metadata_enforcement_type: '"INSPECT_ONLY"'
+        template_metadata_ignore_partial_invocation_failures: "false"
+        template_metadata_log_sanitize_operations: "false"
+        template_metadata_log_template_operations: "true"
+        template_metadata_multi_language_detection_enable_multi_language_detection: "true"
+        templateId: '"modelarmor3"'
+  - name: modelarmor_template_label
+    primary_resource_id: template-label-advanced-config
+    steps:
+    - name: modelarmor_template_label
+      test_vars_overrides:
+        filter_config_rai_settings_rai_filters_0_confidence_level: '"MEDIUM_AND_ABOVE"'
+        filter_config_rai_settings_rai_filters_0_filter_type: '"DANGEROUS"'
+        filter_config_sdp_settings_advanced_config_deidentify_template: '"projects/llm-firewall-demo/locations/us-central1/deidentifyTemplates/t2"'
+        filter_config_sdp_settings_advanced_config_inspect_template: '"projects/llm-firewall-demo/locations/us-central1/inspectTemplates/t3"'
+        filter_config_sdp_settings_basic_config_filter_enforcement: '"ENABLED"'
+        label_test_label: '"template-test-label"'
+        location: '"us-central1"'
+        sdp_settings_config_type: '"advanced_config"'
+        template_metadata_multi_language_detection_enable_multi_language_detection: "false"
+        templateId: '"modelarmor4"'
 autogen_status: VGVtcGxhdGU=
 parameters:
   - name: location

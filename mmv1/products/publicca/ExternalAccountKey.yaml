@@ -47,12 +47,14 @@ identity:
 custom_code:
   custom_create: templates/terraform/custom_create/public_ca_external_account_key.go.tmpl
 exclude_tgc: true
-examples:
-  - name: 'public_ca_external_account_key'
-    primary_resource_id: 'prod'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    exclude_import_test: true
+samples:
+  - name: public_ca_external_account_key
+    primary_resource_id: prod
+    steps:
+    - name: public_ca_external_account_key
+      test_env_vars:
+        project: PROJECT_NAME
+      exclude_import_test: true
 parameters:
 properties:
   - name: 'name'

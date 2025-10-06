@@ -48,17 +48,20 @@ async:
     resource_inside_response: false
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/netapp_volume_force_delete.go.tmpl'
-examples:
-  - name: 'netapp_volume_basic'
-    primary_resource_id: 'test_volume'
-    vars:
-      volume_name: 'test-volume'
-      pool_name: 'test-pool'
-      network_name: 'test-network'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
-    ignore_read_extra:
-      - 'deletion_policy'
+samples:
+  - name: netapp_volume_basic
+    primary_resource_id: test_volume
+    steps:
+    - name: netapp_volume_basic
+      prefixed_vars:
+        network_name: test-network
+        pool_name: test-pool
+        volume_name: test-volume
+      test_vars_overrides:
+        network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3",
+          acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))
+      ignore_read_extra:
+      - deletion_policy
 virtual_fields:
   - name: 'deletion_policy'
     description: |

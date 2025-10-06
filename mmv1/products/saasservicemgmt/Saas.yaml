@@ -23,15 +23,17 @@ id_format: projects/{{project}}/locations/{{location}}/saas/{{saas_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/saas/{{saas_id}}
 min_version: beta
-examples:
+samples:
   - name: saas_runtime_saas_basic
-    primary_resource_id: "example"
-    min_version: 'beta'
-    vars:
-      saas_name: test-saas
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com"
-        role: "roles/saasservicemgmt.serviceAgent"
+    - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
+      role: roles/saasservicemgmt.serviceAgent
+    min_version: beta
+    primary_resource_id: example
+    steps:
+    - name: saas_runtime_saas_basic
+      prefixed_vars:
+        saas_name: test-saas
 autogen_async: false
 autogen_status: U2Fhcw==
 parameters:

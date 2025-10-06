@@ -37,25 +37,31 @@ custom_code:
   decoder: 'templates/terraform/decoders/long_name_to_self_link.go.tmpl'
   custom_import: 'templates/terraform/custom_import/healthcare_hl7_v2_store.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'healthcare_hl7_v2_store_basic'
-    primary_resource_id: 'store'
-    vars:
-      dataset_name: 'example-dataset'
-      hl7_v2_store_name: 'example-hl7-v2-store'
-      pubsub_topic: 'hl7-v2-notifications'
-  - name: 'healthcare_hl7_v2_store_parser_config'
-    primary_resource_id: 'store'
-    min_version: 'beta'
-    vars:
-      dataset_name: 'example-dataset'
-      hl7_v2_store_name: 'example-hl7-v2-store'
-  - name: 'healthcare_hl7_v2_store_unschematized'
-    primary_resource_id: 'store'
-    min_version: 'beta'
-    vars:
-      dataset_name: 'example-dataset'
-      hl7_v2_store_name: 'example-hl7-v2-store'
+samples:
+  - name: healthcare_hl7_v2_store_basic
+    primary_resource_id: store
+    steps:
+    - name: healthcare_hl7_v2_store_basic
+      prefixed_vars:
+        dataset_name: example-dataset
+        hl7_v2_store_name: example-hl7-v2-store
+        pubsub_topic: hl7-v2-notifications
+  - name: healthcare_hl7_v2_store_parser_config
+    min_version: beta
+    primary_resource_id: store
+    steps:
+    - name: healthcare_hl7_v2_store_parser_config
+      prefixed_vars:
+        dataset_name: example-dataset
+        hl7_v2_store_name: example-hl7-v2-store
+  - name: healthcare_hl7_v2_store_unschematized
+    min_version: beta
+    primary_resource_id: store
+    steps:
+    - name: healthcare_hl7_v2_store_unschematized
+      prefixed_vars:
+        dataset_name: example-dataset
+        hl7_v2_store_name: example-hl7-v2-store
 parameters:
   - name: 'dataset'
     type: ResourceRef

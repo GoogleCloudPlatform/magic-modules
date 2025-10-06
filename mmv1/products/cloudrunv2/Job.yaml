@@ -50,88 +50,108 @@ iam_policy:
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/cloudrunv2_job_deletion_policy.go.tmpl'
 taint_resource_on_failed_create: true
-examples:
-  - name: 'cloudrunv2_job_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
-    vars:
-      cloud_run_job_name: 'cloudrun-job'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_job_limits'
-    primary_resource_id: 'default'
-    vars:
-      cloud_run_job_name: 'cloudrun-job'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_job_sql'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    vars:
-      cloud_run_job_name: 'cloudrun-job'
-      secret_id: 'secret'
-      cloud_run_sql_name: 'cloudrun-sql'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_job_vpcaccess'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    vars:
-      cloud_run_job_name: 'cloudrun-job'
-      vpc_access_connector_name: 'run-vpc'
-      vpc_compute_subnetwork_name: 'run-subnetwork'
-      compute_network_name: 'run-network'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_job_directvpc'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
-    vars:
-      cloud_run_job_name: 'cloudrun-job'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_job_secret'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    vars:
-      cloud_run_job_name: 'cloudrun-job'
-      secret_id: 'secret'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_job_emptydir'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
-    vars:
-      cloud_run_job_name: 'cloudrun-job'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_job_run_job'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
-    min_version: 'beta'
-    vars:
-      cloud_run_job_name: 'cloudrun-job'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_job_multicontainer'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
-    vars:
-      cloud_run_job_name: 'cloudrun-job'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_job_gpu'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
-    vars:
-      cloud_run_job_name: 'cloudrun-job'
-    ignore_read_extra:
-      - 'deletion_protection'
+samples:
+  - name: cloudrunv2_job_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_job_basic
+      prefixed_vars:
+        cloud_run_job_name: cloudrun-job
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_job_limits
+    primary_resource_id: default
+    steps:
+    - name: cloudrunv2_job_limits
+      prefixed_vars:
+        cloud_run_job_name: cloudrun-job
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_job_sql
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_job_sql
+      prefixed_vars:
+        cloud_run_job_name: cloudrun-job
+        cloud_run_sql_name: cloudrun-sql
+        deletion_protection: "true"
+        secret_id: secret
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_job_vpcaccess
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_job_vpcaccess
+      prefixed_vars:
+        cloud_run_job_name: cloudrun-job
+        compute_network_name: run-network
+        vpc_access_connector_name: run-vpc
+        vpc_compute_subnetwork_name: run-subnetwork
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_job_directvpc
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_job_directvpc
+      prefixed_vars:
+        cloud_run_job_name: cloudrun-job
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_job_secret
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_job_secret
+      prefixed_vars:
+        cloud_run_job_name: cloudrun-job
+        secret_id: secret
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_job_emptydir
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_job_emptydir
+      prefixed_vars:
+        cloud_run_job_name: cloudrun-job
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_job_run_job
+    min_version: beta
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_job_run_job
+      prefixed_vars:
+        cloud_run_job_name: cloudrun-job
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_job_multicontainer
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_job_multicontainer
+      prefixed_vars:
+        cloud_run_job_name: cloudrun-job
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_job_gpu
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_job_gpu
+      prefixed_vars:
+        cloud_run_job_name: cloudrun-job
+      ignore_read_extra:
+      - deletion_protection
 virtual_fields:
   - name: 'deletion_protection'
     description: |

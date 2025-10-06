@@ -36,13 +36,15 @@ custom_code:
   encoder: 'templates/terraform/encoders/billing_project_info.go.tmpl'
   decoder: 'templates/terraform/decoders/billing_project_info.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/billing_project_info.go.tmpl'
-examples:
-  - name: 'billing_project_info_basic'
-    primary_resource_id: 'default'
-    test_env_vars:
-      billing_account: 'BILLING_ACCT'
-      org_id: 'ORG_ID'
-    exclude_import_test: true
+samples:
+  - name: billing_project_info_basic
+    primary_resource_id: default
+    steps:
+    - name: billing_project_info_basic
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_import_test: true
 parameters:
 properties:
   - name: 'billing_account'

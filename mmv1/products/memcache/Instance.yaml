@@ -38,23 +38,27 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-examples:
-  - name: 'memcache_instance_basic'
-    primary_resource_id: 'instance'
-    vars:
-      instance_name: 'test-instance'
-      network_name: 'test-network'
-      address_name: 'address'
+samples:
+  - name: memcache_instance_basic
+    primary_resource_id: instance
     exclude_test: true
-  - name: 'memcache_instance_basic_test'
-    primary_resource_id: 'instance'
-    vars:
-      instance_name: 'test-instance'
-      network_name: 'test-network'
-      address_name: 'address'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
-    exclude_docs: true
+    steps:
+    - name: memcache_instance_basic
+      prefixed_vars:
+        address_name: address
+        instance_name: test-instance
+        network_name: test-network
+  - name: memcache_instance_basic_test
+    primary_resource_id: instance
+    steps:
+    - name: memcache_instance_basic_test
+      prefixed_vars:
+        address_name: address
+        instance_name: test-instance
+        network_name: test-network
+      test_vars_overrides:
+        network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")
+      exclude_docs: true
 parameters:
   - name: 'region'
     type: String

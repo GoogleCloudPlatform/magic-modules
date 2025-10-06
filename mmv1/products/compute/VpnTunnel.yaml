@@ -40,29 +40,33 @@ custom_code:
   constants: 'templates/terraform/constants/vpn_tunnel.tmpl'
   encoder: 'templates/terraform/encoders/vpn_tunnel.go.tmpl'
   post_create: 'templates/terraform/post_create/labels.tmpl'
-examples:
-  - name: 'vpn_tunnel_basic'
-    primary_resource_id: 'tunnel1'
-    vars:
-      vpn_tunnel_name: 'tunnel-1'
-      target_vpn_gateway_name: 'vpn-1'
-      network_name: 'network-1'
-      address_name: 'vpn-static-ip'
-      esp_forwarding_rule_name: 'fr-esp'
-      udp500_forwarding_rule_name: 'fr-udp500'
-      udp4500_forwarding_rule_name: 'fr-udp4500'
-      route_name: 'route1'
-  - name: 'vpn_tunnel_cipher_suite'
-    primary_resource_id: 'tunnel1'
-    vars:
-      vpn_tunnel_name: 'tunnel-cipher'
-      target_vpn_gateway_name: 'vpn-1'
-      network_name: 'network-1'
-      address_name: 'vpn-static-ip'
-      esp_forwarding_rule_name: 'fr-esp'
-      udp500_forwarding_rule_name: 'fr-udp500'
-      udp4500_forwarding_rule_name: 'fr-udp4500'
-      route_name: 'route1'
+samples:
+  - name: vpn_tunnel_basic
+    primary_resource_id: tunnel1
+    steps:
+    - name: vpn_tunnel_basic
+      prefixed_vars:
+        address_name: vpn-static-ip
+        esp_forwarding_rule_name: fr-esp
+        network_name: network-1
+        route_name: route1
+        target_vpn_gateway_name: vpn-1
+        udp500_forwarding_rule_name: fr-udp500
+        udp4500_forwarding_rule_name: fr-udp4500
+        vpn_tunnel_name: tunnel-1
+  - name: vpn_tunnel_cipher_suite
+    primary_resource_id: tunnel1
+    steps:
+    - name: vpn_tunnel_cipher_suite
+      prefixed_vars:
+        address_name: vpn-static-ip
+        esp_forwarding_rule_name: fr-esp
+        network_name: network-1
+        route_name: route1
+        target_vpn_gateway_name: vpn-1
+        udp500_forwarding_rule_name: fr-udp500
+        udp4500_forwarding_rule_name: fr-udp4500
+        vpn_tunnel_name: tunnel-cipher
 parameters:
   - name: 'region'
     type: ResourceRef

@@ -44,14 +44,16 @@ async:
 custom_code:
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
-examples:
-  - name: 'gkehub_namespace_basic'
-    primary_resource_id: 'namespace'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'scope'
+samples:
+  - name: gkehub_namespace_basic
+    primary_resource_id: namespace
+    primary_resource_name: fmt.Sprintf("basic%s", context["random_suffix"])
+    steps:
+    - name: gkehub_namespace_basic
+      test_env_vars:
+        project: PROJECT_NAME
+      ignore_read_extra:
+      - scope
 parameters:
   - name: 'scope_id'
     type: String

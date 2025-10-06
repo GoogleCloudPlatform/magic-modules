@@ -35,23 +35,27 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'firebasehosting_channel_basic'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      site_id: 'site-with-channel'
-      channel_id: 'channel-basic'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firebasehosting_channel_full'
-    primary_resource_id: 'full'
-    min_version: 'beta'
-    vars:
-      site_id: 'site-with-channel'
-      channel_id: 'channel-full'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+samples:
+  - name: firebasehosting_channel_basic
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: firebasehosting_channel_basic
+      prefixed_vars:
+        channel_id: channel-basic
+        site_id: site-with-channel
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firebasehosting_channel_full
+    min_version: beta
+    primary_resource_id: full
+    steps:
+    - name: firebasehosting_channel_full
+      prefixed_vars:
+        channel_id: channel-full
+        site_id: site-with-channel
+      test_env_vars:
+        project_id: PROJECT_NAME
 parameters:
   - name: 'site_id'
     type: String

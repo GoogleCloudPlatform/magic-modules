@@ -36,26 +36,32 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-examples:
-  - name: 'vertex_ai_reasoning_engine_basic'
-    primary_resource_id: 'reasoning_engine'
-    exclude_docs: true
-    vars:
-      name: 'reasoning-engine'
-  - name: 'vertex_ai_reasoning_engine_full'
-    primary_resource_id: 'reasoning_engine'
-    vars:
-      name: 'reasoning-engine'
-      bucket_name: 'reasoning-engine'
-      kms_key_name: 'example-key'
-      secret_name: 'secret'
-      service_account_id: 'sa'
+samples:
+  - name: vertex_ai_reasoning_engine_basic
+    primary_resource_id: reasoning_engine
+    steps:
+    - name: vertex_ai_reasoning_engine_basic
+      prefixed_vars:
+        name: reasoning-engine
+      exclude_docs: true
+  - name: vertex_ai_reasoning_engine_full
+    external_providers:
+    - time
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-    test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name'
-    external_providers: ["time"]
+    - member: serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com
+      role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    primary_resource_id: reasoning_engine
+    steps:
+    - name: vertex_ai_reasoning_engine_full
+      prefixed_vars:
+        bucket_name: reasoning-engine
+        kms_key_name: example-key
+        name: reasoning-engine
+        secret_name: secret
+        service_account_id: sa
+      test_vars_overrides:
+        kms_key_name: acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT",
+          "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name
 parameters:
   - name: 'region'
     type: String

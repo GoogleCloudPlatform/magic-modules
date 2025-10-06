@@ -84,81 +84,105 @@ sweeper:
     - region: "southamerica-west1"
     - region: "us-west1"
     - region: "us-south1"
-examples:
-  - name: 'subnetwork_basic'
-    primary_resource_id: 'network-with-private-secondary-ip-ranges'
-    primary_resource_name: 'fmt.Sprintf("tf-test-test-subnetwork%s", context["random_suffix"])'
-    vars:
-      subnetwork_name: 'test-subnetwork'
-      network_name: 'test-network'
-  - name: 'subnetwork_logging_config'
-    primary_resource_id: 'subnet-with-logging'
-    vars:
-      subnetwork_name: 'log-test-subnetwork'
-      network_name: 'log-test-network'
-  - name: 'subnetwork_internal_l7lb'
-    primary_resource_id: 'network-for-l7lb'
-    min_version: 'beta'
-    vars:
-      subnetwork_name: 'l7lb-test-subnetwork'
-      network_name: 'l7lb-test-network'
-  - name: 'subnetwork_ipv6'
-    primary_resource_id: 'subnetwork-ipv6'
-    vars:
-      subnetwork_name: 'ipv6-test-subnetwork'
-      network_name: 'ipv6-test-network'
-  - name: 'subnetwork_internal_ipv6'
-    primary_resource_id: 'subnetwork-internal-ipv6'
-    vars:
-      subnetwork_name: 'internal-ipv6-test-subnetwork'
-      network_name: 'internal-ipv6-test-network'
-  - name: 'subnetwork_purpose_private_nat'
-    primary_resource_id: 'subnetwork-purpose-private-nat'
-    min_version: 'beta'
-    vars:
-      subnetwork_name: 'subnet-purpose-test-subnetwork'
-      network_name: 'subnet-purpose-test-network'
-  - name: 'subnetwork_cidr_overlap'
-    primary_resource_id: 'subnetwork-cidr-overlap'
-    min_version: 'beta'
-    vars:
-      subnetwork_name: 'subnet-cidr-overlap'
-      network_name: 'net-cidr-overlap'
-  - name: 'subnetwork_reserved_internal_range'
-    primary_resource_id: 'subnetwork-reserved-internal-range'
-    min_version: 'beta'
-    vars:
-      subnetwork_name: 'subnetwork-reserved-internal-range'
-      network_name: 'network-reserved-internal-range'
-  - name: 'subnetwork_reserved_secondary_range'
-    primary_resource_id: 'subnetwork-reserved-secondary-range'
-    min_version: 'beta'
-    vars:
-      subnetwork_name: 'subnetwork-reserved-secondary-range'
-      network_name: 'network-reserved-secondary-range'
-      primary_range_name: 'reserved-primary'
-      secondary_range_name: 'reserved-secondary'
-  - name: 'subnetwork_ipv6_only_internal'
-    primary_resource_id: 'subnetwork-ipv6-only'
-    exclude_docs: true
-    vars:
-      subnetwork_name: 'subnet-ipv6-only'
-      network_name: 'network-ipv6-only'
-  - name: 'subnetwork_with_subnet_mode_pdp'
-    primary_resource_id: 'subnetwork-with-subnet-mode-pdp'
-    exclude_docs: true
-    vars:
-      subnetwork_name: 'subnet-mode-pdp-subnet'
-      network_name: 'network-byoipv6-external'
-      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
-    test_vars_overrides:
-      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
-  - name: 'subnetwork_ipv6_only_external'
-    primary_resource_id: 'subnetwork-ipv6-only'
-    exclude_docs: true
-    vars:
-      subnetwork_name: 'subnet-ipv6-only'
-      network_name: 'network-ipv6-only'
+samples:
+  - name: subnetwork_basic
+    primary_resource_id: network-with-private-secondary-ip-ranges
+    primary_resource_name: fmt.Sprintf("tf-test-test-subnetwork%s", context["random_suffix"])
+    steps:
+    - name: subnetwork_basic
+      prefixed_vars:
+        network_name: test-network
+        subnetwork_name: test-subnetwork
+  - name: subnetwork_logging_config
+    primary_resource_id: subnet-with-logging
+    steps:
+    - name: subnetwork_logging_config
+      prefixed_vars:
+        network_name: log-test-network
+        subnetwork_name: log-test-subnetwork
+  - name: subnetwork_internal_l7lb
+    min_version: beta
+    primary_resource_id: network-for-l7lb
+    steps:
+    - name: subnetwork_internal_l7lb
+      prefixed_vars:
+        network_name: l7lb-test-network
+        subnetwork_name: l7lb-test-subnetwork
+  - name: subnetwork_ipv6
+    primary_resource_id: subnetwork-ipv6
+    steps:
+    - name: subnetwork_ipv6
+      prefixed_vars:
+        network_name: ipv6-test-network
+        subnetwork_name: ipv6-test-subnetwork
+  - name: subnetwork_internal_ipv6
+    primary_resource_id: subnetwork-internal-ipv6
+    steps:
+    - name: subnetwork_internal_ipv6
+      prefixed_vars:
+        network_name: internal-ipv6-test-network
+        subnetwork_name: internal-ipv6-test-subnetwork
+  - name: subnetwork_purpose_private_nat
+    min_version: beta
+    primary_resource_id: subnetwork-purpose-private-nat
+    steps:
+    - name: subnetwork_purpose_private_nat
+      prefixed_vars:
+        network_name: subnet-purpose-test-network
+        subnetwork_name: subnet-purpose-test-subnetwork
+  - name: subnetwork_cidr_overlap
+    min_version: beta
+    primary_resource_id: subnetwork-cidr-overlap
+    steps:
+    - name: subnetwork_cidr_overlap
+      prefixed_vars:
+        network_name: net-cidr-overlap
+        subnetwork_name: subnet-cidr-overlap
+  - name: subnetwork_reserved_internal_range
+    min_version: beta
+    primary_resource_id: subnetwork-reserved-internal-range
+    steps:
+    - name: subnetwork_reserved_internal_range
+      prefixed_vars:
+        network_name: network-reserved-internal-range
+        subnetwork_name: subnetwork-reserved-internal-range
+  - name: subnetwork_reserved_secondary_range
+    min_version: beta
+    primary_resource_id: subnetwork-reserved-secondary-range
+    steps:
+    - name: subnetwork_reserved_secondary_range
+      prefixed_vars:
+        network_name: network-reserved-secondary-range
+        primary_range_name: reserved-primary
+        secondary_range_name: reserved-secondary
+        subnetwork_name: subnetwork-reserved-secondary-range
+  - name: subnetwork_ipv6_only_internal
+    primary_resource_id: subnetwork-ipv6-only
+    steps:
+    - name: subnetwork_ipv6_only_internal
+      prefixed_vars:
+        network_name: network-ipv6-only
+        subnetwork_name: subnet-ipv6-only
+      exclude_docs: true
+  - name: subnetwork_with_subnet_mode_pdp
+    primary_resource_id: subnetwork-with-subnet-mode-pdp
+    steps:
+    - name: subnetwork_with_subnet_mode_pdp
+      prefixed_vars:
+        ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
+        network_name: network-byoipv6-external
+        subnetwork_name: subnet-mode-pdp-subnet
+      test_vars_overrides:
+        ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
+      exclude_docs: true
+  - name: subnetwork_ipv6_only_external
+    primary_resource_id: subnetwork-ipv6-only
+    steps:
+    - name: subnetwork_ipv6_only_external
+      prefixed_vars:
+        network_name: network-ipv6-only
+        subnetwork_name: subnet-ipv6-only
+      exclude_docs: true
 virtual_fields:
   - name: 'send_secondary_ip_range_if_empty'
     description: |

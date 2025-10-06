@@ -52,16 +52,20 @@ custom_code:
 custom_diff:
   - 'tpgresource.DefaultProviderProject'
 exclude_sweeper: true
-examples:
-  - name: 'dialogflowcx_environment_full'
-    primary_resource_id: 'development'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-  - name: 'dialogflowcx_environment_regional'
-    primary_resource_id: 'development'
-    vars:
-      agent_name: 'issue-12880'
-    exclude_docs: true
+samples:
+  - name: dialogflowcx_environment_full
+    primary_resource_id: development
+    steps:
+    - name: dialogflowcx_environment_full
+      prefixed_vars:
+        agent_name: dialogflowcx-agent
+  - name: dialogflowcx_environment_regional
+    primary_resource_id: development
+    steps:
+    - name: dialogflowcx_environment_regional
+      prefixed_vars:
+        agent_name: issue-12880
+      exclude_docs: true
 parameters:
   - name: 'parent'
     type: String

@@ -36,21 +36,25 @@ custom_code:
   post_read: 'templates/terraform/post_read/iam_workload_identity_pool_managed_identity.go.tmpl'
   pre_create: 'templates/terraform/pre_create/iam_workload_identity_pool_managed_identity.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/iam_workload_identity_pool_managed_identity.go.tmpl'
-examples:
-  - name: 'iam_workload_identity_pool_managed_identity_basic'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_namespace_id: 'example-namespace'
-      workload_identity_pool_managed_identity_id: 'example-managed-identity'
-  - name: 'iam_workload_identity_pool_managed_identity_full'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_namespace_id: 'example-namespace'
-      workload_identity_pool_managed_identity_id: 'example-managed-identity'
-    test_env_vars:
-      project: 'PROJECT_NUMBER'
+samples:
+  - name: iam_workload_identity_pool_managed_identity_basic
+    primary_resource_id: example
+    steps:
+    - name: iam_workload_identity_pool_managed_identity_basic
+      prefixed_vars:
+        workload_identity_pool_id: example-pool
+        workload_identity_pool_managed_identity_id: example-managed-identity
+        workload_identity_pool_namespace_id: example-namespace
+  - name: iam_workload_identity_pool_managed_identity_full
+    primary_resource_id: example
+    steps:
+    - name: iam_workload_identity_pool_managed_identity_full
+      prefixed_vars:
+        workload_identity_pool_id: example-pool
+        workload_identity_pool_managed_identity_id: example-managed-identity
+        workload_identity_pool_namespace_id: example-namespace
+      test_env_vars:
+        project: PROJECT_NUMBER
 parameters:
   - name: 'workload_identity_pool_id'
     type: String

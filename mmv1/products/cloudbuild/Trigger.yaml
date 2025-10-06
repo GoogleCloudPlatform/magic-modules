@@ -52,94 +52,132 @@ sweeper:
   url_substitutions:
     - region: "us-central1"
     - region: "global"
-examples:
-  - name: 'cloudbuild_trigger_filename'
-    primary_resource_id: 'filename-trigger'
-  - name: 'cloudbuild_trigger_build'
-    primary_resource_id: 'build-trigger'
-    vars:
-      cloudbuild_trigger_name: 'my-trigger'
-  - name: 'cloudbuild_trigger_service_account'
-    primary_resource_id: 'service-account-trigger'
-    vars:
-      sa_name: 'cloud-sa'
-  - name: 'cloudbuild_trigger_include_build_logs'
-    primary_resource_id: 'include-build-logs-trigger'
+samples:
+  - name: cloudbuild_trigger_filename
+    primary_resource_id: filename-trigger
+    steps:
+    - name: cloudbuild_trigger_filename
+  - name: cloudbuild_trigger_build
+    primary_resource_id: build-trigger
+    steps:
+    - name: cloudbuild_trigger_build
+      prefixed_vars:
+        cloudbuild_trigger_name: my-trigger
+  - name: cloudbuild_trigger_service_account
+    primary_resource_id: service-account-trigger
+    steps:
+    - name: cloudbuild_trigger_service_account
+      prefixed_vars:
+        sa_name: cloud-sa
+  - name: cloudbuild_trigger_include_build_logs
+    primary_resource_id: include-build-logs-trigger
     exclude_test: true
-  - name: 'cloudbuild_trigger_pubsub_config'
-    primary_resource_id: 'pubsub-config-trigger'
-    vars:
-      pubsub_topic_name: 'my-topic'
-      cloudbuild_trigger_name: 'pubsub-trigger'
-  - name: 'cloudbuild_trigger_webhook_config'
-    primary_resource_id: 'webhook-config-trigger'
-    vars:
-      cloudbuild_trigger_name: 'webhook-trigger'
-      secret_id: 'webhook-trigger-secret-key'
-  - name: 'cloudbuild_trigger_manual'
-    primary_resource_id: 'manual-trigger'
-    vars:
-      cloudbuild_trigger_name: 'manual-trigger'
-  - name: 'cloudbuild_trigger_manual_github_enterprise'
-    primary_resource_id: 'manual-ghe-trigger'
-    vars:
-      cloudbuild_trigger_name: 'my-trigger'
+    steps:
+    - name: cloudbuild_trigger_include_build_logs
+  - name: cloudbuild_trigger_pubsub_config
+    primary_resource_id: pubsub-config-trigger
+    steps:
+    - name: cloudbuild_trigger_pubsub_config
+      prefixed_vars:
+        cloudbuild_trigger_name: pubsub-trigger
+        pubsub_topic_name: my-topic
+  - name: cloudbuild_trigger_webhook_config
+    primary_resource_id: webhook-config-trigger
+    steps:
+    - name: cloudbuild_trigger_webhook_config
+      prefixed_vars:
+        cloudbuild_trigger_name: webhook-trigger
+        secret_id: webhook-trigger-secret-key
+  - name: cloudbuild_trigger_manual
+    primary_resource_id: manual-trigger
+    steps:
+    - name: cloudbuild_trigger_manual
+      prefixed_vars:
+        cloudbuild_trigger_name: manual-trigger
+  - name: cloudbuild_trigger_manual_github_enterprise
+    primary_resource_id: manual-ghe-trigger
     exclude_test: true
-  - name: 'cloudbuild_trigger_manual_bitbucket_server'
-    primary_resource_id: 'manual-bitbucket-trigger'
-  - name: 'cloudbuild_trigger_repo'
-    primary_resource_id: 'repo-trigger'
-    vars:
-      installation_id: '123123'
-      pat_secret: 'projects/my-project/secrets/github-pat-secret/versions/latest'
-      repo_uri: 'https://github.com/myuser/my-repo.git'
-      cloudbuildv2_connection_name: 'my-connection'
-      cloudbuildv2_repo_name: 'my-repo'
-    test_vars_overrides:
-      'installation_id': '31300675'
-      'pat_secret': '"projects/gcb-terraform-creds/secrets/github-pat/versions/latest"'
-      'repo_uri': '"https://github.com/gcb-repos-robot/tf-demo.git"'
-  - name: 'cloudbuild_trigger_bitbucket_server_push'
-    primary_resource_id: 'bbs-push-trigger'
-    vars:
-      cloudbuild_trigger_name: 'bbs-push-trigger'
-  - name: 'cloudbuild_trigger_bitbucket_server_pull_request'
-    primary_resource_id: 'bbs-pull-request-trigger'
-    vars:
-      cloudbuild_trigger_name: 'ghe-trigger'
-  - name: 'cloudbuild_trigger_github_enterprise'
-    primary_resource_id: 'ghe-trigger'
-    vars:
-      cloudbuild_trigger_name: 'ghe-trigger'
+    steps:
+    - name: cloudbuild_trigger_manual_github_enterprise
+      prefixed_vars:
+        cloudbuild_trigger_name: my-trigger
+  - name: cloudbuild_trigger_manual_bitbucket_server
+    primary_resource_id: manual-bitbucket-trigger
+    steps:
+    - name: cloudbuild_trigger_manual_bitbucket_server
+  - name: cloudbuild_trigger_repo
+    primary_resource_id: repo-trigger
+    steps:
+    - name: cloudbuild_trigger_repo
+      prefixed_vars:
+        cloudbuildv2_connection_name: my-connection
+        cloudbuildv2_repo_name: my-repo
+        installation_id: "123123"
+        pat_secret: projects/my-project/secrets/github-pat-secret/versions/latest
+        repo_uri: https://github.com/myuser/my-repo.git
+      test_vars_overrides:
+        installation_id: "31300675"
+        pat_secret: '"projects/gcb-terraform-creds/secrets/github-pat/versions/latest"'
+        repo_uri: '"https://github.com/gcb-repos-robot/tf-demo.git"'
+  - name: cloudbuild_trigger_bitbucket_server_push
+    primary_resource_id: bbs-push-trigger
+    steps:
+    - name: cloudbuild_trigger_bitbucket_server_push
+      prefixed_vars:
+        cloudbuild_trigger_name: bbs-push-trigger
+  - name: cloudbuild_trigger_bitbucket_server_pull_request
+    primary_resource_id: bbs-pull-request-trigger
+    steps:
+    - name: cloudbuild_trigger_bitbucket_server_pull_request
+      prefixed_vars:
+        cloudbuild_trigger_name: ghe-trigger
+  - name: cloudbuild_trigger_github_enterprise
+    primary_resource_id: ghe-trigger
     exclude_test: true
-  - name: 'cloudbuild_trigger_allow_failure'
-    primary_resource_id: 'allow-failure-trigger'
-    vars:
-      cloudbuild_trigger_name: 'my-trigger'
-  - name: 'cloudbuild_trigger_allow_exit_codes'
-    primary_resource_id: 'allow-exit-codes-trigger'
-    vars:
-      cloudbuild_trigger_name: 'my-trigger'
-  - name: 'cloudbuild_trigger_pubsub_with_repo'
-    primary_resource_id: 'pubsub-with-repo-trigger'
-    vars:
-      installation_id: '123123'
-      pat_secret: 'projects/my-project/secrets/github-pat-secret/versions/latest'
-      repo_uri: 'https://github.com/myuser/my-repo.git'
-      cloudbuildv2_connection_name: 'my-connection'
-      cloudbuildv2_repo_name: 'my-repo'
-      pubsub_topic_name: 'my-topic'
-      cloudbuild_trigger_name: 'pubsub-with-repo-trigger'
-    test_vars_overrides:
-      'installation_id': '31300675'
-      'pat_secret': '"projects/gcb-terraform-creds/secrets/github-pat/versions/latest"'
-      'repo_uri': '"https://github.com/gcb-repos-robot/tf-demo.git"'
-  - name: 'cloudbuild_trigger_developer_connect_pull'
-    primary_resource_id: 'developer-connect-trigger-pull'
-  - name: 'cloudbuild_trigger_developer_connect_push'
-    primary_resource_id: 'developer-connect-trigger-push'
-  - name: 'cloudbuild_trigger_developer_connect_push_branch'
-    primary_resource_id: 'dc-trigger-regular-push-branch'
+    steps:
+    - name: cloudbuild_trigger_github_enterprise
+      prefixed_vars:
+        cloudbuild_trigger_name: ghe-trigger
+  - name: cloudbuild_trigger_allow_failure
+    primary_resource_id: allow-failure-trigger
+    steps:
+    - name: cloudbuild_trigger_allow_failure
+      prefixed_vars:
+        cloudbuild_trigger_name: my-trigger
+  - name: cloudbuild_trigger_allow_exit_codes
+    primary_resource_id: allow-exit-codes-trigger
+    steps:
+    - name: cloudbuild_trigger_allow_exit_codes
+      prefixed_vars:
+        cloudbuild_trigger_name: my-trigger
+  - name: cloudbuild_trigger_pubsub_with_repo
+    primary_resource_id: pubsub-with-repo-trigger
+    steps:
+    - name: cloudbuild_trigger_pubsub_with_repo
+      prefixed_vars:
+        cloudbuild_trigger_name: pubsub-with-repo-trigger
+        cloudbuildv2_connection_name: my-connection
+        cloudbuildv2_repo_name: my-repo
+        installation_id: "123123"
+        pat_secret: projects/my-project/secrets/github-pat-secret/versions/latest
+        pubsub_topic_name: my-topic
+        repo_uri: https://github.com/myuser/my-repo.git
+      test_vars_overrides:
+        installation_id: "31300675"
+        pat_secret: '"projects/gcb-terraform-creds/secrets/github-pat/versions/latest"'
+        repo_uri: '"https://github.com/gcb-repos-robot/tf-demo.git"'
+  - name: cloudbuild_trigger_developer_connect_pull
+    primary_resource_id: developer-connect-trigger-pull
+    steps:
+    - name: cloudbuild_trigger_developer_connect_pull
+  - name: cloudbuild_trigger_developer_connect_push
+    primary_resource_id: developer-connect-trigger-push
+    steps:
+    - name: cloudbuild_trigger_developer_connect_push
+  - name: cloudbuild_trigger_developer_connect_push_branch
+    primary_resource_id: dc-trigger-regular-push-branch
+    steps:
+    - name: cloudbuild_trigger_developer_connect_push_branch
 parameters:
   - name: 'location'
     type: String

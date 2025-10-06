@@ -48,22 +48,27 @@ sweeper:
     - region: 'global'
     - region: 'southamerica-west1'
     - region: 'me-west1'
-examples:
-  - name: 'vmware_engine_network_standard'
+samples:
+  - name: vmware_engine_network_standard
     skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20719
-    primary_resource_id: 'vmw-engine-network'
-  - name: 'vmware_engine_network_legacy'
+    primary_resource_id: vmw-engine-network
+    steps:
+    - name: vmware_engine_network_standard
+  - name: vmware_engine_network_legacy
     skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20719
-    primary_resource_id: 'vmw-engine-network'
-    vars:
-      proj_id: 'vmw-proj'
-    test_env_vars:
-      location: 'REGION'
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    external_providers: ["random", "time"]
- # update tests will take care of create and update. Legacy network needs to be created on an isolated project.
+    external_providers:
+    - random
+    - time
+    primary_resource_id: vmw-engine-network
     exclude_test: true
+    steps:
+    - name: vmware_engine_network_legacy
+      prefixed_vars:
+        proj_id: vmw-proj
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        location: REGION
+        org_id: ORG_ID
 parameters:
   - name: 'location'
     type: String

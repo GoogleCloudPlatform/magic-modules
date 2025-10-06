@@ -29,13 +29,15 @@ async:
     base_url: '{{op_id}}'
 # A handwritten sweeper is needed as the resource name can only be `default`, `center`, and `edge`.
 exclude_sweeper: true
-examples:
-  - name: 'network_connectivity_group_basic'
-    primary_resource_id: 'primary'
-    vars:
-      hub_name: "network-connectivity-hub1"
-      auto_accept_project_1_name: "foo"
-      auto_accept_project_2_name: "bar"
+samples:
+  - name: network_connectivity_group_basic
+    primary_resource_id: primary
+    steps:
+    - name: network_connectivity_group_basic
+      prefixed_vars:
+        auto_accept_project_1_name: foo
+        auto_accept_project_2_name: bar
+        hub_name: network-connectivity-hub1
 description: The NetworkConnectivity Group resource
 parameters:
   - name: 'hub'

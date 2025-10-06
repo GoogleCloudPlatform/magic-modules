@@ -71,31 +71,37 @@ custom_code:
 error_retry_predicates:
 
   - 'transport_tpg.IsPeeringOperationInProgress'
-examples:
-  - name: 'route_basic'
-    primary_resource_id: 'default'
-    vars:
-      route_name: 'network-route'
-      network_name: 'compute-network'
-  - name: 'route_ilb'
-    primary_resource_id: 'route-ilb'
-    vars:
-      network_name: 'compute-network'
-      subnet_name: 'compute-subnet'
-      forwarding_rule_name: 'compute-forwarding-rule'
-      health_check_name: 'proxy-health-check'
-      backend_name: 'compute-backend'
-      route_name: 'route-ilb'
-  - name: 'route_ilb_vip'
-    primary_resource_id: 'route-ilb'
-    min_version: 'beta'
-    vars:
-      producer_name: 'producer'
-      consumer_name: 'consumer'
-      forwarding_rule_name: 'compute-forwarding-rule'
-      health_check_name: 'proxy-health-check'
-      backend_name: 'compute-backend'
-      route_name: 'route-ilb'
+samples:
+  - name: route_basic
+    primary_resource_id: default
+    steps:
+    - name: route_basic
+      prefixed_vars:
+        network_name: compute-network
+        route_name: network-route
+  - name: route_ilb
+    primary_resource_id: route-ilb
+    steps:
+    - name: route_ilb
+      prefixed_vars:
+        backend_name: compute-backend
+        forwarding_rule_name: compute-forwarding-rule
+        health_check_name: proxy-health-check
+        network_name: compute-network
+        route_name: route-ilb
+        subnet_name: compute-subnet
+  - name: route_ilb_vip
+    min_version: beta
+    primary_resource_id: route-ilb
+    steps:
+    - name: route_ilb_vip
+      prefixed_vars:
+        backend_name: compute-backend
+        consumer_name: consumer
+        forwarding_rule_name: compute-forwarding-rule
+        health_check_name: proxy-health-check
+        producer_name: producer
+        route_name: route-ilb
 parameters:
 properties:
   - name: 'destRange'

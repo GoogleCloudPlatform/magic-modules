@@ -45,14 +45,16 @@ async:
 collection_url_key: 'items'
 include_in_tgc_next_DO_NOT_USE: true
 custom_code:
-examples:
-  - name: 'region_autoscaler_basic'
-    primary_resource_id: 'foobar'
-    vars:
-      region_autoscaler_name: 'my-region-autoscaler'
-      instance_template_name: 'my-instance-template'
-      target_pool_name: 'my-target-pool'
-      rigm_name: 'my-region-igm'
+samples:
+  - name: region_autoscaler_basic
+    primary_resource_id: foobar
+    steps:
+    - name: region_autoscaler_basic
+      prefixed_vars:
+        instance_template_name: my-instance-template
+        region_autoscaler_name: my-region-autoscaler
+        rigm_name: my-region-igm
+        target_pool_name: my-target-pool
 parameters:
   - name: 'region'
     type: ResourceRef

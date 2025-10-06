@@ -41,14 +41,16 @@ timeouts:
   delete_minutes: 20
 custom_code:
   custom_import: 'templates/terraform/custom_import/scc_source_self_link_as_name_set_organization.go.tmpl'
-examples:
-  - name: 'scc_notification_config_basic'
-    primary_resource_id: 'custom_notification_config'
-    vars:
-      topic_name: 'my-topic'
-      config_id: 'my-config'
-    test_env_vars:
-      org_id: 'ORG_ID'
+samples:
+  - name: scc_notification_config_basic
+    primary_resource_id: custom_notification_config
+    steps:
+    - name: scc_notification_config_basic
+      prefixed_vars:
+        config_id: my-config
+        topic_name: my-topic
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
   - name: 'organization'
     type: String

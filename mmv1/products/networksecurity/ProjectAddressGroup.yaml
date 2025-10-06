@@ -45,13 +45,15 @@ iam_policy:
     - '{{name}}'
 custom_code:
 exclude_tgc: true
-examples:
-  - name: 'network_security_address_groups_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-project-address-group'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: network_security_address_groups_basic
+    primary_resource_id: default
+    steps:
+    - name: network_security_address_groups_basic
+      prefixed_vars:
+        resource_name: my-project-address-group
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
 properties:
   - name: 'name'

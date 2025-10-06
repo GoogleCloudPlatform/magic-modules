@@ -32,11 +32,12 @@ timeouts:
   delete_minutes: 20
 custom_code:
   custom_import: 'templates/terraform/custom_import/document_ai_warehouse_document_schema.go.tmpl'
-examples:
-  - name: 'document_ai_warehouse_document_schema_text'
-    primary_resource_id: 'example_text'
-    # docs only, testing is done in an update test
+samples:
+  - name: document_ai_warehouse_document_schema_text
+    primary_resource_id: example_text
     exclude_test: true
+    steps:
+    - name: document_ai_warehouse_document_schema_text
 parameters:
   - name: 'project_number'
     type: String

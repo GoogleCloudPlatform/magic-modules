@@ -43,12 +43,14 @@ include_in_tgc_next_DO_NOT_USE: true
 error_abort_predicates:
 
   - 'transport_tpg.Is429QuotaError'
-examples:
-  - name: 'filestore_backup_basic'
-    primary_resource_id: 'backup'
-    vars:
-      backup_name: 'fs-bkup'
-      instance_name: 'fs-inst'
+samples:
+  - name: filestore_backup_basic
+    primary_resource_id: backup
+    steps:
+    - name: filestore_backup_basic
+      prefixed_vars:
+        backup_name: fs-bkup
+        instance_name: fs-inst
 parameters:
   - name: 'location'
     type: String

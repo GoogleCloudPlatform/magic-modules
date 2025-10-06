@@ -40,16 +40,18 @@ iam_policy:
   parent_resource_attribute: 'cloud_function'
   example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
-examples:
-  - name: 'cloudfunctions_cloud_function'
-    primary_resource_id: 'function'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-function%s", context["random_suffix"])'
-    vars:
-      function_name: 'my-function'
-      bucket_name: 'cloudfunctions-function-example-bucket'
-      zip_path: 'path/to/index.zip'
-    test_vars_overrides:
-      'zip_path': 'acctest.CreateZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
+samples:
+  - name: cloudfunctions_cloud_function
+    primary_resource_id: function
+    primary_resource_name: fmt.Sprintf("tf-test-my-function%s", context["random_suffix"])
+    steps:
+    - name: cloudfunctions_cloud_function
+      prefixed_vars:
+        bucket_name: cloudfunctions-function-example-bucket
+        function_name: my-function
+        zip_path: path/to/index.zip
+      test_vars_overrides:
+        zip_path: acctest.CreateZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
 parameters:
   - name: 'region'
     type: String

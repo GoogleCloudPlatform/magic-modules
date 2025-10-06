@@ -48,16 +48,18 @@ iam_policy:
   example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
 exclude_tgc: true
-examples:
-  - name: 'tag_key_basic'
-    primary_resource_id: 'key'
-    vars:
-      short_name: 'keyname'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    test_vars_overrides:
-      'short_name': '"tf-test-key-" + acctest.RandString(t, 10)'
+samples:
+  - name: tag_key_basic
+    primary_resource_id: key
     exclude_test: true
+    steps:
+    - name: tag_key_basic
+      prefixed_vars:
+        short_name: keyname
+      test_env_vars:
+        org_id: ORG_ID
+      test_vars_overrides:
+        short_name: '"tf-test-key-" + acctest.RandString(t, 10)'
 parameters:
 properties:
   - name: 'name'

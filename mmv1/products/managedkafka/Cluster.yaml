@@ -37,26 +37,33 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-examples:
-  - name: 'managedkafka_cluster_basic'
-    primary_resource_id: 'example'
-    vars:
-      cluster_id: 'my-cluster'
-      key_name: 'example-key'
-      keyring_name: 'example-keyring'
-  - name: 'managedkafka_cluster_mtls'
-    primary_resource_id: 'example'
-    vars:
-      cluster_id: 'my-cluster'
-      ca_pool_id: 'my-ca-pool'
-  - name: 'managedkafka_cluster_cmek'
-    primary_resource_id: 'example'
-    min_version: 'beta'
-    vars:
-      cluster_id: 'my-cluster'
-      key_name: 'example-key'
-      key_ring_name: 'example-key-ring'
-    external_providers: ["time"]
+samples:
+  - name: managedkafka_cluster_basic
+    primary_resource_id: example
+    steps:
+    - name: managedkafka_cluster_basic
+      prefixed_vars:
+        cluster_id: my-cluster
+        key_name: example-key
+        keyring_name: example-keyring
+  - name: managedkafka_cluster_mtls
+    primary_resource_id: example
+    steps:
+    - name: managedkafka_cluster_mtls
+      prefixed_vars:
+        ca_pool_id: my-ca-pool
+        cluster_id: my-cluster
+  - name: managedkafka_cluster_cmek
+    external_providers:
+    - time
+    min_version: beta
+    primary_resource_id: example
+    steps:
+    - name: managedkafka_cluster_cmek
+      prefixed_vars:
+        cluster_id: my-cluster
+        key_name: example-key
+        key_ring_name: example-key-ring
 parameters:
   - name: 'location'
     type: String

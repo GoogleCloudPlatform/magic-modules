@@ -54,19 +54,17 @@ custom_code:
 error_abort_predicates:
 
   - 'transport_tpg.Is429QuotaError'
-examples:
-  - name: 'active_directory_domain_basic'
-    primary_resource_id: 'ad-domain'
-    vars:
-      name: 'myorg'
-      # the part of the domain before the first "." must be <15 chars, and
-      # the random suffix is 10 chars. In order to make sure these get swept,
-      # 'tfgen' is the only option here.
-      domain_name: 'tfgen'
-    ignore_read_extra:
-      - 'deletion_protection'
-    # skip the test until Active Directory setup issue got resolved
+samples:
+  - name: active_directory_domain_basic
+    primary_resource_id: ad-domain
     exclude_test: true
+    steps:
+    - name: active_directory_domain_basic
+      prefixed_vars:
+        domain_name: tfgen
+        name: myorg
+      ignore_read_extra:
+      - deletion_protection
 virtual_fields:
   - name: 'deletion_protection'
     description: |

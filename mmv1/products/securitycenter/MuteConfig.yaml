@@ -41,13 +41,15 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/scc_mute_config.go.tmpl'
 # Skipping sweeper since this is a child resource
 exclude_sweeper: true
-examples:
-  - name: 'scc_mute_config'
-    primary_resource_id: 'default'
-    vars:
-      mute_config_id: 'my-config'
-    test_env_vars:
-      org_id: 'ORG_ID'
+samples:
+  - name: scc_mute_config
+    primary_resource_id: default
+    steps:
+    - name: scc_mute_config
+      prefixed_vars:
+        mute_config_id: my-config
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
   - name: 'muteConfigId'
     type: String

@@ -49,29 +49,34 @@ async:
 collection_url_key: 'items'
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/ssl_certificate.tmpl'
-examples:
-  - name: 'ssl_certificate_basic'
-    primary_resource_id: 'default'
-    ignore_read_extra:
-      - 'name_prefix'
-      # Uses id.UniqueId
+samples:
+  - name: ssl_certificate_basic
     skip_vcr: true
-  - name: 'ssl_certificate_random_provider'
-    primary_resource_id: 'default'
-    external_providers: ["random", "time"]
-      # Uses id.UniqueId
+    primary_resource_id: default
+    steps:
+    - name: ssl_certificate_basic
+      ignore_read_extra:
+      - name_prefix
+  - name: ssl_certificate_random_provider
     skip_vcr: true
-  - name: 'ssl_certificate_target_https_proxies'
-    primary_resource_id: 'default'
-    vars:
-      target_https_proxy_name: 'test-proxy'
-      url_map_name: 'url-map'
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'http-health-check'
-    ignore_read_extra:
-      - 'name_prefix'
-      # Uses id.UniqueId
+    external_providers:
+    - random
+    - time
+    primary_resource_id: default
+    steps:
+    - name: ssl_certificate_random_provider
+  - name: ssl_certificate_target_https_proxies
     skip_vcr: true
+    primary_resource_id: default
+    steps:
+    - name: ssl_certificate_target_https_proxies
+      prefixed_vars:
+        backend_service_name: backend-service
+        http_health_check_name: http-health-check
+        target_https_proxy_name: test-proxy
+        url_map_name: url-map
+      ignore_read_extra:
+      - name_prefix
 parameters:
 properties:
   - name: 'certificate'

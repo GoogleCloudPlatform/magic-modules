@@ -46,27 +46,33 @@ custom_code:
 sweeper:
   url_substitutions:
     - zone: "southamerica-west1-a"
-examples:
-  - name: 'target_instance_basic'
-    primary_resource_id: 'default'
-    vars:
-      target_name: 'target'
-      instance_name: 'target-vm'
-  - name: 'target_instance_custom_network'
-    primary_resource_id: 'custom_network'
-    min_version: 'beta'
-    vars:
-      target_name: 'custom-network'
-      instance_name: 'custom-network-target-vm'
-  - name: 'target_instance_with_security_policy'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      network_name: 'custom-default-network'
-      subnetname_name: 'custom-default-subnet'
-      instance_name: 'target-vm'
-      region_sec_policy: 'region-secpolicy'
-      target_name: 'target-instance'
+samples:
+  - name: target_instance_basic
+    primary_resource_id: default
+    steps:
+    - name: target_instance_basic
+      prefixed_vars:
+        instance_name: target-vm
+        target_name: target
+  - name: target_instance_custom_network
+    min_version: beta
+    primary_resource_id: custom_network
+    steps:
+    - name: target_instance_custom_network
+      prefixed_vars:
+        instance_name: custom-network-target-vm
+        target_name: custom-network
+  - name: target_instance_with_security_policy
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: target_instance_with_security_policy
+      prefixed_vars:
+        instance_name: target-vm
+        network_name: custom-default-network
+        region_sec_policy: region-secpolicy
+        subnetname_name: custom-default-subnet
+        target_name: target-instance
 parameters:
   - name: 'zone'
     type: ResourceRef

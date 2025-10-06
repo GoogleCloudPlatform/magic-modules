@@ -43,26 +43,28 @@ custom_code:
   post_import: 'templates/terraform/post_import/cloud_identity_group_membership.go.tmpl'
 exclude_sweeper: true
 read_error_transform: 'transformCloudIdentityGroupMembershipReadError'
-examples:
-  - name: 'cloud_identity_group_membership'
-    primary_resource_id: 'cloud_identity_group_membership_basic'
-    vars:
-      id_group: 'my-identity-group'
-    test_env_vars:
-      org_domain: 'ORG_DOMAIN'
-      cust_id: 'CUST_ID'
-    # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
+samples:
+  - name: cloud_identity_group_membership
+    primary_resource_id: cloud_identity_group_membership_basic
     exclude_test: true
-  - name: 'cloud_identity_group_membership_user'
-    primary_resource_id: 'cloud_identity_group_membership_basic'
-    vars:
-      id_group: 'my-identity-group'
-    test_env_vars:
-      org_domain: 'ORG_DOMAIN'
-      cust_id: 'CUST_ID'
-      identity_user: 'IDENTITY_USER'
-    # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
+    steps:
+    - name: cloud_identity_group_membership
+      prefixed_vars:
+        id_group: my-identity-group
+      test_env_vars:
+        cust_id: CUST_ID
+        org_domain: ORG_DOMAIN
+  - name: cloud_identity_group_membership_user
+    primary_resource_id: cloud_identity_group_membership_basic
     exclude_test: true
+    steps:
+    - name: cloud_identity_group_membership_user
+      prefixed_vars:
+        id_group: my-identity-group
+      test_env_vars:
+        cust_id: CUST_ID
+        identity_user: IDENTITY_USER
+        org_domain: ORG_DOMAIN
 virtual_fields:
   - name: 'create_ignore_already_exists'
     description: |

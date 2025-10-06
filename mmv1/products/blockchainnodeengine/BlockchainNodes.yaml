@@ -40,15 +40,19 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-examples:
-  - name: 'blockchain_nodes_basic'
-    primary_resource_id: 'default_node'
-    vars:
-      blockchain_node_id: 'blockchain_basic_node'
-  - name: 'blockchain_nodes_geth_details'
-    primary_resource_id: 'default_node_geth'
-    vars:
-      blockchain_node_id: 'blockchain_geth_node'
+samples:
+  - name: blockchain_nodes_basic
+    primary_resource_id: default_node
+    steps:
+    - name: blockchain_nodes_basic
+      prefixed_vars:
+        blockchain_node_id: blockchain_basic_node
+  - name: blockchain_nodes_geth_details
+    primary_resource_id: default_node_geth
+    steps:
+    - name: blockchain_nodes_geth_details
+      prefixed_vars:
+        blockchain_node_id: blockchain_geth_node
 parameters:
   - name: 'location'
     type: String

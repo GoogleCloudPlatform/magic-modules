@@ -40,11 +40,12 @@ async:
     resource_inside_response: true
 custom_code:
 exclude_sweeper: true
-examples:
-  - name: 'document_ai_warehouse_location'
-    primary_resource_id: 'example'
-    # docs only, testing is done in a DocumentSchema update test
+samples:
+  - name: document_ai_warehouse_location
+    primary_resource_id: example
     exclude_test: true
+    steps:
+    - name: document_ai_warehouse_location
 parameters:
   - name: 'project_number'
     type: String

@@ -26,11 +26,13 @@ mutex: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{rele
 sweeper:
   url_substitutions:
     - region: "global"
-examples:
+samples:
   - name: gemini_release_channel_setting_basic
     primary_resource_id: example
-    vars:
-      release_channel_setting_id: ls1-tf
+    steps:
+    - name: gemini_release_channel_setting_basic
+      prefixed_vars:
+        release_channel_setting_id: ls1-tf
 autogen_async: false
 autogen_status: UmVsZWFzZUNoYW5uZWxTZXR0aW5n
 parameters:

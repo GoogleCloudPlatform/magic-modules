@@ -61,18 +61,20 @@ custom_code:
 error_retry_predicates:
 
   - 'transport_tpg.IsAppEngineRetryableError'
-examples:
-  - name: 'app_engine_standard_app_version'
-    primary_resource_id: 'myapp_v1'
-    vars:
-      project_id: 'ae-project'
-      bucket_name: 'appengine-static-content'
-      service_name: 'ae-service'
-      account_id: 'my-account'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    ignore_read_extra:
-      - 'delete_service_on_destroy'
+samples:
+  - name: app_engine_standard_app_version
+    primary_resource_id: myapp_v1
+    steps:
+    - name: app_engine_standard_app_version
+      prefixed_vars:
+        account_id: my-account
+        bucket_name: appengine-static-content
+        project_id: ae-project
+        service_name: ae-service
+      test_env_vars:
+        org_id: ORG_ID
+      ignore_read_extra:
+      - delete_service_on_destroy
 virtual_fields:
   - name: 'noop_on_destroy'
     description: |

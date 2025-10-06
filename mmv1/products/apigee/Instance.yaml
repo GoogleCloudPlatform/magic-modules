@@ -48,77 +48,91 @@ error_retry_predicates:
   - 'transport_tpg.IsApigeeRetryableError'
 exclude_sweeper: true
 include_in_tgc_next_DO_NOT_USE: true
-examples:
-  - name: 'apigee_instance_basic'
-    vars:
-      instance_name: 'my-instance-name'
+samples:
+  - name: apigee_instance_basic
+    primary_resource_id: ""
     exclude_test: true
-      # This is a more verbose version of the above that creates all
-      # the resources needed for the acceptance test.
-  - name: 'apigee_instance_basic_test'
-    primary_resource_id: 'apigee_instance'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-      # Resource creation race
+    steps:
+    - name: apigee_instance_basic
+      prefixed_vars:
+        instance_name: my-instance-name
+  - name: apigee_instance_basic_test
     skip_vcr: true
-    external_providers: ["time"]
-  - name: 'apigee_instance_cidr_range'
-    vars:
-      instance_name: 'my-instance-name'
+    external_providers:
+    - time
+    primary_resource_id: apigee_instance
+    steps:
+    - name: apigee_instance_basic_test
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
+  - name: apigee_instance_cidr_range
+    primary_resource_id: ""
     exclude_test: true
-      # This is a more verbose version of the above that creates all
-      # the resources needed for the acceptance test.
-  - name: 'apigee_instance_cidr_range_test'
-    primary_resource_id: 'apigee_instance'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-      # Resource creation race
+    steps:
+    - name: apigee_instance_cidr_range
+      prefixed_vars:
+        instance_name: my-instance-name
+  - name: apigee_instance_cidr_range_test
     skip_vcr: true
-    external_providers: ["time"]
-  - name: 'apigee_instance_ip_range'
-    vars:
-      instance_name: 'my-instance-name'
+    external_providers:
+    - time
+    primary_resource_id: apigee_instance
+    steps:
+    - name: apigee_instance_cidr_range_test
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
+  - name: apigee_instance_ip_range
+    primary_resource_id: ""
     exclude_test: true
-      # This is a more verbose version of the above that creates all
-      # the resources needed for the acceptance test.
-  - name: 'apigee_instance_ip_range_test'
-    primary_resource_id: 'apigee_instance'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-      # Resource creation race
+    steps:
+    - name: apigee_instance_ip_range
+      prefixed_vars:
+        instance_name: my-instance-name
+  - name: apigee_instance_ip_range_test
     skip_vcr: true
-    external_providers: ["time"]
-  - name: 'apigee_instance_full'
-    vars:
-      instance_name: 'my-instance-name'
+    external_providers:
+    - time
+    primary_resource_id: apigee_instance
+    steps:
+    - name: apigee_instance_ip_range_test
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
+  - name: apigee_instance_full
+    primary_resource_id: ""
     exclude_test: true
-      # This is a more verbose version of the above that creates all
-      # the resources needed for the acceptance test.
-  - name: 'apigee_instance_full_test'
-    primary_resource_id: 'apigee_instance'
-    min_version: 'beta'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-      # Resource creation race
+    steps:
+    - name: apigee_instance_full
+      prefixed_vars:
+        instance_name: my-instance-name
+  - name: apigee_instance_full_test
     skip_vcr: true
-    external_providers: ["time"]
-  - name: 'apigee_instance_service_attachment_basic_test'
-    primary_resource_id: 'apigee_instance'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-      # Resource creation race
+    external_providers:
+    - time
+    min_version: beta
+    primary_resource_id: apigee_instance
+    steps:
+    - name: apigee_instance_full_test
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
+  - name: apigee_instance_service_attachment_basic_test
     skip_vcr: true
-    external_providers: ["time"]
+    external_providers:
+    - time
+    primary_resource_id: apigee_instance
+    steps:
+    - name: apigee_instance_service_attachment_basic_test
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
 parameters:
   - name: 'orgId'
     type: String

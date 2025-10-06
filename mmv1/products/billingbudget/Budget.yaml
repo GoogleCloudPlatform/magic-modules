@@ -43,53 +43,67 @@ custom_code:
 schema_version: 1
 state_upgraders: true
 exclude_sweeper: true
-examples:
-  - name: 'billing_budget_basic'
-    primary_resource_id: 'budget'
-    vars:
-      display_name: 'Example Billing Budget'
-    test_env_vars:
-      billing_acct: 'MASTER_BILLING_ACCT'
-  - name: 'billing_budget_lastperiod'
-    primary_resource_id: 'budget'
-    vars:
-      display_name: 'Example Billing Budget'
-    test_env_vars:
-      billing_acct: 'MASTER_BILLING_ACCT'
-  - name: 'billing_budget_filter'
-    primary_resource_id: 'budget'
-    vars:
-      display_name: 'Example Billing Budget'
-    test_env_vars:
-      billing_acct: 'MASTER_BILLING_ACCT'
-      org_id: 'ORG_ID'
-  - name: 'billing_budget_notify'
-    primary_resource_id: 'budget'
-    vars:
-      budget_name: 'Example Billing Budget'
-      channel_name: 'Example Notification Channel'
-    test_env_vars:
-      billing_acct: 'MASTER_BILLING_ACCT'
-  - name: 'billing_budget_notify_project_recipient'
-    primary_resource_id: 'budget'
-    vars:
-      budget_name: 'Example Billing Budget'
-    test_env_vars:
-      billing_acct: 'MASTER_BILLING_ACCT'
-  - name: 'billing_budget_customperiod'
-    primary_resource_id: 'budget'
-    vars:
-      display_name: 'Example Billing Budget'
-    test_env_vars:
-      billing_acct: 'MASTER_BILLING_ACCT'
-  - name: 'billing_budget_optional'
-    primary_resource_id: 'budget'
-    vars:
-      display_name: 'Example Billing Budget'
-      topic_name: 'example-topic'
-    test_env_vars:
-      billing_acct: 'MASTER_BILLING_ACCT'
-    exclude_docs: true
+samples:
+  - name: billing_budget_basic
+    primary_resource_id: budget
+    steps:
+    - name: billing_budget_basic
+      prefixed_vars:
+        display_name: Example Billing Budget
+      test_env_vars:
+        billing_acct: MASTER_BILLING_ACCT
+  - name: billing_budget_lastperiod
+    primary_resource_id: budget
+    steps:
+    - name: billing_budget_lastperiod
+      prefixed_vars:
+        display_name: Example Billing Budget
+      test_env_vars:
+        billing_acct: MASTER_BILLING_ACCT
+  - name: billing_budget_filter
+    primary_resource_id: budget
+    steps:
+    - name: billing_budget_filter
+      prefixed_vars:
+        display_name: Example Billing Budget
+      test_env_vars:
+        billing_acct: MASTER_BILLING_ACCT
+        org_id: ORG_ID
+  - name: billing_budget_notify
+    primary_resource_id: budget
+    steps:
+    - name: billing_budget_notify
+      prefixed_vars:
+        budget_name: Example Billing Budget
+        channel_name: Example Notification Channel
+      test_env_vars:
+        billing_acct: MASTER_BILLING_ACCT
+  - name: billing_budget_notify_project_recipient
+    primary_resource_id: budget
+    steps:
+    - name: billing_budget_notify_project_recipient
+      prefixed_vars:
+        budget_name: Example Billing Budget
+      test_env_vars:
+        billing_acct: MASTER_BILLING_ACCT
+  - name: billing_budget_customperiod
+    primary_resource_id: budget
+    steps:
+    - name: billing_budget_customperiod
+      prefixed_vars:
+        display_name: Example Billing Budget
+      test_env_vars:
+        billing_acct: MASTER_BILLING_ACCT
+  - name: billing_budget_optional
+    primary_resource_id: budget
+    steps:
+    - name: billing_budget_optional
+      prefixed_vars:
+        display_name: Example Billing Budget
+        topic_name: example-topic
+      test_env_vars:
+        billing_acct: MASTER_BILLING_ACCT
+      exclude_docs: true
 parameters:
   - name: 'billingAccount'
     type: String

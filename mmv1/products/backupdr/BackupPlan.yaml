@@ -32,29 +32,35 @@ timeouts:
 custom_code:
   tgc_decoder: 'templates/tgc_next/decoders/backup_dr_backup_plan.go.tmpl'
 include_in_tgc_next_DO_NOT_USE: true
-examples:
-  - name: 'backup_dr_backup_plan_simple'
-    primary_resource_id: 'my-backup-plan-1'
-    vars:
-      backup_vault_id: 'backup-vault-simple-test'
-      backup_plan_id: 'backup-plan-simple-test'
-    test_env_vars:
-      project: :PROJECT_NAME
-  - name: 'backup_dr_backup_plan_for_disk_resource'
-    primary_resource_id: 'my-disk-backup-plan-1'
-    min_version: 'beta'
-    vars:
-      backup_vault_id: 'backup-vault-disk-test'
-      backup_plan_id: 'backup-plan-disk-test'
-    test_env_vars:
-      project: :PROJECT_NAME
-  - name: 'backup_dr_backup_plan_for_csql_resource'
-    primary_resource_id: 'my-csql-backup-plan-1'
-    vars:
-      backup_vault_id: 'backup-vault-csql-test'
-      backup_plan_id: 'backup-plan-csql-test'
-    test_env_vars:
-      project: :PROJECT_NAME
+samples:
+  - name: backup_dr_backup_plan_simple
+    primary_resource_id: my-backup-plan-1
+    steps:
+    - name: backup_dr_backup_plan_simple
+      prefixed_vars:
+        backup_plan_id: backup-plan-simple-test
+        backup_vault_id: backup-vault-simple-test
+      test_env_vars:
+        project: :PROJECT_NAME
+  - name: backup_dr_backup_plan_for_disk_resource
+    min_version: beta
+    primary_resource_id: my-disk-backup-plan-1
+    steps:
+    - name: backup_dr_backup_plan_for_disk_resource
+      prefixed_vars:
+        backup_plan_id: backup-plan-disk-test
+        backup_vault_id: backup-vault-disk-test
+      test_env_vars:
+        project: :PROJECT_NAME
+  - name: backup_dr_backup_plan_for_csql_resource
+    primary_resource_id: my-csql-backup-plan-1
+    steps:
+    - name: backup_dr_backup_plan_for_csql_resource
+      prefixed_vars:
+        backup_plan_id: backup-plan-csql-test
+        backup_vault_id: backup-vault-csql-test
+      test_env_vars:
+        project: :PROJECT_NAME
 parameters:
   - name: 'location'
     type: String

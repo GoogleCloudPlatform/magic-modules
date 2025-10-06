@@ -45,14 +45,16 @@ exclude_sweeper: true
 error_retry_predicates:
   - 'transport_tpg.IsSiteVerificationRetryableError'
 supports_indirect_user_project_override: true
-examples:
-  - name: 'site_verification_domain_record'
-    primary_resource_id: 'example'
-    vars:
-      managed_zone: 'example.com'
-      domain: 'www.example.com'
-      dns_name: 'www.example.com.'
+samples:
+  - name: site_verification_domain_record
+    primary_resource_id: example
     exclude_test: true
+    steps:
+    - name: site_verification_domain_record
+      prefixed_vars:
+        dns_name: www.example.com.
+        domain: www.example.com
+        managed_zone: example.com
 parameters:
   - name: 'verification_method'
     type: Enum

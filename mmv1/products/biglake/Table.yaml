@@ -33,14 +33,16 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'biglake_table'
-    primary_resource_id: 'table'
-    vars:
-      name: 'my_table'
-      catalog: 'my_catalog'
-      database: 'my_database'
-      bucket: 'my_bucket'
+samples:
+  - name: biglake_table
+    primary_resource_id: table
+    steps:
+    - name: biglake_table
+      prefixed_vars:
+        bucket: my_bucket
+        catalog: my_catalog
+        database: my_database
+        name: my_table
 parameters:
   - name: 'name'
     type: String

@@ -41,12 +41,14 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}'
     - '{{name}}'
 custom_code:
-examples:
-  - name: 'clouddeploy_delivery_pipeline_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cd-delivery-pipeline%s", context["random_suffix"])'
-    vars:
-      delivery_pipeline: 'cd-delivery-pipeline'
+samples:
+  - name: clouddeploy_delivery_pipeline_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cd-delivery-pipeline%s", context["random_suffix"])
+    steps:
+    - name: clouddeploy_delivery_pipeline_basic
+      prefixed_vars:
+        delivery_pipeline: cd-delivery-pipeline
 parameters:
 properties:
   - name: 'name'

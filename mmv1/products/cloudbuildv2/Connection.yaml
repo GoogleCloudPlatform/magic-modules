@@ -54,18 +54,26 @@ sweeper:
   url_substitutions:
     - region: "us-central1"
     - region: "us-west1"
-examples:
-  - name: 'cloudbuildv2_connection'
-    primary_resource_id: 'my-connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
-    vars:
-      connection_name: 'tf-test-connection'
+samples:
+  - name: cloudbuildv2_connection
+    primary_resource_id: my-connection
+    primary_resource_name: fmt.Sprintf("tf-test-connection%s", context["random_suffix"])
+    steps:
+    - name: cloudbuildv2_connection
+      prefixed_vars:
+        connection_name: tf-test-connection
     tgc_test_ignore_extra:
-      - github_config.app_installation_id # It has 0 in Terraform configuration
-  - name: 'cloudbuildv2_connection_ghe'
+    - github_config.app_installation_id
+  - name: cloudbuildv2_connection_ghe
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'cloudbuildv2_connection_github'
+    steps:
+    - name: cloudbuildv2_connection_ghe
+  - name: cloudbuildv2_connection_github
+    primary_resource_id: ""
     exclude_test: true
+    steps:
+    - name: cloudbuildv2_connection_github
 parameters:
   - name: 'name'
     type: String

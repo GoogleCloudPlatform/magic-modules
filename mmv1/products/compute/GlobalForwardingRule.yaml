@@ -46,154 +46,174 @@ custom_code:
   pre_create: 'templates/terraform/pre_create/compute_global_forwarding_rule.go.tmpl'
   post_create: 'templates/terraform/post_create/labels.tmpl'
 legacy_long_form_project: true
-examples:
-  - name: 'external_ssl_proxy_lb_mig_backend'
-    primary_resource_id: 'default'
-    vars:
-      ssl_proxy_xlb_network: 'ssl-proxy-xlb-network'
-      ssl_proxy_xlb_subnet: 'ssl-proxy-xlb-subnet'
-      ssl_proxy_xlb_ip: 'ssl-proxy-xlb-ip'
-      default_cert: 'default-cert'
-      test_proxy: 'test-proxy'
-      ssl_proxy_xlb_forwarding_rule: 'ssl-proxy-xlb-forwarding-rule'
-      ssl_proxy_xlb_backend_service: 'ssl-proxy-xlb-backend-service'
-      ssl_proxy_health_check: 'ssl-proxy-health-check'
-      ssl_proxy_xlb_mig_template: 'ssl-proxy-xlb-mig-template'
-      ssl_proxy_xlb_mig1: 'ssl-proxy-xlb-mig1'
-      ssl_proxy_xlb_fw_allow_hc: 'ssl-proxy-xlb-fw-allow-hc'
-    ignore_read_extra:
-      - 'port_range'
-      - 'target'
-      - 'ip_address'
+samples:
+  - name: external_ssl_proxy_lb_mig_backend
+    primary_resource_id: default
     exclude_test: true
-  - name: 'external_tcp_proxy_lb_mig_backend'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      tcp_proxy_xlb_network: 'tcp-proxy-xlb-network'
-      tcp_proxy_xlb_subnet: 'tcp-proxy-xlb-subnet'
-      tcp_proxy_xlb_ip: 'tcp-proxy-xlb-ip'
-      tcp_proxy_xlb_forwarding_rule: 'tcp-proxy-xlb-forwarding-rule'
-      test_proxy_health_check: 'test-proxy-health-check'
-      tcp_proxy_xlb_backend_service: 'tcp-proxy-xlb-backend-service'
-      tcp_proxy_health_check: 'tcp-proxy-health-check'
-      tcp_proxy_xlb_mig_template: 'tcp-proxy-xlb-mig-template'
-      tcp_proxy_xlb_mig1: 'tcp-proxy-xlb-mig1'
-      tcp_proxy_xlb_fw_allow_hc: 'tcp-proxy-xlb-fw-allow-hc'
-    ignore_read_extra:
-      - 'port_range'
-      - 'target'
-      - 'ip_address'
-  - name: 'external_http_lb_mig_backend_custom_header'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      xlb_network_name: 'l7-xlb-network'
-      backend_subnet_name: 'l7-xlb-subnet'
-      address_name: 'l7-xlb-static-ip'
-      forwarding_rule_name: 'l7-xlb-forwarding-rule'
-      target_http_proxy_name: 'l7-xlb-target-http-proxy'
-      url_map_name: 'l7-xlb-url-map'
-      backend_service_name: 'l7-xlb-backend-service'
-      mig_template_name: 'l7-xlb-mig-template'
-      hc_name: 'l7-xlb-hc'
-      mig_name: 'l7-xlb-mig1'
-      fw_allow_hc_name: 'l7-xlb-fw-allow-hc'
-    ignore_read_extra:
-      - 'port_range'
-      - 'target'
-      - 'ip_address'
-  - name: 'global_forwarding_rule_http'
-    primary_resource_id: 'default'
-    vars:
-      forwarding_rule_name: 'global-rule'
-      http_proxy_name: 'target-proxy'
-      backend_service_name: 'backend'
-    ignore_read_extra:
-      - 'port_range'
-      - 'target'
-  - name: 'global_forwarding_rule_internal'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      forwarding_rule_name: 'global-rule'
-      http_proxy_name: 'target-proxy'
-      backend_service_name: 'backend'
-      igm_name: 'igm-internal'
-    ignore_read_extra:
-      - 'port_range'
-      - 'target'
-  - name: 'global_forwarding_rule_external_managed'
-    primary_resource_id: 'default'
-    vars:
-      forwarding_rule_name: 'global-rule'
-      http_proxy_name: 'target-proxy'
-      backend_service_name: 'backend'
-    ignore_read_extra:
-      - 'port_range'
-      - 'target'
-  - name: 'global_forwarding_rule_hybrid'
-    primary_resource_id: 'default'
-    vars:
-      forwarding_rule_name: 'global-rule'
-      http_proxy_name: 'target-proxy'
-      network_name: 'my-network'
-      internal_network_name: 'my-internal-network'
-      subnetwork_name: 'my-subnetwork'
-      default_backend_service_name: 'backend-default'
-      hybrid_backend_service_name: 'backend-hybrid'
-      internal_backend_service_name": 'backend-internal'
-      default_neg_name: 'default-neg'
-      hybrid_neg_name: 'hybrid-neg'
-      internal_neg_name: 'internal-neg'
-      health_check_name: 'health-check'
-    ignore_read_extra:
-      - 'port_range'
-      - 'target'
-  - name: 'global_internal_http_lb_with_mig_backend'
-    primary_resource_id: 'google_compute_forwarding_rule'
-    min_version: 'beta'
-    vars:
-      gilb_network_name: 'l7-gilb-network'
-      proxy_subnet_name: 'l7-gilb-proxy-subnet'
-      backend_subnet_name: 'l7-gilb-subnet'
-      forwarding_rule_name: 'l7-gilb-forwarding-rule'
-      target_http_proxy_name: 'l7-gilb-target-http-proxy'
-      url_map_name: 'l7-gilb-url-map'
-      backend_service_name: 'l7-gilb-backend-subnet'
-      mig_template_name: 'l7-gilb-mig-template'
-      hc_name: 'l7-gilb-hc'
-      mig_name: 'l7-gilb-mig1'
-      fw_allow_iap_hc_name: 'l7-gilb-fw-allow-iap-hc'
-      fw_allow_gilb_to_backends_name: 'l7-gilb-fw-allow-gilb-to-backends'
-      vm_test_name: 'l7-gilb-test-vm'
-    ignore_read_extra:
-      - 'port_range'
-      - 'target'
-  - name: 'private_service_connect_google_apis'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      network_name: 'my-network'
-      subnetwork_name: 'my-subnetwork'
-      global_address_name: 'global-psconnect-ip'
-      forwarding_rule_name: 'globalrule'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'ip_address'
-  - name: 'private_service_connect_google_apis_no_automate_dns'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      network_name: 'my-network'
-      subnetwork_name: 'my-subnetwork'
-      global_address_name: 'global-psconnect-ip'
-      forwarding_rule_name: 'globalrule'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'ip_address'
+    steps:
+    - name: external_ssl_proxy_lb_mig_backend
+      prefixed_vars:
+        default_cert: default-cert
+        ssl_proxy_health_check: ssl-proxy-health-check
+        ssl_proxy_xlb_backend_service: ssl-proxy-xlb-backend-service
+        ssl_proxy_xlb_forwarding_rule: ssl-proxy-xlb-forwarding-rule
+        ssl_proxy_xlb_fw_allow_hc: ssl-proxy-xlb-fw-allow-hc
+        ssl_proxy_xlb_ip: ssl-proxy-xlb-ip
+        ssl_proxy_xlb_mig_template: ssl-proxy-xlb-mig-template
+        ssl_proxy_xlb_mig1: ssl-proxy-xlb-mig1
+        ssl_proxy_xlb_network: ssl-proxy-xlb-network
+        ssl_proxy_xlb_subnet: ssl-proxy-xlb-subnet
+        test_proxy: test-proxy
+      ignore_read_extra:
+      - port_range
+      - target
+      - ip_address
+  - name: external_tcp_proxy_lb_mig_backend
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: external_tcp_proxy_lb_mig_backend
+      prefixed_vars:
+        tcp_proxy_health_check: tcp-proxy-health-check
+        tcp_proxy_xlb_backend_service: tcp-proxy-xlb-backend-service
+        tcp_proxy_xlb_forwarding_rule: tcp-proxy-xlb-forwarding-rule
+        tcp_proxy_xlb_fw_allow_hc: tcp-proxy-xlb-fw-allow-hc
+        tcp_proxy_xlb_ip: tcp-proxy-xlb-ip
+        tcp_proxy_xlb_mig_template: tcp-proxy-xlb-mig-template
+        tcp_proxy_xlb_mig1: tcp-proxy-xlb-mig1
+        tcp_proxy_xlb_network: tcp-proxy-xlb-network
+        tcp_proxy_xlb_subnet: tcp-proxy-xlb-subnet
+        test_proxy_health_check: test-proxy-health-check
+      ignore_read_extra:
+      - port_range
+      - target
+      - ip_address
+  - name: external_http_lb_mig_backend_custom_header
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: external_http_lb_mig_backend_custom_header
+      prefixed_vars:
+        address_name: l7-xlb-static-ip
+        backend_service_name: l7-xlb-backend-service
+        backend_subnet_name: l7-xlb-subnet
+        forwarding_rule_name: l7-xlb-forwarding-rule
+        fw_allow_hc_name: l7-xlb-fw-allow-hc
+        hc_name: l7-xlb-hc
+        mig_name: l7-xlb-mig1
+        mig_template_name: l7-xlb-mig-template
+        target_http_proxy_name: l7-xlb-target-http-proxy
+        url_map_name: l7-xlb-url-map
+        xlb_network_name: l7-xlb-network
+      ignore_read_extra:
+      - port_range
+      - target
+      - ip_address
+  - name: global_forwarding_rule_http
+    primary_resource_id: default
+    steps:
+    - name: global_forwarding_rule_http
+      prefixed_vars:
+        backend_service_name: backend
+        forwarding_rule_name: global-rule
+        http_proxy_name: target-proxy
+      ignore_read_extra:
+      - port_range
+      - target
+  - name: global_forwarding_rule_internal
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: global_forwarding_rule_internal
+      prefixed_vars:
+        backend_service_name: backend
+        forwarding_rule_name: global-rule
+        http_proxy_name: target-proxy
+        igm_name: igm-internal
+      ignore_read_extra:
+      - port_range
+      - target
+  - name: global_forwarding_rule_external_managed
+    primary_resource_id: default
+    steps:
+    - name: global_forwarding_rule_external_managed
+      prefixed_vars:
+        backend_service_name: backend
+        forwarding_rule_name: global-rule
+        http_proxy_name: target-proxy
+      ignore_read_extra:
+      - port_range
+      - target
+  - name: global_forwarding_rule_hybrid
+    primary_resource_id: default
+    steps:
+    - name: global_forwarding_rule_hybrid
+      prefixed_vars:
+        default_backend_service_name: backend-default
+        default_neg_name: default-neg
+        forwarding_rule_name: global-rule
+        health_check_name: health-check
+        http_proxy_name: target-proxy
+        hybrid_backend_service_name: backend-hybrid
+        hybrid_neg_name: hybrid-neg
+        internal_backend_service_name": backend-internal
+        internal_neg_name: internal-neg
+        internal_network_name: my-internal-network
+        network_name: my-network
+        subnetwork_name: my-subnetwork
+      ignore_read_extra:
+      - port_range
+      - target
+  - name: global_internal_http_lb_with_mig_backend
+    min_version: beta
+    primary_resource_id: google_compute_forwarding_rule
+    steps:
+    - name: global_internal_http_lb_with_mig_backend
+      prefixed_vars:
+        backend_service_name: l7-gilb-backend-subnet
+        backend_subnet_name: l7-gilb-subnet
+        forwarding_rule_name: l7-gilb-forwarding-rule
+        fw_allow_gilb_to_backends_name: l7-gilb-fw-allow-gilb-to-backends
+        fw_allow_iap_hc_name: l7-gilb-fw-allow-iap-hc
+        gilb_network_name: l7-gilb-network
+        hc_name: l7-gilb-hc
+        mig_name: l7-gilb-mig1
+        mig_template_name: l7-gilb-mig-template
+        proxy_subnet_name: l7-gilb-proxy-subnet
+        target_http_proxy_name: l7-gilb-target-http-proxy
+        url_map_name: l7-gilb-url-map
+        vm_test_name: l7-gilb-test-vm
+      ignore_read_extra:
+      - port_range
+      - target
+  - name: private_service_connect_google_apis
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: private_service_connect_google_apis
+      prefixed_vars:
+        forwarding_rule_name: globalrule
+        global_address_name: global-psconnect-ip
+        network_name: my-network
+        subnetwork_name: my-subnetwork
+      test_env_vars:
+        project: PROJECT_NAME
+      ignore_read_extra:
+      - ip_address
+  - name: private_service_connect_google_apis_no_automate_dns
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: private_service_connect_google_apis_no_automate_dns
+      prefixed_vars:
+        forwarding_rule_name: globalrule
+        global_address_name: global-psconnect-ip
+        network_name: my-network
+        subnetwork_name: my-subnetwork
+      test_env_vars:
+        project: PROJECT_NAME
+      ignore_read_extra:
+      - ip_address
 parameters:
 properties:
   - name: 'pscConnectionId'

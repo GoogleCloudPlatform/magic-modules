@@ -30,17 +30,19 @@ timeouts:
   insert_minutes: 60
   update_minutes: 20
   delete_minutes: 60
-examples:
-  - name: 'backup_dr_bpa'
-    primary_resource_id: 'my-backup-plan-association'
-    vars:
-      backup_plan_association_id: "my-bpa"
-      compute-name: "test-instance"
-      backup_vault_id: "bv-bpa"
-      backup_plan_id: "bp-bpa-test"
-      account_id: "my-custom"
-    test_env_vars:
-      project: "PROJECT_NAME"
+samples:
+  - name: backup_dr_bpa
+    primary_resource_id: my-backup-plan-association
+    steps:
+    - name: backup_dr_bpa
+      prefixed_vars:
+        account_id: my-custom
+        backup_plan_association_id: my-bpa
+        backup_plan_id: bp-bpa-test
+        backup_vault_id: bv-bpa
+        compute-name: test-instance
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
   - name: 'location'
     type: String

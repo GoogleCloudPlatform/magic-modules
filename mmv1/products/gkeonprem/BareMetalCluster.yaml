@@ -43,25 +43,31 @@ taint_resource_on_failed_create: true
 sweeper:
   url_substitutions:
     - region: "us-west1"
-examples:
-  - name: 'gkeonprem_bare_metal_cluster_basic'
-    primary_resource_id: 'cluster-basic'
-    vars:
-      name: 'my-cluster'
-    test_env_vars:
-      project: 'fake-backend-360322'
-  - name: 'gkeonprem_bare_metal_cluster_manuallb'
-    primary_resource_id: 'cluster-manuallb'
-    vars:
-      name: 'cluster-manuallb'
-    test_env_vars:
-      project: 'fake-backend-360322'
-  - name: 'gkeonprem_bare_metal_cluster_bgplb'
-    primary_resource_id: 'cluster-bgplb'
-    vars:
-      name: 'cluster-bgplb'
-    test_env_vars:
-      project: 'fake-backend-360322'
+samples:
+  - name: gkeonprem_bare_metal_cluster_basic
+    primary_resource_id: cluster-basic
+    steps:
+    - name: gkeonprem_bare_metal_cluster_basic
+      prefixed_vars:
+        name: my-cluster
+      test_env_vars:
+        project: fake-backend-360322
+  - name: gkeonprem_bare_metal_cluster_manuallb
+    primary_resource_id: cluster-manuallb
+    steps:
+    - name: gkeonprem_bare_metal_cluster_manuallb
+      prefixed_vars:
+        name: cluster-manuallb
+      test_env_vars:
+        project: fake-backend-360322
+  - name: gkeonprem_bare_metal_cluster_bgplb
+    primary_resource_id: cluster-bgplb
+    steps:
+    - name: gkeonprem_bare_metal_cluster_bgplb
+      prefixed_vars:
+        name: cluster-bgplb
+      test_env_vars:
+        project: fake-backend-360322
 parameters:
   - name: 'name'
     type: String

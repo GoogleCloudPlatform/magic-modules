@@ -42,18 +42,24 @@ async:
     resource_inside_response: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/apigee_dns_zone.go.tmpl'
-examples:
-  - name: 'apigee_dns_zone_basic'
+samples:
+  - name: apigee_dns_zone_basic
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'apigee_dns_zone_basic_test'
-    primary_resource_id: 'apigee_dns_zone'
-    min_version: 'beta'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
+    steps:
+    - name: apigee_dns_zone_basic
+  - name: apigee_dns_zone_basic_test
     skip_vcr: true
-    external_providers: ["time"]
+    external_providers:
+    - time
+    min_version: beta
+    primary_resource_id: apigee_dns_zone
+    steps:
+    - name: apigee_dns_zone_basic_test
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
 exclude_sweeper: true
 parameters:
   - name: 'orgId'

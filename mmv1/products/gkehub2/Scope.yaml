@@ -51,14 +51,16 @@ iam_policy:
 custom_code:
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
-examples:
-  - name: 'gkehub_scope_basic'
-    primary_resource_id: 'scope'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-scope%s", context["random_suffix"])'
-    vars:
-      resource_name: 'my-scope'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: gkehub_scope_basic
+    primary_resource_id: scope
+    primary_resource_name: fmt.Sprintf("tf-test-my-scope%s", context["random_suffix"])
+    steps:
+    - name: gkehub_scope_basic
+      prefixed_vars:
+        resource_name: my-scope
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
 properties:
   - name: 'scopeId'

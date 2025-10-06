@@ -33,11 +33,13 @@ async:
     resource_inside_response: false
 custom_code:
 legacy_long_form_project: true
-examples:
-  - name: 'network_firewall_policy_full'
-    primary_resource_id: 'policy'
-    vars:
-      policy_name: 'tf-test-policy'
+samples:
+  - name: network_firewall_policy_full
+    primary_resource_id: policy
+    steps:
+    - name: network_firewall_policy_full
+      prefixed_vars:
+        policy_name: tf-test-policy
 parameters:
 properties:
   - name: 'creationTimestamp'

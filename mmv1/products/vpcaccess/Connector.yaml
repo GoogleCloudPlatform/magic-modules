@@ -46,21 +46,25 @@ custom_code:
 custom_diff:
   - 'customdiff.ForceNewIfChange("min_instances", isInstanceShrinkage)'
   - 'customdiff.ForceNewIfChange("max_instances", isInstanceShrinkage)'
-examples:
-  - name: 'vpc_access_connector'
-    primary_resource_id: 'connector'
-    vars:
-      name: 'vpc-con'
-      network_name: 'default'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-access-connector")'
-  - name: 'vpc_access_connector_shared_vpc'
-    primary_resource_id: 'connector'
-    vars:
-      name: 'vpc-con'
-      network_name: 'default'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-access-connector")'
+samples:
+  - name: vpc_access_connector
+    primary_resource_id: connector
+    steps:
+    - name: vpc_access_connector
+      prefixed_vars:
+        name: vpc-con
+        network_name: default
+      test_vars_overrides:
+        network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-access-connector")
+  - name: vpc_access_connector_shared_vpc
+    primary_resource_id: connector
+    steps:
+    - name: vpc_access_connector_shared_vpc
+      prefixed_vars:
+        name: vpc-con
+        network_name: default
+      test_vars_overrides:
+        network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-access-connector")
 parameters:
   - name: 'region'
     type: String

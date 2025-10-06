@@ -50,96 +50,123 @@ sweeper:
     - region: "EU"
     - region: "azure-eastus2"
     - region: "aws-us-east-1"
-examples:
-  - name: 'bigquery_connection_cloud_resource'
-    primary_resource_id: 'connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-connection%s", context["random_suffix"])'
-    region_override: 'US'
-    vars:
-      connection_id: 'my-connection'
-    external_providers: ["random", "time"]
-  - name: 'bigquery_connection_basic'
-    primary_resource_id: 'connection'
-    vars:
-      database_instance_name: 'my-database-instance'
-      username: 'user'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      # password removed
-      - 'cloud_sql.0.credential'
-    external_providers: ["random", "time"]
-    # Random provider
+samples:
+  - name: bigquery_connection_cloud_resource
+    external_providers:
+    - random
+    - time
+    primary_resource_id: connection
+    primary_resource_name: fmt.Sprintf("tf-test-my-connection%s", context["random_suffix"])
+    steps:
+    - name: bigquery_connection_cloud_resource
+      prefixed_vars:
+        connection_id: my-connection
+    region_override: US
+  - name: bigquery_connection_basic
     skip_vcr: true
-  - name: 'bigquery_connection_full'
-    primary_resource_id: 'connection'
-    vars:
-      database_instance_name: 'my-database-instance'
-      username: 'user'
-      connection_id: 'my-connection'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      # password removed
-      - 'cloud_sql.0.credential'
-    external_providers: ["random", "time"]
-    # Random provider
+    external_providers:
+    - random
+    - time
+    primary_resource_id: connection
+    steps:
+    - name: bigquery_connection_basic
+      prefixed_vars:
+        database_instance_name: my-database-instance
+        deletion_protection: "true"
+        username: user
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
+      ignore_read_extra:
+      - cloud_sql.0.credential
+  - name: bigquery_connection_full
     skip_vcr: true
-  - name: 'bigquery_connection_aws'
-    primary_resource_id: 'connection'
-    vars:
-      connection_id: 'my-connection'
-      iam_role_id: 'arn:aws:iam::999999999999:role/omnirole'
-    external_providers: ["random", "time"]
-  - name: 'bigquery_connection_azure'
-    primary_resource_id: 'connection'
-    vars:
-      connection_id: 'my-connection'
-      customer_tenant_id: 'customer-tenant-id'
-      federated_application_client_id: 'b43eeeee-eeee-eeee-eeee-a480155501ce'
-    external_providers: ["random", "time"]
-  - name: 'bigquery_connection_cloudspanner'
-    primary_resource_id: 'connection'
-    vars:
-      connection_id: 'my-connection'
-      database: 'projects/project/instances/instance/databases/database'
-      database_role: 'database_role'
-    external_providers: ["random", "time"]
-  - name: 'bigquery_connection_cloudspanner_databoost'
-    primary_resource_id: 'connection'
-    vars:
-      connection_id: 'my-connection'
-      database: 'projects/project/instances/instance/databases/database'
-    external_providers: ["random", "time"]
-  - name: 'bigquery_connection_spark'
-    primary_resource_id: 'connection'
-    region_override: 'US'
-    vars:
-      connection_id: 'my-connection'
-  - name: 'bigquery_connection_sql_with_cmek'
-    primary_resource_id: 'bq-connection-cmek'
+    external_providers:
+    - random
+    - time
+    primary_resource_id: connection
+    steps:
+    - name: bigquery_connection_full
+      prefixed_vars:
+        connection_id: my-connection
+        database_instance_name: my-database-instance
+        deletion_protection: "true"
+        username: user
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
+      ignore_read_extra:
+      - cloud_sql.0.credential
+  - name: bigquery_connection_aws
+    external_providers:
+    - random
+    - time
+    primary_resource_id: connection
+    steps:
+    - name: bigquery_connection_aws
+      prefixed_vars:
+        connection_id: my-connection
+        iam_role_id: arn:aws:iam::999999999999:role/omnirole
+  - name: bigquery_connection_azure
+    external_providers:
+    - random
+    - time
+    primary_resource_id: connection
+    steps:
+    - name: bigquery_connection_azure
+      prefixed_vars:
+        connection_id: my-connection
+        customer_tenant_id: customer-tenant-id
+        federated_application_client_id: b43eeeee-eeee-eeee-eeee-a480155501ce
+  - name: bigquery_connection_cloudspanner
+    external_providers:
+    - random
+    - time
+    primary_resource_id: connection
+    steps:
+    - name: bigquery_connection_cloudspanner
+      prefixed_vars:
+        connection_id: my-connection
+        database: projects/project/instances/instance/databases/database
+        database_role: database_role
+  - name: bigquery_connection_cloudspanner_databoost
+    external_providers:
+    - random
+    - time
+    primary_resource_id: connection
+    steps:
+    - name: bigquery_connection_cloudspanner_databoost
+      prefixed_vars:
+        connection_id: my-connection
+        database: projects/project/instances/instance/databases/database
+  - name: bigquery_connection_spark
+    primary_resource_id: connection
+    steps:
+    - name: bigquery_connection_spark
+      prefixed_vars:
+        connection_id: my-connection
+    region_override: US
+  - name: bigquery_connection_sql_with_cmek
     bootstrap_iam:
-      - member: "serviceAccount:bq-{project_number}@bigquery-encryption.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-    vars:
-      database_instance_name: 'my-database-instance'
-      username: 'user'
-      deletion_protection: 'true'
-      kms_key_name: 'projects/project/locations/us-central1/keyRings/us-central1/cryptoKeys/bq-key'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'kms_key_name': 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      # password removed
-      - 'cloud_sql.0.credential'
+    - member: serviceAccount:bq-{project_number}@bigquery-encryption.iam.gserviceaccount.com
+      role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    primary_resource_id: bq-connection-cmek
+    steps:
+    - name: bigquery_connection_sql_with_cmek
+      prefixed_vars:
+        database_instance_name: my-database-instance
+        deletion_protection: "true"
+        kms_key_name: projects/project/locations/us-central1/keyRings/us-central1/cryptoKeys/bq-key
+        username: user
+      test_vars_overrides:
+        deletion_protection: "false"
+        kms_key_name: acctest.BootstrapKMSKey(t).CryptoKey.Name
+      oics_vars_overrides:
+        deletion_protection: "false"
+      ignore_read_extra:
+      - cloud_sql.0.credential
 parameters:
 properties:
   - name: 'name'

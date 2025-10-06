@@ -45,16 +45,18 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-examples:
-  - name: 'discoveryengine_dataconnector_jira_basic'
-    primary_resource_id: 'jira-basic'
-    vars:
-      collection_id: 'collection-id'
-      client_id: 'client-id'
-      client_secret: 'client-secret'
-    test_vars_overrides:
-      client_id: '"tf-test-client-id"'
-      client_secret: '"tf-test-client-secret"'
+samples:
+  - name: discoveryengine_dataconnector_jira_basic
+    primary_resource_id: jira-basic
+    steps:
+    - name: discoveryengine_dataconnector_jira_basic
+      prefixed_vars:
+        client_id: client-id
+        client_secret: client-secret
+        collection_id: collection-id
+      test_vars_overrides:
+        client_id: '"tf-test-client-id"'
+        client_secret: '"tf-test-client-secret"'
 parameters:
   - name: 'location'
     type: String

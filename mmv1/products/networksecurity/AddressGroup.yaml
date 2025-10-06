@@ -47,32 +47,40 @@ async:
   include_project: true
 custom_code:
 include_in_tgc_next_DO_NOT_USE: true
-examples:
-  - name: 'network_security_address_groups_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-address-groups'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'network_security_address_groups_organization_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-address-groups'
-    test_env_vars:
-      org_id: 'ORG_ID'
-  - name: 'network_security_address_groups_advanced'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-address-groups'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'network_security_address_groups_cloud_armor'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      resource_name: 'my-address-groups'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: network_security_address_groups_basic
+    primary_resource_id: default
+    steps:
+    - name: network_security_address_groups_basic
+      prefixed_vars:
+        resource_name: my-address-groups
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: network_security_address_groups_organization_basic
+    primary_resource_id: default
+    steps:
+    - name: network_security_address_groups_organization_basic
+      prefixed_vars:
+        resource_name: my-address-groups
+      test_env_vars:
+        org_id: ORG_ID
+  - name: network_security_address_groups_advanced
+    primary_resource_id: default
+    steps:
+    - name: network_security_address_groups_advanced
+      prefixed_vars:
+        resource_name: my-address-groups
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: network_security_address_groups_cloud_armor
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: network_security_address_groups_cloud_armor
+      prefixed_vars:
+        resource_name: my-address-groups
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
   - name: 'parent'
     type: String

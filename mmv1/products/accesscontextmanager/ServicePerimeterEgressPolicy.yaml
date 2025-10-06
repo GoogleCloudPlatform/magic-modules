@@ -79,15 +79,21 @@ custom_code:
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
 exclude_sweeper: true
-examples:
-  - name: 'access_context_manager_service_perimeter_egress_policy'
-    vars:
-      egress_policy_title: 'egress policy title'
+samples:
+  - name: access_context_manager_service_perimeter_egress_policy
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'access_context_manager_service_perimeter_egress_policy_granular_controls'
-    vars:
-      egress_policy_title: 'granular controls egress policy title'
+    steps:
+    - name: access_context_manager_service_perimeter_egress_policy
+      prefixed_vars:
+        egress_policy_title: egress policy title
+  - name: access_context_manager_service_perimeter_egress_policy_granular_controls
+    primary_resource_id: ""
     exclude_test: true
+    steps:
+    - name: access_context_manager_service_perimeter_egress_policy_granular_controls
+      prefixed_vars:
+        egress_policy_title: granular controls egress policy title
 parameters:
   - name: 'perimeter'
     type: ResourceRef

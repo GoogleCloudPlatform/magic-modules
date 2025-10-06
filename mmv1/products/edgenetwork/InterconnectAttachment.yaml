@@ -40,16 +40,18 @@ async:
   result:
     resource_inside_response: false
 exclude_sweeper: true
-examples:
-  - name: 'edgenetwork_interconnect_attachment'
-    primary_resource_id: 'example_interconnect_attachment'
-    vars:
-      edgenetwork_interconnect_attachment_id: 'example-interconnect-attachment'
-      edgenetwork_network_id: 'example-network'
-    test_env_vars:
-      location: 'REGION'
-      zone: 'ZONE'
+samples:
+  - name: edgenetwork_interconnect_attachment
+    primary_resource_id: example_interconnect_attachment
     exclude_test: true
+    steps:
+    - name: edgenetwork_interconnect_attachment
+      prefixed_vars:
+        edgenetwork_interconnect_attachment_id: example-interconnect-attachment
+        edgenetwork_network_id: example-network
+      test_env_vars:
+        location: REGION
+        zone: ZONE
 parameters:
   - name: 'location'
     type: String

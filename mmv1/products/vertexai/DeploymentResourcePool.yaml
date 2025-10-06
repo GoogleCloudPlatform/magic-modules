@@ -38,11 +38,13 @@ async:
     resource_inside_response: true
 custom_code:
   encoder: 'templates/terraform/encoders/wrap_object_with_deployment_resource_pool_id.go.tmpl'
-examples:
-  - name: 'vertex_ai_deployment_resource_pool'
-    primary_resource_id: 'deployment_resource_pool'
-    vars:
-      deployment_resource_pool_id: 'example-deployment-resource-pool'
+samples:
+  - name: vertex_ai_deployment_resource_pool
+    primary_resource_id: deployment_resource_pool
+    steps:
+    - name: vertex_ai_deployment_resource_pool
+      prefixed_vars:
+        deployment_resource_pool_id: example-deployment-resource-pool
 parameters:
   - name: 'region'
     type: String

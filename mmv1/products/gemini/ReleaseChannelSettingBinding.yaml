@@ -29,17 +29,19 @@ update_mask: true
 import_format:
   - projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}/settingBindings/{{setting_binding_id}}
 mutex: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}
-examples:
+samples:
   - name: gemini_release_channel_setting_binding_basic
     primary_resource_id: example
     exclude_test: true
-    vars:
-      release_channel_setting_id: ls-tf1
-      setting_binding_id: ls-tf1b1
-      target: projects/980109375338
-    test_env_vars:
-      org_id: "ORG_ID"
-      billing_account: "BILLING_ACCT"
+    steps:
+    - name: gemini_release_channel_setting_binding_basic
+      prefixed_vars:
+        release_channel_setting_id: ls-tf1
+        setting_binding_id: ls-tf1b1
+        target: projects/980109375338
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
 autogen_async: true
 async:
   operation:

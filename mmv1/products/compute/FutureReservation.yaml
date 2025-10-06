@@ -48,33 +48,39 @@ collection_url_key: 'items'
 custom_code:
   update_encoder: 'templates/terraform/update_encoder/future_reservation.go.tmpl'
 min_version: beta
-examples:
-  - name: 'future_reservation_basic'
-    primary_resource_id: 'gce_future_reservation'
-    vars:
-      future_reservation_name: 'gce-future-reservation'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-  - name: 'future_reservation_aggregate_reservation'
-    primary_resource_id: 'gce_future_reservation'
-    vars:
-      future_reservation_name: 'gce-future-reservation-aggregate-reservation'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-  - name: 'shared_future_reservation'
-    primary_resource_id: 'gce_future_reservation'
-    vars:
-      future_reservation_name: 'gce-shared-future-reservation'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
+samples:
+  - name: future_reservation_basic
+    primary_resource_id: gce_future_reservation
+    steps:
+    - name: future_reservation_basic
+      prefixed_vars:
+        future_reservation_name: gce-future-reservation
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+        project: PROJECT_NAME
+  - name: future_reservation_aggregate_reservation
+    primary_resource_id: gce_future_reservation
+    steps:
+    - name: future_reservation_aggregate_reservation
+      prefixed_vars:
+        future_reservation_name: gce-future-reservation-aggregate-reservation
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+        project: PROJECT_NAME
+  - name: shared_future_reservation
     skip_vcr: true
+    primary_resource_id: gce_future_reservation
+    steps:
+    - name: shared_future_reservation
+      prefixed_vars:
+        future_reservation_name: gce-shared-future-reservation
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+        project: PROJECT_NAME
+      exclude_docs: true
 parameters:
   - name: 'name'
     type: String

@@ -31,13 +31,15 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'storage_insights_report_config'
-    primary_resource_id: 'config'
-    vars:
-      bucket_name: 'my-bucket'
-    ignore_read_extra:
-      - 'force_destroy'
+samples:
+  - name: storage_insights_report_config
+    primary_resource_id: config
+    steps:
+    - name: storage_insights_report_config
+      prefixed_vars:
+        bucket_name: my-bucket
+      ignore_read_extra:
+      - force_destroy
 parameters:
   - name: 'location'
     type: String

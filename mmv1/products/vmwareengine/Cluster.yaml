@@ -50,29 +50,31 @@ exclude_sweeper: true
 error_abort_predicates:
 
   - 'transport_tpg.Is429QuotaError'
-examples:
-  - name: 'vmware_engine_cluster_basic'
-    primary_resource_id: 'vmw-engine-ext-cluster'
-    vars:
-      name: 'ext-cluster'
-      private_cloud_id: 'sample-pc'
-      network_id: 'pc-nw'
-      management_cluster_id: 'sample-mgmt-cluster'
-    test_env_vars:
-      region: 'REGION'
- # update tests will take care of create and update. PC and cluster creation is expensive and node reservation is required.
+samples:
+  - name: vmware_engine_cluster_basic
+    primary_resource_id: vmw-engine-ext-cluster
     exclude_test: true
-  - name: 'vmware_engine_cluster_full'
-    primary_resource_id: 'vmw-ext-cluster'
-    vars:
-      name: 'ext-cluster'
-      private_cloud_id: 'sample-pc'
-      network_id: 'pc-nw'
-      management_cluster_id: 'sample-mgmt-cluster'
-    test_env_vars:
-      region: 'REGION'
- # update tests will take care of create and update. PC and cluster creation is expensive and node reservation is required.
+    steps:
+    - name: vmware_engine_cluster_basic
+      prefixed_vars:
+        management_cluster_id: sample-mgmt-cluster
+        name: ext-cluster
+        network_id: pc-nw
+        private_cloud_id: sample-pc
+      test_env_vars:
+        region: REGION
+  - name: vmware_engine_cluster_full
+    primary_resource_id: vmw-ext-cluster
     exclude_test: true
+    steps:
+    - name: vmware_engine_cluster_full
+      prefixed_vars:
+        management_cluster_id: sample-mgmt-cluster
+        name: ext-cluster
+        network_id: pc-nw
+        private_cloud_id: sample-pc
+      test_env_vars:
+        region: REGION
 parameters:
   - name: 'parent'
     type: String

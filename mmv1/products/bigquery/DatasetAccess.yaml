@@ -68,37 +68,41 @@ exclude_sweeper: true
 error_retry_predicates:
 
   - 'transport_tpg.IsBigqueryIAMQuotaError'
-examples:
-  - name: 'bigquery_dataset_access_basic_user'
-    primary_resource_id: 'access'
-    vars:
-      dataset_id: 'example_dataset'
-      account_name: 'bqowner'
- # not importable
+samples:
+  - name: bigquery_dataset_access_basic_user
+    primary_resource_id: access
     exclude_test: true
-  - name: 'bigquery_dataset_access_view'
-    primary_resource_id: 'access'
-    vars:
-      dataset_id: 'example_dataset'
-      dataset_id2: 'example_dataset2'
-      table_id: 'example_table'
- # not importable
+    steps:
+    - name: bigquery_dataset_access_basic_user
+      prefixed_vars:
+        account_name: bqowner
+        dataset_id: example_dataset
+  - name: bigquery_dataset_access_view
+    primary_resource_id: access
     exclude_test: true
-  - name: 'bigquery_dataset_access_authorized_dataset'
-    primary_resource_id: 'access'
-    vars:
-      private: 'private'
-      public: 'public'
- # not importable
+    steps:
+    - name: bigquery_dataset_access_view
+      prefixed_vars:
+        dataset_id: example_dataset
+        dataset_id2: example_dataset2
+        table_id: example_table
+  - name: bigquery_dataset_access_authorized_dataset
+    primary_resource_id: access
     exclude_test: true
-  - name: 'bigquery_dataset_access_authorized_routine'
-    primary_resource_id: 'authorized_routine'
-    vars:
-      private_dataset: 'private_dataset'
-      public_dataset: 'public_dataset'
-      public_routine: 'public_routine'
- # not importable
+    steps:
+    - name: bigquery_dataset_access_authorized_dataset
+      prefixed_vars:
+        private: private
+        public: public
+  - name: bigquery_dataset_access_authorized_routine
+    primary_resource_id: authorized_routine
     exclude_test: true
+    steps:
+    - name: bigquery_dataset_access_authorized_routine
+      prefixed_vars:
+        private_dataset: private_dataset
+        public_dataset: public_dataset
+        public_routine: public_routine
 parameters:
 properties:
   - name: 'datasetId'

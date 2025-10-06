@@ -68,23 +68,29 @@ custom_code:
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSuppress'
-examples:
-  - name: 'disk_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])'
-    vars:
-      disk_name: 'test-disk'
-  - name: 'disk_async'
-    primary_resource_id: 'secondary'
-    primary_resource_name: 'fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])'
-    vars:
-      disk_name: 'async-test-disk'
-      secondary_disk_name: 'async-secondary-test-disk'
-  - name: 'disk_features'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])'
-    vars:
-      disk_name: 'test-disk-features'
+samples:
+  - name: disk_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])
+    steps:
+    - name: disk_basic
+      prefixed_vars:
+        disk_name: test-disk
+  - name: disk_async
+    primary_resource_id: secondary
+    primary_resource_name: fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])
+    steps:
+    - name: disk_async
+      prefixed_vars:
+        disk_name: async-test-disk
+        secondary_disk_name: async-secondary-test-disk
+  - name: disk_features
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])
+    steps:
+    - name: disk_features
+      prefixed_vars:
+        disk_name: test-disk-features
 parameters:
   - name: 'zone'
     type: ResourceRef

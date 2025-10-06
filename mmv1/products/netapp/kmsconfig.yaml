@@ -55,14 +55,17 @@ custom_code:
   post_create: 'templates/terraform/post_create/KMS_Verify.go.tmpl'
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
-examples:
-  - name: 'kmsConfig_create'
-    primary_resource_id: 'kmsConfig'
-    vars:
-      kms_name: 'kms-test'
-      kms_key_name: 'crypto-name'
-    test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-netapp-kmsconfig-key1").CryptoKey.Name'
+samples:
+  - name: kmsConfig_create
+    primary_resource_id: kmsConfig
+    steps:
+    - name: kmsConfig_create
+      prefixed_vars:
+        kms_key_name: crypto-name
+        kms_name: kms-test
+      test_vars_overrides:
+        kms_key_name: acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT",
+          "us-central1", "tf-bootstrap-netapp-kmsconfig-key1").CryptoKey.Name
 parameters:
   - name: 'location'
     type: String

@@ -43,46 +43,50 @@ timeouts:
 custom_code:
   custom_create: 'templates/terraform/custom_create/identity_platform_config.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'identity_platform_config_basic'
-    primary_resource_id: 'default'
-    vars:
-      instance_name: 'memory-cache'
-      project_id: 'my-project'
-      quota_start_time: '2014-10-02T15:01:23Z'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_acct: 'BILLING_ACCT'
-        # Resource creation race
-    test_vars_overrides:
-      # Set quota start time for the following day.
-      'quota_start_time': 'time.Now().AddDate(0, 0, 1).Format(time.RFC3339)'
-    ignore_read_extra:
-      - 'client.0.api_key'
-      - 'client.0.firebase_subdomain'
+samples:
+  - name: identity_platform_config_basic
     skip_vcr: true
-  - name: 'identity_platform_config_minimal'
-    primary_resource_id: 'default'
-    vars:
-      project_id: 'my-project-1'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_acct: 'BILLING_ACCT'
-    ignore_read_extra:
-      - 'client.0.api_key'
-      - 'client.0.firebase_subdomain'
-    exclude_docs: true
-  - name: 'identity_platform_config_with_false_values'
-    primary_resource_id: 'default'
-    vars:
-      project_id: 'my-project-2'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_acct: 'BILLING_ACCT'
-    ignore_read_extra:
-      - 'client.0.api_key'
-      - 'client.0.firebase_subdomain'
-    exclude_docs: true
+    primary_resource_id: default
+    steps:
+    - name: identity_platform_config_basic
+      prefixed_vars:
+        instance_name: memory-cache
+        project_id: my-project
+        quota_start_time: "2014-10-02T15:01:23Z"
+      test_env_vars:
+        billing_acct: BILLING_ACCT
+        org_id: ORG_ID
+      test_vars_overrides:
+        quota_start_time: time.Now().AddDate(0, 0, 1).Format(time.RFC3339)
+      ignore_read_extra:
+      - client.0.api_key
+      - client.0.firebase_subdomain
+  - name: identity_platform_config_minimal
+    primary_resource_id: default
+    steps:
+    - name: identity_platform_config_minimal
+      prefixed_vars:
+        project_id: my-project-1
+      test_env_vars:
+        billing_acct: BILLING_ACCT
+        org_id: ORG_ID
+      ignore_read_extra:
+      - client.0.api_key
+      - client.0.firebase_subdomain
+      exclude_docs: true
+  - name: identity_platform_config_with_false_values
+    primary_resource_id: default
+    steps:
+    - name: identity_platform_config_with_false_values
+      prefixed_vars:
+        project_id: my-project-2
+      test_env_vars:
+        billing_acct: BILLING_ACCT
+        org_id: ORG_ID
+      ignore_read_extra:
+      - client.0.api_key
+      - client.0.firebase_subdomain
+      exclude_docs: true
 parameters:
 properties:
   - name: 'name'

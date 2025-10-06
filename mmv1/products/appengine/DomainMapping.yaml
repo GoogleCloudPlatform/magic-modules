@@ -41,11 +41,13 @@ async:
     resource_inside_response: true
 custom_code:
   decoder: 'templates/terraform/decoders/app_engine_domain_mapping.go.tmpl'
-examples:
-  - name: 'app_engine_domain_mapping_basic'
-    primary_resource_id: 'domain_mapping'
-    ignore_read_extra:
-      - 'ssl_settings.0.ssl_management_type'
+samples:
+  - name: app_engine_domain_mapping_basic
+    primary_resource_id: domain_mapping
+    steps:
+    - name: app_engine_domain_mapping_basic
+      ignore_read_extra:
+      - ssl_settings.0.ssl_management_type
 parameters:
   - name: 'overrideStrategy'
     type: Enum

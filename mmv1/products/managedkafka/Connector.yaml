@@ -27,20 +27,23 @@ timeouts:
   insert_minutes: 60
   update_minutes: 30
   delete_minutes: 30
-examples:
-  - name: 'managedkafka_connector_basic'
-    primary_resource_id: 'example'
-    vars:
-      connector_id: 'my-connector'
-      connect_cluster_id: 'my-connect-cluster'
-      topic_id: 'my-topic'
-      cluster_id: 'my-cluster'
-      cps_topic_name: 'my-cps-topic'
-      secondary_subnet_id: 'my-secondary-subnetwork-00'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    external_providers: ["time"]
+samples:
+  - name: managedkafka_connector_basic
+    external_providers:
+    - time
+    primary_resource_id: example
+    steps:
+    - name: managedkafka_connector_basic
+      prefixed_vars:
+        cluster_id: my-cluster
+        connect_cluster_id: my-connect-cluster
+        connector_id: my-connector
+        cps_topic_name: my-cps-topic
+        secondary_subnet_id: my-secondary-subnetwork-00
+        topic_id: my-topic
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
 parameters:
   - name: 'location'
     type: String

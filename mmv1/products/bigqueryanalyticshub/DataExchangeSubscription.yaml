@@ -37,26 +37,27 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "us"
-examples:
-  - name: 'bigquery_analyticshub_dataexchange_subscription_basic'
-    primary_resource_id: 'subscription'
-    primary_resource_name: 'fmt.Sprintf("tf_test_subscription_%s", context["random_suffix"])'
-    region_override: 'us'
-    ignore_read_extra:
-      - 'last_modify_time'
-      - 'state'
-      - 'linked_dataset_map'
-      - 'linked_resources'
-    vars:
-      data_exchange_id: 'my_test_dataexchange'
-      listing_dataset_id: 'listing_src_dataset'
-      listing_table_id: 'listing_src_table'
-      listing_id: 'my_test_listing'
-      subscription_id: 'my_subscription_id'
-      subscriber_contact_email: 'testuser@example.com'
-      # Variables for the Destination Dataset created by the Subscription
-      destination_dataset_id: 'subscribed_dest_dataset'
-      destination_dataset_friendly_name: 'Subscribed Destination Dataset'
+samples:
+  - name: bigquery_analyticshub_dataexchange_subscription_basic
+    primary_resource_id: subscription
+    primary_resource_name: fmt.Sprintf("tf_test_subscription_%s", context["random_suffix"])
+    steps:
+    - name: bigquery_analyticshub_dataexchange_subscription_basic
+      prefixed_vars:
+        data_exchange_id: my_test_dataexchange
+        destination_dataset_friendly_name: Subscribed Destination Dataset
+        destination_dataset_id: subscribed_dest_dataset
+        listing_dataset_id: listing_src_dataset
+        listing_id: my_test_listing
+        listing_table_id: listing_src_table
+        subscriber_contact_email: testuser@example.com
+        subscription_id: my_subscription_id
+      ignore_read_extra:
+      - last_modify_time
+      - state
+      - linked_dataset_map
+      - linked_resources
+    region_override: us
 virtual_fields:
   - name: 'refresh_policy'
     type: Enum

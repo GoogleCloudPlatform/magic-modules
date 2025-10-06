@@ -21,14 +21,16 @@ create_url: projects/{{project}}/locations/{{location}}/plugins/{{plugin}}/insta
 id_format: projects/{{project}}/locations/{{location}}/plugins/{{plugin}}/instances/{{plugin_instance_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/plugins/{{plugin}}/instances/{{plugin_instance_id}}
-examples:
+samples:
   - name: apihub_plugin_instance_basic
+    external_providers:
+    - time
     primary_resource_id: apihub_plugin_instance_basic
-    vars:
-      curation_id: 'test'
-    # API hub instance needs to be created before this, and end to end creation of that resource using Terraform is not yet supported.
     exclude_test: true
-    external_providers: ["time"]
+    steps:
+    - name: apihub_plugin_instance_basic
+      prefixed_vars:
+        curation_id: test
 autogen_async: true
 async:
   operation:

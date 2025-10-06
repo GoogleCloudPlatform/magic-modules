@@ -37,29 +37,39 @@ timeouts:
   delete_minutes: 20
 custom_code:
   custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
-examples:
-  - name: 'logging_metric_basic'
-    primary_resource_id: 'logging_metric'
-    vars:
-      logging_metric_name: 'my-(custom)/metric'
-  - name: 'logging_metric_counter_basic'
-    primary_resource_id: 'logging_metric'
-    vars:
-      logging_metric_name: 'my-(custom)/metric'
-  - name: 'logging_metric_counter_labels'
-    primary_resource_id: 'logging_metric'
-    vars:
-      logging_metric_name: 'my-(custom)/metric'
-  - name: 'logging_metric_logging_bucket'
-    primary_resource_id: 'logging_metric'
-    vars:
-      logging_metric_name: 'my-(custom)/metric'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'logging_metric_disabled'
-    primary_resource_id: 'logging_metric'
-    vars:
-      logging_metric_name: 'my-(custom)/metric'
+samples:
+  - name: logging_metric_basic
+    primary_resource_id: logging_metric
+    steps:
+    - name: logging_metric_basic
+      prefixed_vars:
+        logging_metric_name: my-(custom)/metric
+  - name: logging_metric_counter_basic
+    primary_resource_id: logging_metric
+    steps:
+    - name: logging_metric_counter_basic
+      prefixed_vars:
+        logging_metric_name: my-(custom)/metric
+  - name: logging_metric_counter_labels
+    primary_resource_id: logging_metric
+    steps:
+    - name: logging_metric_counter_labels
+      prefixed_vars:
+        logging_metric_name: my-(custom)/metric
+  - name: logging_metric_logging_bucket
+    primary_resource_id: logging_metric
+    steps:
+    - name: logging_metric_logging_bucket
+      prefixed_vars:
+        logging_metric_name: my-(custom)/metric
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: logging_metric_disabled
+    primary_resource_id: logging_metric
+    steps:
+    - name: logging_metric_disabled
+      prefixed_vars:
+        logging_metric_name: my-(custom)/metric
 parameters:
 properties:
   - name: 'name'

@@ -37,28 +37,38 @@ custom_code:
   encoder: 'templates/terraform/encoders/os_config_patch_deployment.go.tmpl'
   decoder: 'templates/terraform/decoders/os_config_patch_deployment.go.tmpl'
   custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
-examples:
-  - name: 'os_config_patch_deployment_basic'
-    primary_resource_id: 'patch'
-    vars:
-      patch_deployment_id: 'patch-deploy'
-  - name: 'os_config_patch_deployment_daily'
-    primary_resource_id: 'patch'
-    vars:
-      patch_deployment_id: 'patch-deploy'
-  - name: 'os_config_patch_deployment_daily_midnight'
-    primary_resource_id: 'patch'
-    vars:
-      patch_deployment_id: 'patch-deploy'
-  - name: 'os_config_patch_deployment_instance'
-    primary_resource_id: 'patch'
-    vars:
-      instance_name: 'patch-deploy-inst'
-      patch_deployment_id: 'patch-deploy'
-  - name: 'os_config_patch_deployment_full'
-    primary_resource_id: 'patch'
-    vars:
-      patch_deployment_id: 'patch-deploy'
+samples:
+  - name: os_config_patch_deployment_basic
+    primary_resource_id: patch
+    steps:
+    - name: os_config_patch_deployment_basic
+      prefixed_vars:
+        patch_deployment_id: patch-deploy
+  - name: os_config_patch_deployment_daily
+    primary_resource_id: patch
+    steps:
+    - name: os_config_patch_deployment_daily
+      prefixed_vars:
+        patch_deployment_id: patch-deploy
+  - name: os_config_patch_deployment_daily_midnight
+    primary_resource_id: patch
+    steps:
+    - name: os_config_patch_deployment_daily_midnight
+      prefixed_vars:
+        patch_deployment_id: patch-deploy
+  - name: os_config_patch_deployment_instance
+    primary_resource_id: patch
+    steps:
+    - name: os_config_patch_deployment_instance
+      prefixed_vars:
+        instance_name: patch-deploy-inst
+        patch_deployment_id: patch-deploy
+  - name: os_config_patch_deployment_full
+    primary_resource_id: patch
+    steps:
+    - name: os_config_patch_deployment_full
+      prefixed_vars:
+        patch_deployment_id: patch-deploy
 parameters:
   - name: 'patchDeploymentId'
     type: String

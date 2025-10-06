@@ -43,17 +43,21 @@ include_in_tgc_next_DO_NOT_USE: true
 custom_code:
   pre_create: 'templates/terraform/pre_create/compute_global_address.go.tmpl'
   post_create: 'templates/terraform/post_create/labels.tmpl'
-examples:
-  - name: 'global_address_basic'
-    primary_resource_id: 'default'
-    vars:
-      global_address_name: 'global-appserver-ip'
-  - name: 'global_address_private_services_connect'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      global_address_name: 'global-psconnect-ip'
-      network_name: 'my-network-name'
+samples:
+  - name: global_address_basic
+    primary_resource_id: default
+    steps:
+    - name: global_address_basic
+      prefixed_vars:
+        global_address_name: global-appserver-ip
+  - name: global_address_private_services_connect
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: global_address_private_services_connect
+      prefixed_vars:
+        global_address_name: global-psconnect-ip
+        network_name: my-network-name
 parameters:
 properties:
   - name: 'address'

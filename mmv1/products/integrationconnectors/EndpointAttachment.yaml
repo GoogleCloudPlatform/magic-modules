@@ -42,11 +42,13 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-examples:
-  - name: 'integration_connectors_endpoint_attachment'
-    primary_resource_id: 'sampleendpointattachment'
-    vars:
-      endpoint_attachment_name: 'test-endpoint-attachment'
+samples:
+  - name: integration_connectors_endpoint_attachment
+    primary_resource_id: sampleendpointattachment
+    steps:
+    - name: integration_connectors_endpoint_attachment
+      prefixed_vars:
+        endpoint_attachment_name: test-endpoint-attachment
 parameters:
   - name: 'location'
     type: String

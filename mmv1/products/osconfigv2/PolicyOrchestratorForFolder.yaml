@@ -28,20 +28,22 @@ update_verb: PATCH
 id_format: folders/{{folder_id}}/locations/global/policyOrchestrators/{{policy_orchestrator_id}}
 import_format:
   - folders/{{folder_id}}/locations/global/policyOrchestrators/{{policy_orchestrator_id}}
-examples:
+samples:
   - name: osconfigv2_policy_orchestrator_for_folder_basic
-    primary_resource_id: policy_orchestrator_for_folder
-    vars:
-      policy_orchestrator_id: po-folder
-      orchestrated_resource_id: test-orchestrated-resource-folder
-      os_policy_id: test-os-policy-folder
-      folder: po-folder
-    test_env_vars:
-      org_id: ORG_ID
-      zone: 'ZONE'
     external_providers:
-      - "time"
+    - time
     min_version: beta
+    primary_resource_id: policy_orchestrator_for_folder
+    steps:
+    - name: osconfigv2_policy_orchestrator_for_folder_basic
+      prefixed_vars:
+        folder: po-folder
+        orchestrated_resource_id: test-orchestrated-resource-folder
+        os_policy_id: test-os-policy-folder
+        policy_orchestrator_id: po-folder
+      test_env_vars:
+        org_id: ORG_ID
+        zone: ZONE
 autogen_async: true
 async:
   operation:
