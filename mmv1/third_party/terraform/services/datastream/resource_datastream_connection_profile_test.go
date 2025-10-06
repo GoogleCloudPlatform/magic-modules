@@ -532,7 +532,7 @@ func TestAccDatastreamConnectionProfile_datastreamConnectionProfileMongodbSrv(t 
 				ResourceName:            "google_datastream_connection_profile.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"connection_profile_id", "create_without_validation", "labels", "location", "mongodb_profile.0.srv_connection_format", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"connection_profile_id", "create_without_validation", "labels", "location", "terraform_labels", "mongodb_profile.0.ssl_config.0.client_key", "mongodb_profile.0.ssl_config.0.client_certificate", "mongodb_profile.0.ssl_config.0.ca_certificate", "mongodb_profile.0.password", "mongodb_profile.0.srv_connection_format"},
 			},
 		},
 	})
@@ -550,11 +550,110 @@ resource "google_datastream_connection_profile" "default" {
         srv_connection_format {}
 
         host_addresses {
-          hostname = "example.mongodb.com%{random_suffix}"
+          hostname = "example.mongodb.com"
         }
         
         username       = "username%{random_suffix}"
         password       = "password%{random_suffix}"
+
+		    ssl_config {
+		        ca_certificate     = "-----BEGIN CERTIFICATE-----\nMIIDfzCCAmegAwIBAgIJAMz9tB11EHe1MA0GCSqGSIb3DQEBCwUAMG4xCzAJBgNV\nBAYTAlVTMRMwEQYDVQQIDApUZXN0IFN0YXRlMRYwFAYDVQQHDA1UZXN0IExvY2F0\naW9uMRowGAYDVQQKDBFUZXN0IE9yZ2FuaXphdGlvbjEWMBQGA1UEAwwNRHVtbXkg\nVGVzdCBDQTAeFw0yNTEwMDYxMzEzMjRaFw0yNjEwMDYxMzEzMjRaMG4xCzAJBgNV\nBAYTAlVTMRMwEQYDVQQIDApUZXN0IFN0YXRlMRYwFAYDVQQHDA1UZXN0IExvY2F0\naW9uMRowGAYDVQQKDBFUZXN0IE9yZ2FuaXphdGlvbjEWMBQGA1UEAwwNRHVtbXkg\nVGVzdCBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANllxriVNxHY\nGPs3V/rk/oTePcxY4ARYNRVIpw/G7t6828yUGkNRowTNcF0Lf/28VroqTyuC4oPC\nognoEslMdHUC1X5+8EDChz6yO/N3gefL6BFkBYKCaU/1MTSpWuxzLnOVpcMYNBeS\nuDtt5TroeKdZqSh5pTtNriQ5QYorujA6wFeDODqN0eluJwBAL/I8JAkEMRKdv+md\nhjNMCRyQJMUAVTV5cKYa3hwdyaRFORid00RUzPvxJdj40WbJPdT+OhGXCL0yrlWa\njEN3odNvTWhhMzfJZfh6Q3f1sDs/ubNFKGRrcQukb2sK7GQO2ltxTLR6CEh9tT5h\nbhfx022SMukCAwEAAaMgMB4wDwYDVR0TAQH/BAUwAwEB/zALBgNVHQ8EBAMCAQYw\nDQYJKoZIhvcNAQELBQADggEBAHt7xETI2AZEUZfS2WxfFLNmh8WMFxD597kdDdsj\nX4ZXLiUfkOFIkcWwdKYrYibG09Ps4rR4BAtV+2JNwHut059lOBOPR6gBJ44sjpBf\nHHHjrqJ1a6D+wwRUKuK5qSGlnB+l8qy1OZjcRxq9dljw+zFooRUCbZps8mk+lc+a\nwlVXHXZgVM9y4RDxb2CeWwt8al0gakf/vH3XBagxXj0oYS86eVGzS7rpAxRDPROy\nBNzzNFCkymVAQEO7XvLcOf6nD/jFYvfYwHCGfVMpUdAxG2oSzi+Oa1U40NqJKrUg\ndnnyl8jlciOkAslweooS0KUfvAVGSOxC1dmtKtHsguPsbC8=\n-----END CERTIFICATE-----"
+	          client_certificate = "-----BEGIN CERTIFICATE-----\nMIIDXDCCAkQCCQCM9siYSDyyCDANBgkqhkiG9w0BAQsFADBuMQswCQYDVQQGEwJV\nUzETMBEGA1UECAwKVGVzdCBTdGF0ZTEWMBQGA1UEBwwNVGVzdCBMb2NhdGlvbjEa\nMBgGA1UECgwRVGVzdCBPcmdhbml6YXRpb24xFjAUBgNVBAMMDUR1bW15IFRlc3Qg\nQ0EwHhcNMjUxMDA2MTMxMzM0WhcNMjYxMDA2MTMxMzM0WjByMQswCQYDVQQGEwJV\nUzETMBEGA1UECAwKVGVzdCBTdGF0ZTEWMBQGA1UEBwwNVGVzdCBMb2NhdGlvbjEa\nMBgGA1UECgwRVGVzdCBPcmdhbml6YXRpb24xGjAYBgNVBAMMEUR1bW15IFRlc3Qg\nQ2xpZW50MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsuJVeZAuAaPs\nTZwtqCfWzxK3QSehXMQz8p3zjQxPAMgZW5N9VozWiQ5i6E1mVZhW4ugPlD6z+znu\n9CCfuXiAJ5jm8+piOZUON4bRWtuUikQSe6OD4kdgt668liT8ozuN/jrfpxKKnpR0\nFMITfGYmOCU4dRR2K8FTNRBQZXXqBqck9XNXWibr/1b78U+IVXZHq66Ofg59o77e\nYTyzSuSNWZ73pYvhFfcW5tnA6j3ERULWWvYn5SglHX+NLJXHxcort8IUToxZMVn/\n14QApWY5HKSznWI/KgClQPrsWHIf1S2QbUwip41A+SAfP1ZZBqRVMhVp6cGkLbNh\nZ9bOT4OvIQIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQAh2AUtc5q30ACsM8KODDwY\nzEXPDINBGuEcBdTyEb/RWBGyt/QZzbnDhA72IfJ8WX9Etlo6WUJgk4JF7hBJ+wra\nY4EirsOt9l4zk8fjiLADgYMB+sySQl3sy4cVY9dI1UhQPpVoyjZ9JV7qZVwCAXqV\nZug7ulwQUULJDXQnmC7ZCQDJSolJ2wg0cC1FyLakZdZfRS9dhtnrzcbn5th1e/0n\nngQHunR8C94LuCFr+qJZa1+D813T5+OwFUThzwk7B+Ke35wZHALtgvnM0Jc6OR5+\nXVAk0fYAh/fKvIIOoKgF+qRNGcUP83rXQeg69J5mAezb4mw638LuOmKia+EOhoAx\n-----END CERTIFICATE-----"
+	          client_key         = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpgIBAAKCAQEAsuJVeZAuAaPsTZwtqCfWzxK3QSehXMQz8p3zjQxPAMgZW5N9\nVozWiQ5i6E1mVZhW4ugPlD6z+znu9CCfuXiAJ5jm8+piOZUON4bRWtuUikQSe6OD\n4kdgt668liT8ozuN/jrfpxKKnpR0FMITfGYmOCU4dRR2K8FTNRBQZXXqBqck9XNX\nWibr/1b78U+IVXZHq66Ofg59o77eYTyzSuSNWZ73pYvhFfcW5tnA6j3ERULWWvYn\n5SglHX+NLJXHxcort8IUToxZMVn/14QApWY5HKSznWI/KgClQPrsWHIf1S2QbUwi\np41A+SAfP1ZZBqRVMhVp6cGkLbNhZ9bOT4OvIQIDAQABAoIBAQCH6oatVcpO/sD1\n+xuJr7N8JKlOfRESzhT2W+MIoXiJjIAP35GVKG99NYwbG2wMzzH9N/tWVQolcVBI\n91zE7HTbIUchv02gmMtzjyEU2tAS+kPc41G6pScsiTzLDBFU6VQq/Yqfg+wFL6C/\ngPKTS33wnP83njNnbX2OTPX5EU2efS2XiJYJ1MeKszP/gLzNT/nzPVPDQbwy2BBv\nlcUQm5h3kBYUxpFd6JIEohmxgFBfNY4r8UoC00/5xIJmUVJ30cwxJnGd9jiLT0h4\nCW+j/uOS51c7Z60IfoXV7ggkHvwdlx0Plh5SPfqXjmUJxHXKNYwipMxyso6Qt2AI\nO3tLD/8RAoGBAN7NcIoO5+IF9t4h7jZIxJm8nhkIIXnGAOHjEI3w9j/zFyCCYDxx\n6GBPGXY/icNx/JTRt3749s94nX+aIvsniNsKaVwpOWin5bqq12As8DDUiK0CAKVc\n1fxjAa0w6V6kedU33pNXAXn1q2azgtFc5OXk9FWoVKYqbDw6agXHH6ZFAoGBAM2J\nrNMhzhEmCt5e5Qx9k+6KaSxbTYLD/TcJP3KDBSYfMgBqcr0FxOXlETSWgkomWXit\nQCFklwf/egMcYT5dIwoN7cFXUmG6/+h+oPVPwaT3puvvtKhlZXDndFbUDC4R97AX\nEFeelgZAS6fx38c79VUCQpFQnMrqCmjpxVXww3EtAoGBAKrwAXzajMubedjZPXMG\nh1fQH5fi5hQQdtLXq/bKvZM4xTCa9ozJc9iYN1fCzcZWqMvgzqCrEGkDCAtDTb1V\niqlLJqSfuDz0O8vokQ9nyuwb07SwyaAVRtO5firLUPDczeBpWem/IhHZCyTjauWI\nGNHMxC0H1dIa0CmxQ3ClYkHlAoGBALjQT890+SbgTyuOpmRp0ofOey2AV5z6gAhp\nz1w3RXz21e4byVoAAwE4zRS9NSBZhWAGYMDmAwwVA3Aip6n881HKHnwX+aKZFBzJ\nKBAMjDG64aQK4SX+Lo2sASdF+kG+tDnpMy+mEH5EeALmcXJjjoDGzHZ/xsyKT5vw\ngBl7qTFtAoGBAI9POAsCVU9rwK3BqZB0iWyvynBarR6QmSkZf6TAOPcKc7M+QJO5\nKWJ4R1a58g1gpVdcKgU15Nym6WLSCr86+XYNPUWr+TbGxdAsRb8PJwDJVrFvi1W+\ni7dqZQELjScVyttHDE82OmQvt8OocEyhLB/zFXnwc+nNycGYr5H21dOp\n-----END RSA PRIVATE KEY-----"
+		    }
+    }
+}
+`, context)
+}
+
+func TestAccDatastreamConnectionProfile_datastreamConnectionProfileMongodbStrdFull(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"deletion_protection": false,
+		"random_suffix":       acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDatastreamConnectionProfileDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDatastreamConnectionProfile_datastreamConnectionProfileMongodbStrdFull(context),
+			},
+			{
+				ResourceName:            "google_datastream_connection_profile.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"connection_profile_id", "create_without_validation", "labels", "location", "terraform_labels", "mongodb_profile.0.ssl_config.0.client_key", "mongodb_profile.0.ssl_config.0.client_certificate", "mongodb_profile.0.ssl_config.0.ca_certificate", "mongodb_profile.0.password", "mongodb_profile.0.srv_connection_format"},
+			},
+		},
+	})
+}
+
+func testAccDatastreamConnectionProfile_datastreamConnectionProfileMongodbStrdFull(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_secret_manager_secret" "password" {
+  secret_id = "password-%{random_suffix}"
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "password" {
+  secret = google_secret_manager_secret.password.id
+
+  secret_data = "password%{random_suffix}"
+}
+
+resource "google_secret_manager_secret" "client_key" {
+  secret_id = "client-key-%{random_suffix}"
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "client_key" {
+  secret = google_secret_manager_secret.client_key.id
+
+  secret_data = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpgIBAAKCAQEAsuJVeZAuAaPsTZwtqCfWzxK3QSehXMQz8p3zjQxPAMgZW5N9\nVozWiQ5i6E1mVZhW4ugPlD6z+znu9CCfuXiAJ5jm8+piOZUON4bRWtuUikQSe6OD\n4kdgt668liT8ozuN/jrfpxKKnpR0FMITfGYmOCU4dRR2K8FTNRBQZXXqBqck9XNX\nWibr/1b78U+IVXZHq66Ofg59o77eYTyzSuSNWZ73pYvhFfcW5tnA6j3ERULWWvYn\n5SglHX+NLJXHxcort8IUToxZMVn/14QApWY5HKSznWI/KgClQPrsWHIf1S2QbUwi\np41A+SAfP1ZZBqRVMhVp6cGkLbNhZ9bOT4OvIQIDAQABAoIBAQCH6oatVcpO/sD1\n+xuJr7N8JKlOfRESzhT2W+MIoXiJjIAP35GVKG99NYwbG2wMzzH9N/tWVQolcVBI\n91zE7HTbIUchv02gmMtzjyEU2tAS+kPc41G6pScsiTzLDBFU6VQq/Yqfg+wFL6C/\ngPKTS33wnP83njNnbX2OTPX5EU2efS2XiJYJ1MeKszP/gLzNT/nzPVPDQbwy2BBv\nlcUQm5h3kBYUxpFd6JIEohmxgFBfNY4r8UoC00/5xIJmUVJ30cwxJnGd9jiLT0h4\nCW+j/uOS51c7Z60IfoXV7ggkHvwdlx0Plh5SPfqXjmUJxHXKNYwipMxyso6Qt2AI\nO3tLD/8RAoGBAN7NcIoO5+IF9t4h7jZIxJm8nhkIIXnGAOHjEI3w9j/zFyCCYDxx\n6GBPGXY/icNx/JTRt3749s94nX+aIvsniNsKaVwpOWin5bqq12As8DDUiK0CAKVc\n1fxjAa0w6V6kedU33pNXAXn1q2azgtFc5OXk9FWoVKYqbDw6agXHH6ZFAoGBAM2J\nrNMhzhEmCt5e5Qx9k+6KaSxbTYLD/TcJP3KDBSYfMgBqcr0FxOXlETSWgkomWXit\nQCFklwf/egMcYT5dIwoN7cFXUmG6/+h+oPVPwaT3puvvtKhlZXDndFbUDC4R97AX\nEFeelgZAS6fx38c79VUCQpFQnMrqCmjpxVXww3EtAoGBAKrwAXzajMubedjZPXMG\nh1fQH5fi5hQQdtLXq/bKvZM4xTCa9ozJc9iYN1fCzcZWqMvgzqCrEGkDCAtDTb1V\niqlLJqSfuDz0O8vokQ9nyuwb07SwyaAVRtO5firLUPDczeBpWem/IhHZCyTjauWI\nGNHMxC0H1dIa0CmxQ3ClYkHlAoGBALjQT890+SbgTyuOpmRp0ofOey2AV5z6gAhp\nz1w3RXz21e4byVoAAwE4zRS9NSBZhWAGYMDmAwwVA3Aip6n881HKHnwX+aKZFBzJ\nKBAMjDG64aQK4SX+Lo2sASdF+kG+tDnpMy+mEH5EeALmcXJjjoDGzHZ/xsyKT5vw\ngBl7qTFtAoGBAI9POAsCVU9rwK3BqZB0iWyvynBarR6QmSkZf6TAOPcKc7M+QJO5\nKWJ4R1a58g1gpVdcKgU15Nym6WLSCr86+XYNPUWr+TbGxdAsRb8PJwDJVrFvi1W+\ni7dqZQELjScVyttHDE82OmQvt8OocEyhLB/zFXnwc+nNycGYr5H21dOp\n-----END RSA PRIVATE KEY-----"
+}
+
+resource "google_datastream_connection_profile" "default" {
+    display_name              = "Connection profile MongoDB SRV"
+    location                  = "us-central1"
+    connection_profile_id     = "tf-test-source-profile%{random_suffix}"
+    create_without_validation = true
+
+    mongodb_profile {
+			  standard_connection_format {
+				   direct_connection = true
+				}
+		    replica_set = "replica_set_name"
+        host_addresses {
+					  hostname = "example.mongodb1.com"
+					  port = 27017
+        }
+        host_addresses {
+            hostname = "example.mongodb2.com"
+					  port = 27017
+        }
+        host_addresses {
+            hostname = "example.mongodb3.com"
+					  port = 27017
+        }
+
+        username                       = "username%{random_suffix}"
+		    secret_manager_stored_password = google_secret_manager_secret_version.password.name
+		    
+		    ssl_config {
+		        ca_certificate     = "-----BEGIN CERTIFICATE-----\nMIIDfzCCAmegAwIBAgIJAMz9tB11EHe1MA0GCSqGSIb3DQEBCwUAMG4xCzAJBgNV\nBAYTAlVTMRMwEQYDVQQIDApUZXN0IFN0YXRlMRYwFAYDVQQHDA1UZXN0IExvY2F0\naW9uMRowGAYDVQQKDBFUZXN0IE9yZ2FuaXphdGlvbjEWMBQGA1UEAwwNRHVtbXkg\nVGVzdCBDQTAeFw0yNTEwMDYxMzEzMjRaFw0yNjEwMDYxMzEzMjRaMG4xCzAJBgNV\nBAYTAlVTMRMwEQYDVQQIDApUZXN0IFN0YXRlMRYwFAYDVQQHDA1UZXN0IExvY2F0\naW9uMRowGAYDVQQKDBFUZXN0IE9yZ2FuaXphdGlvbjEWMBQGA1UEAwwNRHVtbXkg\nVGVzdCBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANllxriVNxHY\nGPs3V/rk/oTePcxY4ARYNRVIpw/G7t6828yUGkNRowTNcF0Lf/28VroqTyuC4oPC\nognoEslMdHUC1X5+8EDChz6yO/N3gefL6BFkBYKCaU/1MTSpWuxzLnOVpcMYNBeS\nuDtt5TroeKdZqSh5pTtNriQ5QYorujA6wFeDODqN0eluJwBAL/I8JAkEMRKdv+md\nhjNMCRyQJMUAVTV5cKYa3hwdyaRFORid00RUzPvxJdj40WbJPdT+OhGXCL0yrlWa\njEN3odNvTWhhMzfJZfh6Q3f1sDs/ubNFKGRrcQukb2sK7GQO2ltxTLR6CEh9tT5h\nbhfx022SMukCAwEAAaMgMB4wDwYDVR0TAQH/BAUwAwEB/zALBgNVHQ8EBAMCAQYw\nDQYJKoZIhvcNAQELBQADggEBAHt7xETI2AZEUZfS2WxfFLNmh8WMFxD597kdDdsj\nX4ZXLiUfkOFIkcWwdKYrYibG09Ps4rR4BAtV+2JNwHut059lOBOPR6gBJ44sjpBf\nHHHjrqJ1a6D+wwRUKuK5qSGlnB+l8qy1OZjcRxq9dljw+zFooRUCbZps8mk+lc+a\nwlVXHXZgVM9y4RDxb2CeWwt8al0gakf/vH3XBagxXj0oYS86eVGzS7rpAxRDPROy\nBNzzNFCkymVAQEO7XvLcOf6nD/jFYvfYwHCGfVMpUdAxG2oSzi+Oa1U40NqJKrUg\ndnnyl8jlciOkAslweooS0KUfvAVGSOxC1dmtKtHsguPsbC8=\n-----END CERTIFICATE-----"
+	          client_certificate = "-----BEGIN CERTIFICATE-----\nMIIDXDCCAkQCCQCM9siYSDyyCDANBgkqhkiG9w0BAQsFADBuMQswCQYDVQQGEwJV\nUzETMBEGA1UECAwKVGVzdCBTdGF0ZTEWMBQGA1UEBwwNVGVzdCBMb2NhdGlvbjEa\nMBgGA1UECgwRVGVzdCBPcmdhbml6YXRpb24xFjAUBgNVBAMMDUR1bW15IFRlc3Qg\nQ0EwHhcNMjUxMDA2MTMxMzM0WhcNMjYxMDA2MTMxMzM0WjByMQswCQYDVQQGEwJV\nUzETMBEGA1UECAwKVGVzdCBTdGF0ZTEWMBQGA1UEBwwNVGVzdCBMb2NhdGlvbjEa\nMBgGA1UECgwRVGVzdCBPcmdhbml6YXRpb24xGjAYBgNVBAMMEUR1bW15IFRlc3Qg\nQ2xpZW50MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsuJVeZAuAaPs\nTZwtqCfWzxK3QSehXMQz8p3zjQxPAMgZW5N9VozWiQ5i6E1mVZhW4ugPlD6z+znu\n9CCfuXiAJ5jm8+piOZUON4bRWtuUikQSe6OD4kdgt668liT8ozuN/jrfpxKKnpR0\nFMITfGYmOCU4dRR2K8FTNRBQZXXqBqck9XNXWibr/1b78U+IVXZHq66Ofg59o77e\nYTyzSuSNWZ73pYvhFfcW5tnA6j3ERULWWvYn5SglHX+NLJXHxcort8IUToxZMVn/\n14QApWY5HKSznWI/KgClQPrsWHIf1S2QbUwip41A+SAfP1ZZBqRVMhVp6cGkLbNh\nZ9bOT4OvIQIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQAh2AUtc5q30ACsM8KODDwY\nzEXPDINBGuEcBdTyEb/RWBGyt/QZzbnDhA72IfJ8WX9Etlo6WUJgk4JF7hBJ+wra\nY4EirsOt9l4zk8fjiLADgYMB+sySQl3sy4cVY9dI1UhQPpVoyjZ9JV7qZVwCAXqV\nZug7ulwQUULJDXQnmC7ZCQDJSolJ2wg0cC1FyLakZdZfRS9dhtnrzcbn5th1e/0n\nngQHunR8C94LuCFr+qJZa1+D813T5+OwFUThzwk7B+Ke35wZHALtgvnM0Jc6OR5+\nXVAk0fYAh/fKvIIOoKgF+qRNGcUP83rXQeg69J5mAezb4mw638LuOmKia+EOhoAx\n-----END CERTIFICATE-----"
+		        secret_manager_stored_client_key = google_secret_manager_secret_version.client_key.name
+		    }
     }
 }
 `, context)

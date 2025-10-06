@@ -530,6 +530,7 @@ properties:
         required: true
       - name: 'password'
         type: String
+        custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_mongodb_profile_password.go.tmpl'
         description: |
           Password for the MongoDB connection. Mutually exclusive with the secretManagerStoredPassword field.
         exactly_one_of:
@@ -551,33 +552,48 @@ properties:
           - name: 'clientKey'
             type: String
             description: |
-              PEM-encoded private key associated with the Client Certificate. If this field is used then the 'clientCertificate' and the 'caCertificate' fields are mandatory.
+              PEM-encoded private key associated with the Client Certificate.
+              If this field is used then the 'client_certificate' and the
+              'ca_certificate' fields are mandatory.
+            immutable: true
+            sensitive: true
             exactly_one_of:
               - mongodb_profile.0.ssl_config.0.client_key
               - mongodb_profile.0.ssl_config.0.secret_manager_stored_clientKey
+            custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_mongodb_profile_ssl_config_client_key.go.tmpl'
           - name: 'clientKeySet'
             type: Boolean
-            output: true
             description: |
               Indicates whether the clientKey field is set.
+            output: true
           - name: 'clientCertificate'
             type: String
             description: |
-              PEM-encoded certificate that will be used by the replica to authenticate against the source database server. If this field is used then the 'clientKey' and the 'caCertificate' fields are mandatory.
+              PEM-encoded certificate that will be used by the replica to
+              authenticate against the source database server. If this field
+              is used then the 'clientKey' and the 'caCertificate' fields are
+              mandatory.
+            immutable: true
+            sensitive: true
+            custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_mongodb_profile_ssl_config_client_certificate.go.tmpl'
           - name: 'clientCertificateSet'
             type: Boolean
-            output: true
             description: |
               Indicates whether the clientCertificate field is set.
+            output: true
           - name: 'caCertificate'
             type: String
             description: |
-              PEM-encoded certificate of the CA that signed the source database server's certificate.
+              PEM-encoded certificate of the CA that signed the source database
+              server's certificate.
+            immutable: true
+            sensitive: true
+            custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_mongodb_profile_ssl_config_ca_certificate.go.tmpl'
           - name: 'caCertificateSet'
             type: Boolean
-            output: true
             description: |
-              Indicates whether the caCertificate field is set.
+              Indicates whether the clientKey field is set.
+            output: true
           - name: 'secretManagerStoredClientKey'
             type: String
             description: |
