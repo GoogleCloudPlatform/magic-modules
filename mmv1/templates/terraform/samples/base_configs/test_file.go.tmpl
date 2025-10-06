@@ -96,6 +96,11 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 			 Config: testAcc{{ $st.TestStepSlug $.Res.ProductMetadata.Name $.Res.Name }}(context),
 			{{- else }}
 			 Config: testAcc{{ $st.TestStepSlug $.Res.ProductMetadata.Name $.Res.Name }}(context_{{ $i }}),
+			 ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("{{ $s.ResourceType $.Res.TerraformName }}.{{ $s.PrimaryResourceId }}", plancheck.ResourceActionUpdate),
+					},
+				},
 			{{- end }}
 			},
 			{{- if not $st.ExcludeImportTest }}

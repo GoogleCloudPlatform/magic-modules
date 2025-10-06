@@ -77,6 +77,7 @@ samples:
           cloud_run_service_name: 'cloudrun-service'
           secret_id: 'secret-1'
           cloud_run_sql_name: 'cloudrun-sql'
+        vars:  
           deletion_protection: 'true'
         test_vars_overrides:
           'deletion_protection': 'false'
@@ -210,6 +211,27 @@ samples:
           cloud_run_service_name: 'cloudrun-iap-service'
         ignore_read_extra:
           - 'deletion_protection'
+  - name: 'cloudrunv2_service_full_update_convert'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service%s", context["random_suffix"])'
+    steps:
+      - name: 'cloudrunv2_service_full_convert'
+        prefixed_vars:
+          cloud_run_service_name: 'cloudrun-service'
+          service_account_id: 'my-account'
+        ignore_read_extra:
+          - 'deletion_protection'
+        exclude_docs: true
+      - name: 'cloudrunv2_service_full_update_convert'
+        prefixed_vars:
+          cloud_run_service_name: 'cloudrun-service'
+          service_account_id: 'my-account'
+          vpc_access_connector_name: 'run-vpc'
+          compute_subnetwork_name: 'run-subnetwork'
+          compute_network_name: 'run-network'
+        ignore_read_extra:
+          - 'deletion_protection'
+        exclude_docs: true
   # - name: 'cloudrunv2_service_basic_test1'
   #   primary_resource_id: 'default'
   #   skip_vcr: true

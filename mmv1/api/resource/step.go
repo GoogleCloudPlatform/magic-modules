@@ -34,8 +34,6 @@ type Step struct {
 
 	ConfigPath string `yaml:"config_path,omitempty"`
 
-	MinVersion string `yaml:"min_version,omitempty"`
-
 	GenerateDoc bool `yaml:"generate_doc,omitempty"`
 
 	PrefixedVars map[string]string `yaml:"prefixed_vars,omitempty"`
@@ -91,24 +89,24 @@ type Step struct {
 	// See test_vars_overrides for more details
 	OicsVarsOverrides map[string]string `yaml:"oics_vars_overrides,omitempty"`
 
-	// // The version name of of the example's version if it's different than the
-	// // resource version, eg. `beta`
-	// //
-	// // This should be the highest version of all the features used in the
-	// // example; if there's a single beta field in an example, the example's
-	// // min_version is beta. This is only needed if an example uses features
-	// // with a different version than the resource; a beta resource's examples
-	// // are all automatically versioned at beta.
-	// //
-	// // When an example has a version of beta, each resource must use the
-	// // `google-beta` provider in the config. If the `google` provider is
-	// // implicitly used, the test will fail.
-	// //
-	// // NOTE: Until Terraform 0.12 is released and is used in the OiCS tests, an
-	// // explicit provider block should be defined. While the tests @ 0.12 will
-	// // use `google-beta` automatically, past Terraform versions required an
-	// // explicit block.
-	// MinVersion string `yaml:"min_version,omitempty"`
+	// The version name of of the example's version if it's different than the
+	// resource version, eg. `beta`
+	//
+	// This should be the highest version of all the features used in the
+	// example; if there's a single beta field in an example, the example's
+	// min_version is beta. This is only needed if an example uses features
+	// with a different version than the resource; a beta resource's examples
+	// are all automatically versioned at beta.
+	//
+	// When an example has a version of beta, each resource must use the
+	// `google-beta` provider in the config. If the `google` provider is
+	// implicitly used, the test will fail.
+	//
+	// NOTE: Until Terraform 0.12 is released and is used in the OiCS tests, an
+	// explicit provider block should be defined. While the tests @ 0.12 will
+	// use `google-beta` automatically, past Terraform versions required an
+	// explicit block.
+	MinVersion string `yaml:"min_version,omitempty"`
 
 	// Extra properties to ignore read on during import.
 	// These properties will likely be custom code.
@@ -145,7 +143,6 @@ func (s *Step) TestStepSlug(productName, resourceName string) string {
 }
 
 func (s *Step) Validate(rName, sName string) {
-	fmt.Println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~ check when this happends")
 	// TODO: Add check identifier when it's implemented
 	if s.Name == "" {
 		log.Fatalf("Missing `name` for one step in test sample %s in resource %s", sName, rName)
@@ -211,7 +208,7 @@ func (s *Step) SetHCLText() {
 	s.DocumentationHCLText = re2.ReplaceAllString(s.DocumentationHCLText, "")
 
 	testPrefixedVars := make(map[string]string)
-	// testVars := make(map[string]string)
+	testVars := make(map[string]string)
 	testTestEnvVars := make(map[string]string)
 	// Override prefixed_vars to inject test values into configs - will have
 	//   - "a-example-var-value%{random_suffix}""
@@ -233,14 +230,10 @@ func (s *Step) SetHCLText() {
 		testPrefixedVars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
 	}
 
-	// for key := range s.originalVars {
-	// 	testVars[key] = fmt.Sprintf("%%{%s}", key)
-	// }
-
 	// Apply overrides from YAML
 	for key := range s.TestVarsOverrides {
 		testPrefixedVars[key] = fmt.Sprintf("%%{%s}", key)
-		// testVars[key] = fmt.Sprintf("%%{%s}", key)
+		testVars[key] = fmt.Sprintf("%%{%s}", key)
 	}
 
 	for key := range originalTestEnvVars {
