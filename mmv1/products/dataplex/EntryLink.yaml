@@ -20,9 +20,9 @@ references:
     'Official Documentation': 'https://cloud.google.com/dataplex/docs' # Update with specific EntryLink docs when available
   api: 'https://cloud.google.com/dataplex/docs/reference/rest/v1/projects.locations.entryGroups.entryLinks'
 docs:
-base_url: '{{entry_group}}/entryLinks'
+base_url: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entryLinks'
 self_link: '{{name}}'
-create_url: '{{entry_group}}/entryLinks?entryLinkId={{entry_link_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entryLinks?entryLinkId={{entry_link_id}}'
 update_verb: 'PATCH'
 update_mask: true
 import_format:
@@ -51,11 +51,10 @@ examples:
   #     - 'google_dataplex_entry.source'
   #     - 'google_dataplex_entry.target'
 parameters:
-  - name: 'entryGroup'
+  - name: 'entryGroupId'
     type: String
     description: |
-      The name of the entry group this entry link is in.
-      Format: projects/{project}/locations/{location}/entryGroups/{entry_group}
+      The id of the entry group this entry link is in.
     url_param_only: true
     required: true
     immutable: true
@@ -73,13 +72,13 @@ parameters:
   #   url_param_only: true
   #   required: true
   #   immutable: true
-  # - name: location
-  #   type: String
-  #   description: The location for the entry.
-  #   var: true
-  #   url_param_only: true
-  #   required: true
-  #   immutable: true
+  - name: location
+    type: String
+    description: The location for the entry.
+    var: true
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
   - name: 'name'
     type: String
