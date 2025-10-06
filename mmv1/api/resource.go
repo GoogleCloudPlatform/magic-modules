@@ -2084,21 +2084,11 @@ func (r Resource) TestSampleSetUp() {
 				step.ConfigPath = fmt.Sprintf("templates/terraform/samples/services/%s/%s.tf.tmpl", step.ProductName, step.Name)
 			}
 			step.SetHCLText()
-			fmt.Println("///////////////////////////")
-			fmt.Println("r.ProductMetadata.ApiName", r.ProductMetadata.ApiName)
-			fmt.Println("step.ProductName", step.ProductName)
 			configName := step.Name
 			if _, ok := res[step.Name]; !ok {
 				res[configName] = sample.Name
 				sample.NewConfigFuncs = append(sample.NewConfigFuncs, *step)				
 			}
-		}
-	}
-
-	for _, sample := range r.Samples {
-		for _, step := range sample.Steps {
-			fmt.Println("!!!!!!!!!!!!!!!!!!!!!!!")
-			fmt.Println(step.ProductName)
 		}
 	}
 }
