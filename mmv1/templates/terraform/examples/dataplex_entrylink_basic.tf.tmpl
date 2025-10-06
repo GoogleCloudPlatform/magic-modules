@@ -1,0 +1,47 @@
+resource "google_dataplex_entry_group" "entry-group-basic" {
+  project = "{{index $.TestEnvVars "project_number"}}"
+  location = "us-central1"
+  entry_group_id = "{{index $.Vars "entry_group_name"}}"
+}
+
+resource "google_dataplex_entry_type" "entry-type-basic" {
+  entry_type_id = "{{index $.Vars "entry_type_name"}}"
+  project = "{{index $.TestEnvVars "project_number"}}"
+  location = "us-central1"
+}
+
+resource "google_dataplex_entry" "source" {
+  project = "{{index $.TestEnvVars "project_number"}}"
+  location = "us-central1"
+  entry_group_id = google_dataplex_entry_group.entry-group-basic.entry_group_id
+  entry_id = "{{index $.Vars "source_entry_id"}}"
+  entry_type = google_dataplex_entry_type.entry-type-basic.name
+}
+
+resource "google_dataplex_entry" "target" {
+  project = "{{index $.TestEnvVars "project_number"}}"
+  location = "us-central1"
+  entry_group_id = "@dataplex"
+  entry_id = "{{index $.Vars "target_entry_id"}}"
+  entry_type = "projects/655216118709/locations/global/entryTypes/glossary-term"
+}
+
+resource "google_dataplex_entry_link" "basic_entry_link" {
+  project = "{{index $.TestEnvVars "project_number"}}"
+  location = "us-central1"
+  entry_group_id = google_dataplex_entry_group.entry-group-basic.entry_group_id
+  entry_link_id = "{{index $.Vars "entry_link_id"}}"
+
+  entry_link_type = "projects/655216118709/locations/global/entryLinkTypes/defintion"
+
+  entry_references {
+    name = google_dataplex_entry.source.name
+    type = "SOURCE"
+  }
+
+  entry_references {
+    name = google_dataplex_entry.target.name
+    type = "TARGET"
+  }
+}
+
