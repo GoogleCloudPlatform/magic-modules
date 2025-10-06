@@ -310,10 +310,6 @@ func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData Template
 			return e.ExcludeTest
 		})
 
-		// fmt.Println("??????????????????????????????????????///////////////////////////////////")
-		// fmt.Println("examples #", len(examples))
-		// fmt.Println("samples #", len(samples))
-
 		if len(examples) != 0 && len(samples) != 0 {
 			log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
 		}
