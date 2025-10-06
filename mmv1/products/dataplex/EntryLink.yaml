@@ -23,7 +23,7 @@ docs:
 base_url: '{{entry_group}}/entryLinks'
 self_link: '{{name}}'
 create_url: '{{entry_group}}/entryLinks?entryLinkId={{entry_link_id}}'
-update_verb: 'PATCH' # Assuming PATCH is supported for updates, adjust if needed
+update_verb: 'PATCH'
 update_mask: true
 import_format:
   - '{{name}}'
@@ -37,7 +37,6 @@ examples:
     vars:
       entry_link_id: 'my_entry_link_basic'
       entry_group_id: 'my_entry_group_basic'
-      entry_type_id: 'my_entry_type_basic'
       source_entry_id: 'source_entry_basic'
       target_entry_id: 'target_entry_basic'
   # - name: 'dataplex_entry_link_full'
