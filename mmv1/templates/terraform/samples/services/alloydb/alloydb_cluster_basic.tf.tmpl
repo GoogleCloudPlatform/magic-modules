@@ -1,0 +1,15 @@
+resource "google_alloydb_cluster" "{{$.PrimaryResourceId}}" {
+  cluster_id = "{{index $.PrefixedVars "alloydb_cluster_name"}}"
+  location   = "us-central1"
+  network_config {
+    network = google_compute_network.default.id
+  }
+
+  deletion_protection = false
+}
+
+data "google_project" "project" {}
+
+resource "google_compute_network" "default" {
+  name = "{{index $.PrefixedVars "alloydb_cluster_name"}}"
+}

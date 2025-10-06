@@ -1,0 +1,3 @@
+resource "google_sourcerepo_repository" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.PrefixedVars "repository_name"}}"
+}

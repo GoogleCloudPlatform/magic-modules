@@ -1,0 +1,5 @@
+resource "google_gemini_code_repository_index" "example" {
+  location = "us-central1"
+  code_repository_index_id = "code-repository-index-example"
+  kms_key = "projects/projectExample/locations/locationExample/keyRings/keyRingExample/cryptoKeys/cryptoKeyExample"
+}

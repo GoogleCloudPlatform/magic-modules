@@ -1,0 +1,12 @@
+resource "google_project" "project" {
+  project_id      = "{{index $.TestEnvVars "project"}}"
+  name            = "{{index $.TestEnvVars "project"}}"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_access_context_manager_access_policy" "{{$.PrimaryResourceId}}" {
+  parent = "organizations/{{index $.TestEnvVars "org_id"}}"
+  title  = "Scoped Access Policy"
+  scopes = ["projects/${google_project.project.number}"]
+}
