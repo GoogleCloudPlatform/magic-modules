@@ -22,6 +22,11 @@ func EmptyOrFalseSuppressBoolean(k, old, new string, d *schema.ResourceData) boo
 	return (o == nil && !n.(bool))
 }
 
+func EmptyStringOrNilDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	o, n := d.GetChange(k)
+	return (o == nil || o == "") && (n != nil && n != "")
+}
+
 func CaseDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	return strings.ToUpper(old) == strings.ToUpper(new)
 }
