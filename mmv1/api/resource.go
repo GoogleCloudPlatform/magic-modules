@@ -2079,7 +2079,7 @@ func (r Resource) TestSampleSetUp() {
 				continue
 			}
 			step.PrimaryResourceId = sample.PrimaryResourceId
-			step.ProductName = r.ProductMetadata.ApiName
+			step.ProductName = r.ProductMetadata.Name
 			if step.ConfigPath == "" {
 				step.ConfigPath = fmt.Sprintf("templates/terraform/samples/services/%s/%s.tf.tmpl", step.ProductName, step.Name)
 			}
