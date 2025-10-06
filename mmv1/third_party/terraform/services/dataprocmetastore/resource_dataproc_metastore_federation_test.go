@@ -149,7 +149,7 @@ func testAccCheckMetastoreFederationHasTagBindings(t *testing.T) func(s *terrafo
 			var configuredTagValueNamespacedName string
 			var tagKeyNamespacedName, tagValueShortName string
 			for key, val := range rs.Primary.Attributes {
-				if strings.HasPrefix(key, "tags.") && key != "tags.#" {
+				if strings.HasPrefix(key, "tags.") && key != "tags.%" {
 					tagKeyNamespacedName = strings.TrimPrefix(key, "tags.")
 					tagValueShortName = val
 					if tagValueShortName != "" {
