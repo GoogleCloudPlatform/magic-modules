@@ -71,6 +71,8 @@ You will also need to add an entry to [`tgc_next/provider/provider_mmv1_resource
 // ...
 ```
 
+{{< /tab >}}
+
 ###### Resource_tfplan2cai.go file
 Most resources will only need a resource converter with a conversion func. For example,  Resource resource within Product, this might look like:
 
