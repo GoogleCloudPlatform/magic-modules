@@ -351,7 +351,15 @@ service/developerconnect:
   - google_developer_connect_.*
 service/dialogflow:
   resources:
-  - google_dialogflow_.*
+  - google_dialogflow_conversation_profile
+service/dialogflow-cx:
+  resources:
+  - google_dialogflow_cx_.*
+  - google_dialogflow_agent
+  - google_dialogflow_encryption_spec
+  - google_dialogflow_entity_type
+  - google_dialogflow_fulfillment
+  - google_dialogflow_intent
 service/discoveryengine:
   resources:
   - google_discovery_engine_.*
@@ -475,6 +483,7 @@ service/integrations:
 service/logging:
   resources:
   - google_logging_.*
+  - google_observability_.*
 service/looker-core:
   resources:
   - google_looker_instance

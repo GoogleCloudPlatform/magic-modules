@@ -359,7 +359,6 @@ properties:
     type: Boolean
     description: |-
       Disables public resolution of the default URI of this service.
-    min_version: 'beta'
   - name: 'template'
     type: NestedObject
     description: |
@@ -994,6 +993,9 @@ properties:
       - name: 'gpuZonalRedundancyDisabled'
         type: Boolean
         description: True if GPU zonal redundancy is disabled on this revision.
+      - name: 'healthCheckDisabled'
+        type: Boolean
+        description: Disables health checking containers during deployment.
   - name: 'traffic'
     type: Array
     description: |-
