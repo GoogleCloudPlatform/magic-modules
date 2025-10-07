@@ -20,8 +20,8 @@ references:
     'Official Documentation': 'https://cloud.google.com/dataplex/docs' # Update with specific EntryLink docs when available
   api: 'https://cloud.google.com/dataplex/docs/reference/rest/v1/projects.locations.entryGroups.entryLinks'
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entryLinks'
-self_link: '{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entryLinks/{{entry_link_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entryLinks/{{entry_link_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entryLinks?entryLinkId={{entry_link_id}}'
 update_verb: 'PATCH'
 update_mask: true
