@@ -373,13 +373,13 @@ Defaults to false.
 
 * `mode` - (Optional) Specifies how each file's mode attribute should be handled by the transfer.
 
-* `gid` - (Required) "Specifies how each file's POSIX group ID (GID) attribute should be handled by the transfer.
+* `gid` - (Required) Specifies how each file's POSIX group ID (GID) attribute should be handled by the transfer.
 
 * `uid` - (Optional) Specifies how each file's POSIX user ID (UID) attribute should be handled by the transfer.
 
-* `acl` - (Optional) "Specifies how each object's ACLs should be preserved for transfers between Google Cloud Storage buckets.
+* `acl` - (Optional) Specifies how each object's ACLs should be preserved for transfers between Google Cloud Storage buckets.
 
-* `storage_class` - (Optional) "Specifies the storage class to set on objects being transferred to Google Cloud Storage buckets.
+* `storage_class` - (Optional) Specifies the storage class to set on objects being transferred to Google Cloud Storage buckets.
 
 * `temporary_hold` - (Optional) Specifies how each object's temporary hold status should be preserved for transfers between Google Cloud Storage buckets.
 
