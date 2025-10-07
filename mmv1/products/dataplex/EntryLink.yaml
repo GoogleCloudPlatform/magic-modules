@@ -122,7 +122,6 @@ properties:
           description: |
             The reference type of the Entry.
           immutable: true
-          required: true
           enum_values:
             - 'UNSPECIFIED'
             - 'SOURCE'
