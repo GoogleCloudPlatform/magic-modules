@@ -96,6 +96,25 @@ resource "google_app_engine_standard_app_version" "bundled_service_example" {
   service    = "{{index $.Vars "service_name"}}"
   version_id = "v1"
   runtime    = "python38"
+
+  entrypoint {
+    shell = "gunicorn -b :$PORT main:app"
+  }
+
+  deployment {
+    zip {
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.object.name}"
+    }
+  }
+
+  env_variables = {
+    port = "8080"
+  }
+
+  basic_scaling {
+    max_instances = 5
+  }
+  
   app_engine_bundled_services = [
     "BUNDLED_SERVICE_TYPE_APP_IDENTITY_SERVICE",
     "BUNDLED_SERVICE_TYPE_BLOBSTORE",
