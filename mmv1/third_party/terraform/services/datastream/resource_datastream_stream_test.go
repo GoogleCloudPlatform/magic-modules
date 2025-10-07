@@ -382,7 +382,6 @@ resource "google_datastream_stream" "default" {
 
     source_config {
         source_connection_profile = google_datastream_connection_profile.mongo_source.id
-        max_concurrent_backfill_tasks = 14
         mongodb_source_config {
             include_objects {
                 databases {
@@ -409,6 +408,7 @@ resource "google_datastream_stream" "default" {
                     }
                 }
             }
+            max_concurrent_backfill_tasks = 14
         }
     }
 
@@ -508,7 +508,6 @@ resource "google_datastream_stream" "default" {
 
     source_config {
         source_connection_profile = google_datastream_connection_profile.mongo_source.id
-        max_concurrent_backfill_tasks = 25
         mongodb_source_config {
             include_objects {
                 databases {
@@ -543,6 +542,7 @@ resource "google_datastream_stream" "default" {
                     }
                 }
             }
+            max_concurrent_backfill_tasks = 25
         }
     }
 
