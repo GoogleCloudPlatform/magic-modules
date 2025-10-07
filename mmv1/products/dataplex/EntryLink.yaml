@@ -36,11 +36,7 @@ examples:
     primary_resource_id: 'basic_entry_link'
     primary_resource_name: 'fmt.Sprintf("tf-test-entry-link-basic%s", context["random_suffix"])'
     vars:
-      entry_type_name: 'entry_type_basic'
       entry_link_name: 'entry_link_basic'
-      entry_group_name: 'entry_group_basic'
-      source_entry_id: 'source_entry_basic'
-      target_entry_id: 'target_entry_basic'
   # - name: 'dataplex_entry_link_full'
   #   primary_resource_id: 'full_entry_link'
   #   vars:
