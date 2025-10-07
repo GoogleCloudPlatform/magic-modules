@@ -465,17 +465,17 @@ properties:
     item_type:
       type: Enum
       enum_values:
-        - 'app_identity_service'
-        - 'blobstore'
-        - 'capability_service'
-        - 'datastore_v3'
-        - 'images'
-        - 'mail'
-        - 'memcache'
-        - 'modules'
-        - 'search'
-        - 'taskqueue'
-        - 'urlfetch'
-        - 'user'
+        - 'BUNDLED_SERVICE_TYPE_APP_IDENTITY_SERVICE'
+        - 'BUNDLED_SERVICE_TYPE_BLOBSTORE'
+        - 'BUNDLED_SERVICE_TYPE_CAPABILITY_SERVICE'
+        - 'BUNDLED_SERVICE_TYPE_DATASTORE_V3'
+        - 'BUNDLED_SERVICE_TYPE_IMAGES'
+        - 'BUNDLED_SERVICE_TYPE_MAIL'
+        - 'BUNDLED_SERVICE_TYPE_MEMCACHE'
+        - 'BUNDLED_SERVICE_TYPE_MODULES'
+        - 'BUNDLED_SERVICE_TYPE_SEARCH'
+        - 'BUNDLED_SERVICE_TYPE_TASKQUEUES'
+        - 'BUNDLED_SERVICE_TYPE_URLFETCH'
+        - 'BUNDLED_SERVICE_TYPE_USERS'
     conflicts:
       - app_engine_apis
