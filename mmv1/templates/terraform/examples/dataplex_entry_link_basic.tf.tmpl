@@ -36,11 +36,11 @@ resource "google_dataplex_entry_link" "{{$.PrimaryResourceId}}" {
 
   entry_references {
     name = google_dataplex_entry.source.name
-    type = "SOURCE"
+    type = "UNSPECIFIED"
   }
 
   entry_references {
     name = google_dataplex_entry.target.name
-    type = "TARGET"
+    type = "UNSPECIFIED"
   }
 }
