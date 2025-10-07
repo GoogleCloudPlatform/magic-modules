@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -30,6 +31,11 @@ func TestAccGkeonpremVmwareNodePool_vmwareNodePoolUpdate(t *testing.T) {
 			},
 			{
 				Config: testAccGkeonpremVmwareNodePool_vmwareNodePoolUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_gkeonprem_vmware_node_pool.nodepool", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_gkeonprem_vmware_node_pool.nodepool",
