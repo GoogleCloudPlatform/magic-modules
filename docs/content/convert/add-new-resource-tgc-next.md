@@ -1,3 +1,10 @@
+---
+title: "Add a TGC next resource"
+weight: 20
+aliases:
+  - /convert/add-resource
+---
+
 # Adding support for converting a new resource
 
 terraform-google-conversion (TGC) consumes a Terraform plan and uses it to build Cloud Asset Inventory (CAI) Assets. These built Assets only exist locally, in memory.
