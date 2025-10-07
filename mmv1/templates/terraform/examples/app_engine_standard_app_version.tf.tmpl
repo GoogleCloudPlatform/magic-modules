@@ -91,7 +91,7 @@ resource "google_storage_bucket_object" "object" {
   source = "./test-fixtures/hello-world.zip"
 }
 
-resource "google_app_engine_standard_app_version" "{{$.PrimaryResourceId}}" {
+resource "google_app_engine_standard_app_version" "bundled_service_example" {
   project    = "{{index $.Vars "project_id"}}"
   service    = "{{index $.Vars "service_name"}}"
   version_id = "v1"
