@@ -136,6 +136,7 @@ properties:
     type: String
     description: |
       Reference to a SecurityProfile with the URL filtering configuration for the SecurityProfileGroup.
+    is_missing_in_cai: true
   - name: 'customMirroringProfile'
     type: String
     description: |
