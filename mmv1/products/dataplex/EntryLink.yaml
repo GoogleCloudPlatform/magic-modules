@@ -26,7 +26,7 @@ create_url: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_gro
 update_verb: 'PATCH'
 update_mask: true
 import_format:
-  - '{{name}}'
+  - 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entryLinks/{{entry_link_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
