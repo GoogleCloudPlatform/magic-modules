@@ -409,7 +409,6 @@ resource "google_datastream_stream" "default" {
                     }
                 }
             }
-            max_concurrent_backfill_tasks = 14
         }
     }
 
@@ -544,7 +543,6 @@ resource "google_datastream_stream" "default" {
                     }
                 }
             }
-            max_concurrent_backfill_tasks = 25
         }
     }
 
