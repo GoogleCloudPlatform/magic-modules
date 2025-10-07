@@ -300,7 +300,7 @@ func TestAccDatastreamStream_mongoDb(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_datastream_stream.default", "display_name", "tf-mongodb-gcs"),
 					resource.TestCheckResourceAttr("google_datastream_stream.default", "state", "NOT_STARTED"),
-					resource.TestCheckResourceAttr("google_datastream_stream.default", "source_config.0.max_concurrent_backfill_tasks", "25"),
+					resource.TestCheckResourceAttr("google_datastream_stream.default", "source_config.0.mongodb_source_config.0.max_concurrent_backfill_tasks", "25"),
 					resource.TestCheckResourceAttr("google_datastream_stream.default", "source_config.0.mongodb_source_config.0.include_objects.0.databases.0.collections.#", "3"),
 					resource.TestCheckResourceAttr("google_datastream_stream.default", "source_config.0.mongodb_source_config.0.exclude_objects.0.databases.0.collections.0.fields.#", "2"),
 					resource.TestCheckResourceAttr("google_datastream_stream.default", "backfill_all.0.mongodb_excluded_objects.0.databases.0.collections.#", "2"),
@@ -383,6 +383,7 @@ resource "google_datastream_stream" "default" {
     source_config {
         source_connection_profile = google_datastream_connection_profile.mongo_source.id
         mongodb_source_config {
+            max_concurrent_backfill_tasks = 14
             include_objects {
                 databases {
                     database = "test"
@@ -408,7 +409,6 @@ resource "google_datastream_stream" "default" {
                     }
                 }
             }
-            max_concurrent_backfill_tasks = 14
         }
     }
 
@@ -509,6 +509,7 @@ resource "google_datastream_stream" "default" {
     source_config {
         source_connection_profile = google_datastream_connection_profile.mongo_source.id
         mongodb_source_config {
+            max_concurrent_backfill_tasks = 25
             include_objects {
                 databases {
                     database = "test"
@@ -542,7 +543,6 @@ resource "google_datastream_stream" "default" {
                     }
                 }
             }
-            max_concurrent_backfill_tasks = 25
         }
     }
 
