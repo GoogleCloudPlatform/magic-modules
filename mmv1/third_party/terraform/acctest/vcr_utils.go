@@ -255,10 +255,36 @@ func HandleVCRConfiguration(ctx context.Context, testName string, rndTripper htt
 		diags.AddError("error creating record as new mode", err.Error())
 		return pollInterval, rndTripper, diags
 	}
+
+	// Add a passthrough for nodePools and instanceGroupManagers list call
+	// context:
+	// https://github.com/GoogleCloudPlatform/magic-modules/pull/14175
+	// https://github.com/GoogleCloudPlatform/magic-modules/pull/15086
+	rec.AddPassthrough(NewListCallPassthrough("/nodePools"))
+	rec.AddPassthrough(NewListCallPassthrough("/instanceGroupManagers"))
+
 	// Defines how VCR will match requests to responses.
 	rec.SetMatcher(NewVcrMatcherFunc(ctx))
 
 	return pollInterval, rec, diags
+}
+
+// NewListCallPassthrough creates a VCR passthrough filter that ignores
+// list calls for given resources
+func NewListCallPassthrough(urlSuffix string) func(r *http.Request) bool {
+	return func(r *http.Request) bool {
+		// Check if it's a GET request
+		if r.Method != http.MethodGet {
+			return false
+		}
+
+		// Check if the request url path ends with the given suffix
+		if strings.HasSuffix(r.URL.Path, urlSuffix) {
+			return true
+		}
+
+		return false
+	}
 }
 
 // NewVcrMatcherFunc returns a function used for matching HTTP requests with data recorded in VCR cassettes
