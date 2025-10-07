@@ -32,15 +32,13 @@ resource "google_dataplex_entry_link" "{{$.PrimaryResourceId}}" {
   entry_group_id = google_dataplex_entry_group.entry-group-basic.entry_group_id
   entry_link_id = "tf-test-entry-link%{random_suffix}"
 
-  entry_link_type = "projects/655216118709/locations/global/entryLinkTypes/definition"
+  entry_link_type = "projects/655216118709/locations/global/entryLinkTypes/related"
 
   entry_references {
     name = google_dataplex_entry.source.name
-    type = "SOURCE"
   }
 
   entry_references {
     name = google_dataplex_entry.target.name
-    type = "TARGET"
   }
 }
