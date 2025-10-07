@@ -886,7 +886,6 @@ properties:
           - 'grpc_health_check.0.port_specification'
           - 'grpc_health_check.0.grpc_service_name'
   - name: 'grpcTlsHealthCheck'
-    min_version: beta
     type: NestedObject
     exactly_one_of:
       - 'http_health_check'
