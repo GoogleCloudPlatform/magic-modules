@@ -385,7 +385,7 @@ Defaults to false.
 
 * `kms_key` - (Optional) Specifies how each object's Cloud KMS customer-managed encryption key (CMEK) is preserved for transfers between Google Cloud Storage buckets.
 
-* `time_created` - (Optional) Specifies how each object's timeCreated metadata is preserved for transfers.
+* `time_created` - (Optional) Specifies how each object's time created metadata is preserved for transfers.
 
 ## Attributes Reference
 
