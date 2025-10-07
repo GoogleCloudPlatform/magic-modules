@@ -80,4 +80,3 @@ properties:
     type: String
     description: The last update timestamp of the trace scope.
     output: true
-
