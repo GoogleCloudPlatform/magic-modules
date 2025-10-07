@@ -16,8 +16,7 @@ name: 'LicenseConfig'
 description: |
   License Configuration.
 references:
-  # TODO: update public doc
-  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rpc/google.cloud.discoveryengine.v1alpha#aclconfigservice'
+  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.licenseConfigs'
 base_url: 'projects/{{project}}/locations/{{location}}/licenseConfigs'
 self_link: 'projects/{{project}}/locations/{{location}}/licenseConfigs/{{license_config_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/licenseConfigs?licenseConfigId={{license_config_id}}'
