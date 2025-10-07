@@ -1,6 +1,7 @@
 resource "google_dataplex_entry_group" "entry-group-basic" {
   location = "us-central1"
   entry_group_id = "tf-test-entry-group%{random_suffix}"
+  project = "{{index $.TestEnvVars "project_number"}}"
 }
 
 resource "google_dataplex_entry" "source" {
@@ -8,11 +9,13 @@ resource "google_dataplex_entry" "source" {
   entry_group_id = google_dataplex_entry_group.entry-group-basic.entry_group_id
   entry_id = "tf-test-source-entry%{random_suffix}"
   entry_type = google_dataplex_entry_type.entry-type-basic.name
+  project = "{{index $.TestEnvVars "project_number"}}"
 }
 
 resource "google_dataplex_entry_type" "entry-type-basic" {
   entry_type_id = "tf-test-entry-type%{random_suffix}"
   location = "us-central1"
+  project = "{{index $.TestEnvVars "project_number"}}"
 }
 
 resource "google_dataplex_entry" "target" {
@@ -20,9 +23,11 @@ resource "google_dataplex_entry" "target" {
   entry_group_id = google_dataplex_entry_group.entry-group-basic.entry_group_id
   entry_id = "tf-test-target-entry%{random_suffix}"
   entry_type = google_dataplex_entry_type.entry-type-basic.name
+  project = "{{index $.TestEnvVars "project_number"}}"
 }
 
 resource "google_dataplex_entry_link" "{{$.PrimaryResourceId}}" {
+  project = "{{index $.TestEnvVars "project_number"}}"
   location = "us-central1"
   entry_group_id = google_dataplex_entry_group.entry-group-basic.entry_group_id
   entry_link_id = "tf-test-entry-link%{random_suffix}"
