@@ -170,6 +170,95 @@ properties:
                       type: String
                       description: |-
                         The Cloud Secret Manager secret version. Can be 'latest' for the latest version, an integer for a specific version, or a version alias.
+          - name: 'pscInterfaceConfig'
+            type: NestedObject
+            description: |-
+              Optional. Configuration for PSC-Interface.
+            properties:
+              - name: 'networkAttachment'
+                type: String
+                description: |-
+                  Optional. The name of the Compute Engine network attachment
+                  to attach to the resource within the region and user project.
+                  To specify this field, you must have already created a network attachment.
+                  This field is only used for resources using PSC-Interface.
+              - name: 'dnsPeeringConfig'
+                type: 'Array'
+                description: |
+                  Optional. DNS peering configurations.
+                  When specified, Vertex AI will attempt to configure DNS
+                  peering zones in the tenant project VPC to resolve the
+                  specified domains using the target network's Cloud DNS.
+                  The user must grant the dns.peer role to the Vertex AI
+                  service Agent on the target project.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: 'domain'
+                      type: String
+                      description: |
+                        Required. The DNS name suffix of the zone being peered
+                        to, e.g., "my-internal-domain.corp.".
+                        Must end with a dot.
+                      required: true
+                    - name: 'targetProject'
+                      type: String
+                      description: |
+                        Required. The project id hosting the Cloud DNS managed
+                        zone that contains the 'domain'.
+                        The Vertex AI service Agent requires the dns.peer role
+                        on this project.
+                      required: true
+                    - name: 'targetNetwork'
+                      type: String
+                      description: |
+                        Required. The VPC network name in the targetProject
+                        where the DNS zone specified by 'domain' is visible.
+                      required: true
+          - name: 'resourceLimits'
+            type: NestedObject
+            default_from_api: true
+            description: |-
+              Optional. Resource limits for each container.
+              Only 'cpu' and 'memory' keys are supported.
+
+              Defaults to {"cpu": "4", "memory": "4Gi"}.
+
+              The only supported values for CPU are '1', '2', '4', '6' and '8'.
+              For more information, go to
+              https://cloud.google.com/run/docs/configuring/cpu.
+
+              The only supported values for memory are '1Gi', '2Gi', ... '32 Gi'.
+              For more information, go to
+              https://cloud.google.com/run/docs/configuring/memory-limits.
+            properties:
+              - name: 'cpu'
+                type: String
+                description: |-
+                  Optional. CPU resource limits.
+              - name: 'memory'
+                type: String
+                description: |-
+                  Optional. Memory resource limits.
+          - name: 'minInstances'
+            type: 'Integer'
+            description: |
+              Optional. The maximum number of application instances that can be
+              launched to handle increased traffic. Defaults to 100. Range: [1, 1000].
+              If VPC-SC or PSC-I is enabled, the acceptable range is [1, 100].
+            default_from_api: true
+          - name: 'maxInstances'
+            type: 'Integer'
+            description: |
+              Optional. The minimum number of application instances that will be
+              kept running at all times. Defaults to 1. Range: [0, 10].
+            default_from_api: true
+          - name: 'containerConcurrency'
+            type: 'Integer'
+            description: |
+              Optional. Concurrency for each container and agent server.
+              Recommended value: 2 * cpu + 1. Defaults to 9.
+            default_from_api: true
       - name: 'packageSpec'
         type: NestedObject
         description: |-
