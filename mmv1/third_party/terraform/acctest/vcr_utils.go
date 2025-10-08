@@ -266,6 +266,8 @@ func HandleVCRConfiguration(ctx context.Context, testName string, rndTripper htt
 	// Defines how VCR will match requests to responses.
 	rec.SetMatcher(NewVcrMatcherFunc(ctx))
 
+	rec.SkipRequestLatency = true
+
 	return pollInterval, rec, diags
 }
 
