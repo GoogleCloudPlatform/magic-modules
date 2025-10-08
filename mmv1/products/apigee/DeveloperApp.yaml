@@ -171,23 +171,28 @@ properties:
           type: String
           description: |
             Consumer key.
+          output: true
         - name: "consumerSecret"
           type: String
           description: |
             Secret key.
           sensitive: true
+          output: true
         - name: "expiresAt"
           type: String
           description: |
             Time the credential will expire in milliseconds since epoch.
+          output: true
         - name: "issuedAt"
           type: String
           description: |
             Time the credential was issued in milliseconds since epoch.
+          output: true
         - name: "status"
           type: String
           description: |
             Status of the credential. Valid values include approved or revoked.
+          output: true
         - name: "scopes"
           type: Array
           description: |
@@ -196,10 +201,12 @@ properties:
             you associate with the app.
           item_type:
             type: String
+          output: true
         - name: "apiProducts"
           type: Array
           description: |
             List of API products this credential can be used for.
+          output: true
           item_type:
             type: NestedObject
             properties:
@@ -207,14 +214,17 @@ properties:
                 type: String
                 description: |
                   Name of the API product.
+                output: true
               - name: "status"
                 type: String
                 description: |
                   Status of the API product. Valid values are approved or revoked.
+                output: true
         - name: "attributes"
           type: Array
           description: |
             Developer attributes (name/value pairs). The custom attribute limit is 18.
+          output: true
           item_type:
             type: NestedObject
             properties:
@@ -222,7 +232,9 @@ properties:
                 type: String
                 description: |
                   Key of the attribute
+                output: true
               - name: "value"
                 type: String
                 description: |
                   Value of the attribute
+                output: true
