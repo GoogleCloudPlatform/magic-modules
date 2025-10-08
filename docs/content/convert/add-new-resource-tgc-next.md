@@ -7,11 +7,11 @@ aliases:
 
 # Adding support for converting a new resource
 
-terraform-google-conversion (TGC) consumes a Terraform plan and uses it to build Cloud Asset Inventory (CAI) Assets. These built Assets only exist locally, in memory.
+terraform-google-conversion (TGC) consumes a Terraform plan and uses it to build Cloud Asset Inventory (CAI) Assets. These built assets only exist in memory locally.
 
 TGC supports only those GCP resources that are available in both the Terraform provider and Cloud Asset Inventory.
 
-### Getting a terraform resource name from a GCP resource name
+### Getting a Terraform resource name from a GCP resource name
 
 The first step in determining if a GCP resource is supported is to identify the corresponding Terraform resource. You can often do this by searching for the GCP resource name in the [Terraform google-beta provider documentation](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs).
 
@@ -33,7 +33,7 @@ Each of these is discussed in more detail below.
 {{% tabs "resource" %}}
 {{< tab "MMv1" >}}
 
-#### 1. Adding a resource to TGC next (auto-generated)
+### 1. Adding a resource to TGC next (auto-generated)
 
 Magic Modules uses a shared code base to generate terraform-google-conversion and the [google](https://github.com/hashicorp/terraform-provider-google) and [google-beta](https://github.com/hashicorp/terraform-provider-google-beta) Terraform providers.
 Most Terraform resources are represented as [yaml files which are grouped by product](https://github.com/GoogleCloudPlatform/magic-modules/tree/master/mmv1/products).
@@ -207,15 +207,15 @@ You will also need to add an entry to [`tgc_next/cai2hcl/resource_converters.go.
 
 {{< /tab >}}
 
-#### 2. Generate terraform-google-conversion
+### 2. Generate terraform-google-conversion
 To generate terraform-google-conversion code locally, run the following from the root of the `magic-modules` repository:
 
 ```
 make tgc OUTPUT_PATH="/path/to/your/terraform-google-conversion"
 ```
 
-#### 3. Run tests locally
-##### Before you begin
+### 3. Run tests locally
+#### Before you begin
 1. Set the following environment variable:
 ```
 export WRITE_FILES=true
@@ -225,25 +225,25 @@ export WRITE_FILES=true
 
 	Ensure you have the correct Go version installed. Follow [Before you begin](https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/#before-you-begin) and [Setup your development environment](https://googlecloudplatform.github.io/magic-modules/develop/set-up-dev-environment/) from the [Magic Modules documentation](https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/).
 
-##### Run unit tests
+#### Run unit tests
 To run the unit tests locally, run the following from the root of the `terraform-google-conversion` repository:
 
 ```
 make test
 ```
 
-##### Run integration tests
+#### Run integration tests
 
 In the following examples, the resource being tested is `google_alloydb_backup`.
 
 To run the integration tests for the added resource locally, run the following from the root of the `terraform-google-conversion` repository:
 ```
-make test-integration TESTPATH=./test/services/alloydb  TESTARGS='-run=TestAccAlloydbBackup' > alloydbBackup.log
+make test-integration-local TESTPATH=./test/services/alloydb  TESTARGS='-run=TestAccAlloydbBackup' > alloydbBackup.log
 ```
 
 To run one integration test for the added resource locally, run the following from the root of the `terraform-google-conversion` repository:
 ```
-make test-integration TESTPATH=./test/services/alloydb  TESTARGS='-run=TestAccAlloydbBackup_alloydbBackupBasicTestExample' > alloydbBackup.log
+make test-integration-local TESTPATH=./test/services/alloydb  TESTARGS='-run=TestAccAlloydbBackup_alloydbBackupBasicTestExample' > alloydbBackup.log
 ```
 
 The core integration tests in `terraform-google-conversion` mirror the naming of the corresponding acceptance tests in the Terraform provider. This testing process uses a crucial round-trip validation method:
@@ -274,7 +274,7 @@ The core integration tests in `terraform-google-conversion` mirror the naming of
 	1. Every field in the original `raw_config` must exist within the generated `export_config`.
 	2. The `export_config` and the final `roundtrip_config` must be identical.
 
-##### Address integration test failures
+#### Address integration test failures
 To resolve integration test failures, you need to apply the correct override configuration to the Resource.yaml file, based on the root cause of the data mismatch or failure.
 
 * Test Specific Overrides
@@ -335,7 +335,7 @@ To resolve integration test failures, you need to apply the correct override con
 
 		For custom cai2hcl conversion logic, add `custom_tgc_flatten` to the field.
 
-#### 3. Make PRs
+### 3. Make PRs
 
 Now that you have your code working locally, open a PR for [Magic Modules](https://github.com/GoogleCloudPlatform/magic-modules).
 
