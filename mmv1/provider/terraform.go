@@ -162,7 +162,7 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 	////////////////////////////////
 	// Remove after sample conversion
 
-	if object.Samples != nil && object.Examples != nil{
+	if object.Samples != nil && object.Examples != nil {
 		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
 	}
 
@@ -304,8 +304,8 @@ func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData Template
 		samples := google.Reject(object.Samples, func(s resource.Sample) bool {
 			return s.ExcludeTest
 		})
-        ////////////////////////////////
-	    // Remove after sample conversion
+		////////////////////////////////
+		// Remove after sample conversion
 		examples := google.Reject(object.Examples, func(e resource.Examples) bool {
 			return e.ExcludeTest
 		})
@@ -323,7 +323,6 @@ func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData Template
 			targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s_generated_test.go", t.ResourceGoFilename(object)))
 			templateData.GenerateIamPolicyTestFileSample(targetFilePath, object)
 		}
-
 
 	}
 	if generateDocs {

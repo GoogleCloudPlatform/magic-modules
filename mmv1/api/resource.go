@@ -399,8 +399,8 @@ type TGCResource struct {
 }
 
 type TestConfig struct {
-    Sample resource.Sample
-    Step   resource.Step
+	Sample resource.Sample
+	Step   resource.Step
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
@@ -1661,17 +1661,17 @@ func (r Resource) FirstTestSample() resource.Sample {
 
 func (r Resource) FirstTestConfig() TestConfig {
 	for _, sample := range r.Samples {
-		if sample.ExcludeTest || (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0){
+		if sample.ExcludeTest || (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0) {
 			continue
 		}
-		for _, step := range sample.Steps{
-			if (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0){
+		for _, step := range sample.Steps {
+			if r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
 				return TestConfig{
-			        Sample: sample,
-			        Step:   step,
-			    }
+					Sample: sample,
+					Step:   step,
+				}
 			}
-		} 
+		}
 	}
 	return TestConfig{}
 }
@@ -2087,7 +2087,7 @@ func (r Resource) TestSampleSetUp() {
 			configName := step.Name
 			if _, ok := res[step.Name]; !ok {
 				res[configName] = sample.Name
-				sample.NewConfigFuncs = append(sample.NewConfigFuncs, *step)				
+				sample.NewConfigFuncs = append(sample.NewConfigFuncs, *step)
 			}
 		}
 	}
