@@ -6,24 +6,24 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-  "github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccApigeeDeveloperApp_apigeeDeveloperAppUpdateTest(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-    "billing_account": envvar.GetTestBillingAccountFromEnv(t),
-    "org_id":          envvar.GetTestOrgFromEnv(t),
-    "random_suffix":   acctest.RandString(t, 10),
-  }
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    ExternalProviders: map[string]resource.ExternalProvider{
-      "time": {},
-    },
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		CheckDestroy: testAccCheckApigeeDeveloperAppDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -33,7 +33,7 @@ func TestAccApigeeDeveloperApp_apigeeDeveloperAppUpdateTest(t *testing.T) {
 				ResourceName:            "google_apigee_developer_app.apigee_developer_app",
 				ImportState:             true,
 				ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"org_id"},
+				ImportStateVerifyIgnore: []string{"org_id"},
 			},
 			{
 				Config: testAccApigeeDeveloperApp_apigeeDeveloperAppUpdateTest(context),
@@ -42,14 +42,14 @@ func TestAccApigeeDeveloperApp_apigeeDeveloperAppUpdateTest(t *testing.T) {
 				ResourceName:            "google_apigee_developer_app.apigee_developer_app",
 				ImportState:             true,
 				ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"org_id"},
+				ImportStateVerifyIgnore: []string{"org_id"},
 			},
 		},
 	})
 }
 
 func testAccApigeeDeveloperApp_apigeeDeveloperAppBasicTest(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_apigee_developer_app" "apigee_developer_app" {
   name            = "tf-test-sample-app%{random_suffix}"
   app_family      = "default"
