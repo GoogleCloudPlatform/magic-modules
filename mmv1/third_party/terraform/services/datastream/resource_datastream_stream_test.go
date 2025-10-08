@@ -344,22 +344,25 @@ resource "google_storage_bucket" "bucket" {
   uniform_bucket_level_access = true
 }
 
-resource "google_storage_bucket_iam_member" "viewer" {
-    bucket = google_storage_bucket.bucket.name
-    role   = "roles/storage.objectViewer"
-    member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-datastream.iam.gserviceaccount.com"
-}
-
-resource "google_storage_bucket_iam_member" "creator" {
-    bucket = google_storage_bucket.bucket.name
-    role   = "roles/storage.objectCreator"
-    member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-datastream.iam.gserviceaccount.com"
-}
-
-resource "google_storage_bucket_iam_member" "reader" {
-    bucket = google_storage_bucket.bucket.name
-    role   = "roles/storage.legacyBucketReader"
-    member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-datastream.iam.gserviceaccount.com"
+data "google_iam_policy" "datastream_service_agent" {
+    binding {
+        role = "roles/storage.objectViewer"
+        members = [
+            "serviceAccount:service-${data.google_project.project.number}@gcp-sa-datastream.iam.gserviceaccount.com",
+        ]
+    }
+    binding {
+        role = "roles/storage.objectCreator"
+        members = [
+            "serviceAccount:service-${data.google_project.project.number}@gcp-sa-datastream.iam.gserviceaccount.com",
+        ]
+    }
+    binding {
+        role = "roles/storage.legacyBucketReader"
+        members = [
+            "serviceAccount:service-${data.google_project.project.number}@gcp-sa-datastream.iam.gserviceaccount.com",
+        ]
+    }
 }
 
 resource "google_datastream_connection_profile" "gcs_destination" {
@@ -470,22 +473,25 @@ resource "google_storage_bucket" "bucket" {
     uniform_bucket_level_access = true
 }
 
-resource "google_storage_bucket_iam_member" "viewer" {
-    bucket = google_storage_bucket.bucket.name
-    role   = "roles/storage.objectViewer"
-    member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-datastream.iam.gserviceaccount.com"
-}
-
-resource "google_storage_bucket_iam_member" "creator" {
-    bucket = google_storage_bucket.bucket.name
-    role   = "roles/storage.objectCreator"
-    member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-datastream.iam.gserviceaccount.com"
-}
-
-resource "google_storage_bucket_iam_member" "reader" {
-    bucket = google_storage_bucket.bucket.name
-    role   = "roles/storage.legacyBucketReader"
-    member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-datastream.iam.gserviceaccount.com"
+data "google_iam_policy" "datastream_service_agent" {
+    binding {
+        role = "roles/storage.objectViewer"
+        members = [
+            "serviceAccount:service-${data.google_project.project.number}@gcp-sa-datastream.iam.gserviceaccount.com",
+        ]
+    }
+    binding {
+        role = "roles/storage.objectCreator"
+        members = [
+            "serviceAccount:service-${data.google_project.project.number}@gcp-sa-datastream.iam.gserviceaccount.com",
+        ]
+    }
+    binding {
+        role = "roles/storage.legacyBucketReader"
+        members = [
+            "serviceAccount:service-${data.google_project.project.number}@gcp-sa-datastream.iam.gserviceaccount.com",
+        ]
+    }
 }
 
 resource "google_datastream_connection_profile" "gcs_destination" {
