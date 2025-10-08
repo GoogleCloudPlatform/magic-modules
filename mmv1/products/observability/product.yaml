@@ -21,5 +21,3 @@ versions:
     name: 'ga'
   - base_url: https://observability.googleapis.com/v1/
     name: 'beta'
-caibaseurl: ""
-resourceswithcaiassettype: {}
