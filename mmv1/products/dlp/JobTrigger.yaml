@@ -56,6 +56,13 @@ examples:
       trigger: 'trigger'
     test_env_vars:
       project: 'PROJECT_NAME'
+  - name: 'dlp_job_trigger_publish_to_dataplex_catalog'
+    primary_resource_id: 'publish_to_dataplex_catalog'
+    vars:
+      trigger: 'trigger'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    exclude_docs: true
   - name: 'dlp_job_trigger_data_catalog_output'
     primary_resource_id: 'data_catalog_output'
     vars:
