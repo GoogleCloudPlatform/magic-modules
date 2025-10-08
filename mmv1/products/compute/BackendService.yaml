@@ -48,7 +48,7 @@ iam_policy:
   allowed_iam_role: 'roles/compute.admin'
   parent_resource_attribute: 'name'
   iam_conditions_request_type: 'QUERY_PARAM'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   min_version: 'beta'
 custom_code:
   constants: 'templates/terraform/constants/backend_service.go.tmpl'
@@ -58,104 +58,155 @@ custom_code:
   post_update: 'templates/terraform/post_create/compute_backend_service_security_policy.go.tmpl'
   tgc_decoder: 'templates/tgc_next/decoders/compute_backend_service.go.tmpl'
 schema_version: 1
-examples:
-  - name: 'backend_service_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-backend-service%s", context["random_suffix"])'
-    vars:
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'health-check'
-  - name: 'backend_service_external_iap'
-    primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'tf-test-backend-service-external'
-  - name: 'backend_service_cache_simple'
-    primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'health-check'
-  - name: 'backend_service_cache_include_http_headers'
-    primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-  - name: 'backend_service_cache_include_named_cookies'
-    primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-  - name: 'backend_service_cache'
-    primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'health-check'
-  - name: 'backend_service_cache_bypass_cache_on_request_headers'
-    primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'health-check'
-  - name: 'backend_service_traffic_director_round_robin'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
+samples:
+  - name: backend_service_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-backend-service%s", context["random_suffix"])
+    steps:
+    - name: backend_service_basic
+      config_path: templates/terraform/samples/services/compute/backend_service_basic.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend-service
+        http_health_check_name: health-check
+  - name: backend_service_external_iap
+    primary_resource_id: default
+    steps:
+    - name: backend_service_external_iap
+      config_path: templates/terraform/samples/services/compute/backend_service_external_iap.tf.tmpl
+      prefixed_vars:
+        backend_service_name: tf-test-backend-service-external
+  - name: backend_service_cache_simple
+    primary_resource_id: default
+    steps:
+    - name: backend_service_cache_simple
+      config_path: templates/terraform/samples/services/compute/backend_service_cache_simple.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend-service
+        http_health_check_name: health-check
+  - name: backend_service_cache_include_http_headers
+    primary_resource_id: default
+    steps:
+    - name: backend_service_cache_include_http_headers
+      config_path: templates/terraform/samples/services/compute/backend_service_cache_include_http_headers.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend-service
+  - name: backend_service_cache_include_named_cookies
+    primary_resource_id: default
+    steps:
+    - name: backend_service_cache_include_named_cookies
+      config_path: templates/terraform/samples/services/compute/backend_service_cache_include_named_cookies.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend-service
+  - name: backend_service_cache
+    primary_resource_id: default
+    steps:
+    - name: backend_service_cache
+      config_path: templates/terraform/samples/services/compute/backend_service_cache.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend-service
+        http_health_check_name: health-check
+  - name: backend_service_cache_bypass_cache_on_request_headers
+    primary_resource_id: default
+    steps:
+    - name: backend_service_cache_bypass_cache_on_request_headers
+      config_path: templates/terraform/samples/services/compute/backend_service_cache_bypass_cache_on_request_headers.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend-service
+        http_health_check_name: health-check
+  - name: backend_service_traffic_director_round_robin
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: backend_service_traffic_director_round_robin
+      config_path: templates/terraform/samples/services/compute/backend_service_traffic_director_round_robin.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend-service
+        health_check_name: health-check
     tgc_test_ignore_in_asset:
-      - 'RESOURCE.enableCDN' # It has false value in CAI asset
-  - name: 'backend_service_traffic_director_ring_hash'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
+    - RESOURCE.enableCDN
+  - name: backend_service_traffic_director_ring_hash
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: backend_service_traffic_director_ring_hash
+      config_path: templates/terraform/samples/services/compute/backend_service_traffic_director_ring_hash.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend-service
+        health_check_name: health-check
     tgc_test_ignore_extra:
-      - outlier_detection.enforcing_consecutive_gateway_failure # Ignore the 0 value in config
+    - outlier_detection.enforcing_consecutive_gateway_failure
     tgc_test_ignore_in_asset:
-      - 'RESOURCE.enableCDN' # It has false value in CAI asset
-  - name: 'backend_service_stateful_session_affinity'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
-  - name: 'backend_service_network_endpoint'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      backend_service_name: 'backend-service'
-      neg_name: 'network-endpoint'
-  - name: 'backend_service_external_managed'
-    primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
-  - name: 'backend_service_ip_address_selection_policy'
-    primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-  - name: 'backend_service_custom_metrics'
-    primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      default_neg_name: 'network-endpoint'
-      health_check_name: 'health-check'
-      network_name: 'network'
-  - name: 'backend_service_tls_settings'
-    primary_resource_id: 'default'
-    vars:
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
-      authentication_name: 'authentication'
-  - name: 'backend_service_dynamic_backends'
-    primary_resource_id: 'default'
-    vars:
-      url_map_name: 'url_map'
+    - RESOURCE.enableCDN
+  - name: backend_service_stateful_session_affinity
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: backend_service_stateful_session_affinity
+      config_path: templates/terraform/samples/services/compute/backend_service_stateful_session_affinity.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend-service
+        health_check_name: health-check
+  - name: backend_service_network_endpoint
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: backend_service_network_endpoint
+      config_path: templates/terraform/samples/services/compute/backend_service_network_endpoint.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend-service
+        neg_name: network-endpoint
+  - name: backend_service_external_managed
+    primary_resource_id: default
+    steps:
+    - name: backend_service_external_managed
+      config_path: templates/terraform/samples/services/compute/backend_service_external_managed.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend-service
+        health_check_name: health-check
+  - name: backend_service_ip_address_selection_policy
+    primary_resource_id: default
+    steps:
+    - name: backend_service_ip_address_selection_policy
+      config_path: templates/terraform/samples/services/compute/backend_service_ip_address_selection_policy.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend-service
+  - name: backend_service_custom_metrics
+    primary_resource_id: default
+    steps:
+    - name: backend_service_custom_metrics
+      config_path: templates/terraform/samples/services/compute/backend_service_custom_metrics.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend-service
+        default_neg_name: network-endpoint
+        health_check_name: health-check
+        network_name: network
+  - name: backend_service_tls_settings
+    primary_resource_id: default
+    steps:
+    - name: backend_service_tls_settings
+      config_path: templates/terraform/samples/services/compute/backend_service_tls_settings.tf.tmpl
+      prefixed_vars:
+        authentication_name: authentication
+        backend_service_name: backend-service
+        health_check_name: health-check
+  - name: backend_service_dynamic_backends
+    primary_resource_id: default
     exclude_test: true
-  - name: 'backend_service_dynamic_forwarding'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      backend_service_name: 'backend-service'
+    steps:
+    - name: backend_service_dynamic_backends
+      config_path: templates/terraform/samples/services/compute/backend_service_dynamic_backends.tf.tmpl
+      prefixed_vars:
+        url_map_name: url_map
+  - name: backend_service_dynamic_forwarding
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: backend_service_dynamic_forwarding
+      config_path: templates/terraform/samples/services/compute/backend_service_dynamic_forwarding.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend-service
     tgc_test_ignore_in_asset:
-      - 'RESOURCE.enableCDN' # It has false value in CAI asset
+    - RESOURCE.enableCDN
 parameters:
 properties:
   - name: 'affinityCookieTtlSec'

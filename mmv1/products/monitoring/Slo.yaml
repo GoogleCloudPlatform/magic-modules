@@ -47,38 +47,56 @@ custom_code:
   constants: 'templates/terraform/constants/monitoring_slo.go.tmpl'
   encoder: 'templates/terraform/encoders/monitoring_slo.go.tmpl'
   custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
-examples:
-  - name: 'monitoring_slo_appengine'
-    primary_resource_id: 'appeng_slo'
-    vars:
-      slo_id: 'ae-slo'
-  - name: 'monitoring_slo_request_based'
-    primary_resource_id: 'request_based_slo'
-    vars:
-      service_id: 'custom-srv-request-slos'
-      slo_id: 'consumed-api-slo'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'monitoring_slo_windows_based_good_bad_metric_filter'
-    primary_resource_id: 'windows_based'
-    vars:
-      service_id: 'custom-srv-windows-slos'
-      slo_id: 'good-bad-metric-filter'
-  - name: 'monitoring_slo_windows_based_metric_mean'
-    primary_resource_id: 'windows_based'
-    vars:
-      service_id: 'custom-srv-windows-slos'
-      slo_id: 'metric-mean-range'
-  - name: 'monitoring_slo_windows_based_metric_sum'
-    primary_resource_id: 'windows_based'
-    vars:
-      service_id: 'custom-srv-windows-slos'
-      slo_id: 'metric-sum-range'
-  - name: 'monitoring_slo_windows_based_ratio_threshold'
-    primary_resource_id: 'windows_based'
-    vars:
-      service_id: 'custom-srv-windows-slos'
-      slo_id: 'ratio-threshold'
+samples:
+  - name: monitoring_slo_appengine
+    primary_resource_id: appeng_slo
+    steps:
+    - name: monitoring_slo_appengine
+      config_path: templates/terraform/samples/services/monitoring/monitoring_slo_appengine.tf.tmpl
+      prefixed_vars:
+        slo_id: ae-slo
+  - name: monitoring_slo_request_based
+    primary_resource_id: request_based_slo
+    steps:
+    - name: monitoring_slo_request_based
+      config_path: templates/terraform/samples/services/monitoring/monitoring_slo_request_based.tf.tmpl
+      prefixed_vars:
+        service_id: custom-srv-request-slos
+        slo_id: consumed-api-slo
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: monitoring_slo_windows_based_good_bad_metric_filter
+    primary_resource_id: windows_based
+    steps:
+    - name: monitoring_slo_windows_based_good_bad_metric_filter
+      config_path: templates/terraform/samples/services/monitoring/monitoring_slo_windows_based_good_bad_metric_filter.tf.tmpl
+      prefixed_vars:
+        service_id: custom-srv-windows-slos
+        slo_id: good-bad-metric-filter
+  - name: monitoring_slo_windows_based_metric_mean
+    primary_resource_id: windows_based
+    steps:
+    - name: monitoring_slo_windows_based_metric_mean
+      config_path: templates/terraform/samples/services/monitoring/monitoring_slo_windows_based_metric_mean.tf.tmpl
+      prefixed_vars:
+        service_id: custom-srv-windows-slos
+        slo_id: metric-mean-range
+  - name: monitoring_slo_windows_based_metric_sum
+    primary_resource_id: windows_based
+    steps:
+    - name: monitoring_slo_windows_based_metric_sum
+      config_path: templates/terraform/samples/services/monitoring/monitoring_slo_windows_based_metric_sum.tf.tmpl
+      prefixed_vars:
+        service_id: custom-srv-windows-slos
+        slo_id: metric-sum-range
+  - name: monitoring_slo_windows_based_ratio_threshold
+    primary_resource_id: windows_based
+    steps:
+    - name: monitoring_slo_windows_based_ratio_threshold
+      config_path: templates/terraform/samples/services/monitoring/monitoring_slo_windows_based_ratio_threshold.tf.tmpl
+      prefixed_vars:
+        service_id: custom-srv-windows-slos
+        slo_id: ratio-threshold
 parameters:
   - name: 'service'
     type: String

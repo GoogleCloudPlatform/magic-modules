@@ -35,15 +35,18 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-examples:
-  - name: 'compute_cross_site_network_basic'
-    primary_resource_id: 'example-cross-site-network'
-    vars:
-      name: 'test-cross-site-network'
-      description: 'Example cross site network'
-    min_version: 'beta'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: compute_cross_site_network_basic
+    min_version: beta
+    primary_resource_id: example-cross-site-network
+    steps:
+    - name: compute_cross_site_network_basic
+      config_path: templates/terraform/samples/services/compute/compute_cross_site_network_basic.tf.tmpl
+      prefixed_vars:
+        description: Example cross site network
+        name: test-cross-site-network
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
 properties:
   - name: 'name'

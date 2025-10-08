@@ -41,18 +41,23 @@ timeouts:
   delete_minutes: 20
 custom_code:
   post_import: 'templates/terraform/post_import/scc_v2_organization_big_query_export_config.go.tmpl'
-examples:
-  - name: 'scc_v2_organization_big_query_export_config_basic'
-    primary_resource_id: 'custom_big_query_export_config'
-    vars:
-      big_query_export_id: 'my-export'
-      dataset_id: 'my-dataset'
-      name: 'my-export'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      project: 'PROJECT_NAME'
-    external_providers: ["random", "time"]
+samples:
+  - name: scc_v2_organization_big_query_export_config_basic
+    external_providers:
+    - random
+    - time
+    primary_resource_id: custom_big_query_export_config
     exclude_test: true
+    steps:
+    - name: scc_v2_organization_big_query_export_config_basic
+      config_path: templates/terraform/samples/services/securitycenterv2/scc_v2_organization_big_query_export_config_basic.tf.tmpl
+      prefixed_vars:
+        big_query_export_id: my-export
+        dataset_id: my-dataset
+        name: my-export
+      test_env_vars:
+        org_id: ORG_ID
+        project: PROJECT_NAME
 parameters:
   - name: 'organization'
     type: String

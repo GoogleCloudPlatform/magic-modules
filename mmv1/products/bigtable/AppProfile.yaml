@@ -39,63 +39,71 @@ custom_code:
   encoder: 'templates/terraform/encoders/bigtable_app_profile.go.tmpl'
   pre_update: 'templates/terraform/pre_update/bigtable_app_profile.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'bigtable_app_profile_anycluster'
-    primary_resource_id: 'ap'
-    vars:
-      instance_name: 'bt-instance'
-      app_profile_name: 'bt-profile'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      - 'ignore_warnings'
-    # bigtable instance does not use the shared HTTP client, this test creates an instance
+samples:
+  - name: bigtable_app_profile_anycluster
     skip_vcr: true
-  - name: 'bigtable_app_profile_singlecluster'
-    primary_resource_id: 'ap'
-    vars:
-      instance_name: 'bt-instance'
-      app_profile_name: 'bt-profile'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      - 'ignore_warnings'
-    # bigtable instance does not use the shared HTTP client, this test creates an instance
+    primary_resource_id: ap
+    steps:
+    - name: bigtable_app_profile_anycluster
+      config_path: templates/terraform/samples/services/bigtable/bigtable_app_profile_anycluster.tf.tmpl
+      prefixed_vars:
+        app_profile_name: bt-profile
+        deletion_protection: "true"
+        instance_name: bt-instance
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
+      ignore_read_extra:
+      - ignore_warnings
+  - name: bigtable_app_profile_singlecluster
     skip_vcr: true
-  - name: 'bigtable_app_profile_multicluster'
-    primary_resource_id: 'ap'
-    vars:
-      instance_name: 'bt-instance'
-      app_profile_name: 'bt-profile'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      - 'ignore_warnings'
-    # bigtable instance does not use the shared HTTP client, this test creates an instance
+    primary_resource_id: ap
+    steps:
+    - name: bigtable_app_profile_singlecluster
+      config_path: templates/terraform/samples/services/bigtable/bigtable_app_profile_singlecluster.tf.tmpl
+      prefixed_vars:
+        app_profile_name: bt-profile
+        deletion_protection: "true"
+        instance_name: bt-instance
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
+      ignore_read_extra:
+      - ignore_warnings
+  - name: bigtable_app_profile_multicluster
     skip_vcr: true
-  - name: 'bigtable_app_profile_priority'
-    primary_resource_id: 'ap'
-    vars:
-      instance_name: 'bt-instance'
-      app_profile_name: 'bt-profile'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      - 'ignore_warnings'
-    # bigtable instance does not use the shared HTTP client, this test creates an instance
+    primary_resource_id: ap
+    steps:
+    - name: bigtable_app_profile_multicluster
+      config_path: templates/terraform/samples/services/bigtable/bigtable_app_profile_multicluster.tf.tmpl
+      prefixed_vars:
+        app_profile_name: bt-profile
+        deletion_protection: "true"
+        instance_name: bt-instance
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
+      ignore_read_extra:
+      - ignore_warnings
+  - name: bigtable_app_profile_priority
     skip_vcr: true
+    primary_resource_id: ap
+    steps:
+    - name: bigtable_app_profile_priority
+      config_path: templates/terraform/samples/services/bigtable/bigtable_app_profile_priority.tf.tmpl
+      prefixed_vars:
+        app_profile_name: bt-profile
+        deletion_protection: "true"
+        instance_name: bt-instance
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
+      ignore_read_extra:
+      - ignore_warnings
 parameters:
   - name: 'appProfileId'
     type: String

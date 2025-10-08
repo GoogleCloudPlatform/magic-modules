@@ -34,17 +34,21 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   allowed_iam_role: 'roles/servicemanagement.serviceController'
   parent_resource_attribute: 'consumer_project'
-  example_config_body: 'templates/terraform/iam/example_config_body/service_management_consumer.tf.tmpl'
+  sample_config_body: 'templates/terraform/iam/example_config_body/service_management_consumer.tf.tmpl'
 custom_code:
-examples:
-  - name: 'endpoints_iam'
-    primary_resource_id: 'endpoints_service'
-    primary_resource_name: 'fmt.Sprintf("endpoint%s.endpoints.%s.cloud.goog", context["random_suffix"], context["project_name"]), context["project_name"]'
-    vars:
-      name: 'endpoint'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-      consumer_project: 'PROJECT_NAME'
+samples:
+  - name: endpoints_iam
+    primary_resource_id: endpoints_service
+    primary_resource_name: fmt.Sprintf("endpoint%s.endpoints.%s.cloud.goog", context["random_suffix"],
+      context["project_name"]), context["project_name"]
+    steps:
+    - name: endpoints_iam
+      config_path: templates/terraform/samples/services/servicemanagement/endpoints_iam.tf.tmpl
+      prefixed_vars:
+        name: endpoint
+      test_env_vars:
+        consumer_project: PROJECT_NAME
+        project_name: PROJECT_NAME
 parameters:
 properties:
   - name: 'serviceName'

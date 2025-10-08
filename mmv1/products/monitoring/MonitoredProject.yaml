@@ -46,22 +46,28 @@ error_retry_predicates:
 schema_version: 1
 state_upgraders: true
 exclude_sweeper: true
-examples:
-  - name: 'monitoring_monitored_project_basic'
-    primary_resource_id: 'primary'
-    vars:
-      monitored_project: 'm-id'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      project_id: 'PROJECT_NAME'
-  - name: 'monitoring_monitored_project_long_form'
-    primary_resource_id: 'primary'
-    vars:
-      monitored_project: 'm-id'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      project_id: 'PROJECT_NAME'
-    exclude_docs: true
+samples:
+  - name: monitoring_monitored_project_basic
+    primary_resource_id: primary
+    steps:
+    - name: monitoring_monitored_project_basic
+      config_path: templates/terraform/samples/services/monitoring/monitoring_monitored_project_basic.tf.tmpl
+      prefixed_vars:
+        monitored_project: m-id
+      test_env_vars:
+        org_id: ORG_ID
+        project_id: PROJECT_NAME
+  - name: monitoring_monitored_project_long_form
+    primary_resource_id: primary
+    steps:
+    - name: monitoring_monitored_project_long_form
+      config_path: templates/terraform/samples/services/monitoring/monitoring_monitored_project_long_form.tf.tmpl
+      prefixed_vars:
+        monitored_project: m-id
+      test_env_vars:
+        org_id: ORG_ID
+        project_id: PROJECT_NAME
+      exclude_docs: true
 parameters:
   - name: 'metricsScope'
     type: String

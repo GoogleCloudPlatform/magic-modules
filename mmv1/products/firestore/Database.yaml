@@ -49,108 +49,132 @@ async:
     resource_inside_response: true
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/firestore_database.go.tmpl'
-examples:
-  - name: 'firestore_default_database'
-    primary_resource_id: 'database'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'project'
-      - 'etag'
-      - 'deletion_policy'
+samples:
+  - name: firestore_default_database
+    primary_resource_id: database
     exclude_test: true
-  - name: 'firestore_database'
-    primary_resource_id: 'database'
-    vars:
-      database_id: 'database-id'
-      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
-    ignore_read_extra:
-      - 'project'
-      - 'etag'
-      - 'deletion_policy'
-  - name: 'firestore_database_with_tags'
-    primary_resource_id: 'database'
-    vars:
-      database_id: 'database-with-tags-id'
-      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
-      tag_key_id: 'keyname'
-      tag_value_id: 'valuename'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
-    ignore_read_extra:
-      - 'project'
-      - 'etag'
-      - 'deletion_policy'
+    steps:
+    - name: firestore_default_database
+      config_path: templates/terraform/samples/services/firestore/firestore_default_database.tf.tmpl
+      test_env_vars:
+        project_id: PROJECT_NAME
+      ignore_read_extra:
+      - project
+      - etag
+      - deletion_policy
+  - name: firestore_database
+    primary_resource_id: database
+    steps:
+    - name: firestore_database
+      config_path: templates/terraform/samples/services/firestore/firestore_database.tf.tmpl
+      prefixed_vars:
+        database_id: database-id
+        delete_protection_state: DELETE_PROTECTION_ENABLED
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
+      ignore_read_extra:
+      - project
+      - etag
+      - deletion_policy
+  - name: firestore_database_with_tags
+    primary_resource_id: database
     exclude_test: true
-  - name: 'firestore_cmek_database'
-    primary_resource_id: 'database'
-    vars:
-      database_id: 'cmek-database-id'
-      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
-      kms_key_ring_name: 'kms-key-ring'
-      kms_key_name: 'kms-key'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
-    ignore_read_extra:
-      - 'project'
-      - 'etag'
-      - 'deletion_policy'
-  - name: 'firestore_default_database_in_datastore_mode'
-    primary_resource_id: 'datastore_mode_database'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'project'
-      - 'etag'
-      - 'deletion_policy'
+    steps:
+    - name: firestore_database_with_tags
+      config_path: templates/terraform/samples/services/firestore/firestore_database_with_tags.tf.tmpl
+      prefixed_vars:
+        database_id: database-with-tags-id
+        delete_protection_state: DELETE_PROTECTION_ENABLED
+        tag_key_id: keyname
+        tag_value_id: valuename
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
+      ignore_read_extra:
+      - project
+      - etag
+      - deletion_policy
+  - name: firestore_cmek_database
+    primary_resource_id: database
+    steps:
+    - name: firestore_cmek_database
+      config_path: templates/terraform/samples/services/firestore/firestore_cmek_database.tf.tmpl
+      prefixed_vars:
+        database_id: cmek-database-id
+        delete_protection_state: DELETE_PROTECTION_ENABLED
+        kms_key_name: kms-key
+        kms_key_ring_name: kms-key-ring
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
+      ignore_read_extra:
+      - project
+      - etag
+      - deletion_policy
+  - name: firestore_default_database_in_datastore_mode
+    primary_resource_id: datastore_mode_database
     exclude_test: true
-  - name: 'firestore_database_in_datastore_mode'
-    primary_resource_id: 'datastore_mode_database'
-    vars:
-      database_id: 'database-id'
-      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
-    ignore_read_extra:
-      - 'project'
-      - 'etag'
-      - 'deletion_policy'
-  - name: 'firestore_cmek_database_in_datastore_mode'
-    primary_resource_id: 'database'
-    vars:
-      database_id: 'cmek-database-id'
-      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
-      kms_key_ring_name: 'kms-key-ring'
-      kms_key_name: 'kms-key'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
-    ignore_read_extra:
-      - 'project'
-      - 'etag'
-      - 'deletion_policy'
-  - name: 'firestore_database_enterprise'
-    primary_resource_id: 'enterprise-db'
-    vars:
-      database_id: 'database-id'
-      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'project'
-      - 'etag'
-      - 'deletion_policy'
+    steps:
+    - name: firestore_default_database_in_datastore_mode
+      config_path: templates/terraform/samples/services/firestore/firestore_default_database_in_datastore_mode.tf.tmpl
+      test_env_vars:
+        project_id: PROJECT_NAME
+      ignore_read_extra:
+      - project
+      - etag
+      - deletion_policy
+  - name: firestore_database_in_datastore_mode
+    primary_resource_id: datastore_mode_database
+    steps:
+    - name: firestore_database_in_datastore_mode
+      config_path: templates/terraform/samples/services/firestore/firestore_database_in_datastore_mode.tf.tmpl
+      prefixed_vars:
+        database_id: database-id
+        delete_protection_state: DELETE_PROTECTION_ENABLED
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
+      ignore_read_extra:
+      - project
+      - etag
+      - deletion_policy
+  - name: firestore_cmek_database_in_datastore_mode
+    primary_resource_id: database
+    steps:
+    - name: firestore_cmek_database_in_datastore_mode
+      config_path: templates/terraform/samples/services/firestore/firestore_cmek_database_in_datastore_mode.tf.tmpl
+      prefixed_vars:
+        database_id: cmek-database-id
+        delete_protection_state: DELETE_PROTECTION_ENABLED
+        kms_key_name: kms-key
+        kms_key_ring_name: kms-key-ring
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
+      ignore_read_extra:
+      - project
+      - etag
+      - deletion_policy
+  - name: firestore_database_enterprise
+    primary_resource_id: enterprise-db
+    steps:
+    - name: firestore_database_enterprise
+      config_path: templates/terraform/samples/services/firestore/firestore_database_enterprise.tf.tmpl
+      prefixed_vars:
+        database_id: database-id
+        delete_protection_state: DELETE_PROTECTION_ENABLED
+      test_env_vars:
+        project_id: PROJECT_NAME
+      ignore_read_extra:
+      - project
+      - etag
+      - deletion_policy
 virtual_fields:
   - name: 'deletion_policy'
     description: |

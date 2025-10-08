@@ -43,7 +43,7 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/locations/{{location}}/services/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/services/{{name}}'
     - '{{name}}'
@@ -51,136 +51,180 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/cloudrunv2_service_deletion_policy.go.tmpl'
 taint_resource_on_failed_create: true
 # test_custom_code: 'templates/terraform/test_custom/cloudrunv2_service.go.tmpl'
-examples:
-  - name: 'cloudrunv2_service_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service%s", context["random_suffix"])'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_service_limits'
-    primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_service_sql'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-      secret_id: 'secret-1'
-      cloud_run_sql_name: 'cloudrun-sql'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_service_vpcaccess'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-      vpc_access_connector_name: 'run-vpc'
-      vpc_compute_subnetwork_name: 'run-subnetwork'
-      compute_network_name: 'run-network'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_service_directvpc'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_service_gpu'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_service_probes'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_service_secret'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-      secret_id: 'secret-1'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_service_multicontainer'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service%s", context["random_suffix"])'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_service_mount_gcs'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service-%s", context["random_suffix"])'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-    ignore_read_extra:
-      - 'deletion_protection'
-    # Currently failing
+samples:
+  - name: cloudrunv2_service_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-service%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_service_basic
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_service_basic.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-service
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_service_limits
+    primary_resource_id: default
+    steps:
+    - name: cloudrunv2_service_limits
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_service_limits.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-service
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_service_sql
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_service_sql
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_service_sql.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-service
+        cloud_run_sql_name: cloudrun-sql
+        deletion_protection: "true"
+        secret_id: secret-1
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_service_vpcaccess
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_service_vpcaccess
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_service_vpcaccess.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-service
+        compute_network_name: run-network
+        vpc_access_connector_name: run-vpc
+        vpc_compute_subnetwork_name: run-subnetwork
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_service_directvpc
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_service_directvpc
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_service_directvpc.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-service
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_service_gpu
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_service_gpu
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_service_gpu.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-service
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_service_probes
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_service_probes
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_service_probes.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-service
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_service_secret
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_service_secret
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_service_secret.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-service
+        secret_id: secret-1
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_service_multicontainer
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-service%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_service_multicontainer
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_service_multicontainer.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-service
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_service_mount_gcs
     skip_vcr: true
-  - name: 'cloudrunv2_service_mount_nfs'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service-%s", context["random_suffix"])'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-    ignore_read_extra:
-      - 'deletion_protection'
-    # Currently failing
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-service-%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_service_mount_gcs
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_service_mount_gcs.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-service
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_service_mount_nfs
     skip_vcr: true
-  - name: 'cloudrunv2_service_mesh'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service-%s", context["random_suffix"])'
-    min_version: 'beta'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-      mesh_name: 'network-services-mesh'
-    ignore_read_extra:
-      - 'deletion_protection'
-    external_providers: ["time"]
-  - name: 'cloudrunv2_service_invokeriam'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    min_version: 'beta'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_service_function'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-      bucket_name: 'gcf-source'
-      zip_path: 'function_source.zip'
-      sa_name: 'build-sa'
-    test_vars_overrides:
-      'zip_path': '"./test-fixtures/function-source.zip"'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_service_iap'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-iap-service%s", context["random_suffix"])'
-    min_version: 'beta'
-    vars:
-      cloud_run_service_name: 'cloudrun-iap-service'
-    ignore_read_extra:
-      - 'deletion_protection'
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-service-%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_service_mount_nfs
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_service_mount_nfs.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-service
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_service_mesh
+    external_providers:
+    - time
+    min_version: beta
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-service-%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_service_mesh
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_service_mesh.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-service
+        mesh_name: network-services-mesh
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_service_invokeriam
+    min_version: beta
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_service_invokeriam
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_service_invokeriam.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-service
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_service_function
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_service_function
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_service_function.tf.tmpl
+      prefixed_vars:
+        bucket_name: gcf-source
+        cloud_run_service_name: cloudrun-service
+        sa_name: build-sa
+        zip_path: function_source.zip
+      test_vars_overrides:
+        zip_path: '"./test-fixtures/function-source.zip"'
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_service_iap
+    min_version: beta
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-iap-service%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_service_iap
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_service_iap.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-iap-service
+      ignore_read_extra:
+      - deletion_protection
 virtual_fields:
   - name: 'deletion_protection'
     description: |

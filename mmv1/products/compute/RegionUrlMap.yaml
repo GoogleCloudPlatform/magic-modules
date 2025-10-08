@@ -39,137 +39,178 @@ sweeper:
     - region: 'us-central1'
     - region: 'europe-west1'
     - region: 'us-west1'
-examples:
-  - name: 'region_url_map_basic'
-    primary_resource_id: 'regionurlmap'
-    vars:
-      region_url_map_name: 'regionurlmap'
-      login_region_backend_service_name: 'login'
-      home_region_backend_service_name: 'home'
-      region_health_check_name: 'health-check'
-  - name: 'region_url_map_default_route_action'
-    primary_resource_id: 'regionurlmap'
-    vars:
-      region_url_map_name: 'regionurlmap'
-      login_region_backend_service_name: 'login'
-      home_region_backend_service_name: 'home'
-      region_health_check_name: 'health-check'
-  - name: 'region_url_map_l7_ilb_path'
-    primary_resource_id: 'regionurlmap'
-    vars:
-      region_url_map_name: 'regionurlmap'
-      home_region_backend_service_name: 'home'
-      region_health_check_name: 'health-check'
-  - name: 'region_url_map_l7_ilb_path_partial'
-    primary_resource_id: 'regionurlmap'
-    vars:
-      region_url_map_name: 'regionurlmap'
-      home_region_backend_service_name: 'home'
-      region_health_check_name: 'health-check'
-  - name: 'region_url_map_l7_ilb_route'
-    primary_resource_id: 'regionurlmap'
-    vars:
-      region_url_map_name: 'regionurlmap'
-      home_region_backend_service_name: 'home'
-      region_health_check_name: 'health-check'
-  - name: 'region_url_map_l7_ilb_route_partial'
-    primary_resource_id: 'regionurlmap'
-    vars:
-      region_url_map_name: 'regionurlmap'
-      home_region_backend_service_name: 'home'
-      region_health_check_name: 'health-check'
-  - name: 'int_https_lb_https_redirect'
-    primary_resource_id: 'redirect'
-    min_version: 'beta'
-    vars:
-      l7_ilb_network: 'l7-ilb-network'
-      l7_ilb_proxy_subnet: 'l7-ilb-proxy-subnet'
-      l7_ilb_subnet: 'l7-ilb-subnet'
-      l7_ilb_ip: 'l7-ilb-ip'
-      l7_ilb_forwarding_rule: 'l7-ilb-forwarding-rule'
-      l7_ilb_target_https_proxy: 'l7-ilb-target-https-proxy'
-      l7_ilb_regional_url_map: 'l7-ilb-regional-url-map'
-      l7_ilb_backend_service: 'l7-ilb-backend-service'
-      l7_ilb_mig_template: 'l7-ilb-mig-template'
-      l7_ilb_hc: 'l7-ilb-hc'
-      l7_ilb_mig1: 'l7-ilb-mig1'
-      l7_ilb_fw_allow_hc: 'l7-ilb-fw-allow-hc'
-      l7_ilb_fw_allow_ilb_to_backends: 'l7-ilb-fw-allow-ilb-to-backends'
-      l7_ilb_test_vm: 'l7-ilb-test-vm'
-      l7_ilb_redirect: 'l7-ilb-redirect'
-      l7_ilb_target_http_proxy: 'l7-ilb-target-http-proxy'
-      l7_ilb_redirect_url_map: 'l7-ilb-redirect-url-map'
-    ignore_read_extra:
-      - 'target'
-      - 'ip_address'
+samples:
+  - name: region_url_map_basic
+    primary_resource_id: regionurlmap
+    steps:
+    - name: region_url_map_basic
+      config_path: templates/terraform/samples/services/compute/region_url_map_basic.tf.tmpl
+      prefixed_vars:
+        home_region_backend_service_name: home
+        login_region_backend_service_name: login
+        region_health_check_name: health-check
+        region_url_map_name: regionurlmap
+  - name: region_url_map_default_route_action
+    primary_resource_id: regionurlmap
+    steps:
+    - name: region_url_map_default_route_action
+      config_path: templates/terraform/samples/services/compute/region_url_map_default_route_action.tf.tmpl
+      prefixed_vars:
+        home_region_backend_service_name: home
+        login_region_backend_service_name: login
+        region_health_check_name: health-check
+        region_url_map_name: regionurlmap
+  - name: region_url_map_l7_ilb_path
+    primary_resource_id: regionurlmap
+    steps:
+    - name: region_url_map_l7_ilb_path
+      config_path: templates/terraform/samples/services/compute/region_url_map_l7_ilb_path.tf.tmpl
+      prefixed_vars:
+        home_region_backend_service_name: home
+        region_health_check_name: health-check
+        region_url_map_name: regionurlmap
+  - name: region_url_map_l7_ilb_path_partial
+    primary_resource_id: regionurlmap
+    steps:
+    - name: region_url_map_l7_ilb_path_partial
+      config_path: templates/terraform/samples/services/compute/region_url_map_l7_ilb_path_partial.tf.tmpl
+      prefixed_vars:
+        home_region_backend_service_name: home
+        region_health_check_name: health-check
+        region_url_map_name: regionurlmap
+  - name: region_url_map_l7_ilb_route
+    primary_resource_id: regionurlmap
+    steps:
+    - name: region_url_map_l7_ilb_route
+      config_path: templates/terraform/samples/services/compute/region_url_map_l7_ilb_route.tf.tmpl
+      prefixed_vars:
+        home_region_backend_service_name: home
+        region_health_check_name: health-check
+        region_url_map_name: regionurlmap
+  - name: region_url_map_l7_ilb_route_partial
+    primary_resource_id: regionurlmap
+    steps:
+    - name: region_url_map_l7_ilb_route_partial
+      config_path: templates/terraform/samples/services/compute/region_url_map_l7_ilb_route_partial.tf.tmpl
+      prefixed_vars:
+        home_region_backend_service_name: home
+        region_health_check_name: health-check
+        region_url_map_name: regionurlmap
+  - name: int_https_lb_https_redirect
+    min_version: beta
+    primary_resource_id: redirect
     exclude_test: true
-  - name: 'regional_external_http_load_balancer'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      lb_network: 'lb-network'
-      backend_subnet: 'backend-subnet'
-      proxy_only_subnet: 'proxy-only-subnet'
-      fw_allow_health_check: 'fw-allow-health-check'
-      fw_allow_proxies: 'fw-allow-proxies'
-      l7_xlb_backend_template: 'l7-xlb-backend-template'
-      l7_xlb_backend_example: 'l7-xlb-backend-example'
-      address_name: 'address-name'
-      l7_xlb_basic_check: 'l7-xlb-basic-check'
-      l7_xlb_backend_service: 'l7-xlb-backend-service'
-      regional_l7_xlb_map: 'regional-l7-xlb-map'
-      l7_xlb_proxy: 'l7-xlb-proxy'
-      l7_xlb_forwarding_rule: 'l7-xlb-forwarding-rule'
-    # Similar to other samples
+    steps:
+    - name: int_https_lb_https_redirect
+      config_path: templates/terraform/samples/services/compute/int_https_lb_https_redirect.tf.tmpl
+      prefixed_vars:
+        l7_ilb_backend_service: l7-ilb-backend-service
+        l7_ilb_forwarding_rule: l7-ilb-forwarding-rule
+        l7_ilb_fw_allow_hc: l7-ilb-fw-allow-hc
+        l7_ilb_fw_allow_ilb_to_backends: l7-ilb-fw-allow-ilb-to-backends
+        l7_ilb_hc: l7-ilb-hc
+        l7_ilb_ip: l7-ilb-ip
+        l7_ilb_mig_template: l7-ilb-mig-template
+        l7_ilb_mig1: l7-ilb-mig1
+        l7_ilb_network: l7-ilb-network
+        l7_ilb_proxy_subnet: l7-ilb-proxy-subnet
+        l7_ilb_redirect: l7-ilb-redirect
+        l7_ilb_redirect_url_map: l7-ilb-redirect-url-map
+        l7_ilb_regional_url_map: l7-ilb-regional-url-map
+        l7_ilb_subnet: l7-ilb-subnet
+        l7_ilb_target_http_proxy: l7-ilb-target-http-proxy
+        l7_ilb_target_https_proxy: l7-ilb-target-https-proxy
+        l7_ilb_test_vm: l7-ilb-test-vm
+      ignore_read_extra:
+      - target
+      - ip_address
+  - name: regional_external_http_load_balancer
+    min_version: beta
+    primary_resource_id: default
     exclude_test: true
-    exclude_docs: true
-  - name: 'region_url_map_path_template_match'
-    primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      home_backend_service_name: 'home-service'
-      cart_backend_service_name: 'cart-service'
-      user_backend_service_name: 'user-service'
-      health_check_name: 'health-check'
-  - name: 'region_url_map_path_matcher_default_route_action'
-    primary_resource_id: 'regionurlmap'
-    vars:
-      region_url_map_name: 'regionurlmap'
-      login_region_backend_service_name: 'login'
-      home_region_backend_service_name: 'home'
-      region_health_check_name: 'health-check'
-  - name: 'region_url_map_default_mirror_percent'
-    primary_resource_id: 'regionurlmap'
-    min_version: 'beta'
-    vars:
-      region_url_map_name: 'regionurlmap'
-      home_backend_service_name: 'home'
-      mirror_backend_service_name: 'mirror'
-      region_health_check_name: 'health-check'
-  - name: 'region_url_map_path_matcher_default_mirror_percent'
-    primary_resource_id: 'regionurlmap'
-    min_version: 'beta'
-    vars:
-      region_url_map_name: 'regionurlmap'
-      home_backend_service_name: 'home'
-      mirror_backend_service_name: 'mirror'
-      region_health_check_name: 'health-check'
-  - name: 'region_url_map_path_rule_mirror_percent'
-    primary_resource_id: 'regionurlmap'
-    min_version: 'beta'
-    vars:
-      region_url_map_name: 'regionurlmap'
-      home_backend_service_name: 'home'
-      mirror_backend_service_name: 'mirror'
-      region_health_check_name: 'health-check'
-  - name: 'region_url_map_route_rule_mirror_percent'
-    primary_resource_id: 'regionurlmap'
-    min_version: 'beta'
-    vars:
-      region_url_map_name: 'regionurlmap'
-      home_backend_service_name: 'home'
-      mirror_backend_service_name: 'mirror'
-      region_health_check_name: 'health-check'
+    steps:
+    - name: regional_external_http_load_balancer
+      config_path: templates/terraform/samples/services/compute/regional_external_http_load_balancer.tf.tmpl
+      prefixed_vars:
+        address_name: address-name
+        backend_subnet: backend-subnet
+        fw_allow_health_check: fw-allow-health-check
+        fw_allow_proxies: fw-allow-proxies
+        l7_xlb_backend_example: l7-xlb-backend-example
+        l7_xlb_backend_service: l7-xlb-backend-service
+        l7_xlb_backend_template: l7-xlb-backend-template
+        l7_xlb_basic_check: l7-xlb-basic-check
+        l7_xlb_forwarding_rule: l7-xlb-forwarding-rule
+        l7_xlb_proxy: l7-xlb-proxy
+        lb_network: lb-network
+        proxy_only_subnet: proxy-only-subnet
+        regional_l7_xlb_map: regional-l7-xlb-map
+      exclude_docs: true
+  - name: region_url_map_path_template_match
+    primary_resource_id: urlmap
+    steps:
+    - name: region_url_map_path_template_match
+      config_path: templates/terraform/samples/services/compute/region_url_map_path_template_match.tf.tmpl
+      prefixed_vars:
+        cart_backend_service_name: cart-service
+        health_check_name: health-check
+        home_backend_service_name: home-service
+        url_map_name: urlmap
+        user_backend_service_name: user-service
+  - name: region_url_map_path_matcher_default_route_action
+    primary_resource_id: regionurlmap
+    steps:
+    - name: region_url_map_path_matcher_default_route_action
+      config_path: templates/terraform/samples/services/compute/region_url_map_path_matcher_default_route_action.tf.tmpl
+      prefixed_vars:
+        home_region_backend_service_name: home
+        login_region_backend_service_name: login
+        region_health_check_name: health-check
+        region_url_map_name: regionurlmap
+  - name: region_url_map_default_mirror_percent
+    min_version: beta
+    primary_resource_id: regionurlmap
+    steps:
+    - name: region_url_map_default_mirror_percent
+      config_path: templates/terraform/samples/services/compute/region_url_map_default_mirror_percent.tf.tmpl
+      prefixed_vars:
+        home_backend_service_name: home
+        mirror_backend_service_name: mirror
+        region_health_check_name: health-check
+        region_url_map_name: regionurlmap
+  - name: region_url_map_path_matcher_default_mirror_percent
+    min_version: beta
+    primary_resource_id: regionurlmap
+    steps:
+    - name: region_url_map_path_matcher_default_mirror_percent
+      config_path: templates/terraform/samples/services/compute/region_url_map_path_matcher_default_mirror_percent.tf.tmpl
+      prefixed_vars:
+        home_backend_service_name: home
+        mirror_backend_service_name: mirror
+        region_health_check_name: health-check
+        region_url_map_name: regionurlmap
+  - name: region_url_map_path_rule_mirror_percent
+    min_version: beta
+    primary_resource_id: regionurlmap
+    steps:
+    - name: region_url_map_path_rule_mirror_percent
+      config_path: templates/terraform/samples/services/compute/region_url_map_path_rule_mirror_percent.tf.tmpl
+      prefixed_vars:
+        home_backend_service_name: home
+        mirror_backend_service_name: mirror
+        region_health_check_name: health-check
+        region_url_map_name: regionurlmap
+  - name: region_url_map_route_rule_mirror_percent
+    min_version: beta
+    primary_resource_id: regionurlmap
+    steps:
+    - name: region_url_map_route_rule_mirror_percent
+      config_path: templates/terraform/samples/services/compute/region_url_map_route_rule_mirror_percent.tf.tmpl
+      prefixed_vars:
+        home_backend_service_name: home
+        mirror_backend_service_name: mirror
+        region_health_check_name: health-check
+        region_url_map_name: regionurlmap
 parameters:
   - name: 'region'
     type: ResourceRef

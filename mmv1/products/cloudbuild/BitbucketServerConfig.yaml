@@ -46,22 +46,31 @@ custom_code:
   post_create: 'templates/terraform/post_create/cloudbuild_bitbucketserver_config.go.tmpl'
   pre_update: 'templates/terraform/pre_update/cloudbuild_bitbucketserver_config.go.tmpl'
   post_update: 'templates/terraform/post_update/cloudbuild_bitbucketserver_config.go.tmpl'
-examples:
-  - name: 'cloudbuild_bitbucket_server_config'
-    primary_resource_id: 'bbs-config'
-    vars:
-      config_id: 'bbs-config'
-  - name: 'cloudbuild_bitbucket_server_config_repositories'
-    primary_resource_id: 'bbs-config-with-repos'
-    vars:
-      config_id: 'bbs-config'
+samples:
+  - name: cloudbuild_bitbucket_server_config
+    primary_resource_id: bbs-config
+    steps:
+    - name: cloudbuild_bitbucket_server_config
+      config_path: templates/terraform/samples/services/cloudbuild/cloudbuild_bitbucket_server_config.tf.tmpl
+      prefixed_vars:
+        config_id: bbs-config
+  - name: cloudbuild_bitbucket_server_config_repositories
+    primary_resource_id: bbs-config-with-repos
     exclude_test: true
-  - name: 'cloudbuild_bitbucket_server_config_peered_network'
-    primary_resource_id: 'bbs-config-with-peered-network'
-    vars:
-      config_id: 'bbs-config'
-      network_name: 'vpc-network'
-      global_address_name: 'private-ip-alloc'
+    steps:
+    - name: cloudbuild_bitbucket_server_config_repositories
+      config_path: templates/terraform/samples/services/cloudbuild/cloudbuild_bitbucket_server_config_repositories.tf.tmpl
+      prefixed_vars:
+        config_id: bbs-config
+  - name: cloudbuild_bitbucket_server_config_peered_network
+    primary_resource_id: bbs-config-with-peered-network
+    steps:
+    - name: cloudbuild_bitbucket_server_config_peered_network
+      config_path: templates/terraform/samples/services/cloudbuild/cloudbuild_bitbucket_server_config_peered_network.tf.tmpl
+      prefixed_vars:
+        config_id: bbs-config
+        global_address_name: private-ip-alloc
+        network_name: vpc-network
 parameters:
   - name: 'config_id'
     type: String

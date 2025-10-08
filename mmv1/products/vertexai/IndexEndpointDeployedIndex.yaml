@@ -52,51 +52,63 @@ custom_code:
   decoder: 'templates/terraform/decoders/vertex_ai_index_endpoint_deployed_index.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/vertex_ai_index_endpoint_deployed_index.go.tmpl'
   custom_import: 'templates/terraform/custom_import/vertex_ai_index_endpoint_deployed_index.go.tmpl'
-examples:
-  - name: 'vertex_ai_index_endpoint_deployed_index_basic'
-    primary_resource_id: 'basic_deployed_index'
-    vars:
-      endpoint_name: 'endpoint-name'
-      network_name: 'network-name'
-      deployed_index_id: 'deployed_index_id'
-      display_name: 'vertex-deployed-index'
-      display_name_index: 'test-index'
-      bucket_name: 'bucket-name'
-      service_account_id: 'vertex-sa'
-      address_name: 'vertex-ai-range'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
-      'address_name': 'acctest.BootstrapSharedTestGlobalAddress(t, "vpc-network-1", acctest.AddressWithPrefixLength(8))'
-  - name: 'vertex_ai_index_endpoint_deployed_index_basic_two'
-    primary_resource_id: 'basic_deployed_index'
-    vars:
-      endpoint_name: 'endpoint-name'
-      network_name: 'network-name'
-      deployed_index_id: 'deployed_index_id'
-      display_name: 'vertex-deployed-index'
-      display_name_index: 'test-index'
-      bucket_name: 'bucket-name'
-      service_account_id: 'vertex-sa'
-      address_name: 'vertex-ai-range'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
-      'address_name': 'acctest.BootstrapSharedTestGlobalAddress(t, "vpc-network-1", acctest.AddressWithPrefixLength(8))'
-  - name: 'vertex_ai_index_endpoint_deployed_index_dedicated_resources'
-    primary_resource_id: 'dedicated_resources'
-    vars:
-      display_name_index: 'test-index'
-      bucket_name: 'bucket-name'
-      display_name: 'vertex-deployed-index'
-      deployed_index_id: 'deployed_index_id'
-    exclude_docs: true
-  - name: 'vertex_ai_index_endpoint_deployed_index_automatic_resources'
-    primary_resource_id: 'automatic_resources'
-    vars:
-      display_name_index: 'test-index'
-      bucket_name: 'bucket-name'
-      display_name: 'vertex-deployed-index'
-      deployed_index_id: 'deployed_index_id'
-    exclude_docs: true
+samples:
+  - name: vertex_ai_index_endpoint_deployed_index_basic
+    primary_resource_id: basic_deployed_index
+    steps:
+    - name: vertex_ai_index_endpoint_deployed_index_basic
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_index_endpoint_deployed_index_basic.tf.tmpl
+      prefixed_vars:
+        address_name: vertex-ai-range
+        bucket_name: bucket-name
+        deployed_index_id: deployed_index_id
+        display_name: vertex-deployed-index
+        display_name_index: test-index
+        endpoint_name: endpoint-name
+        network_name: network-name
+        service_account_id: vertex-sa
+      test_vars_overrides:
+        address_name: acctest.BootstrapSharedTestGlobalAddress(t, "vpc-network-1", acctest.AddressWithPrefixLength(8))
+        network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")
+  - name: vertex_ai_index_endpoint_deployed_index_basic_two
+    primary_resource_id: basic_deployed_index
+    steps:
+    - name: vertex_ai_index_endpoint_deployed_index_basic_two
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_index_endpoint_deployed_index_basic_two.tf.tmpl
+      prefixed_vars:
+        address_name: vertex-ai-range
+        bucket_name: bucket-name
+        deployed_index_id: deployed_index_id
+        display_name: vertex-deployed-index
+        display_name_index: test-index
+        endpoint_name: endpoint-name
+        network_name: network-name
+        service_account_id: vertex-sa
+      test_vars_overrides:
+        address_name: acctest.BootstrapSharedTestGlobalAddress(t, "vpc-network-1", acctest.AddressWithPrefixLength(8))
+        network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")
+  - name: vertex_ai_index_endpoint_deployed_index_dedicated_resources
+    primary_resource_id: dedicated_resources
+    steps:
+    - name: vertex_ai_index_endpoint_deployed_index_dedicated_resources
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_index_endpoint_deployed_index_dedicated_resources.tf.tmpl
+      prefixed_vars:
+        bucket_name: bucket-name
+        deployed_index_id: deployed_index_id
+        display_name: vertex-deployed-index
+        display_name_index: test-index
+      exclude_docs: true
+  - name: vertex_ai_index_endpoint_deployed_index_automatic_resources
+    primary_resource_id: automatic_resources
+    steps:
+    - name: vertex_ai_index_endpoint_deployed_index_automatic_resources
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_index_endpoint_deployed_index_automatic_resources.tf.tmpl
+      prefixed_vars:
+        bucket_name: bucket-name
+        deployed_index_id: deployed_index_id
+        display_name: vertex-deployed-index
+        display_name_index: test-index
+      exclude_docs: true
 parameters:
   - name: 'indexEndpoint'
     type: ResourceRef

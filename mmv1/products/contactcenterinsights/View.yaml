@@ -27,11 +27,17 @@ id_format: projects/{{project}}/locations/{{location}}/views/{{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/views/{{name}}
 autogen_status: Vmlldw==
-examples:
-  - name: 'contact_center_insights_view_basic'
-    primary_resource_id: 'basic_view'
-  - name: 'contact_center_insights_view_full'
-    primary_resource_id: 'full_view'
+samples:
+  - name: contact_center_insights_view_basic
+    primary_resource_id: basic_view
+    steps:
+    - name: contact_center_insights_view_basic
+      config_path: templates/terraform/samples/services/contactcenterinsights/contact_center_insights_view_basic.tf.tmpl
+  - name: contact_center_insights_view_full
+    primary_resource_id: full_view
+    steps:
+    - name: contact_center_insights_view_full
+      config_path: templates/terraform/samples/services/contactcenterinsights/contact_center_insights_view_full.tf.tmpl
 parameters:
   - name: location
     type: String

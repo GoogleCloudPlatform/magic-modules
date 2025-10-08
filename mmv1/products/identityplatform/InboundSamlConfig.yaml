@@ -30,15 +30,18 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'identity_platform_inbound_saml_config_basic'
-    primary_resource_id: 'saml_config'
-    vars:
-      name: 'saml.tf-config'
-      idp_entity_id: 'tf-idp'
-      sp_entity_id: 'tf-sp'
-    test_vars_overrides:
-      'name': '"saml.tf-config-" + acctest.RandString(t, 10)'
+samples:
+  - name: identity_platform_inbound_saml_config_basic
+    primary_resource_id: saml_config
+    steps:
+    - name: identity_platform_inbound_saml_config_basic
+      config_path: templates/terraform/samples/services/identityplatform/identity_platform_inbound_saml_config_basic.tf.tmpl
+      prefixed_vars:
+        idp_entity_id: tf-idp
+        name: saml.tf-config
+        sp_entity_id: tf-sp
+      test_vars_overrides:
+        name: '"saml.tf-config-" + acctest.RandString(t, 10)'
 parameters:
 properties:
   - name: 'name'

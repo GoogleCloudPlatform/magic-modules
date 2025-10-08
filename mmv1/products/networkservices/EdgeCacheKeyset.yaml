@@ -46,16 +46,22 @@ custom_code:
 error_abort_predicates:
 
   - 'transport_tpg.Is429QuotaError'
-examples:
-  - name: 'network_services_edge_cache_keyset_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-keyset'
-  - name: 'network_services_edge_cache_keyset_dual_token'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-keyset'
-      secret_name: 'secret-name'
+samples:
+  - name: network_services_edge_cache_keyset_basic
+    primary_resource_id: default
+    steps:
+    - name: network_services_edge_cache_keyset_basic
+      config_path: templates/terraform/samples/services/networkservices/network_services_edge_cache_keyset_basic.tf.tmpl
+      prefixed_vars:
+        resource_name: my-keyset
+  - name: network_services_edge_cache_keyset_dual_token
+    primary_resource_id: default
+    steps:
+    - name: network_services_edge_cache_keyset_dual_token
+      config_path: templates/terraform/samples/services/networkservices/network_services_edge_cache_keyset_dual_token.tf.tmpl
+      prefixed_vars:
+        resource_name: my-keyset
+        secret_name: secret-name
 parameters:
   - name: 'name'
     type: String

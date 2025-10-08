@@ -34,19 +34,25 @@ timeouts:
 custom_code:
   constants: 'templates/terraform/constants/binaryauthorization_policy.tmpl'
   pre_delete: 'templates/terraform/pre_delete/restore_default_binaryauthorization_policy.tmpl'
-examples:
-  - name: 'binary_authorization_policy_basic'
-    primary_resource_id: 'policy'
-    vars:
-      attestor_name: 'test-attestor'
-      note_name: 'test-attestor-note'
+samples:
+  - name: binary_authorization_policy_basic
+    primary_resource_id: policy
     exclude_test: true
-  - name: 'binary_authorization_policy_global_evaluation'
-    primary_resource_id: 'policy'
-    vars:
-      attestor_name: 'test-attestor'
-      note_name: 'test-attestor-note'
+    steps:
+    - name: binary_authorization_policy_basic
+      config_path: templates/terraform/samples/services/binaryauthorization/binary_authorization_policy_basic.tf.tmpl
+      prefixed_vars:
+        attestor_name: test-attestor
+        note_name: test-attestor-note
+  - name: binary_authorization_policy_global_evaluation
+    primary_resource_id: policy
     exclude_test: true
+    steps:
+    - name: binary_authorization_policy_global_evaluation
+      config_path: templates/terraform/samples/services/binaryauthorization/binary_authorization_policy_global_evaluation.tf.tmpl
+      prefixed_vars:
+        attestor_name: test-attestor
+        note_name: test-attestor-note
 parameters:
 properties:
   - name: 'description'

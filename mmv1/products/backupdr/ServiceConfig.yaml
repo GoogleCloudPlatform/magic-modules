@@ -35,15 +35,17 @@ async:
   operation:
     base_url: '{{op_id}}'
 
-examples:
-  - name: "backup_dr_service_config"
-    primary_resource_id: "my-service-config"
-    exclude_import_test: true
-    vars:
-      resource_type: 'compute.googleapis.com/Instance'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-
+samples:
+  - name: backup_dr_service_config
+    primary_resource_id: my-service-config
+    steps:
+    - name: backup_dr_service_config
+      config_path: templates/terraform/samples/services/backupdr/backup_dr_service_config.tf.tmpl
+      prefixed_vars:
+        resource_type: compute.googleapis.com/Instance
+      test_env_vars:
+        project: PROJECT_NAME
+      exclude_import_test: true
 parameters:
   - name: 'location'
     type: String

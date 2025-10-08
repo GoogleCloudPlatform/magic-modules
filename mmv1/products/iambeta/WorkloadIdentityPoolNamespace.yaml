@@ -34,17 +34,23 @@ custom_code:
   constants: 'templates/terraform/constants/iam_workload_identity_pool_namespace.go.tmpl'
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/iam_workload_identity_pool_namespace.go.tmpl'
-examples:
-  - name: 'iam_workload_identity_pool_namespace_basic'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_namespace_id: 'example-namespace'
-  - name: 'iam_workload_identity_pool_namespace_full'
-    primary_resource_id: 'example'
-    vars:
-      workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_namespace_id: 'example-namespace'
+samples:
+  - name: iam_workload_identity_pool_namespace_basic
+    primary_resource_id: example
+    steps:
+    - name: iam_workload_identity_pool_namespace_basic
+      config_path: templates/terraform/samples/services/iambeta/iam_workload_identity_pool_namespace_basic.tf.tmpl
+      prefixed_vars:
+        workload_identity_pool_id: example-pool
+        workload_identity_pool_namespace_id: example-namespace
+  - name: iam_workload_identity_pool_namespace_full
+    primary_resource_id: example
+    steps:
+    - name: iam_workload_identity_pool_namespace_full
+      config_path: templates/terraform/samples/services/iambeta/iam_workload_identity_pool_namespace_full.tf.tmpl
+      prefixed_vars:
+        workload_identity_pool_id: example-pool
+        workload_identity_pool_namespace_id: example-namespace
 parameters:
   - name: 'workload_identity_pool_id'
     type: String

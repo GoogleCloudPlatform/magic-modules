@@ -47,21 +47,26 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'workstation_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}/workstations/{{workstation_id}}'
     - '{{workstation_id}}'
   min_version: 'beta'
 custom_code:
-examples:
-  - name: 'workstation_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workstation-cluster%s", context["random_suffix"]), fmt.Sprintf("tf-test-workstation-config%s", context["random_suffix"]), fmt.Sprintf("tf-test-work-station%s", context["random_suffix"])'
-    min_version: 'beta'
-    vars:
-      workstation_cluster_name: 'workstation-cluster'
-      workstation_config_name: 'workstation-config'
-      workstation_name: 'work-station'
+samples:
+  - name: workstation_basic
+    min_version: beta
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-workstation-cluster%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test-workstation-config%s", context["random_suffix"]), fmt.Sprintf("tf-test-work-station%s",
+      context["random_suffix"])
+    steps:
+    - name: workstation_basic
+      config_path: templates/terraform/samples/services/workstations/workstation_basic.tf.tmpl
+      prefixed_vars:
+        workstation_cluster_name: workstation-cluster
+        workstation_config_name: workstation-config
+        workstation_name: work-station
 parameters:
   - name: 'workstationId'
     type: String

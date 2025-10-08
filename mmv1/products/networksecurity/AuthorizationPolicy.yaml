@@ -46,17 +46,23 @@ sweeper:
   url_substitutions:
     - region: "global"
 include_in_tgc_next_DO_NOT_USE: true
-examples:
-  - name: 'network_security_authorization_policy_basic'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      resource_name: 'my-authorization-policy'
-  - name: 'network_security_authorization_policy_destinations'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      resource_name: 'my-authorization-policy'
+samples:
+  - name: network_security_authorization_policy_basic
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: network_security_authorization_policy_basic
+      config_path: templates/terraform/samples/services/networksecurity/network_security_authorization_policy_basic.tf.tmpl
+      prefixed_vars:
+        resource_name: my-authorization-policy
+  - name: network_security_authorization_policy_destinations
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: network_security_authorization_policy_destinations
+      config_path: templates/terraform/samples/services/networksecurity/network_security_authorization_policy_destinations.tf.tmpl
+      prefixed_vars:
+        resource_name: my-authorization-policy
 parameters:
   - name: 'name'
     type: String

@@ -58,27 +58,31 @@ sweeper:
     - region: "me-west1-b"
 error_abort_predicates:
   - 'transport_tpg.Is429QuotaError'
-examples:
-  - name: 'vmware_engine_private_cloud_basic'
-    primary_resource_id: 'vmw-engine-pc'
-    vars:
-      private_cloud_id: 'sample-pc'
-      network_id: 'pc-nw'
-      management_cluster_id: 'sample-mgmt-cluster'
-    test_env_vars:
-      region: 'REGION'
-      # update tests will take care of create and update. PC creation is expensive and node reservation is required.
+samples:
+  - name: vmware_engine_private_cloud_basic
+    primary_resource_id: vmw-engine-pc
     exclude_test: true
-  - name: 'vmware_engine_private_cloud_full'
-    primary_resource_id: 'vmw-engine-pc'
-    vars:
-      private_cloud_id: 'sample-pc'
-      network_id: 'pc-nw'
-      management_cluster_id: 'sample-mgmt-cluster'
-    test_env_vars:
-      region: 'REGION'
-    # update tests will take care of create and update. PC creation is expensive and node reservation is required.
+    steps:
+    - name: vmware_engine_private_cloud_basic
+      config_path: templates/terraform/samples/services/vmwareengine/vmware_engine_private_cloud_basic.tf.tmpl
+      prefixed_vars:
+        management_cluster_id: sample-mgmt-cluster
+        network_id: pc-nw
+        private_cloud_id: sample-pc
+      test_env_vars:
+        region: REGION
+  - name: vmware_engine_private_cloud_full
+    primary_resource_id: vmw-engine-pc
     exclude_test: true
+    steps:
+    - name: vmware_engine_private_cloud_full
+      config_path: templates/terraform/samples/services/vmwareengine/vmware_engine_private_cloud_full.tf.tmpl
+      prefixed_vars:
+        management_cluster_id: sample-mgmt-cluster
+        network_id: pc-nw
+        private_cloud_id: sample-pc
+      test_env_vars:
+        region: REGION
 virtual_fields:
   - name: 'deletion_delay_hours'
     description: |

@@ -46,106 +46,131 @@ sweeper:
 custom_code:
   encoder: 'templates/terraform/encoders/apigee_organization.go.tmpl'
   custom_import: 'templates/terraform/custom_import/apigee_organization.go.tmpl'
-examples:
-  - name: 'apigee_organization_cloud_basic'
+samples:
+  - name: apigee_organization_cloud_basic
+    primary_resource_id: ""
     exclude_test: true
-  # This is a more verbose version of the above that creates all
-  # the resources needed for the acceptance test.
-  - name: 'apigee_organization_cloud_basic_test'
-    primary_resource_id: 'org'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    ignore_read_extra:
-      - 'properties'
-    exclude_docs: true
-    # Resource creation race
+    steps:
+    - name: apigee_organization_cloud_basic
+      config_path: templates/terraform/samples/services/apigee/apigee_organization_cloud_basic.tf.tmpl
+  - name: apigee_organization_cloud_basic_test
     skip_vcr: true
-    external_providers: ["time"]
-  - name: 'apigee_organization_cloud_basic_disable_vpc_peering'
+    external_providers:
+    - time
+    primary_resource_id: org
+    steps:
+    - name: apigee_organization_cloud_basic_test
+      config_path: templates/terraform/samples/services/apigee/apigee_organization_cloud_basic_test.tf.tmpl
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      ignore_read_extra:
+      - properties
+      exclude_docs: true
+  - name: apigee_organization_cloud_basic_disable_vpc_peering
+    primary_resource_id: ""
     exclude_test: true
-  # This is a more verbose version of the above that creates all
-  # the resources needed for the acceptance test.
-  - name: 'apigee_organization_cloud_basic_disable_vpc_peering_test'
-    primary_resource_id: 'org'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    ignore_read_extra:
-      - 'properties'
-    exclude_docs: true
-    # Resource creation race
+    steps:
+    - name: apigee_organization_cloud_basic_disable_vpc_peering
+      config_path: templates/terraform/samples/services/apigee/apigee_organization_cloud_basic_disable_vpc_peering.tf.tmpl
+  - name: apigee_organization_cloud_basic_disable_vpc_peering_test
     skip_vcr: true
-  - name: 'apigee_organization_cloud_basic_data_residency'
+    primary_resource_id: org
+    steps:
+    - name: apigee_organization_cloud_basic_disable_vpc_peering_test
+      config_path: templates/terraform/samples/services/apigee/apigee_organization_cloud_basic_disable_vpc_peering_test.tf.tmpl
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      ignore_read_extra:
+      - properties
+      exclude_docs: true
+  - name: apigee_organization_cloud_basic_data_residency
+    primary_resource_id: ""
     exclude_test: true
-  # This is a more verbose version of the above that creates all
-  # the resources needed for the acceptance test.
-  - name: 'apigee_organization_cloud_basic_data_residency_test'
-    primary_resource_id: 'org'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    ignore_read_extra:
-      - 'properties'
-    exclude_docs: true
-    # Resource creation race
+    steps:
+    - name: apigee_organization_cloud_basic_data_residency
+      config_path: templates/terraform/samples/services/apigee/apigee_organization_cloud_basic_data_residency.tf.tmpl
+  - name: apigee_organization_cloud_basic_data_residency_test
     skip_vcr: true
-  - name: 'apigee_organization_cloud_full'
+    primary_resource_id: org
+    steps:
+    - name: apigee_organization_cloud_basic_data_residency_test
+      config_path: templates/terraform/samples/services/apigee/apigee_organization_cloud_basic_data_residency_test.tf.tmpl
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      ignore_read_extra:
+      - properties
+      exclude_docs: true
+  - name: apigee_organization_cloud_full
+    primary_resource_id: ""
     exclude_test: true
-  # This is a more verbose version of the above that creates all
-  # the resources needed for the acceptance test. While all Apigee
-  # resources in this test are in the GA API, we depend on a service
-  # identity resource which is only available in the beta provider.
-  - name: 'apigee_organization_cloud_full_test'
-    primary_resource_id: 'org'
-    min_version: 'beta'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    ignore_read_extra:
-      - 'properties'
-    exclude_docs: true
-    # Resource creation race
+    steps:
+    - name: apigee_organization_cloud_full
+      config_path: templates/terraform/samples/services/apigee/apigee_organization_cloud_full.tf.tmpl
+  - name: apigee_organization_cloud_full_test
     skip_vcr: true
-    external_providers: ["time"]
-  - name: 'apigee_organization_cloud_full_disable_vpc_peering'
+    external_providers:
+    - time
+    min_version: beta
+    primary_resource_id: org
+    steps:
+    - name: apigee_organization_cloud_full_test
+      config_path: templates/terraform/samples/services/apigee/apigee_organization_cloud_full_test.tf.tmpl
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      ignore_read_extra:
+      - properties
+      exclude_docs: true
+  - name: apigee_organization_cloud_full_disable_vpc_peering
+    primary_resource_id: ""
     exclude_test: true
-  # This is a more verbose version of the above that creates all
-  # the resources needed for the acceptance test. While all Apigee
-  # resources in this test are in the GA API, we depend on a service
-  # identity resource which is only available in the beta provider.
-  - name: 'apigee_organization_cloud_full_disable_vpc_peering_test'
-    primary_resource_id: 'org'
-    min_version: 'beta'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    ignore_read_extra:
-      - 'properties'
-    exclude_docs: true
-    # Resource creation race
+    steps:
+    - name: apigee_organization_cloud_full_disable_vpc_peering
+      config_path: templates/terraform/samples/services/apigee/apigee_organization_cloud_full_disable_vpc_peering.tf.tmpl
+  - name: apigee_organization_cloud_full_disable_vpc_peering_test
     skip_vcr: true
-    external_providers: ["time"]
-  - name: 'apigee_organization_retention_test'
-    primary_resource_id: 'org'
-    min_version: 'beta'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-    # Resource creation race
+    external_providers:
+    - time
+    min_version: beta
+    primary_resource_id: org
+    steps:
+    - name: apigee_organization_cloud_full_disable_vpc_peering_test
+      config_path: templates/terraform/samples/services/apigee/apigee_organization_cloud_full_disable_vpc_peering_test.tf.tmpl
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      ignore_read_extra:
+      - properties
+      exclude_docs: true
+  - name: apigee_organization_retention_test
     skip_vcr: true
-    external_providers: ["time"]
-  - name: 'apigee_organization_drz_test'
-    primary_resource_id: 'org'
-    min_version: 'beta'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-      # Resource creation race
+    external_providers:
+    - time
+    min_version: beta
+    primary_resource_id: org
+    steps:
+    - name: apigee_organization_retention_test
+      config_path: templates/terraform/samples/services/apigee/apigee_organization_retention_test.tf.tmpl
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
+  - name: apigee_organization_drz_test
     skip_vcr: true
-    external_providers: ["time"]
+    external_providers:
+    - time
+    min_version: beta
+    primary_resource_id: org
+    steps:
+    - name: apigee_organization_drz_test
+      config_path: templates/terraform/samples/services/apigee/apigee_organization_drz_test.tf.tmpl
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
 parameters:
   - name: 'projectId'
     type: String

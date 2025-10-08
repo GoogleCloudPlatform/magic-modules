@@ -48,7 +48,7 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'topic'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
 custom_code:
   encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/pubsub_topic.tmpl'
@@ -56,65 +56,102 @@ tgc_ignore_terraform_encoder: true
 error_retry_predicates:
   - 'transport_tpg.PubsubTopicProjectNotReady'
 include_in_tgc_next_DO_NOT_USE: true
-examples:
-  - name: 'pubsub_topic_basic'
-    primary_resource_id: 'example'
-    primary_resource_name: 'fmt.Sprintf("tf-test-example-topic%s", context["random_suffix"])'
-    vars:
-      topic_name: 'example-topic'
-  - name: 'pubsub_topic_cmek'
-    primary_resource_id: 'example'
-    vars:
-      topic_name: 'example-topic'
-      key_name: 'example-key'
-      keyring_name: 'example-keyring'
+samples:
+  - name: pubsub_topic_basic
+    primary_resource_id: example
+    primary_resource_name: fmt.Sprintf("tf-test-example-topic%s", context["random_suffix"])
+    steps:
+    - name: pubsub_topic_basic
+      config_path: templates/terraform/samples/services/pubsub/pubsub_topic_basic.tf.tmpl
+      prefixed_vars:
+        topic_name: example-topic
+  - name: pubsub_topic_cmek
+    primary_resource_id: example
     exclude_test: true
-  - name: 'pubsub_topic_geo_restricted'
-    primary_resource_id: 'example'
-    vars:
-      topic_name: 'example-topic'
-  - name: 'pubsub_topic_schema_settings'
-    primary_resource_id: 'example'
-    vars:
-      topic_name: 'example-topic'
-      schema_name: 'example'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-  - name: 'pubsub_topic_ingestion_kinesis'
-    primary_resource_id: 'example'
-    vars:
-      topic_name: 'example-topic'
-  - name: 'pubsub_topic_ingestion_cloud_storage'
-    primary_resource_id: 'example'
-    vars:
-      topic_name: 'example-topic'
-  - name: 'pubsub_topic_ingestion_azure_event_hubs'
-    primary_resource_id: 'example'
-    vars:
-      topic_name: 'example-topic'
-  - name: 'pubsub_topic_ingestion_aws_msk'
-    primary_resource_id: 'example'
-    vars:
-      topic_name: 'example-topic'
-  - name: 'pubsub_topic_ingestion_confluent_cloud'
-    primary_resource_id: 'example'
-    vars:
-      topic_name: 'example-topic'
-  - name: 'pubsub_topic_single_smt'
-    primary_resource_id: 'example'
-    vars:
-      topic_name: 'example-topic'
-  - name: 'pubsub_topic_multiple_smts'
-    primary_resource_id: 'example'
-    vars:
-      topic_name: 'example-topic'
-    tgc_skip_test: 'The dynamic block is in test configuration. The test takes time to fix.'
-  - name: 'pubsub_topic_tags'
-    primary_resource_id: 'example'
-    vars:
-      topic_name: 'example-topic'
-      tag_key: 'tag_key'
-      tag_value: 'tag_value'
+    steps:
+    - name: pubsub_topic_cmek
+      config_path: templates/terraform/samples/services/pubsub/pubsub_topic_cmek.tf.tmpl
+      prefixed_vars:
+        key_name: example-key
+        keyring_name: example-keyring
+        topic_name: example-topic
+  - name: pubsub_topic_geo_restricted
+    primary_resource_id: example
+    steps:
+    - name: pubsub_topic_geo_restricted
+      config_path: templates/terraform/samples/services/pubsub/pubsub_topic_geo_restricted.tf.tmpl
+      prefixed_vars:
+        topic_name: example-topic
+  - name: pubsub_topic_schema_settings
+    primary_resource_id: example
+    steps:
+    - name: pubsub_topic_schema_settings
+      config_path: templates/terraform/samples/services/pubsub/pubsub_topic_schema_settings.tf.tmpl
+      prefixed_vars:
+        schema_name: example
+        topic_name: example-topic
+      test_env_vars:
+        project_name: PROJECT_NAME
+  - name: pubsub_topic_ingestion_kinesis
+    primary_resource_id: example
+    steps:
+    - name: pubsub_topic_ingestion_kinesis
+      config_path: templates/terraform/samples/services/pubsub/pubsub_topic_ingestion_kinesis.tf.tmpl
+      prefixed_vars:
+        topic_name: example-topic
+  - name: pubsub_topic_ingestion_cloud_storage
+    primary_resource_id: example
+    steps:
+    - name: pubsub_topic_ingestion_cloud_storage
+      config_path: templates/terraform/samples/services/pubsub/pubsub_topic_ingestion_cloud_storage.tf.tmpl
+      prefixed_vars:
+        topic_name: example-topic
+  - name: pubsub_topic_ingestion_azure_event_hubs
+    primary_resource_id: example
+    steps:
+    - name: pubsub_topic_ingestion_azure_event_hubs
+      config_path: templates/terraform/samples/services/pubsub/pubsub_topic_ingestion_azure_event_hubs.tf.tmpl
+      prefixed_vars:
+        topic_name: example-topic
+  - name: pubsub_topic_ingestion_aws_msk
+    primary_resource_id: example
+    steps:
+    - name: pubsub_topic_ingestion_aws_msk
+      config_path: templates/terraform/samples/services/pubsub/pubsub_topic_ingestion_aws_msk.tf.tmpl
+      prefixed_vars:
+        topic_name: example-topic
+  - name: pubsub_topic_ingestion_confluent_cloud
+    primary_resource_id: example
+    steps:
+    - name: pubsub_topic_ingestion_confluent_cloud
+      config_path: templates/terraform/samples/services/pubsub/pubsub_topic_ingestion_confluent_cloud.tf.tmpl
+      prefixed_vars:
+        topic_name: example-topic
+  - name: pubsub_topic_single_smt
+    primary_resource_id: example
+    steps:
+    - name: pubsub_topic_single_smt
+      config_path: templates/terraform/samples/services/pubsub/pubsub_topic_single_smt.tf.tmpl
+      prefixed_vars:
+        topic_name: example-topic
+  - name: pubsub_topic_multiple_smts
+    primary_resource_id: example
+    steps:
+    - name: pubsub_topic_multiple_smts
+      config_path: templates/terraform/samples/services/pubsub/pubsub_topic_multiple_smts.tf.tmpl
+      prefixed_vars:
+        topic_name: example-topic
+    tgc_skip_test: The dynamic block is in test configuration. The test takes time to
+      fix.
+  - name: pubsub_topic_tags
+    primary_resource_id: example
+    steps:
+    - name: pubsub_topic_tags
+      config_path: templates/terraform/samples/services/pubsub/pubsub_topic_tags.tf.tmpl
+      prefixed_vars:
+        tag_key: tag_key
+        tag_value: tag_value
+        topic_name: example-topic
 parameters:
 properties:
   - name: 'name'

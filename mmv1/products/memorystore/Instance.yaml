@@ -43,69 +43,81 @@ async:
 custom_code:
   encoder: 'templates/terraform/encoders/memorystore_instance.go.tmpl'
   decoder: 'templates/terraform/decoders/memorystore_instance.go.tmpl'
-examples:
-  - name: 'memorystore_instance_basic'
-    primary_resource_id: 'instance-basic'
-    vars:
-      instance_name: 'basic-instance'
-      policy_name: 'my-policy'
-      subnet_name: 'my-subnet'
-      network_name: 'my-network'
-      prevent_destroy: 'true'
-    test_vars_overrides:
-      'prevent_destroy': 'false'
-  - name: 'memorystore_instance_full'
-    primary_resource_id: 'instance-full'
+samples:
+  - name: memorystore_instance_basic
+    primary_resource_id: instance-basic
+    steps:
+    - name: memorystore_instance_basic
+      config_path: templates/terraform/samples/services/memorystore/memorystore_instance_basic.tf.tmpl
+      prefixed_vars:
+        instance_name: basic-instance
+        network_name: my-network
+        policy_name: my-policy
+        prevent_destroy: "true"
+        subnet_name: my-subnet
+      test_vars_overrides:
+        prevent_destroy: "false"
+  - name: memorystore_instance_full
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-memorystore.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-    vars:
-      instance_name: 'full-instance'
-      policy_name: 'my-policy'
-      subnet_name: 'my-subnet'
-      network_name: 'my-network'
-      prevent_destroy: 'true'
-      kms_key_name: 'my-key'
-    test_vars_overrides:
-      'prevent_destroy': 'false'
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-    ignore_read_extra:
-      - 'update_time'
-  - name: 'memorystore_instance_persistence_aof'
-    primary_resource_id: 'instance-persistence-aof'
-    vars:
-      instance_name: 'aof-instance'
-      policy_name: 'my-policy'
-      subnet_name: 'my-subnet'
-      network_name: 'my-network'
-      prevent_destroy: 'true'
-    test_vars_overrides:
-      'prevent_destroy': 'false'
-  - name: 'memorystore_instance_secondary_instance'
-    primary_resource_id: 'secondary_instance'
-    vars:
-      primary_instance_name: 'primary-instance'
-      primary_instance_deletion_protection_enabled: 'true'
-      primary_instance_prevent_destroy: 'true'
-      primary_instance_policy_name: 'my-policy-primary-instance'
-      primary_network_name: "my-network-primary-instance"
-      primary_instance_subnet_name: 'my-subnet-primary-instance'
-      secondary_instance_name: 'secondary-instance'
-      secondary_instance_deletion_protection_enabled: 'true'
-      secondary_instance_prevent_destroy: 'true'
-      secondary_instance_policy_name: 'my-policy-secondary-instance'
-      secondary_network_name: "my-network-secondary-instance"
-      secondary_instance_subnet_name: 'my-subnet-secondary-instance'
-    test_vars_overrides:
-      'primary_instance_deletion_protection_enabled': 'false'
-      'secondary_instance_deletion_protection_enabled': 'false'
-      'primary_instance_prevent_destroy': 'false'
-      'secondary_instance_prevent_destroy': 'false'
-    oics_vars_overrides:
-      'primary_instance_deletion_protection_enabled': 'false'
-      'secondary_instance_deletion_protection_enabled': 'false'
-      'primary_instance_prevent_destroy': 'false'
-      'secondary_instance_prevent_destroy': 'false'
+    - member: serviceAccount:service-{project_number}@gcp-sa-memorystore.iam.gserviceaccount.com
+      role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    primary_resource_id: instance-full
+    steps:
+    - name: memorystore_instance_full
+      config_path: templates/terraform/samples/services/memorystore/memorystore_instance_full.tf.tmpl
+      prefixed_vars:
+        instance_name: full-instance
+        kms_key_name: my-key
+        network_name: my-network
+        policy_name: my-policy
+        prevent_destroy: "true"
+        subnet_name: my-subnet
+      test_vars_overrides:
+        kms_key_name: acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+        prevent_destroy: "false"
+      ignore_read_extra:
+      - update_time
+  - name: memorystore_instance_persistence_aof
+    primary_resource_id: instance-persistence-aof
+    steps:
+    - name: memorystore_instance_persistence_aof
+      config_path: templates/terraform/samples/services/memorystore/memorystore_instance_persistence_aof.tf.tmpl
+      prefixed_vars:
+        instance_name: aof-instance
+        network_name: my-network
+        policy_name: my-policy
+        prevent_destroy: "true"
+        subnet_name: my-subnet
+      test_vars_overrides:
+        prevent_destroy: "false"
+  - name: memorystore_instance_secondary_instance
+    primary_resource_id: secondary_instance
+    steps:
+    - name: memorystore_instance_secondary_instance
+      config_path: templates/terraform/samples/services/memorystore/memorystore_instance_secondary_instance.tf.tmpl
+      prefixed_vars:
+        primary_instance_deletion_protection_enabled: "true"
+        primary_instance_name: primary-instance
+        primary_instance_policy_name: my-policy-primary-instance
+        primary_instance_prevent_destroy: "true"
+        primary_instance_subnet_name: my-subnet-primary-instance
+        primary_network_name: my-network-primary-instance
+        secondary_instance_deletion_protection_enabled: "true"
+        secondary_instance_name: secondary-instance
+        secondary_instance_policy_name: my-policy-secondary-instance
+        secondary_instance_prevent_destroy: "true"
+        secondary_instance_subnet_name: my-subnet-secondary-instance
+        secondary_network_name: my-network-secondary-instance
+      test_vars_overrides:
+        primary_instance_deletion_protection_enabled: "false"
+        primary_instance_prevent_destroy: "false"
+        secondary_instance_deletion_protection_enabled: "false"
+        secondary_instance_prevent_destroy: "false"
+      oics_vars_overrides:
+        primary_instance_deletion_protection_enabled: "false"
+        primary_instance_prevent_destroy: "false"
+        secondary_instance_deletion_protection_enabled: "false"
+        secondary_instance_prevent_destroy: "false"
 virtual_fields:
   - name: 'desired_psc_auto_connections'
     description: "`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead `terraform import` will only work with desired_auto_created_endpoints`."

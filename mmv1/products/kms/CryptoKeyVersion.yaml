@@ -41,10 +41,13 @@ custom_code:
   pre_update: 'templates/terraform/pre_update/kms_crypto_key_version.go.tmpl'
   custom_delete: 'templates/terraform/custom_delete/kms_crypto_key_version.tmpl'
   custom_import: 'templates/terraform/custom_import/kms_crypto_key_version.go.tmpl'
-examples:
-  - name: 'kms_crypto_key_version_basic'
-    primary_resource_id: 'example-key'
+samples:
+  - name: kms_crypto_key_version_basic
+    primary_resource_id: example-key
     exclude_test: true
+    steps:
+    - name: kms_crypto_key_version_basic
+      config_path: templates/terraform/samples/services/kms/kms_crypto_key_version_basic.tf.tmpl
 parameters:
   - name: 'cryptoKey'
     type: String

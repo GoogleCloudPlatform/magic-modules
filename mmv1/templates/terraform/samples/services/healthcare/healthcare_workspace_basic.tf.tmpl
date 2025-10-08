@@ -1,0 +1,18 @@
+resource "google_healthcare_workspace" "{{$.PrimaryResourceId}}" {
+  name    = "{{index $.PrefixedVars "workspace_name"}}"
+  dataset = google_healthcare_dataset.dataset.id
+
+  settings {
+    data_project_ids = ["{{index $.PrefixedVars "source_project_id"}}"]
+  }
+  
+  labels = {
+    label1 = "labelvalue1"
+  }
+}
+
+
+resource "google_healthcare_dataset" "dataset" {
+  name     = "{{index $.PrefixedVars "dataset_name"}}"
+  location = "us-central1"
+}

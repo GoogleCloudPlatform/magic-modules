@@ -42,18 +42,20 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-examples:
-  - name: 'active_directory_peering_basic'
-    primary_resource_id: 'ad-domain-peering'
-    vars:
-      domain_name: 'ad.test.hashicorptest.com'
-      project_id: 'my-peered-project'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-      # skip the test until Active Directory setup issue got resolved
+samples:
+  - name: active_directory_peering_basic
+    primary_resource_id: ad-domain-peering
     exclude_test: true
-    exclude_import_test: true
+    steps:
+    - name: active_directory_peering_basic
+      config_path: templates/terraform/samples/services/activedirectory/active_directory_peering_basic.tf.tmpl
+      prefixed_vars:
+        domain_name: ad.test.hashicorptest.com
+        project_id: my-peered-project
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_import_test: true
 parameters:
   - name: 'peeringId'
     type: String

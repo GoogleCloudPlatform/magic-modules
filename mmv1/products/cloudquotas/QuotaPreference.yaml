@@ -35,14 +35,17 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'cloudquotas_quota_preference_basic'
-    primary_resource_id: 'preference'
-    vars:
-      name: 'compute_googleapis_com-CPUS-per-project_us-east1'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: cloudquotas_quota_preference_basic
+    primary_resource_id: preference
     exclude_test: true
+    steps:
+    - name: cloudquotas_quota_preference_basic
+      config_path: templates/terraform/samples/services/cloudquotas/cloudquotas_quota_preference_basic.tf.tmpl
+      prefixed_vars:
+        name: compute_googleapis_com-CPUS-per-project_us-east1
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
   - name: 'parent'
     type: String

@@ -40,15 +40,18 @@ async:
     resource_inside_response: false
 custom_code:
   constants: 'templates/terraform/constants/iam_workforce_pool_provider_key.go.tmpl'
-examples:
-  - name: 'iam_workforce_pool_provider_saml_key_basic'
-    primary_resource_id: "example"
-    vars:
-      workforce_pool_id: 'example-pool'
-      provider_id: 'example-prvdr'
-      key_id: 'example-key'
-    test_env_vars:
-      org_id: 'ORG_ID'
+samples:
+  - name: iam_workforce_pool_provider_saml_key_basic
+    primary_resource_id: example
+    steps:
+    - name: iam_workforce_pool_provider_saml_key_basic
+      config_path: templates/terraform/samples/services/iamworkforcepool/iam_workforce_pool_provider_saml_key_basic.tf.tmpl
+      prefixed_vars:
+        key_id: example-key
+        provider_id: example-prvdr
+        workforce_pool_id: example-pool
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
   - name: 'location'
     type: String

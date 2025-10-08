@@ -37,12 +37,15 @@ custom_code:
   pre_delete: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
   custom_import: 'templates/terraform/custom_import/dialogflowcx_page.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'dialogflowcx_page_full'
-    primary_resource_id: 'basic_page'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-      data-store: 'datastore-page-full'
+samples:
+  - name: dialogflowcx_page_full
+    primary_resource_id: basic_page
+    steps:
+    - name: dialogflowcx_page_full
+      config_path: templates/terraform/samples/services/dialogflowcx/dialogflowcx_page_full.tf.tmpl
+      prefixed_vars:
+        agent_name: dialogflowcx-agent
+        data-store: datastore-page-full
 parameters:
   - name: 'parent'
     type: String

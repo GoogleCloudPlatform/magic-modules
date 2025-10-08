@@ -39,28 +39,39 @@ custom_code:
   custom_create: 'templates/terraform/custom_create/apigee_environment_keyvaluemaps.go.tmpl'
   custom_import: 'templates/terraform/custom_import/apigee_environment_keyvaluemaps.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'apigee_environment_keyvaluemaps_basic'
-    primary_resource_id: 'apigee_environment_keyvaluemaps'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
+samples:
+  - name: apigee_environment_keyvaluemaps_basic
+    primary_resource_id: apigee_environment_keyvaluemaps
     exclude_test: true
-  - name: 'apigee_environment_keyvaluemaps_test'
-    primary_resource_id: 'apigee_environment_keyvaluemaps'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-    external_providers: ["time"]
-  - name: 'apigee_environment_keyvaluemaps_beta_test'
-    primary_resource_id: 'apigee_environment_keyvaluemaps'
-    min_version: 'beta'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-    external_providers: ["time"]
+    steps:
+    - name: apigee_environment_keyvaluemaps_basic
+      config_path: templates/terraform/samples/services/apigee/apigee_environment_keyvaluemaps_basic.tf.tmpl
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+  - name: apigee_environment_keyvaluemaps_test
+    external_providers:
+    - time
+    primary_resource_id: apigee_environment_keyvaluemaps
+    steps:
+    - name: apigee_environment_keyvaluemaps_test
+      config_path: templates/terraform/samples/services/apigee/apigee_environment_keyvaluemaps_test.tf.tmpl
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
+  - name: apigee_environment_keyvaluemaps_beta_test
+    external_providers:
+    - time
+    min_version: beta
+    primary_resource_id: apigee_environment_keyvaluemaps
+    steps:
+    - name: apigee_environment_keyvaluemaps_beta_test
+      config_path: templates/terraform/samples/services/apigee/apigee_environment_keyvaluemaps_beta_test.tf.tmpl
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
 parameters:
   - name: 'envId'
     type: String

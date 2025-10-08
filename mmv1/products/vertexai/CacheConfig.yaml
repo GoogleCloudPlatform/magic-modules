@@ -24,11 +24,14 @@ import_format:
   - 'projects/{{project}}/cacheConfig'
 base_url: 'projects/{{project}}/cacheConfig'
 self_link: 'projects/{{project}}/cacheConfig'
-examples:
-  - name: 'vertex_ai_cache_config'
-    primary_resource_id: 'cache_config'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: vertex_ai_cache_config
+    primary_resource_id: cache_config
+    steps:
+    - name: vertex_ai_cache_config
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_cache_config.tf.tmpl
+      test_env_vars:
+        project: PROJECT_NAME
 create_verb: 'PATCH'
 update_verb: 'PATCH'
 exclude_delete: true

@@ -46,15 +46,18 @@ async:
     base_url: '{{op_id}}'
 custom_code:
   custom_import: 'templates/terraform/custom_import/resource_manager_capability.go.tmpl'
-examples:
-  - name: 'resource_manager_capability'
-    primary_resource_id: 'capability'
-    vars:
-      display_name: 'my-folder'
-    test_env_vars:
-      org_id: "ORG_ID"
-    external_providers: ["time"]
-
+samples:
+  - name: resource_manager_capability
+    external_providers:
+    - time
+    primary_resource_id: capability
+    steps:
+    - name: resource_manager_capability
+      config_path: templates/terraform/samples/services/resourcemanager3/resource_manager_capability.tf.tmpl
+      prefixed_vars:
+        display_name: my-folder
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
 
 properties:

@@ -37,31 +37,41 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'scc_management_folder_security_health_analytics_custom_module_basic'
-    primary_resource_id: 'example'
-    vars:
-      folder_display_name: 'folder-name'
-      display_name: 'basic_custom_module'
-      sleep: ''
-    test_env_vars:
-      org_id: 'ORG_ID'
-    test_vars_overrides:
-      'sleep': 'true'
-    external_providers: ["random", "time"]
+samples:
+  - name: scc_management_folder_security_health_analytics_custom_module_basic
+    external_providers:
+    - random
+    - time
+    primary_resource_id: example
     exclude_test: true
-  - name: 'scc_management_folder_security_health_analytics_custom_module_full'
-    primary_resource_id: 'example'
-    vars:
-      folder_display_name: 'folder-name'
-      display_name: 'full_custom_module'
-      sleep: ''
-    test_env_vars:
-      org_id: 'ORG_ID'
-    test_vars_overrides:
-      'sleep': 'true'
-    external_providers: ["random", "time"]
+    steps:
+    - name: scc_management_folder_security_health_analytics_custom_module_basic
+      config_path: templates/terraform/samples/services/securitycentermanagement/scc_management_folder_security_health_analytics_custom_module_basic.tf.tmpl
+      prefixed_vars:
+        display_name: basic_custom_module
+        folder_display_name: folder-name
+        sleep: ""
+      test_env_vars:
+        org_id: ORG_ID
+      test_vars_overrides:
+        sleep: "true"
+  - name: scc_management_folder_security_health_analytics_custom_module_full
+    external_providers:
+    - random
+    - time
+    primary_resource_id: example
     exclude_test: true
+    steps:
+    - name: scc_management_folder_security_health_analytics_custom_module_full
+      config_path: templates/terraform/samples/services/securitycentermanagement/scc_management_folder_security_health_analytics_custom_module_full.tf.tmpl
+      prefixed_vars:
+        display_name: full_custom_module
+        folder_display_name: folder-name
+        sleep: ""
+      test_env_vars:
+        org_id: ORG_ID
+      test_vars_overrides:
+        sleep: "true"
 parameters:
   - name: 'folder'
     type: String

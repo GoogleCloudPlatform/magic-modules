@@ -55,23 +55,29 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   allowed_iam_role: 'roles/accesscontextmanager.policyAdmin'
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'accessPolicies/{{name}}'
     - '{{name}}'
 # Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
-examples:
-  - name: 'access_context_manager_access_policy_basic'
-    primary_resource_id: 'access-policy'
+samples:
+  - name: access_context_manager_access_policy_basic
+    primary_resource_id: access-policy
     exclude_test: true
-  - name: 'access_context_manager_access_policy_scoped'
-    primary_resource_id: 'access-policy'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      project: 'PROJECT_NAME'
+    steps:
+    - name: access_context_manager_access_policy_basic
+      config_path: templates/terraform/samples/services/accesscontextmanager/access_context_manager_access_policy_basic.tf.tmpl
+  - name: access_context_manager_access_policy_scoped
+    primary_resource_id: access-policy
     exclude_test: true
-    exclude_import_test: true
+    steps:
+    - name: access_context_manager_access_policy_scoped
+      config_path: templates/terraform/samples/services/accesscontextmanager/access_context_manager_access_policy_scoped.tf.tmpl
+      test_env_vars:
+        org_id: ORG_ID
+        project: PROJECT_NAME
+      exclude_import_test: true
 parameters:
   - name: 'parent'
     type: String

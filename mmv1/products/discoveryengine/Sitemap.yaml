@@ -46,13 +46,16 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/discoveryengine_sitemap_set_id.go.tmpl'
   post_read: 'templates/terraform/post_read/discoveryengine_sitemap_post_read.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/discoveryengine_sitemap.go.tmpl'
-examples:
-  - name: 'discoveryengine_sitemap_basic'
-    primary_resource_id: 'basic'
-    vars:
-      data_store_id: 'data-store-id'
-    ignore_read_extra:
-      - 'project'
+samples:
+  - name: discoveryengine_sitemap_basic
+    primary_resource_id: basic
+    steps:
+    - name: discoveryengine_sitemap_basic
+      config_path: templates/terraform/samples/services/discoveryengine/discoveryengine_sitemap_basic.tf.tmpl
+      prefixed_vars:
+        data_store_id: data-store-id
+      ignore_read_extra:
+      - project
 parameters:
   - name: 'location'
     type: String

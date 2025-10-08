@@ -27,23 +27,26 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/global/policyOrchestrators/{{policy_orchestrator_id}}
 import_format:
   - projects/{{project}}/locations/global/policyOrchestrators/{{policy_orchestrator_id}}
-examples:
+samples:
   - name: osconfigv2_policy_orchestrator_basic
-    primary_resource_id: policy_orchestrator
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-osconfig.iam.gserviceaccount.com"
-        role: "roles/osconfig.serviceAgent"
-      - member: "serviceAccount:service-{project_number}@gcp-sa-osconfig-rollout.iam.gserviceaccount.com"
-        role: "roles/osconfig.rolloutServiceAgent"
-      - member: "serviceAccount:service-{project_number}@gcp-sa-progrollout.iam.gserviceaccount.com"
-        role: "roles/progressiverollout.serviceAgent"
-    vars:
-      policy_orchestrator_id: po
-      orchestrated_resource_id: test-orchestrated-resource
-      os_policy_id: test-os-policy
-    test_env_vars:
-      project_number: PROJECT_NUMBER
-      project: PROJECT_NAME
+    - member: serviceAccount:service-{project_number}@gcp-sa-osconfig.iam.gserviceaccount.com
+      role: roles/osconfig.serviceAgent
+    - member: serviceAccount:service-{project_number}@gcp-sa-osconfig-rollout.iam.gserviceaccount.com
+      role: roles/osconfig.rolloutServiceAgent
+    - member: serviceAccount:service-{project_number}@gcp-sa-progrollout.iam.gserviceaccount.com
+      role: roles/progressiverollout.serviceAgent
+    primary_resource_id: policy_orchestrator
+    steps:
+    - name: osconfigv2_policy_orchestrator_basic
+      config_path: templates/terraform/samples/services/osconfigv2/osconfigv2_policy_orchestrator_basic.tf.tmpl
+      prefixed_vars:
+        orchestrated_resource_id: test-orchestrated-resource
+        os_policy_id: test-os-policy
+        policy_orchestrator_id: po
+      test_env_vars:
+        project: PROJECT_NAME
+        project_number: PROJECT_NUMBER
 autogen_async: true
 async:
   operation:

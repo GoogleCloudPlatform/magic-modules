@@ -37,17 +37,21 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-examples:
-  - name: 'managedkafka_connect_cluster_basic'
-    primary_resource_id: 'example'
-    vars:
-      connect_cluster_id: 'my-connect-cluster'
-      cluster_id: 'my-cluster'
-      secondary_subnet_id: 'my-secondary-subnetwork'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    external_providers: ["time"]
+samples:
+  - name: managedkafka_connect_cluster_basic
+    external_providers:
+    - time
+    primary_resource_id: example
+    steps:
+    - name: managedkafka_connect_cluster_basic
+      config_path: templates/terraform/samples/services/managedkafka/managedkafka_connect_cluster_basic.tf.tmpl
+      prefixed_vars:
+        cluster_id: my-cluster
+        connect_cluster_id: my-connect-cluster
+        secondary_subnet_id: my-secondary-subnetwork
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
 parameters:
   - name: 'location'
     type: String

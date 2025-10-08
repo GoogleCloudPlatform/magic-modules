@@ -53,7 +53,7 @@ async:
 collection_url_key: 'items'
 iam_policy:
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'projects/{{project}}/global/snapshots/{{name}}'
     - '{{name}}'
@@ -63,20 +63,26 @@ custom_code:
 sweeper:
   url_substitutions:
     - zone: "us-central1-a"
-examples:
-  - name: 'snapshot_basic'
-    primary_resource_id: 'snapshot'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-snapshot%s", context["random_suffix"])'
-    vars:
-      snapshot_name: 'my-snapshot'
-      disk_name: 'debian-disk'
-  - name: 'snapshot_chainname'
-    primary_resource_id: 'snapshot'
-    primary_resource_name: 'fmt.Sprintf("tf-test-snapshot-chainname%s", context["random_suffix"])'
-    vars:
-      snapshot_name: 'my-snapshot'
-      disk_name: 'debian-disk'
-      chain_name: 'snapshot-chain'
+samples:
+  - name: snapshot_basic
+    primary_resource_id: snapshot
+    primary_resource_name: fmt.Sprintf("tf-test-my-snapshot%s", context["random_suffix"])
+    steps:
+    - name: snapshot_basic
+      config_path: templates/terraform/samples/services/compute/snapshot_basic.tf.tmpl
+      prefixed_vars:
+        disk_name: debian-disk
+        snapshot_name: my-snapshot
+  - name: snapshot_chainname
+    primary_resource_id: snapshot
+    primary_resource_name: fmt.Sprintf("tf-test-snapshot-chainname%s", context["random_suffix"])
+    steps:
+    - name: snapshot_chainname
+      config_path: templates/terraform/samples/services/compute/snapshot_chainname.tf.tmpl
+      prefixed_vars:
+        chain_name: snapshot-chain
+        disk_name: debian-disk
+        snapshot_name: my-snapshot
 parameters:
   - name: 'sourceDisk'
     type: ResourceRef

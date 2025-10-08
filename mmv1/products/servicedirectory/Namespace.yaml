@@ -38,16 +38,19 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
 custom_code:
   custom_import: 'templates/terraform/custom_import/service_directory_namespace.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'service_directory_namespace_basic'
-    primary_resource_id: 'example'
-    min_version: 'beta'
-    vars:
-      namespace_id: 'example-namespace'
+samples:
+  - name: service_directory_namespace_basic
+    min_version: beta
+    primary_resource_id: example
+    steps:
+    - name: service_directory_namespace_basic
+      config_path: templates/terraform/samples/services/servicedirectory/service_directory_namespace_basic.tf.tmpl
+      prefixed_vars:
+        namespace_id: example-namespace
 parameters:
   - name: 'location'
     type: String

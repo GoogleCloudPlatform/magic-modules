@@ -36,11 +36,14 @@ timeouts:
   delete_minutes: 20
 custom_code:
 exclude_sweeper: true
-examples:
-  - name: 'dialogflow_agent_full'
-    primary_resource_id: 'full_agent'
-    vars:
-      agent_name: 'dialogflow-agent'
+samples:
+  - name: dialogflow_agent_full
+    primary_resource_id: full_agent
+    steps:
+    - name: dialogflow_agent_full
+      config_path: templates/terraform/samples/services/dialogflow/dialogflow_agent_full.tf.tmpl
+      prefixed_vars:
+        agent_name: dialogflow-agent
 parameters:
 properties:
   - name: 'displayName'

@@ -67,13 +67,17 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/compute_instance_group_membership.go.tmpl'
   custom_import: 'templates/terraform/custom_import/compute_instance_group_membership.go.tmpl'
 exclude_tgc: true
-examples:
-  - name: 'instance_group_membership'
-    vars:
-      network_name: 'network'
-      instance_group_name: 'instance-group'
-      instance_name: 'instance'
+samples:
+  - name: instance_group_membership
+    primary_resource_id: ""
     exclude_test: true
+    steps:
+    - name: instance_group_membership
+      config_path: templates/terraform/samples/services/compute/instance_group_membership.tf.tmpl
+      prefixed_vars:
+        instance_group_name: instance-group
+        instance_name: instance
+        network_name: network
 parameters:
   - name: 'zone'
     type: ResourceRef

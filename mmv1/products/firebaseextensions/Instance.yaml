@@ -43,20 +43,22 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-examples:
-  - name: 'firebase_extentions_instance_resize_image'
-    primary_resource_id: 'resize_image'
-    min_version: 'beta'
-    vars:
-      # using a hyphen "-"" because underscore is not a valid instance ID
-      instance-id: 'storage-resize-images'
-      bucket_id: 'bucket-id'
-      service-account-id: 's-a'
-      location: "us-central1"
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'location': '"us-central1"'
+samples:
+  - name: firebase_extentions_instance_resize_image
+    min_version: beta
+    primary_resource_id: resize_image
+    steps:
+    - name: firebase_extentions_instance_resize_image
+      config_path: templates/terraform/samples/services/firebaseextensions/firebase_extentions_instance_resize_image.tf.tmpl
+      prefixed_vars:
+        bucket_id: bucket-id
+        instance-id: storage-resize-images
+        location: us-central1
+        service-account-id: s-a
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        location: '"us-central1"'
 parameters:
   - name: 'instance_id'
     type: String

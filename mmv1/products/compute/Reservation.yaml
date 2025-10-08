@@ -53,45 +53,63 @@ sweeper:
     - zone: "us-central1-a"
     - zone: "us-west1-a"
     - zone: "us-central1-f"
-examples:
-  - name: 'reservation_basic'
-    primary_resource_id: 'gce_reservation'
-    vars:
-      reservation_name: 'gce-reservation'
-  - name: 'reservation_basic_beta'
-    primary_resource_id: 'gce_reservation'
-    vars:
-      reservation_name: 'gce-reservation'
-    min_version: 'beta'
-  - name: 'reservation_source_instance_template'
-    primary_resource_id: 'gce_reservation_source_instance_template'
-    vars:
-      instance-template: 'instance-template'
-      reservation_name: 'gce-reservation-source-instance-template'
-  - name: 'reservation_sharing_policy'
-    primary_resource_id: 'gce_reservation_sharing_policy'
-    vars:
-      instance-template: 'instance-template'
-      reservation_name: 'gce-reservation-sharing-policy'
-  - name: 'shared_reservation_basic'
-    primary_resource_id: 'gce_reservation'
-    vars:
-      reservation_name: 'gce-shared-reservation'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-  - name: 'shared_reservation_beta'
-    primary_resource_id: 'gce_reservation'
-    vars:
-      reservation_name: 'gce-shared-reservation-beta'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-    min_version: 'beta'
+samples:
+  - name: reservation_basic
+    primary_resource_id: gce_reservation
+    steps:
+    - name: reservation_basic
+      config_path: templates/terraform/samples/services/compute/reservation_basic.tf.tmpl
+      prefixed_vars:
+        reservation_name: gce-reservation
+  - name: reservation_basic_beta
+    min_version: beta
+    primary_resource_id: gce_reservation
+    steps:
+    - name: reservation_basic_beta
+      config_path: templates/terraform/samples/services/compute/reservation_basic_beta.tf.tmpl
+      prefixed_vars:
+        reservation_name: gce-reservation
+  - name: reservation_source_instance_template
+    primary_resource_id: gce_reservation_source_instance_template
+    steps:
+    - name: reservation_source_instance_template
+      config_path: templates/terraform/samples/services/compute/reservation_source_instance_template.tf.tmpl
+      prefixed_vars:
+        instance-template: instance-template
+        reservation_name: gce-reservation-source-instance-template
+  - name: reservation_sharing_policy
+    primary_resource_id: gce_reservation_sharing_policy
+    steps:
+    - name: reservation_sharing_policy
+      config_path: templates/terraform/samples/services/compute/reservation_sharing_policy.tf.tmpl
+      prefixed_vars:
+        instance-template: instance-template
+        reservation_name: gce-reservation-sharing-policy
+  - name: shared_reservation_basic
+    primary_resource_id: gce_reservation
+    steps:
+    - name: shared_reservation_basic
+      config_path: templates/terraform/samples/services/compute/shared_reservation_basic.tf.tmpl
+      prefixed_vars:
+        reservation_name: gce-shared-reservation
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+        project: PROJECT_NAME
+      exclude_docs: true
+  - name: shared_reservation_beta
+    min_version: beta
+    primary_resource_id: gce_reservation
+    steps:
+    - name: shared_reservation_beta
+      config_path: templates/terraform/samples/services/compute/shared_reservation_beta.tf.tmpl
+      prefixed_vars:
+        reservation_name: gce-shared-reservation-beta
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+        project: PROJECT_NAME
+      exclude_docs: true
 parameters:
   - name: 'zone'
     type: ResourceRef

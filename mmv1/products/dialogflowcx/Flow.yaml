@@ -37,29 +37,41 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/dialogflowcx_set_location_skip_default_obj.go.tmpl'
   custom_import: 'templates/terraform/custom_import/dialogflowcx_flow.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'dialogflowcx_flow_basic'
-    primary_resource_id: 'basic_flow'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-    ignore_read_extra:
-      - 'advanced_settings.0.logging_settings'
-  - name: 'dialogflowcx_flow_full'
-    primary_resource_id: 'basic_flow'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-      bucket_name: 'dialogflowcx-bucket'
-      data-store: 'datastore-flow-full'
-  - name: 'dialogflowcx_flow_default_start_flow'
-    primary_resource_id: 'default_start_flow'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-    exclude_docs: true
-  - name: 'dialogflowcx_flow_custom_endpoint'
-    primary_resource_id: 'custom_endpoint_flow'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-    exclude_docs: true
+samples:
+  - name: dialogflowcx_flow_basic
+    primary_resource_id: basic_flow
+    steps:
+    - name: dialogflowcx_flow_basic
+      config_path: templates/terraform/samples/services/dialogflowcx/dialogflowcx_flow_basic.tf.tmpl
+      prefixed_vars:
+        agent_name: dialogflowcx-agent
+      ignore_read_extra:
+      - advanced_settings.0.logging_settings
+  - name: dialogflowcx_flow_full
+    primary_resource_id: basic_flow
+    steps:
+    - name: dialogflowcx_flow_full
+      config_path: templates/terraform/samples/services/dialogflowcx/dialogflowcx_flow_full.tf.tmpl
+      prefixed_vars:
+        agent_name: dialogflowcx-agent
+        bucket_name: dialogflowcx-bucket
+        data-store: datastore-flow-full
+  - name: dialogflowcx_flow_default_start_flow
+    primary_resource_id: default_start_flow
+    steps:
+    - name: dialogflowcx_flow_default_start_flow
+      config_path: templates/terraform/samples/services/dialogflowcx/dialogflowcx_flow_default_start_flow.tf.tmpl
+      prefixed_vars:
+        agent_name: dialogflowcx-agent
+      exclude_docs: true
+  - name: dialogflowcx_flow_custom_endpoint
+    primary_resource_id: custom_endpoint_flow
+    steps:
+    - name: dialogflowcx_flow_custom_endpoint
+      config_path: templates/terraform/samples/services/dialogflowcx/dialogflowcx_flow_custom_endpoint.tf.tmpl
+      prefixed_vars:
+        agent_name: dialogflowcx-agent
+      exclude_docs: true
 virtual_fields:
   - name: 'is_default_start_flow'
     description: |

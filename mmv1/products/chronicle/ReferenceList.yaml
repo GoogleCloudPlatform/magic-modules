@@ -29,15 +29,17 @@ update_mask: true
 exclude_delete: true
 autogen_status: UmVmZXJlbmNlTGlzdA==
 
-examples:
-  - name: 'chronicle_referencelist_basic'
-    primary_resource_id: 'example'
-    vars:
-      reference_list_id: reference_list_id
-      data_access_scope_id: scope-id
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-
+samples:
+  - name: chronicle_referencelist_basic
+    primary_resource_id: example
+    steps:
+    - name: chronicle_referencelist_basic
+      config_path: templates/terraform/samples/services/chronicle/chronicle_referencelist_basic.tf.tmpl
+      prefixed_vars:
+        data_access_scope_id: scope-id
+        reference_list_id: reference_list_id
+      test_env_vars:
+        chronicle_id: CHRONICLE_ID
 parameters:
   - name: location
     type: String

@@ -60,84 +60,138 @@ custom_diff:
 sweeper:
   dependencies:
     - "google_compute_subnetwork"
-examples:
-  - name: 'health_check_tcp'
-    primary_resource_id: 'tcp-health-check'
-    vars:
-      health_check_name: 'tcp-health-check'
-  - name: 'health_check_tcp_full'
-    primary_resource_id: 'tcp-health-check'
-    vars:
-      health_check_name: 'tcp-health-check'
-  - name: 'health_check_ssl'
-    primary_resource_id: 'ssl-health-check'
-    vars:
-      health_check_name: 'ssl-health-check'
-  - name: 'health_check_ssl_full'
-    primary_resource_id: 'ssl-health-check'
-    vars:
-      health_check_name: 'ssl-health-check'
-  - name: 'health_check_http'
-    primary_resource_id: 'http-health-check'
-    vars:
-      health_check_name: 'http-health-check'
-  - name: 'health_check_http_full'
-    primary_resource_id: 'http-health-check'
-    vars:
-      health_check_name: 'http-health-check'
-  - name: 'health_check_https'
-    primary_resource_id: 'https-health-check'
-    vars:
-      health_check_name: 'https-health-check'
-  - name: 'health_check_https_full'
-    primary_resource_id: 'https-health-check'
-    vars:
-      health_check_name: 'https-health-check'
-  - name: 'health_check_http2'
-    primary_resource_id: 'http2-health-check'
-    vars:
-      health_check_name: 'http2-health-check'
-  - name: 'health_check_http2_full'
-    primary_resource_id: 'http2-health-check'
-    vars:
-      health_check_name: 'http2-health-check'
-  - name: 'health_check_grpc'
-    primary_resource_id: 'grpc-health-check'
-    vars:
-      health_check_name: 'grpc-health-check'
-  - name: 'health_check_grpc_full'
-    primary_resource_id: 'grpc-health-check'
-    vars:
-      health_check_name: 'grpc-health-check'
-  - name: 'health_check_grpc_with_tls'
-    primary_resource_id: 'grpc-with-tls-health-check'
-    min_version: 'beta'
-    vars:
-      health_check_name: 'grpc-with-tls-health-check'
-    tgc_skip_test: 'grpcTlsHealthCheck is not in CAI asset, but is required in this test.'
-  - name: 'health_check_grpc_with_tls_full'
-    primary_resource_id: 'grpc-with-tls-health-check'
-    min_version: 'beta'
-    vars:
-      health_check_name: 'grpc-with-tls-health-check'
-    tgc_skip_test: 'grpcTlsHealthCheck is not in CAI asset, but is required in this test.'
-  - name: 'health_check_with_logging'
-    primary_resource_id: 'health-check-with-logging'
-    min_version: 'beta'
-    vars:
-      health_check_name: 'tcp-health-check'
-  - name: 'compute_health_check_http_source_regions'
-    primary_resource_id: 'http-health-check-with-source-regions'
-    vars:
-      health_check_name: 'http-health-check'
-  - name: 'compute_health_check_https_source_regions'
-    primary_resource_id: 'https-health-check-with-source-regions'
-    vars:
-      health_check_name: 'https-health-check'
-  - name: 'compute_health_check_tcp_source_regions'
-    primary_resource_id: 'tcp-health-check-with-source-regions'
-    vars:
-      health_check_name: 'tcp-health-check'
+samples:
+  - name: health_check_tcp
+    primary_resource_id: tcp-health-check
+    steps:
+    - name: health_check_tcp
+      config_path: templates/terraform/samples/services/compute/health_check_tcp.tf.tmpl
+      prefixed_vars:
+        health_check_name: tcp-health-check
+  - name: health_check_tcp_full
+    primary_resource_id: tcp-health-check
+    steps:
+    - name: health_check_tcp_full
+      config_path: templates/terraform/samples/services/compute/health_check_tcp_full.tf.tmpl
+      prefixed_vars:
+        health_check_name: tcp-health-check
+  - name: health_check_ssl
+    primary_resource_id: ssl-health-check
+    steps:
+    - name: health_check_ssl
+      config_path: templates/terraform/samples/services/compute/health_check_ssl.tf.tmpl
+      prefixed_vars:
+        health_check_name: ssl-health-check
+  - name: health_check_ssl_full
+    primary_resource_id: ssl-health-check
+    steps:
+    - name: health_check_ssl_full
+      config_path: templates/terraform/samples/services/compute/health_check_ssl_full.tf.tmpl
+      prefixed_vars:
+        health_check_name: ssl-health-check
+  - name: health_check_http
+    primary_resource_id: http-health-check
+    steps:
+    - name: health_check_http
+      config_path: templates/terraform/samples/services/compute/health_check_http.tf.tmpl
+      prefixed_vars:
+        health_check_name: http-health-check
+  - name: health_check_http_full
+    primary_resource_id: http-health-check
+    steps:
+    - name: health_check_http_full
+      config_path: templates/terraform/samples/services/compute/health_check_http_full.tf.tmpl
+      prefixed_vars:
+        health_check_name: http-health-check
+  - name: health_check_https
+    primary_resource_id: https-health-check
+    steps:
+    - name: health_check_https
+      config_path: templates/terraform/samples/services/compute/health_check_https.tf.tmpl
+      prefixed_vars:
+        health_check_name: https-health-check
+  - name: health_check_https_full
+    primary_resource_id: https-health-check
+    steps:
+    - name: health_check_https_full
+      config_path: templates/terraform/samples/services/compute/health_check_https_full.tf.tmpl
+      prefixed_vars:
+        health_check_name: https-health-check
+  - name: health_check_http2
+    primary_resource_id: http2-health-check
+    steps:
+    - name: health_check_http2
+      config_path: templates/terraform/samples/services/compute/health_check_http2.tf.tmpl
+      prefixed_vars:
+        health_check_name: http2-health-check
+  - name: health_check_http2_full
+    primary_resource_id: http2-health-check
+    steps:
+    - name: health_check_http2_full
+      config_path: templates/terraform/samples/services/compute/health_check_http2_full.tf.tmpl
+      prefixed_vars:
+        health_check_name: http2-health-check
+  - name: health_check_grpc
+    primary_resource_id: grpc-health-check
+    steps:
+    - name: health_check_grpc
+      config_path: templates/terraform/samples/services/compute/health_check_grpc.tf.tmpl
+      prefixed_vars:
+        health_check_name: grpc-health-check
+  - name: health_check_grpc_full
+    primary_resource_id: grpc-health-check
+    steps:
+    - name: health_check_grpc_full
+      config_path: templates/terraform/samples/services/compute/health_check_grpc_full.tf.tmpl
+      prefixed_vars:
+        health_check_name: grpc-health-check
+  - name: health_check_grpc_with_tls
+    min_version: beta
+    primary_resource_id: grpc-with-tls-health-check
+    steps:
+    - name: health_check_grpc_with_tls
+      config_path: templates/terraform/samples/services/compute/health_check_grpc_with_tls.tf.tmpl
+      prefixed_vars:
+        health_check_name: grpc-with-tls-health-check
+    tgc_skip_test: grpcTlsHealthCheck is not in CAI asset, but is required in this test.
+  - name: health_check_grpc_with_tls_full
+    min_version: beta
+    primary_resource_id: grpc-with-tls-health-check
+    steps:
+    - name: health_check_grpc_with_tls_full
+      config_path: templates/terraform/samples/services/compute/health_check_grpc_with_tls_full.tf.tmpl
+      prefixed_vars:
+        health_check_name: grpc-with-tls-health-check
+    tgc_skip_test: grpcTlsHealthCheck is not in CAI asset, but is required in this test.
+  - name: health_check_with_logging
+    min_version: beta
+    primary_resource_id: health-check-with-logging
+    steps:
+    - name: health_check_with_logging
+      config_path: templates/terraform/samples/services/compute/health_check_with_logging.tf.tmpl
+      prefixed_vars:
+        health_check_name: tcp-health-check
+  - name: compute_health_check_http_source_regions
+    primary_resource_id: http-health-check-with-source-regions
+    steps:
+    - name: compute_health_check_http_source_regions
+      config_path: templates/terraform/samples/services/compute/compute_health_check_http_source_regions.tf.tmpl
+      prefixed_vars:
+        health_check_name: http-health-check
+  - name: compute_health_check_https_source_regions
+    primary_resource_id: https-health-check-with-source-regions
+    steps:
+    - name: compute_health_check_https_source_regions
+      config_path: templates/terraform/samples/services/compute/compute_health_check_https_source_regions.tf.tmpl
+      prefixed_vars:
+        health_check_name: https-health-check
+  - name: compute_health_check_tcp_source_regions
+    primary_resource_id: tcp-health-check-with-source-regions
+    steps:
+    - name: compute_health_check_tcp_source_regions
+      config_path: templates/terraform/samples/services/compute/compute_health_check_tcp_source_regions.tf.tmpl
+      prefixed_vars:
+        health_check_name: tcp-health-check
 parameters:
 properties:
   - name: 'checkIntervalSec'

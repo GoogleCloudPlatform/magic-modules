@@ -55,13 +55,16 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/set_access_policy_parent_from_access_policy.go.tmpl'
 # Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
-examples:
-  - name: 'access_context_manager_access_levels_basic'
-    primary_resource_id: 'access-levels'
-    vars:
-      access_level_name1: 'chromeos_no_lock'
-      access_level_name2: 'mac_no_lock'
+samples:
+  - name: access_context_manager_access_levels_basic
+    primary_resource_id: access-levels
     exclude_test: true
+    steps:
+    - name: access_context_manager_access_levels_basic
+      config_path: templates/terraform/samples/services/accesscontextmanager/access_context_manager_access_levels_basic.tf.tmpl
+      prefixed_vars:
+        access_level_name1: chromeos_no_lock
+        access_level_name2: mac_no_lock
 parameters:
   # Parent is a path parameter that _cannot_ be read or sent in the request at all.
   # This must be done at the provider level.

@@ -28,21 +28,27 @@ import_format:
   - 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
   - '{{project}}/{{location}}/{{service_id}}'
   - '{{location}}/{{service_id}}'
-examples:
+samples:
   - name: firebasedataconnect_service_basic
     primary_resource_id: default
-    vars:
-      service_id: example-service
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+    - name: firebasedataconnect_service_basic
+      config_path: templates/terraform/samples/services/firebasedataconnect/firebasedataconnect_service_basic.tf.tmpl
+      prefixed_vars:
+        service_id: example-service
+      test_env_vars:
+        project_id: PROJECT_NAME
   - name: firebasedataconnect_service_with_force_deletion
     primary_resource_id: default
-    vars:
-      service_id: example-service
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'deletion_policy'
+    steps:
+    - name: firebasedataconnect_service_with_force_deletion
+      config_path: templates/terraform/samples/services/firebasedataconnect/firebasedataconnect_service_with_force_deletion.tf.tmpl
+      prefixed_vars:
+        service_id: example-service
+      test_env_vars:
+        project_id: PROJECT_NAME
+      ignore_read_extra:
+      - deletion_policy
 autogen_async: true
 async:
   operation:

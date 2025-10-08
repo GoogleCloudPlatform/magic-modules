@@ -39,16 +39,22 @@ custom_code:
   post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project_and_location.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'dialogflow_conversation_profile_basic'
-    primary_resource_id: 'basic_profile'
-    vars:
-      profile_name: 'dialogflow-profile'
-  - name: 'dialogflow_conversation_profile_recognition_result_notification'
-    primary_resource_id: 'recognition_result_notification_profile'
-    vars:
-      profile_name: 'dialogflow-profile'
-      topic_name: 'recognition-result-notification'
+samples:
+  - name: dialogflow_conversation_profile_basic
+    primary_resource_id: basic_profile
+    steps:
+    - name: dialogflow_conversation_profile_basic
+      config_path: templates/terraform/samples/services/dialogflow/dialogflow_conversation_profile_basic.tf.tmpl
+      prefixed_vars:
+        profile_name: dialogflow-profile
+  - name: dialogflow_conversation_profile_recognition_result_notification
+    primary_resource_id: recognition_result_notification_profile
+    steps:
+    - name: dialogflow_conversation_profile_recognition_result_notification
+      config_path: templates/terraform/samples/services/dialogflow/dialogflow_conversation_profile_recognition_result_notification.tf.tmpl
+      prefixed_vars:
+        profile_name: dialogflow-profile
+        topic_name: recognition-result-notification
 parameters:
   - name: 'location'
     type: String

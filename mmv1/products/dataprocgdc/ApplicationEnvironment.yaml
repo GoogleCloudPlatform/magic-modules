@@ -42,23 +42,29 @@ parameters:
     description: 'The id of the application environment '
     url_param_only: true
     immutable: true
-examples:
-  - name: "dataprocgdc_applicationenvironment_basic"
-    primary_resource_id: "application-environment"
-    vars:
-      application_environment_id: "dp-tf-e2e-application-environment-basic"
-      project: "my-project"
-    test_vars_overrides:
-      'project': '"gdce-cluster-monitoring"'
+samples:
+  - name: dataprocgdc_applicationenvironment_basic
     skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20419
-  - name: "dataprocgdc_applicationenvironment"
-    primary_resource_id: "application-environment"
-    vars:
-      application_environment_id: "dp-tf-e2e-application-environment"
-      project: "my-project"
-    test_vars_overrides:
-      'project': '"gdce-cluster-monitoring"'
+    primary_resource_id: application-environment
+    steps:
+    - name: dataprocgdc_applicationenvironment_basic
+      config_path: templates/terraform/samples/services/dataprocgdc/dataprocgdc_applicationenvironment_basic.tf.tmpl
+      prefixed_vars:
+        application_environment_id: dp-tf-e2e-application-environment-basic
+        project: my-project
+      test_vars_overrides:
+        project: '"gdce-cluster-monitoring"'
+  - name: dataprocgdc_applicationenvironment
     skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20419
+    primary_resource_id: application-environment
+    steps:
+    - name: dataprocgdc_applicationenvironment
+      config_path: templates/terraform/samples/services/dataprocgdc/dataprocgdc_applicationenvironment.tf.tmpl
+      prefixed_vars:
+        application_environment_id: dp-tf-e2e-application-environment
+        project: my-project
+      test_vars_overrides:
+        project: '"gdce-cluster-monitoring"'
 update_verb: PATCH
 update_mask: true
 autogen_async: false

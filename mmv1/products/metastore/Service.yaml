@@ -46,111 +46,166 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'service_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
     - '{{service_id}}'
 custom_code:
-examples:
-  - name: 'dataproc_metastore_service_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
-    vars:
-      metastore_service_name: 'metastore-srv'
-  - name: 'dataproc_metastore_service_deletion_protection'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
-    vars:
-      metastore_service_name: 'metastore-srv'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'dataproc_metastore_service_cmek_test'
-    primary_resource_id: 'default'
-    vars:
-      metastore_service_name: 'example-service'
-      kms_key_name: 'example-key'
-    test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-metastore-service-key1").CryptoKey.Name'
-    exclude_docs: true
+samples:
+  - name: dataproc_metastore_service_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])
+    steps:
+    - name: dataproc_metastore_service_basic
+      config_path: templates/terraform/samples/services/metastore/dataproc_metastore_service_basic.tf.tmpl
+      prefixed_vars:
+        metastore_service_name: metastore-srv
+  - name: dataproc_metastore_service_deletion_protection
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])
+    steps:
+    - name: dataproc_metastore_service_deletion_protection
+      config_path: templates/terraform/samples/services/metastore/dataproc_metastore_service_deletion_protection.tf.tmpl
+      prefixed_vars:
+        deletion_protection: "true"
+        metastore_service_name: metastore-srv
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: dataproc_metastore_service_cmek_test
     skip_vcr: true
-  - name: 'dataproc_metastore_service_cmek_example'
-    primary_resource_id: 'default'
-    vars:
-      metastore_service_name: 'example-service'
-      key_name: 'example-key'
-      keyring_name: 'example-keyring'
+    primary_resource_id: default
+    steps:
+    - name: dataproc_metastore_service_cmek_test
+      config_path: templates/terraform/samples/services/metastore/dataproc_metastore_service_cmek_test.tf.tmpl
+      prefixed_vars:
+        kms_key_name: example-key
+        metastore_service_name: example-service
+      test_vars_overrides:
+        kms_key_name: acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT",
+          "us-central1", "tf-bootstrap-metastore-service-key1").CryptoKey.Name
+      exclude_docs: true
+  - name: dataproc_metastore_service_cmek_example
+    primary_resource_id: default
     exclude_test: true
-  - name: 'dataproc_metastore_service_endpoint'
-    primary_resource_id: 'endpoint'
-    vars:
-      metastore_service_name: 'metastore-endpoint'
-    exclude_docs: true
-  - name: 'dataproc_metastore_service_aux'
-    primary_resource_id: 'aux'
-    vars:
-      metastore_service_name: 'metastore-aux'
-    exclude_docs: true
-  - name: 'dataproc_metastore_service_metadata'
-    primary_resource_id: 'metadata'
-    vars:
-      metastore_service_name: 'metastore-metadata'
-    exclude_docs: true
-  - name: 'dataproc_metastore_service_private_service_connect'
-    primary_resource_id: 'default'
-    vars:
-      metastore_service_name: 'metastore-srv'
-      network_name: 'my-network'
-      subnet_name: 'my-subnetwork'
+    steps:
+    - name: dataproc_metastore_service_cmek_example
+      config_path: templates/terraform/samples/services/metastore/dataproc_metastore_service_cmek_example.tf.tmpl
+      prefixed_vars:
+        key_name: example-key
+        keyring_name: example-keyring
+        metastore_service_name: example-service
+  - name: dataproc_metastore_service_endpoint
+    primary_resource_id: endpoint
+    steps:
+    - name: dataproc_metastore_service_endpoint
+      config_path: templates/terraform/samples/services/metastore/dataproc_metastore_service_endpoint.tf.tmpl
+      prefixed_vars:
+        metastore_service_name: metastore-endpoint
+      exclude_docs: true
+  - name: dataproc_metastore_service_aux
+    primary_resource_id: aux
+    steps:
+    - name: dataproc_metastore_service_aux
+      config_path: templates/terraform/samples/services/metastore/dataproc_metastore_service_aux.tf.tmpl
+      prefixed_vars:
+        metastore_service_name: metastore-aux
+      exclude_docs: true
+  - name: dataproc_metastore_service_metadata
+    primary_resource_id: metadata
+    steps:
+    - name: dataproc_metastore_service_metadata
+      config_path: templates/terraform/samples/services/metastore/dataproc_metastore_service_metadata.tf.tmpl
+      prefixed_vars:
+        metastore_service_name: metastore-metadata
+      exclude_docs: true
+  - name: dataproc_metastore_service_private_service_connect
+    primary_resource_id: default
     exclude_test: true
-  - name: 'dataproc_metastore_service_private_service_connect_custom_routes'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      metastore_service_name: 'metastore-srv'
-      network_name: 'my-network'
-      subnet_name: 'my-subnetwork'
+    steps:
+    - name: dataproc_metastore_service_private_service_connect
+      config_path: templates/terraform/samples/services/metastore/dataproc_metastore_service_private_service_connect.tf.tmpl
+      prefixed_vars:
+        metastore_service_name: metastore-srv
+        network_name: my-network
+        subnet_name: my-subnetwork
+  - name: dataproc_metastore_service_private_service_connect_custom_routes
+    min_version: beta
+    primary_resource_id: default
     exclude_test: true
-  - name: 'dataproc_metastore_service_telemetry'
-    primary_resource_id: 'telemetry'
-    vars:
-      metastore_service_name: 'ms-telemetry'
-    exclude_docs: true
-  - name: 'dataproc_metastore_service_dpms2'
-    primary_resource_id: 'dpms2'
-    vars:
-      metastore_service_name: 'ms-dpms2'
-  - name: 'dataproc_metastore_service_dpms2_scaling_factor'
-    primary_resource_id: 'dpms2_scaling_factor'
-    vars:
-      metastore_service_name: 'ms-dpms2sf'
-  - name: 'dataproc_metastore_service_dpms2_scaling_factor_lt1'
-    primary_resource_id: 'dpms2_scaling_factor_lt1'
-    vars:
-      metastore_service_name: 'ms-dpms2sflt1'
-    exclude_docs: true
-  - name: 'dataproc_metastore_service_scheduled_backup'
-    primary_resource_id: 'backup'
-    vars:
-      metastore_service_name: 'backup'
-  - name: 'dataproc_metastore_service_autoscaling_max_scaling_factor'
-    primary_resource_id: 'test_resource'
-    vars:
-      metastore_service_name: 'test-service'
-  - name: 'dataproc_metastore_service_autoscaling_min_and_max_scaling_factor'
-    primary_resource_id: 'test_resource'
-    vars:
-      metastore_service_name: 'test-service'
-  - name: 'dataproc_metastore_service_autoscaling_min_scaling_factor'
-    primary_resource_id: 'test_resource'
-    vars:
-      metastore_service_name: 'test-service'
-  - name: 'dataproc_metastore_service_autoscaling_no_limit_config'
-    primary_resource_id: 'test_resource'
-    vars:
-      metastore_service_name: 'test-service'
+    steps:
+    - name: dataproc_metastore_service_private_service_connect_custom_routes
+      config_path: templates/terraform/samples/services/metastore/dataproc_metastore_service_private_service_connect_custom_routes.tf.tmpl
+      prefixed_vars:
+        metastore_service_name: metastore-srv
+        network_name: my-network
+        subnet_name: my-subnetwork
+  - name: dataproc_metastore_service_telemetry
+    primary_resource_id: telemetry
+    steps:
+    - name: dataproc_metastore_service_telemetry
+      config_path: templates/terraform/samples/services/metastore/dataproc_metastore_service_telemetry.tf.tmpl
+      prefixed_vars:
+        metastore_service_name: ms-telemetry
+      exclude_docs: true
+  - name: dataproc_metastore_service_dpms2
+    primary_resource_id: dpms2
+    steps:
+    - name: dataproc_metastore_service_dpms2
+      config_path: templates/terraform/samples/services/metastore/dataproc_metastore_service_dpms2.tf.tmpl
+      prefixed_vars:
+        metastore_service_name: ms-dpms2
+  - name: dataproc_metastore_service_dpms2_scaling_factor
+    primary_resource_id: dpms2_scaling_factor
+    steps:
+    - name: dataproc_metastore_service_dpms2_scaling_factor
+      config_path: templates/terraform/samples/services/metastore/dataproc_metastore_service_dpms2_scaling_factor.tf.tmpl
+      prefixed_vars:
+        metastore_service_name: ms-dpms2sf
+  - name: dataproc_metastore_service_dpms2_scaling_factor_lt1
+    primary_resource_id: dpms2_scaling_factor_lt1
+    steps:
+    - name: dataproc_metastore_service_dpms2_scaling_factor_lt1
+      config_path: templates/terraform/samples/services/metastore/dataproc_metastore_service_dpms2_scaling_factor_lt1.tf.tmpl
+      prefixed_vars:
+        metastore_service_name: ms-dpms2sflt1
+      exclude_docs: true
+  - name: dataproc_metastore_service_scheduled_backup
+    primary_resource_id: backup
+    steps:
+    - name: dataproc_metastore_service_scheduled_backup
+      config_path: templates/terraform/samples/services/metastore/dataproc_metastore_service_scheduled_backup.tf.tmpl
+      prefixed_vars:
+        metastore_service_name: backup
+  - name: dataproc_metastore_service_autoscaling_max_scaling_factor
+    primary_resource_id: test_resource
+    steps:
+    - name: dataproc_metastore_service_autoscaling_max_scaling_factor
+      config_path: templates/terraform/samples/services/metastore/dataproc_metastore_service_autoscaling_max_scaling_factor.tf.tmpl
+      prefixed_vars:
+        metastore_service_name: test-service
+  - name: dataproc_metastore_service_autoscaling_min_and_max_scaling_factor
+    primary_resource_id: test_resource
+    steps:
+    - name: dataproc_metastore_service_autoscaling_min_and_max_scaling_factor
+      config_path: templates/terraform/samples/services/metastore/dataproc_metastore_service_autoscaling_min_and_max_scaling_factor.tf.tmpl
+      prefixed_vars:
+        metastore_service_name: test-service
+  - name: dataproc_metastore_service_autoscaling_min_scaling_factor
+    primary_resource_id: test_resource
+    steps:
+    - name: dataproc_metastore_service_autoscaling_min_scaling_factor
+      config_path: templates/terraform/samples/services/metastore/dataproc_metastore_service_autoscaling_min_scaling_factor.tf.tmpl
+      prefixed_vars:
+        metastore_service_name: test-service
+  - name: dataproc_metastore_service_autoscaling_no_limit_config
+    primary_resource_id: test_resource
+    steps:
+    - name: dataproc_metastore_service_autoscaling_no_limit_config
+      config_path: templates/terraform/samples/services/metastore/dataproc_metastore_service_autoscaling_no_limit_config.tf.tmpl
+      prefixed_vars:
+        metastore_service_name: test-service
 parameters:
   - name: 'serviceId'
     type: String

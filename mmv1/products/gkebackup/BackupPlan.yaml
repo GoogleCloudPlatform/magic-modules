@@ -40,141 +40,173 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/locations/{{location}}/backupPlans/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/backupPlans/{{name}}'
     - '{{name}}'
 custom_code:
-examples:
-  - name: 'gkebackup_backupplan_basic'
-    primary_resource_id: 'basic'
-    primary_resource_name: 'fmt.Sprintf("tf-test-basic-plan%s", context["random_suffix"])'
-    vars:
-      name: 'basic-plan'
-      cluster_name: 'basic-cluster'
-      deletion_protection: 'true'
-      network_name: 'default'
-      subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_backupplan_autopilot'
-    primary_resource_id: 'autopilot'
-    vars:
-      name: 'autopilot-plan'
-      cluster_name: 'autopilot-cluster'
-      deletion_protection: 'true'
-      network_name: 'default'
-      subnetwork_name: 'default'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_backupplan_cmek'
-    primary_resource_id: 'cmek'
-    vars:
-      name: 'cmek-plan'
-      cluster_name: 'cmek-cluster'
-      key_name: 'backup-key'
-      deletion_protection: 'true'
-      network_name: 'default'
-      subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_backupplan_nslabels'
-    primary_resource_id: 'nslabels'
-    primary_resource_name: 'fmt.Sprintf("tf-test-nslabels-plan%s", context["random_suffix"])'
-    vars:
-      name: 'nslabels-plan'
-      cluster_name: 'nslabels-cluster'
-      deletion_protection: 'true'
-      network_name: 'default'
-      subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_backupplan_full'
-    primary_resource_id: 'full'
-    vars:
-      name: 'full-plan'
-      cluster_name: 'full-cluster'
-      deletion_protection: 'true'
-      network_name: 'default'
-      subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_backupplan_permissive'
-    primary_resource_id: 'permissive'
-    vars:
-      name: 'permissive-plan'
-      cluster_name: 'permissive-cluster'
-      deletion_protection: 'true'
-      network_name: 'default'
-      subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_backupplan_rpo_daily_window'
-    primary_resource_id: 'rpo_daily_window'
-    vars:
-      name: 'rpo-daily-window'
-      cluster_name: 'rpo-daily-cluster'
-      deletion_protection: 'true'
-      network_name: 'default'
-      subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'gkebackup_backupplan_rpo_weekly_window'
-    primary_resource_id: 'rpo_weekly_window'
-    vars:
-      name: 'rpo-weekly-window'
-      cluster_name: 'rpo-weekly-cluster'
-      deletion_protection: 'true'
-      network_name: 'default'
-      subnetwork_name: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
+samples:
+  - name: gkebackup_backupplan_basic
+    primary_resource_id: basic
+    primary_resource_name: fmt.Sprintf("tf-test-basic-plan%s", context["random_suffix"])
+    steps:
+    - name: gkebackup_backupplan_basic
+      config_path: templates/terraform/samples/services/gkebackup/gkebackup_backupplan_basic.tf.tmpl
+      prefixed_vars:
+        cluster_name: basic-cluster
+        deletion_protection: "true"
+        name: basic-plan
+        network_name: default
+        subnetwork_name: default
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        deletion_protection: "false"
+        network_name: acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+        subnetwork_name: acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t,
+          "gke-cluster"))
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: gkebackup_backupplan_autopilot
+    primary_resource_id: autopilot
+    steps:
+    - name: gkebackup_backupplan_autopilot
+      config_path: templates/terraform/samples/services/gkebackup/gkebackup_backupplan_autopilot.tf.tmpl
+      prefixed_vars:
+        cluster_name: autopilot-cluster
+        deletion_protection: "true"
+        name: autopilot-plan
+        network_name: default
+        subnetwork_name: default
+      test_vars_overrides:
+        deletion_protection: "false"
+        network_name: acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+        subnetwork_name: acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t,
+          "gke-cluster"))
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: gkebackup_backupplan_cmek
+    primary_resource_id: cmek
+    steps:
+    - name: gkebackup_backupplan_cmek
+      config_path: templates/terraform/samples/services/gkebackup/gkebackup_backupplan_cmek.tf.tmpl
+      prefixed_vars:
+        cluster_name: cmek-cluster
+        deletion_protection: "true"
+        key_name: backup-key
+        name: cmek-plan
+        network_name: default
+        subnetwork_name: default
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        deletion_protection: "false"
+        network_name: acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+        subnetwork_name: acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t,
+          "gke-cluster"))
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: gkebackup_backupplan_nslabels
+    primary_resource_id: nslabels
+    primary_resource_name: fmt.Sprintf("tf-test-nslabels-plan%s", context["random_suffix"])
+    steps:
+    - name: gkebackup_backupplan_nslabels
+      config_path: templates/terraform/samples/services/gkebackup/gkebackup_backupplan_nslabels.tf.tmpl
+      prefixed_vars:
+        cluster_name: nslabels-cluster
+        deletion_protection: "true"
+        name: nslabels-plan
+        network_name: default
+        subnetwork_name: default
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        deletion_protection: "false"
+        network_name: acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+        subnetwork_name: acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t,
+          "gke-cluster"))
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: gkebackup_backupplan_full
+    primary_resource_id: full
+    steps:
+    - name: gkebackup_backupplan_full
+      config_path: templates/terraform/samples/services/gkebackup/gkebackup_backupplan_full.tf.tmpl
+      prefixed_vars:
+        cluster_name: full-cluster
+        deletion_protection: "true"
+        name: full-plan
+        network_name: default
+        subnetwork_name: default
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        deletion_protection: "false"
+        network_name: acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+        subnetwork_name: acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t,
+          "gke-cluster"))
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: gkebackup_backupplan_permissive
+    primary_resource_id: permissive
+    steps:
+    - name: gkebackup_backupplan_permissive
+      config_path: templates/terraform/samples/services/gkebackup/gkebackup_backupplan_permissive.tf.tmpl
+      prefixed_vars:
+        cluster_name: permissive-cluster
+        deletion_protection: "true"
+        name: permissive-plan
+        network_name: default
+        subnetwork_name: default
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        deletion_protection: "false"
+        network_name: acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+        subnetwork_name: acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t,
+          "gke-cluster"))
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: gkebackup_backupplan_rpo_daily_window
+    primary_resource_id: rpo_daily_window
+    steps:
+    - name: gkebackup_backupplan_rpo_daily_window
+      config_path: templates/terraform/samples/services/gkebackup/gkebackup_backupplan_rpo_daily_window.tf.tmpl
+      prefixed_vars:
+        cluster_name: rpo-daily-cluster
+        deletion_protection: "true"
+        name: rpo-daily-window
+        network_name: default
+        subnetwork_name: default
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        deletion_protection: "false"
+        network_name: acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+        subnetwork_name: acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t,
+          "gke-cluster"))
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: gkebackup_backupplan_rpo_weekly_window
+    primary_resource_id: rpo_weekly_window
+    steps:
+    - name: gkebackup_backupplan_rpo_weekly_window
+      config_path: templates/terraform/samples/services/gkebackup/gkebackup_backupplan_rpo_weekly_window.tf.tmpl
+      prefixed_vars:
+        cluster_name: rpo-weekly-cluster
+        deletion_protection: "true"
+        name: rpo-weekly-window
+        network_name: default
+        subnetwork_name: default
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        deletion_protection: "false"
+        network_name: acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+        subnetwork_name: acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t,
+          "gke-cluster"))
+      oics_vars_overrides:
+        deletion_protection: "false"
 parameters:
   - name: 'location'
     type: String

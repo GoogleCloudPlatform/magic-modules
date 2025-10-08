@@ -44,32 +44,44 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'workstation_cluster_basic'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      workstation_cluster_name: 'workstation-cluster'
-  - name: 'workstation_cluster_private'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      workstation_cluster_name: 'workstation-cluster-private'
-  - name: 'workstation_cluster_custom_domain'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      workstation_cluster_name: 'workstation-cluster-custom-domain'
-  - name: 'workstation_cluster_tags'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      workstation_cluster_name: 'workstation-cluster-tags'
-      key_short_name: 'keyname'
-      value_short_name: 'valuename'
-    test_vars_overrides:
-      'key_short_name': '"tf-test-key-" + acctest.RandString(t, 10)'
-      'value_short_name': '"tf-test-value-" + acctest.RandString(t, 10)'
+samples:
+  - name: workstation_cluster_basic
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: workstation_cluster_basic
+      config_path: templates/terraform/samples/services/workstations/workstation_cluster_basic.tf.tmpl
+      prefixed_vars:
+        workstation_cluster_name: workstation-cluster
+  - name: workstation_cluster_private
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: workstation_cluster_private
+      config_path: templates/terraform/samples/services/workstations/workstation_cluster_private.tf.tmpl
+      prefixed_vars:
+        workstation_cluster_name: workstation-cluster-private
+  - name: workstation_cluster_custom_domain
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: workstation_cluster_custom_domain
+      config_path: templates/terraform/samples/services/workstations/workstation_cluster_custom_domain.tf.tmpl
+      prefixed_vars:
+        workstation_cluster_name: workstation-cluster-custom-domain
+  - name: workstation_cluster_tags
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: workstation_cluster_tags
+      config_path: templates/terraform/samples/services/workstations/workstation_cluster_tags.tf.tmpl
+      prefixed_vars:
+        key_short_name: keyname
+        value_short_name: valuename
+        workstation_cluster_name: workstation-cluster-tags
+      test_vars_overrides:
+        key_short_name: '"tf-test-key-" + acctest.RandString(t, 10)'
+        value_short_name: '"tf-test-value-" + acctest.RandString(t, 10)'
 parameters:
   - name: 'workstationClusterId'
     type: String

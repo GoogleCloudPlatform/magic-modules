@@ -35,25 +35,32 @@ description: |
  The Eventarc Channel resource
 error_retry_predicates:
   - transport_tpg.EventarcChannel403Retry
-examples:
+samples:
   - name: eventarc_channel_with_cmek
-    primary_resource_id: primary
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-    vars:
-      channel_name: some-channel
-      key_name: some-key
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      project_number: 'PROJECT_NUMBER'
-    test_vars_overrides:
-      'key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-channel-key").CryptoKey.Name'
+    - member: serviceAccount:service-{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com
+      role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    primary_resource_id: primary
+    steps:
+    - name: eventarc_channel_with_cmek
+      config_path: templates/terraform/samples/services/eventarc/eventarc_channel_with_cmek.tf.tmpl
+      prefixed_vars:
+        channel_name: some-channel
+        key_name: some-key
+      test_env_vars:
+        project: PROJECT_NAME
+        project_number: PROJECT_NUMBER
+      test_vars_overrides:
+        key_name: acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT",
+          "us-central1", "tf-bootstrap-eventarc-channel-key").CryptoKey.Name
   - name: eventarc_channel
     primary_resource_id: primary
-    vars:
-      channel_name: some-channel
-    exclude_docs: true
+    steps:
+    - name: eventarc_channel
+      config_path: templates/terraform/samples/services/eventarc/eventarc_channel.tf.tmpl
+      prefixed_vars:
+        channel_name: some-channel
+      exclude_docs: true
 parameters:
   - name: location
     type: String

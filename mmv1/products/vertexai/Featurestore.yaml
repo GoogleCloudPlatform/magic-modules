@@ -40,57 +40,66 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'featurestore'
-  example_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_featurestore.tf.tmpl'
+  sample_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_featurestore.tf.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{region}}/featurestores/{{name}}'
   min_version: 'beta'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/vertex_ai_force_delete.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'vertex_ai_featurestore'
-    primary_resource_id: 'featurestore'
-    primary_resource_name: 'fmt.Sprintf("terraform%s", context["random_suffix"])'
-    vars:
-      name: 'terraform'
-      project: 'appeng-flex'
-      kms_key_name: 'kms-name'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-    ignore_read_extra:
-      - 'force_destroy'
-  - name: 'vertex_ai_featurestore_with_beta_fields'
-    primary_resource_id: 'featurestore'
-    primary_resource_name: 'fmt.Sprintf("terraform%s", context["random_suffix"])'
-    min_version: 'beta'
-    vars:
-      name: 'terraform2'
-      project: 'appeng-flex'
-      kms_key_name: 'kms-name'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-    ignore_read_extra:
-      - 'force_destroy'
-  - name: 'vertex_ai_featurestore_scaling'
-    primary_resource_id: 'featurestore'
-    primary_resource_name: 'fmt.Sprintf("terraform%s", context["random_suffix"])'
-    vars:
-      name: 'terraform3'
-      project: 'appeng-flex'
-      kms_key_name: 'kms-name'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-    ignore_read_extra:
-      - 'force_destroy'
+samples:
+  - name: vertex_ai_featurestore
+    primary_resource_id: featurestore
+    primary_resource_name: fmt.Sprintf("terraform%s", context["random_suffix"])
+    steps:
+    - name: vertex_ai_featurestore
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_featurestore.tf.tmpl
+      prefixed_vars:
+        kms_key_name: kms-name
+        name: terraform
+        project: appeng-flex
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      test_vars_overrides:
+        kms_key_name: acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+      ignore_read_extra:
+      - force_destroy
+  - name: vertex_ai_featurestore_with_beta_fields
+    min_version: beta
+    primary_resource_id: featurestore
+    primary_resource_name: fmt.Sprintf("terraform%s", context["random_suffix"])
+    steps:
+    - name: vertex_ai_featurestore_with_beta_fields
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_featurestore_with_beta_fields.tf.tmpl
+      prefixed_vars:
+        kms_key_name: kms-name
+        name: terraform2
+        project: appeng-flex
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      test_vars_overrides:
+        kms_key_name: acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+      ignore_read_extra:
+      - force_destroy
+  - name: vertex_ai_featurestore_scaling
+    primary_resource_id: featurestore
+    primary_resource_name: fmt.Sprintf("terraform%s", context["random_suffix"])
+    steps:
+    - name: vertex_ai_featurestore_scaling
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_featurestore_scaling.tf.tmpl
+      prefixed_vars:
+        kms_key_name: kms-name
+        name: terraform3
+        project: appeng-flex
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      test_vars_overrides:
+        kms_key_name: acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+      ignore_read_extra:
+      - force_destroy
 virtual_fields:
   - name: 'force_destroy'
     description:

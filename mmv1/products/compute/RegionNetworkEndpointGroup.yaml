@@ -53,60 +53,87 @@ sweeper:
     - region: "us-central1"
     - region: "europe-west4"
     - region: "asia-northeast3"
-examples:
-  - name: 'region_network_endpoint_group_functions'
-    primary_resource_id: 'function_neg'
-    vars:
-      neg_name: 'function-neg'
-      function_name: 'function-neg'
-      bucket_name: 'cloudfunctions-function-example-bucket'
-      zip_path: 'path/to/index.zip'
-    test_vars_overrides:
-      'zip_path': 'acctest.CreateZIPArchiveForCloudFunctionSource(t, "./test-fixtures/http_trigger.js")'
-  - name: 'region_network_endpoint_group_cloudrun'
-    primary_resource_id: 'cloudrun_neg'
-    vars:
-      neg_name: 'cloudrun-neg'
-  - name: 'region_network_endpoint_group_appengine'
-    primary_resource_id: 'appengine_neg'
-    vars:
-      neg_name: 'appengine-neg'
-  - name: 'region_network_endpoint_group_appengine_empty'
-    primary_resource_id: 'appengine_neg'
-    vars:
-      neg_name: 'appengine-neg'
-  - name: 'region_network_endpoint_group_psc'
-    primary_resource_id: 'psc_neg'
-    vars:
-      neg_name: 'psc-neg'
-  - name: 'region_network_endpoint_group_psc_service_attachment'
-    primary_resource_id: 'psc_neg_service_attachment'
-    vars:
-      neg_name: 'psc-neg'
-      network_name: 'psc-network'
-      subnetwork_name: 'psc-subnetwork'
-      psc_subnetwork_name: 'psc-subnetwork-nat'
-      backend_service_name: 'psc-backend'
-      forwarding_rule_name: 'psc-forwarding-rule'
-      service_attachment_name: 'psc-service-attachment'
-      health_check_name: 'psc-healthcheck'
-  - name: 'region_network_endpoint_group_internet_ip_port'
-    primary_resource_id: 'region_network_endpoint_group_internet_ip_port'
-    vars:
-      neg_name: 'ip-port-neg'
-      network_name: 'network'
-  - name: 'region_network_endpoint_group_internet_fqdn_port'
-    primary_resource_id: 'region_network_endpoint_group_internet_fqdn_port'
-    vars:
-      neg_name: 'ip-port-neg'
-      network_name: 'network'
-  - name: 'region_network_endpoint_group_portmap'
-    primary_resource_id: 'region_network_endpoint_group_portmap'
-    min_version: 'beta'
-    vars:
-      network_name: 'network'
-      subnetwork_name: 'subnetwork'
-      neg_name: 'portmap-neg'
+samples:
+  - name: region_network_endpoint_group_functions
+    primary_resource_id: function_neg
+    steps:
+    - name: region_network_endpoint_group_functions
+      config_path: templates/terraform/samples/services/compute/region_network_endpoint_group_functions.tf.tmpl
+      prefixed_vars:
+        bucket_name: cloudfunctions-function-example-bucket
+        function_name: function-neg
+        neg_name: function-neg
+        zip_path: path/to/index.zip
+      test_vars_overrides:
+        zip_path: acctest.CreateZIPArchiveForCloudFunctionSource(t, "./test-fixtures/http_trigger.js")
+  - name: region_network_endpoint_group_cloudrun
+    primary_resource_id: cloudrun_neg
+    steps:
+    - name: region_network_endpoint_group_cloudrun
+      config_path: templates/terraform/samples/services/compute/region_network_endpoint_group_cloudrun.tf.tmpl
+      prefixed_vars:
+        neg_name: cloudrun-neg
+  - name: region_network_endpoint_group_appengine
+    primary_resource_id: appengine_neg
+    steps:
+    - name: region_network_endpoint_group_appengine
+      config_path: templates/terraform/samples/services/compute/region_network_endpoint_group_appengine.tf.tmpl
+      prefixed_vars:
+        neg_name: appengine-neg
+  - name: region_network_endpoint_group_appengine_empty
+    primary_resource_id: appengine_neg
+    steps:
+    - name: region_network_endpoint_group_appengine_empty
+      config_path: templates/terraform/samples/services/compute/region_network_endpoint_group_appengine_empty.tf.tmpl
+      prefixed_vars:
+        neg_name: appengine-neg
+  - name: region_network_endpoint_group_psc
+    primary_resource_id: psc_neg
+    steps:
+    - name: region_network_endpoint_group_psc
+      config_path: templates/terraform/samples/services/compute/region_network_endpoint_group_psc.tf.tmpl
+      prefixed_vars:
+        neg_name: psc-neg
+  - name: region_network_endpoint_group_psc_service_attachment
+    primary_resource_id: psc_neg_service_attachment
+    steps:
+    - name: region_network_endpoint_group_psc_service_attachment
+      config_path: templates/terraform/samples/services/compute/region_network_endpoint_group_psc_service_attachment.tf.tmpl
+      prefixed_vars:
+        backend_service_name: psc-backend
+        forwarding_rule_name: psc-forwarding-rule
+        health_check_name: psc-healthcheck
+        neg_name: psc-neg
+        network_name: psc-network
+        psc_subnetwork_name: psc-subnetwork-nat
+        service_attachment_name: psc-service-attachment
+        subnetwork_name: psc-subnetwork
+  - name: region_network_endpoint_group_internet_ip_port
+    primary_resource_id: region_network_endpoint_group_internet_ip_port
+    steps:
+    - name: region_network_endpoint_group_internet_ip_port
+      config_path: templates/terraform/samples/services/compute/region_network_endpoint_group_internet_ip_port.tf.tmpl
+      prefixed_vars:
+        neg_name: ip-port-neg
+        network_name: network
+  - name: region_network_endpoint_group_internet_fqdn_port
+    primary_resource_id: region_network_endpoint_group_internet_fqdn_port
+    steps:
+    - name: region_network_endpoint_group_internet_fqdn_port
+      config_path: templates/terraform/samples/services/compute/region_network_endpoint_group_internet_fqdn_port.tf.tmpl
+      prefixed_vars:
+        neg_name: ip-port-neg
+        network_name: network
+  - name: region_network_endpoint_group_portmap
+    min_version: beta
+    primary_resource_id: region_network_endpoint_group_portmap
+    steps:
+    - name: region_network_endpoint_group_portmap
+      config_path: templates/terraform/samples/services/compute/region_network_endpoint_group_portmap.tf.tmpl
+      prefixed_vars:
+        neg_name: portmap-neg
+        network_name: network
+        subnetwork_name: subnetwork
 parameters:
   - name: 'region'
     type: ResourceRef

@@ -40,18 +40,21 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
-examples:
-  - name: 'target_vpn_gateway_basic'
-    primary_resource_id: 'target_gateway'
-    vars:
-      target_vpn_gateway_name: 'vpn-1'
-      network_name: 'network-1'
-      address_name: 'vpn-static-ip'
-      esp_forwarding_rule_name: 'fr-esp'
-      udp500_forwarding_rule_name: 'fr-udp500'
-      udp4500_forwarding_rule_name: 'fr-udp4500'
-      vpn_tunnel_name: 'tunnel1'
-      route_name: 'route1'
+samples:
+  - name: target_vpn_gateway_basic
+    primary_resource_id: target_gateway
+    steps:
+    - name: target_vpn_gateway_basic
+      config_path: templates/terraform/samples/services/compute/target_vpn_gateway_basic.tf.tmpl
+      prefixed_vars:
+        address_name: vpn-static-ip
+        esp_forwarding_rule_name: fr-esp
+        network_name: network-1
+        route_name: route1
+        target_vpn_gateway_name: vpn-1
+        udp500_forwarding_rule_name: fr-udp500
+        udp4500_forwarding_rule_name: fr-udp4500
+        vpn_tunnel_name: tunnel1
 parameters:
   - name: 'region'
     type: ResourceRef

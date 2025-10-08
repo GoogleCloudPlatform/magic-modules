@@ -28,29 +28,37 @@ update_verb: PATCH
 update_mask: true
 autogen_status: UnVsZQ==
 
-examples:
-  - name: 'chronicle_rule_basic'
+samples:
+  - name: chronicle_rule_basic
     primary_resource_id: example
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-    ignore_read_extra:
-      - 'deletion_policy'
-    exclude_import_test: true
-  - name: 'chronicle_rule_with_force_deletion'
+    steps:
+    - name: chronicle_rule_basic
+      config_path: templates/terraform/samples/services/chronicle/chronicle_rule_basic.tf.tmpl
+      test_env_vars:
+        chronicle_id: CHRONICLE_ID
+      ignore_read_extra:
+      - deletion_policy
+      exclude_import_test: true
+  - name: chronicle_rule_with_force_deletion
     primary_resource_id: example
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-    ignore_read_extra:
-      - 'deletion_policy'
-    exclude_import_test: true
-  - name: 'chronicle_rule_with_data_access_scope'
+    steps:
+    - name: chronicle_rule_with_force_deletion
+      config_path: templates/terraform/samples/services/chronicle/chronicle_rule_with_force_deletion.tf.tmpl
+      test_env_vars:
+        chronicle_id: CHRONICLE_ID
+      ignore_read_extra:
+      - deletion_policy
+      exclude_import_test: true
+  - name: chronicle_rule_with_data_access_scope
     primary_resource_id: example
-    vars:
-      data_access_scope_id: scope-name
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-    exclude_import_test: true
-
+    steps:
+    - name: chronicle_rule_with_data_access_scope
+      config_path: templates/terraform/samples/services/chronicle/chronicle_rule_with_data_access_scope.tf.tmpl
+      prefixed_vars:
+        data_access_scope_id: scope-name
+      test_env_vars:
+        chronicle_id: CHRONICLE_ID
+      exclude_import_test: true
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/chronicle_rule.go.tmpl'
 

@@ -31,15 +31,19 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'database'
   parent_resource_type: "google_dataproc_metastore_service"
-  example_config_body: "templates/terraform/iam/example_config_body/dataproc_metastore_database_template.tf.tmpl"
+  sample_config_body: "templates/terraform/iam/example_config_body/dataproc_metastore_database_template.tf.tmpl"
   import_format:
     - 'projects/{{project}}/locations/{{location}}/services/{{serviceId}}/databases/{{name}}'
     - '{{name}}'
 custom_code:
-examples:
-  - name: 'dataproc_metastore_service_database_iam'
-    primary_resource_id: 'dpms_service'
-    primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv-%s", context["random_suffix"]), "testdb"'
+samples:
+  - name: dataproc_metastore_service_database_iam
+    primary_resource_id: dpms_service
+    primary_resource_name: fmt.Sprintf("tf-test-metastore-srv-%s", context["random_suffix"]),
+      "testdb"
+    steps:
+    - name: dataproc_metastore_service_database_iam
+      config_path: templates/terraform/samples/services/metastore/dataproc_metastore_service_database_iam.tf.tmpl
 parameters:
 properties:
   - name: 'name'

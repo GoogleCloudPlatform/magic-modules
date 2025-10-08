@@ -26,17 +26,23 @@ import_format:
   - projects/{{project}}/locations/{{location}}/apiHubInstances/{{api_hub_instance_id}}
 custom_code:
   custom_import: 'templates/terraform/custom_import/apihub_api_hub_instance_set_id.go.tmpl'
-examples:
+samples:
   - name: apihub_api_hub_instance_basic
     primary_resource_id: apihub-instance-without-search
-    vars:
-      instance_id: test-instance-basic
     exclude_test: true
+    steps:
+    - name: apihub_api_hub_instance_basic
+      config_path: templates/terraform/samples/services/apihub/apihub_api_hub_instance_basic.tf.tmpl
+      prefixed_vars:
+        instance_id: test-instance-basic
   - name: apihub_api_hub_instance_full
     primary_resource_id: apihub-instance-search
-    vars:
-      instance_id: test-instance-full
     exclude_test: true
+    steps:
+    - name: apihub_api_hub_instance_full
+      config_path: templates/terraform/samples/services/apihub/apihub_api_hub_instance_full.tf.tmpl
+      prefixed_vars:
+        instance_id: test-instance-full
 autogen_async: true
 exclude_delete: true
 async:

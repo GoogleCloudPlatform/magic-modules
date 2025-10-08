@@ -37,34 +37,49 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/dlp_import.go.tmpl'
 # Skip sweeper due to non-standard URL
 exclude_sweeper: true
-examples:
-  - name: 'dlp_inspect_template_basic'
-    primary_resource_id: 'basic'
-    vars:
-      template: 'temp'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_inspect_template_custom_type'
-    primary_resource_id: 'custom'
-    vars:
-      template: 'temp'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_inspect_template_custom_type_surrogate'
-    primary_resource_id: 'custom_type_surrogate'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_inspect_template_with_template_id'
-    primary_resource_id: 'with_template_id'
-    vars:
-      name: 'my-template'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    exclude_docs: true
-  - name: 'dlp_inspect_template_max_infotype_per_finding_default'
-    primary_resource_id: 'max_infotype_per_finding_default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: dlp_inspect_template_basic
+    primary_resource_id: basic
+    steps:
+    - name: dlp_inspect_template_basic
+      config_path: templates/terraform/samples/services/dlp/dlp_inspect_template_basic.tf.tmpl
+      prefixed_vars:
+        template: temp
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: dlp_inspect_template_custom_type
+    primary_resource_id: custom
+    steps:
+    - name: dlp_inspect_template_custom_type
+      config_path: templates/terraform/samples/services/dlp/dlp_inspect_template_custom_type.tf.tmpl
+      prefixed_vars:
+        template: temp
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: dlp_inspect_template_custom_type_surrogate
+    primary_resource_id: custom_type_surrogate
+    steps:
+    - name: dlp_inspect_template_custom_type_surrogate
+      config_path: templates/terraform/samples/services/dlp/dlp_inspect_template_custom_type_surrogate.tf.tmpl
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: dlp_inspect_template_with_template_id
+    primary_resource_id: with_template_id
+    steps:
+    - name: dlp_inspect_template_with_template_id
+      config_path: templates/terraform/samples/services/dlp/dlp_inspect_template_with_template_id.tf.tmpl
+      prefixed_vars:
+        name: my-template
+      test_env_vars:
+        project: PROJECT_NAME
+      exclude_docs: true
+  - name: dlp_inspect_template_max_infotype_per_finding_default
+    primary_resource_id: max_infotype_per_finding_default
+    steps:
+    - name: dlp_inspect_template_max_infotype_per_finding_default
+      config_path: templates/terraform/samples/services/dlp/dlp_inspect_template_max_infotype_per_finding_default.tf.tmpl
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
   - name: 'parent'
     type: String

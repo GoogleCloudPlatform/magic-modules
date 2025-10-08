@@ -39,18 +39,21 @@ async:
 custom_code:
 # Skipping sweeper since this is a child resource
 exclude_sweeper: true
-examples:
-  - name: 'iam_access_boundary_policy_basic'
-    primary_resource_id: 'example'
-    vars:
-      policy_name: 'my-ab-policy'
-      account_id: 'svc-acc'
-      project_id: 'my-project'
-      access_level_title: 'chromeos_no_lock'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
+samples:
+  - name: iam_access_boundary_policy_basic
+    primary_resource_id: example
     exclude_test: true
+    steps:
+    - name: iam_access_boundary_policy_basic
+      config_path: templates/terraform/samples/services/iam2/iam_access_boundary_policy_basic.tf.tmpl
+      prefixed_vars:
+        access_level_title: chromeos_no_lock
+        account_id: svc-acc
+        policy_name: my-ab-policy
+        project_id: my-project
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
 parameters:
 properties:
   - name: 'name'

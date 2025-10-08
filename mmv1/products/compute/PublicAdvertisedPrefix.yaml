@@ -35,25 +35,27 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'public_advertised_prefixes_basic'
-    primary_resource_id: 'prefixes'
-    vars:
-      prefixes_name: 'my-prefix'
-    test_env_vars:
-      desc: 'PAP_DESCRIPTION'
-    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
-    # resource_compute_public_advertised_prefix_test.go
+samples:
+  - name: public_advertised_prefixes_basic
+    primary_resource_id: prefixes
     exclude_test: true
-  - name: 'public_advertised_prefixes_pdp_scope'
-    primary_resource_id: 'prefixes'
-    vars:
-      prefixes_name: 'my-pap'
-    test_env_vars:
-      desc: 'PAP_DESCRIPTION'
-    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
-    # resource_compute_public_advertised_prefix_test.go
+    steps:
+    - name: public_advertised_prefixes_basic
+      config_path: templates/terraform/samples/services/compute/public_advertised_prefixes_basic.tf.tmpl
+      prefixed_vars:
+        prefixes_name: my-prefix
+      test_env_vars:
+        desc: PAP_DESCRIPTION
+  - name: public_advertised_prefixes_pdp_scope
+    primary_resource_id: prefixes
     exclude_test: true
+    steps:
+    - name: public_advertised_prefixes_pdp_scope
+      config_path: templates/terraform/samples/services/compute/public_advertised_prefixes_pdp_scope.tf.tmpl
+      prefixed_vars:
+        prefixes_name: my-pap
+      test_env_vars:
+        desc: PAP_DESCRIPTION
 parameters:
 properties:
   - name: 'description'

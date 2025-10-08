@@ -27,15 +27,19 @@ create_url: projects/{{project}}/locations/{{location}}/hostProjectRegistrations
 id_format: projects/{{project}}/locations/{{location}}/hostProjectRegistrations/{{host_project_registration_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/hostProjectRegistrations/{{host_project_registration_id}}
-examples:
+samples:
   - name: apihub_host_project_registration_basic
+    external_providers:
+    - time
     primary_resource_id: apihub_host_project
-    vars:
-      project_id: 'apihub-proj'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    external_providers: ["time"]
+    steps:
+    - name: apihub_host_project_registration_basic
+      config_path: templates/terraform/samples/services/apihub/apihub_host_project_registration_basic.tf.tmpl
+      prefixed_vars:
+        project_id: apihub-proj
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
 exclude_delete: true
 autogen_status: SG9zdFByb2plY3RSZWdpc3RyYXRpb24=
 parameters:

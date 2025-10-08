@@ -42,21 +42,27 @@ async:
     resource_inside_response: false
 custom_code:
 include_in_tgc_next_DO_NOT_USE: true
-examples:
-  - name: 'clouddeploy_automation_basic'
-    primary_resource_id: 'b-automation'
-    vars:
-      automation: 'cd-automation'
-      delivery_pipeline: 'cd-pipeline'
-    test_env_vars:
-      service_account: 'SERVICE_ACCT'
-  - name: 'clouddeploy_automation_full'
-    primary_resource_id: 'f-automation'
-    vars:
-      automation: 'cd-automation'
-      delivery_pipeline: 'cd-pipeline'
-    test_env_vars:
-      service_account: 'SERVICE_ACCT'
+samples:
+  - name: clouddeploy_automation_basic
+    primary_resource_id: b-automation
+    steps:
+    - name: clouddeploy_automation_basic
+      config_path: templates/terraform/samples/services/clouddeploy/clouddeploy_automation_basic.tf.tmpl
+      prefixed_vars:
+        automation: cd-automation
+        delivery_pipeline: cd-pipeline
+      test_env_vars:
+        service_account: SERVICE_ACCT
+  - name: clouddeploy_automation_full
+    primary_resource_id: f-automation
+    steps:
+    - name: clouddeploy_automation_full
+      config_path: templates/terraform/samples/services/clouddeploy/clouddeploy_automation_full.tf.tmpl
+      prefixed_vars:
+        automation: cd-automation
+        delivery_pipeline: cd-pipeline
+      test_env_vars:
+        service_account: SERVICE_ACCT
 parameters:
   - name: 'location'
     type: String

@@ -43,56 +43,74 @@ async:
   operation:
     base_url: "{{op_id}}"
 immutable: true
-examples:
-  - name: "dataprocgdc_sparkapplication_basic"
-    primary_resource_id: "spark-application"
-    vars:
-      spark_application_id: "tf-e2e-spark-app-basic"
-      project: "my-project"
-    test_vars_overrides:
-      'project': '"gdce-cluster-monitoring"'
+samples:
+  - name: dataprocgdc_sparkapplication_basic
     skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
-  - name: "dataprocgdc_sparkapplication"
-    primary_resource_id: "spark-application"
-    vars:
-      spark_application_id: "tf-e2e-spark-app"
-      application_environment_id: "tf-e2e-spark-app-env"
-      project: "my-project"
-    test_vars_overrides:
-      'project': '"gdce-cluster-monitoring"'
+    primary_resource_id: spark-application
+    steps:
+    - name: dataprocgdc_sparkapplication_basic
+      config_path: templates/terraform/samples/services/dataprocgdc/dataprocgdc_sparkapplication_basic.tf.tmpl
+      prefixed_vars:
+        project: my-project
+        spark_application_id: tf-e2e-spark-app-basic
+      test_vars_overrides:
+        project: '"gdce-cluster-monitoring"'
+  - name: dataprocgdc_sparkapplication
     skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
-  - name: "dataprocgdc_sparkapplication_pyspark"
-    primary_resource_id: "spark-application"
-    vars:
-      spark_application_id: "tf-e2e-pyspark-app"
-      project: "my-project"
-    test_vars_overrides:
-      'project': '"gdce-cluster-monitoring"'
+    primary_resource_id: spark-application
+    steps:
+    - name: dataprocgdc_sparkapplication
+      config_path: templates/terraform/samples/services/dataprocgdc/dataprocgdc_sparkapplication.tf.tmpl
+      prefixed_vars:
+        application_environment_id: tf-e2e-spark-app-env
+        project: my-project
+        spark_application_id: tf-e2e-spark-app
+      test_vars_overrides:
+        project: '"gdce-cluster-monitoring"'
+  - name: dataprocgdc_sparkapplication_pyspark
     skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
-  - name: "dataprocgdc_sparkapplication_sparkr"
-    primary_resource_id: "spark-application"
-    vars:
-      spark_application_id: "tf-e2e-sparkr-app"
-      project: "my-project"
-    test_vars_overrides:
-      'project': '"gdce-cluster-monitoring"'
+    primary_resource_id: spark-application
+    steps:
+    - name: dataprocgdc_sparkapplication_pyspark
+      config_path: templates/terraform/samples/services/dataprocgdc/dataprocgdc_sparkapplication_pyspark.tf.tmpl
+      prefixed_vars:
+        project: my-project
+        spark_application_id: tf-e2e-pyspark-app
+      test_vars_overrides:
+        project: '"gdce-cluster-monitoring"'
+  - name: dataprocgdc_sparkapplication_sparkr
     skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
-  - name: "dataprocgdc_sparkapplication_sparksql"
-    primary_resource_id: "spark-application"
-    vars:
-      spark_application_id: "tf-e2e-sparksql-app"
-      project: "my-project"
-    test_vars_overrides:
-      'project': '"gdce-cluster-monitoring"'
+    primary_resource_id: spark-application
+    steps:
+    - name: dataprocgdc_sparkapplication_sparkr
+      config_path: templates/terraform/samples/services/dataprocgdc/dataprocgdc_sparkapplication_sparkr.tf.tmpl
+      prefixed_vars:
+        project: my-project
+        spark_application_id: tf-e2e-sparkr-app
+      test_vars_overrides:
+        project: '"gdce-cluster-monitoring"'
+  - name: dataprocgdc_sparkapplication_sparksql
     skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
-  - name: "dataprocgdc_sparkapplication_sparksql_query_file"
-    primary_resource_id: "spark-application"
-    vars:
-      spark_application_id: "tf-e2e-sparksql-app"
-      project: "my-project"
-    test_vars_overrides:
-      'project': '"gdce-cluster-monitoring"'
+    primary_resource_id: spark-application
+    steps:
+    - name: dataprocgdc_sparkapplication_sparksql
+      config_path: templates/terraform/samples/services/dataprocgdc/dataprocgdc_sparkapplication_sparksql.tf.tmpl
+      prefixed_vars:
+        project: my-project
+        spark_application_id: tf-e2e-sparksql-app
+      test_vars_overrides:
+        project: '"gdce-cluster-monitoring"'
+  - name: dataprocgdc_sparkapplication_sparksql_query_file
     skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
+    primary_resource_id: spark-application
+    steps:
+    - name: dataprocgdc_sparkapplication_sparksql_query_file
+      config_path: templates/terraform/samples/services/dataprocgdc/dataprocgdc_sparkapplication_sparksql_query_file.tf.tmpl
+      prefixed_vars:
+        project: my-project
+        spark_application_id: tf-e2e-sparksql-app
+      test_vars_overrides:
+        project: '"gdce-cluster-monitoring"'
 base_url: projects/{{project}}/locations/{{location}}/serviceInstances/{{serviceinstance}}/sparkApplications
 create_url: projects/{{project}}/locations/{{location}}/serviceInstances/{{serviceinstance}}/sparkApplications?sparkApplicationId={{spark_application_id}}
 self_link: projects/{{project}}/locations/{{location}}/serviceInstances/{{serviceinstance}}/sparkApplications/{{spark_application_id}}

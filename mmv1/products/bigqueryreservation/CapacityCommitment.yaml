@@ -40,17 +40,31 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "us-west2"
-examples:
-  - name: 'bigquery_reservation_capacity_commitment_basic'
-    primary_resource_id: 'commitment'
-    external_providers: ["random", "time"]
-    exclude_docs: true
-  - name: 'bigquery_reservation_capacity_commitment_no_id'
-    primary_resource_id: 'commitment'
-    external_providers: ["random", "time"]
-    exclude_docs: true
-  - name: 'bigquery_reservation_capacity_commitment_docs'
+samples:
+  - name: bigquery_reservation_capacity_commitment_basic
+    external_providers:
+    - random
+    - time
+    primary_resource_id: commitment
+    steps:
+    - name: bigquery_reservation_capacity_commitment_basic
+      config_path: templates/terraform/samples/services/bigqueryreservation/bigquery_reservation_capacity_commitment_basic.tf.tmpl
+      exclude_docs: true
+  - name: bigquery_reservation_capacity_commitment_no_id
+    external_providers:
+    - random
+    - time
+    primary_resource_id: commitment
+    steps:
+    - name: bigquery_reservation_capacity_commitment_no_id
+      config_path: templates/terraform/samples/services/bigqueryreservation/bigquery_reservation_capacity_commitment_no_id.tf.tmpl
+      exclude_docs: true
+  - name: bigquery_reservation_capacity_commitment_docs
+    primary_resource_id: ""
     exclude_test: true
+    steps:
+    - name: bigquery_reservation_capacity_commitment_docs
+      config_path: templates/terraform/samples/services/bigqueryreservation/bigquery_reservation_capacity_commitment_docs.tf.tmpl
 parameters:
   - name: 'capacityCommitmentId'
     type: String

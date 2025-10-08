@@ -43,14 +43,17 @@ sweeper:
   url_substitutions:
     - parent: "organizations/${ORG_ID}"
     - region: "global"
-examples:
-  - name: 'network_management_org_vpc_flow_logs_config_basic'
-    primary_resource_id: 'org-test'
-    min_version: 'beta'
-    vars:
-      vpc_flow_logs_config_id: 'basic-org-test-id'
-    test_env_vars:
-      org_id: 'ORG_ID'
+samples:
+  - name: network_management_org_vpc_flow_logs_config_basic
+    min_version: beta
+    primary_resource_id: org-test
+    steps:
+    - name: network_management_org_vpc_flow_logs_config_basic
+      config_path: templates/terraform/samples/services/networkmanagement/network_management_org_vpc_flow_logs_config_basic.tf.tmpl
+      prefixed_vars:
+        vpc_flow_logs_config_id: basic-org-test-id
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
   - name: 'organization'
     type: String

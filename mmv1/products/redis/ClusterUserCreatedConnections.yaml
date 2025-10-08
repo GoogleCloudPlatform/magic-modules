@@ -48,36 +48,42 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-examples:
-  - name: 'redis_cluster_user_created_connections'
-    primary_resource_id: 'cluster-user-conn'
-    vars:
-      cluster_name: 'cluster-user-conn'
-      network1_name: 'net1'
-      subnet_network1_name: 'subnet-net1'
-      ip1_network1_name: 'ip1-net1'
-      ip2_network1_name: 'ip2-net1'
-      forwarding_rule1_network1_name: 'fwd1-net1'
-      forwarding_rule2_network1_name: 'fwd2-net1'
-      network2_name: 'network2'
-      subnet_network2_name: 'subnet-net2'
-      ip1_network2_name: 'ip1-net2'
-      ip2_network2_name: 'ip2-net2'
-      forwarding_rule1_network2_name: 'fwd1-net2'
-      forwarding_rule2_network2_name: 'fwd2-net2'
-  - name: 'redis_cluster_user_and_auto_created_connections'
-    primary_resource_id: 'cluster-user-auto-conn'
-    vars:
-      cluster_name: 'cluster-user-auto-conn'
-      network1_name: 'net1'
-      subnet_network1_name: 'subnet-net1'
-      policy_name: 'scpolicy'
-      network2_name: 'network2'
-      subnet_network2_name: 'subnet-net2'
-      ip1_network2_name: 'ip1-net2'
-      ip2_network2_name: 'ip2-net2'
-      forwarding_rule1_network2_name: 'fwd1-net2'
-      forwarding_rule2_network2_name: 'fwd2-net2'
+samples:
+  - name: redis_cluster_user_created_connections
+    primary_resource_id: cluster-user-conn
+    steps:
+    - name: redis_cluster_user_created_connections
+      config_path: templates/terraform/samples/services/redis/redis_cluster_user_created_connections.tf.tmpl
+      prefixed_vars:
+        cluster_name: cluster-user-conn
+        forwarding_rule1_network1_name: fwd1-net1
+        forwarding_rule1_network2_name: fwd1-net2
+        forwarding_rule2_network1_name: fwd2-net1
+        forwarding_rule2_network2_name: fwd2-net2
+        ip1_network1_name: ip1-net1
+        ip1_network2_name: ip1-net2
+        ip2_network1_name: ip2-net1
+        ip2_network2_name: ip2-net2
+        network1_name: net1
+        network2_name: network2
+        subnet_network1_name: subnet-net1
+        subnet_network2_name: subnet-net2
+  - name: redis_cluster_user_and_auto_created_connections
+    primary_resource_id: cluster-user-auto-conn
+    steps:
+    - name: redis_cluster_user_and_auto_created_connections
+      config_path: templates/terraform/samples/services/redis/redis_cluster_user_and_auto_created_connections.tf.tmpl
+      prefixed_vars:
+        cluster_name: cluster-user-auto-conn
+        forwarding_rule1_network2_name: fwd1-net2
+        forwarding_rule2_network2_name: fwd2-net2
+        ip1_network2_name: ip1-net2
+        ip2_network2_name: ip2-net2
+        network1_name: net1
+        network2_name: network2
+        policy_name: scpolicy
+        subnet_network1_name: subnet-net1
+        subnet_network2_name: subnet-net2
 parameters:
   - name: 'name'
     type: String

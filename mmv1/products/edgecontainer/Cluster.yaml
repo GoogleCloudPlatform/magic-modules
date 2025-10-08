@@ -45,26 +45,31 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'edgecontainer_cluster'
-    primary_resource_id: 'default'
-    vars:
-      edgecontainer_cluster_name: 'basic-cluster'
-    # Currently failing
+samples:
+  - name: edgecontainer_cluster
     skip_vcr: true
-  - name: 'edgecontainer_cluster_with_maintenance_window'
-    primary_resource_id: 'default'
-    vars:
-      edgecontainer_cluster_name: 'cluster-with-maintenance'
-    # Currently failing
+    primary_resource_id: default
+    steps:
+    - name: edgecontainer_cluster
+      config_path: templates/terraform/samples/services/edgecontainer/edgecontainer_cluster.tf.tmpl
+      prefixed_vars:
+        edgecontainer_cluster_name: basic-cluster
+  - name: edgecontainer_cluster_with_maintenance_window
     skip_vcr: true
-  # Skip the local control plane cluster test as we only have limited machine resources.
-  # Instead the local control plane cluster test will be tested in the node pool test.
-  - name: 'edgecontainer_local_control_plane_cluster'
-    primary_resource_id: 'default'
-    vars:
-      edgecontainer_cluster_name: 'local-control-plane-cluster'
+    primary_resource_id: default
+    steps:
+    - name: edgecontainer_cluster_with_maintenance_window
+      config_path: templates/terraform/samples/services/edgecontainer/edgecontainer_cluster_with_maintenance_window.tf.tmpl
+      prefixed_vars:
+        edgecontainer_cluster_name: cluster-with-maintenance
+  - name: edgecontainer_local_control_plane_cluster
+    primary_resource_id: default
     exclude_test: true
+    steps:
+    - name: edgecontainer_local_control_plane_cluster
+      config_path: templates/terraform/samples/services/edgecontainer/edgecontainer_local_control_plane_cluster.tf.tmpl
+      prefixed_vars:
+        edgecontainer_cluster_name: local-control-plane-cluster
 parameters:
   - name: 'location'
     type: String

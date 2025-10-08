@@ -37,25 +37,28 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'firebase_app_check_device_check_config_full'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      bundle_id: 'bundle.id.devicecheck'
-      key_id: 'Key ID'
-      private_key_path: 'path/to/private-key.p8'
-      team_id: '9987654321'
-      token_ttl: '7200s'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      # Don't add random suffix
-      'private_key_path': '"test-fixtures/private-key-2.p8"'
-      'team_id': '"9987654321"'
-      'token_ttl': '"7200s"'
-    # Need the time_sleep resource
-    external_providers: ["random", "time"]
+samples:
+  - name: firebase_app_check_device_check_config_full
+    external_providers:
+    - random
+    - time
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: firebase_app_check_device_check_config_full
+      config_path: templates/terraform/samples/services/firebaseappcheck/firebase_app_check_device_check_config_full.tf.tmpl
+      prefixed_vars:
+        bundle_id: bundle.id.devicecheck
+        key_id: Key ID
+        private_key_path: path/to/private-key.p8
+        team_id: "9987654321"
+        token_ttl: 7200s
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        private_key_path: '"test-fixtures/private-key-2.p8"'
+        team_id: '"9987654321"'
+        token_ttl: '"7200s"'
 parameters:
   - name: 'app_id'
     type: String

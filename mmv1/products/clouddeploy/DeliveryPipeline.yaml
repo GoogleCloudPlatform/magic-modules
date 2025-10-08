@@ -36,17 +36,20 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/deliveryPipelines/{{name}}'
     - '{{name}}'
 custom_code:
-examples:
-  - name: 'clouddeploy_delivery_pipeline_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cd-delivery-pipeline%s", context["random_suffix"])'
-    vars:
-      delivery_pipeline: 'cd-delivery-pipeline'
+samples:
+  - name: clouddeploy_delivery_pipeline_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cd-delivery-pipeline%s", context["random_suffix"])
+    steps:
+    - name: clouddeploy_delivery_pipeline_basic
+      config_path: templates/terraform/samples/services/clouddeploy/clouddeploy_delivery_pipeline_basic.tf.tmpl
+      prefixed_vars:
+        delivery_pipeline: cd-delivery-pipeline
 parameters:
 properties:
   - name: 'name'

@@ -51,29 +51,38 @@ sweeper:
     - region: "us-central1"
     - region: "us-east1"
     - region: "us-east4"
-examples:
-  - name: 'router_basic'
-    primary_resource_id: 'foobar'
-    vars:
-      router_name: 'my-router'
-      network_name: 'my-network'
-    ignore_read_extra:
-      - 'advertisedIpRanges'
-  - name: 'compute_router_encrypted_interconnect'
-    primary_resource_id: 'encrypted-interconnect-router'
-    vars:
-      router_name: 'test-router'
-      network_name: 'test-network'
-    ignore_read_extra:
-      - 'advertisedIpRanges'
-  - name: 'compute_router_md5encrypted'
-    primary_resource_id: 'foobar'
-    vars:
-      router_name: 'test-router'
-      network_name: 'test-network'
-    exclude_docs: true
-    ignore_read_extra:
-      - 'advertisedIpRanges'
+samples:
+  - name: router_basic
+    primary_resource_id: foobar
+    steps:
+    - name: router_basic
+      config_path: templates/terraform/samples/services/compute/router_basic.tf.tmpl
+      prefixed_vars:
+        network_name: my-network
+        router_name: my-router
+      ignore_read_extra:
+      - advertisedIpRanges
+  - name: compute_router_encrypted_interconnect
+    primary_resource_id: encrypted-interconnect-router
+    steps:
+    - name: compute_router_encrypted_interconnect
+      config_path: templates/terraform/samples/services/compute/compute_router_encrypted_interconnect.tf.tmpl
+      prefixed_vars:
+        network_name: test-network
+        router_name: test-router
+      ignore_read_extra:
+      - advertisedIpRanges
+  - name: compute_router_md5encrypted
+    primary_resource_id: foobar
+    steps:
+    - name: compute_router_md5encrypted
+      config_path: templates/terraform/samples/services/compute/compute_router_md5encrypted.tf.tmpl
+      prefixed_vars:
+        network_name: test-network
+        router_name: test-router
+      ignore_read_extra:
+      - advertisedIpRanges
+      exclude_docs: true
 parameters:
   - name: 'region'
     type: ResourceRef

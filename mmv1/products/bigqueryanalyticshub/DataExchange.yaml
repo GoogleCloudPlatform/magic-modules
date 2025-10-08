@@ -36,7 +36,7 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'data_exchange_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}'
     - '{{data_exchange_id}}'
@@ -44,35 +44,47 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "US"
-examples:
-  - name: 'bigquery_analyticshub_data_exchange_basic'
-    primary_resource_id: 'data_exchange'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"])'
-    region_override: 'US'
-    vars:
-      data_exchange_id: 'my_data_exchange'
-      desc: 'example data exchange'
-  - name: 'bigquery_analyticshub_data_exchange_dcr'
-    primary_resource_id: 'data_exchange'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"])'
-    region_override: 'US'
-    vars:
-      data_exchange_id: 'dcr_data_exchange'
-      desc: 'example dcr data exchange'
-  - name: 'bigquery_analyticshub_data_exchange_log_linked_dataset_query_user'
-    primary_resource_id: 'data_exchange'
-    primary_resource_name: 'fmt.Sprintf("tf_test_log_email_data_exchange%s", context["random_suffix"])'
-    region_override: 'US'
-    vars:
-      data_exchange_id: 'tf_test_log_email_data_exchange'
-      description: 'Example for log email test for data exchange'
-  - name: 'bigquery_analyticshub_public_data_exchange'
-    primary_resource_id: 'data_exchange'
-    primary_resource_name: 'fmt.Sprintf("tf_test_log_email_data_exchange%s", context["random_suffix"])'
-    region_override: 'US'
-    vars:
-      data_exchange_id: 'public_data_exchange'
-      desc: 'Example for public data exchange'
+samples:
+  - name: bigquery_analyticshub_data_exchange_basic
+    primary_resource_id: data_exchange
+    primary_resource_name: fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"])
+    steps:
+    - name: bigquery_analyticshub_data_exchange_basic
+      config_path: templates/terraform/samples/services/bigqueryanalyticshub/bigquery_analyticshub_data_exchange_basic.tf.tmpl
+      prefixed_vars:
+        data_exchange_id: my_data_exchange
+        desc: example data exchange
+    region_override: US
+  - name: bigquery_analyticshub_data_exchange_dcr
+    primary_resource_id: data_exchange
+    primary_resource_name: fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"])
+    steps:
+    - name: bigquery_analyticshub_data_exchange_dcr
+      config_path: templates/terraform/samples/services/bigqueryanalyticshub/bigquery_analyticshub_data_exchange_dcr.tf.tmpl
+      prefixed_vars:
+        data_exchange_id: dcr_data_exchange
+        desc: example dcr data exchange
+    region_override: US
+  - name: bigquery_analyticshub_data_exchange_log_linked_dataset_query_user
+    primary_resource_id: data_exchange
+    primary_resource_name: fmt.Sprintf("tf_test_log_email_data_exchange%s", context["random_suffix"])
+    steps:
+    - name: bigquery_analyticshub_data_exchange_log_linked_dataset_query_user
+      config_path: templates/terraform/samples/services/bigqueryanalyticshub/bigquery_analyticshub_data_exchange_log_linked_dataset_query_user.tf.tmpl
+      prefixed_vars:
+        data_exchange_id: tf_test_log_email_data_exchange
+        description: Example for log email test for data exchange
+    region_override: US
+  - name: bigquery_analyticshub_public_data_exchange
+    primary_resource_id: data_exchange
+    primary_resource_name: fmt.Sprintf("tf_test_log_email_data_exchange%s", context["random_suffix"])
+    steps:
+    - name: bigquery_analyticshub_public_data_exchange
+      config_path: templates/terraform/samples/services/bigqueryanalyticshub/bigquery_analyticshub_public_data_exchange.tf.tmpl
+      prefixed_vars:
+        data_exchange_id: public_data_exchange
+        desc: Example for public data exchange
+    region_override: US
 parameters:
 properties:
   - name: 'name'

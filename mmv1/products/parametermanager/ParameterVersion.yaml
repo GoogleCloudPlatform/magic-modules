@@ -30,49 +30,67 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-examples:
-  - name: 'parameter_version_basic'
-    primary_resource_id: 'parameter-version-basic'
-    vars:
-      parameter_id: 'parameter'
-      parameter_version_id: 'parameter_version'
-  - name: 'parameter_version_with_json_format'
-    primary_resource_id: 'parameter-version-with-json-format'
-    vars:
-      parameter_id: 'parameter'
-      parameter_version_id: 'parameter_version'
-  - name: 'parameter_version_with_kms_key'
-    primary_resource_id: 'parameter-version-with-kms-key'
-    vars:
-      parameter_id: 'parameter'
-      parameter_version_id: 'parameter_version'
-      kms_key: 'kms-key'
-    test_vars_overrides:
-      'kms_key': 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
+samples:
+  - name: parameter_version_basic
+    primary_resource_id: parameter-version-basic
+    steps:
+    - name: parameter_version_basic
+      config_path: templates/terraform/samples/services/parametermanager/parameter_version_basic.tf.tmpl
+      prefixed_vars:
+        parameter_id: parameter
+        parameter_version_id: parameter_version
+  - name: parameter_version_with_json_format
+    primary_resource_id: parameter-version-with-json-format
+    steps:
+    - name: parameter_version_with_json_format
+      config_path: templates/terraform/samples/services/parametermanager/parameter_version_with_json_format.tf.tmpl
+      prefixed_vars:
+        parameter_id: parameter
+        parameter_version_id: parameter_version
+  - name: parameter_version_with_kms_key
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  - name: 'parameter_version_with_yaml_format'
-    primary_resource_id: 'parameter-version-with-yaml-format'
-    vars:
-      parameter_id: 'parameter'
-      parameter_version_id: 'parameter_version'
-  - name: 'parameter_version_with_json_format_with_file'
-    primary_resource_id: 'parameter-version-with-json-format-with-file'
-    vars:
-      parameter_id: 'parameter'
-      parameter_version_id: 'parameter_version'
-      data: parameter-json-data.json
-    test_vars_overrides:
-      'data': '"./test-fixtures/parameter_data_json_format.json"'
-  - name: 'parameter_version_with_yaml_format_with_file'
-    primary_resource_id: 'parameter-version-with-yaml-format-with-file'
-    vars:
-      parameter_id: 'parameter'
-      parameter_version_id: 'parameter_version'
-      data: parameter-yaml-data.yaml
-    test_vars_overrides:
-      'data': '"./test-fixtures/parameter_data_yaml_format.yaml"'
+    - member: serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com
+      role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    primary_resource_id: parameter-version-with-kms-key
+    steps:
+    - name: parameter_version_with_kms_key
+      config_path: templates/terraform/samples/services/parametermanager/parameter_version_with_kms_key.tf.tmpl
+      prefixed_vars:
+        kms_key: kms-key
+        parameter_id: parameter
+        parameter_version_id: parameter_version
+      test_vars_overrides:
+        kms_key: acctest.BootstrapKMSKey(t).CryptoKey.Name
+  - name: parameter_version_with_yaml_format
+    primary_resource_id: parameter-version-with-yaml-format
+    steps:
+    - name: parameter_version_with_yaml_format
+      config_path: templates/terraform/samples/services/parametermanager/parameter_version_with_yaml_format.tf.tmpl
+      prefixed_vars:
+        parameter_id: parameter
+        parameter_version_id: parameter_version
+  - name: parameter_version_with_json_format_with_file
+    primary_resource_id: parameter-version-with-json-format-with-file
+    steps:
+    - name: parameter_version_with_json_format_with_file
+      config_path: templates/terraform/samples/services/parametermanager/parameter_version_with_json_format_with_file.tf.tmpl
+      prefixed_vars:
+        data: parameter-json-data.json
+        parameter_id: parameter
+        parameter_version_id: parameter_version
+      test_vars_overrides:
+        data: '"./test-fixtures/parameter_data_json_format.json"'
+  - name: parameter_version_with_yaml_format_with_file
+    primary_resource_id: parameter-version-with-yaml-format-with-file
+    steps:
+    - name: parameter_version_with_yaml_format_with_file
+      config_path: templates/terraform/samples/services/parametermanager/parameter_version_with_yaml_format_with_file.tf.tmpl
+      prefixed_vars:
+        data: parameter-yaml-data.yaml
+        parameter_id: parameter
+        parameter_version_id: parameter_version
+      test_vars_overrides:
+        data: '"./test-fixtures/parameter_data_yaml_format.yaml"'
 custom_code:
   custom_import: 'templates/terraform/custom_import/parameter_manager_parameter_version.go.tmpl'
 parameters:

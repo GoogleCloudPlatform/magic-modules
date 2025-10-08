@@ -43,25 +43,34 @@ taint_resource_on_failed_create: true
 sweeper:
   url_substitutions:
     - region: "us-west1"
-examples:
-  - name: 'gkeonprem_vmware_cluster_basic'
-    primary_resource_id: 'cluster-basic'
-    vars:
-      name: 'cluster-basic'
-    test_env_vars:
-      project: 'fake-backend-360322'
-  - name: 'gkeonprem_vmware_cluster_f5lb'
-    primary_resource_id: 'cluster-f5lb'
-    vars:
-      name: 'cluster-f5lb'
-    test_env_vars:
-      project: 'fake-backend-360322'
-  - name: 'gkeonprem_vmware_cluster_manuallb'
-    primary_resource_id: 'cluster-manuallb'
-    vars:
-      name: 'cluster-manuallb'
-    test_env_vars:
-      project: 'fake-backend-360322'
+samples:
+  - name: gkeonprem_vmware_cluster_basic
+    primary_resource_id: cluster-basic
+    steps:
+    - name: gkeonprem_vmware_cluster_basic
+      config_path: templates/terraform/samples/services/gkeonprem/gkeonprem_vmware_cluster_basic.tf.tmpl
+      prefixed_vars:
+        name: cluster-basic
+      test_env_vars:
+        project: fake-backend-360322
+  - name: gkeonprem_vmware_cluster_f5lb
+    primary_resource_id: cluster-f5lb
+    steps:
+    - name: gkeonprem_vmware_cluster_f5lb
+      config_path: templates/terraform/samples/services/gkeonprem/gkeonprem_vmware_cluster_f5lb.tf.tmpl
+      prefixed_vars:
+        name: cluster-f5lb
+      test_env_vars:
+        project: fake-backend-360322
+  - name: gkeonprem_vmware_cluster_manuallb
+    primary_resource_id: cluster-manuallb
+    steps:
+    - name: gkeonprem_vmware_cluster_manuallb
+      config_path: templates/terraform/samples/services/gkeonprem/gkeonprem_vmware_cluster_manuallb.tf.tmpl
+      prefixed_vars:
+        name: cluster-manuallb
+      test_env_vars:
+        project: fake-backend-360322
 parameters:
   - name: 'name'
     type: String

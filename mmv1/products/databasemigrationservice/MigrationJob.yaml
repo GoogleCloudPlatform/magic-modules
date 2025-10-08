@@ -43,40 +43,49 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'database_migration_service_migration_job_mysql_to_mysql'
-    primary_resource_id: 'mysqltomysql'
-    vars:
-      migration_id: 'my-migrationid'
-      source_csql: 'source-csql'
-      source_sqldb_cert: 'cert'
-      source_sqldb_user: 'username'
-      source_sqldb_pass: 'password'
-      source_cp: 'source-cp'
-      destination_csql: 'destination-csql'
-      destination_cp: 'destination-cp'
-  - name: 'database_migration_service_migration_job_postgres_to_postgres'
-    primary_resource_id: 'psqltopsql'
-    vars:
-      migration_id: 'my-migrationid'
-      source_csql: 'source-csql'
-      source_sqldb_cert: 'cert'
-      source_sqldb_user: 'username'
-      source_sqldb_pass: 'password'
-      source_cp: 'source-cp'
-      destination_csql: 'destination-csql'
-      destination_cp: 'destination-cp'
-  - name: 'database_migration_service_migration_job_postgres_to_alloydb'
-    primary_resource_id: 'psqltoalloydb'
-    vars:
-      migration_id: 'my-migrationid'
-      source_csql: 'source-csql'
-      source_sqldb_cert: 'cert'
-      source_sqldb_user: 'username'
-      source_sqldb_pass: 'password'
-      source_cp: 'source-cp'
-      destination_alloydb: 'destination-alloydb'
-      destination_cp: 'destination-cp'
+samples:
+  - name: database_migration_service_migration_job_mysql_to_mysql
+    primary_resource_id: mysqltomysql
+    steps:
+    - name: database_migration_service_migration_job_mysql_to_mysql
+      config_path: templates/terraform/samples/services/databasemigrationservice/database_migration_service_migration_job_mysql_to_mysql.tf.tmpl
+      prefixed_vars:
+        destination_cp: destination-cp
+        destination_csql: destination-csql
+        migration_id: my-migrationid
+        source_cp: source-cp
+        source_csql: source-csql
+        source_sqldb_cert: cert
+        source_sqldb_pass: password
+        source_sqldb_user: username
+  - name: database_migration_service_migration_job_postgres_to_postgres
+    primary_resource_id: psqltopsql
+    steps:
+    - name: database_migration_service_migration_job_postgres_to_postgres
+      config_path: templates/terraform/samples/services/databasemigrationservice/database_migration_service_migration_job_postgres_to_postgres.tf.tmpl
+      prefixed_vars:
+        destination_cp: destination-cp
+        destination_csql: destination-csql
+        migration_id: my-migrationid
+        source_cp: source-cp
+        source_csql: source-csql
+        source_sqldb_cert: cert
+        source_sqldb_pass: password
+        source_sqldb_user: username
+  - name: database_migration_service_migration_job_postgres_to_alloydb
+    primary_resource_id: psqltoalloydb
+    steps:
+    - name: database_migration_service_migration_job_postgres_to_alloydb
+      config_path: templates/terraform/samples/services/databasemigrationservice/database_migration_service_migration_job_postgres_to_alloydb.tf.tmpl
+      prefixed_vars:
+        destination_alloydb: destination-alloydb
+        destination_cp: destination-cp
+        migration_id: my-migrationid
+        source_cp: source-cp
+        source_csql: source-csql
+        source_sqldb_cert: cert
+        source_sqldb_pass: password
+        source_sqldb_user: username
 parameters:
   - name: 'migrationJobId'
     type: String

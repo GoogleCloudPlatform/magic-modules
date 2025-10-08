@@ -31,16 +31,22 @@ sweeper:
   url_substitutions:
     - region: "us"
     - region: "eu"
-examples:
-  - name: 'documentai_processor'
-    primary_resource_id: 'processor'
-    vars:
-      processor_name: 'test-processor'
-  - name: 'documentai_processor_eu'
-    primary_resource_id: 'processor'
-    vars:
-      processor_name: 'test-processor'
-    exclude_docs: true
+samples:
+  - name: documentai_processor
+    primary_resource_id: processor
+    steps:
+    - name: documentai_processor
+      config_path: templates/terraform/samples/services/documentai/documentai_processor.tf.tmpl
+      prefixed_vars:
+        processor_name: test-processor
+  - name: documentai_processor_eu
+    primary_resource_id: processor
+    steps:
+    - name: documentai_processor_eu
+      config_path: templates/terraform/samples/services/documentai/documentai_processor_eu.tf.tmpl
+      prefixed_vars:
+        processor_name: test-processor
+      exclude_docs: true
 parameters:
   - name: 'location'
     type: String

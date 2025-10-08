@@ -48,39 +48,48 @@ async:
     resource_inside_response: false
 custom_diff:
   - 'tpgresource.DefaultProviderRegion'
-examples:
-  - name: 'region_network_firewall_policy_rule'
-    primary_resource_id: 'primary'
-    vars:
-      address_group: 'address-group'
-      fw_policy: 'fw-policy'
-      network: 'network'
-      tag_key: 'tag-key'
-      tag_value: 'tag-value'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      project_name: 'PROJECT_NAME'
-      region: 'REGION'
-      service_acct: 'SERVICE_ACCT'
-  - name: 'region_network_firewall_policy_rule_network_scope_egress'
-    primary_resource_id: 'primary'
-    vars:
-      fw_policy: 'fw-policy'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      project_name: 'PROJECT_NAME'
-      region: 'REGION'
+samples:
+  - name: region_network_firewall_policy_rule
+    primary_resource_id: primary
+    steps:
+    - name: region_network_firewall_policy_rule
+      config_path: templates/terraform/samples/services/compute/region_network_firewall_policy_rule.tf.tmpl
+      prefixed_vars:
+        address_group: address-group
+        fw_policy: fw-policy
+        network: network
+        tag_key: tag-key
+        tag_value: tag-value
+      test_env_vars:
+        org_id: ORG_ID
+        project_name: PROJECT_NAME
+        region: REGION
+        service_acct: SERVICE_ACCT
+  - name: region_network_firewall_policy_rule_network_scope_egress
     min_version: beta
-  - name: 'region_network_firewall_policy_rule_network_scope_ingress'
-    primary_resource_id: 'primary'
-    vars:
-      fw_policy: 'fw-policy'
-      network: 'network'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      project_name: 'PROJECT_NAME'
-      region: 'REGION'
+    primary_resource_id: primary
+    steps:
+    - name: region_network_firewall_policy_rule_network_scope_egress
+      config_path: templates/terraform/samples/services/compute/region_network_firewall_policy_rule_network_scope_egress.tf.tmpl
+      prefixed_vars:
+        fw_policy: fw-policy
+      test_env_vars:
+        org_id: ORG_ID
+        project_name: PROJECT_NAME
+        region: REGION
+  - name: region_network_firewall_policy_rule_network_scope_ingress
     min_version: beta
+    primary_resource_id: primary
+    steps:
+    - name: region_network_firewall_policy_rule_network_scope_ingress
+      config_path: templates/terraform/samples/services/compute/region_network_firewall_policy_rule_network_scope_ingress.tf.tmpl
+      prefixed_vars:
+        fw_policy: fw-policy
+        network: network
+      test_env_vars:
+        org_id: ORG_ID
+        project_name: PROJECT_NAME
+        region: REGION
 parameters:
   - name: 'firewallPolicy'
     type: ResourceRef

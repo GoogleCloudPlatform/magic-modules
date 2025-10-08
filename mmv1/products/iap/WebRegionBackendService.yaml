@@ -35,16 +35,19 @@ iam_policy:
   allowed_iam_role: 'roles/iap.httpsResourceAccessor'
   parent_resource_attribute: 'web_region_backend_service'
   iam_conditions_request_type: 'REQUEST_BODY'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
 custom_code:
 exclude_tgc: true
-examples:
-  - name: 'region_backend_service_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-region-backend-service%s", context["random_suffix"])'
-    vars:
-      region_backend_service_name: 'region-backend-service'
-      health_check_name: 'health-check'
+samples:
+  - name: region_backend_service_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-region-backend-service%s", context["random_suffix"])
+    steps:
+    - name: region_backend_service_basic
+      config_path: templates/terraform/samples/services/iap/region_backend_service_basic.tf.tmpl
+      prefixed_vars:
+        health_check_name: health-check
+        region_backend_service_name: region-backend-service
 parameters:
 properties:
   - name: 'name'

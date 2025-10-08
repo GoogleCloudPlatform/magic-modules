@@ -40,17 +40,20 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-examples:
-  - name: 'gkebackup_restorechannel_basic'
-    primary_resource_id: 'basic'
-    primary_resource_name: 'fmt.Sprintf("tf-test-basic-channel%s", context["random_suffix"])'
-    vars:
-      name: 'basic-channel'
-      destination_project: 'projects/24240755850'
-    test_vars_overrides:
-      'destination_project': '"projects/24240755850"'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: gkebackup_restorechannel_basic
+    primary_resource_id: basic
+    primary_resource_name: fmt.Sprintf("tf-test-basic-channel%s", context["random_suffix"])
+    steps:
+    - name: gkebackup_restorechannel_basic
+      config_path: templates/terraform/samples/services/gkebackup/gkebackup_restorechannel_basic.tf.tmpl
+      prefixed_vars:
+        destination_project: projects/24240755850
+        name: basic-channel
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        destination_project: '"projects/24240755850"'
 parameters:
   - name: 'location'
     type: String

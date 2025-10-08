@@ -41,16 +41,19 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-examples:
-  - name: 'compute_wire_group_basic'
-    primary_resource_id: 'example-test-wire-group'
-    vars:
-      name: 'test-wire-group'
-      description: 'Example Wire Group'
-      cross_site_network: 'test-cross-site-network'
-    min_version: 'beta'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: compute_wire_group_basic
+    min_version: beta
+    primary_resource_id: example-test-wire-group
+    steps:
+    - name: compute_wire_group_basic
+      config_path: templates/terraform/samples/services/compute/compute_wire_group_basic.tf.tmpl
+      prefixed_vars:
+        cross_site_network: test-cross-site-network
+        description: Example Wire Group
+        name: test-wire-group
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
   - name: 'crossSiteNetwork'
     type: ResourceRef

@@ -33,18 +33,21 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'dataform_repository_workflow_config'
-    primary_resource_id: 'workflow'
-    min_version: 'beta'
-    vars:
-      workflow_name: 'my_workflow'
-      release_name: 'my_release'
-      service_account_name: 'dataform-sa'
-      git_repository_name: 'my/repository'
-      dataform_repository_name: 'dataform_repository'
-      data: 'secret-data'
-      secret_name: 'my_secret'
+samples:
+  - name: dataform_repository_workflow_config
+    min_version: beta
+    primary_resource_id: workflow
+    steps:
+    - name: dataform_repository_workflow_config
+      config_path: templates/terraform/samples/services/dataform/dataform_repository_workflow_config.tf.tmpl
+      prefixed_vars:
+        data: secret-data
+        dataform_repository_name: dataform_repository
+        git_repository_name: my/repository
+        release_name: my_release
+        secret_name: my_secret
+        service_account_name: dataform-sa
+        workflow_name: my_workflow
 parameters:
   - name: 'region'
     type: String

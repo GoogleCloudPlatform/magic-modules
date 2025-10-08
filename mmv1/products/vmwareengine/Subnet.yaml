@@ -45,18 +45,20 @@ async:
     resource_inside_response: false
   include_project: true
 custom_code:
-examples:
-  - name: 'vmware_engine_subnet_user_defined'
-    primary_resource_id: 'vmw-engine-subnet'
-    vars:
-      private_cloud_id: 'sample-pc'
-      management_cluster_id: 'sample-mgmt-cluster'
-      network_id: 'pc-nw'
-      subnet_id: 'service-1'
-    test_env_vars:
-      region: 'REGION'
- # update tests will take care of read and update. Parent PC creation is expensive and node reservation is required.
+samples:
+  - name: vmware_engine_subnet_user_defined
+    primary_resource_id: vmw-engine-subnet
     exclude_test: true
+    steps:
+    - name: vmware_engine_subnet_user_defined
+      config_path: templates/terraform/samples/services/vmwareengine/vmware_engine_subnet_user_defined.tf.tmpl
+      prefixed_vars:
+        management_cluster_id: sample-mgmt-cluster
+        network_id: pc-nw
+        private_cloud_id: sample-pc
+        subnet_id: service-1
+      test_env_vars:
+        region: REGION
 parameters:
   - name: 'parent'
     type: String

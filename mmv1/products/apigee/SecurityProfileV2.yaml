@@ -30,19 +30,27 @@ import_format:
   - '{{org_id}}/{{profile_id}}'
 custom_code:
   custom_import: "templates/terraform/custom_import/apigee_security_profile_v2.go.tmpl"
-examples:
-  - name: 'apigee_security_profile_v2_basic'
-    vars:
-      security_profile_id: "my-profile"
+samples:
+  - name: apigee_security_profile_v2_basic
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'apigee_security_profile_v2_basic_test'
-    primary_resource_id: 'security_profile_v2'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
+    steps:
+    - name: apigee_security_profile_v2_basic
+      config_path: templates/terraform/samples/services/apigee/apigee_security_profile_v2_basic.tf.tmpl
+      prefixed_vars:
+        security_profile_id: my-profile
+  - name: apigee_security_profile_v2_basic_test
     skip_vcr: true
-    external_providers: ["time"]
+    external_providers:
+    - time
+    primary_resource_id: security_profile_v2
+    steps:
+    - name: apigee_security_profile_v2_basic_test
+      config_path: templates/terraform/samples/services/apigee/apigee_security_profile_v2_basic_test.tf.tmpl
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
 parameters:
   - name: 'orgId'
     type: String

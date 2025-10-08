@@ -41,25 +41,34 @@ async:
     resource_inside_response: true
 custom_code:
 filename_override: 'connectivity_test_resource'
-examples:
-  - name: 'network_management_connectivity_test_instances'
-    primary_resource_id: 'instance-test'
-    vars:
-      primary_resource_name: 'conn-test-instances'
-      network_name: 'conn-test-net'
-      source_instance: 'source-vm'
-      dest_instance: 'dest-vm'
-  - name: 'network_management_connectivity_test_addresses'
-    primary_resource_id: 'address-test'
-    vars:
-      primary_resource_name: 'conn-test-addr'
-      network: 'connectivity-vpc'
-      source_addr: 'src-addr'
-      dest_addr: 'dest-addr'
-  - name: 'network_management_connectivity_test_endpoints'
-    primary_resource_id: 'endpoints-test'
-    vars:
-      primary_resource_name: 'conn-test-endpoints'
+samples:
+  - name: network_management_connectivity_test_instances
+    primary_resource_id: instance-test
+    steps:
+    - name: network_management_connectivity_test_instances
+      config_path: templates/terraform/samples/services/networkmanagement/network_management_connectivity_test_instances.tf.tmpl
+      prefixed_vars:
+        dest_instance: dest-vm
+        network_name: conn-test-net
+        primary_resource_name: conn-test-instances
+        source_instance: source-vm
+  - name: network_management_connectivity_test_addresses
+    primary_resource_id: address-test
+    steps:
+    - name: network_management_connectivity_test_addresses
+      config_path: templates/terraform/samples/services/networkmanagement/network_management_connectivity_test_addresses.tf.tmpl
+      prefixed_vars:
+        dest_addr: dest-addr
+        network: connectivity-vpc
+        primary_resource_name: conn-test-addr
+        source_addr: src-addr
+  - name: network_management_connectivity_test_endpoints
+    primary_resource_id: endpoints-test
+    steps:
+    - name: network_management_connectivity_test_endpoints
+      config_path: templates/terraform/samples/services/networkmanagement/network_management_connectivity_test_endpoints.tf.tmpl
+      prefixed_vars:
+        primary_resource_name: conn-test-endpoints
 parameters:
 properties:
   - name: 'name'

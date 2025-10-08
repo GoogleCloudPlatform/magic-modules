@@ -46,12 +46,15 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'discoveryengine_schema_basic'
-    primary_resource_id: 'basic'
-    vars:
-      data_store_id: 'data-store-id'
-      schema_id: 'schema-id'
+samples:
+  - name: discoveryengine_schema_basic
+    primary_resource_id: basic
+    steps:
+    - name: discoveryengine_schema_basic
+      config_path: templates/terraform/samples/services/discoveryengine/discoveryengine_schema_basic.tf.tmpl
+      prefixed_vars:
+        data_store_id: data-store-id
+        schema_id: schema-id
 parameters:
   - name: 'location'
     type: String

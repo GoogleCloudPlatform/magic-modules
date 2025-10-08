@@ -43,26 +43,32 @@ iam_policy:
   exclude_import_test: true
   method_name_separator: ':'
   parent_resource_attribute: 'aspect_type_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/aspectTypes/{{aspect_type_id}}'
     - '{{aspect_type_id}}'
 custom_code:
-examples:
-  - name: 'dataplex_aspect_type_basic'
-    primary_resource_id: 'test_aspect_type_basic'
-    primary_resource_name: 'fmt.Sprintf("tf-test-aspect-type%s", context["random_suffix"])'
-    vars:
-      aspect_type_name: 'aspect-type-basic'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-  - name: 'dataplex_aspect_type_full'
-    primary_resource_id: 'test_aspect_type_full'
-    primary_resource_name: 'fmt.Sprintf("tf-test-aspect-type%s", context["random_suffix"])'
-    vars:
-      aspect_type_name: 'aspect-type-full'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
+samples:
+  - name: dataplex_aspect_type_basic
+    primary_resource_id: test_aspect_type_basic
+    primary_resource_name: fmt.Sprintf("tf-test-aspect-type%s", context["random_suffix"])
+    steps:
+    - name: dataplex_aspect_type_basic
+      config_path: templates/terraform/samples/services/dataplex/dataplex_aspect_type_basic.tf.tmpl
+      prefixed_vars:
+        aspect_type_name: aspect-type-basic
+      test_env_vars:
+        project_name: PROJECT_NAME
+  - name: dataplex_aspect_type_full
+    primary_resource_id: test_aspect_type_full
+    primary_resource_name: fmt.Sprintf("tf-test-aspect-type%s", context["random_suffix"])
+    steps:
+    - name: dataplex_aspect_type_full
+      config_path: templates/terraform/samples/services/dataplex/dataplex_aspect_type_full.tf.tmpl
+      prefixed_vars:
+        aspect_type_name: aspect-type-full
+      test_env_vars:
+        project_name: PROJECT_NAME
 parameters:
   - name: 'location'
     type: String

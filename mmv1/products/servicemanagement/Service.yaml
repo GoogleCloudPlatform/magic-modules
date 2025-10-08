@@ -31,16 +31,20 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'service_name'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
 custom_code:
-examples:
-  - name: 'endpoints_iam'
-    primary_resource_id: 'endpoints_service'
-    primary_resource_name: 'fmt.Sprintf("endpoint%s.endpoints.%s.cloud.goog", context["random_suffix"], context["project_name"])'
-    vars:
-      name: 'endpoint'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
+samples:
+  - name: endpoints_iam
+    primary_resource_id: endpoints_service
+    primary_resource_name: fmt.Sprintf("endpoint%s.endpoints.%s.cloud.goog", context["random_suffix"],
+      context["project_name"])
+    steps:
+    - name: endpoints_iam
+      config_path: templates/terraform/samples/services/servicemanagement/endpoints_iam.tf.tmpl
+      prefixed_vars:
+        name: endpoint
+      test_env_vars:
+        project_name: PROJECT_NAME
 parameters:
 properties:
   - name: 'serviceName'

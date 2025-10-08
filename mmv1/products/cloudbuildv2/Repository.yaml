@@ -40,37 +40,52 @@ custom_code:
 exclude_tgc: true
 legacy_long_form_project: true
 include_in_tgc_next_DO_NOT_USE: true
-examples:
-# These tests depend on secrets stored in a separate project, so we prefer not
-# to show them in the docs.
-  - name: 'cloudbuildv2_repository_ghe'
-    primary_resource_id: 'primary'
-    vars:
-      connection_name: 'connection'
-      repository_name: 'repository'
-    exclude_docs: true
+samples:
+  - name: cloudbuildv2_repository_ghe
+    primary_resource_id: primary
+    steps:
+    - name: cloudbuildv2_repository_ghe
+      config_path: templates/terraform/samples/services/cloudbuildv2/cloudbuildv2_repository_ghe.tf.tmpl
+      prefixed_vars:
+        connection_name: connection
+        repository_name: repository
+      exclude_docs: true
     tgc_test_ignore_extra:
-      - annotations # It has empty object in Terraform configuration
-  - name: 'cloudbuildv2_repository_github'
-    primary_resource_id: 'primary'
-    vars:
-      connection_name: 'connection'
-      repository_name: 'repository'
-    exclude_docs: true
+    - annotations
+  - name: cloudbuildv2_repository_github
+    primary_resource_id: primary
+    steps:
+    - name: cloudbuildv2_repository_github
+      config_path: templates/terraform/samples/services/cloudbuildv2/cloudbuildv2_repository_github.tf.tmpl
+      prefixed_vars:
+        connection_name: connection
+        repository_name: repository
+      exclude_docs: true
     tgc_test_ignore_extra:
-      - annotations # It has empty object in Terraform configuration
-  - name: 'cloudbuildv2_repository_gle'
-    primary_resource_id: 'primary'
-    vars:
-      connection_name: 'connection'
-      repository_name: 'repository'
-    exclude_docs: true
+    - annotations
+  - name: cloudbuildv2_repository_gle
+    primary_resource_id: primary
+    steps:
+    - name: cloudbuildv2_repository_gle
+      config_path: templates/terraform/samples/services/cloudbuildv2/cloudbuildv2_repository_gle.tf.tmpl
+      prefixed_vars:
+        connection_name: connection
+        repository_name: repository
+      exclude_docs: true
     tgc_test_ignore_extra:
-      - annotations # It has empty object in Terraform configuration
-  - name: 'cloudbuildv2_repository_ghe_doc'
+    - annotations
+  - name: cloudbuildv2_repository_ghe_doc
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'cloudbuildv2_repository_github_doc'
+    steps:
+    - name: cloudbuildv2_repository_ghe_doc
+      config_path: templates/terraform/samples/services/cloudbuildv2/cloudbuildv2_repository_ghe_doc.tf.tmpl
+  - name: cloudbuildv2_repository_github_doc
+    primary_resource_id: ""
     exclude_test: true
+    steps:
+    - name: cloudbuildv2_repository_github_doc
+      config_path: templates/terraform/samples/services/cloudbuildv2/cloudbuildv2_repository_github_doc.tf.tmpl
 parameters:
   - name: 'location'
     type: String

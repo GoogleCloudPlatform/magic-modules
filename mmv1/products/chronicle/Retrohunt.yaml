@@ -30,20 +30,22 @@ autogen_status: UmV0cm9odW50
 
 custom_code:
   post_create: 'templates/terraform/post_create/chronicle_retrohunt_id.go.tmpl'
-examples:
-  - name: 'chronicle_retrohunt_basic'
-    primary_resource_id: example
-    exclude_import_test: true
+samples:
+  - name: chronicle_retrohunt_basic
     skip_vcr: true
-    vars:
-      start_time: '2025-01-01T00:00:00Z'
-      end_time: '2025-01-01T12:00:00Z'
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-    test_vars_overrides:
-      start_time: 'time.Now().Add(time.Hour * (-12)).Format(time.RFC3339)'
-      end_time: 'time.Now().Add(time.Hour * (-1)).Format(time.RFC3339)'
-
+    primary_resource_id: example
+    steps:
+    - name: chronicle_retrohunt_basic
+      config_path: templates/terraform/samples/services/chronicle/chronicle_retrohunt_basic.tf.tmpl
+      prefixed_vars:
+        end_time: "2025-01-01T12:00:00Z"
+        start_time: "2025-01-01T00:00:00Z"
+      test_env_vars:
+        chronicle_id: CHRONICLE_ID
+      test_vars_overrides:
+        end_time: time.Now().Add(time.Hour * (-1)).Format(time.RFC3339)
+        start_time: time.Now().Add(time.Hour * (-12)).Format(time.RFC3339)
+      exclude_import_test: true
 async:
   actions: [create]
   type: OpAsync

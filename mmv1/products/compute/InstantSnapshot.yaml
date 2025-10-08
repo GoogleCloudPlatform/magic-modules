@@ -46,7 +46,7 @@ async:
 collection_url_key: 'items'
 iam_policy:
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   iam_conditions_request_type: 'QUERY_PARAM'
   allowed_iam_role: 'roles/compute.storageAdmin'
   import_format:
@@ -54,13 +54,16 @@ iam_policy:
 sweeper:
   url_substitutions:
     - zone: "us-central1-a"
-examples:
-  - name: 'instant_snapshot_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-instant-snapshot%s", context["random_suffix"])'
-    vars:
-      instance_name: 'instant-snapshot'
-      disk_name: 'example-disk'
+samples:
+  - name: instant_snapshot_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-instant-snapshot%s", context["random_suffix"])
+    steps:
+    - name: instant_snapshot_basic
+      config_path: templates/terraform/samples/services/compute/instant_snapshot_basic.tf.tmpl
+      prefixed_vars:
+        disk_name: example-disk
+        instance_name: instant-snapshot
 parameters:
   - name: 'sourceDisk'
     type: ResourceRef

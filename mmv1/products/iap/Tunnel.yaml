@@ -35,15 +35,20 @@ iam_policy:
   allowed_iam_role: 'roles/iap.tunnelResourceAccessor'
   parent_resource_attribute: 'project'
   iam_conditions_request_type: 'REQUEST_BODY'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
 custom_code:
-examples:
-  - name: 'iap_project'
-    primary_resource_id: 'project_service'
-    primary_resource_name: 'fmt.Sprintf("tf-test%s", context["random_suffix"])'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    external_providers: ["random", "time"]
+samples:
+  - name: iap_project
+    external_providers:
+    - random
+    - time
+    primary_resource_id: project_service
+    primary_resource_name: fmt.Sprintf("tf-test%s", context["random_suffix"])
+    steps:
+    - name: iap_project
+      config_path: templates/terraform/samples/services/iap/iap_project.tf.tmpl
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
 properties:
   - name: 'project'

@@ -43,20 +43,26 @@ iam_policy:
   allowed_iam_role: 'roles/privateca.templateUser'
   parent_resource_attribute: 'certificate_template'
   iam_conditions_request_type: 'QUERY_PARAM_NESTED'
-  example_config_body: 'templates/terraform/iam/example_config_body/privateca_certificate_template.tf.tmpl'
+  sample_config_body: 'templates/terraform/iam/example_config_body/privateca_certificate_template.tf.tmpl'
 custom_code:
 legacy_long_form_project: true
-examples:
-  - name: 'privateca_template_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-template%s", context["random_suffix"])'
-    vars:
-      name: 'my-template'
-  - name: 'privateca_template_zero_max_issuer_path_length_null_ca'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-template%s", context["random_suffix"])'
-    vars:
-      name: 'my-template'
+samples:
+  - name: privateca_template_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-my-template%s", context["random_suffix"])
+    steps:
+    - name: privateca_template_basic
+      config_path: templates/terraform/samples/services/privateca/privateca_template_basic.tf.tmpl
+      prefixed_vars:
+        name: my-template
+  - name: privateca_template_zero_max_issuer_path_length_null_ca
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-my-template%s", context["random_suffix"])
+    steps:
+    - name: privateca_template_zero_max_issuer_path_length_null_ca
+      config_path: templates/terraform/samples/services/privateca/privateca_template_zero_max_issuer_path_length_null_ca.tf.tmpl
+      prefixed_vars:
+        name: my-template
 parameters:
 properties:
   - name: 'name'

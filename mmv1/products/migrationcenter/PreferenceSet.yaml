@@ -41,15 +41,21 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-examples:
-  - name: 'preference_set_basic'
-    primary_resource_id: 'default'
-    vars:
-      set_name: 'preference-set-test'
-  - name: 'preference_set_full'
-    primary_resource_id: 'default'
-    vars:
-      set_name: 'preference-set-test'
+samples:
+  - name: preference_set_basic
+    primary_resource_id: default
+    steps:
+    - name: preference_set_basic
+      config_path: templates/terraform/samples/services/migrationcenter/preference_set_basic.tf.tmpl
+      prefixed_vars:
+        set_name: preference-set-test
+  - name: preference_set_full
+    primary_resource_id: default
+    steps:
+    - name: preference_set_full
+      config_path: templates/terraform/samples/services/migrationcenter/preference_set_full.tf.tmpl
+      prefixed_vars:
+        set_name: preference-set-test
 parameters:
   - name: 'location'
     type: String

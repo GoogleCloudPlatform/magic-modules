@@ -49,13 +49,16 @@ async:
 custom_code:
   constants: 'templates/terraform/constants/privileged_access_manager_entitlement.go.tmpl'
   pre_update: 'templates/terraform/pre_update/privileged_access_manager_entitlement.go.tmpl'
-examples:
-  - name: 'privileged_access_manager_entitlement_basic'
-    primary_resource_id: 'tfentitlement'
-    vars:
-      entitlement_id: 'example-entitlement'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: privileged_access_manager_entitlement_basic
+    primary_resource_id: tfentitlement
+    steps:
+    - name: privileged_access_manager_entitlement_basic
+      config_path: templates/terraform/samples/services/privilegedaccessmanager/privileged_access_manager_entitlement_basic.tf.tmpl
+      prefixed_vars:
+        entitlement_id: example-entitlement
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
   - name: 'location'
     type: String

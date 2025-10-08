@@ -44,49 +44,64 @@ custom_code:
   # This causes the encoder logic to not be applied during update.
   update_encoder: 'templates/terraform/encoders/compute_target_https_proxy.go.tmpl'
   decoder: 'templates/terraform/decoders/compute_target_https_proxy.go.tmpl'
-examples:
-  - name: 'target_https_proxy_basic'
-    primary_resource_id: 'default'
-    vars:
-      target_https_proxy_name: 'test-proxy'
-      ssl_certificate_name: 'my-certificate'
-      url_map_name: 'url-map'
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'http-health-check'
-  - name: 'target_https_proxy_http_keep_alive_timeout'
-    primary_resource_id: 'default'
-    vars:
-      target_https_proxy_name: 'test-http-keep-alive-timeout-proxy'
-      ssl_certificate_name: 'my-certificate'
-      url_map_name: 'url-map'
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'http-health-check'
-  - name: 'target_https_proxy_mtls'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      target_https_proxy_name: 'test-mtls-proxy'
-      ssl_certificate_name: 'my-certificate'
-      url_map_name: 'url-map'
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'http-health-check'
-      server_tls_policy_name: 'my-tls-policy'
-      trust_config_name: 'my-trust-config'
-  - name: 'target_https_proxy_certificate_manager_certificate'
-    primary_resource_id: 'default'
-    vars:
-      target_https_proxy_name: 'target-http-proxy'
-      certificate_manager_certificate_name: 'my-certificate'
-      url_map_name: 'url-map'
-      backend_service_name: 'backend-service'
-  - name: 'target_https_proxy_fingerprint'
-    primary_resource_id: 'default'
-    vars:
-      target_https_proxy_name: 'test-fingerprint-proxy'
-      ssl_certificate_name: 'my-certificate'
-      url_map_name: 'url-map'
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'http-health-check'
+samples:
+  - name: target_https_proxy_basic
+    primary_resource_id: default
+    steps:
+    - name: target_https_proxy_basic
+      config_path: templates/terraform/samples/services/compute/target_https_proxy_basic.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend-service
+        http_health_check_name: http-health-check
+        ssl_certificate_name: my-certificate
+        target_https_proxy_name: test-proxy
+        url_map_name: url-map
+  - name: target_https_proxy_http_keep_alive_timeout
+    primary_resource_id: default
+    steps:
+    - name: target_https_proxy_http_keep_alive_timeout
+      config_path: templates/terraform/samples/services/compute/target_https_proxy_http_keep_alive_timeout.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend-service
+        http_health_check_name: http-health-check
+        ssl_certificate_name: my-certificate
+        target_https_proxy_name: test-http-keep-alive-timeout-proxy
+        url_map_name: url-map
+  - name: target_https_proxy_mtls
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: target_https_proxy_mtls
+      config_path: templates/terraform/samples/services/compute/target_https_proxy_mtls.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend-service
+        http_health_check_name: http-health-check
+        server_tls_policy_name: my-tls-policy
+        ssl_certificate_name: my-certificate
+        target_https_proxy_name: test-mtls-proxy
+        trust_config_name: my-trust-config
+        url_map_name: url-map
+  - name: target_https_proxy_certificate_manager_certificate
+    primary_resource_id: default
+    steps:
+    - name: target_https_proxy_certificate_manager_certificate
+      config_path: templates/terraform/samples/services/compute/target_https_proxy_certificate_manager_certificate.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend-service
+        certificate_manager_certificate_name: my-certificate
+        target_https_proxy_name: target-http-proxy
+        url_map_name: url-map
+  - name: target_https_proxy_fingerprint
+    primary_resource_id: default
+    steps:
+    - name: target_https_proxy_fingerprint
+      config_path: templates/terraform/samples/services/compute/target_https_proxy_fingerprint.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend-service
+        http_health_check_name: http-health-check
+        ssl_certificate_name: my-certificate
+        target_https_proxy_name: test-fingerprint-proxy
+        url_map_name: url-map
 parameters:
 properties:
   - name: 'creationTimestamp'

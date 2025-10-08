@@ -39,25 +39,31 @@ async:
     resource_inside_response: true
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/memcache_instance.go.tmpl'
-examples:
-  - name: 'memcache_instance_basic'
-    primary_resource_id: 'instance'
-    vars:
-      instance_name: 'test-instance'
-      network_name: 'test-network'
-      address_name: 'address'
+samples:
+  - name: memcache_instance_basic
+    primary_resource_id: instance
     exclude_test: true
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'memcache_instance_basic_test'
-    primary_resource_id: 'instance'
-    vars:
-      instance_name: 'test-instance'
-      network_name: 'test-network'
-      address_name: 'address'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
-    exclude_docs: true
+    steps:
+    - name: memcache_instance_basic
+      config_path: templates/terraform/samples/services/memcache/memcache_instance_basic.tf.tmpl
+      prefixed_vars:
+        address_name: address
+        instance_name: test-instance
+        network_name: test-network
+      ignore_read_extra:
+      - deletion_protection
+  - name: memcache_instance_basic_test
+    primary_resource_id: instance
+    steps:
+    - name: memcache_instance_basic_test
+      config_path: templates/terraform/samples/services/memcache/memcache_instance_basic_test.tf.tmpl
+      prefixed_vars:
+        address_name: address
+        instance_name: test-instance
+        network_name: test-network
+      test_vars_overrides:
+        network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")
+      exclude_docs: true
 parameters:
   - name: 'region'
     type: String

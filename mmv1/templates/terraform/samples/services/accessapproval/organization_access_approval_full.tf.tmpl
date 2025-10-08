@@ -1,0 +1,13 @@
+resource "google_organization_access_approval_settings" "{{$.PrimaryResourceId}}" {
+  organization_id     = "{{index $.TestEnvVars "org_id"}}"
+  notification_emails = ["testuser@example.com", "example.user@example.com"]
+
+  enrolled_services {
+  	cloud_product = "appengine.googleapis.com"
+  }
+
+  enrolled_services {
+  	cloud_product = "dataflow.googleapis.com"
+  	enrollment_level = "BLOCK_ALL"
+  }
+}

@@ -45,16 +45,21 @@ async: !ruby/object:Api::OpAsync
 import_format:
   - 'projects/{{project}}/locations/{{location}}/datasetConfigs/{{dataset_config_id}}'
 
-examples:
-  - name: 'storage_insights_dataset_config_includes'
-    primary_resource_id: 'config_includes'
-    vars:
-      dataset_config_id: 'my_config_includes'
-  - name: 'storage_insights_dataset_config_excludes'
-    primary_resource_id: 'config_excludes'
-    vars:
-      dataset_config_id: 'my_config_excludes'
-
+samples:
+  - name: storage_insights_dataset_config_includes
+    primary_resource_id: config_includes
+    steps:
+    - name: storage_insights_dataset_config_includes
+      config_path: templates/terraform/samples/services/storageinsights/storage_insights_dataset_config_includes.tf.tmpl
+      prefixed_vars:
+        dataset_config_id: my_config_includes
+  - name: storage_insights_dataset_config_excludes
+    primary_resource_id: config_excludes
+    steps:
+    - name: storage_insights_dataset_config_excludes
+      config_path: templates/terraform/samples/services/storageinsights/storage_insights_dataset_config_excludes.tf.tmpl
+      prefixed_vars:
+        dataset_config_id: my_config_excludes
 virtual_fields:
   - name: 'link_dataset'
     type: Boolean

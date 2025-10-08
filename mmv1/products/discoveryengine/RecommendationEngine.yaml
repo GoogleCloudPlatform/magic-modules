@@ -43,17 +43,23 @@ async:
     resource_inside_response: true
 custom_code:
   encoder: 'templates/terraform/encoders/discovery_engine_recommendation_engine_hardcode_solution_type.go.tmpl'
-examples:
-  - name: 'discoveryengine_recommendationengine_generic'
-    primary_resource_id: 'generic'
-    vars:
-      engine_id: 'recommendation-engine-id'
-      data_store_id: 'recommendation-datastore-id'
-  - name: 'discoveryengine_recommendationengine_media'
-    primary_resource_id: 'media'
-    vars:
-      engine_id: 'recommendation-engine-id'
-      data_store_id: 'recommendation-datastore-id'
+samples:
+  - name: discoveryengine_recommendationengine_generic
+    primary_resource_id: generic
+    steps:
+    - name: discoveryengine_recommendationengine_generic
+      config_path: templates/terraform/samples/services/discoveryengine/discoveryengine_recommendationengine_generic.tf.tmpl
+      prefixed_vars:
+        data_store_id: recommendation-datastore-id
+        engine_id: recommendation-engine-id
+  - name: discoveryengine_recommendationengine_media
+    primary_resource_id: media
+    steps:
+    - name: discoveryengine_recommendationengine_media
+      config_path: templates/terraform/samples/services/discoveryengine/discoveryengine_recommendationengine_media.tf.tmpl
+      prefixed_vars:
+        data_store_id: recommendation-datastore-id
+        engine_id: recommendation-engine-id
 parameters:
   - name: 'engineId'
     type: String

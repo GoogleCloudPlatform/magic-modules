@@ -43,91 +43,118 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'database_migration_service_connection_profile_cloudsql'
-    primary_resource_id: 'cloudsqlprofile'
-    vars:
-      sqldb: 'my-database'
-      sqldb_cert: 'my-cert'
-      sqldb_user: 'my-username'
-      sqldb_pass: 'my-password'
-      from_profile: 'my-fromprofileid'
-      to_profile: 'my-toprofileid'
-    ignore_read_extra:
-      - 'mysql.0.password'
-      - 'mysql.0.ssl.0.ca_certificate'
-      - 'mysql.0.ssl.0.client_certificate'
-      - 'mysql.0.ssl.0.client_key'
-  - name: 'database_migration_service_connection_profile_postgres'
-    primary_resource_id: 'postgresprofile'
-    vars:
-      sqldb: 'my-database'
-      sqldb_cert: 'my-cert'
-      sqldb_user: 'my-username'
-      sqldb_pass: 'my-password'
-      profile: 'my-profileid'
-    ignore_read_extra:
-      - 'postgresql.0.password'
-      - 'postgresql.0.ssl.0.ca_certificate'
-      - 'postgresql.0.ssl.0.client_certificate'
-      - 'postgresql.0.ssl.0.client_key'
-  - name: 'database_migration_service_connection_profile_postgres_no_ssl'
-    primary_resource_id: 'postgresprofile'
-    vars:
-      sqldb: 'my-database'
-      sqldb_cert: 'my-cert'
-      sqldb_user: 'my-username'
-      sqldb_pass: 'my-password'
-      profile: 'my-profileid'
-    ignore_read_extra:
-      - 'postgresql.0.password'
-      - 'postgresql.0.ssl.0.ca_certificate'
-      - 'postgresql.0.ssl.0.client_certificate'
-      - 'postgresql.0.ssl.0.client_key'
-  - name: 'database_migration_service_connection_profile_postgres_required_ssl'
-    primary_resource_id: 'postgresprofile'
-    vars:
-      sqldb: 'my-database'
-      sqldb_cert: 'my-cert'
-      sqldb_user: 'my-username'
-      sqldb_pass: 'my-password'
-      profile: 'my-profileid'
-    ignore_read_extra:
-      - 'postgresql.0.password'
-      - 'postgresql.0.ssl.0.ca_certificate'
-      - 'postgresql.0.ssl.0.client_certificate'
-      - 'postgresql.0.ssl.0.client_key'
-  - name: 'database_migration_service_connection_profile_oracle'
-    primary_resource_id: 'oracleprofile'
-    vars:
-      profile: 'my-profileid'
-    ignore_read_extra:
-      - 'oracle.0.password'
+samples:
+  - name: database_migration_service_connection_profile_cloudsql
+    primary_resource_id: cloudsqlprofile
+    steps:
+    - name: database_migration_service_connection_profile_cloudsql
+      config_path: templates/terraform/samples/services/databasemigrationservice/database_migration_service_connection_profile_cloudsql.tf.tmpl
+      prefixed_vars:
+        from_profile: my-fromprofileid
+        sqldb: my-database
+        sqldb_cert: my-cert
+        sqldb_pass: my-password
+        sqldb_user: my-username
+        to_profile: my-toprofileid
+      ignore_read_extra:
+      - mysql.0.password
+      - mysql.0.ssl.0.ca_certificate
+      - mysql.0.ssl.0.client_certificate
+      - mysql.0.ssl.0.client_key
+  - name: database_migration_service_connection_profile_postgres
+    primary_resource_id: postgresprofile
+    steps:
+    - name: database_migration_service_connection_profile_postgres
+      config_path: templates/terraform/samples/services/databasemigrationservice/database_migration_service_connection_profile_postgres.tf.tmpl
+      prefixed_vars:
+        profile: my-profileid
+        sqldb: my-database
+        sqldb_cert: my-cert
+        sqldb_pass: my-password
+        sqldb_user: my-username
+      ignore_read_extra:
+      - postgresql.0.password
+      - postgresql.0.ssl.0.ca_certificate
+      - postgresql.0.ssl.0.client_certificate
+      - postgresql.0.ssl.0.client_key
+  - name: database_migration_service_connection_profile_postgres_no_ssl
+    primary_resource_id: postgresprofile
+    steps:
+    - name: database_migration_service_connection_profile_postgres_no_ssl
+      config_path: templates/terraform/samples/services/databasemigrationservice/database_migration_service_connection_profile_postgres_no_ssl.tf.tmpl
+      prefixed_vars:
+        profile: my-profileid
+        sqldb: my-database
+        sqldb_cert: my-cert
+        sqldb_pass: my-password
+        sqldb_user: my-username
+      ignore_read_extra:
+      - postgresql.0.password
+      - postgresql.0.ssl.0.ca_certificate
+      - postgresql.0.ssl.0.client_certificate
+      - postgresql.0.ssl.0.client_key
+  - name: database_migration_service_connection_profile_postgres_required_ssl
+    primary_resource_id: postgresprofile
+    steps:
+    - name: database_migration_service_connection_profile_postgres_required_ssl
+      config_path: templates/terraform/samples/services/databasemigrationservice/database_migration_service_connection_profile_postgres_required_ssl.tf.tmpl
+      prefixed_vars:
+        profile: my-profileid
+        sqldb: my-database
+        sqldb_cert: my-cert
+        sqldb_pass: my-password
+        sqldb_user: my-username
+      ignore_read_extra:
+      - postgresql.0.password
+      - postgresql.0.ssl.0.ca_certificate
+      - postgresql.0.ssl.0.client_certificate
+      - postgresql.0.ssl.0.client_key
+  - name: database_migration_service_connection_profile_oracle
+    primary_resource_id: oracleprofile
     exclude_test: true
-  - name: 'database_migration_service_connection_profile_alloydb'
-    primary_resource_id: 'alloydbprofile'
-    vars:
-      profile: 'my-profileid'
-      global_address_name: 'private-ip-alloc'
-      network_name: 'vpc-network'
-    ignore_read_extra:
-      - 'alloydb.0.settings.0.initial_user.0.password'
+    steps:
+    - name: database_migration_service_connection_profile_oracle
+      config_path: templates/terraform/samples/services/databasemigrationservice/database_migration_service_connection_profile_oracle.tf.tmpl
+      prefixed_vars:
+        profile: my-profileid
+      ignore_read_extra:
+      - oracle.0.password
+  - name: database_migration_service_connection_profile_alloydb
+    primary_resource_id: alloydbprofile
     exclude_test: true
-  - name: 'database_migration_service_connection_profile_existing_mysql'
-    primary_resource_id: 'existing-mysql'
-    vars:
-      destination_csql: 'destination-csql'
-      destination_cp: 'destination-cp'
-  - name: 'database_migration_service_connection_profile_existing_postgres'
-    primary_resource_id: 'existing-psql'
-    vars:
-      destination_csql: 'destination-csql'
-      destination_cp: 'destination-cp'
-  - name: 'database_migration_service_connection_profile_existing_alloydb'
-    primary_resource_id: 'existing-alloydb'
-    vars:
-      destination_alloydb: 'destination-alloydb'
-      destination_cp: 'destination-cp'
+    steps:
+    - name: database_migration_service_connection_profile_alloydb
+      config_path: templates/terraform/samples/services/databasemigrationservice/database_migration_service_connection_profile_alloydb.tf.tmpl
+      prefixed_vars:
+        global_address_name: private-ip-alloc
+        network_name: vpc-network
+        profile: my-profileid
+      ignore_read_extra:
+      - alloydb.0.settings.0.initial_user.0.password
+  - name: database_migration_service_connection_profile_existing_mysql
+    primary_resource_id: existing-mysql
+    steps:
+    - name: database_migration_service_connection_profile_existing_mysql
+      config_path: templates/terraform/samples/services/databasemigrationservice/database_migration_service_connection_profile_existing_mysql.tf.tmpl
+      prefixed_vars:
+        destination_cp: destination-cp
+        destination_csql: destination-csql
+  - name: database_migration_service_connection_profile_existing_postgres
+    primary_resource_id: existing-psql
+    steps:
+    - name: database_migration_service_connection_profile_existing_postgres
+      config_path: templates/terraform/samples/services/databasemigrationservice/database_migration_service_connection_profile_existing_postgres.tf.tmpl
+      prefixed_vars:
+        destination_cp: destination-cp
+        destination_csql: destination-csql
+  - name: database_migration_service_connection_profile_existing_alloydb
+    primary_resource_id: existing-alloydb
+    steps:
+    - name: database_migration_service_connection_profile_existing_alloydb
+      config_path: templates/terraform/samples/services/databasemigrationservice/database_migration_service_connection_profile_existing_alloydb.tf.tmpl
+      prefixed_vars:
+        destination_alloydb: destination-alloydb
+        destination_cp: destination-cp
 parameters:
   - name: 'connectionProfileId'
     type: String

@@ -47,7 +47,7 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'service'
   base_url: 'v1/projects/{{project}}/locations/{{location}}/services/{{service}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/services/{{service}}'
     - '{{service}}'
@@ -68,94 +68,124 @@ sweeper:
     - region: "us-central1"
     - region: "europe-west1"
     - region: "europe-north1"
-examples:
-  - name: 'cloud_run_service_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    vars:
-      cloud_run_service_name: 'cloudrun-srv'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'cloud_run_service_gpu'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    vars:
-      cloud_run_service_name: 'cloudrun-srv'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'cloud_run_service_sql'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    vars:
-      cloud_run_service_name: 'cloudrun-srv'
-      cloud_run_sql_name: 'cloudrun-sql'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      - 'autogenerate_revision_name'
-  - name: 'cloud_run_service_noauth'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    vars:
-      cloud_run_service_name: 'cloudrun-srv'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'cloud_run_service_multiple_environment_variables'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    vars:
-      cloud_run_service_name: 'cloudrun-srv'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'autogenerate_revision_name'
-    exclude_docs: true
-  - name: 'cloud_run_service_secret_environment_variables'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    vars:
-      cloud_run_service_name: 'cloudrun-srv'
-      secret_id: 'secret'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'autogenerate_revision_name'
-    exclude_docs: true
-  - name: 'cloud_run_service_secret_volumes'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    vars:
-      cloud_run_service_name: 'cloudrun-srv'
-      secret_id: 'secret'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'autogenerate_revision_name'
-    exclude_docs: true
-  - name: 'cloud_run_service_probes'
-    primary_resource_id: 'default'
-    vars:
-      cloud_run_service_name: 'cloudrun-srv'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'cloud_run_service_multicontainer'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      cloud_run_service_name: 'cloudrun-srv'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'cloud_run_service_iap'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    min_version: 'beta'
-    vars:
-      cloud_run_service_name: 'cloudrun-srv'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: cloud_run_service_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])
+    steps:
+    - name: cloud_run_service_basic
+      config_path: templates/terraform/samples/services/cloudrun/cloud_run_service_basic.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-srv
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: cloud_run_service_gpu
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])
+    steps:
+    - name: cloud_run_service_gpu
+      config_path: templates/terraform/samples/services/cloudrun/cloud_run_service_gpu.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-srv
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: cloud_run_service_sql
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])
+    steps:
+    - name: cloud_run_service_sql
+      config_path: templates/terraform/samples/services/cloudrun/cloud_run_service_sql.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-srv
+        cloud_run_sql_name: cloudrun-sql
+        deletion_protection: "true"
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
+      ignore_read_extra:
+      - autogenerate_revision_name
+  - name: cloud_run_service_noauth
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])
+    steps:
+    - name: cloud_run_service_noauth
+      config_path: templates/terraform/samples/services/cloudrun/cloud_run_service_noauth.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-srv
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: cloud_run_service_multiple_environment_variables
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])
+    steps:
+    - name: cloud_run_service_multiple_environment_variables
+      config_path: templates/terraform/samples/services/cloudrun/cloud_run_service_multiple_environment_variables.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-srv
+      test_env_vars:
+        project: PROJECT_NAME
+      ignore_read_extra:
+      - autogenerate_revision_name
+      exclude_docs: true
+  - name: cloud_run_service_secret_environment_variables
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])
+    steps:
+    - name: cloud_run_service_secret_environment_variables
+      config_path: templates/terraform/samples/services/cloudrun/cloud_run_service_secret_environment_variables.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-srv
+        secret_id: secret
+      test_env_vars:
+        project: PROJECT_NAME
+      ignore_read_extra:
+      - autogenerate_revision_name
+      exclude_docs: true
+  - name: cloud_run_service_secret_volumes
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])
+    steps:
+    - name: cloud_run_service_secret_volumes
+      config_path: templates/terraform/samples/services/cloudrun/cloud_run_service_secret_volumes.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-srv
+        secret_id: secret
+      test_env_vars:
+        project: PROJECT_NAME
+      ignore_read_extra:
+      - autogenerate_revision_name
+      exclude_docs: true
+  - name: cloud_run_service_probes
+    primary_resource_id: default
+    steps:
+    - name: cloud_run_service_probes
+      config_path: templates/terraform/samples/services/cloudrun/cloud_run_service_probes.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-srv
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: cloud_run_service_multicontainer
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: cloud_run_service_multicontainer
+      config_path: templates/terraform/samples/services/cloudrun/cloud_run_service_multicontainer.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-srv
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: cloud_run_service_iap
+    min_version: beta
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])
+    steps:
+    - name: cloud_run_service_iap
+      config_path: templates/terraform/samples/services/cloudrun/cloud_run_service_iap.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-srv
+      test_env_vars:
+        project: PROJECT_NAME
 virtual_fields:
   - name: 'autogenerate_revision_name'
     description: |

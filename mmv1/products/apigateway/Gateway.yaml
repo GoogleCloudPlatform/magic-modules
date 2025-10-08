@@ -46,31 +46,37 @@ iam_policy:
   allowed_iam_role: 'roles/apigateway.viewer'
   parent_resource_attribute: 'gateway'
   base_url: 'projects/{{project}}/locations/{{region}}/gateways/{{gateway}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{region}}/gateways/{{gateway}}'
     - '{{project}}/{{region}}/{{gateway}}'
     - '{{region}}/{{gateway}}'
     - '{{gateway}}'
 custom_code:
-examples:
-  - name: 'apigateway_gateway_basic'
-    primary_resource_id: 'api_gw'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-gateway%s", context["random_suffix"])'
-    min_version: 'beta'
-    vars:
-      api_id: 'my-api'
-      config_id: 'my-config'
-      gateway_id: 'my-gateway'
-  - name: 'apigateway_gateway_full'
-    primary_resource_id: 'api_gw'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-gateway%s", context["random_suffix"])'
-    min_version: 'beta'
-    vars:
-      api_id: 'my-api'
-      config_id: 'my-config'
-      gateway_id: 'my-gateway'
-    exclude_docs: true
+samples:
+  - name: apigateway_gateway_basic
+    min_version: beta
+    primary_resource_id: api_gw
+    primary_resource_name: fmt.Sprintf("tf-test-my-gateway%s", context["random_suffix"])
+    steps:
+    - name: apigateway_gateway_basic
+      config_path: templates/terraform/samples/services/apigateway/apigateway_gateway_basic.tf.tmpl
+      prefixed_vars:
+        api_id: my-api
+        config_id: my-config
+        gateway_id: my-gateway
+  - name: apigateway_gateway_full
+    min_version: beta
+    primary_resource_id: api_gw
+    primary_resource_name: fmt.Sprintf("tf-test-my-gateway%s", context["random_suffix"])
+    steps:
+    - name: apigateway_gateway_full
+      config_path: templates/terraform/samples/services/apigateway/apigateway_gateway_full.tf.tmpl
+      prefixed_vars:
+        api_id: my-api
+        config_id: my-config
+        gateway_id: my-gateway
+      exclude_docs: true
 parameters:
   - name: 'region'
     type: String

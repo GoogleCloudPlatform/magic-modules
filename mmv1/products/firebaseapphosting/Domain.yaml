@@ -40,34 +40,37 @@ async:
   check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
   # Errors are on the Domain resource itself
   suppress_error: true
-examples:
+samples:
   - name: firebase_app_hosting_domain_minimal
     primary_resource_id: example
-    vars:
-      backend_id: 'domain-mini'
-      service_act_id: 'sa-id'
-      domain_id: example.com
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      domain_id: '"my-domain-m.com"'
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-domain-m"'
+    steps:
+    - name: firebase_app_hosting_domain_minimal
+      config_path: templates/terraform/samples/services/firebaseapphosting/firebase_app_hosting_domain_minimal.tf.tmpl
+      prefixed_vars:
+        backend_id: domain-mini
+        domain_id: example.com
+        service_act_id: sa-id
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        domain_id: '"my-domain-m.com"'
+        service_act_id: '"tf-test-domain-m"'
   - name: firebase_app_hosting_domain_full
     primary_resource_id: example
-    ignore_read_extra:
-      # This isn't guaranteed to be set right away.
+    steps:
+    - name: firebase_app_hosting_domain_full
+      config_path: templates/terraform/samples/services/firebaseapphosting/firebase_app_hosting_domain_full.tf.tmpl
+      prefixed_vars:
+        backend_id: domain-full
+        domain_id: example.com
+        service_act_id: sa-id
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        domain_id: '"my-domain.com"'
+        service_act_id: '"tf-test-domain"'
+      ignore_read_extra:
       - custom_domain_status
-    vars:
-      backend_id: 'domain-full'
-      service_act_id: 'sa-id'
-      domain_id: example.com
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      domain_id: '"my-domain.com"'
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-domain"'
 autogen_status: RG9tYWlu
 parameters:
   - name: location

@@ -47,12 +47,15 @@ custom_code:
   decoder: 'templates/terraform/decoders/avoid_meaningless_project_update.tmpl'
   pre_delete: 'templates/terraform/pre_delete/modify_delete_url.tmpl'
   post_import: 'templates/terraform/post_import/lien_import.tmpl'
-examples:
-  - name: 'resource_manager_lien'
-    primary_resource_id: 'lien'
-    vars:
-      project_id: 'staging-project'
+samples:
+  - name: resource_manager_lien
+    primary_resource_id: lien
     exclude_test: true
+    steps:
+    - name: resource_manager_lien
+      config_path: templates/terraform/samples/services/resourcemanager/resource_manager_lien.tf.tmpl
+      prefixed_vars:
+        project_id: staging-project
 parameters:
   - name: 'parent'
     type: String

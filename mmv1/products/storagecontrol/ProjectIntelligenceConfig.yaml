@@ -56,14 +56,16 @@ datasource:
   generate: true
   exclude_test: true
 
-examples:
+samples:
   - name: storage_control_project_intelligence_config_basic
     primary_resource_id: example
-    vars:
-      project_id: "test-project"
     exclude_test: true
-    exclude_import_test: true
-
+    steps:
+    - name: storage_control_project_intelligence_config_basic
+      config_path: templates/terraform/samples/services/storagecontrol/storage_control_project_intelligence_config_basic.tf.tmpl
+      prefixed_vars:
+        project_id: test-project
+      exclude_import_test: true
 properties:
   - name: 'name'
     type: String

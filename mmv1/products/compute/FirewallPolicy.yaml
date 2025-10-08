@@ -43,13 +43,16 @@ custom_diff:
   - 'tpgresource.DefaultProviderProject'
 include_in_tgc_next_DO_NOT_USE: true
 tgc_hcl_block_name: 'shortName'
-examples:
-  - name: 'firewall_policy'
-    primary_resource_id: 'default'
-    vars:
-      policy_name: 'my-policy'
-    test_env_vars:
-      org_id: 'ORG_ID'
+samples:
+  - name: firewall_policy
+    primary_resource_id: default
+    steps:
+    - name: firewall_policy
+      config_path: templates/terraform/samples/services/compute/firewall_policy.tf.tmpl
+      prefixed_vars:
+        policy_name: my-policy
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
 properties:
   - name: 'creationTimestamp'

@@ -43,25 +43,34 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'network_services_tls_route_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-tls-route'
-      backend_service_name: 'my-backend-service'
-      http_health_check_name: 'backend-service-health-check'
-  - name: 'network_services_tls_route_mesh_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-tls-route'
-      backend_service_name: 'my-backend-service'
-      http_health_check_name: 'backend-service-health-check'
-  - name: 'network_services_tls_route_gateway_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-tls-route'
-      backend_service_name: 'my-backend-service'
-      http_health_check_name: 'backend-service-health-check'
+samples:
+  - name: network_services_tls_route_basic
+    primary_resource_id: default
+    steps:
+    - name: network_services_tls_route_basic
+      config_path: templates/terraform/samples/services/networkservices/network_services_tls_route_basic.tf.tmpl
+      prefixed_vars:
+        backend_service_name: my-backend-service
+        http_health_check_name: backend-service-health-check
+        resource_name: my-tls-route
+  - name: network_services_tls_route_mesh_basic
+    primary_resource_id: default
+    steps:
+    - name: network_services_tls_route_mesh_basic
+      config_path: templates/terraform/samples/services/networkservices/network_services_tls_route_mesh_basic.tf.tmpl
+      prefixed_vars:
+        backend_service_name: my-backend-service
+        http_health_check_name: backend-service-health-check
+        resource_name: my-tls-route
+  - name: network_services_tls_route_gateway_basic
+    primary_resource_id: default
+    steps:
+    - name: network_services_tls_route_gateway_basic
+      config_path: templates/terraform/samples/services/networkservices/network_services_tls_route_gateway_basic.tf.tmpl
+      prefixed_vars:
+        backend_service_name: my-backend-service
+        http_health_check_name: backend-service-health-check
+        resource_name: my-tls-route
 parameters:
   - name: 'name'
     type: String

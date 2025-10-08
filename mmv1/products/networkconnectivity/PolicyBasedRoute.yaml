@@ -41,18 +41,24 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'network_connectivity_policy_based_route_basic'
-    primary_resource_id: 'default'
-    vars:
-      pbr_name: 'my-pbr'
-      network_name: 'my-network'
-  - name: 'network_connectivity_policy_based_route_full'
-    primary_resource_id: 'default'
-    vars:
-      pbr_name: 'my-pbr'
-      network_name: 'my-network'
-      ilb_name: 'my-ilb'
+samples:
+  - name: network_connectivity_policy_based_route_basic
+    primary_resource_id: default
+    steps:
+    - name: network_connectivity_policy_based_route_basic
+      config_path: templates/terraform/samples/services/networkconnectivity/network_connectivity_policy_based_route_basic.tf.tmpl
+      prefixed_vars:
+        network_name: my-network
+        pbr_name: my-pbr
+  - name: network_connectivity_policy_based_route_full
+    primary_resource_id: default
+    steps:
+    - name: network_connectivity_policy_based_route_full
+      config_path: templates/terraform/samples/services/networkconnectivity/network_connectivity_policy_based_route_full.tf.tmpl
+      prefixed_vars:
+        ilb_name: my-ilb
+        network_name: my-network
+        pbr_name: my-pbr
 parameters:
 properties:
   - name: 'name'

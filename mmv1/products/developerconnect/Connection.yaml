@@ -26,67 +26,119 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/connections/{{connection_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/connections/{{connection_id}}
-examples:
-  - name: 'developer_connect_connection_new'
-    primary_resource_id: 'my-connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-connection-new%s", context["random_suffix"])'
-    vars:
-      connection_name: 'tf-test-connection-new'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: developer_connect_connection_new
+    primary_resource_id: my-connection
+    primary_resource_name: fmt.Sprintf("tf-test-connection-new%s", context["random_suffix"])
     exclude_test: true
-  - name: 'developer_connect_connection_existing_credentials'
-    primary_resource_id: 'my-connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-connection-cred%s", context["random_suffix"])'
-    vars:
-      connection_name: 'tf-test-connection-cred'
-      secret_name: "projects/your-project/secrets/your-secret-id/versions/latest"
-    test_vars_overrides:
-      secret_name: '"projects/devconnect-terraform-creds/secrets/tf-test-do-not-change-github-oauthtoken-e0b9e7/versions/1"'
-  - name: 'developer_connect_connection_existing_installation'
+    steps:
+    - name: developer_connect_connection_new
+      config_path: templates/terraform/samples/services/developerconnect/developer_connect_connection_new.tf.tmpl
+      prefixed_vars:
+        connection_name: tf-test-connection-new
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: developer_connect_connection_existing_credentials
+    primary_resource_id: my-connection
+    primary_resource_name: fmt.Sprintf("tf-test-connection-cred%s", context["random_suffix"])
+    steps:
+    - name: developer_connect_connection_existing_credentials
+      config_path: templates/terraform/samples/services/developerconnect/developer_connect_connection_existing_credentials.tf.tmpl
+      prefixed_vars:
+        connection_name: tf-test-connection-cred
+        secret_name: projects/your-project/secrets/your-secret-id/versions/latest
+      test_vars_overrides:
+        secret_name: '"projects/devconnect-terraform-creds/secrets/tf-test-do-not-change-github-oauthtoken-e0b9e7/versions/1"'
+  - name: developer_connect_connection_existing_installation
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'developer_connect_connection_github'
-    primary_resource_id: 'my-connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
-    vars:
-      connection_name: 'tf-test-connection'
-  - name: 'developer_connect_connection_github_doc'
+    steps:
+    - name: developer_connect_connection_existing_installation
+      config_path: templates/terraform/samples/services/developerconnect/developer_connect_connection_existing_installation.tf.tmpl
+  - name: developer_connect_connection_github
+    primary_resource_id: my-connection
+    primary_resource_name: fmt.Sprintf("tf-test-connection%s", context["random_suffix"])
+    steps:
+    - name: developer_connect_connection_github
+      config_path: templates/terraform/samples/services/developerconnect/developer_connect_connection_github.tf.tmpl
+      prefixed_vars:
+        connection_name: tf-test-connection
+  - name: developer_connect_connection_github_doc
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'developer_connect_connection_github_enterprise'
-    primary_resource_id: 'my-connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
-    vars:
-      connection_name: 'tf-test-connection'
-  - name: 'developer_connect_connection_github_enterprise_doc'
+    steps:
+    - name: developer_connect_connection_github_doc
+      config_path: templates/terraform/samples/services/developerconnect/developer_connect_connection_github_doc.tf.tmpl
+  - name: developer_connect_connection_github_enterprise
+    primary_resource_id: my-connection
+    primary_resource_name: fmt.Sprintf("tf-test-connection%s", context["random_suffix"])
+    steps:
+    - name: developer_connect_connection_github_enterprise
+      config_path: templates/terraform/samples/services/developerconnect/developer_connect_connection_github_enterprise.tf.tmpl
+      prefixed_vars:
+        connection_name: tf-test-connection
+  - name: developer_connect_connection_github_enterprise_doc
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'developer_connect_connection_gitlab'
-    primary_resource_id: 'my-connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
-    vars:
-      connection_name: 'tf-test-connection'
-  - name: 'developer_connect_connection_gitlab_doc'
+    steps:
+    - name: developer_connect_connection_github_enterprise_doc
+      config_path: templates/terraform/samples/services/developerconnect/developer_connect_connection_github_enterprise_doc.tf.tmpl
+  - name: developer_connect_connection_gitlab
+    primary_resource_id: my-connection
+    primary_resource_name: fmt.Sprintf("tf-test-connection%s", context["random_suffix"])
+    steps:
+    - name: developer_connect_connection_gitlab
+      config_path: templates/terraform/samples/services/developerconnect/developer_connect_connection_gitlab.tf.tmpl
+      prefixed_vars:
+        connection_name: tf-test-connection
+  - name: developer_connect_connection_gitlab_doc
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'developer_connect_connection_gitlab_enterprise'
-    primary_resource_id: 'my-connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
-    vars:
-      connection_name: 'tf-test-connection'
-  - name: 'developer_connect_connection_gitlab_enterprise_doc'
+    steps:
+    - name: developer_connect_connection_gitlab_doc
+      config_path: templates/terraform/samples/services/developerconnect/developer_connect_connection_gitlab_doc.tf.tmpl
+  - name: developer_connect_connection_gitlab_enterprise
+    primary_resource_id: my-connection
+    primary_resource_name: fmt.Sprintf("tf-test-connection%s", context["random_suffix"])
+    steps:
+    - name: developer_connect_connection_gitlab_enterprise
+      config_path: templates/terraform/samples/services/developerconnect/developer_connect_connection_gitlab_enterprise.tf.tmpl
+      prefixed_vars:
+        connection_name: tf-test-connection
+  - name: developer_connect_connection_gitlab_enterprise_doc
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'developer_connect_connection_bbc'
-    primary_resource_id: 'my-connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
-    vars:
-      connection_name: 'tf-test-connection'
-  - name: 'developer_connect_connection_bbc_doc'
+    steps:
+    - name: developer_connect_connection_gitlab_enterprise_doc
+      config_path: templates/terraform/samples/services/developerconnect/developer_connect_connection_gitlab_enterprise_doc.tf.tmpl
+  - name: developer_connect_connection_bbc
+    primary_resource_id: my-connection
+    primary_resource_name: fmt.Sprintf("tf-test-connection%s", context["random_suffix"])
+    steps:
+    - name: developer_connect_connection_bbc
+      config_path: templates/terraform/samples/services/developerconnect/developer_connect_connection_bbc.tf.tmpl
+      prefixed_vars:
+        connection_name: tf-test-connection
+  - name: developer_connect_connection_bbc_doc
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'developer_connect_connection_bbdc'
-    primary_resource_id: 'my-connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
-    vars:
-      connection_name: 'tf-test-connection'
-  - name: 'developer_connect_connection_bbdc_doc'
+    steps:
+    - name: developer_connect_connection_bbc_doc
+      config_path: templates/terraform/samples/services/developerconnect/developer_connect_connection_bbc_doc.tf.tmpl
+  - name: developer_connect_connection_bbdc
+    primary_resource_id: my-connection
+    primary_resource_name: fmt.Sprintf("tf-test-connection%s", context["random_suffix"])
+    steps:
+    - name: developer_connect_connection_bbdc
+      config_path: templates/terraform/samples/services/developerconnect/developer_connect_connection_bbdc.tf.tmpl
+      prefixed_vars:
+        connection_name: tf-test-connection
+  - name: developer_connect_connection_bbdc_doc
+    primary_resource_id: ""
     exclude_test: true
+    steps:
+    - name: developer_connect_connection_bbdc_doc
+      config_path: templates/terraform/samples/services/developerconnect/developer_connect_connection_bbdc_doc.tf.tmpl
 autogen_async: true
 async:
   operation:

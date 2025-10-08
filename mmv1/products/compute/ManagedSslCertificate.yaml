@@ -65,22 +65,29 @@ async:
 collection_url_key: 'items'
 custom_code:
   constants: 'templates/terraform/constants/compute_managed_ssl_certificate.go.tmpl'
-examples:
-  - name: 'managed_ssl_certificate_basic'
-    primary_resource_id: 'default'
-    vars:
-      cert_name: 'test-cert'
-      proxy_name: 'test-proxy'
-      url_map_name: 'url-map'
-      backend_service_name: 'backend-service'
-      dns_zone_name: 'dnszone'
-      forwarding_rule_name: 'forwarding-rule'
-      http_health_check_name: 'http-health-check'
-  - name: 'managed_ssl_certificate_recreation'
-    primary_resource_id: 'cert'
-    external_providers: ["random", "time"]
-      # Random provider
+samples:
+  - name: managed_ssl_certificate_basic
+    primary_resource_id: default
+    steps:
+    - name: managed_ssl_certificate_basic
+      config_path: templates/terraform/samples/services/compute/managed_ssl_certificate_basic.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend-service
+        cert_name: test-cert
+        dns_zone_name: dnszone
+        forwarding_rule_name: forwarding-rule
+        http_health_check_name: http-health-check
+        proxy_name: test-proxy
+        url_map_name: url-map
+  - name: managed_ssl_certificate_recreation
     skip_vcr: true
+    external_providers:
+    - random
+    - time
+    primary_resource_id: cert
+    steps:
+    - name: managed_ssl_certificate_recreation
+      config_path: templates/terraform/samples/services/compute/managed_ssl_certificate_recreation.tf.tmpl
 parameters:
 properties:
   - name: 'creationTimestamp'

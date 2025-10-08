@@ -1,0 +1,6 @@
+resource "google_apihub_api_hub_instance" "{{$.PrimaryResourceId}}"{
+    location = "us-central1"
+    config {
+        disable_search = true
+    }
+}

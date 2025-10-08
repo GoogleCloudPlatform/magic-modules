@@ -37,17 +37,20 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'compute_packet_mirroring_full'
-    primary_resource_id: 'foobar'
-    vars:
-      instance_name: 'my-instance'
-      subnetwork_name: 'my-subnetwork'
-      service_name: 'my-service'
-      hc_name: 'my-healthcheck'
-      mirroring_name: 'my-mirroring'
-      ilb_rule_name: 'my-ilb'
-      network_name: 'my-network'
+samples:
+  - name: compute_packet_mirroring_full
+    primary_resource_id: foobar
+    steps:
+    - name: compute_packet_mirroring_full
+      config_path: templates/terraform/samples/services/compute/compute_packet_mirroring_full.tf.tmpl
+      prefixed_vars:
+        hc_name: my-healthcheck
+        ilb_rule_name: my-ilb
+        instance_name: my-instance
+        mirroring_name: my-mirroring
+        network_name: my-network
+        service_name: my-service
+        subnetwork_name: my-subnetwork
 parameters:
 properties:
   - name: 'name'

@@ -22,36 +22,57 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/accountConnectors/{{account_connector_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/accountConnectors/{{account_connector_id}}
-examples:
+samples:
   - name: developer_connect_account_connector_github
-    primary_resource_id: 'my-account-connector'
-    primary_resource_name: 'fmt.Sprintf("tf-test-account-connector%s", context["random_suffix"])'
-    vars:
-      account_connector_name: tf-test-ac
+    primary_resource_id: my-account-connector
+    primary_resource_name: fmt.Sprintf("tf-test-account-connector%s", context["random_suffix"])
+    steps:
+    - name: developer_connect_account_connector_github
+      config_path: templates/terraform/samples/services/developerconnect/developer_connect_account_connector_github.tf.tmpl
+      prefixed_vars:
+        account_connector_name: tf-test-ac
   - name: developer_connect_account_connector_gitlab
-    primary_resource_id: 'my-account-connector'
-    vars:
-      account_connector_name: tf-test-ac
+    primary_resource_id: my-account-connector
+    steps:
+    - name: developer_connect_account_connector_gitlab
+      config_path: templates/terraform/samples/services/developerconnect/developer_connect_account_connector_gitlab.tf.tmpl
+      prefixed_vars:
+        account_connector_name: tf-test-ac
   - name: developer_connect_account_connector_google
-    primary_resource_id: 'my-account-connector'
-    vars:
-      account_connector_name: tf-test-ac
+    primary_resource_id: my-account-connector
+    steps:
+    - name: developer_connect_account_connector_google
+      config_path: templates/terraform/samples/services/developerconnect/developer_connect_account_connector_google.tf.tmpl
+      prefixed_vars:
+        account_connector_name: tf-test-ac
   - name: developer_connect_account_connector_sentry
-    primary_resource_id: 'my-account-connector'
-    vars:
-      account_connector_name: tf-test-ac
+    primary_resource_id: my-account-connector
+    steps:
+    - name: developer_connect_account_connector_sentry
+      config_path: templates/terraform/samples/services/developerconnect/developer_connect_account_connector_sentry.tf.tmpl
+      prefixed_vars:
+        account_connector_name: tf-test-ac
   - name: developer_connect_account_connector_rovo
-    primary_resource_id: 'my-account-connector'
-    vars:
-      account_connector_name: tf-test-ac
+    primary_resource_id: my-account-connector
+    steps:
+    - name: developer_connect_account_connector_rovo
+      config_path: templates/terraform/samples/services/developerconnect/developer_connect_account_connector_rovo.tf.tmpl
+      prefixed_vars:
+        account_connector_name: tf-test-ac
   - name: developer_connect_account_connector_new_relic
-    primary_resource_id: 'my-account-connector'
-    vars:
-      account_connector_name: tf-test-ac
+    primary_resource_id: my-account-connector
+    steps:
+    - name: developer_connect_account_connector_new_relic
+      config_path: templates/terraform/samples/services/developerconnect/developer_connect_account_connector_new_relic.tf.tmpl
+      prefixed_vars:
+        account_connector_name: tf-test-ac
   - name: developer_connect_account_connector_datastax
-    primary_resource_id: 'my-account-connector'
-    vars:
-      account_connector_name: tf-test-ac
+    primary_resource_id: my-account-connector
+    steps:
+    - name: developer_connect_account_connector_datastax
+      config_path: templates/terraform/samples/services/developerconnect/developer_connect_account_connector_datastax.tf.tmpl
+      prefixed_vars:
+        account_connector_name: tf-test-ac
 autogen_async: true
 async:
   operation:

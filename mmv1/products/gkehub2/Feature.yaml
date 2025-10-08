@@ -46,7 +46,7 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/locations/{{location}}/features/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/features/{{name}}'
     - '{{name}}'
@@ -56,59 +56,98 @@ custom_code:
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
 legacy_long_form_project: true
-examples:
-  - name: 'gkehub_feature_multi_cluster_ingress'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("multiclusteringress")'
+samples:
+  - name: gkehub_feature_multi_cluster_ingress
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprint("multiclusteringress")
     exclude_test: true
-  - name: 'gkehub_feature_multi_cluster_service_discovery'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("multiclusterservicediscovery")'
+    steps:
+    - name: gkehub_feature_multi_cluster_ingress
+      config_path: templates/terraform/samples/services/gkehub2/gkehub_feature_multi_cluster_ingress.tf.tmpl
+  - name: gkehub_feature_multi_cluster_service_discovery
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprint("multiclusterservicediscovery")
     exclude_test: true
-  - name: 'gkehub_feature_anthos_service_mesh'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("servicemesh")'
+    steps:
+    - name: gkehub_feature_multi_cluster_service_discovery
+      config_path: templates/terraform/samples/services/gkehub2/gkehub_feature_multi_cluster_service_discovery.tf.tmpl
+  - name: gkehub_feature_anthos_service_mesh
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprint("servicemesh")
     exclude_test: true
-  - name: 'enable_fleet_observability_for_default_logs_with_COPY'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("fleetobservability")'
+    steps:
+    - name: gkehub_feature_anthos_service_mesh
+      config_path: templates/terraform/samples/services/gkehub2/gkehub_feature_anthos_service_mesh.tf.tmpl
+  - name: enable_fleet_observability_for_default_logs_with_COPY
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprint("fleetobservability")
     exclude_test: true
-  - name: 'enable_fleet_observability_for_scope_logs_with_MOVE'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("fleetobservability")'
+    steps:
+    - name: enable_fleet_observability_for_default_logs_with_COPY
+      config_path: templates/terraform/samples/services/gkehub2/enable_fleet_observability_for_default_logs_with_COPY.tf.tmpl
+  - name: enable_fleet_observability_for_scope_logs_with_MOVE
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprint("fleetobservability")
     exclude_test: true
-  - name: 'enable_fleet_observability_for_both_default_and_scope_logs'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("fleetobservability")'
+    steps:
+    - name: enable_fleet_observability_for_scope_logs_with_MOVE
+      config_path: templates/terraform/samples/services/gkehub2/enable_fleet_observability_for_scope_logs_with_MOVE.tf.tmpl
+  - name: enable_fleet_observability_for_both_default_and_scope_logs
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprint("fleetobservability")
     exclude_test: true
-  - name: 'enable_fleet_default_member_config_service_mesh'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprintf("servicemesh")'
+    steps:
+    - name: enable_fleet_observability_for_both_default_and_scope_logs
+      config_path: templates/terraform/samples/services/gkehub2/enable_fleet_observability_for_both_default_and_scope_logs.tf.tmpl
+  - name: enable_fleet_default_member_config_service_mesh
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprintf("servicemesh")
     exclude_test: true
-  - name: 'enable_fleet_default_member_config_configmanagement'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprintf("configmanagement")'
+    steps:
+    - name: enable_fleet_default_member_config_service_mesh
+      config_path: templates/terraform/samples/services/gkehub2/enable_fleet_default_member_config_service_mesh.tf.tmpl
+  - name: enable_fleet_default_member_config_configmanagement
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprintf("configmanagement")
     exclude_test: true
-  - name: 'enable_fleet_default_member_config_policycontroller'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprintf("policycontroller")'
+    steps:
+    - name: enable_fleet_default_member_config_configmanagement
+      config_path: templates/terraform/samples/services/gkehub2/enable_fleet_default_member_config_configmanagement.tf.tmpl
+  - name: enable_fleet_default_member_config_policycontroller
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprintf("policycontroller")
     exclude_test: true
-  - name: 'enable_fleet_default_member_config_policycontroller_full'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprintf("policycontroller")'
+    steps:
+    - name: enable_fleet_default_member_config_policycontroller
+      config_path: templates/terraform/samples/services/gkehub2/enable_fleet_default_member_config_policycontroller.tf.tmpl
+  - name: enable_fleet_default_member_config_policycontroller_full
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprintf("policycontroller")
     exclude_test: true
-  - name: 'enable_fleet_default_member_config_policycontroller_minimal'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprintf("policycontroller")'
+    steps:
+    - name: enable_fleet_default_member_config_policycontroller_full
+      config_path: templates/terraform/samples/services/gkehub2/enable_fleet_default_member_config_policycontroller_full.tf.tmpl
+  - name: enable_fleet_default_member_config_policycontroller_minimal
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprintf("policycontroller")
     exclude_test: true
-  - name: 'gkehub_feature_clusterupgrade'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("clusterupgrade")'
+    steps:
+    - name: enable_fleet_default_member_config_policycontroller_minimal
+      config_path: templates/terraform/samples/services/gkehub2/enable_fleet_default_member_config_policycontroller_minimal.tf.tmpl
+  - name: gkehub_feature_clusterupgrade
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprint("clusterupgrade")
     exclude_test: true
-  - name: 'gkehub_feature_rbacrolebinding_actuation'
-    primary_resource_id: 'feature'
-    primary_resource_name: 'fmt.Sprint("rbacrolebindingactuation")'
+    steps:
+    - name: gkehub_feature_clusterupgrade
+      config_path: templates/terraform/samples/services/gkehub2/gkehub_feature_clusterupgrade.tf.tmpl
+  - name: gkehub_feature_rbacrolebinding_actuation
+    primary_resource_id: feature
+    primary_resource_name: fmt.Sprint("rbacrolebindingactuation")
     exclude_test: true
+    steps:
+    - name: gkehub_feature_rbacrolebinding_actuation
+      config_path: templates/terraform/samples/services/gkehub2/gkehub_feature_rbacrolebinding_actuation.tf.tmpl
 parameters:
   - name: 'location'
     type: String

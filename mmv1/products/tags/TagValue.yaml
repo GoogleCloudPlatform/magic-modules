@@ -46,22 +46,25 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'tag_value'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
 custom_code:
 exclude_tgc: true
 exclude_sweeper: true
-examples:
-  - name: 'tag_value_basic'
-    primary_resource_id: 'value'
-    vars:
-      key_short_name: 'keyname'
-      value_short_name: 'valuename'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    test_vars_overrides:
-      'key_short_name': '"tf-test-key-" + acctest.RandString(t, 10)'
-      'value_short_name': '"tf-test-value-" + acctest.RandString(t, 10)'
+samples:
+  - name: tag_value_basic
+    primary_resource_id: value
     exclude_test: true
+    steps:
+    - name: tag_value_basic
+      config_path: templates/terraform/samples/services/tags/tag_value_basic.tf.tmpl
+      prefixed_vars:
+        key_short_name: keyname
+        value_short_name: valuename
+      test_env_vars:
+        org_id: ORG_ID
+      test_vars_overrides:
+        key_short_name: '"tf-test-key-" + acctest.RandString(t, 10)'
+        value_short_name: '"tf-test-value-" + acctest.RandString(t, 10)'
 parameters:
 properties:
   - name: 'name'

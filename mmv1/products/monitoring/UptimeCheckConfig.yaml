@@ -42,47 +42,65 @@ custom_code:
 error_retry_predicates:
 
   - 'transport_tpg.IsMonitoringConcurrentEditError'
-examples:
-  - name: 'uptime_check_config_http'
-    primary_resource_id: 'http'
-    vars:
-      display_name: 'http-uptime-check'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'uptime_check_config_http_password_wo'
-    primary_resource_id: 'http'
-    vars:
-      display_name: 'http-uptime-check'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'uptime_check_config_status_code'
-    primary_resource_id: 'status_code'
-    vars:
-      display_name: 'http-uptime-check'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'uptime_check_config_https'
-    primary_resource_id: 'https'
-    vars:
-      display_name: 'https-uptime-check'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'uptime_check_tcp'
-    primary_resource_id: 'tcp_group'
-    vars:
-      display_name: 'tcp-uptime-check'
-      group_display_name: 'uptime-check-group'
-  - name: 'uptime_check_config_synthetic_monitor'
-    primary_resource_id: 'synthetic_monitor'
-    vars:
-      display_name: 'synthetic_monitor'
-      function_name: 'synthetic_function'
-      zip_path: 'synthetic-fn-source.zip'
-      bucket_name: 'gcf-source'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'zip_path': '"./test-fixtures/synthetic-fn-source.zip"'
+samples:
+  - name: uptime_check_config_http
+    primary_resource_id: http
+    steps:
+    - name: uptime_check_config_http
+      config_path: templates/terraform/samples/services/monitoring/uptime_check_config_http.tf.tmpl
+      prefixed_vars:
+        display_name: http-uptime-check
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: uptime_check_config_http_password_wo
+    primary_resource_id: http
+    steps:
+    - name: uptime_check_config_http_password_wo
+      config_path: templates/terraform/samples/services/monitoring/uptime_check_config_http_password_wo.tf.tmpl
+      prefixed_vars:
+        display_name: http-uptime-check
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: uptime_check_config_status_code
+    primary_resource_id: status_code
+    steps:
+    - name: uptime_check_config_status_code
+      config_path: templates/terraform/samples/services/monitoring/uptime_check_config_status_code.tf.tmpl
+      prefixed_vars:
+        display_name: http-uptime-check
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: uptime_check_config_https
+    primary_resource_id: https
+    steps:
+    - name: uptime_check_config_https
+      config_path: templates/terraform/samples/services/monitoring/uptime_check_config_https.tf.tmpl
+      prefixed_vars:
+        display_name: https-uptime-check
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: uptime_check_tcp
+    primary_resource_id: tcp_group
+    steps:
+    - name: uptime_check_tcp
+      config_path: templates/terraform/samples/services/monitoring/uptime_check_tcp.tf.tmpl
+      prefixed_vars:
+        display_name: tcp-uptime-check
+        group_display_name: uptime-check-group
+  - name: uptime_check_config_synthetic_monitor
+    primary_resource_id: synthetic_monitor
+    steps:
+    - name: uptime_check_config_synthetic_monitor
+      config_path: templates/terraform/samples/services/monitoring/uptime_check_config_synthetic_monitor.tf.tmpl
+      prefixed_vars:
+        bucket_name: gcf-source
+        display_name: synthetic_monitor
+        function_name: synthetic_function
+        zip_path: synthetic-fn-source.zip
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        zip_path: '"./test-fixtures/synthetic-fn-source.zip"'
 parameters:
 properties:
   - name: 'name'

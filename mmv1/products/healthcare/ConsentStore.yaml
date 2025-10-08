@@ -36,7 +36,7 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'consent_store_id'
   base_url: '{{%dataset}}/consentStores/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   self_link: '{{%dataset}}/consentStores/{{name}}'
   import_format:
     - '{{%dataset}}/consentStores/{{name}}'
@@ -44,24 +44,35 @@ iam_policy:
 custom_code:
 # Skipping the sweeper since this is a fine-grained resource under dataset
 exclude_sweeper: true
-examples:
-  - name: 'healthcare_consent_store_basic'
-    primary_resource_id: 'my-consent'
-    primary_resource_name: ' fmt.Sprintf("projects/%s/locations/%s/datasets/tf-test-my-dataset%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), context["random_suffix"]), fmt.Sprintf("tf-test-my-consent-store%s", context["random_suffix"])'
-    vars:
-      dataset_id: 'my-dataset'
-      consent_id: 'my-consent-store'
-  - name: 'healthcare_consent_store_full'
-    primary_resource_id: 'my-consent'
-    vars:
-      dataset_id: 'my-dataset'
-      consent_id: 'my-consent-store'
-  - name: 'healthcare_consent_store_iam'
-    primary_resource_id: 'my-consent'
-    vars:
-      dataset_id: 'my-dataset'
-      account_id: 'my-account'
-      consent_id: 'my-consent-store'
+samples:
+  - name: healthcare_consent_store_basic
+    primary_resource_id: my-consent
+    primary_resource_name: ' fmt.Sprintf("projects/%s/locations/%s/datasets/tf-test-my-dataset%s",
+      envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), context["random_suffix"]),
+      fmt.Sprintf("tf-test-my-consent-store%s", context["random_suffix"])'
+    steps:
+    - name: healthcare_consent_store_basic
+      config_path: templates/terraform/samples/services/healthcare/healthcare_consent_store_basic.tf.tmpl
+      prefixed_vars:
+        consent_id: my-consent-store
+        dataset_id: my-dataset
+  - name: healthcare_consent_store_full
+    primary_resource_id: my-consent
+    steps:
+    - name: healthcare_consent_store_full
+      config_path: templates/terraform/samples/services/healthcare/healthcare_consent_store_full.tf.tmpl
+      prefixed_vars:
+        consent_id: my-consent-store
+        dataset_id: my-dataset
+  - name: healthcare_consent_store_iam
+    primary_resource_id: my-consent
+    steps:
+    - name: healthcare_consent_store_iam
+      config_path: templates/terraform/samples/services/healthcare/healthcare_consent_store_iam.tf.tmpl
+      prefixed_vars:
+        account_id: my-account
+        consent_id: my-consent-store
+        dataset_id: my-dataset
 parameters:
   - name: 'dataset'
     type: ResourceRef

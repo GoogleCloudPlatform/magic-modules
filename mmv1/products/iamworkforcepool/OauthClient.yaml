@@ -40,11 +40,14 @@ custom_code:
   post_update: "templates/terraform/post_create/sleep.go.tmpl"
   post_delete: "templates/terraform/post_create/sleep.go.tmpl"
 exclude_sweeper: true
-examples:
-  - name: "iam_oauth_client_full"
-    primary_resource_id: "example"
-    vars:
-      oauth_client_id: "example-client-id"
+samples:
+  - name: iam_oauth_client_full
+    primary_resource_id: example
+    steps:
+    - name: iam_oauth_client_full
+      config_path: templates/terraform/samples/services/iamworkforcepool/iam_oauth_client_full.tf.tmpl
+      prefixed_vars:
+        oauth_client_id: example-client-id
 parameters:
   - name: location
     type: String

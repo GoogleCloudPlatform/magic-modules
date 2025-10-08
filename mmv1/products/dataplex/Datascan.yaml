@@ -52,60 +52,81 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'data_scan_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}'
     - '{{data_scan_id}}'
 custom_code:
-examples:
-  - name: 'dataplex_datascan_basic_profile'
-    primary_resource_id: 'basic_profile'
-    primary_resource_name: 'fmt.Sprintf("tf-test-dataprofile-basic%s", context["random_suffix"])'
-    vars:
-      datascan_name: 'dataprofile-basic'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-  - name: 'dataplex_datascan_full_profile'
-    primary_resource_id: 'full_profile'
-    vars:
-      dataset_name: 'dataplex_dataset'
-      datascan_name: 'dataprofile-full'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-  - name: 'dataplex_datascan_basic_quality'
-    primary_resource_id: 'basic_quality'
-    vars:
-      datascan_name: 'dataquality-basic'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-  - name: 'dataplex_datascan_full_quality'
-    primary_resource_id: 'full_quality'
-    vars:
-      datascan_name: 'dataquality-full'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
+samples:
+  - name: dataplex_datascan_basic_profile
+    primary_resource_id: basic_profile
+    primary_resource_name: fmt.Sprintf("tf-test-dataprofile-basic%s", context["random_suffix"])
+    steps:
+    - name: dataplex_datascan_basic_profile
+      config_path: templates/terraform/samples/services/dataplex/dataplex_datascan_basic_profile.tf.tmpl
+      prefixed_vars:
+        datascan_name: dataprofile-basic
+      test_env_vars:
+        project_name: PROJECT_NAME
+  - name: dataplex_datascan_full_profile
+    primary_resource_id: full_profile
+    steps:
+    - name: dataplex_datascan_full_profile
+      config_path: templates/terraform/samples/services/dataplex/dataplex_datascan_full_profile.tf.tmpl
+      prefixed_vars:
+        datascan_name: dataprofile-full
+        dataset_name: dataplex_dataset
+      test_env_vars:
+        project_name: PROJECT_NAME
+  - name: dataplex_datascan_basic_quality
+    primary_resource_id: basic_quality
+    steps:
+    - name: dataplex_datascan_basic_quality
+      config_path: templates/terraform/samples/services/dataplex/dataplex_datascan_basic_quality.tf.tmpl
+      prefixed_vars:
+        datascan_name: dataquality-basic
+      test_env_vars:
+        project_name: PROJECT_NAME
+  - name: dataplex_datascan_full_quality
+    primary_resource_id: full_quality
     exclude_test: true
-  - name: 'dataplex_datascan_full_quality_test'
-    primary_resource_id: 'full_quality_test'
-    vars:
-      datascan_name: 'dataquality-full-test'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-    exclude_docs: true
-  - name: 'dataplex_datascan_basic_discovery'
-    primary_resource_id: 'basic_discovery'
-    vars:
-      datascan_name: 'datadiscovery-basic'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-      location: 'REGION'
-  - name: 'dataplex_datascan_full_discovery'
-    primary_resource_id: 'full_discovery'
-    vars:
-      datascan_name: 'datadiscovery-full'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-      location: 'REGION'
+    steps:
+    - name: dataplex_datascan_full_quality
+      config_path: templates/terraform/samples/services/dataplex/dataplex_datascan_full_quality.tf.tmpl
+      prefixed_vars:
+        datascan_name: dataquality-full
+      test_env_vars:
+        project_name: PROJECT_NAME
+  - name: dataplex_datascan_full_quality_test
+    primary_resource_id: full_quality_test
+    steps:
+    - name: dataplex_datascan_full_quality_test
+      config_path: templates/terraform/samples/services/dataplex/dataplex_datascan_full_quality_test.tf.tmpl
+      prefixed_vars:
+        datascan_name: dataquality-full-test
+      test_env_vars:
+        project_name: PROJECT_NAME
+      exclude_docs: true
+  - name: dataplex_datascan_basic_discovery
+    primary_resource_id: basic_discovery
+    steps:
+    - name: dataplex_datascan_basic_discovery
+      config_path: templates/terraform/samples/services/dataplex/dataplex_datascan_basic_discovery.tf.tmpl
+      prefixed_vars:
+        datascan_name: datadiscovery-basic
+      test_env_vars:
+        location: REGION
+        project_name: PROJECT_NAME
+  - name: dataplex_datascan_full_discovery
+    primary_resource_id: full_discovery
+    steps:
+    - name: dataplex_datascan_full_discovery
+      config_path: templates/terraform/samples/services/dataplex/dataplex_datascan_full_discovery.tf.tmpl
+      prefixed_vars:
+        datascan_name: datadiscovery-full
+      test_env_vars:
+        location: REGION
+        project_name: PROJECT_NAME
 parameters:
   - name: 'location'
     type: String

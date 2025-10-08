@@ -47,27 +47,30 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "us-west1"
-examples:
-  - name: 'network_services_authz_policy_advanced'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-authz-policy'
-      network_name: 'lb-network'
-      subnet_name: 'backend-subnet'
-      proxy_subnet_name: 'proxy-only-subnet'
-      address_name: 'l7-ilb-ip-address'
-      health_check_name: 'l7-ilb-basic-check'
-      backend_url_name: 'l7-ilb-backend-service'
-      url_name: 'l7-ilb-map'
-      target_proxy_name: 'l7-ilb-proxy'
-      forwarding_rule_name: 'l7-ilb-forwarding-rule'
-      callouts_instance_name: 'l7-ilb-callouts-ins'
-      callouts_instance_group_name: 'l7-ilb-callouts-ins-group'
-      callouts_health_check_name: 'l7-ilb-callouts-healthcheck'
-      backend_authz_name: 'authz-service'
-      authz_extension_name: 'my-authz-ext'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: network_services_authz_policy_advanced
+    primary_resource_id: default
+    steps:
+    - name: network_services_authz_policy_advanced
+      config_path: templates/terraform/samples/services/networksecurity/network_services_authz_policy_advanced.tf.tmpl
+      prefixed_vars:
+        address_name: l7-ilb-ip-address
+        authz_extension_name: my-authz-ext
+        backend_authz_name: authz-service
+        backend_url_name: l7-ilb-backend-service
+        callouts_health_check_name: l7-ilb-callouts-healthcheck
+        callouts_instance_group_name: l7-ilb-callouts-ins-group
+        callouts_instance_name: l7-ilb-callouts-ins
+        forwarding_rule_name: l7-ilb-forwarding-rule
+        health_check_name: l7-ilb-basic-check
+        network_name: lb-network
+        proxy_subnet_name: proxy-only-subnet
+        resource_name: my-authz-policy
+        subnet_name: backend-subnet
+        target_proxy_name: l7-ilb-proxy
+        url_name: l7-ilb-map
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
   - name: 'name'
     type: String

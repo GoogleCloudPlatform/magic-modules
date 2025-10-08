@@ -44,19 +44,25 @@ async:
     resource_inside_response: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/discoveryengine_targetsite_set_id.go.tmpl'
-examples:
-  - name: 'discoveryengine_targetsite_basic'
-    primary_resource_id: 'basic'
-    vars:
-      data_store_id: 'data-store-id'
-    ignore_read_extra:
-      - 'project'
-  - name: 'discoveryengine_targetsite_advanced'
-    primary_resource_id: 'advanced'
-    vars:
-      data_store_id: 'data-store-id'
-    ignore_read_extra:
-      - 'project'
+samples:
+  - name: discoveryengine_targetsite_basic
+    primary_resource_id: basic
+    steps:
+    - name: discoveryengine_targetsite_basic
+      config_path: templates/terraform/samples/services/discoveryengine/discoveryengine_targetsite_basic.tf.tmpl
+      prefixed_vars:
+        data_store_id: data-store-id
+      ignore_read_extra:
+      - project
+  - name: discoveryengine_targetsite_advanced
+    primary_resource_id: advanced
+    steps:
+    - name: discoveryengine_targetsite_advanced
+      config_path: templates/terraform/samples/services/discoveryengine/discoveryengine_targetsite_advanced.tf.tmpl
+      prefixed_vars:
+        data_store_id: data-store-id
+      ignore_read_extra:
+      - project
 parameters:
   - name: 'location'
     type: String

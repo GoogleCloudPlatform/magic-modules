@@ -41,19 +41,22 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'scc_folder_big_query_export_config_basic'
-    primary_resource_id: 'custom_big_query_export_config'
-    vars:
-      big_query_export_id: 'my-export'
-      dataset: 'my-dataset'
-      dataset_id: 'my_dataset_id'
-      name: 'my-export'
-      folder_display_name: 'folder-name'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      project: 'PROJECT_NAME'
+samples:
+  - name: scc_folder_big_query_export_config_basic
+    primary_resource_id: custom_big_query_export_config
     exclude_test: true
+    steps:
+    - name: scc_folder_big_query_export_config_basic
+      config_path: templates/terraform/samples/services/securitycenter/scc_folder_big_query_export_config_basic.tf.tmpl
+      prefixed_vars:
+        big_query_export_id: my-export
+        dataset: my-dataset
+        dataset_id: my_dataset_id
+        folder_display_name: folder-name
+        name: my-export
+      test_env_vars:
+        org_id: ORG_ID
+        project: PROJECT_NAME
 parameters:
   - name: 'folder'
     type: String

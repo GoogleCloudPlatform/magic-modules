@@ -38,159 +38,215 @@ async:
 collection_url_key: 'items'
 include_in_tgc_next_DO_NOT_USE: true
 custom_code:
-examples:
-  - name: 'url_map_bucket_and_service'
-    primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      login_backend_service_name: 'login'
-      http_health_check_name: 'health-check'
-      backend_bucket_name: 'static-asset-backend-bucket'
-      storage_bucket_name: 'static-asset-bucket'
-  - name: 'url_map_traffic_director_route'
-    primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      home_backend_service_name: 'home'
-      health_check_name: 'health-check'
+samples:
+  - name: url_map_bucket_and_service
+    primary_resource_id: urlmap
+    steps:
+    - name: url_map_bucket_and_service
+      config_path: templates/terraform/samples/services/compute/url_map_bucket_and_service.tf.tmpl
+      prefixed_vars:
+        backend_bucket_name: static-asset-backend-bucket
+        http_health_check_name: health-check
+        login_backend_service_name: login
+        storage_bucket_name: static-asset-bucket
+        url_map_name: urlmap
+  - name: url_map_traffic_director_route
+    primary_resource_id: urlmap
+    steps:
+    - name: url_map_traffic_director_route
+      config_path: templates/terraform/samples/services/compute/url_map_traffic_director_route.tf.tmpl
+      prefixed_vars:
+        health_check_name: health-check
+        home_backend_service_name: home
+        url_map_name: urlmap
     tgc_test_ignore_extra:
-      - 'path_matcher.route_rules.url_redirect.https_redirect'
-  - name: 'url_map_traffic_director_route_partial'
-    primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      home_backend_service_name: 'home'
-      health_check_name: 'health-check'
-  - name: 'url_map_traffic_director_path'
-    primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      home_backend_service_name: 'home'
-      health_check_name: 'health-check'
-  - name: 'url_map_traffic_director_path_partial'
-    primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      home_backend_service_name: 'home'
-      health_check_name: 'health-check'
-  - name: 'url_map_header_based_routing'
-    primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      default_backend_service_name: 'default'
-      service_a_backend_service_name: 'service-a'
-      service_b_backend_service_name: 'service-b'
-      health_check_name: 'health-check'
-  - name: 'url_map_parameter_based_routing'
-    primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      default_backend_service_name: 'default'
-      service_a_backend_service_name: 'service-a'
-      service_b_backend_service_name: 'service-b'
-      health_check_name: 'health-check'
-  - name: 'url_map_default_mirror_percent'
-    primary_resource_id: 'urlmap'
-    min_version: 'beta'
-    vars:
-      url_map_name: 'urlmap'
-      home_backend_service_name: 'home'
-      mirror_backend_service_name: 'mirror'
-      health_check_name: 'health-check'
-  - name: 'url_map_path_matcher_default_mirror_percent'
-    primary_resource_id: 'urlmap'
-    min_version: 'beta'
-    vars:
-      url_map_name: 'urlmap'
-      home_backend_service_name: 'home'
-      mirror_backend_service_name: 'mirror'
-      health_check_name: 'health-check'
-  - name: 'url_map_path_rule_mirror_percent'
-    primary_resource_id: 'urlmap'
-    min_version: 'beta'
-    vars:
-      url_map_name: 'urlmap'
-      home_backend_service_name: 'home'
-      mirror_backend_service_name: 'mirror'
-      health_check_name: 'health-check'
-  - name: 'url_map_route_rule_mirror_percent'
-    primary_resource_id: 'urlmap'
-    min_version: 'beta'
-    vars:
-      url_map_name: 'urlmap'
-      home_backend_service_name: 'home'
-      mirror_backend_service_name: 'mirror'
-      health_check_name: 'health-check'
-  - name: 'url_map_test_headers'
-    primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      backend_service_name: 'backend'
-      health_check_name: 'health-check'
-  - name: 'url_map_test_expected_output_url'
-    primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      backend_service_name: 'backend'
-      health_check_name: 'health-check'
-  - name: 'url_map_test_redirect_response_code'
-    primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      backend_service_name: 'backend'
-      health_check_name: 'health-check'
-  - name: 'external_http_lb_mig_backend'
-    primary_resource_id: 'default'
-    vars:
-      lb_backend_template: 'lb-backend-template'
-      lb_backend_example: 'lb-backend-example'
-      fw_allow_health_check: 'fw-allow-health-check'
-      lb_ipv4_1: 'lb-ipv4-1'
-      http_basic_check: 'http-basic-check'
-      web_backend_service: 'web-backend-service'
-      web_map_http: 'web-map-http'
-      http_lb_proxy: 'http-lb-proxy'
-      http_content_rule: 'http-content-rule'
-    ignore_read_extra:
-      - 'metadata'
-      - 'metadata_startup_script'
- # Very similar to external_http_lb_mig_backend_custom_header
+    - path_matcher.route_rules.url_redirect.https_redirect
+  - name: url_map_traffic_director_route_partial
+    primary_resource_id: urlmap
+    steps:
+    - name: url_map_traffic_director_route_partial
+      config_path: templates/terraform/samples/services/compute/url_map_traffic_director_route_partial.tf.tmpl
+      prefixed_vars:
+        health_check_name: health-check
+        home_backend_service_name: home
+        url_map_name: urlmap
+  - name: url_map_traffic_director_path
+    primary_resource_id: urlmap
+    steps:
+    - name: url_map_traffic_director_path
+      config_path: templates/terraform/samples/services/compute/url_map_traffic_director_path.tf.tmpl
+      prefixed_vars:
+        health_check_name: health-check
+        home_backend_service_name: home
+        url_map_name: urlmap
+  - name: url_map_traffic_director_path_partial
+    primary_resource_id: urlmap
+    steps:
+    - name: url_map_traffic_director_path_partial
+      config_path: templates/terraform/samples/services/compute/url_map_traffic_director_path_partial.tf.tmpl
+      prefixed_vars:
+        health_check_name: health-check
+        home_backend_service_name: home
+        url_map_name: urlmap
+  - name: url_map_header_based_routing
+    primary_resource_id: urlmap
+    steps:
+    - name: url_map_header_based_routing
+      config_path: templates/terraform/samples/services/compute/url_map_header_based_routing.tf.tmpl
+      prefixed_vars:
+        default_backend_service_name: default
+        health_check_name: health-check
+        service_a_backend_service_name: service-a
+        service_b_backend_service_name: service-b
+        url_map_name: urlmap
+  - name: url_map_parameter_based_routing
+    primary_resource_id: urlmap
+    steps:
+    - name: url_map_parameter_based_routing
+      config_path: templates/terraform/samples/services/compute/url_map_parameter_based_routing.tf.tmpl
+      prefixed_vars:
+        default_backend_service_name: default
+        health_check_name: health-check
+        service_a_backend_service_name: service-a
+        service_b_backend_service_name: service-b
+        url_map_name: urlmap
+  - name: url_map_default_mirror_percent
+    min_version: beta
+    primary_resource_id: urlmap
+    steps:
+    - name: url_map_default_mirror_percent
+      config_path: templates/terraform/samples/services/compute/url_map_default_mirror_percent.tf.tmpl
+      prefixed_vars:
+        health_check_name: health-check
+        home_backend_service_name: home
+        mirror_backend_service_name: mirror
+        url_map_name: urlmap
+  - name: url_map_path_matcher_default_mirror_percent
+    min_version: beta
+    primary_resource_id: urlmap
+    steps:
+    - name: url_map_path_matcher_default_mirror_percent
+      config_path: templates/terraform/samples/services/compute/url_map_path_matcher_default_mirror_percent.tf.tmpl
+      prefixed_vars:
+        health_check_name: health-check
+        home_backend_service_name: home
+        mirror_backend_service_name: mirror
+        url_map_name: urlmap
+  - name: url_map_path_rule_mirror_percent
+    min_version: beta
+    primary_resource_id: urlmap
+    steps:
+    - name: url_map_path_rule_mirror_percent
+      config_path: templates/terraform/samples/services/compute/url_map_path_rule_mirror_percent.tf.tmpl
+      prefixed_vars:
+        health_check_name: health-check
+        home_backend_service_name: home
+        mirror_backend_service_name: mirror
+        url_map_name: urlmap
+  - name: url_map_route_rule_mirror_percent
+    min_version: beta
+    primary_resource_id: urlmap
+    steps:
+    - name: url_map_route_rule_mirror_percent
+      config_path: templates/terraform/samples/services/compute/url_map_route_rule_mirror_percent.tf.tmpl
+      prefixed_vars:
+        health_check_name: health-check
+        home_backend_service_name: home
+        mirror_backend_service_name: mirror
+        url_map_name: urlmap
+  - name: url_map_test_headers
+    primary_resource_id: urlmap
+    steps:
+    - name: url_map_test_headers
+      config_path: templates/terraform/samples/services/compute/url_map_test_headers.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend
+        health_check_name: health-check
+        url_map_name: urlmap
+  - name: url_map_test_expected_output_url
+    primary_resource_id: urlmap
+    steps:
+    - name: url_map_test_expected_output_url
+      config_path: templates/terraform/samples/services/compute/url_map_test_expected_output_url.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend
+        health_check_name: health-check
+        url_map_name: urlmap
+  - name: url_map_test_redirect_response_code
+    primary_resource_id: urlmap
+    steps:
+    - name: url_map_test_redirect_response_code
+      config_path: templates/terraform/samples/services/compute/url_map_test_redirect_response_code.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend
+        health_check_name: health-check
+        url_map_name: urlmap
+  - name: external_http_lb_mig_backend
+    primary_resource_id: default
     exclude_test: true
-    exclude_docs: true
-  - name: 'url_map_path_template_match'
-    primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      cart_backend_service_name: 'cart-service'
-      user_backend_service_name: 'user-service'
-      http_health_check_name: 'health-check'
-      backend_bucket_name: 'static-asset-backend-bucket'
-      storage_bucket_name: 'static-asset-bucket'
-  - name: 'url_map_custom_error_response_policy'
-    primary_resource_id: 'urlmap'
-    vars:
-      url_map_name: 'urlmap'
-      backend_service_name: 'login'
-      http_health_check_name: 'health-check'
-      storage_bucket_name: 'static-asset-bucket'
-      error_backend_bucket_name: 'error-backend-bucket'
-  - name: 'url_map_http_filter_configs'
-    primary_resource_id: 'urlmap'
-    min_version: 'beta'
-    vars:
-      url_map_name: 'urlmap'
-      default_backend_service_name: 'default-backend'
-      service_a_backend_service_name: 'service-a-backend'
-      health_check_name: 'health-check'
-  - name: 'url_map_http_filter_metadata'
-    primary_resource_id: 'urlmap'
-    min_version: 'beta'
-    vars:
-      url_map_name: 'urlmap'
-      default_backend_service_name: 'default-backend'
-      service_a_backend_service_name: 'service-a-backend'
-      service_b_backend_service_name: 'service-b-backend'
-      health_check_name: 'health-check'
+    steps:
+    - name: external_http_lb_mig_backend
+      config_path: templates/terraform/samples/services/compute/external_http_lb_mig_backend.tf.tmpl
+      prefixed_vars:
+        fw_allow_health_check: fw-allow-health-check
+        http_basic_check: http-basic-check
+        http_content_rule: http-content-rule
+        http_lb_proxy: http-lb-proxy
+        lb_backend_example: lb-backend-example
+        lb_backend_template: lb-backend-template
+        lb_ipv4_1: lb-ipv4-1
+        web_backend_service: web-backend-service
+        web_map_http: web-map-http
+      ignore_read_extra:
+      - metadata
+      - metadata_startup_script
+      exclude_docs: true
+  - name: url_map_path_template_match
+    primary_resource_id: urlmap
+    steps:
+    - name: url_map_path_template_match
+      config_path: templates/terraform/samples/services/compute/url_map_path_template_match.tf.tmpl
+      prefixed_vars:
+        backend_bucket_name: static-asset-backend-bucket
+        cart_backend_service_name: cart-service
+        http_health_check_name: health-check
+        storage_bucket_name: static-asset-bucket
+        url_map_name: urlmap
+        user_backend_service_name: user-service
+  - name: url_map_custom_error_response_policy
+    primary_resource_id: urlmap
+    steps:
+    - name: url_map_custom_error_response_policy
+      config_path: templates/terraform/samples/services/compute/url_map_custom_error_response_policy.tf.tmpl
+      prefixed_vars:
+        backend_service_name: login
+        error_backend_bucket_name: error-backend-bucket
+        http_health_check_name: health-check
+        storage_bucket_name: static-asset-bucket
+        url_map_name: urlmap
+  - name: url_map_http_filter_configs
+    min_version: beta
+    primary_resource_id: urlmap
+    steps:
+    - name: url_map_http_filter_configs
+      config_path: templates/terraform/samples/services/compute/url_map_http_filter_configs.tf.tmpl
+      prefixed_vars:
+        default_backend_service_name: default-backend
+        health_check_name: health-check
+        service_a_backend_service_name: service-a-backend
+        url_map_name: urlmap
+  - name: url_map_http_filter_metadata
+    min_version: beta
+    primary_resource_id: urlmap
+    steps:
+    - name: url_map_http_filter_metadata
+      config_path: templates/terraform/samples/services/compute/url_map_http_filter_metadata.tf.tmpl
+      prefixed_vars:
+        default_backend_service_name: default-backend
+        health_check_name: health-check
+        service_a_backend_service_name: service-a-backend
+        service_b_backend_service_name: service-b-backend
+        url_map_name: urlmap
 parameters:
 properties:
   - name: 'creationTimestamp'

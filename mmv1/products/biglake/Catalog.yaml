@@ -32,11 +32,14 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "US"
-examples:
-  - name: 'bigquery_biglake_catalog'
-    primary_resource_id: 'default'
-    vars:
-      name: 'my_catalog'
+samples:
+  - name: bigquery_biglake_catalog
+    primary_resource_id: default
+    steps:
+    - name: bigquery_biglake_catalog
+      config_path: templates/terraform/samples/services/biglake/bigquery_biglake_catalog.tf.tmpl
+      prefixed_vars:
+        name: my_catalog
 parameters:
   - name: 'location'
     type: String

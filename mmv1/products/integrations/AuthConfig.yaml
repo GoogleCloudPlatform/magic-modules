@@ -44,76 +44,105 @@ sweeper:
     - region: "us-east4"
     - region: "southamerica-west1"
     - region: "asia-east2"
-examples:
-  - name: 'integrations_auth_config_basic'
-    primary_resource_id: 'basic_example'
-    vars:
-      auth_config_name: 'test-authconfig'
- # This is already part of other examples.
+samples:
+  - name: integrations_auth_config_basic
+    primary_resource_id: basic_example
     exclude_test: true
-  - name: 'integrations_auth_config_advance'
-    primary_resource_id: 'advance_example'
-    vars:
-      auth_config_name: 'test-authconfig'
-    exclude_docs: true
-  - name: 'integrations_auth_config_username_and_password'
-    primary_resource_id: 'username_and_password_example'
-    vars:
-      auth_config_name: 'test-authconfig-username-and-password'
-    test_vars_overrides:
-      client: 'acctest.BootstrapIntegrationsClient(t, "us-east4")'
-    exclude_docs: true
-  - name: 'integrations_auth_config_oauth2_authorization_code'
-    primary_resource_id: 'oauth2_authotization_code_example'
-    vars:
-      auth_config_name: 'test-authconfig-oauth2-authorization-code'
-    test_vars_overrides:
-      client: 'acctest.BootstrapIntegrationsClient(t, "us-east4")'
-    exclude_docs: true
-  - name: 'integrations_auth_config_oauth2_client_credentials'
-    primary_resource_id: 'oauth2_client_credentials_example'
-    vars:
-      auth_config_name: 'test-authconfig-oauth2-client-credentials'
-    test_vars_overrides:
-      client: 'acctest.BootstrapIntegrationsClient(t, "us-east4")'
-    exclude_docs: true
-  - name: 'integrations_auth_config_jwt'
-    primary_resource_id: 'jwt_example'
-    vars:
-      auth_config_name: 'test-authconfig-jwt'
-    test_vars_overrides:
-      client: 'acctest.BootstrapIntegrationsClient(t, "us-east4")'
-    exclude_docs: true
-  - name: 'integrations_auth_config_auth_token'
-    primary_resource_id: 'auth_token_example'
-    vars:
-      auth_config_name: 'test-authconfig-auth-token'
-    test_vars_overrides:
-      client: 'acctest.BootstrapIntegrationsClient(t, "us-east4")'
-    exclude_docs: true
-  - name: 'integrations_auth_config_service_account'
-    primary_resource_id: 'service_account_example'
-    vars:
-      auth_config_name: 'test-authconfig-service-account'
-      service_account_id: 'sa'
-    test_vars_overrides:
-      client: 'acctest.BootstrapIntegrationsClient(t, "us-east4")'
-    exclude_docs: true
-  - name: 'integrations_auth_config_oidc_token'
-    primary_resource_id: 'oidc_token_example'
-    vars:
-      auth_config_name: 'test-authconfig-oidc-token'
-      service_account_id: 'sa'
-    test_vars_overrides:
-      client: 'acctest.BootstrapIntegrationsClient(t, "us-east4")'
-    exclude_docs: true
-  - name: 'integrations_auth_config_client_certificate_only'
-    primary_resource_id: 'client_certificate_example'
-    vars:
-      auth_config_name: 'test-authconfig-client-certificate'
-    test_vars_overrides:
-      client: 'acctest.BootstrapIntegrationsClient(t, "us-east4")'
-    exclude_docs: true
+    steps:
+    - name: integrations_auth_config_basic
+      config_path: templates/terraform/samples/services/integrations/integrations_auth_config_basic.tf.tmpl
+      prefixed_vars:
+        auth_config_name: test-authconfig
+  - name: integrations_auth_config_advance
+    primary_resource_id: advance_example
+    steps:
+    - name: integrations_auth_config_advance
+      config_path: templates/terraform/samples/services/integrations/integrations_auth_config_advance.tf.tmpl
+      prefixed_vars:
+        auth_config_name: test-authconfig
+      exclude_docs: true
+  - name: integrations_auth_config_username_and_password
+    primary_resource_id: username_and_password_example
+    steps:
+    - name: integrations_auth_config_username_and_password
+      config_path: templates/terraform/samples/services/integrations/integrations_auth_config_username_and_password.tf.tmpl
+      prefixed_vars:
+        auth_config_name: test-authconfig-username-and-password
+      test_vars_overrides:
+        client: acctest.BootstrapIntegrationsClient(t, "us-east4")
+      exclude_docs: true
+  - name: integrations_auth_config_oauth2_authorization_code
+    primary_resource_id: oauth2_authotization_code_example
+    steps:
+    - name: integrations_auth_config_oauth2_authorization_code
+      config_path: templates/terraform/samples/services/integrations/integrations_auth_config_oauth2_authorization_code.tf.tmpl
+      prefixed_vars:
+        auth_config_name: test-authconfig-oauth2-authorization-code
+      test_vars_overrides:
+        client: acctest.BootstrapIntegrationsClient(t, "us-east4")
+      exclude_docs: true
+  - name: integrations_auth_config_oauth2_client_credentials
+    primary_resource_id: oauth2_client_credentials_example
+    steps:
+    - name: integrations_auth_config_oauth2_client_credentials
+      config_path: templates/terraform/samples/services/integrations/integrations_auth_config_oauth2_client_credentials.tf.tmpl
+      prefixed_vars:
+        auth_config_name: test-authconfig-oauth2-client-credentials
+      test_vars_overrides:
+        client: acctest.BootstrapIntegrationsClient(t, "us-east4")
+      exclude_docs: true
+  - name: integrations_auth_config_jwt
+    primary_resource_id: jwt_example
+    steps:
+    - name: integrations_auth_config_jwt
+      config_path: templates/terraform/samples/services/integrations/integrations_auth_config_jwt.tf.tmpl
+      prefixed_vars:
+        auth_config_name: test-authconfig-jwt
+      test_vars_overrides:
+        client: acctest.BootstrapIntegrationsClient(t, "us-east4")
+      exclude_docs: true
+  - name: integrations_auth_config_auth_token
+    primary_resource_id: auth_token_example
+    steps:
+    - name: integrations_auth_config_auth_token
+      config_path: templates/terraform/samples/services/integrations/integrations_auth_config_auth_token.tf.tmpl
+      prefixed_vars:
+        auth_config_name: test-authconfig-auth-token
+      test_vars_overrides:
+        client: acctest.BootstrapIntegrationsClient(t, "us-east4")
+      exclude_docs: true
+  - name: integrations_auth_config_service_account
+    primary_resource_id: service_account_example
+    steps:
+    - name: integrations_auth_config_service_account
+      config_path: templates/terraform/samples/services/integrations/integrations_auth_config_service_account.tf.tmpl
+      prefixed_vars:
+        auth_config_name: test-authconfig-service-account
+        service_account_id: sa
+      test_vars_overrides:
+        client: acctest.BootstrapIntegrationsClient(t, "us-east4")
+      exclude_docs: true
+  - name: integrations_auth_config_oidc_token
+    primary_resource_id: oidc_token_example
+    steps:
+    - name: integrations_auth_config_oidc_token
+      config_path: templates/terraform/samples/services/integrations/integrations_auth_config_oidc_token.tf.tmpl
+      prefixed_vars:
+        auth_config_name: test-authconfig-oidc-token
+        service_account_id: sa
+      test_vars_overrides:
+        client: acctest.BootstrapIntegrationsClient(t, "us-east4")
+      exclude_docs: true
+  - name: integrations_auth_config_client_certificate_only
+    primary_resource_id: client_certificate_example
+    steps:
+    - name: integrations_auth_config_client_certificate_only
+      config_path: templates/terraform/samples/services/integrations/integrations_auth_config_client_certificate_only.tf.tmpl
+      prefixed_vars:
+        auth_config_name: test-authconfig-client-certificate
+      test_vars_overrides:
+        client: acctest.BootstrapIntegrationsClient(t, "us-east4")
+      exclude_docs: true
 parameters:
   - name: 'location'
     type: String

@@ -48,11 +48,14 @@ exclude_sweeper: true
 error_retry_predicates:
 
   - 'transport_tpg.IsAppEngineRetryableError'
-examples:
-  - name: 'app_engine_application_url_dispatch_rules_basic'
-    primary_resource_id: 'web_service'
-    vars:
-      bucket_name: 'appengine-test-bucket'
+samples:
+  - name: app_engine_application_url_dispatch_rules_basic
+    primary_resource_id: web_service
+    steps:
+    - name: app_engine_application_url_dispatch_rules_basic
+      config_path: templates/terraform/samples/services/appengine/app_engine_application_url_dispatch_rules_basic.tf.tmpl
+      prefixed_vars:
+        bucket_name: appengine-test-bucket
 parameters:
 properties:
   - name: 'dispatchRules'

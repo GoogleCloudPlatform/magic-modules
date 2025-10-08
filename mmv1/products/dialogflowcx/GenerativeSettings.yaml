@@ -41,11 +41,14 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/dialogflowcx_set_location_skip_default_obj.go.tmpl'
   custom_import: 'templates/terraform/custom_import/dialogflowcx_generative_settings.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'dialogflowcx_generative_settings_full'
-    primary_resource_id: 'full_generative_settings'
-    vars:
-      agent_name: 'dialogflowcx-agent'
+samples:
+  - name: dialogflowcx_generative_settings_full
+    primary_resource_id: full_generative_settings
+    steps:
+    - name: dialogflowcx_generative_settings_full
+      config_path: templates/terraform/samples/services/dialogflowcx/dialogflowcx_generative_settings_full.tf.tmpl
+      prefixed_vars:
+        agent_name: dialogflowcx-agent
 parameters:
   - name: 'parent'
     type: String

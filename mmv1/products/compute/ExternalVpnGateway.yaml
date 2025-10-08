@@ -37,22 +37,27 @@ async:
 collection_url_key: 'items'
 include_in_tgc_next_DO_NOT_USE: true
 custom_code:
-examples:
-  - name: 'external_vpn_gateway'
-    primary_resource_id: 'external_gateway'
-    vars:
-      ha_vpn_gateway_name: 'ha-vpn'
-      network_name: 'network-1'
-      external_gateway_name: 'external-gateway'
-      global_address_name: 'global-address'
-      router_name: 'ha-vpn-router1'
-      # Multiple fine-grained resources
+samples:
+  - name: external_vpn_gateway
     skip_vcr: true
-  - name: 'only_external_vpn_gateway_full'
-    primary_resource_id: 'external_gateway'
-    vars:
-      external_gateway_name: 'external-gateway'
-    exclude_docs: true
+    primary_resource_id: external_gateway
+    steps:
+    - name: external_vpn_gateway
+      config_path: templates/terraform/samples/services/compute/external_vpn_gateway.tf.tmpl
+      prefixed_vars:
+        external_gateway_name: external-gateway
+        global_address_name: global-address
+        ha_vpn_gateway_name: ha-vpn
+        network_name: network-1
+        router_name: ha-vpn-router1
+  - name: only_external_vpn_gateway_full
+    primary_resource_id: external_gateway
+    steps:
+    - name: only_external_vpn_gateway_full
+      config_path: templates/terraform/samples/services/compute/only_external_vpn_gateway_full.tf.tmpl
+      prefixed_vars:
+        external_gateway_name: external-gateway
+      exclude_docs: true
 parameters:
 properties:
   - name: 'description'

@@ -36,13 +36,16 @@ iam_policy:
   allowed_iam_role: 'roles/iap.httpsResourceAccessor'
   parent_resource_attribute: 'version_id'
   iam_conditions_request_type: 'REQUEST_BODY'
-  example_config_body: 'templates/terraform/iam/example_config_body/app_engine_version.tf.tmpl'
+  sample_config_body: 'templates/terraform/iam/example_config_body/app_engine_version.tf.tmpl'
 custom_code:
 exclude_tgc: true
-examples:
-  - name: 'iap_app_engine_version'
-    primary_resource_id: 'version'
-    primary_resource_name: 'envvar.GetTestProjectFromEnv(), "default", context["random_suffix"]'
+samples:
+  - name: iap_app_engine_version
+    primary_resource_id: version
+    primary_resource_name: envvar.GetTestProjectFromEnv(), "default", context["random_suffix"]
+    steps:
+    - name: iap_app_engine_version
+      config_path: templates/terraform/samples/services/iap/iap_app_engine_version.tf.tmpl
 parameters:
 properties:
   - name: 'appId'

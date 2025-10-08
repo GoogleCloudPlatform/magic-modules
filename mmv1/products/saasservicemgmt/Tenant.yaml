@@ -23,18 +23,21 @@ id_format: projects/{{project}}/locations/{{location}}/tenants/{{tenant_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/tenants/{{tenant_id}}
 min_version: beta
-examples:
+samples:
   - name: saas_runtime_tenant_basic
-    primary_resource_id: "example"
-    min_version: "beta"
-    vars:
-      saas_name: example-saas
-      tenant_name: example-tenant
-    test_env_vars:
-      project: "PROJECT_NAME"
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com"
-        role: "roles/saasservicemgmt.serviceAgent"
+    - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
+      role: roles/saasservicemgmt.serviceAgent
+    min_version: beta
+    primary_resource_id: example
+    steps:
+    - name: saas_runtime_tenant_basic
+      config_path: templates/terraform/samples/services/saasservicemgmt/saas_runtime_tenant_basic.tf.tmpl
+      prefixed_vars:
+        saas_name: example-saas
+        tenant_name: example-tenant
+      test_env_vars:
+        project: PROJECT_NAME
 autogen_async: false
 autogen_status: VGVuYW50
 parameters:

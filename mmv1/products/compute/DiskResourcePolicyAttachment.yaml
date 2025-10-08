@@ -49,12 +49,15 @@ custom_code:
   encoder: 'templates/terraform/encoders/compute_disk_resource_policies_attachment.go.tmpl'
   decoder: 'templates/terraform/decoders/compute_disk_resource_policies_attachment.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/compute_disk_resource_policies_attachment.go.tmpl'
-examples:
-  - name: 'disk_resource_policy_attachment_basic'
-    primary_resource_id: 'attachment'
-    vars:
-      disk_name: 'my-disk'
-      policy_name: 'my-resource-policy'
+samples:
+  - name: disk_resource_policy_attachment_basic
+    primary_resource_id: attachment
+    steps:
+    - name: disk_resource_policy_attachment_basic
+      config_path: templates/terraform/samples/services/compute/disk_resource_policy_attachment_basic.tf.tmpl
+      prefixed_vars:
+        disk_name: my-disk
+        policy_name: my-resource-policy
 parameters:
   - name: 'disk'
     type: ResourceRef

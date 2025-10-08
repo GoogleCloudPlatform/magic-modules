@@ -44,32 +44,44 @@ sweeper:
   url_substitutions:
     - zone: "us-central1-f"
     - zone: "us-central1-a"
-examples:
-  - name: 'node_group_basic'
-    primary_resource_id: 'nodes'
-    vars:
-      group_name: 'soletenant-group'
-      template_name: 'soletenant-tmpl'
-  - name: 'node_group_maintenance_interval'
-    primary_resource_id: 'nodes'
-    min_version: 'beta'
-    vars:
-      group_name: 'soletenant-group'
-      template_name: 'soletenant-tmpl'
-  - name: 'node_group_autoscaling_policy'
-    primary_resource_id: 'nodes'
-    vars:
-      group_name: 'soletenant-group'
-      template_name: 'soletenant-tmpl'
-  - name: 'node_group_share_settings'
-    primary_resource_id: 'nodes'
-    vars:
-      group_name: 'soletenant-group'
-      template_name: 'soletenant-tmpl'
-      guest_project_id: 'project-id'
-      guest_project_name: 'project-name'
-    test_env_vars:
-      org_id: 'ORG_ID'
+samples:
+  - name: node_group_basic
+    primary_resource_id: nodes
+    steps:
+    - name: node_group_basic
+      config_path: templates/terraform/samples/services/compute/node_group_basic.tf.tmpl
+      prefixed_vars:
+        group_name: soletenant-group
+        template_name: soletenant-tmpl
+  - name: node_group_maintenance_interval
+    min_version: beta
+    primary_resource_id: nodes
+    steps:
+    - name: node_group_maintenance_interval
+      config_path: templates/terraform/samples/services/compute/node_group_maintenance_interval.tf.tmpl
+      prefixed_vars:
+        group_name: soletenant-group
+        template_name: soletenant-tmpl
+  - name: node_group_autoscaling_policy
+    primary_resource_id: nodes
+    steps:
+    - name: node_group_autoscaling_policy
+      config_path: templates/terraform/samples/services/compute/node_group_autoscaling_policy.tf.tmpl
+      prefixed_vars:
+        group_name: soletenant-group
+        template_name: soletenant-tmpl
+  - name: node_group_share_settings
+    primary_resource_id: nodes
+    steps:
+    - name: node_group_share_settings
+      config_path: templates/terraform/samples/services/compute/node_group_share_settings.tf.tmpl
+      prefixed_vars:
+        group_name: soletenant-group
+        guest_project_id: project-id
+        guest_project_name: project-name
+        template_name: soletenant-tmpl
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
   - name: 'zone'
     type: ResourceRef

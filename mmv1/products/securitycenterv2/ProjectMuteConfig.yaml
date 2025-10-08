@@ -40,14 +40,17 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "global"
-examples:
-  - name: 'scc_v2_project_mute_config_basic'
-    primary_resource_id: 'default'
-    vars:
-      mute_config_id: 'my-config'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+samples:
+  - name: scc_v2_project_mute_config_basic
+    primary_resource_id: default
     exclude_test: true
+    steps:
+    - name: scc_v2_project_mute_config_basic
+      config_path: templates/terraform/samples/services/securitycenterv2/scc_v2_project_mute_config_basic.tf.tmpl
+      prefixed_vars:
+        mute_config_id: my-config
+      test_env_vars:
+        project_id: PROJECT_NAME
 parameters:
   - name: 'location'
     type: String

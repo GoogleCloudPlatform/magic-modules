@@ -47,14 +47,17 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "us-west1"
-examples:
-  - name: 'network_services_authz_extension_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-authz-ext'
-      backend_name: 'authz-service'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: network_services_authz_extension_basic
+    primary_resource_id: default
+    steps:
+    - name: network_services_authz_extension_basic
+      config_path: templates/terraform/samples/services/networkservices/network_services_authz_extension_basic.tf.tmpl
+      prefixed_vars:
+        backend_name: authz-service
+        resource_name: my-authz-ext
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
   - name: 'name'
     type: String

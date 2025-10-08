@@ -37,28 +37,42 @@ async:
     resource_inside_response: false
 custom_code:
 legacy_long_form_project: true
-examples:
-  - name: 'network_connectivity_hub_basic'
-    primary_resource_id: 'primary'
-    vars:
-      resource_name: 'basic'
-  - name: 'network_connectivity_hub_with_export_psc'
-    primary_resource_id: 'primary'
-    vars:
-      resource_name: 'basic'
-  - name: 'network_connectivity_hub_mesh_topology'
-    primary_resource_id: 'primary'
-    vars:
-      resource_name: 'mesh'
-  - name: 'network_connectivity_hub_star_topology'
-    primary_resource_id: 'primary'
-    vars:
-      resource_name: 'star'
-  - name: 'network_connectivity_hub_policy_mode'
-    primary_resource_id: 'primary'
-    vars:
-      resource_name: 'policy'
-
+samples:
+  - name: network_connectivity_hub_basic
+    primary_resource_id: primary
+    steps:
+    - name: network_connectivity_hub_basic
+      config_path: templates/terraform/samples/services/networkconnectivity/network_connectivity_hub_basic.tf.tmpl
+      prefixed_vars:
+        resource_name: basic
+  - name: network_connectivity_hub_with_export_psc
+    primary_resource_id: primary
+    steps:
+    - name: network_connectivity_hub_with_export_psc
+      config_path: templates/terraform/samples/services/networkconnectivity/network_connectivity_hub_with_export_psc.tf.tmpl
+      prefixed_vars:
+        resource_name: basic
+  - name: network_connectivity_hub_mesh_topology
+    primary_resource_id: primary
+    steps:
+    - name: network_connectivity_hub_mesh_topology
+      config_path: templates/terraform/samples/services/networkconnectivity/network_connectivity_hub_mesh_topology.tf.tmpl
+      prefixed_vars:
+        resource_name: mesh
+  - name: network_connectivity_hub_star_topology
+    primary_resource_id: primary
+    steps:
+    - name: network_connectivity_hub_star_topology
+      config_path: templates/terraform/samples/services/networkconnectivity/network_connectivity_hub_star_topology.tf.tmpl
+      prefixed_vars:
+        resource_name: star
+  - name: network_connectivity_hub_policy_mode
+    primary_resource_id: primary
+    steps:
+    - name: network_connectivity_hub_policy_mode
+      config_path: templates/terraform/samples/services/networkconnectivity/network_connectivity_hub_policy_mode.tf.tmpl
+      prefixed_vars:
+        resource_name: policy
 parameters:
 properties:
   - name: 'name'

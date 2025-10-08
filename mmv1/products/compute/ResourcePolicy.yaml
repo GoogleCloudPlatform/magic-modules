@@ -44,62 +44,101 @@ sweeper:
     - region: "europe-west1"
     - region: "us-east4"
     - region: "europe-west9"
-examples:
-  - name: 'resource_policy_basic'
-    primary_resource_id: 'foo'
-    vars:
-      name: 'gce-policy'
-  - name: 'resource_policy_hourly_format'
-    primary_resource_id: 'foo'
-    vars:
-      name: 'gce-policy'
-    exclude_docs: true
-  - name: 'resource_policy_full'
-    primary_resource_id: 'bar'
-    vars:
-      name: 'gce-policy'
-  - name: 'resource_policy_placement_policy'
-    primary_resource_id: 'baz'
-    vars:
-      name: 'gce-policy'
-  - name: 'resource_policy_placement_policy_max_distance'
-    primary_resource_id: 'baz'
-    min_version: 'beta'
-    vars:
-      name: 'gce-policy'
-  - name: 'resource_policy_instance_schedule_policy'
-    primary_resource_id: 'hourly'
-    vars:
-      name: 'gce-policy'
-  - name: 'resource_policy_snapshot_schedule_chain_name'
-    primary_resource_id: 'hourly'
-    vars:
-      name: 'gce-policy'
-  - name: 'resource_policy_consistency_group'
-    primary_resource_id: 'cgroup'
-    vars:
-      name: 'gce-policy'
-  - name: 'resource_policy_workload_policy'
-    primary_resource_id: 'bar'
-    vars:
-      name: 'gce-policy'
-  - name: 'resource_policy_workload_policy_accelerator_topology'
-    primary_resource_id: 'bar'
-    vars:
-      name: 'gce-policy'
-  - name: 'resource_policy_workload_policy_max_topology_distance'
-    primary_resource_id: 'bar'
-    vars:
-      name: 'gce-policy'
-  - name: 'resource_policy_placement_policy_gpu_topology'
-    primary_resource_id: 'baz'
-    vars:
-      name: 'gce-policy'
-  - name: 'resource_policy_placement_policy_tpu_topology'
-    primary_resource_id: 'baz'
-    min_version: 'beta'
-    vars:
-      name: 'gce-policy'
+samples:
+  - name: resource_policy_basic
+    primary_resource_id: foo
+    steps:
+    - name: resource_policy_basic
+      config_path: templates/terraform/samples/services/compute/resource_policy_basic.tf.tmpl
+      prefixed_vars:
+        name: gce-policy
+  - name: resource_policy_hourly_format
+    primary_resource_id: foo
+    steps:
+    - name: resource_policy_hourly_format
+      config_path: templates/terraform/samples/services/compute/resource_policy_hourly_format.tf.tmpl
+      prefixed_vars:
+        name: gce-policy
+      exclude_docs: true
+  - name: resource_policy_full
+    primary_resource_id: bar
+    steps:
+    - name: resource_policy_full
+      config_path: templates/terraform/samples/services/compute/resource_policy_full.tf.tmpl
+      prefixed_vars:
+        name: gce-policy
+  - name: resource_policy_placement_policy
+    primary_resource_id: baz
+    steps:
+    - name: resource_policy_placement_policy
+      config_path: templates/terraform/samples/services/compute/resource_policy_placement_policy.tf.tmpl
+      prefixed_vars:
+        name: gce-policy
+  - name: resource_policy_placement_policy_max_distance
+    min_version: beta
+    primary_resource_id: baz
+    steps:
+    - name: resource_policy_placement_policy_max_distance
+      config_path: templates/terraform/samples/services/compute/resource_policy_placement_policy_max_distance.tf.tmpl
+      prefixed_vars:
+        name: gce-policy
+  - name: resource_policy_instance_schedule_policy
+    primary_resource_id: hourly
+    steps:
+    - name: resource_policy_instance_schedule_policy
+      config_path: templates/terraform/samples/services/compute/resource_policy_instance_schedule_policy.tf.tmpl
+      prefixed_vars:
+        name: gce-policy
+  - name: resource_policy_snapshot_schedule_chain_name
+    primary_resource_id: hourly
+    steps:
+    - name: resource_policy_snapshot_schedule_chain_name
+      config_path: templates/terraform/samples/services/compute/resource_policy_snapshot_schedule_chain_name.tf.tmpl
+      prefixed_vars:
+        name: gce-policy
+  - name: resource_policy_consistency_group
+    primary_resource_id: cgroup
+    steps:
+    - name: resource_policy_consistency_group
+      config_path: templates/terraform/samples/services/compute/resource_policy_consistency_group.tf.tmpl
+      prefixed_vars:
+        name: gce-policy
+  - name: resource_policy_workload_policy
+    primary_resource_id: bar
+    steps:
+    - name: resource_policy_workload_policy
+      config_path: templates/terraform/samples/services/compute/resource_policy_workload_policy.tf.tmpl
+      prefixed_vars:
+        name: gce-policy
+  - name: resource_policy_workload_policy_accelerator_topology
+    primary_resource_id: bar
+    steps:
+    - name: resource_policy_workload_policy_accelerator_topology
+      config_path: templates/terraform/samples/services/compute/resource_policy_workload_policy_accelerator_topology.tf.tmpl
+      prefixed_vars:
+        name: gce-policy
+  - name: resource_policy_workload_policy_max_topology_distance
+    primary_resource_id: bar
+    steps:
+    - name: resource_policy_workload_policy_max_topology_distance
+      config_path: templates/terraform/samples/services/compute/resource_policy_workload_policy_max_topology_distance.tf.tmpl
+      prefixed_vars:
+        name: gce-policy
+  - name: resource_policy_placement_policy_gpu_topology
+    primary_resource_id: baz
+    steps:
+    - name: resource_policy_placement_policy_gpu_topology
+      config_path: templates/terraform/samples/services/compute/resource_policy_placement_policy_gpu_topology.tf.tmpl
+      prefixed_vars:
+        name: gce-policy
+  - name: resource_policy_placement_policy_tpu_topology
+    min_version: beta
+    primary_resource_id: baz
+    steps:
+    - name: resource_policy_placement_policy_tpu_topology
+      config_path: templates/terraform/samples/services/compute/resource_policy_placement_policy_tpu_topology.tf.tmpl
+      prefixed_vars:
+        name: gce-policy
 parameters:
   - name: 'region'
     type: ResourceRef

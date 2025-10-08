@@ -49,15 +49,18 @@ async:
   operation:
     base_url: "{{op_id}}"
 immutable: true
-examples:
-  - name: "dataprocgdc_serviceinstance"
-    primary_resource_id: "service-instance"
-    vars:
-      service_instance_id: "tf-e2e-service-instance"
-      project: "my-project"
-    test_vars_overrides:
-      'project': '"gdce-cluster-monitoring"'
+samples:
+  - name: dataprocgdc_serviceinstance
     skip_test: https://github.com/hashicorp/terraform-provider-google/issues/21173
+    primary_resource_id: service-instance
+    steps:
+    - name: dataprocgdc_serviceinstance
+      config_path: templates/terraform/samples/services/dataprocgdc/dataprocgdc_serviceinstance.tf.tmpl
+      prefixed_vars:
+        project: my-project
+        service_instance_id: tf-e2e-service-instance
+      test_vars_overrides:
+        project: '"gdce-cluster-monitoring"'
 properties:
   - name: gdceCluster
     type: NestedObject

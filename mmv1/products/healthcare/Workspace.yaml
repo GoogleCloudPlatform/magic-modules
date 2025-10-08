@@ -35,13 +35,16 @@ timeouts:
   delete_minutes: 20
 custom_code:
 exclude_sweeper: true
-examples:
-  - name: 'healthcare_workspace_basic'
-    primary_resource_id: 'default'
-    vars:
-      dataset_name: 'example-dataset'
-      workspace_name: 'example-dm-workspace'
-      source_project_id: 'example-data-source-project-id'
+samples:
+  - name: healthcare_workspace_basic
+    primary_resource_id: default
+    steps:
+    - name: healthcare_workspace_basic
+      config_path: templates/terraform/samples/services/healthcare/healthcare_workspace_basic.tf.tmpl
+      prefixed_vars:
+        dataset_name: example-dataset
+        source_project_id: example-data-source-project-id
+        workspace_name: example-dm-workspace
 parameters:
   - name: 'dataset'
     type: ResourceRef

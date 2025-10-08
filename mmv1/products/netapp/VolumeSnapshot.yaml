@@ -47,16 +47,20 @@ async:
 custom_code:
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
-examples:
-  - name: 'volume_snapshot_create'
-    primary_resource_id: 'test_snapshot'
-    vars:
-      volume_name: 'test-volume'
-      pool_name: 'test-pool'
-      network_name: 'test-network'
-      snap_name: 'testvolumesnap'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+samples:
+  - name: volume_snapshot_create
+    primary_resource_id: test_snapshot
+    steps:
+    - name: volume_snapshot_create
+      config_path: templates/terraform/samples/services/netapp/volume_snapshot_create.tf.tmpl
+      prefixed_vars:
+        network_name: test-network
+        pool_name: test-pool
+        snap_name: testvolumesnap
+        volume_name: test-volume
+      test_vars_overrides:
+        network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3",
+          acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))
 parameters:
   - name: 'location'
     type: String

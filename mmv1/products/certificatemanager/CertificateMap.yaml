@@ -37,11 +37,14 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'certificate_manager_certificate_map_basic'
-    primary_resource_id: 'default'
-    vars:
-      cert_map_name: 'cert-map'
+samples:
+  - name: certificate_manager_certificate_map_basic
+    primary_resource_id: default
+    steps:
+    - name: certificate_manager_certificate_map_basic
+      config_path: templates/terraform/samples/services/certificatemanager/certificate_manager_certificate_map_basic.tf.tmpl
+      prefixed_vars:
+        cert_map_name: cert-map
 parameters:
   - name: 'name'
     type: String

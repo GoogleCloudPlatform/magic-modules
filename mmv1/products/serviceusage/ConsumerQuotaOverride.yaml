@@ -56,36 +56,48 @@ nested_query:
 custom_code:
   test_check_destroy: 'templates/terraform/custom_check_destroy/consumer_quota_override.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'consumer_quota_override'
-    primary_resource_id: 'override'
-    min_version: 'beta'
-    vars:
-      project_id: 'quota'
-    test_env_vars:
-      org_id: 'ORG_ID'
-  - name: 'consumer_quota_override_zero_value'
-    primary_resource_id: 'override'
-    min_version: 'beta'
-    vars:
-      project_id: 'quota'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    exclude_docs: true
-  - name: 'region_consumer_quota_override'
-    primary_resource_id: 'override'
-    min_version: 'beta'
-    vars:
-      project_id: 'quota'
-    test_env_vars:
-      org_id: 'ORG_ID'
-  - name: 'consumer_quota_override_custom_dimension'
-    primary_resource_id: 'override'
-    min_version: 'beta'
-    vars:
-      project_id: 'quota'
-    test_env_vars:
-      org_id: 'ORG_ID'
+samples:
+  - name: consumer_quota_override
+    min_version: beta
+    primary_resource_id: override
+    steps:
+    - name: consumer_quota_override
+      config_path: templates/terraform/samples/services/serviceusage/consumer_quota_override.tf.tmpl
+      prefixed_vars:
+        project_id: quota
+      test_env_vars:
+        org_id: ORG_ID
+  - name: consumer_quota_override_zero_value
+    min_version: beta
+    primary_resource_id: override
+    steps:
+    - name: consumer_quota_override_zero_value
+      config_path: templates/terraform/samples/services/serviceusage/consumer_quota_override_zero_value.tf.tmpl
+      prefixed_vars:
+        project_id: quota
+      test_env_vars:
+        org_id: ORG_ID
+      exclude_docs: true
+  - name: region_consumer_quota_override
+    min_version: beta
+    primary_resource_id: override
+    steps:
+    - name: region_consumer_quota_override
+      config_path: templates/terraform/samples/services/serviceusage/region_consumer_quota_override.tf.tmpl
+      prefixed_vars:
+        project_id: quota
+      test_env_vars:
+        org_id: ORG_ID
+  - name: consumer_quota_override_custom_dimension
+    min_version: beta
+    primary_resource_id: override
+    steps:
+    - name: consumer_quota_override_custom_dimension
+      config_path: templates/terraform/samples/services/serviceusage/consumer_quota_override_custom_dimension.tf.tmpl
+      prefixed_vars:
+        project_id: quota
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
   - name: 'name'
     type: String

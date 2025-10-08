@@ -35,20 +35,22 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 exclude_sweeper: true
-examples:
-  - name: 'bigtable_logical_view'
-    primary_resource_id: 'logical_view'
-    vars:
-      instance_name: 'bt-instance'
-      table_name: 'bt-table'
-      logical_view_name: 'bt-logical-view'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    # bigtable instance does not use the shared HTTP client, this test creates an instance
+samples:
+  - name: bigtable_logical_view
     skip_vcr: true
+    primary_resource_id: logical_view
+    steps:
+    - name: bigtable_logical_view
+      config_path: templates/terraform/samples/services/bigtable/bigtable_logical_view.tf.tmpl
+      prefixed_vars:
+        deletion_protection: "true"
+        instance_name: bt-instance
+        logical_view_name: bt-logical-view
+        table_name: bt-table
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
 parameters:
   - name: 'logicalViewId'
     type: String

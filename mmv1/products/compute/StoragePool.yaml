@@ -39,23 +39,29 @@ iam_policy:
     - "projects/{{project}}/zones/{{zone}}/storagePools/{{name}}"
   iam_conditions_request_type: "QUERY_PARAM"
   allowed_iam_role: "roles/compute.viewer"
-examples:
-  - name: "compute_storage_pool_basic"
-    primary_resource_id: "test-storage-pool-basic"
-    primary_resource_name: 'fmt.Sprintf("tf-test-storage-pool-basic%s", context["random_suffix"])'
-    vars:
-      storage_pool_name: "storage-pool-basic"
-    ignore_read_extra:
-      - 'deletion_protection'
+samples:
+  - name: compute_storage_pool_basic
+    primary_resource_id: test-storage-pool-basic
+    primary_resource_name: fmt.Sprintf("tf-test-storage-pool-basic%s", context["random_suffix"])
     exclude_test: true
-  - name: "compute_storage_pool_full"
-    primary_resource_id: "test-storage-pool-full"
-    primary_resource_name: 'fmt.Sprintf("tf-test-storage-pool-full%s", context["random_suffix"])'
-    vars:
-      storage_pool_name: "storage-pool-full"
-    ignore_read_extra:
-      - 'deletion_protection'
+    steps:
+    - name: compute_storage_pool_basic
+      config_path: templates/terraform/samples/services/compute/compute_storage_pool_basic.tf.tmpl
+      prefixed_vars:
+        storage_pool_name: storage-pool-basic
+      ignore_read_extra:
+      - deletion_protection
+  - name: compute_storage_pool_full
+    primary_resource_id: test-storage-pool-full
+    primary_resource_name: fmt.Sprintf("tf-test-storage-pool-full%s", context["random_suffix"])
     exclude_test: true
+    steps:
+    - name: compute_storage_pool_full
+      config_path: templates/terraform/samples/services/compute/compute_storage_pool_full.tf.tmpl
+      prefixed_vars:
+        storage_pool_name: storage-pool-full
+      ignore_read_extra:
+      - deletion_protection
 parameters:
   - name: "zone"
     type: ResourceRef

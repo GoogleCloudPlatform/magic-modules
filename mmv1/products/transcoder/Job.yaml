@@ -32,51 +32,66 @@ timeouts:
   delete_minutes: 20
 custom_code:
   custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
-examples:
-  - name: 'transcoder_job_basic'
-    primary_resource_id: 'default'
-    vars:
-      job_template_id: 'example-job-template'
-      bucket_name: 'transcoder-job'
-    ignore_read_extra:
-      - 'state'
-      - 'end_time'
-  - name: 'transcoder_job_pubsub'
-    primary_resource_id: 'default'
-    vars:
-      job_template_id: 'example-job-template'
-      bucket_name: 'transcoder-job'
-      pub_sub_topic_name: 'transcoder-notifications'
-    ignore_read_extra:
-      - 'state'
-      - 'end_time'
-  - name: 'transcoder_job_encryptions'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      job_template_id: 'example-job-template'
-      bucket_name: 'transcoder-job'
-      secret_manager_secret_id: 'transcoder-encryption-key'
-    ignore_read_extra:
-      - 'state'
-      - 'end_time'
-  - name: 'transcoder_job_overlays'
-    primary_resource_id: 'default'
-    vars:
-      job_template_id: 'example-job-template'
-      bucket_name: 'transcoder-job'
-    ignore_read_extra:
-      - 'state'
-      - 'end_time'
-  - name: 'transcoder_job_manifests'
-    primary_resource_id: 'default'
-    vars:
-      job_template_id: 'example-job-template'
-      bucket_name: 'transcoder-job'
-    ignore_read_extra:
-      - 'state'
-      - 'start_time'
-      - 'end_time'
+samples:
+  - name: transcoder_job_basic
+    primary_resource_id: default
+    steps:
+    - name: transcoder_job_basic
+      config_path: templates/terraform/samples/services/transcoder/transcoder_job_basic.tf.tmpl
+      prefixed_vars:
+        bucket_name: transcoder-job
+        job_template_id: example-job-template
+      ignore_read_extra:
+      - state
+      - end_time
+  - name: transcoder_job_pubsub
+    primary_resource_id: default
+    steps:
+    - name: transcoder_job_pubsub
+      config_path: templates/terraform/samples/services/transcoder/transcoder_job_pubsub.tf.tmpl
+      prefixed_vars:
+        bucket_name: transcoder-job
+        job_template_id: example-job-template
+        pub_sub_topic_name: transcoder-notifications
+      ignore_read_extra:
+      - state
+      - end_time
+  - name: transcoder_job_encryptions
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: transcoder_job_encryptions
+      config_path: templates/terraform/samples/services/transcoder/transcoder_job_encryptions.tf.tmpl
+      prefixed_vars:
+        bucket_name: transcoder-job
+        job_template_id: example-job-template
+        secret_manager_secret_id: transcoder-encryption-key
+      ignore_read_extra:
+      - state
+      - end_time
+  - name: transcoder_job_overlays
+    primary_resource_id: default
+    steps:
+    - name: transcoder_job_overlays
+      config_path: templates/terraform/samples/services/transcoder/transcoder_job_overlays.tf.tmpl
+      prefixed_vars:
+        bucket_name: transcoder-job
+        job_template_id: example-job-template
+      ignore_read_extra:
+      - state
+      - end_time
+  - name: transcoder_job_manifests
+    primary_resource_id: default
+    steps:
+    - name: transcoder_job_manifests
+      config_path: templates/terraform/samples/services/transcoder/transcoder_job_manifests.tf.tmpl
+      prefixed_vars:
+        bucket_name: transcoder-job
+        job_template_id: example-job-template
+      ignore_read_extra:
+      - state
+      - start_time
+      - end_time
 parameters:
   - name: 'location'
     type: String

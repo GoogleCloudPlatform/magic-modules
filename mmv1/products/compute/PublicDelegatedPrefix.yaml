@@ -40,36 +40,41 @@ sweeper:
     - region: "us-central1"
     - region: "us-west1"
     - region: "us-east1"
-examples:
-  - name: 'public_delegated_prefixes_basic'
-    primary_resource_id: 'prefixes'
-    vars:
-      prefixes_name: 'my-prefix'
-    test_env_vars:
-      desc: 'PAP_DESCRIPTION'
-    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
-    # resource_compute_public_advertised_prefix_test.go
+samples:
+  - name: public_delegated_prefixes_basic
+    primary_resource_id: prefixes
     exclude_test: true
-  - name: 'public_delegated_prefixes_ipv6'
-    vars:
-      pap_name: "ipv6-pap"
-      root_pdp_name: "ipv6-root-pdp"
-      sub_pdp_name: "ipv6-sub-pdp"
-    test_env_vars:
-      desc: 'PAP_DESCRIPTION'
-    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
-    # resource_compute_public_advertised_prefix_test.go
+    steps:
+    - name: public_delegated_prefixes_basic
+      config_path: templates/terraform/samples/services/compute/public_delegated_prefixes_basic.tf.tmpl
+      prefixed_vars:
+        prefixes_name: my-prefix
+      test_env_vars:
+        desc: PAP_DESCRIPTION
+  - name: public_delegated_prefixes_ipv6
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'public_delegated_prefix_ipv6_subnet_mode'
-    vars:
-      pap_name: "ipv6-pap"
-      root_pdp_name: "ipv6-root-pdp"
-      sub_pdp_name: "ipv6-sub-pdp"
-    test_env_vars:
-      desc: 'PAP_DESCRIPTION'
-    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
-    # resource_compute_public_advertised_prefix_test.go
+    steps:
+    - name: public_delegated_prefixes_ipv6
+      config_path: templates/terraform/samples/services/compute/public_delegated_prefixes_ipv6.tf.tmpl
+      prefixed_vars:
+        pap_name: ipv6-pap
+        root_pdp_name: ipv6-root-pdp
+        sub_pdp_name: ipv6-sub-pdp
+      test_env_vars:
+        desc: PAP_DESCRIPTION
+  - name: public_delegated_prefix_ipv6_subnet_mode
+    primary_resource_id: ""
     exclude_test: true
+    steps:
+    - name: public_delegated_prefix_ipv6_subnet_mode
+      config_path: templates/terraform/samples/services/compute/public_delegated_prefix_ipv6_subnet_mode.tf.tmpl
+      prefixed_vars:
+        pap_name: ipv6-pap
+        root_pdp_name: ipv6-root-pdp
+        sub_pdp_name: ipv6-sub-pdp
+      test_env_vars:
+        desc: PAP_DESCRIPTION
 parameters:
 properties:
   - name: 'region'

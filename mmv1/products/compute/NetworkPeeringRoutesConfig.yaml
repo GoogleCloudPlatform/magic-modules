@@ -55,14 +55,17 @@ nested_query:
   modify_by_patch: false
 custom_code:
   encoder: 'templates/terraform/encoders/network_peering_routes_config.go.tmpl'
-examples:
-  - name: 'network_peering_routes_config_basic'
-    primary_resource_id: 'peering_primary_routes'
-    vars:
-      peering_primary_name: 'primary-peering'
-      peering_secondary_name: 'secondary-peering'
-      network_primary_name: 'primary-network'
-      network_secondary_name: 'secondary-network'
+samples:
+  - name: network_peering_routes_config_basic
+    primary_resource_id: peering_primary_routes
+    steps:
+    - name: network_peering_routes_config_basic
+      config_path: templates/terraform/samples/services/compute/network_peering_routes_config_basic.tf.tmpl
+      prefixed_vars:
+        network_primary_name: primary-network
+        network_secondary_name: secondary-network
+        peering_primary_name: primary-peering
+        peering_secondary_name: secondary-peering
 parameters:
   - name: 'network'
     type: ResourceRef

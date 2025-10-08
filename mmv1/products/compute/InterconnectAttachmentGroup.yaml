@@ -36,14 +36,17 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-examples:
-  - name: 'interconnect_attachment_group_basic'
-    primary_resource_id: 'example-interconnect-attachment-group'
-    vars:
-      interconnect_attachment_group_name: 'example-interconnect-attachment-group'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
+samples:
+  - name: interconnect_attachment_group_basic
+    primary_resource_id: example-interconnect-attachment-group
+    steps:
+    - name: interconnect_attachment_group_basic
+      config_path: templates/terraform/samples/services/compute/interconnect_attachment_group_basic.tf.tmpl
+      prefixed_vars:
+        deletion_protection: "true"
+        interconnect_attachment_group_name: example-interconnect-attachment-group
+      test_vars_overrides:
+        deletion_protection: "false"
 parameters:
 properties:
   - name: 'description'

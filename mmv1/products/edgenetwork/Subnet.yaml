@@ -40,25 +40,31 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'edgenetwork_subnet'
-    primary_resource_id: 'example_subnet'
-    vars:
-      edgenetwork_subnet_id: 'example-subnet'
-      edgenetwork_network_id: 'example-network'
-    test_env_vars:
-      location: 'REGION'
-      zone: 'ZONE'
+samples:
+  - name: edgenetwork_subnet
+    primary_resource_id: example_subnet
     exclude_test: true
-  - name: 'edgenetwork_subnet_with_vlan_id'
-    primary_resource_id: 'example_subnet_with_vlan_id'
-    vars:
-      edgenetwork_subnet_id: 'example-subnet-with-vlan-id'
-      edgenetwork_network_id: 'example-network'
-    test_env_vars:
-      location: 'REGION'
-      zone: 'ZONE'
+    steps:
+    - name: edgenetwork_subnet
+      config_path: templates/terraform/samples/services/edgenetwork/edgenetwork_subnet.tf.tmpl
+      prefixed_vars:
+        edgenetwork_network_id: example-network
+        edgenetwork_subnet_id: example-subnet
+      test_env_vars:
+        location: REGION
+        zone: ZONE
+  - name: edgenetwork_subnet_with_vlan_id
+    primary_resource_id: example_subnet_with_vlan_id
     exclude_test: true
+    steps:
+    - name: edgenetwork_subnet_with_vlan_id
+      config_path: templates/terraform/samples/services/edgenetwork/edgenetwork_subnet_with_vlan_id.tf.tmpl
+      prefixed_vars:
+        edgenetwork_network_id: example-network
+        edgenetwork_subnet_id: example-subnet-with-vlan-id
+      test_env_vars:
+        location: REGION
+        zone: ZONE
 exclude_sweeper: true
 parameters:
   - name: 'location'

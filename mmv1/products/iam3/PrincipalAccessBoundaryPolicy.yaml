@@ -44,26 +44,33 @@ async:
   result:
     resource_inside_response: true
   include_project: true
-examples:
-  - name: 'iam_principal_access_boundary_policy'
-    primary_resource_id: 'pab-policy-for-org'
-    external_providers: ["time"]
-    test_env_vars:
-      org_id: 'ORG_ID'
-    vars:
-      display_name: 'PAB policy for Organization'
-      pab_id: 'pab-policy-for-org'
-  - name: 'iam_organizations_policy_binding'
-    primary_resource_id: 'my-pab-policy'
-    external_providers: ["time"]
-    test_env_vars:
-      org_id: 'ORG_ID'
-    vars:
-      pab_policy_id: 'my-pab-policy'
-      display_name: 'Binding for all principals in the Organization'
-      org_binding_id: 'binding-for-all-org-principals'
-    # This example is already used as a test in OrganizationsPolicyBinding
+samples:
+  - name: iam_principal_access_boundary_policy
+    external_providers:
+    - time
+    primary_resource_id: pab-policy-for-org
+    steps:
+    - name: iam_principal_access_boundary_policy
+      config_path: templates/terraform/samples/services/iam3/iam_principal_access_boundary_policy.tf.tmpl
+      prefixed_vars:
+        display_name: PAB policy for Organization
+        pab_id: pab-policy-for-org
+      test_env_vars:
+        org_id: ORG_ID
+  - name: iam_organizations_policy_binding
+    external_providers:
+    - time
+    primary_resource_id: my-pab-policy
     exclude_test: true
+    steps:
+    - name: iam_organizations_policy_binding
+      config_path: templates/terraform/samples/services/iam3/iam_organizations_policy_binding.tf.tmpl
+      prefixed_vars:
+        display_name: Binding for all principals in the Organization
+        org_binding_id: binding-for-all-org-principals
+        pab_policy_id: my-pab-policy
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
   - name: 'organization'
     type: String

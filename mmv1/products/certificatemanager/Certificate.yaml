@@ -57,55 +57,79 @@ sweeper:
     - "google_network_services_gateway"
     - "google_compute_target_https_proxy"
     - "google_compute_network"
-examples:
-  - name: 'certificate_manager_google_managed_certificate_dns'
-    primary_resource_id: 'default'
-    vars:
-      dns_auth_name: 'dns-auth'
-      dns_auth_subdomain: 'subdomain'
-      dns_auth_name2: 'dns-auth2'
-      dns_auth_subdomain2: 'subdomain2'
-      cert_name: 'dns-cert'
-  - name: 'certificate_manager_google_managed_certificate_issuance_config'
-    primary_resource_id: 'default'
-    vars:
-      cert_name: 'issuance-config-cert'
-      ca_name: 'ca-authority'
-      pool_name: 'ca-pool'
-      issuance_config_name: 'issuance-config'
-  - name: 'certificate_manager_self_managed_certificate'
-    primary_resource_id: 'default'
-    vars:
-      cert_name: 'self-managed-cert'
-  - name: 'certificate_manager_self_managed_certificate_regional'
-    primary_resource_id: 'default'
-    vars:
-      cert_name: 'self-managed-cert'
-  - name: 'certificate_manager_google_managed_certificate_issuance_config_all_regions'
-    primary_resource_id: 'default'
-    vars:
-      cert_name: 'issuance-config-cert'
-      ca_name: 'ca-authority'
-      pool_name: 'ca-pool'
-      issuance_config_name: 'issuance-config'
-  - name: 'certificate_manager_google_managed_certificate_dns_all_regions'
-    primary_resource_id: 'default'
-    vars:
-      dns_auth_name: 'dns-auth'
-      dns_auth_subdomain: 'subdomain'
-      dns_auth_name2: 'dns-auth2'
-      dns_auth_subdomain2: 'subdomain2'
-      cert_name: 'dns-cert'
-  - name: 'certificate_manager_google_managed_regional_certificate_dns_auth'
-    primary_resource_id: 'default'
-    vars:
-      dns_auth_name: 'dns-auth'
-      dns_auth_subdomain: 'subdomain'
-      cert_name: 'dns-cert'
-  - name: 'certificate_manager_client_auth_certificate'
-    primary_resource_id: 'default'
-    vars:
-      cert_name: 'client-auth-cert'
+samples:
+  - name: certificate_manager_google_managed_certificate_dns
+    primary_resource_id: default
+    steps:
+    - name: certificate_manager_google_managed_certificate_dns
+      config_path: templates/terraform/samples/services/certificatemanager/certificate_manager_google_managed_certificate_dns.tf.tmpl
+      prefixed_vars:
+        cert_name: dns-cert
+        dns_auth_name: dns-auth
+        dns_auth_name2: dns-auth2
+        dns_auth_subdomain: subdomain
+        dns_auth_subdomain2: subdomain2
+  - name: certificate_manager_google_managed_certificate_issuance_config
+    primary_resource_id: default
+    steps:
+    - name: certificate_manager_google_managed_certificate_issuance_config
+      config_path: templates/terraform/samples/services/certificatemanager/certificate_manager_google_managed_certificate_issuance_config.tf.tmpl
+      prefixed_vars:
+        ca_name: ca-authority
+        cert_name: issuance-config-cert
+        issuance_config_name: issuance-config
+        pool_name: ca-pool
+  - name: certificate_manager_self_managed_certificate
+    primary_resource_id: default
+    steps:
+    - name: certificate_manager_self_managed_certificate
+      config_path: templates/terraform/samples/services/certificatemanager/certificate_manager_self_managed_certificate.tf.tmpl
+      prefixed_vars:
+        cert_name: self-managed-cert
+  - name: certificate_manager_self_managed_certificate_regional
+    primary_resource_id: default
+    steps:
+    - name: certificate_manager_self_managed_certificate_regional
+      config_path: templates/terraform/samples/services/certificatemanager/certificate_manager_self_managed_certificate_regional.tf.tmpl
+      prefixed_vars:
+        cert_name: self-managed-cert
+  - name: certificate_manager_google_managed_certificate_issuance_config_all_regions
+    primary_resource_id: default
+    steps:
+    - name: certificate_manager_google_managed_certificate_issuance_config_all_regions
+      config_path: templates/terraform/samples/services/certificatemanager/certificate_manager_google_managed_certificate_issuance_config_all_regions.tf.tmpl
+      prefixed_vars:
+        ca_name: ca-authority
+        cert_name: issuance-config-cert
+        issuance_config_name: issuance-config
+        pool_name: ca-pool
+  - name: certificate_manager_google_managed_certificate_dns_all_regions
+    primary_resource_id: default
+    steps:
+    - name: certificate_manager_google_managed_certificate_dns_all_regions
+      config_path: templates/terraform/samples/services/certificatemanager/certificate_manager_google_managed_certificate_dns_all_regions.tf.tmpl
+      prefixed_vars:
+        cert_name: dns-cert
+        dns_auth_name: dns-auth
+        dns_auth_name2: dns-auth2
+        dns_auth_subdomain: subdomain
+        dns_auth_subdomain2: subdomain2
+  - name: certificate_manager_google_managed_regional_certificate_dns_auth
+    primary_resource_id: default
+    steps:
+    - name: certificate_manager_google_managed_regional_certificate_dns_auth
+      config_path: templates/terraform/samples/services/certificatemanager/certificate_manager_google_managed_regional_certificate_dns_auth.tf.tmpl
+      prefixed_vars:
+        cert_name: dns-cert
+        dns_auth_name: dns-auth
+        dns_auth_subdomain: subdomain
+  - name: certificate_manager_client_auth_certificate
+    primary_resource_id: default
+    steps:
+    - name: certificate_manager_client_auth_certificate
+      config_path: templates/terraform/samples/services/certificatemanager/certificate_manager_client_auth_certificate.tf.tmpl
+      prefixed_vars:
+        cert_name: client-auth-cert
 parameters:
   - name: 'name'
     type: String

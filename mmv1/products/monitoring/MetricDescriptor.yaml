@@ -46,17 +46,23 @@ custom_code:
 error_retry_predicates:
 
   - 'transport_tpg.IsMonitoringConcurrentEditError'
-examples:
-  - name: 'monitoring_metric_descriptor_basic'
-    primary_resource_id: 'basic'
-    vars:
-      display_name: 'metric-descriptor'
-      type: 'daily_sales'
-  - name: 'monitoring_metric_descriptor_alert'
-    primary_resource_id: 'with_alert'
-    vars:
-      display_name: 'metric-descriptor'
-      type: 'daily_sales'
+samples:
+  - name: monitoring_metric_descriptor_basic
+    primary_resource_id: basic
+    steps:
+    - name: monitoring_metric_descriptor_basic
+      config_path: templates/terraform/samples/services/monitoring/monitoring_metric_descriptor_basic.tf.tmpl
+      prefixed_vars:
+        display_name: metric-descriptor
+        type: daily_sales
+  - name: monitoring_metric_descriptor_alert
+    primary_resource_id: with_alert
+    steps:
+    - name: monitoring_metric_descriptor_alert
+      config_path: templates/terraform/samples/services/monitoring/monitoring_metric_descriptor_alert.tf.tmpl
+      prefixed_vars:
+        display_name: metric-descriptor
+        type: daily_sales
 parameters:
 properties:
   - name: 'name'

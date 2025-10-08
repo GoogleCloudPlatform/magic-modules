@@ -43,105 +43,136 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/locations/{{location}}/workerPools/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/workerPools/{{name}}'
     - '{{name}}'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/cloudrunv2_worker_pool_deletion_policy.go.tmpl'
 taint_resource_on_failed_create: true
-examples:
-  - name: 'cloudrunv2_worker_pool_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-worker-pool%s", context["random_suffix"])'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_worker_pool_limits'
-    primary_resource_id: 'default'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_worker_pool_sql'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-      secret_id: 'secret-1'
-      cloud_run_sql_name: 'cloudrun-sql'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_worker_pool_directvpc'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_worker_pool_gpu'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_worker_pool_secret'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-      secret_id: 'secret-1'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_worker_pool_multicontainer'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-worker-pool%s", context["random_suffix"])'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_worker_pool_mount_gcs'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-worker-pool-%s", context["random_suffix"])'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-    ignore_read_extra:
-      - 'deletion_protection'
-    # Currently failing
+samples:
+  - name: cloudrunv2_worker_pool_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-worker-pool%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_worker_pool_basic
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_worker_pool_basic.tf.tmpl
+      prefixed_vars:
+        cloud_run_worker_pool_name: cloudrun-worker-pool
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_worker_pool_limits
+    primary_resource_id: default
+    steps:
+    - name: cloudrunv2_worker_pool_limits
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_worker_pool_limits.tf.tmpl
+      prefixed_vars:
+        cloud_run_worker_pool_name: cloudrun-worker-pool
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_worker_pool_sql
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_worker_pool_sql
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_worker_pool_sql.tf.tmpl
+      prefixed_vars:
+        cloud_run_sql_name: cloudrun-sql
+        cloud_run_worker_pool_name: cloudrun-worker-pool
+        deletion_protection: "true"
+        secret_id: secret-1
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_worker_pool_directvpc
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_worker_pool_directvpc
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_worker_pool_directvpc.tf.tmpl
+      prefixed_vars:
+        cloud_run_worker_pool_name: cloudrun-worker-pool
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_worker_pool_gpu
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_worker_pool_gpu
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_worker_pool_gpu.tf.tmpl
+      prefixed_vars:
+        cloud_run_worker_pool_name: cloudrun-worker-pool
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_worker_pool_secret
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_worker_pool_secret
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_worker_pool_secret.tf.tmpl
+      prefixed_vars:
+        cloud_run_worker_pool_name: cloudrun-worker-pool
+        secret_id: secret-1
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_worker_pool_multicontainer
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-worker-pool%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_worker_pool_multicontainer
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_worker_pool_multicontainer.tf.tmpl
+      prefixed_vars:
+        cloud_run_worker_pool_name: cloudrun-worker-pool
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_worker_pool_mount_gcs
     skip_vcr: true
-  - name: 'cloudrunv2_worker_pool_mount_nfs'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-worker-pool-%s", context["random_suffix"])'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-    ignore_read_extra:
-      - 'deletion_protection'
-    # Currently failing
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-worker-pool-%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_worker_pool_mount_gcs
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_worker_pool_mount_gcs.tf.tmpl
+      prefixed_vars:
+        cloud_run_worker_pool_name: cloudrun-worker-pool
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_worker_pool_mount_nfs
     skip_vcr: true
-  - name: 'cloudrunv2_worker_pool_custom_audiences'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-worker-pool-%s", context["random_suffix"])'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'cloudrunv2_worker_pool_startup_liveness_probe'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-      vpc_access_connector_name: 'wp-connector'
-      compute_network_name: 'wp-net'
-      vpc_compute_subnetwork_name: 'wp-subnet'
-    ignore_read_extra:
-      - 'deletion_protection'
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-worker-pool-%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_worker_pool_mount_nfs
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_worker_pool_mount_nfs.tf.tmpl
+      prefixed_vars:
+        cloud_run_worker_pool_name: cloudrun-worker-pool
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_worker_pool_custom_audiences
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-worker-pool-%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_worker_pool_custom_audiences
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_worker_pool_custom_audiences.tf.tmpl
+      prefixed_vars:
+        cloud_run_worker_pool_name: cloudrun-worker-pool
+      ignore_read_extra:
+      - deletion_protection
+  - name: cloudrunv2_worker_pool_startup_liveness_probe
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_worker_pool_startup_liveness_probe
+      config_path: templates/terraform/samples/services/cloudrunv2/cloudrunv2_worker_pool_startup_liveness_probe.tf.tmpl
+      prefixed_vars:
+        cloud_run_worker_pool_name: cloudrun-worker-pool
+        compute_network_name: wp-net
+        vpc_access_connector_name: wp-connector
+        vpc_compute_subnetwork_name: wp-subnet
+      ignore_read_extra:
+      - deletion_protection
 virtual_fields:
   - name: 'deletion_protection'
     description: |

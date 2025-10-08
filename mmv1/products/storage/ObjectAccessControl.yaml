@@ -44,12 +44,15 @@ timeouts:
   delete_minutes: 20
 custom_code:
 exclude_sweeper: true
-examples:
-  - name: 'storage_object_access_control_public_object'
-    primary_resource_id: 'public_rule'
-    vars:
-      bucket_name: 'static-content-bucket'
-      object_name: 'public-object'
+samples:
+  - name: storage_object_access_control_public_object
+    primary_resource_id: public_rule
+    steps:
+    - name: storage_object_access_control_public_object
+      config_path: templates/terraform/samples/services/storage/storage_object_access_control_public_object.tf.tmpl
+      prefixed_vars:
+        bucket_name: static-content-bucket
+        object_name: public-object
 parameters:
 properties:
   - name: 'bucket'

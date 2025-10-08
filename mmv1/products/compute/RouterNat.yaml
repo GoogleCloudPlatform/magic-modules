@@ -61,49 +61,57 @@ custom_code:
 custom_diff:
   - 'resourceComputeRouterNatDrainNatIpsCustomDiff'
 exclude_tgc: true
-examples:
-  # These examples are not used to autogenerate tests, as fine-grained
-  # resources do not fit the normal test flow - we need to test deletion
-  # in a test step while parent resource still exists vs in CheckDestroy
-  # when all resources have been deleted.
-  - name: 'router_nat_basic'
-    primary_resource_id: 'nat'
-    vars:
-      router_name: 'my-router'
-      nat_name: 'my-router-nat'
-      network_name: 'my-network'
-      subnet_name: 'my-subnetwork'
+samples:
+  - name: router_nat_basic
+    primary_resource_id: nat
     exclude_test: true
-  - name: 'router_nat_manual_ips'
-    primary_resource_id: 'nat_manual'
-    vars:
-      router_name: 'my-router'
-      nat_name: 'my-router-nat'
-      network_name: 'my-network'
-      subnet_name: 'my-subnetwork'
-      address_name: 'nat-manual-ip'
+    steps:
+    - name: router_nat_basic
+      config_path: templates/terraform/samples/services/compute/router_nat_basic.tf.tmpl
+      prefixed_vars:
+        nat_name: my-router-nat
+        network_name: my-network
+        router_name: my-router
+        subnet_name: my-subnetwork
+  - name: router_nat_manual_ips
+    primary_resource_id: nat_manual
     exclude_test: true
-  - name: 'router_nat_rules'
-    primary_resource_id: 'nat_rules'
-    vars:
-      router_name: 'my-router'
-      nat_name: 'my-router-nat'
-      network_name: 'my-network'
-      subnet_name: 'my-subnetwork'
-      address_name1: 'nat-address1'
-      address_name2: 'nat-address2'
-      address_name3: 'nat-address3'
+    steps:
+    - name: router_nat_manual_ips
+      config_path: templates/terraform/samples/services/compute/router_nat_manual_ips.tf.tmpl
+      prefixed_vars:
+        address_name: nat-manual-ip
+        nat_name: my-router-nat
+        network_name: my-network
+        router_name: my-router
+        subnet_name: my-subnetwork
+  - name: router_nat_rules
+    primary_resource_id: nat_rules
     exclude_test: true
-  - name: 'router_nat_private'
-    primary_resource_id: 'nat_type'
-    vars:
-      router_name: 'my-router'
-      nat_name: 'my-router-nat'
-      network_name: 'my-network'
-      subnet_name: 'my-subnetwork'
-      hub_name: 'my-hub'
-      spoke_name: 'my-spoke'
+    steps:
+    - name: router_nat_rules
+      config_path: templates/terraform/samples/services/compute/router_nat_rules.tf.tmpl
+      prefixed_vars:
+        address_name1: nat-address1
+        address_name2: nat-address2
+        address_name3: nat-address3
+        nat_name: my-router-nat
+        network_name: my-network
+        router_name: my-router
+        subnet_name: my-subnetwork
+  - name: router_nat_private
+    primary_resource_id: nat_type
     exclude_test: true
+    steps:
+    - name: router_nat_private
+      config_path: templates/terraform/samples/services/compute/router_nat_private.tf.tmpl
+      prefixed_vars:
+        hub_name: my-hub
+        nat_name: my-router-nat
+        network_name: my-network
+        router_name: my-router
+        spoke_name: my-spoke
+        subnet_name: my-subnetwork
 parameters:
   - name: 'router'
     type: ResourceRef

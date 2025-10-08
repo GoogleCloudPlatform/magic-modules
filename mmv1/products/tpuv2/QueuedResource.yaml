@@ -35,27 +35,33 @@ async:
 sweeper:
   url_substitutions:
     - zone: "us-central1-c"
-examples:
-  - name: 'tpu_v2_queued_resource_basic'
-    primary_resource_id: 'qr'
-    min_version: 'beta'
-    vars:
-      qr_name: 'test-qr'
-      tpu_name: 'test-tpu'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: tpu_v2_queued_resource_basic
     skip_vcr: true
-  - name: 'tpu_v2_queued_resource_full'
-    primary_resource_id: 'qr'
-    min_version: 'beta'
-    vars:
-      qr_name: 'test-qr'
-      tpu_name: 'test-tpu'
-      network_name: 'tpu-net'
-      subnet_name: 'tpu-subnet'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    min_version: beta
+    primary_resource_id: qr
+    steps:
+    - name: tpu_v2_queued_resource_basic
+      config_path: templates/terraform/samples/services/tpuv2/tpu_v2_queued_resource_basic.tf.tmpl
+      prefixed_vars:
+        qr_name: test-qr
+        tpu_name: test-tpu
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: tpu_v2_queued_resource_full
     skip_vcr: true
+    min_version: beta
+    primary_resource_id: qr
+    steps:
+    - name: tpu_v2_queued_resource_full
+      config_path: templates/terraform/samples/services/tpuv2/tpu_v2_queued_resource_full.tf.tmpl
+      prefixed_vars:
+        network_name: tpu-net
+        qr_name: test-qr
+        subnet_name: tpu-subnet
+        tpu_name: test-tpu
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
   - name: 'zone'
     type: String

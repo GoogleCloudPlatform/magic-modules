@@ -41,43 +41,53 @@ async:
     resource_inside_response: true
 custom_code:
 include_in_tgc_next_DO_NOT_USE: true
-examples:
-  - name: 'apphub_service_basic'
-    primary_resource_id: 'example'
-    vars:
-      application_id: 'example-application-1'
-      service_project_attachment_id: 'project-1'
-      ilb_network: 'l7-ilb-network'
-      ilb_subnet: 'l7-ilb-subnet'
-      forwarding_rule: 'l7-ilb-forwarding-rule'
-      backend_service: 'l7-ilb-backend-subnet'
-      health_check: 'l7-ilb-hc'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    external_providers: ["random", "time"]
-  - name: 'apphub_service_full'
-    primary_resource_id: 'example'
-    vars:
-      application_id: 'example-application-1'
-      service_project_attachment_id: 'project-1'
-      display_name: 'Example Service Full'
-      desc: 'Register service for testing'
-      business_name: 'Alice'
-      business_email: 'alice@google.com'
-      developer_name: 'Bob'
-      developer_email: 'bob@google.com'
-      operator_name: 'Charlie'
-      operator_email: 'charlie@google.com'
-      ilb_network: 'l7-ilb-network'
-      ilb_subnet: 'l7-ilb-subnet'
-      forwarding_rule: 'l7-ilb-forwarding-rule'
-      backend_service: 'l7-ilb-backend-subnet'
-      health_check: 'l7-ilb-hc'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    external_providers: ["random", "time"]
+samples:
+  - name: apphub_service_basic
+    external_providers:
+    - random
+    - time
+    primary_resource_id: example
+    steps:
+    - name: apphub_service_basic
+      config_path: templates/terraform/samples/services/apphub/apphub_service_basic.tf.tmpl
+      prefixed_vars:
+        application_id: example-application-1
+        backend_service: l7-ilb-backend-subnet
+        forwarding_rule: l7-ilb-forwarding-rule
+        health_check: l7-ilb-hc
+        ilb_network: l7-ilb-network
+        ilb_subnet: l7-ilb-subnet
+        service_project_attachment_id: project-1
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+  - name: apphub_service_full
+    external_providers:
+    - random
+    - time
+    primary_resource_id: example
+    steps:
+    - name: apphub_service_full
+      config_path: templates/terraform/samples/services/apphub/apphub_service_full.tf.tmpl
+      prefixed_vars:
+        application_id: example-application-1
+        backend_service: l7-ilb-backend-subnet
+        business_email: alice@google.com
+        business_name: Alice
+        desc: Register service for testing
+        developer_email: bob@google.com
+        developer_name: Bob
+        display_name: Example Service Full
+        forwarding_rule: l7-ilb-forwarding-rule
+        health_check: l7-ilb-hc
+        ilb_network: l7-ilb-network
+        ilb_subnet: l7-ilb-subnet
+        operator_email: charlie@google.com
+        operator_name: Charlie
+        service_project_attachment_id: project-1
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
 parameters:
   - name: 'location'
     type: String

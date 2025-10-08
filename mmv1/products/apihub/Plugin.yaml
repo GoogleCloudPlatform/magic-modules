@@ -21,14 +21,17 @@ create_url: projects/{{project}}/locations/{{location}}/plugins?pluginId={{plugi
 id_format: projects/{{project}}/locations/{{location}}/plugins/{{plugin_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/plugins/{{plugin_id}}
-examples:
+samples:
   - name: apihub_plugin_full
+    external_providers:
+    - time
     primary_resource_id: apihub_plugin_full
-    vars:
-      plugin_id: 'plugin-full'
-    # API hub instance needs to be created before this, and end to end creation of that resource using Terraform is not yet supported.
     exclude_test: true
-    external_providers: ["time"]
+    steps:
+    - name: apihub_plugin_full
+      config_path: templates/terraform/samples/services/apihub/apihub_plugin_full.tf.tmpl
+      prefixed_vars:
+        plugin_id: plugin-full
 autogen_async: true
 autogen_status: UGx1Z2lu
 parameters:

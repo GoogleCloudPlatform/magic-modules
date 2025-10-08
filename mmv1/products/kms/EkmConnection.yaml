@@ -41,16 +41,19 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   iam_conditions_request_type: 'QUERY_PARAM_NESTED'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/ekmConnections/{{name}}'
 custom_code:
-examples:
-  - name: 'kms_ekm_connection_basic'
-    primary_resource_id: 'example-ekmconnection'
-    vars:
-      ekmconnection_name: 'ekmconnection_example'
+samples:
+  - name: kms_ekm_connection_basic
+    primary_resource_id: example-ekmconnection
     exclude_test: true
+    steps:
+    - name: kms_ekm_connection_basic
+      config_path: templates/terraform/samples/services/kms/kms_ekm_connection_basic.tf.tmpl
+      prefixed_vars:
+        ekmconnection_name: ekmconnection_example
 parameters:
   - name: 'location'
     type: String

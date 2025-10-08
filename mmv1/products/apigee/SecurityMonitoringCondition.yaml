@@ -31,20 +31,28 @@ import_format:
   - '{{org_id}}/{{condition_id}}'
 custom_code:
   custom_import: "templates/terraform/custom_import/apigee_security_monitoring_condition.go.tmpl"
-examples:
-  - name: 'apigee_security_monitoring_condition_basic'
-    vars:
-      environment_name: 'my-environment'
-      security_monitoring_condition_id: 'my-condition'
+samples:
+  - name: apigee_security_monitoring_condition_basic
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'apigee_security_monitoring_condition_basic_test'
-    primary_resource_id: 'security_monitoring_condition'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
+    steps:
+    - name: apigee_security_monitoring_condition_basic
+      config_path: templates/terraform/samples/services/apigee/apigee_security_monitoring_condition_basic.tf.tmpl
+      prefixed_vars:
+        environment_name: my-environment
+        security_monitoring_condition_id: my-condition
+  - name: apigee_security_monitoring_condition_basic_test
     skip_vcr: true
-    external_providers: ["time"]
+    external_providers:
+    - time
+    primary_resource_id: security_monitoring_condition
+    steps:
+    - name: apigee_security_monitoring_condition_basic_test
+      config_path: templates/terraform/samples/services/apigee/apigee_security_monitoring_condition_basic_test.tf.tmpl
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
 parameters:
   - name: 'orgId'
     type: String
