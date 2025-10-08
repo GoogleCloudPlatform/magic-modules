@@ -2,7 +2,7 @@
 title: "Add a TGC next resource"
 weight: 20
 aliases:
-  - /convert/add-resource
+  - /reference/add-resource
 ---
 
 # Adding support for converting a new resource
