@@ -292,7 +292,7 @@ func TestAccDatastreamStream_mongoDb(t *testing.T) {
 					resource.TestCheckResourceAttr("google_datastream_stream.default", "display_name", "tf-mongodb-gcs"),
 					resource.TestCheckResourceAttr("google_datastream_stream.default", "state", "NOT_STARTED"),
 					resource.TestCheckResourceAttr("google_datastream_stream.default", "source_config.0.mongodb_source_config.0.include_objects.0.databases.0.database", "test"),
-					resource.TestCheckResourceAttr("google_datastream_stream.default", "source_config.0.max_concurrent_backfill_tasks", "14"),
+					resource.TestCheckResourceAttr("google_datastream_stream.default", "source_config.0.mongodb_source_config.0.max_concurrent_backfill_tasks", "14"),
 				),
 			},
 			{
