@@ -22,7 +22,7 @@ references:
 base_url: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}/deployments'
 self_link: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}/deployments'
 immutable: true
-create_url: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}/deployments'
+create_url: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}/deployments?override={{override}}&sequencedRollout={{sequenced_rollout}}&serviceAccount={{service_account}}'
 delete_url: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}/deployments'
 autogen_async: false
 id_format: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}'

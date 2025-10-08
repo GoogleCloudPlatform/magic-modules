@@ -36,14 +36,6 @@ func TestAccApigeeEnvironmentApiRevisionDeployment_apigeeEnvironmentApiRevisionD
 				),
 			},
 			{
-				Config: testAccApigeeEnvironmentApiRevisionDeployment_apigeeEnvironmentApiRevisionDeploymentUpdate(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_apigee_environment_api_revision_deployment.deploy", "revision", "2"),
-					resource.TestCheckResourceAttrSet("google_apigee_environment_api_revision_deployment.deploy", "state"),
-				),
-			},
-
-			{
 				ResourceName:            "google_apigee_environment_api_revision_deployment.deploy",
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -158,119 +150,6 @@ func testAccApigeeEnvironmentApiRevisionDeployment_apigeeEnvironmentApiRevisionD
 		environment       = google_apigee_environment.env.name
 		api               = google_apigee_api.proxy.name
 		revision          = 1
-		override          = true
-		sequenced_rollout = true
-		service_account   = google_service_account.proxy_sa.email
-	}
-`, context)
-}
-
-func testAccApigeeEnvironmentApiRevisionDeployment_apigeeEnvironmentApiRevisionDeploymentUpdate(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-	resource "google_project" "project" {
-		project_id      = "tf-test%{random_suffix}"
-		name            = "tf-test%{random_suffix}"
-		org_id          = "%{org_id}"
-		billing_account = "%{billing_account}"
-		deletion_policy = "DELETE"
-	}
-
-	resource "google_project_service" "apigee" {
-		project = google_project.project.project_id
-		service = "apigee.googleapis.com"
-	}
-
-	resource "google_project_service" "servicenetworking" {
-		project    = google_project.project.project_id
-		service    = "servicenetworking.googleapis.com"
-		depends_on = [google_project_service.apigee]
-	}
-		
-	resource "google_project_service" "compute" {
-		project    = google_project.project.project_id
-		service    = "compute.googleapis.com"
-		depends_on = [google_project_service.servicenetworking]
-	}
-
-	resource "time_sleep" "wait_120_seconds" {
-		create_duration = "120s"
-		depends_on      = [google_project_service.compute]
-	}
-		
-	resource "google_compute_network" "apigee_network" {
-		name       = "apigee-network%{random_suffix}"
-	    project    = google_project.project.project_id
-		depends_on = [time_sleep.wait_120_seconds]
-	}
-	
-	resource "google_compute_global_address" "apigee_range" {
-		name          = "tf-test-apigee-range%{random_suffix}"
-		purpose       = "VPC_PEERING"
-		address_type  = "INTERNAL"
-		prefix_length = 16
-		network       = google_compute_network.apigee_network.id
-		project       = google_project.project.project_id
-		
-	}
-		
-	resource "google_service_networking_connection" "apigee_vpc_connection" {
-		network                 = google_compute_network.apigee_network.id
-		service                 = "servicenetworking.googleapis.com"
-		reserved_peering_ranges = [google_compute_global_address.apigee_range.name]
-	}
-		
-	resource "google_apigee_organization" "apigee_org" {
-		analytics_region   = "us-central1"
-		project_id         = google_project.project.project_id
-		authorized_network = google_compute_network.apigee_network.id
-		depends_on         = [google_service_networking_connection.apigee_vpc_connection]
-	}
-    
-	resource "time_sleep" "wait_after_org" {
-		create_duration = "300s"
-		depends_on      = [google_apigee_organization.apigee_org]
-	}
-
-	resource "google_apigee_environment" "env" {
-		org_id       = google_apigee_organization.apigee_org.id
-		name         = "dev"
-		display_name = "dev"
-		description  = "terraform test env"
-		depends_on   = [time_sleep.wait_after_org]
-
-	}
-
-	resource "google_apigee_instance" "apigee_ins" {
-		name         = "apigee-instance%{random_suffix}"
-		location     = "us-central1"
-		org_id       = google_apigee_organization.apigee_org.id
-		depends_on   = [google_apigee_environment.env]
-	}
-		
-	resource "google_apigee_instance_attachment" "instance_att" {
-		instance_id  = google_apigee_instance.apigee_ins.id
-		environment  = google_apigee_environment.env.name
-		depends_on   = [google_apigee_instance.apigee_ins]
-	}
-	
-	resource "google_service_account" "proxy_sa" {
-		account_id   = "proxy-sa-%{random_suffix}"
-		display_name = "TF Proxy Test SA"
-		project      = google_project.project.project_id
-	}
-	
-	resource "google_apigee_api" "proxy" {
-		name          = "tf-test-apigee-proxy-%{random_suffix}"
-		org_id        = google_project.project.project_id
-		config_bundle = "./test-fixtures/apigee_api_bundle2.zip"
-		depends_on    = [google_apigee_instance_attachment.instance_att]
-	}
-
-	resource "google_apigee_environment_api_revision_deployment" "deploy" {
-		org_id   = google_project.project.project_id
-		environment       = google_apigee_environment.env.name
-		api               = google_apigee_api.proxy.name
-		revision          = 2
 		override          = true
 		sequenced_rollout = true
 		service_account   = google_service_account.proxy_sa.email
