@@ -139,6 +139,31 @@ func TestAccDataLossPreventionJobTrigger_dlpJobTriggerPubsub(t *testing.T) {
 	})
 }
 
+func TestAccDataLossPreventionJobTrigger_dlpJobTriggerDataplexCatalog(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project": envvar.GetTestProjectFromEnv(),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataLossPreventionJobTriggerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataLossPreventionJobTrigger_publishFindingsToDataplexCatalog(context),
+			},
+			{
+				ResourceName:            "google_data_loss_prevention_job_trigger.actions",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
+			},
+		},
+	})
+}
+
 func TestAccDataLossPreventionJobTrigger_dlpJobTriggerDeidentifyUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -938,9 +963,16 @@ resource "google_data_loss_prevention_job_trigger" "actions" {
 			publish_findings_to_dataplex_catalog {}
 		}
 		storage_config {
-			cloud_storage_options {
-				file_set {
-					url = "gs://mybucket/directory/"
+			big_query_options {
+				table_reference {
+					project_id = "project"
+					dataset_id = "dataset"
+					table_id = "table_to_scan"
+				}
+				rows_limit = 1000
+				sample_method = "RANDOM_START"
+				identifying_fields {
+					name = "field"
 				}
 			}
 		}
