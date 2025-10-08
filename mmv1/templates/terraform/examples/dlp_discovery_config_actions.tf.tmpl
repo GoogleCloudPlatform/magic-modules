@@ -56,6 +56,9 @@ resource "google_data_loss_prevention_discovery_config" "{{$.PrimaryResourceId}}
       lower_data_risk_to_low     = true
     }
   }
+  actions {
+    publish_to_dataplex_catalog {}
+  }
   inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.basic.name}"]
 }
 
