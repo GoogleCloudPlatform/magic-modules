@@ -48,7 +48,7 @@ resource "google_apigee_api_product" "full_api_product" {
 
   environments = ["dev", "hom"]
 
-  # Set them in reverse order to set set
+  # Set them in reverse order to test set
   scopes = [
     "write:reports"
     "read:weather",
