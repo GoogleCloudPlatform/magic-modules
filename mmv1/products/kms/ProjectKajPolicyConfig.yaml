@@ -54,8 +54,12 @@ examples:
   - name: 'kms_project_kaj_policy_config_basic'
     primary_resource_id: 'example'
     min_version: 'beta'
+    vars:
+      project_id: 'my-project'
     test_env_vars:
-      project_id: 'PROJECT_NAME'
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    external_providers: ["time"]
 parameters:
 properties:
   - name: 'defaultKeyAccessJustificationPolicy'
