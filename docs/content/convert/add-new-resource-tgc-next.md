@@ -7,9 +7,15 @@ aliases:
 
 # Adding support for converting a new resource
 
+{{< hint warning >}}
+This method of adding TGC support is currently experimental and not officially supported. Use at your own risk!
+{{< /hint >}}
+
 terraform-google-conversion (TGC) consumes a Terraform plan and uses it to build Cloud Asset Inventory (CAI) Assets. These built assets only exist in memory locally.
 
 TGC supports only those GCP resources that are available in both the Terraform provider and Cloud Asset Inventory.
+
+## Before you begin
 
 ### Getting a Terraform resource name from a GCP resource name
 
@@ -19,7 +25,7 @@ The first step in determining if a GCP resource is supported is to identify the 
 
 The second step in determining if a GCP resource is supported is to verify its inclusion in the Cloud Asset Inventory (CAI). You can complete this by searching for the resource's asset type within CAI's list of [supported asset types](https://cloud.google.com/asset-inventory/docs/asset-types).
 
-## How to add support for a new resource
+## Adding support
 
 Adding support for a resource has 4 steps:
 
@@ -77,8 +83,6 @@ You will also need to add an entry to [`tgc_next/provider/provider_mmv1_resource
 "google_product_resource": product.ResourceName(),
 // ...
 ```
-
-{{< /tab >}}
 
 ###### Resource_tfplan2cai.go file
 Most resources will only need a resource converter with a conversion func. For example,  Resource resource within Product, this might look like:
@@ -206,6 +210,7 @@ You will also need to add an entry to [`tgc_next/cai2hcl/resource_converters.go.
 ```
 
 {{< /tab >}}
+{{% /tabs %}}
 
 ### 2. Generate terraform-google-conversion
 To generate terraform-google-conversion code locally, run the following from the root of the `magic-modules` repository:
@@ -335,7 +340,7 @@ To resolve integration test failures, you need to apply the correct override con
 
 		For custom cai2hcl conversion logic, add `custom_tgc_flatten` to the field.
 
-### 3. Make PRs
+### 4. Make PRs
 
 Now that you have your code working locally, open a PR for [Magic Modules](https://github.com/GoogleCloudPlatform/magic-modules).
 
