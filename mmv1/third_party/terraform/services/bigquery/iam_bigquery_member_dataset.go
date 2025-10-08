@@ -7,6 +7,8 @@
 package bigquery
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"strings"
@@ -66,7 +68,7 @@ func NewBigqueryDatasetIamMemberUpdater(d tpgresource.TerraformResourceData, con
 }
 
 func (u *BigqueryDatasetIamMemberUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
-	url := fmt.Sprintf("%s%s", u.Config.BigQueryBasePath, u.GetResourceId())
+	url := fmt.Sprintf("%s%s?accessPolicyVersion=3", u.Config.BigQueryBasePath, u.GetResourceId())
 
 	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
@@ -92,7 +94,7 @@ func (u *BigqueryDatasetIamMemberUpdater) GetResourceIamPolicy() (*cloudresource
 }
 
 func GetCurrentResourceAccess(u *BigqueryDatasetIamMemberUpdater) ([]interface{}, error) {
-	url := fmt.Sprintf("%s%s", u.Config.BigQueryBasePath, u.GetResourceId())
+	url := fmt.Sprintf("%s%s?accessPolicyVersion=3", u.Config.BigQueryBasePath, u.GetResourceId())
 
 	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
@@ -141,7 +143,7 @@ func mergeAccess(newAccess []map[string]interface{}, currAccess []interface{}) [
 }
 
 func (u *BigqueryDatasetIamMemberUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
-	url := fmt.Sprintf("%s%s", u.Config.BigQueryBasePath, u.GetResourceId())
+	url := fmt.Sprintf("%s%s?accessPolicyVersion=3", u.Config.BigQueryBasePath, u.GetResourceId())
 
 	newAccess, err := policyToAccessForIamMember(policy)
 	if err != nil {
@@ -179,11 +181,25 @@ func (u *BigqueryDatasetIamMemberUpdater) SetResourceIamPolicy(policy *cloudreso
 	return nil
 }
 
+func conditionFingerprint(condition *cloudresourcemanager.Expr) string {
+	if condition == nil {
+		return "no-condition"
+	}
+
+	data := fmt.Sprintf("%s|%s|%s", condition.Title, condition.Description, condition.Expression)
+	hash := sha256.Sum256([]byte(data))
+	return hex.EncodeToString(hash[:])
+}
+
 func accessToPolicyForIamMember(access interface{}) (*cloudresourcemanager.Policy, error) {
 	if access == nil {
 		return nil, nil
 	}
-	roleToBinding := make(map[string]*cloudresourcemanager.Binding)
+	type bindingKey struct {
+		role      string
+		condition string
+	}
+	roleToBinding := make(map[bindingKey]*cloudresourcemanager.Binding)
 
 	accessArr := access.([]interface{})
 	for _, v := range accessArr {
@@ -203,14 +219,37 @@ func accessToPolicyForIamMember(access interface{}) (*cloudresourcemanager.Polic
 		if err != nil {
 			return nil, err
 		}
-		// We have to combine bindings manually
-		binding, ok := roleToBinding[role]
+
+		var condition *cloudresourcemanager.Expr
+		if rawCondition, ok := memberRole["condition"]; ok {
+			conditionMap := rawCondition.(map[string]interface{})
+			var description string
+			// description is optional
+			if strValue, ok := conditionMap["description"].(string); ok {
+				description = strValue
+			}
+			condition = &cloudresourcemanager.Expr{
+				Title:       conditionMap["title"].(string),
+				Description: description,
+				Expression:  conditionMap["expression"].(string),
+			}
+		}
+
+		key := bindingKey{
+			role:      role,
+			condition: conditionFingerprint(condition),
+		}
+
+		binding, ok := roleToBinding[key]
 		if !ok {
-			binding = &cloudresourcemanager.Binding{Role: role, Members: []string{}}
+			binding = &cloudresourcemanager.Binding{
+				Role:      role,
+				Members:   []string{},
+				Condition: condition,
+			}
 		}
 		binding.Members = append(binding.Members, member)
-
-		roleToBinding[role] = binding
+		roleToBinding[key] = binding
 	}
 	bindings := make([]*cloudresourcemanager.Binding, 0)
 	for _, v := range roleToBinding {
@@ -226,9 +265,6 @@ func policyToAccessForIamMember(policy *cloudresourcemanager.Policy) ([]map[stri
 		return nil, errors.New("Access policies not allowed on BigQuery Dataset IAM policies")
 	}
 	for _, binding := range policy.Bindings {
-		if binding.Condition != nil {
-			return nil, errors.New("IAM conditions not allowed on BigQuery Dataset IAM")
-		}
 		if fullRole, ok := bigqueryIamMemberAccessPrimitiveToRoleMap[binding.Role]; ok {
 			return nil, fmt.Errorf("BigQuery Dataset legacy role %s is not allowed when using google_bigquery_dataset_iam resources. Please use the full form: %s", binding.Role, fullRole)
 		}
@@ -239,6 +275,9 @@ func policyToAccessForIamMember(policy *cloudresourcemanager.Policy) ([]map[stri
 			}
 			access := map[string]interface{}{
 				"role": binding.Role,
+			}
+			if binding.Condition != nil {
+				access["condition"] = binding.Condition
 			}
 			memberType, member, err := iamMemberToAccessForIamMember(member)
 			if err != nil {
