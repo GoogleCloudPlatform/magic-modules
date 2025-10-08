@@ -76,6 +76,13 @@ resource "google_saas_runtime_unit_kind" "example_unit_kind" {
   saas = google_saas_runtime_saas.example_saas_regional.id
 }
 
+resource "google_saas_runtime_tenant" "example_tenant" {
+  provider = google-beta
+  location = "us-central1"
+  tenant_id = "tf-test-example-tenant%{random_suffix}"
+  saas = google_saas_runtime_saas.example_saas_regional.id
+}
+
 resource "google_saas_runtime_unit" "example" {
   provider = google-beta
   location = "us-central1"
@@ -104,11 +111,19 @@ resource "google_saas_runtime_unit_kind" "example_unit_kind" {
   saas = google_saas_runtime_saas.example_saas_regional.id
 }
 
+resource "google_saas_runtime_tenant" "example_tenant" {
+  provider = google-beta
+  location = "us-central1"
+  tenant_id = "tf-test-example-tenant%{random_suffix}"
+  saas = google_saas_runtime_saas.example_saas_regional.id
+}
+
 resource "google_saas_runtime_unit" "example" {
   provider = google-beta
   location = "us-central1"
   unit_id = "tf-test-example-unit%{random_suffix}"
   unit_kind = google_saas_runtime_unit_kind.example_unit_kind.id
+  tenant = google_saas_runtime_tenant.example_tenant.id
   labels = {
     "label-one": "foo"
   }
