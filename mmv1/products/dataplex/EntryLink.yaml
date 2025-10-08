@@ -39,17 +39,13 @@ examples:
       entry_link_name: 'entry_link_basic'
     test_env_vars:
       project_number: 'PROJECT_NUMBER'
-  # - name: 'dataplex_entry_link_full'
-  #   primary_resource_id: 'full_entry_link'
-  #   vars:
-  #     entry_link_id: 'my_entry_link_full'
-  #     entry_group_id: 'my_entry_group_full'
-  #     source_entry_id: 'source_entry_full'
-  #     target_entry_id: 'target_entry_full'
-  #   resource_creation_order:
-  #     - 'google_dataplex_entry_group.full'
-  #     - 'google_dataplex_entry.source'
-  #     - 'google_dataplex_entry.target'
+  - name: 'dataplex_entry_link_full'
+    primary_resource_id: 'full_entry_link'
+    primary_resource_name: 'fmt.Sprintf("tf-test-entry-link-full%s", context["random_suffix"])'
+    vars:
+      entry_link_name: 'my_entry_link_full'
+    test_env_vars:
+      project_number: 'PROJECT_NUMBER'
 parameters:
   - name: 'entryGroupId'
     type: String

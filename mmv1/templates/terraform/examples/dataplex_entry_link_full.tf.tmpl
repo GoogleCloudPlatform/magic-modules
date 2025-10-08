@@ -1,0 +1,45 @@
+resource "google_dataplex_entry_group" "entry-group-full" {
+  location = "us-central1"
+  entry_group_id = "tf-test-entry-group-full%{random_suffix}"
+  project = "{{index $.TestEnvVars "project_number"}}"
+}
+
+resource "google_dataplex_entry" "source" {
+  location = "us-central1"
+  entry_group_id = google_dataplex_entry_group.entry-group-full.entry_group_id
+  entry_id = "tf-test-source-entry-full%{random_suffix}"
+  entry_type = google_dataplex_entry_type.entry-type-full.name
+  project = "{{index $.TestEnvVars "project_number"}}"
+}
+
+resource "google_dataplex_entry_type" "entry-type-full" {
+  entry_type_id = "tf-test-entry-type-full%{random_suffix}"
+  location = "us-central1"
+  project = "{{index $.TestEnvVars "project_number"}}"
+}
+
+resource "google_dataplex_entry" "target" {
+  location = "us-central1"
+  entry_group_id = google_dataplex_entry_group.entry-group-full.entry_group_id
+  entry_id = "tf-test-target-entry-full%{random_suffix}"
+  entry_type = google_dataplex_entry_type.entry-type-full.name
+  project = "{{index $.TestEnvVars "project_number"}}"
+}
+
+resource "google_dataplex_entry_link" "{{$.PrimaryResourceId}}" {
+  project = "{{index $.TestEnvVars "project_number"}}"
+  location = "us-central1"
+  entry_group_id = google_dataplex_entry_group.entry-group-full.entry_group_id
+  entry_link_id = "tf-test-entry-link-full%{random_suffix}"
+
+  entry_link_type = "projects/655216118709/locations/global/entryLinkTypes/related"
+
+  entry_references {
+    name = google_dataplex_entry.source.name,
+    path = "Schema.name"
+  }
+
+  entry_references {
+    name = google_dataplex_entry.target.name
+  }
+}
