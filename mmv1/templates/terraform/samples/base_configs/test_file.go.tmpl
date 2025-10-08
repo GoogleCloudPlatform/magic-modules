@@ -11,7 +11,7 @@
 //     changes will be clobbered when the file is regenerated.
 //
 //     Please read more about how to change this file in
-//     .github/CONTRIBUTING.md. test
+//     .github/CONTRIBUTING.md.
 //
 // ----------------------------------------------------------------------------
 
@@ -71,7 +71,7 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 		"{{$varKey}}": {{$varVal}},
 		{{- end }}
 		"random_suffix": acctest.RandString(t, 10),
-		}
+	}
 	{{- end }}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -93,7 +93,7 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 		{{- range $i, $st := $s.TestSteps }}
 			{
 			{{- if eq $i 0 }}
-			 Config: testAcc{{ $st.TestStepSlug $.Res.ProductMetadata.Name $.Res.Name }}(context),
+				Config: testAcc{{ $st.TestStepSlug $.Res.ProductMetadata.Name $.Res.Name }}(context),
 			{{- else }}
 			 Config: testAcc{{ $st.TestStepSlug $.Res.ProductMetadata.Name $.Res.Name }}(context_{{ $i }}),
 			 ConfigPlanChecks: resource.ConfigPlanChecks{
@@ -110,17 +110,17 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 				ImportStateVerify: true,
 			{{- if $.Res.IgnoreReadPropertiesStepToString $st }}
 				ImportStateVerifyIgnore: {{ $.Res.IgnoreReadPropertiesStepToString $st }},
+			{{- end }}
 			},
 			{{- end }}
-			{{- end }}
-	  {{- end }}
+		{{- end }}
 		},
 	})
 }
 
 {{ range $st := $s.NewConfigFuncs }}
 func testAcc{{ $st.TestStepSlug $.Res.ProductMetadata.Name $.Res.Name }}(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 {{ $st.TestHCLText -}}
 `, context)
 }
