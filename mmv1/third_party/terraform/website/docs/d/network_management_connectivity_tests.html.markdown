@@ -23,7 +23,7 @@ To get more information about connectivity tests, see:
 
 ```hcl
 data "google_network_management_connectivity_tests" "tests" {
-  filter = "name:my-tests"
+  filter = "name:projects/project-id/locations/global/connectivityTests/my-tests"
 }
 ```
 
