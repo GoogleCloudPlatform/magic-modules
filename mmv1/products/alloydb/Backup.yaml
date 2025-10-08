@@ -41,117 +41,57 @@ async:
 custom_code:
   encoder: 'templates/terraform/encoders/alloydb_backup.tmpl'
 include_in_tgc_next_DO_NOT_USE: true
-samples:
+examples:
   - name: 'alloydb_backup_basic'
     primary_resource_id: 'default'
+    vars:
+      alloydb_backup_id: 'alloydb-backup'
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
+    ignore_read_extra:
+      - 'reconciling'
+      - 'update_time'
     exclude_test: true
-    steps:
-      - name: 'alloydb_backup_basic'
-        prefixed_vars:
-          alloydb_backup_id: 'alloydb-backup'
-          alloydb_cluster_name: 'alloydb-cluster'
-          alloydb_instance_name: 'alloydb-instance'
-          network_name: 'alloydb-network'
-        ignore_read_extra:
-          - 'reconciling'
-          - 'update_time'
   - name: 'alloydb_backup_basic_test'
     primary_resource_id: 'default'
-    steps:
-      - name: 'alloydb_backup_basic_test'
-        prefixed_vars:
-          alloydb_backup_id: 'alloydb-backup'
-          alloydb_cluster_name: 'alloydb-cluster'
-          alloydb_instance_name: 'alloydb-instance'
-          network_name: 'alloydb-network'
-        test_vars_overrides:
-          'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
-        ignore_read_extra:
-          - 'reconciling'
-          - 'update_time'
-        exclude_docs: true
+    vars:
+      alloydb_backup_id: 'alloydb-backup'
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
+    test_vars_overrides:
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
+    ignore_read_extra:
+      - 'reconciling'
+      - 'update_time'
+    exclude_docs: true
   - name: 'alloydb_backup_full'
     primary_resource_id: 'default'
+    vars:
+      alloydb_backup_id: 'alloydb-backup'
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
+    ignore_read_extra:
+      - 'reconciling'
+      - 'update_time'
     exclude_test: true
-    steps:
-      - name: 'alloydb_backup_full'
-        prefixed_vars:
-          alloydb_backup_id: 'alloydb-backup'
-          alloydb_cluster_name: 'alloydb-cluster'
-          alloydb_instance_name: 'alloydb-instance'
-          network_name: 'alloydb-network'
-        ignore_read_extra:
-          - 'reconciling'
-          - 'update_time'
   - name: 'alloydb_backup_full_test'
     primary_resource_id: 'default'
-    skip_vcr: true
-    steps:
-      - name: 'alloydb_backup_full_test'
-        prefixed_vars:
-          alloydb_backup_id: 'alloydb-backup'
-          alloydb_cluster_name: 'alloydb-cluster'
-          alloydb_instance_name: 'alloydb-instance'
-          network_name: 'alloydb-network'
-        test_vars_overrides:
-          'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
-        ignore_read_extra:
-          - 'reconciling'
-          - 'update_time'
-        exclude_docs: true
+    vars:
+      alloydb_backup_id: 'alloydb-backup'
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
+    test_vars_overrides:
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
+    ignore_read_extra:
+      - 'reconciling'
+      - 'update_time'
+    exclude_docs: true
     # https://github.com/hashicorp/terraform-provider-google/issues/16231
-    
-# examples:
-#   - name: 'alloydb_backup_basic'
-#     primary_resource_id: 'default'
-#     vars:
-#       alloydb_backup_id: 'alloydb-backup'
-#       alloydb_cluster_name: 'alloydb-cluster'
-#       alloydb_instance_name: 'alloydb-instance'
-#       network_name: 'alloydb-network'
-#     ignore_read_extra:
-#       - 'reconciling'
-#       - 'update_time'
-#     exclude_test: true
-#   - name: 'alloydb_backup_basic_test'
-#     primary_resource_id: 'default'
-#     vars:
-#       alloydb_backup_id: 'alloydb-backup'
-#       alloydb_cluster_name: 'alloydb-cluster'
-#       alloydb_instance_name: 'alloydb-instance'
-#       network_name: 'alloydb-network'
-#     test_vars_overrides:
-#       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
-#     ignore_read_extra:
-#       - 'reconciling'
-#       - 'update_time'
-#     exclude_docs: true
-#   - name: 'alloydb_backup_full'
-#     primary_resource_id: 'default'
-#     vars:
-#       alloydb_backup_id: 'alloydb-backup'
-#       alloydb_cluster_name: 'alloydb-cluster'
-#       alloydb_instance_name: 'alloydb-instance'
-#       network_name: 'alloydb-network'
-#     ignore_read_extra:
-#       - 'reconciling'
-#       - 'update_time'
-#     exclude_test: true
-#   - name: 'alloydb_backup_full_test'
-#     primary_resource_id: 'default'
-#     vars:
-#       alloydb_backup_id: 'alloydb-backup'
-#       alloydb_cluster_name: 'alloydb-cluster'
-#       alloydb_instance_name: 'alloydb-instance'
-#       network_name: 'alloydb-network'
-#     test_vars_overrides:
-#       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
-#     ignore_read_extra:
-#       - 'reconciling'
-#       - 'update_time'
-#     exclude_docs: true
-#     # https://github.com/hashicorp/terraform-provider-google/issues/16231
-#     skip_vcr: true
+    skip_vcr: true
 parameters:
   - name: 'backupId'
     type: String
