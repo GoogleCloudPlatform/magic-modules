@@ -277,6 +277,7 @@ The core integration tests in `terraform-google-conversion` mirror the naming of
  | File 4 (roundtrip.json) | CAI Assets (roundtrip_assets) converted from File 3           | tfplan2cai           |
  | File 5 (roundtrip.tf)   | Final Terraform configuration (roundtrip_config) from File 4  | cai2hcl              |
 
+![Test files flowchart](/images/tgc-v6-flowchart.webp)
 
 The integration tests pass only when two conditions are met:
 1. Every field in the original `raw_config` must exist within the generated `export_config`.
