@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccDataplexEntryLink_dataplexEntryLinkBasicExample(t *testing.T) {
+func TestAccDataplexEntryLink_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -22,7 +22,7 @@ func TestAccDataplexEntryLink_dataplexEntryLinkBasicExample(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataplexEntryLink_dataplexEntryLinkBasicExample(context),
+				Config: testAccDataplexEntryLink_dataplexEntryLinkUpdate(context),
 			},
 			{
 				ResourceName:            "google_dataplex_entry_link.basic_entry_link",
@@ -34,7 +34,7 @@ func TestAccDataplexEntryLink_dataplexEntryLinkBasicExample(t *testing.T) {
 	})
 }
 
-func testAccDataplexEntryLink_dataplexEntryLinkBasicExample(context map[string]interface{}) string {
+func testAccDataplexEntryLink_dataplexEntryLinkUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dataplex_entry_group" "entry-group-basic" {
   location = "us-central1"
