@@ -88,7 +88,9 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 		{{- end }}
 		},
 	{{- end }}
+	{{- if not $.Res.ExcludeDelete }}
 		CheckDestroy: testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t),
+	{{- end }}
 		Steps: []resource.TestStep{
 		{{- range $i, $st := $s.TestSteps }}
 			{
