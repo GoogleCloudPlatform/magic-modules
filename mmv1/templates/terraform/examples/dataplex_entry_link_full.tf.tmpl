@@ -35,7 +35,7 @@ resource "google_dataplex_entry_link" "{{$.PrimaryResourceId}}" {
   entry_link_type = "projects/655216118709/locations/global/entryLinkTypes/related"
 
   entry_references {
-    name = google_dataplex_entry.source.name,
+    name = google_dataplex_entry.source.name
     path = "Schema.name"
   }
 
