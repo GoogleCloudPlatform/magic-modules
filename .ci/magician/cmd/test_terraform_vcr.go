@@ -92,7 +92,7 @@ It expects the following arguments:
 	3. Build ID
 	4. Project ID where Cloud Builds are located
 	5. Build step number
-	
+
 The following environment variables are required:
 ` + listTTVRequiredEnvironmentVariables(),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -145,6 +145,10 @@ The following environment variables are required:
 		if len(args) > 5 {
 			enableAsyncUploadCassettes = strings.ToLower(args[5]) == "true"
 		}
+
+		// TODO: remove these after debug finished
+		fmt.Printf("enable async upload = %v\n", enableAsyncUploadCassettes)
+		enableAsyncUploadCassettes = true
 		return execTestTerraformVCR(args[0], args[1], args[2], args[3], args[4], baseBranch, gh, rnr, ctlr, vt, enableAsyncUploadCassettes)
 	},
 }
