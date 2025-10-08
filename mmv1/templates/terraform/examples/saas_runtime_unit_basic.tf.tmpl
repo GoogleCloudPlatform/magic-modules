@@ -20,4 +20,5 @@ resource "google_saas_runtime_unit" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
   unit_id = "{{index $.Vars "unit_name"}}"
   unit_kind = google_saas_runtime_unit_kind.example_unit_kind.id
+  management_mode = "MANAGEMENT_MODE_USER"
 }
