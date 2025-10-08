@@ -919,6 +919,36 @@ resource "google_data_loss_prevention_job_trigger" "pubsub" {
 `, context)
 }
 
+func testAccDataLossPreventionJobTrigger_publishFindingsToDataplexCatalog(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_data_loss_prevention_job_trigger" "actions" {
+	parent = "projects/%{project}"
+	description = "Starting description"
+	display_name = "display"
+
+	triggers {
+		schedule {
+			recurrence_period_duration = "86400s"
+		}
+	}
+
+	inspect_job {
+		inspect_template_name = "fake"
+		actions {
+			publish_findings_to_dataplex_catalog {}
+		}
+		storage_config {
+			cloud_storage_options {
+				file_set {
+					url = "gs://mybucket/directory/"
+				}
+			}
+		}
+	}
+}
+`, context)
+}
+
 func testAccDataLossPreventionJobTrigger_dlpJobTriggerDeidentifyBasic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_data_loss_prevention_job_trigger" "actions" {
