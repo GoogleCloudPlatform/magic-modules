@@ -1,0 +1,50 @@
+func desiredPscAndEndpointCustomizeDiff(_, old, new string, d *schema.ResourceData) bool {
+	// Use GetRawConfig to check if desired_psc_auto_connections field is set in the configuration
+	configRawPsc, _ := d.GetRawConfigAt(cty.GetAttrPath("desired_psc_auto_connections"))
+	configRawEndpoint, _ := d.GetRawConfigAt(cty.GetAttrPath("desired_auto_created_endpoints"))
+
+	// Check if the field is set (not null and known)
+	if !configRawPsc.IsNull() && configRawPsc.IsKnown() {
+		// Field is explicitly set in configuration
+		configSlice := configRawPsc.AsValueSlice()
+		if len(configSlice) > 0 {
+			// Field is set with values - perform any necessary diff logic here
+			// For example, you might want to force new resource creation or set computed values
+			log.Printf("[DEBUG] configRawPsc value in rawconfig is %#v", configRawPsc)
+
+			/*
+				// Example: Set a computed field based on the presence of desired_psc_auto_connections
+				if d.HasChange("desired_psc_auto_connections") {
+					// Handle changes to the field when it's explicitly configured
+					// This could include validation, setting other computed fields, etc.
+				}
+			*/
+		}
+	} else {
+		log.Printf("[DEBUG] set to nothing for configRawPsc")
+		d.Set("desired_psc_auto_connections", []interface{}{})
+
+	}
+	// Check if the field is set (not null and known)
+	if !configRawEndpoint.IsNull() && configRawEndpoint.IsKnown() {
+		// Field is explicitly set in configuration
+		configSlice := configRawEndpoint.AsValueSlice()
+		if len(configSlice) > 0 {
+			// Field is set with values - perform any necessary diff logic here
+			// For example, you might want to force new resource creation or set computed values
+			log.Printf("[DEBUG] configRawEndpoint value in rawconfig is %#v", configRawEndpoint)
+			/* // Example: Set a computed field based on the presence of desired_psc_auto_connections
+			if d.HasChange("desired_auto_created_endpoints") {
+				// Handle changes to the field when it's explicitly configured
+				// This could include validation, setting other computed fields, etc.
+			}
+			*/
+		}
+	} else {
+		log.Printf("[DEBUG] set to nothing for configRawEndpoint")
+		d.Set("desired_auto_created_endpoints", []interface{}{})
+
+	}
+
+	return false
+}
