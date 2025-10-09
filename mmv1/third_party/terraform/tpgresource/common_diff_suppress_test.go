@@ -144,6 +144,14 @@ func TestEmptyOrUnsetBlockDiffSuppress(t *testing.T) {
 			NewVal:             []interface{}{map[string]interface{}{"example_list": []interface{}{}}},
 			ExpectDiffSuppress: true,
 		},
+		"empty block vs. list with nil": {
+			Key:                "example_block.#",
+			Old:                "0",
+			New:                "1",
+			OldVal:             []interface{}{},
+			NewVal:             []interface{}{nil},
+			ExpectDiffSuppress: true,
+		},
 		// If a parent block returns an empty sub-block in lieu of nil or an empty map, the values of the undefined
 		// parent block and an empty, but defined block will be identical while the array count will have changed
 		"nested block, defined empty vs. undefined": {

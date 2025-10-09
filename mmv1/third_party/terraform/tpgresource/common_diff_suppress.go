@@ -47,6 +47,11 @@ func EmptyOrUnsetBlockDiffSuppressLogic(k, old, new string, o, n interface{}) bo
 		return false
 	}
 
+	// If the block contents are nil instead of a map, consider it empty & suppress the diff.
+	if l[0] == nil {
+		return true
+	}
+
 	contents, ok := l[0].(map[string]interface{})
 	if !ok {
 		return false
