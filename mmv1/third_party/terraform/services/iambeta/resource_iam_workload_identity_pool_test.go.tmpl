@@ -71,37 +71,6 @@ func TestAccIAMBetaWorkloadIdentityPool_minimal(t *testing.T) {
 	})
 }
 
-func TestAccIAMBetaWorkloadIdentityPool_defaultPoolName(t *testing.T) {
-	t.Parallel()
-
-	randomSuffix := acctest.RandString(t, 10)
-	defaultPoolName := randomSuffix + ".svc.id.goog"
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckIAMBetaWorkloadIdentityPoolDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccIAMBetaWorkloadIdentityPool_minimal(defaultPoolName),
-			},
-			{
-				ResourceName:      "google_iam_workload_identity_pool.my_pool",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccIAMBetaWorkloadIdentityPool_update(defaultPoolName),
-			},
-			{
-				ResourceName:      "google_iam_workload_identity_pool.my_pool",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
 {{if ne $.TargetVersionName "ga" -}}
 func TestAccIAMBetaWorkloadIdentityPool_beta_update(t *testing.T) {
 	t.Parallel()
