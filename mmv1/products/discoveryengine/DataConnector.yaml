@@ -277,7 +277,7 @@ properties:
     type: Array
     description: |
       The modes enabled for this connector. The possible value can be:
-      'CONNECTOR_MODE_UNSPECIFIED', 'DATA_INGESTION', 'ACTIONS', 'FEDERATED'
+      'DATA_INGESTION', 'ACTIONS', 'FEDERATED'
       'EUA', 'FEDERATED_AND_EUA'.
     item_type:
       type: String
@@ -285,7 +285,7 @@ properties:
     type: String
     description: |
       The data synchronization mode supported by the data connector. The possible value can be:
-      'UNSPECIFIED', 'PERIODIC', 'STREAMING'.
+      'PERIODIC', 'STREAMING'.
     ignore_read: true
   - name: 'incrementalRefreshInterval'
     type: String
