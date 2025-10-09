@@ -6,7 +6,7 @@ weight: 20
 # Add TGC conversion 
 
 {{< hint warning >}}
-This method of adding TGC support is currently experimental and not officially supported. Use at your own risk!
+This method of adding TGC support is currently experimental and not officially supported. We recommended this path only for core contributors.
 {{< /hint >}}
 
 terraform-google-conversion (TGC) consumes a Terraform plan and uses it to build Cloud Asset Inventory (CAI) Assets. These built assets only exist in memory locally.
@@ -17,7 +17,7 @@ TGC supports only those GCP resources that are available in both the Terraform p
 
 ### Getting a Terraform resource name from a GCP resource name
 
-The first step in determining if a GCP resource is supported is to identify the corresponding Terraform resource. You can often do this by searching for the GCP resource name in the [Terraform google-beta provider documentation](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs).
+The first step in determining if a GCP resource is supported is to identify the corresponding Terraform resource. You can often do this by searching for the GCP resource name in the [Terraform google provider documentation](https://registry.terraform.io/providers/hashicorp/google/latest/docs).
 
 ### Getting the CAI asset type of a GCP resource
 
