@@ -21,7 +21,6 @@ iam_policy:
   allowed_iam_role: 'roles/iap.httpsResourceAccessor'
   parent_resource_attribute: 'forwarding_rule_region_service_name'
   iam_conditions_request_type: 'REQUEST_BODY'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 exclude_tgc: true
 examples:
   - name: 'forwarding_rule_region_service_basic'
