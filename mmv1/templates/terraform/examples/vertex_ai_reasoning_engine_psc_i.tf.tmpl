@@ -3,23 +3,27 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
   description  = "A basic reasoning engine"
   region       = "us-central1"
 
-  encryption_spec {
-    kms_key_name = "{{index $.Vars "kms_key_name"}}"
-  }
-
   spec {
     agent_framework = "google-adk"
-
-    deployment_spec {
-
-
-    }
 
     package_spec {
       dependency_files_gcs_uri = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_dependencies_tar_gz.name}"
       pickle_object_gcs_uri    = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_pickle.name}"
-      python_version           = "3.11"
+      python_version           = "3.12"
       requirements_gcs_uri     = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_requirements_txt.name}"
+    }
+
+    deployment_spec {
+
+      psc_interface_config {
+        network_attachment = google_compute_network_attachment.network_attachment.name
+
+        dns_peering_config {
+          domain         = "example.com"
+          target_project = data.google_project.project.id
+          target_network = google_compute_network.network.id
+        }
+      }
     }
   }
 
@@ -33,38 +37,10 @@ resource "time_sleep" "wait_5_minutes" {
   create_duration = "5m"
 
   depends_on = [
-    google_project_iam_member.sa_iam_ai_platform_user,
-    google_project_iam_member.sa_iam_object_viewer,
     google_project_iam_member.sa_iam_viewer,
-    google_secret_manager_secret_iam_member.secret_access,
-    google_secret_manager_secret_version.secret_version
+    google_project_iam_member.sa_network_admin,
+    google_project_iam_member.sa_dns_peer
   ]
-}
-
-resource "google_secret_manager_secret_version" "secret_version" {
-  secret      = google_secret_manager_secret.secret.id
-  secret_data = "test"
-}
-
-resource "google_secret_manager_secret" "secret" {
-  secret_id = "{{index $.Vars "secret_name"}}"
-
-  replication {
-    auto {}
-  }
-}
-
-resource "google_secret_manager_secret_iam_member" "secret_access" {
-  secret_id  = google_secret_manager_secret.secret.id
-  role       = "roles/secretmanager.secretAccessor"
-  member     = google_service_account.service_account.member
-}
-
-resource "google_storage_bucket" "bucket" {
-  name                        = "{{index $.Vars "bucket_name"}}"
-  location                    = "us-central1"
-  uniform_bucket_level_access = true
-  force_destroy               = true
 }
 
 resource "google_storage_bucket_object" "bucket_obj_requirements_txt" {
@@ -85,26 +61,55 @@ resource "google_storage_bucket_object" "bucket_obj_dependencies_tar_gz" {
   source = "./test-fixtures/dependencies_adk.tar.gz"
 }
 
-resource "google_service_account" "service_account" {
-  account_id = "{{index $.Vars "service_account_id"}}"
+resource "google_storage_bucket" "bucket" {
+  name                        = "{{index $.Vars "bucket_name"}}"
+  location                    = "us-central1"
+  uniform_bucket_level_access = true
+  force_destroy               = true
 }
 
-resource "google_project_iam_member" "sa_iam_object_viewer" {
-  role    = "roles/storage.objectViewer"
-  project = data.google_project.project.id
-  member  = google_service_account.service_account.member
+resource "google_compute_network_attachment" "network_attachment" {
+  name                  = "{{index $.Vars "network_attachment_name"}}"
+  region                = "us-central1"
+  connection_preference = "ACCEPT_AUTOMATIC"
+
+  subnetworks = [
+    google_compute_subnetwork.subnetwork.id
+  ]
+
+  producer_accept_lists = [
+    data.google_project.project.project_id
+  ]
 }
 
-resource "google_project_iam_member" "sa_iam_ai_platform_user" {
-  role    = "roles/aiplatform.user"
-  project = data.google_project.project.id
-  member  = google_service_account.service_account.member
+resource "google_compute_subnetwork" "subnetwork" {
+  name          = "{{index $.Vars "subnetwork_name"}}"
+  region        = "us-central1"
+  ip_cidr_range = "10.0.0.0/16"
+  network       = google_compute_network.network.id
+}
+
+resource "google_compute_network" "network" {
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
 }
 
 resource "google_project_iam_member" "sa_iam_viewer" {
   role    = "roles/viewer"
   project = data.google_project.project.id
-  member  = google_service_account.service_account.member
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "sa_network_admin" {
+  role    = "roles/compute.networkAdmin"
+  project = data.google_project.project.id
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "sa_dns_peer" {
+  role    = "roles/dns.peer"
+  project = data.google_project.project.id
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
 }
 
 data "google_project" "project" {
