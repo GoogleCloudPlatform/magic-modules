@@ -37,6 +37,9 @@ data "google_iam_policy" "admin" {
 resource "google_storage_bucket_iam_policy" "policy" {
   bucket = google_storage_bucket.default.name
   policy_data = data.google_iam_policy.admin.policy_data
+  timeouts {
+    create = "5m"
+  }
 }
 ```
 
@@ -61,6 +64,9 @@ data "google_iam_policy" "admin" {
 resource "google_storage_bucket_iam_policy" "policy" {
   bucket = google_storage_bucket.default.name
   policy_data = data.google_iam_policy.admin.policy_data
+  timeouts {
+    create = "5m"
+  }
 }
 ```
 ## google_storage_bucket_iam_binding
@@ -72,6 +78,9 @@ resource "google_storage_bucket_iam_binding" "binding" {
   members = [
     "user:jane@example.com",
   ]
+  timeouts {
+    create = "5m"
+  }
 }
 ```
 
@@ -90,6 +99,9 @@ resource "google_storage_bucket_iam_binding" "binding" {
     description = "Expiring at midnight of 2019-12-31"
     expression  = "request.time < timestamp(\"2020-01-01T00:00:00Z\")"
   }
+  timeouts {
+    create = "5m"
+  }
 }
 ```
 ## google_storage_bucket_iam_member
@@ -99,6 +111,9 @@ resource "google_storage_bucket_iam_member" "member" {
   bucket = google_storage_bucket.default.name
   role = "roles/storage.admin"
   member = "user:jane@example.com"
+  timeouts {
+    create = "5m"
+  }
 }
 ```
 
@@ -114,6 +129,9 @@ resource "google_storage_bucket_iam_member" "member" {
     title       = "expires_after_2019_12_31"
     description = "Expiring at midnight of 2019-12-31"
     expression  = "request.time < timestamp(\"2020-01-01T00:00:00Z\")"
+  }
+  timeouts {
+    create = "5m"
   }
 }
 ```
@@ -165,6 +183,13 @@ In addition to the arguments listed above, the following computed attributes are
 exported:
 
 * `etag` - (Computed) The etag of the IAM policy.
+
+## Timeouts
+
+This resource provides the following
+[Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options:
+
+- `create` - Default is 20 minutes.
 
 ## Import
 

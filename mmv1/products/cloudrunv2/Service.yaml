@@ -929,7 +929,6 @@ properties:
                   description: If true, mount the GCS bucket as read-only
                   required: false
                 - name: 'mountOptions'
-                  min_version: 'beta'
                   type: Array
                   description: |
                     A list of flags to pass to the gcsfuse command for configuring this volume.
