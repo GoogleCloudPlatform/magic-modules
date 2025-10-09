@@ -110,6 +110,36 @@ func TestAccBigqueryDatasetIamMember_serviceAccount(t *testing.T) {
 	})
 }
 
+func TestAccBigqueryDatasetIamMember_iamMemberWithIAMCondition(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	wifIDs := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigqueryDatasetIamMember_withServiceAccountAndIAMCondition(datasetID, wifIDs),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_member.access", "condition.0.title", "Expire access on 2050-12-31"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_member.access", "condition.0.expression", "request.time < timestamp('2050-12-31T23:59:59Z')"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_member.access", "condition.0.description", "This condition will automatically remove access after 2050-12-31"),
+				),
+			},
+			{
+				Config: testAccBigqueryDatasetIamMember_withServiceAccountAndIAMCondition_update(datasetID, wifIDs),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_member.access", "condition.0.title", "Expire access on 2040-12-31"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_member.access", "condition.0.expression", "request.time < timestamp('2040-12-31T23:59:59Z')"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_member.access", "condition.0.description", ""),
+				),
+			},
+		},
+	})
+}
+
 func TestAccBigqueryDatasetIamMember_iamMember(t *testing.T) {
 	t.Parallel()
 
@@ -404,4 +434,51 @@ resource "google_bigquery_dataset_iam_member" "access" {
   member     = "serviceAccount:%s"
 }
 `, datasetID, serviceAccountEmail)
+}
+
+func testAccBigqueryDatasetIamMember_withServiceAccountAndIAMCondition(datasetID, serviceAccountID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id = "%s"
+}
+
+resource "google_service_account" "sa" {
+  account_id = "%s"
+}
+
+resource "google_bigquery_dataset_iam_member" "access" {
+  dataset_id = google_bigquery_dataset.dataset.dataset_id
+  role       = "roles/bigquery.dataViewer"
+  member     = "serviceAccount:${google_service_account.sa.email}"
+
+  condition {
+    title       = "Expire access on 2050-12-31"
+    description = "This condition will automatically remove access after 2050-12-31"
+		expression  = "request.time < timestamp('2050-12-31T23:59:59Z')"
+  }
+}
+`, datasetID, serviceAccountID)
+}
+
+func testAccBigqueryDatasetIamMember_withServiceAccountAndIAMCondition_update(datasetID, serviceAccountID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id = "%s"
+}
+
+resource "google_service_account" "sa" {
+  account_id = "%s"
+}
+
+resource "google_bigquery_dataset_iam_member" "access" {
+  dataset_id = google_bigquery_dataset.dataset.dataset_id
+  role       = "roles/bigquery.dataViewer"
+  member     = "serviceAccount:${google_service_account.sa.email}"
+
+  condition {
+    title       = "Expire access on 2040-12-31"
+		expression  = "request.time < timestamp('2040-12-31T23:59:59Z')"
+  }
+}
+`, datasetID, serviceAccountID)
 }

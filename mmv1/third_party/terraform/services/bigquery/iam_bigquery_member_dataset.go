@@ -226,15 +226,12 @@ func accessToPolicyForIamMember(access interface{}) (*cloudresourcemanager.Polic
 		var condition *cloudresourcemanager.Expr
 		if rawCondition, ok := memberRole["condition"]; ok {
 			conditionMap := rawCondition.(map[string]interface{})
-			var description string
-			if strValue, ok := conditionMap["description"].(string); ok {
-				// description is optional
-				description = strValue
-			}
 			condition = &cloudresourcemanager.Expr{
-				Title:       conditionMap["title"].(string),
-				Description: description,
-				Expression:  conditionMap["expression"].(string),
+				Title:      conditionMap["title"].(string),
+				Expression: conditionMap["expression"].(string),
+			}
+			if strValue, ok := conditionMap["description"].(string); ok {
+				condition.Description = strValue
 			}
 		}
 
