@@ -1,0 +1,13 @@
+resource "google_oracle_database_cloud_exadata_infrastructure" "{{$.PrimaryResourceId}}"{
+  cloud_exadata_infrastructure_id = "{{index $.PrefixedVars "cloud_exadata_infrastructure_id"}}"
+  display_name = "{{index $.PrefixedVars "cloud_exadata_infrastructure_id"}} displayname"
+  location = "us-east4"
+  project = "{{index $.PrefixedVars "project"}}"
+  properties {
+    shape = "Exadata.X9M"
+    compute_count= "2"
+    storage_count= "3"
+  }
+
+  deletion_protection = "{{index $.PrefixedVars "deletion_protection"}}"
+}

@@ -1,0 +1,8 @@
+data "google_project" "project" {}
+
+resource "google_parameter_manager_regional_parameter" "{{$.PrimaryResourceId}}" {
+  parameter_id = "{{index $.PrefixedVars "parameter_id"}}"
+  location = "us-central1"
+
+  kms_key = "{{index $.PrefixedVars "kms_key"}}"
+}

@@ -1,0 +1,6 @@
+resource "google_network_services_service_lb_policies" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  
+  name        = "{{index $.PrefixedVars "resource_name"}}"
+  location    = "global"
+}
