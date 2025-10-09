@@ -138,7 +138,11 @@ func accessToPolicy(access interface{}) (*cloudresourcemanager.Policy, error) {
 	if access == nil {
 		return nil, nil
 	}
-	roleToBinding := make(map[string]*cloudresourcemanager.Binding)
+	type bindingKey struct {
+		role      string
+		condition string
+	}
+	roleToBinding := make(map[bindingKey]*cloudresourcemanager.Binding)
 
 	accessArr := access.([]interface{})
 	for _, v := range accessArr {
@@ -158,14 +162,37 @@ func accessToPolicy(access interface{}) (*cloudresourcemanager.Policy, error) {
 		if err != nil {
 			return nil, err
 		}
-		// We have to combine bindings manually
-		binding, ok := roleToBinding[role]
+
+		var condition *cloudresourcemanager.Expr
+		if rawCondition, ok := memberRole["condition"]; ok {
+			conditionMap := rawCondition.(map[string]interface{})
+			var description string
+			if strValue, ok := conditionMap["description"].(string); ok {
+				// description is optional
+				description = strValue
+			}
+			condition = &cloudresourcemanager.Expr{
+				Title:       conditionMap["title"].(string),
+				Description: description,
+				Expression:  conditionMap["expression"].(string),
+			}
+		}
+
+		key := bindingKey{
+			role:      role,
+			condition: hashCondition(condition),
+		}
+
+		binding, ok := roleToBinding[key]
 		if !ok {
-			binding = &cloudresourcemanager.Binding{Role: role, Members: []string{}}
+			binding = &cloudresourcemanager.Binding{
+				Role:      role,
+				Members:   []string{},
+				Condition: condition,
+			}
 		}
 		binding.Members = append(binding.Members, member)
-
-		roleToBinding[role] = binding
+		roleToBinding[key] = binding
 	}
 	bindings := make([]*cloudresourcemanager.Binding, 0)
 	for _, v := range roleToBinding {
@@ -181,9 +208,6 @@ func policyToAccess(policy *cloudresourcemanager.Policy) ([]map[string]interface
 		return nil, errors.New("Access policies not allowed on BigQuery Dataset IAM policies")
 	}
 	for _, binding := range policy.Bindings {
-		if binding.Condition != nil {
-			return nil, errors.New("IAM conditions not allowed on BigQuery Dataset IAM")
-		}
 		if fullRole, ok := bigqueryAccessPrimitiveToRoleMap[binding.Role]; ok {
 			return nil, fmt.Errorf("BigQuery Dataset legacy role %s is not allowed when using google_bigquery_dataset_iam resources. Please use the full form: %s", binding.Role, fullRole)
 		}
@@ -194,6 +218,9 @@ func policyToAccess(policy *cloudresourcemanager.Policy) ([]map[string]interface
 			}
 			access := map[string]interface{}{
 				"role": binding.Role,
+			}
+			if binding.Condition != nil {
+				access["condition"] = binding.Condition
 			}
 			memberType, member, err := iamMemberToAccess(member)
 			if err != nil {
