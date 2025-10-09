@@ -181,7 +181,10 @@ func (u *BigqueryDatasetIamMemberUpdater) SetResourceIamPolicy(policy *cloudreso
 	return nil
 }
 
-func conditionFingerprint(condition *cloudresourcemanager.Expr) string {
+// hashCondition creates a hash of the condition to use as part of a map key
+// so that roles without conditions and roles with different conditions are
+// not mixed in the same binding.
+func hashCondition(condition *cloudresourcemanager.Expr) string {
 	if condition == nil {
 		return "no-condition"
 	}
@@ -224,8 +227,8 @@ func accessToPolicyForIamMember(access interface{}) (*cloudresourcemanager.Polic
 		if rawCondition, ok := memberRole["condition"]; ok {
 			conditionMap := rawCondition.(map[string]interface{})
 			var description string
-			// description is optional
 			if strValue, ok := conditionMap["description"].(string); ok {
+				// description is optional
 				description = strValue
 			}
 			condition = &cloudresourcemanager.Expr{
@@ -237,7 +240,7 @@ func accessToPolicyForIamMember(access interface{}) (*cloudresourcemanager.Polic
 
 		key := bindingKey{
 			role:      role,
-			condition: conditionFingerprint(condition),
+			condition: hashCondition(condition),
 		}
 
 		binding, ok := roleToBinding[key]
