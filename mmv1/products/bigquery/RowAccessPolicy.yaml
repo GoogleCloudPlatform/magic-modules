@@ -21,13 +21,16 @@ import_format:
   - projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}/rowAccessPolicies/{{policy_id}}
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/bigquery_row_access_policy.go.tmpl'
-examples:
-  - name: 'bigquery_row_access_policy_basic'
-    primary_resource_id: 'example'
-    vars:
-      dataset_id: 'dataset_id'
-      table_id: 'table_id'
-      policy_id: 'policy_id'
+samples:
+  - name: bigquery_row_access_policy_basic
+    primary_resource_id: example
+    steps:
+    - name: bigquery_row_access_policy_basic
+      config_path: templates/terraform/samples/services/bigquery/bigquery_row_access_policy_basic.tf.tmpl
+      prefixed_vars:
+        dataset_id: dataset_id
+        policy_id: policy_id
+        table_id: table_id
 parameters:
 properties:
   - name: rowAccessPolicyReference

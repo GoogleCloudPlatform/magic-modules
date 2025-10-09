@@ -51,36 +51,42 @@ custom_code:
   custom_delete: 'templates/terraform/custom_delete/firebase_app_deletion_policy.tmpl'
 # Sweeper skipped as this resource has customized deletion.
 exclude_sweeper: true
-examples:
-  - name: 'firebase_android_app_basic'
-    primary_resource_id: 'basic'
-    min_version: 'beta'
-    vars:
-      display_name: 'Display Name Basic'
-      package_name: 'android.package.app'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'package_name': '"android.package.app" + acctest.RandString(t, 4)'
-      'display_name': '"tf-test Display Name Basic"'
-    ignore_read_extra:
-      - 'project'
-      - 'deletion_policy'
-  - name: 'firebase_android_app_custom_api_key'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      display_name: 'Display Name'
-      api_key_name: 'api-key'
-      package_name: 'android.package.app'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'package_name': '"android.package.app" + acctest.RandString(t, 4)'
-      'display_name': '"tf-test Display Name"'
-    ignore_read_extra:
-      - 'project'
-      - 'deletion_policy'
+samples:
+  - name: firebase_android_app_basic
+    min_version: beta
+    primary_resource_id: basic
+    steps:
+    - name: firebase_android_app_basic
+      config_path: templates/terraform/samples/services/firebase/firebase_android_app_basic.tf.tmpl
+      prefixed_vars:
+        display_name: Display Name Basic
+        package_name: android.package.app
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        display_name: '"tf-test Display Name Basic"'
+        package_name: '"android.package.app" + acctest.RandString(t, 4)'
+      ignore_read_extra:
+      - project
+      - deletion_policy
+  - name: firebase_android_app_custom_api_key
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: firebase_android_app_custom_api_key
+      config_path: templates/terraform/samples/services/firebase/firebase_android_app_custom_api_key.tf.tmpl
+      prefixed_vars:
+        api_key_name: api-key
+        display_name: Display Name
+        package_name: android.package.app
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        display_name: '"tf-test Display Name"'
+        package_name: '"android.package.app" + acctest.RandString(t, 4)'
+      ignore_read_extra:
+      - project
+      - deletion_policy
 virtual_fields:
   - name: 'deletion_policy'
     description: |

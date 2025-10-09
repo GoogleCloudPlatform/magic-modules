@@ -47,41 +47,59 @@ custom_code:
   update_encoder: 'templates/terraform/update_encoder/compute_network.go.tmpl'
   decoder: 'templates/terraform/decoders/compute_network.go.tmpl'
   post_create: 'templates/terraform/post_create/compute_network_delete_default_route.tmpl'
-examples:
-  - name: 'network_basic'
-    primary_resource_id: 'vpc_network'
-    vars:
-      network_name: 'vpc-network'
-  - name: 'network_custom_mtu'
-    primary_resource_id: 'vpc_network'
-    vars:
-      network_name: 'vpc-network'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'network_custom_firewall_enforcement_order'
-    primary_resource_id: 'vpc_network'
-    vars:
-      network_name: 'vpc-network'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'network_bgp_best_path_selection_mode'
-    primary_resource_id: 'vpc_network'
-    vars:
-      network_name: 'vpc-network'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'network_bgp_best_path_selection_mode_standard'
-    primary_resource_id: 'vpc_network'
-    vars:
-      network_name: 'vpc-network'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'network_bgp_best_path_selection_mode_standard_custom_fields'
-    primary_resource_id: 'vpc_network'
-    vars:
-      network_name: 'vpc-network'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: network_basic
+    primary_resource_id: vpc_network
+    steps:
+    - name: network_basic
+      config_path: templates/terraform/samples/services/compute/network_basic.tf.tmpl
+      prefixed_vars:
+        network_name: vpc-network
+  - name: network_custom_mtu
+    primary_resource_id: vpc_network
+    steps:
+    - name: network_custom_mtu
+      config_path: templates/terraform/samples/services/compute/network_custom_mtu.tf.tmpl
+      prefixed_vars:
+        network_name: vpc-network
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: network_custom_firewall_enforcement_order
+    primary_resource_id: vpc_network
+    steps:
+    - name: network_custom_firewall_enforcement_order
+      config_path: templates/terraform/samples/services/compute/network_custom_firewall_enforcement_order.tf.tmpl
+      prefixed_vars:
+        network_name: vpc-network
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: network_bgp_best_path_selection_mode
+    primary_resource_id: vpc_network
+    steps:
+    - name: network_bgp_best_path_selection_mode
+      config_path: templates/terraform/samples/services/compute/network_bgp_best_path_selection_mode.tf.tmpl
+      prefixed_vars:
+        network_name: vpc-network
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: network_bgp_best_path_selection_mode_standard
+    primary_resource_id: vpc_network
+    steps:
+    - name: network_bgp_best_path_selection_mode_standard
+      config_path: templates/terraform/samples/services/compute/network_bgp_best_path_selection_mode_standard.tf.tmpl
+      prefixed_vars:
+        network_name: vpc-network
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: network_bgp_best_path_selection_mode_standard_custom_fields
+    primary_resource_id: vpc_network
+    steps:
+    - name: network_bgp_best_path_selection_mode_standard_custom_fields
+      config_path: templates/terraform/samples/services/compute/network_bgp_best_path_selection_mode_standard_custom_fields.tf.tmpl
+      prefixed_vars:
+        network_name: vpc-network
+      test_env_vars:
+        project: PROJECT_NAME
 virtual_fields:
   - name: 'delete_default_routes_on_create'
     description: |

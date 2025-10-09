@@ -37,18 +37,20 @@ iam_policy:
   parent_resource_attribute: 'service'
   test_project_name: 'tf-test'
   iam_conditions_request_type: 'REQUEST_BODY'
-  example_config_body: 'templates/terraform/iam/example_config_body/app_engine_service.tf.tmpl'
+  sample_config_body: 'templates/terraform/iam/example_config_body/app_engine_service.tf.tmpl'
 custom_code:
 exclude_tgc: true
-examples:
-  - name: 'iap_app_engine_service'
-    primary_resource_id: 'version'
-    primary_resource_name: 'context["project_id"], "default"'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    # https://github.com/hashicorp/terraform-provider-google/issues/18936
+samples:
+  - name: iap_app_engine_service
+    primary_resource_id: version
+    primary_resource_name: context["project_id"], "default"
     exclude_test: true
+    steps:
+    - name: iap_app_engine_service
+      config_path: templates/terraform/samples/services/iap/iap_app_engine_service.tf.tmpl
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
 parameters:
 properties:
   - name: 'appId'

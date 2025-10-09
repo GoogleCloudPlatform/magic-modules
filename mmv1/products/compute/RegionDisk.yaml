@@ -54,7 +54,7 @@ collection_url_key: 'items'
 iam_policy:
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
     - '{{name}}'
@@ -66,30 +66,42 @@ custom_code:
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSuppress'
-examples:
-  - name: 'region_disk_basic'
-    primary_resource_id: 'regiondisk'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-region-disk%s", context["random_suffix"])'
-    vars:
-      region_disk_name: 'my-region-disk'
-      disk_name: 'my-disk'
-      snapshot_name: 'my-snapshot'
-  - name: 'region_disk_async'
-    primary_resource_id: 'primary'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-region-disk%s", context["random_suffix"])'
-    vars:
-      region_disk_name: 'primary-region-disk'
-      secondary_region_disk_name: 'secondary-region-disk'
-  - name: 'region_disk_features'
-    primary_resource_id: 'regiondisk'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-region-disk%s", context["random_suffix"])'
-    vars:
-      region_disk_name: 'my-region-features-disk'
-  - name: 'region_disk_hyperdisk_balanced_ha_write_many'
-    primary_resource_id: 'primary'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-region-disk%s", context["random_suffix"])'
-    vars:
-      region_disk_name: 'my-region-hyperdisk'
+samples:
+  - name: region_disk_basic
+    primary_resource_id: regiondisk
+    primary_resource_name: fmt.Sprintf("tf-test-my-region-disk%s", context["random_suffix"])
+    steps:
+    - name: region_disk_basic
+      config_path: templates/terraform/samples/services/compute/region_disk_basic.tf.tmpl
+      prefixed_vars:
+        disk_name: my-disk
+        region_disk_name: my-region-disk
+        snapshot_name: my-snapshot
+  - name: region_disk_async
+    primary_resource_id: primary
+    primary_resource_name: fmt.Sprintf("tf-test-my-region-disk%s", context["random_suffix"])
+    steps:
+    - name: region_disk_async
+      config_path: templates/terraform/samples/services/compute/region_disk_async.tf.tmpl
+      prefixed_vars:
+        region_disk_name: primary-region-disk
+        secondary_region_disk_name: secondary-region-disk
+  - name: region_disk_features
+    primary_resource_id: regiondisk
+    primary_resource_name: fmt.Sprintf("tf-test-my-region-disk%s", context["random_suffix"])
+    steps:
+    - name: region_disk_features
+      config_path: templates/terraform/samples/services/compute/region_disk_features.tf.tmpl
+      prefixed_vars:
+        region_disk_name: my-region-features-disk
+  - name: region_disk_hyperdisk_balanced_ha_write_many
+    primary_resource_id: primary
+    primary_resource_name: fmt.Sprintf("tf-test-my-region-disk%s", context["random_suffix"])
+    steps:
+    - name: region_disk_hyperdisk_balanced_ha_write_many
+      config_path: templates/terraform/samples/services/compute/region_disk_hyperdisk_balanced_ha_write_many.tf.tmpl
+      prefixed_vars:
+        region_disk_name: my-region-hyperdisk
 parameters:
   - name: 'region'
     type: ResourceRef

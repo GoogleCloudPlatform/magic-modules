@@ -39,7 +39,7 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
     - '{{name}}'
@@ -49,57 +49,74 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "us-central1"
-examples:
-  - name: 'data_fusion_instance_basic'
-    primary_resource_id: 'basic_instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
-    vars:
-      instance_name: 'my-instance'
-      prober_test_run: ''
-    test_vars_overrides:
-      # Mark for testing to avoid service networking connection usage that is not cleaned up
-      'prober_test_run': '`options = { prober_test_run = "true" }`'
-  - name: 'data_fusion_instance_full'
-    primary_resource_id: 'extended_instance'
-    vars:
-      instance_name: 'my-instance'
-      ip_alloc: 'datafusion-ip-alloc'
-      network_name: 'datafusion-full-network'
-      prober_test_run: ''
-    test_vars_overrides:
-      # Mark for testing to avoid service networking connection usage that is not cleaned up
-      'prober_test_run': '`options = { prober_test_run = "true" }`'
-  - name: 'data_fusion_instance_psc'
-    primary_resource_id: 'psc_instance'
-    vars:
-      instance_name: 'psc-instance'
-      network_name: 'datafusion-psc-network'
-      subnet_name: 'datafusion-psc-subnet'
-      attachment_name: 'datafusion-psc-attachment'
-      prober_test_run: ''
-    test_vars_overrides:
-      # Mark for testing to avoid service networking connection usage that is not cleaned up
-      'prober_test_run': '`options = { prober_test_run = "true" }`'
-  - name: 'data_fusion_instance_cmek'
-    primary_resource_id: 'cmek'
-    vars:
-      instance_name: 'my-instance'
-  - name: 'data_fusion_instance_enterprise'
-    primary_resource_id: 'enterprise_instance'
-    vars:
-      instance_name: 'my-instance'
-      prober_test_run: ''
-    test_vars_overrides:
-      # Mark for testing to avoid service networking connection usage that is not cleaned up
-      'prober_test_run': '`options = { prober_test_run = "true" }`'
-  - name: 'data_fusion_instance_event'
-    primary_resource_id: 'event'
-    vars:
-      instance_name: 'my-instance'
-  - name: 'data_fusion_instance_zone'
-    primary_resource_id: 'zone'
-    vars:
-      instance_name: 'my-instance'
+samples:
+  - name: data_fusion_instance_basic
+    primary_resource_id: basic_instance
+    primary_resource_name: fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])
+    steps:
+    - name: data_fusion_instance_basic
+      config_path: templates/terraform/samples/services/datafusion/data_fusion_instance_basic.tf.tmpl
+      prefixed_vars:
+        instance_name: my-instance
+        prober_test_run: ""
+      test_vars_overrides:
+        prober_test_run: '`options = { prober_test_run = "true" }`'
+  - name: data_fusion_instance_full
+    primary_resource_id: extended_instance
+    steps:
+    - name: data_fusion_instance_full
+      config_path: templates/terraform/samples/services/datafusion/data_fusion_instance_full.tf.tmpl
+      prefixed_vars:
+        instance_name: my-instance
+        ip_alloc: datafusion-ip-alloc
+        network_name: datafusion-full-network
+        prober_test_run: ""
+      test_vars_overrides:
+        prober_test_run: '`options = { prober_test_run = "true" }`'
+  - name: data_fusion_instance_psc
+    primary_resource_id: psc_instance
+    steps:
+    - name: data_fusion_instance_psc
+      config_path: templates/terraform/samples/services/datafusion/data_fusion_instance_psc.tf.tmpl
+      prefixed_vars:
+        attachment_name: datafusion-psc-attachment
+        instance_name: psc-instance
+        network_name: datafusion-psc-network
+        prober_test_run: ""
+        subnet_name: datafusion-psc-subnet
+      test_vars_overrides:
+        prober_test_run: '`options = { prober_test_run = "true" }`'
+  - name: data_fusion_instance_cmek
+    primary_resource_id: cmek
+    steps:
+    - name: data_fusion_instance_cmek
+      config_path: templates/terraform/samples/services/datafusion/data_fusion_instance_cmek.tf.tmpl
+      prefixed_vars:
+        instance_name: my-instance
+  - name: data_fusion_instance_enterprise
+    primary_resource_id: enterprise_instance
+    steps:
+    - name: data_fusion_instance_enterprise
+      config_path: templates/terraform/samples/services/datafusion/data_fusion_instance_enterprise.tf.tmpl
+      prefixed_vars:
+        instance_name: my-instance
+        prober_test_run: ""
+      test_vars_overrides:
+        prober_test_run: '`options = { prober_test_run = "true" }`'
+  - name: data_fusion_instance_event
+    primary_resource_id: event
+    steps:
+    - name: data_fusion_instance_event
+      config_path: templates/terraform/samples/services/datafusion/data_fusion_instance_event.tf.tmpl
+      prefixed_vars:
+        instance_name: my-instance
+  - name: data_fusion_instance_zone
+    primary_resource_id: zone
+    steps:
+    - name: data_fusion_instance_zone
+      config_path: templates/terraform/samples/services/datafusion/data_fusion_instance_zone.tf.tmpl
+      prefixed_vars:
+        instance_name: my-instance
 parameters:
   - name: 'region'
     type: String

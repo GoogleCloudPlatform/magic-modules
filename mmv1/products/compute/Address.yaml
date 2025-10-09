@@ -59,38 +59,54 @@ sweeper:
     - region: "us-east1"
     - region: "europe-west1"
     - region: "us-west1"
-examples:
-  - name: 'address_basic'
-    primary_resource_id: 'ip_address'
-    vars:
-      address_name: 'my-address'
-  - name: 'address_with_subnetwork'
-    primary_resource_id: 'internal_with_subnet_and_address'
-    vars:
-      address_name: 'my-internal-address'
-      network_name: 'my-network'
-      subnetwork_name: 'my-subnet'
-  - name: 'address_with_gce_endpoint'
-    primary_resource_id: 'internal_with_gce_endpoint'
-    vars:
-      address_name: 'my-internal-address-'
-  - name: 'address_with_shared_loadbalancer_vip'
-    primary_resource_id: 'internal_with_shared_loadbalancer_vip'
-    vars:
-      address_name: 'my-internal-address'
- # It is almost identical to internal_with_gce_endpoint
-    exclude_docs: true
-  # TODO: Remove this example when instance is supported
-  - name: 'instance_with_ip'
-    primary_resource_id: 'static'
-    vars:
-      address_name: 'ipv4-address'
-      instance_name: 'vm-instance'
-  - name: 'compute_address_ipsec_interconnect'
-    primary_resource_id: 'ipsec-interconnect-address'
-    vars:
-      address_name: 'test-address'
-      network_name: 'test-network'
+samples:
+  - name: address_basic
+    primary_resource_id: ip_address
+    steps:
+    - name: address_basic
+      config_path: templates/terraform/samples/services/compute/address_basic.tf.tmpl
+      prefixed_vars:
+        address_name: my-address
+  - name: address_with_subnetwork
+    primary_resource_id: internal_with_subnet_and_address
+    steps:
+    - name: address_with_subnetwork
+      config_path: templates/terraform/samples/services/compute/address_with_subnetwork.tf.tmpl
+      prefixed_vars:
+        address_name: my-internal-address
+        network_name: my-network
+        subnetwork_name: my-subnet
+  - name: address_with_gce_endpoint
+    primary_resource_id: internal_with_gce_endpoint
+    steps:
+    - name: address_with_gce_endpoint
+      config_path: templates/terraform/samples/services/compute/address_with_gce_endpoint.tf.tmpl
+      prefixed_vars:
+        address_name: my-internal-address-
+  - name: address_with_shared_loadbalancer_vip
+    primary_resource_id: internal_with_shared_loadbalancer_vip
+    steps:
+    - name: address_with_shared_loadbalancer_vip
+      config_path: templates/terraform/samples/services/compute/address_with_shared_loadbalancer_vip.tf.tmpl
+      prefixed_vars:
+        address_name: my-internal-address
+      exclude_docs: true
+  - name: instance_with_ip
+    primary_resource_id: static
+    steps:
+    - name: instance_with_ip
+      config_path: templates/terraform/samples/services/compute/instance_with_ip.tf.tmpl
+      prefixed_vars:
+        address_name: ipv4-address
+        instance_name: vm-instance
+  - name: compute_address_ipsec_interconnect
+    primary_resource_id: ipsec-interconnect-address
+    steps:
+    - name: compute_address_ipsec_interconnect
+      config_path: templates/terraform/samples/services/compute/compute_address_ipsec_interconnect.tf.tmpl
+      prefixed_vars:
+        address_name: test-address
+        network_name: test-network
 parameters:
   - name: 'region'
     type: ResourceRef

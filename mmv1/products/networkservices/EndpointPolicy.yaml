@@ -41,15 +41,21 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'network_services_endpoint_policy_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-endpoint-policy'
-  - name: 'network_services_endpoint_policy_empty_match'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-endpoint-policy'
+samples:
+  - name: network_services_endpoint_policy_basic
+    primary_resource_id: default
+    steps:
+    - name: network_services_endpoint_policy_basic
+      config_path: templates/terraform/samples/services/networkservices/network_services_endpoint_policy_basic.tf.tmpl
+      prefixed_vars:
+        resource_name: my-endpoint-policy
+  - name: network_services_endpoint_policy_empty_match
+    primary_resource_id: default
+    steps:
+    - name: network_services_endpoint_policy_empty_match
+      config_path: templates/terraform/samples/services/networkservices/network_services_endpoint_policy_empty_match.tf.tmpl
+      prefixed_vars:
+        resource_name: my-endpoint-policy
 parameters:
   - name: 'name'
     type: String

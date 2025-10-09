@@ -42,10 +42,13 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-examples:
-  - name: 'gkehub_fleet_basic'
-    primary_resource_id: 'default'
+samples:
+  - name: gkehub_fleet_basic
+    primary_resource_id: default
     exclude_test: true
+    steps:
+    - name: gkehub_fleet_basic
+      config_path: templates/terraform/samples/services/gkehub2/gkehub_fleet_basic.tf.tmpl
 parameters:
 properties:
   - name: 'displayName'

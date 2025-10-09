@@ -53,19 +53,21 @@ sweeper:
     child_field: "parent"
 error_retry_predicates:
   - 'transport_tpg.ExternalIpServiceNotActive'
-examples:
-  - name: 'vmware_engine_external_address_basic'
-    primary_resource_id: 'vmw-engine-external-address'
-    vars:
-      name: 'sample-external-address'
-      network_id: 'pc-nw'
-      private_cloud_id: 'sample-pc'
-      management_cluster_id: 'sample-mgmt-cluster'
-      network_policy_id: 'sample-np'
-    test_env_vars:
-      region: 'REGION'
- # update tests will take care of all CRUD tests. Parent PC creation is expensive and node reservation is required.
+samples:
+  - name: vmware_engine_external_address_basic
+    primary_resource_id: vmw-engine-external-address
     exclude_test: true
+    steps:
+    - name: vmware_engine_external_address_basic
+      config_path: templates/terraform/samples/services/vmwareengine/vmware_engine_external_address_basic.tf.tmpl
+      prefixed_vars:
+        management_cluster_id: sample-mgmt-cluster
+        name: sample-external-address
+        network_id: pc-nw
+        network_policy_id: sample-np
+        private_cloud_id: sample-pc
+      test_env_vars:
+        region: REGION
 parameters:
   - name: 'parent'
     type: String

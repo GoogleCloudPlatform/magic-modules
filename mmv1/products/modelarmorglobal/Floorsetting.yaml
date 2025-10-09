@@ -35,23 +35,31 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/modelarmorglobal_floorsetting.go.tmpl'
   post_create: 'templates/terraform/post_create/modelarmor_floorsetting_sleep.go.tmpl'
   post_update: 'templates/terraform/post_create/modelarmor_floorsetting_sleep.go.tmpl'
-examples:
-  # Excluding tests as they modify a singleton resource and hence will result in race conditions
-  - name: 'modelarmor_floorsetting_basic'
-    primary_resource_id: 'floorsetting-basic'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+samples:
+  - name: modelarmor_floorsetting_basic
+    primary_resource_id: floorsetting-basic
     exclude_test: true
-  - name: 'modelarmor_floorsetting_filter_config'
-    primary_resource_id: 'floorsetting-filter-config'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+    - name: modelarmor_floorsetting_basic
+      config_path: templates/terraform/samples/services/modelarmorglobal/modelarmor_floorsetting_basic.tf.tmpl
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: modelarmor_floorsetting_filter_config
+    primary_resource_id: floorsetting-filter-config
     exclude_test: true
-  - name: 'modelarmor_floorsetting_ai_platform_metadata'
-    primary_resource_id: 'floorsetting-integrated-metadata'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+    steps:
+    - name: modelarmor_floorsetting_filter_config
+      config_path: templates/terraform/samples/services/modelarmorglobal/modelarmor_floorsetting_filter_config.tf.tmpl
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: modelarmor_floorsetting_ai_platform_metadata
+    primary_resource_id: floorsetting-integrated-metadata
     exclude_test: true
+    steps:
+    - name: modelarmor_floorsetting_ai_platform_metadata
+      config_path: templates/terraform/samples/services/modelarmorglobal/modelarmor_floorsetting_ai_platform_metadata.tf.tmpl
+      test_env_vars:
+        project_id: PROJECT_NAME
 parameters:
   - name: location
     type: String

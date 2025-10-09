@@ -28,15 +28,17 @@ update_verb: PATCH
 update_mask: true
 autogen_status: RGF0YUFjY2Vzc0xhYmVs
 
-examples:
-  - name: 'chronicle_dataaccesslabel_basic'
-    primary_resource_id: 'example'
-    vars:
-      data_access_label_id: label-id
-      description: label-description
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-
+samples:
+  - name: chronicle_dataaccesslabel_basic
+    primary_resource_id: example
+    steps:
+    - name: chronicle_dataaccesslabel_basic
+      config_path: templates/terraform/samples/services/chronicle/chronicle_dataaccesslabel_basic.tf.tmpl
+      prefixed_vars:
+        data_access_label_id: label-id
+        description: label-description
+      test_env_vars:
+        chronicle_id: CHRONICLE_ID
 parameters:
   - name: location
     type: String

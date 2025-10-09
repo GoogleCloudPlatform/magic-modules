@@ -34,47 +34,65 @@ autogen_async: true
 custom_code:
   pre_create: 'templates/terraform/pre_create/privateca_certificate.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'privateca_certificate_config'
-    primary_resource_id: 'default'
-    vars:
-      ca_pool_id: 'my-pool'
-      certificate_name: 'my-certificate'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    exclude_docs: true
-  - name: 'privateca_certificate_generated_key'
-    primary_resource_id: 'default'
+samples:
+  - name: privateca_certificate_config
+    primary_resource_id: default
+    steps:
+    - name: privateca_certificate_config
+      config_path: templates/terraform/samples/services/privateca/privateca_certificate_config.tf.tmpl
+      prefixed_vars:
+        ca_pool_id: my-pool
+        certificate_name: my-certificate
+      test_env_vars:
+        project: PROJECT_NAME
+      exclude_docs: true
+  - name: privateca_certificate_generated_key
+    primary_resource_id: default
     exclude_test: true
-  - name: 'privateca_certificate_with_template'
-    primary_resource_id: 'default'
-    vars:
-      ca_pool_id: 'my-pool'
-      certificate_name: 'my-certificate'
-      certificate_template_name: 'my-certificate-template'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'privateca_certificate_csr'
-    primary_resource_id: 'default'
-    vars:
-      certificate_name: 'my-certificate'
-      ca_pool_id: 'my-pool'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'privateca_certificate_no_authority'
-    primary_resource_id: 'default'
-    vars:
-      certificate_name: 'my-certificate'
-      ca_pool_id: 'my-pool'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'privateca_certificate_custom_ski'
-    primary_resource_id: 'default'
-    vars:
-      certificate_name: 'my-certificate'
-      ca_pool_id: 'my-pool'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+    - name: privateca_certificate_generated_key
+      config_path: templates/terraform/samples/services/privateca/privateca_certificate_generated_key.tf.tmpl
+  - name: privateca_certificate_with_template
+    primary_resource_id: default
+    steps:
+    - name: privateca_certificate_with_template
+      config_path: templates/terraform/samples/services/privateca/privateca_certificate_with_template.tf.tmpl
+      prefixed_vars:
+        ca_pool_id: my-pool
+        certificate_name: my-certificate
+        certificate_template_name: my-certificate-template
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: privateca_certificate_csr
+    primary_resource_id: default
+    steps:
+    - name: privateca_certificate_csr
+      config_path: templates/terraform/samples/services/privateca/privateca_certificate_csr.tf.tmpl
+      prefixed_vars:
+        ca_pool_id: my-pool
+        certificate_name: my-certificate
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: privateca_certificate_no_authority
+    primary_resource_id: default
+    steps:
+    - name: privateca_certificate_no_authority
+      config_path: templates/terraform/samples/services/privateca/privateca_certificate_no_authority.tf.tmpl
+      prefixed_vars:
+        ca_pool_id: my-pool
+        certificate_name: my-certificate
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: privateca_certificate_custom_ski
+    primary_resource_id: default
+    steps:
+    - name: privateca_certificate_custom_ski
+      config_path: templates/terraform/samples/services/privateca/privateca_certificate_custom_ski.tf.tmpl
+      prefixed_vars:
+        ca_pool_id: my-pool
+        certificate_name: my-certificate
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
   - name: 'location'
     type: String

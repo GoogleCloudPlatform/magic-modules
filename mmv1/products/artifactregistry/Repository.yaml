@@ -46,7 +46,7 @@ iam_policy:
     # TODO: Change to repository_id in 4.0
   parent_resource_attribute: 'repository'
   base_url: 'projects/{{project}}/locations/{{location}}/repositories/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   self_link: 'projects/{{project}}/locations/{{location}}/repositories/{{name}}'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/repositories/{{repository}}'
@@ -58,167 +58,205 @@ sweeper:
   url_substitutions:
     - region: "us-central1"
     - region: "us"
-examples:
-  - name: 'artifact_registry_repository_basic'
-    primary_resource_id: 'my-repo'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
-    vars:
-      repository_id: 'my-repository'
-      desc: 'example docker repository'
-  - name: 'artifact_registry_repository_multi_region'
-    primary_resource_id: 'my-repo'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
-    vars:
-      repository_id: 'my-repository'
-      desc: 'example docker repository'
-  - name: 'artifact_registry_repository_docker'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'my-repository'
-      desc: 'example docker repository'
-  - name: 'artifact_registry_repository_cmek'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'my-repository'
-      kms_key_name: 'kms-key'
-    test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-  - name: 'artifact_registry_repository_virtual'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'my-repository'
-      desc: 'example virtual docker repository'
-      upstream_repository_id: 'my-repository-upstream'
-      upstream_desc: 'example docker repository (upstream source)'
-      upstream_policy_id: 'my-repository-upstream'
-  - name: 'artifact_registry_repository_remote'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'my-repository'
-      desc: 'example remote docker repository'
-  - name: 'artifact_registry_repository_remote_apt'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'debian-stable'
-      desc: 'example remote apt repository'
-  - name: 'artifact_registry_repository_remote_yum'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'rocky-9'
-      desc: 'example remote yum repository'
-  - name: 'artifact_registry_repository_cleanup'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'my-repository'
-      desc: 'example docker repository with cleanup policies'
+samples:
+  - name: artifact_registry_repository_basic
+    primary_resource_id: my-repo
+    primary_resource_name: fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])
+    steps:
+    - name: artifact_registry_repository_basic
+      config_path: templates/terraform/samples/services/artifactregistry/artifact_registry_repository_basic.tf.tmpl
+      prefixed_vars:
+        desc: example docker repository
+        repository_id: my-repository
+  - name: artifact_registry_repository_multi_region
+    primary_resource_id: my-repo
+    primary_resource_name: fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])
+    steps:
+    - name: artifact_registry_repository_multi_region
+      config_path: templates/terraform/samples/services/artifactregistry/artifact_registry_repository_multi_region.tf.tmpl
+      prefixed_vars:
+        desc: example docker repository
+        repository_id: my-repository
+  - name: artifact_registry_repository_docker
+    primary_resource_id: my-repo
+    steps:
+    - name: artifact_registry_repository_docker
+      config_path: templates/terraform/samples/services/artifactregistry/artifact_registry_repository_docker.tf.tmpl
+      prefixed_vars:
+        desc: example docker repository
+        repository_id: my-repository
+  - name: artifact_registry_repository_cmek
+    primary_resource_id: my-repo
+    steps:
+    - name: artifact_registry_repository_cmek
+      config_path: templates/terraform/samples/services/artifactregistry/artifact_registry_repository_cmek.tf.tmpl
+      prefixed_vars:
+        kms_key_name: kms-key
+        repository_id: my-repository
+      test_vars_overrides:
+        kms_key_name: acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+  - name: artifact_registry_repository_virtual
+    primary_resource_id: my-repo
+    steps:
+    - name: artifact_registry_repository_virtual
+      config_path: templates/terraform/samples/services/artifactregistry/artifact_registry_repository_virtual.tf.tmpl
+      prefixed_vars:
+        desc: example virtual docker repository
+        repository_id: my-repository
+        upstream_desc: example docker repository (upstream source)
+        upstream_policy_id: my-repository-upstream
+        upstream_repository_id: my-repository-upstream
+  - name: artifact_registry_repository_remote
+    primary_resource_id: my-repo
+    steps:
+    - name: artifact_registry_repository_remote
+      config_path: templates/terraform/samples/services/artifactregistry/artifact_registry_repository_remote.tf.tmpl
+      prefixed_vars:
+        desc: example remote docker repository
+        repository_id: my-repository
+  - name: artifact_registry_repository_remote_apt
+    primary_resource_id: my-repo
+    steps:
+    - name: artifact_registry_repository_remote_apt
+      config_path: templates/terraform/samples/services/artifactregistry/artifact_registry_repository_remote_apt.tf.tmpl
+      prefixed_vars:
+        desc: example remote apt repository
+        repository_id: debian-stable
+  - name: artifact_registry_repository_remote_yum
+    primary_resource_id: my-repo
+    steps:
+    - name: artifact_registry_repository_remote_yum
+      config_path: templates/terraform/samples/services/artifactregistry/artifact_registry_repository_remote_yum.tf.tmpl
+      prefixed_vars:
+        desc: example remote yum repository
+        repository_id: rocky-9
+  - name: artifact_registry_repository_cleanup
+    primary_resource_id: my-repo
+    steps:
+    - name: artifact_registry_repository_cleanup
+      config_path: templates/terraform/samples/services/artifactregistry/artifact_registry_repository_cleanup.tf.tmpl
+      prefixed_vars:
+        desc: example docker repository with cleanup policies
+        repository_id: my-repository
     tgc_test_ignore_extra:
-      - cleanup_policy_dry_run
-  - name: 'artifact_registry_repository_remote_dockerhub_auth'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'example-dockerhub-remote'
-      desc: 'example remote dockerhub repository with credentials'
-      secret_id: 'example-secret'
-      secret_resource_id: 'example-remote-secret'
-      username: 'remote-username'
-      secret_data: 'remote-password'
-    # Ignore this field as it is INPUT_ONLY. AR will not return this in the
-    # response.
-    ignore_read_extra:
-      - 'remote_repository_config.0.disable_upstream_validation'
-  - name: 'artifact_registry_repository_remote_docker_custom_with_auth'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'example-docker-custom-remote'
-      desc: 'example remote custom docker repository with credentials'
-      secret_id: 'example-secret'
-      secret_resource_id: 'example-remote-secret'
-      username: 'remote-username'
-      secret_data: 'remote-password'
-    ignore_read_extra:
-      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
-      # response.
-      - 'remote_repository_config.0.disable_upstream_validation'
-  - name: 'artifact_registry_repository_remote_maven_custom_with_auth'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'example-maven-custom-remote'
-      desc: 'example remote custom maven repository with credentials'
-      secret_id: 'example-secret'
-      secret_resource_id: 'example-remote-secret'
-      username: 'remote-username'
-      secret_data: 'remote-password'
-    ignore_read_extra:
-      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
-      # response.
-      - 'remote_repository_config.0.disable_upstream_validation'
-  - name: 'artifact_registry_repository_remote_npm_custom_with_auth'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'example-npm-custom-remote'
-      desc: 'example remote custom npm repository with credentials'
-      secret_id: 'example-secret'
-      secret_resource_id: 'example-remote-secret'
-      username: 'remote-username'
-      secret_data: 'remote-password'
-    ignore_read_extra:
-      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
-      # response.
-      - 'remote_repository_config.0.disable_upstream_validation'
-  - name: 'artifact_registry_repository_remote_python_custom_with_auth'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'example-python-custom-remote'
-      desc: 'example remote custom python repository with credentials'
-      secret_id: 'example-secret'
-      secret_resource_id: 'example-remote-secret'
-      username: 'remote-username'
-      secret_data: 'remote-password'
-    ignore_read_extra:
-      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
-      # response.
-      - 'remote_repository_config.0.disable_upstream_validation'
-  - name: 'artifact_registry_repository_remote_common_repository_with_docker'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'example-common-remote'
-      desc: 'example remote common repository with docker upstream'
-      upstream_repository_id: 'example-upstream-repo'
-      upstream_repository_desc: 'example upstream repository'
-    ignore_read_extra:
-      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
-      # response.
-      - 'remote_repository_config.0.disable_upstream_validation'
-  - name: 'artifact_registry_repository_remote_common_repository_with_artifact_registry_uri'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'example-common-remote'
-      desc: 'example remote common repository with docker upstream'
-      upstream_repository_id: 'example-upstream-repo'
-      upstream_repository_desc: 'example upstream repository'
-    ignore_read_extra:
-      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
-      # response.
-      - 'remote_repository_config.0.disable_upstream_validation'
-  - name: 'artifact_registry_repository_remote_common_repository_with_custom_upstream'
-    primary_resource_id: 'my-repo'
-    vars:
-      repository_id: 'example-docker-custom-remote'
-      desc: 'example remote custom docker repository with credentials'
-      secret_id: 'example-secret'
-      secret_resource_id: 'example-remote-secret'
-      username: 'remote-username'
-      secret_data: 'remote-password'
-    ignore_read_extra:
-      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
-      # response.
-      - 'remote_repository_config.0.disable_upstream_validation'
-  - name: 'artifact_registry_repository_vulnerability_scanning'
-    primary_resource_id: 'my-repo'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
-    vars:
-      repository_id: 'my-repository'
-      desc: 'example docker repository with vulnerability scanning config'
+    - cleanup_policy_dry_run
+  - name: artifact_registry_repository_remote_dockerhub_auth
+    primary_resource_id: my-repo
+    steps:
+    - name: artifact_registry_repository_remote_dockerhub_auth
+      config_path: templates/terraform/samples/services/artifactregistry/artifact_registry_repository_remote_dockerhub_auth.tf.tmpl
+      prefixed_vars:
+        desc: example remote dockerhub repository with credentials
+        repository_id: example-dockerhub-remote
+        secret_data: remote-password
+        secret_id: example-secret
+        secret_resource_id: example-remote-secret
+        username: remote-username
+      ignore_read_extra:
+      - remote_repository_config.0.disable_upstream_validation
+  - name: artifact_registry_repository_remote_docker_custom_with_auth
+    primary_resource_id: my-repo
+    steps:
+    - name: artifact_registry_repository_remote_docker_custom_with_auth
+      config_path: templates/terraform/samples/services/artifactregistry/artifact_registry_repository_remote_docker_custom_with_auth.tf.tmpl
+      prefixed_vars:
+        desc: example remote custom docker repository with credentials
+        repository_id: example-docker-custom-remote
+        secret_data: remote-password
+        secret_id: example-secret
+        secret_resource_id: example-remote-secret
+        username: remote-username
+      ignore_read_extra:
+      - remote_repository_config.0.disable_upstream_validation
+  - name: artifact_registry_repository_remote_maven_custom_with_auth
+    primary_resource_id: my-repo
+    steps:
+    - name: artifact_registry_repository_remote_maven_custom_with_auth
+      config_path: templates/terraform/samples/services/artifactregistry/artifact_registry_repository_remote_maven_custom_with_auth.tf.tmpl
+      prefixed_vars:
+        desc: example remote custom maven repository with credentials
+        repository_id: example-maven-custom-remote
+        secret_data: remote-password
+        secret_id: example-secret
+        secret_resource_id: example-remote-secret
+        username: remote-username
+      ignore_read_extra:
+      - remote_repository_config.0.disable_upstream_validation
+  - name: artifact_registry_repository_remote_npm_custom_with_auth
+    primary_resource_id: my-repo
+    steps:
+    - name: artifact_registry_repository_remote_npm_custom_with_auth
+      config_path: templates/terraform/samples/services/artifactregistry/artifact_registry_repository_remote_npm_custom_with_auth.tf.tmpl
+      prefixed_vars:
+        desc: example remote custom npm repository with credentials
+        repository_id: example-npm-custom-remote
+        secret_data: remote-password
+        secret_id: example-secret
+        secret_resource_id: example-remote-secret
+        username: remote-username
+      ignore_read_extra:
+      - remote_repository_config.0.disable_upstream_validation
+  - name: artifact_registry_repository_remote_python_custom_with_auth
+    primary_resource_id: my-repo
+    steps:
+    - name: artifact_registry_repository_remote_python_custom_with_auth
+      config_path: templates/terraform/samples/services/artifactregistry/artifact_registry_repository_remote_python_custom_with_auth.tf.tmpl
+      prefixed_vars:
+        desc: example remote custom python repository with credentials
+        repository_id: example-python-custom-remote
+        secret_data: remote-password
+        secret_id: example-secret
+        secret_resource_id: example-remote-secret
+        username: remote-username
+      ignore_read_extra:
+      - remote_repository_config.0.disable_upstream_validation
+  - name: artifact_registry_repository_remote_common_repository_with_docker
+    primary_resource_id: my-repo
+    steps:
+    - name: artifact_registry_repository_remote_common_repository_with_docker
+      config_path: templates/terraform/samples/services/artifactregistry/artifact_registry_repository_remote_common_repository_with_docker.tf.tmpl
+      prefixed_vars:
+        desc: example remote common repository with docker upstream
+        repository_id: example-common-remote
+        upstream_repository_desc: example upstream repository
+        upstream_repository_id: example-upstream-repo
+      ignore_read_extra:
+      - remote_repository_config.0.disable_upstream_validation
+  - name: artifact_registry_repository_remote_common_repository_with_artifact_registry_uri
+    primary_resource_id: my-repo
+    steps:
+    - name: artifact_registry_repository_remote_common_repository_with_artifact_registry_uri
+      config_path: templates/terraform/samples/services/artifactregistry/artifact_registry_repository_remote_common_repository_with_artifact_registry_uri.tf.tmpl
+      prefixed_vars:
+        desc: example remote common repository with docker upstream
+        repository_id: example-common-remote
+        upstream_repository_desc: example upstream repository
+        upstream_repository_id: example-upstream-repo
+      ignore_read_extra:
+      - remote_repository_config.0.disable_upstream_validation
+  - name: artifact_registry_repository_remote_common_repository_with_custom_upstream
+    primary_resource_id: my-repo
+    steps:
+    - name: artifact_registry_repository_remote_common_repository_with_custom_upstream
+      config_path: templates/terraform/samples/services/artifactregistry/artifact_registry_repository_remote_common_repository_with_custom_upstream.tf.tmpl
+      prefixed_vars:
+        desc: example remote custom docker repository with credentials
+        repository_id: example-docker-custom-remote
+        secret_data: remote-password
+        secret_id: example-secret
+        secret_resource_id: example-remote-secret
+        username: remote-username
+      ignore_read_extra:
+      - remote_repository_config.0.disable_upstream_validation
+  - name: artifact_registry_repository_vulnerability_scanning
+    primary_resource_id: my-repo
+    primary_resource_name: fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])
+    steps:
+    - name: artifact_registry_repository_vulnerability_scanning
+      config_path: templates/terraform/samples/services/artifactregistry/artifact_registry_repository_vulnerability_scanning.tf.tmpl
+      prefixed_vars:
+        desc: example docker repository with vulnerability scanning config
+        repository_id: my-repository
 parameters:
   - name: 'repository_id'
     type: String

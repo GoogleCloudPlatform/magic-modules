@@ -43,15 +43,18 @@ supports_indirect_user_project_override: true
 include_in_tgc_next_DO_NOT_USE: true
 cai_base_url: 'folders/{{folder}}/feeds'
 tgc_ignore_terraform_encoder: true
-examples:
-  - name: 'cloud_asset_folder_feed'
-    primary_resource_id: 'folder_feed'
-    vars:
-      feed_id: 'network-updates'
-      folder_name: 'Networking'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
+samples:
+  - name: cloud_asset_folder_feed
+    primary_resource_id: folder_feed
+    steps:
+    - name: cloud_asset_folder_feed
+      config_path: templates/terraform/samples/services/cloudasset/cloud_asset_folder_feed.tf.tmpl
+      prefixed_vars:
+        feed_id: network-updates
+        folder_name: Networking
+      test_env_vars:
+        org_id: ORG_ID
+        project: PROJECT_NAME
 parameters:
   - name: 'folder'
     type: String

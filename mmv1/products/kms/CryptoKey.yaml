@@ -51,13 +51,19 @@ custom_code:
 schema_version: 1
 state_upgraders: true
 supports_indirect_user_project_override: true
-examples:
-  - name: 'kms_crypto_key_basic'
-    primary_resource_id: 'example-key'
+samples:
+  - name: kms_crypto_key_basic
+    primary_resource_id: example-key
     exclude_test: true
-  - name: 'kms_crypto_key_asymmetric_sign'
-    primary_resource_id: 'example-asymmetric-sign-key'
+    steps:
+    - name: kms_crypto_key_basic
+      config_path: templates/terraform/samples/services/kms/kms_crypto_key_basic.tf.tmpl
+  - name: kms_crypto_key_asymmetric_sign
+    primary_resource_id: example-asymmetric-sign-key
     exclude_test: true
+    steps:
+    - name: kms_crypto_key_asymmetric_sign
+      config_path: templates/terraform/samples/services/kms/kms_crypto_key_asymmetric_sign.tf.tmpl
 parameters:
   - name: 'keyRing'
     type: String

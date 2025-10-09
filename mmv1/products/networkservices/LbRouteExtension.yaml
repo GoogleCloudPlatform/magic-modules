@@ -41,31 +41,34 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "us-west1"
-examples:
-  - name: 'network_services_lb_route_extension_basic'
-    primary_resource_id: 'default'
-    vars:
-      ilb_network_name: 'l7-ilb-network'
-      proxy_subnet_name: 'l7-ilb-proxy-subnet'
-      backend_subnet_name: 'l7-ilb-subnet'
-      forwarding_rule_name: 'l7-ilb-forwarding-rule'
-      target_http_proxy_name: 'l7-ilb-target-http-proxy'
-      regional_url_map_name: 'l7-ilb-regional-url-map'
-      backend_service_name: 'l7-ilb-backend-subnet'
-      mig_template_name: 'l7-ilb-mig-template'
-      hc_name: 'l7-ilb-hc'
-      mig_name: 'l7-ilb-mig1'
-      fw_allow_iap_hc_name: 'l7-ilb-fw-allow-iap-hc'
-      fw_allow_ilb_to_backends_name: 'l7-ilb-fw-allow-ilb-to-backends'
-      vm_test_name: 'l7-ilb-test-vm'
-      lb_route_extension_name: 'l7-ilb-route-ext'
-      callouts_instance_name: 'l7-ilb-callouts-ins'
-      callouts_instance_group: 'l7-ilb-callouts-ins-group'
-      callouts_hc_name: 'l7-ilb-callouts-hc'
-      callouts_backend_name: 'l7-ilb-callouts-backend'
-    ignore_read_extra:
-      - 'port_range'
-      - 'target'
+samples:
+  - name: network_services_lb_route_extension_basic
+    primary_resource_id: default
+    steps:
+    - name: network_services_lb_route_extension_basic
+      config_path: templates/terraform/samples/services/networkservices/network_services_lb_route_extension_basic.tf.tmpl
+      prefixed_vars:
+        backend_service_name: l7-ilb-backend-subnet
+        backend_subnet_name: l7-ilb-subnet
+        callouts_backend_name: l7-ilb-callouts-backend
+        callouts_hc_name: l7-ilb-callouts-hc
+        callouts_instance_group: l7-ilb-callouts-ins-group
+        callouts_instance_name: l7-ilb-callouts-ins
+        forwarding_rule_name: l7-ilb-forwarding-rule
+        fw_allow_iap_hc_name: l7-ilb-fw-allow-iap-hc
+        fw_allow_ilb_to_backends_name: l7-ilb-fw-allow-ilb-to-backends
+        hc_name: l7-ilb-hc
+        ilb_network_name: l7-ilb-network
+        lb_route_extension_name: l7-ilb-route-ext
+        mig_name: l7-ilb-mig1
+        mig_template_name: l7-ilb-mig-template
+        proxy_subnet_name: l7-ilb-proxy-subnet
+        regional_url_map_name: l7-ilb-regional-url-map
+        target_http_proxy_name: l7-ilb-target-http-proxy
+        vm_test_name: l7-ilb-test-vm
+      ignore_read_extra:
+      - port_range
+      - target
 parameters:
   - name: 'location'
     type: String

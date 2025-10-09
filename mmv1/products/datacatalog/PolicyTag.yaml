@@ -36,22 +36,28 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'policy_tag'
   base_url: '{{%policy_tag}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - '{{%policy_tag}}'
 custom_code:
   custom_import: 'templates/terraform/custom_import/extract_taxonomy.go.tmpl'
-examples:
-  - name: 'data_catalog_taxonomies_policy_tag_basic'
-    primary_resource_id: 'basic_policy_tag'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_policy_tag%s", context["random_suffix"])'
-    vars:
-      taxonomy_display_name: 'taxonomy_display_name'
-  - name: 'data_catalog_taxonomies_policy_tag_child_policies'
-    primary_resource_id: 'child_policy'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_child_tag%s", context["random_suffix"])'
-    vars:
-      taxonomy_display_name: 'taxonomy_display_name'
+samples:
+  - name: data_catalog_taxonomies_policy_tag_basic
+    primary_resource_id: basic_policy_tag
+    primary_resource_name: fmt.Sprintf("tf_test_my_policy_tag%s", context["random_suffix"])
+    steps:
+    - name: data_catalog_taxonomies_policy_tag_basic
+      config_path: templates/terraform/samples/services/datacatalog/data_catalog_taxonomies_policy_tag_basic.tf.tmpl
+      prefixed_vars:
+        taxonomy_display_name: taxonomy_display_name
+  - name: data_catalog_taxonomies_policy_tag_child_policies
+    primary_resource_id: child_policy
+    primary_resource_name: fmt.Sprintf("tf_test_my_child_tag%s", context["random_suffix"])
+    steps:
+    - name: data_catalog_taxonomies_policy_tag_child_policies
+      config_path: templates/terraform/samples/services/datacatalog/data_catalog_taxonomies_policy_tag_child_policies.tf.tmpl
+      prefixed_vars:
+        taxonomy_display_name: taxonomy_display_name
 parameters:
   - name: 'taxonomy'
     type: String

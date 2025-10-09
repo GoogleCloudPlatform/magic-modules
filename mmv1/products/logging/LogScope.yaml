@@ -32,15 +32,18 @@ timeouts:
   delete_minutes: 20
 custom_code:
   encoder: 'templates/terraform/encoders/logging_log_scope.go.tmpl'
-examples:
-  - name: 'logging_log_scope_basic'
-    primary_resource_id: 'logging_log_scope'
-    vars:
-      log_scope_name: 'my-log-scope'
-      log_view_name_1: 'view1'
-      log_view_name_2: 'view2'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: logging_log_scope_basic
+    primary_resource_id: logging_log_scope
+    steps:
+    - name: logging_log_scope_basic
+      config_path: templates/terraform/samples/services/logging/logging_log_scope_basic.tf.tmpl
+      prefixed_vars:
+        log_scope_name: my-log-scope
+        log_view_name_1: view1
+        log_view_name_2: view2
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
   - name: 'parent'
     type: String

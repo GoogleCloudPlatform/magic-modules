@@ -57,12 +57,15 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.tmpl'
 # Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
-examples:
-  - name: 'access_context_manager_authorized_orgs_desc_basic'
-    primary_resource_id: 'authorized-orgs-desc'
+samples:
+  - name: access_context_manager_authorized_orgs_desc_basic
+    primary_resource_id: authorized-orgs-desc
     exclude_test: true
-    test_env_vars:
-      org_id: 'ORG_ID'
+    steps:
+    - name: access_context_manager_authorized_orgs_desc_basic
+      config_path: templates/terraform/samples/services/accesscontextmanager/access_context_manager_authorized_orgs_desc_basic.tf.tmpl
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
   - name: 'parent'
     type: String

@@ -43,15 +43,21 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
-examples:
-  - name: 'global_network_endpoint_group'
-    primary_resource_id: 'neg'
-    vars:
-      neg_name: 'my-lb-neg'
-  - name: 'global_network_endpoint_group_ip_address'
-    primary_resource_id: 'neg'
-    vars:
-      neg_name: 'my-lb-neg'
+samples:
+  - name: global_network_endpoint_group
+    primary_resource_id: neg
+    steps:
+    - name: global_network_endpoint_group
+      config_path: templates/terraform/samples/services/compute/global_network_endpoint_group.tf.tmpl
+      prefixed_vars:
+        neg_name: my-lb-neg
+  - name: global_network_endpoint_group_ip_address
+    primary_resource_id: neg
+    steps:
+    - name: global_network_endpoint_group_ip_address
+      config_path: templates/terraform/samples/services/compute/global_network_endpoint_group_ip_address.tf.tmpl
+      prefixed_vars:
+        neg_name: my-lb-neg
 parameters:
 properties:
   - name: 'name'

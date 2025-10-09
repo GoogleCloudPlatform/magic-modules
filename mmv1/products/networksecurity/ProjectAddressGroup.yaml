@@ -37,7 +37,7 @@ iam_policy:
   allowed_iam_role: 'roles/compute.networkAdmin'
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/locations/{{location}}/addressGroups/{{name}}'
-  example_config_body: 'templates/terraform/iam/example_config_body/networksecurity_project_address_group.tf.tmpl'
+  sample_config_body: 'templates/terraform/iam/example_config_body/networksecurity_project_address_group.tf.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/addressGroups/{{name}}'
     - '{{project}}/{{location}}/{{name}}'
@@ -45,13 +45,16 @@ iam_policy:
     - '{{name}}'
 custom_code:
 exclude_tgc: true
-examples:
-  - name: 'network_security_address_groups_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-project-address-group'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: network_security_address_groups_basic
+    primary_resource_id: default
+    steps:
+    - name: network_security_address_groups_basic
+      config_path: templates/terraform/samples/services/networksecurity/network_security_address_groups_basic.tf.tmpl
+      prefixed_vars:
+        resource_name: my-project-address-group
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
 properties:
   - name: 'name'

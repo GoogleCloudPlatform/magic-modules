@@ -40,21 +40,26 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'scc_project_big_query_export_config_basic'
-    primary_resource_id: 'custom_big_query_export_config'
-    vars:
-      big_query_export_id: 'my-export'
-      dataset: 'my-dataset'
-      dataset_id: 'my_dataset_id'
-      name: 'my-export'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      project: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'project'
-    external_providers: ["random", "time"]
+samples:
+  - name: scc_project_big_query_export_config_basic
+    external_providers:
+    - random
+    - time
+    primary_resource_id: custom_big_query_export_config
     exclude_test: true
+    steps:
+    - name: scc_project_big_query_export_config_basic
+      config_path: templates/terraform/samples/services/securitycenter/scc_project_big_query_export_config_basic.tf.tmpl
+      prefixed_vars:
+        big_query_export_id: my-export
+        dataset: my-dataset
+        dataset_id: my_dataset_id
+        name: my-export
+      test_env_vars:
+        org_id: ORG_ID
+        project: PROJECT_NAME
+      ignore_read_extra:
+      - project
 parameters:
   - name: 'bigQueryExportId'
     type: String

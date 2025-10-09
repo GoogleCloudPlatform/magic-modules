@@ -36,12 +36,15 @@ timeouts:
   delete_minutes: 20
 collection_url_key: 'items'
 custom_code:
-examples:
-  - name: 'storage_bucket_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"])'
-    vars:
-      name: 'my-bucket'
+samples:
+  - name: storage_bucket_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"])
+    steps:
+    - name: storage_bucket_basic
+      config_path: templates/terraform/samples/services/storage/storage_bucket_basic.tf.tmpl
+      prefixed_vars:
+        name: my-bucket
 parameters:
   - name: 'project'
     type: String

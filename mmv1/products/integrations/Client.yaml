@@ -38,27 +38,36 @@ custom_code:
   decoder: 'templates/terraform/decoders/integrations_client.go.tmpl'
   pre_create: 'templates/terraform/pre_create/integrations_client.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'integrations_client_basic'
-    primary_resource_id: 'example'
-  - name: 'integrations_client_full'
-    primary_resource_id: 'example'
-    vars:
-      key_ring_name: 'my-keyring'
-      crypto_key_name: 'my-crypto-key'
-    test_vars_overrides:
-      key_ring_name: '"tftest-shared-keyring-1"'
-      crypto_key_name: '"tftest-shared-key-1"'
-      kms_key: 'acctest.BootstrapKMSKeyInLocation(t, "us-east1")'
-    bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-integrations.iam.gserviceaccount.com"
-        role: "roles/cloudkmskacls.serviceAgent"
+samples:
+  - name: integrations_client_basic
+    primary_resource_id: example
+    steps:
+    - name: integrations_client_basic
+      config_path: templates/terraform/samples/services/integrations/integrations_client_basic.tf.tmpl
+  - name: integrations_client_full
     skip_vcr: true
-  - name: 'integrations_client_service_account'
-    primary_resource_id: 'example'
-    vars:
-      service_account_id: 'service-acc'
-    exclude_docs: true
+    bootstrap_iam:
+    - member: serviceAccount:service-{project_number}@gcp-sa-integrations.iam.gserviceaccount.com
+      role: roles/cloudkmskacls.serviceAgent
+    primary_resource_id: example
+    steps:
+    - name: integrations_client_full
+      config_path: templates/terraform/samples/services/integrations/integrations_client_full.tf.tmpl
+      prefixed_vars:
+        crypto_key_name: my-crypto-key
+        key_ring_name: my-keyring
+      test_vars_overrides:
+        crypto_key_name: '"tftest-shared-key-1"'
+        key_ring_name: '"tftest-shared-keyring-1"'
+        kms_key: acctest.BootstrapKMSKeyInLocation(t, "us-east1")
+  - name: integrations_client_service_account
+    primary_resource_id: example
+    steps:
+    - name: integrations_client_service_account
+      config_path: templates/terraform/samples/services/integrations/integrations_client_service_account.tf.tmpl
+      prefixed_vars:
+        service_account_id: service-acc
+      exclude_docs: true
 parameters:
   - name: 'location'
     type: String

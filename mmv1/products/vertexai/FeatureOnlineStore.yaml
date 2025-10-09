@@ -39,37 +39,47 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'feature_online_store'
-  example_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_feature_online_store.tf.tmpl'
+  sample_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_feature_online_store.tf.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{region}}/featureOnlineStores/{{name}}'
   min_version: 'beta'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/vertex_ai_force_delete.go.tmpl'
-examples:
-  - name: 'vertex_ai_feature_online_store'
-    primary_resource_id: 'feature_online_store'
-    primary_resource_name: 'fmt.Sprintf("tf_test_example_feature_online_store%s", context["random_suffix"])'
-    vars:
-      name: 'example_feature_online_store'
-    ignore_read_extra:
-      - 'force_destroy'
-  - name: 'vertex_ai_featureonlinestore_with_optimized'
-    primary_resource_id: 'featureonlinestore'
-    primary_resource_name: 'fmt.Sprintf("tf_test_example_feature_online_store_optimized%s", context["random_suffix"])'
-    vars:
-      name: 'example_feature_online_store_optimized'
-    ignore_read_extra:
-      - 'force_destroy'
-  - name: 'vertex_ai_featureonlinestore_with_beta_fields_bigtable'
-    primary_resource_id: 'featureonlinestore'
-    primary_resource_name: 'fmt.Sprintf("tf_test_example_feature_online_store_beta_bigtable%s", context["random_suffix"])'
-    min_version: 'beta'
-    vars:
-      name: 'example_feature_online_store_beta_bigtable'
-    ignore_read_extra:
-      - 'force_destroy'
-    # currently failing
+samples:
+  - name: vertex_ai_feature_online_store
+    primary_resource_id: feature_online_store
+    primary_resource_name: fmt.Sprintf("tf_test_example_feature_online_store%s", context["random_suffix"])
+    steps:
+    - name: vertex_ai_feature_online_store
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_feature_online_store.tf.tmpl
+      prefixed_vars:
+        name: example_feature_online_store
+      ignore_read_extra:
+      - force_destroy
+  - name: vertex_ai_featureonlinestore_with_optimized
+    primary_resource_id: featureonlinestore
+    primary_resource_name: fmt.Sprintf("tf_test_example_feature_online_store_optimized%s",
+      context["random_suffix"])
+    steps:
+    - name: vertex_ai_featureonlinestore_with_optimized
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_featureonlinestore_with_optimized.tf.tmpl
+      prefixed_vars:
+        name: example_feature_online_store_optimized
+      ignore_read_extra:
+      - force_destroy
+  - name: vertex_ai_featureonlinestore_with_beta_fields_bigtable
     skip_vcr: true
+    min_version: beta
+    primary_resource_id: featureonlinestore
+    primary_resource_name: fmt.Sprintf("tf_test_example_feature_online_store_beta_bigtable%s",
+      context["random_suffix"])
+    steps:
+    - name: vertex_ai_featureonlinestore_with_beta_fields_bigtable
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_featureonlinestore_with_beta_fields_bigtable.tf.tmpl
+      prefixed_vars:
+        name: example_feature_online_store_beta_bigtable
+      ignore_read_extra:
+      - force_destroy
 virtual_fields:
   - name: 'force_destroy'
     description:

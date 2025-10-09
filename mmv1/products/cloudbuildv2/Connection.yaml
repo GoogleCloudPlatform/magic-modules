@@ -45,7 +45,7 @@ iam_policy:
   method_name_separator: ':'
   allowed_iam_role: 'roles/cloudbuild.connectionViewer'
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
 custom_code:
 exclude_tgc: true
 legacy_long_form_project: true
@@ -54,18 +54,29 @@ sweeper:
   url_substitutions:
     - region: "us-central1"
     - region: "us-west1"
-examples:
-  - name: 'cloudbuildv2_connection'
-    primary_resource_id: 'my-connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
-    vars:
-      connection_name: 'tf-test-connection'
+samples:
+  - name: cloudbuildv2_connection
+    primary_resource_id: my-connection
+    primary_resource_name: fmt.Sprintf("tf-test-connection%s", context["random_suffix"])
+    steps:
+    - name: cloudbuildv2_connection
+      config_path: templates/terraform/samples/services/cloudbuildv2/cloudbuildv2_connection.tf.tmpl
+      prefixed_vars:
+        connection_name: tf-test-connection
     tgc_test_ignore_extra:
-      - github_config.app_installation_id # It has 0 in Terraform configuration
-  - name: 'cloudbuildv2_connection_ghe'
+    - github_config.app_installation_id
+  - name: cloudbuildv2_connection_ghe
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'cloudbuildv2_connection_github'
+    steps:
+    - name: cloudbuildv2_connection_ghe
+      config_path: templates/terraform/samples/services/cloudbuildv2/cloudbuildv2_connection_ghe.tf.tmpl
+  - name: cloudbuildv2_connection_github
+    primary_resource_id: ""
     exclude_test: true
+    steps:
+    - name: cloudbuildv2_connection_github
+      config_path: templates/terraform/samples/services/cloudbuildv2/cloudbuildv2_connection_github.tf.tmpl
 parameters:
   - name: 'name'
     type: String

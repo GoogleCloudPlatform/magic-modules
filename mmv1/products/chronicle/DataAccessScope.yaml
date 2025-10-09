@@ -28,46 +28,59 @@ update_verb: PATCH
 update_mask: true
 autogen_status: RGF0YUFjY2Vzc1Njb3Bl
 
-examples:
-  - name: 'chronicle_dataaccessscope_with_logtype'
-    primary_resource_id: 'example'
-    vars:
-      data_access_scope_id: scope-id
-      description: scope-description
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-  - name: 'chronicle_dataaccessscope_with_dataaccesslabel'
-    primary_resource_id: 'example'
-    vars:
-      data_access_scope_id: scope-id
-      description: scope-description
-      data_access_label_id: label-id
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-  - name: 'chronicle_dataaccessscope_with_asset_namespace'
-    primary_resource_id: 'example'
-    vars:
-      data_access_scope_id: scope-id
-      description: scope-description
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-  - name: 'chronicle_dataaccessscope_with_ingestion_label'
-    primary_resource_id: 'example'
-    vars:
-      data_access_scope_id: scope-id
-      description: scope-description
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-  - name: 'chronicle_dataaccessscope_with_denied_labels'
-    primary_resource_id: 'example'
-    vars:
-      data_access_scope_id: scope-id
-      description: scope-description
-      data_access_label_id: label-id
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-
-
+samples:
+  - name: chronicle_dataaccessscope_with_logtype
+    primary_resource_id: example
+    steps:
+    - name: chronicle_dataaccessscope_with_logtype
+      config_path: templates/terraform/samples/services/chronicle/chronicle_dataaccessscope_with_logtype.tf.tmpl
+      prefixed_vars:
+        data_access_scope_id: scope-id
+        description: scope-description
+      test_env_vars:
+        chronicle_id: CHRONICLE_ID
+  - name: chronicle_dataaccessscope_with_dataaccesslabel
+    primary_resource_id: example
+    steps:
+    - name: chronicle_dataaccessscope_with_dataaccesslabel
+      config_path: templates/terraform/samples/services/chronicle/chronicle_dataaccessscope_with_dataaccesslabel.tf.tmpl
+      prefixed_vars:
+        data_access_label_id: label-id
+        data_access_scope_id: scope-id
+        description: scope-description
+      test_env_vars:
+        chronicle_id: CHRONICLE_ID
+  - name: chronicle_dataaccessscope_with_asset_namespace
+    primary_resource_id: example
+    steps:
+    - name: chronicle_dataaccessscope_with_asset_namespace
+      config_path: templates/terraform/samples/services/chronicle/chronicle_dataaccessscope_with_asset_namespace.tf.tmpl
+      prefixed_vars:
+        data_access_scope_id: scope-id
+        description: scope-description
+      test_env_vars:
+        chronicle_id: CHRONICLE_ID
+  - name: chronicle_dataaccessscope_with_ingestion_label
+    primary_resource_id: example
+    steps:
+    - name: chronicle_dataaccessscope_with_ingestion_label
+      config_path: templates/terraform/samples/services/chronicle/chronicle_dataaccessscope_with_ingestion_label.tf.tmpl
+      prefixed_vars:
+        data_access_scope_id: scope-id
+        description: scope-description
+      test_env_vars:
+        chronicle_id: CHRONICLE_ID
+  - name: chronicle_dataaccessscope_with_denied_labels
+    primary_resource_id: example
+    steps:
+    - name: chronicle_dataaccessscope_with_denied_labels
+      config_path: templates/terraform/samples/services/chronicle/chronicle_dataaccessscope_with_denied_labels.tf.tmpl
+      prefixed_vars:
+        data_access_label_id: label-id
+        data_access_scope_id: scope-id
+        description: scope-description
+      test_env_vars:
+        chronicle_id: CHRONICLE_ID
 parameters:
   - name: location
     type: String

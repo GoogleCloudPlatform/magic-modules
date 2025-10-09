@@ -54,50 +54,73 @@ custom_code:
 error_retry_predicates:
 
   - 'transport_tpg.FirestoreIndex409Retry'
-examples:
-  - name: 'firestore_index_basic'
-    primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    external_providers: ["random", "time"]
-  - name: 'firestore_index_datastore_mode'
-    primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-dm'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firestore_index_vector'
-    primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-vector'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firestore_index_name_descending'
-    primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firestore_index_mongodb_compatible_scope'
-    primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-mongodb-compatible'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firestore_index_sparse_any'
-    primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-sparse-any'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firestore_index_unique'
-    primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-unique'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+samples:
+  - name: firestore_index_basic
+    external_providers:
+    - random
+    - time
+    primary_resource_id: my-index
+    steps:
+    - name: firestore_index_basic
+      config_path: templates/terraform/samples/services/firestore/firestore_index_basic.tf.tmpl
+      prefixed_vars:
+        database_id: database-id
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firestore_index_datastore_mode
+    primary_resource_id: my-index
+    steps:
+    - name: firestore_index_datastore_mode
+      config_path: templates/terraform/samples/services/firestore/firestore_index_datastore_mode.tf.tmpl
+      prefixed_vars:
+        database_id: database-id-dm
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firestore_index_vector
+    primary_resource_id: my-index
+    steps:
+    - name: firestore_index_vector
+      config_path: templates/terraform/samples/services/firestore/firestore_index_vector.tf.tmpl
+      prefixed_vars:
+        database_id: database-id-vector
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firestore_index_name_descending
+    primary_resource_id: my-index
+    steps:
+    - name: firestore_index_name_descending
+      config_path: templates/terraform/samples/services/firestore/firestore_index_name_descending.tf.tmpl
+      prefixed_vars:
+        database_id: database-id
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firestore_index_mongodb_compatible_scope
+    primary_resource_id: my-index
+    steps:
+    - name: firestore_index_mongodb_compatible_scope
+      config_path: templates/terraform/samples/services/firestore/firestore_index_mongodb_compatible_scope.tf.tmpl
+      prefixed_vars:
+        database_id: database-id-mongodb-compatible
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firestore_index_sparse_any
+    primary_resource_id: my-index
+    steps:
+    - name: firestore_index_sparse_any
+      config_path: templates/terraform/samples/services/firestore/firestore_index_sparse_any.tf.tmpl
+      prefixed_vars:
+        database_id: database-id-sparse-any
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firestore_index_unique
+    primary_resource_id: my-index
+    steps:
+    - name: firestore_index_unique
+      config_path: templates/terraform/samples/services/firestore/firestore_index_unique.tf.tmpl
+      prefixed_vars:
+        database_id: database-id-unique
+      test_env_vars:
+        project_id: PROJECT_NAME
 parameters:
 properties:
   - name: 'name'

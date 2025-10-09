@@ -53,11 +53,14 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/storage_hmac_key.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/storage_hmac_key.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'storage_hmac_key'
-    primary_resource_id: 'key'
-    vars:
-      account_id: 'my-svc-acc'
+samples:
+  - name: storage_hmac_key
+    primary_resource_id: key
+    steps:
+    - name: storage_hmac_key
+      config_path: templates/terraform/samples/services/storage/storage_hmac_key.tf.tmpl
+      prefixed_vars:
+        account_id: my-svc-acc
 parameters:
 properties:
   - name: 'serviceAccountEmail'

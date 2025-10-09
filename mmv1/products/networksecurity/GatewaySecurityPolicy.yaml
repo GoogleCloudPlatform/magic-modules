@@ -53,18 +53,24 @@ sweeper:
     - region: "us-west2"
     - region: "us-west1"
     - region: "us-south1"
-examples:
-  - name: 'network_security_gateway_security_policy_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-gateway-security-policy'
-  - name: 'network_security_gateway_security_policy_tls_inspection_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-gateway-security-policy'
-      privateca_ca_tls_name: 'my-tls-inspection-policy'
-      privateca_ca_pool_name: 'my-basic-ca-pool'
-      privateca_certificate_authority_id: 'my-basic-certificate-authority'
+samples:
+  - name: network_security_gateway_security_policy_basic
+    primary_resource_id: default
+    steps:
+    - name: network_security_gateway_security_policy_basic
+      config_path: templates/terraform/samples/services/networksecurity/network_security_gateway_security_policy_basic.tf.tmpl
+      prefixed_vars:
+        resource_name: my-gateway-security-policy
+  - name: network_security_gateway_security_policy_tls_inspection_basic
+    primary_resource_id: default
+    steps:
+    - name: network_security_gateway_security_policy_tls_inspection_basic
+      config_path: templates/terraform/samples/services/networksecurity/network_security_gateway_security_policy_tls_inspection_basic.tf.tmpl
+      prefixed_vars:
+        privateca_ca_pool_name: my-basic-ca-pool
+        privateca_ca_tls_name: my-tls-inspection-policy
+        privateca_certificate_authority_id: my-basic-certificate-authority
+        resource_name: my-gateway-security-policy
 parameters:
   - name: 'name'
     type: String

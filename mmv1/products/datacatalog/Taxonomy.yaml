@@ -36,7 +36,7 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'taxonomy'
   base_url: 'projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}'
     - '{{taxonomy}}'
@@ -44,12 +44,15 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/data_catalog_taxonomy.go.tmpl'
 sweeper:
   identifier_field: displayName
-examples:
-  - name: 'data_catalog_taxonomy_basic'
-    primary_resource_id: 'basic_taxonomy'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_taxonomy%s", context["random_suffix"])'
-    vars:
-      display_name: 'my_taxonomy'
+samples:
+  - name: data_catalog_taxonomy_basic
+    primary_resource_id: basic_taxonomy
+    primary_resource_name: fmt.Sprintf("tf_test_my_taxonomy%s", context["random_suffix"])
+    steps:
+    - name: data_catalog_taxonomy_basic
+      config_path: templates/terraform/samples/services/datacatalog/data_catalog_taxonomy_basic.tf.tmpl
+      prefixed_vars:
+        display_name: my_taxonomy
 parameters:
   - name: 'region'
     type: String

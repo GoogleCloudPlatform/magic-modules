@@ -37,15 +37,17 @@ custom_code:
   post_create: 'templates/terraform/post_create/sleep.go.tmpl'
   post_update: 'templates/terraform/post_create/sleep.go.tmpl'
 
-examples:
-  - name: 'managedkafka_acl_basic'
-    primary_resource_id: 'example'
-    vars:
-      acl_id: 'topic/mytopic'
-      cluster_id: 'my-cluster'
-    test_vars_overrides:
-      'acl_id': '"topic/mytopic"'
-
+samples:
+  - name: managedkafka_acl_basic
+    primary_resource_id: example
+    steps:
+    - name: managedkafka_acl_basic
+      config_path: templates/terraform/samples/services/managedkafka/managedkafka_acl_basic.tf.tmpl
+      prefixed_vars:
+        acl_id: topic/mytopic
+        cluster_id: my-cluster
+      test_vars_overrides:
+        acl_id: '"topic/mytopic"'
 parameters:
   - name: 'location'
     type: String

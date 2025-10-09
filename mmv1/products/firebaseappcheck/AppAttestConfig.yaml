@@ -37,35 +37,41 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'firebase_app_check_app_attest_config_minimal'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      # Don't add random suffix
-      team_id: '9987654321'
-      bundle_id: 'bundle.id.appattest'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'team_id': '"9987654321"'
-    # Need the time_sleep resource
-    external_providers: ["random", "time"]
-  - name: 'firebase_app_check_app_attest_config_full'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      # Don't add random suffix
-      team_id: '9987654321'
-      bundle_id: 'bundle.id.appattest'
-      token_ttl: '7200s'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'team_id': '"9987654321"'
-      'token_ttl': '"7200s"'
-    # Need the time_sleep resource
-    external_providers: ["random", "time"]
+samples:
+  - name: firebase_app_check_app_attest_config_minimal
+    external_providers:
+    - random
+    - time
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: firebase_app_check_app_attest_config_minimal
+      config_path: templates/terraform/samples/services/firebaseappcheck/firebase_app_check_app_attest_config_minimal.tf.tmpl
+      prefixed_vars:
+        bundle_id: bundle.id.appattest
+        team_id: "9987654321"
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        team_id: '"9987654321"'
+  - name: firebase_app_check_app_attest_config_full
+    external_providers:
+    - random
+    - time
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: firebase_app_check_app_attest_config_full
+      config_path: templates/terraform/samples/services/firebaseappcheck/firebase_app_check_app_attest_config_full.tf.tmpl
+      prefixed_vars:
+        bundle_id: bundle.id.appattest
+        team_id: "9987654321"
+        token_ttl: 7200s
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        team_id: '"9987654321"'
+        token_ttl: '"7200s"'
 parameters:
   - name: 'app_id'
     type: String

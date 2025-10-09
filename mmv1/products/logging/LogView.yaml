@@ -42,7 +42,7 @@ iam_policy:
   allowed_iam_role: 'roles/logging.admin'
   parent_resource_attribute: 'name'
   iam_conditions_request_type: 'REQUEST_BODY'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - '{{%parent}}/locations/{{location}}/buckets/{{bucket}}/views/{{name}}'
     - '{{name}}'
@@ -51,18 +51,24 @@ custom_code:
   pre_read: 'templates/terraform/pre_read/logging_log_view.go.tmpl'
 # Skipping sweeper since this is a child resource.
 exclude_sweeper: true
-examples:
-  - name: 'logging_log_view_basic'
-    primary_resource_id: 'logging_log_view'
-    vars:
-      log_view_name: 'my-view'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'logging_log_view_long_name'
-    primary_resource_id: 'logging_log_view'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    exclude_docs: true
+samples:
+  - name: logging_log_view_basic
+    primary_resource_id: logging_log_view
+    steps:
+    - name: logging_log_view_basic
+      config_path: templates/terraform/samples/services/logging/logging_log_view_basic.tf.tmpl
+      prefixed_vars:
+        log_view_name: my-view
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: logging_log_view_long_name
+    primary_resource_id: logging_log_view
+    steps:
+    - name: logging_log_view_long_name
+      config_path: templates/terraform/samples/services/logging/logging_log_view_long_name.tf.tmpl
+      test_env_vars:
+        project: PROJECT_NAME
+      exclude_docs: true
 parameters:
   - name: 'parent'
     type: String

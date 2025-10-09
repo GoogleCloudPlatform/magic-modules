@@ -27,14 +27,17 @@ id_format: projects/{{project}}/locations/{{location}}/codeToolsSettings/{{code_
 import_format:
   - projects/{{project}}/locations/{{location}}/codeToolsSettings/{{code_tools_setting_id}}/settingBindings/{{setting_binding_id}}
 mutex: projects/{{project}}/locations/{{location}}/codeToolsSettings/{{code_tools_setting_id}}
-examples:
+samples:
   - name: gemini_code_tools_setting_binding_basic
     primary_resource_id: example
     exclude_test: true
-    vars:
-      code_tools_setting_id: ls-tf1
-      setting_binding_id: ls-tf1b1
-      target: projects/980109375338
+    steps:
+    - name: gemini_code_tools_setting_binding_basic
+      config_path: templates/terraform/samples/services/gemini/gemini_code_tools_setting_binding_basic.tf.tmpl
+      prefixed_vars:
+        code_tools_setting_id: ls-tf1
+        setting_binding_id: ls-tf1b1
+        target: projects/980109375338
 autogen_async: true
 async:
   operation:

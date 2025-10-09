@@ -54,17 +54,18 @@ sweeper:
   url_substitutions:
     - parent: "projects/${PROJECT_NAME}"
       region: "us-central1-a"
-examples:
-  - name: 'network_security_firewall_endpoint_association_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name_prefix: 'my-firewall-endpoint'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      project: 'PROJECT_NAME'
-    # Handwritten test will take care of creates and updates.
-    # Firewall endpoint association creation is subjet to firewall endpoint creation which is long and expensive.
+samples:
+  - name: network_security_firewall_endpoint_association_basic
+    primary_resource_id: default
     exclude_test: true
+    steps:
+    - name: network_security_firewall_endpoint_association_basic
+      config_path: templates/terraform/samples/services/networksecurity/network_security_firewall_endpoint_association_basic.tf.tmpl
+      prefixed_vars:
+        resource_name_prefix: my-firewall-endpoint
+      test_env_vars:
+        org_id: ORG_ID
+        project: PROJECT_NAME
 parameters:
   - name: 'name'
     type: String

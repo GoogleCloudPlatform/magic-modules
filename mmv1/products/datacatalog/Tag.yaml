@@ -49,56 +49,66 @@ nested_query:
 custom_code:
   encoder: 'templates/terraform/encoders/data_catalog_tag.go.tmpl'
   custom_import: 'templates/terraform/custom_import/data_catalog_tag.go.tmpl'
-examples:
-  - name: 'data_catalog_entry_tag_basic'
-    primary_resource_id: 'basic_tag'
-    vars:
-      entry_group_id: 'my_entry_group'
-      entry_id: 'my_entry'
-      tag_template_id: 'my_template'
-      force_delete: 'false'
-    test_vars_overrides:
-      'force_delete': 'true'
-    oics_vars_overrides:
-      'force_delete': 'true'
-  - name: 'data_catalog_entry_group_tag'
-    primary_resource_id: 'entry_group_tag'
-    vars:
-      entry_group_id: 'my_entry_group'
-      first_entry: 'first_entry'
-      second_entry: 'second_entry'
-      tag_template_id: 'my_template'
-      force_delete: 'false'
-    test_vars_overrides:
-      'force_delete': 'true'
-    oics_vars_overrides:
-      'force_delete': 'true'
-  - name: 'data_catalog_entry_tag_full'
-    primary_resource_id: 'basic_tag'
-    vars:
-      entry_group_id: 'my_entry_group'
-      entry_id: 'my_entry'
-      tag_template_id: 'my_template'
-      force_delete: 'false'
-    test_vars_overrides:
-      'force_delete': 'true'
-    oics_vars_overrides:
-      'force_delete': 'true'
-    # Multiple fine-grained resources
+samples:
+  - name: data_catalog_entry_tag_basic
+    primary_resource_id: basic_tag
+    steps:
+    - name: data_catalog_entry_tag_basic
+      config_path: templates/terraform/samples/services/datacatalog/data_catalog_entry_tag_basic.tf.tmpl
+      prefixed_vars:
+        entry_group_id: my_entry_group
+        entry_id: my_entry
+        force_delete: "false"
+        tag_template_id: my_template
+      test_vars_overrides:
+        force_delete: "true"
+      oics_vars_overrides:
+        force_delete: "true"
+  - name: data_catalog_entry_group_tag
+    primary_resource_id: entry_group_tag
+    steps:
+    - name: data_catalog_entry_group_tag
+      config_path: templates/terraform/samples/services/datacatalog/data_catalog_entry_group_tag.tf.tmpl
+      prefixed_vars:
+        entry_group_id: my_entry_group
+        first_entry: first_entry
+        force_delete: "false"
+        second_entry: second_entry
+        tag_template_id: my_template
+      test_vars_overrides:
+        force_delete: "true"
+      oics_vars_overrides:
+        force_delete: "true"
+  - name: data_catalog_entry_tag_full
     skip_vcr: true
-  - name: 'data_catalog_entry_tag_false'
-    primary_resource_id: 'basic_tag'
-    vars:
-      entry_group_id: 'my_entry_group'
-      entry_id: 'my_entry'
-      tag_template_id: 'my_template'
-      force_delete: 'false'
-    test_vars_overrides:
-      'force_delete': 'true'
-    oics_vars_overrides:
-      'force_delete': 'true'
- # omitting doc as it is almost identical to the case of data_catalog_entry_tag_basic
-    exclude_docs: true
+    primary_resource_id: basic_tag
+    steps:
+    - name: data_catalog_entry_tag_full
+      config_path: templates/terraform/samples/services/datacatalog/data_catalog_entry_tag_full.tf.tmpl
+      prefixed_vars:
+        entry_group_id: my_entry_group
+        entry_id: my_entry
+        force_delete: "false"
+        tag_template_id: my_template
+      test_vars_overrides:
+        force_delete: "true"
+      oics_vars_overrides:
+        force_delete: "true"
+  - name: data_catalog_entry_tag_false
+    primary_resource_id: basic_tag
+    steps:
+    - name: data_catalog_entry_tag_false
+      config_path: templates/terraform/samples/services/datacatalog/data_catalog_entry_tag_false.tf.tmpl
+      prefixed_vars:
+        entry_group_id: my_entry_group
+        entry_id: my_entry
+        force_delete: "false"
+        tag_template_id: my_template
+      test_vars_overrides:
+        force_delete: "true"
+      oics_vars_overrides:
+        force_delete: "true"
+      exclude_docs: true
 parameters:
   - name: 'parent'
     type: String

@@ -26,17 +26,22 @@ timeouts:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'asset'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/lakes/{{lake}}/zones/{{dataplex_zone}}/assets/{{name}}'
     - '{{name}}'
 custom_code:
-examples:
-  - name: 'dataplex_asset_primary'
-    primary_resource_id: 'example'
-    primary_resource_name: 'fmt.Sprintf("tf-test-lake%s", context["random_suffix"]), fmt.Sprintf("tf-test-zone%s", context["random_suffix"]), fmt.Sprintf("tf-test-asset%s", context["random_suffix"])'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
+samples:
+  - name: dataplex_asset_primary
+    primary_resource_id: example
+    primary_resource_name: fmt.Sprintf("tf-test-lake%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test-zone%s", context["random_suffix"]), fmt.Sprintf("tf-test-asset%s",
+      context["random_suffix"])
+    steps:
+    - name: dataplex_asset_primary
+      config_path: templates/terraform/samples/services/dataplex/dataplex_asset_primary.tf.tmpl
+      test_env_vars:
+        project_name: PROJECT_NAME
 parameters:
 properties:
   - name: 'name'

@@ -37,20 +37,20 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "US"
-examples:
-  - name: 'bigquery_analyticshub_listing_subscription_basic'
-    primary_resource_id: 'subscription'
-    primary_resource_name: 'fmt.Sprintf(\"tf_test_my_data_exchange%s\",
-      context[\"\
-      random_suffix\"]), fmt.Sprintf(\"tf_test_my_listing%s\",
-      context[\"random_suffix\"\
-      ])'
-    region_override: 'US'
-    vars:
-      data_exchange_id: 'my_data_exchange'
-      listing_id: 'my_listing'
-      destination_dataset_id: 'destination_dataset'
-      description: 'example data exchange'
+samples:
+  - name: bigquery_analyticshub_listing_subscription_basic
+    primary_resource_id: subscription
+    primary_resource_name: fmt.Sprintf(\"tf_test_my_data_exchange%s\", context[\"\ random_suffix\"]),
+      fmt.Sprintf(\"tf_test_my_listing%s\", context[\"random_suffix\"\ ])
+    steps:
+    - name: bigquery_analyticshub_listing_subscription_basic
+      config_path: templates/terraform/samples/services/bigqueryanalyticshub/bigquery_analyticshub_listing_subscription_basic.tf.tmpl
+      prefixed_vars:
+        data_exchange_id: my_data_exchange
+        description: example data exchange
+        destination_dataset_id: destination_dataset
+        listing_id: my_listing
+    region_override: US
 parameters:
   - name: 'dataExchangeId'
     type: String

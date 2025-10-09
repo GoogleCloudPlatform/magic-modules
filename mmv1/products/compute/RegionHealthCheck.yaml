@@ -59,72 +59,117 @@ sweeper:
     - region: "europe-west4"
     - region: "europe-west1"
     - region: "us-west1"
-examples:
-  - name: 'region_health_check_tcp'
-    primary_resource_id: 'tcp-region-health-check'
-    vars:
-      health_check_name: 'tcp-region-health-check'
-  - name: 'region_health_check_tcp_full'
-    primary_resource_id: 'tcp-region-health-check'
-    vars:
-      health_check_name: 'tcp-region-health-check'
-  - name: 'region_health_check_ssl'
-    primary_resource_id: 'ssl-region-health-check'
-    vars:
-      health_check_name: 'ssl-region-health-check'
-  - name: 'region_health_check_ssl_full'
-    primary_resource_id: 'ssl-region-health-check'
-    vars:
-      health_check_name: 'ssl-region-health-check'
-  - name: 'region_health_check_http'
-    primary_resource_id: 'http-region-health-check'
-    vars:
-      health_check_name: 'http-region-health-check'
-  - name: 'region_health_check_http_logs'
-    primary_resource_id: 'http-region-health-check'
-    min_version: 'beta'
-    vars:
-      health_check_name: 'http-region-health-check'
-  - name: 'region_health_check_http_full'
-    primary_resource_id: 'http-region-health-check'
-    vars:
-      health_check_name: 'http-region-health-check'
-  - name: 'region_health_check_https'
-    primary_resource_id: 'https-region-health-check'
-    vars:
-      health_check_name: 'https-region-health-check'
-  - name: 'region_health_check_https_full'
-    primary_resource_id: 'https-region-health-check'
-    vars:
-      health_check_name: 'https-region-health-check'
-  - name: 'region_health_check_http2'
-    primary_resource_id: 'http2-region-health-check'
-    vars:
-      health_check_name: 'http2-region-health-check'
-  - name: 'region_health_check_http2_full'
-    primary_resource_id: 'http2-region-health-check'
-    vars:
-      health_check_name: 'http2-region-health-check'
-  - name: 'region_health_check_grpc'
-    primary_resource_id: 'grpc-region-health-check'
-    vars:
-      health_check_name: 'grpc-region-health-check'
-  - name: 'region_health_check_grpc_full'
-    primary_resource_id: 'grpc-region-health-check'
-    vars:
-      health_check_name: 'grpc-region-health-check'
-  - name: 'region_health_check_grpc_with_tls'
-    primary_resource_id: 'grpc-with-tls-region-health-check'
-    min_version: 'beta'
-    vars:
-      health_check_name: 'grpc-with-tls-region-health-check'
-    tgc_skip_test: 'grpcTlsHealthCheck is not in CAI asset, but is required in this test.'
-  - name: 'region_health_check_grpc_with_tls_full'
-    primary_resource_id: 'grpc-with-tls-region-health-check'
-    min_version: 'beta'
-    vars:
-      health_check_name: 'grpc-with-tls-region-health-check'
-    tgc_skip_test: 'grpcTlsHealthCheck is not in CAI asset, but is required in this test.'
+samples:
+  - name: region_health_check_tcp
+    primary_resource_id: tcp-region-health-check
+    steps:
+    - name: region_health_check_tcp
+      config_path: templates/terraform/samples/services/compute/region_health_check_tcp.tf.tmpl
+      prefixed_vars:
+        health_check_name: tcp-region-health-check
+  - name: region_health_check_tcp_full
+    primary_resource_id: tcp-region-health-check
+    steps:
+    - name: region_health_check_tcp_full
+      config_path: templates/terraform/samples/services/compute/region_health_check_tcp_full.tf.tmpl
+      prefixed_vars:
+        health_check_name: tcp-region-health-check
+  - name: region_health_check_ssl
+    primary_resource_id: ssl-region-health-check
+    steps:
+    - name: region_health_check_ssl
+      config_path: templates/terraform/samples/services/compute/region_health_check_ssl.tf.tmpl
+      prefixed_vars:
+        health_check_name: ssl-region-health-check
+  - name: region_health_check_ssl_full
+    primary_resource_id: ssl-region-health-check
+    steps:
+    - name: region_health_check_ssl_full
+      config_path: templates/terraform/samples/services/compute/region_health_check_ssl_full.tf.tmpl
+      prefixed_vars:
+        health_check_name: ssl-region-health-check
+  - name: region_health_check_http
+    primary_resource_id: http-region-health-check
+    steps:
+    - name: region_health_check_http
+      config_path: templates/terraform/samples/services/compute/region_health_check_http.tf.tmpl
+      prefixed_vars:
+        health_check_name: http-region-health-check
+  - name: region_health_check_http_logs
+    min_version: beta
+    primary_resource_id: http-region-health-check
+    steps:
+    - name: region_health_check_http_logs
+      config_path: templates/terraform/samples/services/compute/region_health_check_http_logs.tf.tmpl
+      prefixed_vars:
+        health_check_name: http-region-health-check
+  - name: region_health_check_http_full
+    primary_resource_id: http-region-health-check
+    steps:
+    - name: region_health_check_http_full
+      config_path: templates/terraform/samples/services/compute/region_health_check_http_full.tf.tmpl
+      prefixed_vars:
+        health_check_name: http-region-health-check
+  - name: region_health_check_https
+    primary_resource_id: https-region-health-check
+    steps:
+    - name: region_health_check_https
+      config_path: templates/terraform/samples/services/compute/region_health_check_https.tf.tmpl
+      prefixed_vars:
+        health_check_name: https-region-health-check
+  - name: region_health_check_https_full
+    primary_resource_id: https-region-health-check
+    steps:
+    - name: region_health_check_https_full
+      config_path: templates/terraform/samples/services/compute/region_health_check_https_full.tf.tmpl
+      prefixed_vars:
+        health_check_name: https-region-health-check
+  - name: region_health_check_http2
+    primary_resource_id: http2-region-health-check
+    steps:
+    - name: region_health_check_http2
+      config_path: templates/terraform/samples/services/compute/region_health_check_http2.tf.tmpl
+      prefixed_vars:
+        health_check_name: http2-region-health-check
+  - name: region_health_check_http2_full
+    primary_resource_id: http2-region-health-check
+    steps:
+    - name: region_health_check_http2_full
+      config_path: templates/terraform/samples/services/compute/region_health_check_http2_full.tf.tmpl
+      prefixed_vars:
+        health_check_name: http2-region-health-check
+  - name: region_health_check_grpc
+    primary_resource_id: grpc-region-health-check
+    steps:
+    - name: region_health_check_grpc
+      config_path: templates/terraform/samples/services/compute/region_health_check_grpc.tf.tmpl
+      prefixed_vars:
+        health_check_name: grpc-region-health-check
+  - name: region_health_check_grpc_full
+    primary_resource_id: grpc-region-health-check
+    steps:
+    - name: region_health_check_grpc_full
+      config_path: templates/terraform/samples/services/compute/region_health_check_grpc_full.tf.tmpl
+      prefixed_vars:
+        health_check_name: grpc-region-health-check
+  - name: region_health_check_grpc_with_tls
+    min_version: beta
+    primary_resource_id: grpc-with-tls-region-health-check
+    steps:
+    - name: region_health_check_grpc_with_tls
+      config_path: templates/terraform/samples/services/compute/region_health_check_grpc_with_tls.tf.tmpl
+      prefixed_vars:
+        health_check_name: grpc-with-tls-region-health-check
+    tgc_skip_test: grpcTlsHealthCheck is not in CAI asset, but is required in this test.
+  - name: region_health_check_grpc_with_tls_full
+    min_version: beta
+    primary_resource_id: grpc-with-tls-region-health-check
+    steps:
+    - name: region_health_check_grpc_with_tls_full
+      config_path: templates/terraform/samples/services/compute/region_health_check_grpc_with_tls_full.tf.tmpl
+      prefixed_vars:
+        health_check_name: grpc-with-tls-region-health-check
+    tgc_skip_test: grpcTlsHealthCheck is not in CAI asset, but is required in this test.
 parameters:
   - name: 'region'
     type: ResourceRef

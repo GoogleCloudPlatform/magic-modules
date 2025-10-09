@@ -46,15 +46,21 @@ async:
     resource_inside_response: false
 custom_code:
 include_in_tgc_next_DO_NOT_USE: true
-examples:
-  - name: 'network_security_url_lists_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-url-lists'
-  - name: 'network_security_url_lists_advanced'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-url-lists'
+samples:
+  - name: network_security_url_lists_basic
+    primary_resource_id: default
+    steps:
+    - name: network_security_url_lists_basic
+      config_path: templates/terraform/samples/services/networksecurity/network_security_url_lists_basic.tf.tmpl
+      prefixed_vars:
+        resource_name: my-url-lists
+  - name: network_security_url_lists_advanced
+    primary_resource_id: default
+    steps:
+    - name: network_security_url_lists_advanced
+      config_path: templates/terraform/samples/services/networksecurity/network_security_url_lists_advanced.tf.tmpl
+      prefixed_vars:
+        resource_name: my-url-lists
 parameters:
   - name: 'name'
     type: String

@@ -55,15 +55,18 @@ custom_code:
 exclude_sweeper: true
 # The generated resource converter is not used. Instead, a handwritten converter is used.
 exclude_tgc: true
-examples:
-  - name: 'firebase_project_basic'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      instance_name: 'memory-cache'
-      project_name: 'my-project'
-    test_env_vars:
-      org_id: 'ORG_ID'
+samples:
+  - name: firebase_project_basic
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: firebase_project_basic
+      config_path: templates/terraform/samples/services/firebase/firebase_project_basic.tf.tmpl
+      prefixed_vars:
+        instance_name: memory-cache
+        project_name: my-project
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
 properties:
   - name: 'projectNumber'

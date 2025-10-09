@@ -37,28 +37,43 @@ custom_code:
   encoder: 'templates/terraform/encoders/os_config_patch_deployment.go.tmpl'
   decoder: 'templates/terraform/decoders/os_config_patch_deployment.go.tmpl'
   custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
-examples:
-  - name: 'os_config_patch_deployment_basic'
-    primary_resource_id: 'patch'
-    vars:
-      patch_deployment_id: 'patch-deploy'
-  - name: 'os_config_patch_deployment_daily'
-    primary_resource_id: 'patch'
-    vars:
-      patch_deployment_id: 'patch-deploy'
-  - name: 'os_config_patch_deployment_daily_midnight'
-    primary_resource_id: 'patch'
-    vars:
-      patch_deployment_id: 'patch-deploy'
-  - name: 'os_config_patch_deployment_instance'
-    primary_resource_id: 'patch'
-    vars:
-      instance_name: 'patch-deploy-inst'
-      patch_deployment_id: 'patch-deploy'
-  - name: 'os_config_patch_deployment_full'
-    primary_resource_id: 'patch'
-    vars:
-      patch_deployment_id: 'patch-deploy'
+samples:
+  - name: os_config_patch_deployment_basic
+    primary_resource_id: patch
+    steps:
+    - name: os_config_patch_deployment_basic
+      config_path: templates/terraform/samples/services/osconfig/os_config_patch_deployment_basic.tf.tmpl
+      prefixed_vars:
+        patch_deployment_id: patch-deploy
+  - name: os_config_patch_deployment_daily
+    primary_resource_id: patch
+    steps:
+    - name: os_config_patch_deployment_daily
+      config_path: templates/terraform/samples/services/osconfig/os_config_patch_deployment_daily.tf.tmpl
+      prefixed_vars:
+        patch_deployment_id: patch-deploy
+  - name: os_config_patch_deployment_daily_midnight
+    primary_resource_id: patch
+    steps:
+    - name: os_config_patch_deployment_daily_midnight
+      config_path: templates/terraform/samples/services/osconfig/os_config_patch_deployment_daily_midnight.tf.tmpl
+      prefixed_vars:
+        patch_deployment_id: patch-deploy
+  - name: os_config_patch_deployment_instance
+    primary_resource_id: patch
+    steps:
+    - name: os_config_patch_deployment_instance
+      config_path: templates/terraform/samples/services/osconfig/os_config_patch_deployment_instance.tf.tmpl
+      prefixed_vars:
+        instance_name: patch-deploy-inst
+        patch_deployment_id: patch-deploy
+  - name: os_config_patch_deployment_full
+    primary_resource_id: patch
+    steps:
+    - name: os_config_patch_deployment_full
+      config_path: templates/terraform/samples/services/osconfig/os_config_patch_deployment_full.tf.tmpl
+      prefixed_vars:
+        patch_deployment_id: patch-deploy
 parameters:
   - name: 'patchDeploymentId'
     type: String

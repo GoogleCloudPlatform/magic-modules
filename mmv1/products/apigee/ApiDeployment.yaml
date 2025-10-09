@@ -70,19 +70,26 @@ properties:
       The ID of the API deployment in the format `organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments`.
     output: true
 
-examples:
-  - name: 'apigee_api_deployment_basic'
-    primary_resource_id: 'api_deployment_test'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
+samples:
+  - name: apigee_api_deployment_basic
     skip_vcr: true
+    primary_resource_id: api_deployment_test
     exclude_test: true
-  - name: 'apigee_api_deployment_basic_test'
-    primary_resource_id: 'api_deployment_test'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    external_providers: ['time']
+    steps:
+    - name: apigee_api_deployment_basic
+      config_path: templates/terraform/samples/services/apigee/apigee_api_deployment_basic.tf.tmpl
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+  - name: apigee_api_deployment_basic_test
     skip_vcr: true
-    exclude_docs: true
+    external_providers:
+    - time
+    primary_resource_id: api_deployment_test
+    steps:
+    - name: apigee_api_deployment_basic_test
+      config_path: templates/terraform/samples/services/apigee/apigee_api_deployment_basic_test.tf.tmpl
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true

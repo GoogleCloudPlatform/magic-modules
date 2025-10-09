@@ -37,61 +37,79 @@ timeouts:
 custom_code:
   post_create: 'templates/terraform/post_create/firebasehosting_version_immediate_finalize.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'firebasehosting_version_redirect'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      site_id: 'site-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firebasehosting_version_headers'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      site_id: 'site-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firebasehosting_version_headers_regex'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      site_id: 'site-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firebasehosting_version_path'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      site_id: 'site-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firebasehosting_version_cloud_run'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      site_id: 'site-id'
-      cloud_run_service_id: 'cloud-run-service-via-hosting'
-      deletion_protection: 'true'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      - 'deletion_protection'
-  - name: 'firebasehosting_version_cloud_functions'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      site_id: 'site-id'
-      cloud_function_id: 'cloud-function-via-hosting'
-      zip_path: 'function-source.zip'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'zip_path': '"./test-fixtures/function-source.zip"'
+samples:
+  - name: firebasehosting_version_redirect
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: firebasehosting_version_redirect
+      config_path: templates/terraform/samples/services/firebasehosting/firebasehosting_version_redirect.tf.tmpl
+      prefixed_vars:
+        site_id: site-id
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firebasehosting_version_headers
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: firebasehosting_version_headers
+      config_path: templates/terraform/samples/services/firebasehosting/firebasehosting_version_headers.tf.tmpl
+      prefixed_vars:
+        site_id: site-id
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firebasehosting_version_headers_regex
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: firebasehosting_version_headers_regex
+      config_path: templates/terraform/samples/services/firebasehosting/firebasehosting_version_headers_regex.tf.tmpl
+      prefixed_vars:
+        site_id: site-id
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firebasehosting_version_path
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: firebasehosting_version_path
+      config_path: templates/terraform/samples/services/firebasehosting/firebasehosting_version_path.tf.tmpl
+      prefixed_vars:
+        site_id: site-id
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firebasehosting_version_cloud_run
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: firebasehosting_version_cloud_run
+      config_path: templates/terraform/samples/services/firebasehosting/firebasehosting_version_cloud_run.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_id: cloud-run-service-via-hosting
+        deletion_protection: "true"
+        site_id: site-id
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
+      ignore_read_extra:
+      - deletion_protection
+  - name: firebasehosting_version_cloud_functions
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: firebasehosting_version_cloud_functions
+      config_path: templates/terraform/samples/services/firebasehosting/firebasehosting_version_cloud_functions.tf.tmpl
+      prefixed_vars:
+        cloud_function_id: cloud-function-via-hosting
+        site_id: site-id
+        zip_path: function-source.zip
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        zip_path: '"./test-fixtures/function-source.zip"'
 parameters:
   - name: 'site_id'
     type: String

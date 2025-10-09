@@ -35,20 +35,28 @@ custom_code:
   custom_create: 'templates/terraform/custom_create/chronicle_rule_deployment.go.tmpl'
   pre_update: 'templates/terraform/pre_update/chronicle_rule_deployment.go.tmpl'
 
-examples:
-  - name: 'chronicle_ruledeployment_basic'
-    primary_resource_id: 'example'
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-  - name: 'chronicle_ruledeployment_disabled'
-    primary_resource_id: 'example'
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-  - name: 'chronicle_ruledeployment_run_frequency_missing'
-    primary_resource_id: 'example'
-    test_env_vars:
-      chronicle_id: 'CHRONICLE_ID'
-
+samples:
+  - name: chronicle_ruledeployment_basic
+    primary_resource_id: example
+    steps:
+    - name: chronicle_ruledeployment_basic
+      config_path: templates/terraform/samples/services/chronicle/chronicle_ruledeployment_basic.tf.tmpl
+      test_env_vars:
+        chronicle_id: CHRONICLE_ID
+  - name: chronicle_ruledeployment_disabled
+    primary_resource_id: example
+    steps:
+    - name: chronicle_ruledeployment_disabled
+      config_path: templates/terraform/samples/services/chronicle/chronicle_ruledeployment_disabled.tf.tmpl
+      test_env_vars:
+        chronicle_id: CHRONICLE_ID
+  - name: chronicle_ruledeployment_run_frequency_missing
+    primary_resource_id: example
+    steps:
+    - name: chronicle_ruledeployment_run_frequency_missing
+      config_path: templates/terraform/samples/services/chronicle/chronicle_ruledeployment_run_frequency_missing.tf.tmpl
+      test_env_vars:
+        chronicle_id: CHRONICLE_ID
 parameters:
   - name: location
     type: String

@@ -43,15 +43,18 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-examples:
-  - name: 'network_firewall_policy_association'
-    primary_resource_id: 'default'
-    vars:
-      policy_name: 'my-policy'
-      association_name: 'my-association'
-      network_name: 'my-network'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
+samples:
+  - name: network_firewall_policy_association
+    primary_resource_id: default
+    steps:
+    - name: network_firewall_policy_association
+      config_path: templates/terraform/samples/services/compute/network_firewall_policy_association.tf.tmpl
+      prefixed_vars:
+        association_name: my-association
+        network_name: my-network
+        policy_name: my-policy
+      test_env_vars:
+        project_name: PROJECT_NAME
 parameters:
   - name: 'firewallPolicy'
     type: ResourceRef

@@ -44,21 +44,27 @@ async:
     resource_inside_response: false
 custom_code:
   decoder: 'templates/terraform/decoders/unwrap_route_policy_resource.go.tmpl'
-examples:
-  - name: 'router_route_policy_export'
-    primary_resource_id: 'rp-export'
-    vars:
-      router_name: 'my-router'
-      network_name: 'my-network'
-      subnet_name: 'my-subnetwork'
-      route_policy_name: 'my-rp1'
-  - name: 'router_route_policy_import'
-    primary_resource_id: 'rp-import'
-    vars:
-      router_name: 'my-router'
-      network_name: 'my-network'
-      subnet_name: 'my-subnetwork'
-      route_policy_name: 'my-rp2'
+samples:
+  - name: router_route_policy_export
+    primary_resource_id: rp-export
+    steps:
+    - name: router_route_policy_export
+      config_path: templates/terraform/samples/services/compute/router_route_policy_export.tf.tmpl
+      prefixed_vars:
+        network_name: my-network
+        route_policy_name: my-rp1
+        router_name: my-router
+        subnet_name: my-subnetwork
+  - name: router_route_policy_import
+    primary_resource_id: rp-import
+    steps:
+    - name: router_route_policy_import
+      config_path: templates/terraform/samples/services/compute/router_route_policy_import.tf.tmpl
+      prefixed_vars:
+        network_name: my-network
+        route_policy_name: my-rp2
+        router_name: my-router
+        subnet_name: my-subnetwork
 parameters:
   - name: 'router'
     type: ResourceRef

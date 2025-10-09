@@ -43,26 +43,32 @@ iam_policy:
   exclude_import_test: true
   method_name_separator: ':'
   parent_resource_attribute: 'entry_type_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/entryTypes/{{entry_type_id}}'
     - '{{entry_type_id}}'
 custom_code:
-examples:
-  - name: 'dataplex_entry_type_basic'
-    primary_resource_id: 'test_entry_type_basic'
-    primary_resource_name: 'fmt.Sprintf("tf-test-entry-type%s", context["random_suffix"])'
-    vars:
-      entry_type_name: 'entry-type-basic'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-  - name: 'dataplex_entry_type_full'
-    primary_resource_id: 'test_entry_type_full'
-    primary_resource_name: 'fmt.Sprintf("tf-test-entry-type%s", context["random_suffix"])'
-    vars:
-      entry_type_name: 'entry-type-full'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
+samples:
+  - name: dataplex_entry_type_basic
+    primary_resource_id: test_entry_type_basic
+    primary_resource_name: fmt.Sprintf("tf-test-entry-type%s", context["random_suffix"])
+    steps:
+    - name: dataplex_entry_type_basic
+      config_path: templates/terraform/samples/services/dataplex/dataplex_entry_type_basic.tf.tmpl
+      prefixed_vars:
+        entry_type_name: entry-type-basic
+      test_env_vars:
+        project_name: PROJECT_NAME
+  - name: dataplex_entry_type_full
+    primary_resource_id: test_entry_type_full
+    primary_resource_name: fmt.Sprintf("tf-test-entry-type%s", context["random_suffix"])
+    steps:
+    - name: dataplex_entry_type_full
+      config_path: templates/terraform/samples/services/dataplex/dataplex_entry_type_full.tf.tmpl
+      prefixed_vars:
+        entry_type_name: entry-type-full
+      test_env_vars:
+        project_name: PROJECT_NAME
 parameters:
   - name: 'location'
     type: String

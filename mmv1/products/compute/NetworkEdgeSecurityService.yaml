@@ -43,13 +43,16 @@ async:
 custom_code:
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
-examples:
-  - name: 'compute_network_edge_security_service_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-edge-security-service'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+samples:
+  - name: compute_network_edge_security_service_basic
+    primary_resource_id: default
+    steps:
+    - name: compute_network_edge_security_service_basic
+      config_path: templates/terraform/samples/services/compute/compute_network_edge_security_service_basic.tf.tmpl
+      prefixed_vars:
+        resource_name: my-edge-security-service
+      test_env_vars:
+        project_id: PROJECT_NAME
 parameters:
   - name: 'region'
     type: ResourceRef

@@ -38,28 +38,37 @@ iam_policy:
   parent_resource_attribute: 'runtime_template'
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
-  example_config_body: 'templates/terraform/iam/example_config_body/colab_runtime_template.tf.tmpl'
+  sample_config_body: 'templates/terraform/iam/example_config_body/colab_runtime_template.tf.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates/{{runtime_template}}'
     - '{{runtime_template}}'
-examples:
-  - name: 'colab_runtime_template_basic'
-    primary_resource_id: 'runtime-template'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime-template%s", context["random_suffix"])'
-    vars:
-      runtime_template_name: 'colab-runtime-template'
-  - name: 'colab_runtime_template_no_name'
-    primary_resource_id: 'runtime-template'
-    exclude_import_test: true
-  - name: 'colab_runtime_template_full'
-    primary_resource_id: 'runtime-template'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime-template%s", context["random_suffix"])'
-    vars:
-      runtime_template_name: 'colab-runtime-template'
-      network_name: 'colab-test-default'
-      key_name: 'my-crypto-key'
-    test_vars_overrides:
-      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+samples:
+  - name: colab_runtime_template_basic
+    primary_resource_id: runtime-template
+    primary_resource_name: fmt.Sprintf("tf-test-colab-runtime-template%s", context["random_suffix"])
+    steps:
+    - name: colab_runtime_template_basic
+      config_path: templates/terraform/samples/services/colab/colab_runtime_template_basic.tf.tmpl
+      prefixed_vars:
+        runtime_template_name: colab-runtime-template
+  - name: colab_runtime_template_no_name
+    primary_resource_id: runtime-template
+    steps:
+    - name: colab_runtime_template_no_name
+      config_path: templates/terraform/samples/services/colab/colab_runtime_template_no_name.tf.tmpl
+      exclude_import_test: true
+  - name: colab_runtime_template_full
+    primary_resource_id: runtime-template
+    primary_resource_name: fmt.Sprintf("tf-test-colab-runtime-template%s", context["random_suffix"])
+    steps:
+    - name: colab_runtime_template_full
+      config_path: templates/terraform/samples/services/colab/colab_runtime_template_full.tf.tmpl
+      prefixed_vars:
+        key_name: my-crypto-key
+        network_name: colab-test-default
+        runtime_template_name: colab-runtime-template
+      test_vars_overrides:
+        key_name: acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
 parameters:
   - name: 'location'
     type: String

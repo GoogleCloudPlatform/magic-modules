@@ -28,11 +28,14 @@ import_format:
 timeouts:
   insert_minutes: 5
   update_minutes: 5
-examples:
-  - name: 'discoveryengine_licenseconfig_basic'
-    primary_resource_id: 'basic'
-    vars:
-      license_config_id: 'license-config-id'
+samples:
+  - name: discoveryengine_licenseconfig_basic
+    primary_resource_id: basic
+    steps:
+    - name: discoveryengine_licenseconfig_basic
+      config_path: templates/terraform/samples/services/discoveryengine/discoveryengine_licenseconfig_basic.tf.tmpl
+      prefixed_vars:
+        license_config_id: license-config-id
 parameters:
   - name: 'location'
     type: String

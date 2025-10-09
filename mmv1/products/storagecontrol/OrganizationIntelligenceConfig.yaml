@@ -55,14 +55,16 @@ datasource:
   generate: true
   exclude_test: true
 
-examples:
+samples:
   - name: storage_control_organization_intelligence_config_basic
     primary_resource_id: example
-    vars:
-      org_id: "12345678"
     exclude_test: true
-    exclude_import_test: true
-
+    steps:
+    - name: storage_control_organization_intelligence_config_basic
+      config_path: templates/terraform/samples/services/storagecontrol/storage_control_organization_intelligence_config_basic.tf.tmpl
+      prefixed_vars:
+        org_id: "12345678"
+      exclude_import_test: true
 properties:
   - name: 'name'
     type: String

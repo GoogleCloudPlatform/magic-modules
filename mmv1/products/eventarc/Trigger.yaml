@@ -37,65 +37,86 @@ sweeper:
   url_substitutions:
     - region: "us-central1"
     - region: "europe-west1"
-examples:
+samples:
   - name: eventarc_trigger_with_cloud_run_destination
     primary_resource_id: primary
-    vars:
-      trigger_name: some-trigger
-      topic_name: some-topic
-      service_name: some-service
+    steps:
+    - name: eventarc_trigger_with_cloud_run_destination
+      config_path: templates/terraform/samples/services/eventarc/eventarc_trigger_with_cloud_run_destination.tf.tmpl
+      prefixed_vars:
+        service_name: some-service
+        topic_name: some-topic
+        trigger_name: some-trigger
   - name: eventarc_trigger_with_http_destination
     primary_resource_id: primary
-    vars:
-      trigger_name: some-trigger
-      network_attachment_name: network-attachment
-    test_vars_overrides:
-      'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-trigger-na", acctest.BootstrapSubnet(t, "tf-bootstrap-eventarc-trigger-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-trigger-network")))'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-      service_account: 'SERVICE_ACCT'
-    exclude_docs: true
+    steps:
+    - name: eventarc_trigger_with_http_destination
+      config_path: templates/terraform/samples/services/eventarc/eventarc_trigger_with_http_destination.tf.tmpl
+      prefixed_vars:
+        network_attachment_name: network-attachment
+        trigger_name: some-trigger
+      test_env_vars:
+        project_id: PROJECT_NAME
+        service_account: SERVICE_ACCT
+      test_vars_overrides:
+        network_attachment_name: acctest.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-trigger-na",
+          acctest.BootstrapSubnet(t, "tf-bootstrap-eventarc-trigger-subnet", acctest.BootstrapSharedTestNetwork(t,
+          "tf-bootstrap-eventarc-trigger-network")))
+      exclude_docs: true
   - name: eventarc_trigger_with_channel_cmek
-    primary_resource_id: primary
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-    vars:
-      trigger_name: some-trigger
-      service_name: some-service
-      channel_name: some-channel
-      key_name: some-key
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-      service_account: 'SERVICE_ACCT'
-    test_vars_overrides:
-      'key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-trigger-key").CryptoKey.Name'
-    exclude_docs: true
+    - member: serviceAccount:service-{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com
+      role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    primary_resource_id: primary
+    steps:
+    - name: eventarc_trigger_with_channel_cmek
+      config_path: templates/terraform/samples/services/eventarc/eventarc_trigger_with_channel_cmek.tf.tmpl
+      prefixed_vars:
+        channel_name: some-channel
+        key_name: some-key
+        service_name: some-service
+        trigger_name: some-trigger
+      test_env_vars:
+        project_id: PROJECT_NAME
+        service_account: SERVICE_ACCT
+      test_vars_overrides:
+        key_name: acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT",
+          "us-central1", "tf-bootstrap-eventarc-trigger-key").CryptoKey.Name
+      exclude_docs: true
   - name: eventarc_trigger_with_workflow_destination
     primary_resource_id: primary
-    vars:
-      trigger_name: some-trigger
-      workflow_name: some-workflow
-    test_env_vars:
-      service_account: 'SERVICE_ACCT'
-    exclude_docs: true
+    steps:
+    - name: eventarc_trigger_with_workflow_destination
+      config_path: templates/terraform/samples/services/eventarc/eventarc_trigger_with_workflow_destination.tf.tmpl
+      prefixed_vars:
+        trigger_name: some-trigger
+        workflow_name: some-workflow
+      test_env_vars:
+        service_account: SERVICE_ACCT
+      exclude_docs: true
   - name: eventarc_trigger_with_path_pattern_filter
     primary_resource_id: primary
-    vars:
-      trigger_name: some-trigger
-      service_account_id: trigger-sa
-      service_name: some-service
-    exclude_docs: true
+    steps:
+    - name: eventarc_trigger_with_path_pattern_filter
+      config_path: templates/terraform/samples/services/eventarc/eventarc_trigger_with_path_pattern_filter.tf.tmpl
+      prefixed_vars:
+        service_account_id: trigger-sa
+        service_name: some-service
+        trigger_name: some-trigger
+      exclude_docs: true
   - name: eventarc_trigger_with_firestore_source
     primary_resource_id: primary
-    vars:
-      trigger_name: some-trigger
-      service_account_id: trigger-sa
-      service_name: some-service
-      database_id: some-database
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    exclude_docs: true
+    steps:
+    - name: eventarc_trigger_with_firestore_source
+      config_path: templates/terraform/samples/services/eventarc/eventarc_trigger_with_firestore_source.tf.tmpl
+      prefixed_vars:
+        database_id: some-database
+        service_account_id: trigger-sa
+        service_name: some-service
+        trigger_name: some-trigger
+      test_env_vars:
+        project_id: PROJECT_NAME
+      exclude_docs: true
 parameters:
   - name: location
     type: String

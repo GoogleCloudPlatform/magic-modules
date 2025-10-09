@@ -45,15 +45,18 @@ async:
     resource_inside_response: false
 custom_code:
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
-examples:
-  - name: 'app_engine_service_split_traffic'
-    primary_resource_id: 'liveapp'
-    vars:
-      service_id: 'default'
-      split.allocations.v1: '1'
-      bucket_name: 'appengine-static-content'
-    test_env_vars:
-      org_id: 'ORG_ID'
+samples:
+  - name: app_engine_service_split_traffic
+    primary_resource_id: liveapp
+    steps:
+    - name: app_engine_service_split_traffic
+      config_path: templates/terraform/samples/services/appengine/app_engine_service_split_traffic.tf.tmpl
+      prefixed_vars:
+        bucket_name: appengine-static-content
+        service_id: default
+        split.allocations.v1: "1"
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
   - name: 'migrate_traffic'
     type: Boolean

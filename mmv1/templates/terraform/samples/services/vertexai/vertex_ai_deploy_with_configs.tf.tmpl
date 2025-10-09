@@ -1,0 +1,17 @@
+resource "google_vertex_ai_endpoint_with_model_garden_deployment" "{{$.PrimaryResourceId}}" {
+  publisher_model_name = "publishers/google/models/paligemma@paligemma-224-float32"
+  location             = "us-central1"
+  model_config {
+    accept_eula =  true
+  }
+  deploy_config {
+    dedicated_resources {
+      machine_spec {
+        machine_type      = "g2-standard-16"
+        accelerator_type  = "NVIDIA_L4"
+        accelerator_count = 1
+      }
+      min_replica_count = 1
+    }
+  }
+}

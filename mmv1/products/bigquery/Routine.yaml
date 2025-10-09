@@ -30,55 +30,82 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'bigquery_routine_basic'
-    primary_resource_id: 'sproc'
-    primary_resource_name: 'fmt.Sprintf("tf_test_dataset_id%s", context["random_suffix"]), fmt.Sprintf("tf_test_table_id%s", context["random_suffix"])'
-    vars:
-      dataset_id: 'dataset_id'
-      routine_id: 'routine_id'
-  - name: 'bigquery_routine_json'
-    primary_resource_id: 'sproc'
-    primary_resource_name: 'fmt.Sprintf("tf_test_dataset_id%s", context["random_suffix"]), fmt.Sprintf("tf_test_table_id%s", context["random_suffix"])'
-    vars:
-      dataset_id: 'dataset_id'
-      routine_id: 'routine_id'
-  - name: 'bigquery_routine_tvf'
-    primary_resource_id: 'sproc'
-    primary_resource_name: 'fmt.Sprintf("tf_test_dataset_id%s", context["random_suffix"]), fmt.Sprintf("tf_test_table_id%s", context["random_suffix"])'
-    vars:
-      dataset_id: 'dataset_id'
-      routine_id: 'routine_id'
-  - name: 'bigquery_routine_pyspark'
-    primary_resource_id: 'pyspark'
-    vars:
-      dataset_id: 'dataset_id'
-      connection_id: 'connection_id'
-      routine_id: 'routine_id'
-  - name: 'bigquery_routine_pyspark_mainfile'
-    primary_resource_id: 'pyspark_mainfile'
-    vars:
-      dataset_id: 'dataset_id'
-      connection_id: 'connection_id'
-      routine_id: 'routine_id'
-  - name: 'bigquery_routine_spark_jar'
-    primary_resource_id: 'spark_jar'
-    vars:
-      dataset_id: 'dataset_id'
-      connection_id: 'connection_id'
-      routine_id: 'routine_id'
-  - name: 'bigquery_routine_data_governance_type'
-    primary_resource_id: 'custom_masking_routine'
-    vars:
-      dataset_id: 'dataset_id'
-      routine_id: 'routine_id'
-  - name: 'bigquery_routine_remote_function'
-    primary_resource_id: 'remote_function'
-    vars:
-      dataset_id: 'dataset_id'
-      connection_id: 'connection_id'
-      routine_id: 'routine_id'
+samples:
+  - name: bigquery_routine_basic
+    primary_resource_id: sproc
+    primary_resource_name: fmt.Sprintf("tf_test_dataset_id%s", context["random_suffix"]),
+      fmt.Sprintf("tf_test_table_id%s", context["random_suffix"])
+    steps:
+    - name: bigquery_routine_basic
+      config_path: templates/terraform/samples/services/bigquery/bigquery_routine_basic.tf.tmpl
+      prefixed_vars:
+        dataset_id: dataset_id
+        routine_id: routine_id
+  - name: bigquery_routine_json
+    primary_resource_id: sproc
+    primary_resource_name: fmt.Sprintf("tf_test_dataset_id%s", context["random_suffix"]),
+      fmt.Sprintf("tf_test_table_id%s", context["random_suffix"])
+    steps:
+    - name: bigquery_routine_json
+      config_path: templates/terraform/samples/services/bigquery/bigquery_routine_json.tf.tmpl
+      prefixed_vars:
+        dataset_id: dataset_id
+        routine_id: routine_id
+  - name: bigquery_routine_tvf
+    primary_resource_id: sproc
+    primary_resource_name: fmt.Sprintf("tf_test_dataset_id%s", context["random_suffix"]),
+      fmt.Sprintf("tf_test_table_id%s", context["random_suffix"])
+    steps:
+    - name: bigquery_routine_tvf
+      config_path: templates/terraform/samples/services/bigquery/bigquery_routine_tvf.tf.tmpl
+      prefixed_vars:
+        dataset_id: dataset_id
+        routine_id: routine_id
+  - name: bigquery_routine_pyspark
+    primary_resource_id: pyspark
+    steps:
+    - name: bigquery_routine_pyspark
+      config_path: templates/terraform/samples/services/bigquery/bigquery_routine_pyspark.tf.tmpl
+      prefixed_vars:
+        connection_id: connection_id
+        dataset_id: dataset_id
+        routine_id: routine_id
+  - name: bigquery_routine_pyspark_mainfile
+    primary_resource_id: pyspark_mainfile
+    steps:
+    - name: bigquery_routine_pyspark_mainfile
+      config_path: templates/terraform/samples/services/bigquery/bigquery_routine_pyspark_mainfile.tf.tmpl
+      prefixed_vars:
+        connection_id: connection_id
+        dataset_id: dataset_id
+        routine_id: routine_id
+  - name: bigquery_routine_spark_jar
+    primary_resource_id: spark_jar
+    steps:
+    - name: bigquery_routine_spark_jar
+      config_path: templates/terraform/samples/services/bigquery/bigquery_routine_spark_jar.tf.tmpl
+      prefixed_vars:
+        connection_id: connection_id
+        dataset_id: dataset_id
+        routine_id: routine_id
+  - name: bigquery_routine_data_governance_type
+    primary_resource_id: custom_masking_routine
+    steps:
+    - name: bigquery_routine_data_governance_type
+      config_path: templates/terraform/samples/services/bigquery/bigquery_routine_data_governance_type.tf.tmpl
+      prefixed_vars:
+        dataset_id: dataset_id
+        routine_id: routine_id
+  - name: bigquery_routine_remote_function
+    primary_resource_id: remote_function
     exclude_test: true
+    steps:
+    - name: bigquery_routine_remote_function
+      config_path: templates/terraform/samples/services/bigquery/bigquery_routine_remote_function.tf.tmpl
+      prefixed_vars:
+        connection_id: connection_id
+        dataset_id: dataset_id
+        routine_id: routine_id
 parameters:
 properties:
   - name: 'routineReference'

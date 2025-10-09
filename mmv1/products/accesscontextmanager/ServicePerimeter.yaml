@@ -69,28 +69,40 @@ custom_code:
 # Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
 # Exclude tests for examples becauses tests run in parallel and will conflict when trying to create the org level access policy
-examples:
-  - name: 'access_context_manager_service_perimeter_basic'
-    primary_resource_id: 'service-perimeter'
-    vars:
-      access_level_name: 'chromeos_no_lock'
-      service_perimeter_name: 'restrict_storage'
+samples:
+  - name: access_context_manager_service_perimeter_basic
+    primary_resource_id: service-perimeter
     exclude_test: true
-  - name: 'access_context_manager_service_perimeter_secure_data_exchange'
-    primary_resource_id: 'secure-data-exchange'
-    vars:
-      access_level_name: 'secure_data_exchange'
+    steps:
+    - name: access_context_manager_service_perimeter_basic
+      config_path: templates/terraform/samples/services/accesscontextmanager/access_context_manager_service_perimeter_basic.tf.tmpl
+      prefixed_vars:
+        access_level_name: chromeos_no_lock
+        service_perimeter_name: restrict_storage
+  - name: access_context_manager_service_perimeter_secure_data_exchange
+    primary_resource_id: secure-data-exchange
     exclude_test: true
-  - name: 'access_context_manager_service_perimeter_dry-run'
-    primary_resource_id: 'service-perimeter'
-    vars:
-      service_perimeter_name: 'restrict_bigquery_dryrun_storage'
+    steps:
+    - name: access_context_manager_service_perimeter_secure_data_exchange
+      config_path: templates/terraform/samples/services/accesscontextmanager/access_context_manager_service_perimeter_secure_data_exchange.tf.tmpl
+      prefixed_vars:
+        access_level_name: secure_data_exchange
+  - name: access_context_manager_service_perimeter_dry-run
+    primary_resource_id: service-perimeter
     exclude_test: true
-  - name: 'access_context_manager_service_perimeter_granular_controls'
-    primary_resource_id: 'service-perimeter'
-    vars:
-      service_perimeter_name: 'granular_controls'
+    steps:
+    - name: access_context_manager_service_perimeter_dry-run
+      config_path: templates/terraform/samples/services/accesscontextmanager/access_context_manager_service_perimeter_dry-run.tf.tmpl
+      prefixed_vars:
+        service_perimeter_name: restrict_bigquery_dryrun_storage
+  - name: access_context_manager_service_perimeter_granular_controls
+    primary_resource_id: service-perimeter
     exclude_test: true
+    steps:
+    - name: access_context_manager_service_perimeter_granular_controls
+      config_path: templates/terraform/samples/services/accesscontextmanager/access_context_manager_service_perimeter_granular_controls.tf.tmpl
+      prefixed_vars:
+        service_perimeter_name: granular_controls
 parameters:
   # Parent is a path parameter that _cannot_ be read or sent in the request at all.
   # This must be done at the provider level.

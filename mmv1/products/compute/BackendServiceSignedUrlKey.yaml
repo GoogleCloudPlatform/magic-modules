@@ -51,15 +51,20 @@ nested_query:
   modify_by_patch: false
 custom_code:
 exclude_tgc: true
-examples:
-  - name: 'backend_service_signed_url_key'
-    primary_resource_id: 'backend_key'
-    vars:
-      key_name: 'test-key'
-      backend_name: 'my-backend-service'
-      igm_name: 'my-webservers'
-    external_providers: ["random", "time"]
+samples:
+  - name: backend_service_signed_url_key
+    external_providers:
+    - random
+    - time
+    primary_resource_id: backend_key
     exclude_test: true
+    steps:
+    - name: backend_service_signed_url_key
+      config_path: templates/terraform/samples/services/compute/backend_service_signed_url_key.tf.tmpl
+      prefixed_vars:
+        backend_name: my-backend-service
+        igm_name: my-webservers
+        key_name: test-key
 parameters:
   - name: 'backendService'
     type: ResourceRef

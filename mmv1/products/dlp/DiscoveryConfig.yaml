@@ -39,50 +39,74 @@ custom_code:
   decoder: 'templates/terraform/decoders/unwrap_resource.go.tmpl'
   custom_import: 'templates/terraform/custom_import/dlp_import.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'dlp_discovery_config_basic'
-    primary_resource_id: 'basic'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      location: 'REGION'
+samples:
+  - name: dlp_discovery_config_basic
+    primary_resource_id: basic
     exclude_test: true
-  - name: 'dlp_discovery_config_actions'
-    primary_resource_id: 'actions'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+    - name: dlp_discovery_config_basic
+      config_path: templates/terraform/samples/services/dlp/dlp_discovery_config_basic.tf.tmpl
+      test_env_vars:
+        location: REGION
+        project: PROJECT_NAME
+  - name: dlp_discovery_config_actions
+    primary_resource_id: actions
     exclude_test: true
-  - name: 'dlp_discovery_config_org_running'
-    primary_resource_id: 'org_running'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      organization: 'ORG_ID'
+    steps:
+    - name: dlp_discovery_config_actions
+      config_path: templates/terraform/samples/services/dlp/dlp_discovery_config_actions.tf.tmpl
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: dlp_discovery_config_org_running
+    primary_resource_id: org_running
     exclude_test: true
-  - name: 'dlp_discovery_config_org_folder_paused'
-    primary_resource_id: 'org_folder_paused'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      organization: 'ORG_ID'
-      location: 'REGION'
-  - name: 'dlp_discovery_config_conditions_cadence'
-    primary_resource_id: 'conditions_cadence'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+    - name: dlp_discovery_config_org_running
+      config_path: templates/terraform/samples/services/dlp/dlp_discovery_config_org_running.tf.tmpl
+      test_env_vars:
+        organization: ORG_ID
+        project: PROJECT_NAME
+  - name: dlp_discovery_config_org_folder_paused
+    primary_resource_id: org_folder_paused
+    steps:
+    - name: dlp_discovery_config_org_folder_paused
+      config_path: templates/terraform/samples/services/dlp/dlp_discovery_config_org_folder_paused.tf.tmpl
+      test_env_vars:
+        location: REGION
+        organization: ORG_ID
+        project: PROJECT_NAME
+  - name: dlp_discovery_config_conditions_cadence
+    primary_resource_id: conditions_cadence
     exclude_test: true
-  - name: 'dlp_discovery_config_filter_regexes_and_conditions'
-    primary_resource_id: 'filter_regexes_and_conditions'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+    - name: dlp_discovery_config_conditions_cadence
+      config_path: templates/terraform/samples/services/dlp/dlp_discovery_config_conditions_cadence.tf.tmpl
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: dlp_discovery_config_filter_regexes_and_conditions
+    primary_resource_id: filter_regexes_and_conditions
     exclude_test: true
-  - name: 'dlp_discovery_config_cloud_sql'
-    primary_resource_id: 'cloud_sql'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+    - name: dlp_discovery_config_filter_regexes_and_conditions
+      config_path: templates/terraform/samples/services/dlp/dlp_discovery_config_filter_regexes_and_conditions.tf.tmpl
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: dlp_discovery_config_cloud_sql
+    primary_resource_id: cloud_sql
     exclude_test: true
-  - name: 'dlp_discovery_config_cloud_storage'
-    primary_resource_id: 'cloud_storage'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    steps:
+    - name: dlp_discovery_config_cloud_sql
+      config_path: templates/terraform/samples/services/dlp/dlp_discovery_config_cloud_sql.tf.tmpl
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: dlp_discovery_config_cloud_storage
+    primary_resource_id: cloud_storage
     exclude_test: true
+    steps:
+    - name: dlp_discovery_config_cloud_storage
+      config_path: templates/terraform/samples/services/dlp/dlp_discovery_config_cloud_storage.tf.tmpl
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
   - name: 'parent'
     type: String

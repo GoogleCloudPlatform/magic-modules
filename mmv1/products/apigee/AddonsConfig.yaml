@@ -41,17 +41,28 @@ async:
 custom_code:
   custom_import: 'templates/terraform/custom_import/apigee_addons.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/apigee_addons_override.go.tmpl'
-examples:
-  - name: 'apigee_addons_basic'
+samples:
+  - name: apigee_addons_basic
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'apigee_addons_full'
+    steps:
+    - name: apigee_addons_basic
+      config_path: templates/terraform/samples/services/apigee/apigee_addons_basic.tf.tmpl
+  - name: apigee_addons_full
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'apigee_addons_test'
-    primary_resource_id: 'apigee_org_addons'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
+    steps:
+    - name: apigee_addons_full
+      config_path: templates/terraform/samples/services/apigee/apigee_addons_full.tf.tmpl
+  - name: apigee_addons_test
+    primary_resource_id: apigee_org_addons
+    steps:
+    - name: apigee_addons_test
+      config_path: templates/terraform/samples/services/apigee/apigee_addons_test.tf.tmpl
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
 parameters:
   - name: 'org'
     type: String

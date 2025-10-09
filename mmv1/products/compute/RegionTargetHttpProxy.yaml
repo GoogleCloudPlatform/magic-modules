@@ -42,26 +42,35 @@ sweeper:
     - region: "us-central1"
     - region: "europe-west1"
     - region: "us-west1"
-examples:
-  - name: 'region_target_http_proxy_basic'
-    primary_resource_id: 'default'
-    vars:
-      region_target_http_proxy_name: 'test-proxy'
-      region_url_map_name: 'url-map'
-      region_backend_service_name: 'backend-service'
-      region_health_check_name: 'http-health-check'
-  - name: 'region_target_http_proxy_http_keep_alive_timeout'
-    primary_resource_id: 'default'
-    vars:
-      region_target_http_proxy_name: 'test-http-keep-alive-timeout-proxy'
-      region_url_map_name: 'url-map'
-      region_backend_service_name: 'backend-service'
-      region_health_check_name: 'http-health-check'
-  - name: 'region_target_http_proxy_https_redirect'
-    primary_resource_id: 'default'
-    vars:
-      region_target_http_proxy_name: 'test-https-redirect-proxy'
-      region_url_map_name: 'url-map'
+samples:
+  - name: region_target_http_proxy_basic
+    primary_resource_id: default
+    steps:
+    - name: region_target_http_proxy_basic
+      config_path: templates/terraform/samples/services/compute/region_target_http_proxy_basic.tf.tmpl
+      prefixed_vars:
+        region_backend_service_name: backend-service
+        region_health_check_name: http-health-check
+        region_target_http_proxy_name: test-proxy
+        region_url_map_name: url-map
+  - name: region_target_http_proxy_http_keep_alive_timeout
+    primary_resource_id: default
+    steps:
+    - name: region_target_http_proxy_http_keep_alive_timeout
+      config_path: templates/terraform/samples/services/compute/region_target_http_proxy_http_keep_alive_timeout.tf.tmpl
+      prefixed_vars:
+        region_backend_service_name: backend-service
+        region_health_check_name: http-health-check
+        region_target_http_proxy_name: test-http-keep-alive-timeout-proxy
+        region_url_map_name: url-map
+  - name: region_target_http_proxy_https_redirect
+    primary_resource_id: default
+    steps:
+    - name: region_target_http_proxy_https_redirect
+      config_path: templates/terraform/samples/services/compute/region_target_http_proxy_https_redirect.tf.tmpl
+      prefixed_vars:
+        region_target_http_proxy_name: test-https-redirect-proxy
+        region_url_map_name: url-map
 parameters:
   - name: 'region'
     type: ResourceRef

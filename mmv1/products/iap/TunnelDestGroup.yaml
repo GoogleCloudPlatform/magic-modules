@@ -40,16 +40,21 @@ iam_policy:
   parent_resource_attribute: 'dest_group'
   iam_conditions_request_type: 'REQUEST_BODY'
   base_url: 'projects/{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{dest_group}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'projects/{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{dest_group}}'
     - '{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{dest_group}}'
 custom_code:
-examples:
-  - name: 'iap_destgroup'
-    primary_resource_id: 'dest_group'
-    primary_resource_name: 'fmt.Sprintf("tf-test%s", context["random_suffix"])'
-    external_providers: ["random", "time"]
+samples:
+  - name: iap_destgroup
+    external_providers:
+    - random
+    - time
+    primary_resource_id: dest_group
+    primary_resource_name: fmt.Sprintf("tf-test%s", context["random_suffix"])
+    steps:
+    - name: iap_destgroup
+      config_path: templates/terraform/samples/services/iap/iap_destgroup.tf.tmpl
 parameters:
   - name: 'region'
     type: String

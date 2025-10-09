@@ -39,21 +39,23 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'source'
   base_url: 'organizations/{{organization}}/sources/{{source}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'organizations/{{organization}}/sources/{{source}}'
     - '{{source}}'
 custom_code:
   custom_import: 'templates/terraform/custom_import/scc_source_self_link_as_name_set_organization.go.tmpl'
-examples:
-  - name: 'scc_source_basic'
-    primary_resource_id: 'custom_source'
-    vars:
-      source_display_name: 'My Source'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      # resource can't be destroyed, so checkdestroy fails unnecessarily
+samples:
+  - name: scc_source_basic
+    primary_resource_id: custom_source
     exclude_test: true
+    steps:
+    - name: scc_source_basic
+      config_path: templates/terraform/samples/services/securitycenter/scc_source_basic.tf.tmpl
+      prefixed_vars:
+        source_display_name: My Source
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
   - name: 'organization'
     type: String

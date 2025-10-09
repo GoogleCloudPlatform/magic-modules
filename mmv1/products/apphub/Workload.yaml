@@ -41,41 +41,51 @@ async:
     resource_inside_response: true
 custom_code:
 include_in_tgc_next_DO_NOT_USE: true
-examples:
-  - name: 'apphub_workload_basic'
-    primary_resource_id: 'example'
-    vars:
-      application_id: 'example-application-1'
-      service_project_attachment_id: 'project-1'
-      ilb_network: 'l7-ilb-network'
-      ilb_subnet: 'l7-ilb-subnet'
-      instance_template: 'l7-ilb-mig-template'
-      mig: 'l7-ilb-mig1'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    external_providers: ["random", "time"]
-  - name: 'apphub_workload_full'
-    primary_resource_id: 'example'
-    vars:
-      application_id: 'example-application-1'
-      service_project_attachment_id: 'project-1'
-      display_name: 'Example Service Full'
-      desc: 'Register service for testing'
-      business_name: 'Alice'
-      business_email: 'alice@google.com'
-      developer_name: 'Bob'
-      developer_email: 'bob@google.com'
-      operator_name: 'Charlie'
-      operator_email: 'charlie@google.com'
-      ilb_network: 'l7-ilb-network'
-      ilb_subnet: 'l7-ilb-subnet'
-      instance_template: 'l7-ilb-mig-template'
-      mig: 'l7-ilb-mig1'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    external_providers: ["random", "time"]
+samples:
+  - name: apphub_workload_basic
+    external_providers:
+    - random
+    - time
+    primary_resource_id: example
+    steps:
+    - name: apphub_workload_basic
+      config_path: templates/terraform/samples/services/apphub/apphub_workload_basic.tf.tmpl
+      prefixed_vars:
+        application_id: example-application-1
+        ilb_network: l7-ilb-network
+        ilb_subnet: l7-ilb-subnet
+        instance_template: l7-ilb-mig-template
+        mig: l7-ilb-mig1
+        service_project_attachment_id: project-1
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+  - name: apphub_workload_full
+    external_providers:
+    - random
+    - time
+    primary_resource_id: example
+    steps:
+    - name: apphub_workload_full
+      config_path: templates/terraform/samples/services/apphub/apphub_workload_full.tf.tmpl
+      prefixed_vars:
+        application_id: example-application-1
+        business_email: alice@google.com
+        business_name: Alice
+        desc: Register service for testing
+        developer_email: bob@google.com
+        developer_name: Bob
+        display_name: Example Service Full
+        ilb_network: l7-ilb-network
+        ilb_subnet: l7-ilb-subnet
+        instance_template: l7-ilb-mig-template
+        mig: l7-ilb-mig1
+        operator_email: charlie@google.com
+        operator_name: Charlie
+        service_project_attachment_id: project-1
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
 parameters:
   - name: 'location'
     type: String

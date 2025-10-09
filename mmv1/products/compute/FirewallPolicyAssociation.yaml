@@ -44,25 +44,31 @@ custom_code:
   post_delete: 'templates/terraform/post_delete/compute_firewall_policy_association_operation.go.tmpl'
 custom_diff:
   - 'tpgresource.DefaultProviderProject'
-examples:
-  - name: 'firewall_policy_association'
-    primary_resource_id: 'default'
-    vars:
-      policy_name: 'my-policy'
-      association_name: 'my-association'
-      folder_name: 'my-folder'
-    test_env_vars:
-      org_id: 'ORG_ID'
+samples:
+  - name: firewall_policy_association
+    primary_resource_id: default
     exclude_test: true
-  - name: 'firewall_policy_association_swapover'
-    primary_resource_id: 'default'
-    vars:
-      policy_name: 'my-policy'
-      association_name: 'my-association'
-      folder_name: 'my-folder'
-    test_env_vars:
-      org_id: 'ORG_ID'
+    steps:
+    - name: firewall_policy_association
+      config_path: templates/terraform/samples/services/compute/firewall_policy_association.tf.tmpl
+      prefixed_vars:
+        association_name: my-association
+        folder_name: my-folder
+        policy_name: my-policy
+      test_env_vars:
+        org_id: ORG_ID
+  - name: firewall_policy_association_swapover
+    primary_resource_id: default
     exclude_test: true
+    steps:
+    - name: firewall_policy_association_swapover
+      config_path: templates/terraform/samples/services/compute/firewall_policy_association_swapover.tf.tmpl
+      prefixed_vars:
+        association_name: my-association
+        folder_name: my-folder
+        policy_name: my-policy
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
   - name: 'firewallPolicy'
     type: ResourceRef

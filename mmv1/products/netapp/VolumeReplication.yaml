@@ -60,23 +60,27 @@ custom_code:
   post_delete: 'templates/terraform/post_delete/netapp_volume_replication_delete_destination_volume.go.tmpl'
   post_update: 'templates/terraform/post_update/netapp_volume_replication_mirror_state.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/netapp_volume_replication_stop_before_delete.go.tmpl'
-examples:
-  - name: 'netapp_volume_replication_create'
-    primary_resource_id: 'test_replication'
-    vars:
-      source_pool_name: 'source-pool'
-      destination_pool_name: 'destination-pool'
-      volume_name: 'source-volume'
-      replication_name: 'test-replication'
-      destination_volume: 'destination-volume'
-      network_name: 'test-network'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
-    ignore_read_extra:
-      - 'delete_destination_volume'
-      - 'replication_enabled'
-      - 'force_stopping'
-      - 'wait_for_mirror'
+samples:
+  - name: netapp_volume_replication_create
+    primary_resource_id: test_replication
+    steps:
+    - name: netapp_volume_replication_create
+      config_path: templates/terraform/samples/services/netapp/netapp_volume_replication_create.tf.tmpl
+      prefixed_vars:
+        destination_pool_name: destination-pool
+        destination_volume: destination-volume
+        network_name: test-network
+        replication_name: test-replication
+        source_pool_name: source-pool
+        volume_name: source-volume
+      test_vars_overrides:
+        network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3",
+          acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))
+      ignore_read_extra:
+      - delete_destination_volume
+      - replication_enabled
+      - force_stopping
+      - wait_for_mirror
 virtual_fields:
   - name: 'delete_destination_volume'
     description: |

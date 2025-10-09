@@ -34,9 +34,12 @@ timeouts:
   delete_minutes: 20
 custom_code:
 exclude_sweeper: true
-examples:
-  - name: 'identity_platform_tenant_default_supported_idp_config_basic'
-    primary_resource_id: 'idp_config'
+samples:
+  - name: identity_platform_tenant_default_supported_idp_config_basic
+    primary_resource_id: idp_config
+    steps:
+    - name: identity_platform_tenant_default_supported_idp_config_basic
+      config_path: templates/terraform/samples/services/identityplatform/identity_platform_tenant_default_supported_idp_config_basic.tf.tmpl
 parameters:
 properties:
   - name: 'name'

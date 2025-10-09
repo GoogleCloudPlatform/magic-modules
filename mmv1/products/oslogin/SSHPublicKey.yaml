@@ -38,9 +38,12 @@ custom_code:
   post_create: 'templates/terraform/post_create/sshkeyfingerprint_and_sleep.go.tmpl'
 # Skip sweeper since due to URL containing user ID
 exclude_sweeper: true
-examples:
-  - name: 'os_login_ssh_key_basic'
-    primary_resource_id: 'cache'
+samples:
+  - name: os_login_ssh_key_basic
+    primary_resource_id: cache
+    steps:
+    - name: os_login_ssh_key_basic
+      config_path: templates/terraform/samples/services/oslogin/os_login_ssh_key_basic.tf.tmpl
 parameters:
   - name: 'user'
     type: String

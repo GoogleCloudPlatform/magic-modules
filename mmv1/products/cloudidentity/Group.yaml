@@ -48,16 +48,18 @@ custom_code:
   post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   custom_import: 'templates/terraform/custom_import/cloud_identity_group_import.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'cloud_identity_groups_basic'
-    primary_resource_id: 'cloud_identity_group_basic'
-    vars:
-      id_group: 'my-identity-group'
-    test_env_vars:
-      org_domain: 'ORG_DOMAIN'
-      cust_id: 'CUST_ID'
-    # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
+samples:
+  - name: cloud_identity_groups_basic
+    primary_resource_id: cloud_identity_group_basic
     exclude_test: true
+    steps:
+    - name: cloud_identity_groups_basic
+      config_path: templates/terraform/samples/services/cloudidentity/cloud_identity_groups_basic.tf.tmpl
+      prefixed_vars:
+        id_group: my-identity-group
+      test_env_vars:
+        cust_id: CUST_ID
+        org_domain: ORG_DOMAIN
 parameters:
   - name: 'initialGroupConfig'
     type: Enum

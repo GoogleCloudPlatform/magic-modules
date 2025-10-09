@@ -47,19 +47,23 @@ include_in_tgc_next_DO_NOT_USE: true
 sweeper:
   url_substitutions:
     - region: "global"
-examples:
-  - name: 'network_security_client_tls_policy_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-client-tls-policy'
-    # Currently failing
+samples:
+  - name: network_security_client_tls_policy_basic
     skip_vcr: true
-  - name: 'network_security_client_tls_policy_advanced'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-client-tls-policy'
-    # Currently failing
+    primary_resource_id: default
+    steps:
+    - name: network_security_client_tls_policy_basic
+      config_path: templates/terraform/samples/services/networksecurity/network_security_client_tls_policy_basic.tf.tmpl
+      prefixed_vars:
+        resource_name: my-client-tls-policy
+  - name: network_security_client_tls_policy_advanced
     skip_vcr: true
+    primary_resource_id: default
+    steps:
+    - name: network_security_client_tls_policy_advanced
+      config_path: templates/terraform/samples/services/networksecurity/network_security_client_tls_policy_advanced.tf.tmpl
+      prefixed_vars:
+        resource_name: my-client-tls-policy
 parameters:
   - name: 'name'
     type: String

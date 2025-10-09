@@ -43,16 +43,20 @@ async:
 custom_code:
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
-examples:
-  - name: 'netapp_volume_quota_rule_basic'
-    primary_resource_id: 'test_quota_rule'
-    vars:
-      volume_name: 'test-volume'
-      pool_name: 'test-pool'
-      network_name: 'test-network'
-      quota_rule_name: 'test-volume-quota-rule'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+samples:
+  - name: netapp_volume_quota_rule_basic
+    primary_resource_id: test_quota_rule
+    steps:
+    - name: netapp_volume_quota_rule_basic
+      config_path: templates/terraform/samples/services/netapp/netapp_volume_quota_rule_basic.tf.tmpl
+      prefixed_vars:
+        network_name: test-network
+        pool_name: test-pool
+        quota_rule_name: test-volume-quota-rule
+        volume_name: test-volume
+      test_vars_overrides:
+        network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3",
+          acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))
 parameters:
   - name: 'location'
     type: String

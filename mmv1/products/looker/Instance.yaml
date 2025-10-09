@@ -41,72 +41,98 @@ exclude_sweeper: true
 error_abort_predicates:
 
   - 'transport_tpg.Is429QuotaError'
-examples:
-  - name: 'looker_instance_basic'
-    primary_resource_id: 'looker-instance'
-    vars:
-      instance_name: 'my-instance'
-      client_id: 'my-client-id'
-      client_secret: 'my-client-secret'
-  - name: 'looker_instance_full'
-    primary_resource_id: 'looker-instance'
-    vars:
-      instance_name: 'my-instance'
-      client_id: 'my-client-id'
-      client_secret: 'my-client-secret'
-  - name: 'looker_instance_fips'
-    primary_resource_id: 'looker-instance'
-    vars:
-      instance_name: 'my-instance-fips'
-      client_id: 'my-client-id'
-      client_secret: 'my-client-secret'
-  - name: 'looker_instance_enterprise_full'
-    primary_resource_id: 'looker-instance'
-    vars:
-      network_name: 'looker-network'
-      kms_key_ring_name: 'looker-kms-ring'
-      kms_key_name: 'looker-kms-key'
-      address_name: 'looker-range'
-      instance_name: 'my-instance'
-      client_id: 'my-client-id'
-      client_secret: 'my-client-secret'
+samples:
+  - name: looker_instance_basic
+    primary_resource_id: looker-instance
+    steps:
+    - name: looker_instance_basic
+      config_path: templates/terraform/samples/services/looker/looker_instance_basic.tf.tmpl
+      prefixed_vars:
+        client_id: my-client-id
+        client_secret: my-client-secret
+        instance_name: my-instance
+  - name: looker_instance_full
+    primary_resource_id: looker-instance
+    steps:
+    - name: looker_instance_full
+      config_path: templates/terraform/samples/services/looker/looker_instance_full.tf.tmpl
+      prefixed_vars:
+        client_id: my-client-id
+        client_secret: my-client-secret
+        instance_name: my-instance
+  - name: looker_instance_fips
+    primary_resource_id: looker-instance
+    steps:
+    - name: looker_instance_fips
+      config_path: templates/terraform/samples/services/looker/looker_instance_fips.tf.tmpl
+      prefixed_vars:
+        client_id: my-client-id
+        client_secret: my-client-secret
+        instance_name: my-instance-fips
+  - name: looker_instance_enterprise_full
+    primary_resource_id: looker-instance
     exclude_test: true
-  - name: 'looker_instance_enterprise_full_test'
-    primary_resource_id: 'looker-instance'
-    vars:
-      network_name: 'looker-network'
-      kms_key_ring_name: 'looker-kms-ring'
-      kms_key_name: 'looker-kms-key'
-      address_name: 'looker-range'
-      instance_name: 'my-instance'
-      client_id: 'my-client-id'
-      client_secret: 'my-client-secret'
-    test_vars_overrides:
-      'address_name': 'acctest.BootstrapSharedTestGlobalAddress(t, "looker-vpc-network-3", acctest.AddressWithPrefixLength(8))'
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "looker-vpc-network-3", acctest.ServiceNetworkWithPrefixLength(8))'
-    exclude_docs: true
-  - name: 'looker_instance_custom_domain'
-    primary_resource_id: 'looker-instance'
-    vars:
-      instance_name: 'my-instance'
-      client_id: 'my-client-id'
-      client_secret: 'my-client-secret'
-      custom_domain: 'my-custom-domain'
-  - name: 'looker_instance_psc'
-    primary_resource_id: 'looker-instance'
-    vars:
-      instance_name: 'my-instance'
-      client_id: 'my-client-id'
-      client_secret: 'my-client-secret'
-  - name: 'looker_instance_force_delete'
-    primary_resource_id: 'looker-instance'
-    vars:
-      instance_name: 'my-instance'
-      client_id: 'my-client-id'
-      client_secret: 'my-client-secret'
-    ignore_read_extra:
-      - 'deletion_policy'
+    steps:
+    - name: looker_instance_enterprise_full
+      config_path: templates/terraform/samples/services/looker/looker_instance_enterprise_full.tf.tmpl
+      prefixed_vars:
+        address_name: looker-range
+        client_id: my-client-id
+        client_secret: my-client-secret
+        instance_name: my-instance
+        kms_key_name: looker-kms-key
+        kms_key_ring_name: looker-kms-ring
+        network_name: looker-network
+  - name: looker_instance_enterprise_full_test
+    primary_resource_id: looker-instance
+    steps:
+    - name: looker_instance_enterprise_full_test
+      config_path: templates/terraform/samples/services/looker/looker_instance_enterprise_full_test.tf.tmpl
+      prefixed_vars:
+        address_name: looker-range
+        client_id: my-client-id
+        client_secret: my-client-secret
+        instance_name: my-instance
+        kms_key_name: looker-kms-key
+        kms_key_ring_name: looker-kms-ring
+        network_name: looker-network
+      test_vars_overrides:
+        address_name: acctest.BootstrapSharedTestGlobalAddress(t, "looker-vpc-network-3",
+          acctest.AddressWithPrefixLength(8))
+        kms_key_name: acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+        network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "looker-vpc-network-3",
+          acctest.ServiceNetworkWithPrefixLength(8))
+      exclude_docs: true
+  - name: looker_instance_custom_domain
+    primary_resource_id: looker-instance
+    steps:
+    - name: looker_instance_custom_domain
+      config_path: templates/terraform/samples/services/looker/looker_instance_custom_domain.tf.tmpl
+      prefixed_vars:
+        client_id: my-client-id
+        client_secret: my-client-secret
+        custom_domain: my-custom-domain
+        instance_name: my-instance
+  - name: looker_instance_psc
+    primary_resource_id: looker-instance
+    steps:
+    - name: looker_instance_psc
+      config_path: templates/terraform/samples/services/looker/looker_instance_psc.tf.tmpl
+      prefixed_vars:
+        client_id: my-client-id
+        client_secret: my-client-secret
+        instance_name: my-instance
+  - name: looker_instance_force_delete
+    primary_resource_id: looker-instance
+    steps:
+    - name: looker_instance_force_delete
+      config_path: templates/terraform/samples/services/looker/looker_instance_force_delete.tf.tmpl
+      prefixed_vars:
+        client_id: my-client-id
+        client_secret: my-client-secret
+        instance_name: my-instance
+      ignore_read_extra:
+      - deletion_policy
 virtual_fields:
   - name: 'deletion_policy'
     default_value: "DEFAULT"

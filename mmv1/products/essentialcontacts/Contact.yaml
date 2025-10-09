@@ -43,9 +43,12 @@ timeouts:
   delete_minutes: 20
 custom_code:
   post_import: 'templates/terraform/post_import/essential_contacts_contact.go.tmpl'
-examples:
-  - name: 'essential_contact'
-    primary_resource_id: 'contact'
+samples:
+  - name: essential_contact
+    primary_resource_id: contact
+    steps:
+    - name: essential_contact
+      config_path: templates/terraform/samples/services/essentialcontacts/essential_contact.tf.tmpl
 parameters:
   - name: 'parent'
     type: String

@@ -43,38 +43,47 @@ custom_code:
   post_create: 'templates/terraform/post_create/compute_firewall_policy_rule.go.tmpl'
   post_delete: 'templates/terraform/post_delete/compute_firewall_policy_rule.go.tmpl'
   post_update: 'templates/terraform/post_update/compute_firewall_policy_rule.go.tmpl'
-examples:
-  - name: 'firewall_policy_rule'
-    primary_resource_id: 'primary'
-    vars:
-      address_group: 'address-group'
-      folder: 'folder'
-      fw_policy: 'fw-policy'
-      tag_key: 'tag-key'
-      tag_value: 'tag-value'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      service_acct: 'SERVICE_ACCT'
-  - name: 'firewall_policy_rule_network_scope'
-    primary_resource_id: 'primary'
-    vars:
-      folder: 'folder'
-      fw_policy: 'fw-policy'
-      network: 'network'
-      tag_key: 'tag-key'
-      tag_value: 'tag-value'
-    test_env_vars:
-      org_id: 'ORG_ID'
+samples:
+  - name: firewall_policy_rule
+    primary_resource_id: primary
+    steps:
+    - name: firewall_policy_rule
+      config_path: templates/terraform/samples/services/compute/firewall_policy_rule.tf.tmpl
+      prefixed_vars:
+        address_group: address-group
+        folder: folder
+        fw_policy: fw-policy
+        tag_key: tag-key
+        tag_value: tag-value
+      test_env_vars:
+        org_id: ORG_ID
+        service_acct: SERVICE_ACCT
+  - name: firewall_policy_rule_network_scope
     min_version: beta
-  - name: 'firewall_policy_rule_secure_tags'
-    primary_resource_id: 'primary'
-    vars:
-      folder: 'folder'
-      fw_policy: 'fw-policy'
-      tag_key: 'tag-key'
-      tag_value: 'tag-value'
-    test_env_vars:
-      org_id: 'ORG_ID'
+    primary_resource_id: primary
+    steps:
+    - name: firewall_policy_rule_network_scope
+      config_path: templates/terraform/samples/services/compute/firewall_policy_rule_network_scope.tf.tmpl
+      prefixed_vars:
+        folder: folder
+        fw_policy: fw-policy
+        network: network
+        tag_key: tag-key
+        tag_value: tag-value
+      test_env_vars:
+        org_id: ORG_ID
+  - name: firewall_policy_rule_secure_tags
+    primary_resource_id: primary
+    steps:
+    - name: firewall_policy_rule_secure_tags
+      config_path: templates/terraform/samples/services/compute/firewall_policy_rule_secure_tags.tf.tmpl
+      prefixed_vars:
+        folder: folder
+        fw_policy: fw-policy
+        tag_key: tag-key
+        tag_value: tag-value
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
   - name: 'firewallPolicy'
     type: ResourceRef

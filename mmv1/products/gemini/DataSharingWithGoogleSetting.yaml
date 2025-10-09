@@ -26,12 +26,15 @@ mutex: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings
 sweeper:
   url_substitutions:
     - region: "global"
-examples:
+samples:
   - name: gemini_data_sharing_with_google_setting_basic
     primary_resource_id: example
     exclude_test: true
-    vars:
-      data_sharing_with_google_setting_id: ls1-tf
+    steps:
+    - name: gemini_data_sharing_with_google_setting_basic
+      config_path: templates/terraform/samples/services/gemini/gemini_data_sharing_with_google_setting_basic.tf.tmpl
+      prefixed_vars:
+        data_sharing_with_google_setting_id: ls1-tf
 autogen_async: false
 autogen_status: RGF0YVNoYXJpbmdXaXRoR29vZ2xlU2V0dGluZw==
 parameters:

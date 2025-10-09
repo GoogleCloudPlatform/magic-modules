@@ -34,16 +34,18 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'scc_event_threat_detection_custom_module'
-    primary_resource_id: 'example'
-    vars:
-      display_name: 'basic_custom_module'
-      type: 'CONFIGURABLE_BAD_IP'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    # Has a handwritten update test
+samples:
+  - name: scc_event_threat_detection_custom_module
+    primary_resource_id: example
     exclude_test: true
+    steps:
+    - name: scc_event_threat_detection_custom_module
+      config_path: templates/terraform/samples/services/securitycenter/scc_event_threat_detection_custom_module.tf.tmpl
+      prefixed_vars:
+        display_name: basic_custom_module
+        type: CONFIGURABLE_BAD_IP
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
   - name: 'organization'
     type: String

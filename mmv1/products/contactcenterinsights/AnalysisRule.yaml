@@ -33,17 +33,26 @@ id_format: projects/{{project}}/locations/{{location}}/analysisRules/{{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/analysisRules/{{name}}
 autogen_status: QW5hbHlzaXNSdWxl
-examples:
-  - name: 'contact_center_insights_analysis_rule_basic'
-    primary_resource_id: 'analysis_rule_basic'
-  - name: 'contact_center_insights_analysis_rule_full'
-    primary_resource_id: 'analysis_rule_full'
-    test_env_vars:
-      project_number: 'PROJECT_NUMBER'
-  - name: 'contact_center_insights_analysis_rule_profile'
-    primary_resource_id: 'analysis_rule_profile'
-    test_env_vars:
-      project_number: 'PROJECT_NUMBER'
+samples:
+  - name: contact_center_insights_analysis_rule_basic
+    primary_resource_id: analysis_rule_basic
+    steps:
+    - name: contact_center_insights_analysis_rule_basic
+      config_path: templates/terraform/samples/services/contactcenterinsights/contact_center_insights_analysis_rule_basic.tf.tmpl
+  - name: contact_center_insights_analysis_rule_full
+    primary_resource_id: analysis_rule_full
+    steps:
+    - name: contact_center_insights_analysis_rule_full
+      config_path: templates/terraform/samples/services/contactcenterinsights/contact_center_insights_analysis_rule_full.tf.tmpl
+      test_env_vars:
+        project_number: PROJECT_NUMBER
+  - name: contact_center_insights_analysis_rule_profile
+    primary_resource_id: analysis_rule_profile
+    steps:
+    - name: contact_center_insights_analysis_rule_profile
+      config_path: templates/terraform/samples/services/contactcenterinsights/contact_center_insights_analysis_rule_profile.tf.tmpl
+      test_env_vars:
+        project_number: PROJECT_NUMBER
 parameters:
   - name: location
     type: String

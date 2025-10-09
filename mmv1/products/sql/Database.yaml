@@ -44,29 +44,35 @@ custom_code:
 # Sweeper skipped as this resource has customized deletion.
 exclude_sweeper: true
 read_error_transform: 'transformSQLDatabaseReadError'
-examples:
-  - name: 'sql_database_basic'
-    primary_resource_id: 'database'
-    vars:
-      database_name: 'my-database'
-      database_instance_name: 'my-database-instance'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'sql_database_deletion_policy'
-    primary_resource_id: 'database_deletion_policy'
-    vars:
-      database_name: 'my-database'
-      database_instance_name: 'my-database-instance'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      - 'deletion_policy'
+samples:
+  - name: sql_database_basic
+    primary_resource_id: database
+    steps:
+    - name: sql_database_basic
+      config_path: templates/terraform/samples/services/sql/sql_database_basic.tf.tmpl
+      prefixed_vars:
+        database_instance_name: my-database-instance
+        database_name: my-database
+        deletion_protection: "true"
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: sql_database_deletion_policy
+    primary_resource_id: database_deletion_policy
+    steps:
+    - name: sql_database_deletion_policy
+      config_path: templates/terraform/samples/services/sql/sql_database_deletion_policy.tf.tmpl
+      prefixed_vars:
+        database_instance_name: my-database-instance
+        database_name: my-database
+        deletion_protection: "true"
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
+      ignore_read_extra:
+      - deletion_policy
 virtual_fields:
   # TODO: make this an enum in a future major version. If using this field as a reference, look at PerInstanceConfig's minimal_action field for enum configuration.
   - name: 'deletion_policy'

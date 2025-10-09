@@ -45,23 +45,29 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "me-west1"
-examples:
-  - name: 'vmware_engine_network_policy_basic'
+samples:
+  - name: vmware_engine_network_policy_basic
     skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20719
-    primary_resource_id: 'vmw-engine-network-policy'
-    vars:
-      network_name: 'sample-network'
-      network_policy_name: 'sample-network-policy'
-    test_env_vars:
-      region: 'REGION'
-  - name: 'vmware_engine_network_policy_full'
+    primary_resource_id: vmw-engine-network-policy
+    steps:
+    - name: vmware_engine_network_policy_basic
+      config_path: templates/terraform/samples/services/vmwareengine/vmware_engine_network_policy_basic.tf.tmpl
+      prefixed_vars:
+        network_name: sample-network
+        network_policy_name: sample-network-policy
+      test_env_vars:
+        region: REGION
+  - name: vmware_engine_network_policy_full
     skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20719
-    primary_resource_id: 'vmw-engine-network-policy'
-    vars:
-      network_name: 'sample-network'
-      network_policy_name: 'sample-network-policy'
-    test_env_vars:
-      region: 'REGION'
+    primary_resource_id: vmw-engine-network-policy
+    steps:
+    - name: vmware_engine_network_policy_full
+      config_path: templates/terraform/samples/services/vmwareengine/vmware_engine_network_policy_full.tf.tmpl
+      prefixed_vars:
+        network_name: sample-network
+        network_policy_name: sample-network-policy
+      test_env_vars:
+        region: REGION
 parameters:
   - name: 'location'
     type: String

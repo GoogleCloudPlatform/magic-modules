@@ -1,0 +1,9 @@
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_compute_cross_site_network" "{{$.PrimaryResourceId}}" {
+  name                 = "{{index $.PrefixedVars "name"}}"
+  description         = "{{index $.PrefixedVars "description"}}"
+  provider = google-beta
+}

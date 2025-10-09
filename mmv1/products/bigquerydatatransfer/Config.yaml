@@ -46,27 +46,36 @@ custom_diff:
 error_retry_predicates:
 
   - 'transport_tpg.IamMemberMissing'
-examples:
-  - name: 'bigquerydatatransfer_config_scheduled_query'
-    primary_resource_id: 'query_config'
-    vars:
-      display_name: 'my-query'
-      dataset_id: 'my_dataset'
+samples:
+  - name: bigquerydatatransfer_config_scheduled_query
+    primary_resource_id: query_config
     exclude_test: true
-  - name: 'bigquerydatatransfer_config_cmek'
-    primary_resource_id: 'query_config_cmek'
-    vars:
-      dataset_id: 'example_dataset'
-      key_name: 'example-key'
-      keyring_name: 'example-keyring'
-      display_name: 'display-name'
+    steps:
+    - name: bigquerydatatransfer_config_scheduled_query
+      config_path: templates/terraform/samples/services/bigquerydatatransfer/bigquerydatatransfer_config_scheduled_query.tf.tmpl
+      prefixed_vars:
+        dataset_id: my_dataset
+        display_name: my-query
+  - name: bigquerydatatransfer_config_cmek
+    primary_resource_id: query_config_cmek
     exclude_test: true
-  - name: 'bigquerydatatransfer_config_salesforce'
-    primary_resource_id: 'salesforce_config'
-    vars:
-      display_name: 'my-salesforce-config'
-      dataset_id: 'my_dataset'
+    steps:
+    - name: bigquerydatatransfer_config_cmek
+      config_path: templates/terraform/samples/services/bigquerydatatransfer/bigquerydatatransfer_config_cmek.tf.tmpl
+      prefixed_vars:
+        dataset_id: example_dataset
+        display_name: display-name
+        key_name: example-key
+        keyring_name: example-keyring
+  - name: bigquerydatatransfer_config_salesforce
+    primary_resource_id: salesforce_config
     exclude_test: true
+    steps:
+    - name: bigquerydatatransfer_config_salesforce
+      config_path: templates/terraform/samples/services/bigquerydatatransfer/bigquerydatatransfer_config_salesforce.tf.tmpl
+      prefixed_vars:
+        dataset_id: my_dataset
+        display_name: my-salesforce-config
 parameters:
   - name: 'location'
     type: String

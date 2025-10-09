@@ -31,12 +31,15 @@ autogen_status: VG9waWM=
 custom_code:
   post_create: 'templates/terraform/post_create/sleep.go.tmpl'
   post_update: 'templates/terraform/post_create/sleep.go.tmpl'
-examples:
-  - name: 'managedkafka_topic_basic'
-    primary_resource_id: 'example'
-    vars:
-      cluster_id: 'my-cluster'
-      topic_id: 'my-topic'
+samples:
+  - name: managedkafka_topic_basic
+    primary_resource_id: example
+    steps:
+    - name: managedkafka_topic_basic
+      config_path: templates/terraform/samples/services/managedkafka/managedkafka_topic_basic.tf.tmpl
+      prefixed_vars:
+        cluster_id: my-cluster
+        topic_id: my-topic
 parameters:
   - name: 'location'
     type: String

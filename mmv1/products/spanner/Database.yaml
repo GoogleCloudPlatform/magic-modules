@@ -61,16 +61,18 @@ custom_diff:
   - 'resourceSpannerDBDdlCustomDiff'
 # Sweeper skipped as this resource has customized deletion.
 exclude_sweeper: true
-examples:
-  - name: 'spanner_database_basic'
-    primary_resource_id: 'database'
-    vars:
-      database_name: 'my-database'
-    ignore_read_extra:
-      - 'deletion_protection'
-      - 'default_time_zone'
-      # Randomness due to spanner instance
+samples:
+  - name: spanner_database_basic
     skip_vcr: true
+    primary_resource_id: database
+    steps:
+    - name: spanner_database_basic
+      config_path: templates/terraform/samples/services/spanner/spanner_database_basic.tf.tmpl
+      prefixed_vars:
+        database_name: my-database
+      ignore_read_extra:
+      - deletion_protection
+      - default_time_zone
 virtual_fields:
   - name: 'deletion_protection'
     description: |

@@ -35,17 +35,19 @@ timeouts:
   update_minutes: 10
   delete_minutes: 10
 exclude_sweeper: true
-examples:
-  - name: 'bigtable_schema_bundle'
-    primary_resource_id: 'schema_bundle'
-    vars:
-      instance_name: 'bt-instance'
-      table_name: 'bt-table'
-      schema_bundle_name: 'bt-schema-bundle'
-    ignore_read_extra:
-      - 'ignore_warnings'
-    # bigtable instance does not use the shared HTTP client, this test creates an instance
+samples:
+  - name: bigtable_schema_bundle
     skip_vcr: true
+    primary_resource_id: schema_bundle
+    steps:
+    - name: bigtable_schema_bundle
+      config_path: templates/terraform/samples/services/bigtable/bigtable_schema_bundle.tf.tmpl
+      prefixed_vars:
+        instance_name: bt-instance
+        schema_bundle_name: bt-schema-bundle
+        table_name: bt-table
+      ignore_read_extra:
+      - ignore_warnings
 parameters:
   - name: 'schemaBundleId'
     type: String

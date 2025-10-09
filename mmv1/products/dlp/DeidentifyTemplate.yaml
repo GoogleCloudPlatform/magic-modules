@@ -37,27 +37,39 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/dlp_import.go.tmpl'
 # Skip sweeper due to non-standard URL
 exclude_sweeper: true
-examples:
-  - name: 'dlp_deidentify_template_basic'
-    primary_resource_id: 'basic'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_deidentify_template_skip_characters'
-    primary_resource_id: 'basic'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    exclude_docs: true
-  - name: 'dlp_deidentify_template_image_transformations'
-    primary_resource_id: 'basic'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_deidentify_template_with_template_id'
-    primary_resource_id: 'with_template_id'
-    vars:
-      name: 'my-template'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    exclude_docs: true
+samples:
+  - name: dlp_deidentify_template_basic
+    primary_resource_id: basic
+    steps:
+    - name: dlp_deidentify_template_basic
+      config_path: templates/terraform/samples/services/dlp/dlp_deidentify_template_basic.tf.tmpl
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: dlp_deidentify_template_skip_characters
+    primary_resource_id: basic
+    steps:
+    - name: dlp_deidentify_template_skip_characters
+      config_path: templates/terraform/samples/services/dlp/dlp_deidentify_template_skip_characters.tf.tmpl
+      test_env_vars:
+        project: PROJECT_NAME
+      exclude_docs: true
+  - name: dlp_deidentify_template_image_transformations
+    primary_resource_id: basic
+    steps:
+    - name: dlp_deidentify_template_image_transformations
+      config_path: templates/terraform/samples/services/dlp/dlp_deidentify_template_image_transformations.tf.tmpl
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: dlp_deidentify_template_with_template_id
+    primary_resource_id: with_template_id
+    steps:
+    - name: dlp_deidentify_template_with_template_id
+      config_path: templates/terraform/samples/services/dlp/dlp_deidentify_template_with_template_id.tf.tmpl
+      prefixed_vars:
+        name: my-template
+      test_env_vars:
+        project: PROJECT_NAME
+      exclude_docs: true
 parameters:
   - name: 'parent'
     type: String

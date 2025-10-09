@@ -27,40 +27,46 @@ import_format:
   - "projects/{{project}}/locations/{{location}}/backends/{{backend}}/traffic"
   - "{{project}}/{{location}}/{{backend}}"
   - "{{location}}/{{backend}}"
-examples:
+samples:
   - name: firebase_app_hosting_traffic_target
     primary_resource_id: example
-    vars:
-      backend_id: "traffic-tg"
-      build_id: "target-build"
-      service_act_id: "firebase-app-hosting-compute"
-    test_env_vars:
-      project_id: "PROJECT_NAME"
-    test_vars_overrides:
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-traffic-tg"'
+    steps:
+    - name: firebase_app_hosting_traffic_target
+      config_path: templates/terraform/samples/services/firebaseapphosting/firebase_app_hosting_traffic_target.tf.tmpl
+      prefixed_vars:
+        backend_id: traffic-tg
+        build_id: target-build
+        service_act_id: firebase-app-hosting-compute
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        service_act_id: '"tf-test-traffic-tg"'
   - name: firebase_app_hosting_traffic_rollout_policy
     primary_resource_id: example
-    vars:
-      backend_id: "traffic-rp"
-      service_act_id: "firebase-app-hosting-compute"
-      branch: "main"
-    test_env_vars:
-      project_id: "PROJECT_NAME"
-    test_vars_overrides:
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-traffic-rp"'
+    steps:
+    - name: firebase_app_hosting_traffic_rollout_policy
+      config_path: templates/terraform/samples/services/firebaseapphosting/firebase_app_hosting_traffic_rollout_policy.tf.tmpl
+      prefixed_vars:
+        backend_id: traffic-rp
+        branch: main
+        service_act_id: firebase-app-hosting-compute
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        service_act_id: '"tf-test-traffic-rp"'
   - name: firebase_app_hosting_traffic_rollout_policy_disabled
     primary_resource_id: example
-    vars:
-      backend_id: "traffic-rpd"
-      service_act_id: "firebase-app-hosting-compute"
-      branch: "main"
-    test_env_vars:
-      project_id: "PROJECT_NAME"
-    test_vars_overrides:
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-traffic-rpd"'
+    steps:
+    - name: firebase_app_hosting_traffic_rollout_policy_disabled
+      config_path: templates/terraform/samples/services/firebaseapphosting/firebase_app_hosting_traffic_rollout_policy_disabled.tf.tmpl
+      prefixed_vars:
+        backend_id: traffic-rpd
+        branch: main
+        service_act_id: firebase-app-hosting-compute
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        service_act_id: '"tf-test-traffic-rpd"'
 autogen_async: true
 async:
   operation:

@@ -30,33 +30,49 @@ import_format:
   - "{{org_id}}/{{email}}"
 custom_code:
   custom_import: "templates/terraform/custom_import/apigee_developer.go.tmpl"
-examples:
-  - name: "apigee_developer_basic"
-    vars:
-      instance_name: "my-instance"
-      developer_email: "john.doe@acme.com"
+samples:
+  - name: apigee_developer_basic
+    primary_resource_id: ""
     exclude_test: true
-  - name: "apigee_developer_basic_test"
-    primary_resource_id: "apigee_developer"
-    test_env_vars:
-      org_id: "ORG_ID"
-      billing_account: "BILLING_ACCT"
-    exclude_docs: true
+    steps:
+    - name: apigee_developer_basic
+      config_path: templates/terraform/samples/services/apigee/apigee_developer_basic.tf.tmpl
+      prefixed_vars:
+        developer_email: john.doe@acme.com
+        instance_name: my-instance
+  - name: apigee_developer_basic_test
     skip_vcr: true
-    external_providers: ["time"]
-  - name: "apigee_developer_with_attributes"
-    vars:
-      instance_name: "my-instance"
-      developer_email: "john.doe@acme.com"
+    external_providers:
+    - time
+    primary_resource_id: apigee_developer
+    steps:
+    - name: apigee_developer_basic_test
+      config_path: templates/terraform/samples/services/apigee/apigee_developer_basic_test.tf.tmpl
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
+  - name: apigee_developer_with_attributes
+    primary_resource_id: ""
     exclude_test: true
-  - name: "apigee_developer_with_attributes_test"
-    primary_resource_id: "apigee_developer"
-    test_env_vars:
-      org_id: "ORG_ID"
-      billing_account: "BILLING_ACCT"
-    exclude_docs: true
+    steps:
+    - name: apigee_developer_with_attributes
+      config_path: templates/terraform/samples/services/apigee/apigee_developer_with_attributes.tf.tmpl
+      prefixed_vars:
+        developer_email: john.doe@acme.com
+        instance_name: my-instance
+  - name: apigee_developer_with_attributes_test
     skip_vcr: true
-    external_providers: ["time"]
+    external_providers:
+    - time
+    primary_resource_id: apigee_developer
+    steps:
+    - name: apigee_developer_with_attributes_test
+      config_path: templates/terraform/samples/services/apigee/apigee_developer_with_attributes_test.tf.tmpl
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
 parameters:
   - name: "orgId"
     type: String

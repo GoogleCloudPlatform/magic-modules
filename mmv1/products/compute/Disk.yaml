@@ -54,7 +54,7 @@ include_in_tgc_next_DO_NOT_USE: true
 iam_policy:
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
     - '{{name}}'
@@ -68,23 +68,32 @@ custom_code:
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSuppress'
-examples:
-  - name: 'disk_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])'
-    vars:
-      disk_name: 'test-disk'
-  - name: 'disk_async'
-    primary_resource_id: 'secondary'
-    primary_resource_name: 'fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])'
-    vars:
-      disk_name: 'async-test-disk'
-      secondary_disk_name: 'async-secondary-test-disk'
-  - name: 'disk_features'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])'
-    vars:
-      disk_name: 'test-disk-features'
+samples:
+  - name: disk_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])
+    steps:
+    - name: disk_basic
+      config_path: templates/terraform/samples/services/compute/disk_basic.tf.tmpl
+      prefixed_vars:
+        disk_name: test-disk
+  - name: disk_async
+    primary_resource_id: secondary
+    primary_resource_name: fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])
+    steps:
+    - name: disk_async
+      config_path: templates/terraform/samples/services/compute/disk_async.tf.tmpl
+      prefixed_vars:
+        disk_name: async-test-disk
+        secondary_disk_name: async-secondary-test-disk
+  - name: disk_features
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])
+    steps:
+    - name: disk_features
+      config_path: templates/terraform/samples/services/compute/disk_features.tf.tmpl
+      prefixed_vars:
+        disk_name: test-disk-features
 parameters:
   - name: 'zone'
     type: ResourceRef

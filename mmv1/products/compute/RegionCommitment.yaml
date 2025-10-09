@@ -45,21 +45,23 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
-examples:
-  - name: 'compute_region_commitment_basic'
-    primary_resource_id: 'foobar'
-    vars:
-      region_commitment_name: 'my-region-commitment'
-    # Creating a resource means signing a contract
-    # Spanning years that cannot be deleted
+samples:
+  - name: compute_region_commitment_basic
+    primary_resource_id: foobar
     exclude_test: true
-  - name: 'compute_region_commitment_full'
-    primary_resource_id: 'foobar'
-    vars:
-      region_commitment_name: 'my-full-commitment'
-    # Creating a resource means signing a contract
-    # Spanning years that cannot be deleted
+    steps:
+    - name: compute_region_commitment_basic
+      config_path: templates/terraform/samples/services/compute/compute_region_commitment_basic.tf.tmpl
+      prefixed_vars:
+        region_commitment_name: my-region-commitment
+  - name: compute_region_commitment_full
+    primary_resource_id: foobar
     exclude_test: true
+    steps:
+    - name: compute_region_commitment_full
+      config_path: templates/terraform/samples/services/compute/compute_region_commitment_full.tf.tmpl
+      prefixed_vars:
+        region_commitment_name: my-full-commitment
 parameters:
   - name: 'region'
     type: ResourceRef

@@ -50,12 +50,15 @@ timeouts:
 custom_code:
   post_create: 'templates/terraform/post_create/sleep_1_min.go.tmpl'
   post_update: 'templates/terraform/post_create/sleep_1_min.go.tmpl'
-examples:
-  - name: 'kms_organization_kaj_policy_config_basic'
-    primary_resource_id: "example"
-    min_version: 'beta'
-    test_env_vars:
-      org_id: 'ORG_TARGET'
+samples:
+  - name: kms_organization_kaj_policy_config_basic
+    min_version: beta
+    primary_resource_id: example
+    steps:
+    - name: kms_organization_kaj_policy_config_basic
+      config_path: templates/terraform/samples/services/kms/kms_organization_kaj_policy_config_basic.tf.tmpl
+      test_env_vars:
+        org_id: ORG_TARGET
 parameters:
   - name: 'organization'
     type: String

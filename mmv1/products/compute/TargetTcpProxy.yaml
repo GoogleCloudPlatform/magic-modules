@@ -39,13 +39,16 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
-examples:
-  - name: 'target_tcp_proxy_basic'
-    primary_resource_id: 'default'
-    vars:
-      target_tcp_proxy_name: 'test-proxy'
-      backend_service_name: 'backend-service'
-      health_check_name: 'health-check'
+samples:
+  - name: target_tcp_proxy_basic
+    primary_resource_id: default
+    steps:
+    - name: target_tcp_proxy_basic
+      config_path: templates/terraform/samples/services/compute/target_tcp_proxy_basic.tf.tmpl
+      prefixed_vars:
+        backend_service_name: backend-service
+        health_check_name: health-check
+        target_tcp_proxy_name: test-proxy
 parameters:
 properties:
   - name: 'creationTimestamp'

@@ -37,20 +37,29 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/dialogflowcx_set_location_skip_default_obj.go.tmpl'
   custom_import: 'templates/terraform/custom_import/dialogflowcx_tool.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'dialogflowcx_tool_open_api'
-    primary_resource_id: 'open_api_tool'
-    vars:
-      agent_name: 'dialogflowcx-agent-open-api'
-  - name: 'dialogflowcx_tool_data_store'
-    primary_resource_id: 'data_store_tool'
-    vars:
-      agent_name: 'dialogflowcx-agent-data-store'
-      data_store: 'datastore-tool'
-  - name: 'dialogflowcx_tool_function'
-    primary_resource_id: 'function_tool'
-    vars:
-      agent_name: 'dialogflowcx-agent-fucntion'
+samples:
+  - name: dialogflowcx_tool_open_api
+    primary_resource_id: open_api_tool
+    steps:
+    - name: dialogflowcx_tool_open_api
+      config_path: templates/terraform/samples/services/dialogflowcx/dialogflowcx_tool_open_api.tf.tmpl
+      prefixed_vars:
+        agent_name: dialogflowcx-agent-open-api
+  - name: dialogflowcx_tool_data_store
+    primary_resource_id: data_store_tool
+    steps:
+    - name: dialogflowcx_tool_data_store
+      config_path: templates/terraform/samples/services/dialogflowcx/dialogflowcx_tool_data_store.tf.tmpl
+      prefixed_vars:
+        agent_name: dialogflowcx-agent-data-store
+        data_store: datastore-tool
+  - name: dialogflowcx_tool_function
+    primary_resource_id: function_tool
+    steps:
+    - name: dialogflowcx_tool_function
+      config_path: templates/terraform/samples/services/dialogflowcx/dialogflowcx_tool_function.tf.tmpl
+      prefixed_vars:
+        agent_name: dialogflowcx-agent-fucntion
 parameters:
   - name: 'parent'
     type: String

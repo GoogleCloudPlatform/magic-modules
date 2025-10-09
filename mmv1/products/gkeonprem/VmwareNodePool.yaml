@@ -39,21 +39,27 @@ async:
     resource_inside_response: true
 custom_code:
 taint_resource_on_failed_create: true
-examples:
-  - name: 'gkeonprem_vmware_node_pool_basic'
-    primary_resource_id: 'nodepool-basic'
-    vars:
-      name: 'my-nodepool'
-      cluster: 'my-cluster'
-    test_env_vars:
-      project: 'fake-backend-360322'
-  - name: 'gkeonprem_vmware_node_pool_full'
-    primary_resource_id: 'nodepool-full'
-    vars:
-      name: 'my-nodepool'
-      cluster: 'my-cluster'
-    test_env_vars:
-      project: 'fake-backend-360322'
+samples:
+  - name: gkeonprem_vmware_node_pool_basic
+    primary_resource_id: nodepool-basic
+    steps:
+    - name: gkeonprem_vmware_node_pool_basic
+      config_path: templates/terraform/samples/services/gkeonprem/gkeonprem_vmware_node_pool_basic.tf.tmpl
+      prefixed_vars:
+        cluster: my-cluster
+        name: my-nodepool
+      test_env_vars:
+        project: fake-backend-360322
+  - name: gkeonprem_vmware_node_pool_full
+    primary_resource_id: nodepool-full
+    steps:
+    - name: gkeonprem_vmware_node_pool_full
+      config_path: templates/terraform/samples/services/gkeonprem/gkeonprem_vmware_node_pool_full.tf.tmpl
+      prefixed_vars:
+        cluster: my-cluster
+        name: my-nodepool
+      test_env_vars:
+        project: fake-backend-360322
 parameters:
   - name: 'name'
     type: String

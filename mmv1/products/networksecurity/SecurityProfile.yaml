@@ -45,47 +45,64 @@ sweeper:
   url_substitutions:
     - parent: "organizations/${ORG_ID}"
       region: "global"
-examples:
-  - name: 'network_security_security_profile_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-security-profile'
-    test_env_vars:
-      org_id: 'ORG_ID'
-  - name: 'network_security_security_profile_overrides'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-security-profile'
-    test_env_vars:
-      org_id: 'ORG_ID'
-  - name: 'network_security_security_profile_mirroring'
-    min_version: 'beta'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-security-profile'
-      network_name: 'my-network'
-      deployment_group_id: 'my-dg'
-      endpoint_group_id: 'my-eg'
-    test_env_vars:
-      org_id: 'ORG_ID'
-  - name: 'network_security_security_profile_intercept'
-    min_version: 'beta'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-security-profile'
-      network_name: 'my-network'
-      deployment_group_id: 'my-dg'
-      endpoint_group_id: 'my-eg'
-    test_env_vars:
-      org_id: 'ORG_ID'
-  - name: 'network_security_security_profile_url_filtering'
-    min_version: 'beta'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-security-profile'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    tgc_skip_test: The ENUM value URL_FILTERING in type field is transformed to UNKNOWN_ENUM_VALUE_ProfileType_5 in CAI asset. The reason could be that URL_FILTERING is not supported in CAI yet. Will check if the value in CAI assets will be correct later.
+samples:
+  - name: network_security_security_profile_basic
+    primary_resource_id: default
+    steps:
+    - name: network_security_security_profile_basic
+      config_path: templates/terraform/samples/services/networksecurity/network_security_security_profile_basic.tf.tmpl
+      prefixed_vars:
+        resource_name: my-security-profile
+      test_env_vars:
+        org_id: ORG_ID
+  - name: network_security_security_profile_overrides
+    primary_resource_id: default
+    steps:
+    - name: network_security_security_profile_overrides
+      config_path: templates/terraform/samples/services/networksecurity/network_security_security_profile_overrides.tf.tmpl
+      prefixed_vars:
+        resource_name: my-security-profile
+      test_env_vars:
+        org_id: ORG_ID
+  - name: network_security_security_profile_mirroring
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: network_security_security_profile_mirroring
+      config_path: templates/terraform/samples/services/networksecurity/network_security_security_profile_mirroring.tf.tmpl
+      prefixed_vars:
+        deployment_group_id: my-dg
+        endpoint_group_id: my-eg
+        network_name: my-network
+        resource_name: my-security-profile
+      test_env_vars:
+        org_id: ORG_ID
+  - name: network_security_security_profile_intercept
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: network_security_security_profile_intercept
+      config_path: templates/terraform/samples/services/networksecurity/network_security_security_profile_intercept.tf.tmpl
+      prefixed_vars:
+        deployment_group_id: my-dg
+        endpoint_group_id: my-eg
+        network_name: my-network
+        resource_name: my-security-profile
+      test_env_vars:
+        org_id: ORG_ID
+  - name: network_security_security_profile_url_filtering
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: network_security_security_profile_url_filtering
+      config_path: templates/terraform/samples/services/networksecurity/network_security_security_profile_url_filtering.tf.tmpl
+      prefixed_vars:
+        resource_name: my-security-profile
+      test_env_vars:
+        org_id: ORG_ID
+    tgc_skip_test: The ENUM value URL_FILTERING in type field is transformed to UNKNOWN_ENUM_VALUE_ProfileType_5
+      in CAI asset. The reason could be that URL_FILTERING is not supported in CAI yet.
+      Will check if the value in CAI assets will be correct later.
 parameters:
   - name: 'name'
     type: String

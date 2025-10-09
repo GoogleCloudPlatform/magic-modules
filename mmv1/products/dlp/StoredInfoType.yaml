@@ -47,28 +47,40 @@ custom_diff:
   - 'storedInfoTypeCustomizeDiff'
 # Skip sweeper due to non-standard URL
 exclude_sweeper: true
-examples:
-  - name: 'dlp_stored_info_type_basic'
-    primary_resource_id: 'basic'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_stored_info_type_dictionary'
-    primary_resource_id: 'dictionary'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_stored_info_type_large_custom_dictionary'
-    primary_resource_id: 'large'
-    vars:
-      bucket_name: 'tf-test-bucket'
-      object_name: 'tf-test-object'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'dlp_stored_info_type_with_id'
-    primary_resource_id: 'with_stored_info_type_id'
-    vars:
-      name: 'id-'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: dlp_stored_info_type_basic
+    primary_resource_id: basic
+    steps:
+    - name: dlp_stored_info_type_basic
+      config_path: templates/terraform/samples/services/dlp/dlp_stored_info_type_basic.tf.tmpl
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: dlp_stored_info_type_dictionary
+    primary_resource_id: dictionary
+    steps:
+    - name: dlp_stored_info_type_dictionary
+      config_path: templates/terraform/samples/services/dlp/dlp_stored_info_type_dictionary.tf.tmpl
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: dlp_stored_info_type_large_custom_dictionary
+    primary_resource_id: large
+    steps:
+    - name: dlp_stored_info_type_large_custom_dictionary
+      config_path: templates/terraform/samples/services/dlp/dlp_stored_info_type_large_custom_dictionary.tf.tmpl
+      prefixed_vars:
+        bucket_name: tf-test-bucket
+        object_name: tf-test-object
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: dlp_stored_info_type_with_id
+    primary_resource_id: with_stored_info_type_id
+    steps:
+    - name: dlp_stored_info_type_with_id
+      config_path: templates/terraform/samples/services/dlp/dlp_stored_info_type_with_id.tf.tmpl
+      prefixed_vars:
+        name: id-
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
   - name: 'parent'
     type: String

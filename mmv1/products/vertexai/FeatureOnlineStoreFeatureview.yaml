@@ -42,39 +42,53 @@ iam_policy:
   parent_resource_type: 'feature_online_store'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'feature_view'
-  example_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_feature_online_store_featureview.tf.tmpl'
+  sample_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_feature_online_store_featureview.tf.tmpl'
   import_format:
     - '{{feature_online_store}}/featureViews/{{name}}'
     - '{{name}}'
   min_version: 'beta'
 custom_code:
-examples:
-  - name: 'vertex_ai_featureonlinestore_featureview'
-    primary_resource_id: 'featureview'
-    primary_resource_name: 'fmt.Sprintf("projects/%s/locations/%s/featureOnlineStores/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), fmt.Sprintf("tf_test_example_feature_view%s", context["random_suffix"])), fmt.Sprintf("tf_test_example_feature_view%s", context["random_suffix"])'
-    vars:
-      name: 'example_feature_view'
-  - name: 'vertex_ai_featureonlinestore_featureview_feature_registry'
-    primary_resource_id: 'featureview_featureregistry'
-    vars:
-      name: 'example_feature_view_feature_registry'
-  - name: 'vertex_ai_featureonlinestore_featureview_cross_project'
-    primary_resource_id: 'cross_project_featureview'
-    vars:
-      name: 'example_cross_project_featureview'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    ignore_read_extra:
-      - 'feature_registry_source.0.project_number'
-    external_providers: ["time"]
-  - name: 'vertex_ai_featureonlinestore_featureview_with_vector_search'
-    primary_resource_id: 'featureview_vector_search'
-    min_version: 'beta'
-    vars:
-      name: 'example_feature_view_vector_search'
-    # currently failing
+samples:
+  - name: vertex_ai_featureonlinestore_featureview
+    primary_resource_id: featureview
+    primary_resource_name: fmt.Sprintf("projects/%s/locations/%s/featureOnlineStores/%s",
+      envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), fmt.Sprintf("tf_test_example_feature_view%s",
+      context["random_suffix"])), fmt.Sprintf("tf_test_example_feature_view%s", context["random_suffix"])
+    steps:
+    - name: vertex_ai_featureonlinestore_featureview
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_featureonlinestore_featureview.tf.tmpl
+      prefixed_vars:
+        name: example_feature_view
+  - name: vertex_ai_featureonlinestore_featureview_feature_registry
+    primary_resource_id: featureview_featureregistry
+    steps:
+    - name: vertex_ai_featureonlinestore_featureview_feature_registry
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_featureonlinestore_featureview_feature_registry.tf.tmpl
+      prefixed_vars:
+        name: example_feature_view_feature_registry
+  - name: vertex_ai_featureonlinestore_featureview_cross_project
+    external_providers:
+    - time
+    primary_resource_id: cross_project_featureview
+    steps:
+    - name: vertex_ai_featureonlinestore_featureview_cross_project
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_featureonlinestore_featureview_cross_project.tf.tmpl
+      prefixed_vars:
+        name: example_cross_project_featureview
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      ignore_read_extra:
+      - feature_registry_source.0.project_number
+  - name: vertex_ai_featureonlinestore_featureview_with_vector_search
     skip_vcr: true
+    min_version: beta
+    primary_resource_id: featureview_vector_search
+    steps:
+    - name: vertex_ai_featureonlinestore_featureview_with_vector_search
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_featureonlinestore_featureview_with_vector_search.tf.tmpl
+      prefixed_vars:
+        name: example_feature_view_vector_search
 parameters:
   - name: 'featureOnlineStore'
     type: String

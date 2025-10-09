@@ -46,16 +46,18 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "global"
-examples:
-  - name: 'network_security_mirroring_endpoint_group_association_basic'
-    config_path: 'templates/terraform/examples/network_security_mirroring_endpoint_group_association_basic.tf.tmpl'
-    primary_resource_id: 'default'
-    vars:
-      producer_network_name: 'example-prod-network'
-      consumer_network_name: 'example-cons-network'
-      deployment_group_id: 'example-dg'
-      endpoint_group_id: 'example-eg'
-      endpoint_group_association_id: 'example-ega'
+samples:
+  - name: network_security_mirroring_endpoint_group_association_basic
+    primary_resource_id: default
+    steps:
+    - name: network_security_mirroring_endpoint_group_association_basic
+      config_path: templates/terraform/samples/services/networksecurity/network_security_mirroring_endpoint_group_association_basic.tf.tmpl
+      prefixed_vars:
+        consumer_network_name: example-cons-network
+        deployment_group_id: example-dg
+        endpoint_group_association_id: example-ega
+        endpoint_group_id: example-eg
+        producer_network_name: example-prod-network
 parameters:
   - name: 'location'
     type: String

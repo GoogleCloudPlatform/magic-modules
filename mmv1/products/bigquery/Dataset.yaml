@@ -42,70 +42,100 @@ custom_code:
   constants: 'templates/terraform/constants/bigquery_dataset.go.tmpl'
   pre_read: 'templates/terraform/pre_read/bigquery_dataset.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'bigquery_dataset_basic'
-    primary_resource_id: 'dataset'
-    vars:
-      dataset_id: 'example_dataset'
-      account_name: 'bqowner'
-  - name: 'bigquery_dataset_with_max_time_travel_hours'
-    primary_resource_id: 'dataset'
-    vars:
-      dataset_id: 'example_dataset'
-      account_name: 'bqowner'
-    exclude_docs: true
-  - name: 'bigquery_dataset_cmek'
-    primary_resource_id: 'dataset'
-    vars:
-      dataset_id: 'example_dataset'
-      key_name: 'example-key'
-      keyring_name: 'example-keyring'
+samples:
+  - name: bigquery_dataset_basic
+    primary_resource_id: dataset
+    steps:
+    - name: bigquery_dataset_basic
+      config_path: templates/terraform/samples/services/bigquery/bigquery_dataset_basic.tf.tmpl
+      prefixed_vars:
+        account_name: bqowner
+        dataset_id: example_dataset
+  - name: bigquery_dataset_with_max_time_travel_hours
+    primary_resource_id: dataset
+    steps:
+    - name: bigquery_dataset_with_max_time_travel_hours
+      config_path: templates/terraform/samples/services/bigquery/bigquery_dataset_with_max_time_travel_hours.tf.tmpl
+      prefixed_vars:
+        account_name: bqowner
+        dataset_id: example_dataset
+      exclude_docs: true
+  - name: bigquery_dataset_cmek
+    primary_resource_id: dataset
     exclude_test: true
-  - name: 'bigquery_dataset_authorized_dataset'
-    primary_resource_id: 'dataset'
-    vars:
-      private: 'private'
-      public: 'public'
-      account_name: 'bqowner'
-  - name: 'bigquery_dataset_authorized_routine'
-    primary_resource_id: 'private'
-    vars:
-      private_dataset: 'private_dataset'
-      public_dataset: 'public_dataset'
-      public_routine: 'public_routine'
-    test_env_vars:
-      service_account: 'SERVICE_ACCT'
-  - name: 'bigquery_dataset_case_insensitive_names'
-    primary_resource_id: 'dataset'
-    vars:
-      dataset_id: 'example_dataset'
-      account_name: 'bqowner'
-    exclude_docs: true
-  - name: 'bigquery_dataset_default_collation_set'
-    primary_resource_id: 'dataset'
-    vars:
-      dataset_id: 'example_dataset'
-      account_name: 'bqowner'
-    exclude_docs: true
-  - name: 'bigquery_dataset_external_reference_aws'
-    primary_resource_id: 'dataset'
-    vars:
-      dataset_id: 'example_dataset'
+    steps:
+    - name: bigquery_dataset_cmek
+      config_path: templates/terraform/samples/services/bigquery/bigquery_dataset_cmek.tf.tmpl
+      prefixed_vars:
+        dataset_id: example_dataset
+        key_name: example-key
+        keyring_name: example-keyring
+  - name: bigquery_dataset_authorized_dataset
+    primary_resource_id: dataset
+    steps:
+    - name: bigquery_dataset_authorized_dataset
+      config_path: templates/terraform/samples/services/bigquery/bigquery_dataset_authorized_dataset.tf.tmpl
+      prefixed_vars:
+        account_name: bqowner
+        private: private
+        public: public
+  - name: bigquery_dataset_authorized_routine
+    primary_resource_id: private
+    steps:
+    - name: bigquery_dataset_authorized_routine
+      config_path: templates/terraform/samples/services/bigquery/bigquery_dataset_authorized_routine.tf.tmpl
+      prefixed_vars:
+        private_dataset: private_dataset
+        public_dataset: public_dataset
+        public_routine: public_routine
+      test_env_vars:
+        service_account: SERVICE_ACCT
+  - name: bigquery_dataset_case_insensitive_names
+    primary_resource_id: dataset
+    steps:
+    - name: bigquery_dataset_case_insensitive_names
+      config_path: templates/terraform/samples/services/bigquery/bigquery_dataset_case_insensitive_names.tf.tmpl
+      prefixed_vars:
+        account_name: bqowner
+        dataset_id: example_dataset
+      exclude_docs: true
+  - name: bigquery_dataset_default_collation_set
+    primary_resource_id: dataset
+    steps:
+    - name: bigquery_dataset_default_collation_set
+      config_path: templates/terraform/samples/services/bigquery/bigquery_dataset_default_collation_set.tf.tmpl
+      prefixed_vars:
+        account_name: bqowner
+        dataset_id: example_dataset
+      exclude_docs: true
+  - name: bigquery_dataset_external_reference_aws
+    primary_resource_id: dataset
     exclude_test: true
-  - name: 'bigquery_dataset_external_catalog_dataset_options'
-    primary_resource_id: 'dataset'
-    vars:
-      dataset_id: 'example_dataset'
-  - name: 'bigquery_dataset_resource_tags'
-    primary_resource_id: 'dataset'
-    primary_resource_name: 'fmt.Sprintf("tf_test_dataset%s", context["random_suffix"])'
-    vars:
-      dataset_id: 'dataset'
-      tag_key1: 'tag_key1'
-      tag_value1: 'tag_value1'
-      tag_key2: 'tag_key2'
-      tag_value2: 'tag_value2'
-    exclude_docs: true
+    steps:
+    - name: bigquery_dataset_external_reference_aws
+      config_path: templates/terraform/samples/services/bigquery/bigquery_dataset_external_reference_aws.tf.tmpl
+      prefixed_vars:
+        dataset_id: example_dataset
+  - name: bigquery_dataset_external_catalog_dataset_options
+    primary_resource_id: dataset
+    steps:
+    - name: bigquery_dataset_external_catalog_dataset_options
+      config_path: templates/terraform/samples/services/bigquery/bigquery_dataset_external_catalog_dataset_options.tf.tmpl
+      prefixed_vars:
+        dataset_id: example_dataset
+  - name: bigquery_dataset_resource_tags
+    primary_resource_id: dataset
+    primary_resource_name: fmt.Sprintf("tf_test_dataset%s", context["random_suffix"])
+    steps:
+    - name: bigquery_dataset_resource_tags
+      config_path: templates/terraform/samples/services/bigquery/bigquery_dataset_resource_tags.tf.tmpl
+      prefixed_vars:
+        dataset_id: dataset
+        tag_key1: tag_key1
+        tag_key2: tag_key2
+        tag_value1: tag_value1
+        tag_value2: tag_value2
+      exclude_docs: true
 virtual_fields:
   - name: 'delete_contents_on_destroy'
     description: |

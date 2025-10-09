@@ -26,11 +26,14 @@ mutex: projects/{{project}}/locations/{{location}}/loggingSettings/{{logging_set
 sweeper:
   url_substitutions:
     - region: "global"
-examples:
+samples:
   - name: gemini_logging_setting_basic
-    primary_resource_id: "example"
-    vars:
-      logging_setting_id: ls1-tf
+    primary_resource_id: example
+    steps:
+    - name: gemini_logging_setting_basic
+      config_path: templates/terraform/samples/services/gemini/gemini_logging_setting_basic.tf.tmpl
+      prefixed_vars:
+        logging_setting_id: ls1-tf
 autogen_async: false
 timeouts:
   insert_minutes: 90

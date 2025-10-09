@@ -41,22 +41,28 @@ legacy_long_form_project: true
 sweeper:
   url_substitutions:
     - region: "us-west2"
-examples:
-  - name: 'compute_region_network_firewall_policy_with_rules_full'
-    primary_resource_id: 'primary'
-    vars:
-      address_group: 'address-group'
-      network: 'network'
-      fw_policy: 'fw-policy'
-      tag_key: 'tag-key'
-      tag_value: 'tag-value'
-    test_env_vars:
-      org_id: 'ORG_ID'
-  - name: 'compute_region_network_firewall_policy_with_rules_roce'
-    primary_resource_id: 'policy'
+samples:
+  - name: compute_region_network_firewall_policy_with_rules_full
+    primary_resource_id: primary
+    steps:
+    - name: compute_region_network_firewall_policy_with_rules_full
+      config_path: templates/terraform/samples/services/compute/compute_region_network_firewall_policy_with_rules_full.tf.tmpl
+      prefixed_vars:
+        address_group: address-group
+        fw_policy: fw-policy
+        network: network
+        tag_key: tag-key
+        tag_value: tag-value
+      test_env_vars:
+        org_id: ORG_ID
+  - name: compute_region_network_firewall_policy_with_rules_roce
     min_version: beta
-    vars:
-      policy_name: 'rnf-policy'
+    primary_resource_id: policy
+    steps:
+    - name: compute_region_network_firewall_policy_with_rules_roce
+      config_path: templates/terraform/samples/services/compute/compute_region_network_firewall_policy_with_rules_roce.tf.tmpl
+      prefixed_vars:
+        policy_name: rnf-policy
 parameters:
   - name: 'region'
     type: String

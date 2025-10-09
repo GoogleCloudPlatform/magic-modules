@@ -32,22 +32,28 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'policy_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}'
     - '{{policy_id}}'
 custom_code:
-examples:
-  - name: 'dataproc_autoscaling_policy_basic'
-    primary_resource_id: 'basic'
-    primary_resource_name: 'fmt.Sprintf("tf-test-dataproc-policy%s", context["random_suffix"])'
-    vars:
-      name: 'dataproc-policy'
-    exclude_docs: true
-  - name: 'dataproc_autoscaling_policy'
-    primary_resource_id: 'asp'
-    vars:
-      name: 'dataproc-policy'
+samples:
+  - name: dataproc_autoscaling_policy_basic
+    primary_resource_id: basic
+    primary_resource_name: fmt.Sprintf("tf-test-dataproc-policy%s", context["random_suffix"])
+    steps:
+    - name: dataproc_autoscaling_policy_basic
+      config_path: templates/terraform/samples/services/dataproc/dataproc_autoscaling_policy_basic.tf.tmpl
+      prefixed_vars:
+        name: dataproc-policy
+      exclude_docs: true
+  - name: dataproc_autoscaling_policy
+    primary_resource_id: asp
+    steps:
+    - name: dataproc_autoscaling_policy
+      config_path: templates/terraform/samples/services/dataproc/dataproc_autoscaling_policy.tf.tmpl
+      prefixed_vars:
+        name: dataproc-policy
 parameters:
   - name: 'location'
     type: String

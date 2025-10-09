@@ -77,12 +77,15 @@ custom_code:
   custom_update: 'templates/terraform/custom_create/service_networking_vpc_service_controls.go.tmpl'
  # excluding tgc because of helpers in custom_code.constants
 exclude_tgc: true
-examples:
-  - name: 'service_networking_vpc_service_controls_basic'
-    primary_resource_id: 'default'
-    vars:
-      network_name: 'example-network'
-      psa_range_name: 'psa-range'
+samples:
+  - name: service_networking_vpc_service_controls_basic
+    primary_resource_id: default
+    steps:
+    - name: service_networking_vpc_service_controls_basic
+      config_path: templates/terraform/samples/services/servicenetworking/service_networking_vpc_service_controls_basic.tf.tmpl
+      prefixed_vars:
+        network_name: example-network
+        psa_range_name: psa-range
 parameters:
   - name: 'network'
     type: String

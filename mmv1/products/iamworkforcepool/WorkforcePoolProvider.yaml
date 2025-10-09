@@ -48,92 +48,119 @@ custom_code:
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
   post_create: 'templates/terraform/post_create/iam_workforce_pool_provider.go.tmpl'
   post_update: 'templates/terraform/post_update/iam_workforce_pool_provider.go.tmpl'
-examples:
-  - name: 'iam_workforce_pool_provider_saml_basic'
-    primary_resource_id: 'example'
-    vars:
-      workforce_pool_id: 'example-pool'
-      provider_id: 'example-prvdr'
-    test_env_vars:
-      org_id: 'ORG_ID'
-  - name: 'iam_workforce_pool_provider_saml_full'
-    primary_resource_id: 'example'
-    vars:
-      workforce_pool_id: 'example-pool'
-      provider_id: 'example-prvdr'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    ignore_read_extra:
-      - 'extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text'
-  - name: 'iam_workforce_pool_provider_oidc_basic'
-    primary_resource_id: 'example'
-    vars:
-      workforce_pool_id: 'example-pool'
-      provider_id: 'example-prvdr'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    ignore_read_extra:
-      - 'oidc.0.client_secret.0.value.0.plain_text'
-  - name: 'iam_workforce_pool_provider_oidc_full'
-    primary_resource_id: 'example'
-    vars:
-      workforce_pool_id: 'example-pool'
-      provider_id: 'example-prvdr'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    ignore_read_extra:
-      - 'oidc.0.client_secret.0.value.0.plain_text'
-      - 'extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text'
-  - name: 'iam_workforce_pool_provider_oidc_upload_key'
-    primary_resource_id: 'example'
-    vars:
-      workforce_pool_id: 'example-pool'
-      provider_id: 'example-prvdr'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    ignore_read_extra:
-      - 'oidc.0.client_secret.0.value.0.plain_text'
-    exclude_docs: true
-  - name: 'iam_workforce_pool_provider_extra_attributes_oauth2_config_client_basic'
-    primary_resource_id: 'example'
-    vars:
-      workforce_pool_id: 'example-pool'
-      provider_id: 'example-prvdr'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    ignore_read_extra:
-      - 'oidc.0.client_secret.0.value.0.plain_text'
-      - 'extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text'
-  - name: 'iam_workforce_pool_provider_extra_attributes_oauth2_config_client_full'
-    primary_resource_id: 'example'
-    vars:
-      workforce_pool_id: 'example-pool'
-      provider_id: 'example-prvdr'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    ignore_read_extra:
-      - 'oidc.0.client_secret.0.value.0.plain_text'
-      - 'extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text'
-  - name: 'iam_workforce_pool_provider_extended_attributes_oauth2_config_client_basic'
-    primary_resource_id: 'example'
-    vars:
-      workforce_pool_id: 'example-pool'
-      provider_id: 'example-prvdr'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    ignore_read_extra:
-      - 'oidc.0.client_secret.0.value.0.plain_text'
-      - 'extended_attributes_oauth2_client.0.client_secret.0.value.0.plain_text'
-  - name: 'iam_workforce_pool_provider_extended_attributes_oauth2_config_client_full'
-    primary_resource_id: 'example'
-    vars:
-      workforce_pool_id: 'example-pool'
-      provider_id: 'example-prvdr'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    ignore_read_extra:
-      - 'oidc.0.client_secret.0.value.0.plain_text'
-      - 'extended_attributes_oauth2_client.0.client_secret.0.value.0.plain_text'
+samples:
+  - name: iam_workforce_pool_provider_saml_basic
+    primary_resource_id: example
+    steps:
+    - name: iam_workforce_pool_provider_saml_basic
+      config_path: templates/terraform/samples/services/iamworkforcepool/iam_workforce_pool_provider_saml_basic.tf.tmpl
+      prefixed_vars:
+        provider_id: example-prvdr
+        workforce_pool_id: example-pool
+      test_env_vars:
+        org_id: ORG_ID
+  - name: iam_workforce_pool_provider_saml_full
+    primary_resource_id: example
+    steps:
+    - name: iam_workforce_pool_provider_saml_full
+      config_path: templates/terraform/samples/services/iamworkforcepool/iam_workforce_pool_provider_saml_full.tf.tmpl
+      prefixed_vars:
+        provider_id: example-prvdr
+        workforce_pool_id: example-pool
+      test_env_vars:
+        org_id: ORG_ID
+      ignore_read_extra:
+      - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+  - name: iam_workforce_pool_provider_oidc_basic
+    primary_resource_id: example
+    steps:
+    - name: iam_workforce_pool_provider_oidc_basic
+      config_path: templates/terraform/samples/services/iamworkforcepool/iam_workforce_pool_provider_oidc_basic.tf.tmpl
+      prefixed_vars:
+        provider_id: example-prvdr
+        workforce_pool_id: example-pool
+      test_env_vars:
+        org_id: ORG_ID
+      ignore_read_extra:
+      - oidc.0.client_secret.0.value.0.plain_text
+  - name: iam_workforce_pool_provider_oidc_full
+    primary_resource_id: example
+    steps:
+    - name: iam_workforce_pool_provider_oidc_full
+      config_path: templates/terraform/samples/services/iamworkforcepool/iam_workforce_pool_provider_oidc_full.tf.tmpl
+      prefixed_vars:
+        provider_id: example-prvdr
+        workforce_pool_id: example-pool
+      test_env_vars:
+        org_id: ORG_ID
+      ignore_read_extra:
+      - oidc.0.client_secret.0.value.0.plain_text
+      - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+  - name: iam_workforce_pool_provider_oidc_upload_key
+    primary_resource_id: example
+    steps:
+    - name: iam_workforce_pool_provider_oidc_upload_key
+      config_path: templates/terraform/samples/services/iamworkforcepool/iam_workforce_pool_provider_oidc_upload_key.tf.tmpl
+      prefixed_vars:
+        provider_id: example-prvdr
+        workforce_pool_id: example-pool
+      test_env_vars:
+        org_id: ORG_ID
+      ignore_read_extra:
+      - oidc.0.client_secret.0.value.0.plain_text
+      exclude_docs: true
+  - name: iam_workforce_pool_provider_extra_attributes_oauth2_config_client_basic
+    primary_resource_id: example
+    steps:
+    - name: iam_workforce_pool_provider_extra_attributes_oauth2_config_client_basic
+      config_path: templates/terraform/samples/services/iamworkforcepool/iam_workforce_pool_provider_extra_attributes_oauth2_config_client_basic.tf.tmpl
+      prefixed_vars:
+        provider_id: example-prvdr
+        workforce_pool_id: example-pool
+      test_env_vars:
+        org_id: ORG_ID
+      ignore_read_extra:
+      - oidc.0.client_secret.0.value.0.plain_text
+      - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+  - name: iam_workforce_pool_provider_extra_attributes_oauth2_config_client_full
+    primary_resource_id: example
+    steps:
+    - name: iam_workforce_pool_provider_extra_attributes_oauth2_config_client_full
+      config_path: templates/terraform/samples/services/iamworkforcepool/iam_workforce_pool_provider_extra_attributes_oauth2_config_client_full.tf.tmpl
+      prefixed_vars:
+        provider_id: example-prvdr
+        workforce_pool_id: example-pool
+      test_env_vars:
+        org_id: ORG_ID
+      ignore_read_extra:
+      - oidc.0.client_secret.0.value.0.plain_text
+      - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+  - name: iam_workforce_pool_provider_extended_attributes_oauth2_config_client_basic
+    primary_resource_id: example
+    steps:
+    - name: iam_workforce_pool_provider_extended_attributes_oauth2_config_client_basic
+      config_path: templates/terraform/samples/services/iamworkforcepool/iam_workforce_pool_provider_extended_attributes_oauth2_config_client_basic.tf.tmpl
+      prefixed_vars:
+        provider_id: example-prvdr
+        workforce_pool_id: example-pool
+      test_env_vars:
+        org_id: ORG_ID
+      ignore_read_extra:
+      - oidc.0.client_secret.0.value.0.plain_text
+      - extended_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+  - name: iam_workforce_pool_provider_extended_attributes_oauth2_config_client_full
+    primary_resource_id: example
+    steps:
+    - name: iam_workforce_pool_provider_extended_attributes_oauth2_config_client_full
+      config_path: templates/terraform/samples/services/iamworkforcepool/iam_workforce_pool_provider_extended_attributes_oauth2_config_client_full.tf.tmpl
+      prefixed_vars:
+        provider_id: example-prvdr
+        workforce_pool_id: example-pool
+      test_env_vars:
+        org_id: ORG_ID
+      ignore_read_extra:
+      - oidc.0.client_secret.0.value.0.plain_text
+      - extended_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
 parameters:
 properties:
   - name: 'location'

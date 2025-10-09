@@ -37,22 +37,28 @@ async:
     resource_inside_response: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/vertex_ai_tensorboard_import.go.tmpl'
-examples:
-  - name: 'vertex_ai_tensorboard'
-    primary_resource_id: 'tensorboard'
-    vars:
-      display_name: 'terraform'
-    ignore_read_extra:
-      - 'project'
-  - name: 'vertex_ai_tensorboard_full'
-    primary_resource_id: 'tensorboard'
-    vars:
-      display_name: 'terraform'
-      kms_key_name: 'kms-name'
-    test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-    ignore_read_extra:
-      - 'project'
+samples:
+  - name: vertex_ai_tensorboard
+    primary_resource_id: tensorboard
+    steps:
+    - name: vertex_ai_tensorboard
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_tensorboard.tf.tmpl
+      prefixed_vars:
+        display_name: terraform
+      ignore_read_extra:
+      - project
+  - name: vertex_ai_tensorboard_full
+    primary_resource_id: tensorboard
+    steps:
+    - name: vertex_ai_tensorboard_full
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_tensorboard_full.tf.tmpl
+      prefixed_vars:
+        display_name: terraform
+        kms_key_name: kms-name
+      test_vars_overrides:
+        kms_key_name: acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
+      ignore_read_extra:
+      - project
 parameters:
   - name: 'region'
     type: String

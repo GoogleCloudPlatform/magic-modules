@@ -43,11 +43,14 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
-examples:
-  - name: 'http_health_check_basic'
-    primary_resource_id: 'default'
-    vars:
-      http_health_check_name: 'authentication-health-check'
+samples:
+  - name: http_health_check_basic
+    primary_resource_id: default
+    steps:
+    - name: http_health_check_basic
+      config_path: templates/terraform/samples/services/compute/http_health_check_basic.tf.tmpl
+      prefixed_vars:
+        http_health_check_name: authentication-health-check
 parameters:
 properties:
   - name: 'checkIntervalSec'

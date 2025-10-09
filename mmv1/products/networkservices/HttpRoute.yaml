@@ -44,24 +44,36 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'network_services_http_route_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-http-route'
-  - name: 'network_services_http_route_matches_and_actions'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-http-route'
-  - name: 'network_services_http_route_actions'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-http-route'
-  - name: 'network_services_http_route_mesh_basic'
-    primary_resource_id: 'default'
-    vars:
-      mesh_name: 'my-mesh'
-      resource_name: 'my-http-route'
+samples:
+  - name: network_services_http_route_basic
+    primary_resource_id: default
+    steps:
+    - name: network_services_http_route_basic
+      config_path: templates/terraform/samples/services/networkservices/network_services_http_route_basic.tf.tmpl
+      prefixed_vars:
+        resource_name: my-http-route
+  - name: network_services_http_route_matches_and_actions
+    primary_resource_id: default
+    steps:
+    - name: network_services_http_route_matches_and_actions
+      config_path: templates/terraform/samples/services/networkservices/network_services_http_route_matches_and_actions.tf.tmpl
+      prefixed_vars:
+        resource_name: my-http-route
+  - name: network_services_http_route_actions
+    primary_resource_id: default
+    steps:
+    - name: network_services_http_route_actions
+      config_path: templates/terraform/samples/services/networkservices/network_services_http_route_actions.tf.tmpl
+      prefixed_vars:
+        resource_name: my-http-route
+  - name: network_services_http_route_mesh_basic
+    primary_resource_id: default
+    steps:
+    - name: network_services_http_route_mesh_basic
+      config_path: templates/terraform/samples/services/networkservices/network_services_http_route_mesh_basic.tf.tmpl
+      prefixed_vars:
+        mesh_name: my-mesh
+        resource_name: my-http-route
 parameters:
   - name: 'name'
     type: String

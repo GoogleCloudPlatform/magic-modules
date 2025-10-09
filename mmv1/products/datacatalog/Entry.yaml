@@ -44,22 +44,31 @@ timeouts:
 custom_code:
   custom_import: 'templates/terraform/custom_import/data_catalog_entry.go.tmpl'
 supports_indirect_user_project_override: true
-examples:
-  - name: 'data_catalog_entry_basic'
-    primary_resource_id: 'basic_entry'
-    vars:
-      entry_id: 'my_entry'
-      entry_group_id: 'my_group'
-  - name: 'data_catalog_entry_fileset'
-    primary_resource_id: 'basic_entry'
-    vars:
-      entry_id: 'my_entry'
-      entry_group_id: 'my_group'
-  - name: 'data_catalog_entry_full'
-    primary_resource_id: 'basic_entry'
-    vars:
-      entry_id: 'my_entry'
-      entry_group_id: 'my_group'
+samples:
+  - name: data_catalog_entry_basic
+    primary_resource_id: basic_entry
+    steps:
+    - name: data_catalog_entry_basic
+      config_path: templates/terraform/samples/services/datacatalog/data_catalog_entry_basic.tf.tmpl
+      prefixed_vars:
+        entry_group_id: my_group
+        entry_id: my_entry
+  - name: data_catalog_entry_fileset
+    primary_resource_id: basic_entry
+    steps:
+    - name: data_catalog_entry_fileset
+      config_path: templates/terraform/samples/services/datacatalog/data_catalog_entry_fileset.tf.tmpl
+      prefixed_vars:
+        entry_group_id: my_group
+        entry_id: my_entry
+  - name: data_catalog_entry_full
+    primary_resource_id: basic_entry
+    steps:
+    - name: data_catalog_entry_full
+      config_path: templates/terraform/samples/services/datacatalog/data_catalog_entry_full.tf.tmpl
+      prefixed_vars:
+        entry_group_id: my_group
+        entry_id: my_entry
 parameters:
   - name: 'entryGroup'
     type: String

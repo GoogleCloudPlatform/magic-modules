@@ -46,30 +46,43 @@ async:
 custom_code:
   pre_create: 'templates/terraform/pre_create/region_security_policy_default_rule_update_on_create.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/security_policy_default_rule_delete.go.tmpl'
-examples:
-  - name: 'region_security_policy_rule_basic'
-    primary_resource_id: 'policy_rule'
-    vars:
-      sec_policy_name: 'policyruletest'
-  - name: 'region_security_policy_rule_multiple_rules'
-    primary_resource_id: 'policy_rule_one'
-    vars:
-      sec_policy_name: 'policywithmultiplerules'
-  - name: 'region_security_policy_rule_default_rule'
-    primary_resource_id: 'policy_rule'
-    vars:
-      sec_policy_name: 'policywithdefaultrule'
-  - name: 'region_security_policy_rule_with_preconfigured_waf_config'
-    primary_resource_id: 'policy_rule'
-    vars:
-      sec_policy_name: 'policyruletest'
-  - name: 'region_security_policy_rule_with_network_match'
-    primary_resource_id: 'policy_rule_network_match'
-    vars:
-      sec_policy_name: 'policyfornetworkmatch'
-    # it needs to run synchronously because a region can have only one google_compute_network_edge_security_service.
-    # there is a robust handwritten test which covers this scenario.
+samples:
+  - name: region_security_policy_rule_basic
+    primary_resource_id: policy_rule
+    steps:
+    - name: region_security_policy_rule_basic
+      config_path: templates/terraform/samples/services/compute/region_security_policy_rule_basic.tf.tmpl
+      prefixed_vars:
+        sec_policy_name: policyruletest
+  - name: region_security_policy_rule_multiple_rules
+    primary_resource_id: policy_rule_one
+    steps:
+    - name: region_security_policy_rule_multiple_rules
+      config_path: templates/terraform/samples/services/compute/region_security_policy_rule_multiple_rules.tf.tmpl
+      prefixed_vars:
+        sec_policy_name: policywithmultiplerules
+  - name: region_security_policy_rule_default_rule
+    primary_resource_id: policy_rule
+    steps:
+    - name: region_security_policy_rule_default_rule
+      config_path: templates/terraform/samples/services/compute/region_security_policy_rule_default_rule.tf.tmpl
+      prefixed_vars:
+        sec_policy_name: policywithdefaultrule
+  - name: region_security_policy_rule_with_preconfigured_waf_config
+    primary_resource_id: policy_rule
+    steps:
+    - name: region_security_policy_rule_with_preconfigured_waf_config
+      config_path: templates/terraform/samples/services/compute/region_security_policy_rule_with_preconfigured_waf_config.tf.tmpl
+      prefixed_vars:
+        sec_policy_name: policyruletest
+  - name: region_security_policy_rule_with_network_match
+    primary_resource_id: policy_rule_network_match
     exclude_test: true
+    steps:
+    - name: region_security_policy_rule_with_network_match
+      config_path: templates/terraform/samples/services/compute/region_security_policy_rule_with_network_match.tf.tmpl
+      prefixed_vars:
+        sec_policy_name: policyfornetworkmatch
 parameters:
   - name: 'region'
     type: String

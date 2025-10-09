@@ -46,63 +46,84 @@ async:
 custom_code:
   post_create: "templates/terraform/post_create/resource_vertexai_endpoint_with_model_garden_deployment.go.tmpl"
   custom_delete: "templates/terraform/custom_delete/resource_vertexai_endpoint_with_model_garden_deployment.go.tmpl"
-examples:
-  - name: "vertex_ai_deploy_basic"
-    primary_resource_id: "deploy"
-    vars:
-      project: "vertex-ai"
-      publisher_model_name: "publisher_model_name"
-    ignore_read_extra:
-      - "project"
-    exclude_test: true  # handwritten test required since resource does not support import
-  - name: "vertex_ai_deploy_huggingface_model"
-    primary_resource_id: "deploy"
-    vars:
-      project: "vertex-ai"
-      publisher_model_name: "publisher_model_name"
-    ignore_read_extra:
-      - "project"
-    exclude_test: true  # handwritten test required since resource does not support import
-  - name: "vertex_ai_deploy_with_configs"
-    primary_resource_id: "deploy"
-    vars:
-      project: "vertex-ai"
-      publisher_model_name: "publisher_model_name"
-    ignore_read_extra:
-      - "project"
-    exclude_test: true  # handwritten test required since resource does not support import
-  - name: "vertex_ai_deploy_multiple_models_in_parallel"
-    primary_resource_id: "deploy"
-    vars:
-      project: "vertex-ai"
-      publisher_model_name: "publisher_model_name"
-    ignore_read_extra:
-      - "project"
-    exclude_test: true  # handwritten test required since resource does not support import
-  - name: "vertex_ai_deploy_multiple_models_in_sequence"
-    primary_resource_id: "deploy"
-    vars:
-      project: "vertex-ai"
-      publisher_model_name: "publisher_model_name"
-    ignore_read_extra:
-      - "project"
-    exclude_test: true  # handwritten test required since resource does not support import
-  - name: "vertex_ai_deploy_psc_endpoint"
-    primary_resource_id: "deploy"
-    vars:
-      project: "vertex-ai"
-      publisher_model_name: "publisher_model_name"
-    ignore_read_extra:
-      - "project"
-    exclude_test: true  # handwritten test required since resource does not support import
-  - name: "vertex_ai_deploy_psc_endpoint_automated"
-    primary_resource_id: "deploy"
-    vars:
-      project: "vertex-ai"
-      publisher_model_name: "publisher_model_name"
-    ignore_read_extra:
-      - "project"
-    exclude_test: true  # handwritten test required since resource does not support import
+samples:
+  - name: vertex_ai_deploy_basic
+    primary_resource_id: deploy
+    exclude_test: true
+    steps:
+    - name: vertex_ai_deploy_basic
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_deploy_basic.tf.tmpl
+      prefixed_vars:
+        project: vertex-ai
+        publisher_model_name: publisher_model_name
+      ignore_read_extra:
+      - project
+  - name: vertex_ai_deploy_huggingface_model
+    primary_resource_id: deploy
+    exclude_test: true
+    steps:
+    - name: vertex_ai_deploy_huggingface_model
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_deploy_huggingface_model.tf.tmpl
+      prefixed_vars:
+        project: vertex-ai
+        publisher_model_name: publisher_model_name
+      ignore_read_extra:
+      - project
+  - name: vertex_ai_deploy_with_configs
+    primary_resource_id: deploy
+    exclude_test: true
+    steps:
+    - name: vertex_ai_deploy_with_configs
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_deploy_with_configs.tf.tmpl
+      prefixed_vars:
+        project: vertex-ai
+        publisher_model_name: publisher_model_name
+      ignore_read_extra:
+      - project
+  - name: vertex_ai_deploy_multiple_models_in_parallel
+    primary_resource_id: deploy
+    exclude_test: true
+    steps:
+    - name: vertex_ai_deploy_multiple_models_in_parallel
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_deploy_multiple_models_in_parallel.tf.tmpl
+      prefixed_vars:
+        project: vertex-ai
+        publisher_model_name: publisher_model_name
+      ignore_read_extra:
+      - project
+  - name: vertex_ai_deploy_multiple_models_in_sequence
+    primary_resource_id: deploy
+    exclude_test: true
+    steps:
+    - name: vertex_ai_deploy_multiple_models_in_sequence
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_deploy_multiple_models_in_sequence.tf.tmpl
+      prefixed_vars:
+        project: vertex-ai
+        publisher_model_name: publisher_model_name
+      ignore_read_extra:
+      - project
+  - name: vertex_ai_deploy_psc_endpoint
+    primary_resource_id: deploy
+    exclude_test: true
+    steps:
+    - name: vertex_ai_deploy_psc_endpoint
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_deploy_psc_endpoint.tf.tmpl
+      prefixed_vars:
+        project: vertex-ai
+        publisher_model_name: publisher_model_name
+      ignore_read_extra:
+      - project
+  - name: vertex_ai_deploy_psc_endpoint_automated
+    primary_resource_id: deploy
+    exclude_test: true
+    steps:
+    - name: vertex_ai_deploy_psc_endpoint_automated
+      config_path: templates/terraform/samples/services/vertexai/vertex_ai_deploy_psc_endpoint_automated.tf.tmpl
+      prefixed_vars:
+        project: vertex-ai
+        publisher_model_name: publisher_model_name
+      ignore_read_extra:
+      - project
 parameters:
   - name: location
     type: String

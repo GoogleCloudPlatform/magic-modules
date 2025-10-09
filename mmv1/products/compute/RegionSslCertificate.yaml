@@ -51,29 +51,37 @@ collection_url_key: 'items'
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/ssl_certificate.tmpl'
   constants: 'templates/terraform/constants/compute_certificate.go.tmpl'
-examples:
-  - name: 'region_ssl_certificate_basic'
-    primary_resource_id: 'default'
-    ignore_read_extra:
-      - 'name_prefix'
-      # Uses id.UniqueId
+samples:
+  - name: region_ssl_certificate_basic
     skip_vcr: true
-  - name: 'region_ssl_certificate_random_provider'
-    primary_resource_id: 'default'
-    external_providers: ["random", "time"]
-      # Uses id.UniqueId
+    primary_resource_id: default
+    steps:
+    - name: region_ssl_certificate_basic
+      config_path: templates/terraform/samples/services/compute/region_ssl_certificate_basic.tf.tmpl
+      ignore_read_extra:
+      - name_prefix
+  - name: region_ssl_certificate_random_provider
     skip_vcr: true
-  - name: 'region_ssl_certificate_target_https_proxies'
-    primary_resource_id: 'default'
-    vars:
-      region_target_https_proxy_name: 'test-proxy'
-      region_url_map_name: 'url-map'
-      region_backend_service_name: 'backend-service'
-      region_health_check_name: 'http-health-check'
-    ignore_read_extra:
-      - 'name_prefix'
-      # Uses id.UniqueId
+    external_providers:
+    - random
+    - time
+    primary_resource_id: default
+    steps:
+    - name: region_ssl_certificate_random_provider
+      config_path: templates/terraform/samples/services/compute/region_ssl_certificate_random_provider.tf.tmpl
+  - name: region_ssl_certificate_target_https_proxies
     skip_vcr: true
+    primary_resource_id: default
+    steps:
+    - name: region_ssl_certificate_target_https_proxies
+      config_path: templates/terraform/samples/services/compute/region_ssl_certificate_target_https_proxies.tf.tmpl
+      prefixed_vars:
+        region_backend_service_name: backend-service
+        region_health_check_name: http-health-check
+        region_target_https_proxy_name: test-proxy
+        region_url_map_name: url-map
+      ignore_read_extra:
+      - name_prefix
 parameters:
   - name: 'region'
     type: ResourceRef

@@ -48,24 +48,36 @@ state_upgraders: true
 sweeper:
   url_substitutions:
     - region: "global"
-examples:
-  - name: 'network_services_grpc_route_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-grpc-route'
-  - name: 'network_services_grpc_route_matches_and_actions'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-grpc-route'
-  - name: 'network_services_grpc_route_actions'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-grpc-route'
-  - name: 'network_services_grpc_route_location'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      resource_name: 'my-grpc-route'
+samples:
+  - name: network_services_grpc_route_basic
+    primary_resource_id: default
+    steps:
+    - name: network_services_grpc_route_basic
+      config_path: templates/terraform/samples/services/networkservices/network_services_grpc_route_basic.tf.tmpl
+      prefixed_vars:
+        resource_name: my-grpc-route
+  - name: network_services_grpc_route_matches_and_actions
+    primary_resource_id: default
+    steps:
+    - name: network_services_grpc_route_matches_and_actions
+      config_path: templates/terraform/samples/services/networkservices/network_services_grpc_route_matches_and_actions.tf.tmpl
+      prefixed_vars:
+        resource_name: my-grpc-route
+  - name: network_services_grpc_route_actions
+    primary_resource_id: default
+    steps:
+    - name: network_services_grpc_route_actions
+      config_path: templates/terraform/samples/services/networkservices/network_services_grpc_route_actions.tf.tmpl
+      prefixed_vars:
+        resource_name: my-grpc-route
+  - name: network_services_grpc_route_location
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: network_services_grpc_route_location
+      config_path: templates/terraform/samples/services/networkservices/network_services_grpc_route_location.tf.tmpl
+      prefixed_vars:
+        resource_name: my-grpc-route
 parameters:
   - name: 'name'
     type: String

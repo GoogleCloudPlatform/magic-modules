@@ -49,23 +49,35 @@ sweeper:
     - region: "europe-west1"
     - region: "southamerica-west1"
     - region: "us-central1"
-examples:
-  - name: 'region_security_policy_basic'
-    primary_resource_id: 'region-sec-policy-basic'
-    vars:
-      sec_policy_name: 'my-sec-policy-basic'
-  - name: 'region_security_policy_with_ddos_protection_config'
-    primary_resource_id: 'region-sec-policy-ddos-protection'
-    vars:
-      sec_policy_name: 'my-sec-policy-ddos-protection'
-  - name: 'region_security_policy_with_user_defined_fields'
-    primary_resource_id: 'region-sec-policy-user-defined-fields'
-    vars:
-      sec_policy_name: 'my-sec-policy-user-defined-fields'
-  - name: 'region_security_policy_with_rules'
-    primary_resource_id: 'region-sec-policy-with-rules'
-    vars:
-      sec_policy_name: 'my-sec-policy-with-rules'
+samples:
+  - name: region_security_policy_basic
+    primary_resource_id: region-sec-policy-basic
+    steps:
+    - name: region_security_policy_basic
+      config_path: templates/terraform/samples/services/compute/region_security_policy_basic.tf.tmpl
+      prefixed_vars:
+        sec_policy_name: my-sec-policy-basic
+  - name: region_security_policy_with_ddos_protection_config
+    primary_resource_id: region-sec-policy-ddos-protection
+    steps:
+    - name: region_security_policy_with_ddos_protection_config
+      config_path: templates/terraform/samples/services/compute/region_security_policy_with_ddos_protection_config.tf.tmpl
+      prefixed_vars:
+        sec_policy_name: my-sec-policy-ddos-protection
+  - name: region_security_policy_with_user_defined_fields
+    primary_resource_id: region-sec-policy-user-defined-fields
+    steps:
+    - name: region_security_policy_with_user_defined_fields
+      config_path: templates/terraform/samples/services/compute/region_security_policy_with_user_defined_fields.tf.tmpl
+      prefixed_vars:
+        sec_policy_name: my-sec-policy-user-defined-fields
+  - name: region_security_policy_with_rules
+    primary_resource_id: region-sec-policy-with-rules
+    steps:
+    - name: region_security_policy_with_rules
+      config_path: templates/terraform/samples/services/compute/region_security_policy_with_rules.tf.tmpl
+      prefixed_vars:
+        sec_policy_name: my-sec-policy-with-rules
 parameters:
   - name: 'region'
     type: ResourceRef

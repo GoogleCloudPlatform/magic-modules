@@ -35,20 +35,22 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 exclude_sweeper: true
-examples:
-  - name: 'bigtable_materialized_view'
-    primary_resource_id: 'materialized_view'
-    vars:
-      instance_name: 'bt-instance'
-      table_name: 'bt-table'
-      materialized_view_name: 'bt-materialized-view'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    # bigtable instance does not use the shared HTTP client, this test creates an instance
+samples:
+  - name: bigtable_materialized_view
     skip_vcr: true
+    primary_resource_id: materialized_view
+    steps:
+    - name: bigtable_materialized_view
+      config_path: templates/terraform/samples/services/bigtable/bigtable_materialized_view.tf.tmpl
+      prefixed_vars:
+        deletion_protection: "true"
+        instance_name: bt-instance
+        materialized_view_name: bt-materialized-view
+        table_name: bt-table
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
 parameters:
   - name: 'materializedViewId'
     type: String

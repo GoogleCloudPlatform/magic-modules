@@ -23,17 +23,20 @@ id_format: projects/{{project}}/locations/{{location}}/rolloutKinds/{{rollout_ki
 import_format:
   - projects/{{project}}/locations/{{location}}/rolloutKinds/{{rollout_kind_id}}
 min_version: beta
-examples:
+samples:
   - name: saas_runtime_rollout_kind_basic
-    primary_resource_id: "example"
-    min_version: "beta"
-    vars:
-      saas_name: example-saas
-      unitkind_name: example-unitkind
-      rolloutkind_name: example-rolloutkind
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com"
-        role: "roles/saasservicemgmt.serviceAgent"
+    - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
+      role: roles/saasservicemgmt.serviceAgent
+    min_version: beta
+    primary_resource_id: example
+    steps:
+    - name: saas_runtime_rollout_kind_basic
+      config_path: templates/terraform/samples/services/saasservicemgmt/saas_runtime_rollout_kind_basic.tf.tmpl
+      prefixed_vars:
+        rolloutkind_name: example-rolloutkind
+        saas_name: example-saas
+        unitkind_name: example-unitkind
 autogen_async: false
 autogen_status: Um9sbG91dEtpbmQ=
 parameters:

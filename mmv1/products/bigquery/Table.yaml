@@ -34,16 +34,20 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   allowed_iam_role: 'roles/bigquery.dataOwner'
   parent_resource_attribute: 'table_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
   iam_policy_version: '1'
 custom_code:
-examples:
-  - name: 'bigquery_bigquery_table'
-    primary_resource_id: 'test'
-    primary_resource_name: 'fmt.Sprintf("tf_test_dataset_id%s", context["random_suffix"]), fmt.Sprintf("tf_test_table_id%s", context["random_suffix"])'
-    vars:
-      dataset_id: 'dataset_id'
-      table_id: 'table_id'
+samples:
+  - name: bigquery_bigquery_table
+    primary_resource_id: test
+    primary_resource_name: fmt.Sprintf("tf_test_dataset_id%s", context["random_suffix"]),
+      fmt.Sprintf("tf_test_table_id%s", context["random_suffix"])
+    steps:
+    - name: bigquery_bigquery_table
+      config_path: templates/terraform/samples/services/bigquery/bigquery_bigquery_table.tf.tmpl
+      prefixed_vars:
+        dataset_id: dataset_id
+        table_id: table_id
 parameters:
   # TODO: Remove once we have support for placing
   # nested object fields in URL

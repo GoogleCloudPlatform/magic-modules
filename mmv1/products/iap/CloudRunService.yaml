@@ -36,15 +36,18 @@ iam_policy:
   allowed_iam_role: 'roles/iap.httpsResourceAccessor'
   parent_resource_attribute: 'cloud_run_service_name'
   iam_conditions_request_type: 'REQUEST_BODY'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
 custom_code:
 exclude_tgc: true
-examples:
-  - name: 'cloudrunv2_service_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloud-run-service%s", context["random_suffix"])'
-    vars:
-      cloud_run_service_name: 'cloud-run-service'
+samples:
+  - name: cloudrunv2_service_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-cloud-run-service%s", context["random_suffix"])
+    steps:
+    - name: cloudrunv2_service_basic
+      config_path: templates/terraform/samples/services/iap/cloudrunv2_service_basic.tf.tmpl
+      prefixed_vars:
+        cloud_run_service_name: cloud-run-service
 parameters:
   - name: 'location'
     type: String

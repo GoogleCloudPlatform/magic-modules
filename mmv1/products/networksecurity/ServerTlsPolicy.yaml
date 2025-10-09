@@ -48,32 +48,44 @@ sweeper:
     - region: "us-central1"
     - region: "global"
     - region: "us-east1"
-examples:
-  - name: 'network_security_server_tls_policy_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-server-tls-policy'
+samples:
+  - name: network_security_server_tls_policy_basic
+    primary_resource_id: default
+    steps:
+    - name: network_security_server_tls_policy_basic
+      config_path: templates/terraform/samples/services/networksecurity/network_security_server_tls_policy_basic.tf.tmpl
+      prefixed_vars:
+        resource_name: my-server-tls-policy
     tgc_test_ignore_extra:
-      - 'allow_open' # Ignore its false value in Terraform configuration
-  - name: 'network_security_server_tls_policy_advanced'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-server-tls-policy'
+    - allow_open
+  - name: network_security_server_tls_policy_advanced
+    primary_resource_id: default
+    steps:
+    - name: network_security_server_tls_policy_advanced
+      config_path: templates/terraform/samples/services/networksecurity/network_security_server_tls_policy_advanced.tf.tmpl
+      prefixed_vars:
+        resource_name: my-server-tls-policy
     tgc_test_ignore_extra:
-      - 'allow_open' # Ignore its false value in Terraform configuration
-  - name: 'network_security_server_tls_policy_server_cert'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-server-tls-policy'
+    - allow_open
+  - name: network_security_server_tls_policy_server_cert
+    primary_resource_id: default
+    steps:
+    - name: network_security_server_tls_policy_server_cert
+      config_path: templates/terraform/samples/services/networksecurity/network_security_server_tls_policy_server_cert.tf.tmpl
+      prefixed_vars:
+        resource_name: my-server-tls-policy
     tgc_test_ignore_extra:
-      - 'allow_open' # Ignore its false value in Terraform configuration
-  - name: 'network_security_server_tls_policy_mtls'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-server-tls-policy'
-      trust_config_name: 'my-trust-config'
+    - allow_open
+  - name: network_security_server_tls_policy_mtls
+    primary_resource_id: default
+    steps:
+    - name: network_security_server_tls_policy_mtls
+      config_path: templates/terraform/samples/services/networksecurity/network_security_server_tls_policy_mtls.tf.tmpl
+      prefixed_vars:
+        resource_name: my-server-tls-policy
+        trust_config_name: my-trust-config
     tgc_test_ignore_extra:
-      - 'allow_open' # Ignore its false value in Terraform configuration
+    - allow_open
 parameters:
   - name: 'name'
     type: String

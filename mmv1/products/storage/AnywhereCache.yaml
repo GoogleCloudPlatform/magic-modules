@@ -27,12 +27,16 @@ update_verb: 'PATCH'
 delete_verb: 'POST'
 import_format: ['b/{{bucket}}/anywhereCaches/{{anywhere_cache_id}}']
 id_format: '{{bucket}}/{{anywhere_cache_id}}'
-examples:
-  - name: 'storage_anywhere_cache_basic'
-    primary_resource_id: 'cache'
-    vars:
-      bucket_name: 'bucket-name'
-    external_providers: ["time"]
+samples:
+  - name: storage_anywhere_cache_basic
+    external_providers:
+    - time
+    primary_resource_id: cache
+    steps:
+    - name: storage_anywhere_cache_basic
+      config_path: templates/terraform/samples/services/storage/storage_anywhere_cache_basic.tf.tmpl
+      prefixed_vars:
+        bucket_name: bucket-name
 identity:
   - bucket
   - anywhereCacheId

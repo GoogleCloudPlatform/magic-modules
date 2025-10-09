@@ -40,12 +40,15 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project.go.tmpl'
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
-examples:
-  - name: 'dialogflow_fulfillment_basic'
-    primary_resource_id: 'basic_fulfillment'
-    vars:
-      fulfillment_name: 'basic-fulfillment'
+samples:
+  - name: dialogflow_fulfillment_basic
+    primary_resource_id: basic_fulfillment
     exclude_test: true
+    steps:
+    - name: dialogflow_fulfillment_basic
+      config_path: templates/terraform/samples/services/dialogflow/dialogflow_fulfillment_basic.tf.tmpl
+      prefixed_vars:
+        fulfillment_name: basic-fulfillment
 parameters:
 properties:
   - name: 'name'

@@ -49,13 +49,16 @@ custom_code:
 exclude_tgc: true
 # Sweeper skipped as this resource has customized deletion.
 exclude_sweeper: true
-examples:
-  - name: 'spanner_instance_config_basic'
-    primary_resource_id: 'example'
-    vars:
-      instance_config_name: '"custom-nam11-config"'
-    test_vars_overrides:
-      'instance_config_name': '"custom-tf-test-nam11-config"'
+samples:
+  - name: spanner_instance_config_basic
+    primary_resource_id: example
+    steps:
+    - name: spanner_instance_config_basic
+      config_path: templates/terraform/samples/services/spanner/spanner_instance_config_basic.tf.tmpl
+      prefixed_vars:
+        instance_config_name: '"custom-nam11-config"'
+      test_vars_overrides:
+        instance_config_name: '"custom-tf-test-nam11-config"'
 parameters:
 properties:
   - name: 'name'

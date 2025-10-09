@@ -43,11 +43,14 @@ custom_code:
 error_retry_predicates:
 
   - 'transport_tpg.IsMonitoringConcurrentEditError'
-examples:
-  - name: 'monitoring_service_example'
-    primary_resource_id: 'my_service'
-    vars:
-      service_id: 'my-service'
+samples:
+  - name: monitoring_service_example
+    primary_resource_id: my_service
+    steps:
+    - name: monitoring_service_example
+      config_path: templates/terraform/samples/services/monitoring/monitoring_service_example.tf.tmpl
+      prefixed_vars:
+        service_id: my-service
 parameters:
   - name: 'serviceId'
     type: String

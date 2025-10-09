@@ -43,26 +43,32 @@ iam_policy:
   allowed_iam_role: 'roles/compute.admin'
   parent_resource_attribute: 'machine_image'
   iam_conditions_request_type: 'QUERY_PARAM'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  sample_config_body: 'templates/terraform/iam/iam_attributes_sample.go.tmpl'
 custom_code:
-examples:
-  - name: 'machine_image_basic'
-    primary_resource_id: 'image'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])'
-    vars:
-      vm_name: 'my-vm'
-      image_name: 'my-image'
-  - name: 'compute_machine_image_kms'
-    primary_resource_id: 'image'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])'
+samples:
+  - name: machine_image_basic
+    primary_resource_id: image
+    primary_resource_name: fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])
+    steps:
+    - name: machine_image_basic
+      config_path: templates/terraform/samples/services/compute/machine_image_basic.tf.tmpl
+      prefixed_vars:
+        image_name: my-image
+        vm_name: my-vm
+  - name: compute_machine_image_kms
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-    vars:
-      vm_name: 'my-vm'
-      image_name: 'my-image'
-      key_name: 'key'
-      keyring_name: 'keyring'
+    - member: serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com
+      role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    primary_resource_id: image
+    primary_resource_name: fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])
+    steps:
+    - name: compute_machine_image_kms
+      config_path: templates/terraform/samples/services/compute/compute_machine_image_kms.tf.tmpl
+      prefixed_vars:
+        image_name: my-image
+        key_name: key
+        keyring_name: keyring
+        vm_name: my-vm
 parameters:
 properties:
   - name: 'name'

@@ -51,15 +51,20 @@ nested_query:
   modify_by_patch: false
 custom_code:
 exclude_tgc: true
-examples:
-  - name: 'backend_bucket_signed_url_key'
-    primary_resource_id: 'backend_key'
-    vars:
-      key_name: 'test-key'
-      backend_name: 'test-signed-backend-bucket'
-      bucket_name: 'test-storage-bucket'
-    external_providers: ["random", "time"]
+samples:
+  - name: backend_bucket_signed_url_key
+    external_providers:
+    - random
+    - time
+    primary_resource_id: backend_key
     exclude_test: true
+    steps:
+    - name: backend_bucket_signed_url_key
+      config_path: templates/terraform/samples/services/compute/backend_bucket_signed_url_key.tf.tmpl
+      prefixed_vars:
+        backend_name: test-signed-backend-bucket
+        bucket_name: test-storage-bucket
+        key_name: test-key
 parameters:
   - name: 'backendBucket'
     type: ResourceRef

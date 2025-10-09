@@ -38,31 +38,40 @@ timeouts:
   delete_minutes: 20
 custom_code:
   test_check_destroy: 'templates/terraform/custom_check_destroy/firebase_app_check_service_config.go.tmpl'
-examples:
-  - name: 'firebase_app_check_service_config_off'
-    primary_resource_id: 'default'
-    vars:
-      service_id: 'firestore.googleapis.com'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'service_id': '"firestore.googleapis.com"'
-  - name: 'firebase_app_check_service_config_enforced'
-    primary_resource_id: 'default'
-    vars:
-      service_id: 'firebasestorage.googleapis.com'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'service_id': '"firebasestorage.googleapis.com"'
-  - name: 'firebase_app_check_service_config_unenforced'
-    primary_resource_id: 'default'
-    vars:
-      service_id: 'identitytoolkit.googleapis.com'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'service_id': '"identitytoolkit.googleapis.com"'
+samples:
+  - name: firebase_app_check_service_config_off
+    primary_resource_id: default
+    steps:
+    - name: firebase_app_check_service_config_off
+      config_path: templates/terraform/samples/services/firebaseappcheck/firebase_app_check_service_config_off.tf.tmpl
+      prefixed_vars:
+        service_id: firestore.googleapis.com
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        service_id: '"firestore.googleapis.com"'
+  - name: firebase_app_check_service_config_enforced
+    primary_resource_id: default
+    steps:
+    - name: firebase_app_check_service_config_enforced
+      config_path: templates/terraform/samples/services/firebaseappcheck/firebase_app_check_service_config_enforced.tf.tmpl
+      prefixed_vars:
+        service_id: firebasestorage.googleapis.com
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        service_id: '"firebasestorage.googleapis.com"'
+  - name: firebase_app_check_service_config_unenforced
+    primary_resource_id: default
+    steps:
+    - name: firebase_app_check_service_config_unenforced
+      config_path: templates/terraform/samples/services/firebaseappcheck/firebase_app_check_service_config_unenforced.tf.tmpl
+      prefixed_vars:
+        service_id: identitytoolkit.googleapis.com
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        service_id: '"identitytoolkit.googleapis.com"'
 parameters:
   - name: 'service_id'
     type: String

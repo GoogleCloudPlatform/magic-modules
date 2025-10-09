@@ -42,19 +42,25 @@ sweeper:
   url_substitutions:
     - region: "us-central1"
     - region: "global"
-examples:
-  - name: 'certificate_manager_dns_authorization_basic'
-    primary_resource_id: 'default'
-    vars:
-      dns_auth_name: 'dns-auth'
-      zone_name: 'my-zone'
-      subdomain: 'subdomain'
-  - name: 'certificate_manager_dns_authorization_regional'
-    primary_resource_id: 'default'
-    vars:
-      dns_auth_name: 'dns-auth'
-      zone_name: 'my-zone'
-      subdomain: 'subdomain'
+samples:
+  - name: certificate_manager_dns_authorization_basic
+    primary_resource_id: default
+    steps:
+    - name: certificate_manager_dns_authorization_basic
+      config_path: templates/terraform/samples/services/certificatemanager/certificate_manager_dns_authorization_basic.tf.tmpl
+      prefixed_vars:
+        dns_auth_name: dns-auth
+        subdomain: subdomain
+        zone_name: my-zone
+  - name: certificate_manager_dns_authorization_regional
+    primary_resource_id: default
+    steps:
+    - name: certificate_manager_dns_authorization_regional
+      config_path: templates/terraform/samples/services/certificatemanager/certificate_manager_dns_authorization_regional.tf.tmpl
+      prefixed_vars:
+        dns_auth_name: dns-auth
+        subdomain: subdomain
+        zone_name: my-zone
 parameters:
   - name: 'name'
     type: String
