@@ -47,6 +47,35 @@ resource "google_bigquery_dataset" "dataset" {
 }
 ```
 
+## With IAM condition
+
+```hcl
+data "google_iam_policy" "owner" {
+  binding {
+    role = "roles/bigquery.dataOwner"
+
+    members = [
+      "user:jane@example.com",
+    ]
+
+    condition {
+      title       = "expires_after_2029_12_31"
+      description = "Expiring at midnight of 2029-12-31"
+      expression  = "request.time < timestamp(\"2030-01-01T00:00:00Z\")"
+    }
+  }
+}
+
+resource "google_bigquery_dataset_iam_policy" "dataset" {
+  dataset_id  = google_bigquery_dataset.dataset.dataset_id
+  policy_data = data.google_iam_policy.owner.policy_data
+}
+
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id = "example_dataset"
+}
+```
+
 ## google_bigquery_dataset_iam_binding
 
 ```hcl
@@ -57,6 +86,29 @@ resource "google_bigquery_dataset_iam_binding" "reader" {
   members = [
     "user:jane@example.com",
   ]
+}
+
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id = "example_dataset"
+}
+```
+
+## With IAM condition
+
+```hcl
+resource "google_bigquery_dataset_iam_binding" "reader" {
+  dataset_id = google_bigquery_dataset.dataset.dataset_id
+  role       = "roles/bigquery.dataViewer"
+
+  members = [
+    "user:jane@example.com",
+  ]
+
+  condition {
+    title       = "expires_after_2029_12_31"
+    description = "Expiring at midnight of 2029-12-31"
+    expression  = "request.time < timestamp(\"2030-01-01T00:00:00Z\")"
+  }
 }
 
 resource "google_bigquery_dataset" "dataset" {
