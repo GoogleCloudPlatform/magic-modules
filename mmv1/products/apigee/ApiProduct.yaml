@@ -154,6 +154,7 @@ properties:
       Comma-separated list of OAuth scopes that are validated at runtime. Apigee validates that the scopes in any access token presented match the scopes defined in the OAuth policy associated with the API product.
     item_type:
       type: String
+    custom_flatten: 'templates/terraform/custom_flatten/apigee_api_product_scopes.go.tmpl'
 
   - name: "quota"
     type: String
