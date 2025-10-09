@@ -1,11 +1,9 @@
 ---
-title: "Add a TGC next resource"
+title: "Add TGC conversion"
 weight: 20
-aliases:
-  - /reference/add-resource
 ---
 
-# Adding support for converting a new resource
+# Add TGC conversion 
 
 {{< hint warning >}}
 This method of adding TGC support is currently experimental and not officially supported. Use at your own risk!
@@ -36,7 +34,7 @@ Adding support for a resource has 4 steps:
 
 Each of these is discussed in more detail below.
 
-### 1. Adding a resource to TGC next
+### 1. Adding a resource to TGC
 
 {{% tabs "resource" %}}
 {{< tab "MMv1" >}}
