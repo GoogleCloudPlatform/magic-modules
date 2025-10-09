@@ -28,6 +28,7 @@ import_format:
   - 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
   - '{{project}}/{{location}}/{{service_id}}'
   - '{{location}}/{{service_id}}'
+include_in_tgc_next_DO_NOT_USE: true
 examples:
   - name: firebasedataconnect_service_basic
     primary_resource_id: default
@@ -82,6 +83,7 @@ properties:
   - name: annotations
     type: KeyValueAnnotations
     description: Optional. Stores small amounts of arbitrary data.
+    is_missing_in_cai: true
   - name: reconciling
     type: Boolean
     description: |-
@@ -119,6 +121,7 @@ properties:
   - name: labels
     type: KeyValueLabels
     description: Optional. Labels as key value pairs.
+    is_missing_in_cai: true
   - name: uid
     type: String
     description: Output only. System-assigned, unique identifier.
