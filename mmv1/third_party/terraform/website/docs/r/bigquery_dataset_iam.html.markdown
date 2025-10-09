@@ -78,6 +78,26 @@ resource "google_bigquery_dataset" "dataset" {
 }
 ```
 
+## With IAM condition
+
+```hcl
+resource "google_bigquery_dataset_iam_member" "editor" {
+  dataset_id = google_bigquery_dataset.dataset.dataset_id
+  role       = "roles/bigquery.dataEditor"
+  member     = "user:jane@example.com"
+
+  condition {
+    title       = "expires_after_2029_12_31"
+    description = "Expiring at midnight of 2029-12-31"
+    expression  = "request.time < timestamp(\"2030-01-01T00:00:00Z\")"
+  }
+}
+
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id = "example_dataset"
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
