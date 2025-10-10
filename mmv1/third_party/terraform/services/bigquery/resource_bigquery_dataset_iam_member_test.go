@@ -14,6 +14,14 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
+const (
+	condTitle2050 = "Expire access on 2050-12-31"
+	condExpr2050  = "request.time < timestamp('2050-12-31T23:59:59Z')"
+	condDesc2050  = "This condition will automatically remove access after 2050-12-31"
+	condTitle2040 = "Expire access on 2040-12-31"
+	condExpr2040  = "request.time < timestamp('2040-12-31T23:59:59Z')"
+)
+
 func TestAccBigqueryDatasetIamMember_afterDatasetCreation(t *testing.T) {
 	t.Parallel()
 
@@ -123,16 +131,16 @@ func TestAccBigqueryDatasetIamMember_iamMemberWithIAMCondition(t *testing.T) {
 			{
 				Config: testAccBigqueryDatasetIamMember_withServiceAccountAndIAMCondition(datasetID, wifIDs),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_member.access", "condition.0.title", "Expire access on 2050-12-31"),
-					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_member.access", "condition.0.expression", "request.time < timestamp('2050-12-31T23:59:59Z')"),
-					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_member.access", "condition.0.description", "This condition will automatically remove access after 2050-12-31"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_member.access", "condition.0.title", condTitle2050),
+					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_member.access", "condition.0.expression", condExpr2050),
+					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_member.access", "condition.0.description", condDesc2050),
 				),
 			},
 			{
 				Config: testAccBigqueryDatasetIamMember_withServiceAccountAndIAMCondition_update(datasetID, wifIDs),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_member.access", "condition.0.title", "Expire access on 2040-12-31"),
-					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_member.access", "condition.0.expression", "request.time < timestamp('2040-12-31T23:59:59Z')"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_member.access", "condition.0.title", condTitle2040),
+					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_member.access", "condition.0.expression", condExpr2040),
 					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_member.access", "condition.0.description", ""),
 				),
 			},
@@ -452,12 +460,12 @@ resource "google_bigquery_dataset_iam_member" "access" {
   member     = "serviceAccount:${google_service_account.sa.email}"
 
   condition {
-    title       = "Expire access on 2050-12-31"
-    description = "This condition will automatically remove access after 2050-12-31"
-		expression  = "request.time < timestamp('2050-12-31T23:59:59Z')"
+    title       = "%s"
+    description = "%s"
+    expression  = "%s"
   }
 }
-`, datasetID, serviceAccountID)
+`, datasetID, serviceAccountID, condTitle2050, condDesc2050, condExpr2050)
 }
 
 func testAccBigqueryDatasetIamMember_withServiceAccountAndIAMCondition_update(datasetID, serviceAccountID string) string {
@@ -476,9 +484,9 @@ resource "google_bigquery_dataset_iam_member" "access" {
   member     = "serviceAccount:${google_service_account.sa.email}"
 
   condition {
-    title       = "Expire access on 2040-12-31"
-		expression  = "request.time < timestamp('2040-12-31T23:59:59Z')"
+    title       = "%s"
+    expression  = "%s"
   }
 }
-`, datasetID, serviceAccountID)
+`, datasetID, serviceAccountID, condTitle2040, condExpr2040)
 }
