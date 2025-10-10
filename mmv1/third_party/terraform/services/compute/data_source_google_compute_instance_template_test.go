@@ -36,14 +36,13 @@ func TestAccInstanceTemplateDatasource_filter(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				                Config: testAccInstanceTemplate_filter(envvar.GetTestProjectFromEnv(), acctest.RandString(t, 10)),
-								Check: resource.ComposeTestCheckFunc(
-									acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
-										"data.google_compute_instance_template.default",
-										"google_compute_instance_template.c",
-										[]string{},
-									),
-								),			},
+				Config: testAccInstanceTemplate_filter(envvar.GetTestProjectFromEnv(), acctest.RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					acctest.CheckDataSourceStateMatchesResourceState(
+						"data.google_compute_instance_template.default",
+						"google_compute_instance_template.c",
+					),
+				)},
 		},
 	})
 }
