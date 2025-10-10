@@ -118,8 +118,8 @@ clean-tgc:
 		rm -rf ./tfplan2cai/converters/google/resources;\
 		rm -rf ./cai2hcl/*;\
 		find ./tfplan2cai/test/** -type f -exec git rm {} \; > /dev/null;\
-		rm -rf ./pkg/cai2hcl/*;\
-		rm -rf ./pkg/tfplan2cai/*;\
+		rm -rf ./pkg/*;\
+		rm -rf ./test/*;\
 
 tgc:
 	cd mmv1;\
