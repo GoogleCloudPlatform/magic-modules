@@ -1288,7 +1288,6 @@ properties:
     type: String
     description: |
       The security policy associated with this backend service.
-    min_version: 'beta'
     update_url: 'projects/{{project}}/regions/{{region}}/backendServices/{{name}}/setSecurityPolicy'
     update_verb: 'POST'
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
