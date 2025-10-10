@@ -25,10 +25,10 @@ func TestAccDataSourceSpannerDatabase_basic(t *testing.T) {
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_spanner_database.bar",
 						"google_spanner_database.foo",
-						map[string]struct{}{
-							"ddl.#":               {},
-							"ddl.0":               {},
-							"deletion_protection": {},
+						[]string{
+							"ddl.#",
+							"ddl.0",
+							"deletion_protection",
 						},
 					),
 				),
