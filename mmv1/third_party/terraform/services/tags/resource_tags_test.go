@@ -476,7 +476,7 @@ resource "google_tags_tag_value" "value" {
 	description = "For foo%{random_suffix} resources."
 }
 
-resource "google_tags_tag_binding" "{{$.PrimaryResourceId}}" {
+resource "google_tags_tag_binding" "binding" {
   parent    = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
   tag_value_namespaced_name = "${google_tags_tag_key.key.parent}/${google_tags_tag_key.key.short_name}/${google_tags_tag_value.value.short_name}"
 }
