@@ -132,6 +132,7 @@ properties:
     type: Array
     description: |
       List of entities from the connected data source to ingest.
+    immutable: true
     item_type:
       type: NestedObject
       properties:
