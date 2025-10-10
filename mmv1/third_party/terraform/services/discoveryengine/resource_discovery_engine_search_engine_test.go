@@ -12,6 +12,7 @@ func TestAccDiscoveryEngineSearchEngine_discoveryengineSearchengineBasicExample_
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
+		"kms_key_name":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tftest-shared-key-6").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -77,6 +78,7 @@ resource "google_discovery_engine_search_engine" "basic" {
     search_tier = "SEARCH_TIER_ENTERPRISE"
     search_add_ons = ["SEARCH_ADD_ON_LLM"]
   }
+  kms_key_name: "%{kms_key_name}"
 }
 `, context)
 }
@@ -118,6 +120,7 @@ resource "google_discovery_engine_search_engine" "basic" {
   features = {
     feedback = "FEATURE_STATE_OFF"
   }
+  kms_key_name: "%{kms_key_name}"
 }
 `, context)
 }

@@ -66,38 +66,40 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
   refresh_interval             = "86400s"
   entities {
     entity_name                = "catalog"
-    params                     = jsonencode({
-      "inclusion_filters": {
+    params                     = {
+      inclusion_filters        = jsonencode({
         "knowledgeBaseSysId": [
           "123"
         ]
-      }
-    })
+      })
+    }
   }
   entities {
     entity_name                = "incident"
-    params                     = jsonencode({
-      "inclusion_filters": {
+    params                     = {
+      inclusion_filters        = jsonencode({
         "knowledgeBaseSysId": [
           "123"
         ]
-      }
-    })
+      })
+    }
   }
   entities {
     entity_name                = "knowledge_base"
-    params                     = jsonencode({
-      "inclusion_filters": {
+    params                     = {
+      inclusion_filters        = jsonencode({
         "knowledgeBaseSysId": [
           "123"
         ]
-      }
-    })
+      })
+    }
   }
   static_ip_enabled            = false
   incremental_refresh_interval = "21600s"
   connector_modes              = ["DATA_INGESTION"]
   sync_mode                    = "PERIODIC"
+  auto_run_disabled            = true
+  incremental_sync_disabled    = true
 }
 `, context)
 }
@@ -120,38 +122,40 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
   refresh_interval             = "172800s"
   entities {
     entity_name                = "catalog"
-    params                     = jsonencode({
-      "inclusion_filters": {
+    params                     = {
+      inclusion_filters        = jsonencode({
         "knowledgeBaseSysId": [
           "123"
         ]
-      }
-    })
+      })
+    }
   }
   entities {
     entity_name                = "incident"
-    params                     = jsonencode({
-      "inclusion_filters": {
+    params                     = {
+      inclusion_filters        = jsonencode({
         "knowledgeBaseSysId": [
           "123"
         ]
-      }
-    })
+      })
+    }
   }
   entities {
     entity_name                = "knowledge_base"
-    params                     = jsonencode({
-      "inclusion_filters": {
+    params                     = {
+      inclusion_filters        = jsonencode({
         "knowledgeBaseSysId": [
           "123"
         ]
-      }
-    })
+      })
+    }
   }
   static_ip_enabled            = false
   incremental_refresh_interval = "21600s"
   connector_modes              = ["DATA_INGESTION"]
   sync_mode                    = "PERIODIC"
+  auto_run_disabled            = false
+  incremental_sync_disabled    = false
 }
 `, context)
 }
