@@ -1,0 +1,13 @@
+// Custom encoder require because of:
+// Due to a bug, NestedObject fields will currently be sent as null if unset (rather than being omitted.)
+// See: https://github.com/hashicorp/terraform-provider-google/issues/13201
+
+mongodbProfile := obj["mongodbProfile"].(map[string]interface{})
+if mongodbProfile != nil {
+  srvConnectionFormat := mongodbProfile["srvConnectionFormat"]
+  if srvConnectionFormat != nil {
+    mongodbProfile["srvConnectionFormat"] = map[string]interface{}{}
+  }
+}
+
+return obj, nil
