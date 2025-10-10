@@ -132,12 +132,12 @@ properties:
     type: Array
     description: |
       List of entities from the connected data source to ingest.
-    immutable: true
     item_type:
       type: NestedObject
       properties:
         - name: 'entityName'
           type: String
+          immutable: true
           description: |
             The name of the entity. Supported values by data source:
             * Salesforce: `Lead`, `Opportunity`, `Contact`, `Account`, `Case`, `Contract`, `Campaign`
@@ -145,6 +145,7 @@ properties:
             * Confluence: `Content`, `Space`
         - name: 'keyPropertyMappings'
           type: KeyValuePairs
+          immutable: true
           description: |
             Attributes for indexing.
             Key: Field name.
@@ -156,6 +157,7 @@ properties:
               on search results.
         - name: 'dataStore'
           type: String
+          immutable: true
           description: |
             The full resource name of the associated data store for the source
             entity.
