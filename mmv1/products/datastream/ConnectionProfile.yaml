@@ -587,8 +587,8 @@ properties:
         send_empty_value: true
         allow_empty_object: true
         at_least_one_of:
-          - 'srv_connection_format'
-          - 'standard_connection_format'
+          - 'mongodb_profile.0.srv_connection_format'
+          - 'mongodb_profile.0.standard_connection_format'
         conflicts:
           - mongodb_profile.0.standard_connection_format
         properties:
@@ -601,8 +601,8 @@ properties:
         send_empty_value: true
         allow_empty_object: true
         at_least_one_of:
-          - 'srv_connection_format'
-          - 'standard_connection_format'
+          - 'mongodb_profile.0.srv_connection_format'
+          - 'mongodb_profile.0.standard_connection_format'
         conflicts:
           - mongodb_profile.0.srv_connection_format
         properties:
