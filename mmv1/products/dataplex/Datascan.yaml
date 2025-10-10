@@ -573,6 +573,10 @@ properties:
               For instance, if 'x' is of nested field type, listing 'x' is supported but 'x.y.z' is not supported. Here 'y' and 'y.z' are nested fields of 'x'.
             item_type:
               type: String
+      - name: 'catalogPublishingEnabled'
+        type: Boolean
+        description: |
+          If set, the latest DataScan job result will be published to Dataplex Catalog.
   - name: 'dataDiscoverySpec'
     type: NestedObject
     description: |
