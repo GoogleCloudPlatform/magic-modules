@@ -163,6 +163,7 @@ properties:
     description: |
       A map of the feature config for the engine to opt in or opt out of features.
   - name: 'kmsKeyName'
+    ignore_read: true
     type: String
     description: |
       The KMS key to be used to protect this Engine at creation time.
