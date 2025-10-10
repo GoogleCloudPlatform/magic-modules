@@ -75,6 +75,10 @@ var (
 					startDate: newDate(2025, 4, 9),
 					endDate:   newDate(2025, 4, 15),
 				},
+				{
+					startDate: newDate(2025, 9, 26),
+					endDate:   newDate(2025, 10, 4),
+				},
 			},
 		},
 		"hao-nan-li": {
@@ -115,7 +119,12 @@ var (
 			},
 		},
 		"ScottSuarez": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 9, 26),
+					endDate:   newDate(2025, 10, 5),
+				},
+			},
 		},
 		"shuyama1": {
 			vacations: []Vacation{

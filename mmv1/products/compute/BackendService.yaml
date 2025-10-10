@@ -48,7 +48,6 @@ iam_policy:
   allowed_iam_role: 'roles/compute.admin'
   parent_resource_attribute: 'name'
   iam_conditions_request_type: 'QUERY_PARAM'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   min_version: 'beta'
 custom_code:
   constants: 'templates/terraform/constants/backend_service.go.tmpl'
@@ -311,6 +310,39 @@ properties:
             Used when balancingMode is UTILIZATION. This ratio defines the
             CPU utilization target for the group. Valid range is [0.0, 1.0].
           default_from_api: true
+        - name: 'maxInFlightRequests'
+          type: Integer
+          description: |
+            Defines a maximum number of in-flight requests for the whole NEG
+            or instance group. Not available if backend's balancingMode is RATE
+            or CONNECTION.
+          default_from_api: true
+          min_version: 'beta'
+        - name: 'maxInFlightRequestsPerInstance'
+          type: Integer
+          description: |
+            Defines a maximum number of in-flight requests for a single VM.
+            Not available if backend's balancingMode is RATE or CONNECTION.
+          default_from_api: true
+          min_version: 'beta'
+        - name: 'maxInFlightRequestsPerEndpoint'
+          type: Integer
+          description: |
+            Defines a maximum number of in-flight requests for a single endpoint.
+            Not available if backend's balancingMode is RATE or CONNECTION.
+          default_from_api: true
+          min_version: 'beta'
+        - name: 'trafficDuration'
+          type: Enum
+          description: |
+            This field specifies how long a connection should be kept alive for:
+            - LONG: Most of the requests are expected to take more than multiple
+              seconds to finish.
+            - SHORT: Most requests are expected to finish with a sub-second latency.
+          enum_values:
+            - 'LONG'
+            - 'SHORT'
+          min_version: 'beta'
         - name: 'customMetrics'
           type: Array
           description: |

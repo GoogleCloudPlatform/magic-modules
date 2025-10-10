@@ -43,7 +43,6 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/locations/{{location}}/services/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/services/{{name}}'
     - '{{name}}'
@@ -359,7 +358,6 @@ properties:
     type: Boolean
     description: |-
       Disables public resolution of the default URI of this service.
-    min_version: 'beta'
   - name: 'template'
     type: NestedObject
     description: |
@@ -994,6 +992,9 @@ properties:
       - name: 'gpuZonalRedundancyDisabled'
         type: Boolean
         description: True if GPU zonal redundancy is disabled on this revision.
+      - name: 'healthCheckDisabled'
+        type: Boolean
+        description: Disables health checking containers during deployment.
   - name: 'traffic'
     type: Array
     description: |-
