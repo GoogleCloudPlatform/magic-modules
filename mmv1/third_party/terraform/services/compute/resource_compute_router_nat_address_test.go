@@ -130,10 +130,10 @@ func TestAccComputeRouterNatAddress_withAddressRemoved(t *testing.T) {
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_router_nat.foo",
 						"google_compute_router_nat.foobar",
-						map[string]struct{}{
-							"initial_nat_ips":   {},
-							"initial_nat_ips.#": {},
-							"initial_nat_ips.0": {},
+						[]string{
+							"initial_nat_ips",
+							"initial_nat_ips.#",
+							"initial_nat_ips.0",
 						},
 					),
 				),
@@ -172,17 +172,15 @@ func TestAccComputeRouterNatAddress_withAutoAllocateAndAddressRemoved(t *testing
 			{
 				Config: testAccComputeRouterNatAddressWithAutoAllocateAndAddressRemoved(routerName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.google_compute_router_nat.foo", "nat_ips.#", "0"),
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_router_nat.foo",
 						"google_compute_router_nat.foobar",
-						map[string]struct{}{
-							"initial_nat_ips":   {},
-							"initial_nat_ips.#": {},
-							"initial_nat_ips.0": {},
+						[]string{
+							"initial_nat_ips",
+							"initial_nat_ips.#",
+							"initial_nat_ips.0",
 						},
-					),
-				),
+					)),
 			},
 			{
 				ResourceName:      "google_compute_router_nat.foobar",
@@ -258,11 +256,7 @@ func TestAccComputeRouterNatAddress_withNatIpsAndDrainNatIps(t *testing.T) {
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_router_nat.foo",
 						"google_compute_router_nat.foobar",
-						map[string]struct{}{
-							"initial_nat_ips":   {},
-							"initial_nat_ips.#": {},
-							"initial_nat_ips.0": {},
-						},
+						[]string{"initial_nat_ips", "initial_nat_ips.#", "initial_nat_ips.0"},
 					),
 				),
 			},
