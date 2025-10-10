@@ -65,8 +65,12 @@ func NewBigqueryDatasetIamMemberUpdater(d tpgresource.TerraformResourceData, con
 	}, nil
 }
 
+func (u *BigqueryDatasetIamMemberUpdater) policyURL() string {
+	return fmt.Sprintf("%s%s?accessPolicyVersion=3", u.Config.BigQueryBasePath, u.GetResourceId())
+}
+
 func (u *BigqueryDatasetIamMemberUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
-	url := fmt.Sprintf("%s%s?accessPolicyVersion=3", u.Config.BigQueryBasePath, u.GetResourceId())
+	url := u.policyURL()
 
 	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
@@ -92,7 +96,7 @@ func (u *BigqueryDatasetIamMemberUpdater) GetResourceIamPolicy() (*cloudresource
 }
 
 func GetCurrentResourceAccess(u *BigqueryDatasetIamMemberUpdater) ([]interface{}, error) {
-	url := fmt.Sprintf("%s%s?accessPolicyVersion=3", u.Config.BigQueryBasePath, u.GetResourceId())
+	url := u.policyURL()
 
 	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
 	if err != nil {
@@ -141,7 +145,7 @@ func mergeAccess(newAccess []map[string]interface{}, currAccess []interface{}) [
 }
 
 func (u *BigqueryDatasetIamMemberUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
-	url := fmt.Sprintf("%s%s?accessPolicyVersion=3", u.Config.BigQueryBasePath, u.GetResourceId())
+	url := u.policyURL()
 
 	newAccess, err := policyToAccessForIamMember(policy)
 	if err != nil {
@@ -323,7 +327,7 @@ func accessToIamMemberForIamMember(access map[string]interface{}) (string, error
 		if strings.HasPrefix(ms, "deleted:") || strings.Contains(ms, "?uid=") {
 			return ms, nil
 		}
-		if strings.Contains(ms, "iam.gserviceaccount.com") {
+		if strings.Contains(ms, "gserviceaccount") {
 			return fmt.Sprintf("serviceAccount:%s", ms), nil
 		}
 		return fmt.Sprintf("user:%s", ms), nil
