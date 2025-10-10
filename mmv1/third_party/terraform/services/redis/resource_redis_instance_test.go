@@ -2,6 +2,7 @@ package redis_test
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -406,4 +407,63 @@ resource "google_redis_instance" "test" {
   redis_version = "REDIS_4_0"
 }
 `, name)
+}
+
+func TestAccRedisInstance_deletionprotection(t *testing.T) {
+	t.Parallel()
+
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckRedisInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRedisInstance_deletionprotection(name, "us-central1", true),
+			},
+			{
+				ResourceName:            "google_redis_instance.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "deletion_protection"},
+			},
+			{
+				Config:      testAccRedisInstance_deletionprotection(name, "us-west2", true),
+				ExpectError: regexp.MustCompile("deletion_protection"),
+			},
+			{
+				Config: testAccRedisInstance_update(name, true),
+			},
+		},
+	})
+}
+
+func testAccRedisInstance_deletionprotection(name string, region string, preventDestroy bool) string {
+	lifecycleBlock := ""
+	if preventDestroy {
+		lifecycleBlock = `
+		lifecycle {
+			prevent_destroy = false
+		}`
+	}
+	return fmt.Sprintf(`
+resource "google_redis_instance" "test" {
+  name           = "%s"
+  region       = "%s"
+  display_name   = "pre-update"
+  memory_size_gb = 1
+  deletion_protection = true
+	%s
+  labels = {
+    my_key    = "my_val"
+    other_key = "other_val"
+  }
+  redis_configs = {
+    maxmemory-policy       = "allkeys-lru"
+    notify-keyspace-events = "KEA"
+  }
+  redis_version = "REDIS_4_0"
+}
+`, name, region, lifecycleBlock)
 }
