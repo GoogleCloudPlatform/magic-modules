@@ -29,7 +29,7 @@ func TestAccDiscoveryEngineSearchEngine_discoveryengineSearchengineBasicExample_
 				ResourceName:            "google_discovery_engine_search_engine.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"engine_id", "collection_id", "location"},
+				ImportStateVerifyIgnore: []string{"engine_id", "collection_id", "location", "kms_key_name"},
 			},
 			{
 				Config: testAccDiscoveryEngineSearchEngine_discoveryengineSearchengineBasicExample_update(context),
@@ -38,7 +38,7 @@ func TestAccDiscoveryEngineSearchEngine_discoveryengineSearchengineBasicExample_
 				ResourceName:            "google_discovery_engine_search_engine.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"engine_id", "collection_id", "location"},
+				ImportStateVerifyIgnore: []string{"engine_id", "collection_id", "location", "kms_key_name"},
 			},
 		},
 	})
