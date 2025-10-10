@@ -33,6 +33,10 @@ update_mask: true
 delete_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataConnector'
+custom_code:
+  constants: "templates/terraform/constants/discoveryengine_data_connector.go.tmpl"
+state_upgraders: true
+schema_version: 1
 timeouts:
   insert_minutes: 20
   update_minutes: 5
@@ -138,7 +142,6 @@ properties:
       properties:
         - name: 'entityName'
           type: String
-          immutable: true
           description: |
             The name of the entity. Supported values by data source:
             * Salesforce: `Lead`, `Opportunity`, `Contact`, `Account`, `Case`, `Contract`, `Campaign`
@@ -146,7 +149,6 @@ properties:
             * Confluence: `Content`, `Space`
         - name: 'keyPropertyMappings'
           type: KeyValuePairs
-          immutable: true
           description: |
             Attributes for indexing.
             Key: Field name.
@@ -158,7 +160,6 @@ properties:
               on search results.
         - name: 'dataStore'
           type: String
-          immutable: true
           description: |
             The full resource name of the associated data store for the source
             entity.
@@ -168,7 +169,7 @@ properties:
           output: true
         - name: 'params'
           description: 'The parameters for the entity to facilitate data ingestion.'
-          immutable: true
+          diff_suppress_func: 'dataConnectorEntitiesParamsDiffSuppress'
           custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
           custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
           state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
