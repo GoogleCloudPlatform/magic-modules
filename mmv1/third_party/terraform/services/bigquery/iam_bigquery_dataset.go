@@ -14,6 +14,24 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
+type conditionKey struct {
+	Description string
+	Expression  string
+	Title       string
+}
+
+type iamBindingKey struct {
+	Role      string
+	Condition conditionKey
+}
+
+func conditionKeyFromCondition(condition *cloudresourcemanager.Expr) conditionKey {
+	if condition == nil {
+		return conditionKey{}
+	}
+	return conditionKey{Description: condition.Description, Expression: condition.Expression, Title: condition.Title}
+}
+
 var IamBigqueryDatasetSchema = map[string]*schema.Schema{
 	"dataset_id": {
 		Type:     schema.TypeString,
@@ -138,11 +156,7 @@ func accessToPolicy(access interface{}) (*cloudresourcemanager.Policy, error) {
 	if access == nil {
 		return nil, nil
 	}
-	type bindingKey struct {
-		role      string
-		condition string
-	}
-	roleToBinding := make(map[bindingKey]*cloudresourcemanager.Binding)
+	roleToBinding := make(map[iamBindingKey]*cloudresourcemanager.Binding)
 
 	accessArr := access.([]interface{})
 	for _, v := range accessArr {
@@ -166,36 +180,26 @@ func accessToPolicy(access interface{}) (*cloudresourcemanager.Policy, error) {
 		var condition *cloudresourcemanager.Expr
 		if rawCondition, ok := memberRole["condition"]; ok {
 			conditionMap := rawCondition.(map[string]interface{})
-			condition = &cloudresourcemanager.Expr{
-				Title:      conditionMap["title"].(string),
-				Expression: conditionMap["expression"].(string),
-			}
-			if strValue, ok := conditionMap["description"].(string); ok {
-				condition.Description = strValue
+			title := conditionMap["title"].(string)
+			expr := conditionMap["expression"].(string)
+			condition = &cloudresourcemanager.Expr{Title: title, Expression: expr}
+			if desc, ok := conditionMap["description"].(string); ok {
+				condition.Description = desc
 			}
 		}
 
-		key := bindingKey{
-			role:      role,
-			condition: hashCondition(condition),
-		}
-
+		key := iamBindingKey{Role: role, Condition: conditionKeyFromCondition(condition)}
 		binding, ok := roleToBinding[key]
 		if !ok {
-			binding = &cloudresourcemanager.Binding{
-				Role:      role,
-				Members:   []string{},
-				Condition: condition,
-			}
+			binding = &cloudresourcemanager.Binding{Role: role, Members: []string{}, Condition: condition}
 		}
 		binding.Members = append(binding.Members, member)
 		roleToBinding[key] = binding
 	}
-	bindings := make([]*cloudresourcemanager.Binding, 0)
+	bindings := make([]*cloudresourcemanager.Binding, 0, len(roleToBinding))
 	for _, v := range roleToBinding {
 		bindings = append(bindings, v)
 	}
-
 	return &cloudresourcemanager.Policy{Bindings: bindings}, nil
 }
 
@@ -287,11 +291,14 @@ func accessToIamMember(access map[string]interface{}) (string, error) {
 		return "", fmt.Errorf("Failed to convert BigQuery Dataset access to IAM member. To use views with a dataset, please use dataset_access")
 	}
 	if member, ok := access["userByEmail"]; ok {
-		// service accounts have "gservice" in their email. This is best guess due to lost information
-		if strings.Contains(member.(string), "gserviceaccount") {
-			return fmt.Sprintf("serviceAccount:%s", member.(string)), nil
+		ms := member.(string)
+		if strings.HasPrefix(ms, "deleted:serviceAccount:") {
+			return ms, nil
 		}
-		return fmt.Sprintf("user:%s", member.(string)), nil
+		if strings.Contains(ms, "iam.gserviceaccount.com") {
+			return fmt.Sprintf("serviceAccount:%s", ms), nil
+		}
+		return fmt.Sprintf("user:%s", ms), nil
 	}
 	return "", fmt.Errorf("Failed to identify IAM member from BigQuery Dataset access: %v", access)
 }
