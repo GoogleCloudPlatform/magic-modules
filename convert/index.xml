@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Convert on Magic Modules</title><link>https://googlecloudplatform.github.io/magic-modules/convert/</link><description>Recent content in Convert on Magic Modules</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://googlecloudplatform.github.io/magic-modules/convert/index.xml" rel="self" type="application/rss+xml"/><item><title>Add TGC conversion</title><link>https://googlecloudplatform.github.io/magic-modules/convert/add-new-resource-tgc/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/convert/add-new-resource-tgc/</guid><description>&lt;h1 id="add-tgc-conversion"&gt;Add TGC conversion&lt;a class="anchor" href="#add-tgc-conversion"&gt;#&lt;/a&gt;&lt;/h1&gt;
+&lt;blockquote class="book-hint warning"&gt;
+
+This method of adding TGC support is currently experimental and not officially supported. We recommended this path only for core contributors.
+&lt;/blockquote&gt;
+&lt;p&gt;terraform-google-conversion (TGC) consumes a Terraform plan and uses it to build Cloud Asset Inventory (CAI) Assets. These built assets only exist in memory locally.&lt;/p&gt;
+&lt;p&gt;TGC supports only those GCP resources that are available in both the Terraform provider and Cloud Asset Inventory.&lt;/p&gt;
+&lt;h2 id="before-you-begin"&gt;Before you begin&lt;a class="anchor" href="#before-you-begin"&gt;#&lt;/a&gt;&lt;/h2&gt;
+&lt;h3 id="getting-a-terraform-resource-name-from-a-gcp-resource-name"&gt;Getting a Terraform resource name from a GCP resource name&lt;a class="anchor" href="#getting-a-terraform-resource-name-from-a-gcp-resource-name"&gt;#&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;The first step in determining if a GCP resource is supported is to identify the corresponding Terraform resource. You can often do this by searching for the GCP resource name in the &lt;a href="https://registry.terraform.io/providers/hashicorp/google/latest/docs"&gt;Terraform google provider documentation&lt;/a&gt;.&lt;/p&gt;</description></item></channel></rss>
