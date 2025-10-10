@@ -1263,8 +1263,6 @@ properties:
                   MongoDB databases in the cluster.
                 item_type:
                   type: NestedObject
-                  send_empty_value: true
-                  allow_empty_object: true
                   properties:
                     - type: String
                       name: 'database'
@@ -1276,8 +1274,6 @@ properties:
                         Collections in the database.
                       item_type:
                         type: NestedObject
-                        send_empty_value: true
-                        allow_empty_object: true
                         properties:
                           - type: String
                             name: 'collection'
@@ -1307,8 +1303,6 @@ properties:
                   MongoDB databases in the cluster.
                 item_type:
                   type: NestedObject
-                  send_empty_value: true
-                  allow_empty_object: true
                   properties:
                     - type: String
                       name: 'database'
@@ -1320,8 +1314,6 @@ properties:
                         Collections in the database.
                       item_type:
                         type: NestedObject
-                        send_empty_value: true
-                        allow_empty_object: true
                         properties:
                           - type: String
                             name: 'collection'

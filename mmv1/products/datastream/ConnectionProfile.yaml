@@ -490,9 +490,6 @@ properties:
       - 'sql_server_profile'
       - 'salesforce_profile'
       - 'mongodb_profile'
-    at_least_one_of:
-      - 'srv_connection_format'
-      - 'standard_connection_format'
     properties:
       - name: 'hostAddresses'
         type: Array
@@ -586,22 +583,28 @@ properties:
         type: NestedObject
         description: |
           Srv connection format. Mutually exclusive with
-          standardConnectionFormat.
+          standard_connection_Format.
         send_empty_value: true
         allow_empty_object: true
+        at_least_one_of:
+          - 'srv_connection_format'
+          - 'standard_connection_format'
         conflicts:
-          - standard_connection_format
+          - mongodb_profile.0.standard_connection_format
         properties:
           []
       - name: 'standardConnectionFormat'
         type: NestedObject
         description: |
           Standard connection format. Mutually exclusive with
-          srvConnectionFormat.
+          srv_connection_format.
         send_empty_value: true
         allow_empty_object: true
+        at_least_one_of:
+          - 'srv_connection_format'
+          - 'standard_connection_format'
         conflicts:
-          - srv_connection_format
+          - mongodb_profile.0.srv_connection_format
         properties:
           - name: 'directConnection'
             type: Boolean
