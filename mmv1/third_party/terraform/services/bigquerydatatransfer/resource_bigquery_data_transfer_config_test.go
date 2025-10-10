@@ -921,6 +921,7 @@ resource "google_project_iam_member" "data_editor" {
   member = "serviceAccount:${google_service_account.bqwriter%s.email}"
 }
 
+
 resource "google_bigquery_dataset" "my_dataset" {
   dataset_id    = "my_dataset%s"
   friendly_name = "foo"
@@ -973,7 +974,14 @@ resource "google_bigquery_data_transfer_config" "salesforce_config" {
 
 func testAccBigqueryDataTransferConfig_pub_sub(randomSuffix string) string {
 	return fmt.Sprintf(`
+data "google_project" "project" {
+}
 
+resource "google_project_iam_member" "permissions" {
+  project = data.google_project.project.project_id
+  role   = "roles/iam.serviceAccountTokenCreator"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
+}
 resource "google_bigquery_data_transfer_config" "event_driven_config" {
   depends_on = [google_project_iam_member.permissions]
 
