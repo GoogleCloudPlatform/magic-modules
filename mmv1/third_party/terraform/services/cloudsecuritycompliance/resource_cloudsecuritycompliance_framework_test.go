@@ -5,30 +5,41 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-// Acceptance test for Framework resource
 func TestAccCloudSecurityComplianceFramework_basic(t *testing.T) {
-   resourceName := "google_cloudsecuritycompliance_framework.test"
-   location := "us-central1"
-   name := "test-framework"
+	t.Parallel()
 
-   testAccFrameworkConfig := fmt.Sprintf(`
-resource "google_cloudsecuritycompliance_framework" "test" {
-   location = "%s"
-   name     = "%s"
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudSecurityComplianceFrameworkConfig(t, acctest.RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_cloudsecuritycompliance_framework.test", "location", "global"),
+					resource.TestCheckResourceAttr("google_cloudsecuritycompliance_framework.test", "display_name", "Test Framework"),
+					resource.TestCheckResourceAttr("google_cloudsecuritycompliance_framework.test", "description", "A test framework for cloud security compliance"),
+					resource.TestCheckResourceAttrSet("google_cloudsecuritycompliance_framework.test", "framework_id"),
+					resource.TestCheckResourceAttrSet("google_cloudsecuritycompliance_framework.test", "name"),
+					resource.TestCheckResourceAttrSet("google_cloudsecuritycompliance_framework.test", "major_revision_id"),
+					resource.TestCheckResourceAttrSet("google_cloudsecuritycompliance_framework.test", "type"),
+				),
+			},
+		},
+	})
 }
-`, location, name)
 
-   resource.ParallelTest(t, resource.TestCase{
-      PreCheck:          func() { testAccPreCheck(t) },
-      ProviderFactories: testAccProviderFactories,
-      Steps: []resource.TestStep{{
-         Config: testAccFrameworkConfig,
-         Check: resource.ComposeTestCheckFunc(
-            resource.TestCheckResourceAttr(resourceName, "location", location),
-            resource.TestCheckResourceAttr(resourceName, "name", name),
-         ),
-      }},
-   })
+func testAccCloudSecurityComplianceFrameworkConfig(t *testing.T, suffix string) string {
+	return fmt.Sprintf(`
+resource "google_cloudsecuritycompliance_framework" "test" {
+	organization   = "123456789"
+	location       = "global"
+	framework_id   = "tf-test-%s"
+	display_name   = "Test Framework"
+	description    = "A test framework for cloud security compliance"
+	category       = ["SECURITY", "COMPLIANCE"]
+}
+`, suffix)
 }
