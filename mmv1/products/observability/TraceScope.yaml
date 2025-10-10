@@ -26,6 +26,7 @@ import_format:
 examples:
   - name: observability_trace_scope_basic
     primary_resource_id: observability_trace_scope
+    min_version: beta
     vars:
       trace_scope_id: test-scope
     test_env_vars:
