@@ -1254,8 +1254,6 @@ properties:
             type: NestedObject
             description: |
               MongoDB collections to include in the stream.
-            send_empty_value: true
-            allow_empty_object: true
             properties:
               - type: Array
                 name: 'databases'
@@ -1294,8 +1292,6 @@ properties:
             type: NestedObject
             description: |
               MongoDB collections to include in the stream.
-            send_empty_value: true
-            allow_empty_object: true
             properties:
               - type: Array
                 name: 'databases'
