@@ -47,7 +47,6 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'service'
   base_url: 'v1/projects/{{project}}/locations/{{location}}/services/{{service}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/services/{{service}}'
     - '{{service}}'
@@ -340,6 +339,7 @@ properties:
                     See https://cloud.google.com/sdk/gcloud/reference/run/deploy#--vpc-egress.
                   - `run.googleapis.com/gpu-zonal-redundancy-disabled` sets
                     [GPU zonal redundancy](https://cloud.google.com/run/docs/configuring/services/gpu-zonal-redundancy) for the Revision.
+                  - `run.googleapis.com/health-check-disabled` disabled health checking containers during deployment.
                 default_from_api: true
                 diff_suppress_func: 'cloudrunTemplateAnnotationDiffSuppress'
               - name: 'name'

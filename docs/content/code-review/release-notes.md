@@ -29,7 +29,7 @@ Set an appropriate release note type. | Don't leave the type as `REPLACEME`.
 
 ## Type-specific guidelines and examples
 
-{{< tabs >}}
+{{% tabs %}}
 {{< tab "New field(s)" >}}
 Write your release note in the following format:
 
@@ -117,4 +117,4 @@ container: deprecated `region` and `zone` on `google_container_unicorn`. Use `lo
 ```
 ~~~
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
