@@ -23,13 +23,11 @@ docs:
 base_url: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entryLinks/{{entry_link_id}}'
 self_link: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entryLinks/{{entry_link_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entryLinks?entryLinkId={{entry_link_id}}'
-update_verb: 'PATCH'
-update_mask: true
+immutable: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entryLinks/{{entry_link_id}}'
 timeouts:
   insert_minutes: 20
-  update_minutes: 20
   delete_minutes: 20
 examples:
   - name: 'dataplex_entry_link_basic'
@@ -53,20 +51,17 @@ parameters:
       The id of the entry group this entry link is in.
     url_param_only: true
     required: true
-    immutable: true
   - name: 'entryLinkId'
     type: String
     description: |
       The id of the entry link to create.
     url_param_only: true
     required: true
-    immutable: true
   - name: location
     type: String
     description: The location for the entry.
     url_param_only: true
     required: true
-    immutable: true
 properties:
   - name: 'name'
     type: String
@@ -74,7 +69,6 @@ properties:
       The relative resource name of the Entry Link, of the form:
       projects/{project_id_or_number}/locations/{location_id}/entryGroups/{entry_group_id}/entryLinks/{entry_link_id}
     output: true
-    immutable: true
   - name: 'entryLinkType'
     type: String
     description: |
@@ -119,6 +113,5 @@ properties:
             The reference type of the Entry.
           immutable: true
           enum_values:
-            - 'UNSPECIFIED'
             - 'SOURCE'
             - 'TARGET'
