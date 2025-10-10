@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/discoveryengine"
 )
 
 func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_update(t *testing.T) {
@@ -158,4 +159,33 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
   incremental_sync_disabled    = false
 }
 `, context)
+}
+
+func TestAccDiscoveryEngineDataConnector_DataConnectorEntitiesParamsDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"Old empty JSON": {
+			Old:                "{}",
+			New:                "",
+			ExpectDiffSuppress: true,
+		},
+		"New empty JSON": {
+			Old:                "",
+			New:                "{}",
+			ExpectDiffSuppress: true,
+		},
+		"Diff not supressed": {
+			Old:                "123",
+			New:                "",
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		if discoveryengine.DataConnectdorEntitiesParamsDiffSuppress("entities_params_diff_supress", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Errorf("bad: %s, %q => %q expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
 }
