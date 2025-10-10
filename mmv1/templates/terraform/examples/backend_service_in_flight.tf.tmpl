@@ -1,14 +1,19 @@
 resource "google_compute_network" "custom" {
+  provider              = google-beta
   name                    = "custom-vpc"
   auto_create_subnetworks = false
 }
+
 resource "google_compute_subnetwork" "default" {
+  provider              = google-beta
   name          = "custom-subnet"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
   network       = google_compute_network.custom.id
 }
+
 resource "google_compute_instance_template" "default" {
+  provider              = google-beta
   name_prefix   = "instance-template-"
   machine_type  = "e2-micro"
 
@@ -33,7 +38,9 @@ resource "google_compute_instance_template" "default" {
     EOT
   }
 }
+
 resource "google_compute_region_instance_group_manager" "foobar" {
+  provider              = google-beta
   name               = "instance-group-manager"
   base_instance_name = "vm"
   region             = "us-central1"
@@ -44,6 +51,7 @@ resource "google_compute_region_instance_group_manager" "foobar" {
 
   target_size = 1
 }
+
 resource "google_compute_backend_service" "{{$.PrimaryResourceId}}" {
   provider              = google-beta
   name                  = "{{index $.Vars "backend_service_name"}}"
@@ -61,7 +69,9 @@ resource "google_compute_backend_service" "{{$.PrimaryResourceId}}" {
 
   health_checks = [google_compute_health_check.default.self_link]
 }
+
 resource "google_compute_health_check" "default" {
+  provider              = google-beta
   name = "{{index $.Vars "health_check_name"}}"
 
   http_health_check {
