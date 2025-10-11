@@ -541,6 +541,7 @@ properties:
               'ca_certificate' fields are mandatory.
             immutable: true
             sensitive: true
+            ignore_read: true
           - name: 'clientKeySet'
             type: Boolean
             description: |
@@ -555,6 +556,7 @@ properties:
               mandatory.
             immutable: true
             sensitive: true
+            ignore_read: true
           - name: 'clientCertificateSet'
             type: Boolean
             description: |
@@ -567,6 +569,7 @@ properties:
               server's certificate.
             immutable: true
             sensitive: true
+            ignore_read: true
           - name: 'caCertificateSet'
             type: Boolean
             description: |
@@ -579,6 +582,7 @@ properties:
               PEM-encoded private key. Mutually exclusive with clientKey.
             immutable: true
             sensitive: true
+            ignore_read: true
       - name: 'srvConnectionFormat'
         type: NestedObject
         description: |
@@ -589,8 +593,6 @@ properties:
         at_least_one_of:
           - 'mongodb_profile.0.srv_connection_format'
           - 'mongodb_profile.0.standard_connection_format'
-        conflicts:
-          - mongodb_profile.0.standard_connection_format
         properties:
           []
       - name: 'standardConnectionFormat'
@@ -603,8 +605,6 @@ properties:
         at_least_one_of:
           - 'mongodb_profile.0.srv_connection_format'
           - 'mongodb_profile.0.standard_connection_format'
-        conflicts:
-          - mongodb_profile.0.srv_connection_format
         properties:
           - name: 'directConnection'
             type: Boolean
