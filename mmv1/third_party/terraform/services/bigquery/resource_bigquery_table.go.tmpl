@@ -1091,12 +1091,15 @@ func ResourceBigQueryTable() *schema.Resource {
 				Description: `If specified, configures this table as a view.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						// Query: [Required] A query that BigQuery executes when the view is
+						// Query: [Optional] A query that BigQuery executes when the view is
 						// referenced.
 						"query": {
 							Type:        schema.TypeString,
-							Required:    true,
+							Optional:    true,
 							Description: `A query that BigQuery executes when the view is referenced.`,
+							{{- if ne $.TargetVersionName "ga" }}
+							ConflictsWith: []string{"view.0.foreign_definitions"},
+							{{- end }}
 						},
 
 						// UseLegacySQL: [Optional] Specifies whether to use BigQuery's
@@ -1107,7 +1110,37 @@ func ResourceBigQueryTable() *schema.Resource {
 							Optional:    true,
 							Computed:    true,
 							Description: `Specifies whether to use BigQuery's legacy SQL for this view. If set to false, the view will use BigQuery's standard SQL`,
+							{{- if ne $.TargetVersionName "ga" }}
+							ConflictsWith: []string{"view.0.foreign_definitions"},
+							{{- end }}
 						},
+						{{- if ne $.TargetVersionName "ga" }}
+
+						// ForeignDefinitions: [Optional] Foreign view representations.
+						"foreign_definitions": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: `Foreign view representations.`,
+							Elem:        &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									// Query: [Required] Represents the dialect of the query.
+									"query": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: `The query that defines the view.`,
+									},
+
+									// Dialect: [Optional] Represents the dialect of the query.
+									"dialect": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `Represents the dialect of the query.`,
+									},
+								},
+							},
+							ConflictsWith: []string{"view.0.query", "view.0.use_legacy_sql"},
+						},
+						{{- end }}
 					},
 				},
 			},
@@ -1892,7 +1925,13 @@ func resourceBigQueryTableCreate(d *schema.ResourceData, meta interface{}) error
 		return resourceBigQueryTableRead(d, meta)
 	}
 
-	if table.View != nil && table.Schema != nil {
+	handleSchemaForView := table.View != nil
+	{{- if ne $.TargetVersionName "ga" }}
+	if handleSchemaForView && table.View.ForeignDefinitions != nil {
+		handleSchemaForView = false
+	}
+	{{- end }}
+	if handleSchemaForView && table.Schema != nil {
 		if schemaHasRequiredFields(table.Schema) {
 			return errors.New("Schema cannot contain required fields when creating a view")
 		}
@@ -3112,16 +3151,71 @@ func expandView(d *schema.ResourceData) *bigquery.ViewDefinition {
 		vd.ForceSendFields = append(vd.ForceSendFields, "UseLegacySql")
 	}
 
+	{{- if ne $.TargetVersionName "ga" }}
+	if v, ok := raw["foreign_definitions"]; ok && len(v.([]interface{})) > 0 {
+		fds := []*bigquery.ForeignViewDefinition{}
+		for _, rawFd := range v.([]interface{}) {
+			fvd := expandForeignViewDefinition(rawFd)
+			if fvd != nil {
+				fds = append(fds, fvd)
+			}
+		}
+		if len(fds) > 0 {
+			vd.ForeignDefinitions = fds
+		}
+	}
+
+	{{- end }}
 	return vd
 }
 
+{{- if ne $.TargetVersionName "ga" }}
+func expandForeignViewDefinition(cfg interface{}) *bigquery.ForeignViewDefinition {
+	fvd := &bigquery.ForeignViewDefinition{}
+
+	fd := cfg.(map[string]interface{})
+	if fd != nil {
+		if v, ok := fd["query"]; ok {
+			fvd.Query = v.(string)
+		}
+
+		if v, ok := fd["dialect"]; ok {
+			fvd.Dialect = v.(string)
+		}
+	}
+
+	return fvd
+}
+
+{{- end }}
 func flattenView(vd *bigquery.ViewDefinition) []map[string]interface{} {
 	result := map[string]interface{}{"query": vd.Query}
 	result["use_legacy_sql"] = vd.UseLegacySql
 
+	{{- if ne $.TargetVersionName "ga" }}
+	if vd.ForeignDefinitions != nil {
+		result["foreign_definitions"] = flattenForeignViewDefinitions(vd.ForeignDefinitions)
+	}
+
+	{{- end }}
 	return []map[string]interface{}{result}
 }
 
+{{- if ne $.TargetVersionName "ga" }}
+func flattenForeignViewDefinitions(fvd []*bigquery.ForeignViewDefinition) []map[string]interface{} {
+	results := []map[string]interface{}{}
+
+	for _, d := range fvd {
+		result := map[string]interface{}{}
+		result["query"] = d.Query
+		result["dialect"] = d.Dialect
+		results = append(results, result)
+	}
+
+	return results
+}
+
+{{- end }}
 func expandMaterializedView(configured interface{}) *bigquery.MaterializedViewDefinition {
 	raw := configured.([]interface{})[0].(map[string]interface{})
 	mvd := &bigquery.MaterializedViewDefinition{Query: raw["query"].(string)}
