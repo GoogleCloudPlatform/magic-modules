@@ -1,5 +1,5 @@
 resource "google_network_management_connectivity_test" "{{$.PrimaryResourceId}}" {
-  name = "{{index $.Vars "primary_resource_name"}}"
+  name = "{{index $.Vars "connectivity_test_name"}}"
   source {
     gke_master_cluster =  "projects/test-project/locations/us-central1/clusters/name"
     cloud_sql_instance = "projects/test-project/instances/name"

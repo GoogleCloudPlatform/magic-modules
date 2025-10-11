@@ -1,5 +1,5 @@
 resource "google_network_management_connectivity_test" "{{$.PrimaryResourceId}}" {
-  name = "{{index $.Vars "primary_resource_name"}}"
+  name = "{{index $.Vars "connectivity_test_name"}}"
   source {
       ip_address = google_compute_address.source-addr.address
       project_id = google_compute_address.source-addr.project
