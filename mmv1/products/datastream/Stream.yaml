@@ -240,6 +240,13 @@ examples:
       source_connection_profile_id: 'source-profile'
       destination_connection_profile_id: 'destination-profile'
     exclude_test: true
+  - name: 'datastream_stream_mongodb'
+    primary_resource_id: 'default'
+    vars:
+      stream_id: 'mongodb-stream'
+      source_connection_profile_id: 'source-profile'
+      destination_connection_profile_id: 'destination-profile'
+    exclude_test: true
 virtual_fields:
   - name: 'desired_state'
     description: |
@@ -309,6 +316,7 @@ properties:
           - 'source_config.0.postgresql_source_config'
           - 'source_config.0.sql_server_source_config'
           - 'source_config.0.salesforce_source_config'
+          - 'source_config.0.mongodb_source_config'
         properties:
           - name: 'includeObjects'
             type: NestedObject
@@ -510,6 +518,7 @@ properties:
           - 'source_config.0.postgresql_source_config'
           - 'source_config.0.sql_server_source_config'
           - 'source_config.0.salesforce_source_config'
+          - 'source_config.0.mongodb_source_config'
         properties:
           - name: 'includeObjects'
             type: NestedObject
@@ -737,6 +746,7 @@ properties:
           - 'source_config.0.postgresql_source_config'
           - 'source_config.0.sql_server_source_config'
           - 'source_config.0.salesforce_source_config'
+          - 'source_config.0.mongodb_source_config'
         properties:
           - name: 'includeObjects'
             type: NestedObject
@@ -935,6 +945,7 @@ properties:
           - 'source_config.0.postgresql_source_config'
           - 'source_config.0.sql_server_source_config'
           - 'source_config.0.salesforce_source_config'
+          - 'source_config.0.mongodb_source_config'
         properties:
           - name: 'includeObjects'
             type: NestedObject
@@ -1150,6 +1161,7 @@ properties:
           - 'source_config.0.postgresql_source_config'
           - 'source_config.0.sql_server_source_config'
           - 'source_config.0.salesforce_source_config'
+          - 'source_config.0.mongodb_source_config'
         properties:
           - name: 'includeObjects'
             type: NestedObject
@@ -1224,6 +1236,102 @@ properties:
             description: |
               Salesforce objects polling interval. The interval at which new changes will be polled for each object. The duration must be between 5 minutes and 24 hours.
             required: true
+      - name: 'mongodbSourceConfig'
+        description: |
+          MongoDB source configuration.
+        type: NestedObject
+        send_empty_value: true
+        allow_empty_object: true
+        exactly_one_of:
+          - 'source_config.0.mysql_source_config'
+          - 'source_config.0.oracle_source_config'
+          - 'source_config.0.postgresql_source_config'
+          - 'source_config.0.sql_server_source_config'
+          - 'source_config.0.salesforce_source_config'
+          - 'source_config.0.mongodb_source_config'
+        properties:
+          - name: 'includeObjects'
+            type: NestedObject
+            description: |
+              MongoDB collections to include in the stream.
+            properties:
+              - type: Array
+                name: 'databases'
+                description: |
+                  MongoDB databases in the cluster.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - type: String
+                      name: 'database'
+                      description: |
+                        Database name.
+                    - type: Array
+                      name: 'collections'
+                      description: |
+                        Collections in the database.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - type: String
+                            name: 'collection'
+                            description: |
+                              Collection name.
+                          - type: Array
+                            name: 'fields'
+                            description: |
+                              Fields in the collection.
+                            item_type:
+                              type: NestedObject
+                              properties:
+                                - type: 'String'
+                                  name: 'field'
+                                  description: |
+                                    Field name.
+          - name: 'excludeObjects'
+            type: NestedObject
+            description: |
+              MongoDB collections to include in the stream.
+            properties:
+              - type: Array
+                name: 'databases'
+                description: |
+                  MongoDB databases in the cluster.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - type: String
+                      name: 'database'
+                      description: |
+                        Database name.
+                    - type: Array
+                      name: 'collections'
+                      description: |
+                        Collections in the database.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - type: String
+                            name: 'collection'
+                            description: |
+                              Collection name.
+                          - type: Array
+                            name: 'fields'
+                            description: |
+                              Fields in the collection.
+                            item_type:
+                              type: NestedObject
+                              properties:
+                                - type: 'String'
+                                  name: 'field'
+                                  description: |
+                                    Field name.
+          - name: 'maxConcurrentBackfillTasks'
+            type: Integer
+            description: |
+              Optional. Maximum number of concurrent backfill tasks. The number
+              should be non-negative and less than or equal to 50. If not set
+              (or set to 0), the system''s default value is used
   - name: 'destinationConfig'
     type: NestedObject
     description: |
@@ -1802,6 +1910,50 @@ properties:
                         type: String
                         description: |
                           Field name.
+      - name: 'mongodbExcludedObjects'
+        type: NestedObject
+        description: |
+          MongoDB data source objects to avoid backfilling.
+        properties:
+          - type: Array
+            name: 'databases'
+            description: |
+              MongoDB databases in the cluster.
+            required: true
+            min_size: 1
+            item_type:
+              type: NestedObject
+              properties:
+                - type: String
+                  name: 'database'
+                  required: true
+                  description: |
+                    Database name.
+                - type: Array
+                  name: 'collections'
+                  min_size: 1
+                  description: |
+                    Collections in the database.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - type: String
+                        name: 'collection'
+                        required: true
+                        description: |
+                          Collection name.
+                      - type: Array
+                        name: 'fields'
+                        min_size: 1
+                        description: |
+                          Fields in the collection.
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - type: 'String'
+                              name: 'field'
+                              description: |
+                                Field name.
   - name: 'backfillNone'
     type: NestedObject
     description: |
