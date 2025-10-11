@@ -3,18 +3,14 @@ package appengine_test
 {{ if ne $.TargetVersionName `ga` -}}
 
 import (
-  "log"
-  "strings"
   "testing"
 
   "github.com/hashicorp/terraform-plugin-testing/helper/resource"
-  "github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccAppEngineFlexibleAppVersion_update(t *testing.T) {
-	t.Skip("https://github.com/hashicorp/terraform-provider-google/issues/18239")
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -78,6 +74,20 @@ resource "google_project_service" "appengineflex" {
   depends_on = [google_project_service.compute]
 }
 
+resource "google_service_account" "custom_service_account" {
+  provider = google-beta
+  project      = google_project_service.appengineflex.project
+  account_id   = "my-account"
+  display_name = "Custom Service Account"
+}
+
+resource "google_project_iam_member" "editor" {
+  provider = google-beta
+  project = google_project_service.appengineflex.project
+  role    = "roles/editor"
+  member  = "serviceAccount:${google_service_account.custom_service_account.email}"
+}
+
 resource "google_compute_network" "network" {
   provider = google-beta
   project                 = google_project_service.compute.project
@@ -136,6 +146,8 @@ resource "google_app_engine_standard_app_version" "foo" {
   }
 
   noop_on_destroy = true
+
+  service_account = google_service_account.custom_service_account.email
 }
 
 resource "google_app_engine_flexible_app_version" "foo" {
@@ -206,6 +218,8 @@ resource "google_app_engine_flexible_app_version" "foo" {
   noop_on_destroy = true
 
   depends_on = [google_app_engine_standard_app_version.foo]
+
+  service_account = google_service_account.custom_service_account.email
 }
 
 resource "google_storage_bucket" "bucket" {
@@ -263,6 +277,20 @@ resource "google_project_service" "appengineflex" {
 
   disable_dependent_services = false
   depends_on = [google_project_service.compute]
+}
+
+resource "google_service_account" "custom_service_account" {
+  provider = google-beta
+  project      = google_project_service.appengineflex.project
+  account_id   = "my-account"
+  display_name = "Custom Service Account"
+}
+
+resource "google_project_iam_member" "editor" {
+  provider = google-beta
+  project = google_project_service.appengineflex.project
+  role    = "roles/editor"
+  member  = "serviceAccount:${google_service_account.custom_service_account.email}"
 }
 
 resource "google_compute_network" "network" {
@@ -323,6 +351,8 @@ resource "google_app_engine_standard_app_version" "foo" {
   }
 
   noop_on_destroy = true
+
+  service_account = google_service_account.custom_service_account.email
 }
 
 resource "google_app_engine_flexible_app_version" "foo" {
@@ -393,6 +423,8 @@ resource "google_app_engine_flexible_app_version" "foo" {
   delete_service_on_destroy = true
   
   depends_on = [google_app_engine_standard_app_version.foo]
+
+  service_account = google_service_account.custom_service_account.email
 }
 
 resource "google_storage_bucket" "bucket" {
@@ -422,24 +454,6 @@ resource "google_storage_bucket_object" "main" {
   bucket = google_storage_bucket.bucket.name
   source = "./test-fixtures/hello-world-flask/main.py"
 }`, context)
-}
-
-// Remove when generated test is enabled
-func testAccCheckAppEngineFlexibleAppVersionDestroyProducer(t *testing.T) func(s *terraform.State) error {
-  return func(s *terraform.State) error {
-    for name, rs := range s.RootModule().Resources {
-      if rs.Type != "google_app_engine_flexible_app_version" {
-        continue
-      }
-      if strings.HasPrefix(name, "data.") {
-        continue
-      }
-
-      log.Printf("[DEBUG] Ignoring destroy during test")
-    }
-
-    return nil
-  }
 }
 
 {{ end }}
