@@ -33,6 +33,7 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
         results_table = "//bigquery.googleapis.com/projects/{{index $.TestEnvVars "project_name"}}/datasets/{{index $.Vars "dataset_name"}}/tables/profile_export"
       }
     }
+    catalog_publishing_enabled = true
   }
 
   project = "{{index $.TestEnvVars "project_name"}}"
