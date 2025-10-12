@@ -75,7 +75,6 @@ properties:
       Relative resource name of the Entry Link Type used to create this Entry Link. For example:
       projects/dataplex-types/locations/global/entryLinkTypes/definition
     required: true
-    immutable: true
   - name: 'createTime'
     type: Time
     description: |
@@ -100,18 +99,15 @@ properties:
             The relative resource name of the referenced Entry, of the form:
             projects/{project_id_or_number}/locations/{location_id}/entryGroups/{entry_group_id}/entries/{entry_id}
           required: true
-          immutable: true
         - name: 'path'
           type: String
           description: |
             The path in the Entry that is referenced in the Entry Link.
             Empty path denotes that the Entry itself is referenced in the Entry Link.
-          immutable: true
         - name: 'type'
           type: Enum
           description: |
             The reference type of the Entry.
-          immutable: true
           enum_values:
             - 'SOURCE'
             - 'TARGET'
