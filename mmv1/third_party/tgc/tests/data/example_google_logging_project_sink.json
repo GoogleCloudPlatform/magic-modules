@@ -1,0 +1,26 @@
+[{
+  "name": "//logging.googleapis.com/projects/my-project/sinks/my-sink",
+  "asset_type": "logging.googleapis.com/LogSink",
+  "resource": {
+    "version": "v2",
+    "discovery_document_uri": "https://logging.googleapis.com/$discovery/rest?version=v2",
+    "discovery_name": "LogSink",
+    "parent": "//cloudresourcemanager.googleapis.com/projects/my-project",
+    "data": {
+      "name": "my-sink",
+      "destination": "bigquery.googleapis.com/projects/my-project/datasets/my_dataset",
+      "filter": "severity >= ERROR",
+      "description": "A sink for errors",
+      "disabled": false,
+      "exclusions": [{
+        "name": "exclude-debug",
+        "description": "Exclude debug logs",
+        "filter": "severity < INFO",
+        "disabled": false
+      }],
+      "bigqueryOptions": {
+        "usePartitionedTables": true
+      }
+    }
+  }
+}]
