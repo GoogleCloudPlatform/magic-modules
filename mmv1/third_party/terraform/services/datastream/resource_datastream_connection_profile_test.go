@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -74,20 +73,6 @@ func TestAccDatastreamConnectionProfile_update(t *testing.T) {
 			{
 				// Disable prevent_destroy
 				Config: testAccDatastreamConnectionProfile_mySQLUpdate(context, false, random_pass_2),
-			},
-			{
-				Config: testAccDatastreamConnectionProfile_mongodbUpdate(context),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_datastream_connection_profile.mongodb_con_profile", plancheck.ResourceActionUpdate),
-					},
-				},
-			},
-			{
-				ResourceName:            "google_datastream_connection_profile.mongodb_con_profile",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"create_without_validation", "connection_profile_id", "location", "mongodb_profile.0.password"},
 			},
 		},
 	})
@@ -215,36 +200,6 @@ resource "google_datastream_connection_profile" "default" {
 	lifecycle {
 		prevent_destroy = true
 	}
-}
-`, context)
-}
-
-func testAccDatastreamConnectionProfile_mongodbUpdate(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_datastream_connection_profile" "mongodb_con_profile" {
-    display_name          = "tf-mongodb-profile"
-    location              = "us-central1"
-    connection_profile_id = "tf-mongodb-profile-%{random_suffix}"
-    create_without_validation = true
-
-    mongodb_profile {
-        host_addresses {
-          hostname = "1.1.1.1"
-          port = 27017
-        }
-        replica_set = "rs0"
-        username = "user"
-        secret_manager_stored_password = "/path/to/password"
-        ssl_config {
-					ca_certificate                   = "xxx"
-					client_certificate               = "xxx"
-					client_key                       = "xxx"
-					secret_manager_stored_client_key = "xxx"
-				}
-				standard_connection_format {
-					direct_connection = true
-				}
-    }
 }
 `, context)
 }
@@ -553,6 +508,99 @@ EOT
          create = "10m"
 	}
     %{lifecycle_block}
+}
+`, context)
+}
+
+func TestAccDatastreamConnectionProfile_mongoDb(t *testing.T) {
+	t.Parallel()
+
+	// Context to provide a unique suffix for resource names, preventing collisions.
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDatastreamConnectionProfileDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// Step 1: Test resource creation
+			{
+				Config: testAccDatastreamConnectionProfile_mongoDbBasicExample(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_datastream_connection_profile.default", "display_name", "tf-mongodb-profile"),
+					resource.TestCheckResourceAttr("google_datastream_connection_profile.default", "location", "us-central1"),
+					resource.TestCheckResourceAttr("google_datastream_connection_profile.default", "mongodb_profile.0.username", "user"),
+					resource.TestCheckResourceAttr("google_datastream_connection_profile.default", "mongodb_profile.0.replica_set", "rs0"),
+				),
+			},
+			// Step 2: Test resource update (change display_name and username)
+			{
+				Config: testAccDatastreamConnectionProfile_mongoDbUpdateExample(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_datastream_connection_profile.default", "display_name", "tf-mongodb-profile-updated"),
+					resource.TestCheckResourceAttr("google_datastream_connection_profile.default", "mongodb_profile.0.username", "newuser"),
+				),
+			},
+			// Step 3: Test resource import
+			{
+				ResourceName:            "google_datastream_connection_profile.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"create_without_validation"}, // This attribute is only used at creation time.
+			},
+		},
+	})
+}
+
+// Terraform configuration for the initial creation of the MongoDB connection profile.
+func testAccDatastreamConnectionProfile_mongoDbBasicExample(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_datastream_connection_profile" "default" {
+	project                 = data.google_project.project.project_id
+	display_name            = "tf-mongodb-profile"
+	location                = "us-central1"
+	connection_profile_id   = "tf-mongo-cp-%{random_suffix}"
+	create_without_validation = true // Set to true for tests to bypass actual connectivity checks.
+
+	mongodb_profile {
+		host_addresses {
+			hostname = "1.1.1.1"
+			port     = 27017
+		}
+		replica_set            = "rs0"
+		username               = "user"
+		password               = "password"
+		standard_connection_format {}
+	}
+}
+`, context)
+}
+
+func testAccDatastreamConnectionProfile_mongoDbUpdateExample(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_datastream_connection_profile" "default" {
+	project                 = data.google_project.project.project_id
+	display_name            = "tf-mongodb-profile-updated" // <-- Changed
+	location                = "us-central1"
+	connection_profile_id   = "tf-mongo-cp-%{random_suffix}"
+	create_without_validation = true
+
+	mongodb_profile {
+		host_addresses {
+			hostname = "1.1.1.1"
+			port     = 27017
+		}
+		replica_set            = "rs1"  
+		username               = "newuser"  // <-- Changed
+		password               = "password"
+		standard_connection_format {}
+	}
 }
 `, context)
 }
