@@ -591,9 +591,9 @@ var ServicesListBeta = mapOf(
         "displayName" to "Networkconnectivity",
         "path" to "./google-beta/services/networkconnectivity"
     ),
-    "networkconnectivity" to mapOf(
-        "name" to "networkconnectivity",
-        "displayName" to "Networkconnectivity",
+    "networkconnectivityv1" to mapOf(
+        "name" to "networkconnectivityv1",
+        "displayName" to "Networkconnectivityv1",
         "path" to "./google-beta/services/networkconnectivityv1"
     ),
     "networkmanagement" to mapOf(
