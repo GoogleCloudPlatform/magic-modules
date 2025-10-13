@@ -75,6 +75,7 @@ examples:
   - name: 'dataplex_datascan_full_profile_test'
     primary_resource_id: 'full_profile_test'
     vars:
+      dataset_name: 'dataplex_dataset'
       datascan_name: 'dataprofile-full-test'
     test_env_vars:
       project_name: 'PROJECT_NAME'
