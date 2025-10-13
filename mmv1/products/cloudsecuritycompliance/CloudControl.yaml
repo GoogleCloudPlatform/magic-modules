@@ -22,11 +22,25 @@ update_verb: PATCH
 id_format: organizations/{{organization}}/locations/{{location}}/cloudControls/{{cloud_control_id}}
 import_format:
   - organizations/{{organization}}/locations/{{location}}/cloudControls/{{cloud_control_id}}
-#examples:
-#- name: name_of_example_file
-# primary_resource_id: example
-#vars:
-# resource_name: test-resource
+examples:
+  - name: "cloudsecuritycompliance_cloudcontrol_basic"
+    primary_resource_id: "example"
+    vars:
+      cloudcontrol_name: "example-cloudcontrol"
+    bootstrap_iam:
+      - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
+        role: "roles/cloudsecuritycompliance.admin"
+    test_env_vars:
+      org_id: "123456789"
+  - name: "cloudsecuritycompliance_cloudcontrol_update"
+    primary_resource_id: "example"
+    vars:
+      cloudcontrol_name: "example-cloudcontrol"
+    bootstrap_iam:
+      - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
+        role: "roles/cloudsecuritycompliance.admin"
+    test_env_vars:
+      org_id: "123456789"
 autogen_async: true
 async:
   operation:
