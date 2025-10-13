@@ -135,12 +135,6 @@ test:
 	cd mmv1; \
 		go test ./...
 
-test-tgc:
-	cd mmv1/third_party/tgc && \
-		go mod init tgc && \
-		go mod tidy && \
-		go test ./...
-
 serialize:
 	cd tpgtools;\
 		cp -f serialization.go.base serialization.go &&\
