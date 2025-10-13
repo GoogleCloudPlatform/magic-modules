@@ -1662,7 +1662,7 @@ linux_node_config {
 
 * `project` - (Optional) The name of the Fleet host project where this cluster will be registered.
 
-* `membership_type` - (Optional) Sets the membership type of the cluster.  Available options are `LIGHTWEIGHT` and `MEMBERSHIP_TYPE_UNSPECIFIED`.
+* `membership_type` - (Optional) Sets the membership type of the cluster.  Available option is `LIGHTWEIGHT` to support only lightweight compatible features.  If unspecified, the membership_type will be a regular membership that supports all features.
 
 <a name="nested_workload_alts_config"></a>The `workload_alts_config` block supports:
 
