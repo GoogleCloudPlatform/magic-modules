@@ -185,7 +185,11 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		return fmt.Errorf("missing hcl after cai2hcl conversion for resource %s", testData.ResourceType)
 	}
 
-	ignoredFieldSet := make(map[string]struct{}, 0)
+	if os.Getenv("WRITE_FILES") != "" {
+		writeJSONFile(fmt.Sprintf("%s_export_attrs", testName), exportResources)
+	}
+
+	ignoredFieldSet := make(map[string]any, 0)
 	for _, f := range ignoredFields {
 		ignoredFieldSet[f] = struct{}{}
 	}
@@ -323,9 +327,9 @@ func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 }
 
 // Compares HCL and finds all of the keys in map1 that are not in map2
-func compareHCLFields(map1, map2, ignoredFields map[string]struct{}) []string {
+func compareHCLFields(map1, map2, ignoredFields map[string]any) []string {
 	var missingKeys []string
-	for key := range map1 {
+	for key, _ := range map1 {
 		if isIgnored(key, ignoredFields) {
 			continue
 		}
@@ -339,7 +343,7 @@ func compareHCLFields(map1, map2, ignoredFields map[string]struct{}) []string {
 }
 
 // Returns true if the given key should be ignored according to the given set of ignored fields.
-func isIgnored(key string, ignoredFields map[string]struct{}) bool {
+func isIgnored(key string, ignoredFields map[string]any) bool {
 	// Check for exact match first.
 	if _, ignored := ignoredFields[key]; ignored {
 		return true
