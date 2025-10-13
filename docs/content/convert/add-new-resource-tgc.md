@@ -62,7 +62,7 @@ const ProductResourceAssetType string = "whatever.googleapis.com/asset-type"
 // ProductResourceSchemaName is the TF resource schema name for the Resource resource within Product.
 const ProductResourceSchemaName string = "google_product_resource"
 
-// Copy the resource schema from [google-beta](https://github.com/hashicorp/terraform-provider-google-beta) Terraform provider
+// Copy the resource schema from [google](https://github.com/hashicorp/terraform-provider-google) Terraform provider
 func ResourceGoogleProject() *schema.Resource {
 	return &schema.Resource{
 		SchemaVersion: 1,
