@@ -2,8 +2,8 @@ package redis_test
 
 import (
 	"fmt"
-	"regexp"
 	"net/url"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -495,7 +495,6 @@ func TestAccRedisInstance_tags(t *testing.T) {
 		},
 	})
 }
-
 
 func checkRedisInstanceTags(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
