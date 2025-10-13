@@ -260,13 +260,11 @@ func HandleVCRConfiguration(ctx context.Context, testName string, rndTripper htt
 	// context:
 	// https://github.com/GoogleCloudPlatform/magic-modules/pull/14175
 	// https://github.com/GoogleCloudPlatform/magic-modules/pull/15086
-	rec.AddPassthrough(NewListCallPassthrough("/nodePools"))
+	// rec.AddPassthrough(NewListCallPassthrough("/nodePools"))
 	rec.AddPassthrough(NewListCallPassthrough("/instanceGroupManagers"))
 
 	// Defines how VCR will match requests to responses.
 	rec.SetMatcher(NewVcrMatcherFunc(ctx))
-
-	rec.SkipRequestLatency = true
 
 	return pollInterval, rec, diags
 }
