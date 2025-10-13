@@ -43,7 +43,6 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
     - '{{name}}'
@@ -109,6 +108,9 @@ examples:
       - 'gce_setup.0.vm_image'
       - 'gce_setup.0.boot_disk.0.disk_type'
       - 'gce_setup.0.data_disks.0.disk_type'
+      - 'gce_setup.0.metadata.version'
+      - 'gce_setup.0.metadata.%'
+      - 'update_time'
   - name: 'workbench_instance_confidential_compute'
     primary_resource_id: 'instance'
     primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
@@ -130,6 +132,8 @@ virtual_fields:
       Desired state of the Workbench Instance. Set this field to `ACTIVE` to start the Instance, and `STOPPED` to stop the Instance.
     type: String
     default_value: "ACTIVE"
+error_retry_predicates:
+  - 'transport_tpg.IsWorkbenchQueueError'
 parameters:
   - name: 'location'
     type: String
@@ -615,7 +619,6 @@ properties:
     description: |
       Optional. Labels to apply to this instance. These can be later modified
       by the UpdateInstance method.
-    diff_suppress_func: 'WorkbenchInstanceLabelsDiffSuppress'
   - name: 'enableThirdPartyIdentity'
     type: Boolean
     description: |

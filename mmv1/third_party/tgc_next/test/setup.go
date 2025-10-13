@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
 )
 
 type ResourceMetadata struct {
@@ -28,41 +28,50 @@ type CaiData struct {
 }
 
 type NightlyRun struct {
-	MetadataByTest map[string]TgcMetadataPayload
-	Date           time.Time
+	MetadataByTestAndStep map[string]map[int]TgcMetadataPayload
+	Date                  time.Time
 }
 
+// The metadata for each step in one test
 type TgcMetadataPayload struct {
 	TestName         string                       `json:"test_name"`
+	StepNumber       int                          `json:"step_number"`
 	RawConfig        string                       `json:"raw_config"`
 	ResourceMetadata map[string]*ResourceMetadata `json:"resource_metadata"`
 	PrimaryResource  string                       `json:"primary_resource"`
 }
 
 type ResourceTestData struct {
-	ParsedRawConfig  map[string]struct{} `json:"parsed_raw_config"`
+	ParsedRawConfig  map[string]any `json:"parsed_raw_config"`
 	ResourceMetadata `json:"resource_metadata"`
 }
 
+type StepTestData struct {
+	StepNumber       int
+	PrimaryResource  string
+	ResourceTestData map[string]ResourceTestData // key is resource address
+}
+
 type Resource struct {
-	Type       string              `json:"type"`
-	Name       string              `json:"name"`
-	Attributes map[string]struct{} `json:"attributes"`
+	Type       string         `json:"type"`
+	Name       string         `json:"name"`
+	Attributes map[string]any `json:"attributes"`
 }
 
 const (
-	ymdFormat  = "2006-01-02"
-	maxRetries = 3
+	ymdFormat   = "2006-01-02"
+	maxAttempts = 3
 )
 
 var (
-	TestsMetadata = make([]NightlyRun, maxRetries)
+	TestsMetadata = make([]NightlyRun, maxAttempts)
 	setupDone     = false
 )
 
 func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 	if !setupDone {
-		bucketName := "cai_assets_metadata"
+		// bucketName := "cai_assets_metadata"
+		bucketName := "cai_assets" // Use the bucket in testing project for tansition
 		currentDate := time.Now()
 		ctx := context.Background()
 		client, err := storage.NewClient(ctx)
@@ -88,14 +97,14 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 				// Keep looking until we find a date with metadata.
 				i--
 				retries++
-				if retries > maxRetries {
-					// Stop looking when we find maxRetries dates with no metadata.
+				if retries > maxAttempts {
+					// Stop looking when we find maxAttempts dates with no metadata.
 					return nil, fmt.Errorf("too many retries, %v", allErrs)
 				}
 			} else {
 				TestsMetadata[i] = NightlyRun{
-					MetadataByTest: metadata,
-					Date:           currentDate,
+					MetadataByTestAndStep: metadata,
+					Date:                  currentDate,
 				}
 			}
 			currentDate = currentDate.AddDate(0, 0, -1)
@@ -113,8 +122,8 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 	return TestsMetadata, nil
 }
 
-func readTestsDataFromGCSForRun(ctx context.Context, currentDate time.Time, bucketName string, bucket *storage.BucketHandle) (map[string]TgcMetadataPayload, error) {
-	metadata := make(map[string]TgcMetadataPayload)
+func readTestsDataFromGCSForRun(ctx context.Context, currentDate time.Time, bucketName string, bucket *storage.BucketHandle) (map[string]map[int]TgcMetadataPayload, error) {
+	metadata := make(map[string]map[int]TgcMetadataPayload)
 	objectName := fmt.Sprintf("nightly_tests/%s/nightly_tests_meta.json", currentDate.Format(ymdFormat))
 	log.Printf("Read object  %s from the bucket %s", objectName, bucketName)
 
@@ -142,64 +151,84 @@ func readTestsDataFromGCSForRun(ctx context.Context, currentDate time.Time, buck
 	return metadata, nil
 }
 
-func prepareTestData(testName string) (map[string]ResourceTestData, string, error) {
+func getStepNumbers(testName string) ([]int, error) {
 	var err error
 	cacheMutex.Lock()
 	defer cacheMutex.Unlock()
 	TestsMetadata, err = ReadTestsDataFromGcs()
 	if err != nil {
-		return nil, "", err
+		return nil, err
 	}
 
-	var testMetadata TgcMetadataPayload
-	var resourceMetadata map[string]*ResourceMetadata
+	stepNumbers := make([]int, 0)
 	for _, run := range TestsMetadata {
-		var ok bool
-		testMetadata, ok = run.MetadataByTest[testName]
-		if ok {
-			log.Printf("Found metadata for %s from run on %s", testName, run.Date.Format(ymdFormat))
-			resourceMetadata = testMetadata.ResourceMetadata
-			if len(resourceMetadata) > 0 {
-				break
+		testMetadata, ok := run.MetadataByTestAndStep[testName]
+		if ok && len(testMetadata) > 0 {
+			for stepNumber := range testMetadata {
+				stepNumbers = append(stepNumbers, stepNumber)
+			}
+			break
+		}
+	}
+	return stepNumbers, nil
+}
+
+func prepareTestData(testName string, stepNumber int, retries int) (*StepTestData, error) {
+	var err error
+
+	var testMetadata map[int]TgcMetadataPayload
+
+	run := TestsMetadata[retries]
+	testMetadata, ok := run.MetadataByTestAndStep[testName]
+	if !ok {
+		log.Printf("Data of test is unavailable: %s", testName)
+		return nil, nil
+	}
+
+	log.Printf("Found metadata for %s from run on %s", testName, run.Date.Format(ymdFormat))
+
+	if stepMetadata, ok := testMetadata[stepNumber]; ok {
+		resourceMetadata := stepMetadata.ResourceMetadata
+
+		rawTfFile := fmt.Sprintf("%s_step%d.tf", testName, stepNumber)
+		err = os.WriteFile(rawTfFile, []byte(stepMetadata.RawConfig), 0644)
+		if err != nil {
+			return nil, fmt.Errorf("error writing to file %s: %#v", rawTfFile, err)
+		}
+		if os.Getenv("WRITE_FILES") == "" {
+			defer os.Remove(rawTfFile)
+		}
+
+		rawResourceConfigs, err := parseResourceConfigs(rawTfFile)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing resource configs: %#v", err)
+		}
+
+		if len(rawResourceConfigs) == 0 {
+			return nil, fmt.Errorf("test %s fails: raw config is unavailable", testName)
+		}
+
+		if os.Getenv("WRITE_FILES") != "" {
+			writeJSONFile(fmt.Sprintf("%s_attrs", testName), rawResourceConfigs)
+		}
+
+		rawConfigMap := convertToConfigMap(rawResourceConfigs)
+
+		resourceTestData := make(map[string]ResourceTestData, 0)
+		for address, metadata := range resourceMetadata {
+			resourceTestData[address] = ResourceTestData{
+				ParsedRawConfig:  rawConfigMap[address],
+				ResourceMetadata: *metadata,
 			}
 		}
-		log.Printf("Missing metadata for %s from run on %s, looking at previous run", testName, run.Date.Format(ymdFormat))
+		return &StepTestData{
+			StepNumber:       stepNumber,
+			PrimaryResource:  stepMetadata.PrimaryResource,
+			ResourceTestData: resourceTestData,
+		}, nil
 	}
 
-	if len(resourceMetadata) == 0 {
-		log.Printf("Data of test is unavailable: %s", testName)
-		return nil, "", nil
-	}
-
-	rawTfFile := fmt.Sprintf("%s.tf", testName)
-	err = os.WriteFile(rawTfFile, []byte(testMetadata.RawConfig), 0644)
-	if err != nil {
-		return nil, "", fmt.Errorf("error writing to file %s: %#v", rawTfFile, err)
-	}
-	if os.Getenv("WRITE_FILES") == "" {
-		defer os.Remove(rawTfFile)
-	}
-
-	rawResourceConfigs, err := parseResourceConfigs(rawTfFile)
-	if err != nil {
-		return nil, "", fmt.Errorf("error parsing resource configs: %#v", err)
-	}
-
-	if len(rawResourceConfigs) == 0 {
-		return nil, "", fmt.Errorf("Test %s fails: raw config is unavailable", testName)
-	}
-
-	rawConfigMap := convertToConfigMap(rawResourceConfigs)
-
-	resourceTestData := make(map[string]ResourceTestData, 0)
-	for address, metadata := range resourceMetadata {
-		resourceTestData[address] = ResourceTestData{
-			ParsedRawConfig:  rawConfigMap[address],
-			ResourceMetadata: *metadata,
-		}
-	}
-
-	return resourceTestData, testMetadata.PrimaryResource, nil
+	return nil, nil
 }
 
 // Parses a Terraform configuation file written with HCL
@@ -230,8 +259,8 @@ func parseResourceConfigs(filePath string) ([]Resource, error) {
 }
 
 // Converts the slice to map with resource address as the key
-func convertToConfigMap(resources []Resource) map[string]map[string]struct{} {
-	configMap := make(map[string]map[string]struct{}, 0)
+func convertToConfigMap(resources []Resource) map[string]map[string]any {
+	configMap := make(map[string]map[string]any, 0)
 
 	for _, r := range resources {
 		addr := fmt.Sprintf("%s.%s", r.Type, r.Name)

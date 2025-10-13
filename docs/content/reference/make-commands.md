@@ -11,9 +11,8 @@ weight: 30
 Generates the code for the downstream `google` and `google-beta` providers
 into the `OUTPUT_PATH`, overriding and deleting any local changes.
 
-{{< hint info >}}
-**Note:** Generation works best if the downstream provider has a commit checked out corresponding to the latest `main` branch commit that is present in your `magic-modules` working branch. This can generally be identified based on matching commit messages.
-{{< /hint >}}
+> [!NOTE]
+> **Note:** Generation works best if the downstream provider has a commit checked out corresponding to the latest `main` branch commit that is present in your `magic-modules` working branch. This can generally be identified based on matching commit messages.
 
 Examples:
 
@@ -53,7 +52,8 @@ git checkout -- . && git clean -f google/ google-beta/ website/
 
 ### Container-based environment
 
-{{< hint warning >}}This approach is in beta and still collecting feedback. Please [file an issue](https://github.com/hashicorp/terraform-provider-google/issues/new/choose) if you encounter challenges.{{< /hint >}}
+> [!WARNING]
+> This approach is in beta and still collecting feedback. Please [file an issue](https://github.com/hashicorp/terraform-provider-google/issues/new/choose) if you encounter challenges.
 
 [`./scripts/make-in-container.sh`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/scripts/make-in-container.sh) runs `make` with the provided arguments inside a container with all necessary dependencies preinstalled. It uses [Docker](https://docker.io/) if available and [Podman](https://podman.io/) otherwise. Like `make`, this script must be run in the root of a `magic-modules` repository clone.
 
