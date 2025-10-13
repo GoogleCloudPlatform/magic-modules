@@ -1,0 +1,31 @@
+resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryResourceId}}" {
+  organization            = "{{index $.TestEnvVars "org_id"}}"
+  location                = "global"
+  framework_deployment_id = "{{index $.Vars "deployment_name"}}"
+  description             = "A framework deployment for cloud security compliance"
+  
+  framework {
+    framework         = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/frameworks/{{index $.Vars "framework_name"}}"
+    major_revision_id = "1"
+  }
+  
+  target_resource_config {
+    existing_target_resource = "organizations/{{index $.TestEnvVars "org_id"}}"
+  }
+  
+  cloud_control_metadata {
+    enforcement_mode = "DETECTIVE"
+    
+    cloud_control_details {
+      name              = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/builtin-assess-resource-availability"
+      major_revision_id = "1"
+      
+      parameters {
+        name = "location"
+        parameter_value {
+          string_value = "us-central1"
+        }
+      }
+    }
+  }
+}
