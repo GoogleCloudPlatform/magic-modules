@@ -14,8 +14,8 @@ resource "google_compute_subnetwork" "default" {
 
 resource "google_compute_instance_template" "default" {
   provider              = google-beta
-  name_prefix   = "instance-template-"
-  machine_type  = "e2-micro"
+  name                  = "instance-template-"
+  machine_type          = "e2-micro"
 
   disk {
     source_image = "debian-cloud/debian-11"
