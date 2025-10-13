@@ -1,5 +1,5 @@
-resource "google_cloudsecuritycompliance_framework" "{{$.PrimaryResourceId}}" {
-  organization = "12345678"
+resource "google_cloud_security_compliance_framework" "{{$.PrimaryResourceId}}" {
+  organization = "{{index $.TestEnvVars "org_id"}}"
   location     = "global"
   framework_id = "{{index $.Vars "framework_name"}}"
   
@@ -8,7 +8,7 @@ resource "google_cloudsecuritycompliance_framework" "{{$.PrimaryResourceId}}" {
   category     = ["SECURITY", "COMPLIANCE"]
   
   cloud_control_details {
-    name              = "organizations/12345678/locations/global/cloudControls/example-control"
+    name              = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/example-control"
     major_revision_id = "1"
     
     parameters {

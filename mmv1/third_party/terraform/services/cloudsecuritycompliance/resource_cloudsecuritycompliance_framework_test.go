@@ -33,13 +33,13 @@ func TestAccCloudSecurityComplianceFramework_basic(t *testing.T) {
 
 func testAccCloudSecurityComplianceFrameworkConfig(t *testing.T, suffix string) string {
 	return fmt.Sprintf(`
-resource "google_cloudsecuritycompliance_framework" "test" {
+resource "google_cloud_security_compliance_framework" "test" {
 	organization   = "123456789"
 	location       = "global"
 	framework_id   = "tf-test-%s"
 	display_name   = "Test Framework"
 	description    = "A test framework for cloud security compliance"
-	category       = ["SECURITY", "COMPLIANCE"]
+	category       = ["CC_CATEGORY_INFRASTRUCTURE"]
 }
 `, suffix)
 }
