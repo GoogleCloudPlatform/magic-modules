@@ -1,0 +1,21 @@
+resource "google_cloudsecuritycompliance_framework" "{{$.PrimaryResourceId}}" {
+  organization = "12345678"
+  location     = "global"
+  framework_id = "{{index $.Vars "framework_name"}}"
+  
+  display_name = "Updated Framework Name"
+  description  = "An updated description for the framework"
+  category     = ["SECURITY", "COMPLIANCE"]
+  
+  cloud_control_details {
+    name              = "organizations/12345678/locations/global/cloudControls/example-control"
+    major_revision_id = "1"
+    
+    parameters {
+      name = "location"
+      parameter_value {
+        string_value = "us-central1"
+      }
+    }
+  }
+}

@@ -22,12 +22,21 @@ update_verb: PATCH
 id_format: organizations/{{organization}}/locations/{{location}}/frameworks/{{framework_id}}
 import_format:
   - organizations/{{organization}}/locations/{{location}}/frameworks/{{framework_id}}
-#examples:
-# - name: "cloudsecuritycompliance_framework_basic"
-#  primary_resource_id: example
-# bootstrap_iam:
-#  - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
-#   role: roles/cloudsecuritycompliance.admin
+examples:
+  - name: "cloudsecuritycompliance_framework_basic"
+    primary_resource_id: "example"
+    vars:
+      framework_name: "example-framework"
+    bootstrap_iam:
+      - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
+        role: "roles/cloudsecuritycompliance.admin"
+  # - name: "cloudsecuritycompliance_framework_update"
+  #   primary_resource_id: "example"
+  #   vars:
+  #     framework_name: "example-framework"
+  #   bootstrap_iam:
+  #     - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
+  #       role: "roles/cloudsecuritycompliance.admin"
 
 autogen_async: true
 async:
