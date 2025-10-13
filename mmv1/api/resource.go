@@ -390,6 +390,9 @@ type TGCResource struct {
 	// Generally, it shouldn't be set when the identity can be decided.
 	// Otherswise, it should be set.
 	CaiIdentity string `yaml:"cai_identity,omitempty"`
+
+	// If true, create TGC tests automatically for all handwritten provider tests.
+	TGCIncludeHandwrittenTests bool `yaml:"tgc_include_handwritten_tests,omitempty"`
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
