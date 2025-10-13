@@ -573,8 +573,16 @@ resource "google_datastream_connection_profile" "default" {
 		}
 		replica_set            = "rs0"
 		username               = "user"
-		password               = "password"
-		standard_connection_format {}
+		secret_manager_stored_password = "/path/to/password"
+		ssl_config {
+			ca_certificate                   = "xxx"
+			client_certificate               = "xxx"
+			client_key                       = "xxx"
+			secret_manager_stored_client_key = "xxx"
+		}
+		standard_connection_format {
+			direct_connection = true
+		}
 	}
 }
 `, context)
@@ -598,8 +606,16 @@ resource "google_datastream_connection_profile" "default" {
 		}
 		replica_set            = "rs1"  
 		username               = "newuser"  // <-- Changed
-		password               = "password"
-		standard_connection_format {}
+		secret_manager_stored_password = "/path/to/password"
+		ssl_config {
+			ca_certificate                   = "xxx"
+			client_certificate               = "xxx"
+			client_key                       = "xxx"
+			secret_manager_stored_client_key = "xxx"
+		}
+		standard_connection_format {
+			direct_connection = true
+		}
 	}
 }
 `, context)
