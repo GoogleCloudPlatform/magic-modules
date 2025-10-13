@@ -18,13 +18,13 @@ func TestAccCloudSecurityComplianceFramework_basic(t *testing.T) {
 			{
 				Config: testAccCloudSecurityComplianceFrameworkConfig(t, acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_cloudsecuritycompliance_framework.test", "location", "global"),
-					resource.TestCheckResourceAttr("google_cloudsecuritycompliance_framework.test", "display_name", "Test Framework"),
-					resource.TestCheckResourceAttr("google_cloudsecuritycompliance_framework.test", "description", "A test framework for cloud security compliance"),
-					resource.TestCheckResourceAttrSet("google_cloudsecuritycompliance_framework.test", "framework_id"),
-					resource.TestCheckResourceAttrSet("google_cloudsecuritycompliance_framework.test", "name"),
-					resource.TestCheckResourceAttrSet("google_cloudsecuritycompliance_framework.test", "major_revision_id"),
-					resource.TestCheckResourceAttrSet("google_cloudsecuritycompliance_framework.test", "type"),
+					resource.TestCheckResourceAttr("google_cloud_security_compliance_framework.test", "location", "global"),
+					resource.TestCheckResourceAttr("google_cloud_security_compliance_framework.test", "display_name", "Test Framework"),
+					resource.TestCheckResourceAttr("google_cloud_security_compliance_framework.test", "description", "A test framework for cloud security compliance"),
+					resource.TestCheckResourceAttrSet("google_cloud_security_compliance_framework.test", "framework_id"),
+					resource.TestCheckResourceAttrSet("google_cloud_security_compliance_framework.test", "name"),
+					resource.TestCheckResourceAttrSet("google_cloud_security_compliance_framework.test", "major_revision_id"),
+					resource.TestCheckResourceAttrSet("google_cloud_security_compliance_framework.test", "type"),
 				),
 			},
 		},
@@ -39,7 +39,7 @@ resource "google_cloud_security_compliance_framework" "test" {
 	framework_id   = "tf-test-%s"
 	display_name   = "Test Framework"
 	description    = "A test framework for cloud security compliance"
-	category       = ["CC_CATEGORY_INFRASTRUCTURE"]
+	category       = ["CUSTOM_FRAMEWORK"]
 }
 `, suffix)
 }
