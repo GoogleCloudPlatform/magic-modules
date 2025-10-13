@@ -741,7 +741,7 @@ func TestAccNetappStoragePool_unifiedStoragePoolCreate(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccNetappStoragePool_unifiedStoragePoolCreate(context),
+				Config: testAccNetappStoragePool_unifiedStoragePoolCreate(context),
 			},
 			{
 				ResourceName:            "google_netapp_storage_pool.test_pool",
@@ -753,7 +753,7 @@ func TestAccNetappStoragePool_unifiedStoragePoolCreate(t *testing.T) {
 	})
 }
 
-func TestAccNetappStoragePool_unifiedStoragePoolCreate(context map[string]interface{}) string {
+func testAccNetappStoragePool_unifiedStoragePoolCreate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 
 data "google_compute_network" "default" {
