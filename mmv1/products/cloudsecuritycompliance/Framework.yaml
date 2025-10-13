@@ -30,13 +30,17 @@ examples:
     bootstrap_iam:
       - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
         role: "roles/cloudsecuritycompliance.admin"
-  # - name: "cloudsecuritycompliance_framework_update"
-  #   primary_resource_id: "example"
-  #   vars:
-  #     framework_name: "example-framework"
-  #   bootstrap_iam:
-  #     - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
-  #       role: "roles/cloudsecuritycompliance.admin"
+    test_env_vars:
+      org_id: "1035865795181"
+  - name: "cloudsecuritycompliance_framework_update"
+    primary_resource_id: "example"
+    vars:
+      framework_name: "example-framework"
+    bootstrap_iam:
+      - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
+        role: "roles/cloudsecuritycompliance.admin"
+    test_env_vars:
+      org_id: "1035865795181"
 
 autogen_async: true
 async:
@@ -155,7 +159,6 @@ properties:
       Identifier. The name of the framework.
       Format:
       organizations/{organization}/locations/{{location}}/frameworks/{framework_id}
-    output: true
   - name: supportedCloudProviders
     type: Array
     description: cloud providers supported

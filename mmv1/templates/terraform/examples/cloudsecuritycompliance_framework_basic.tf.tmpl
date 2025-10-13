@@ -5,7 +5,7 @@ resource "google_cloud_security_compliance_framework" "{{$.PrimaryResourceId}}" 
   
   display_name = "Updated Framework Name"
   description  = "An updated description for the framework"
-  category     = ["SECURITY", "COMPLIANCE"]
+  category     = ["CUSTOM_FRAMEWORK"]
   
   cloud_control_details {
     name              = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/example-control"
