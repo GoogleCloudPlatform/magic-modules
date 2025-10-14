@@ -18,7 +18,6 @@ A simple create test is now defined as a sample with a single step.
 
 Old `examples` format
 
-
 ```yaml
 examples:
   - name: "pubsub_topic_basic"
@@ -28,6 +27,7 @@ examples:
 ```
 
 New `samples` format
+
 ```yaml
 samples:
   - name: "pubsub_topic_basic"
@@ -37,7 +37,6 @@ samples:
         prefixed_vars:
           topic_name: "example-topic"
 ```
-
 
 ### Create and Update Test Comparison
 
