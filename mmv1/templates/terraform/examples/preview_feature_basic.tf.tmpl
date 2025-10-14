@@ -1,6 +1,6 @@
 resource "google_compute_preview_feature" "{{ .PrimaryResourceId }}" {
   name              = "alpha-api-access"
-  activation_status = "DISABLED"
+  activation_status = "UNSPECIFIED"
   rollout_operation {
     rollout_input {
       predefined_rollout_plan = "ROLLOUT_PLAN_FAST_ROLLOUT"
