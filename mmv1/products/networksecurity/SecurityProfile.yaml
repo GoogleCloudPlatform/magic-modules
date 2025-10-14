@@ -85,6 +85,7 @@ examples:
       resource_name: 'my-security-profile'
     test_env_vars:
       org_id: 'ORG_ID'
+    tgc_skip_test: The ENUM value URL_FILTERING in type field is transformed to UNKNOWN_ENUM_VALUE_ProfileType_5 in CAI asset. The reason could be that URL_FILTERING is not supported in CAI yet. Will check if the value in CAI assets will be correct later.
 parameters:
   - name: 'name'
     type: String
@@ -236,6 +237,7 @@ properties:
   - name: 'urlFilteringProfile'
     min_version: 'beta'
     type: NestedObject
+    is_missing_in_cai: true
     description: The url filtering configuration for the security profile.
     custom_flatten: 'templates/terraform/custom_flatten/network_security_security_profile_url_filters_flatten.go.tmpl'
     properties:

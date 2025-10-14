@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	compute "google.golang.org/api/compute/v0.beta"
+	"google.golang.org/api/compute/v1"
 )
 
 // ComputeInstanceAssetType is the CAI asset type name for compute instance.
@@ -71,8 +71,6 @@ var (
 		"scheduling.0.max_run_duration",
 		"scheduling.0.on_instance_stop_action",
 		"scheduling.0.maintenance_interval",
-		"scheduling.0.host_error_timeout_seconds",
-		"scheduling.0.graceful_shutdown",
 		"scheduling.0.local_ssd_recovery_timeout",
 	}
 
@@ -463,15 +461,6 @@ func ResourceComputeInstance() *schema.Resource {
 							Description:      `The name or self_link of the subnetwork attached to this interface.`,
 						},
 
-						"network_attachment": {
-							Type:             schema.TypeString,
-							Optional:         true,
-							Computed:         true,
-							ForceNew:         true,
-							DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
-							Description:      `The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.`,
-						},
-
 						"subnetwork_project": {
 							Type:        schema.TypeString,
 							Optional:    true,
@@ -829,15 +818,6 @@ func ResourceComputeInstance() *schema.Resource {
 				Description: `Metadata key/value pairs made available within the instance.`,
 			},
 
-			"partner_metadata": {
-				Type:                  schema.TypeMap,
-				Optional:              true,
-				DiffSuppressFunc:      ComparePartnerMetadataDiff,
-				DiffSuppressOnRefresh: true,
-				Elem:                  &schema.Schema{Type: schema.TypeString},
-				Description:           `Partner Metadata Map made available within the instance.`,
-			},
-
 			"metadata_startup_script": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -985,11 +965,6 @@ be from 0 to 999,999,999 inclusive.`,
 									},
 								},
 							},
-						},
-						"host_error_timeout_seconds": {
-							Type:        schema.TypeInt,
-							Optional:    true,
-							Description: `Specify the time in seconds for host error detection, the value must be within the range of [90, 330] with the increment of 30, if unset, the default behavior of host error recovery will be used.`,
 						},
 
 						"maintenance_interval": {
@@ -1441,8 +1416,6 @@ func flattenAliasIpRangeTgc(ranges []*compute.AliasIpRange) []map[string]interfa
 func flattenSchedulingTgc(resp *compute.Scheduling) []map[string]interface{} {
 	schedulingMap := make(map[string]interface{}, 0)
 
-	// gracefulShutdown is not in the cai asset, so graceful_shutdown is skipped.
-
 	if resp.InstanceTerminationAction != "" {
 		schedulingMap["instance_termination_action"] = resp.InstanceTerminationAction
 	}
@@ -1485,14 +1458,6 @@ func flattenSchedulingTgc(resp *compute.Scheduling) []map[string]interface{} {
 
 	if resp.OnInstanceStopAction != nil {
 		schedulingMap["on_instance_stop_action"] = flattenOnInstanceStopAction(resp.OnInstanceStopAction)
-	}
-
-	if resp.HostErrorTimeoutSeconds != 0 {
-		schedulingMap["host_error_timeout_seconds"] = resp.HostErrorTimeoutSeconds
-	}
-
-	if resp.MaintenanceInterval != "" {
-		schedulingMap["maintenance_interval"] = resp.MaintenanceInterval
 	}
 
 	if resp.LocalSsdRecoveryTimeout != nil {
@@ -1544,14 +1509,6 @@ func flattenNetworkInterfacesTgc(networkInterfaces []*compute.NetworkInterface, 
 
 		if internalIP == "" {
 			internalIP = iface.NetworkIP
-		}
-
-		if iface.NetworkAttachment != "" {
-			networkAttachment, err := tpgresource.GetRelativePath(iface.NetworkAttachment)
-			if err != nil {
-				return nil, "", "", err
-			}
-			flattened[i]["network_attachment"] = networkAttachment
 		}
 
 		// the security_policy for a network_interface is found in one of its accessConfigs.

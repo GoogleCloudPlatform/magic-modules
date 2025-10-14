@@ -18,6 +18,13 @@ test-integration:
 	./config-tf-dev-override.sh
 	TF_CLI_CONFIG_FILE="$${PWD}/${TF_CONFIG_FILE}" GO111MODULE=on go test -run=TestAcc $(TESTPATH) $(TESTARGS) -timeout 30m -v ./...
 
+mod-clean:
+	git restore go.mod
+	git restore go.sum
+	go mod tidy
+
+test-integration-local: mod-clean test-integration
+
 test-go-licenses:
 	cd .. && go version && go install github.com/google/go-licenses@latest
 	$$(go env GOPATH)/bin/go-licenses check ./... --ignore github.com/dnaeon/go-vcr

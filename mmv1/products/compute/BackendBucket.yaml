@@ -44,7 +44,6 @@ collection_url_key: 'items'
 include_in_tgc_next_DO_NOT_USE: true
 iam_policy:
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/global/backendBuckets/{{name}}'
     - '{{name}}'
