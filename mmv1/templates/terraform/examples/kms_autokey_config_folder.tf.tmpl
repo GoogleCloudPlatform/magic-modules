@@ -1,0 +1,23 @@
+resource "random_id" "bucket_prefix" {
+  byte_length = 4
+}
+
+resource "google_folder" "autokey_folder" {
+  display_name = "tf-test-folder-${random_id.bucket_prefix.hex}"
+  parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
+}
+
+resource "google_project" "key_project" {
+  name       = "tf-test-key-project-${random_id.bucket_prefix.hex}"
+  project_id = "tf-test-key-project-${random_id.bucket_prefix.hex}"
+  org_id     = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
+}
+
+resource "google_kms_autokey_config" "folder_config" {
+  provider    = google-beta
+  folder      = google_folder.autokey_folder.name
+  key_project = "projects/${google_project.key_project.project_id}"
+  # For folder scope, valid values: DEDICATED_KEY_PROJECT, RESOURCE_PROJECT, DISABLED
+  key_project_resolution_mode = "DEDICATED_KEY_PROJECT"
+}

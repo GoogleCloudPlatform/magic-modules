@@ -1,0 +1,17 @@
+resource "random_id" "bucket_prefix" {
+  byte_length = 4
+}
+
+resource "google_project" "test_project" {
+  name       = "tf-test-project-${random_id.bucket_prefix.hex}"
+  project_id = "tf-test-project-${random_id.bucket_prefix.hex}"
+  org_id     = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
+}
+
+resource "google_kms_autokey_config" "project_config" {
+  provider    = google-beta
+  project     = google_project.test_project.name
+  # For project scope, valid values: RESOURCE_PROJECT, DISABLED
+  key_project_resolution_mode = "RESOURCE_PROJECT"
+}
