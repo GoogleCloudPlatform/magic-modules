@@ -1,0 +1,11 @@
+// Custom import for google_kms_autokey_config
+// The id can be either folders/{folder_id} or projects/{project_id}
+id := d.Id()
+if autokeyHasPrefix(id, autokeyFolderPrefix) {
+    d.Set("folder", id)
+} else if autokeyHasPrefix(id, autokeyProjectPrefix) {
+    d.Set("project", id)
+} else {
+    return nil, fmt.Errorf("invalid import id %q, expected folders/{folder_id} or projects/{project_id}", id)
+}
+return []*schema.ResourceData{d}, nil
