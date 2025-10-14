@@ -15,6 +15,10 @@ resource "google_managed_kafka_cluster" "{{$.PrimaryResourceId}}" {
   }
 
   provider = google-beta
+
+  depends_on = [
+    google_kms_crypto_key_iam_binding.crypto_key_binding,
+  ]
 }
 
 resource "google_project_service_identity" "kafka_service_identity" {
