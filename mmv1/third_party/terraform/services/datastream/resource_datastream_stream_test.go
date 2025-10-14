@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -289,24 +290,22 @@ func TestAccDatastreamStream_mongoDb(t *testing.T) {
 			{
 				Config: testAccDatastreamStream_mongoDbBasicExample(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_datastream_stream.default", "display_name", "tf-mongodb-gcs"),
 					resource.TestCheckResourceAttr("google_datastream_stream.default", "state", "NOT_STARTED"),
-					resource.TestCheckResourceAttr("google_datastream_stream.default", "source_config.0.mongodb_source_config.0.include_objects.0.databases.0.database", "test"),
-					resource.TestCheckResourceAttr("google_datastream_stream.default", "source_config.0.mongodb_source_config.0.max_concurrent_backfill_tasks", "14"),
 				),
+			},
+			{
+				ResourceName:            "google_datastream_stream.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"create_without_validation", "stream_id", "location", "desired_state"},
 			},
 			{
 				Config: testAccDatastreamStream_mongoDbUpdateExample(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_datastream_stream.default", "display_name", "tf-mongodb-gcs"),
-					resource.TestCheckResourceAttr("google_datastream_stream.default", "state", "NOT_STARTED"),
-					resource.TestCheckResourceAttr("google_datastream_stream.default", "source_config.0.mongodb_source_config.0.max_concurrent_backfill_tasks", "25"),
-					resource.TestCheckResourceAttr("google_datastream_stream.default", "source_config.0.mongodb_source_config.0.include_objects.0.databases.0.collections.#", "3"),
-					resource.TestCheckResourceAttr("google_datastream_stream.default", "source_config.0.mongodb_source_config.0.exclude_objects.0.databases.0.collections.0.fields.#", "2"),
-					resource.TestCheckResourceAttr("google_datastream_stream.default", "backfill_all.0.mongodb_excluded_objects.0.databases.0.collections.#", "2"),
-				),
-			},
-			{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_datastream_stream.default", plancheck.ResourceActionUpdate),
+					},
+				},
 				ResourceName:            "google_datastream_stream.default",
 				ImportState:             true,
 				ImportStateVerify:       true,

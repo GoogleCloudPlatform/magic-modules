@@ -525,30 +525,31 @@ func TestAccDatastreamConnectionProfile_mongoDb(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDatastreamConnectionProfileDestroyProducer(t),
 		Steps: []resource.TestStep{
-			// Step 1: Test resource creation
 			{
 				Config: testAccDatastreamConnectionProfile_mongoDbBasicExample(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_datastream_connection_profile.default", "display_name", "tf-mongodb-profile"),
-					resource.TestCheckResourceAttr("google_datastream_connection_profile.default", "location", "us-central1"),
-					resource.TestCheckResourceAttr("google_datastream_connection_profile.default", "mongodb_profile.0.username", "user"),
-					resource.TestCheckResourceAttr("google_datastream_connection_profile.default", "mongodb_profile.0.replica_set", "rs0"),
-				),
 			},
-			// Step 2: Test resource update (change display_name and username)
 			{
-				Config: testAccDatastreamConnectionProfile_mongoDbUpdateExample(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_datastream_connection_profile.default", "display_name", "tf-mongodb-profile-updated"),
-					resource.TestCheckResourceAttr("google_datastream_connection_profile.default", "mongodb_profile.0.username", "newuser"),
-				),
+				ResourceName:      "google_datastream_connection_profile.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"create_without_validation",
+					"mongodb_profile.0.ssl_config.0.ca_certificate",
+					"mongodb_profile.0.ssl_config.0.client_certificate",
+					"mongodb_profile.0.ssl_config.0.secret_manager_stored_client_key",
+				},
 			},
-			// Step 3: Test resource import
 			{
-				ResourceName:            "google_datastream_connection_profile.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"create_without_validation"}, // This attribute is only used at creation time.
+				Config:            testAccDatastreamConnectionProfile_mongoDbUpdateExample(context),
+				ResourceName:      "google_datastream_connection_profile.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"create_without_validation",
+					"mongodb_profile.0.ssl_config.0.ca_certificate",
+					"mongodb_profile.0.ssl_config.0.client_certificate",
+					"mongodb_profile.0.ssl_config.0.secret_manager_stored_client_key",
+				},
 			},
 		},
 	})
@@ -573,12 +574,11 @@ resource "google_datastream_connection_profile" "default" {
 		}
 		replica_set            = "rs0"
 		username               = "user"
-		secret_manager_stored_password = "/path/to/password"
+		secret_manager_stored_password = "projects/datastream-con-adkr/locations/us-central1/secrets/mongodb-secret/versions/1"
 		ssl_config {
-			ca_certificate                   = "xxx"
-			client_certificate               = "xxx"
-			client_key                       = "xxx"
-			secret_manager_stored_client_key = "xxx"
+			ca_certificate                   = file("text-fixtures/ca-cert.pem")
+			client_certificate               = file("text-fixtures/cert.pem")
+			secret_manager_stored_client_key = "projects/datastream-con-adkr/locations/us-central1/secrets/mongodb-secret/versions/5"
 		}
 		standard_connection_format {
 			direct_connection = true
@@ -606,12 +606,11 @@ resource "google_datastream_connection_profile" "default" {
 		}
 		replica_set            = "rs1"  
 		username               = "newuser"  // <-- Changed
-		secret_manager_stored_password = "/path/to/password"
+		secret_manager_stored_password = "projects/datastream-con-adkr/locations/us-central1/secrets/mongodb-secret/versions/1"
 		ssl_config {
-			ca_certificate                   = "xxx"
-			client_certificate               = "xxx"
-			client_key                       = "xxx"
-			secret_manager_stored_client_key = "xxx"
+			ca_certificate                   = file("text-fixtures/ca-cert.pem")
+			client_certificate               = file("text-fixtures/cert.pem")
+			secret_manager_stored_client_key = "projects/datastream-con-adkr/locations/us-central1/secrets/mongodb-secret/versions/5"
 		}
 		standard_connection_format {
 			direct_connection = true
