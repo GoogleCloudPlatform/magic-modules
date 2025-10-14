@@ -43,9 +43,14 @@ resource "google_dataplex_entry_group" "entry-group-basic" {
 }
 resource "google_dataplex_entry" "source" {
   location = "us-central1"
-  entry_group_id = "@bigquery"
+  entry_group_id = google_dataplex_entry_group.entry-group-basic.entry_group_id
   entry_id = "tf-test-source-entry%{random_suffix}"
-  entry_type = "projects/655216118709/locations/global/entryTypes/bigquery-table"
+  entry_type = google_dataplex_entry_type.entry-type-basic.name
+  project = "%{project_number}"
+}
+resource "google_dataplex_entry_type" "entry-type-basic" {
+  entry_type_id = "tf-test-entry-type%{random_suffix}"
+  location = "us-central1"
   project = "%{project_number}"
 }
 resource "google_dataplex_glossary" "term_test_id_full" {
@@ -64,7 +69,7 @@ resource "google_dataplex_glossary_term" "term_test_id_full" {
 resource "google_dataplex_entry_link" "basic_entry_link" {
   project = "%{project_number}"
   location = "us-central1"
-  entry_group_id = "@bigquery"
+  entry_group_id = google_dataplex_entry_group.entry-group-basic.entry_group_id
   entry_link_id = "tf-test-entry-link%{random_suffix}"
   entry_link_type = "projects/655216118709/locations/global/entryLinkTypes/definition"
   entry_references {
