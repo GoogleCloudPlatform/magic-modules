@@ -489,7 +489,7 @@ properties:
     description: |
       This field represents the actual maintenance version of the cluster.
     output: true
-  - name: 'availableMaintenanceVersions '
+  - name: 'availableMaintenanceVersions'
     type: String
     description: |
       This field is used to determine the available maintenance versions for the self service update.
