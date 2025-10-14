@@ -77,7 +77,7 @@ resource "google_dataplex_entry_link" "basic_entry_link" {
 	type = "SOURCE"
   }
   entry_references {
-    name = "projects/${google_dataplex_entry_group.entry-group-basic.project}/locations/us-central1/entryGroups/@dataplex/entries/${google_dataplex_glossary_term.term_test_id_full.name}"
+    name = "projects/${google_dataplex_entry_group.entry-group-basic.project}/locations/us-central1/entryGroups/@dataplex/entries/projects/${google_dataplex_entry_group.entry-group-basic.project}/locations/us-central1/glossaries/${google_dataplex_glossary.term_test_id_full.glossary_id}/terms/${google_dataplex_glossary_term.term_test_id_full.term_id}"
 	type = "TARGET"
   }
 }
