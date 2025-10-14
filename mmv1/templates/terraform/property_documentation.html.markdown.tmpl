@@ -13,6 +13,8 @@
   {{- else }}    
     {{- if $.Required }}
   (Required{{ if $.DeprecationMessage }}, Deprecated{{ end }})
+    {{- else if or $.WriteOnlyLegacy $.WriteOnly }}
+  (Optional, Write-Only)
     {{- else if not $.Output }}
   (Optional{{ if $.DeprecationMessage }}, Deprecated{{ end }})
     {{- else if and $.Output $.ParentMetadata }}
@@ -38,6 +40,8 @@
   {{- end }}
   {{- if or $.WriteOnlyLegacy $.WriteOnly }}
   **Note**: This property is write-only and will not be read from the API.
+
+  * ~> **Note:** One of `{{ underscore $.Name }}` or `{{ underscore $.ApiName }}` can only be set.
   {{- end }}
   {{- if and (not $.FlattenObject) $.NestedProperties }}
   Structure is [documented below](#nested_{{ $.LineageAsSnakeCase}}).
