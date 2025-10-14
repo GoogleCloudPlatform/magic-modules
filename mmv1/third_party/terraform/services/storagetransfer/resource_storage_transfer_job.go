@@ -303,19 +303,10 @@ func ResourceStorageTransferJob() *schema.Resource {
 							Description:  `An AWS S3 Compatible data source.`,
 						},
 						"transfer_manifest": {
-							Type:     schema.TypeList,
-							Optional: true,
-							MaxItems: 1,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"location": {
-										Type:         schema.TypeString,
-										Required:     true,
-										Description:  `Cloud Strorage path to the manifest CSV.`,
-										ValidateFunc: validation.StringMatch(regexp.MustCompile(`^gs://[^/]+/.+`), "must be a Cloud path like gs://BUCKET/path/manifest.csv"),
-									},
-								},
-							},
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Elem:        transferManifest(),
 							Description: `A manifest file listing specific objects to transfer.`,
 						},
 					},
@@ -838,6 +829,19 @@ func hdfsDataSchema() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: `Directory path to the filesystem.`,
+			},
+		},
+	}
+}
+
+func transferManifest() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"location": {
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  `Cloud Strorage path to the manifest CSV.`,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^gs://[^/]+/.+`), "must be a Cloud path like gs://BUCKET/path/manifest.csv"),
 			},
 		},
 	}
