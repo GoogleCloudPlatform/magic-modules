@@ -1,0 +1,29 @@
+resource "google_kms_autokey_config" "project_config" {
+  provider    = google-beta
+  project     = "projects/${var.project_id}"
+  key_project_resolution_mode = "RESOURCE_PROJECT"
+}
+
+resource "google_project" "test_project" {
+  name       = "tf-test-${var.project_name}"
+  project_id = "tf-test-${var.project_name}"
+  org_id     = var.org_id
+  billing_account = var.billing_account
+}
+
+variable "project_name" {
+  type = string
+}
+
+variable "project_id" {
+  type = string
+  default = google_project.test_project.project_id
+}
+
+variable "org_id" {
+  type = string
+}
+
+variable "billing_account" {
+  type = string
+}
