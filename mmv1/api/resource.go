@@ -826,7 +826,6 @@ func deduplicateSliceOfStrings(slice []string) []string {
 }
 
 func buildWriteOnlyField(name string, versionFieldName string, originalField *Type) *Type {
-	description := fmt.Sprintf("%s Note: This property is write-only and will not be read from the API. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", originalField.Description)
 	originalFieldLineage := originalField.TerraformLineage()
 	fieldPathCurrentField := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(name))
 	requiredWith := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(versionFieldName))
@@ -839,7 +838,7 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 	options := []func(*Type){
 		propertyWithType("String"),
 		propertyWithRequired(false),
-		propertyWithDescription(description),
+		propertyWithDescription(originalField.Description),
 		propertyWithWriteOnly(true),
 		propertyWithApiName(apiName),
 		propertyWithIgnoreRead(true),
