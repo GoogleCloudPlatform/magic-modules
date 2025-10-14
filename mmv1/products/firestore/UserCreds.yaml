@@ -96,3 +96,4 @@ properties:
         description: |
           The principal identifier string.
           See https://cloud.google.com/iam/docs/principal-identifiers.
+        output: true
