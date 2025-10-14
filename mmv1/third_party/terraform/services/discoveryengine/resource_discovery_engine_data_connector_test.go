@@ -184,7 +184,7 @@ func TestAccDiscoveryEngineDataConnector_DataConnectorEntitiesParamsDiffSuppress
 	}
 
 	for tn, tc := range cases {
-		if discoveryengine.DataConnectorEntitiesParamsDiffSuppress("entities_params_diff_supress", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if discoveryengine.DataConnectorEntitiesFieldsDiffSuppress("entities_params_diff_supress", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Errorf("bad: %s, %q => %q expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
