@@ -79,6 +79,7 @@ resource "google_discovery_engine_assistant" "basic" {
       ignore_diacritics         = false
     }
   }
+  web_grounding_type            = "WEB_GROUNDING_TYPE_DISABLED"
 }
 `, context)
 }
@@ -127,6 +128,7 @@ resource "google_discovery_engine_assistant" "basic" {
       ignore_diacritics         = false
     }
   }
+  web_grounding_type            = "WEB_GROUNDING_TYPE_GOOGLE_SEARCH"
 }
 `, context)
 }

@@ -166,3 +166,8 @@ properties:
             description: |
               Defines the failure mode for Model Armor sanitization.
               The supported values: 'FAIL_OPEN', 'FAIL_CLOSED'.
+  - name: 'webGroundingType'
+    type: String
+    description: |
+      The type of web grounding to use.
+      The supported values: 'WEB_GROUNDING_TYPE_DISABLED', 'WEB_GROUNDING_TYPE_GOOGLE_SEARCH', 'WEB_GROUNDING_TYPE_ENTERPRISE_WEB_SEARCH'.
