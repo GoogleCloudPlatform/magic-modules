@@ -41,13 +41,11 @@ examples:
     test_env_vars:
       project_id: 'PROJECT_NAME'
 parameters:
-properties:
   - name: 'database'
     type: String
     description: |
       The Firestore database ID.
     required: true
-    immutable: true
     url_param_only: true
   - name: 'name'
     type: String
@@ -59,10 +57,10 @@ properties:
       with first character a letter and the last a letter or a number. Must not
       be UUID-like /[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/.
     required: true
-    immutable: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
-  - name: 'create_time'
+properties:
+    - name: 'create_time'
     type: String
     description: |
       Output only. The timestamp at which these user creds were created.
