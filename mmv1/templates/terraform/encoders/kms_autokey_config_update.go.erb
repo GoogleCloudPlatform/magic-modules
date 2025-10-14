@@ -1,0 +1,33 @@
+// Build request body and update mask for AutokeyConfig PATCH.
+
+// The encoder should only build and return the request body. The Update
+// function's custom_update template handles URL/update_mask and sending the
+// request. Avoid redeclaring scaffold locals here.
+
+// The generated Update function provides `meta` as an interface{}; decode
+// it here so the encoder can call expand* helpers that require the config.
+config := meta.(*transport_tpg.Config)
+
+body := make(map[string]interface{})
+
+if d.HasChange("key_project") {
+    // Use the same expansion + IsEmptyValue logic as Create to avoid sending
+    // an empty string. This treats empty/zero values as unset.
+    keyProjectProp, _ := expandKMSAutokeyConfigKeyProject(d.Get("key_project"), d, config)
+    if v, ok := d.GetOkExists("key_project"); !tpgresource.IsEmptyValue(reflect.ValueOf(keyProjectProp)) && (ok || !reflect.DeepEqual(v, keyProjectProp)) {
+        body["keyProject"] = keyProjectProp
+    } else {
+        body["keyProject"] = nil
+    }
+}
+
+if d.HasChange("key_project_resolution_mode") {
+    keyProjectResolutionModeProp, _ := expandKMSAutokeyConfigKeyProjectResolutionMode(d.Get("key_project_resolution_mode"), d, config)
+    if v, ok := d.GetOkExists("key_project_resolution_mode"); !tpgresource.IsEmptyValue(reflect.ValueOf(keyProjectResolutionModeProp)) && (ok || !reflect.DeepEqual(v, keyProjectResolutionModeProp)) {
+        body["keyProjectResolutionMode"] = keyProjectResolutionModeProp
+    } else {
+        body["keyProjectResolutionMode"] = nil
+    }
+}
+
+return body, nil

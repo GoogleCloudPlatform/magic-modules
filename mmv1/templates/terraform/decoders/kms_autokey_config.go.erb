@@ -1,0 +1,26 @@
+// Contains the logic for decoding the API response into Terraform state.
+
+// The 'res' variable here is the API response body.
+if name, ok := res["name"].(string); ok {
+    if autokeyHasPrefix(name, autokeyFolderPrefix) {
+        d.Set("folder", autokeyTrimSuffix(name, autokeyConfigSuffix))
+        d.Set("project", nil)
+    } else if autokeyHasPrefix(name, autokeyProjectPrefix) {
+        d.Set("project", autokeyTrimSuffix(name, autokeyConfigSuffix))
+        d.Set("folder", nil)
+    }
+}
+
+if v, ok := res["keyProject"].(string); ok {
+    d.Set("key_project", v)
+} else {
+    d.Set("key_project", nil)
+}
+
+if v, ok := res["keyProjectResolutionMode"].(string); ok {
+    d.Set("key_project_resolution_mode", v)
+} else {
+    d.Set("key_project_resolution_mode", nil)
+}
+
+return res, nil

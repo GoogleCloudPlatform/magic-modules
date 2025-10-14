@@ -1,0 +1,99 @@
+// Custom create for AutokeyConfig: build parent from folder/project and POST the object.
+// This template replaces the default Create body and must declare any locals it uses.
+
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+    return err
+}
+
+var parent string
+if v, ok := d.GetOk("folder"); ok {
+    parent = normalizeParent(v.(string), "folder")
+} else if v, ok := d.GetOk("project"); ok {
+    parent = normalizeParent(v.(string), "project")
+} else {
+    return fmt.Errorf("either folder or project must be set")
+}
+
+billingProject := ""
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+    billingProject = bp
+}
+
+headers := make(http.Header)
+
+// Build the request object from settable properties.
+obj := make(map[string]interface{})
+keyProjectProp, err := expandKMSAutokeyConfigKeyProject(d.Get("key_project"), d, config)
+if err != nil {
+    return err
+} else if v, ok := d.GetOkExists("key_project"); !tpgresource.IsEmptyValue(reflect.ValueOf(keyProjectProp)) && (ok || !reflect.DeepEqual(v, keyProjectProp)) {
+    obj["keyProject"] = keyProjectProp
+}
+keyProjectResolutionModeProp, err := expandKMSAutokeyConfigKeyProjectResolutionMode(d.Get("key_project_resolution_mode"), d, config)
+if err != nil {
+    return err
+} else if v, ok := d.GetOkExists("key_project_resolution_mode"); !tpgresource.IsEmptyValue(reflect.ValueOf(keyProjectResolutionModeProp)) && (ok || !reflect.DeepEqual(v, keyProjectResolutionModeProp)) {
+    obj["keyProjectResolutionMode"] = keyProjectResolutionModeProp
+}
+
+// Some KMS APIs accept PATCH to create/update singleton configs (projects/{id}/autokeyConfig)
+// (the staging endpoint accepts PATCH for project-scoped AutokeyConfig). Use PATCH
+// with an explicit update_mask of settable fields so creation works across scopes.
+var updateMask []string
+if !tpgresource.IsEmptyValue(reflect.ValueOf(keyProjectProp)) {
+    updateMask = append(updateMask, "keyProject")
+}
+if !tpgresource.IsEmptyValue(reflect.ValueOf(keyProjectResolutionModeProp)) {
+    updateMask = append(updateMask, "keyProjectResolutionMode")
+}
+var res map[string]interface{}
+if len(updateMask) == 0 {
+    // Nothing to set; use PATCH without update_mask as a no-op.
+    url := config.KMSBasePath + parent + "/autokeyConfig"
+    res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+        Config:    config,
+        Method:    "PATCH",
+        Project:   billingProject,
+        RawURL:    url,
+        UserAgent: userAgent,
+        Body:      obj,
+        Timeout:   d.Timeout(schema.TimeoutCreate),
+        Headers:   headers,
+    })
+    if err != nil {
+        return fmt.Errorf("Error creating AutokeyConfig: %s", err)
+    }
+} else {
+    url := config.KMSBasePath + parent + "/autokeyConfig?update_mask=" + autokeyJoin(updateMask)
+    res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+        Config:    config,
+        Method:    "PATCH",
+        Project:   billingProject,
+        RawURL:    url,
+        UserAgent: userAgent,
+        Body:      obj,
+        Timeout:   d.Timeout(schema.TimeoutCreate),
+        Headers:   headers,
+    })
+    if err != nil {
+        return fmt.Errorf("Error creating AutokeyConfig: %s", err)
+    }
+}
+
+// Set computed resource properties from create API response so that they're available on the subsequent Read call.
+err = resourceKMSAutokeyConfigPostCreateSetComputedFields(d, meta, res)
+if err != nil {
+    return fmt.Errorf("setting computed ID format fields: %w", err)
+}
+
+// Store the ID now. Read the computed `name` field set by PostCreateSetComputedFields.
+if nameVal, ok := d.Get("name").(string); ok && nameVal != "" {
+    d.SetId(nameVal)
+} else {
+    return fmt.Errorf("Error constructing id: computed `name` not set")
+}
+
+log.Printf("[DEBUG] Finished creating AutokeyConfig %q: %#v", d.Id(), res)
+
+return resourceKMSAutokeyConfigRead(d, meta)
