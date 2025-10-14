@@ -1,4 +1,4 @@
---
+---
 title: "Test Template Migration Guide"
 weight: 50
 ---
@@ -83,6 +83,7 @@ The location for template files has moved from `templates/terraform/examples/` t
 Additionally, the variable object passed into the templates has been updated. $.PrefixedVars will append tf-test prefixes and random string suffixes, which is used for resource identifiers in most cases. $.Vars will apply plain values from the YAML configuration.
 
 ### Example .tf.tmpl variables
+
 Old template `pubsub_topic_basic.tf.tmpl` (in `templates/terraform/examples/`)
 
 ```
