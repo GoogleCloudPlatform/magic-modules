@@ -1,0 +1,26 @@
+// Contains the logic for decoding the API response into Terraform state.
+
+// The 'res' variable here is the API response body.
+if name, ok := res["name"].(string); ok {
+    if strings.Contains(name, "/folders/") {
+        d.Set("folder", strings.Split(name, "/autokeyConfig")[0])
+        d.Set("project", nil)
+    } else if strings.Contains(name, "/projects/") {
+        d.Set("project", strings.Split(name, "/autokeyConfig")[0])
+        d.Set("folder", nil)
+    }
+}
+
+if v, ok := res["keyProject"].(string); ok {
+    d.Set("key_project", v)
+} else {
+    d.Set("key_project", nil)
+}
+
+if v, ok := res["sameProjectAutokey"].(string); ok {
+    d.Set("same_project_autokey", v)
+} else {
+    d.Set("same_project_autokey", nil)
+}
+
+return res, nil

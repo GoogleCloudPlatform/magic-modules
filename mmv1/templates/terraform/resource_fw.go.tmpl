@@ -69,6 +69,9 @@ import (
 {{- end}}
 )
 
+// Ensure cty is referenced in the generated file to avoid unused-import errors
+var _ = cty.NullVal(cty.String)
+
 {{if $.CustomCode.Constants -}} 
     {{- $.CustomTemplate $.CustomCode.Constants true -}}
 {{- end}}

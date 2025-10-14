@@ -1,4 +1,37 @@
-func folderPrefixSuppress(_, old, new string, d *schema.ResourceData) bool {
-	prefix := "folders/"
-	return prefix+old == new || prefix+new == old
+// Helper functions injected into generated provider files for AutokeyConfig.
+// This template is included via the `constants` custom_code entry in the
+// AutokeyConfig product YAML. It must not emit a package or import block
+// because it is inserted into generated files which already declare those.
+
+// normalizeParent ensures the parent identifier has the expected prefix
+// (either "folders/" or "projects/"). Callers should pass the raw value
+// from the Terraform config along with the kind ("folder" or "project").
+func normalizeParent(parent, kind string) string {
+    if parent == "" {
+        return parent
+    }
+    switch kind {
+    case "folder":
+        if !strings.HasPrefix(parent, "folders/") {
+            return "folders/" + parent
+        }
+    case "project":
+        if !strings.HasPrefix(parent, "projects/") {
+            return "projects/" + parent
+        }
+    }
+    return parent
+}
+
+// folderPrefixSuppress is a DiffSuppressFunc for the folder parameter that
+// treats the values "folders/123" and "123" as equivalent. It matches the
+// behavior of normalizeParent for user convenience.
+func folderPrefixSuppress(k, old, new string, d *schema.ResourceData) bool {
+    if strings.HasPrefix(old, "folders/") {
+        old = strings.TrimPrefix(old, "folders/")
+    }
+    if strings.HasPrefix(new, "folders/") {
+        new = strings.TrimPrefix(new, "folders/")
+    }
+    return old == new
 }

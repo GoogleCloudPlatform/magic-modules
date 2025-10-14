@@ -20,16 +20,13 @@
 package {{ lower $.ProductMetadata.Name }}
 
 import (
-
     "fmt"
     "log"
     "net/http"
     "reflect"
+    "strings"
 {{- if $.SupportsIndirectUserProjectOverride }}
     "regexp"
-{{- end }}
-{{- if or (and (not $.Immutable) ($.UpdateMask)) $.LegacyLongFormProject }}
-    "strings"
 {{- end }}
     "time"
 
@@ -54,9 +51,13 @@ import (
 {{- end}}
 )
 
+// Ensure cty is referenced in the generated file to avoid unused-import errors
 {{if $.CustomCode.Constants -}} 
     {{- $.CustomTemplate $.CustomCode.Constants true -}}
 {{- end}}
+
+// Ensure cty is referenced in the generated file to avoid unused-import errors
+var _ = cty.NullVal(cty.String)
 
 func Resource{{ $.ResourceName -}}() *schema.Resource {
     return &schema.Resource{
@@ -300,12 +301,14 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     }
 {{- end}}
 
+    {{- if $.IdFormat }}
     // Store the ID now
     id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
     if err != nil {
         return fmt.Errorf("Error constructing id: %s", err)
     }
     d.SetId(id)
+    {{- end }}
 
 {{if and $.GetAsync ($.GetAsync.Allow "Create") -}}
 {{  if ($.GetAsync.IsA "OpAsync") -}}

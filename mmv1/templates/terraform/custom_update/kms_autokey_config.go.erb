@@ -1,0 +1,80 @@
+// Custom update body for google_kms_autokey_config
+// This template runs inside the generated Update function; reuse variables
+// already declared by the scaffold (config, userAgent, billingProject, headers, etc.).
+
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+    return err
+}
+
+billingProject := ""
+// err == nil indicates that the billing_project value was found
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+    billingProject = bp
+}
+
+headers := make(http.Header)
+
+var parent string
+if v, ok := d.GetOk("folder"); ok {
+    parent = v.(string)
+    if !strings.HasPrefix(parent, "folders/") {
+        parent = "folders/" + parent
+    }
+} else if v, ok := d.GetOk("project"); ok {
+    parent = v.(string)
+    if !strings.HasPrefix(parent, "projects/") {
+        parent = "projects/" + parent
+    }
+} else {
+    return fmt.Errorf("either folder or project must be set")
+}
+
+body := make(map[string]interface{})
+var updateMask []string
+
+if d.HasChange("key_project") {
+    updateMask = append(updateMask, "keyProject")
+    if !strings.HasPrefix(parent, "projects/") {
+        keyProjectProp, _ := expandKMSAutokeyConfigKeyProject(d.Get("key_project"), d, config)
+        if v, ok := d.GetOkExists("key_project"); !tpgresource.IsEmptyValue(reflect.ValueOf(keyProjectProp)) && (ok || !reflect.DeepEqual(v, keyProjectProp)) {
+            body["keyProject"] = keyProjectProp
+        } else {
+            body["keyProject"] = nil
+        }
+    }
+}
+
+if d.HasChange("same_project_autokey") {
+    updateMask = append(updateMask, "sameProjectAutokey")
+    sameProjectAutokeyProp, _ := expandKMSAutokeyConfigSameProjectAutokey(d.Get("same_project_autokey"), d, config)
+    if v, ok := d.GetOkExists("same_project_autokey"); !tpgresource.IsEmptyValue(reflect.ValueOf(sameProjectAutokeyProp)) && (ok || !reflect.DeepEqual(v, sameProjectAutokeyProp)) {
+        body["sameProjectAutokey"] = sameProjectAutokeyProp
+    } else {
+        body["sameProjectAutokey"] = nil
+    }
+}
+
+if len(updateMask) == 0 {
+    return resourceKMSAutokeyConfigRead(d, meta)
+}
+
+// Build the request URL for the PATCH call.
+url := config.KMSBasePath + parent + "/autokeyConfig?update_mask=" + strings.Join(updateMask, ",")
+
+_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    Config:    config,
+    Method:    "PATCH",
+    Project:   billingProject,
+    RawURL:    url,
+    UserAgent: userAgent,
+    Body:      body,
+    Timeout:   d.Timeout(schema.TimeoutUpdate),
+    Headers:   headers,
+})
+if err != nil {
+    return fmt.Errorf("Error updating AutokeyConfig: %s", err)
+}
+
+return resourceKMSAutokeyConfigRead(d, meta)
+

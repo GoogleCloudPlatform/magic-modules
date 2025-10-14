@@ -53,6 +53,9 @@ import (
 {{- end}}
 )
 
+// Ensure cty is referenced in the generated file to avoid unused-import errors
+var _ = cty.NullVal(cty.String)
+
 func DataSource{{ .ResourceName -}}() *schema.Resource {
 	rs := Resource{{ .ResourceName -}}().Schema
 
