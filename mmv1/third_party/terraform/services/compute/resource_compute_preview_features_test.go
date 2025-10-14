@@ -24,7 +24,7 @@ func TestAccComputePreviewFeature_update(t *testing.T) {
 				Config: testAccComputePreviewFeature_unspecify(featureName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", featureName),
-					resource.TestCheckResourceAttr(resourceName, "activation_status", "UNSPECIFIED"),
+					resource.TestCheckResourceAttr(resourceName, "activation_status", "ACTIVATION_STATE_UNSPECIFIED"),
 				),
 			},
 			// Step 2: Verify that the resource can be successfully imported.
@@ -42,7 +42,7 @@ func testAccComputePreviewFeature_unspecify(name string) string {
 	return fmt.Sprintf(`
 resource "google_compute_preview_feature" "acceptance" {
   name              = "%s"
-  activation_status = "UNSPECIFIED"
+  activation_status = "ACTIVATION_STATE_UNSPECIFIED"
   
   rollout_operation {
     rollout_input {

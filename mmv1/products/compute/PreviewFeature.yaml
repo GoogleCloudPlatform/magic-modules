@@ -20,7 +20,7 @@ description: |
 references:
   guides:
     'Use the Compute Engine alpha API': 'https://cloud.google.com/compute/docs/reference/rest/alpha'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/PreviewFeatures'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/previewFeatures'
 docs:
 base_url: 'projects/{{project}}/global/previewFeatures'
 has_self_link: false
@@ -65,7 +65,7 @@ properties:
     required: true
     enum_values:
       - 'ENABLED'
-      - 'UNSPECIFIED'
+      - 'ACTIVATION_STATE_UNSPECIFIED'
   - name: 'rolloutOperation'
     type: NestedObject
     description: 'The rollout operation of the feature.'
