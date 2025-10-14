@@ -17,11 +17,10 @@ name: 'PreviewFeature'
 kind: 'compute#PreviewFeature'
 description: |
   Represents a single Google Compute Engine preview feature such as Alpha API access, which can be enabled or disabled for a project.
-min_version: 'beta'
 references:
   guides:
     'Use the Compute Engine alpha API': 'https://cloud.google.com/compute/docs/reference/rest/alpha'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/PreviewFeatures'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/PreviewFeatures'
 docs:
 base_url: 'projects/{{project}}/global/previewFeatures'
 has_self_link: false
