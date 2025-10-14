@@ -178,9 +178,6 @@ type Type struct {
 	// For more information, see: https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments
 	WriteOnly bool `yaml:"write_only,omitempty"`
 
-	// Used for generating write-only fields in documentation to be paired with their original fields
-	NonWriteOnlyApiName string
-
 	// TODO: remove this field after all references are migrated
 	// see: https://github.com/GoogleCloudPlatform/magic-modules/pull/14933#pullrequestreview-3166578379
 	WriteOnlyLegacy bool `yaml:"write_only_legacy,omitempty"` // Adds `WriteOnlyLegacy: true` to the schema
