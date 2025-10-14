@@ -110,13 +110,13 @@ The following arguments are supported:
 {{ "" }}
 {{ "" }}
 {{- range $p := $.RootProperties }}
-	{{- if and $p.Required (not $p.WriteOnlyLegacy) (not $p.WriteOnly) }}
+	{{- if and $p.Required }}
 {{- trimTemplate "property_documentation.html.markdown.tmpl" $p -}}
 	{{- end }}
 {{- end }}
 {{ "" }}
 {{- range $p := $.RootProperties }}
-	{{- if and (not $p.Required) (not $p.Output) (not $p.WriteOnlyLegacy) (not $p.WriteOnly) }}
+	{{- if and (not $p.Required) (not $p.Output) }}
 {{- trimTemplate "property_documentation.html.markdown.tmpl" $p -}}
 	{{- end }}
 {{- end }}
