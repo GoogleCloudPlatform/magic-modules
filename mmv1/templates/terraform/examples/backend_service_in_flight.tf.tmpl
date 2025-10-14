@@ -14,7 +14,7 @@ resource "google_compute_subnetwork" "default" {
 
 resource "google_compute_instance_template" "default" {
   provider              = google-beta
-  name                  = "instance-template-"
+  name                  = "instance-template"
   machine_type          = "e2-micro"
 
   disk {
