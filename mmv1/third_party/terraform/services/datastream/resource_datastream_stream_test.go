@@ -306,6 +306,8 @@ func TestAccDatastreamStream_mongoDb(t *testing.T) {
 						plancheck.ExpectResourceAction("google_datastream_stream.default", plancheck.ResourceActionUpdate),
 					},
 				},
+			},
+			{
 				ResourceName:            "google_datastream_stream.default",
 				ImportState:             true,
 				ImportStateVerify:       true,

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -540,7 +541,14 @@ func TestAccDatastreamConnectionProfile_mongoDb(t *testing.T) {
 				},
 			},
 			{
-				Config:            testAccDatastreamConnectionProfile_mongoDbUpdateExample(context),
+				Config: testAccDatastreamConnectionProfile_mongoDbUpdateExample(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_datastream_connection_profile.default", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
 				ResourceName:      "google_datastream_connection_profile.default",
 				ImportState:       true,
 				ImportStateVerify: true,
