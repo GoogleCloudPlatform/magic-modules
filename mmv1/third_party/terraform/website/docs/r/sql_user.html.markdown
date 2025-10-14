@@ -12,6 +12,8 @@ Creates a new Google SQL User on a Google SQL User Instance. For more informatio
 [Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data). Passwords will not be retrieved when running
 "terraform import".
 
+-> **Note:** Write-Only argument `password_wo` is available to use in place of `password`. Write-Only argumentss are supported in HashiCorp Terraform 1.11.0 and later. [Learn more](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments).
+
 ## Example Usage
 
 Example creating a SQL User.
@@ -117,6 +119,12 @@ The following arguments are supported:
     or CLOUD_IAM_SERVICE_ACCOUNT. Don't set this field for CLOUD_IAM_USER
     and CLOUD_IAM_SERVICE_ACCOUNT user types for any Cloud SQL instance.
 
+* `password_wo` - (Optional) The password for the user. Can be updated. For Postgres
+    instances this is a Required field, unless type is set to either CLOUD_IAM_USER
+    or CLOUD_IAM_SERVICE_ACCOUNT. Don't set this field for CLOUD_IAM_USER
+    and CLOUD_IAM_SERVICE_ACCOUNT user types for any Cloud SQL instance.
+  **Note**: This property is write-only and will not be read from the API.
+
 * `type` - (Optional) The user type. It determines the method to authenticate the
     user during login. The default is the database's built-in user type. Flags
     include "BUILT_IN", "CLOUD_IAM_USER", "CLOUD_IAM_SERVICE_ACCOUNT", "CLOUD_IAM_GROUP",
@@ -156,16 +164,6 @@ The read only `password_policy.status` subblock supports:
 * `locked` - (read only) If true, user does not have login privileges.
 
 * `password_expiration_time` - (read only) Password expiration duration with one week grace period.
-
-## Ephemeral Attributes Reference
-
-The following write-only attributes are supported:
-
-* `password_wo` - (Optional) The password for the user. Can be updated. For Postgres
-    instances this is a Required field, unless type is set to either CLOUD_IAM_USER
-    or CLOUD_IAM_SERVICE_ACCOUNT. Don't set this field for CLOUD_IAM_USER
-    and CLOUD_IAM_SERVICE_ACCOUNT user types for any Cloud SQL instance.
-  **Note**: This property is write-only and will not be read from the API.
 
 ## Attributes Reference
 
