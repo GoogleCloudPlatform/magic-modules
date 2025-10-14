@@ -517,6 +517,28 @@ The optional `settings.ip_configuration.psc_config` sublist supports:
 
 * `consumer_service_project_id` - (Optional) The project ID of consumer service project of this consumer endpoint.
 
+The optional `settings.read_pool_auto_scale_config` subblock supports:
+
+* `enabled` - True if Read Pool Auto Scale is enabled.
+
+* `max_node_count` - Maximum number of nodes in the read pool. If set to lower than current node count, node count will be updated.
+
+* `min_node_count` - Minimum number of nodes in the read pool. If set to higher than current node count, node count will be updated.
+
+
+
+* `disable_scale_in` - True if auto scale in is disabled.
+
+* `scale_in_cooldown_seconds` - The cooldown period for scale in operations.
+
+* `scale_out_cooldown_seconds` - The cooldown period for scale out operations.
+
+* `target_metrics` - Target metrics for Read Pool Auto Scale. Must specify `target_metrics.metric` and `target_metrics.target_value` in subblock.
+
+* `metric` - Metric name for Read Pool Auto Scale.
+
+* `target_value` - Target value for Read Pool Auto Scale.
+
 The optional `settings.location_preference` subblock supports:
 
 * `follow_gae_application` - (Optional) A GAE application whose zone to remain
