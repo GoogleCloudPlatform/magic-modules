@@ -29,6 +29,7 @@ resource "google_memorystore_instance" "{{$.PrimaryResourceId}}" {
       }
     }
   }
+  maintenance_version         = "MEMORYSTORE_20250519_00_00"
   engine_version              = "VALKEY_7_2"
   deletion_protection_enabled = false
   mode                        = "CLUSTER"
