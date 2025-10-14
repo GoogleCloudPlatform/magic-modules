@@ -559,6 +559,20 @@ func TestAccDatastreamConnectionProfile_mongoDb(t *testing.T) {
 					"mongodb_profile.0.ssl_config.0.secret_manager_stored_client_key",
 				},
 			},
+			{
+				Config: testAccDatastreamConnectionProfile_mongoDbBasic2Example(context),
+			},
+			{
+				ResourceName:      "google_datastream_connection_profile.default2",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"create_without_validation",
+					"mongodb_profile.0.ssl_config.0.client_key",
+					"mongodb_profile.0.ssl_config.0.ca_certificate",
+					"mongodb_profile.0.ssl_config.0.client_certificate",
+				},
+			},
 		},
 	})
 }
@@ -591,6 +605,34 @@ resource "google_datastream_connection_profile" "default" {
 		standard_connection_format {
 			direct_connection = true
 		}
+	}
+}
+`, context)
+}
+
+func testAccDatastreamConnectionProfile_mongoDbBasic2Example(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_datastream_connection_profile" "default2" {
+	project                 = data.google_project.project.project_id
+	display_name            = "tf-mongodb-profile"
+	location                = "us-central1"
+	connection_profile_id   = "tf-mongo-cp-%{random_suffix}-2"
+	create_without_validation = true // Set to true for tests to bypass actual connectivity checks.
+
+	mongodb_profile {
+		host_addresses {
+			hostname = "1.1.1.1"
+		}
+		username               = "user"
+		password               = "password"
+		ssl_config {
+      client_key                       = file("text-fixtures/private-key.pem")
+			ca_certificate                   = file("text-fixtures/ca-cert.pem")
+			client_certificate               = file("text-fixtures/cert.pem")
+		}
+		srv_connection_format {}
 	}
 }
 `, context)
