@@ -10,7 +10,7 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/models"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/tfplan"
 
-	provider "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/provider"
+	provider "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/provider"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -107,11 +107,10 @@ func (r *AdvancedPreResolver) Resolve(jsonPlan []byte, resourceDataMap map[strin
 			} else {
 				idToAddressMap[resourceId] = append(idToAddressMap[resourceId], rc.Address)
 			}
-			//fmt.Println(resourceDataMap[rc.Address][0].Address())
 
 		}
 	}
-	// fmt.Println(idToAddressMap)
+
 	var groupKey [][]string
 	// id : [resource1, resource2]
 	for _, values := range idToAddressMap {
@@ -123,14 +122,11 @@ func (r *AdvancedPreResolver) Resolve(jsonPlan []byte, resourceDataMap map[strin
 				if value == curResource[0].Address() {
 					tempList = append(tempList, key)
 				}
-				//fmt.Print(key)
-				//fmt.Print(" ")
-				//fmt.Println(curResource[0].Address())
 			}
 		}
 		groupKey = append(groupKey, tempList)
 	}
-	// fmt.Println(groupKey)
+
 	// Could be something like [key1, key2] [key3, key4]
 	for _, row := range groupKey {
 		for i := 1; i < len(row); i++ {
