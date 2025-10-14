@@ -227,8 +227,18 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	}
 
 	if diff := cmp.Diff(string(roundtripConfigData), string(exportConfigData)); diff != "" {
-		log.Printf("Roundtrip config is different from the export config.\nroundtrip config:\n%s\nexport config:\n%s", string(roundtripConfigData), string(exportConfigData))
-		return fmt.Errorf("test %s got diff (-want +got): %s", testName, diff)
+		tfFileName := fmt.Sprintf("%s_roundtrip", testName)
+		jsonFileName := fmt.Sprintf("%s_reexport", testName)
+
+		reexportAssets, err := tfplan2caiConvert(t, tfFileName, jsonFileName, tfDir, ancestryCache, defaultProject, logger)
+		if err != nil {
+			return fmt.Errorf("error when converting the third round-trip config: %#v", err)
+		}
+
+		if assestsDiff := cmp.Diff(reexportAssets, roundtripAssets); assestsDiff != "" {
+			log.Printf("Roundtrip config is different from the export config.\nroundtrip config:\n%s\nexport config:\n%s", string(roundtripConfigData), string(exportConfigData))
+			return fmt.Errorf("test %s got diff (-want +got): %s", testName, diff)
+		}
 	}
 	log.Printf("Step 2 passes for resource %s. Roundtrip config and export config are identical", testData.ResourceAddress)
 
@@ -377,19 +387,46 @@ func isIgnored(key string, ignoredFields map[string]any) bool {
 // Converts a tfplan to CAI asset, and then converts the CAI asset into HCL
 func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCache map[string]string, defaultProject string, logger *zap.Logger, ignoredAssetFields []string) ([]caiasset.Asset, []byte, error) {
 	fileName := fmt.Sprintf("%s_export", testName)
+	roundtripAssetFile := fmt.Sprintf("%s_roundtrip.json", testName)
 
-	// Run terraform init and terraform apply to generate tfplan.json files
-	terraformWorkflow(t, tfDir, fileName)
-
-	planFile := fmt.Sprintf("%s.tfplan.json", fileName)
-	planfilePath := filepath.Join(tfDir, planFile)
-	jsonPlan, err := os.ReadFile(planfilePath)
+	roundtripAssets, err := tfplan2caiConvert(t, fileName, roundtripAssetFile, tfDir, ancestryCache, defaultProject, logger)
 	if err != nil {
 		return nil, nil, err
 	}
 
+	var roundtripAssetsCopy []caiasset.Asset
+	// Perform the deep copy in case the assets are transformed in cai2hcl
+	err = DeepCopyMap(roundtripAssets, &roundtripAssetsCopy)
+	if err != nil {
+		fmt.Println("Error during deep copy:", err)
+		return nil, nil, err
+	}
+
+	deleteFieldsFromAssets(roundtripAssetsCopy, ignoredAssetFields)
+	roundtripConfig, err := cai2hcl.Convert(roundtripAssetsCopy, &cai2hcl.Options{
+		ErrorLogger: logger,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return roundtripAssets, roundtripConfig, nil
+}
+
+// Converts tf file to CAI assets
+func tfplan2caiConvert(t *testing.T, tfFileName, jsonFileName string, tfDir string, ancestryCache map[string]string, defaultProject string, logger *zap.Logger) ([]caiasset.Asset, error) {
+	// Run terraform init and terraform apply to generate tfplan.json files
+	terraformWorkflow(t, tfDir, tfFileName)
+
+	planFile := fmt.Sprintf("%s.tfplan.json", tfFileName)
+	planfilePath := filepath.Join(tfDir, planFile)
+	jsonPlan, err := os.ReadFile(planfilePath)
+	if err != nil {
+		return nil, err
+	}
+
 	ctx := context.Background()
-	roundtripAssets, err := tfplan2cai.Convert(ctx, jsonPlan, &tfplan2cai.Options{
+	assets, err := tfplan2cai.Convert(ctx, jsonPlan, &tfplan2cai.Options{
 		ErrorLogger:    logger,
 		Offline:        true,
 		DefaultProject: defaultProject,
@@ -400,24 +437,14 @@ func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCac
 	})
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-
-	deleteFieldsFromAssets(roundtripAssets, ignoredAssetFields)
 
 	if os.Getenv("WRITE_FILES") != "" {
-		roundtripAssetFile := fmt.Sprintf("%s_roundtrip.json", testName)
-		writeJSONFile(roundtripAssetFile, roundtripAssets)
+		writeJSONFile(jsonFileName, assets)
 	}
 
-	roundtripConfig, err := cai2hcl.Convert(roundtripAssets, &cai2hcl.Options{
-		ErrorLogger: logger,
-	})
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return roundtripAssets, roundtripConfig, nil
+	return assets, nil
 }
 
 // Example:
