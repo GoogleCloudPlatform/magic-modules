@@ -864,7 +864,7 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 }
 
 func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField *Type) *Type {
-	description := fmt.Sprintf("Triggers update of %s write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", google.Underscore(writeOnlyField.Name))
+	description := fmt.Sprintf("Triggers update of %s write-only. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)", google.Underscore(writeOnlyField.Name))
 	requiredWith := strings.ReplaceAll(originalField.TerraformLineage(), google.Underscore(originalField.Name), google.Underscore(writeOnlyField.Name))
 
 	options := []func(*Type){
