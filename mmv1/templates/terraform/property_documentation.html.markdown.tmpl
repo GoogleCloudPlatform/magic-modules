@@ -13,6 +13,8 @@
   {{- else }}    
     {{- if $.Required }}
   (Required{{ if $.DeprecationMessage }}, Deprecated{{ end }})
+    {{- else if and (or $.WriteOnlyLegacy $.WriteOnly) $.Required }}
+  (Required, Write-Only)
     {{- else if or $.WriteOnlyLegacy $.WriteOnly }}
   (Optional, Write-Only)
     {{- else if not $.Output }}
