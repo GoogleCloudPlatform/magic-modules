@@ -22,7 +22,7 @@ resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryRes
     enforcement_mode = "DETECTIVE"
     
     cloud_control_details {
-      name              = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/builtin-assess-resource-availability"
+      name              = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/builtin-data-access-governance"
       major_revision_id = "1"
       
       parameters {
