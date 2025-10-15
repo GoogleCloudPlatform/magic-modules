@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -21,43 +22,43 @@ type IamMember struct {
 }
 
 type Step struct {
-	Name                 string              `yaml:"name,omitempty"`
-	ConfigPath           string              `yaml:"config_path,omitempty"`
-	MinVersion           string              `yaml:"min_version,omitempty"`
-	GenerateDoc          bool                `yaml:"generate_doc,omitempty"`
-	PrefixedVars         map[string]string   `yaml:"prefixed_vars,omitempty"`
-	Vars                 map[string]string   `yaml:"vars,omitempty"`
-	TestEnvVars          map[string]string   `yaml:"test_env_vars,omitempty"`
-	TestVarsOverrides    map[string]string   `yaml:"test_vars_overrides,omitempty"`
-	OicsVarsOverrides    map[string]string   `yaml:"oics_vars_overrides,omitempty"`
-	IgnoreReadExtra      []string            `yaml:"ignore_read_extra,omitempty"`
-	ExcludeImportTest    bool                `yaml:"exclude_import_test,omitempty"`
-	ExcludeDocs          bool                `yaml:"exclude_docs,omitempty"`
-	DocumentationHCLText string              `yaml:"-"`
-	TestHCLText          string              `yaml:"-"`
-	OicsHCLText          string              `yaml:"-"`
-	PrimaryResourceId    string              `yaml:"-"`
-	ProductName          string              `yaml:"-"`
+	Name                 string            `yaml:"name,omitempty"`
+	ConfigPath           string            `yaml:"config_path,omitempty"`
+	MinVersion           string            `yaml:"min_version,omitempty"`
+	GenerateDoc          bool              `yaml:"generate_doc,omitempty"`
+	PrefixedVars         map[string]string `yaml:"prefixed_vars,omitempty"`
+	Vars                 map[string]string `yaml:"vars,omitempty"`
+	TestEnvVars          map[string]string `yaml:"test_env_vars,omitempty"`
+	TestVarsOverrides    map[string]string `yaml:"test_vars_overrides,omitempty"`
+	OicsVarsOverrides    map[string]string `yaml:"oics_vars_overrides,omitempty"`
+	IgnoreReadExtra      []string          `yaml:"ignore_read_extra,omitempty"`
+	ExcludeImportTest    bool              `yaml:"exclude_import_test,omitempty"`
+	ExcludeDocs          bool              `yaml:"exclude_docs,omitempty"`
+	DocumentationHCLText string            `yaml:"-"`
+	TestHCLText          string            `yaml:"-"`
+	OicsHCLText          string            `yaml:"-"`
+	PrimaryResourceId    string            `yaml:"-"`
+	ProductName          string            `yaml:"-"`
 }
 
 type Sample struct {
-	Name                 string            `yaml:"name"`
-	SkipVcr              bool              `yaml:"skip_vcr,omitempty"`
-	SkipTest             string            `yaml:"skip_test,omitempty"`
-	ExternalProviders    []string          `yaml:"external_providers,omitempty"`
-	BootstrapIam         []IamMember       `yaml:"bootstrap_iam,omitempty"`
-	MinVersion           string            `yaml:"min_version,omitempty"`
-	TargetVersionName    string            `yaml:"-"`
-	PrimaryResourceId    string            `yaml:"primary_resource_id"`
-	PrimaryResourceType  string            `yaml:"primary_resource_type,omitempty"`
-	PrimaryResourceName  string            `yaml:"primary_resource_name,omitempty"`
-	ExcludeTest          bool              `yaml:"exclude_test,omitempty"`
-	Steps                []Step            `yaml:"steps"`
-	NewConfigFuncs       []Step            `yaml:"-"`
-	RegionOverride       string            `yaml:"region_override,omitempty"`
-	TGCTestIgnoreExtra   []string          `yaml:"tgc_test_ignore_extra,omitempty"`
-	TGCTestIgnoreInAsset []string          `yaml:"tgc_test_ignore_in_asset,omitempty"`
-	TGCSkipTest          string            `yaml:"tgc_skip_test,omitempty"`
+	Name                 string      `yaml:"name"`
+	SkipVcr              bool        `yaml:"skip_vcr,omitempty"`
+	SkipTest             string      `yaml:"skip_test,omitempty"`
+	ExternalProviders    []string    `yaml:"external_providers,omitempty"`
+	BootstrapIam         []IamMember `yaml:"bootstrap_iam,omitempty"`
+	MinVersion           string      `yaml:"min_version,omitempty"`
+	TargetVersionName    string      `yaml:"-"`
+	PrimaryResourceId    string      `yaml:"primary_resource_id"`
+	PrimaryResourceType  string      `yaml:"primary_resource_type,omitempty"`
+	PrimaryResourceName  string      `yaml:"primary_resource_name,omitempty"`
+	ExcludeTest          bool        `yaml:"exclude_test,omitempty"`
+	Steps                []Step      `yaml:"steps"`
+	NewConfigFuncs       []Step      `yaml:"-"`
+	RegionOverride       string      `yaml:"region_override,omitempty"`
+	TGCTestIgnoreExtra   []string    `yaml:"tgc_test_ignore_extra,omitempty"`
+	TGCTestIgnoreInAsset []string    `yaml:"tgc_test_ignore_in_asset,omitempty"`
+	TGCSkipTest          string      `yaml:"tgc_skip_test,omitempty"`
 }
 
 // =============================================================================
@@ -118,127 +119,177 @@ func main() {
 }
 
 func migrateFile(filePath string) error {
-	yamlFile, err := ioutil.ReadFile(filePath)
+	originalBytes, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return fmt.Errorf("failed to read file: %w", err)
 	}
 
-	// Step 1: Unmarshal into a generic map to robustly find the 'examples' data,
-	// without relying on fragile string parsing for the data itself.
+	contentStr := string(originalBytes)
+	madeChanges := false
+
+	// Transformation 1: `examples` -> `samples`
 	var resourceMap map[string]interface{}
-	if err := yaml.Unmarshal(yamlFile, &resourceMap); err != nil {
-		return fmt.Errorf("failed to unmarshal YAML: %w", err)
+	if err := yaml.Unmarshal(originalBytes, &resourceMap); err != nil {
+		return fmt.Errorf("failed to unmarshal YAML from %s: %w", filePath, err)
 	}
 
-	examplesData, ok := resourceMap["examples"]
-	if !ok {
-		// No 'examples' block to migrate, so we skip this file.
-		return nil
+	if examplesData, ok := resourceMap["examples"]; ok {
+		examplesBytes, err := yaml.Marshal(examplesData)
+		if err != nil {
+			return fmt.Errorf("failed to re-marshal examples block from %s: %w", filePath, err)
+		}
+		var oldExamples []OldExample
+		if err := yaml.Unmarshal(examplesBytes, &oldExamples); err != nil {
+			return fmt.Errorf("failed to unmarshal examples into structured format from %s: %w", filePath, err)
+		}
+		newSamples := transformExamplesToSamples(oldExamples, filePath)
+
+		newSamplesBytes, err := yaml.Marshal(newSamples)
+		if err != nil {
+			return fmt.Errorf("failed to marshal new samples data for %s: %w", filePath, err)
+		}
+
+		lines := strings.Split(contentStr, "\n")
+		startLineIndex := -1
+		var initialIndent string
+		for i, line := range lines {
+			if strings.HasPrefix(strings.TrimLeft(line, " \t"), "examples:") {
+				startLineIndex = i
+				indentation := len(line) - len(strings.TrimLeft(line, " \t"))
+				initialIndent = line[:indentation]
+				break
+			}
+		}
+
+		if startLineIndex != -1 {
+			var contentIndent string
+			for i := startLineIndex + 1; i < len(lines); i++ {
+				if strings.TrimSpace(lines[i]) != "" {
+					line := lines[i]
+					indentation := len(line) - len(strings.TrimLeft(line, " \t"))
+					contentIndent = line[:indentation]
+					break
+				}
+			}
+			if contentIndent == "" {
+				contentIndent = initialIndent + "  " // Default indent if block is empty
+			}
+
+			endLineIndex := startLineIndex + 1
+			for ; endLineIndex < len(lines); endLineIndex++ {
+				line := lines[endLineIndex]
+				trimmedLine := strings.TrimSpace(line)
+				if trimmedLine == "" || strings.HasPrefix(trimmedLine, "#") {
+					continue
+				}
+				indentation := len(line) - len(strings.TrimLeft(line, " \t"))
+				if indentation <= len(initialIndent) {
+					break
+				}
+			}
+
+			newSamplesStr := string(newSamplesBytes)
+			newSamplesContentLines := strings.Split(strings.TrimRight(newSamplesStr, "\n"), "\n")
+			var newBlockLines []string
+			newBlockLines = append(newBlockLines, initialIndent+"samples:")
+			for _, line := range newSamplesContentLines {
+				newBlockLines = append(newBlockLines, contentIndent+line)
+			}
+
+			var finalLines []string
+			finalLines = append(finalLines, lines[:startLineIndex]...)
+			finalLines = append(finalLines, newBlockLines...)
+			if endLineIndex < len(lines) {
+				finalLines = append(finalLines, lines[endLineIndex:]...)
+			}
+
+			outputContent := strings.Join(finalLines, "\n")
+			if strings.HasSuffix(contentStr, "\n") && !strings.HasSuffix(outputContent, "\n") {
+				outputContent += "\n"
+			}
+
+			if outputContent != contentStr {
+				contentStr = outputContent
+				madeChanges = true
+				fmt.Printf("Migrated 'examples' block in %s\n", filePath)
+			}
+		}
 	}
 
-	// Step 2: Transform the extracted data
-	examplesBytes, err := yaml.Marshal(examplesData)
-	if err != nil {
-		return fmt.Errorf("failed to re-marshal examples block: %w", err)
-	}
-	var oldExamples []OldExample
-	if err := yaml.Unmarshal(examplesBytes, &oldExamples); err != nil {
-		return fmt.Errorf("failed to unmarshal examples into structured format: %w", err)
-	}
-	newSamples := transformExamplesToSamples(oldExamples)
-
-	// Step 3: Generate the new 'samples' block as a string.
-	newSamplesBytes, err := yaml.Marshal(newSamples)
-	if err != nil {
-		return fmt.Errorf("failed to marshal new samples data: %w", err)
-	}
-
-	// Step 4: Perform a textual replacement on the original file content
-	// to preserve all formatting and comments outside the 'examples' block.
-	contentStr := string(yamlFile)
+	// Transformation 2: Update `example_config_body` and `iam_policy` paths.
+	// This is done with line-by-line processing to handle different replacement rules.
 	lines := strings.Split(contentStr, "\n")
+	iamMadeChanges := false
 
-	startLineIndex := -1
-	var initialIndent string
+	oldIAMPath := "templates/terraform/iam/iam_attributes.go.tmpl"
+	newIAMPath := "templates/terraform/iam/iam_attributes_sample.go.tmpl"
+
+	oldIAMKey := "example_config_body:"
+	newIAMKey := "sample_config_body:"
+
 	for i, line := range lines {
-		if strings.HasPrefix(strings.TrimLeft(line, " \t"), "examples:") {
-			startLineIndex = i
-			indentation := len(line) - len(strings.TrimLeft(line, " \t"))
-			initialIndent = line[:indentation]
-			break
+		// Check if the line contains the key we need to change.
+		if strings.Contains(line, oldIAMKey) {
+			var newLine string
+			// Case 1: Standard config body path. Change both key and value.
+			if strings.Contains(line, oldIAMPath) {
+				tempLine := strings.Replace(line, oldIAMKey, newIAMKey, 1)
+				newLine = strings.Replace(tempLine, oldIAMPath, newIAMPath, 1)
+				// Case 2: Custom config body path. Change only the key.
+			} else {
+				newLine = strings.Replace(line, oldIAMKey, newIAMKey, 1)
+			}
+
+			if newLine != line {
+				lines[i] = newLine
+				iamMadeChanges = true
+			}
 		}
 	}
 
-	if startLineIndex == -1 {
-		return fmt.Errorf("consistency error: could not find 'examples:' line for textual replacement")
-	}
-
-	// Determine the indentation for the content of the block.
-	var contentIndent string
-	for i := startLineIndex + 1; i < len(lines); i++ {
-		if strings.TrimSpace(lines[i]) != "" {
-			line := lines[i]
-			indentation := len(line) - len(strings.TrimLeft(line, " \t"))
-			contentIndent = line[:indentation]
-			break
-		}
-	}
-	if contentIndent == "" {
-		contentIndent = initialIndent + "  " // Default indent if block is empty
-	}
-
-	// Find the end of the block to be replaced.
-	endLineIndex := startLineIndex + 1
-	for ; endLineIndex < len(lines); endLineIndex++ {
-		line := lines[endLineIndex]
-		if strings.TrimSpace(line) == "" {
-			continue // Skip empty lines
-		}
-		indentation := len(line) - len(strings.TrimLeft(line, " \t"))
-		if indentation <= len(initialIndent) {
-			break
+	if iamMadeChanges {
+		newContentStr := strings.Join(lines, "\n")
+		// The overall `madeChanges` flag will be set if this transform did anything.
+		if newContentStr != contentStr {
+			contentStr = newContentStr
+			madeChanges = true
+			fmt.Printf("Updated 'iam_policy' / 'example_config_body' in %s\n", filePath)
 		}
 	}
 
-	// Prepare the new content lines, correctly indented.
-	newSamplesStr := string(newSamplesBytes)
-	newSamplesContentLines := strings.Split(strings.TrimRight(newSamplesStr, "\n"), "\n")
-	var newBlockLines []string
-	newBlockLines = append(newBlockLines, initialIndent+"samples:")
-	for _, line := range newSamplesContentLines {
-		newBlockLines = append(newBlockLines, contentIndent+line)
+	if madeChanges {
+		if err := ioutil.WriteFile(filePath, []byte(contentStr), 0644); err != nil {
+			return fmt.Errorf("failed to write updated file %s: %w", filePath, err)
+		}
 	}
 
-	// Stitch the file back together.
-	var finalLines []string
-	finalLines = append(finalLines, lines[:startLineIndex]...)
-	finalLines = append(finalLines, newBlockLines...)
-	if endLineIndex < len(lines) {
-		finalLines = append(finalLines, lines[endLineIndex:]...)
-	}
-
-	outputContent := strings.Join(finalLines, "\n")
-	// Preserve trailing newline if it existed.
-	if strings.HasSuffix(contentStr, "\n") && !strings.HasSuffix(outputContent, "\n") {
-		outputContent += "\n"
-	}
-
-	// Write the new content back to the original file.
-	if err := ioutil.WriteFile(filePath, []byte(outputContent), 0644); err != nil {
-		return fmt.Errorf("failed to write updated file: %w", err)
-	}
-
-	fmt.Printf("Migrated %s\n", filePath)
 	return nil
 }
 
-// transformExamplesToSamples converts the old structure to the new one.
-func transformExamplesToSamples(oldExamples []OldExample) []Sample {
+func transformExamplesToSamples(oldExamples []OldExample, filePath string) []Sample {
+	productsPath := filepath.Join("..", "..", "mmv1", "products")
+	relPath, err := filepath.Rel(productsPath, filePath)
+	var serviceName string
+	if err != nil {
+		log.Printf("Could not determine service name from path %s: %v. ConfigPath will not be updated.", filePath, err)
+	} else {
+		serviceName = filepath.ToSlash(filepath.Dir(relPath))
+	}
+
 	newSamples := make([]Sample, len(oldExamples))
 	for i, old := range oldExamples {
-		// Per the new logic, all fields from the old 'vars' block are moved
-		// directly into the new 'prefixed_vars' block. The step-level 'vars'
-		// and 'min_version' are ignored.
+		var newConfigPath string
+		if serviceName != "" {
+			var templateName string
+			if old.ConfigPath != "" {
+				templateName = filepath.Base(old.ConfigPath)
+			} else {
+				templateName = old.Name + ".tf.tmpl"
+			}
+			newConfigPath = path.Join("templates/terraform/samples/services", serviceName, templateName)
+		} else {
+			newConfigPath = old.ConfigPath
+		}
 		newSamples[i] = Sample{
 			Name:                 old.Name,
 			SkipVcr:              old.SkipVcr,
@@ -257,7 +308,7 @@ func transformExamplesToSamples(oldExamples []OldExample) []Sample {
 			Steps: []Step{
 				{
 					Name:              old.Name,
-					ConfigPath:        old.ConfigPath,
+					ConfigPath:        newConfigPath,
 					PrefixedVars:      old.Vars,
 					TestEnvVars:       old.TestEnvVars,
 					TestVarsOverrides: old.TestVarsOverrides,
@@ -271,4 +322,3 @@ func transformExamplesToSamples(oldExamples []OldExample) []Sample {
 	}
 	return newSamples
 }
-
