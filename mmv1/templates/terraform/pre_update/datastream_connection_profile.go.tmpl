@@ -11,8 +11,18 @@
 	limitations under the License.
 */}}
 
-if d.HasChange("desired_state") {
-  updateMask = append(updateMask, "state")
+if d.HasChange("mongodb_profile.0.username") {
+    updateMask = append(updateMask, "mongodbProfile.username")
+}
+if d.HasChange("mongodb_profile.0.password") {
+    // Note: Password updates might require special handling
+    updateMask = append(updateMask, "mongodbProfile.password")
+}
+if d.HasChange("mongodb_profile.0.replica_set") {
+    updateMask = append(updateMask, "mongodbProfile.replicaSet")
+}
+if d.HasChange("mongodb_profile.0.host_addresses") {
+    updateMask = append(updateMask, "mongodbProfile.hostAddresses")
 }
 
 // Override the previous setting of updateMask to include state.
@@ -23,20 +33,6 @@ if err != nil {
   return err
 }
 
-// lables and terraform_labels fields are overridden with the labels before updating inside the function waitForDatastreamStreamReady
-labels := d.Get("labels")
-terraformLabels := d.Get("terraform_labels")
-
-if err := waitForDatastreamStreamReady(d, config, d.Timeout(schema.TimeoutCreate) - time.Minute); err != nil {
-  return fmt.Errorf("Error waiting for Stream %q to be NOT_STARTED, RUNNING, or PAUSED before updating: %q", d.Get("name").(string), err)
-}
-
-if err := d.Set("labels", labels); err != nil {
-  return fmt.Errorf("Error setting back labels field: %s", err)
-}
-if err := d.Set("terraform_labels", terraformLabels); err != nil {
-  return fmt.Errorf("Error setting back terraform_labels field: %s", err)
-}
 if d.Get("create_without_validation").(bool) {
 	url, err = transport_tpg.AddQueryParams(url, map[string]string{"force": "true"})
 } else {
