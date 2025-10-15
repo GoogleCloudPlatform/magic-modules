@@ -127,9 +127,9 @@ func (p *googleEphemeralSecretManagerSecretVersion) Open(ctx context.Context, re
 
 	var url string
 	if version != "" {
-		url = fmt.Sprintf("%s%s/versions/%s", config.SecretManagerBasePath, secret, version)
+		url = fmt.Sprintf("%sprojects/%s/secrets/%s/versions/%s", config.SecretManagerBasePath, project, secret, version)
 	} else {
-		url = fmt.Sprintf("%s%s/versions/latest", config.SecretManagerBasePath, secret)
+		url = fmt.Sprintf("%sprojects/%s/secrets/%s/versions/latest", config.SecretManagerBasePath, project, secret)
 	}
 
 	versionResp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
