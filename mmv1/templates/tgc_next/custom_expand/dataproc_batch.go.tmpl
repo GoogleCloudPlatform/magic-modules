@@ -4,6 +4,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 	}
 	m := make(map[string]string)
 	for k, val := range v.(map[string]interface{}) {
+		// In CAI asset, the properties have prefix "spark:" (e.g. spark:spark.dynamicAllocation.enabled)
         modifiedK := fmt.Sprintf("spark:%s", k)
 		m[modifiedK] = val.(string)
 	}
