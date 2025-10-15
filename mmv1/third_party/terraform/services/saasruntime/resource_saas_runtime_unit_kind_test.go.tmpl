@@ -62,23 +62,24 @@ func testAccSaasRuntimeUnitKind_basic(context map[string]interface{}) string {
 resource "google_saas_runtime_saas" "example_saas" {
   provider = google-beta
   saas_id  = "tf-test-example-saas%{random_suffix}"
-  location = "global"
+  location = "us-east1"
 
   locations {
-    name = "us-central1"
+    name = "us-east1"
   }
 }
 
 resource "google_saas_runtime_unit_kind" "cluster_unit_kind" {
   provider = google-beta
-  location = "global"
+  location = "us-east1"
   unit_kind_id = "tf-test-cluster-unitkind%{random_suffix}"
   saas = google_saas_runtime_saas.example_saas.id
+  default_release = "projects/%{project}/locations/us-east1/releases/tf-test-example-release%{random_suffix}"
 }
 
 resource "google_saas_runtime_unit_kind" "example" {
   provider = google-beta
-  location = "global"
+  location = "us-east1"
   unit_kind_id = "tf-test-app-unitkind%{random_suffix}"
   saas = google_saas_runtime_saas.example_saas.id
 
@@ -90,7 +91,7 @@ resource "google_saas_runtime_unit_kind" "example" {
 
 resource "google_saas_runtime_release" "example_release" {
   provider          = google-beta
-  location          = "global"
+  location          = "us-east1"
   release_id        = "tf-test-example-release%{random_suffix}"
   unit_kind         = google_saas_runtime_unit_kind.cluster_unit_kind.id
   blueprint {
@@ -105,24 +106,24 @@ func testAccSaasRuntimeUnitKind_update(context map[string]interface{}) string {
 resource "google_saas_runtime_saas" "example_saas" {
   provider = google-beta
   saas_id  = "tf-test-example-saas%{random_suffix}"
-  location = "global"
+  location = "us-east1"
 
   locations {
-    name = "us-central1"
+    name = "us-east1"
   }
 }
 
 resource "google_saas_runtime_unit_kind" "cluster_unit_kind" {
   provider = google-beta
-  location = "global"
+  location = "us-east1"
   unit_kind_id = "tf-test-cluster-unitkind%{random_suffix}"
   saas = google_saas_runtime_saas.example_saas.id
-  default_release = "projects/%{project}/locations/global/releases/tf-test-example-release%{random_suffix}"
+  default_release = "projects/%{project}/locations/us-east1/releases/tf-test-example-release%{random_suffix}"
 }
 
 resource "google_saas_runtime_unit_kind" "example" {
   provider = google-beta
-  location = "global"
+  location = "us-east1"
   unit_kind_id = "tf-test-app-unitkind%{random_suffix}"
   saas = google_saas_runtime_saas.example_saas.id
 
@@ -175,7 +176,7 @@ resource "google_saas_runtime_unit_kind" "example" {
 
 resource "google_saas_runtime_release" "example_release" {
   provider          = google-beta
-  location          = "global"
+  location          = "us-east1"
   release_id        = "tf-test-example-release%{random_suffix}"
   unit_kind         = google_saas_runtime_unit_kind.cluster_unit_kind.id
   blueprint {
