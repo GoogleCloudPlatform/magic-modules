@@ -16,7 +16,8 @@ type Resource struct {
 }
 
 type Example struct {
-	Name string `yaml:"name"`
+	Name       string `yaml:"name"`
+	ConfigPath string `yaml:"config_path,omitempty"`
 }
 
 func main() {
@@ -97,12 +98,18 @@ func processResourceFile(filePath, examplesSourceDir, samplesDestDir string) err
 			continue
 		}
 
-		// Construct the source and destination paths for the template file.
-		sourceFileName := fmt.Sprintf("%s.tf.tmpl", example.Name)
+		// Determine the source file name. Use config_path if it exists,
+		// otherwise fall back to the example's name.
+		var sourceFileName string
+		if example.ConfigPath != "" {
+			sourceFileName = filepath.Base(example.ConfigPath)
+		} else {
+			sourceFileName = fmt.Sprintf("%s.tf.tmpl", example.Name)
+		}
+
 		sourcePath := filepath.Join(examplesSourceDir, sourceFileName)
 
 		// Before trying to copy, check if the source template file actually exists.
-		// It's possible for an example to be defined without a corresponding template.
 		if _, err := os.Stat(sourcePath); os.IsNotExist(err) {
 			// Silently skip if the template doesn't exist.
 			continue
