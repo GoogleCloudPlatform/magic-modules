@@ -1637,6 +1637,26 @@ func flattenHdfsData(hdfsData *storagetransfer.HdfsData) []map[string]interface{
 	return []map[string]interface{}{data}
 }
 
+func expandTransferManifest(manifest []interface{}) *storagetransfer.TransferManifest {
+	if len(manifest) == 0 || manifest[0] == nil {
+		return nil
+	}
+
+	manifestFile := manifest[0].(map[string]interface{})
+	return &storagetransfer.TransferManifest{
+		Location: manifestFile["location"].(string),
+	}
+}
+
+func flattenTransferManifest(manifest *storagetransfer.TransferManifest) []map[string]interface{} {
+
+	return []map[string]interface{}{
+		{
+			"location": manifest.Location,
+		},
+	}
+}
+
 func expandAwsS3CompatibleData(awsS3CompatibleDataSchema []interface{}) *storagetransfer.AwsS3CompatibleData {
 	if len(awsS3CompatibleDataSchema) == 0 || awsS3CompatibleDataSchema[0] == nil {
 		return nil
@@ -1855,7 +1875,7 @@ func expandTransferSpecs(transferSpecs []interface{}) *storagetransfer.TransferS
 	}
 
 	transferSpec := transferSpecs[0].(map[string]interface{})
-	ts := &storagetransfer.TransferSpec{
+	return &storagetransfer.TransferSpec{
 		SourceAgentPoolName:        transferSpec["source_agent_pool_name"].(string),
 		SinkAgentPoolName:          transferSpec["sink_agent_pool_name"].(string),
 		GcsDataSink:                expandGcsData(transferSpec["gcs_data_sink"].([]interface{})),
@@ -1869,18 +1889,8 @@ func expandTransferSpecs(transferSpecs []interface{}) *storagetransfer.TransferS
 		PosixDataSource:            expandPosixData(transferSpec["posix_data_source"].([]interface{})),
 		HdfsDataSource:             expandHdfsData(transferSpec["hdfs_data_source"].([]interface{})),
 		AwsS3CompatibleDataSource:  expandAwsS3CompatibleData(transferSpec["aws_s3_compatible_data_source"].([]interface{})),
+		TransferManifest:           expandTransferManifest(transferSpec["transfer_manifest"].([]interface{})),
 	}
-
-	if v, ok := transferSpec["transfer_manifest"].([]interface{}); ok && len(v) > 0 && v[0] != nil {
-		tm := v[0].(map[string]interface{})
-		loc := tm["location"].(string)
-		if loc != "" {
-			ts.TransferManifest = &storagetransfer.TransferManifest{
-				Location: loc,
-			}
-		}
-	}
-	return ts
 }
 
 func flattenTransferSpec(transferSpec *storagetransfer.TransferSpec, d *schema.ResourceData) []map[string]interface{} {
@@ -1924,11 +1934,7 @@ func flattenTransferSpec(transferSpec *storagetransfer.TransferSpec, d *schema.R
 		data["aws_s3_compatible_data_source"] = flattenAwsS3CompatibleData(transferSpec.AwsS3CompatibleDataSource, d)
 	}
 	if transferSpec.TransferManifest != nil && transferSpec.TransferManifest.Location != "" {
-		data["transfer_manifest"] = []map[string]interface{}{
-			{
-				"location": transferSpec.TransferManifest.Location,
-			},
-		}
+		data["transfer_manifest"] = flattenTransferManifest(transferSpec.TransferManifest)
 	}
 
 	return []map[string]interface{}{data}
