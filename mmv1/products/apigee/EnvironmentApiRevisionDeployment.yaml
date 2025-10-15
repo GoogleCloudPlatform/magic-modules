@@ -1,0 +1,88 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'EnvironmentApiRevisionDeployment'
+description: |
+  Deploys a specific Apigee API Proxy revision to a given Apigee environment.
+references:
+  guides:
+    'Deploying an API proxy': 'https://cloud.google.com/apigee/docs/api-platform/deploy/ui-deploy-new#apigee-api'
+  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.apis.revisions.deployments/deploy'
+base_url: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}/deployments'
+self_link: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}/deployments'
+immutable: true
+create_url: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}/deployments?override={{override}}&sequencedRollout={{sequenced_rollout}}&serviceAccount={{service_account}}'
+delete_url: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}/deployments'
+autogen_async: false
+id_format: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}'
+import_format:
+  - 'organizations/{{org_id}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}'
+  - '{{id}}'
+examples:
+  - name: "apigee_environment_api_revision_deployment_basic"
+    primary_resource_id: "proxy_deployment_basic"
+    vars:
+      apigee_org: "my-org"
+    exclude_test: true
+parameters:
+  - name: 'org_id'
+    type: String
+    required: true
+    url_param_only: true
+    description: 'Apigee organization ID.'
+  - name: 'environment'
+    type: String
+    required: true
+    url_param_only: true
+    description: 'Apigee environment name.'
+  - name: 'api'
+    type: String
+    required: true
+    url_param_only: true
+    description: 'Apigee API proxy name.'
+  - name: 'revision'
+    type: Integer
+    required: true
+    url_param_only: true
+    description: 'API proxy revision number to deploy.'
+properties:
+  - name: 'override'
+    type: Boolean
+    description: 'If true, replaces other deployed revisions of this proxy in the environment.'
+    default_value: false
+    url_param_only: true
+  - name: 'sequenced_rollout'
+    type: Boolean
+    description: 'If true, enables sequenced rollout for safe traffic switching.'
+    default_value: false
+    url_param_only: true
+  - name: 'service_account'
+    type: String
+    description: 'Optional service account the deployed proxy runs as.'
+    url_param_only: true
+  - name: 'state'
+    type: String
+    output: true
+    description: 'Deployment state reported by Apigee.'
+  - name: 'basepaths'
+    type: Array
+    item_type:
+      type: String
+    output: true
+    api_name: 'basePath'
+    description: 'Basepaths associated with the deployed proxy.'
+  - name: 'deployStartTime'
+    type: String
+    output: true
+    description: 'RFC3339 timestamp when deployment started.'

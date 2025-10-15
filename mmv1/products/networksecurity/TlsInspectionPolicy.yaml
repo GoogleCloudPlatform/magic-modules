@@ -52,7 +52,6 @@ examples:
       resource_name: 'my-tls-inspection-policy'
       privateca_ca_pool_name: 'my-basic-ca-pool'
       privateca_certificate_authority_id: 'my-basic-certificate-authority'
-    tgc_skip_test: 'It takes time to fix it.'
   - name: 'network_security_tls_inspection_policy_custom'
     primary_resource_id: 'default'
     min_version: 'beta'

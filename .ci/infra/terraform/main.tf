@@ -327,6 +327,7 @@ module "project-services" {
     "networksecurity.googleapis.com",
     "networkservices.googleapis.com",
     "notebooks.googleapis.com",
+    "observability.googleapis.com",
     "orgpolicy.googleapis.com",
     "osconfig.googleapis.com",
     "oslogin.googleapis.com",

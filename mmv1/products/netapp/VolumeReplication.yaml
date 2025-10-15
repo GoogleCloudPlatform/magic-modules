@@ -344,3 +344,16 @@ properties:
         description: |
           Optional. Name of the user's local source vserver svm to be peered with the destination vserver svm.
         output: true
+  - name: 'hybridReplicationUserCommands'
+    type: NestedObject
+    description: |-
+      Copy pastable snapmirror commands to be executed on onprem cluster by the customer.
+    output: true
+    properties:
+      - name: 'commands'
+        type: Array
+        description: |
+          List of commands to be executed by the customer.
+        item_type:
+          type: String
+        output: true

@@ -2,6 +2,7 @@ package cai2hcl
 
 import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/cai2hcl/common"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/cai2hcl/services/certificatemanager"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/cai2hcl/services/compute"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/cai2hcl/services/networksecurity"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/cai2hcl/services/resourcemanager"
@@ -26,6 +27,8 @@ var AssetTypeToConverter = map[string]string{
 
 	networksecurity.ServerTLSPolicyAssetType:             "google_network_security_server_tls_policy",
 	networksecurity.BackendAuthenticationConfigAssetType: "google_network_security_backend_authentication_config",
+
+	certificatemanager.CertificateAssetType: "google_certificate_manager_certificate",
 }
 
 // ConverterMap is a collection of converters instances, indexed by name.
@@ -42,4 +45,6 @@ var ConverterMap = map[string]common.Converter{
 
 	"google_network_security_server_tls_policy":             networksecurity.NewServerTLSPolicyConverter(provider),
 	"google_network_security_backend_authentication_config": networksecurity.NewBackendAuthenticationConfigConverter(provider),
+
+	"google_certificate_manager_certificate": certificatemanager.NewCertificateConverter(provider),
 }
