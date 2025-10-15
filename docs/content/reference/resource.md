@@ -486,47 +486,50 @@ properties:
     type: String
 ```
 
-## Examples
+## Samples
 
-### `examples`
+A sample is a collection of one or more `steps`, where each step represents a distinct Terraform configuration and test step (e.g., create, update).
 
-A list of configurations that are used to generate documentation and tests. Each example supports the following common
-attributes – for a full reference, see
-[examples.go ↗](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource/examples.go):
+Each sample supports the following attributes at the top level, with more granular control inside each step.
 
-- `name`: snake_case name of the example. This corresponds to the configuration file in
-  [mmv1/templates/terraform/examples](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/templates/terraform/examples) (excluding the `.go.tmpl` suffix) and is used to generate the test name and the documentation header.
-- `primary_resource_id`: The id of the resource under test. This is used by tests to automatically run additional checks.
-  Configuration files should reference this to avoid getting out of sync. For example:
-  `resource "google_compute_address" ""{{$.PrimaryResourceId}}" {`
-- `bootstrap_iam`: specify member/role pairs that should always exist. `{project_number}` will be replaced with the
-  default project's project number, and `{organization_id}` will be replaced with the "target" test organization's ID. This avoids race conditions when modifying the global IAM permissions.
-  Permissions attached to resources created _in_ a test should instead be provisioned with standard terraform resources.
-- `vars`: Key/value pairs of variables to inject into the configuration file. These can be referenced in the configuration file
-  with `{{index $.Vars "key"}}`. All resource IDs (even for resources not under test) should be declared with variables that
-  contain a `-` or `_`; this will ensure that, in tests, the resources are created with a `tf-test` prefix to allow automatic cleanup of dangling resources and a random suffix to avoid name collisions.
-- `test_env_vars`: Key/value pairs of variable names and special values indicating variables that should be pulled from the
-  environment during tests. These will receive a neutral default value in documentation. Common special values include:
-  `PROJECT_NAME`, `REGION`, `ORG_ID`, `ORG_TARGET` (a separate test org for testing certain org-level resources such as IAM), `BILLING_ACCT`, `SERVICE_ACCT` (the test runner service account).
-- `test_vars_overrides`: Key/value pairs of literal overrides for variables used in tests. This can be used to call functions to
-  generate or determine a variable's value.
-- `min_version`: Set this to `beta` if the resource is in the `google` provider but the example will only work with the
-  `google-beta` provider (for example, because it includes a beta-only field.)
-- `ignore_read_extra`: Properties to not check on import. This should be used in cases where a property will not be set on import,
-  for example write-only fields.
-- `exclude_test`: If set to `true`, no test will be generated based on this example.
-- `exclude_docs`: If set to `true`, no documentation will be generated based on this example.
-- `exclude_import_test`: If set to `true`, no import test will be generated for this example.
-- `skip_vcr`: See [Skip tests in VCR replaying mode]({{< ref "/test/test#skip-vcr" >}}) for more information about this flag.
-- `skip_test`: If not empty, the test generated based on this example will always be skipped. In most cases, the value should be a
-  link to a ticket explaining the issue that needs to be resolved before the test can be unskipped.
-- `external_providers`: A list of external providers that are needed for the testcase. This does add some latency to the testcase,
-  so only use if necessary. Common external providers: `random`, `time`.
+---
+
+### Sample Attributes (Top-Level)
+
+These attributes are defined once for an entire sample.
+
+* `name`: **(Required)** `snake_case` name for the overall sample. This is used for generating test names and documentation headers.
+* `primary_resource_id`: The ID of the main resource under test for the entire sample. Tests use this to run additional checks automatically.
+* `bootstrap_iam`: Specify member/role pairs that should exist before the test runs. This avoids race conditions on global IAM permissions. `{project_number}` and `{organization_id}` are replaced automatically.
+* `min_version`: Sets a minimum provider version for the entire sample (e.g., `beta`). This can be overridden by the `min_version` attribute within a specific step.
+* `exclude_test`: If `true`, no tests are generated for this entire sample.
+* `exclude_docs`: If `true`, no documentation is generated for this entire sample.
+* `skip_vcr`: If `true`, skips VCR testing for the entire sample.
+* `skip_test`: If not empty, the entire sample is skipped during tests. The value should be a link to a ticket explaining why.
+* `external_providers`: A list of external providers (e.g., `random`, `time`) needed for the sample.
+
+---
+
+### Step Attributes
+
+A sample contains a list of one or more `steps`. Each step has its own configuration and test-specific attributes.
+
+* `name`: **(Required)** `snake_case` name of the individual step.
+* `config_path`: **(Required)** The path to the step's configuration file, relative to the resource's directory (e.g., `samples/basic.tf.tmpl`).
+* `prefixed_vars`: Key/value pairs to inject into the configuration file, replacing the old `vars` field. Reference them with `{{index $.PrefixedVars "key"}}`. Resource IDs should be declared here to ensure they get a `tf-test` prefix and a random suffix for cleanup and collision avoidance.
+* `vars`: A new field for key/value pairs that are copied directly to tests without a prefix.
+* `test_env_vars`: Key/value pairs that map variable names to environment variables for tests (e.g., `PROJECT_NAME`, `REGION`, `ORG_ID`).
+* `test_vars_overrides`: Key/value pairs to override variables with literal values or function calls specifically for tests.
+* `min_version`: Overrides the sample-level `min_version` for this specific step.
+* `ignore_read_extra`: A list of properties to ignore during the import test for this step, typically for write-only fields.
+* `exclude_import_test`: If `true`, no import test is generated for this specific step.
+
+---
 
 Example:
 
 ```yaml
-examples:
+samples:
   - name: service_resource_basic
     primary_resource_id: example
     bootstrap_iam:
@@ -534,21 +537,24 @@ examples:
         role: "roles/bigquery.dataEditor"
       - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
         role: "roles/osconfig.serviceAgent"
-    vars:
-      dataset_id: "my-dataset"
-      network_name: "my-network"
-    test_env_vars:
-      org_id: "ORG_ID"
-    test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "service-resource-network-config")'
     min_version: "beta"
-    ignore_read_extra: 
-      - 'foo'
     exclude_test: true
     exclude_docs: true
-    exclude_import_test: true
     skip_vcr: true
-    skip_test: "https://github.com/hashicorp/terraform-provider-google/issues/20574"
+    skip_test: "[https://github.com/hashicorp/terraform-provider-google/issues/20574](https://github.com/hashicorp/terraform-provider-google/issues/20574)"
     external_providers:
       - "time"
+    steps:
+      - name: basic_creation # Name for this specific step
+        config_path: samples/basic.tf.tmpl # Path to the step's config
+        prefixed_vars:
+          dataset_id: "my-dataset"
+          network_name: "my-network"
+        test_env_vars:
+          org_id: "ORG_ID"
+        test_vars_overrides:
+          network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "service-resource-network-config")'
+        ignore_read_extra:
+          - 'foo'
+        exclude_import_test: true
 ```
