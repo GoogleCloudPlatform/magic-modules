@@ -298,4 +298,3 @@ properties:
     type: String
     description: |
       Anthos version for the node pool. Defaults to the user cluster version.
-    output: true

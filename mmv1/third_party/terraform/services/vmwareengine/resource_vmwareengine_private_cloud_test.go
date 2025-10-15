@@ -40,9 +40,9 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_vmwareengine_private_cloud.ds",
 						"google_vmwareengine_private_cloud.vmw-engine-pc",
-						map[string]struct{}{
-							"deletion_delay_hours":              {},
-							"send_deletion_delay_hours_if_zero": {},
+						[]string{
+							"deletion_delay_hours",
+							"send_deletion_delay_hours_if_zero",
 						}),
 					testAccCheckGoogleVmwareengineNsxCredentialsMeta("data.google_vmwareengine_nsx_credentials.nsx-ds"),
 					testAccCheckGoogleVmwareengineVcenterCredentialsMeta("data.google_vmwareengine_vcenter_credentials.vcenter-ds"),
@@ -61,9 +61,9 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_vmwareengine_private_cloud.ds",
 						"google_vmwareengine_private_cloud.vmw-engine-pc",
-						map[string]struct{}{
-							"deletion_delay_hours":              {},
-							"send_deletion_delay_hours_if_zero": {},
+						[]string{
+							"deletion_delay_hours",
+							"send_deletion_delay_hours_if_zero",
 						}),
 				),
 			},
@@ -80,9 +80,9 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_vmwareengine_private_cloud.ds",
 						"google_vmwareengine_private_cloud.vmw-engine-pc",
-						map[string]struct{}{
-							"deletion_delay_hours":              {},
-							"send_deletion_delay_hours_if_zero": {},
+						[]string{
+							"deletion_delay_hours",
+							"send_deletion_delay_hours_if_zero",
 						}),
 				),
 			},
@@ -109,9 +109,9 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_vmwareengine_private_cloud.ds",
 						"google_vmwareengine_private_cloud.vmw-engine-pc",
-						map[string]struct{}{
-							"deletion_delay_hours":              {},
-							"send_deletion_delay_hours_if_zero": {},
+						[]string{
+							"deletion_delay_hours",
+							"send_deletion_delay_hours_if_zero",
 						}),
 				),
 			},
@@ -125,7 +125,7 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 			{
 				Config: testVmwareengineSubnetImportConfig(context),
 				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores("data.google_vmwareengine_subnet.subnet-ds", "google_vmwareengine_subnet.vmw-engine-subnet", map[string]struct{}{}),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_vmwareengine_subnet.subnet-ds", "google_vmwareengine_subnet.vmw-engine-subnet"),
 				),
 			},
 			{
