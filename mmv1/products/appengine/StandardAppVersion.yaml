@@ -73,14 +73,6 @@ examples:
       org_id: 'ORG_ID'
     ignore_read_extra:
       - 'delete_service_on_destroy'
-  - name: 'app_engine_standard_app_version_bundled_services'
-    primary_resource_id: 'gae-std-app-ver-bundled'
-    vars:
-      project_id: 'tf-test-project'
-      service_id: 'bundled-service'
-      bucket_name: 'tf-test-gae-bkt-bundled'
-      object_name: 'hello-world.zip'
-      sa_email: 'gae-sa-bundled'
 virtual_fields:
   - name: 'noop_on_destroy'
     description: |

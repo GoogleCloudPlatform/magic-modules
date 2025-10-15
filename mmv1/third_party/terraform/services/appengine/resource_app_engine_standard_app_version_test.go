@@ -346,7 +346,6 @@ resource "google_storage_bucket_object" "main" {
 }
 
 func TestAccAppEngineStandardAppVersion_updateBundledServices(t *testing.T) {
-	t.Skip("https://github.com/hashicorp/terraform-provider-google/issues/18936")
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -435,7 +434,7 @@ resource "google_app_engine_standard_app_version" "foo" {
 
 resource "google_storage_bucket" "bucket" {
   project  = google_project.my_project.project_id
-  name     = "tf-test-%{random_suffix}-standard-ae-bucket"
+  name     = "tf-test-standard-ae-bucket%{random_suffix}"
   location = "US"
 }
 
@@ -503,7 +502,7 @@ resource "google_app_engine_standard_app_version" "foo" {
 
 resource "google_storage_bucket" "bucket" {
   project  = google_project.my_project.project_id
-  name     = "tf-test-%{random_suffix}-standard-ae-bucket"
+  name     = "tf-test-standard-ae-bucket%{random_suffix}"
   location = "US"
 }
 
