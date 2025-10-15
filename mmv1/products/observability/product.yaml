@@ -12,12 +12,12 @@
 # limitations under the License.
 
 ---
-name: CloudSecurityCompliance
-display_name: Cloud Security Compliance
+name: Observability
+display_name: Observability
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 versions:
-  - base_url: https://cloudsecuritycompliance.googleapis.com/v1/
-    name: ga
-caibaseurl: ""
-resourceswithcaiassettype: {}
+  - base_url: https://observability.googleapis.com/v1/
+    name: 'ga'
+  - base_url: https://observability.googleapis.com/v1/
+    name: 'beta'

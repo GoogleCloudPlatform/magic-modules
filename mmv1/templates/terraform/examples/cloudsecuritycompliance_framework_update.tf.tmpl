@@ -5,35 +5,16 @@ resource "google_cloud_security_compliance_framework" "{{$.PrimaryResourceId}}" 
   
   display_name = "Updated Framework Name"
   description  = "An updated description for the framework with additional details"
-  category     = ["CUSTOM_FRAMEWORK", "SECURITY"]
+  category     = ["CUSTOM_FRAMEWORK"]
   
   cloud_control_details {
-    name              = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/example-control"
+    name              = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/builtin-data-access-governance"
     major_revision_id = "1"
     
     parameters {
       name = "location"
       parameter_value {
         string_value = "us-west1"
-      }
-    }
-  }
-  
-  cloud_control_details {
-    name              = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/example-control-2"
-    major_revision_id = "1"
-    
-    parameters {
-      name = "environment"
-      parameter_value {
-        string_value = "production"
-      }
-    }
-    
-    parameters {
-      name = "enable_monitoring"
-      parameter_value {
-        bool_value = true
       }
     }
   }
