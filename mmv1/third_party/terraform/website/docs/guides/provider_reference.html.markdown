@@ -378,7 +378,7 @@ Example for Apigee with a European Union mREP:
 
 ```
 provider "google" {
-  apigee_custom_endpoint = "https://eu-apigee.googleapis.com/v1/"
+  apigee_custom_endpoint = "https://apigee.eu.rep.googleapis.com/v1/"
 }
 ```
 
