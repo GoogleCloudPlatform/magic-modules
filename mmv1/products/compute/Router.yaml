@@ -120,7 +120,6 @@ properties:
     type: ResourceRef
     description: |
       A reference to the network to which this router belongs.
-    required: false
     immutable: true
   # TODO: Figure out the story for interfaces/bgpPeers. Right
   # now in Terraform we have three separate resources: router,
@@ -248,10 +247,8 @@ properties:
     description: |
       A URI of an NCC Gateway spoke
     min_version: 'beta'
-    required: false
     immutable: true
     resource: 'Spoke'
-    imports: 'name'
     custom_expand: 'templates/terraform/custom_expand/self_link_from_name_network_connectivity.tmpl'
     conflicts:
       - network

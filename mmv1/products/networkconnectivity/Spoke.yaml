@@ -330,7 +330,7 @@ properties:
           type: String
   - name: gateway
     type: NestedObject
-    description: Optional. This is a gateway that can apply specialized processing to traffic going through it.
+    description: This is a gateway that can apply specialized processing to traffic going through it.
     immutable: true
     min_version: beta
     conflicts:
@@ -342,9 +342,9 @@ properties:
     properties:
       - name: ipRangeReservations
         type: Array
-        description: A list of IP ranges that are reserved for this gateway's internal intfrastructure.
+        description: A list of IP ranges that are reserved for this gateway's internal infrastructure.
         required: true
-        immutable: false
+        immutable: true
         item_type:
           type: NestedObject
           properties:
@@ -352,18 +352,18 @@ properties:
               type: String
               description: A block of IP address ranges used to allocate supporting infrastructure for this gateway—for example, 10.1.2.0/23. The IP address block must be a /23 range. This IP address block must not overlap with subnets in any spoke or peer network that the gateway can communicate with.
               required: true
+              immutable: true
       - name: capacity
         type: Enum
         description: the capacity of the gateway spoke, in Gbps.
-        immutable: false
-        required: false
+        required: true
         enum_values:
           - 'CAPACITY_1_GBPS'
           - 'CAPACITY_10_GBPS'
           - 'CAPACITY_100_GBPS'
       - name: routers
         type: Array
-        description: Output only. Set of Cloud Routers that are attached to this NCC-GW
+        description: Set of Cloud Routers that are attached to this NCC-GW
         min_version: beta
         item_type:
           type: String
