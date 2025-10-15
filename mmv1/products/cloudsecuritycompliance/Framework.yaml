@@ -28,15 +28,14 @@ examples:
     vars:
       framework_name: "example-framework"
     test_env_vars:
-      org_id: "ORG_TARGET"
+      org_id: "ORG_ID"
 
   - name: "cloudsecuritycompliance_framework_update"
     primary_resource_id: "example"
     vars:
       framework_name: "example-framework"
-      org_id: "1035865795181"
     test_env_vars:
-      org_id: "ORG_TARGET"
+      org_id: "ORG_ID"
 
 autogen_async: true
 async:
