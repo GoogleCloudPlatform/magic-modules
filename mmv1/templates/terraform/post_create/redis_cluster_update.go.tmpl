@@ -1,0 +1,5 @@
+if v, ok := d.GetOkExists("maintenance_version"); !tpgresource.IsEmptyValue(reflect.ValueOf(maintenanceVersionProp)) && (ok || !reflect.DeepEqual(v, maintenanceVersionProp)) {
+	log.Printf("[DEBUG] Calling update after create to patch in maintenance_version")
+	// maintenance_version cannot be added on create
+	return resourceRedisClusterUpdate(d, meta)
+}
