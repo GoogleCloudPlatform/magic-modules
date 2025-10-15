@@ -21,11 +21,12 @@ resource "google_cloud_security_compliance_framework" "{{$.PrimaryResourceId}}" 
   }
 }
 
+
 resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryResourceId}}" {
   organization            = "{{index $.TestEnvVars "org_id"}}"
   location                = "global"
   framework_deployment_id = "{{index $.Vars "deployment_name"}}"
-  description             = "A framework deployment for cloud security compliance"
+  description             = "An updated framework deployment for cloud security compliance with enhanced security policies"
   
   framework {
     framework         = google_cloud_security_compliance_framework.example.name
@@ -46,7 +47,7 @@ resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryRes
       parameters {
         name = "location"
         parameter_value {
-          string_value = "us-central1"
+          string_value = "us-west2"
         }
       }
     }

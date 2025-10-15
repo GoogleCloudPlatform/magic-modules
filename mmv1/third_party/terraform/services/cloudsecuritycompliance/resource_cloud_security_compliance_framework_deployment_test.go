@@ -1,0 +1,198 @@
+package cloudsecuritycompliance_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccCloudSecurityComplianceFrameworkDeployment_basic(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudSecurityComplianceFrameworkDeployment_basic(context),
+			},
+			{
+				ResourceName:            "google_cloud_security_compliance_framework_deployment.example",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"framework_deployment_id", "location", "organization"},
+			},
+		},
+	})
+}
+
+func testAccCloudSecurityComplianceFrameworkDeployment_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+provider "google" {
+  billing_project = "terraform-test-472610"
+  user_project_override = true
+}
+
+resource "google_cloud_security_compliance_framework" "example" {
+  name 		   = "organizations/%{org_id}/locations/global/frameworks/tf-test-example-framework%{random_suffix}"
+  organization = "%{org_id}"
+  location     = "global"
+  framework_id = "tf-test-example-framework%{random_suffix}"
+  
+  display_name = "Terraform Framework Name"
+  description  = "An Terraform description for the framework"
+  category     = ["CUSTOM_FRAMEWORK"]
+  
+  cloud_control_details {
+		name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-detective-policy-for-vertex-ai-runtime-template-idle-shutdown"
+		major_revision_id = "1"
+    
+    parameters {
+      name = "location"
+      parameter_value {
+        string_value = "us-central1"
+      }
+    }
+  }
+}
+
+resource "google_cloud_security_compliance_framework_deployment" "example" {
+  organization            = "%{org_id}"
+  location                = "global"
+  framework_deployment_id = "tf-test-example-deployment%{random_suffix}"
+  description             = "A framework deployment for cloud security compliance"
+  
+  framework {
+    framework         = google_cloud_security_compliance_framework.example.name
+    major_revision_id = "1"
+  }
+  
+  target_resource_config {
+    existing_target_resource = "organizations/%{org_id}"
+  }
+  
+  cloud_control_metadata {
+    enforcement_mode = "DETECTIVE"
+    
+    cloud_control_details {
+      name              = google_cloud_security_compliance_framework.example.cloud_control_details[0].name
+      major_revision_id = "1"
+      
+      parameters {
+        name = "location"
+        parameter_value {
+          string_value = "us-central1"
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func TestAccCloudSecurityComplianceFrameworkDeployment_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudSecurityComplianceFrameworkDeployment_basic(context),
+			},
+			{
+				ResourceName:            "google_cloud_security_compliance_framework_deployment.example",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"framework_deployment_id", "location", "organization"},
+			},
+			{
+				Config: testAccCloudSecurityComplianceFrameworkDeployment_update(context),
+			},
+			{
+				ResourceName:            "google_cloud_security_compliance_framework_deployment.example",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"framework_deployment_id", "location", "organization"},
+			},
+		},
+	})
+}
+
+func testAccCloudSecurityComplianceFrameworkDeployment_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+provider "google" {
+  billing_project = "terraform-test-472610"
+  user_project_override = true
+}
+  
+resource "google_cloud_security_compliance_framework" "example" {
+  name 		   = "organizations/%{org_id}/locations/global/frameworks/tf-test-example-framework%{random_suffix}"
+  organization = "%{org_id}"
+  location     = "global"
+  framework_id = "tf-test-example-framework%{random_suffix}"
+  
+  display_name = "Terraform Framework Name"
+  description  = "An Terraform description for the framework"
+  category     = ["CUSTOM_FRAMEWORK"]
+  
+  cloud_control_details {
+		name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-detective-policy-for-vertex-ai-runtime-template-idle-shutdown"
+		major_revision_id = "1"
+    
+    parameters {
+      name = "location"
+      parameter_value {
+        string_value = "us-central1"
+      }
+    }
+  }
+}
+
+
+resource "google_cloud_security_compliance_framework_deployment" "example" {
+  organization            = "%{org_id}"
+  location                = "global"
+  framework_deployment_id = "tf-test-example-deployment%{random_suffix}"
+  description             = "An updated framework deployment for cloud security compliance with enhanced security policies"
+  
+  framework {
+    framework         = google_cloud_security_compliance_framework.example.name
+    major_revision_id = "2"
+  }
+  
+  target_resource_config {
+    existing_target_resource = "organizations/%{org_id}"
+  }
+  
+  cloud_control_metadata {
+    enforcement_mode = "DETECTIVE"
+    
+    cloud_control_details {
+      name              = google_cloud_security_compliance_framework.example.cloud_control_details[0].name
+      major_revision_id = "1"
+      
+      parameters {
+        name = "location"
+        parameter_value {
+          string_value = "us-west2"
+        }
+      }
+    }
+  }
+}
+`, context)
+}
