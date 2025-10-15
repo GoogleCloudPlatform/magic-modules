@@ -414,6 +414,7 @@ service/firestore-controlplane:
   resources:
   - google_firestore_backup_schedule
   - google_firestore_database
+  - google_firestore_user_creds
 service/firestore-dataplane:
   resources:
   - google_datastore_index
