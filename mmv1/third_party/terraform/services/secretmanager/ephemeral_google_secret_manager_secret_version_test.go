@@ -107,6 +107,12 @@ ephemeral "google_secret_manager_secret_version" "ephemeral" {
   is_secret_data_base64 = true
 }
 
+ephemeral "google_secret_manager_secret_version" "ephemeral_from_secret_id" {
+  secret  				= google_secret_manager_secret_version.version.secret_id
+  version 				= google_secret_manager_secret_version.version.version
+  is_secret_data_base64 = true
+}
+
 resource "google_secret_manager_secret_version" "version_two_based_on_ephemeral" {
   secret  	             = google_secret_manager_secret_version.version.secret
   secret_data_wo 		 = ephemeral.google_secret_manager_secret_version.ephemeral.secret_data
