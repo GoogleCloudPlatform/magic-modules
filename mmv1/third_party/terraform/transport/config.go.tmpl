@@ -87,6 +87,7 @@ import (
 	"google.golang.org/api/sourcerepo/v1"
 	"google.golang.org/api/spanner/v1"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
+	backupdr "google.golang.org/api/backupdr/v1"
 	"google.golang.org/api/storage/v1"
 	"google.golang.org/api/storagetransfer/v1"
 	"google.golang.org/api/transport"
@@ -903,6 +904,20 @@ func (c *Config) NewSqlAdminClient(userAgent string) *sqladmin.Service {
 	return clientSqlAdmin
 }
 
+func (c *Config) NewBackupDRClient(userAgent string) *backupdr.Service {
+	backupdrClientBasePath := RemoveBasePathVersion(RemoveBasePathVersion(c.BackupDRBasePath))
+	log.Printf("[INFO] Instantiating Google SqlAdmin client for path %s", backupdrClientBasePath)
+	clientBackupdrAdmin, err := backupdr.NewService(c.Context, option.WithHTTPClient(c.Client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client storage: %s", err)
+		return nil
+	}
+	clientBackupdrAdmin.UserAgent = userAgent
+	clientBackupdrAdmin.BasePath = backupdrClientBasePath
+
+	return clientBackupdrAdmin
+}
+
 func (c *Config) NewPubsubClient(userAgent string) *pubsub.Service {
 	pubsubClientBasePath := RemoveBasePathVersion(c.PubsubBasePath)
 	log.Printf("[INFO] Instantiating Google Pubsub client for path %s", pubsubClientBasePath)
@@ -1505,6 +1520,12 @@ func ConfigureBasePaths(c *Config) {
 }
 
 func GetCurrentUserEmail(config *Config, userAgent string) (string, error) {
+	ud := config.UniverseDomain
+	if ud != "" && ud != "googleapis.com" {
+		log.Printf("[INFO] Configured universe domain detected. Skipping user email retrieval.")
+		return "", nil
+	}
+
 	// When environment variables UserProjectOverride and BillingProject are set for the provider,
 	// the header X-Goog-User-Project is set for the API requests.
 	// But it causes an error when calling GetCurrentUserEmail. Set the project to be "NO_BILLING_PROJECT_OVERRIDE".
@@ -1513,9 +1534,10 @@ func GetCurrentUserEmail(config *Config, userAgent string) (string, error) {
 	// See https://github.com/golang/oauth2/issues/306 for a recommendation to do this from a Go maintainer
 	// URL retrieved from https://accounts.google.com/.well-known/openid-configuration
 	res, err := SendRequest(SendRequestOptions{
-		Config: config,
-		Method: "GET",
+		Config:  config,
+		Method:  "GET",
 		Project: "NO_BILLING_PROJECT_OVERRIDE",
+		// URL does not need to be universe domain-aware since we return early for non-GDU universes
 		RawURL: "https://openidconnect.googleapis.com/v1/userinfo",
 		UserAgent: userAgent,
 	})

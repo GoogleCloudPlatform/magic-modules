@@ -1,6 +1,6 @@
 module magician
 
-go 1.23
+go 1.24
 
 replace github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler => ../../tools/issue-labeler
 

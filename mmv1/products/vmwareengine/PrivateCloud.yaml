@@ -108,6 +108,34 @@ properties:
     type: String
     description: |
       User-provided description for this private cloud.
+  - name: 'createTime'
+    type: Time
+    description: |
+      Creation time of this resource.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Last update time of this resource.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'deleteTime'
+    type: Time
+    description: |
+      Time when the resource was scheduled for deletion.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'expireTime'
+    type: Time
+    description: |
+      Time when the resource will be irreversibly deleted.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
   - name: 'uid'
     type: String
     description: |

@@ -34,7 +34,6 @@ timeouts:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'repository'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   min_version: 'beta'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/dataform_repository.go.tmpl'

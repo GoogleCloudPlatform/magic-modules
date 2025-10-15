@@ -26,7 +26,7 @@ For more information about types of resources and the generation process overall
 
 ## Promote fields and resources
 
-{{< tabs "resources" >}}
+{{% tabs "resources" %}}
 {{< tab "MMv1" >}}
 1. Remove `min_version: 'beta'` from the resource's or field's configuration in `ResourceName.yaml`.
 2. If necessary, remove version guards from resource-level `custom_code`.
@@ -46,7 +46,7 @@ For more information about types of resources and the generation process overall
    - For other fields, expanders and flatteners
    - Any other resource-specific code
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 ## Promote tests
 

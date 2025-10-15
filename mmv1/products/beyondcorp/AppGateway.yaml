@@ -45,6 +45,7 @@ async:
   result:
     resource_inside_response: true
 custom_code:
+include_in_tgc_next_DO_NOT_USE: true
 schema_version: 1
 state_upgraders: true
 examples:

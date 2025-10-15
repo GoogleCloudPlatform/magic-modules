@@ -108,6 +108,7 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 			t.GenerateResourceTests(object, *templateData, outputFolder)
 			t.GenerateResourceSweeper(object, *templateData, outputFolder)
 			t.GenerateSingularDataSource(object, *templateData, outputFolder)
+			t.GenerateSingularDataSourceTests(object, *templateData, outputFolder)
 			// log.Printf("Generating %s metadata", object.Name)
 			t.GenerateResourceMetadata(object, *templateData, outputFolder)
 		}
@@ -128,8 +129,13 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 			log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 		}
-		targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s.go", t.ResourceGoFilename(object)))
-		templateData.GenerateResourceFile(targetFilePath, object)
+		if object.FrameworkResource {
+			targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_fw_%s.go", t.ResourceGoFilename(object)))
+			templateData.GenerateFWResourceFile(targetFilePath, object)
+		} else {
+			targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s.go", t.ResourceGoFilename(object)))
+			templateData.GenerateResourceFile(targetFilePath, object)
+		}
 	}
 
 	if generateDocs {
@@ -201,6 +207,21 @@ func (t *Terraform) GenerateSingularDataSource(object api.Resource, templateData
 	}
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s.go", t.ResourceGoFilename(object)))
 	templateData.GenerateDataSourceFile(targetFilePath, object)
+}
+
+func (t *Terraform) GenerateSingularDataSourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
+	if !object.ShouldGenerateSingularDataSourceTests() {
+		return
+	}
+
+	productName := t.Product.ApiName
+	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s_test.go", t.ResourceGoFilename(object)))
+	templateData.GenerateDataSourceTestFile(targetFilePath, object)
+
 }
 
 // GenerateProduct creates the product.go file for a given service directory.
@@ -281,10 +302,8 @@ func (t *Terraform) GenerateIamDocumentation(object api.Resource, templateData T
 func (t *Terraform) FolderName() string {
 	if t.TargetVersionName == "ga" {
 		return "google"
-	} else if t.TargetVersionName == "beta" {
-		return "google-beta"
 	}
-	return "google-private"
+	return "google-" + t.TargetVersionName
 }
 
 // Similar to FullResourceName, but override-aware to prevent things like ending in _test.
@@ -711,9 +730,8 @@ func (t Terraform) replaceImportPath(outputFolder, target string) {
 		tpg = TERRAFORM_PROVIDER_BETA
 		dir = RESOURCE_DIRECTORY_BETA
 	default:
-		tpg = TERRAFORM_PROVIDER_PRIVATE
-		dir = RESOURCE_DIRECTORY_PRIVATE
-
+		tpg = "github.com/hashicorp/terraform-provider-google-" + t.TargetVersionName
+		dir = "google-" + t.TargetVersionName
 	}
 
 	sourceByte = bytes.Replace(sourceByte, []byte(gaImportPath), []byte(tpg+"/"+dir), -1)
@@ -743,7 +761,7 @@ func (t Terraform) ProviderFromVersion() string {
 	case "beta":
 		dir = RESOURCE_DIRECTORY_BETA
 	default:
-		dir = RESOURCE_DIRECTORY_PRIVATE
+		dir = "google-" + t.TargetVersionName
 	}
 	return dir
 }

@@ -1,7 +1,8 @@
 createdOidcClientSecret := d.Get("oidc.0.client_secret.0.value.0.plain_text")
 createdExtraAttributesClientSecret := d.Get("extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text")
+createdExtendedAttributesClientSecret := d.Get("extended_attributes_oauth2_client.0.client_secret.0.value.0.plain_text")
 
-if (createdOidcClientSecret != nil && createdOidcClientSecret != "") || (createdExtraAttributesClientSecret != nil && createdExtraAttributesClientSecret != "") {
+if (createdOidcClientSecret != nil && createdOidcClientSecret != "") || (createdExtraAttributesClientSecret != nil && createdExtraAttributesClientSecret != "") || (createdExtendedAttributesClientSecret != nil && createdExtendedAttributesClientSecret != "") {
 	// After the create, reading from the API returns a new thumbprint
 	// for the client secret value, which clears the plain_text. We set the plain_text since
 	// this case should not warrant a diff.
@@ -16,6 +17,17 @@ if (createdOidcClientSecret != nil && createdOidcClientSecret != "") || (created
 		clientSecretValue := clientSecret.([]interface{})[0].(map[string]interface{})["value"]
 		clientSecretValue.([]interface{})[0].(map[string]interface{})["plain_text"] = createdExtraAttributesClientSecret
 		if err := d.Set("extra_attributes_oauth2_client", extraAttributesOauth2Client); err != nil {
+			return err
+		}
+	}
+
+	// Populate ExtendedAttributesOauth2Client the client secret plain text 
+	if createdExtendedAttributesClientSecret != nil && createdExtendedAttributesClientSecret != "" {
+		extendedAttributesOauth2Client := d.Get("extended_attributes_oauth2_client")
+		clientSecret := extendedAttributesOauth2Client.([]interface{})[0].(map[string]interface{})["client_secret"]
+		clientSecretValue := clientSecret.([]interface{})[0].(map[string]interface{})["value"]
+		clientSecretValue.([]interface{})[0].(map[string]interface{})["plain_text"] = createdExtendedAttributesClientSecret
+		if err := d.Set("extended_attributes_oauth2_client", extendedAttributesOauth2Client); err != nil {
 			return err
 		}
 	}

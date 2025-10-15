@@ -1,0 +1,195 @@
+[
+  {
+    "ancestors": ["projects/307841421122"],
+    "asset_type": "networksecurity.googleapis.com/BackendAuthenticationConfig",
+    "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test1",
+    "resource": {
+      "data": {
+        "createTime": "2025-09-01T12:06:59.449575828Z",
+        "etag": "tyOJj9L43CxYuKifz5lEwq4SkQqs5426-4H7BCgyUMw",
+        "name": "projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test1",
+        "updateTime": "2025-09-01T12:07:03.557427913Z",
+        "wellKnownRoots": "PUBLIC_ROOTS"
+      },
+      "discovery_document_uri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discovery_name": "BackendAuthenticationConfig",
+      "location": "global",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
+      "version": "v1"
+    },
+    "updateTime": "2025-09-01T12:07:03.557427913Z"
+  },
+  {
+    "ancestors": ["projects/307841421122"],
+    "asset_type": "networksecurity.googleapis.com/BackendAuthenticationConfig",
+    "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test2",
+    "resource": {
+      "data": {
+        "createTime": "2025-09-01T12:22:50.489447184Z",
+        "etag": "hI87OGITW_38twEfrG1qMbgXTjulOs0PvGVm5zgpNfQ",
+        "name": "projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test2",
+        "trustConfig": "projects/ccm-breakit/locations/global/trustConfigs/id-2de0d4b7-89cf-476f-893d-4567b3791ca9",
+        "updateTime": "2025-09-01T12:22:56.430273835Z",
+        "wellKnownRoots": "PUBLIC_ROOTS"
+      },
+
+      "discovery_document_uri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discovery_name": "BackendAuthenticationConfig",
+      "location": "global",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
+      "version": "v1"
+    },
+    "updateTime": "2025-09-01T12:22:56.430273835Z"
+  },
+  {
+    "ancestors": ["projects/307841421122"],
+    "asset_type": "networksecurity.googleapis.com/BackendAuthenticationConfig",
+    "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test3",
+    "resource": {
+      "data": {
+        "clientCertificate": "projects/ccm-breakit/locations/global/certificates/anatolisaukhin-27101",
+        "createTime": "2025-09-01T12:23:21.187162159Z",
+        "etag": "TbNENVDPeneynkqLnTmLvn757xA-GnuI_XTsk2F00y0",
+        "name": "projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test3",
+        "updateTime": "2025-09-01T12:23:25.982840761Z",
+        "wellKnownRoots": "PUBLIC_ROOTS"
+      },
+      "discovery_document_uri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discovery_name": "BackendAuthenticationConfig",
+      "location": "global",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
+      "version": "v1"
+    },
+    "updateTime": "2025-09-01T12:23:25.982840761Z"
+  },
+  {
+    "ancestors": ["projects/307841421122"],
+    "asset_type": "networksecurity.googleapis.com/BackendAuthenticationConfig",
+    "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test4",
+    "resource": {
+      "data": {
+        "clientCertificate": "projects/ccm-breakit/locations/global/certificates/anatolisaukhin-27101",
+        "createTime": "2025-09-01T12:23:59.175425527Z",
+        "etag": "MtMLKQSPwOIjp25H_ndWUe9zKCcVvtHdoHxv5XvBvHU",
+        "name": "projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test4",
+        "trustConfig": "projects/ccm-breakit/locations/global/trustConfigs/id-2de0d4b7-89cf-476f-893d-4567b3791ca9",
+        "updateTime": "2025-09-01T12:24:09.189436548Z",
+        "wellKnownRoots": "PUBLIC_ROOTS"
+      },
+      "discovery_document_uri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discovery_name": "BackendAuthenticationConfig",
+      "location": "global",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
+      "version": "v1"
+    },
+    "updateTime": "2025-09-01T12:24:09.189436548Z"
+  },
+  {
+    "ancestors": ["projects/307841421122"],
+    "asset_type": "networksecurity.googleapis.com/BackendAuthenticationConfig",
+    "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test5",
+    "resource": {
+      "data": {
+        "createTime": "2025-09-01T12:24:38.165237290Z",
+        "etag": "q-3pJ_Ae7LorXoNfPMbuxSiwH4JiS4KMlk6Ojm50qbo",
+        "name": "projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test5",
+        "trustConfig": "projects/ccm-breakit/locations/global/trustConfigs/id-2de0d4b7-89cf-476f-893d-4567b3791ca9",
+        "updateTime": "2025-09-01T12:24:42.574599551Z",
+        "wellKnownRoots": "NONE"
+      },
+      "discovery_document_uri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discovery_name": "BackendAuthenticationConfig",
+      "location": "global",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
+      "version": "v1"
+    },
+    "updateTime": "2025-09-01T12:24:42.574599551Z"
+  },
+  {
+    "ancestors": ["projects/307841421122"],
+    "asset_type": "networksecurity.googleapis.com/BackendAuthenticationConfig",
+    "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test7",
+    "resource": {
+      "data": {
+        "clientCertificate": "projects/ccm-breakit/locations/global/certificates/anatolisaukhin-27101",
+        "createTime": "2025-09-01T12:25:29.338526364Z",
+        "etag": "5dYcNBll7z2KaHuJd2nxr9Qp4U1JPuPBzJtFkVdRO_k",
+        "name": "projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test7",
+        "trustConfig": "projects/ccm-breakit/locations/global/trustConfigs/id-2de0d4b7-89cf-476f-893d-4567b3791ca9",
+        "updateTime": "2025-09-01T12:25:36.419856961Z",
+        "wellKnownRoots": "NONE"
+      },
+      "discovery_document_uri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discovery_name": "BackendAuthenticationConfig",
+      "location": "global",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
+      "version": "v1"
+    },
+    "updateTime": "2025-09-01T12:25:36.419856961Z"
+  },
+  {
+    "ancestors": ["projects/307841421122"],
+    "asset_type": "networksecurity.googleapis.com/BackendAuthenticationConfig",
+    "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test8",
+    "resource": {
+      "data": {
+        "createTime": "2025-09-01T12:28:43.012225935Z",
+        "description": "My test description",
+        "etag": "jAgYExhvS1-odwm8v6WzKxXcWqnMgOqyQNxz0LpLzcE",
+        "labels": {
+          "foo": "bar"
+        },
+        "name": "projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test8",
+        "updateTime": "2025-09-01T12:28:48.571512164Z",
+        "wellKnownRoots": "PUBLIC_ROOTS"
+      },
+      "discovery_document_uri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discovery_name": "BackendAuthenticationConfig",
+      "location": "global",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
+      "version": "v1"
+    },
+    "updateTime": "2025-09-01T12:28:48.571512164Z"
+  },
+
+  {
+    "ancestors": ["projects/307841421122"],
+    "asset_type": "networksecurity.googleapis.com/BackendAuthenticationConfig",
+    "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/europe-west1/backendAuthenticationConfigs/laurenzk-test9",
+    "resource": {
+      "data": {
+        "createTime": "2025-09-01T12:37:43.341940613Z",
+        "etag": "DQgzWLri0AvaD72f8Xk5SBtT6nEoH4B3krtcsjS7V2A",
+        "name": "projects/ccm-breakit/locations/europe-west1/backendAuthenticationConfigs/laurenzk-test9",
+        "updateTime": "2025-09-01T12:37:43.402977101Z",
+        "wellKnownRoots": "PUBLIC_ROOTS"
+      },
+      "discovery_document_uri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discovery_name": "BackendAuthenticationConfig",
+      "location": "europe-west1",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
+      "version": "v1"
+    },
+    "updateTime": "2025-09-01T12:37:43.402977101Z"
+  },
+  {
+    "ancestors": ["projects/307841421122"],
+    "asset_type": "networksecurity.googleapis.com/BackendAuthenticationConfig",
+    "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test10",
+    "resource": {
+      "data": {
+        "createTime": "2025-09-01T12:28:42.936655254Z",
+        "etag": "7hxmlYo8sLeaML92DAHdBZGpNDehxn6ksGJsTQDXcHE",
+        "name": "projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test10",
+        "updateTime": "2025-09-01T12:28:46.761498301Z",
+        "wellKnownRoots": "PUBLIC_ROOTS"
+      },
+      "discovery_document_uri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discovery_name": "BackendAuthenticationConfig",
+      "location": "global",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
+      "version": "v1"
+    },
+    "updateTime": "2025-09-01T12:28:46.761498301Z"
+  }
+]

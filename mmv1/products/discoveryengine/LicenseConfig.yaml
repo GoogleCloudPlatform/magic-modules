@@ -1,0 +1,151 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'LicenseConfig'
+description: |
+  License Configuration.
+references:
+  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.licenseConfigs'
+base_url: 'projects/{{project}}/locations/{{location}}/licenseConfigs'
+self_link: 'projects/{{project}}/locations/{{location}}/licenseConfigs/{{license_config_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/licenseConfigs?licenseConfigId={{license_config_id}}'
+update_verb: 'PATCH'
+update_mask: true
+exclude_delete: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/licenseConfigs/{{license_config_id}}'
+timeouts:
+  insert_minutes: 5
+  update_minutes: 5
+examples:
+  - name: 'discoveryengine_licenseconfig_basic'
+    primary_resource_id: 'basic'
+    vars:
+      license_config_id: 'license-config-id'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The geographic location where the data store should reside. The value can
+      only be one of "global", "us" and "eu".
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'licenseConfigId'
+    type: String
+    description: |
+      The unique id of the license config.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The unique full resource name of the license config. Values are of the format
+      `projects/{project}/locations/{location}/licenseConfigs/{license_config}`.
+    output: true
+  - name: 'licenseCount'
+    type: Integer
+    description: |
+      Number of licenses purchased.
+    required: true
+  - name: 'subscriptionTier'
+    type: Enum
+    description: |
+      Subscription tier information for the license config.
+    required: true
+    enum_values:
+      - 'SUBSCRIPTION_TIER_UNSPECIFIED'
+      - 'SUBSCRIPTION_TIER_SEARCH'
+      - 'SUBSCRIPTION_TIER_SEARCH_AND_ASSISTANT'
+      - 'SUBSCRIPTION_TIER_NOTEBOOK_LM'
+      - 'SUBSCRIPTION_TIER_FRONTLINE_WORKER'
+      - 'SUBSCRIPTION_TIER_AGENTSPACE_STARTER'
+      - 'SUBSCRIPTION_TIER_AGENTSPACE_BUSINESS'
+      - 'SUBSCRIPTION_TIER_ENTERPRISE'
+      - 'SUBSCRIPTION_TIER_EDU'
+      - 'SUBSCRIPTION_TIER_EDU_PRO'
+  - name: 'autoRenew'
+    type: Boolean
+    description: |
+      Whether the license config should be auto renewed when it reaches the end date.
+  - name: 'startDate'
+    type: NestedObject
+    description: |
+      The start date.
+    required: true
+    properties:
+      - name: 'year'
+        type: Integer
+        description:
+          Year of the date. Must be from 1 to
+          9999, or 0 to specify a date without a
+          year.
+      - name: 'month'
+        type: Integer
+        description:
+          Month of a year. Must be from 1 to 12,
+          or 0 to specify a year without a month
+          and day.
+      - name: 'day'
+        type: Integer
+        description:
+          Day of a month. Must be from 1 to 31
+          and valid for the year and month, or 0
+          to specify a year by itself or a year
+          and month where the day isn't
+          significant.
+  - name: 'endDate'
+    type: NestedObject
+    description: |
+      The planned end date.
+    properties:
+      - name: 'year'
+        type: Integer
+        description:
+          Year of the date. Must be from 1 to
+          9999, or 0 to specify a date without a
+          year.
+      - name: 'month'
+        type: Integer
+        description:
+          Month of a year. Must be from 1 to 12,
+          or 0 to specify a year without a month
+          and day.
+      - name: 'day'
+        type: Integer
+        description:
+          Day of a month. Must be from 1 to 31
+          and valid for the year and month, or 0
+          to specify a year by itself or a year
+          and month where the day isn't
+          significant.
+  - name: 'subscriptionTerm'
+    type: Enum
+    description: |
+      Subscription term.
+    required: true
+    enum_values:
+      - 'SUBSCRIPTION_TERM_UNSPECIFIED'
+      - 'SUBSCRIPTION_TERM_ONE_MONTH'
+      - 'SUBSCRIPTION_TERM_ONE_YEAR'
+      - 'SUBSCRIPTION_TERM_THREE_YEARS'
+      - 'SUBSCRIPTION_TERM_THREE_MONTHS'
+      - 'SUBSCRIPTION_TERM_FOURTEEN_DAYS'
+      - 'SUBSCRIPTION_TERM_CUSTOM'
+  - name: 'freeTrial'
+    type: Boolean
+    description: |
+      Whether the license config is for free trial.

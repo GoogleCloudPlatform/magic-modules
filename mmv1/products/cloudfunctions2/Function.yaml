@@ -49,7 +49,6 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'cloud_function'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/functions/{{cloud_function}}'
     - '{{cloud_function}}'
@@ -503,7 +502,7 @@ properties:
         type: String
         description: |
           Name of the service associated with a Function.
-        default_from_api: true
+        output: true
       - name: 'timeoutSeconds'
         type: Integer
         description: |
@@ -678,6 +677,7 @@ properties:
         default_from_api: true
       - name: 'eventType'
         type: String
+        required: true
         description: 'Required. The type of event to observe.'
       - name: 'eventFilters'
         type: Array

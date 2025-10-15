@@ -45,7 +45,7 @@ custom_code:
   constants: 'templates/terraform/constants/subscription.go.tmpl'
   encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/pubsub_subscription.tmpl'
-  tgc_encoder: 'templates/tgc_next/encoders/pubsub_add_name.go.tmpl'
+tgc_ignore_terraform_encoder: true
 examples:
   - name: 'pubsub_subscription_push'
     primary_resource_id: 'example'
@@ -131,6 +131,13 @@ examples:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
     tgc_skip_test: 'The dynamic block is in test configuration. The test takes time to fix.'
+  - name: 'pubsub_subscription_tags'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+      subscription_name: 'example-subscription'
+      tag_key: 'tag_key'
+      tag_value: 'tag_value'
 parameters:
 properties:
   - name: 'name'
@@ -583,3 +590,16 @@ properties:
           description: |
             Controls whether or not to use this transform. If not set or `false`,
             the transform will be applied to messages. Default: `true`.
+  - name: 'tags'
+    type: KeyValuePairs
+    description: |
+      Input only. Resource manager tags to be bound to the subscription. Tag
+      keys and values have the same definition as resource manager tags. Keys
+      must be in the format tagKeys/{tag_key_id}, and values are in the format
+      tagValues/456. The field is ignored when empty. The field is immutable and
+      causes resource replacement when mutated. This field is only set at create
+      time and modifying this field after creation will trigger recreation. To
+      apply tags to an existing resource, see the `google_tags_tag_value`
+      resource.
+    immutable: true
+    ignore_read: true

@@ -1,0 +1,75 @@
+package networkmanagement_test
+
+{{ if ne $.TargetVersionName "ga" -}}
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+    "github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccNetworkManagementOrganizationVpcFlowLogsConfig_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckNetworkManagementVpcFlowLogsConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkManagementOrganizationVpcFlowLogsConfig_basic(context),
+			},
+			{
+				ResourceName:            "google_network_management_organization_vpc_flow_logs_config.org-test-update",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"organization", "location", "vpc_flow_logs_config_id"},
+			},
+			{
+				Config: testAccNetworkManagementOrganizationVpcFlowLogsConfig_update(context),
+			},
+			{
+				ResourceName:            "google_network_management_organization_vpc_flow_logs_config.org-test-update",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"organization", "location", "vpc_flow_logs_config_id"},
+			},
+		},
+	})
+}
+
+func testAccNetworkManagementOrganizationVpcFlowLogsConfig_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_network_management_organization_vpc_flow_logs_config" "org-test-update" {
+  provider                = google-beta
+  vpc_flow_logs_config_id = "tf-test-update-org-id-%{random_suffix}"
+  organization            = "%{org_id}"
+  location                = "global"
+}
+`, context)
+}
+
+func testAccNetworkManagementOrganizationVpcFlowLogsConfig_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_network_management_organization_vpc_flow_logs_config" "org-test-update" {
+  provider                = google-beta
+  vpc_flow_logs_config_id = "tf-test-update-org-id-%{random_suffix}"
+  organization            = "%{org_id}"
+  location                = "global"
+
+  state                   = "DISABLED"
+  aggregation_interval    = "INTERVAL_30_SEC"
+  description             = "This is an updated description"
+  flow_sampling           = 0.5
+  metadata                = "EXCLUDE_ALL_METADATA"
+  cross_project_metadata  = "CROSS_PROJECT_METADATA_DISABLED"
+}
+`, context)
+}
+{{ end }}

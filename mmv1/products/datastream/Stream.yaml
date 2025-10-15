@@ -180,6 +180,26 @@ examples:
     external_providers: ["random", "time"]
       # Random provider
     skip_vcr: true
+  - name: 'datastream_stream_bigquery_cross_project_source_hierachy'
+    primary_resource_id: 'default'
+    vars:
+      stream_id: 'my-stream'
+      private_connection_id: 'my-connection'
+      network_name: 'my-network'
+      source_connection_profile_id: 'source-profile'
+      database_instance_name: 'my-instance'
+      deletion_protection: 'true'
+      destination_connection_profile_id: 'destination-profile'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
+    external_providers: ["random", "time"]
+      # Random provider
+    skip_vcr: true
   - name: 'datastream_stream_bigquery_append_only'
     primary_resource_id: 'default'
     vars:
@@ -1337,6 +1357,10 @@ properties:
                       encryption key. i.e. projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{cryptoKey}.
                       See https://cloud.google.com/bigquery/docs/customer-managed-encryption for more information.
                     immutable: true
+              - name: 'projectId'
+                type: string
+                description: |
+                  Optional. The project id of the BigQuery dataset. If not specified, the project will be inferred from the stream resource.
           - name: 'blmtConfig'
             type: NestedObject
             description: 'BigLake Managed Tables configuration for BigQuery streams.'

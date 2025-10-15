@@ -42,3 +42,4 @@ The list of fields used by this resource. Each field can contain the following a
 - `field`: The name of the field in Terraform, including the path e.g., "build_config.source.storage_source.bucket"
 - `api_field`: The name of the field in the API, including the path e.g., "build_config.source.storage_source.bucket". Defaults to the value of `field`.
 - `provider_only`: If true, the field is only present in the provider. This primarily applies for virtual fields and url-only parameters. When set to true, `api_field` should be left empty, as it will be ignored. Default: `false`.
+- `json`: If true, this is a JSON field which "covers" all child API fields. As a special case, JSON fields which cover an entire resource can have `api_field` set to `*`.

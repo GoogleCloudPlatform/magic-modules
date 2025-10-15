@@ -155,7 +155,6 @@ func ResourceBigtableInstance() *schema.Resource {
 						"node_scaling_factor": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ForceNew:     true,
 							Default:      "NodeScalingFactor1X",
 							ValidateFunc: validation.StringInSlice([]string{"NodeScalingFactor1X", "NodeScalingFactor2X"}, false),
 							Description:  `The node scaling factor of this cluster. One of "NodeScalingFactor1X" or "NodeScalingFactor2X". Defaults to "NodeScalingFactor1X".`,
@@ -821,6 +820,14 @@ func resourceBigtableInstanceClusterReorderTypeListFunc(diff tpgresource.Terrafo
 				return fmt.Errorf("Error setting cluster diff: %s", err)
 			}
 		}
+
+		oNSF, nNSF := diff.GetChange(fmt.Sprintf("cluster.%d.node_scaling_factor", i))
+		if oNSF != nNSF {
+			err := diff.ForceNew(fmt.Sprintf("cluster.%d.node_scaling_factor", i))
+			if err != nil {
+				return fmt.Errorf("Error setting cluster diff: %s", err)
+			}
+		}
 	}
 
 	return nil
@@ -829,9 +836,9 @@ func resourceBigtableInstanceClusterReorderTypeListFunc(diff tpgresource.Terrafo
 func resourceBigtableInstanceImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
 	if err := tpgresource.ParseImportId([]string{
-		"projects/(?P<project>[^/]+)/instances/(?P<name>[^/]+)",
-		"(?P<project>[^/]+)/(?P<name>[^/]+)",
-		"(?P<name>[^/]+)",
+		"^projects/(?P<project>[^/]+)/instances/(?P<name>[^/]+)$",
+		"^(?P<project>[^/]+)/(?P<name>[^/]+)$",
+		"^(?P<name>[^/]+)$",
 	}, d, config); err != nil {
 		return nil, err
 	}

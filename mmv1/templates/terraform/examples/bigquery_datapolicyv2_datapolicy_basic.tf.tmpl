@@ -1,0 +1,5 @@
+resource "google_bigquery_datapolicyv2_data_policy" "{{$.PrimaryResourceId}}" {
+  location         = "us-central1"
+  data_policy_type = "RAW_DATA_ACCESS_POLICY"
+  data_policy_id   = "{{index $.Vars "data_policy_id"}}"
+}

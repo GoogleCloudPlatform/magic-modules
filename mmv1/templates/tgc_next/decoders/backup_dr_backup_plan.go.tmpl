@@ -1,0 +1,20 @@
+// startHourOfDay is missing in CAI, but has default value 0 in API object
+if rules, ok := res["backupRules"].([]interface{}); ok {
+    for _, raw := range rules {
+        if rule, ok := raw.(map[string]interface{}); ok {
+            if raw, ok := rule["standardSchedule"]; ok {
+                if ss, ok := raw.(map[string]interface{}); ok {
+                    if raw, ok := ss["backupWindow"]; ok {
+                        if bw, ok := raw.(map[string]interface{}); ok {
+                            if _, ok := ss["startHourOfDay"]; !ok {
+                                bw["startHourOfDay"] = 0
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+return res, hclData, nil
