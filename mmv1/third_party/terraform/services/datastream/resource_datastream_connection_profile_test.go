@@ -582,30 +582,62 @@ func testAccDatastreamConnectionProfile_mongoDbBasicExample(context map[string]i
 	return acctest.Nprintf(`
 data "google_project" "project" {}
 
-resource "google_datastream_connection_profile" "default" {
-	project                 = data.google_project.project.project_id
-	display_name            = "tf-mongodb-profile"
-	location                = "us-central1"
-	connection_profile_id   = "tf-mongo-cp-%{random_suffix}"
-	create_without_validation = true // Set to true for tests to bypass actual connectivity checks.
+resource "google_secret_manager_secret" "password_secret" {
+  project   = data.google_project.project.project_id
+  secret_id = "tf-mongo-pw-secret-%{random_suffix}"
+  replication {
+    auto {}
+  }
+}
 
-	mongodb_profile {
-		host_addresses {
-			hostname = "1.1.1.1"
-			port     = 27017
-		}
-		replica_set            = "rs0"
-		username               = "user"
-		secret_manager_stored_password = "projects/datastream-con-adkr/locations/us-central1/secrets/mongodb-secret/versions/1"
-		ssl_config {
-			ca_certificate                   = file("text-fixtures/ca-cert.pem")
-			client_certificate               = file("text-fixtures/cert.pem")
-			secret_manager_stored_client_key = "projects/datastream-con-adkr/locations/us-central1/secrets/mongodb-secret/versions/5"
-		}
-		standard_connection_format {
-			direct_connection = true
-		}
-	}
+resource "google_secret_manager_secret_version" "password_secret_version" {
+  secret      = google_secret_manager_secret.password_secret.id
+  secret_data = "my-secret-password"
+}
+
+resource "google_secret_manager_secret" "client_key_secret" {
+  project   = data.google_project.project.project_id
+  secret_id = "tf-mongo-key-secret-%{random_suffix}"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "client_key_secret_version" {
+  secret      = google_secret_manager_secret.client_key_secret.id
+  secret_data = file("text-fixtures/private-key.pem") 
+}
+
+
+resource "google_datastream_connection_profile" "default" {
+  project                 = data.google_project.project.project_id
+  display_name            = "tf-mongodb-profile"
+  location                = "us-central1"
+  connection_profile_id   = "tf-mongo-cp-%{random_suffix}"
+  create_without_validation = true // Set to true for tests to bypass actual connectivity checks.
+
+  mongodb_profile {
+    host_addresses {
+      hostname = "1.1.1.1"
+      port     = 27017
+    }
+    replica_set               = "rs0"
+    username                  = "user"
+    secret_manager_stored_password = google_secret_manager_secret_version.password_secret_version.id
+    ssl_config {
+      ca_certificate               = file("text-fixtures/ca-cert.pem")
+      client_certificate           = file("text-fixtures/cert.pem")
+      secret_manager_stored_client_key = google_secret_manager_secret_version.client_key_secret_version.id
+    }
+    standard_connection_format {
+      direct_connection = true
+    }
+  }
+
+  depends_on = [
+    google_secret_manager_secret_version.password_secret_version,
+    google_secret_manager_secret_version.client_key_secret_version,
+  ]
 }
 `, context)
 }
@@ -642,30 +674,62 @@ func testAccDatastreamConnectionProfile_mongoDbUpdateExample(context map[string]
 	return acctest.Nprintf(`
 data "google_project" "project" {}
 
-resource "google_datastream_connection_profile" "default" {
-	project                 = data.google_project.project.project_id
-	display_name            = "tf-mongodb-profile-updated" // <-- Changed
-	location                = "us-central1"
-	connection_profile_id   = "tf-mongo-cp-%{random_suffix}"
-	create_without_validation = true
+resource "google_secret_manager_secret" "password_secret" {
+  project   = data.google_project.project.project_id
+  secret_id = "tf-mongo-pw-secret-%{random_suffix}"
+  replication {
+    auto {}
+  }
+}
 
-	mongodb_profile {
-		host_addresses {
-			hostname = "1.1.1.1"
-			port     = 27017
-		}
-		replica_set            = "rs1"  
-		username               = "newuser"  // <-- Changed
-		secret_manager_stored_password = "projects/datastream-con-adkr/locations/us-central1/secrets/mongodb-secret/versions/1"
-		ssl_config {
-			ca_certificate                   = file("text-fixtures/ca-cert.pem")
-			client_certificate               = file("text-fixtures/cert.pem")
-			secret_manager_stored_client_key = "projects/datastream-con-adkr/locations/us-central1/secrets/mongodb-secret/versions/5"
-		}
-		standard_connection_format {
-			direct_connection = true
-		}
-	}
+resource "google_secret_manager_secret_version" "password_secret_version" {
+  secret      = google_secret_manager_secret.password_secret.id
+  secret_data = "my-secret-password"
+}
+
+resource "google_secret_manager_secret" "client_key_secret" {
+  project   = data.google_project.project.project_id
+  secret_id = "tf-mongo-key-secret-%{random_suffix}"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "client_key_secret_version" {
+  secret      = google_secret_manager_secret.client_key_secret.id
+  secret_data = file("text-fixtures/private-key.pem") 
+}
+
+
+resource "google_datastream_connection_profile" "default" {
+  project                 = data.google_project.project.project_id
+  display_name            = "tf-mongodb-profile-updated" // <-- Changed
+  location                = "us-central1"
+  connection_profile_id   = "tf-mongo-cp-%{random_suffix}"
+  create_without_validation = true // Set to true for tests to bypass actual connectivity checks.
+
+  mongodb_profile {
+    host_addresses {
+      hostname = "1.1.1.1"
+      port     = 27017
+    }
+    replica_set               = "rs0"
+    username                  = "newuser"  // <-- Changed
+    secret_manager_stored_password = google_secret_manager_secret_version.password_secret_version.id
+    ssl_config {
+      ca_certificate               = file("text-fixtures/ca-cert.pem")
+      client_certificate           = file("text-fixtures/cert.pem")
+      secret_manager_stored_client_key = google_secret_manager_secret_version.client_key_secret_version.id
+    }
+    standard_connection_format {
+      direct_connection = true
+    }
+  }
+
+  depends_on = [
+    google_secret_manager_secret_version.password_secret_version,
+    google_secret_manager_secret_version.client_key_secret_version,
+  ]
 }
 `, context)
 }
