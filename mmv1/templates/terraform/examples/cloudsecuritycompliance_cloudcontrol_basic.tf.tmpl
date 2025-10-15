@@ -1,9 +1,10 @@
 resource "google_cloud_security_compliance_cloud_control" "{{$.PrimaryResourceId}}" {
-  organization      = "{{index $.TestEnvVars "org_id"}}"
-  location          = "global"
-  cloud_control_id  = "{{index $.Vars "cloudcontrol_name"}}"
-  
-  display_name      = "Example CloudControl"
+  name                = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/{{index $.Vars "cloudcontrol_name"}}"
+  organization        = "{{index $.TestEnvVars "org_id"}}"
+  location            = "global"
+  cloud_control_id    = "{{index $.Vars "cloudcontrol_name"}}"
+
+  display_name        = "Example CloudControl"
   description       = "An example cloud control for testing"
   categories        = ["SECURITY"]
   severity          = "HIGH"

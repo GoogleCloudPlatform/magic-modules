@@ -27,20 +27,14 @@ examples:
     primary_resource_id: "example"
     vars:
       cloudcontrol_name: "example-cloudcontrol"
-    bootstrap_iam:
-      - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
-        role: "roles/cloudsecuritycompliance.admin"
     test_env_vars:
-      org_id: "123456789"
+      org_id: "ORG_ID"
   - name: "cloudsecuritycompliance_cloudcontrol_update"
     primary_resource_id: "example"
     vars:
       cloudcontrol_name: "example-cloudcontrol"
-    bootstrap_iam:
-      - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
-        role: "roles/cloudsecuritycompliance.admin"
     test_env_vars:
-      org_id: "123456789"
+      org_id: "ORG_ID"
 autogen_async: true
 async:
   operation:
