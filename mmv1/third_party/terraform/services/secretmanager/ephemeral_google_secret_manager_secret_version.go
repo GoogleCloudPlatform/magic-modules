@@ -132,10 +132,14 @@ func (p *googleEphemeralSecretManagerSecretVersion) Open(ctx context.Context, re
 		versionID = version
 	}
 
-	// The secret name can be either the short name or the full resource name.
-	secretName := strings.Replace(secret, fmt.Sprintf("projects/%s/secrets/", project), "", 1)
+	// The secret can be given as a full resource name or just the secret id.
+	fullSecretName := secret
+	if !strings.Contains(secret, "/") {
+		// If no slash is present, assume it's a secret id and construct the full resource name.
+		fullSecretName = fmt.Sprintf("projects/%s/secrets/%s", project, secret)
+	}
 
-	url = fmt.Sprintf("%sprojects/%s/secrets/%s/versions/%s", config.SecretManagerBasePath, project, secretName, versionID)
+	url = fmt.Sprintf("%s%s/versions/%s", config.SecretManagerBasePath, fullSecretName, versionID)
 
 	versionResp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
