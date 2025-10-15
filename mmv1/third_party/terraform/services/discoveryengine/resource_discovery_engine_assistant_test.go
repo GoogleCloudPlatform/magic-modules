@@ -71,6 +71,7 @@ resource "google_discovery_engine_assistant" "basic" {
     system_instruction {
       additional_system_instruction = "foobar"
     }
+    default_language            = "en"
   }
   customer_policy {
     banned_phrases {
@@ -115,6 +116,7 @@ resource "google_discovery_engine_assistant" "basic" {
     system_instruction {
       additional_system_instruction = "new_foobar"
     }
+    default_language            = "en"
   }
   customer_policy {
     banned_phrases {
