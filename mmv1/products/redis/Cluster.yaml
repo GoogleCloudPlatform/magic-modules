@@ -118,7 +118,6 @@ async:
 custom_code:
   encoder: 'templates/terraform/encoders/redis_cluster.go.tmpl'
   decoder: 'templates/terraform/decoders/redis_cluster.go.tmpl'
-  post_create: 'templates/terraform/post_create/redis_cluster_update.go.tmpl'
 sweeper:
   ensure_value:
     field: deletionProtectionEnabled
@@ -694,6 +693,7 @@ properties:
     type: String
     description: |
       This field can be used to trigger self service update to indicate the desired maintenance version. The input to this field can be determined by the available_maintenance_versions field.
+      *Note*: This field can only be specified when updating an existing cluster to a newer version. Downgrades are currently not supported!
   - name: 'effectiveMaintenanceVersion'
     type: String
     description: |
