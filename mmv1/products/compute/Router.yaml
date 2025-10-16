@@ -235,7 +235,6 @@ properties:
         required: true
   - name: 'params'
     type: NestedObject
-    min_version: 'beta'
     ignore_read: true
     immutable: true
     description: |

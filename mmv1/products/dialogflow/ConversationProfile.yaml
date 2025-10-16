@@ -49,7 +49,6 @@ examples:
     vars:
       profile_name: 'dialogflow-profile'
       topic_name: 'recognition-result-notification'
-      message_format: 'JSON'
 parameters:
   - name: 'location'
     type: String
