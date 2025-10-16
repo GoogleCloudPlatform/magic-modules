@@ -349,8 +349,6 @@ func TestAccAppEngineStandardAppVersion_updateBundledServices(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":          envvar.GetTestOrgFromEnv(t),
-		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 		"random_suffix":   acctest.RandString(t, 10),
 	}
 
@@ -386,136 +384,142 @@ func TestAccAppEngineStandardAppVersion_updateBundledServices(t *testing.T) {
 
 func testAccAppEngineStandardAppVersion_bundledServices(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_project" "my_project" {
-  name = "tf-test-appeng-std%{random_suffix}"
-  project_id = "tf-test-appeng-std%{random_suffix}"
-  org_id = "%{org_id}"
-  billing_account = "%{billing_account}"
-  deletion_policy = "DELETE"
+resource "google_service_account" "custom_service_account" {
+  account_id   = "tf-test-my-account%{random_suffix}"
+  display_name = "Custom Service Account"
 }
 
-resource "google_app_engine_application" "app" {
-  project     = google_project.my_project.project_id
-  location_id = "us-central"
+resource "google_project_iam_member" "gae_api" {
+  project = google_service_account.custom_service_account.project
+  role    = "roles/compute.networkUser"
+  member  = "serviceAccount:${google_service_account.custom_service_account.email}"
 }
 
-resource "google_project_service" "project" {
-  project = google_project.my_project.project_id
-  service = "appengine.googleapis.com"
-  disable_dependent_services = false
+resource "google_project_iam_member" "storage_viewer" {
+  project = google_service_account.custom_service_account.project
+  role    = "roles/storage.objectViewer"
+  member  = "serviceAccount:${google_service_account.custom_service_account.email}"
 }
 
 resource "google_app_engine_standard_app_version" "foo" {
-  project    = google_project_service.project.project
   version_id = "v1"
-  service    = "default"
-  runtime    = "python38"
+  service    = "myapp"
+  runtime    = "nodejs20"
 
   app_engine_bundled_services = ["BUNDLED_SERVICE_TYPE_MAIL", "BUNDLED_SERVICE_TYPE_USERS"]
 
   entrypoint {
-    shell = "gunicorn -b :$PORT main:app"
+    shell = "node ./app.js"
   }
 
   deployment {
-    files {
-      name = "main.py"
-      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.main.name}"
-    }
-    files {
-      name = "requirements.txt"
-      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.requirements.name}"
+    zip {
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.object.name}"
     }
   }
 
-  instance_class = "F2"
-  noop_on_destroy = true
+  env_variables = {
+    port = "8080"
+  }
+
+  automatic_scaling {
+    max_concurrent_requests = 10
+    min_idle_instances = 1
+    max_idle_instances = 3
+    min_pending_latency = "1s"
+    max_pending_latency = "5s"
+    standard_scheduler_settings {
+      target_cpu_utilization = 0.5
+      target_throughput_utilization = 0.75
+      min_instances = 2
+      max_instances = 10
+    }
+  }
+
+  delete_service_on_destroy = true
+  service_account = google_service_account.custom_service_account.email
 }
 
 resource "google_storage_bucket" "bucket" {
-  project  = google_project.my_project.project_id
-  name     = "tf-test-standard-ae-bucket%{random_suffix}"
+  name     = "tf-test-appengine-static-content%{random_suffix}"
   location = "US"
 }
 
-resource "google_storage_bucket_object" "requirements" {
-  name   = "requirements.txt"
+resource "google_storage_bucket_object" "object" {
+  name   = "hello-world.zip"
   bucket = google_storage_bucket.bucket.name
-  source = "./test-fixtures/hello-world-flask/requirements.txt"
-}
-
-resource "google_storage_bucket_object" "main" {
-  name   = "main.py"
-  bucket = google_storage_bucket.bucket.name
-  source = "./test-fixtures/hello-world-flask/main.py"
+  source = "./test-fixtures/hello-world.zip"
 }
 `, context)
 }
 
 func testAccAppEngineStandardAppVersion_bundledServicesUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_project" "my_project" {
-  name = "tf-test-appeng-std%{random_suffix}"
-  project_id = "tf-test-appeng-std%{random_suffix}"
-  org_id = "%{org_id}"
-  billing_account = "%{billing_account}"
-  deletion_policy = "DELETE"
+resource "google_service_account" "custom_service_account" {
+  account_id   = "tf-test-my-account%{random_suffix}"
+  display_name = "Custom Service Account"
 }
 
-resource "google_app_engine_application" "app" {
-  project     = google_project.my_project.project_id
-  location_id = "us-central"
+resource "google_project_iam_member" "gae_api" {
+  project = google_service_account.custom_service_account.project
+  role    = "roles/compute.networkUser"
+  member  = "serviceAccount:${google_service_account.custom_service_account.email}"
 }
 
-resource "google_project_service" "project" {
-  project = google_project.my_project.project_id
-  service = "appengine.googleapis.com"
-  disable_dependent_services = false
+resource "google_project_iam_member" "storage_viewer" {
+  project = google_service_account.custom_service_account.project
+  role    = "roles/storage.objectViewer"
+  member  = "serviceAccount:${google_service_account.custom_service_account.email}"
 }
 
 resource "google_app_engine_standard_app_version" "foo" {
-  project    = google_project_service.project.project
   version_id = "v1"
-  service    = "default"
-  runtime    = "python38"
+  service    = "myapp"
+  runtime    = "nodejs20"
 
-  app_engine_bundled_services = ["mail", "user"]
+  app_engine_bundled_services = ["BUNDLED_SERVICE_TYPE_MAIL"]
 
   entrypoint {
-    shell = "gunicorn -b :$PORT main:app"
+    shell = "node ./app.js"
   }
 
   deployment {
-    files {
-      name = "main.py"
-      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.main.name}"
-    }
-    files {
-      name = "requirements.txt"
-      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.requirements.name}"
+    zip {
+      source_url = "https://storage.googleapis.com/${google_storage_bucket.bucket.name}/${google_storage_bucket_object.object.name}"
     }
   }
 
-  instance_class = "F2"
-  noop_on_destroy = true
+  env_variables = {
+    port = "8080"
+  }
+
+  automatic_scaling {
+    max_concurrent_requests = 10
+    min_idle_instances = 1
+    max_idle_instances = 3
+    min_pending_latency = "1s"
+    max_pending_latency = "5s"
+    standard_scheduler_settings {
+      target_cpu_utilization = 0.5
+      target_throughput_utilization = 0.75
+      min_instances = 2
+      max_instances = 10
+    }
+  }
+
+  delete_service_on_destroy = true
+  service_account = google_service_account.custom_service_account.email
 }
 
 resource "google_storage_bucket" "bucket" {
-  project  = google_project.my_project.project_id
-  name     = "tf-test-standard-ae-bucket%{random_suffix}"
+  name     = "tf-test-appengine-static-content%{random_suffix}"
   location = "US"
 }
 
-resource "google_storage_bucket_object" "requirements" {
-  name   = "requirements.txt"
+resource "google_storage_bucket_object" "object" {
+  name   = "hello-world.zip"
   bucket = google_storage_bucket.bucket.name
-  source = "./test-fixtures/hello-world-flask/requirements.txt"
-}
-
-resource "google_storage_bucket_object" "main" {
-  name   = "main.py"
-  bucket = google_storage_bucket.bucket.name
-  source = "./test-fixtures/hello-world-flask/main.py"
+  source = "./test-fixtures/hello-world.zip"
 }
 `, context)
 }
