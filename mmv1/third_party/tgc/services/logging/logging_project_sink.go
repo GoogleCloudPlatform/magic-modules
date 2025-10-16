@@ -22,20 +22,20 @@ func GetLogProjectSinkCaiObject(d tpgresource.TerraformResourceData, config *tra
 	if err != nil {
 		return []cai.Asset{}, err
 	}
-	if obj, err := GetLogProjectSinkApiObject(d, config); err == nil {
-		return []cai.Asset{{
-			Name: name,
-			Type: logProjectSinkAssetType,
-			Resource: &cai.AssetResource{
-				Version:              "v2",
-				DiscoveryDocumentURI: "https://logging.googleapis.com/$discovery/rest?version=v2",
-				DiscoveryName:        "LogSink",
-				Data:                 obj,
-			},
-		}}, nil
-	} else {
-		return []cai.Asset{}, err
-	}
+obj, err := GetLogProjectSinkApiObject(d, config)
+if err != nil {
+	return []cai.Asset{}, err
+}
+return []cai.Asset{{
+	Name: name,
+	Type: logProjectSinkAssetType,
+	Resource: &cai.AssetResource{
+		Version:              "v2",
+		DiscoveryDocumentURI: "https://logging.googleapis.com/$discovery/rest?version=v2",
+		DiscoveryName:        "LogSink",
+		Data:                 obj,
+	},
+}}, nil
 }
 
 func GetLogProjectSinkApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
