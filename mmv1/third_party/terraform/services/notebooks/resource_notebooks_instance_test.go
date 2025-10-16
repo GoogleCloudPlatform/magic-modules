@@ -94,6 +94,10 @@ resource "google_notebooks_instance" "test" {
     project      = "cloud-notebooks-managed"
     image_family = "workbench-instances"
   }
+
+	lifecycle {
+	prevent_destroy = true
+	}
 }
 `, name)
 }
