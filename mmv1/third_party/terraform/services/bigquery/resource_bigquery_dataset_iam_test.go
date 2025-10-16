@@ -280,12 +280,13 @@ resource "google_bigquery_dataset_iam_binding" "binding" {
   ]
 
   condition {
-    title       = "Expire access on 2050-12-31"
-    description = "This condition will automatically remove access after 2050-12-31"
-		expression  = "request.time < timestamp('2050-12-31T23:59:59Z')"
+    title       = "%s"
+    description = "%s"
+    expression  = "%s"
+    location    = "%s"
   }
 }
-`, dataset, account, account, role)
+`, dataset, account, account, role, condTitle2050, condDesc2050, condExpr2050, condLoc)
 }
 
 func testAccBigqueryDatasetIamBindingWithIAMCondition_update(dataset, account, role string) string {
@@ -309,12 +310,13 @@ resource "google_bigquery_dataset_iam_binding" "binding" {
   ]
 
   condition {
-    title       = "Expire access on 2040-12-31"
-    description = "This condition will automatically remove access after 2040-12-31"
-		expression  = "request.time < timestamp('2040-12-31T23:59:59Z')"
+    title       = "%s"
+    description = "%s"
+    expression  = "%s"
+    location    = "%s"
   }
 }
-`, dataset, account, account, role)
+`, dataset, account, account, role, condTitle2040, condDesc2040, condExpr2040, condLoc)
 }
 
 func testAccBigqueryDatasetIamPolicyWithIAMCondition(dataset, owner, account, role string) string {
@@ -340,9 +342,10 @@ data "google_iam_policy" "policy" {
     members = ["serviceAccount:${google_service_account.test-account.email}"]
 
 		condition {
-			title       = "Expire access on 2050-12-31"
-			description = "This condition will automatically remove access after 2050-12-31"
-			expression  = "request.time < timestamp('2050-12-31T23:59:59Z')"
+      title       = "%s"
+      description = "%s"
+      expression  = "%s"
+      location    = "%s"
 		}
   }
 }
@@ -355,5 +358,5 @@ resource "google_bigquery_dataset_iam_policy" "policy" {
 data "google_bigquery_dataset_iam_policy" "policy" {
   dataset_id  = google_bigquery_dataset.dataset.dataset_id
 }
-`, dataset, owner, account, role)
+`, dataset, owner, account, role, condTitle2050, condDesc2050, condExpr2050, condLoc)
 }
