@@ -1785,15 +1785,7 @@ func TestAccMemorystoreInstance_memorystoreInstanceMaintenanceVersion(t *testing
 		CheckDestroy:             testAccCheckMemorystoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMemorystoreInstance_memorystoreInstanceMaintenanceVersionDeploy(context),
-			},
-			{
-				ResourceName:      "google_memorystore_instance.instance-ms",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccMemorystoreInstance_memorystoreInstanceMaintenanceVersionUpdate(context),
+				Config: testAccMemorystoreInstance_memorystoreInstanceMaintenanceVersion(context),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.instance-ms",
@@ -1804,28 +1796,19 @@ func TestAccMemorystoreInstance_memorystoreInstanceMaintenanceVersion(t *testing
 	})
 }
 
-func testAccMemorystoreInstance_memorystoreInstanceMaintenanceVersionDeploy(context map[string]interface{}) string {
+// TODO:
+// Re-enabled maintenance_version when new version is out
+func testAccMemorystoreInstance_memorystoreInstanceMaintenanceVersion(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_memorystore_instance" "instance-ms" {
   instance_id 					= "tf-test-ms-instance%{random_suffix}"
   shard_count 					= 1
   location                    	= "%{location}"
+  node_type                     = "SHARED_CORE_NANO"
   deletion_protection_enabled 	= false
+  #maintenance_version 			= "MEMORYSTORE_20251007.00_p00"
   transit_encryption_mode 		= "SERVER_AUTHENTICATION"
 }
 
-`, context)
-}
-
-func testAccMemorystoreInstance_memorystoreInstanceMaintenanceVersionUpdate(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_memorystore_instance" "instance-ms" {
-  instance_id 					= "tf-test-ms-instance%{random_suffix}"
-  shard_count 					= 1
-  location                   	= "%{location}"
-  deletion_protection_enabled 	= false
-  maintenance_version 			= "MEMORYSTORE_20250902_00_00"
-  transit_encryption_mode 		= "SERVER_AUTHENTICATION"
-}
 `, context)
 }
