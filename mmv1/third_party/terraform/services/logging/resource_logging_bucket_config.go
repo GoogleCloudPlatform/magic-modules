@@ -112,6 +112,13 @@ For example: jsonPayload.request.status`,
 			},
 		},
 	},
+	"tags": {
+		Type:        schema.TypeMap,
+		Optional:    true,
+		Description: `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/{tag_value_id}.`,
+		ForceNew:    true,
+		Elem:        &schema.Schema{Type: schema.TypeString},
+	},
 }
 
 type loggingBucketConfigIDFunc func(d *schema.ResourceData, config *transport_tpg.Config) (string, error)
@@ -231,6 +238,10 @@ func resourceLoggingBucketConfigCreate(d *schema.ResourceData, meta interface{},
 	obj["retentionDays"] = d.Get("retention_days")
 	obj["cmekSettings"] = expandCmekSettings(d.Get("cmek_settings"))
 	obj["indexConfigs"] = expandIndexConfigs(d.Get("index_configs"))
+
+	if v, ok := d.GetOk("tags"); ok {
+		obj["tags"] = v
+	}
 
 	url, err := tpgresource.ReplaceVars(d, config, "{{LoggingBasePath}}projects/{{project}}/locations/{{location}}/buckets?bucketId={{bucket_id}}")
 	if err != nil {

@@ -2,11 +2,15 @@ package logging_test
 
 import (
 	"fmt"
+	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccLoggingBucketConfigFolder_basic(t *testing.T) {
@@ -686,4 +690,175 @@ resource "google_logging_project_bucket_config" "basic" {
 	}
 }
 `, context), urlIndexType, statusIndexType)
+}
+
+func TestAccLoggingBucketConfigOrganization_tags(t *testing.T) {
+	t.Parallel()
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "logging-bucket-tagkey", map[string]interface{}{})
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"org":           envvar.GetTestOrgFromEnv(t),
+		"tagKey":        tagKey,
+		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "logging-bucket-tagvalue", tagKey),
+		"bucket_id":     "_Default",
+	}
+	retentionValue := 30
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLoggingBucketConfigOrganizationWithTags(context, retentionValue),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_logging_organization_bucket_config.test", "tags.%"),
+					checkLoggingBucketConfigOrganizationWithTags(t),
+				),
+			},
+			{
+				ResourceName:            "google_logging_organization_bucket_config.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"tags"},
+			},
+		},
+	})
+}
+
+func checkLoggingBucketConfigOrganizationWithTags(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_logging_organization_bucket_config" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+
+			// 1. Get the configured tag key and value from the state.
+			var configuredTagValueNamespacedName string
+			for key, val := range rs.Primary.Attributes {
+				if strings.HasPrefix(key, "tags.") && key != "tags.%" {
+					tfTagKey := strings.TrimPrefix(key, "tags.")
+					tfTagValue := val
+					if tfTagValue != "" {
+						configuredTagValueNamespacedName = fmt.Sprintf("%s/%s", tfTagKey, tfTagValue)
+						break
+					}
+				}
+			}
+
+			if configuredTagValueNamespacedName == "" {
+				return fmt.Errorf("could not find a configured tag value in the state for resource %s", rs.Primary.ID)
+			}
+
+			// Check if placeholders are still present.
+			if strings.Contains(configuredTagValueNamespacedName, "%{") {
+				return fmt.Errorf("tag namespaced name contains unsubstituted variables: %q. Ensure the context map in the test step is populated", configuredTagValueNamespacedName)
+			}
+
+			// 2. Describe the tag value using the namespaced name to get its full resource name.
+			safeNamespacedName := url.QueryEscape(configuredTagValueNamespacedName)
+			describeTagValueURL := fmt.Sprintf("https://cloudresourcemanager.googleapis.com/v3/tagValues/namespaced?name=%s", safeNamespacedName)
+
+			respDescribe, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				RawURL:    describeTagValueURL,
+				UserAgent: config.UserAgent,
+			})
+
+			if err != nil {
+				return fmt.Errorf("error describing tag value using namespaced name %q: %v", configuredTagValueNamespacedName, err)
+			}
+
+			fullTagValueName, ok := respDescribe["name"].(string)
+			if !ok || fullTagValueName == "" {
+				return fmt.Errorf("tag value details (name) not found in response for namespaced name: %q, response: %v", configuredTagValueNamespacedName, respDescribe)
+			}
+
+			// 3. Get the tag bindings from the Logging Buckets.
+			parts := strings.Split(rs.Primary.ID, "/")
+			if len(parts) != 6 {
+				return fmt.Errorf("invalid resource ID format: %s", rs.Primary.ID)
+			}
+			orgID := parts[1]
+			location := parts[3]
+			bucket_id := parts[5]
+
+			parentURL := fmt.Sprintf("//logging.googleapis.com/organizations/%s/locations/%s/buckets/%s", orgID, location, bucket_id)
+			crmLocation := location
+			if crmLocation == "global" {
+				crmLocation = "us-central1"
+			}
+			listBindingsURL := fmt.Sprintf("https://%s-cloudresourcemanager.googleapis.com/v3/tagBindings?parent=%s", crmLocation, url.QueryEscape(parentURL))
+
+			resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				RawURL:    listBindingsURL,
+				UserAgent: config.UserAgent,
+			})
+
+			if err != nil {
+				return fmt.Errorf("error calling TagBindings API: %v", err)
+			}
+
+			tagBindingsVal, exists := resp["tagBindings"]
+			if !exists {
+				tagBindingsVal = []interface{}{}
+			}
+
+			tagBindings, ok := tagBindingsVal.([]interface{})
+			if !ok {
+				return fmt.Errorf("'tagBindings' is not a slice in response for resource %s. Response: %v", rs.Primary.ID, resp)
+			}
+
+			// 4. Perform the comparison.
+			foundMatch := false
+			for _, binding := range tagBindings {
+				bindingMap, ok := binding.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				if bindingMap["tagValue"] == fullTagValueName {
+					foundMatch = true
+					break
+				}
+			}
+
+			if !foundMatch {
+				return fmt.Errorf("expected tag value %s (from namespaced %q) not found in tag bindings for resource %s. Bindings: %v", fullTagValueName, configuredTagValueNamespacedName, rs.Primary.ID, tagBindings)
+			}
+
+			t.Logf("Successfully found matching tag binding for %s with tagValue %s", rs.Primary.ID, fullTagValueName)
+		}
+
+		return nil
+	}
+}
+
+func testAccLoggingBucketConfigOrganizationWithTags(context map[string]interface{}, retention int) string {
+	template := acctest.Nprintf(`
+resource "google_logging_organization_settings" "default" {
+  organization = "%{org}"
+}
+
+data "google_organization" "default" {
+	organization = "%{org}"
+}
+
+resource "google_logging_organization_bucket_config" "test" {
+	organization    = data.google_organization.default.organization
+	location  = "global"
+	retention_days = %d
+	description = "retention test %d days"
+	bucket_id = "%{bucket_id}"
+	tags = {
+	  "%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}`, context)
+	return fmt.Sprintf(template, retention, retention)
 }
