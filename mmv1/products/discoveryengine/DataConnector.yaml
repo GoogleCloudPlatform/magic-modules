@@ -136,11 +136,14 @@ properties:
     type: Array
     description: |
       List of entities from the connected data source to ingest.
-    immutable: true
+    update_mask_fields:
+      - 'entities.params'
+      - 'entities.keyPropertyMappings'
     item_type:
       type: NestedObject
       properties:
         - name: 'entityName'
+          immutable: true
           type: String
           description: |
             The name of the entity. Supported values by data source:
@@ -149,6 +152,7 @@ properties:
             * Confluence: `Content`, `Space`
         - name: 'keyPropertyMappings'
           type: KeyValuePairs
+          diff_suppress_func: 'DataConnectorEntitiesFieldsDiffSuppress'
           description: |
             Attributes for indexing.
             Key: Field name.
@@ -169,7 +173,7 @@ properties:
           output: true
         - name: 'params'
           description: 'The parameters for the entity to facilitate data ingestion.'
-          diff_suppress_func: 'DataConnectorEntitiesParamsDiffSuppress'
+          diff_suppress_func: 'DataConnectorEntitiesFieldsDiffSuppress'
           custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
           custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
           state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
