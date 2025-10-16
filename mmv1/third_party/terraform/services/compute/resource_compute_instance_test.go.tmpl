@@ -2506,7 +2506,6 @@ func TestAccComputeInstance_guestAccelerator(t *testing.T) {
 			},
 			{
 				Config:             testAccComputeInstance_guestAccelerator(instanceName, 0),
-				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
 					testAccCheckComputeInstanceHasGuestAccelerator(&instance, "nvidia-tesla-t4", 0),
