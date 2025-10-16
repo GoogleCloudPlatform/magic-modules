@@ -710,6 +710,20 @@ func TestAccStorageTransferJob_transferManifest(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccStorageTransferJob_withoutTransferManifest(project, src, dst, desc),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckNoResourceAttr(
+						"google_storage_transfer_job.transfer_job",
+						"transfer_spec.0.transfer_manifest.0.location",
+					),
+				),
+			},
+			{
+				ResourceName:      "google_storage_transfer_job.transfer_job",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -2988,6 +3002,76 @@ resource "google_storage_transfer_job" "transfer_job" {
     transfer_manifest {
       location = "gs://${google_storage_bucket.data_source.name}/${google_storage_bucket_object.manifest.name}"
     }
+    gcs_data_source {
+      bucket_name = google_storage_bucket.data_source.name
+      path        = "foo/bar/"
+    }
+    gcs_data_sink {
+      bucket_name = google_storage_bucket.data_sink.name
+      path        = "foo/bar/"
+    }
+  }
+
+  schedule {
+    schedule_start_date {
+      year  = 2023
+      month = 1
+      day   = 13
+    }
+    schedule_end_date {
+      year  = 2023
+      month = 1
+      day   = 13
+    }
+  }
+
+  depends_on = [
+    google_storage_bucket_object.manifest,
+  ]
+
+}
+`, project, dataSourceBucketName, dataSinkBucketName, transferJobDescription, manifestObjectName)
+}
+
+func testAccStorageTransferJob_withoutTransferManifest(project, dataSourceBucketName, dataSinkBucketName, transferJobDescription string) string {
+	return fmt.Sprintf(`
+data "google_storage_transfer_project_service_account" "default" {
+  project = "%[1]s"
+}
+
+resource "google_storage_bucket" "data_source" {
+  project                      = "%[1]s"
+  name                         = "%[2]s"
+  location                     = "US"
+  force_destroy                = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket" "data_sink" {
+  project                      = "%[1]s"
+  name                         = "%[3]s"
+  location                     = "US"
+  force_destroy                = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_iam_member" "source_iam" {
+  bucket = google_storage_bucket.data_source.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
+}
+
+resource "google_storage_bucket_iam_member" "sink_iam" {
+  bucket = google_storage_bucket.data_sink.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
+}
+
+resource "google_storage_transfer_job" "transfer_job" {
+  description = "%[4]s"
+  project     = "%[1]s"
+
+  transfer_spec {
     gcs_data_source {
       bucket_name = google_storage_bucket.data_source.name
       path        = "foo/bar/"

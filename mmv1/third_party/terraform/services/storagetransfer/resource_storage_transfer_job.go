@@ -840,7 +840,7 @@ func transferManifest() *schema.Resource {
 			"location": {
 				Type:         schema.TypeString,
 				Required:     true,
-				Description:  `Cloud Strorage path to the manifest CSV.`,
+				Description:  `Cloud Storage path to the manifest CSV.`,
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^gs://[^/]+/.+`), "must be a Cloud path like gs://BUCKET/path/manifest.csv"),
 			},
 		},
