@@ -3096,7 +3096,7 @@ resource "google_storage_transfer_job" "transfer_job" {
   }
 
   depends_on = [
-    google_storage_bucket_object.manifest,
+    google_storage_bucket_iam_member.sink_iam, google_storage_bucket_iam_member.source_iam,
   ]
 
 }
