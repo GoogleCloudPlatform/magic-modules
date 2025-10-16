@@ -62,7 +62,7 @@ resource "google_beyondcorp_security_gateway_application" "example" {
   application_id = "google-sga%{random_suffix}"
   endpoint_matchers {
     hostname = "google.com"
-	ports = [443]
+    ports = [80, 443]
   }
 }
 `, context)
@@ -84,7 +84,7 @@ resource "google_beyondcorp_security_gateway_application" "example" {
   application_id = "google-sga%{random_suffix}"
   endpoint_matchers {
     hostname = "*.google.com"
-	ports = [80]
+    ports = [80]
   }
   endpoint_matchers {
 	hostname = "google.com"
