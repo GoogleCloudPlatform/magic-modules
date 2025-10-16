@@ -136,10 +136,14 @@ properties:
     type: Array
     description: |
       List of entities from the connected data source to ingest.
+    update_mask_fields:
+      - 'entities.params'
+      - 'entities.keyPropertyMappings'
     item_type:
       type: NestedObject
       properties:
         - name: 'entityName'
+          immutable: true
           type: String
           description: |
             The name of the entity. Supported values by data source:
