@@ -188,9 +188,11 @@ The `condition` block supports:
 
 * `expression` - (Required) Textual representation of an expression in Common Expression Language syntax.
 
-* `title` - (Required) A title for the expression, i.e. a short string describing its purpose.
+* `title` - (Optional) A title for the expression, i.e. a short string describing its purpose.
 
 * `description` - (Optional) An optional description of the expression. This is a longer text which describes the expression, e.g. when hovered over it in a UI.
+
+* `location` - (Optional) String indicating the location of the expression for error reporting, e.g. a file name and a position in the file.
 
 ~> **Warning:** Terraform considers the `role` and condition contents (`title`+`description`+`expression`) as the
   identifier for the binding. This means that if any part of the condition is changed out-of-band, Terraform will
