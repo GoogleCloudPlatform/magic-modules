@@ -18,7 +18,6 @@ type conditionKey struct {
 	Description string
 	Expression  string
 	Title       string
-	Location    string
 }
 
 type iamBindingKey struct {
@@ -30,7 +29,7 @@ func conditionKeyFromCondition(condition *cloudresourcemanager.Expr) conditionKe
 	if condition == nil {
 		return conditionKey{}
 	}
-	return conditionKey{Description: condition.Description, Expression: condition.Expression, Title: condition.Title, Location: condition.Location}
+	return conditionKey{Description: condition.Description, Expression: condition.Expression, Title: condition.Title}
 }
 
 var IamBigqueryDatasetSchema = map[string]*schema.Schema{
@@ -44,37 +43,6 @@ var IamBigqueryDatasetSchema = map[string]*schema.Schema{
 		Optional: true,
 		Computed: true,
 		ForceNew: true,
-	},
-	// gets merged with the base schema for IAM Members which does not include condition.location
-	"condition": {
-		Type:     schema.TypeList,
-		Optional: true,
-		MaxItems: 1,
-		ForceNew: true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"expression": {
-					Type:     schema.TypeString,
-					Required: true,
-					ForceNew: true,
-				},
-				"title": {
-					Type:     schema.TypeString,
-					Required: true,
-					ForceNew: true,
-				},
-				"description": {
-					Type:     schema.TypeString,
-					Optional: true,
-					ForceNew: true,
-				},
-				"location": {
-					Type:     schema.TypeString,
-					Optional: true,
-					ForceNew: true,
-				},
-			},
-		},
 	},
 }
 
@@ -223,9 +191,6 @@ func accessToPolicy(access interface{}) (*cloudresourcemanager.Policy, error) {
 			}
 			if desc, ok := conditionMap["description"].(string); ok {
 				condition.Description = desc
-			}
-			if location, ok := conditionMap["location"].(string); ok {
-				condition.Location = location
 			}
 		}
 

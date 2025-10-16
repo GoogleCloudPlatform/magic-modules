@@ -283,10 +283,9 @@ resource "google_bigquery_dataset_iam_binding" "binding" {
     title       = "%s"
     description = "%s"
     expression  = "%s"
-    location    = "%s"
   }
 }
-`, dataset, account, account, role, condTitle2050, condDesc2050, condExpr2050, condLoc)
+`, dataset, account, account, role, condTitle2050, condDesc2050, condExpr2050)
 }
 
 func testAccBigqueryDatasetIamBindingWithIAMCondition_update(dataset, account, role string) string {
@@ -313,10 +312,9 @@ resource "google_bigquery_dataset_iam_binding" "binding" {
     title       = "%s"
     description = "%s"
     expression  = "%s"
-    location    = "%s"
   }
 }
-`, dataset, account, account, role, condTitle2040, condDesc2040, condExpr2040, condLoc)
+`, dataset, account, account, role, condTitle2040, condDesc2040, condExpr2040)
 }
 
 func testAccBigqueryDatasetIamPolicyWithIAMCondition(dataset, owner, account, role string) string {
@@ -345,7 +343,6 @@ data "google_iam_policy" "policy" {
       title       = "%s"
       description = "%s"
       expression  = "%s"
-      location    = "%s"
 		}
   }
 }
@@ -358,5 +355,5 @@ resource "google_bigquery_dataset_iam_policy" "policy" {
 data "google_bigquery_dataset_iam_policy" "policy" {
   dataset_id  = google_bigquery_dataset.dataset.dataset_id
 }
-`, dataset, owner, account, role, condTitle2050, condDesc2050, condExpr2050, condLoc)
+`, dataset, owner, account, role, condTitle2050, condDesc2050, condExpr2050)
 }

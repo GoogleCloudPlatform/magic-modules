@@ -32,37 +32,6 @@ var IamMemberBigqueryDatasetSchema = map[string]*schema.Schema{
 		Computed: true,
 		ForceNew: true,
 	},
-	// gets merged with the base schema for IAM Members which does not include condition.location
-	"condition": {
-		Type:     schema.TypeList,
-		Optional: true,
-		MaxItems: 1,
-		ForceNew: true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"expression": {
-					Type:     schema.TypeString,
-					Required: true,
-					ForceNew: true,
-				},
-				"title": {
-					Type:     schema.TypeString,
-					Required: true,
-					ForceNew: true,
-				},
-				"description": {
-					Type:     schema.TypeString,
-					Optional: true,
-					ForceNew: true,
-				},
-				"location": {
-					Type:     schema.TypeString,
-					Optional: true,
-					ForceNew: true,
-				},
-			},
-		},
-	},
 }
 
 var bigqueryIamMemberAccessPrimitiveToRoleMap = map[string]string{
@@ -249,9 +218,6 @@ func accessToPolicyForIamMember(access interface{}) (*cloudresourcemanager.Polic
 			}
 			if desc, ok := conditionMap["description"].(string); ok {
 				condition.Description = desc
-			}
-			if location, ok := conditionMap["location"].(string); ok {
-				condition.Location = location
 			}
 		}
 
