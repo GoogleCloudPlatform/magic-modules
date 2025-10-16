@@ -1356,7 +1356,15 @@ func TestAccRedisCluster_redisClusterMaintenanceVersion(t *testing.T) {
 		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRedisCluster_redisClusterMaintenanceVersion(context),
+				Config: testAccRedisCluster_redisClusterMaintenanceVersionDeploy(context),
+			},
+			{
+				ResourceName:      "google_redis_cluster.cluster-ms",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccRedisCluster_redisClusterMaintenanceVersionUpdate(context),
 			},
 			{
 				ResourceName:      "google_redis_cluster.cluster-ms",
@@ -1367,9 +1375,7 @@ func TestAccRedisCluster_redisClusterMaintenanceVersion(t *testing.T) {
 	})
 }
 
-// TODO:
-// Re-enabled maintenance_version when new version is out
-func testAccRedisCluster_redisClusterMaintenanceVersion(context map[string]interface{}) string {
+func testAccRedisCluster_redisClusterMaintenanceVersionDeploy(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_redis_cluster" "cluster-ms" {
   name           			 = "tf-test-ms-cluster%{random_suffix}"
@@ -1379,12 +1385,33 @@ resource "google_redis_cluster" "cluster-ms" {
   node_type 				 = "REDIS_SHARED_CORE_NANO"
   transit_encryption_mode 	 = "TRANSIT_ENCRYPTION_MODE_SERVER_AUTHENTICATION"
   authorization_mode 		 = "AUTH_MODE_DISABLED"
-  #maintenance_version 		 = "REDISCLUSTER_20251008.00_p00"
   redis_configs = { 
     maxmemory-policy		 = "volatile-ttl"
   }
   deletion_protection_enabled = false
 
+  zone_distribution_config {
+    mode 					 = "MULTI_ZONE"
+  }
+}
+`, context)
+}
+
+func testAccRedisCluster_redisClusterMaintenanceVersionUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_redis_cluster" "cluster-ms" {
+  name           			 = "tf-test-ms-cluster%{random_suffix}"
+  shard_count    			 = 1
+  region 					 = "%{location}"
+  replica_count				 = 1
+  node_type 				 = "REDIS_SHARED_CORE_NANO"
+  transit_encryption_mode 	 = "TRANSIT_ENCRYPTION_MODE_SERVER_AUTHENTICATION"
+  authorization_mode 		 = "AUTH_MODE_DISABLED"
+  # maintenance_version 		 = "REDISCLUSTER_20251008.00_p00"
+  redis_configs = { 
+    maxmemory-policy		 = "volatile-ttl"
+  }
+  deletion_protection_enabled = false
   zone_distribution_config {
     mode 					 = "MULTI_ZONE"
   }
