@@ -35,22 +35,6 @@ examples:
       cloudcontrol_name: "example-cloudcontrol"
     test_env_vars:
       org_id: "ORG_ID"
-autogen_async: true
-async:
-  operation:
-    timeouts:
-      insert_minutes: 20
-      update_minutes: 20
-      delete_minutes: 20
-    base_url: "{{op_id}}"
-  actions:
-    - create
-    - delete
-    - update
-  type: OpAsync
-  result:
-    resource_inside_response: true
-  include_project: false
 autogen_status: Q2xvdWRDb250cm9s
 parameters:
   - name: organization
