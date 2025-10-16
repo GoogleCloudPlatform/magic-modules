@@ -107,9 +107,9 @@ func checkCertificateManagerCertificateMapWithTags(t *testing.T) func(s *terrafo
 			}
 			project := parts[1]
 			location := parts[3]
-			instance_id := parts[5]
+			certificateMap_id := parts[5]
 
-			parentURL := fmt.Sprintf("//certificatemanager.googleapis.com/projects/%s/locations/%s/certificateMaps/%s", project, location, instance_id)
+			parentURL := fmt.Sprintf("//certificatemanager.googleapis.com/projects/%s/locations/%s/certificateMaps/%s", project, location, certificateMap_id)
 			listBindingsURL := fmt.Sprintf("https://%s-cloudresourcemanager.googleapis.com/v3/tagBindings?parent=%s", location, url.QueryEscape(parentURL))
 
 			resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
