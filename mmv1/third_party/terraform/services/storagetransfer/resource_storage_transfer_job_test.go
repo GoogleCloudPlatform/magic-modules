@@ -3100,5 +3100,5 @@ resource "google_storage_transfer_job" "transfer_job" {
   ]
 
 }
-`, project, dataSourceBucketName, dataSinkBucketName, transferJobDescription, manifestObjectName)
+`, project, dataSourceBucketName, dataSinkBucketName, transferJobDescription)
 }
