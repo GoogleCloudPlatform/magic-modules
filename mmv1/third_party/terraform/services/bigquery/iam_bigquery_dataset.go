@@ -18,6 +18,7 @@ type conditionKey struct {
 	Description string
 	Expression  string
 	Title       string
+	Location    string
 }
 
 type iamBindingKey struct {
@@ -29,7 +30,7 @@ func conditionKeyFromCondition(condition *cloudresourcemanager.Expr) conditionKe
 	if condition == nil {
 		return conditionKey{}
 	}
-	return conditionKey{Description: condition.Description, Expression: condition.Expression, Title: condition.Title}
+	return conditionKey{Description: condition.Description, Expression: condition.Expression, Title: condition.Title, Location: condition.Location}
 }
 
 var IamBigqueryDatasetSchema = map[string]*schema.Schema{
@@ -184,11 +185,16 @@ func accessToPolicy(access interface{}) (*cloudresourcemanager.Policy, error) {
 		var condition *cloudresourcemanager.Expr
 		if rawCondition, ok := memberRole["condition"]; ok {
 			conditionMap := rawCondition.(map[string]interface{})
-			title := conditionMap["title"].(string)
 			expr := conditionMap["expression"].(string)
-			condition = &cloudresourcemanager.Expr{Title: title, Expression: expr}
+			condition = &cloudresourcemanager.Expr{Expression: expr}
+			if title, ok := conditionMap["title"].(string); ok {
+				condition.Title = title
+			}
 			if desc, ok := conditionMap["description"].(string); ok {
 				condition.Description = desc
+			}
+			if location, ok := conditionMap["location"].(string); ok {
+				condition.Location = location
 			}
 		}
 

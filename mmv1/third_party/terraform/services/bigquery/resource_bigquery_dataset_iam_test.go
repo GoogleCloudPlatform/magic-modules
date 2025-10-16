@@ -149,7 +149,6 @@ func TestAccBigqueryDatasetIamBindingWithIAMCondition(t *testing.T) {
 	})
 }
 
-// TODO(ramon): refactor tests inputs to vars
 func TestAccBigqueryDatasetIamPolicyWithIAMCondition(t *testing.T) {
 	t.Parallel()
 
