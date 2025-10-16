@@ -110,7 +110,6 @@ type Sample struct {
 	// for one reason or another
 	RegionOverride string `yaml:"region_override,omitempty"`
 
-
 	// ====================
 	// TGC
 	// ====================

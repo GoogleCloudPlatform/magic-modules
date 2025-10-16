@@ -205,8 +205,6 @@ type Resource struct {
 
 	CustomCode resource.CustomCode `yaml:"custom_code,omitempty"`
 
-	TestCustomCode string `yaml:"test_custom_code,omitempty"`
-
 	Docs resource.Docs `yaml:"docs,omitempty"`
 
 	// This block inserts entries into the customdiff.All() block in the
@@ -223,8 +221,6 @@ type Resource struct {
 	Examples []resource.Examples
 
 	Samples []resource.Sample
-
-	// SampleConfigMap map[string]string `yaml:"-"`
 
 	// If true, generates product operation handling logic.
 	AutogenAsync bool `yaml:"autogen_async,omitempty"`
@@ -399,8 +395,8 @@ type TGCResource struct {
 }
 
 type TestConfig struct {
-    Sample resource.Sample
-    Step   resource.Step
+	Sample resource.Sample
+	Step   resource.Step
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
@@ -450,7 +446,6 @@ func (r *Resource) SetDefault(product *Product) {
 	}
 
 	r.ProductMetadata = product
-
 	for _, property := range r.AllProperties() {
 		property.SetDefault(r)
 	}
@@ -1661,17 +1656,17 @@ func (r Resource) FirstTestSample() resource.Sample {
 
 func (r Resource) FirstTestConfig() TestConfig {
 	for _, sample := range r.Samples {
-		if sample.ExcludeTest || (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0){
+		if sample.ExcludeTest || (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0) {
 			continue
 		}
-		for _, step := range sample.Steps{
-			if (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0){
+		for _, step := range sample.Steps {
+			if r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
 				return TestConfig{
-			        Sample: sample,
-			        Step:   step,
-			    }
+					Sample: sample,
+					Step:   step,
+				}
 			}
-		} 
+		}
 	}
 	return TestConfig{}
 }
@@ -2087,31 +2082,11 @@ func (r Resource) TestSampleSetUp() {
 			configName := step.Name
 			if _, ok := res[step.Name]; !ok {
 				res[configName] = sample.Name
-				sample.NewConfigFuncs = append(sample.NewConfigFuncs, *step)				
+				sample.NewConfigFuncs = append(sample.NewConfigFuncs, *step)
 			}
 		}
 	}
 }
-
-// func (r Resource) TestSteps() []resource.Step {
-
-// 	res := make(map[string]resource.Step)
-// 	for _, sample := range r.Samples {
-// 		for _, step := range sample.Steps {
-// 			if step.Config != "" {
-// 				res[step.Config] = step
-// 			}
-// 		}
-
-// 	}
-
-// 	var ret []resource.Step
-// 	for _, val := range res {
-// 		ret = append(ret, val)
-// 	}
-
-// 	return ret
-// }
 
 func (r Resource) VersionedProvider(exampleVersion string) bool {
 	var vp string
@@ -2122,8 +2097,7 @@ func (r Resource) VersionedProvider(exampleVersion string) bool {
 	} else {
 		vp = r.MinVersion
 	}
-	res := vp != "" && vp != "ga"
-	return res
+	return vp != "" && vp != "ga"
 }
 
 func (r Resource) StateUpgradersCount() []int {

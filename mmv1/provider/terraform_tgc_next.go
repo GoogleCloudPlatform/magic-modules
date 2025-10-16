@@ -159,24 +159,24 @@ func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resou
 
 	eligibleSample := false
 	for _, sample := range object.Samples {
-			if !sample.ExcludeTest {
-				if object.ProductMetadata.VersionObjOrClosest(tgc.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
-					eligibleSample = true
-					break
-				}
+		if !sample.ExcludeTest {
+			if object.ProductMetadata.VersionObjOrClosest(tgc.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
+				eligibleSample = true
+				break
 			}
 		}
-		if !eligibleSample {
-			return
-		}
+	}
+	if !eligibleSample {
+		return
+	}
 
-		productName := tgc.Product.ApiName
-		targetFolder := path.Join(outputFolder, "test", "services", productName)
-		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
-			log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
-		}
-		targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s_generated_test.go", productName, google.Underscore(object.Name)))
-		templateData.GenerateTGCNextTestFileSample(targetFilePath, object)	
+	productName := tgc.Product.ApiName
+	targetFolder := path.Join(outputFolder, "test", "services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s_generated_test.go", productName, google.Underscore(object.Name)))
+	templateData.GenerateTGCNextTestFileSample(targetFilePath, object)
 }
 
 func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {

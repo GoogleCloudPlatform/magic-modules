@@ -182,7 +182,3 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 	}
 }
 {{- end }}
-
-{{if $.Res.TestCustomCode -}} 
-    {{- $.Res.CustomTemplate $.Res.TestCustomCode true -}}
-{{- end}}
