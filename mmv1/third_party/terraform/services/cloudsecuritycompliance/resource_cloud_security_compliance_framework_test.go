@@ -44,7 +44,6 @@ resource "google_cloud_security_compliance_framework" "example" {
   
   display_name = "Terraform Framework Name"
   description  = "An Terraform description for the framework"
-  category     = ["CUSTOM_FRAMEWORK"]
   
   cloud_control_details {
 		name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-assess-resource-availability"
@@ -105,7 +104,6 @@ resource "google_cloud_security_compliance_framework" "example" {
   
   display_name = "Updated Terraform Framework Name"
   description  = "An updated description for the framework with additional details"
-  category     = ["CUSTOM_FRAMEWORK"]
   
   cloud_control_details {
     name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-data-access-governance"
