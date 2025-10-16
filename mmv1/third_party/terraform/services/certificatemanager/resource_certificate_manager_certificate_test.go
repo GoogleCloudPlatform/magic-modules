@@ -106,9 +106,9 @@ func checkCertificateManagerCertificateTags(t *testing.T) func(s *terraform.Stat
 			}
 			project := parts[1]
 			location := parts[3]
-			instance_id := parts[5]
+			certificate_id := parts[5]
 
-			parentURL := fmt.Sprintf("//certificatemanager.googleapis.com/projects/%s/locations/%s/certificates/%s", project, location, instance_id)
+			parentURL := fmt.Sprintf("//certificatemanager.googleapis.com/projects/%s/locations/%s/certificates/%s", project, location, certificate_id)
 			listBindingsURL := fmt.Sprintf("https://%s-cloudresourcemanager.googleapis.com/v3/tagBindings?parent=%s", location, url.QueryEscape(parentURL))
 
 			resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
