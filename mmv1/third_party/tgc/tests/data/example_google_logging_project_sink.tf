@@ -11,10 +11,16 @@ provider "google" {
   {{if .Provider.credentials }}credentials = "{{.Provider.credentials}}"{{end}}
 }
 
-resource "google_logging_project_sink" "my-sink" {
-  name   = "my-sink"
+resource "google_bigquery_dataset" "basic_logsink_dataset" {
+  project     = "{{.Provider.project}}"
+  dataset_id  = "basic_logsink_dataset"
+  description = "Dataset for storing logs from the project-level log sink."
+}
+
+resource "google_logging_project_sink" "basic_log_sink" {
+  name   = "basic_log_sink"
   project = "{{.Provider.project}}"
-  destination = "bigquery.googleapis.com/projects/{{.Provider.project}}/datasets/my_dataset"
+  destination = "bigquery.googleapis.com/projects/{{.Provider.project}}/datasets/basic_logsink_dataset"
   filter = "severity >= ERROR"
   description = "A sink for errors"
   disabled = false
