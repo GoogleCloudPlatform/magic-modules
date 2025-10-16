@@ -6,7 +6,6 @@ resource "google_cloud_security_compliance_framework" "{{$.PrimaryResourceId}}" 
   
   display_name = "Terraform Framework Name"
   description  = "An Terraform description for the framework"
-  category     = ["CUSTOM_FRAMEWORK"]
   
   cloud_control_details {
 		name              = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/builtin-assess-resource-availability"
