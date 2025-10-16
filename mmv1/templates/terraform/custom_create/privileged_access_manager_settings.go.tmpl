@@ -1,0 +1,65 @@
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+	return err
+}
+
+id, err := tpgresource.ReplaceVars(d, config, "{{$.SelfLinkUri}}")
+if err != nil {
+	return fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
+
+url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}")
+if err != nil {
+	return err
+}
+
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	RawURL:    url,
+	UserAgent: userAgent,
+})
+if err != nil {
+	return fmt.Errorf("Error reading Settings: %s", err)
+}
+
+obj := make(map[string]interface{})
+updateMask := []string{}
+
+{{- range $prop := .Properties }}
+{{- if and (not $prop.Output) (not $prop.UrlParamOnly) }}
+{{ $propName := underscore $prop.Name -}}
+{{ $apiName := $prop.ApiName -}}
+if v, ok := d.GetOkExists("{{ $propName }}"); ok {
+	{{ $propName }}Prop, err := expand{{ $.ResourceName }}{{ $prop.TitlelizeProperty }}(v, d, config)
+	if err != nil {
+		return err
+	}
+	obj["{{ $apiName }}"] = {{ $propName }}Prop
+	updateMask = append(updateMask, "{{ $apiName }}")
+}
+{{- end }}
+{{- end }}
+
+if etag, ok := res["etag"]; ok {
+	obj["etag"] = etag
+}
+
+if len(updateMask) > 0 {
+	url = fmt.Sprintf("%s?updateMask=%s", url, strings.Join(updateMask, ","))
+}
+
+res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "PATCH",
+	RawURL:    url,
+	UserAgent: userAgent,
+	Body:      obj,
+	Timeout:   d.Timeout(schema.TimeoutCreate),
+})
+if err != nil {
+	return fmt.Errorf("Error creating Settings: %s", err)
+}
+
+return resourcePrivilegedAccessManagerSettingsRead(d, meta)

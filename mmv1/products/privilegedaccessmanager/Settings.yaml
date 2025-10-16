@@ -29,8 +29,18 @@ id_format: '{{parent}}/locations/{{location}}/settings'
 base_url: '{{parent}}/locations/{{location}}/settings'
 self_link: '{{parent}}/locations/{{location}}/settings'
 create_url: '{{parent}}/locations/{{location}}/settings'
+exclude_delete: true
 update_verb: 'PATCH'
+create_verb: 'PATCH'
 update_mask: true
+custom_code:
+  custom_create: 'templates/terraform/custom_create/privileged_access_manager_settings.go.tmpl'
+examples:
+  - name: 'privileged_access_manager_settings_basic'
+    primary_resource_id: 'settings'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    exclude_test: true
 import_format:
   - '{{%parent}}/locations/{{location}}/settings'
 min_version: 'beta'
@@ -91,6 +101,7 @@ properties:
     properties:
       - name: 'enabled'
         type: Boolean
+        send_empty_value: true
         description: |
           Indicates whether service account is allowed to grant approvals.
   - name: 'emailNotificationSettings'
