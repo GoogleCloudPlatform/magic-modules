@@ -639,7 +639,7 @@ properties:
           default_from_api: true
         - name: 'hostGroups'
           type: Array
-          description: | 
+          description: |
             A list of host groups that identify hosts that can mount the block volume.
             Format:
             `projects/{project_id}/locations/{location}/hostGroups/{host_group_id}`
