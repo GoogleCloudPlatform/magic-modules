@@ -626,6 +626,36 @@ properties:
                                   - name: 'bucketNameRegex'
                                     type: String
                                     description: 'Regex to test the bucket name against. If empty, all buckets match. Example: "marketing2021" or "(marketing)\d{4}" will both match the bucket gs://marketing2021'
+                    - name: 'includeTags'
+                      type: NestedObject
+                      description: |
+                        For a resource to match the tag filters, the resource must have all of the
+                        provided tags attached. Tags refer to Resource Manager tags bound to the
+                        resource or its ancestors.
+                      properties:
+                        - name: 'tagFilters'
+                          type: Array
+                          description: 'A resource must match ALL of the specified tag filters to be included in the collection.'
+                          item_type:
+                            type: NestedObject
+                            properties:
+                              - name: 'namespacedTagValue'
+                                type: String
+                                description: |
+                                  The namespaced name for the tag value. Must be in the format
+                                  `{parent_id}/{tag_key_short_name}/{short_name}`, for example,
+                                  "123456/environment/prod" for an organization parent, or
+                                  "my-project/environment/prod" for a project parent.
+                                conflicts:
+                                  - targets.cloud_storage_target.filter.collection.include_tags.tag_filters.namespaced_tag_key
+                              - name: 'namespacedTagKey'
+                                type: String
+                                description: |
+                                  The namespaced name for the tag key. Must be in the format
+                                  `{parent_id}/{tag_key_short_name}`, for example, "123456/sensitive" for
+                                  an organization parent, or "my-project/sensitive" for a project parent.
+                                conflicts:
+                                  - targets.cloud_storage_target.filter.collection.include_tags.tag_filters.namespaced_tag_value
                 - name: 'cloudStorageResourceReference'
                   type: NestedObject
                   description: The bucket to scan. Targets including this can only include one target (the target with this bucket). This enables profiling the contents of a single bucket, while the other options allow for easy profiling of many buckets within a project or an organization.
