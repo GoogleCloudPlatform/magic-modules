@@ -56,6 +56,8 @@ examples:
       cluster_id: 'my-cluster'
       key_name: 'example-key'
       key_ring_name: 'example-key-ring'
+    test_vars_overrides:
+      key_name: 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
     external_providers: ["time"]
 parameters:
   - name: 'location'
