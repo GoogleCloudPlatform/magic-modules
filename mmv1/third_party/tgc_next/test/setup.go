@@ -106,15 +106,14 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 					Date:                  currentDate,
 				}
 			}
+			if os.Getenv("WRITE_FILES") != "" {
+				writeJSONFile(fmt.Sprintf("../../tests_metadata_%s.json", currentDate.Format(ymdFormat)), metadata)
+			}
 			currentDate = currentDate.AddDate(0, 0, -1)
 		}
 
 		if allErrs != nil {
 			return nil, allErrs
-		}
-
-		if os.Getenv("WRITE_FILES") != "" {
-			writeJSONFile("../../tests_metadata.json", TestsMetadata)
 		}
 		setupDone = true
 	}
