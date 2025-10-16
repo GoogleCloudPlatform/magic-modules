@@ -126,7 +126,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
     params                     = jsonencode({
       "inclusion_filters": {
         "knowledgeBaseSysId": [
-          "123"
+          "456"
         ]
       }
     })
@@ -136,7 +136,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
     params                     = jsonencode({
       "inclusion_filters": {
         "knowledgeBaseSysId": [
-          "123"
+          "456"
         ]
       }
     })
@@ -146,7 +146,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
     params                     = jsonencode({
       "inclusion_filters": {
         "knowledgeBaseSysId": [
-          "123"
+          "456"
         ]
       }
     })
