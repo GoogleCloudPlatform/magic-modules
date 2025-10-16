@@ -20,6 +20,8 @@ const (
 	condDesc2050  = "This condition will automatically remove access after 2050-12-31"
 	condTitle2040 = "Expire access on 2040-12-31"
 	condExpr2040  = "request.time < timestamp('2040-12-31T23:59:59Z')"
+	condDesc2040  = "This condition will automatically remove access after 2040-12-31"
+	condLoc       = "some_file.tf#112"
 )
 
 func TestAccBigqueryDatasetIamMember_afterDatasetCreation(t *testing.T) {
@@ -463,9 +465,10 @@ resource "google_bigquery_dataset_iam_member" "access" {
     title       = "%s"
     description = "%s"
     expression  = "%s"
+    location    = "%s"
   }
 }
-`, datasetID, serviceAccountID, condTitle2050, condDesc2050, condExpr2050)
+`, datasetID, serviceAccountID, condTitle2050, condDesc2050, condExpr2050, condLoc)
 }
 
 func testAccBigqueryDatasetIamMember_withServiceAccountAndIAMCondition_update(datasetID, serviceAccountID string) string {
@@ -486,7 +489,8 @@ resource "google_bigquery_dataset_iam_member" "access" {
   condition {
     title       = "%s"
     expression  = "%s"
+    location    = "%s"
   }
 }
-`, datasetID, serviceAccountID, condTitle2040, condExpr2040)
+`, datasetID, serviceAccountID, condTitle2040, condExpr2040, condLoc)
 }
