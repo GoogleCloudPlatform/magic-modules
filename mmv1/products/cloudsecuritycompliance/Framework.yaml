@@ -65,7 +65,6 @@ properties:
     description: The category of the framework.
     item_type:
       type: String
-    computed: true
   - name: cloudControlDetails
     type: Array
     description: |-
