@@ -1,12 +1,12 @@
-resource "google_cloud_security_compliance_cloud_control" "{{$.PrimaryResourceId}}" {
+resource "google_cloud_security_compliance_cloud_control" "example" {
   name                = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/{{index $.Vars "cloudcontrol_name"}}"
   organization        = "{{index $.TestEnvVars "org_id"}}"
   location            = "global"
   cloud_control_id    = "{{index $.Vars "cloudcontrol_name"}}"
 
-  display_name        = "Example CloudControl"
-  description       = "An example cloud control for testing"
-  categories        = ["SECURITY"]
+  display_name      = "TF test CloudControl Name"
+  description       = "A test cloud control for security compliance"
+  categories        = ["CC_CATEGORY_INFRASTRUCTURE"]
   severity          = "HIGH"
   finding_category  = "SECURITY_POLICY"
   remediation_steps = "Review and update the security configuration according to best practices."
@@ -25,7 +25,7 @@ resource "google_cloud_security_compliance_cloud_control" "{{$.PrimaryResourceId
       }
     }
   }
-  
+
   parameter_spec {
     name         = "location"
     display_name = "Resource Location"
