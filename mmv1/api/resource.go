@@ -390,6 +390,9 @@ type TGCResource struct {
 	// Generally, it shouldn't be set when the identity can be decided.
 	// Otherswise, it should be set.
 	CaiIdentity string `yaml:"cai_identity,omitempty"`
+
+	// [Optional] if true, generate cai_asset_name_format in resource metadata yaml file.
+	IncludeCaiAssetMeta string `yaml:"include_cai_asset_meta,omitempty"`
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
