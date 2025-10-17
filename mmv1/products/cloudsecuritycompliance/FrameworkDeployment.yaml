@@ -198,6 +198,7 @@ properties:
       DEPLOYMENT_STATE_READY
       DEPLOYMENT_STATE_PARTIALLY_DEPLOYED
       DEPLOYMENT_STATE_PARTIALLY_DELETED
+    output: true
   - name: description
     type: String
     description: User provided description of the Framework deployment

@@ -49,7 +49,6 @@ resource "google_cloud_security_compliance_framework" "example" {
   
   display_name = "Terraform Framework Name"
   description  = "An Terraform description for the framework"
-  category     = ["CUSTOM_FRAMEWORK"]
   
   cloud_control_details {
 		name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-detective-policy-for-vertex-ai-runtime-template-idle-shutdown"
@@ -147,7 +146,6 @@ resource "google_cloud_security_compliance_framework" "example" {
   
   display_name = "Terraform Framework Name"
   description  = "An Terraform description for the framework"
-  category     = ["CUSTOM_FRAMEWORK"]
   
   cloud_control_details {
 		name              = "organizations/%{org_id}/locations/global/cloudControls/builtin-detective-policy-for-vertex-ai-runtime-template-idle-shutdown"
