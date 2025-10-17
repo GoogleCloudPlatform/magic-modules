@@ -1,0 +1,523 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: DbSystem
+description: A DbSystem Resource
+base_url: projects/{{project}}/locations/{{location}}/dbSystems
+immutable: true
+self_link: projects/{{project}}/locations/{{location}}/dbSystems/{{db_system_id}}
+create_url: projects/{{project}}/locations/{{location}}/dbSystems?dbSystemId={{db_system_id}}
+id_format: projects/{{project}}/locations/{{location}}/dbSystems/{{db_system_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/dbSystems/{{db_system_id}}
+timeouts:
+  insert_minutes: 120
+  update_minutes: 60
+  delete_minutes: 60
+examples:
+  - name: 'oracledatabase_db_system_basic'
+    primary_resource_id: 'my_db_system'
+    vars:
+      project: 'my-project'
+      db_system_id: 'my-instance'
+      database_id: 'mydb'
+      odb_network: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork'
+      odb_subnet: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet'
+      deletion_protection: 'true'
+    ignore_read_extra:
+      - 'deletion_protection'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+      'project': '"oci-terraform-testing-prod"'
+      # ofake- prefix is needed to create a dummy resource for testing purposes only
+      # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
+      # As a result these resources are not sweepable
+      # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
+      db_system_id: 'fmt.Sprintf("ofake-tf-test-dbsystem-basic-%s", acctest.RandString(t, 10))'
+      database_id: 'fmt.Sprintf("ofake-tf-test-database-basic-%s", acctest.RandString(t, 10))'
+      odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
+      odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+  - name: 'oracledatabase_db_system_full'
+    primary_resource_id: 'my_db_system'
+    vars:
+      project: 'my-project'
+      db_system_id: 'my-instance'
+      database_id: 'mydb'
+      odb_network: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork'
+      odb_subnet: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet'
+      deletion_protection: 'true'
+    ignore_read_extra:
+      - 'deletion_protection'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+      'project': '"oci-terraform-testing-prod"'
+      # ofake- prefix is needed to create a dummy resource for testing purposes only
+      # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
+      # As a result these resources are not sweepable
+      # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
+      db_system_id: 'fmt.Sprintf("ofake-tf-test-dbsystem-basic-%s", acctest.RandString(t, 10))'
+      database_id: 'fmt.Sprintf("ofake-tf-test-database-basic-%s", acctest.RandString(t, 10))'
+      odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
+      odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+virtual_fields:
+  - name: 'deletion_protection'
+    type: Boolean
+    default_value: true
+    description: 'Whether or not to allow Terraform to destroy the instance. Unless this field is set to false in Terraform state, a terraform destroy or terraform apply that would delete the instance will fail.'
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 120
+      update_minutes: 60
+      delete_minutes: 60
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+    - update
+  type: OpAsync
+  result:
+    resource_inside_response: true
+  include_project: false
+custom_code:
+  pre_delete: 'templates/terraform/pre_delete/oracledatabase_db_system.go.tmpl'
+autogen_status: RGJTeXN0ZW0=
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: dbSystemId
+    type: String
+    description: |-
+      The ID of the DbSystem to create. This value is
+      restricted to (^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$) and must be a maximum of
+      63 characters in length. The value must start with a letter and end with a
+      letter or a number.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: createTime
+    type: String
+    description: The date and time that the DbSystem was created.
+    output: true
+  - name: displayName
+    type: String
+    description: |-
+      The display name for the System db. The name does not have to
+      be unique within your project.
+    required: true
+  - name: entitlementId
+    type: String
+    description: The ID of the subscription entitlement associated with the DbSystem
+    output: true
+  - name: gcpOracleZone
+    type: String
+    description: |-
+      The GCP Oracle zone where Oracle DbSystem is hosted.
+      Example: us-east4-b-r2.
+      If not specified, the system will pick a zone based on availability.
+    default_from_api: true
+  - name: labels
+    type: KeyValueLabels
+    description: The labels or tags associated with the DbSystem.
+  - name: name
+    type: String
+    description: |-
+      Identifier. The name of the DbSystem resource in the following format:
+      projects/{project}/locations/{region}/dbSystems/{db_system}
+    output: true
+  - name: ociUrl
+    type: String
+    description: HTTPS link to OCI resources exposed to Customer via UI Interface.
+    output: true
+  - name: odbNetwork
+    type: String
+    description: |-
+      The name of the OdbNetwork associated with the DbSystem.
+      Format: projects/{project}/locations/{location}/odbNetworks/{odb_network}
+      It is optional but if specified, this should match the parent ODBNetwork of
+      the OdbSubnet.
+  - name: odbSubnet
+    type: String
+    description: |-
+      The name of the OdbSubnet associated with the DbSystem for IP
+      allocation. Format:
+      projects/{project}/locations/{location}/odbNetworks/{odb_network}/odbSubnets/{odb_subnet}
+    required: true
+  - name: properties
+    type: NestedObject
+    description: The properties of a DbSystem.
+    properties:
+      - name: computeCount
+        type: Integer
+        description: The number of CPU cores to enable for the DbSystem.
+        required: true
+      - name: computeModel
+        type: String
+        description: |-
+          The compute model of the DbSystem.
+          Possible values:
+          ECPU
+          OCPU
+        default_from_api: true
+      - name: dataCollectionOptions
+        type: NestedObject
+        description: Data collection options for DbSystem.
+        properties:
+          - name: isDiagnosticsEventsEnabled
+            type: Boolean
+            description: Indicates whether to enable data collection for diagnostics.
+          - name: isIncidentLogsEnabled
+            type: Boolean
+            description: Indicates whether to enable incident logs and trace collection.
+      - name: dataStorageSizeGb
+        type: Integer
+        description: The data storage size in GB that is currently available to DbSystems.
+        default_from_api: true
+      - name: databaseEdition
+        type: String
+        description: |-
+          The database edition of the DbSystem.
+          Possible values:
+          STANDARD_EDITION
+          ENTERPRISE_EDITION
+          ENTERPRISE_EDITION_HIGH_PERFORMANCE
+        required: true
+        ignore_read: true
+      - name: dbHome
+        type: NestedObject
+        description: Details of the Database Home resource.
+        ignore_read: true
+        properties:
+          - name: database
+            type: NestedObject
+            description: |-
+              Details of the Database resource.
+              https://docs.oracle.com/en-us/iaas/api/#/en/database/20160918/Database/
+            required: true
+            properties:
+              - name: adminPassword
+                type: String
+                description: The password for the default ADMIN user.
+                required: true
+              - name: characterSet
+                type: String
+                description: The character set for the database. The default is AL32UTF8.
+                default_from_api: true
+              - name: createTime
+                type: String
+                description: The date and time that the Database was created.
+                output: true
+              - name: databaseId
+                type: String
+                description: The database ID of the Database.
+                required: true
+              - name: dbHomeName
+                type: String
+                description: The name of the DbHome resource associated with the Database.
+                default_from_api: true
+              - name: dbName
+                type: String
+                description: |-
+                  The database name. The name must begin with an alphabetic character and can
+                  contain a maximum of eight alphanumeric characters. Special characters are
+                  not permitted.
+              - name: dbUniqueName
+                type: String
+                description: The DB_UNIQUE_NAME of the Oracle Database being backed up.
+                default_from_api: true
+              - name: gcpOracleZone
+                type: String
+                description: The GCP Oracle zone where the Database is created.
+                default_from_api: true
+              - name: name
+                type: String
+                description: |-
+                  Identifier. The name of the Database resource in the following format:
+                  projects/{project}/locations/{region}/databases/{database}
+                output: true
+              - name: ncharacterSet
+                type: String
+                description: The national character set for the database. The default is AL16UTF16.
+                default_from_api: true
+              - name: ociUrl
+                type: String
+                description: HTTPS link to OCI resources exposed to Customer via UI Interface.
+                output: true
+              - name: opsInsightsStatus
+                type: String
+                description: |-
+                  The Status of Operations Insights for this Database.
+                  Possible values:
+                  ENABLING
+                  ENABLED
+                  DISABLING
+                  NOT_ENABLED
+                  FAILED_ENABLING
+                  FAILED_DISABLING
+                output: true
+              - name: properties
+                type: NestedObject
+                description: The properties of a Database.
+                properties:
+                  - name: databaseManagementConfig
+                    type: NestedObject
+                    description: The configuration of the Database Management service.
+                    properties:
+                      - name: managementState
+                        type: String
+                        description: |-
+                          The status of the Database Management service.
+                          Possible values:
+                          ENABLING
+                          ENABLED
+                          DISABLING
+                          DISABLED
+                          UPDATING
+                          FAILED_ENABLING
+                          FAILED_DISABLING
+                          FAILED_UPDATING
+                        output: true
+                      - name: managementType
+                        type: String
+                        description: |-
+                          The Database Management type.
+                          Possible values:
+                          BASIC
+                          ADVANCED
+                        output: true
+                  - name: dbBackupConfig
+                    type: NestedObject
+                    description: Backup Options for the Database.
+                    properties:
+                      - name: autoBackupEnabled
+                        type: Boolean
+                        description: If set to true, enables automatic backups on the database.
+                      - name: autoFullBackupDay
+                        type: String
+                        description: |2-
+                          Possible values:
+                          MONDAY
+                          TUESDAY
+                          WEDNESDAY
+                          THURSDAY
+                          FRIDAY
+                          SATURDAY
+                          SUNDAY
+                      - name: autoFullBackupWindow
+                        type: String
+                        description: |-
+                          The window in which the full backup should be performed on the database.
+                          If no value is provided, the default is anytime.
+                          Possible values:
+                          SLOT_ONE
+                          SLOT_TWO
+                          SLOT_THREE
+                          SLOT_FOUR
+                          SLOT_FIVE
+                          SLOT_SIX
+                          SLOT_SEVEN
+                          SLOT_EIGHT
+                          SLOT_NINE
+                          SLOT_TEN
+                          SLOT_ELEVEN
+                          SLOT_TWELVE
+                        default_from_api: true
+                      - name: autoIncrementalBackupWindow
+                        type: String
+                        description: |-
+                          The window in which the incremental backup should be performed on the
+                          database. If no value is provided, the default is anytime except the auto
+                          full backup day.
+                          Possible values:
+                          SLOT_ONE
+                          SLOT_TWO
+                          SLOT_THREE
+                          SLOT_FOUR
+                          SLOT_FIVE
+                          SLOT_SIX
+                          SLOT_SEVEN
+                          SLOT_EIGHT
+                          SLOT_NINE
+                          SLOT_TEN
+                          SLOT_ELEVEN
+                          SLOT_TWELVE
+                        default_from_api: true
+                      - name: backupDeletionPolicy
+                        type: String
+                        description: |-
+                          This defines when the backups will be deleted after Database termination.
+                          Possible values:
+                          DELETE_IMMEDIATELY
+                          DELETE_AFTER_RETENTION_PERIOD
+                        default_from_api: true
+                      - name: backupDestinationDetails
+                        type: Array
+                        description: Details of the database backup destinations.
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: type
+                              type: String
+                              description: |-
+                                The type of the database backup destination.
+                                Possible values:
+                                NFS
+                                RECOVERY_APPLIANCE
+                                OBJECT_STORE
+                                LOCAL
+                                DBRS
+                              default_from_api: true
+                      - name: retentionPeriodDays
+                        type: Integer
+                        description: |-
+                          The number of days an automatic backup is retained before being
+                          automatically deleted. This value determines the earliest point in time to
+                          which a database can be restored. Min: 1, Max: 60.
+                        default_from_api: true
+                  - name: dbVersion
+                    type: String
+                    description: The Oracle Database version.
+                    required: true
+                  - name: state
+                    type: String
+                    description: |-
+                      State of the Database.
+                      Possible values:
+                      PROVISIONING
+                      AVAILABLE
+                      UPDATING
+                      BACKUP_IN_PROGRESS
+                      UPGRADING
+                      CONVERTING
+                      TERMINATING
+                      TERMINATED
+                      RESTORE_FAILED
+                      FAILED
+                    output: true
+              - name: tdeWalletPassword
+                type: String
+                description: The TDE wallet password for the database.
+          - name: dbVersion
+            type: String
+            description: |-
+              A valid Oracle Database version. For a list of supported versions, use the
+              ListDbVersions operation.
+            required: true
+          - name: displayName
+            type: String
+            description: |-
+              The display name for the Database Home. The name does not have to
+              be unique within your project.
+          - name: isUnifiedAuditingEnabled
+            type: Boolean
+            description: Whether unified auditing is enabled for the Database Home.
+            default_from_api: true
+      - name: dbSystemOptions
+        type: NestedObject
+        description: Details of the DbSystem Options.
+        properties:
+          - name: storageManagement
+            type: String
+            description: |-
+              The storage option used in DB system.
+              Possible values:
+              ASM
+              LVM
+            default_from_api: true
+      - name: domain
+        type: String
+        description: The host domain name of the DbSystem.
+        default_from_api: true
+      - name: hostname
+        type: String
+        description: The hostname of the DbSystem.
+        output: true
+      - name: hostnamePrefix
+        type: String
+        description: Prefix for DB System host names.
+        ignore_read: true
+      - name: initialDataStorageSizeGb
+        type: Integer
+        description: The initial data storage size in GB.
+        required: true
+        ignore_read: true
+      - name: licenseModel
+        type: String
+        description: |-
+          The license model of the DbSystem.
+          Possible values:
+          LICENSE_INCLUDED
+          BRING_YOUR_OWN_LICENSE
+        required: true
+      - name: lifecycleState
+        type: String
+        description: |-
+          State of the DbSystem.
+          Possible values:
+          PROVISIONING
+          AVAILABLE
+          UPDATING
+          TERMINATING
+          TERMINATED
+          FAILED
+          MIGRATED
+          MAINTENANCE_IN_PROGRESS
+          NEEDS_ATTENTION
+          UPGRADING
+        output: true
+      - name: memorySizeGb
+        type: Integer
+        description: The memory size in GB.
+        default_from_api: true
+      - name: nodeCount
+        type: Integer
+        description: The number of nodes in the DbSystem.
+        default_from_api: true
+      - name: ocid
+        type: String
+        description: OCID of the DbSystem.
+        output: true
+      - name: privateIp
+        type: String
+        description: The private IP address of the DbSystem.
+        default_from_api: true
+      - name: recoStorageSizeGb
+        type: Integer
+        description: The reco/redo storage size in GB.
+        default_from_api: true
+      - name: shape
+        type: String
+        description: Shape of DB System.
+        required: true
+      - name: sshPublicKeys
+        type: Array
+        description: SSH public keys to be stored with the DbSystem.
+        required: true
+        item_type:
+          type: String
+      - name: timeZone
+        type: NestedObject
+        description: |-
+          Represents a time zone from the
+          [IANA Time Zone Database](https://www.iana.org/time-zones).
+        default_from_api: true
+        properties:
+          - name: id
+            type: String
+            description: IANA Time Zone Database time zone. For example "America/New_York".
+            default_from_api: true

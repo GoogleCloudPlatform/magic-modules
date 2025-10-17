@@ -64,12 +64,16 @@ examples:
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
+    ignore_read_extra:
+      - 'update_time'
   - name: 'workbench_instance_basic_container'
     primary_resource_id: 'instance'
     primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
+    ignore_read_extra:
+      - 'update_time'
   - name: 'workbench_instance_basic_gpu'
     primary_resource_id: 'instance'
     primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
@@ -79,6 +83,7 @@ examples:
       reservation_name: 'wbi-reservation'
     ignore_read_extra:
       - 'gce_setup.0.vm_image'
+      - 'update_time'
   - name: 'workbench_instance_labels_stopped'
     primary_resource_id: 'instance'
     primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
@@ -90,6 +95,7 @@ examples:
       service_account: 'SERVICE_ACCT'
     ignore_read_extra:
       - 'desired_state'
+      - 'update_time'
   - name: 'workbench_instance_full'
     primary_resource_id: 'instance'
     primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
@@ -117,6 +123,8 @@ examples:
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
+    ignore_read_extra:
+      - 'update_time'
   - name: 'workbench_instance_euc'
     primary_resource_id: 'instance'
     primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
@@ -126,6 +134,8 @@ examples:
     test_env_vars:
       project_id: 'PROJECT_NAME'
       project_number: 'PROJECT_NUMBER'
+    ignore_read_extra:
+      - 'update_time'
 virtual_fields:
   - name: 'desired_state'
     description: |

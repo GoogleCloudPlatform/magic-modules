@@ -1,4 +1,4 @@
-package networkconnectivity_test
+package networkconnectivityv1_test
 
 import (
 	"testing"
@@ -19,7 +19,7 @@ func TestAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesBa
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckNetworkConnectivityInternalRangeDestroyProducer(t),
+		CheckDestroy:             testAccCheckNetworkConnectivityv1InternalRangeDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesBasicExample_full(context),
@@ -129,7 +129,7 @@ func TestAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesEx
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckNetworkConnectivityInternalRangeDestroyProducer(t),
+		CheckDestroy:             testAccCheckNetworkConnectivityv1InternalRangeDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesExternalRangesExample_full(context),
@@ -213,7 +213,7 @@ func TestAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesEx
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckNetworkConnectivityInternalRangeDestroyProducer(t),
+		CheckDestroy:             testAccCheckNetworkConnectivityv1InternalRangeDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesExcludeCIDRExample_full(context),
@@ -295,7 +295,7 @@ func TestAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesIP
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckNetworkConnectivityInternalRangeDestroyProducer(t),
+		CheckDestroy:             testAccCheckNetworkConnectivityv1InternalRangeDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesIPv6Example_full(context),
@@ -350,7 +350,7 @@ func TestAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesIm
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckNetworkConnectivityInternalRangeDestroyProducer(t),
+		CheckDestroy:             testAccCheckNetworkConnectivityv1InternalRangeDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesImmutableExample_full(context),

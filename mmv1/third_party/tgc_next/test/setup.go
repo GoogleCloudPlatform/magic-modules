@@ -70,8 +70,7 @@ var (
 
 func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 	if !setupDone {
-		// bucketName := "cai_assets_metadata"
-		bucketName := "cai_assets" // Use the bucket in testing project for tansition
+		bucketName := "cai_assets_metadata"
 		currentDate := time.Now()
 		ctx := context.Background()
 		client, err := storage.NewClient(ctx)
@@ -107,15 +106,14 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 					Date:                  currentDate,
 				}
 			}
+			if os.Getenv("WRITE_FILES") != "" {
+				writeJSONFile(fmt.Sprintf("../../tests_metadata_%s.json", currentDate.Format(ymdFormat)), metadata)
+			}
 			currentDate = currentDate.AddDate(0, 0, -1)
 		}
 
 		if allErrs != nil {
 			return nil, allErrs
-		}
-
-		if os.Getenv("WRITE_FILES") != "" {
-			writeJSONFile("../../tests_metadata.json", TestsMetadata)
 		}
 		setupDone = true
 	}

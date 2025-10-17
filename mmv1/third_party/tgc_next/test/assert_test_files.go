@@ -228,7 +228,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 
 	if diff := cmp.Diff(string(roundtripConfigData), string(exportConfigData)); diff != "" {
 		tfFileName := fmt.Sprintf("%s_roundtrip", testName)
-		jsonFileName := fmt.Sprintf("%s_reexport", testName)
+		jsonFileName := fmt.Sprintf("%s_reexport.json", testName)
 
 		reexportAssets, err := tfplan2caiConvert(t, tfFileName, jsonFileName, tfDir, ancestryCache, defaultProject, logger)
 		if err != nil {
@@ -339,13 +339,31 @@ func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 // Compares HCL and finds all of the keys in map1 that are not in map2
 func compareHCLFields(map1, map2, ignoredFields map[string]any) []string {
 	var missingKeys []string
-	for key, _ := range map1 {
+	for key, val := range map1 {
 		if isIgnored(key, ignoredFields) {
 			continue
 		}
 
 		if _, ok := map2[key]; !ok {
-			missingKeys = append(missingKeys, key)
+			// If a field is an empty map in map1, it is possible that its children are in map2.
+			// In this case, the field is not missing in map2.
+			// map1 = {a: {}}, map2 = {a.b: {}}
+			if vMap, ok := val.(map[string]interface{}); ok {
+				childrenFound := false
+				if len(vMap) == 0 {
+					for key := range map2 {
+						if strings.HasPrefix(key, key) {
+							childrenFound = true
+							break
+						}
+					}
+				}
+				if !childrenFound {
+					missingKeys = append(missingKeys, key)
+				}
+			} else {
+				missingKeys = append(missingKeys, key)
+			}
 		}
 	}
 	sort.Strings(missingKeys)
