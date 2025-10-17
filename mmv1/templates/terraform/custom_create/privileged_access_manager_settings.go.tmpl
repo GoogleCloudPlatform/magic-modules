@@ -1,3 +1,4 @@
+obj := make(map[string]interface{})
 userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 if err != nil {
 	return err
@@ -24,7 +25,10 @@ if err != nil {
 	return fmt.Errorf("Error reading Settings: %s", err)
 }
 
-obj := make(map[string]interface{})
+if etag, ok := res["etag"]; ok {
+	obj["etag"] = etag
+}
+
 updateMask := []string{}
 
 {{- range $prop := .Properties }}
@@ -41,10 +45,6 @@ if v, ok := d.GetOkExists("{{ $propName }}"); ok {
 }
 {{- end }}
 {{- end }}
-
-if etag, ok := res["etag"]; ok {
-	obj["etag"] = etag
-}
 
 if len(updateMask) > 0 {
 	url = fmt.Sprintf("%s?updateMask=%s", url, strings.Join(updateMask, ","))

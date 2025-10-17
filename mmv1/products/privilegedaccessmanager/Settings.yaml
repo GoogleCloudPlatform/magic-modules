@@ -34,6 +34,7 @@ update_verb: 'PATCH'
 create_verb: 'PATCH'
 update_mask: true
 custom_code:
+  pre_update: 'templates/terraform/pre_update/privileged_access_manager_settings.go.tmpl' # get etag
   custom_create: 'templates/terraform/custom_create/privileged_access_manager_settings.go.tmpl'
 examples:
   - name: 'privileged_access_manager_settings_basic'

@@ -15,7 +15,7 @@ func TestAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_basi
 
 	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
-        "org_id":        envvar.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -35,6 +35,15 @@ func TestAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_basi
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "parent"},
 			},
+			{
+				Config: testAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_basic_update(context),
+			},
+			{
+				ResourceName:            "google_privileged_access_manager_settings.settings",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "parent"},
+			},
 		},
 	})
 }
@@ -42,10 +51,10 @@ func TestAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_basi
 func testAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_folder" "folder" {
-  provider            = google-beta
-  display_name        = "tf-test-%{random_suffix}"
-  parent              = "organizations/%{org_id}"
-  deletion_protection = false
+    provider            = google-beta
+    display_name        = "tf-test-%{random_suffix}"
+    parent              = "organizations/%{org_id}"
+    deletion_protection = false
 }
 
 resource "time_sleep" "wait_90s" {
@@ -79,5 +88,47 @@ resource "google_privileged_access_manager_settings" "settings" {
 }
 `, context)
 }
+
+func testAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_basic_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_folder" "folder" {
+    provider            = google-beta
+    display_name        = "tf-test-%{random_suffix}"
+    parent              = "organizations/%{org_id}"
+    deletion_protection = false
+}
+
+resource "time_sleep" "wait_90s" {
+    depends_on = [google_folder.folder]
+    create_duration = "90s"
+}
+
+resource "google_privileged_access_manager_settings" "settings" {
+    provider = google-beta
+    location = "global"
+    parent   = "folders/${google_folder.folder.folder_id}"
+    service_account_approver_settings {
+        enabled = true
+    }
+    email_notification_settings {
+        custom_notification_behavior {
+            requester_notifications {
+                entitlement_assigned = "ENABLED"
+                grant_activated = "ENABLED"
+                grant_denied = "DISABLED"
+                grant_expired = "ENABLED"
+                grant_ended = "ENABLED"
+                grant_revoked = "ENABLED"
+                grant_externally_modified = "ENABLED"
+                grant_activation_failed = "ENABLED"
+            }
+        }
+    }
+
+    depends_on = [time_sleep.wait_90s]
+}
+`, context)
+}
+
 
 {{- end }}
