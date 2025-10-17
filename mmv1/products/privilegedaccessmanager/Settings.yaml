@@ -68,7 +68,6 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-    # TODO(ramon): maybe add plan-time validation?
 properties:
   - name: 'name'
     type: String
