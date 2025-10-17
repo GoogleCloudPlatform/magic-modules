@@ -240,6 +240,8 @@ func GenerateProduct(version, providerName, productName, outputPath string, prod
 		resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
 		// SetDefault after AddExtraFields to ensure relevant metadata is available for the newly generated fields
 		resource.SetDefault(productApi)
+		resource.TestSampleSetUp()
+
 		resource.Validate()
 		resources = append(resources, resource)
 	}
