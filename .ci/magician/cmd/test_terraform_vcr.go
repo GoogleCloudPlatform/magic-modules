@@ -476,6 +476,9 @@ func runReplaying(runFullVCR bool, version provider.Version, services map[string
 		// })
 
 		// temporary workaround
+		currentPath, err := os.Getwd()
+		fmt.Printf("The current working directory is: %s\n", currentPath)
+		fmt.Printf("vt.GetRepoPath(version) is: %s\n", vt.GetRepoPath(version))
 		serviceRoot := filepath.Join(version.ProviderName(), "services")
 		allServies, err := allSubFolders(serviceRoot)
 		if err != nil {
