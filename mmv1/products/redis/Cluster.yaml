@@ -703,6 +703,8 @@ properties:
     type: Array
     description: |
      This field is used to determine the available maintenance versions for the self service update.
+    item_type:
+      type: String
     output: true
   - name: 'crossClusterReplicationConfig'
     type: NestedObject
