@@ -131,18 +131,18 @@ func TestAccBigqueryDatasetIamBindingWithIAMCondition(t *testing.T) {
 			{
 				Config: testAccBigqueryDatasetIamBindingWithIAMCondition(dataset, account, role),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_binding.binding", "condition.0.title", "Expire access on 2050-12-31"),
-					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_binding.binding", "condition.0.description", "This condition will automatically remove access after 2050-12-31"),
-					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_binding.binding", "condition.0.expression", "request.time < timestamp('2050-12-31T23:59:59Z')"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_binding.binding", "condition.0.title", condTitle2050),
+					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_binding.binding", "condition.0.description", condDesc2050),
+					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_binding.binding", "condition.0.expression", condExpr2050),
 				),
 			},
 			{
 				Config: testAccBigqueryDatasetIamBindingWithIAMCondition_update(dataset, account, role),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_bigquery_dataset_iam_binding.binding", "members.1"),
-					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_binding.binding", "condition.0.title", "Expire access on 2040-12-31"),
-					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_binding.binding", "condition.0.description", "This condition will automatically remove access after 2040-12-31"),
-					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_binding.binding", "condition.0.expression", "request.time < timestamp('2040-12-31T23:59:59Z')"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_binding.binding", "condition.0.title", condTitle2040),
+					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_binding.binding", "condition.0.description", condDesc2040),
+					resource.TestCheckResourceAttr("google_bigquery_dataset_iam_binding.binding", "condition.0.expression", condExpr2040),
 				),
 			},
 		},
@@ -340,9 +340,9 @@ data "google_iam_policy" "policy" {
     members = ["serviceAccount:${google_service_account.test-account.email}"]
 
 		condition {
-      title       = "%s"
-      description = "%s"
-      expression  = "%s"
+			title       = "%s"
+			description = "%s"
+			expression  = "%s"
 		}
   }
 }
