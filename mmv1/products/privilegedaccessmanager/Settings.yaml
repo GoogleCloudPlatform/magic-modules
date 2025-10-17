@@ -114,6 +114,8 @@ properties:
     properties:
       - name: 'disableAllNotifications'
         type: NestedObject
+        allow_empty_object: true
+        send_empty_value: true
         description: |
           This option indicates that all email notifications are disabled.
         exactly_one_of:
@@ -137,7 +139,7 @@ properties:
                 type: Enum
                 description: |
                   Notification mode for entitlement assigned.
-                default_value: 'NOTIFICATION_MODE_UNSPECIFIED'
+                default_from_api: true
                 enum_values:
                   - 'NOTIFICATION_MODE_UNSPECIFIED'
                   - 'ENABLED'
@@ -146,7 +148,7 @@ properties:
                 type: Enum
                 description: |
                   Notification mode for grant activated.
-                default_value: 'NOTIFICATION_MODE_UNSPECIFIED'
+                default_from_api: true
                 enum_values:
                   - 'NOTIFICATION_MODE_UNSPECIFIED'
                   - 'ENABLED'
@@ -155,7 +157,7 @@ properties:
                 type: Enum
                 description: |
                   Notification mode for grant denied.
-                default_value: 'NOTIFICATION_MODE_UNSPECIFIED'
+                default_from_api: true
                 enum_values:
                   - 'NOTIFICATION_MODE_UNSPECIFIED'
                   - 'ENABLED'
@@ -164,7 +166,7 @@ properties:
                 type: Enum
                 description: |
                   Notification mode for grant expired.
-                default_value: 'NOTIFICATION_MODE_UNSPECIFIED'
+                default_from_api: true
                 enum_values:
                   - 'NOTIFICATION_MODE_UNSPECIFIED'
                   - 'ENABLED'
@@ -173,7 +175,7 @@ properties:
                 type: Enum
                 description: |
                   Notification mode for grant ended.
-                default_value: 'NOTIFICATION_MODE_UNSPECIFIED'
+                default_from_api: true
                 enum_values:
                   - 'NOTIFICATION_MODE_UNSPECIFIED'
                   - 'ENABLED'
@@ -182,7 +184,7 @@ properties:
                 type: Enum
                 description: |
                   Notification mode for grant revoked.
-                default_value: 'NOTIFICATION_MODE_UNSPECIFIED'
+                default_from_api: true
                 enum_values:
                   - 'NOTIFICATION_MODE_UNSPECIFIED'
                   - 'ENABLED'
@@ -191,7 +193,7 @@ properties:
                 type: Enum
                 description: |
                   Notification mode for grant externally modified.
-                default_value: 'NOTIFICATION_MODE_UNSPECIFIED'
+                default_from_api: true
                 enum_values:
                   - 'NOTIFICATION_MODE_UNSPECIFIED'
                   - 'ENABLED'
@@ -200,7 +202,7 @@ properties:
                 type: Enum
                 description: |
                   Notification mode for grant activation failed.
-                default_value: 'NOTIFICATION_MODE_UNSPECIFIED'
+                default_from_api: true
                 enum_values:
                   - 'NOTIFICATION_MODE_UNSPECIFIED'
                   - 'ENABLED'
@@ -214,7 +216,7 @@ properties:
                 type: Enum
                 description: |
                   Notification mode for grant activated.
-                default_value: 'NOTIFICATION_MODE_UNSPECIFIED'
+                default_from_api: true
                 enum_values:
                   - 'NOTIFICATION_MODE_UNSPECIFIED'
                   - 'ENABLED'
@@ -223,7 +225,7 @@ properties:
                 type: Enum
                 description: |
                   Notification mode for grant ended.
-                default_value: 'NOTIFICATION_MODE_UNSPECIFIED'
+                default_from_api: true
                 enum_values:
                   - 'NOTIFICATION_MODE_UNSPECIFIED'
                   - 'ENABLED'
@@ -232,7 +234,7 @@ properties:
                 type: Enum
                 description: |
                   Notification mode for grant externally modified.
-                default_value: 'NOTIFICATION_MODE_UNSPECIFIED'
+                default_from_api: true
                 enum_values:
                   - 'NOTIFICATION_MODE_UNSPECIFIED'
                   - 'ENABLED'
@@ -241,7 +243,7 @@ properties:
                 type: Enum
                 description: |
                   Notification mode for grant activation failed.
-                default_value: 'NOTIFICATION_MODE_UNSPECIFIED'
+                default_from_api: true
                 enum_values:
                   - 'NOTIFICATION_MODE_UNSPECIFIED'
                   - 'ENABLED'
@@ -255,7 +257,7 @@ properties:
                 type: Enum
                 description: |
                   Notification mode for pending approval.
-                default_value: 'NOTIFICATION_MODE_UNSPECIFIED'
+                default_from_api: true
                 enum_values:
                   - 'NOTIFICATION_MODE_UNSPECIFIED'
                   - 'ENABLED'
