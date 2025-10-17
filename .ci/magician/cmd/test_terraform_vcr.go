@@ -476,7 +476,8 @@ func runReplaying(runFullVCR bool, version provider.Version, services map[string
 		// })
 
 		// temporary workaround
-		allServies, err := allSubFolders(version.ProviderName())
+		serviceRoot := filepath.Join(version.ProviderName(), "services")
+		allServies, err := allSubFolders(serviceRoot)
 		if err != nil {
 			return result, testDirs, err
 		}
