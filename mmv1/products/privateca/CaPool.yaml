@@ -58,11 +58,11 @@ examples:
     primary_resource_id: 'default'
     vars:
       name: 'my-pool'
-      pool_location: 'asia-east1'
-      cloud_kms_key: 'projects/keys-project/locations/asia-east1/keyRings/key-ring/cryptoKeys/crypto-key'
+      cloud_kms_key: 'projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key'
     test_vars_overrides:
-      'pool_location': '"asia-east1"'
-      'cloud_kms_key': 'acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "asia-east1").CryptoKey.Name'
+      'cloud_kms_key': 'acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "us-central1").CryptoKey.Name'
+    # Test requires a beta-only resource
+    min_version: beta
   - name: 'privateca_quickstart'
     primary_resource_id: 'default'
     vars:

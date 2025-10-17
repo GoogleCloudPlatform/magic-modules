@@ -1,0 +1,18 @@
+resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "topic_name"}}"
+  tags = {
+    (google_tags_tag_key.tag_key.namespaced_name) = google_tags_tag_value.tag_value.short_name
+  }
+}
+
+data "google_project" "project" {}
+
+resource "google_tags_tag_key" "tag_key" {
+  parent     = data.google_project.project.id
+  short_name = "{{index $.Vars "tag_key"}}"
+}
+
+resource "google_tags_tag_value" "tag_value" {
+  parent     = google_tags_tag_key.tag_key.id
+  short_name = "{{index $.Vars "tag_value"}}"
+}

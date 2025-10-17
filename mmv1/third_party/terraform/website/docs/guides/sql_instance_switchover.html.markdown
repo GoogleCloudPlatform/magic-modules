@@ -87,7 +87,7 @@ resource "google_sql_database_instance" "original-primary" {
 
 ## MySQL
 
-1. Create a **cross-region, Enterprise Plus edition** primary and replica. The primary should have backup and binary log enabled.
+1. Create a **cross-region, Enterprise Plus edition** primary and replica. The primary should have backup and binary log enabled, and the replica should have binary log enabled.
 
 ```
 resource "google_sql_database_instance" "original-primary" {
@@ -126,6 +126,9 @@ resource "google_sql_database_instance" "original-replica" {
     # Any tier that supports Enterprise Plus edition.
     tier              = "db-perf-optimized-N-2"
     edition           = "ENTERPRISE_PLUS"
+    backup_configuration {
+      binary_log_enabled = true
+    }
   }
   
   # You can add more settings.
@@ -168,6 +171,9 @@ resource "google_sql_database_instance" "original-replica" {
   settings {
     tier              = "db-perf-optimized-N-2"
     edition           = "ENTERPRISE_PLUS"
+    backup_configuration {
+      binary_log_enabled = true
+    }
   }
 }
 ```
@@ -177,7 +183,7 @@ resource "google_sql_database_instance" "original-replica" {
 * Change `instance_type` from `READ_REPLICA_INSTANCE` to `CLOUD_SQL_INSTANCE`.
 * Remove `master_instance_name`.
 * Add original primary's name to the original replica's `replica_names` list and `replication_cluster.failover_dr_replica_name`.
-* Enable backup and binary log for original replica.
+* Enable backup for original replica.
 
 ```diff
 resource "google_sql_database_instance" "original-primary" {
@@ -218,10 +224,10 @@ resource "google_sql_database_instance" "original-replica" {
   settings {
     tier              = "db-perf-optimized-N-2"
     edition           = "ENTERPRISE_PLUS"
-+    backup_configuration {
+    backup_configuration {
 +      enabled            = true
-+      binary_log_enabled = true
-+    }    
+      binary_log_enabled = true
+    }    
   }
 }
 ```

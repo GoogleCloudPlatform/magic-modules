@@ -1,0 +1,61 @@
+resource "google_compute_network" "custom_test" {
+  name                    = "{{index $.Vars "compute_network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "custom_test" {
+  name          = "{{index $.Vars "vpc_compute_subnetwork_name"}}"
+  ip_cidr_range = "10.2.0.0/28"
+  region        = "us-central1"
+  network       = google_compute_network.custom_test.id
+}
+
+resource "google_cloud_run_v2_worker_pool" "default" {
+  name                = "{{index $.Vars "cloud_run_worker_pool_name"}}"
+  location            = "us-central1"
+  launch_stage        = "BETA"
+  deletion_protection = false
+
+  template {
+    annotations = {}
+    labels      = {}
+
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+
+      command    = []
+      args       = []
+
+      startup_probe {
+        initial_delay_seconds = 0
+        timeout_seconds       = 1
+        period_seconds        = 3
+        failure_threshold     = 3
+
+        tcp_socket {
+          port = 8080
+        }
+      }
+
+      liveness_probe {
+        initial_delay_seconds = 0
+        timeout_seconds       = 1
+        period_seconds        = 10
+        failure_threshold     = 3
+
+        http_get {
+          path = "/"
+          port = 8080
+        }
+      }
+    }
+
+    vpc_access {
+      network_interfaces {
+        network    = google_compute_network.custom_test.id
+        subnetwork = google_compute_subnetwork.custom_test.id
+        tags       = []
+      }
+    }
+  }
+}
