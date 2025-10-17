@@ -191,6 +191,18 @@ properties:
               type: Boolean
               description: |
                 If enabled (true) the rule defines read and write access for clients matching the 'allowedClients' specification. It enables nfs clients to mount using 'privacy' kerberos security mode. The 'kerberos5pReadOnly' value is ignored if this is enabled.
+            - name: 'squashMode'
+              type: Enum
+              description: |-
+                SquashMode defines how remote user privileges are restricted when accessing an NFS export. It controls how the user identities (like root) are mapped to anonymous users to limit access and enforce security.
+              enum_values:
+                - 'NO_ROOT_SQUASH'
+                - 'ROOT_SQUASH'
+                - 'ALL_SQUASH'
+            - name: 'anonUid'
+              type: Integer
+              description: |-
+                An integer representing the anonymous user ID. Range is 0 to 4294967295. Required when `squash_mode` is `ROOT_SQUASH` or `ALL_SQUASH`.
   - name: 'protocols'
     type: Array
     description: |
@@ -567,3 +579,8 @@ properties:
         description: |
           Optional. Labels to be added to the replication as the key value pairs.
           An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+  - name: 'throughputMibps'
+    type: Double
+    description: |
+      Optional. Custom Performance Total Throughput of the pool (in MiB/s).
+    default_from_api: true

@@ -13,12 +13,12 @@
   See the License for the specific language governing permissions and
   limitations under the License. */ -}}
 {{- define "flattenPropertyMethod" }}
-{{- if $.WriteOnly }}
-{{- else if $.CustomFlatten }}
+{{- if $.WriteOnlyLegacy }}
+{{- else if and $.CustomFlatten (not $.ShouldIgnoreCustomFlatten) }}
     {{- $.CustomTemplate $.CustomFlatten false -}}
 {{- else -}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-  {{- if or (and $.IgnoreRead (not $.ResourceMetadata.IsTgcCompiler)) $.ClientSide }}
+  {{- if and $.IgnoreRead (not $.ResourceMetadata.IsTgcCompiler) }}
   return d.Get("{{ $.TerraformLineage }}")
   {{- else if $.IsA "NestedObject" }}
   if v == nil {
@@ -34,7 +34,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     {{- end }}
   transformed := make(map[string]interface{})
     {{- range $prop := $.UserProperties }}
-      {{- if $prop.WriteOnly }}
+      {{- if $prop.WriteOnlyLegacy }}
       {{- else if $prop.FlattenObject }}
     if {{ $prop.ApiName }} := flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config); {{ $prop.ApiName }} != nil {
       obj := {{ $prop.ApiName }}.([]interface{})[0]
@@ -80,7 +80,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
   {{- end }}
 
   {{- range $prop := $.ItemType.UserProperties }}
-    {{- if not (or $prop.IgnoreRead $prop.WriteOnly) }}
+    {{- if not (or $prop.IgnoreRead $prop.WriteOnlyLegacy) }}
       "{{ underscore $prop.Name }}": flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config),
     {{- end }}
   {{- end }}
@@ -129,6 +129,12 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 		intVal := int(floatVal)
 		return intVal
 	}
+
+ {{- if and $.ResourceMetadata.IsTgcCompiler $.Required }}
+	if v == nil {
+		return 0
+	}
+ {{- end }}
 
 	return v // let terraform core handle it otherwise
   {{- else if and ($.IsA "Array") ($.ItemType.IsA "ResourceRef")}}
