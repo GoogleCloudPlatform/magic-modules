@@ -94,6 +94,34 @@ func ResourceDnsRecordSet() *schema.Resource {
 			State: resourceDnsRecordSetImportState,
 		},
 
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"project": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+						Description:       `The project that the service account belongs to.`,
+					},
+					"managed_zone": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+						Description:       `The name of the zone in which this record set will reside.`,
+					},
+					"name": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+						Description:       `The DNS name this record set will apply to.`,
+					},
+					"type": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+						Description:       `The DNS record set type.`,
+					},
+				}
+			},
+		},
+
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
 		),
@@ -473,6 +501,27 @@ func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
+	}
+
+	identity, err := d.Identity()
+	if err != nil {
+		return fmt.Errorf("Error getting identity: %s", err)
+	}
+	err = identity.Set("project", project)
+	if err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	err = identity.Set("managed_zone", zone)
+	if err != nil {
+		return fmt.Errorf("Error setting managed_zone: %s", err)
+	}
+	err = identity.Set("name", name)
+	if err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	err = identity.Set("type", dnsType)
+	if err != nil {
+		return fmt.Errorf("Error setting type: %s", err)
 	}
 
 	return nil
