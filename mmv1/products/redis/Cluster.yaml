@@ -699,6 +699,11 @@ properties:
     description: |
       This field represents the actual maintenance version of the cluster.
     output: true
+  - name: 'availableMaintenanceVersions'
+    type: Array
+    description: |
+     This field is used to determine the available maintenance versions for the self service update.
+    output: true
   - name: 'crossClusterReplicationConfig'
     type: NestedObject
     description: Cross cluster replication config
