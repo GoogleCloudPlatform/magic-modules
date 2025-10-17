@@ -53,6 +53,7 @@ resource "google_network_security_dns_threat_detector" "foobar" {
   provider = google-beta
 
   name                     = "%s"
+  location                 = "global"
   threat_detector_provider = "INFOBLOX"
   labels                   = {
     foo = "bar"
@@ -74,6 +75,7 @@ resource "google_network_security_dns_threat_detector" "foobar" {
   provider = google-beta
 
   name                     = "%s"
+  location                 = "global"
   threat_detector_provider = "INFOBLOX"
   excluded_networks        = [ google_compute_network.foobar.id ]
   labels                   = {
