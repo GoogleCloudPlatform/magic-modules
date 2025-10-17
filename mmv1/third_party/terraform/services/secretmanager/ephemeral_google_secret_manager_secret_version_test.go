@@ -71,13 +71,13 @@ resource "google_secret_manager_secret_version" "version" {
 }
 
 ephemeral "google_secret_manager_secret_version" "ephemeral" {
-  secret  = google_secret_manager_secret_version.version.secret
+  secret  = google_secret_manager_secret.secret.id
   version = google_secret_manager_secret_version.version.version
 }
 
 resource "google_secret_manager_secret_version" "version_two_based_on_ephemeral" {
-  secret  	             = google_secret_manager_secret_version.version.secret
-  secret_data_wo 		 = ephemeral.google_secret_manager_secret_version.ephemeral.secret_data
+  secret                 = google_secret_manager_secret_version.version.secret
+  secret_data_wo         = ephemeral.google_secret_manager_secret_version.ephemeral.secret_data
   secret_data_wo_version = "1"
 }
 
@@ -87,13 +87,13 @@ data "google_secret_manager_secret_version" "default" {
 }
 
 ephemeral "google_secret_manager_secret_version" "ephemeral_from_secret_id" {
-  secret  = google_secret_manager_secret_version.version.secret_id
+  secret  = google_secret_manager_secret.secret.secret_id
   version = google_secret_manager_secret_version.version.version
 }
 
 resource "google_secret_manager_secret_version" "version_from_secret_id_ephemeral" {
-  secret  	             = google_secret_manager_secret_version.version.secret
-  secret_data_wo 		 = ephemeral.google_secret_manager_secret_version.ephemeral_from_secret_id.secret_data
+  secret                 = google_secret_manager_secret_version.version.secret
+  secret_data_wo         = ephemeral.google_secret_manager_secret_version.ephemeral_from_secret_id.secret_data
   secret_data_wo_version = "2"
 }
 
@@ -115,33 +115,33 @@ resource "google_secret_manager_secret" "secret" {
 }
 
 resource "google_secret_manager_secret_version" "version" {
-  secret                 = google_secret_manager_secret.secret.id
-  secret_data            = base64encode("%s")
-  is_secret_data_base64  = true
+  secret                = google_secret_manager_secret.secret.id
+  secret_data           = base64encode("%s")
+  is_secret_data_base64 = true
 }
 
 ephemeral "google_secret_manager_secret_version" "ephemeral" {
-  secret  				= google_secret_manager_secret_version.version.secret
-  version 				= google_secret_manager_secret_version.version.version
+  secret                = google_secret_manager_secret.secret.id
+  version               = google_secret_manager_secret_version.version.version
   is_secret_data_base64 = true
 }
 
 resource "google_secret_manager_secret_version" "version_two_based_on_ephemeral" {
-  secret  	             = google_secret_manager_secret_version.version.secret
-  secret_data_wo 		 = ephemeral.google_secret_manager_secret_version.ephemeral.secret_data
+  secret                 = google_secret_manager_secret_version.version.secret
+  secret_data_wo         = ephemeral.google_secret_manager_secret_version.ephemeral.secret_data
   secret_data_wo_version = "1"
   is_secret_data_base64  = true
 }
 
 data "google_secret_manager_secret_version" "default" {
-  secret                 = google_secret_manager_secret_version.version_two_based_on_ephemeral.secret
-  version                = google_secret_manager_secret_version.version_two_based_on_ephemeral.version
-  is_secret_data_base64  = true
+  secret                = google_secret_manager_secret_version.version_two_based_on_ephemeral.secret
+  version               = google_secret_manager_secret_version.version_two_based_on_ephemeral.version
+  is_secret_data_base64 = true
 }
 
 ephemeral "google_secret_manager_secret_version" "ephemeral_from_secret_id" {
-  secret  				= google_secret_manager_secret_version.version.secret_id
-  version 				= google_secret_manager_secret_version.version.version
+  secret                = google_secret_manager_secret.secret.secret_id
+  version               = google_secret_manager_secret_version.version.version
   is_secret_data_base64 = true
 }
 
@@ -153,9 +153,9 @@ resource "google_secret_manager_secret_version" "version_from_secret_id_ephemera
 }
 
 data "google_secret_manager_secret_version" "from_secret_id" {
-  secret                 = google_secret_manager_secret_version.version_from_secret_id_ephemeral.secret
-  version                = google_secret_manager_secret_version.version_from_secret_id_ephemeral.version
-  is_secret_data_base64  = true
+  secret                = google_secret_manager_secret_version.version_from_secret_id_ephemeral.secret
+  version               = google_secret_manager_secret_version.version_from_secret_id_ephemeral.version
+  is_secret_data_base64 = true
 }
 `, secret, secretData)
 }
