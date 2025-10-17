@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/fsnotify/fsnotify"
 )
 
 type Result struct {
@@ -51,15 +53,18 @@ type logKey struct {
 }
 
 type Tester struct {
-	env            map[string]string           // shared environment variables for running tests
-	rnr            ExecRunner                  // for running commands and manipulating files
-	cassetteBucket string                      // name of GCS bucket to store cassettes
-	logBucket      string                      // name of GCS bucket to store logs
-	baseDir        string                      // the directory in which this tester was created
-	saKeyPath      string                      // where sa_key.json is relative to baseDir
-	cassettePaths  map[provider.Version]string // where cassettes are relative to baseDir by version
-	logPaths       map[logKey]string           // where logs are relative to baseDir by version and mode
-	repoPaths      map[provider.Version]string // relative paths of already cloned repos by version
+	env                        map[string]string           // shared environment variables for running tests
+	rnr                        ExecRunner                  // for running commands and manipulating files
+	cassetteBucket             string                      // name of GCS bucket to store cassettes
+	logBucket                  string                      // name of GCS bucket to store logs
+	baseDir                    string                      // the directory in which this tester was created
+	saKeyPath                  string                      // where sa_key.json is relative to baseDir
+	cassettePaths              map[provider.Version]string // where cassettes are relative to baseDir by version
+	logPaths                   map[logKey]string           // where logs are relative to baseDir by version and mode
+	repoPaths                  map[provider.Version]string // relative paths of already cloned repos by version
+	enableAsyncUploadCassettes bool
+	uploadFunc                 func(head string, version provider.Version, fileName string) error
+	uploadDone                 chan struct{}
 }
 
 const accTestParallelism = 32
@@ -115,7 +120,7 @@ var safeToLog = map[string]bool{
 } // true if shown, false if hidden (default false)
 
 // Create a new tester in the current working directory and write the service account key file.
-func NewTester(env map[string]string, cassetteBucket, logBucket string, rnr ExecRunner) (*Tester, error) {
+func NewTester(env map[string]string, cassetteBucket, logBucket string, rnr ExecRunner, enableAsyncUpload bool) (*Tester, error) {
 	var saKeyPath string
 	if saKeyVal, ok := env["SA_KEY"]; ok {
 		saKeyPath = "sa_key.json"
@@ -123,7 +128,7 @@ func NewTester(env map[string]string, cassetteBucket, logBucket string, rnr Exec
 			return nil, err
 		}
 	}
-	return &Tester{
+	vt := &Tester{
 		env:            env,
 		rnr:            rnr,
 		cassetteBucket: cassetteBucket,
@@ -133,7 +138,14 @@ func NewTester(env map[string]string, cassetteBucket, logBucket string, rnr Exec
 		cassettePaths:  make(map[provider.Version]string, provider.NumVersions),
 		logPaths:       make(map[logKey]string, provider.NumVersions*numModes),
 		repoPaths:      make(map[provider.Version]string, provider.NumVersions),
-	}, nil
+	}
+
+	if enableAsyncUpload {
+		vt.enableAsyncUploadCassettes = true
+		vt.uploadDone = make(chan struct{})
+		vt.uploadFunc = vt.uploadOneCassetteFile
+	}
+	return vt, nil
 }
 
 func (vt *Tester) SetRepoPath(version provider.Version, repoPath string) {
@@ -193,10 +205,11 @@ func (vt *Tester) LogPath(mode Mode, version provider.Version) string {
 }
 
 type RunOptions struct {
-	Mode     Mode
-	Version  provider.Version
-	TestDirs []string
-	Tests    []string
+	Mode             Mode
+	Version          provider.Version
+	TestDirs         []string
+	Tests            []string
+	UploadBranchName string
 }
 
 // Run the vcr tests in the given mode and provider version and return the result.
@@ -346,6 +359,18 @@ func (vt *Tester) RunParallel(opt RunOptions) (Result, error) {
 			return Result{}, fmt.Errorf("error creating cassette dir: %v", err)
 		}
 		vt.cassettePaths[opt.Version] = cassettePath
+
+		w, err := fsnotify.NewWatcher()
+		if err != nil {
+			return Result{}, fmt.Errorf("failed to create watcher")
+		}
+		defer w.Close()
+		if err := w.Add(cassettePath); err != nil {
+			return Result{}, fmt.Errorf("failed to add cassette path into watcher")
+		}
+		if vt.enableAsyncUploadCassettes {
+			go vt.asyncUploadCassettes(opt.Version, opt.UploadBranchName, w)
+		}
 	}
 
 	running := make(chan struct{}, parallelJobs)
@@ -531,7 +556,71 @@ func (vt *Tester) UploadLogs(opts UploadLogsOptions) error {
 	return nil
 }
 
+func (vt *Tester) asyncUploadCassettes(version provider.Version, branch string, w *fsnotify.Watcher) error {
+	var (
+		wg sync.WaitGroup
+
+		// Callback we run.
+		cb = func(e fsnotify.Event) {
+			vt.uploadFunc(branch, version, e.Name)
+		}
+	)
+
+	defer func() {
+		wg.Wait()
+		if vt.uploadDone != nil {
+			close(vt.uploadDone)
+		}
+	}()
+	for {
+		select {
+		case err, ok := <-w.Errors:
+			if !ok { // Channel was closed (i.e. Watcher.Close() was called).
+				return nil
+			}
+			fmt.Println(err)
+		case e, ok := <-w.Events:
+			if !ok { // Channel was closed (i.e. Watcher.Close() was called).
+				return nil
+			}
+			// ignore everything outside of Create and Write.
+			if !e.Has(fsnotify.Create) && !e.Has(fsnotify.Write) {
+				continue
+			}
+
+			wg.Add(1)
+			defer wg.Done()
+			cb(e)
+		}
+	}
+}
+
+func (vt *Tester) uploadOneCassetteFile(head string, version provider.Version, fileName string) error {
+	uploadPath := fmt.Sprintf("gs://%s/%s/refs/heads/%s/fixtures/", vt.cassetteBucket, version, head)
+	cassettePath, ok := vt.cassettePaths[version]
+	if !ok {
+		return fmt.Errorf("no cassettes found for version %s", version)
+	}
+	args := []string{
+		"-m",
+		"-q",
+		"cp",
+		filepath.Join(cassettePath, fileName),
+		uploadPath,
+	}
+	fmt.Printf("Uploading %s to %s: %v\n", fileName, uploadPath, "gsutil "+strings.Join(args, " "))
+	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
+		return fmt.Errorf("error uploading file %s: %s", fileName, err)
+	}
+	return nil
+}
+
 func (vt *Tester) UploadCassettes(head string, version provider.Version) error {
+	if vt.enableAsyncUploadCassettes {
+		<-vt.uploadDone
+		fmt.Println("Async upload cassettes done.")
+		return nil
+	}
 	cassettePath, ok := vt.cassettePaths[version]
 	if !ok {
 		return fmt.Errorf("no cassettes found for version %s", version)
