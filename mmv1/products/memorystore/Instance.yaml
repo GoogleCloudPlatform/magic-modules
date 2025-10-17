@@ -496,6 +496,7 @@ properties:
      This field is used to determine the available maintenance versions for the self service update.
     item_type:
       type: String
+    output: true
   - name: 'engineVersion'
     type: String
     description: "Optional. Engine version of the instance."
