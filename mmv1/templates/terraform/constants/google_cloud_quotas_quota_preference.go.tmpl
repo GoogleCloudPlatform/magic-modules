@@ -1,0 +1,8 @@
+func QuotaPreferredValueDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	o, n := d.GetChange(k)
+	
+	oldEmpty := o == nil || o == ""
+	newEmpty := n == nil || n == ""
+	
+	return (oldEmpty && n == "0") || (o == "0" && newEmpty)
+}
