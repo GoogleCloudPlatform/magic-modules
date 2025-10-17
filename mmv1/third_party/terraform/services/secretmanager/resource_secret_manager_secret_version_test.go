@@ -52,6 +52,31 @@ func TestAccSecretManagerSecretVersion_update(t *testing.T) {
 	})
 }
 
+func TestAccSecretManagerSecretVersion_byName(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSecretManagerSecretVersionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSecretManagerSecretVersion_byName(context),
+			},
+			{
+				ResourceName:            "google_secret_manager_secret_version.secret-version-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"secret_data", "secret_data_wo_version"},
+			},
+		},
+	})
+}
+
 func testAccSecretManagerSecretVersion_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_secret_manager_secret" "secret-basic" {
@@ -117,6 +142,8 @@ resource "google_secret_manager_secret_version" "secret-version-basic" {
 
   secret_data = "my-tf-test-secret%{random_suffix}"
   enabled     = true
+
+	depends_on = [google_secret_manager_secret.secret-basic]
 }
 `, context)
 }
