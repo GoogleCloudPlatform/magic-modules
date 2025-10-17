@@ -36,12 +36,7 @@ func TestAccCloudSecurityComplianceCloudControl_basic(t *testing.T) {
 
 func testAccCloudSecurityComplianceCloudControl_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-provider "google" {
-  billing_project = "terraform-test-472610"
-  user_project_override = true
-}
-
-resource "google_cloud_security_compliance_cloud_control" "test" {
+resource "google_cloud_security_compliance_cloud_control" "example" {
 	organization      = "%{org_id}"
 	name              = "organizations/%{org_id}/locations/global/cloudControls/tf-test-%{random_suffix}"
 	location          = "global"
@@ -125,27 +120,21 @@ func TestAccCloudSecurityComplianceCloudControl_update(t *testing.T) {
 
 func testAccCloudSecurityComplianceCloudControl_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-provider "google" {
-  billing_project = "terraform-test-472610"
-  user_project_override = true
-}
-
 resource "google_cloud_security_compliance_cloud_control" "example" {
   name              = "organizations/%{org_id}/locations/global/cloudControls/tf-test-%{random_suffix}"
   organization      = "%{org_id}"
   location          = "global"
   cloud_control_id  = "tf-test-%{random_suffix}"
 
-  
   display_name      = "Updated CloudControl Name"
   description       = "An updated description for the cloud control"
   categories        = ["CC_CATEGORY_INFRASTRUCTURE"]
   severity          = "CRITICAL"
-  finding_category  = "UPDATED_SECURITY_POLICY"
+  finding_category  = "SECURITY_POLICY"
   remediation_steps = "Updated remediation steps with more detailed instructions for security configuration."
   
-  supported_cloud_providers        = ["GCP", "AWS"]
-  supported_target_resource_types = ["TARGET_RESOURCE_CRM_TYPE_ORG"]
+  supported_cloud_providers        = ["GCP"]
+  supported_target_resource_types = []
   
   rules {
     description         = "Updated rule: Ensure compute instances have secure boot and integrity monitoring enabled"

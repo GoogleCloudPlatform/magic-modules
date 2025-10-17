@@ -4,16 +4,15 @@ resource "google_cloud_security_compliance_cloud_control" "example" {
   location          = "global"
   cloud_control_id  = "tf-test-%{random_suffix}"
 
-  
   display_name      = "Updated CloudControl Name"
   description       = "An updated description for the cloud control"
   categories        = ["CC_CATEGORY_INFRASTRUCTURE"]
   severity          = "CRITICAL"
-  finding_category  = "UPDATED_SECURITY_POLICY"
+  finding_category  = "SECURITY_POLICY"
   remediation_steps = "Updated remediation steps with more detailed instructions for security configuration."
   
-  supported_cloud_providers        = ["GCP", "AWS"]
-  supported_target_resource_types = ["TARGET_RESOURCE_CRM_TYPE_ORG"]
+  supported_cloud_providers        = ["GCP"]
+  supported_target_resource_types = []
   
   rules {
     description         = "Updated rule: Ensure compute instances have secure boot and integrity monitoring enabled"

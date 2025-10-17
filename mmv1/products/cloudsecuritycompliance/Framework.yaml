@@ -36,23 +36,6 @@ examples:
       framework_name: "example-framework"
     test_env_vars:
       org_id: "ORG_ID"
-
-autogen_async: true
-async:
-  operation:
-    timeouts:
-      insert_minutes: 20
-      update_minutes: 20
-      delete_minutes: 20
-    base_url: "{{op_id}}"
-  actions:
-    - create
-    - delete
-    - update
-  type: OpAsync
-  result:
-    resource_inside_response: true
-  include_project: false
 autogen_status: RnJhbWV3b3Jr
 parameters:
   - name: organization
@@ -82,6 +65,7 @@ properties:
     description: The category of the framework.
     item_type:
       type: String
+    output: true
   - name: cloudControlDetails
     type: Array
     description: |-

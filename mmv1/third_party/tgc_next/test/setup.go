@@ -70,8 +70,7 @@ var (
 
 func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 	if !setupDone {
-		// bucketName := "cai_assets_metadata"
-		bucketName := "cai_assets" // Use the bucket in testing project for tansition
+		bucketName := "cai_assets_metadata"
 		currentDate := time.Now()
 		ctx := context.Background()
 		client, err := storage.NewClient(ctx)
