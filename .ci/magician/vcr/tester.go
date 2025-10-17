@@ -136,6 +136,10 @@ func NewTester(env map[string]string, cassetteBucket, logBucket string, rnr Exec
 	}, nil
 }
 
+func (vt *Tester) GetRepoPath(version provider.Version) string {
+	return vt.repoPaths[version]
+}
+
 func (vt *Tester) SetRepoPath(version provider.Version, repoPath string) {
 	vt.repoPaths[version] = repoPath
 }
