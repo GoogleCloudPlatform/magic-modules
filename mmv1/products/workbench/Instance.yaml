@@ -60,7 +60,6 @@ custom_diff:
 examples:
   - name: 'workbench_instance_basic'
     primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
@@ -68,7 +67,6 @@ examples:
       - 'update_time'
   - name: 'workbench_instance_basic_container'
     primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
@@ -76,7 +74,6 @@ examples:
       - 'update_time'
   - name: 'workbench_instance_basic_gpu'
     primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
@@ -86,7 +83,6 @@ examples:
       - 'update_time'
   - name: 'workbench_instance_labels_stopped'
     primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
@@ -98,7 +94,6 @@ examples:
       - 'update_time'
   - name: 'workbench_instance_full'
     primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
@@ -119,7 +114,6 @@ examples:
       - 'update_time'
   - name: 'workbench_instance_confidential_compute'
     primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
@@ -127,7 +121,6 @@ examples:
       - 'update_time'
   - name: 'workbench_instance_euc'
     primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'

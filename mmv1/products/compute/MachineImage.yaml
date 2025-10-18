@@ -47,13 +47,11 @@ custom_code:
 examples:
   - name: 'machine_image_basic'
     primary_resource_id: 'image'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])'
     vars:
       vm_name: 'my-vm'
       image_name: 'my-image'
   - name: 'compute_machine_image_kms'
     primary_resource_id: 'image'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])'
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com"
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
