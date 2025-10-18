@@ -54,7 +54,7 @@ import_format:
   - 'projects/{{project}}/locations/{{location}}/storagePools/{{name}}'
 timeouts:
   insert_minutes: 45
-  update_minutes: 20
+  update_minutes: 60
   delete_minutes: 45
 autogen_async: true
 async:
