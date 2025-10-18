@@ -1002,7 +1002,6 @@ API (for read pools, effective_availability_type may differ from availability_ty
 			"root_password": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
 				Sensitive:   true,
 				Description: `Initial root password. Required for MS SQL Server.`,
 				ConflictsWith:  []string{"root_password_wo"},
@@ -1019,7 +1018,6 @@ API (for read pools, effective_availability_type may differ from availability_ty
 			"root_password_wo_version": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ForceNew:     true,
 				Description:  `Triggers update of root_password_wo write-only. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)`,
 				RequiredWith: []string{"root_password_wo"},
 			},
