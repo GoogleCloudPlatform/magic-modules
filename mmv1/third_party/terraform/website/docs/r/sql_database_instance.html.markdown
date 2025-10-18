@@ -316,6 +316,7 @@ includes an up-to-date reference of supported versions.
 * `root_password_wo` - (Optional) Initial root password. Can be updated. Required for MS SQL Server. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)
 
 * `root_password_wo_version` - (Optional) Triggers update of root password write-only. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)
+
 * `encryption_key_name` - (Optional)
     The full path to the encryption key used for the CMEK disk encryption.  Setting
     up disk encryption currently requires manual steps outside of Terraform.

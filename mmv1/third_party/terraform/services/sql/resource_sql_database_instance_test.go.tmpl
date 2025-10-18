@@ -129,7 +129,7 @@ func TestAccSqlDatabaseInstance_basicMSSQL_passwordWo(t *testing.T) {
 
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
 	rootPassword := acctest.RandString(t, 15)
-  updatedRootPassword := acctest.RandString(t, 15)
+	updatedRootPassword := acctest.RandString(t, 15)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
