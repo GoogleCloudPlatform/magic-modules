@@ -35,7 +35,7 @@ func TestAccNetappHostGroup_HostGroupCreateExample_Update(t *testing.T) {
 				Config: testAccNetappHostGroup_HostGroupCreateExample_Update(context),
 			},
 			{
-				ResourceName:            "google_netapp_kmsconfig.test_host_group",
+				ResourceName:            "google_netapp_host_group.test_host_group",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
