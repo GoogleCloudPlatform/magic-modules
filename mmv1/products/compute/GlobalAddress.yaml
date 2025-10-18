@@ -54,6 +54,14 @@ examples:
     vars:
       global_address_name: 'global-psconnect-ip'
       network_name: 'my-network-name'
+  - name: 'global_address_with_network_tier'
+    primary_resource_id: 'default'
+    vars:
+      global_address_name: 'global-address-premium'
+  - name: 'global_address_ipv6_endpoint_type'
+    primary_resource_id: 'default'
+    vars:
+      global_address_name: 'global-ipv6-address'
 parameters:
 properties:
   - name: 'address'
@@ -106,6 +114,26 @@ properties:
     enum_values:
       - 'IPV4'
       - 'IPV6'
+  - name: 'ipv6EndpointType'
+    type: Enum
+    description: |
+      The endpoint type of this address, which should be VM or NETLB. This is
+      used for deciding which type of endpoint this address can be used after
+      the external IPv6 address reservation.
+    ignore_read: true
+    enum_values:
+      - 'VM'
+      - 'NETLB'
+  - name: 'networkTier'
+    type: Enum
+    description: |
+      The networking tier used for configuring this address. If this field is not
+      specified, it is assumed to be PREMIUM.
+      This argument should not be used when configuring Internal addresses, because [network tier cannot be set for internal traffic; it's always Premium](https://cloud.google.com/network-tiers/docs/overview).
+    default_from_api: true
+    enum_values:
+      - 'PREMIUM'
+      - 'STANDARD'
   - name: 'prefixLength'
     type: Integer
     description: |
@@ -135,6 +163,17 @@ properties:
       * VPC_PEERING - for peer networks
 
       * PRIVATE_SERVICE_CONNECT - for ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) only) Private Service Connect networks
+  - name: 'subnetwork'
+    type: ResourceRef
+    description: |
+      The URL of the subnetwork in which to reserve the address. If an IP
+      address is specified, it must be within the subnetwork's IP range.
+      This field can only be used with INTERNAL type with
+      GCE_ENDPOINT/DNS_RESOLVER purposes.
+    default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Subnetwork'
+    imports: 'selfLink'
   - name: 'network'
     type: ResourceRef
     description: |
@@ -146,3 +185,15 @@ properties:
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
+  - name: 'ipCollection'
+    type: String
+    description: |
+      Reference to the source of external IPv4 addresses, like a PublicDelegatedPrefix (PDP) for BYOIP.
+      The PDP must support enhanced IPv4 allocations.
+
+      Use one of the following formats to specify a PDP when reserving an external IPv4 address using BYOIP:
+      * Full resource URL, as in `https://www.googleapis.com/compute/v1/projects/{{projectId}}/regions/{{region}}/publicDelegatedPrefixes/{{pdp-name}}`
+      * Partial URL, as in:
+        * `projects/{{projectId}}/regions/{{region}}/publicDelegatedPrefixes/{{pdp-name}}`
+        * `regions/{{region}}/publicDelegatedPrefixes/{{pdp-name}}`
+    min_version: 'beta'
