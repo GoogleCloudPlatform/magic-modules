@@ -400,6 +400,25 @@ func TestAccSqlUser_instanceWithActivationPolicy(t *testing.T) {
 	})
 }
 
+func TestAccSqlUser_ResourceIdentity(t *testing.T) {
+	t.Parallel()
+
+	instance := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	resource.Test(t, resource.TestCase{
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlUser_mysql(instance, "password"),
+			},
+			{
+				ResourceName:    "google_sql_user.user1",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+			},
+		},
+	})
+}
+
 func testGoogleSqlUser_instanceWithActivationPolicy(instance, activationPolicy string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
