@@ -18,25 +18,29 @@
 package {{ $.Res.PackageName }}_test
 
 import (
-{{- if not $.Res.ExcludeDelete }}
+	{{- if not $.Res.ExcludeDelete }}
 	{{- if not $.Res.CustomCode.TestCheckDestroy }}
 	"fmt"
 	{{- end }}
 	"strings"
-{{- end }}
+	{{- end }}
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 {{- if not $.Res.ExcludeDelete }}
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 {{- end }}
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath  }}/envvar"
 	"{{ $.ImportPath  }}/tpgresource"
 	transport_tpg "{{ $.ImportPath  }}/transport"
 )
-{{ range $e := $.Res.TestExamples }}
+{{ range $i, $e := $.Res.TestExamples }}
 func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T) {
 	{{- if $e.SkipTest }}
 	t.Skip("{{$e.SkipTest}}")
@@ -95,6 +99,14 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 		{{- if $.Res.IgnoreReadPropertiesToString $e }}
 				ImportStateVerifyIgnore: {{ $.Res.IgnoreReadPropertiesToString $e }},
 		{{- end }}
+			},
+	{{- end }}
+	{{- if eq $i 0 }}
+			{
+				ResourceName:       "{{ $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}",
+				RefreshState:       true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},
 	{{- end }}
 		},
