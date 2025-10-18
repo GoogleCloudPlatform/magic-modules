@@ -78,6 +78,7 @@ fields:
   - field: 'settings.data_cache_config.data_cache_enabled'
   - field: 'settings.database_flags.name'
   - field: 'settings.database_flags.value'
+  - field: 'settings.db_aligned_atomic_writes_config.db_aligned_atomic_writes'
   - field: 'settings.deletion_protection_enabled'
   - field: 'settings.deny_maintenance_period.end_date'
   - field: 'settings.deny_maintenance_period.start_date'
