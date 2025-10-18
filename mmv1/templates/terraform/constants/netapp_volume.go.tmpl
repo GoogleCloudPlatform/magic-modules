@@ -1,0 +1,32 @@
+// DiffSuppressFunc for the squash_mode attribute
+func suppressSquashModeDiff(k, old, new string, d *schema.ResourceData) bool {
+	// k: The key of the field, e.g., "export_policy.0.rules.1.squash_mode"
+	// old: The value in the state (what the API returned on last read)
+	// new: The value in the configuration (what the user set)
+	// d: The ResourceData for the entire resource
+
+	// 1. Only suppress if the user did NOT set squash_mode in the config.
+	if new != "" {
+		return false // User specified a value, so don't suppress any diff.
+	}
+
+	// 2. Only suppress if the value from the API/state is "NO_ROOT_SQUASH".
+	if old != "NO_ROOT_SQUASH" {
+		return false // The diff is not about the default API behavior for classic rules.
+	}
+
+	// 3. Check if this rule is configured as "classic" (using has_root_access: "true").
+	// Parse the key 'k' to find the index of the rule.
+	parts := strings.Split(k, ".")
+	if len(parts) < 5 || parts[0] != "export_policy" || parts[2] != "rules" || parts[4] != "squash_mode" {
+		return false // Key format not as expected.
+	}
+
+	//log.Print("suppressSquashModeDiff: Suppressing diff for hasRootAccessVal %s. value of old %s, value of new %s", hasRootAccessVal, old, new)
+
+    return old == "NO_ROOT_SQUASH" ||  old == "ROOT_SQUASH"
+
+
+    // Should not be reached if has_root_access is properly validated as "true" or "false".
+    return false
+}
