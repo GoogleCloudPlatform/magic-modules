@@ -139,6 +139,10 @@ func TestAccSqlDatabaseInstance_basicMSSQL_passwordWo(t *testing.T) {
 			{
 				Config: fmt.Sprintf(
 					testGoogleSqlDatabaseInstance_basic_mssql_wo_password, databaseName, rootPassword),
+				Check:  resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_sql_database_instance.instance", "root_password_wo"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "root_password_wo_version", "1"),
+				),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -149,6 +153,10 @@ func TestAccSqlDatabaseInstance_basicMSSQL_passwordWo(t *testing.T) {
 			{
 				Config: fmt.Sprintf(
 					testGoogleSqlDatabaseInstance_basic_mssql_wo_password_update, databaseName, updatedRootPassword),
+				Check:  resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_sql_database_instance.instance", "root_password_wo"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "root_password_wo_version", "2"),
+				),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -4221,7 +4229,7 @@ resource "google_sql_database_instance" "instance" {
   name                     = "%s"
   database_version         = "SQLSERVER_2019_STANDARD"
   root_password_wo         = "%s"
-  root_password_wo_version = "1"
+  root_password_wo_version = "2"
   deletion_protection      = false
   settings {
     tier = "db-custom-1-3840"
