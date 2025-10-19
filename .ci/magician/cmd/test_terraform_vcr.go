@@ -217,10 +217,11 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	}
 
 	if err := vt.UploadLogs(vcr.UploadLogsOptions{
-		Head:    newBranch,
-		BuildID: buildID,
-		Mode:    vcr.Replaying,
-		Version: provider.Beta,
+		Head:     newBranch,
+		BuildID:  buildID,
+		Parallel: true,
+		Mode:     vcr.Replaying,
+		Version:  provider.Beta,
 	}); err != nil {
 		return fmt.Errorf("error uploading replaying logs: %w", err)
 	}
@@ -484,20 +485,31 @@ func runReplaying(runFullVCR bool, version provider.Version, services map[string
 		for service := range allServies {
 			servicePath := "./" + filepath.Join(version.ProviderName(), "services", service)
 			testDirs = append(testDirs, servicePath)
-			fmt.Println("run VCR tests in ", service)
-			serviceResult, serviceReplayingErr := vt.Run(vcr.RunOptions{
-				Mode:     vcr.Replaying,
-				Version:  version,
-				TestDirs: []string{servicePath},
-			})
-			if serviceReplayingErr != nil {
-				replayingErr = serviceReplayingErr
-			}
-			result.PassedTests = append(result.PassedTests, serviceResult.PassedTests...)
-			result.SkippedTests = append(result.SkippedTests, serviceResult.SkippedTests...)
-			result.FailedTests = append(result.FailedTests, serviceResult.FailedTests...)
-			result.Panics = append(result.Panics, serviceResult.Panics...)
 		}
+		result, replayingErr = vt.RunParallel(vcr.RunOptions{
+			Mode:     vcr.Replaying,
+			Version:  provider.Beta,
+			TestDirs: testDirs,
+			Tests:    []string{"TestAccNOTEXIST"},
+		})
+
+		// for service := range allServies {
+		// 	servicePath := "./" + filepath.Join(version.ProviderName(), "services", service)
+		// 	testDirs = append(testDirs, servicePath)
+		// 	fmt.Println("run VCR tests in ", service)
+		// 	serviceResult, serviceReplayingErr := vt.Run(vcr.RunOptions{
+		// 		Mode:     vcr.Replaying,
+		// 		Version:  version,
+		// 		TestDirs: []string{servicePath},
+		// 	})
+		// 	if serviceReplayingErr != nil {
+		// 		replayingErr = serviceReplayingErr
+		// 	}
+		// 	result.PassedTests = append(result.PassedTests, serviceResult.PassedTests...)
+		// 	result.SkippedTests = append(result.SkippedTests, serviceResult.SkippedTests...)
+		// 	result.FailedTests = append(result.FailedTests, serviceResult.FailedTests...)
+		// 	result.Panics = append(result.Panics, serviceResult.Panics...)
+		// }
 	} else if len(services) > 0 {
 		fmt.Printf("runReplaying: %d specific services: %v\n", len(services), services)
 		for service := range services {
