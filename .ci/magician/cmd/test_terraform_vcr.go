@@ -477,13 +477,12 @@ func runReplaying(runFullVCR bool, version provider.Version, services map[string
 		// })
 
 		// temporary workaround
-		// serviceRoot := filepath.Join(vt.GetRepoPath(version), version.ProviderName(), "services")
-		// allServies, err := allSubFolders(serviceRoot)
-		// if err != nil {
-		// 	return result, testDirs, err
-		// }
-		allServies := []string{"sql"}
-		for _, service := range allServies {
+		serviceRoot := filepath.Join(vt.GetRepoPath(version), version.ProviderName(), "services")
+		allServies, err := allSubFolders(serviceRoot)
+		if err != nil {
+			return result, testDirs, err
+		}
+		for service := range allServies {
 			servicePath := "./" + filepath.Join(version.ProviderName(), "services", service)
 			testDirs = append(testDirs, servicePath)
 		}
