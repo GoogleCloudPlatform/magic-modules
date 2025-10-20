@@ -1807,12 +1807,14 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
       }
     }
 
-		preemptible_worker_config {
-		  accelerators {
-				accelerator_type  = "%s"
-				accelerator_count = "1"
-			}
-		}
+    preemptible_worker_config {
+      num_instances = "1"
+
+      accelerators {
+        accelerator_type  = "%s"
+        accelerator_count = "1"
+      }
+    }
   }
 }
 `, rnd, subnetworkName, zone, acceleratorType, acceleratorType, acceleratorType)
