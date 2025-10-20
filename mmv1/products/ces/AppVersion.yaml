@@ -274,6 +274,8 @@ properties:
         description: |-
           Default agent type. The agent uses instructions and callbacks specified in
           the agent to perform the task using a large language model.
+        properties:
+          []
       - name: modelSettings
         type: NestedObject
         description: Model settings contains various configurations for the LLM model.
@@ -537,17 +539,37 @@ properties:
           prompts the user for reengagement. If not set, the agent will not prompt
           the user for reengagement.
       - name: synthesizeSpeechConfigs
-        type: NestedObject
+        type: Map
         description: |-
           Configuration of how the agent response should be synthesized, mapping from
           the language code to SynthesizeSpeechConfig.
-
           If the configuration for the specified language code is not found, the
           configuration for the root language code will be used. For example, if the
           map contains "en-us" and "en", and the specified language code is "en-gb",
           then "en" configuration will be used.
-
           Note: Language code is case-insensitive.
+        key_name: 'language_code'
+        required: false
+        value_type:
+          name: SynthesizeSpeechConfig
+          type: NestedObject
+          description: Configuration for speech synthesis for a specific language.
+          properties:
+          - name: voice
+            type: String
+            description: |-
+              The name of the voice. If not set, the service will choose a
+              voice based on the other parameters such as language_code.
+              For the list of available voices, please refer to Supported voices and
+              languages from Cloud Text-to-Speech.
+            required: false
+          - name: speakingRate
+            type: Double
+            description: |-
+              The speaking rate/speed in the range [0.25, 2.0]. 1.0 is the normal native
+              speed supported by the specific voice. 2.0 is twice as fast, and 0.5 is
+              half as fast. Values outside of the range [0.25, 2.0] will return an error.
+            required: false
     - name: createTime
       type: String
       description: Timestamp when the app was created.
@@ -1326,6 +1348,8 @@ properties:
                 description: |-
                   A struct represents variables that were updated in the conversation,
                   keyed by variable names.
+                properties:
+                  []
           - name: eventTime
             type: String
             description: |-
@@ -2598,6 +2622,8 @@ properties:
               Configurations for authentication with [ID
               token](https://cloud.google.com/docs/authentication/token-types#id) generated
               from service agent.
+            properties:
+              []
         - name: description
           type: String
           description: The description of the MCP tool.
@@ -2950,6 +2976,8 @@ properties:
               Configurations for authentication with [ID
               token](https://cloud.google.com/docs/authentication/token-types#id) generated
               from service agent.
+            properties:
+              []
         - name: description
           type: String
           description: |-
@@ -3304,6 +3332,8 @@ properties:
               Configurations for authentication with [ID
               token](https://cloud.google.com/docs/authentication/token-types#id) generated
               from service agent.
+            properties:
+              []
         - name: serverAddress
           type: String
           description: |-
@@ -3413,6 +3443,8 @@ properties:
               Configurations for authentication with [ID
               token](https://cloud.google.com/docs/authentication/token-types#id) generated
               from service agent.
+            properties:
+              []
         - name: ignoreUnknownFields
           type: Boolean
           description: |-
