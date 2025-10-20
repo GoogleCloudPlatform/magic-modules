@@ -317,3 +317,4 @@ func newProvider(providerName, version string, productApi *api.Product, startTim
 		return provider.NewTerraform(productApi, version, startTime)
 	}
 }
+
