@@ -490,7 +490,7 @@ func runReplaying(runFullVCR bool, version provider.Version, services map[string
 			Mode:     vcr.Replaying,
 			Version:  provider.Beta,
 			TestDirs: testDirs,
-			Tests:    []string{"TestAccNOTEXIST"},
+			Tests:    []string{"TestAcc"},
 		})
 
 		// for service := range allServies {
