@@ -137,7 +137,7 @@ Additionally, the variable object passed into the templates has been updated. `$
 
 Old template `pubsub_topic_basic.tf.tmpl` (in `templates/terraform/examples/`)
 
-```
+```tf
 resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
   name = "{{index $.Vars "topic_name"}}"
 
@@ -149,7 +149,7 @@ resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
 
 New template `pubsub_topic_basic.tf.tmpl` (in `templates/terraform/samples/services/pubsub/`)
 
-```
+```tf
 resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
   name = "{{index $.PrefixedVars "topic_name"}}"
 
