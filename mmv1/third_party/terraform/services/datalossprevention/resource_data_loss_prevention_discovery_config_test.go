@@ -621,7 +621,7 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
 }
 
 resource "google_pubsub_topic" "basic" {
-	name = "test-topic"
+	name = "tf-test-topic-%{random_suffix}"
 }
 
 resource "google_project_iam_member" "tag_role" {
@@ -666,7 +666,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
 			detail_of_message = "TABLE_PROFILE"
 		}
     }
-	actions {
+    actions {
         tag_resources {
             tag_conditions {
                 tag {
@@ -676,9 +676,20 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
                     score = "SENSITIVITY_HIGH"
                 }
             }
+			tag_conditions {
+                tag {
+                    namespaced_value = "%{project}/tf_test_environment%{random_suffix}/tf_test_prod%{random_suffix}"
+                }
+                sensitivity_score {
+                    score = "SENSITIVITY_UNKNOWN"
+                }
+            }	
             profile_generations_to_tag = ["PROFILE_GENERATION_NEW", "PROFILE_GENERATION_UPDATE"]
             lower_data_risk_to_low = true
         }
+    }
+    actions {
+	publish_to_dataplex_catalog {}
     }
     inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.basic.name}"]
 	depends_on = [
@@ -705,7 +716,7 @@ resource "google_data_loss_prevention_inspect_template" "basic" {
 }
 
 resource "google_pubsub_topic" "basic" {
-	name = "test-topic"
+	name = "tf-test-topic-%{random_suffix}"
 }
 
 resource "google_data_loss_prevention_discovery_config" "basic" {

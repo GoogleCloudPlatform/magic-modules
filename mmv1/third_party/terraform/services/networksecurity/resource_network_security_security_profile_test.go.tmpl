@@ -1,0 +1,332 @@
+package networksecurity_test
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccNetworkSecuritySecurityProfiles_update(t *testing.T) {
+	t.Parallel()
+
+	orgId := envvar.GetTestOrgFromEnv(t)
+	randomSuffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetworkSecuritySecurityProfileDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkSecuritySecurityProfiles_basic(orgId, randomSuffix),
+			},
+			{
+				ResourceName:            "google_network_security_security_profile.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetworkSecuritySecurityProfiles_update(orgId, randomSuffix),
+			},
+			{
+				ResourceName:            "google_network_security_security_profile.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func TestAccNetworkSecuritySecurityProfiles_antivirusOverrides(t *testing.T) {
+	t.Parallel()
+
+	orgId := envvar.GetTestOrgFromEnv(t)
+	randomSuffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetworkSecuritySecurityProfileDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkSecuritySecurityProfiles_basic(orgId, randomSuffix),
+			},
+			{
+				ResourceName:            "google_network_security_security_profile.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetworkSecuritySecurityProfiles_antivirusOverrides(orgId, randomSuffix),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_network_security_security_profile.foobar", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_network_security_security_profile.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetworkSecuritySecurityProfiles_basic(orgId, randomSuffix),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_network_security_security_profile.foobar", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_network_security_security_profile.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+{{- if ne $.TargetVersionName "ga" }}
+func TestAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckNetworkSecuritySecurityProfileDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdateEmpty(context),
+			},
+			{
+				ResourceName:            "google_network_security_security_profile.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels", "url_filtering_profile"},
+			},
+			{
+				Config: testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdate1(context),
+			},
+			{
+				ResourceName:            "google_network_security_security_profile.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels", "url_filtering_profile"},
+			},
+			{
+				Config: testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdate2(context),
+			},
+			{
+				ResourceName:            "google_network_security_security_profile.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels", "url_filtering_profile"},
+			},
+			{
+				Config: testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdateDefault(context),
+			},
+			{
+				ResourceName:            "google_network_security_security_profile.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels", "url_filtering_profile"},
+			},
+      			{
+				Config: testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdateEmpty(context),
+			},
+			{
+				ResourceName:            "google_network_security_security_profile.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels", "url_filtering_profile"},
+			},
+		},
+	})
+}
+{{- end }}
+
+func testAccNetworkSecuritySecurityProfiles_basic(orgId string, randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_network_security_security_profile" "foobar" {
+    name        = "tf-test-my-security-profile%s"
+    parent      = "organizations/%s"
+    location    = "global"
+    description = "My security profile."
+    type        = "THREAT_PREVENTION"
+
+    labels = {
+        foo = "bar"
+    }
+}
+`, randomSuffix, orgId)
+}
+
+func testAccNetworkSecuritySecurityProfiles_update(orgId string, randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_network_security_security_profile" "foobar" {
+    name        = "tf-test-my-security-profile%s"
+    parent      = "organizations/%s"
+    location    = "global"
+    description = "My security profile. Update"
+    type        = "THREAT_PREVENTION"
+
+    labels = {
+        foo = "foo"
+    }
+
+    threat_prevention_profile {
+        severity_overrides {
+            action   = "ALLOW"
+            severity = "INFORMATIONAL"
+        }
+
+        severity_overrides {
+            action   = "DENY"
+            severity = "HIGH"
+        }
+    }
+}
+`, randomSuffix, orgId)
+}
+
+func testAccNetworkSecuritySecurityProfiles_antivirusOverrides(orgId string, randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_network_security_security_profile" "foobar" {
+    name        = "tf-test-my-security-profile%s"
+    parent      = "organizations/%s"
+    location    = "global"
+    description = "My security profile. Update"
+    type        = "THREAT_PREVENTION"
+
+    labels = {
+        foo = "foo"
+    }
+
+    threat_prevention_profile {
+        antivirus_overrides {
+            action   = "ALLOW"
+            protocol = "FTP"
+        }
+
+        antivirus_overrides {
+            action   = "DENY"
+            protocol = "HTTP"
+        }
+
+        antivirus_overrides {
+            action   = "ALERT"
+            protocol = "HTTP2"
+        }
+    }
+}
+`, randomSuffix, orgId)
+}
+
+{{- if ne $.TargetVersionName "ga" }}
+func testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdateEmpty(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_network_security_security_profile" "default" {
+  provider    = google-beta
+  name        = "tf-test-my-security-profile%{random_suffix}"
+  parent      = "organizations/%{org_id}"
+  description = "my description"
+  type        = "URL_FILTERING"
+
+  labels = {
+    foo = "bar"
+  }
+}
+`, context)
+}
+
+func testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdate1(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_network_security_security_profile" "default" {
+  provider    = google-beta
+  name        = "tf-test-my-security-profile%{random_suffix}"
+  parent      = "organizations/%{org_id}"
+  description = "my description"
+  type        = "URL_FILTERING"
+
+  url_filtering_profile {
+    url_filters {
+      priority = 1
+      filtering_action   = "ALLOW"
+      urls = ["*example.com", "*about.example.com", "*help.example.com"]
+    }
+  }
+
+  labels = {
+    foo = "bar"
+  }
+}
+`, context)
+}
+
+func testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdate2(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_network_security_security_profile" "default" {
+  provider    = google-beta
+  name        = "tf-test-my-security-profile%{random_suffix}"
+  parent      = "organizations/%{org_id}"
+  description = "my description"
+  type        = "URL_FILTERING"
+
+  url_filtering_profile {
+    url_filters {
+      priority = 1
+      filtering_action   = "ALLOW"
+      urls = ["*example.com", "*help.example.com"]
+    }
+    url_filters {
+      priority = 2
+      filtering_action   = "DENY"
+      urls = ["*restricted.example.com"]
+    }
+  }
+
+  labels = {
+    foo = "bar"
+  }
+}
+`, context)
+}
+
+func testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdateDefault(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_network_security_security_profile" "default" {
+  provider    = google-beta
+  name        = "tf-test-my-security-profile%{random_suffix}"
+  parent      = "organizations/%{org_id}"
+  description = "my description"
+  type        = "URL_FILTERING"
+
+  url_filtering_profile {
+    url_filters {
+      priority = 2147483647
+      filtering_action = "DENY"
+      urls = ["*"]
+    }
+  }
+
+  labels = {
+    foo = "bar"
+  }
+}
+`, context)
+}
+{{- end }}
