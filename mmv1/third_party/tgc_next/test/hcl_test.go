@@ -77,6 +77,46 @@ resource "google_compute_firewall" "default" {
   source_tags = ["web"]
 }
 `
+	mapHCL = `
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id    = "datasetjlgukul2im"
+  description   = "This is a test description"
+  friendly_name = "test"
+  location      = "EU"
+  project       = "ci-test-project-nightly-beta"
+  resource_tags = {
+    "ci-test-project-nightly-beta/tf_test_tag_key1jlgukul2im" = "tf_test_tag_value1jlgukul2im"
+    "ci-test-project-nightly-beta/tf_test_tag_key2jlgukul2im" = "tf_test_tag_value2jlgukul2im"
+  }
+}
+`
+
+	boolFieldWithFalseHCL = `
+resource "google_compute_backend_bucket" "image_backend" {
+  name        = "tf-test-image-backend-bucket"
+  description = "Contains beautiful images"
+  bucket_name = "tf-test-image-backend-bucket"
+  enable_cdn  = false
+  cdn_policy {
+    cache_key_policy {
+        query_string_whitelist = ["image-version"]
+    }
+  }
+}
+`
+
+	boolFieldUnsetHCL = `
+resource "google_compute_backend_bucket" "image_backend" {
+  name        = "tf-test-image-backend-bucket"
+  description = "Contains beautiful images"
+  bucket_name = "tf-test-image-backend-bucket"
+  cdn_policy {
+    cache_key_policy {
+        query_string_whitelist = ["image-version"]
+    }
+  }
+}
+`
 )
 
 func TestParseHCLBytes(t *testing.T) {
@@ -84,70 +124,109 @@ func TestParseHCLBytes(t *testing.T) {
 	cases := []struct {
 		name      string
 		hcl       string
-		exp       map[string]map[string]struct{}
+		exp       map[string]map[string]any
 		expectErr bool
 	}{
 		{
 			name: "basic",
 			hcl:  basicHCL,
-			exp: map[string]map[string]struct{}{
+			exp: map[string]map[string]any{
 				"google_project_service.project": {
-					"service": {},
+					"service": "iam.googleapis.com",
 				},
 			},
 		},
 		{
 			name: "nested blocks",
 			hcl:  nestedBlocksHCL,
-			exp: map[string]map[string]struct{}{
+			exp: map[string]map[string]any{
 				"google_storage_bucket.bucket": {
-					"name":                         {},
-					"location":                     {},
-					"force_destroy":                {},
-					"lifecycle_rule.action.type":   {},
-					"lifecycle_rule.condition.age": {},
+					"name":                         "my-bucket",
+					"location":                     "US",
+					"force_destroy":                true,
+					"lifecycle_rule.action.type":   "Delete",
+					"lifecycle_rule.condition.age": float64(30),
 				},
 			},
 		},
 		{
 			name: "multiple resources",
 			hcl:  multipleResourcesHCL,
-			exp: map[string]map[string]struct{}{
+			exp: map[string]map[string]any{
 				"google_project_service.project": {
-					"service": {},
+					"service": "iam.googleapis.com",
 				},
 				"google_storage_bucket.bucket": {
-					"name": {},
+					"name": "my-bucket",
 				},
 			},
 		},
 		{
 			name: "resource with a list of nested objects",
 			hcl:  listOfNestedObjectsHCL,
-			exp: map[string]map[string]struct{}{
+			exp: map[string]map[string]any{
 				"google_compute_firewall.default": {
-					"allow.0.ports":    {}, // "ports" appears in first element due to sorting
-					"allow.0.protocol": {},
-					"allow.1.protocol": {},
-					"name":             {},
-					"network":          {},
-					"source_tags":      {},
+					"allow.0.ports":    "80,8080,1000-2000", // "ports" appears in first element due to sorting
+					"allow.0.protocol": "tcp",
+					"allow.1.protocol": "icmp",
+					"name":             "test-firewall",
+					"network":          "google_compute_network.default.name",
+					"source_tags":      "web",
 				},
 			},
 		},
 		{
 			name: "resource with a list of multi-level nested objects",
 			hcl:  listOfMultiLevelNestedObjectsHCL,
-			exp: map[string]map[string]struct{}{
+			exp: map[string]map[string]any{
 				"google_compute_firewall.default": {
-					"allow.0.a_second_level.0.a": {},
-					"allow.0.a_second_level.1.b": {},
-					"allow.0.protocol":           {},
-					"allow.1.ports":              {},
-					"allow.1.protocol":           {},
-					"name":                       {},
-					"network":                    {},
-					"source_tags":                {},
+					"allow.0.a_second_level.0.a": false,
+					"allow.0.a_second_level.1.b": true,
+					"allow.0.protocol":           "icmp",
+					"allow.1.ports":              "80,8080,1000-2000",
+					"allow.1.protocol":           "tcp",
+					"name":                       "test-firewall",
+					"network":                    "google_compute_network.default.name",
+					"source_tags":                "web",
+				},
+			},
+		},
+		{
+			name: "resource with map",
+			hcl:  mapHCL,
+			exp: map[string]map[string]any{
+				"google_bigquery_dataset.dataset": {
+					"dataset_id":    "datasetjlgukul2im",
+					"description":   "This is a test description",
+					"friendly_name": "test",
+					"location":      "EU",
+					"project":       "ci-test-project-nightly-beta",
+					"resource_tags": map[string]any{},
+				},
+			},
+		},
+		{
+			name: "resource with false bool field",
+			hcl:  boolFieldWithFalseHCL,
+			exp: map[string]map[string]any{
+				"google_compute_backend_bucket.image_backend": {
+					"name":        "tf-test-image-backend-bucket",
+					"description": "Contains beautiful images",
+					"bucket_name": "tf-test-image-backend-bucket",
+					"enable_cdn":  false,
+					"cdn_policy.cache_key_policy.query_string_whitelist": "image-version",
+				},
+			},
+		},
+		{
+			name: "resource with unset bool field",
+			hcl:  boolFieldUnsetHCL,
+			exp: map[string]map[string]any{
+				"google_compute_backend_bucket.image_backend": {
+					"name":        "tf-test-image-backend-bucket",
+					"description": "Contains beautiful images",
+					"bucket_name": "tf-test-image-backend-bucket",
+					"cdn_policy.cache_key_policy.query_string_whitelist": "image-version",
 				},
 			},
 		},

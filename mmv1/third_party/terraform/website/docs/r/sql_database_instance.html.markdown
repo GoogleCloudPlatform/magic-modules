@@ -395,7 +395,7 @@ The `settings` block supports:
 
 * `data_disk_provisioned_throughput` - (Optional, Beta) Provisioned throughput measured in MiB per second for the data disk. This field is only used for `HYPERDISK_BALANCED` disk types.
 
-* `node_count` - For a read pool instance, the number of nodes in the read pool.
+* `node_count` - For a read pool instance, the number of nodes in the read pool. For read pools with auto scaling enabled, this field is read only.
 
 * `pricing_plan` - (Optional) Pricing plan for this instance, can only be `PER_USE`.
 
@@ -517,6 +517,28 @@ The optional `settings.ip_configuration.psc_config` sublist supports:
 
 * `consumer_service_project_id` - (Optional) The project ID of consumer service project of this consumer endpoint.
 
+The optional `settings.read_pool_auto_scale_config` subblock supports:
+
+* `enabled` - True if Read Pool Auto Scale is enabled.
+
+* `max_node_count` - Maximum number of nodes in the read pool. If set to lower than current node count, node count will be updated.
+
+* `min_node_count` - Minimum number of nodes in the read pool. If set to higher than current node count, node count will be updated.
+
+
+
+* `disable_scale_in` - True if auto scale in is disabled.
+
+* `scale_in_cooldown_seconds` - The cooldown period for scale in operations.
+
+* `scale_out_cooldown_seconds` - The cooldown period for scale out operations.
+
+* `target_metrics` - Target metrics for Read Pool Auto Scale. Must specify `target_metrics.metric` and `target_metrics.target_value` in subblock.
+
+* `metric` - Metric name for Read Pool Auto Scale.
+
+* `target_value` - Target value for Read Pool Auto Scale.
+
 The optional `settings.location_preference` subblock supports:
 
 * `follow_gae_application` - (Optional) A GAE application whose zone to remain
@@ -625,6 +647,10 @@ The optional `point_in_time_restore_context` block supports:
 
 * `allocated_ip_range` -  (Optional) The name of the allocated ip range for the private ip CloudSQL instance. For example: "google-managed-services-default". If set, the cloned instance ip will be created in the allocated range. The range name must comply with [RFC 1035](https://tools.ietf.org/html/rfc1035). Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.
 
+* `source_instance_deletion_time` -  (Optional) The timestamp of when the source instance was deleted for a clone from a deleted instance.
+
+    A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+
 * `database_names` - (Optional) (SQL Server only, use with `point_in_time`) Clone only the specified databases from the source instance. Clone all databases if empty.
 
 The optional `clone` block supports:
@@ -640,6 +666,10 @@ The optional `clone` block supports:
 * `database_names` - (Optional) (SQL Server only, use with `point_in_time`) Clone only the specified databases from the source instance. Clone all databases if empty.
 
 * `allocated_ip_range` -  (Optional) The name of the allocated ip range for the private ip CloudSQL instance. For example: "google-managed-services-default". If set, the cloned instance ip will be created in the allocated range. The range name must comply with [RFC 1035](https://tools.ietf.org/html/rfc1035). Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.
+
+* `source_instance_deletion_time` -  (Optional) The timestamp of when the source instance was deleted for a clone from a deleted instance.
+
+    A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
 
 The optional `restore_backup_context` block supports:
 **NOTE:** Restoring from a backup is an imperative action and not recommended via Terraform. Adding or modifying this
