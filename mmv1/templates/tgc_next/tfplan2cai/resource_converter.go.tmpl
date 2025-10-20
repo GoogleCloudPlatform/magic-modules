@@ -53,7 +53,7 @@ func {{ $.ResourceName -}}Tfplan2caiConverter() cai.Tfplan2caiConverter {
 }
 
 func Get{{ $.ResourceName -}}CaiAssets(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]caiasset.Asset, error) {
-    name, err := cai.AssetName(d, config, "{{ $.CaiAssetNameTemplate $productBackendName }}")
+    name, err := cai.AssetName(d, config, "{{ $.GetCaiAssetNameTemplate }}")
     if err != nil {
         return []caiasset.Asset{}, err
     }

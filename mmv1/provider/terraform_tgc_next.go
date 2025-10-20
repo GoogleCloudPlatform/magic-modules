@@ -345,7 +345,7 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 				TerraformName:      object.TerraformName(),
 				ResourceName:       object.ResourceName(),
 				AliasName:          object.ResourceName(),
-				CaiAssetNameFormat: object.GetCaiAssetNameFormat(),
+				CaiAssetNameFormat: object.GetCaiAssetNameTemplate(),
 			}
 			tgc.ResourcesForVersion = append(tgc.ResourcesForVersion, resourceIdentifier)
 

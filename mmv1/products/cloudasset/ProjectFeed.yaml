@@ -40,6 +40,7 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/cloud_asset_feed.go.tmpl'
 include_in_tgc_next_DO_NOT_USE: true
 cai_base_url: 'projects/{{project}}/feeds'
+cai_asset_name_format: 'projects/{{project}}/feeds/{{feed_id}}'
 tgc_ignore_terraform_encoder: true
 examples:
   - name: 'cloud_asset_project_feed'

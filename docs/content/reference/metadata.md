@@ -31,6 +31,10 @@ The version of the API used for this resource e.g., "v2".
 
 The API "resource type kind" used for this resource e.g., "Function".
 
+### `cai_asset_name_format`
+
+The custom CAI asset name format for this resource is typically specified (e.g., //cloudsql.googleapis.com/projects/{{project}}/instances/{{name}}). If this format is not provided, the Terraform resource ID format is used instead.
+
 ### `api_variant_patterns`
 
 The API URL patterns used by this resource that represent variants e.g., "folders/{folder}/feeds/{feed}". Each pattern must match the value defined in the API exactly. The use of `api_variant_patterns` is only meaningful when the resource type has multiple parent types available.

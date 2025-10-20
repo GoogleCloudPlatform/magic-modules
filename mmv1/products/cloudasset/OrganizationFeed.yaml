@@ -42,6 +42,7 @@ custom_code:
 supports_indirect_user_project_override: true
 include_in_tgc_next_DO_NOT_USE: true
 cai_base_url: 'organizations/{{org_id}}/feeds'
+cai_asset_name_format: 'organizations/{{org_id}}/feeds/{{feed_id}}'
 tgc_ignore_terraform_encoder: true
 examples:
   - name: 'cloud_asset_organization_feed'
