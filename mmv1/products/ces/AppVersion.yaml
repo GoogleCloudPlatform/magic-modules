@@ -22,7 +22,6 @@ import_format:
 - projects/{{project}}/locations/{{location}}/apps/{{app}}/versions/{{name}}
 examples:
 - name: "ces_app_version_basic"
-  config_path: '{{override_path}}/examples/ces_app_version_basic.tf.tmpl'
   primary_resource_id: "my-app-version"
   vars:
     app_version_display_name: 'my-app-version'
@@ -270,6 +269,11 @@ properties:
       - name: instruction
         type: String
         description: Instructions for the LLM model to guide the agent's behavior.
+      - name: llmAgent
+        type: NestedObject
+        description: |-
+          Default agent type. The agent uses instructions and callbacks specified in
+          the agent to perform the task using a large language model.
       - name: modelSettings
         type: NestedObject
         description: Model settings contains various configurations for the LLM model.
@@ -457,6 +461,9 @@ properties:
         description: |-
           Configuration for the ambient sound to be played with the synthesized agent
           response, to enhance the naturalness of the conversation.
+
+          **Limitation:** Ambient sound is **only available** when the output audio
+          encoding is **16 kHz 16-bit linear PCM**.
         properties:
         - name: gcsUri
           type: String
@@ -474,6 +481,24 @@ properties:
             RETAIL_STORE
             CONVENTION_HALL
             OUTDOOR
+        - name: prebuiltAmbientSound
+          type: String
+          description: |-
+            Name of the prebuilt ambient sound.
+            Valid values are:
+            - "coffee_shop"
+            - "keyboard"
+            - "keypad"
+            - "hum"
+            - "office_1"
+            - "office_2"
+            - "office_3"
+            - "room_1"
+            - "room_2"
+            - "room_3"
+            - "room_4"
+            - "room_5"
+            - "air_conditioner"
         - name: volumeGainDb
           type: Double
           description: |-
@@ -501,12 +526,28 @@ properties:
           description: |-
             Disables user barge-in while the agent is speaking. If true, user input
             during agent response playback will be ignored.
+
+            Deprecated. This field is deprecated in favor of
+            `disable_barge_in_control` in
+            ChannelProfile.
       - name: inactivityTimeout
         type: String
         description: |-
           The duration of user inactivity (no speech or interaction) before the agent
           prompts the user for reengagement. If not set, the agent will not prompt
           the user for reengagement.
+      - name: synthesizeSpeechConfigs
+        type: NestedObject
+        description: |-
+          Configuration of how the agent response should be synthesized, mapping from
+          the language code to SynthesizeSpeechConfig.
+
+          If the configuration for the specified language code is not found, the
+          configuration for the root language code will be used. For example, if the
+          map contains "en-us" and "en", and the specified language code is "en-gb",
+          then "en" configuration will be used.
+
+          Note: Language code is case-insensitive.
     - name: createTime
       type: String
       description: Timestamp when the app was created.
@@ -556,7 +597,11 @@ properties:
           CONTACT_CENTER_AS_A_SERVICE
       - name: disableBargeInControl
         type: Boolean
-        description: Whether to disable user barge-in in the conversation.
+        description: |-
+          Whether to disable user barge-in control in the conversation.
+          - **true**: User interruptions are disabled while the agent is speaking.
+          - **false**: The agent retains automatic control over when the user can
+          interrupt.
       - name: disableDtmf
         type: Boolean
         description: Whether to disable DTMF (dual-tone multi-frequency).
@@ -800,6 +845,16 @@ properties:
       description: |-
         The root agent is the entry point of the app.
         Format: `projects/{project}/locations/{location}/apps/{app}/agents/{agent}`
+    - name: timeZoneSettings
+      type: NestedObject
+      description: TimeZone settings of the app.
+      properties:
+      - name: timeZone
+        type: String
+        description: |-
+          The time zone of the app from the [time zone
+          database](https://www.iana.org/time-zones), e.g., America/Los_Angeles,
+          Europe/Paris.
     - name: updateTime
       type: String
       description: Timestamp when the app was last updated.
@@ -824,7 +879,7 @@ properties:
           type: NestedObject
           description: Represents a select subset of an OpenAPI 3.0 schema object.
           required: true
-          properties:
+          properties: 
           - name: description
             type: String
             description: The description of the data.
@@ -851,14 +906,14 @@ properties:
               named "Pet":
               type: object
               properties:
-              pet:
-              ref: #/defs/Pet
+                pet:
+                  ref: #/defs/Pet
               defs:
-              Pet:
-              type: object
-              properties:
-              name:
-              type: string
+                Pet:
+                  type: object
+                  properties:
+                    name:
+                      type: string
               The value of the "pet" property is a reference to the schema node
               named "Pet".
               See details in
@@ -883,6 +938,63 @@ properties:
           - name: uniqueItems
             type: Boolean
             description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
+          - name: defs
+            type: String
+            description: A map of definitions for use by ref. Only allowed at the root of the schema.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: default
+            description: |-
+              Optional. Default value of the data. Represents a dynamically typed value
+              which can be either null, a number, a string, a boolean, a struct,
+              or a list of values. The provided default value must be compatible
+              with the defined 'type' and other schema constraints.
+          - name: additionalProperties
+            type: String
+            description: |-
+              Optional. Defines the schema for additional properties allowed in an object.
+              The value must be a valid JSON string representing the Schema object.
+              (Note: OpenAPI also allows a boolean, this definition expects a Schema JSON).
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: anyOf
+            type: String
+            description: Optional. The instance value should be valid against at least one of the schemas in this list.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: prefixItems
+            type: String
+            description: Optional. Schemas of initial elements of Type.ARRAY.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: properties
+            type: String
+            description: Properties of Type.OBJECT.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: items
+            type: String
+            description: Schema of the elements of Type.ARRAY.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
   - name: examples
     type: Array
     description: List of examples in the app.
@@ -963,8 +1075,6 @@ properties:
                     * image/png
                     * image/jpeg
                     * image/webp
-                    * image/heic
-                    * image/heif
                   required: true
               - name: text
                 type: String
@@ -991,17 +1101,21 @@ properties:
                   description: |-
                     The name of the tool to execute.
                     Format: `projects/{project}/locations/{location}/apps/{app}/tools/{tool}`
-                - name: toolset
+                - name: toolsetTool
                   type: NestedObject
                   description: A tool that is created from a toolset.
                   properties:
                   - name: toolPredicate
                     type: NestedObject
-                    description: A predicate to match a tool created by a toolset.
+                    description: |-
+                      A predicate to match a tool created by a toolset.
+                      WILL BE DEPRECATED SOON. Use toolDisplayName instead.
                     properties:
                     - name: connectorToolPredicate
                       type: NestedObject
-                      description: A tool predicate that is used to match a Connector tool.
+                      description: |-
+                        A tool predicate that is used to match a Connector tool. The specified
+                        actions must match exactly one tool from the toolset.
                       properties:
                       - name: action
                         type: NestedObject
@@ -1109,17 +1223,21 @@ properties:
                   description: |-
                     The name of the tool to execute.
                     Format: `projects/{project}/locations/{location}/apps/{app}/tools/{tool}`
-                - name: toolset
+                - name: toolsetTool
                   type: NestedObject
                   description: A tool that is created from a toolset.
                   properties:
                   - name: toolPredicate
                     type: NestedObject
-                    description: A predicate to match a tool created by a toolset.
+                    description: |-
+                      A predicate to match a tool created by a toolset.
+                      WILL BE DEPRECATED SOON.
                     properties:
                     - name: connectorToolPredicate
                       type: NestedObject
-                      description: A tool predicate that is used to match a Connector tool.
+                      description: |-
+                        A tool predicate that is used to match a Connector tool. The specified
+                        actions must match exactly one tool from the toolset.
                       properties:
                       - name: action
                         type: NestedObject
@@ -1203,6 +1321,11 @@ properties:
                       Format:
                       `projects/{project}/locations/{location}/apps/{app}/toolsets/{toolset}`
                     required: true
+              - name: updatedVariables
+                type: NestedObject
+                description: |-
+                  A struct represents variables that were updated in the conversation,
+                  keyed by variable names.
           - name: eventTime
             type: String
             description: |-
@@ -1518,35 +1641,6 @@ properties:
               This field is for display purposes to show the user what prompt
               the system uses by default. It is OUTPUT_ONLY.
             output: true
-      - name: modelArmor
-        type: NestedObject
-        description: |-
-          Guardrail that uses Cloud Model Armor to sanitize the prompt or
-          response. If the prompt or response is sanitized, the guardrail is
-          triggered.
-        properties:
-        - name: failOpen
-          type: Boolean
-          description: |-
-            If true, the guardrail will not trigger if it receives any errors from
-            the model armor service. By default, the guardrail will trigger if it
-            receives any errors from the model armor service.
-        - name: modelArmorTemplate
-          type: String
-          description: |-
-            Model armor template resource name.
-            Format:
-            `projects/{project_id}/locations/{location}/templates/{template_id}`
-          required: true
-        - name: sanitizationScope
-          type: String
-          description: |-
-            When to run the sanitization check with model armor.
-            Possible values:
-            PROMPT
-            RESPONSE
-            PROMPT_AND_RESPONSE
-          required: true
       - name: modelSafety
         type: NestedObject
         description: |-
@@ -1644,7 +1738,7 @@ properties:
           required: true
         - name: parameters
           type: NestedObject
-          description: Represents a select subset of an OpenAPI 3.0 schema object.
+          description: The schema of the function parameters.
           properties:
           - name: description
             type: String
@@ -1672,14 +1766,14 @@ properties:
               named "Pet":
               type: object
               properties:
-              pet:
-              ref: #/defs/Pet
+                pet:
+                  ref: #/defs/Pet
               defs:
-              Pet:
-              type: object
-              properties:
-              name:
-              type: string
+                Pet:
+                  type: object
+                  properties:
+                    name:
+                      type: string
               The value of the "pet" property is a reference to the schema node
               named "Pet".
               See details in
@@ -1704,10 +1798,67 @@ properties:
           - name: uniqueItems
             type: Boolean
             description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
+          - name: defs
+            type: String
+            description: A map of definitions for use by ref. Only allowed at the root of the schema.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: default
+            description: |-
+              Optional. Default value of the data. Represents a dynamically typed value
+              which can be either null, a number, a string, a boolean, a struct,
+              or a list of values. The provided default value must be compatible
+              with the defined 'type' and other schema constraints.
+          - name: additionalProperties
+            type: String
+            description: |-
+              Optional. Defines the schema for additional properties allowed in an object.
+              The value must be a valid JSON string representing the Schema object.
+              (Note: OpenAPI also allows a boolean, this definition expects a Schema JSON).
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: anyOf
+            type: String
+            description: Optional. The instance value should be valid against at least one of the schemas in this list.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: prefixItems
+            type: String
+            description: Optional. Schemas of initial elements of Type.ARRAY.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: properties
+            type: String
+            description: Properties of Type.OBJECT.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: items
+            type: String
+            description: Schema of the elements of Type.ARRAY.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
         - name: response
           type: NestedObject
-          description: Represents a select subset of an OpenAPI 3.0 schema object.
-          properties:
+          description: The schema of the function response.
+          properties: 
           - name: description
             type: String
             description: The description of the data.
@@ -1734,14 +1885,14 @@ properties:
               named "Pet":
               type: object
               properties:
-              pet:
-              ref: #/defs/Pet
+                pet:
+                  ref: #/defs/Pet
               defs:
-              Pet:
-              type: object
-              properties:
-              name:
-              type: string
+                Pet:
+                  type: object
+                  properties:
+                    name:
+                      type: string
               The value of the "pet" property is a reference to the schema node
               named "Pet".
               See details in
@@ -1766,6 +1917,63 @@ properties:
           - name: uniqueItems
             type: Boolean
             description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
+          - name: defs
+            type: String
+            description: A map of definitions for use by ref. Only allowed at the root of the schema.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: default
+            description: |-
+              Optional. Default value of the data. Represents a dynamically typed value
+              which can be either null, a number, a string, a boolean, a struct,
+              or a list of values. The provided default value must be compatible
+              with the defined 'type' and other schema constraints.
+          - name: additionalProperties
+            type: String
+            description: |-
+              Optional. Defines the schema for additional properties allowed in an object.
+              The value must be a valid JSON string representing the Schema object.
+              (Note: OpenAPI also allows a boolean, this definition expects a Schema JSON).
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: anyOf
+            type: String
+            description: Optional. The instance value should be valid against at least one of the schemas in this list.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: prefixItems
+            type: String
+            description: Optional. Schemas of initial elements of Type.ARRAY.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: properties
+            type: String
+            description: Properties of Type.OBJECT.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: items
+            type: String
+            description: Schema of the elements of Type.ARRAY.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
       - name: connectorTool
         type: NestedObject
         description: |-
@@ -2279,22 +2487,9 @@ properties:
         type: NestedObject
         description: |-
           Represents a tool to perform Google web searches for grounding.
-          See https://ai.google.dev/gemini-api/docs/google-search.
+          See
+          https://cloud.google.com/vertex-ai/generative-ai/docs/grounding/grounding-with-google-search.
         properties:
-        - name: contextUrls
-          type: Array
-          description: |-
-            Specifies sources to guide the search and grounding. Entries can be
-            full URLs or domain names.
-            - Full URLs (e.g., "https://example.com/path.html"):
-            Content will be fetched directly from these URLs for context.
-            More details: https://ai.google.dev/gemini-api/docs/url-context.
-            - Domain names (e.g., "example.com", "another.site"):
-            The model will be instructed to prioritize these domains when
-            formulating search queries. These domains may or may not be
-            exclusively reflected in the final search results.
-          item_type:
-            type: String
         - name: description
           type: String
           description: Description of the tool's purpose.
@@ -2310,23 +2505,6 @@ properties:
           type: String
           description: The name of the tool.
           required: true
-        - name: promptConfig
-          type: NestedObject
-          description: |-
-            Prompt settings used by the model when performing and summarizing the
-            google search.
-          properties:
-          - name: textPrompt
-            type: String
-            description: |-
-              Defines the prompt used for the system instructions when interacting with
-              the agent in chat conversations. If not set, default prompt will be used.
-          - name: voicePrompt
-            type: String
-            description: |-
-              Defines the prompt used for the system instructions when interacting with
-              the agent in voice conversations. If not set, default prompt will be
-              used.
       - name: mcpTool
         type: NestedObject
         description: |-
@@ -2414,13 +2592,19 @@ properties:
                 CES service agent
                 `service-@gcp-sa-ces.iam.gserviceaccount.com`.
               required: true
+          - name: serviceAgentIdTokenAuthConfig
+            type: NestedObject
+            description: |-
+              Configurations for authentication with [ID
+              token](https://cloud.google.com/docs/authentication/token-types#id) generated
+              from service agent.
         - name: description
           type: String
           description: The description of the MCP tool.
         - name: inputSchema
           type: NestedObject
-          description: Represents a select subset of an OpenAPI 3.0 schema object.
-          properties:
+          description: The schema of the input arguments of the MCP tool.
+          properties: 
           - name: description
             type: String
             description: The description of the data.
@@ -2447,14 +2631,14 @@ properties:
               named "Pet":
               type: object
               properties:
-              pet:
-              ref: #/defs/Pet
+                pet:
+                  ref: #/defs/Pet
               defs:
-              Pet:
-              type: object
-              properties:
-              name:
-              type: string
+                Pet:
+                  type: object
+                  properties:
+                    name:
+                      type: string
               The value of the "pet" property is a reference to the schema node
               named "Pet".
               See details in
@@ -2479,14 +2663,71 @@ properties:
           - name: uniqueItems
             type: Boolean
             description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
+          - name: defs
+            type: String
+            description: A map of definitions for use by ref. Only allowed at the root of the schema.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: default
+            description: |-
+              Optional. Default value of the data. Represents a dynamically typed value
+              which can be either null, a number, a string, a boolean, a struct,
+              or a list of values. The provided default value must be compatible
+              with the defined 'type' and other schema constraints.
+          - name: additionalProperties
+            type: String
+            description: |-
+              Optional. Defines the schema for additional properties allowed in an object.
+              The value must be a valid JSON string representing the Schema object.
+              (Note: OpenAPI also allows a boolean, this definition expects a Schema JSON).
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: anyOf
+            type: String
+            description: Optional. The instance value should be valid against at least one of the schemas in this list.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: prefixItems
+            type: String
+            description: Optional. Schemas of initial elements of Type.ARRAY.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: properties
+            type: String
+            description: Properties of Type.OBJECT.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: items
+            type: String
+            description: Schema of the elements of Type.ARRAY.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
         - name: name
           type: String
           description: The name of the MCP tool.
           required: true
         - name: outputSchema
           type: NestedObject
-          description: Represents a select subset of an OpenAPI 3.0 schema object.
-          properties:
+          description: The schema of the output arguments of the MCP tool.
+          properties: 
           - name: description
             type: String
             description: The description of the data.
@@ -2513,14 +2754,14 @@ properties:
               named "Pet":
               type: object
               properties:
-              pet:
-              ref: #/defs/Pet
+                pet:
+                  ref: #/defs/Pet
               defs:
-              Pet:
-              type: object
-              properties:
-              name:
-              type: string
+                Pet:
+                  type: object
+                  properties:
+                    name:
+                      type: string
               The value of the "pet" property is a reference to the schema node
               named "Pet".
               See details in
@@ -2545,6 +2786,63 @@ properties:
           - name: uniqueItems
             type: Boolean
             description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
+          - name: defs
+            type: String
+            description: A map of definitions for use by ref. Only allowed at the root of the schema.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: default
+            description: |-
+              Optional. Default value of the data. Represents a dynamically typed value
+              which can be either null, a number, a string, a boolean, a struct,
+              or a list of values. The provided default value must be compatible
+              with the defined 'type' and other schema constraints.
+          - name: additionalProperties
+            type: String
+            description: |-
+              Optional. Defines the schema for additional properties allowed in an object.
+              The value must be a valid JSON string representing the Schema object.
+              (Note: OpenAPI also allows a boolean, this definition expects a Schema JSON).
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: anyOf
+            type: String
+            description: Optional. The instance value should be valid against at least one of the schemas in this list.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: prefixItems
+            type: String
+            description: Optional. Schemas of initial elements of Type.ARRAY.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: properties
+            type: String
+            description: Properties of Type.OBJECT.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: items
+            type: String
+            description: Schema of the elements of Type.ARRAY.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
         - name: serverAddress
           type: String
           description: |-
@@ -2646,6 +2944,12 @@ properties:
                 CES service agent
                 `service-@gcp-sa-ces.iam.gserviceaccount.com`.
               required: true
+          - name: serviceAgentIdTokenAuthConfig
+            type: NestedObject
+            description: |-
+              Configurations for authentication with [ID
+              token](https://cloud.google.com/docs/authentication/token-types#id) generated
+              from service agent.
         - name: description
           type: String
           description: |-
@@ -2730,6 +3034,18 @@ properties:
         - name: pythonCode
           type: String
           description: The Python code to execute for the tool.
+      - name: systemTool
+        type: NestedObject
+        description: Pre-defined system tool.
+        properties:
+        - name: description
+          type: String
+          description: The description of the system tool.
+          output: true
+        - name: name
+          type: String
+          description: The name of the system tool.
+          required: true
       - name: updateTime
         type: String
         description: Timestamp when the tool was last updated.
@@ -2831,6 +3147,49 @@ properties:
             Format:
             `projects/{project}/locations/{location}/connections/{connection}`
           required: true
+        - name: connectorActions
+          type: Array
+          description: The list of connector actions/entity operations to generate tools for.
+          required: true
+          item_type:
+            type: NestedObject
+            properties:
+            - name: connectionActionId
+              type: String
+              description: ID of a Connection action for the tool to use.
+            - name: entityOperation
+              type: NestedObject
+              description: Entity CRUD operation specification.
+              properties:
+              - name: entityId
+                type: String
+                description: ID of the entity.
+                required: true
+              - name: operation
+                type: String
+                description: |-
+                  Operation to perform on the entity.
+                  Possible values:
+                  LIST
+                  GET
+                  CREATE
+                  UPDATE
+                  DELETE
+                required: true
+            - name: inputFields
+              type: Array
+              description: |-
+                Entity fields to use as inputs for the operation.
+                If no fields are specified, all fields of the Entity will be used.
+              item_type:
+                type: String
+            - name: outputFields
+              type: Array
+              description: |-
+                Entity fields to return from the operation.
+                If no fields are specified, all fields of the Entity will be returned.
+              item_type:
+                type: String
       - name: createTime
         type: String
         description: Timestamp when the toolset was created.
@@ -2939,6 +3298,12 @@ properties:
                 CES service agent
                 `service-@gcp-sa-ces.iam.gserviceaccount.com`.
               required: true
+          - name: serviceAgentIdTokenAuthConfig
+            type: NestedObject
+            description: |-
+              Configurations for authentication with [ID
+              token](https://cloud.google.com/docs/authentication/token-types#id) generated
+              from service agent.
         - name: serverAddress
           type: String
           description: |-
@@ -3042,6 +3407,12 @@ properties:
                 CES service agent
                 `service-@gcp-sa-ces.iam.gserviceaccount.com`.
               required: true
+          - name: serviceAgentIdTokenAuthConfig
+            type: NestedObject
+            description: |-
+              Configurations for authentication with [ID
+              token](https://cloud.google.com/docs/authentication/token-types#id) generated
+              from service agent.
         - name: ignoreUnknownFields
           type: Boolean
           description: |-
