@@ -1297,6 +1297,13 @@ func ResourceDataprocCluster() *schema.Resource {
 											},
 										},
 									},
+									"accelerators": {
+										Type:        schema.TypeSet,
+										Optional:    true,
+										ForceNew:    true,
+										Elem:        acceleratorsSchema(),
+										Description: `The Compute Engine accelerator configuration for these instances.`,
+									},
 								},
 							},
 						},
@@ -2546,6 +2553,9 @@ func expandPreemptibleInstanceGroupConfig(cfg map[string]interface{}) *dataproc.
 	if p, ok := cfg["preemptibility"]; ok {
 		icg.Preemptibility = p.(string)
 	}
+	if ac, ok := cfg["accelerators"]; ok {
+		icg.Accelerators = expandAccelerators(ac.(*schema.Set).List())
+	}
 	return icg
 }
 
@@ -3349,6 +3359,9 @@ func flattenPreemptibleInstanceGroupConfig(d *schema.ResourceData, icg *dataproc
 			if icg.InstanceFlexibilityPolicy.ProvisioningModelMix != nil {
 				instanceFlexibilityPolicy["provisioning_model_mix"] = flattenProvisioningModelMix(icg.InstanceFlexibilityPolicy.ProvisioningModelMix)
 			}
+		}
+		if len(icg.Accelerators) > 0 {
+			data["accelerators"] = flattenAccelerators(icg.Accelerators)
 		}
 	}
 
