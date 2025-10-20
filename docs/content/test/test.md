@@ -83,36 +83,36 @@ An **acceptance test** verifies that a resource can be created, updated, and des
 {{< tab "MMv1" >}}
 1. Add an entry to your `RESOURCE_NAME.yaml` file's `samples` list. Each sample can contain multiple steps. The first step will generate a `create` test, and any subsequent steps will generate `update` tests. For a comprehensive reference, see [MMv1 resource reference: `samples` ↗]({{<ref "/reference/resource#samples" >}}).
    ```yaml
-samples:
-  # name is used to generate the test name.
-  - name: "PRODUCT_RESOURCE_update"
-    # primary_resource_id will be used for the Terraform resource id in the configuration file.
-    primary_resource_id: "default"
-    # min_version can be set at the top level if it applies to all steps.
-    min_version: beta
-    steps:
-      # The first step defines the initial create configuration.
-      - name: "create" # A descriptive name for the step
-        config_path: "create_config.tf.tmpl"
-        # prefixed_vars contains key/value pairs to inject into the configuration file.
-        # These can be referenced as a key inside `{{$.PrefixedVars}}`.
-        prefixed_vars:
-          resource_name: "example-resource"
-          network_name: "example-network"
-        # test_vars_overrides contains literal overrides for variables in tests.
-        test_vars_overrides:
-          network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "PRODUCT-RESOURCE-network-config")'
-      # Subsequent steps define update configurations.
-      - name: "update"
-        config_path: "update_config.tf.tmpl" # Can be the same or a different file
-        prefixed_vars:
-          resource_name: "example-resource"
-          network_name: "example-network"
-        # test_vars_overrides contains literal overrides for variables in tests.
-        test_vars_overrides:
-          network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "PRODUCT-RESOURCE-network-config")'
-        vars:
-          display_name: "Updated Name" # The new value for the updatable field
+   samples:
+     # name is used to generate the test name.
+     - name: "PRODUCT_RESOURCE_update"
+       # primary_resource_id will be used for the Terraform resource id in the configuration file.
+       primary_resource_id: "default"
+       # min_version can be set at the top level if it applies to all steps.
+       min_version: beta
+       steps:
+         # The first step defines the initial create configuration.
+         - name: "create" # A descriptive name for the step
+           config_path: "create_config.tf.tmpl"
+           # prefixed_vars contains key/value pairs to inject into the configuration file.
+           # These can be referenced as a key inside `{{$.PrefixedVars}}`.
+           prefixed_vars:
+             resource_name: "example-resource"
+             network_name: "example-network"tabs
+           # test_vars_overrides contains literal overrides for variables in tests.
+           test_vars_overrides:
+             network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "PRODUCT-RESOURCE-network-config")'
+         # Subsequent steps define update configurations.
+         - name: "update"
+           config_path: "update_config.tf.tmpl" # Can be the same or a different file
+           prefixed_vars:
+             resource_name: "example-resource"
+             network_name: "example-network"
+           # test_vars_overrides contains literal overrides for variables in tests.
+           test_vars_overrides:
+             network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "PRODUCT-RESOURCE-network-config")'
+           vars:
+             display_name: "Updated Name" # The new value for the updatable field
    ```
 
 2. Create one or more `.tf.tmpl` files in `mmv1/templates/terraform/samples/services/SERVICE_NAME/`. The file names should match the `config_path` values from the previous step.
