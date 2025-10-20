@@ -267,19 +267,7 @@ properties:
             exactly_one_of:
               - 'cloud_sql.0.credential.0.passwordWo'
             sensitive: true
-          - name: 'passwordWo'
-            type: String
-            description: Write-Only password for database.
-            exactly_one_of:
-              - 'cloud_sql.0.credential.0.password'
             write_only: true
-          - name: 'passwordWoVersion'
-            type: String
-            description: Write-Only version of password for database.
-            immutable: true
-            required_with:
-              - 'cloud_sql.0.credential.0.passwordWo'
-
       - name: 'type'
         type: Enum
         description: Type of the Cloud SQL database.
