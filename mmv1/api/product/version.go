@@ -26,6 +26,8 @@ var ORDER = []string{"ga", "beta", "alpha", "private"}
 // a superset of beta, and beta a superset of GA. Each version will have a
 // different version url.
 type Version struct {
+	// The service name from CAI asset name, e.g. bigtable.googleapis.com.
+	CaiAssetService  string `yaml:"cai_asset_service,omitempty"`
 	CaiBaseUrl       string `yaml:"cai_base_url,omitempty"`
 	CaiLegacyBaseUrl string `yaml:"cai_legacy_base_url,omitempty"`
 	BaseUrl          string `yaml:"base_url"`

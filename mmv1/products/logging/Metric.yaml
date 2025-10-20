@@ -27,6 +27,7 @@ id_format: '{{name}}'
 base_url: 'projects/{{project}}/metrics'
 # The % in self_link indicates that the name value should be URL-encoded.
 self_link: 'projects/{{project}}/metrics/{{%name}}'
+cai_asset_name_format: 'projects/{{project}}/metrics/{{%name}}'
 mutex: 'customMetric/{{project}}'
 import_format:
   - '{{name}}'
@@ -37,7 +38,6 @@ timeouts:
   delete_minutes: 20
 custom_code:
   custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
-include_cai_asset_meta: true
 examples:
   - name: 'logging_metric_basic'
     primary_resource_id: 'logging_metric'
