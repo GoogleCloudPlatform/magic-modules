@@ -330,20 +330,20 @@ resource "google_service_account" "test-account" {
 }
 
 data "google_iam_policy" "policy" {
-	binding {
-		role    = "roles/bigquery.dataOwner"
-		members = ["serviceAccount:${google_service_account.owner.email}"]
-	}
+  binding {
+    role    = "roles/bigquery.dataOwner"
+    members = ["serviceAccount:${google_service_account.owner.email}"]
+  }
 
   binding {
     role    = "%s"
     members = ["serviceAccount:${google_service_account.test-account.email}"]
 
-		condition {
-			title       = "%s"
-			description = "%s"
-			expression  = "%s"
-		}
+    condition {
+      title       = "%s"
+      description = "%s"
+      expression  = "%s"
+    }
   }
 }
 
