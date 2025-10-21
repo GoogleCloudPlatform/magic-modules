@@ -289,12 +289,12 @@ properties:
           The search link promotion to apply to the search results.
         required: true
         update_mask_fields:
-        - 'promote_action.search_link_promotion.title'
-        - 'promote_action.search_link_promotion.uri'
-        - 'promote_action.search_link_promotion.document'
-        - 'promote_action.search_link_promotion.description'
-        - 'promote_action.search_link_promotion.image_uri'
-        - 'promote_action.search_link_promotion.enabled'
+          - 'promote_action.search_link_promotion.title'
+          - 'promote_action.search_link_promotion.uri'
+          - 'promote_action.search_link_promotion.document'
+          - 'promote_action.search_link_promotion.description'
+          - 'promote_action.search_link_promotion.image_uri'
+          - 'promote_action.search_link_promotion.enabled'
         properties:
           - name: 'title'
             type: String
