@@ -13,7 +13,8 @@
   See the License for the specific language governing permissions and
   limitations under the License. */ -}}
 {{- define "flattenPropertyMethod" }}
-{{- if and $.CustomFlatten (not $.ShouldIgnoreCustomFlatten) }}
+{{- if and (or $.WriteOnlyLegacy $.WriteOnly) $.IgnoreRead }}
+{{- else if and $.CustomFlatten (not $.ShouldIgnoreCustomFlatten) }}
     {{- $.CustomTemplate $.CustomFlatten false -}}
 {{- else -}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
