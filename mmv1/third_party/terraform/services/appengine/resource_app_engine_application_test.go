@@ -71,7 +71,6 @@ func TestAccAppEngineApplication_withIAP(t *testing.T) {
 	})
 }
 
-
 func TestAccAppEngineApplication_withSSLPolicy(t *testing.T) {
 	t.Parallel()
 
@@ -100,9 +99,9 @@ func TestAccAppEngineApplication_withSSLPolicy(t *testing.T) {
 func testAccAppEngineApplication_withIAP(pid, org, billingAccount string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
-  project_id = "%s"
-  name       = "%s"
-  org_id     = "%s"
+  project_id      = "%s"
+  name            = "%s"
+  org_id          = "%s"
   billing_account = "%s"
   deletion_policy = "DELETE"
 }
@@ -125,9 +124,9 @@ resource "google_app_engine_application" "acceptance" {
 func testAccAppEngineApplication_basic(pid, org, billingAccount string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
-  project_id = "%s"
-  name       = "%s"
-  org_id     = "%s"
+  project_id      = "%s"
+  name            = "%s"
+  org_id          = "%s"
   billing_account = "%s"
   deletion_policy = "DELETE"
 }
@@ -145,9 +144,9 @@ resource "google_app_engine_application" "acceptance" {
 func testAccAppEngineApplication_update(pid, org, billingAccount string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
-  project_id = "%s"
-  name       = "%s"
-  org_id     = "%s"
+  project_id      = "%s"
+  name            = "%s"
+  org_id          = "%s"
   billing_account = "%s"
   deletion_policy = "DELETE"
 }
