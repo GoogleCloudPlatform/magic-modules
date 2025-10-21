@@ -79,7 +79,13 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 	var err error
 	res := asset.Resource.Data
 	config := transport.NewConfig()
-	d := &schema.ResourceData{}
+
+	// This is a fake resource used to get fake d
+	// d.Get will return empty map, instead of nil
+	fakeResource := &schema.Resource{
+		Schema: c.schema,
+	}
+	d := fakeResource.TestResourceData()
 
 {{	if $.TgcHclBlockName -}}
 	hclBlockName := res["{{ $.TgcHclBlockName -}}"].(string)
@@ -98,7 +104,7 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 	}
 {{ end}}
 
-{{ if $.CustomCode.Decoder -}}
+{{ if and $.CustomCode.Decoder (not $.TGCIgnoreTerraformDecoder) -}}
 	res, err = resource{{ $.ResourceName -}}Decoder(d, config, res)
 	if err != nil {
 		return nil, err
@@ -145,7 +151,7 @@ func resource{{ $.ResourceName -}}TgcDecoder(d *schema.ResourceData, meta interf
 }
 {{- end }}
 
-{{- if $.CustomCode.Decoder }}
+{{- if and $.CustomCode.Decoder (not $.TGCIgnoreTerraformDecoder) }}
 func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
 	{{ $.CustomTemplate $.CustomCode.Decoder false -}}
 }
