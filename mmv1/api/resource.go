@@ -820,8 +820,6 @@ func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField
 }
 
 func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type) []*Type {
-	propWithWoConfigured.WriteOnly = false
-	propWithWoConfigured.Sensitive = true
 	if len(propWithWoConfigured.RequiredWith) > 0 {
 		log.Fatalf("WriteOnly property '%s' in resource '%s' cannot have RequiredWith set. This combination is not supported.", propWithWoConfigured.Name, r.Name)
 	}
