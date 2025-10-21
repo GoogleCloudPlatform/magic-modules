@@ -74,14 +74,16 @@ func TestAccAppEngineApplication_withIAP(t *testing.T) {
 func TestAccAppEngineApplication_withSSLPolicy(t *testing.T) {
 	t.Parallel()
 
+	org := envvar.GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	billingAccount := envvar.GetTestBillingAccountFromEnv(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAppEngineApplication_withSSLPolicy(pid),
+				Config: testAccAppEngineApplication_withSSLPolicy(pid, org, billingAccount),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_app_engine_application.acceptance", "ssl_policy", "MODERN"),
 					resource.TestCheckResourceAttr("google_app_engine_application.acceptance", "location_id", "us-central"),
@@ -161,12 +163,20 @@ resource "google_app_engine_application" "acceptance" {
 `, pid, pid, org, billingAccount)
 }
 
-func testAccAppEngineApplication_withSSLPolicy(pid string) string {
+func testAccAppEngineApplication_withSSLPolicy(pid, org, billingAccount string) string {
 	return fmt.Sprintf(`
+resource "google_project" "acceptance" {
+  project_id      = "%s"
+  name            = "%s"
+  org_id          = "%s"
+  billing_account = "%s"
+  deletion_policy = "DELETE"
+}
+
 resource "google_app_engine_application" "acceptance" {
-  project     = "%s"
+  project     = google_project.acceptance.project_id
   location_id = "us-central"
   ssl_policy  = "MODERN"
 }
-`, pid)
+`, pid, pid, org, billingAccount)
 }
