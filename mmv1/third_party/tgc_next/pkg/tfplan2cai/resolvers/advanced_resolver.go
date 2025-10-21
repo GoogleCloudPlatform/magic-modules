@@ -15,7 +15,7 @@ import (
 )
 
 // List of keyword to filter out in order to find the iam resource parent
-var filterList = []string{"etag", "id", "role", "members", "condition", "member"}
+var filterList = []string{"etag", "policy_data", "id", "role", "members", "condition", "member"}
 
 type AdvancedPreResolver struct {
 	schema *schema.Provider
@@ -44,8 +44,8 @@ func (r *AdvancedPreResolver) Resolve(jsonPlan []byte, resourceDataMap map[strin
 		return resourceDataMap
 	}
 
-	// Key is iam resource, values are ids
-	idToAddressMap := make(map[string][]string)
+	// Keys are resource IDs, and values are lists of IAM resource addresses.
+	idToAddresses := make(map[string][]string)
 
 	for _, rc := range planChanges {
 		// Silently skip non-google resources
@@ -56,8 +56,7 @@ func (r *AdvancedPreResolver) Resolve(jsonPlan []byte, resourceDataMap map[strin
 		if strings.Contains(rc.Type, "iam") {
 			var keys []string
 			// Take all keys from Change.After and store them in a list
-			afterMap, ok := rc.Change.After.(map[string]interface{})
-			if ok {
+			if afterMap, ok := rc.Change.After.(map[string]interface{}); ok {
 				for k := range afterMap {
 					if !slices.Contains(filterList, k) {
 						keys = append(keys, k)
@@ -81,16 +80,14 @@ func (r *AdvancedPreResolver) Resolve(jsonPlan []byte, resourceDataMap map[strin
 			for _, key := range keys {
 				// variable refers to the parent argument,
 
-				value, ok := afterMap[key]
-				if ok {
+				if value, ok := afterMap[key]; ok {
 					resourceId = resourceId + key + "/"
-					if s, ok := value.(string); ok {
-						resourceId = resourceId + s + "/"
+					if sVal, ok := value.(string); ok {
+						resourceId = fmt.Sprintf("%s/%/", key, sVal)
 					}
 				}
 
-				_, ok = afterUnknownMap[key]
-				if ok {
+				if _, ok = afterUnknownMap[key]; ok {
 					resourceId = resourceId + key + "/"
 					unknownValue := ""
 					for _, resource := range resourceConfig.RootModule.Resources {
@@ -128,7 +125,7 @@ func (r *AdvancedPreResolver) Resolve(jsonPlan []byte, resourceDataMap map[strin
 	}
 
 	// Could be something like [key1, key2] [key3, key4]
-	for _, row := range groupKey {
+	for _, addresses := range idToAddresses {
 		for i := 1; i < len(row); i++ {
 			resourceDataMap[row[0]] = append(resourceDataMap[row[0]], resourceDataMap[row[i]][0])
 			delete(resourceDataMap, row[i])
