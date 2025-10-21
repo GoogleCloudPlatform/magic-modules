@@ -176,6 +176,7 @@ properties:
       Shared secret used to set the secure session between the Cloud VPN
       gateway and the peer VPN gateway.
     required: true
+    ignore_read: true
     write_only: true
   - name: 'sharedSecretHash'
     type: String
