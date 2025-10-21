@@ -63,22 +63,22 @@ properties:
   - name: 'create_time'
     type: String
     description: |
-      Output only. The timestamp at which these user creds were created.
+      The timestamp at which these user creds were created.
     output: true
   - name: 'update_time'
     type: String
     description: |
-      Output only. The timestamp at which these user creds were updated.
+      The timestamp at which these user creds were updated.
     output: true
   - name: 'state'
     type: String
     description: |
-      Output only. The state of the user creds.
+      The state of the user creds.
     output: true
   - name: 'secure_password'
     type: String
     description: |
-      Output only. The plaintext server-generated password for the user creds.
+      The plaintext server-generated password for the user creds.
     output: true
     sensitive: true
     # Only returned in the create call.
@@ -86,7 +86,7 @@ properties:
   - name: 'resource_identity'
     type: NestedObject
     description: |
-      Output only. Describes the Resource Identity principal.
+      Describes the Resource Identity principal.
     output: true
     properties:
       - name: 'principal'
