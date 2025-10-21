@@ -140,6 +140,10 @@ func (vt *Tester) SetRepoPath(version provider.Version, repoPath string) {
 	vt.repoPaths[version] = repoPath
 }
 
+func (vt *Tester) GetRepoPath(version provider.Version) string {
+	return vt.repoPaths[version]
+}
+
 // Fetch the cassettes for the current version if not already fetched.
 // Should be run from the base dir.
 func (vt *Tester) FetchCassettes(version provider.Version, baseBranch, head string) error {
@@ -216,7 +220,7 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 	}
 	if len(opt.TestDirs) == 0 {
 		var err error
-		opt.TestDirs, err = vt.GoogleTestDirectory()
+		opt.TestDirs, err = vt.googleTestDirectory()
 		if err != nil {
 			return Result{}, err
 		}
@@ -325,7 +329,7 @@ func (vt *Tester) RunParallel(opt RunOptions) (Result, error) {
 	}
 	if len(opt.TestDirs) == 0 {
 		var err error
-		opt.TestDirs, err = vt.GoogleTestDirectory()
+		opt.TestDirs, err = vt.googleTestDirectory()
 		if err != nil {
 			return Result{}, err
 		}
@@ -563,7 +567,7 @@ func (vt *Tester) Cleanup() error {
 
 // Returns a list of all directories to run tests in.
 // Must be called after changing into the provider dir.
-func (vt *Tester) GoogleTestDirectory() ([]string, error) {
+func (vt *Tester) googleTestDirectory() ([]string, error) {
 	var testDirs []string
 	if allPackages, err := vt.rnr.Run("go", []string{"list", "./..."}, nil); err != nil {
 		return nil, err
