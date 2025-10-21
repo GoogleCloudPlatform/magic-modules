@@ -42,6 +42,22 @@ examples:
     exclude_docs: true
     vars:
       name: 'reasoning-engine'
+  - name: 'vertex_ai_reasoning_engine_psc_interface'
+    primary_resource_id: 'reasoning_engine'
+    vars:
+      name: 'reasoning-engine'
+      bucket_name: 'reasoning-engine'
+      network_name: 'network'
+      network_attachment_name: 'network-attachment'
+      subnetwork_name: 'subnetwork'
+    external_providers: ["time"]
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/compute.networkAdmin"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/dns.peer"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
+        role: "roles/viewer"
   - name: 'vertex_ai_reasoning_engine_full'
     primary_resource_id: 'reasoning_engine'
     vars:
@@ -182,7 +198,7 @@ properties:
                   to attach to the resource within the region and user project.
                   To specify this field, you must have already created a network attachment.
                   This field is only used for resources using PSC-Interface.
-              - name: 'dnsPeeringConfig'
+              - name: 'dnsPeeringConfigs'
                 type: 'Array'
                 description: |
                   Optional. DNS peering configurations.
@@ -216,7 +232,7 @@ properties:
                         where the DNS zone specified by 'domain' is visible.
                       required: true
           - name: 'resourceLimits'
-            type: NestedObject
+            type: KeyValuePairs
             default_from_api: true
             description: |-
               Optional. Resource limits for each container.
@@ -231,15 +247,6 @@ properties:
               The only supported values for memory are '1Gi', '2Gi', ... '32 Gi'.
               For more information, go to
               https://cloud.google.com/run/docs/configuring/memory-limits.
-            properties:
-              - name: 'cpu'
-                type: String
-                description: |-
-                  Optional. CPU resource limits.
-              - name: 'memory'
-                type: String
-                description: |-
-                  Optional. Memory resource limits.
           - name: 'minInstances'
             type: 'Integer'
             description: |
