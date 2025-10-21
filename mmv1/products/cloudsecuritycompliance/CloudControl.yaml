@@ -45,7 +45,7 @@ parameters:
     required: true
   - name: location
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122. Currently, only "global" is supported as a location.
     immutable: true
     url_param_only: true
     required: true
