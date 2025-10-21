@@ -49,6 +49,7 @@ async:
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/netapp_volume_force_delete.go.tmpl'
   constants: 'templates/terraform/constants/netapp_volume.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/netapp_volume_remove_squash_mode.go.tmpl'
 examples:
   - name: 'netapp_volume_basic'
     primary_resource_id: 'test_volume'
@@ -200,6 +201,7 @@ properties:
               type: Enum
               description: |-
                 SquashMode defines how remote user privileges are restricted when accessing an NFS export. It controls how the user identities (like root) are mapped to anonymous users to limit access and enforce security.
+              default_from_api: true
               enum_values:
                 - 'SQUASH_MODE_UNSPECIFIED'
                 - 'NO_ROOT_SQUASH'
@@ -207,8 +209,7 @@ properties:
                 - 'ALL_SQUASH'
               conflicts:
                 - has_root_access
-              ignore_read: true
-              # diff_suppress_func: 'suppressSquashModeDiff'
+              diff_suppress_func: 'suppressSquashModeDiff'
             - name: 'anonUid'
               type: Integer
               description: |-

@@ -5,28 +5,25 @@ func suppressSquashModeDiff(k, old, new string, d *schema.ResourceData) bool {
 	// new: The value in the configuration (what the user set)
 	// d: The ResourceData for the entire resource
 
-	// 1. Only suppress if the user did NOT set squash_mode in the config.
-	if new != "" {
-		return false // User specified a value, so don't suppress any diff.
-	}
+	// Check if the field is present in the *new* configuration.
+    // d.GetOkExists(k) returns true if the key exists and has a non-zero value.
+    // We want to suppress if the field is *not* in the config.
+    _, configExists := d.GetOkExists(k)
 
-	// 2. Only suppress if the value from the API/state is "NO_ROOT_SQUASH".
-	if old != "NO_ROOT_SQUASH" {
-		return false // The diff is not about the default API behavior for classic rules.
-	}
+    // Define the expected server-side default value. This must match what the API returns.
+    // Replace "YOUR_API_SERVER_DEFAULT_VALUE" with the actual default string, number, etc.
+    serverDefault := "NO_ROOT_SQUASH"
 
-	// 3. Check if this rule is configured as "classic" (using has_root_access: "true").
-	// Parse the key 'k' to find the index of the rule.
-	parts := strings.Split(k, ".")
-	if len(parts) < 5 || parts[0] != "export_policy" || parts[2] != "rules" || parts[4] != "squash_mode" {
-		return false // Key format not as expected.
-	}
+    // Suppress the diff if:
+    // 1. The field is NOT defined in the user's .tf configuration (configExists is false).
+    // 2. The value currently in Terraform's state ('old') is equal to the server's default.
+    //    'old' comes from the API's GET response during the refresh.
+    if !configExists && old == serverDefault {
+        // The user omitted the field, we sent null, and the API reverted to its default.
+        // We suppress the diff because this state is acceptable.
+        return true
+    }
 
-	//log.Print("suppressSquashModeDiff: Suppressing diff for hasRootAccessVal %s. value of old %s, value of new %s", hasRootAccessVal, old, new)
-
-    return old == "NO_ROOT_SQUASH" ||  old == "ROOT_SQUASH"
-
-
-    // Should not be reached if has_root_access is properly validated as "true" or "false".
+    // Otherwise, do not suppress the diff.
     return false
 }
