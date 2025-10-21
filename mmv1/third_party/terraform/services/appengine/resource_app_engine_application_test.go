@@ -71,6 +71,32 @@ func TestAccAppEngineApplication_withIAP(t *testing.T) {
 	})
 }
 
+
+func TestAccAppEngineApplication_withSSLPolicy(t *testing.T) {
+	t.Parallel()
+
+	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAppEngineApplication_withSSLPolicy(pid),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_app_engine_application.acceptance", "ssl_policy", "MODERN"),
+					resource.TestCheckResourceAttr("google_app_engine_application.acceptance", "location_id", "us-central"),
+				),
+			},
+			{
+				ResourceName:      "google_app_engine_application.acceptance",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccAppEngineApplication_withIAP(pid, org, billingAccount string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
@@ -134,4 +160,14 @@ resource "google_app_engine_application" "acceptance" {
   serving_status = "USER_DISABLED"
 }
 `, pid, pid, org, billingAccount)
+}
+
+func testAccAppEngineApplication_withSSLPolicy(pid string) string {
+	return fmt.Sprintf(`
+resource "google_app_engine_application" "acceptance" {
+  project     = "%s"
+  location_id = "us-central"
+  ssl_policy  = "MODERN"
+}
+`, pid)
 }
