@@ -54,7 +54,6 @@ collection_url_key: 'items'
 iam_policy:
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
     - '{{name}}'

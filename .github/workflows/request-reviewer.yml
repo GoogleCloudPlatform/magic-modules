@@ -29,7 +29,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
-          go-version: '^1.23'
+          go-version: '^1.24'
           # Disable caching for now due to issues with large provider dependency caches
           cache: false
       - name: Build magician
@@ -37,10 +37,10 @@ jobs:
           cd .ci/magician
           go build .
       - name: Request reviewer
-        if: ${{ github.event.issue.user.login != 'copybara-service' }}
+        if: ${{ (github.event.action == 'created' && github.event.issue.user.login != 'copybara-service') || (github.event.action != 'created' && github.event.pull_request.user.login != 'copybara-service') }}
         run: .ci/magician/magician request-reviewer ${{ github.event.pull_request.number || github.event.issue.number }}
       - name: Request reviewer (copybara)
-        if: ${{ github.event.issue.user.login == 'copybara-service' }}
+        if: ${{ github.event.issue.user.login == 'copybara-service' || github.event.pull_request.user.login == 'copybara-service' }}
         env:
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: gh pr edit ${{ github.event.pull_request.number || github.event.issue.number }} --add-reviewer "@ScottSuarez"
+        run: gh pr edit ${{ github.event.pull_request.number || github.event.issue.number }} --add-reviewer "@melinath"

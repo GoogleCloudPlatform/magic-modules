@@ -49,7 +49,6 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'workstation_config_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/workstationClusters/{{workstation_cluster_id}}/workstationConfigs/{{workstation_config_id}}'
     - '{{workstation_config_id}}'

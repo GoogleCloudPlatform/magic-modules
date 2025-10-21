@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 )
 
 // Remove the Terraform attribution label "goog-terraform-provisioned" from labels
