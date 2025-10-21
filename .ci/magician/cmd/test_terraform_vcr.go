@@ -449,25 +449,48 @@ func modifiedPackages(changedFiles []string, version provider.Version) (map[stri
 	return services, runFullVCR
 }
 
+func allSubFolders(root string) (map[string]struct{}, error) {
+	subfolders := make(map[string]struct{})
+	entries, err := os.ReadDir(root)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read directory '%s': %w", root, err)
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			subfolders[entry.Name()] = struct{}{}
+		}
+	}
+	return subfolders, nil
+}
+
 func runReplaying(runFullVCR bool, version provider.Version, services map[string]struct{}, vt *vcr.Tester) (vcr.Result, []string, error) {
 	result := vcr.Result{}
 	var testDirs []string
 	var replayingErr error
 	if runFullVCR {
 		fmt.Println("runReplaying: full VCR tests")
-		allTestPaths, err := vt.GoogleTestDirectory()
+		// result, replayingErr = vt.Run(vcr.RunOptions{
+		// 	Mode:    vcr.Replaying,
+		// 	Version: version,
+		// })
+
+		// temporary workaround
+		serviceRoot := filepath.Join(vt.GetRepoPath(version), version.ProviderName(), "services")
+		allServies, err := allSubFolders(serviceRoot)
 		if err != nil {
 			return result, testDirs, err
 		}
+
 		var gkePath string
 		var otherPaths []string
-
-		for _, testPath := range allTestPaths {
-			if strings.HasSuffix(testPath, "/container") {
-				gkePath = testPath
+		for service := range allServies {
+			servicePath := "./" + filepath.Join(version.ProviderName(), "services", service)
+			if service == "container" {
+				gkePath = servicePath
 				continue
 			}
-			otherPaths = append(otherPaths, testPath)
+			otherPaths = append(otherPaths, servicePath)
 		}
 		result, replayingErr = vt.Run(vcr.RunOptions{
 			Mode:     vcr.Replaying,
