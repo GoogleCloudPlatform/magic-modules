@@ -126,7 +126,7 @@ The following arguments are supported:
 
 * ~> **Note:** One of `value` or `value_wo` can only be set.
 
-* `password_wo_version` - (Optional) An integer value used to trigger an update for `password_wo`. This property should be incremented when updating `password_wo`. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes).
+* `password_wo_version` - (Optional) An integer value used to trigger an update for `password_wo`. This property should be incremented when updating `password_wo`. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes).
 
 * `type` - (Optional) The user type. It determines the method to authenticate the
     user during login. The default is the database's built-in user type. Flags
