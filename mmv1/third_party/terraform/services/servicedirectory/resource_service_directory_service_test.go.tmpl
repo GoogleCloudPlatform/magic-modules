@@ -1,5 +1,4 @@
 package servicedirectory_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -89,4 +88,3 @@ resource "google_service_directory_service" "example" {
 }
 `, testId, location, testId)
 }
-{{- end }}
