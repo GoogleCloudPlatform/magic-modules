@@ -511,7 +511,7 @@ var schemaNodePool = map[string]*schema.Schema{
 		Description: `Networking configuration for this NodePool. If specified, it overrides the cluster-level defaults.`,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-			{{- if ne $.TargetVersionName "ga" }}
+			{{- if eq $.TargetVersionName "alpha" }}
 				"accelerator_network_profile": {
 					Type:        schema.TypeString,
 					Description: "The accelerator network profile to use for this node pool.",
@@ -1431,7 +1431,7 @@ func flattenNodeNetworkConfig(c *container.NodeNetworkConfig, d *schema.Resource
 			"additional_node_network_configs": flattenAdditionalNodeNetworkConfig(c.AdditionalNodeNetworkConfigs),
 			"additional_pod_network_configs":  flattenAdditionalPodNetworkConfig(c.AdditionalPodNetworkConfigs),
 			"subnetwork":                      c.Subnetwork,
-			{{- if ne $.TargetVersionName "ga" }}
+			{{- if eq $.TargetVersionName "alpha" }}
 			"accelerator_network_profile": 	   c.AcceleratorNetworkProfile,
 			{{- end }}
 		})
@@ -1548,7 +1548,7 @@ func expandNodeNetworkConfig(v interface{}) *container.NodeNetworkConfig {
 			nnc.NetworkPerformanceConfig.TotalEgressBandwidthTier = total_egress_bandwidth_tier.(string)
 		}
 	}
-	{{- if ne $.TargetVersionName "ga" }}
+	{{- if eq $.TargetVersionName "alpha" }}
 	if v, ok := networkNodeConfig["accelerator_network_profile"]; ok {
 		nnc.AcceleratorNetworkProfile = v.(string)
 	}

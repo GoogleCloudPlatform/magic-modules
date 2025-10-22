@@ -6084,7 +6084,7 @@ func testAccContainerNodePool_acceleratorNetworkProfile_zonal(clusterName, npNam
 	return fmt.Sprintf(`
 resource "google_container_cluster" "cluster" {
   name     = "%s"
-  location = "us-central1-c"
+  location = "us-central1-a"
 
   datapath_provider       = "ADVANCED_DATAPATH"
   ip_allocation_policy    {} // Enables IP aliasing
@@ -6097,7 +6097,7 @@ resource "google_container_cluster" "cluster" {
 resource "google_container_node_pool" "np" {
   name     = "%s"
   cluster  = google_container_cluster.cluster.id
-  location = "us-central1-c"
+  location = "us-central1-a"
   node_count = 1
 
   node_config {
