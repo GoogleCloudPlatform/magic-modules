@@ -487,6 +487,7 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 					),
 				),
 			},
+{{- if ne $.TargetVersionName "ga" }}
 			{
 				ResourceName:            "google_filestore_instance.replica_instance",
 				ImportState:             true,
@@ -503,8 +504,8 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 					),
 					resource.TestCheckResourceAttr(
 						"google_filestore_instance.replica_instance",
-						"effective_replication.0.role",
-						"STANDBY",
+						"state",
+						"PAUSED",
 					),
 				),
 			},
@@ -524,8 +525,8 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 					),
 					resource.TestCheckResourceAttr(
 						"google_filestore_instance.replica_instance",
-						"effective_replication.0.role",
-						"STANDBY",
+						"state",
+						"READY",
 					),
 				),
 			},
@@ -535,6 +536,7 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"zone", "initial_replication"},
 			},
+{{- end }}
 		},
 	})
 }
@@ -583,6 +585,7 @@ resource "google_filestore_instance" "replica_instance" {
 `, context)
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func testAccFilestoreInstance_replication_pause(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_filestore_instance" "source_instance" {
@@ -607,6 +610,7 @@ resource "google_filestore_instance" "replica_instance" {
   location      	= "%{location_2}"
   tier          	= "%{tier}"
   description   	= "An replica instance created during testing."
+  pause_replication = true
 
   file_shares {	
     capacity_gb 	= 1024
@@ -630,19 +634,20 @@ resource "google_filestore_instance" "replica_instance" {
 func testAccFilestoreInstance_replication_resume(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_filestore_instance" "source_instance" {
-  name             = "tf-test-source-instance-%{random_suffix}"
-  location         = "%{location_1}"
-  tier             = "%{tier}"
-  description      = "An source instance created during testing."
+  name              = "tf-test-source-instance-%{random_suffix}"
+  location          = "%{location_1}"
+  tier              = "%{tier}"
+  description       = "An source instance created during testing."
+  pause_replication = false
 
   file_shares {
-    capacity_gb    = 1024
-    name           = "share"
+    capacity_gb     = 1024
+    name            = "share"
   }
 
   networks {
-    network        = "default"
-    modes          = ["MODE_IPV4"]
+    network         = "default"
+    modes           = ["MODE_IPV4"]
   }
 }
 
@@ -670,6 +675,7 @@ resource "google_filestore_instance" "replica_instance" {
 }
 `, context)
 }
+{{- end }}
 
 {{- if ne $.TargetVersionName "ga" }}
 

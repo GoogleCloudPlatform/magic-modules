@@ -41,7 +41,7 @@ async:
     resource_inside_response: true
 custom_code:
   pre_create: 'templates/terraform/pre_create/filestore_instance.go.tmpl'
-  # update_encoder: 'templates/terraform/update_encoder/filestore_instance.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/filestore_instance.go.tmpl'
 include_in_tgc_next_DO_NOT_USE: true
 error_abort_predicates:
 
@@ -440,9 +440,15 @@ properties:
               output: true
   - name: 'pauseReplication'
     type: Boolean
+    min_version: beta
     description: |
-      Pause the standby instance (replica). WARNING: This operation makes the standby instance's NFS filesystem writable. 
+      Pause the standby instance (replica). WARNING: This operation makes the standby instance's NFS filesystem writable.
       Any data written to the standby instance while paused will be lost when the replica is resumed or promoted
+      NOTE: This can only be set on the replica and can only be used on already deployed resources
+      true pauses replication
+      false enables replication
+
+    default_value: false
   - name: 'directoryServices'
     type: NestedObject
     min_version: beta
