@@ -87,13 +87,10 @@ properties:
       range of [0, 65535]. If unspecified, the default is 0.
     validation:
       function: 'validation.IntBetween(0, 65535)'
-  - name: 'metadata'
-    type: KeyValuePairs
+  - name: 'annotations'
+    type: KeyValueAnnotations
     description: |
-      Metadata for the endpoint. This data can be consumed
-      by service clients. The entire metadata dictionary may contain
-      up to 512 characters, spread across all key-value pairs.
-      Metadata that goes beyond any these limits will be rejected.
+      Annotations for the endpoint. This data can be consumed by service clients.
   - name: 'network'
     type: String
     description: |
