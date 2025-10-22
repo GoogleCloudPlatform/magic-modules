@@ -511,6 +511,13 @@ var schemaNodePool = map[string]*schema.Schema{
 		Description: `Networking configuration for this NodePool. If specified, it overrides the cluster-level defaults.`,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
+			{{- if ne $.TargetVersionName "ga" }}
+				"accelerator_network_profile": {
+					Type:        schema.TypeString,
+					Description: "The accelerator network profile to use for this node pool.",
+					Optional:    true,
+				},
+			{{- end }}
 				"create_pod_range": {
 					Type:         schema.TypeBool,
 					Optional:     true,
@@ -541,20 +548,18 @@ var schemaNodePool = map[string]*schema.Schema{
 				"additional_node_network_configs": {
 					Type:         schema.TypeList,
 					Optional:     true,
-					ForceNew:     true,
+					Computed: 	  true,
 					Description:  `We specify the additional node networks for this node pool using this list. Each node network corresponds to an additional interface`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"network": {
 								Type:         schema.TypeString,
 								Optional:     true,
-								ForceNew:     true,
 								Description:  `Name of the VPC where the additional interface belongs.`,
 							},
 							"subnetwork": {
 								Type:         schema.TypeString,
 								Optional:     true,
-								ForceNew:     true,
 								Description:  `Name of the subnetwork where the additional interface belongs.`,
 							},
 						},
@@ -628,7 +633,6 @@ var schemaNodePool = map[string]*schema.Schema{
 			},
 		},
 	},
-
 }
 
 type NodePoolInformation struct {
@@ -1427,6 +1431,9 @@ func flattenNodeNetworkConfig(c *container.NodeNetworkConfig, d *schema.Resource
 			"additional_node_network_configs": flattenAdditionalNodeNetworkConfig(c.AdditionalNodeNetworkConfigs),
 			"additional_pod_network_configs":  flattenAdditionalPodNetworkConfig(c.AdditionalPodNetworkConfigs),
 			"subnetwork":                      c.Subnetwork,
+			{{- if ne $.TargetVersionName "ga" }}
+			"accelerator_network_profile": 	   c.AcceleratorNetworkProfile,
+			{{- end }}
 		})
 	}
 	return result
@@ -1541,7 +1548,11 @@ func expandNodeNetworkConfig(v interface{}) *container.NodeNetworkConfig {
 			nnc.NetworkPerformanceConfig.TotalEgressBandwidthTier = total_egress_bandwidth_tier.(string)
 		}
 	}
-
+	{{- if ne $.TargetVersionName "ga" }}
+	if v, ok := networkNodeConfig["accelerator_network_profile"]; ok {
+		nnc.AcceleratorNetworkProfile = v.(string)
+	}
+	{{- end }}
 	return nnc
 }
 
