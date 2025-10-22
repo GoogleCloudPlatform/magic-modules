@@ -103,6 +103,7 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 
 	if !object.IsExcluded() {
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
+		tgc.addTestsFromExamples(&object)
 		tgc.GenerateResourceTests(object, *templateData, outputFolder)
 	}
 }
@@ -311,6 +312,15 @@ func (tgc TerraformGoogleConversionNext) replaceImportPath(outputFolder, target 
 	err = os.WriteFile(targetFile, sourceByte, 0644)
 	if err != nil {
 		log.Fatalf("Cannot write file %s to replace import path: %s", target, err)
+	}
+}
+
+func (tgc TerraformGoogleConversionNext) addTestsFromExamples(object *api.Resource) {
+	for _, example := range object.Examples {
+		object.TGCTests = append(object.TGCTests, resource.TGCTest{
+			Name: "TestAcc" + example.TestSlug(object.ProductMetadata.Name, object.Name),
+			Skip: example.TGCSkipTest,
+		})
 	}
 }
 

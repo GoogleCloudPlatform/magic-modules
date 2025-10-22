@@ -1,12 +1,4 @@
-<<<<<<< HEAD
 // Copyright 2025 Google Inc.
-=======
-<<<<<<< HEAD
-// Copyright 2025 Google Inc.
-=======
-// Copyright 2024 Google Inc.
->>>>>>> 43bc7cfc1 (Add TGCTest struct)
->>>>>>> 176901f81 (Add TGCTest struct)
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
