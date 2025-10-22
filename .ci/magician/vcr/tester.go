@@ -136,6 +136,10 @@ func NewTester(env map[string]string, cassetteBucket, logBucket string, rnr Exec
 	}, nil
 }
 
+func (vt *Tester) GetRepoPath(version provider.Version) string {
+	return vt.repoPaths[version]
+}
+
 func (vt *Tester) SetRepoPath(version provider.Version, repoPath string) {
 	vt.repoPaths[version] = repoPath
 }
@@ -310,6 +314,7 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 
 func (vt *Tester) RunParallel(opt RunOptions) (Result, error) {
 	logPath, err := vt.makeLogPath(opt.Mode, opt.Version)
+	fmt.Println("logPath: ", logPath)
 	if err != nil {
 		return Result{}, err
 	}
@@ -317,6 +322,7 @@ func (vt *Tester) RunParallel(opt RunOptions) (Result, error) {
 		return Result{}, err
 	}
 	repoPath, ok := vt.repoPaths[opt.Version]
+	fmt.Println("repoPath: ", repoPath)
 	if !ok {
 		return Result{}, fmt.Errorf("no repo cloned for version %s in %v", opt.Version, vt.repoPaths)
 	}
@@ -355,6 +361,8 @@ func (vt *Tester) RunParallel(opt RunOptions) (Result, error) {
 	errs := make(chan error, len(opt.TestDirs)*len(opt.Tests)*2)
 	for _, testDir := range opt.TestDirs {
 		for _, test := range opt.Tests {
+			fmt.Println("testDir: ", testDir)
+			fmt.Println("test: ", test)
 			running <- struct{}{}
 			go vt.runInParallel(opt.Mode, opt.Version, testDir, test, logPath, cassettePath, running, wg, outputs, errs)
 		}
@@ -374,6 +382,7 @@ func (vt *Tester) RunParallel(opt RunOptions) (Result, error) {
 		output += otpt
 	}
 	logFileName := filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", opt.Mode.Lower()))
+	fmt.Println("logFileName: ", logFileName)
 	if err := vt.rnr.WriteFile(logFileName, output); err != nil {
 		return Result{}, err
 	}
