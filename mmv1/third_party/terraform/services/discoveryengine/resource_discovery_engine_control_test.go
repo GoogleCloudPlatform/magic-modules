@@ -55,11 +55,11 @@ resource "google_discovery_engine_data_store" "basic" {
 resource "google_discovery_engine_search_engine" "basic" {
   location = google_discovery_engine_data_store.basic.location
   engine_id = "tf-test-engine-id-%{random_suffix}"
-	collection_id = "default_collection"
+  collection_id = "default_collection"
   display_name = "tf-test-engine-%{random_suffix}"
   industry_vertical = google_discovery_engine_data_store.basic.industry_vertical
   data_store_ids = [google_discovery_engine_data_store.basic.data_store_id]
-	search_engine_config {
+  search_engine_config {
     search_tier = "SEARCH_TIER_STANDARD"
     search_add_ons = ["SEARCH_ADD_ON_LLM"]
   }
@@ -93,11 +93,11 @@ resource "google_discovery_engine_data_store" "basic" {
 resource "google_discovery_engine_search_engine" "basic" {
   location = google_discovery_engine_data_store.basic.location
   engine_id = "tf-test-engine-id-%{random_suffix}"
-	collection_id = "default_collection"
+  collection_id = "default_collection"
   display_name = "tf-test-engine-%{random_suffix}"
   industry_vertical = google_discovery_engine_data_store.basic.industry_vertical
   data_store_ids = [google_discovery_engine_data_store.basic.data_store_id]
-	search_engine_config {
+  search_engine_config {
     search_tier = "SEARCH_TIER_STANDARD"
     search_add_ons = ["SEARCH_ADD_ON_LLM"]
   }
