@@ -57,8 +57,6 @@ examples:
     vars:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
-    tgc_test_ignore_extra:
-      - enable_message_ordering  # ignore its false value in configuration
   - name: 'pubsub_subscription_pull_filter'
     primary_resource_id: 'example'
     vars:
@@ -546,6 +544,7 @@ properties:
           description: |
             Javascript User Defined Function. If multiple Javascript UDFs are specified on a resource,
             each one must have a unique `function_name`.
+          is_missing_in_cai: true
           properties:
             - name: functionName
               type: String
