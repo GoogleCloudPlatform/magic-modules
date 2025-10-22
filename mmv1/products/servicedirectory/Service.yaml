@@ -70,10 +70,7 @@ properties:
       The resource name for the service in the
       format `projects/*/locations/*/namespaces/*/services/*`.
     output: true
-  - name: 'metadata'
-    type: KeyValuePairs
+  - name: 'annotations'
+    type: KeyValueAnnotations
     description: |
-      Metadata for the service. This data can be consumed
-      by service clients. The entire metadata dictionary may contain
-      up to 2000 characters, spread across all key-value pairs.
-      Metadata that goes beyond any these limits will be rejected.
+      Annotations for the service. This data can be consumed by service clients.
