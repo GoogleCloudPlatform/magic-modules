@@ -29,9 +29,12 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/otiai10/copy"
 )
+
+var testRegex = regexp.MustCompile("func (TestAcc[^(]+)")
 
 // TerraformGoogleConversionNext is for both tfplan2cai and cai2hcl conversions
 // and copying other files, such as transport.go
@@ -103,6 +106,11 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 
 	if !object.IsExcluded() {
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
+		if object.TGCIncludeHandwrittenTests {
+			if err := tgc.addExamplesFromHandwrittenTests(&object); err != nil {
+				log.Printf("Error adding examples from handwritten tests: %v", err)
+			}
+		}
 		tgc.GenerateResourceTests(object, *templateData, outputFolder)
 	}
 }
@@ -312,6 +320,54 @@ func (tgc TerraformGoogleConversionNext) replaceImportPath(outputFolder, target 
 	if err != nil {
 		log.Fatalf("Cannot write file %s to replace import path: %s", target, err)
 	}
+}
+
+func (tgc TerraformGoogleConversionNext) addExamplesFromHandwrittenTests(object *api.Resource) error {
+	if object.ProductMetadata == nil {
+		return nil
+	}
+	product := object.ProductMetadata
+	productName := google.Underscore(product.Name)
+	resourceFullName := fmt.Sprintf("%s_%s", productName, google.Underscore(object.Name))
+	handwrittenTestFilePath := fmt.Sprintf("third_party/terraform/services/%s/resource_%s_test.go", productName, resourceFullName)
+	data, err := os.ReadFile(handwrittenTestFilePath)
+	for err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			if strings.HasSuffix(handwrittenTestFilePath, ".tmpl") {
+				log.Printf("no handwritten test file found for %s", resourceFullName)
+				return nil
+			}
+			handwrittenTestFilePath += ".tmpl"
+			data, err = os.ReadFile(handwrittenTestFilePath)
+		} else {
+			return fmt.Errorf("error reading handwritten test file %s: %v", handwrittenTestFilePath, err)
+		}
+	}
+
+	// Skip adding handwritten tests that are already defined in yaml (because they have custom overrides etc.)
+	handwrittenTestNamesInYAML := make(map[string]struct{})
+	for _, example := range object.Examples {
+		if example.TGCHandwrittenTestName != "" {
+			handwrittenTestNamesInYAML[example.TGCHandwrittenTestName] = struct{}{}
+		}
+	}
+
+	matches := testRegex.FindAllSubmatch(data, -1)
+	examples := make([]resource.Examples, len(matches))
+	for i, match := range matches {
+		if len(match) == 2 {
+			if _, ok := handwrittenTestNamesInYAML[string(match[1])]; ok {
+				continue
+			}
+			examples[i] = resource.Examples{
+				TGCHandwrittenTestName: string(match[1]),
+			}
+		}
+	}
+
+	object.Examples = append(object.Examples, examples...)
+
+	return nil
 }
 
 // Generates the list of resources, and gets the count of resources.
