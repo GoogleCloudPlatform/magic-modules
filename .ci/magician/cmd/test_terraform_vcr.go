@@ -455,10 +455,38 @@ func runReplaying(runFullVCR bool, version provider.Version, services map[string
 	var replayingErr error
 	if runFullVCR {
 		fmt.Println("runReplaying: full VCR tests")
+		allTestPaths, err := vt.GoogleTestDirectory()
+		if err != nil {
+			return result, testDirs, err
+		}
+		var gkePath string
+		var otherPaths []string
+
+		for _, testPath := range allTestPaths {
+			if strings.HasSuffix(testPath, "/container") {
+				gkePath = testPath
+				continue
+			}
+			otherPaths = append(otherPaths, testPath)
+		}
 		result, replayingErr = vt.Run(vcr.RunOptions{
-			Mode:    vcr.Replaying,
-			Version: version,
+			Mode:     vcr.Replaying,
+			Version:  version,
+			TestDirs: otherPaths,
 		})
+		// run gke replaying tests separately
+		gkeResult, gkeReplayingErr := vt.Run(vcr.RunOptions{
+			Mode:     vcr.Replaying,
+			Version:  version,
+			TestDirs: []string{gkePath},
+		})
+		if gkeReplayingErr != nil {
+			replayingErr = gkeReplayingErr
+		}
+		result.PassedTests = append(result.PassedTests, gkeResult.PassedTests...)
+		result.SkippedTests = append(result.SkippedTests, gkeResult.SkippedTests...)
+		result.FailedTests = append(result.FailedTests, gkeResult.FailedTests...)
+		result.Panics = append(result.Panics, gkeResult.Panics...)
 	} else if len(services) > 0 {
 		fmt.Printf("runReplaying: %d specific services: %v\n", len(services), services)
 		for service := range services {

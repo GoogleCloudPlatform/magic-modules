@@ -216,7 +216,7 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 	}
 	if len(opt.TestDirs) == 0 {
 		var err error
-		opt.TestDirs, err = vt.googleTestDirectory()
+		opt.TestDirs, err = vt.GoogleTestDirectory()
 		if err != nil {
 			return Result{}, err
 		}
@@ -325,7 +325,7 @@ func (vt *Tester) RunParallel(opt RunOptions) (Result, error) {
 	}
 	if len(opt.TestDirs) == 0 {
 		var err error
-		opt.TestDirs, err = vt.googleTestDirectory()
+		opt.TestDirs, err = vt.GoogleTestDirectory()
 		if err != nil {
 			return Result{}, err
 		}
@@ -563,7 +563,7 @@ func (vt *Tester) Cleanup() error {
 
 // Returns a list of all directories to run tests in.
 // Must be called after changing into the provider dir.
-func (vt *Tester) googleTestDirectory() ([]string, error) {
+func (vt *Tester) GoogleTestDirectory() ([]string, error) {
 	var testDirs []string
 	if allPackages, err := vt.rnr.Run("go", []string{"list", "./..."}, nil); err != nil {
 		return nil, err
