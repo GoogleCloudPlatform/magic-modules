@@ -15,7 +15,6 @@
 name: 'LbEdgeExtension'
 description: |
   LbEdgeExtension is a resource that lets the extension service influence the selection of backend services and Cloud CDN cache keys by modifying request headers.
-min_version: 'beta'
 references:
   guides:
     'Configure a edge extension': 'https://cloud.google.com/service-extensions/docs/configure-edge-extensions'
