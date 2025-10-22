@@ -29,10 +29,14 @@ func (p *googleEphemeralServiceAccountKey) Metadata(ctx context.Context, req eph
 }
 
 type ephemeralServiceAccountKeyModel struct {
-	Name          types.String `tfsdk:"name"`
-	PublicKeyType types.String `tfsdk:"public_key_type"`
-	KeyAlgorithm  types.String `tfsdk:"key_algorithm"`
-	PublicKey     types.String `tfsdk:"public_key"`
+	Name           types.String `tfsdk:"name"`
+	PublicKeyType  types.String `tfsdk:"public_key_type"`
+	KeyAlgorithm   types.String `tfsdk:"key_algorithm"`
+	PublicKey      types.String `tfsdk:"public_key"`
+	PrivateKey     types.String `tfsdk:"private_key"`
+	PrivateKeyType types.String `tfsdk:"private_key_type"`
+	ValidAfter     types.String `tfsdk:"valid_after"`
+	ValidBefore    types.String `tfsdk:"valid_before"`
 }
 
 func (p *googleEphemeralServiceAccountKey) Schema(ctx context.Context, req ephemeral.SchemaRequest, resp *ephemeral.SchemaResponse) {
@@ -64,6 +68,22 @@ func (p *googleEphemeralServiceAccountKey) Schema(ctx context.Context, req ephem
 			},
 			"public_key": schema.StringAttribute{
 				Description: "The public key, base64 encoded.",
+				Computed:    true,
+			},
+			"private_key": schema.StringAttribute{
+				Description: "The private key, base64 encoded.",
+				Computed:    true,
+			},
+			"private_key_type": schema.StringAttribute{
+				Description: "The type of the private key.",
+				Computed:    true,
+			},
+			"valid_after": schema.StringAttribute{
+				Description: "The key can be used after this timestamp. A timestamp in RFC3339 UTC \"Zulu\" format, accurate to nanoseconds. Example: \"2014-10-02T15:01:23.045123456Z\".",
+				Computed:    true,
+			},
+			"valid_before": schema.StringAttribute{
+				Description: "The key can be used before this timestamp. A timestamp in RFC3339 UTC \"Zulu\" format, accurate to nanoseconds. Example: \"2014-10-02T15:01:23.045123456Z\".",
 				Computed:    true,
 			},
 		},
@@ -123,4 +143,10 @@ func (p *googleEphemeralServiceAccountKey) Open(ctx context.Context, req ephemer
 	data.PublicKey = types.StringValue(sak.PublicKeyData)
 
 	resp.Diagnostics.Append(resp.Result.Set(ctx, &data)...)
+}
+
+func (p *googleEphemeralServiceAccountKey) Renew(ctx context.Context, req ephemeral.RenewRequest, resp *ephemeral.RenewResponse) {
+}
+
+func (p *googleEphemeralServiceAccountKey) Close(ctx context.Context, req ephemeral.CloseRequest, resp *ephemeral.CloseResponse) {
 }
