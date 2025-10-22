@@ -2,6 +2,9 @@ resource "google_ces_app" "my-app" {
     location     = "us"
     display_name = "{{index $.Vars "app_display_name"}}"
     app_id       = "{{index $.Vars "app_id"}}"
+    time_zone_settings {   
+        time_zone = "America/Los_Angeles"
+    }
 }
 resource "google_ces_deployment" "{{$.PrimaryResourceId}}" {
     location     = "us"
