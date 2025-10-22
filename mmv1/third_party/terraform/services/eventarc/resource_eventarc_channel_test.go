@@ -78,9 +78,6 @@ resource "google_eventarc_channel" "primary" {
   crypto_key_name      = "%{key2}"
   third_party_provider = "projects/%{project_name}/locations/%{region}/providers/datadog"
 
-  labels = {
-    "foo" = "baz"
-  }
 }
 `, context)
 }
