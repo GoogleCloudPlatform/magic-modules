@@ -394,46 +394,78 @@ func FindIdentityParams(rids []ResourceIdentifier) []ResourceIdentifier {
 		segmentsList[i] = cleanSegments
 	}
 
-	if len(segmentsList[0]) == 0 {
-		return rids
-	}
-	expectedLength := len(segmentsList[0])
+	segmentsList = removeSharedElements(segmentsList)
 
-	for i := 1; i < len(segmentsList); i++ {
-		if len(segmentsList[i]) != expectedLength {
-			return rids
+	for i, segments := range segmentsList {
+		if len(segments) == 0 {
+			rids[i].IdentityParam = ""
+		} else {
+			rids[i].IdentityParam = segments[0]
 		}
 	}
 
-	varyingIndex := -1
-
-	for i := 0; i < expectedLength; i++ {
-		referenceSegment := segmentsList[0][i]
-		isVarying := false
-
-		for j := 1; j < len(segmentsList); j++ {
-			if segmentsList[j][i] != referenceSegment {
-				isVarying = true
-				break
+	// Move the id with empty IdentityParam to the end of the list
+	for i, ids := range rids {
+		if ids.IdentityParam == "" {
+			temp := ids
+			lastIndex := len(rids) - 1
+			if i != lastIndex {
+				rids[i] = rids[lastIndex]
+				rids[lastIndex] = temp
 			}
+			break
 		}
-
-		if isVarying {
-			if varyingIndex != -1 {
-				return rids
-			}
-			varyingIndex = i
-		}
-	}
-
-	if varyingIndex != -1 {
-		for i, segments := range segmentsList {
-			rids[i].IdentityParam = segments[varyingIndex]
-		}
-		return rids
 	}
 
 	return rids
+}
+
+// Finds elements common to ALL lists in a list of lists
+// and returns a new list of lists with those common elements removed.
+func removeSharedElements(list_of_lists [][]string) [][]string {
+	if len(list_of_lists) <= 1 {
+		return list_of_lists
+	}
+
+	sharedSet := make(map[string]bool)
+	for _, element := range list_of_lists[0] {
+		sharedSet[element] = true
+	}
+
+	for i := 1; i < len(list_of_lists); i++ {
+		currentListSet := make(map[string]bool)
+		for _, element := range list_of_lists[i] {
+			currentListSet[element] = true
+		}
+
+		newSharedSet := make(map[string]bool)
+
+		for element := range sharedSet {
+			if currentListSet[element] {
+				newSharedSet[element] = true
+			}
+		}
+
+		sharedSet = newSharedSet
+
+		if len(sharedSet) == 0 {
+			break
+		}
+	}
+
+	var new_list_of_lists [][]string
+
+	for _, sublist := range list_of_lists {
+		var newSublist []string
+		for _, element := range sublist {
+			if !sharedSet[element] {
+				newSublist = append(newSublist, element)
+			}
+		}
+		new_list_of_lists = append(new_list_of_lists, newSublist)
+	}
+
+	return new_list_of_lists
 }
 
 type TgcWithProducts struct {
