@@ -1,5 +1,4 @@
 package compute
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"log"
@@ -25,4 +24,3 @@ func transformSecurityPolicyAssociationReadError(err error) error {
 
 	return err
 }
-{{- end }}
