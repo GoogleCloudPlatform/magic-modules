@@ -88,7 +88,7 @@ properties:
     output: true
   - name: 'labels'
     type: KeyValueLabels
-    description:  |-
+    description: |-
       Labels are key/value pairs that help to organize and filter resources.
     min_version: 'beta'
   - name: 'mirroringEndpointGroup'
