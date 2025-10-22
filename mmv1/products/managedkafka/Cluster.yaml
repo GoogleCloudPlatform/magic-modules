@@ -56,6 +56,9 @@ examples:
       cluster_id: 'my-cluster'
       key_name: 'example-key'
       key_ring_name: 'example-key-ring'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-managedkafka.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     test_vars_overrides:
       key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     external_providers: ["time"]
