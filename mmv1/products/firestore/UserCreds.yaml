@@ -60,12 +60,12 @@ parameters:
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
 properties:
-  - name: 'create_time'
+  - name: 'createTime'
     type: String
     description: |
       The timestamp at which these user creds were created.
     output: true
-  - name: 'update_time'
+  - name: 'updateTime'
     type: String
     description: |
       The timestamp at which these user creds were updated.
@@ -75,7 +75,7 @@ properties:
     description: |
       The state of the user creds.
     output: true
-  - name: 'secure_password'
+  - name: 'securePassword'
     type: String
     description: |
       The plaintext server-generated password for the user creds.
@@ -83,7 +83,7 @@ properties:
     sensitive: true
     # Only returned in the create call.
     ignore_read: true
-  - name: 'resource_identity'
+  - name: 'resourceIdentity'
     type: NestedObject
     description: |
       Describes the Resource Identity principal.
