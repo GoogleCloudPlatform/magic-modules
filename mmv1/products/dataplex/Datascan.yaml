@@ -71,6 +71,15 @@ examples:
       datascan_name: 'dataprofile-full'
     test_env_vars:
       project_name: 'PROJECT_NAME'
+    exclude_test: true
+  - name: 'dataplex_datascan_full_profile_test'
+    primary_resource_id: 'full_profile_test'
+    vars:
+      dataset_name: 'dataplex_dataset'
+      datascan_name: 'dataprofile-full-test'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+    exclude_docs: true
   - name: 'dataplex_datascan_basic_quality'
     primary_resource_id: 'basic_quality'
     vars:
@@ -573,6 +582,10 @@ properties:
               For instance, if 'x' is of nested field type, listing 'x' is supported but 'x.y.z' is not supported. Here 'y' and 'y.z' are nested fields of 'x'.
             item_type:
               type: String
+      - name: 'catalogPublishingEnabled'
+        type: Boolean
+        description: |
+          If set, the latest DataScan job result will be published to Dataplex Catalog.
   - name: 'dataDiscoverySpec'
     type: NestedObject
     description: |
