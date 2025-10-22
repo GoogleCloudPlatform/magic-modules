@@ -304,6 +304,10 @@ To resolve integration test failures, you need to apply the correct override con
 
 		If the default Terraform encoding applied during conversion is causing issues, disable it by adding `tgc_ignore_terraform_encoder: true` to the Resource.yaml file.
 
+	* Ignore Default Terraform Decoder
+
+		If the default Terraform decoding applied during conversion is causing issues, disable it by adding `tgc_ignore_terraform_decoder: true` to the Resource.yaml file.
+
 	* Custom Decoder (CAI → GET API object Mismatch)
 
 		This is used when the value of a field in a CAI asset is different from the value required in the final API object during cai2hcl.
