@@ -447,7 +447,6 @@ properties:
       NOTE: This can only be set on the replica and can only be used on already deployed resources
       true pauses replication
       false enables replication
-
     default_value: false
   - name: 'directoryServices'
     type: NestedObject
