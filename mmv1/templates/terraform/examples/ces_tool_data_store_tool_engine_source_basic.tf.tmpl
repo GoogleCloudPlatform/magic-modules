@@ -1,0 +1,107 @@
+resource "google_discovery_engine_data_store" "test_data_store" {
+  location                    = "global"
+  data_store_id               = "{{index $.Vars "data_store_id"}}"
+  display_name                = "Structured datastore"
+  industry_vertical           = "GENERIC"
+  content_config              = "NO_CONTENT"
+  solution_types              = ["SOLUTION_TYPE_CHAT"]
+}
+resource "google_discovery_engine_data_store" "test_data_store_2" {
+  location                    = google_discovery_engine_data_store.test_data_store.location
+  data_store_id               = "{{index $.Vars "data_store_id_2"}}"
+  display_name                = "Structured datastore 2"
+  industry_vertical           = "GENERIC"
+  content_config              = "NO_CONTENT"
+  solution_types              = ["SOLUTION_TYPE_CHAT"]
+}
+resource "google_discovery_engine_chat_engine" "primary" {
+  engine_id = "{{index $.Vars "engine_id"}}"
+  collection_id = "default_collection"
+  location = google_discovery_engine_data_store.test_data_store.location
+  display_name = "Chat engine"
+  industry_vertical = "GENERIC"
+  data_store_ids = [google_discovery_engine_data_store.test_data_store.data_store_id, google_discovery_engine_data_store.test_data_store_2.data_store_id]
+  common_config {
+    company_name = "test-company"
+  }
+  chat_engine_config {
+    agent_creation_config {
+    business = "test business name"
+    default_language_code = "en"
+    time_zone = "America/Los_Angeles"
+    }
+  }
+}
+resource "google_ces_app" "my-app" {
+    location     = "us"
+    display_name = "{{index $.Vars "app_display_name"}}"
+    app_id       = "{{index $.Vars "app_id"}}"
+    time_zone_settings {   
+        time_zone = "America/Los_Angeles"
+    }
+}
+resource "google_ces_tool" "{{$.PrimaryResourceId}}" {
+    location       = "us"
+    app            = google_ces_app.my-app.name
+    tool_id        = "{{index $.Vars "tool_id"}}"
+    execution_type = "SYNCHRONOUS"
+    data_store_tool {
+        name = "example-tool"
+        description = "example-description"
+        boost_specs {
+            data_stores = [
+                google_discovery_engine_data_store.test_data_store_2.name,
+            ]
+            spec {
+                condition_boost_specs {
+                    condition = "(lang_code: ANY(\"en\", \"fr\"))"
+                    boost = 1
+                    boost_control_spec {
+                        field_name = "example-field"
+                        attribute_type = "NUMERICAL"
+                        interpolation_type = "LINEAR"
+                        control_points {
+                            attribute_value = 1
+                            boost_amount = 1
+                        }
+                    }
+                }
+            }
+        }
+        modality_configs {
+            modality_type = "TEXT"
+            rewriter_config {
+                model_settings {
+                    model = "gemini-2.5-flash"
+                    temperature = 1
+                }
+                prompt = "example-prompt"
+                disabled = false
+            }
+            summarization_config {
+                model_settings {
+                    model = "gemini-2.5-flash"
+                    temperature = 1
+                }
+                prompt = "example-prompt"
+                disabled = false
+            }
+            grounding_config {
+                grounding_level = 3
+                disabled = false
+            }
+        }
+
+        engine_source {
+            engine = google_discovery_engine_chat_engine.primary.name
+            data_store_sources {
+                filter = "example_field: ANY(\"specific_example\")"
+                data_store {
+                    name = google_discovery_engine_data_store.test_data_store_2.name
+                }
+            }
+            filter = "example_field: ANY(\"specific_example\")"
+        }
+        max_results = 5
+    }
+}
