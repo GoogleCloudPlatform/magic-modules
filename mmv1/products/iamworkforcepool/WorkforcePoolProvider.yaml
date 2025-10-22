@@ -556,3 +556,19 @@ properties:
               The filter used to request specific records from IdP. In case of attributes type as AZURE_AD_GROUPS_ID, it represents the
               filter used to request specific groups for users from IdP. By default, all of the groups associated with the user are fetched. The
               groups should be security enabled. See https://learn.microsoft.com/en-us/graph/search-query-parameter for more details.
+  - name: 'scimUsage'
+    type: Enum
+    description: |
+      Agentspace only. Specifies whether the workforce identity pool
+      provider uses SCIM-managed groups instead of the `google.groups`
+      attribute mapping for authorization checks.
+
+      The `scimUsage` and `extendedAttributesOauth2Client` fields are
+      mutually exclusive. A request that enables both fields on the same
+      workforce identity pool provider will produce an error.
+      * SCIM_USAGE_UNSPECIFIED: Default behaviour
+      * ENABLED_FOR_GROUPS: Use SCIM-managed groups instead of the `google.groups`
+        attribute mapping for authorization checks
+    enum_values:
+      - 'SCIM_USAGE_UNSPECIFIED'
+      - 'ENABLED_FOR_GROUPS'
