@@ -16,10 +16,13 @@ name: MulticastDomain
 description: Create a multicast domain in the current project.
 base_url: projects/{{project}}/locations/{{location}}/multicastDomains
 update_mask: true
-self_link: projects/{{project}}/locations/{{location}}/multicastDomains/{{multicast_domain_id}}
-create_url: projects/{{project}}/locations/{{location}}/multicastDomains?multicastDomainId={{multicast_domain_id}}
+self_link:
+  projects/{{project}}/locations/{{location}}/multicastDomains/{{multicast_domain_id}}
+create_url:
+  projects/{{project}}/locations/{{location}}/multicastDomains?multicastDomainId={{multicast_domain_id}}
 update_verb: PATCH
-id_format: projects/{{project}}/locations/{{location}}/multicastDomains/{{multicast_domain_id}}
+id_format:
+  projects/{{project}}/locations/{{location}}/multicastDomains/{{multicast_domain_id}}
 import_format:
 - projects/{{project}}/locations/{{location}}/multicastDomains/{{multicast_domain_id}}
 examples:
@@ -48,7 +51,9 @@ autogen_status: TXVsdGljYXN0RG9tYWlu
 parameters:
 - name: location
   type: String
-  description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+  description: Resource ID segment making up resource `name`. It identifies the
+    resource within its parent collection as described in
+    https://google.aip.dev/122.
   immutable: true
   url_param_only: true
   required: true
