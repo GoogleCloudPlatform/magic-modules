@@ -393,6 +393,9 @@ type TGCResource struct {
 	// Generally, it shouldn't be set when the identity can be decided.
 	// Otherswise, it should be set.
 	CaiIdentity string `yaml:"cai_identity,omitempty"`
+
+	// [Optional] It overrides the default Cai asset name format, which is the resource id format
+	CaiAssetNameFormat string `yaml:"cai_asset_name_format,omitempty"`
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
@@ -1945,12 +1948,7 @@ func (r Resource) StateUpgradersCount() []int {
 }
 
 func (r Resource) CaiProductBaseUrl() string {
-	version := r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName)
-	baseUrl := version.CaiBaseUrl
-	if baseUrl == "" {
-		baseUrl = version.BaseUrl
-	}
-	return baseUrl
+	return r.ProductMetadata.ServiceBaseUrl()
 }
 
 // Gets the CAI product legacy base url.
@@ -2080,6 +2078,33 @@ func (r Resource) CaiAssetNameTemplate(productBackendName string) string {
 	}
 
 	return versionRegex.ReplaceAllString(template, "/")
+}
+
+// Gets a format string that is used to override the default format from resource id format
+func (r Resource) CAIFormatOverride() string {
+	caiAssetService := strings.Trim(r.ProductMetadata.CaiAssetService, "/")
+	if r.CaiAssetNameFormat != "" || caiAssetService != "" {
+		if caiAssetService == "" {
+			caiAssetService = r.ProductMetadata.ServiceName()
+		}
+
+		caiAssetName := r.CaiAssetNameFormat
+		if caiAssetName == "" {
+			caiAssetName = r.IdFormat
+		}
+		return fmt.Sprintf("//%s/%s", caiAssetService, caiAssetName)
+	}
+	return ""
+}
+
+// Gets a format string for CAI asset name
+func (r Resource) GetCaiAssetNameTemplate() string {
+	caiAssetNameFormat := r.CAIFormatOverride()
+	if caiAssetNameFormat != "" {
+		return caiAssetNameFormat
+	}
+
+	return fmt.Sprintf("//%s/%s", r.ProductMetadata.ServiceName(), r.IdFormat)
 }
 
 // Gets the Cai API version
