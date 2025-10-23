@@ -6080,6 +6080,7 @@ resource "google_container_node_pool" "np" {
 `, cluster, np, networkName, subnetworkName, storagePoolResourceName, location)
 }
 
+{{- if eq $.TargetVersionName "alpha" }}
 func testAccContainerNodePool_acceleratorNetworkProfile_zonal(clusterName, npName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "cluster" {
@@ -6110,7 +6111,9 @@ resource "google_container_node_pool" "np" {
 }
 `, clusterName, npName)
 }
+{{- end }}
 
+{{- if eq $.TargetVersionName "alpha" }}
 func TestAccContainerNodePool_acceleratorNetworkProfile(t *testing.T) {
 	t.Parallel()
 
@@ -6134,3 +6137,4 @@ func TestAccContainerNodePool_acceleratorNetworkProfile(t *testing.T) {
 		},
 	})
 }
+{{- end }}
