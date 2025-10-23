@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
+// trigger tests
+
 func TestAccApihubCuration_apihubCurationBasic_Update(t *testing.T) {
 	// This is added for reference, but the test needs to be skipped as it needs API hub instance as a prerequisite
 	// But the support for that resources is not yet complete.
