@@ -6890,7 +6890,7 @@ func TestAccContainerCluster_network_tier_config(t *testing.T) {
 				ResourceName:      "google_container_cluster.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "min_master_version"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccContainerCluster_network_tier_config(clusterName, networkName, subnetworkName, "NETWORK_TIER_PREMIUM"),
@@ -6902,7 +6902,7 @@ func TestAccContainerCluster_network_tier_config(t *testing.T) {
 				ResourceName:      "google_container_cluster.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "min_master_version"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccContainerCluster_network_tier_config(clusterName, networkName, subnetworkName, "NETWORK_TIER_STANDARD"),
@@ -6914,7 +6914,7 @@ func TestAccContainerCluster_network_tier_config(t *testing.T) {
 				ResourceName:      "google_container_cluster.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "min_master_version"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -6934,8 +6934,6 @@ resource "google_container_cluster" "primary" {
   subnetwork = "%s"
 
   deletion_protection = false
-
-  min_master_version = "1.33.4-gke.1134000"
 
   ip_allocation_policy {
     network_tier_config {
@@ -6959,8 +6957,6 @@ resource "google_container_cluster" "primary" {
   subnetwork = "%s"
 
   deletion_protection = false
-
-  min_master_version = "1.33.4-gke.1134000"
 
   ip_allocation_policy {
   }
