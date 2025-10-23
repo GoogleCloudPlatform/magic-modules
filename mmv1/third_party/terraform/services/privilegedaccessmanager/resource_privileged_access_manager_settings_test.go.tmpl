@@ -144,6 +144,28 @@ func TestAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_disa
 	})
 }
 
+func TestAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_empty(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+        ExternalProviders: map[string]resource.ExternalProvider{
+            "time": {},
+        },
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_empty(context),
+			},
+		},
+	})
+}
 
 func testAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -154,9 +176,9 @@ resource "google_folder" "folder" {
     deletion_protection = false
 }
 
-resource "time_sleep" "wait_90s" {
+resource "time_sleep" "wait_120s" {
     depends_on = [google_folder.folder]
-    create_duration = "90s"
+    create_duration = "120s"
 }
 
 resource "google_privileged_access_manager_settings" "settings" {
@@ -181,7 +203,7 @@ resource "google_privileged_access_manager_settings" "settings" {
         }
     }
 
-    depends_on = [time_sleep.wait_90s]
+    depends_on = [time_sleep.wait_120s]
 }
 `, context)
 }
@@ -195,9 +217,9 @@ resource "google_folder" "folder" {
     deletion_protection = false
 }
 
-resource "time_sleep" "wait_90s" {
+resource "time_sleep" "wait_120s" {
     depends_on = [google_folder.folder]
-    create_duration = "90s"
+    create_duration = "120s"
 }
 
 resource "google_privileged_access_manager_settings" "settings" {
@@ -222,7 +244,7 @@ resource "google_privileged_access_manager_settings" "settings" {
         }
     }
 
-    depends_on = [time_sleep.wait_90s]
+    depends_on = [time_sleep.wait_120s]
 }
 `, context)
 }
@@ -236,9 +258,9 @@ resource "google_folder" "folder" {
     deletion_protection = false
 }
 
-resource "time_sleep" "wait_90s" {
+resource "time_sleep" "wait_120s" {
     depends_on = [google_folder.folder]
-    create_duration = "90s"
+    create_duration = "120s"
 }
 
 resource "google_privileged_access_manager_settings" "settings" {
@@ -272,7 +294,7 @@ resource "google_privileged_access_manager_settings" "settings" {
         }
     }
 
-    depends_on = [time_sleep.wait_90s]
+    depends_on = [time_sleep.wait_120s]
 }
 `, context)
 }
@@ -288,9 +310,9 @@ resource "google_folder" "folder" {
     deletion_protection = false
 }
 
-resource "time_sleep" "wait_90s" {
+resource "time_sleep" "wait_120s" {
     depends_on = [google_folder.folder]
-    create_duration = "90s"
+    create_duration = "120s"
 }
 
 resource "google_privileged_access_manager_settings" "settings" {
@@ -324,7 +346,7 @@ resource "google_privileged_access_manager_settings" "settings" {
         }
     }
 
-    depends_on = [time_sleep.wait_90s]
+    depends_on = [time_sleep.wait_120s]
 }
 `, context)
 }
@@ -338,9 +360,9 @@ resource "google_folder" "folder" {
     deletion_protection = false
 }
 
-resource "time_sleep" "wait_90s" {
+resource "time_sleep" "wait_120s" {
     depends_on = [google_folder.folder]
-    create_duration = "90s"
+    create_duration = "120s"
 }
 
 resource "google_privileged_access_manager_settings" "settings" {
@@ -368,7 +390,7 @@ resource "google_privileged_access_manager_settings" "settings" {
         }
     }
 
-    depends_on = [time_sleep.wait_90s]
+    depends_on = [time_sleep.wait_120s]
 }
 `, context)
 }
@@ -382,9 +404,9 @@ resource "google_folder" "folder" {
     deletion_protection = false
 }
 
-resource "time_sleep" "wait_90s" {
+resource "time_sleep" "wait_120s" {
     depends_on = [google_folder.folder]
-    create_duration = "90s"
+    create_duration = "120s"
 }
 
 resource "google_privileged_access_manager_settings" "settings" {
@@ -398,10 +420,33 @@ resource "google_privileged_access_manager_settings" "settings" {
         disable_all_notifications {}
     }
 
-    depends_on = [time_sleep.wait_90s]
+    depends_on = [time_sleep.wait_120s]
 }
 `, context)
 }
 
+func testAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_empty(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_folder" "folder" {
+    provider            = google-beta
+    display_name        = "tf-test-%{random_suffix}"
+    parent              = "organizations/%{org_id}"
+    deletion_protection = false
+}
+
+resource "time_sleep" "wait_120s" {
+    depends_on = [google_folder.folder]
+    create_duration = "120s"
+}
+
+resource "google_privileged_access_manager_settings" "settings" {
+    provider = google-beta
+    location = "global"
+    parent   = "folders/${google_folder.folder.folder_id}"
+
+    depends_on = [time_sleep.wait_120s]
+}
+`, context)
+}
 
 {{- end }}
