@@ -49,46 +49,46 @@ async:
   include_project: false
 autogen_status: TXVsdGljYXN0RG9tYWlu
 parameters:
-- name: location
-  type: String
-  description: Resource ID segment making up resource `name`. It identifies the
-    resource within its parent collection as described in
-    https://google.aip.dev/122.
-  immutable: true
-  url_param_only: true
-  required: true
-- name: multicastDomainId
-  type: String
-  description: |-
-    A unique name for the multicast domain.
-    The name is restricted to letters, numbers, and hyphen, with the first
-    character a letter, and the last a letter or a number. The name must not
-    exceed 48 characters.
-  immutable: true
-  url_param_only: true
-  required: true
-properties:
-- name: adminNetwork
-  type: String
-  description: |-
-    The resource name of the multicast admin VPC network.
-    Use the following format:
-    `projects/{project}/locations/global/networks/{network}`.
-  required: true
-- name: connectionConfig
-  type: NestedObject
-  api_name: connection
-  description: VPC connectivity information.
-  required: true
-  properties:
-  - name: connectionType
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the
+      resource within its parent collection as described in
+      https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: multicastDomainId
     type: String
     description: |-
-      The VPC connection type.
-      Possible values:
-      NCC
-      SAME_VPC
+      A unique name for the multicast domain.
+      The name is restricted to letters, numbers, and hyphen, with the first
+      character a letter, and the last a letter or a number. The name must not
+      exceed 48 characters.
+    immutable: true
+    url_param_only: true
     required: true
+properties:
+  - name: adminNetwork
+    type: String
+    description: |-
+      The resource name of the multicast admin VPC network.
+      Use the following format:
+      `projects/{project}/locations/global/networks/{network}`.
+    required: true
+  - name: connectionConfig
+    type: NestedObject
+    api_name: connection
+    description: VPC connectivity information.
+    required: true
+    properties:
+    - name: connectionType
+      type: String
+      description: |-
+        The VPC connection type.
+        Possible values:
+        NCC
+        SAME_VPC
+      required: true
   - name: nccHub
     type: String
     description: |-
@@ -96,40 +96,40 @@ properties:
       [NCC](https://cloud.google.com/network-connectivity-center) hub.
       Use the following format:
       `projects/{project}/locations/global/hubs/{hub}`.
-- name: createTime
-  type: String
-  description: '[Output only] The timestamp when the multicast domain was created.'
-  output: true
-- name: description
-  type: String
-  description: An optional text description of the multicast domain.
-- name: labels
-  type: KeyValueLabels
-  description: Labels as key-value pairs.
-- name: multicastDomainGroup
-  type: String
-  description: |-
-    The multicast domain group this domain should be associated with.
-    Use the following format:
-    `projects/{project}/locations/global/multicastDomainGroups/{multicast_domain_group}`.
-- name: name
-  type: String
-  description: |-
-    Identifier. The resource name of the multicast domain.
-    Use the following format:
-    `projects/*/locations/global/multicastDomains/*`
-  output: true
-- name: uniqueId
-  type: String
-  description: |-
-    [Output only] The Google-generated UUID for the resource. This value is
-    unique across all multicast domain resources. If a domain is deleted and
-    another with the same name is created, the new domain is assigned a
-    different unique_id.
-  output: true
-- name: updateTime
-  type: String
-  description: |-
-    [Output only] The timestamp when the multicast domain was most recently
-    updated.
-  output: true
+  - name: createTime
+    type: String
+    description: '[Output only] The timestamp when the multicast domain was created.'
+    output: true
+  - name: description
+    type: String
+    description: An optional text description of the multicast domain.
+  - name: labels
+    type: KeyValueLabels
+    description: Labels as key-value pairs.
+  - name: multicastDomainGroup
+    type: String
+    description: |-
+      The multicast domain group this domain should be associated with.
+      Use the following format:
+      `projects/{project}/locations/global/multicastDomainGroups/{multicast_domain_group}`.
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the multicast domain.
+      Use the following format:
+      `projects/*/locations/global/multicastDomains/*`
+    output: true
+  - name: uniqueId
+    type: String
+    description: |-
+      [Output only] The Google-generated UUID for the resource. This value is
+      unique across all multicast domain resources. If a domain is deleted and
+      another with the same name is created, the new domain is assigned a
+      different unique_id.
+    output: true
+  - name: updateTime
+    type: String
+    description: |-
+      [Output only] The timestamp when the multicast domain was most recently
+      updated.
+    output: true
