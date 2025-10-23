@@ -62,6 +62,13 @@ examples:
     primary_resource_id: 'default'
     vars:
       global_address_name: 'global-ipv6-address'
+  - name: 'global_address_with_ip_collection'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    skip_test: true
+    vars:
+      global_address_name: 'global-address-byoip'
+      public_delegated_prefix_name: 'my-pdp'
 parameters:
 properties:
   - name: 'address'
