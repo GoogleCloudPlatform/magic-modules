@@ -126,4 +126,3 @@ properties:
     write_only: true
     immutable: true
     diff_suppress_func: 'sha256DiffSuppress'
-    custom_flatten: 'templates/terraform/custom_flatten/sha256.tmpl'
