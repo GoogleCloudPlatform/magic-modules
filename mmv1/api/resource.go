@@ -2298,10 +2298,7 @@ func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string
 		} else if tp.IsMissingInCai {
 			props = append(props, tp.MetadataLineage())
 		} else if tp.IgnoreRead {
-			if tp.Sensitive || tp.Name == "tags" {
-				// TODO: handle tags conversion, which are separate Cai assets with resources.
-				props = append(props, tp.MetadataLineage())
-			}
+			props = append(props, tp.MetadataLineage())
 		}
 	}
 	props = append(props, e.TGCTestIgnoreExtra...)

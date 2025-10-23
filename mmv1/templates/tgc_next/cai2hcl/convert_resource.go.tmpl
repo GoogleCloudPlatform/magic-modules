@@ -41,8 +41,10 @@ func ConvertResource(asset caiasset.Asset) ([]*models.TerraformResourceBlock, er
 		{{- range $i, $object := $resources }}
 			{{- if eq $i 0 }}
 			if strings.Contains(asset.Name, "{{$object.IdentityParam}}") {
-			{{- else }}
+			{{- else if $object.IdentityParam }}
 			} else if strings.Contains(asset.Name, "{{$object.IdentityParam}}") {
+			{{- else }}
+			} else {
 			{{- end }}
 				converter = ConverterMap[asset.Type]["{{ $object.AliasName }}"]
 			{{- if eq $i (sub (len $resources) 1)}}
