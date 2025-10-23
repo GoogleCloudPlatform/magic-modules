@@ -7,10 +7,10 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/models"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/tfplan"
 
 	provider "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/provider"
+	tfjson "github.com/hashicorp/terraform-json"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -31,21 +31,20 @@ func NewAdvancedResolver(errorLogger *zap.Logger) *AdvancedPreResolver {
 	}
 }
 
-func (r *AdvancedPreResolver) Resolve(jsonPlan []byte, resourceDataMap map[string][]*models.FakeResourceDataWithMeta) map[string][]*models.FakeResourceDataWithMeta {
+func (r *AdvancedPreResolver) Resolve(jsonPlan []byte) map[string][]*tfjson.ResourceChange {
+	// Keys are resource IDs, and values are resource change objects.
+	idToResourceChange := make(map[string][]*tfjson.ResourceChange)
 	// ReadChanges
 	planChanges, err := tfplan.ReadResourceChanges(jsonPlan)
 	if err != nil {
-		return resourceDataMap
+		return idToResourceChange
 	}
 
 	// Read elements from the resouce config
 	resourceConfig, err := tfplan.ReadResourceConfigurations(jsonPlan)
 	if err != nil {
-		return resourceDataMap
+		return idToResourceChange
 	}
-
-	// Keys are resource IDs, and values are lists of IAM resource addresses.
-	idToAddresses := make(map[string][]string)
 
 	for _, rc := range planChanges {
 		// Silently skip non-google resources
@@ -53,10 +52,11 @@ func (r *AdvancedPreResolver) Resolve(jsonPlan []byte, resourceDataMap map[strin
 			continue
 		}
 		// Handle iam resources, build an id for each of them and group them together
-		if strings.Contains(rc.Type, "iam") {
+		if strings.Contains(rc.Type, "iam_member") || strings.Contains(rc.Type, "iam_binding") || strings.Contains(rc.Type, "iam_policy") {
 			var keys []string
 			// Take all keys from Change.After and store them in a list
-			if afterMap, ok := rc.Change.After.(map[string]interface{}); ok {
+			afterMap, ok := rc.Change.After.(map[string]interface{})
+			if ok {
 				for k := range afterMap {
 					if !slices.Contains(filterList, k) {
 						keys = append(keys, k)
@@ -79,11 +79,10 @@ func (r *AdvancedPreResolver) Resolve(jsonPlan []byte, resourceDataMap map[strin
 			// Build the id for each iam resource
 			for _, key := range keys {
 				// variable refers to the parent argument,
-
 				if value, ok := afterMap[key]; ok {
 					resourceId = resourceId + key + "/"
 					if sVal, ok := value.(string); ok {
-						resourceId = fmt.Sprintf("%s/%/", key, sVal)
+						resourceId = resourceId + sVal + "/"
 					}
 				}
 
@@ -99,38 +98,15 @@ func (r *AdvancedPreResolver) Resolve(jsonPlan []byte, resourceDataMap map[strin
 				}
 
 			}
-			if len(idToAddressMap[resourceId]) == 0 {
-				idToAddressMap[resourceId] = []string{rc.Address}
+
+			if len(idToResourceChange[resourceId]) == 0 {
+				idToResourceChange[resourceId] = []*tfjson.ResourceChange{rc}
 			} else {
-				idToAddressMap[resourceId] = append(idToAddressMap[resourceId], rc.Address)
+				idToResourceChange[resourceId] = append(idToResourceChange[resourceId], rc)
 			}
 
 		}
 	}
 
-	var groupKey [][]string
-	// id : [resource1, resource2]
-	for _, values := range idToAddressMap {
-		tempList := []string{}
-		// [resource1, resource2]
-		for _, value := range values {
-			for key, curResource := range resourceDataMap {
-				// i is index, rd is the object we need to combine later on
-				if value == curResource[0].Address() {
-					tempList = append(tempList, key)
-				}
-			}
-		}
-		groupKey = append(groupKey, tempList)
-	}
-
-	// Could be something like [key1, key2] [key3, key4]
-	for _, addresses := range idToAddresses {
-		for i := 1; i < len(row); i++ {
-			resourceDataMap[row[0]] = append(resourceDataMap[row[0]], resourceDataMap[row[i]][0])
-			delete(resourceDataMap, row[i])
-		}
-	}
-
-	return resourceDataMap
+	return idToResourceChange
 }
