@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,8 +21,8 @@ references:
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/publicDelegatedPrefixes'
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/publicDelegatedPrefixes'
+update_verb: 'PATCH'
 has_self_link: true
-immutable: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -34,55 +34,53 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-custom_code:
 sweeper:
   url_substitutions:
     - region: "us-central1"
     - region: "us-west1"
     - region: "us-east1"
 examples:
-  - name: 'public_delegated_prefixes_basic'
+  - name: 'compute_public_delegated_prefixes_basic'
     primary_resource_id: 'prefixes'
     vars:
       prefixes_name: 'my-prefix'
     test_env_vars:
       desc: 'PAP_DESCRIPTION'
-    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
-    # resource_compute_public_advertised_prefix_test.go
+    # PAPs have very low quota limits and a shared testing range so serialized
+    # tests exist in resource_compute_public_advertised_prefix_test.go
     exclude_test: true
-  - name: 'public_delegated_prefixes_ipv6'
+  - name: 'compute_public_delegated_prefixes_sub'
+    primary_resource_id: 'prefixes'
+    vars:
+      prefixes_name: 'my-prefix'
+      sub_prefixes_name: 'my-sub-prefix'
+    test_env_vars:
+      desc: 'PAP_DESCRIPTION'
+    # PAPs have very low quota limits and a shared testing range so serialized
+    # tests exist in resource_compute_public_advertised_prefix_test.go
+    exclude_test: true
+  - name: 'compute_public_delegated_prefixes_ipv6'
     vars:
       pap_name: "ipv6-pap"
       root_pdp_name: "ipv6-root-pdp"
       sub_pdp_name: "ipv6-sub-pdp"
     test_env_vars:
       desc: 'PAP_DESCRIPTION'
-    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
-    # resource_compute_public_advertised_prefix_test.go
+    # PAPs have very low quota limits and a shared testing range so serialized
+    # tests exist in resource_compute_public_advertised_prefix_test.go
     exclude_test: true
-  - name: 'public_delegated_prefix_ipv6_subnet_mode'
+  - name: 'compute_public_delegated_prefix_ipv6_subnet_mode'
     vars:
       pap_name: "ipv6-pap"
       root_pdp_name: "ipv6-root-pdp"
       sub_pdp_name: "ipv6-sub-pdp"
     test_env_vars:
       desc: 'PAP_DESCRIPTION'
-    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
-    # resource_compute_public_advertised_prefix_test.go
+    # PAPs have very low quota limits and a shared testing range so serialized
+    # tests exist in resource_compute_public_advertised_prefix_test.go
     exclude_test: true
 parameters:
 properties:
-  - name: 'region'
-    type: String
-    description: 'A region where the prefix will reside.'
-    url_param_only: true
-    required: true
-  - name: 'description'
-    type: String
-    description: An optional description of this resource.
-  - name: 'isLiveMigration'
-    type: Boolean
-    description: If true, the prefix will be live migrated.
   - name: 'name'
     type: String
     description: |
@@ -93,22 +91,37 @@ properties:
       following characters must be a dash, lowercase letter, or digit,
       except the last character, which cannot be a dash.
     required: true
+    immutable: true
+  - name: 'region'
+    type: String
+    description: 'A region where the prefix will reside.'
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'description'
+    type: String
+    description: An optional description of this resource.
+    immutable: true
   - name: 'parentPrefix'
     type: String
     description:
-      The URL of parent prefix. Either PublicAdvertisedPrefix or
-      PublicDelegatedPrefix.
+      The URL of parent prefix.
+      Either PublicAdvertisedPrefix or PublicDelegatedPrefix.
     required: true
+    immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+  # only required for IPv6
   - name: 'mode'
     type: Enum
     description: |
       Specifies the mode of this IPv6 PDP. MODE must be one of: DELEGATION,
-      EXTERNAL_IPV6_FORWARDING_RULE_CREATION and EXTERNAL_IPV6_SUBNETWORK_CREATION.
+      EXTERNAL_IPV6_FORWARDING_RULE_CREATION
+      and EXTERNAL_IPV6_SUBNETWORK_CREATION.
     enum_values:
       - 'DELEGATION'
       - 'EXTERNAL_IPV6_FORWARDING_RULE_CREATION'
       - 'EXTERNAL_IPV6_SUBNETWORK_CREATION'
+    immutable: true
   - name: 'allocatablePrefixLength'
     type: Integer
     default_from_api: true
@@ -122,13 +135,15 @@ properties:
       The IP address range, in CIDR format, represented by this public
       delegated prefix.
     required: true
+    immutable: true
+  # Can only be defined with resource updates (patch API).
+  # Can be updated adding/removing blocks but single elements within each
+  # block cannot be modified.
   - name: 'publicDelegatedSubPrefixs'
     type: Array
-    output: true
     description: |
-      List of sub public delegated fixes for BYO IP functionality.
-      Each item in this array represents a sub prefix that can be
-      used to create addresses or further allocations.
+      The list of sub public delegated prefixes that exist for this public
+      delegated prefix.
     item_type:
       type: NestedObject
       properties:
@@ -143,7 +158,9 @@ properties:
         - name: 'region'
           type: String
           description: |
-            Output-only. The region of the sub public delegated prefix if it is regional. If absent, the sub prefix is global.
+            The region of the sub public delegated prefix if it is regional.
+            If absent, the sub prefix is global.
+          output: true
         - name: 'status'
           type: Enum
           description: |
@@ -153,10 +170,12 @@ properties:
             - 'READY_TO_ANNOUNCE'
             - 'ANNOUNCED'
             - 'DELETING'
+          output: true
         - name: 'ipCidrRange'
           type: String
           description: |
-            The IP address range in the CIDR format represented by this sub prefix.
+            The IP address range in the CIDR format represented by this
+            sub prefix.
         - name: 'isAddress'
           type: Boolean
           description: |
@@ -172,8 +191,24 @@ properties:
         - name: 'allocatablePrefixLength'
           type: Integer
           description: |
-            The allocatable prefix length supported by this PublicDelegatedSubPrefix.
+            The allocatable prefix length supported by this
+            PublicDelegatedSubPrefix.
         - name: 'delegatee_project'
           type: String
           description: |
             Name of the project scoping this PublicDelegatedSubPrefix.
+  - name: 'fingerprint'
+    type: Fingerprint
+    description: |
+      Fingerprint of this resource. A hash of the contents stored in this
+      object. This field is used in optimistic locking. This field will be
+      ignored when inserting a new PublicDelegatedPrefix. An up-to-date
+      fingerprint must be provided in order to update the PublicDelegatedPrefix,
+      otherwise the request will fail with error 412 conditionNotMet.
+      A base64-encoded string.
+    output: true
+  # This is deprecated but we should keep it for now for back compatibility.
+  - name: 'isLiveMigration'
+    type: Boolean
+    description: If true, the prefix will be live migrated.
+    output: true
