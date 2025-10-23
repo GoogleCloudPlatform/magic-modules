@@ -55,35 +55,65 @@ resource "google_service_account" "actuation_service_account" {
   display_name = "SaaS Actuation Service Account"
 }
 
-resource "google_project_iam_member" "tenant_config_admin" {
+resource "google_project_iam_member" "tenant_editor" {
   provider   = google-beta
   project    = google_project.tenant_project.project_id
-  role       = "roles/config.admin"
-  member     = "serviceAccount:${google_service_account.actuation_service_account.email}"
-}
-
-resource "google_project_iam_member" "tenant_storage_admin" {
-  provider   = google-beta
-  project    = google_project.tenant_project.project_id
-  role       = "roles/storage.admin"
-  member     = "serviceAccount:${google_service_account.actuation_service_account.email}"
-}
-
-resource "google_project_iam_member" "tenant_compute_admin" {
-  provider   = google-beta
-  project    = google_project.tenant_project.project_id
-  role       = "roles/compute.admin"
+  role       = "roles/editor"
   member     = "serviceAccount:${google_service_account.actuation_service_account.email}"
 }
 
 resource "google_saas_runtime_unit_operation" "{{$.PrimaryResourceId}}" {
   provider            = google-beta
-  depends_on          = [google_project_iam_member.tenant_config_admin, google_project_iam_member.tenant_storage_admin, google_project_iam_member.tenant_compute_admin, google_project_service.saas_services]
+  depends_on          = [google_project_iam_member.tenant_editor, google_project_service.saas_services]
   location            = "us-east1"
   unit_operation_id   = "{{index $.Vars "provision_operation_name"}}"
   unit                = google_saas_runtime_unit.example_unit.id
   wait_for_completion = true
   provision {
+    release = google_saas_runtime_release.example_release.id
+    input_variables {
+        variable = "tenant_project_id"
+        value    = google_project.tenant_project.project_id
+        type     = "STRING"
+    }
+    input_variables {
+        variable = "tenant_project_number"
+        value    = google_project.tenant_project.number
+        type     = "INT"
+    }
+    input_variables {
+        variable = "zone"
+        value    = "us-central1-a"
+        type     = "STRING"
+    }
+    input_variables {
+        variable = "instance_name"
+        value    = "terraform-test-instance"
+        type     = "STRING"
+    }
+    input_variables {
+        variable = "actuation_sa"
+        value    = "${google_service_account.actuation_service_account.email}"
+        type     = "STRING"
+    }
+  }
+  labels = {
+    "label-one": "foo"
+  }
+  annotations = {
+    "annotation-one": "bar"
+  }
+}
+
+resource "google_saas_runtime_unit_operation" "noop_upgrade_unit_operation" {
+  provider            = google-beta
+  depends_on          = [google_saas_runtime_unit_operation.{{$.PrimaryResourceId}}]
+  location            = "us-east1"
+  unit_operation_id   = "tf-test-provision-unit-operation%{random_suffix}"
+  unit                = google_saas_runtime_unit.example_unit.id
+  wait_for_completion = true
+  upgrade {
+    release = google_saas_runtime_release.example_release.id
     input_variables {
         variable = "tenant_project_id"
         value    = google_project.tenant_project.project_id
@@ -113,11 +143,11 @@ resource "google_saas_runtime_unit_operation" "{{$.PrimaryResourceId}}" {
 }
 
 resource "google_saas_runtime_unit_operation" "deprovision_operation" {
-  provider = google-beta
-  depends_on = [google_saas_runtime_unit_operation.{{$.PrimaryResourceId}}]
-  location = "us-east1"
-  unit_operation_id = "{{index $.Vars "deprovision_operation_name"}}"
-  unit = google_saas_runtime_unit.example_unit.id
+  provider            = google-beta
+  depends_on          = [google_saas_runtime_unit_operation.noop_upgrade_unit_operation]
+  location            = "us-east1"
+  unit_operation_id   = "{{index $.Vars "deprovision_operation_name"}}"
+  unit                = google_saas_runtime_unit.example_unit.id
   wait_for_completion = true
   deprovision {}
 }

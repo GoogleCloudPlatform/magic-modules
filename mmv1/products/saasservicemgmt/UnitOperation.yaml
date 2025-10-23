@@ -31,6 +31,7 @@ examples:
       tenant_name: example-tenant
       unit_name: example-unit
       provision_operation_name: provision-unit-operation
+      upgrade_operation_name: upgrade-unit-operation
       deprovision_operation_name: deprovision-unit-operation
       actuation_service_account: actuator
       tenant_project_name: tenant
@@ -171,13 +172,6 @@ properties:
 
       "projects/{project}/locations/{location}/unitOperations/{unitOperation}"
     output: true
-  - name: parentUnitOperation
-    type: String
-    description: |-
-      Reference to parent resource: UnitOperation. If an operation needs to
-      create other operations as part of its workflow, each of the child
-      operations should have this field set to the parent. This can be used for
-      tracing. (Optional)
   - name: provision
     type: NestedObject
     description: |-
@@ -211,15 +205,6 @@ properties:
       - name: release
         type: String
         description: Reference to the Release object to use for the Unit. (optional).
-  - name: schedule
-    type: NestedObject
-    description: A time specification to schedule the maintenance.
-    properties:
-      - name: startTime
-        type: String
-        description: |-
-          Start of operation. If not set, will be set to the start of the next
-          window. (optional)
   - name: state
     type: String
     description: |-
