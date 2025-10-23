@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -344,26 +345,26 @@ func compareHCLFields(map1, map2, ignoredFields map[string]any) []string {
 			continue
 		}
 
-		if _, ok := map2[key]; !ok {
-			// If a field is an empty map in map1, it is possible that its children are in map2.
-			// In this case, the field is not missing in map2.
-			// map1 = {a: {}}, map2 = {a.b: {}}
-			if vMap, ok := val.(map[string]interface{}); ok {
-				childrenFound := false
-				if len(vMap) == 0 {
-					for key := range map2 {
-						if strings.HasPrefix(key, key) {
-							childrenFound = true
-							break
-						}
-					}
-				}
-				if !childrenFound {
-					missingKeys = append(missingKeys, key)
-				}
-			} else {
-				missingKeys = append(missingKeys, key)
+		if rVal := reflect.ValueOf(val); !rVal.IsValid() || rVal.IsZero() {
+			continue
+		}
+
+		if sVal, ok := val.(string); ok {
+			// TODO: convert to correct type when parsing HCL to fix the edge case where the field type is String and the only values are "false", "00", etc.
+			if bVal, err := strconv.ParseBool(sVal); err == nil && !bVal {
+				continue
 			}
+			if iVal, err := strconv.Atoi(sVal); err == nil && iVal == 0 {
+				continue
+			}
+		}
+
+		if vMap, ok := val.(map[string]any); ok && len(vMap) == 0 {
+			continue
+		}
+
+		if _, ok := map2[key]; !ok {
+			missingKeys = append(missingKeys, key)
 		}
 	}
 	sort.Strings(missingKeys)
