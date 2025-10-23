@@ -251,8 +251,10 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		if roundtripAsset, ok := roundtripAssetMap[assetType]; !ok {
 			return fmt.Errorf("roundtrip asset for type %s is missing", assetType)
 		} else {
-			if err := compareAssetName(asset.Name, roundtripAsset.Name); err != nil {
-				return err
+			if _, ok := ignoredFieldSet["ASSETNAME"]; !ok {
+				if err := compareAssetName(asset.Name, roundtripAsset.Name); err != nil {
+					return err
+				}
 			}
 			if diff := cmp.Diff(
 				asset.Resource,
@@ -435,7 +437,7 @@ func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCac
 // Converts tf file to CAI assets
 func tfplan2caiConvert(t *testing.T, tfFileName, jsonFileName string, tfDir string, ancestryCache map[string]string, defaultProject string, logger *zap.Logger) ([]caiasset.Asset, error) {
 	// Run terraform init and terraform apply to generate tfplan.json files
-	terraformWorkflow(t, tfDir, tfFileName)
+	terraformWorkflow(t, tfDir, tfFileName, defaultProject)
 
 	planFile := fmt.Sprintf("%s.tfplan.json", tfFileName)
 	planfilePath := filepath.Join(tfDir, planFile)
