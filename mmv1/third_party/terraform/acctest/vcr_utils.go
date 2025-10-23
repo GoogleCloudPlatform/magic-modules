@@ -42,6 +42,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
+// trigger test
+
 func IsVcrEnabled() bool {
 	envPath := os.Getenv("VCR_PATH")
 	vcrMode := os.Getenv("VCR_MODE")

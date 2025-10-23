@@ -140,6 +140,10 @@ func (vt *Tester) SetRepoPath(version provider.Version, repoPath string) {
 	vt.repoPaths[version] = repoPath
 }
 
+func (vt *Tester) GetRepoPath(version provider.Version) string {
+	return vt.repoPaths[version]
+}
+
 // Fetch the cassettes for the current version if not already fetched.
 // Should be run from the base dir.
 func (vt *Tester) FetchCassettes(version provider.Version, baseBranch, head string) error {
