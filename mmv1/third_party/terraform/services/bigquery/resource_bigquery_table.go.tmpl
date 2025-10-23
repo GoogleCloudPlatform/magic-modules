@@ -963,6 +963,12 @@ func ResourceBigQueryTable() *schema.Resource {
 							Description:   `Object Metadata is used to create Object Tables. Object Tables contain a listing of objects (with their metadata) found at the sourceUris. If ObjectMetadata is set, sourceFormat should be omitted.`,
 							ConflictsWith: []string{"external_data_configuration.0.source_format"},
 						},
+						"decimal_target_types": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: `The data types that could be used as a target type when converting decimal values.`,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+						},
 					},
 				},
 			},
@@ -2395,6 +2401,14 @@ func expandExternalDataConfiguration(cfg interface{}) (*bigquery.ExternalDataCon
 		edc.SourceUris = sourceUris
 	}
 
+	decimalTargetTypes := []string{}
+	for _, rawDecimalTargetType := range raw["decimal_target_types"].([]interface{}) {
+		decimalTargetTypes = append(decimalTargetTypes, rawDecimalTargetType.(string))
+	}
+	if len(decimalTargetTypes) > 0 {
+		edc.DecimalTargetTypes = decimalTargetTypes
+	}
+
 	if v, ok := raw["file_set_spec_type"]; ok {
 		edc.FileSetSpecType = v.(string)
 	}
@@ -2460,7 +2474,6 @@ func expandExternalDataConfiguration(cfg interface{}) (*bigquery.ExternalDataCon
 	}
 
 	return edc, nil
-
 }
 
 func flattenExternalDataConfiguration(edc *bigquery.ExternalDataConfiguration) ([]map[string]interface{}, error) {
@@ -2468,6 +2481,7 @@ func flattenExternalDataConfiguration(edc *bigquery.ExternalDataConfiguration) (
 
 	result["autodetect"] = edc.Autodetect
 	result["source_uris"] = edc.SourceUris
+	result["decimal_target_types"] = edc.DecimalTargetTypes
 
 	if edc.FileSetSpecType != "" {
 		result["file_set_spec_type"] = edc.FileSetSpecType
