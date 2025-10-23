@@ -230,7 +230,7 @@ A duration in seconds with up to nine fractional digits, terminated by 's'. Exam
 
 * `overwrite_when` - (Optional) When to overwrite objects that already exist in the sink. If not set, overwrite behavior is determined by `overwrite_objects_already_existing_in_sink`. Possible values: ALWAYS, DIFFERENT, NEVER.
 
-* `metadata_options` - (Optional) Specifies the metadata options for running a transfer.[documented below](#nested_metadata_options).
+* `metadata_options` - (Optional) Specifies the metadata options for running a transfer. Structure [documented below](#nested_metadata_options).
 
 
 <a name="nested_gcs_data_sink"></a>The `gcs_data_sink` block supports:
