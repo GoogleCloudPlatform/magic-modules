@@ -43,7 +43,6 @@ custom_code:
 examples:
   - name: 'gkebackup_restorechannel_basic'
     primary_resource_id: 'basic'
-    primary_resource_name: 'fmt.Sprintf("tf-test-basic-channel%s", context["random_suffix"])'
     vars:
       name: 'basic-channel'
       destination_project: 'projects/24240755850'
