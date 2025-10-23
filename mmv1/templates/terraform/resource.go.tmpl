@@ -675,17 +675,9 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         }
     }
 {{-    else -}}
-{{- if $prop.WriteOnlyPairingExists -}}
-    if {{ $prop.Name -}}Wo, _ := d.GetRawConfigAt(cty.GetAttrPath("{{ underscore $prop.Name -}}_wo")); {{ $prop.Name -}}Wo.IsNull() {
-        if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
-            return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
-        }
-    }
-{{- else -}}
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
         return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
     }
-{{- end}}
 {{- end}}
 {{- end}}
 {{if $.HasSelfLink -}}
