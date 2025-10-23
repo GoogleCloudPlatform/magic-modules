@@ -24,13 +24,13 @@ update_verb: PATCH
 id_format:
   projects/{{project}}/locations/{{location}}/multicastDomains/{{multicast_domain_id}}
 import_format:
-- projects/{{project}}/locations/{{location}}/multicastDomains/{{multicast_domain_id}}
+  - projects/{{project}}/locations/{{location}}/multicastDomains/{{multicast_domain_id}}
 examples:
-- name: network_services_multicast_domain_basic
-  primary_resource_id: md_test
-  vars:
-    network_name: test-md-network
-    domain_name: test-md-domain
+  - name: network_services_multicast_domain_basic
+    primary_resource_id: md_test
+    vars:
+      network_name: test-md-network
+      domain_name: test-md-domain
 autogen_async: true
 async:
   operation:
@@ -40,9 +40,9 @@ async:
       delete_minutes: 20
     base_url: '{{op_id}}'
   actions:
-  - create
-  - delete
-  - update
+    - create
+    - delete
+    - update
   type: OpAsync
   result:
     resource_inside_response: true
@@ -81,14 +81,14 @@ properties:
     description: VPC connectivity information.
     required: true
     properties:
-    - name: connectionType
-      type: String
-      description: |-
-        The VPC connection type.
-        Possible values:
-        NCC
-        SAME_VPC
-      required: true
+      - name: connectionType
+        type: String
+        description: |-
+          The VPC connection type.
+          Possible values:
+          NCC
+          SAME_VPC
+        required: true
   - name: nccHub
     type: String
     description: |-
