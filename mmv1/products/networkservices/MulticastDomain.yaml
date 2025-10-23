@@ -24,9 +24,9 @@ update_verb: PATCH
 id_format:
   projects/{{project}}/locations/{{location}}/multicastDomains/{{multicast_domain_id}}
 import_format:
-- projects/{{project}}/locations/{{location}}/multicastDomains/{{multicast_domain_id}}
+  - projects/{{project}}/locations/{{location}}/multicastDomains/{{multicast_domain_id}}
 examples:
-- name: network_services_multicast_domain_basic
+  - name: network_services_multicast_domain_basic
   primary_resource_id: md_test
   vars:
     network_name: test-md-network
@@ -40,16 +40,16 @@ async:
       delete_minutes: 20
     base_url: '{{op_id}}'
   actions:
-  - create
-  - delete
-  - update
+    - create
+    - delete
+    - update
   type: OpAsync
   result:
     resource_inside_response: true
   include_project: false
 autogen_status: TXVsdGljYXN0RG9tYWlu
 parameters:
-- name: location
+  - name: location
   type: String
   description: Resource ID segment making up resource `name`. It identifies the
     resource within its parent collection as described in
@@ -68,7 +68,7 @@ parameters:
   url_param_only: true
   required: true
 properties:
-- name: adminNetwork
+  - name: adminNetwork
   type: String
   description: |-
     The resource name of the multicast admin VPC network.
@@ -81,7 +81,7 @@ properties:
   description: VPC connectivity information.
   required: true
   properties:
-  - name: connectionType
+    - name: connectionType
     type: String
     description: |-
       The VPC connection type.
@@ -125,7 +125,7 @@ properties:
     Information for an Ultra-Low-Latency multicast domain. This is only available
     in specific locations and allowlisted projects.
   properties:
-  - name: preconfiguredUllDomain
+    - name: preconfiguredUllDomain
     type: String
     description: The preconfigured Ultra-Low-Latency domain name.
 - name: uniqueId
