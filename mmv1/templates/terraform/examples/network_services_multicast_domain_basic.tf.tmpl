@@ -1,0 +1,12 @@
+resource "google_compute_network" "network" {
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_network_services_multicast_domain" {{$.PrimaryResourceId}} {
+  multicast_domain_id = "{{index $.Vars "domain_name"}}"
+  location = "global"
+  admin_network = google_compute_network.network.id
+  connection_config  { connection_type="SAME_VPC"}
+  depends_on = [google_compute_network.network]
+}
