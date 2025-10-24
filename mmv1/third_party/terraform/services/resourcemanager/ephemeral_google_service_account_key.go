@@ -165,7 +165,7 @@ func (p *googleEphemeralServiceAccountKey) Open(ctx context.Context, req ephemer
 	data.Name = types.StringValue(getSak.Name)
 	data.KeyAlgorithm = types.StringValue(getSak.KeyAlgorithm)
 	data.PublicKey = types.StringValue(getSak.PublicKeyData)
-	data.PublicKeyType = types.StringValue(getSak.PublicKeyType)
+	data.PublicKeyType = types.StringValue(publicKeyType)
 	if createdSak != nil {
 		data.PrivateKey = types.StringValue(createdSak.PrivateKeyData)
 		data.PrivateKeyType = types.StringValue(createdSak.PrivateKeyType)
@@ -184,11 +184,11 @@ func (p *googleEphemeralServiceAccountKey) Close(ctx context.Context, req epheme
 		return
 	}
 
-	deletion, _ := p.providerConfig.NewIamClient(p.providerConfig.UserAgent).Projects.ServiceAccounts.Keys.Get(serviceAccountKeyName).Delete().Do()
+	deletion, _ := p.providerConfig.NewIamClient(p.providerConfig.UserAgent).Projects.ServiceAccounts.Keys.Delete(string(serviceAccountKeyName)).Do()
 	if deletion != nil {
 		resp.Diagnostics.AddError(
 			"Error deleting Service Account Key",
-			fmt.Sprintf("Error deleting Service Account Key %q: %s", serviceAccountKeyName, deletion.Error()),
+			fmt.Sprintf("Error deleting Service Account Key %q: %s", string(serviceAccountKeyName), err),
 		)
 		return
 	}
