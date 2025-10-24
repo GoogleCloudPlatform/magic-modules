@@ -50,7 +50,7 @@ resource "google_project_service" "saas_services" {
 }
 
 resource "google_service_account" "actuation_service_account" {
-  provider   = google-beta
+  provider     = google-beta
   account_id   = "{{index $.Vars "actuation_service_account"}}"
   display_name = "SaaS Actuation Service Account"
 }
@@ -62,9 +62,16 @@ resource "google_project_iam_member" "tenant_editor" {
   member     = "serviceAccount:${google_service_account.actuation_service_account.email}"
 }
 
+resource "google_service_account_iam_member" "actuation_token_creator" {
+  provider           = google-beta
+  service_account_id = google_service_account.actuation_service_account.email
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "serviceAccount:service-{{index $.TestEnvVars "project_number"}}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com"
+}
+
 resource "google_saas_runtime_unit_operation" "{{$.PrimaryResourceId}}" {
   provider            = google-beta
-  depends_on          = [google_project_iam_member.tenant_editor, google_project_service.saas_services]
+  depends_on          = [google_project_iam_member.tenant_editor, google_service_account_iam_member.actuation_token_creator, google_project_service.saas_services]
   location            = "us-east1"
   unit_operation_id   = "{{index $.Vars "provision_operation_name"}}"
   unit                = google_saas_runtime_unit.example_unit.id
