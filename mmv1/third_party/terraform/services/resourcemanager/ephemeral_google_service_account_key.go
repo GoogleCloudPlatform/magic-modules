@@ -129,12 +129,12 @@ func (p *googleEphemeralServiceAccountKey) Open(ctx context.Context, req ephemer
 	if publicKeyType == "" {
 		publicKeyType = "TYPE_X509_PEM_FILE"
 	}
-	var sak *iam.ServiceAccountKey
+	var createdSak *iam.ServiceAccountKey
 	if data.PublicKey.ValueString() != "" {
 		ru := &iam.UploadServiceAccountKeyRequest{
 			PublicKeyData: data.PublicKey.ValueString(),
 		}
-		sak, err = p.providerConfig.NewIamClient(p.providerConfig.UserAgent).Projects.ServiceAccounts.Keys.Upload(keyName, ru).Do()
+		createdSak, err = p.providerConfig.NewIamClient(p.providerConfig.UserAgent).Projects.ServiceAccounts.Keys.Upload(keyName, ru).Do()
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Error creating service account key",
@@ -142,12 +142,12 @@ func (p *googleEphemeralServiceAccountKey) Open(ctx context.Context, req ephemer
 			)
 			return
 		}
-	} else {
+	} else if data.KeyAlgorithm.ValueString() != "" && data.PrivateKeyType.ValueString() != "" {
 		rc := &iam.CreateServiceAccountKeyRequest{
 			KeyAlgorithm:   data.KeyAlgorithm.ValueString(),
 			PrivateKeyType: data.PrivateKeyType.ValueString(),
 		}
-		sak, err = p.providerConfig.NewIamClient(p.providerConfig.UserAgent).Projects.ServiceAccounts.Keys.Create(keyName, rc).Do()
+		createdSak, err = p.providerConfig.NewIamClient(p.providerConfig.UserAgent).Projects.ServiceAccounts.Keys.Create(keyName, rc).Do()
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Error creating service account key",
@@ -156,12 +156,23 @@ func (p *googleEphemeralServiceAccountKey) Open(ctx context.Context, req ephemer
 			return
 		}
 	}
+	getSak, err := p.providerConfig.NewIamClient(p.providerConfig.UserAgent).Projects.ServiceAccounts.Keys.Get(keyName).PublicKeyType(publicKeyType).Do()
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error retrieving Service Account Key",
+			fmt.Sprintf("Error retrieving Service Account Key %q: %s", keyName, err),
+		)
+		return
+	}
 
-	data.Name = types.StringValue(sak.Name)
-	data.KeyAlgorithm = types.StringValue(sak.KeyAlgorithm)
-	data.PublicKey = types.StringValue(sak.PublicKeyData)
-	data.PrivateKey = types.StringValue(sak.PrivateKeyData)
-	data.PrivateKeyType = types.StringValue(sak.PrivateKeyType)
+	data.Name = types.StringValue(getSak.Name)
+	data.KeyAlgorithm = types.StringValue(getSak.KeyAlgorithm)
+	data.PublicKey = types.StringValue(getSak.PublicKeyData)
+	data.PublicKeyType = types.StringValue(getSak.PublicKeyType)
+	if createdSak != nil {
+		data.PrivateKey = types.StringValue(createdSak.PrivateKeyData)
+		data.PrivateKeyType = types.StringValue(createdSak.PrivateKeyType)
+	}
 
 	resp.Diagnostics.Append(resp.Result.Set(ctx, &data)...)
 }
