@@ -77,14 +77,6 @@ func (p *googleEphemeralServiceAccountKey) Schema(ctx context.Context, req ephem
 				Description: "The type of the private key.",
 				Computed:    true,
 			},
-			"valid_after": schema.StringAttribute{
-				Description: "The key can be used after this timestamp. A timestamp in RFC3339 UTC \"Zulu\" format, accurate to nanoseconds. Example: \"2014-10-02T15:01:23.045123456Z\".",
-				Computed:    true,
-			},
-			"valid_before": schema.StringAttribute{
-				Description: "The key can be used before this timestamp. A timestamp in RFC3339 UTC \"Zulu\" format, accurate to nanoseconds. Example: \"2014-10-02T15:01:23.045123456Z\".",
-				Computed:    true,
-			},
 		},
 	}
 }
@@ -115,16 +107,6 @@ func (p *googleEphemeralServiceAccountKey) Open(ctx context.Context, req ephemer
 	}
 
 	keyName := data.Name.ValueString()
-	// Validate name
-	r := regexp.MustCompile(verify.ServiceAccountKeyNameRegex)
-	if !r.MatchString(keyName) {
-		resp.Diagnostics.AddError(
-			"Invalid key name",
-			fmt.Sprintf("Invalid key name %q does not match regexp %q", keyName, verify.ServiceAccountKeyNameRegex),
-		)
-		return
-	}
-
 	publicKeyType := data.PublicKeyType.ValueString()
 	if publicKeyType == "" {
 		publicKeyType = "TYPE_X509_PEM_FILE"
