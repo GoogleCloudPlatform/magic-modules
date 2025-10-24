@@ -12,7 +12,7 @@ import (
 func TestAccApigeeDeveloperApp_apigeeDeveloperAppUpdateTest(t *testing.T) {
 	t.Parallel()
 
-  resourceName := "google_apigee_developer_app.apigee_developer_app"
+	resourceName := "google_apigee_developer_app.apigee_developer_app"
 
 	context := map[string]interface{}{
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
@@ -32,7 +32,7 @@ func TestAccApigeeDeveloperApp_apigeeDeveloperAppUpdateTest(t *testing.T) {
 				Config: testAccApigeeDeveloperApp_apigeeDeveloperAppBasicTest(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "credentials.*", "consumerKey"),
-          resource.TestCheckResourceAttrSet(resourceName, "credentials.*", "consumerSecret"),
+					resource.TestCheckResourceAttrSet(resourceName, "credentials.*", "consumerSecret"),
 				),
 			},
 			{
@@ -45,7 +45,7 @@ func TestAccApigeeDeveloperApp_apigeeDeveloperAppUpdateTest(t *testing.T) {
 				Config: testAccApigeeDeveloperApp_apigeeDeveloperAppUpdateTest(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "credentials.*", "consumerKey"),
-          resource.TestCheckResourceAttrSet(resourceName, "credentials.*", "consumerSecret"),
+					resource.TestCheckResourceAttrSet(resourceName, "credentials.*", "consumerSecret"),
 				),
 			},
 			{
