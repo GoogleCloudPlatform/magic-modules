@@ -32,12 +32,13 @@ func (p *googleEphemeralServiceAccountKey) Metadata(ctx context.Context, req eph
 }
 
 type ephemeralServiceAccountKeyModel struct {
-	Name           types.String `tfsdk:"name"`
-	PublicKeyType  types.String `tfsdk:"public_key_type"`
-	KeyAlgorithm   types.String `tfsdk:"key_algorithm"`
-	PublicKey      types.String `tfsdk:"public_key"`
-	PrivateKey     types.String `tfsdk:"private_key"`
-	PrivateKeyType types.String `tfsdk:"private_key_type"`
+	ServiceAccountId types.String `tfsdk:"service_account_id"`
+	Name             types.String `tfsdk:"name"`
+	PublicKeyType    types.String `tfsdk:"public_key_type"`
+	KeyAlgorithm     types.String `tfsdk:"key_algorithm"`
+	PublicKey        types.String `tfsdk:"public_key"`
+	PrivateKey       types.String `tfsdk:"private_key"`
+	PrivateKeyType   types.String `tfsdk:"private_key_type"`
 }
 
 func (p *googleEphemeralServiceAccountKey) ConfigValidators(ctx context.Context) []ephemeral.ConfigValidator {
@@ -50,6 +51,10 @@ func (p *googleEphemeralServiceAccountKey) ConfigValidators(ctx context.Context)
 			path.MatchRoot("public_key"),
 			path.MatchRoot("key_algorithm"),
 		),
+		ephemeralvalidator.AtLeastOneOf(
+			path.MatchRoot("service_account_id"),
+			path.MatchRoot("name"),
+		),
 	}
 }
 
@@ -57,9 +62,13 @@ func (p *googleEphemeralServiceAccountKey) Schema(ctx context.Context, req ephem
 	resp.Schema = schema.Schema{
 		Description: "Get an ephemeral service account public key.",
 		Attributes: map[string]schema.Attribute{
+			"service_account_id": schema.StringAttribute{
+				Description: `The ID of the parent service account of the key. This can be a string in the format {ACCOUNT} or projects/{PROJECT_ID}/serviceAccounts/{ACCOUNT}, where {ACCOUNT} is the email address or unique id of the service account. If the {ACCOUNT} syntax is used, the project will be inferred from the provider's configuration.`,
+				Computed:    true,
+			},
 			"name": schema.StringAttribute{
 				Description: "The name of the service account key. This must have format `projects/{PROJECT_ID}/serviceAccounts/{ACCOUNT}/keys/{KEYID}`, where `{ACCOUNT}` is the email address or unique id of the service account.",
-				Required:    true,
+				Computed:    true,
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(verify.ServiceAccountKeyNameRegex),
@@ -144,7 +153,7 @@ func (p *googleEphemeralServiceAccountKey) Open(ctx context.Context, req ephemer
 			KeyAlgorithm:   data.KeyAlgorithm.ValueString(),
 			PrivateKeyType: data.PrivateKeyType.ValueString(),
 		}
-		createdSak, err = p.providerConfig.NewIamClient(p.providerConfig.UserAgent).Projects.ServiceAccounts.Keys.Create(keyName, rc).Do()
+		createdSak, err = p.providerConfig.NewIamClient(p.providerConfig.UserAgent).Projects.ServiceAccounts.Keys.Create(data.ServiceAccountId.ValueString(), rc).Do()
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Error creating service account key",
@@ -153,7 +162,7 @@ func (p *googleEphemeralServiceAccountKey) Open(ctx context.Context, req ephemer
 			return
 		}
 	}
-	getSak, err := p.providerConfig.NewIamClient(p.providerConfig.UserAgent).Projects.ServiceAccounts.Keys.Get(keyName).PublicKeyType(publicKeyType).Do()
+	getSak, err := p.providerConfig.NewIamClient(p.providerConfig.UserAgent).Projects.ServiceAccounts.Keys.Get(data.ServiceAccountId.ValueString()).PublicKeyType(publicKeyType).Do()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error retrieving Service Account Key",
