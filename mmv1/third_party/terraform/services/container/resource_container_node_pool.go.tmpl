@@ -593,7 +593,6 @@ var schemaNodePool = map[string]*schema.Schema{
 					Type:     schema.TypeList,
 					Optional: true,
 					Computed: true,
-					ForceNew: true,
 					MaxItems: 1,
 					Description: `Configuration for node-pool level pod cidr overprovision. If not set, the cluster level setting will be inherited`,
 					Elem: &schema.Resource{
@@ -1813,7 +1812,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 	}
 
 	if d.HasChange(prefix + "network_config") {
-		if d.HasChange(prefix + "network_config.0.enable_private_nodes") || d.HasChange(prefix + "network_config.0.network_performance_config") {
+		if d.HasChange(prefix + "network_config.0.enable_private_nodes") || d.HasChange(prefix + "network_config.0.network_performance_config") || d.HasChange(prefix + "network_config.0.pod_cidr_overprovision_config") {
 			req := &container.UpdateNodePoolRequest{
 				NodePoolId: name,
 				NodeNetworkConfig: expandNodeNetworkConfig(d.Get(prefix + "network_config")),
