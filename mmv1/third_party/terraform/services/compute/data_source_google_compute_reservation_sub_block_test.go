@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package compute_test
 
 import (
@@ -29,7 +27,7 @@ func TestAccDataSourceComputeReservationSubBlock_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(dsFullName, "project"),
 					resource.TestCheckResourceAttrSet(dsFullName, "kind"),
 					resource.TestCheckResourceAttrSet(dsFullName, "self_link"),
-					resource.TestCheckResourceAttrSet(dsFullName, "count"),
+					resource.TestCheckResourceAttrSet(dsFullName, "sub_block_count"),
 					resource.TestCheckResourceAttrSet(dsFullName, "status"),
 				),
 			},

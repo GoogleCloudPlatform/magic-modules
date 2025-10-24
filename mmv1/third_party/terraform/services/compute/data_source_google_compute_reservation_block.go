@@ -60,7 +60,7 @@ func DataSourceGoogleComputeReservationBlock() *schema.Resource {
 				Computed:    true,
 				Description: "Server-defined URL for this resource with the resource id.",
 			},
-			"count": {
+			"block_count": {
 				Type:        schema.TypeInt,
 				Computed:    true,
 				Description: "The number of resources that are allocated in this reservation block.",
@@ -244,7 +244,7 @@ func dataSourceGoogleComputeReservationBlockRead(d *schema.ResourceData, meta in
 		return fmt.Errorf("Error setting self_link_with_id: %s", err)
 	}
 
-	if err := d.Set("count", res["count"]); err != nil {
+	if err := d.Set("block_count", res["count"]); err != nil {
 		return fmt.Errorf("Error setting count: %s", err)
 	}
 
