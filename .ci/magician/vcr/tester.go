@@ -419,19 +419,6 @@ func (vt *Tester) runInParallel(mode Mode, version provider.Version, testDir, te
 	for ev, val := range vt.env {
 		env[ev] = val
 	}
-	var printedEnv string
-	for ev, val := range env {
-		if !safeToLog[ev] {
-			val = "{hidden}"
-		}
-		printedEnv += fmt.Sprintf("%s=%s\n", ev, val)
-	}
-	fmt.Printf(`Running go:
-	env:
-%v
-	args:
-%s
-`, printedEnv, strings.Join(args, " "))
 	output, testErr := vt.rnr.Run("go", args, env)
 	outputs <- output
 	if testErr != nil {

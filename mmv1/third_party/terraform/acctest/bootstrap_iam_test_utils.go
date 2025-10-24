@@ -13,8 +13,6 @@ import (
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
 
-// trigger tests
-
 type IamMember struct {
 	Member, Role string
 }
