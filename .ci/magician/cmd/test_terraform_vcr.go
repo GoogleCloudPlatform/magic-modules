@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -449,16 +450,65 @@ func modifiedPackages(changedFiles []string, version provider.Version) (map[stri
 	return services, runFullVCR
 }
 
+func allSubFolders(root string) (map[string]struct{}, error) {
+	subfolders := make(map[string]struct{})
+	entries, err := os.ReadDir(root)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read directory '%s': %w", root, err)
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			subfolders[entry.Name()] = struct{}{}
+		}
+	}
+	return subfolders, nil
+}
+
 func runReplaying(runFullVCR bool, version provider.Version, services map[string]struct{}, vt *vcr.Tester) (vcr.Result, []string, error) {
 	result := vcr.Result{}
 	var testDirs []string
 	var replayingErr error
 	if runFullVCR {
 		fmt.Println("runReplaying: full VCR tests")
+		// result, replayingErr = vt.Run(vcr.RunOptions{
+		// 	Mode:    vcr.Replaying,
+		// 	Version: version,
+		// })
+
+		// temporary workaround
+		serviceRoot := filepath.Join(vt.GetRepoPath(version), version.ProviderName(), "services")
+		allServies, err := allSubFolders(serviceRoot)
+		if err != nil {
+			return result, testDirs, err
+		}
+
+		var gkePath string
+		var otherPaths []string
+		for service := range allServies {
+			servicePath := "./" + filepath.Join(version.ProviderName(), "services", service)
+			if service == "container" {
+				gkePath = servicePath
+				continue
+			}
+			otherPaths = append(otherPaths, servicePath)
+		}
 		result, replayingErr = vt.Run(vcr.RunOptions{
-			Mode:    vcr.Replaying,
-			Version: version,
+			Mode:     vcr.Replaying,
+			Version:  version,
+			TestDirs: otherPaths,
 		})
+		// run gke replaying tests separately
+		gkeResult, gkeReplayingErr := vt.Run(vcr.RunOptions{
+			Mode:     vcr.Replaying,
+			Version:  version,
+			TestDirs: []string{gkePath},
+		})
+		replayingErr = errors.Join(replayingErr, gkeReplayingErr)
+		result.PassedTests = append(result.PassedTests, gkeResult.PassedTests...)
+		result.SkippedTests = append(result.SkippedTests, gkeResult.SkippedTests...)
+		result.FailedTests = append(result.FailedTests, gkeResult.FailedTests...)
+		result.Panics = append(result.Panics, gkeResult.Panics...)
 	} else if len(services) > 0 {
 		fmt.Printf("runReplaying: %d specific services: %v\n", len(services), services)
 		for service := range services {
@@ -470,9 +520,7 @@ func runReplaying(runFullVCR bool, version provider.Version, services map[string
 				Version:  version,
 				TestDirs: []string{servicePath},
 			})
-			if serviceReplayingErr != nil {
-				replayingErr = serviceReplayingErr
-			}
+			replayingErr = errors.Join(replayingErr, serviceReplayingErr)
 			result.PassedTests = append(result.PassedTests, serviceResult.PassedTests...)
 			result.SkippedTests = append(result.SkippedTests, serviceResult.SkippedTests...)
 			result.FailedTests = append(result.FailedTests, serviceResult.FailedTests...)

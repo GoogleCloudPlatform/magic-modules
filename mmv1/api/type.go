@@ -469,18 +469,35 @@ func (t Type) MetadataLineage() string {
 
 // Returns a dot notation path to where the field is nested within the parent
 // object. eg: parent.meta.label.foo
-// This format is intended for to represent an API type.
-func (t Type) MetadataApiLineage() string {
+// This format converts the API field names directly to snake_case, which can be compared against the MetadataLineage
+// to determine whether to include an explicit Terraform field name.
+func (t Type) MetadataDefaultLineage() string {
 	apiName := t.ApiName
 	if t.ParentMetadata == nil {
 		return google.Underscore(apiName)
 	}
 
 	if t.ParentMetadata.IsA("Array") {
+		return t.ParentMetadata.MetadataDefaultLineage()
+	}
+
+	return fmt.Sprintf("%s.%s", t.ParentMetadata.MetadataDefaultLineage(), google.Underscore(apiName))
+}
+
+// Returns a dot notation path to where the field is nested within the parent
+// object. eg: parent.meta.label.foo
+// This format is intended for to represent an API type.
+func (t Type) MetadataApiLineage() string {
+	apiName := t.ApiName
+	if t.ParentMetadata == nil {
+		return apiName
+	}
+
+	if t.ParentMetadata.IsA("Array") {
 		return t.ParentMetadata.MetadataApiLineage()
 	}
 
-	return fmt.Sprintf("%s.%s", t.ParentMetadata.MetadataApiLineage(), google.Underscore(apiName))
+	return fmt.Sprintf("%s.%s", t.ParentMetadata.MetadataApiLineage(), apiName)
 }
 
 // Returns the lineage in snake case
@@ -531,7 +548,7 @@ func (t *Type) GetPrefix() string {
 		if t.ParentMetadata == nil {
 			nestedPrefix := ""
 			// TODO: Use the nestedPrefix for tgc provider to be consistent with terraform provider
-			if t.ResourceMetadata.NestedQuery != nil && t.ResourceMetadata.Compiler != "terraformgoogleconversion-codegen" {
+			if t.ResourceMetadata.NestedQuery != nil && !strings.Contains(t.ResourceMetadata.Compiler, "terraformgoogleconversion") {
 				nestedPrefix = "Nested"
 			}
 
