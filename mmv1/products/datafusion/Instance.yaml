@@ -91,6 +91,14 @@ examples:
     test_vars_overrides:
       # Mark for testing to avoid service networking connection usage that is not cleaned up
       'prober_test_run': '`options = { prober_test_run = "true" }`'
+  - name: 'data_fusion_instance_enterprise_plus'
+    primary_resource_id: 'enterprise_plus_instance'
+    vars:
+      instance_name: 'my-instance'
+      prober_test_run: ''
+    test_vars_overrides:
+      # Mark for testing to avoid service networking connection usage that is not cleaned up
+      'prober_test_run': '`options = { prober_test_run = "true" }`'
   - name: 'data_fusion_instance_event'
     primary_resource_id: 'event'
     vars:
@@ -133,6 +141,9 @@ properties:
       of concurrent pipelines, no support for streaming pipelines, etc.
       - ENTERPRISE: Enterprise Data Fusion instance. In Enterprise type, the user will have more features
       available, such as support for streaming pipelines, higher number of concurrent pipelines, etc.
+      - ENTERPRISE_PLUS: Enterprise Plus Data Fusion instance. In Enterprise Plus type, the user will
+      have more capacity available than the ENTERPRISE edition. This edition is available for internal
+      use only.
       - DEVELOPER: Developer Data Fusion instance. In Developer type, the user will have all features available but
       with restrictive capabilities. This is to help enterprises design and develop their data ingestion and integration
       pipelines at low cost.
@@ -141,6 +152,7 @@ properties:
     enum_values:
       - 'BASIC'
       - 'ENTERPRISE'
+      - 'ENTERPRISE_PLUS'
       - 'DEVELOPER'
   - name: 'enableStackdriverLogging'
     type: Boolean
@@ -213,7 +225,7 @@ properties:
     type: String
     description: |
       Service account which will be used to access resources in the customer project.
- # This field is deprecated and needs to be absent in GA provider.
+    # This field is deprecated and needs to be absent in GA provider.
     min_version: 'beta'
     output: true
     deprecation_message: '`service_account` is deprecated and will be removed in a future major release. Instead, use `tenant_project_id` to extract the tenant project ID.'
