@@ -220,6 +220,8 @@ type Resource struct {
 	// corresponding OiCS walkthroughs.
 	Examples []resource.Examples
 
+	Samples []resource.Sample
+
 	// If true, generates product operation handling logic.
 	AutogenAsync bool `yaml:"autogen_async,omitempty"`
 
@@ -395,6 +397,11 @@ type TGCResource struct {
 	CaiIdentity string `yaml:"cai_identity,omitempty"`
 }
 
+type TestConfig struct {
+	Sample resource.Sample
+	Step   resource.Step
+}
+
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
 	type resourceAlias Resource
 	aliasObj := (*resourceAlias)(r)
@@ -520,6 +527,10 @@ func (r *Resource) Validate() {
 
 	for _, example := range r.Examples {
 		example.Validate(r.Name)
+	}
+
+	for _, sample := range r.Samples {
+		sample.Validate(r.Name)
 	}
 
 	if r.Async != nil {
@@ -1319,6 +1330,33 @@ func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
 	return ""
 }
 
+// IgnoreReadProperties returns a sorted slice of property names (snake_case) that should be ignored when reading.
+// This is useful for downstream code that needs to iterate over these properties.
+func (r Resource) IgnoreReadPropertiesStep(s resource.Step) []string {
+	var props []string
+	for _, tp := range r.AllUserProperties() {
+		if tp.UrlParamOnly || tp.IsA("ResourceRef") {
+			props = append(props, google.Underscore(tp.Name))
+		}
+	}
+	props = append(props, s.IgnoreReadExtra...)
+	props = append(props, r.IgnoreReadLabelsFields(r.PropertiesWithExcluded())...)
+	props = append(props, ignoreReadFields(r.AllUserProperties())...)
+
+	slices.Sort(props)
+	return props
+}
+
+// IgnoreReadPropertiesToString returns the ignore read properties as a Go-syntax string slice.
+// This is a wrapper around IgnoreReadProperties for backwards compatibility.
+func (r Resource) IgnoreReadPropertiesStepToString(s resource.Step) string {
+	props := r.IgnoreReadPropertiesStep(s)
+	if len(props) > 0 {
+		return fmt.Sprintf("[]string{%s}", strings.Join(quoteStrings(props), ", "))
+	}
+	return ""
+}
+
 // quoteStrings returns a new slice with each string quoted.
 func quoteStrings(strs []string) []string {
 	quoted := make([]string, len(strs))
@@ -1606,6 +1644,36 @@ func (r Resource) FirstTestExample() resource.Examples {
 	return examples[0]
 }
 
+// Since most resources define a "basic" config as their first sample,
+// we can reuse that config to create a resource to test IAM resources with.
+func (r Resource) FirstTestSample() resource.Sample {
+	samples := google.Reject(r.Samples, func(s resource.Sample) bool {
+		return s.ExcludeTest
+	})
+	samples = google.Reject(samples, func(s resource.Sample) bool {
+		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(s.MinVersion)) < 0)
+	})
+
+	return samples[0]
+}
+
+func (r Resource) FirstTestConfig() TestConfig {
+	for _, sample := range r.Samples {
+		if sample.ExcludeTest || (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0) {
+			continue
+		}
+		for _, step := range sample.Steps {
+			if r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
+				return TestConfig{
+					Sample: sample,
+					Step:   step,
+				}
+			}
+		}
+	}
+	return TestConfig{}
+}
+
 func (r Resource) ExamplePrimaryResourceId() string {
 	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
 		return e.ExcludeTest
@@ -1620,6 +1688,22 @@ func (r Resource) ExamplePrimaryResourceId() string {
 		})
 	}
 	return examples[0].PrimaryResourceId
+}
+
+func (r Resource) SamplePrimaryResourceId() string {
+	samples := google.Reject(r.Samples, func(s resource.Sample) bool {
+		return s.ExcludeTest
+	})
+	samples = google.Reject(samples, func(s resource.Sample) bool {
+		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(s.MinVersion)) < 0)
+	})
+
+	if len(samples) == 0 {
+		samples = google.Reject(r.Samples, func(s resource.Sample) bool {
+			return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(s.MinVersion)) < 0)
+		})
+	}
+	return samples[0].PrimaryResourceId
 }
 
 func (r Resource) IamParentSourceType() string {
@@ -1676,6 +1760,52 @@ func (r Resource) IamImportQualifiersForTest() string {
 				importQualifiers = append(importQualifiers, "envvar.GetTestRegionFromEnv()")
 			} else {
 				importQualifiers = append(importQualifiers, fmt.Sprintf("\"%s\"", example.RegionOverride))
+			}
+		} else if param == "universe_domain" {
+			importQualifiers = append(importQualifiers, "envvar.GetTestUniverseDomainFromEnv()")
+		} else {
+			break
+		}
+	}
+
+	if len(importQualifiers) == 0 {
+		return ""
+	}
+
+	return strings.Join(importQualifiers, ", ")
+}
+
+func (r Resource) IamImportQualifiersForTestSample() string {
+	var importFormat string
+	if len(r.IamPolicy.ImportFormat) > 0 {
+		importFormat = r.IamPolicy.ImportFormat[0]
+	} else {
+		importFormat = r.IamPolicy.SelfLink
+		if importFormat == "" {
+			importFormat = r.SelfLinkUrl()
+		}
+	}
+
+	params := r.ExtractIdentifiers(importFormat)
+	var importQualifiers []string
+	for i, param := range params {
+		if param == "project" {
+			if i != len(params)-1 {
+				// If the last parameter is project then we want to create a new project to use for the test, so don't default from the environment
+				if r.IamPolicy.TestProjectName == "" {
+					importQualifiers = append(importQualifiers, "envvar.GetTestProjectFromEnv()")
+				} else {
+					importQualifiers = append(importQualifiers, `context["project_id"]`)
+				}
+			}
+		} else if param == "zone" && r.IamPolicy.SubstituteZoneValue {
+			importQualifiers = append(importQualifiers, "envvar.GetTestZoneFromEnv()")
+		} else if param == "region" || param == "location" {
+			sample := r.FirstTestSample()
+			if sample.RegionOverride == "" {
+				importQualifiers = append(importQualifiers, "envvar.GetTestRegionFromEnv()")
+			} else {
+				importQualifiers = append(importQualifiers, fmt.Sprintf("\"%s\"", sample.RegionOverride))
 			}
 		} else if param == "universe_domain" {
 			importQualifiers = append(importQualifiers, "envvar.GetTestUniverseDomainFromEnv()")
@@ -1922,6 +2052,43 @@ func (r Resource) TestExamples() []resource.Examples {
 	}), func(e resource.Examples) bool {
 		return e.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, e.MinVersion)
 	})
+}
+
+func (r Resource) TestSamples() []resource.Sample {
+	return google.Reject(google.Reject(r.Samples, func(s resource.Sample) bool {
+		return s.ExcludeTest
+	}), func(s resource.Sample) bool {
+		return s.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, s.MinVersion)
+	})
+}
+
+func (r Resource) TestSampleSetUp() {
+
+	res := make(map[string]string)
+	for i := range r.Samples {
+		sample := &r.Samples[i]
+		sample.TargetVersionName = r.TargetVersionName
+		if sample.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, sample.MinVersion) {
+			continue
+		}
+		for j := range sample.Steps {
+			step := &sample.Steps[j]
+			if step.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, step.MinVersion) {
+				continue
+			}
+			step.PrimaryResourceId = sample.PrimaryResourceId
+			step.ProductName = r.ProductMetadata.Name
+			if step.ConfigPath == "" {
+				step.ConfigPath = fmt.Sprintf("templates/terraform/samples/services/%s/%s.tf.tmpl", step.ProductName, step.Name)
+			}
+			step.SetHCLText()
+			configName := step.Name
+			if _, ok := res[step.Name]; !ok {
+				res[configName] = sample.Name
+				sample.NewConfigFuncs = append(sample.NewConfigFuncs, *step)
+			}
+		}
+	}
 }
 
 func (r Resource) VersionedProvider(exampleVersion string) bool {
@@ -2302,6 +2469,34 @@ func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string
 		}
 	}
 	props = append(props, e.TGCTestIgnoreExtra...)
+
+	slices.Sort(props)
+	return props
+}
+
+// TODO: rename to TGCTestIgnorePropertiesToStrings after examples are removed
+// TGC Methods
+// ====================
+// Lists fields that test.BidirectionalConversion should ignore
+func (r Resource) TGCTestIgnorePropertiesToStringsSamples(s resource.Sample) []string {
+	props := []string{
+		"depends_on",
+		"count",
+		"for_each",
+		"provider",
+		"lifecycle",
+	}
+	for _, tp := range r.VirtualFields {
+		props = append(props, google.Underscore(tp.Name))
+	}
+	for _, tp := range r.AllNestedProperties(r.RootProperties()) {
+		if tp.UrlParamOnly {
+			props = append(props, google.Underscore(tp.Name))
+		} else if tp.IsMissingInCai {
+			props = append(props, tp.MetadataLineage())
+		}
+	}
+	props = append(props, s.TGCTestIgnoreExtra...)
 
 	slices.Sort(props)
 	return props
