@@ -393,6 +393,10 @@ type TGCResource struct {
 	// Generally, it shouldn't be set when the identity can be decided.
 	// Otherswise, it should be set.
 	CaiIdentity string `yaml:"cai_identity,omitempty"`
+
+	// Tests for TGC, will automatically be filled with resource's examples
+	// and handwritten tests. Can be specified in order to skip specific tests.
+	TGCTests []resource.TGCTest `yaml:"tgc_tests,omitempty"`
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
@@ -2281,7 +2285,7 @@ func (r Resource) MarkdownHeader(templatePath string) string {
 // TGC Methods
 // ====================
 // Lists fields that test.BidirectionalConversion should ignore
-func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string {
+func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 	props := []string{
 		"depends_on",
 		"count",
@@ -2301,7 +2305,6 @@ func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string
 			props = append(props, tp.MetadataLineage())
 		}
 	}
-	props = append(props, e.TGCTestIgnoreExtra...)
 
 	slices.Sort(props)
 	return props
