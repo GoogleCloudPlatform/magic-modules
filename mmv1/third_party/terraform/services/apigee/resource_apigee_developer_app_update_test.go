@@ -31,8 +31,8 @@ func TestAccApigeeDeveloperApp_apigeeDeveloperAppUpdateTest(t *testing.T) {
 			{
 				Config: testAccApigeeDeveloperApp_apigeeDeveloperAppBasicTest(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(resourceName, "credentials.*", "consumerKey"),
-					resource.TestCheckResourceAttrSet(resourceName, "credentials.*", "consumerSecret"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "credentials.*", "consumerKey"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "credentials.*", "consumerSecret"),
 				),
 			},
 			{
@@ -44,8 +44,8 @@ func TestAccApigeeDeveloperApp_apigeeDeveloperAppUpdateTest(t *testing.T) {
 			{
 				Config: testAccApigeeDeveloperApp_apigeeDeveloperAppUpdateTest(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(resourceName, "credentials.*", "consumerKey"),
-					resource.TestCheckResourceAttrSet(resourceName, "credentials.*", "consumerSecret"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "credentials.*", "consumerKey"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "credentials.*", "consumerSecret"),
 				),
 			},
 			{
