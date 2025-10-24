@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
+	"google.golang.org/api/iam/v1"
 )
 
 var _ ephemeral.EphemeralResource = &googleEphemeralServiceAccountKey{}
@@ -107,11 +108,13 @@ func (p *googleEphemeralServiceAccountKey) Configure(ctx context.Context, req ep
 
 func (p *googleEphemeralServiceAccountKey) Open(ctx context.Context, req ephemeral.OpenRequest, resp *ephemeral.OpenResponse) {
 	var data ephemeralServiceAccountKeyModel
-
+	var err error
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	keyName := data.Name.ValueString()
-
 	// Validate name
 	r := regexp.MustCompile(verify.ServiceAccountKeyNameRegex)
 	if !r.MatchString(keyName) {
@@ -126,19 +129,39 @@ func (p *googleEphemeralServiceAccountKey) Open(ctx context.Context, req ephemer
 	if publicKeyType == "" {
 		publicKeyType = "TYPE_X509_PEM_FILE"
 	}
-
-	sak, err := p.providerConfig.NewIamClient(p.providerConfig.UserAgent).Projects.ServiceAccounts.Keys.Get(keyName).PublicKeyType(publicKeyType).Do()
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error retrieving Service Account Key",
-			fmt.Sprintf("Error retrieving Service Account Key %q: %s", keyName, err),
-		)
-		return
+	var sak *iam.ServiceAccountKey
+	if data.PublicKey.ValueString() != "" {
+		ru := &iam.UploadServiceAccountKeyRequest{
+			PublicKeyData: data.PublicKey.ValueString(),
+		}
+		sak, err = p.providerConfig.NewIamClient(p.providerConfig.UserAgent).Projects.ServiceAccounts.Keys.Upload(keyName, ru).Do()
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Error creating service account key",
+				fmt.Sprintf("Error creating service account key: %s", err),
+			)
+			return
+		}
+	} else {
+		rc := &iam.CreateServiceAccountKeyRequest{
+			KeyAlgorithm:   data.KeyAlgorithm.ValueString(),
+			PrivateKeyType: data.PrivateKeyType.ValueString(),
+		}
+		sak, err = p.providerConfig.NewIamClient(p.providerConfig.UserAgent).Projects.ServiceAccounts.Keys.Create(keyName, rc).Do()
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Error creating service account key",
+				fmt.Sprintf("Error creating service account key: %s", err),
+			)
+			return
+		}
 	}
 
 	data.Name = types.StringValue(sak.Name)
 	data.KeyAlgorithm = types.StringValue(sak.KeyAlgorithm)
 	data.PublicKey = types.StringValue(sak.PublicKeyData)
+	data.PrivateKey = types.StringValue(sak.PrivateKeyData)
+	data.PrivateKeyType = types.StringValue(sak.PrivateKeyType)
 
 	resp.Diagnostics.Append(resp.Result.Set(ctx, &data)...)
 }
