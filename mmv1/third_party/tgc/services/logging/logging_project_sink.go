@@ -8,11 +8,11 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
-const logProjectSinkAssetType string = "logging.googleapis.com/LogSink"
+const logSinkAssetType string = "logging.googleapis.com/LogSink"
 
 func ResourceConverterLogProjectSink() cai.ResourceConverter {
 	return cai.ResourceConverter{
-		AssetType: logProjectSinkAssetType,
+		AssetType: logSinkAssetType,
 		Convert:   GetLogProjectSinkCaiObject,
 	}
 }
@@ -28,7 +28,7 @@ func GetLogProjectSinkCaiObject(d tpgresource.TerraformResourceData, config *tra
 	}
 	return []cai.Asset{{
 		Name: name,
-		Type: logProjectSinkAssetType,
+		Type: logSinkAssetType,
 		Resource: &cai.AssetResource{
 			Version:              "v2",
 			DiscoveryDocumentURI: "https://logging.googleapis.com/$discovery/rest?version=v2",

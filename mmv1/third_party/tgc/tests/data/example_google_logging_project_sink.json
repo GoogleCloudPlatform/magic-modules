@@ -4,7 +4,7 @@
   "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
   "resource": {
     "version": "v2",
-    "discovery_document_uri": "https://logging.googleapis.com/$discovery/rest?version=v2",
+    "discovery_document_uri": "https://logging.googleapis.com/$discovery/rest",
     "discovery_name": "LogSink",
     "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
     "data": {
