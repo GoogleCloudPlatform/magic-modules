@@ -94,15 +94,15 @@ properties:
         - name: lastTransitionTime
           type: String
           description: Last time the condition transited from one status to another.
-          required: true
+          output: true
         - name: message
           type: String
           description: Human readable message indicating details about the last transition.
-          required: true
+          output: true
         - name: reason
           type: String
           description: Brief reason for the condition's last transition.
-          required: true
+          output: true
         - name: status
           type: String
           description: |-
@@ -111,7 +111,7 @@ properties:
             STATUS_UNKNOWN
             STATUS_TRUE
             STATUS_FALSE
-          required: true
+          output: true
         - name: type
           type: String
           description: |-
@@ -121,7 +121,7 @@ properties:
             TYPE_RUNNING
             TYPE_SUCCEEDED
             TYPE_CANCELLED
-          required: true
+          output: true
   - name: createTime
     type: String
     description: The timestamp when the resource was created.
