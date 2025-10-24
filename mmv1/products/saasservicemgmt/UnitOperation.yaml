@@ -18,6 +18,7 @@ base_url: projects/{{project}}/locations/{{location}}/unitOperations
 self_link: projects/{{project}}/locations/{{location}}/unitOperations/{{unit_operation_id}}
 create_url: projects/{{project}}/locations/{{location}}/unitOperations?unitOperationId={{unit_operation_id}}
 id_format: projects/{{project}}/locations/{{location}}/unitOperations/{{unit_operation_id}}
+immutable: true
 import_format:
   - projects/{{project}}/locations/{{location}}/unitOperations/{{unit_operation_id}}
 examples:
