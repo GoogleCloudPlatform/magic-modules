@@ -64,7 +64,7 @@ resource "google_project_iam_member" "tenant_editor" {
 
 resource "google_service_account_iam_member" "actuation_token_creator" {
   provider           = google-beta
-  service_account_id = google_service_account.actuation_service_account.email
+  service_account_id = "projects/{{index $.TestEnvVars "project_id"}}/serviceAccounts/${google_service_account.actuation_service_account.email}"
   role               = "roles/iam.serviceAccountTokenCreator"
   member             = "serviceAccount:service-{{index $.TestEnvVars "project_number"}}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com"
 }
