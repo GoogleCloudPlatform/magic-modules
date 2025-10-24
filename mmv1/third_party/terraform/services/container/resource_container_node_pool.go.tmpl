@@ -159,14 +159,21 @@ func (instanceGroupManagerCache *instanceGroupManagerCache) needsRefresh(fullyQu
 	return time.Since(igm.updateTime) > instanceGroupManagerCache.ttl
 }
 
+func getCacheTTL() time.Duration {
+	if os.Getenv("VCR_PATH") != "" && os.Getenv("VCR_MODE") != "" {
+		return 0 * time.Second
+	}
+	return 30 * time.Second
+}
+
 var (
 	npCache = &nodePoolCache{
 		nodePools: make(map[string]*nodePoolWithUpdateTime),
-		ttl:       30 * time.Second,
+		ttl:       getCacheTTL(),
 	}
 	igmCache = &instanceGroupManagerCache{
 		instanceGroupManagers: make(map[string]*instanceGroupManagerWithUpdateTime),
-		ttl:                   30 * time.Second,
+		ttl:                   getCacheTTL(),
 	}
 )
 {{- end }}
