@@ -1,5 +1,4 @@
 package compute_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -94,4 +93,3 @@ resource "google_compute_organization_security_policy" "policy" {
 }
 `, context)
 }
-{{- end }}
