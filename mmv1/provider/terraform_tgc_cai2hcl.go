@@ -53,7 +53,7 @@ func NewCaiToTerraformConversion(product *api.Product, versionName string, start
 	return t
 }
 
-func (cai2hcl CaiToTerraformConversion) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
+func (cai2hcl CaiToTerraformConversion) Generate(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 }
 
 func (cai2hcl CaiToTerraformConversion) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {

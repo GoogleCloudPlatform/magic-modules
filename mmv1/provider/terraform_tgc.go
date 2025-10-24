@@ -69,7 +69,7 @@ func NewTerraformGoogleConversion(product *api.Product, versionName string, star
 	return t
 }
 
-func (tgc TerraformGoogleConversion) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
+func (tgc TerraformGoogleConversion) Generate(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 	// Temporary shim to generate the missing resources directory. Can be removed
 	// once the folder exists downstream.
 	resourcesFolder := path.Join(outputFolder, "converters/google/resources")
