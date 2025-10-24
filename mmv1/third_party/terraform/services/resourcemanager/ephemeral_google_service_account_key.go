@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/ephemeralvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral/schema"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -36,6 +38,19 @@ type ephemeralServiceAccountKeyModel struct {
 	PublicKey      types.String `tfsdk:"public_key"`
 	PrivateKey     types.String `tfsdk:"private_key"`
 	PrivateKeyType types.String `tfsdk:"private_key_type"`
+}
+
+func (p *googleEphemeralServiceAccountKey) ConfigValidators(ctx context.Context) []ephemeral.ConfigValidator {
+	return []ephemeral.ConfigValidator{
+		ephemeralvalidator.Conflicting(
+			path.MatchRoot("public_key"),
+			path.MatchRoot("private_key_type"),
+		),
+		ephemeralvalidator.Conflicting(
+			path.MatchRoot("public_key"),
+			path.MatchRoot("key_algorithm"),
+		),
+	}
 }
 
 func (p *googleEphemeralServiceAccountKey) Schema(ctx context.Context, req ephemeral.SchemaRequest, resp *ephemeral.SchemaResponse) {
