@@ -144,4 +144,21 @@ func (p *googleEphemeralServiceAccountKey) Open(ctx context.Context, req ephemer
 }
 
 func (p *googleEphemeralServiceAccountKey) Close(ctx context.Context, req ephemeral.CloseRequest, resp *ephemeral.CloseResponse) {
+	serviceAccountKeyName, err := req.Private.GetKey(ctx, "name")
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error getting private key",
+			fmt.Sprintf("Error getting private key: %s", err),
+		)
+		return
+	}
+
+	deletion, _ := p.providerConfig.NewIamClient(p.providerConfig.UserAgent).Projects.ServiceAccounts.Keys.Get(serviceAccountKeyName).Delete().Do()
+	if deletion != nil {
+		resp.Diagnostics.AddError(
+			"Error deleting Service Account Key",
+			fmt.Sprintf("Error deleting Service Account Key %q: %s", serviceAccountKeyName, deletion.Error()),
+		)
+		return
+	}
 }
