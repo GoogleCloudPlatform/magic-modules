@@ -493,11 +493,12 @@ func runReplaying(runFullVCR bool, version provider.Version, services map[string
 			}
 			otherPaths = append(otherPaths, servicePath)
 		}
-		result, replayingErr = vt.Run(vcr.RunOptions{
-			Mode:     vcr.Replaying,
-			Version:  version,
-			TestDirs: otherPaths,
-		})
+		fmt.Println(otherPaths)
+		// result, replayingErr = vt.Run(vcr.RunOptions{
+		// 	Mode:     vcr.Replaying,
+		// 	Version:  version,
+		// 	TestDirs: otherPaths,
+		// })
 		// run gke replaying tests separately
 		gkeResult, gkeReplayingErr := vt.Run(vcr.RunOptions{
 			Mode:     vcr.Replaying,
