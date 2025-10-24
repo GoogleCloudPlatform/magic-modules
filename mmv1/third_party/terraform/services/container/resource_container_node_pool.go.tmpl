@@ -3,6 +3,7 @@ package container
 import (
 {{- if ne $.TargetVersionName `ga` }}
     "context"
+    "os"
 {{- end }}
 	"fmt"
 	"log"
