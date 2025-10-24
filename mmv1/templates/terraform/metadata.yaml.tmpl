@@ -28,3 +28,6 @@ fields:
     {{- end }}
   {{- end}}
 {{- end }}
+{{- if $.HasSelfLink }}
+  - api_field: 'selfLink'
+{{- end }}
