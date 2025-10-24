@@ -140,10 +140,6 @@ func (vt *Tester) SetRepoPath(version provider.Version, repoPath string) {
 	vt.repoPaths[version] = repoPath
 }
 
-func (vt *Tester) GetRepoPath(version provider.Version) string {
-	return vt.repoPaths[version]
-}
-
 // Fetch the cassettes for the current version if not already fetched.
 // Should be run from the base dir.
 func (vt *Tester) FetchCassettes(version provider.Version, baseBranch, head string) error {
@@ -423,6 +419,19 @@ func (vt *Tester) runInParallel(mode Mode, version provider.Version, testDir, te
 	for ev, val := range vt.env {
 		env[ev] = val
 	}
+	var printedEnv string
+	for ev, val := range env {
+		if !safeToLog[ev] {
+			val = "{hidden}"
+		}
+		printedEnv += fmt.Sprintf("%s=%s\n", ev, val)
+	}
+	fmt.Printf(`Running go:
+	env:
+%v
+	args:
+%s
+`, printedEnv, strings.Join(args, " "))
 	output, testErr := vt.rnr.Run("go", args, env)
 	outputs <- output
 	if testErr != nil {
