@@ -35,8 +35,6 @@ type ephemeralServiceAccountKeyModel struct {
 	PublicKey      types.String `tfsdk:"public_key"`
 	PrivateKey     types.String `tfsdk:"private_key"`
 	PrivateKeyType types.String `tfsdk:"private_key_type"`
-	ValidAfter     types.String `tfsdk:"valid_after"`
-	ValidBefore    types.String `tfsdk:"valid_before"`
 }
 
 func (p *googleEphemeralServiceAccountKey) Schema(ctx context.Context, req ephemeral.SchemaRequest, resp *ephemeral.SchemaResponse) {
@@ -143,9 +141,6 @@ func (p *googleEphemeralServiceAccountKey) Open(ctx context.Context, req ephemer
 	data.PublicKey = types.StringValue(sak.PublicKeyData)
 
 	resp.Diagnostics.Append(resp.Result.Set(ctx, &data)...)
-}
-
-func (p *googleEphemeralServiceAccountKey) Renew(ctx context.Context, req ephemeral.RenewRequest, resp *ephemeral.RenewResponse) {
 }
 
 func (p *googleEphemeralServiceAccountKey) Close(ctx context.Context, req ephemeral.CloseRequest, resp *ephemeral.CloseResponse) {
