@@ -115,14 +115,7 @@ func (e *GoogleClientConfigEphemeralResource) Open(ctx context.Context, req ephe
 	data.Region = types.StringValue(e.providerConfig.Region)
 	data.Zone = types.StringValue(e.providerConfig.Zone)
 
-	// Convert default labels from SDK type system to plugin-framework data type
-	m := map[string]*string{}
-	for k, v := range e.providerConfig.DefaultLabels {
-		// m[k] = types.StringValue(v)
-		val := v
-		m[k] = &val
-	}
-	dls, diags := types.MapValueFrom(ctx, types.StringType, m)
+	dls, diags := types.MapValueFrom(ctx, types.StringType, e.providerConfig.DefaultLabels)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
