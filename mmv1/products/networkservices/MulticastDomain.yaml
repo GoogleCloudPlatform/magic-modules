@@ -89,13 +89,13 @@ properties:
           NCC
           SAME_VPC
         required: true
-  - name: nccHub
-    type: String
-    description: |-
-      The resource name of the
-      [NCC](https://cloud.google.com/network-connectivity-center) hub.
-      Use the following format:
-      `projects/{project}/locations/global/hubs/{hub}`.
+      - name: nccHub
+        type: String
+        description: |-
+          The resource name of the
+          [NCC](https://cloud.google.com/network-connectivity-center) hub.
+          Use the following format:
+          `projects/{project}/locations/global/hubs/{hub}`.
   - name: createTime
     type: String
     description: '[Output only] The timestamp when the multicast domain was created.'
