@@ -29,6 +29,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/otiai10/copy"
 )
@@ -103,6 +104,7 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 
 	if !object.IsExcluded() {
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
+		tgc.addTestsFromExamples(&object)
 		tgc.GenerateResourceTests(object, *templateData, outputFolder)
 	}
 }
@@ -130,16 +132,7 @@ func (tgc TerraformGoogleConversionNext) GenerateCaiToHclObjects(outputFolder, r
 }
 
 func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
-	eligibleExample := false
-	for _, example := range object.Examples {
-		if !example.ExcludeTest {
-			if object.ProductMetadata.VersionObjOrClosest(tgc.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
-				eligibleExample = true
-				break
-			}
-		}
-	}
-	if !eligibleExample {
+	if len(object.TGCTests) == 0 {
 		return
 	}
 
@@ -311,6 +304,21 @@ func (tgc TerraformGoogleConversionNext) replaceImportPath(outputFolder, target 
 	err = os.WriteFile(targetFile, sourceByte, 0644)
 	if err != nil {
 		log.Fatalf("Cannot write file %s to replace import path: %s", target, err)
+	}
+}
+
+func (tgc TerraformGoogleConversionNext) addTestsFromExamples(object *api.Resource) {
+	for _, example := range object.Examples {
+		if example.ExcludeTest {
+			continue
+		}
+		if object.ProductMetadata.VersionObjOrClosest(tgc.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) < 0 {
+			continue
+		}
+		object.TGCTests = append(object.TGCTests, resource.TGCTest{
+			Name: "TestAcc" + example.TestSlug(object.ProductMetadata.Name, object.Name),
+			Skip: example.TGCSkipTest,
+		})
 	}
 }
 
