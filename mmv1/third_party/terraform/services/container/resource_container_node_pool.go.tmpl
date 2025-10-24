@@ -160,6 +160,9 @@ func (instanceGroupManagerCache *instanceGroupManagerCache) needsRefresh(fullyQu
 	return time.Since(igm.updateTime) > instanceGroupManagerCache.ttl
 }
 
+// We need to set ttl to 0 to disable caching in VCR testing.
+// This ensure all NP/MIG LIST requests are made consistently,
+// preventing non-deterministic behavior that would break VCR.
 func getCacheTTL() time.Duration {
 	if os.Getenv("VCR_PATH") != "" && os.Getenv("VCR_MODE") != "" {
 		return 0 * time.Second
