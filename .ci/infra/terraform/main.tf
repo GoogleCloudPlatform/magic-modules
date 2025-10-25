@@ -248,6 +248,7 @@ module "project-services" {
     "cloudquotas.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "cloudscheduler.googleapis.com",
+    "cloudsecuritycompliance.googleapis.com",
     "cloudtasks.googleapis.com",
     "cloudtrace.googleapis.com",
     "composer.googleapis.com",

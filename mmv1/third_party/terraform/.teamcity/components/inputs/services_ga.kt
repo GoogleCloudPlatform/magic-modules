@@ -221,6 +221,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Cloudscheduler",
         "path" to "./google/services/cloudscheduler"
     ),
+    "cloudsecuritycompliace" to mapOf(
+        "name" to "cloudsecuritycompliace",
+        "displayName" to "Cloudsecuritycompliace",
+        "path" to "./google/services/cloudsecuritycompliace"
+    ),
     "cloudtasks" to mapOf(
         "name" to "cloudtasks",
         "displayName" to "Cloudtasks",
