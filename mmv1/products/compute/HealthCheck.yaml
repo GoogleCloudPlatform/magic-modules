@@ -111,13 +111,11 @@ examples:
       health_check_name: 'grpc-health-check'
   - name: 'health_check_grpc_with_tls'
     primary_resource_id: 'grpc-with-tls-health-check'
-    min_version: 'beta'
     vars:
       health_check_name: 'grpc-with-tls-health-check'
     tgc_skip_test: 'grpcTlsHealthCheck is not in CAI asset, but is required in this test.'
   - name: 'health_check_grpc_with_tls_full'
     primary_resource_id: 'grpc-with-tls-health-check'
-    min_version: 'beta'
     vars:
       health_check_name: 'grpc-with-tls-health-check'
     tgc_skip_test: 'grpcTlsHealthCheck is not in CAI asset, but is required in this test.'
@@ -888,7 +886,6 @@ properties:
           - 'grpc_health_check.0.port_specification'
           - 'grpc_health_check.0.grpc_service_name'
   - name: 'grpcTlsHealthCheck'
-    min_version: beta
     type: NestedObject
     exactly_one_of:
       - 'http_health_check'
