@@ -22,7 +22,6 @@ references:
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/publicDelegatedPrefixes'
 has_self_link: true
-immutable: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -161,10 +160,12 @@ properties:
           type: String
           description: |
             The name of the sub public delegated prefix.
+          immutable: true
         - name: 'description'
           type: String
           description: |
             An optional description of this sub public delegated prefix.
+          immutable: true
         - name: 'region'
           type: String
           description: |
@@ -186,10 +187,12 @@ properties:
           description: |
             The IP address range in the CIDR format represented by this
             sub prefix.
+          immutable: true
         - name: 'isAddress'
           type: Boolean
           description: |
             Whether the sub prefix is delegated for address creation.
+          immutable: true
         - name: 'mode'
           type: Enum
           description: |
@@ -198,12 +201,15 @@ properties:
             - 'DELEGATION'
             - 'EXTERNAL_IPV6_FORWARDING_RULE_CREATION'
             - 'EXTERNAL_IPV6_SUBNETWORK_CREATION'
+          immutable: true
         - name: 'allocatablePrefixLength'
           type: Integer
           description: |
             The allocatable prefix length supported by this
             PublicDelegatedSubPrefix.
+          immutable: true
         - name: 'delegatee_project'
           type: String
           description: |
             Name of the project scoping this PublicDelegatedSubPrefix.
+          immutable: true
