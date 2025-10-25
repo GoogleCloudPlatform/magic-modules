@@ -1,0 +1,143 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: AssessmentRule
+description: Description
+base_url: projects/{{project}}/locations/{{location}}/assessmentRules
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/assessmentRules/{{assessment_rule_id}}
+create_url: projects/{{project}}/locations/{{location}}/assessmentRules?assessmentRuleId={{assessment_rule_id}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/assessmentRules/{{assessment_rule_id}}
+import_format:
+- projects/{{project}}/locations/{{location}}/assessmentRules/{{assessment_rule_id}}
+examples:
+- name: name_of_example_file
+  primary_resource_id: example
+  vars:
+    resource_name: test-resource
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: '{{op_id}}'
+  actions:
+  - create
+  - delete
+  - update
+  type: OpAsync
+  result:
+    resource_inside_response: true
+  include_project: false
+autogen_status: QXNzZXNzbWVudFJ1bGU=
+parameters:
+- name: location
+  type: String
+  description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+  immutable: true
+  url_param_only: true
+  required: true
+- name: assessmentRuleId
+  type: String
+  description: |-
+    A unique ID for the new AssessmentRule. This ID will become the final
+    component of the AssessmentRule's resource name. If no ID is specified,
+    a server-generated ID will be used.
+
+    This value should be 4-64 characters and must match the regular
+    expression `^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$`.
+  immutable: true
+  url_param_only: true
+  required: true
+properties:
+- name: active
+  type: Boolean
+  description: |-
+    If true, apply this rule to conversations. Otherwise, this rule is
+    inactive.
+- name: createTime
+  type: String
+  description: The time at which this assessment rule was created.
+  output: true
+- name: displayName
+  type: String
+  description: Display Name of the assessment rule.
+- name: name
+  type: String
+  description: |-
+    Identifier. The resource name of the assessment rule.
+    Format:
+    projects/{project}/locations/{location}/assessmentRules/{assessment_rule}
+  output: true
+- name: sampleRule
+  type: NestedObject
+  description: Message for sampling conversations.
+  properties:
+  - name: conversationFilter
+    type: String
+    description: |-
+      To specify the filter for the conversions that should apply this sample
+      rule. An empty filter means this sample rule applies to all conversations.
+  - name: dimension
+    type: String
+    description: |-
+      Group by dimension to sample the conversation. If no dimension is
+      provided, the sampling will be applied to the project level.
+      Current supported dimensions is 'quality_metadata.agent_info.agent_id'.
+  - name: samplePercentage
+    type: Double
+    description: |-
+      Percentage of conversations that we should sample  based on the dimension
+      between [0, 100].
+  - name: sampleRow
+    type: String
+    description: Number of the conversations that we should sample based on the dimension.
+- name: scheduleInfo
+  type: NestedObject
+  description: Message for schedule info.
+  properties:
+  - name: endTime
+    type: String
+    description: |-
+      End time of the schedule. If not specified, will keep scheduling new
+      pipelines for execution util the schedule is no longer active or deleted.
+  - name: schedule
+    type: String
+    description: |-
+      The groc expression.
+      Format: `every number [synchronized]`
+      Time units can be: minutes, hours
+      Synchronized is optional and indicates that the schedule should be
+      synchronized to the start of the interval: every 5 minutes synchronized
+      means 00:00, 00:05 ...
+      Otherwise the start time is random within the interval.
+      Example: `every 5 minutes`
+      could be  00:02, 00:07, 00:12, ...
+  - name: startTime
+    type: String
+    description: |-
+      Start time of the schedule. If not specified, will start as soon as the
+      schedule is created.
+  - name: timeZone
+    type: String
+    description: |-
+      The timezone to use for the groc expression.
+      If not specified, defaults to UTC.
+- name: updateTime
+  type: String
+  description: The most recent time at which this assessment rule was updated.
+  output: true
