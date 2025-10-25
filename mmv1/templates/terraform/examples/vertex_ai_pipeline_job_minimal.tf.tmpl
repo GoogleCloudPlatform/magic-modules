@@ -1,0 +1,22 @@
+resource "google_vertex_ai_pipeline_job" "{{$.PrimaryResourceId}}" {
+  display_name = "{{index $.Vars "display_name"}}"
+  provider     = google-beta
+
+  template_uri = "gs://google-cloud-aiplatform/pipeline-templates/train-bq-automl-tabular.json"
+
+  pipeline_spec {
+    parameter_values = jsonencode({
+      project        = "{{index $.Vars "project"}}"
+      location       = "us-central1"
+      targetColumn   = "species"
+      predictionType = "classification"
+      datasetId      = "bigquery-public-data.ml_datasets.iris"
+      modelDisplayName = "iris-automl-model"
+      budgetMilliNodeHours = 1000
+    })
+  }
+
+  labels = {
+    env = "demo"
+  }
+}
