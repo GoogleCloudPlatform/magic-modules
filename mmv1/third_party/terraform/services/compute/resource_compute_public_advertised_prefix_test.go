@@ -76,7 +76,6 @@ func TestAccComputePublicDelegatedPrefix_computePublicDelegatedPrefixWithSubPref
 
 func testAccComputePublicDelegatedPrefix_computePublicDelegatedPrefixWithSubPrefixExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-
 resource "google_compute_public_delegated_prefix" "subprefix" {
   name          = "tf-test-sub-prefix-1%{random_suffix}"
   description   = "A nested address"
@@ -267,6 +266,7 @@ resource "google_compute_public_delegated_prefix" "prefix" {
     description       = "My delegated sub-prefix 1"
     ip_cidr_range     = "127.127.0.0/25"
     delegatee_project = data.google_project.project.id
+    is_address        = true
   }
 
   public_delegated_sub_prefixes {
@@ -309,6 +309,15 @@ func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesIpv6Test(t *test
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"region"},
 			},
+			{
+				Config: testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesIpv6ExampleUpdate(context),
+			},
+			{
+				ResourceName:            "google_compute_public_delegated_prefix.prefix",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"region"},
+			},
 		},
 	})
 }
@@ -341,6 +350,50 @@ resource "google_compute_public_delegated_prefix" "subprefix" {
   allocatable_prefix_length = 64
   mode                      = "EXTERNAL_IPV6_FORWARDING_RULE_CREATION"
 }
+`, context)
+}
+
+// public_delegated_sub_prefixes blocks can only be defined during updates
+func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesIpv6ExampleUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_public_advertised_prefix" "advertised" {
+  name                = "tf-test-ipv6-pap%{random_suffix}"
+  description         = "%{description}"
+  dns_verification_ip = "2001:db8::"
+  ip_cidr_range       = "2001:db8::/32"
+  pdp_scope           = "REGIONAL"
+}
+
+resource "google_compute_public_delegated_prefix" "prefix" {
+  name          = "tf-test-root-pdp%{random_suffix}"
+  description   = "test-delegation-mode-pdp"
+  region        = "us-west1"
+  ip_cidr_range = "2001:db8::/40"
+  parent_prefix = google_compute_public_advertised_prefix.advertised.id
+  mode          = "DELEGATION"
+
+  public_delegated_sub_prefixes {
+    name              				= "tf-test-sub-pdp-1%{random_suffix}"
+    description       				= "My delegated IPv6 sub-prefix 1"
+    ip_cidr_range     				= "2001:db8:1::/48"
+    delegatee_project 				= data.google_project.project.id
+    is_address        				= true
+    mode              				= "EXTERNAL_IPV6_FORWARDING_RULE_CREATION"
+    allocatable_prefix_length = 49
+  }
+}
+
+resource "google_compute_public_delegated_prefix" "subprefix" {
+  name          						= "tf-test-sub-pdp-2%{random_suffix}"
+  description   						= "test-forwarding-rule-mode-pdp"
+  region        						= "us-west1"
+  ip_cidr_range 						= "2001:db8::/48"
+  parent_prefix 						= google_compute_public_delegated_prefix.prefix.id
+  allocatable_prefix_length = 64
+  mode                      = "EXTERNAL_IPV6_FORWARDING_RULE_CREATION"
+}
+
+data "google_project" "project" {}
 `, context)
 }
 

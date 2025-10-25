@@ -105,6 +105,7 @@ properties:
       fingerprint must be provided in order to update the PublicDelegatedPrefix,
       otherwise the request will fail with error 412 conditionNotMet.
       A base64-encoded string.
+    output: true
   - name: 'name'
     type: String
     description: |
