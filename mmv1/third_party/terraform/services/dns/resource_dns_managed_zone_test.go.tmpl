@@ -479,7 +479,7 @@ resource "google_dns_managed_zone" "private" {
 
   private_visibility_config {
     networks {
-      network_url = google_compute_network.network-1.self_link
+      network_url = google_compute_network.network_1.self_link
     }
   }
 
@@ -495,7 +495,7 @@ resource "google_dns_managed_zone" "private" {
   }
 }
 
-resource "google_dns_managed_zone" "private" {
+resource "google_dns_managed_zone" "private_ipv6" {
   name        = "private-zone-ipv6-%s"
   dns_name    = "private.example.com."
   description = "Example private DNS zone"
@@ -503,7 +503,7 @@ resource "google_dns_managed_zone" "private" {
 
   private_visibility_config {
     networks {
-      network_url = google_compute_network.network-1.self_link
+      network_url = google_compute_network.network_2.self_link
     }
   }
 
@@ -515,12 +515,12 @@ resource "google_dns_managed_zone" "private" {
   }
 }
 
-resource "google_compute_network" "network-1" {
+resource "google_compute_network" "network_1" {
   name                    = "tf-test-net-1-%s"
   auto_create_subnetworks = false
 }
 
-resource "google_compute_network" "network-2" {
+resource "google_compute_network" "network_2" {
   name                    = "tf-test-net-2-%s"
   auto_create_subnetworks = false
 }
