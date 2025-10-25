@@ -20,7 +20,7 @@ references:
 base_url: 'projects/{{project}}/locations/{{location}}/userStores'
 self_link: 'projects/{{project}}/locations/{{location}}/userStores/default_user_store'
 # Update API is also used as create API.
-create_url: 'projects/{{project}}/locations/{{location}}/userStores/default_user_store'
+create_url: 'projects/{{project}}/locations/{{location}}/userStores/default_user_store?updateMask=displayName,defaultLicenseConfig,enableLicenseAutoRegister,enableExpiredLicenseAutoUpdate'
 create_verb: 'PATCH'
 update_url: 'projects/{{project}}/locations/{{location}}/userStores/default_user_store'
 update_verb: 'PATCH'
