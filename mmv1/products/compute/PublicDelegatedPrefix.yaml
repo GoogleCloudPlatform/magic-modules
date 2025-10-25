@@ -161,7 +161,6 @@ properties:
           type: String
           description: |
             The name of the sub public delegated prefix.
-          immutable: true
         - name: 'description'
           type: String
           description: |
@@ -187,12 +186,10 @@ properties:
           description: |
             The IP address range in the CIDR format represented by this
             sub prefix.
-          immutable: true
         - name: 'isAddress'
           type: Boolean
           description: |
             Whether the sub prefix is delegated for address creation.
-          immutable: true
         - name: 'mode'
           type: Enum
           description: |
@@ -201,15 +198,12 @@ properties:
             - 'DELEGATION'
             - 'EXTERNAL_IPV6_FORWARDING_RULE_CREATION'
             - 'EXTERNAL_IPV6_SUBNETWORK_CREATION'
-          immutable: true
         - name: 'allocatablePrefixLength'
           type: Integer
           description: |
             The allocatable prefix length supported by this
             PublicDelegatedSubPrefix.
-          immutable: true
         - name: 'delegatee_project'
           type: String
           description: |
             Name of the project scoping this PublicDelegatedSubPrefix.
-          immutable: true
