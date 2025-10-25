@@ -1,0 +1,7 @@
+resource "google_compute_resource_policy" "bar" {
+  name   = "{{index $.PrefixedVars "name"}}"
+  region = "europe-west1"
+  workload_policy {
+    type = "HIGH_AVAILABILITY"
+  }
+}
