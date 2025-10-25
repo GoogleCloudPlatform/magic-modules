@@ -43,8 +43,6 @@ examples:
     vars:
       display_name: 'example-pipeline-job'
       project: 'fld-cfio-victorsantos-test'
-      location: 'us-central1'
-      datasetId: 'bigquery-public-data.ml_datasets.iris'
 parameters:
   - name: 'region'
     type: String
