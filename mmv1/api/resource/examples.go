@@ -409,8 +409,7 @@ func SubstituteTestPaths(config string) string {
 // Executes example templates for documentation and tests
 func (e *Examples) SetOiCSHCLText() {
 	originalVars := e.Vars
-	originalTestEnvVars := e.TestEnvVars
-
+	
 	// // Remove region tags
 	re1 := regexp.MustCompile(`# \[[a-zA-Z_ ]+\]\n`)
 	re2 := regexp.MustCompile(`\n# \[[a-zA-Z_ ]+\]`)
@@ -436,5 +435,4 @@ func (e *Examples) SetOiCSHCLText() {
 
 	// Reset the example
 	e.Vars = originalVars
-	e.TestEnvVars = originalTestEnvVars
 }
