@@ -348,3 +348,8 @@ properties:
     immutable: true
     ignore_read: true
     min_version: 'beta'
+  - name: 'reservationBlockCount'
+    type: Integer
+    description: |
+      The number of reservation blocks associated with this reservation.
+    
