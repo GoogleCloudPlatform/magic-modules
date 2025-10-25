@@ -88,6 +88,12 @@ examples:
       network_1_name: 'network-1'
       network_2_name: 'network-2'
     exclude_test: true
+  - name: 'dns_managed_zone_private_forwarding_ipv6'
+    primary_resource_id: 'private-zone'
+    vars:
+      zone_name: 'private-zone'
+      network_1_name: 'network-1'
+    exclude_test: true
   - name: 'dns_managed_zone_private_gke'
     primary_resource_id: 'private-zone-gke'
     vars:
@@ -356,10 +362,18 @@ properties:
           properties:
             - name: 'ipv4Address'
               type: String
-              description: 'IPv4 address of a target name server.'
+              description: |
+                IPv4 address of a target name server.
+                Does not accept both fields (ipv4 & ipv6) being populated.
+            - name: 'ipv6Address'
+              type: String
+              description: |
+                IPv6 address of a target name server.
+                Does not accept both fields (ipv4 & ipv6) being populated.
             - name: 'domainName'
               type: String
-              description: 'Fully qualified domain name for the forwarding target.'
+              description: |
+                Fully qualified domain name for the forwarding target.
             - name: 'forwardingPath'
               type: Enum
               description: |
@@ -371,6 +385,7 @@ properties:
                 - 'private'
           exactly_one_of:
             - 'ipv4_address'
+            - 'ipv6_address'
             - 'domain_name'
   - name: 'peeringConfig'
     type: NestedObject
