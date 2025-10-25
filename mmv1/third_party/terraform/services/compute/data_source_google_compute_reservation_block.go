@@ -26,7 +26,7 @@ func DataSourceGoogleComputeReservationBlock() *schema.Resource {
 			},
 			"zone": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "The zone where the reservation block resides.",
 			},
 			"project": {

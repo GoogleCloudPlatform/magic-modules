@@ -2,6 +2,7 @@ package compute
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -31,7 +32,7 @@ func DataSourceGoogleComputeReservationSubBlock() *schema.Resource {
 			},
 			"zone": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "The zone where the reservation sub-block resides.",
 			},
 			"project": {
@@ -207,7 +208,9 @@ func dataSourceGoogleComputeReservationSubBlockRead(d *schema.ResourceData, meta
 	reservationBlock := d.Get("reservation_block").(string)
 	reservation := d.Get("reservation").(string)
 
-	url := fmt.Sprintf("https://compute.googleapis.com/compute/v1/projects/%s/zones/%s/reservations/%s/reservationBlocks/%s/reservationSubBlocks/%s", project, zone, reservation, reservationBlock, name)
+	url := fmt.Sprintf("https://compute.googleapis.com/compute/v1/projects/%s/zones/%s/reservations%%2F%s%%2FreservationBlocks%%2F%s/reservationSubBlocks/%s", project, zone, reservation, reservationBlock, name)
+
+	log.Printf("[DEBUG] URL  %s ", url)
 
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
