@@ -9,7 +9,7 @@ require (
 	github.com/GoogleCloudPlatform/declarative-resource-client-library v1.83.0
 	github.com/apparentlymart/go-cidr v1.1.0
 	github.com/davecgh/go-spew v1.1.1
-	github.com/dnaeon/go-vcr v1.0.1
+	github.com/dnaeon/go-vcr v1.1.0
 	github.com/gammazero/workerpool v0.0.0-20181230203049-86a96b5d5d92
 	github.com/google/go-cmp v0.7.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
