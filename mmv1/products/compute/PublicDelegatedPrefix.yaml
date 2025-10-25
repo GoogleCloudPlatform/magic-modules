@@ -97,7 +97,7 @@ properties:
     description: If true, the prefix will be live migrated.
     output: true
   - name: 'fingerprint'
-    type: String
+    type: Fingerprint
     description: |
       Fingerprint of this resource. A hash of the contents stored in this
       object. This field is used in optimistic locking. This field will be
