@@ -40,13 +40,38 @@ func TestAccSecretManagerSecretVersion_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"secret_data", "secret_data_wo_version"},
 			},
 			{
-				Config: testAccSecretManagerSecretVersion_basic(context),
+				Config: testAccSecretManagerSecretVersion_byName(context),
 			},
 			{
 				ResourceName:            "google_secret_manager_secret_version.secret-version-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"secret_data", "secret_data_wo_version"},
+			},
+		},
+	})
+}
+
+func TestAccSecretManagerSecretVersion_byName(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSecretManagerSecretVersionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSecretManagerSecretVersion_byName(context),
+			},
+			{
+				ResourceName:            "google_secret_manager_secret_version.secret-version-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"secret_data", "secret_data_wo_version", "project"},
 			},
 		},
 	})
@@ -70,7 +95,7 @@ resource "google_secret_manager_secret_version" "secret-version-basic" {
   secret = google_secret_manager_secret.secret-basic.name
 
   secret_data = "my-tf-test-secret%{random_suffix}"
-  enabled = true
+  enabled     = true
 }
 `, context)
 }
@@ -93,7 +118,32 @@ resource "google_secret_manager_secret_version" "secret-version-basic" {
   secret = google_secret_manager_secret.secret-basic.name
 
   secret_data = "my-tf-test-secret%{random_suffix}"
-  enabled = false
+  enabled     = false
+}
+`, context)
+}
+
+func testAccSecretManagerSecretVersion_byName(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_secret_manager_secret" "secret-basic" {
+  secret_id = "tf-test-secret-version-%{random_suffix}"
+
+  labels = {
+    label = "my-label"
+  }
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "secret-version-basic" {
+  secret = "tf-test-secret-version-%{random_suffix}"
+
+  secret_data = "my-tf-test-secret%{random_suffix}"
+  enabled     = true
+
+	depends_on = [google_secret_manager_secret.secret-basic]
 }
 `, context)
 }
