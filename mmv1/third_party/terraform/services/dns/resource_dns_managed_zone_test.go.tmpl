@@ -139,7 +139,7 @@ func TestAccDNSManagedZone_privateForwardingUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckDNSManagedZoneDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDnsManagedZone_privateForwardingUpdate(suffix, "172.16.1.10", "172.16.1.20", "2001:db8:abcd:1234:a1b2:c3d4:e5f6:7890", "default", "private", "default"),
+				Config: testAccDnsManagedZone_privateForwardingUpdate(suffix, "172.16.1.10", "172.16.1.20", "fd20:3e9:7a70:680d:0:8::", "default", "private", "default"),
 			},
 			{
 				ResourceName:      "google_dns_managed_zone.private",
@@ -147,7 +147,7 @@ func TestAccDNSManagedZone_privateForwardingUpdate(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccDnsManagedZone_privateForwardingUpdate(suffix, "172.16.1.10", "192.168.1.1", "fd20:3e9:7a70:680d:0:8::", "private", "default", "private"),
+				Config: testAccDnsManagedZone_privateForwardingUpdate(suffix, "172.16.1.10", "192.168.1.1", "fd20:3e9:7a70:680d:0:8::1", "private", "default", "private"),
 			},
 			{
 				ResourceName:      "google_dns_managed_zone.private",
@@ -485,11 +485,11 @@ resource "google_dns_managed_zone" "private" {
 
   forwarding_config {
     target_name_servers {
-      ipv4_address = "%s"
+      ipv4_address    = "%s"
       forwarding_path = "%s"
     }
     target_name_servers {
-      ipv4_address = "%s"
+      ipv4_address    = "%s"
       forwarding_path = "%s"
     }
   }
