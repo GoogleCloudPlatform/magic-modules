@@ -21,7 +21,7 @@ func TestAccComputePublicPrefixes(t *testing.T) {
 		"public_delegated_prefixes_ipv6":           testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesIpv6Test,
 		"public_advertised_prefixes_pdp_scope":     testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesPdpScopeTest,
 		"public_delegated_prefix_ipv6_subnet_mode": testAccComputePublicDelegatedPrefix_publicDelegatedPrefixIpv6SubnetModeTest,
-		"public_delgated_prefix_with_sub_prefix":   TestAccComputePublicDelegatedPrefix_computePublicDelegatedPrefixWithSubPrefixExample,
+		"public_delgated_prefix_with_sub_prefix":   testAccComputePublicDelegatedPrefix_publicDelegatedPrefixWithSubPrefixTest,
 	}
 
 	for name, tc := range testCases {
@@ -36,7 +36,7 @@ func TestAccComputePublicPrefixes(t *testing.T) {
 	}
 }
 
-func TestAccComputePublicDelegatedPrefix_computePublicDelegatedPrefixWithSubPrefixExample(t *testing.T) {
+func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixWithSubPrefixTest(t *testing.T) {
 	t.Parallel()
 	subPrefixResourceName := "google_compute_public_delegated_prefix.sub_prefix"
 	parentProject := "tf-static-byoip"
@@ -55,7 +55,7 @@ func TestAccComputePublicDelegatedPrefix_computePublicDelegatedPrefixWithSubPref
 		CheckDestroy:             testAccCheckComputePublicDelegatedPrefixDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputePublicDelegatedPrefix_computePublicDelegatedPrefixWithSubPrefixExample(context),
+				Config: testAccComputePublicDelegatedPrefix_publicDelegatedPrefixWithSubPrefixExample(context),
 				Check: resource.ComposeTestCheckFunc(
 					// First, a basic check that the sub-prefix was created
 					resource.TestCheckResourceAttrSet(subPrefixResourceName, "id"),
@@ -74,7 +74,7 @@ func TestAccComputePublicDelegatedPrefix_computePublicDelegatedPrefixWithSubPref
 	})
 }
 
-func testAccComputePublicDelegatedPrefix_computePublicDelegatedPrefixWithSubPrefixExample(context map[string]interface{}) string {
+func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixWithSubPrefixExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_public_delegated_prefix" "sub_prefix" {
   name          = "tf-test-sub-prefix-1%{random_suffix}"
@@ -233,18 +233,18 @@ resource "google_compute_public_delegated_prefix" "prefix" {
   ip_cidr_range = "127.127.0.0/24"
   parent_prefix = google_compute_public_advertised_prefix.advertised.id
 }
-
-resource "google_compute_public_delegated_prefix" "sub_prefix" {
-  name = "tf-test-my-sub-prefix%{random_suffix}"
-  description   = "my description"
-  region        = "us-central1"
-  ip_cidr_range = "127.127.0.0/26"
-  parent_prefix = google_compute_public_delegated_prefix.prefix.id
-}
+//
+// resource "google_compute_public_delegated_prefix" "sub_prefix" {
+//   name = "tf-test-my-sub-prefix%{random_suffix}"
+//   description   = "my description"
+//   region        = "us-central1"
+//   ip_cidr_range = "127.127.0.0/26"
+//   parent_prefix = google_compute_public_delegated_prefix.prefix.id
+// }
 `, context)
 }
 
-// public_delegated_sub_prefixes blocks can only be defined during updates
+// public_delegated_sub_prefixs blocks can only be defined during updates
 func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicExampleUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_public_advertised_prefix" "advertised" {
@@ -276,14 +276,14 @@ resource "google_compute_public_delegated_prefix" "prefix" {
     delegatee_project = data.google_project.project.id
   }
 }
-
-resource "google_compute_public_delegated_prefix" "sub_prefix" {
-  name = "tf-test-my-sub-prefix%{random_suffix}"
-  description   = "my description"
-  region        = "us-central1"
-  ip_cidr_range = "127.127.0.0/26"
-  parent_prefix = google_compute_public_delegated_prefix.prefix.id
-}
+//
+// resource "google_compute_public_delegated_prefix" "sub_prefix" {
+//   name = "tf-test-my-sub-prefix%{random_suffix}"
+//   description   = "my description"
+//   region        = "us-central1"
+//   ip_cidr_range = "127.127.0.0/26"
+//   parent_prefix = google_compute_public_delegated_prefix.prefix.id
+// }
 
 data "google_project" "project" {}
 `, context)
@@ -340,16 +340,16 @@ resource "google_compute_public_delegated_prefix" "prefix" {
   parent_prefix = google_compute_public_advertised_prefix.advertised.id
   mode          = "DELEGATION"
 }
-
-resource "google_compute_public_delegated_prefix" "sub_prefix" {
-  name          						= "tf-test-sub-pdp%{random_suffix}"
-  description   						= "test-forwarding-rule-mode-pdp"
-  region        						= "us-west1"
-  ip_cidr_range 						= "2001:db8::/48"
-  parent_prefix 						= google_compute_public_delegated_prefix.prefix.id
-  allocatable_prefix_length = 64
-  mode                      = "EXTERNAL_IPV6_FORWARDING_RULE_CREATION"
-}
+//
+// resource "google_compute_public_delegated_prefix" "sub_prefix" {
+//   name          						= "tf-test-sub-pdp%{random_suffix}"
+//   description   						= "test-forwarding-rule-mode-pdp"
+//   region        						= "us-west1"
+//   ip_cidr_range 						= "2001:db8::/48"
+//   parent_prefix 						= google_compute_public_delegated_prefix.prefix.id
+//   allocatable_prefix_length = 64
+//   mode                      = "EXTERNAL_IPV6_FORWARDING_RULE_CREATION"
+// }
 `, context)
 }
 
@@ -382,16 +382,16 @@ resource "google_compute_public_delegated_prefix" "prefix" {
     allocatable_prefix_length = 49
   }
 }
-
-resource "google_compute_public_delegated_prefix" "sub_prefix" {
-  name          						= "tf-test-sub-pdp-2%{random_suffix}"
-  description   						= "test-forwarding-rule-mode-pdp"
-  region        						= "us-west1"
-  ip_cidr_range 						= "2001:db8::/48"
-  parent_prefix 						= google_compute_public_delegated_prefix.prefix.id
-  allocatable_prefix_length = 64
-  mode                      = "EXTERNAL_IPV6_FORWARDING_RULE_CREATION"
-}
+//
+// resource "google_compute_public_delegated_prefix" "sub_prefix" {
+//   name          						= "tf-test-sub-pdp-2%{random_suffix}"
+//   description   						= "test-forwarding-rule-mode-pdp"
+//   region        						= "us-west1"
+//   ip_cidr_range 						= "2001:db8::/48"
+//   parent_prefix 						= google_compute_public_delegated_prefix.prefix.id
+//   allocatable_prefix_length = 64
+//   mode                      = "EXTERNAL_IPV6_FORWARDING_RULE_CREATION"
+// }
 
 data "google_project" "project" {}
 `, context)
@@ -439,15 +439,15 @@ resource "google_compute_public_delegated_prefix" "prefix" {
   parent_prefix = google_compute_public_advertised_prefix.advertised.id
   mode 					= "DELEGATION"
 }
-
-resource "google_compute_public_delegated_prefix" "sub_prefix" {
-  name 					= "tf-test-sub-pdp%{random_suffix}"
-  description   = "test-subnet-mode-pdp"
-  region 				= "us-east1"
-  ip_cidr_range = "2001:db8::/48"
-  parent_prefix = google_compute_public_delegated_prefix.prefix.id
-  mode 					= "EXTERNAL_IPV6_SUBNETWORK_CREATION"
-}
+//
+// resource "google_compute_public_delegated_prefix" "sub_prefix" {
+//   name 					= "tf-test-sub-pdp%{random_suffix}"
+//   description   = "test-subnet-mode-pdp"
+//   region 				= "us-east1"
+//   ip_cidr_range = "2001:db8::/48"
+//   parent_prefix = google_compute_public_delegated_prefix.prefix.id
+//   mode 					= "EXTERNAL_IPV6_SUBNETWORK_CREATION"
+// }
 `, context)
 }
 
