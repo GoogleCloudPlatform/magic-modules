@@ -25,7 +25,6 @@ func TestAccDiscoveryEngineControl_discoveryengineControlBasicExample_update(t *
 				ResourceName:            "google_discovery_engine_control.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name"},
 			},
 			{
 				Config: testAccDiscoveryEngineControl_discoveryengineControlBasicExample_update(context),
@@ -34,7 +33,6 @@ func TestAccDiscoveryEngineControl_discoveryengineControlBasicExample_update(t *
 				ResourceName:            "google_discovery_engine_control.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name"},
 			},
 		},
 		CheckDestroy: testAccCheckDiscoveryEngineControlDestroyProducer(t),
@@ -67,6 +65,7 @@ resource "google_discovery_engine_search_engine" "basic" {
 
 resource "google_discovery_engine_control" "basic" {
   location = google_discovery_engine_search_engine.basic.location
+	collection_id = google_discovery_engine_search_engine.basic.collection_id
   engine_id = google_discovery_engine_search_engine.basic.engine_id
   control_id = "tf-test-control-id-%{random_suffix}"
   display_name = "tf-test-control-%{random_suffix}"

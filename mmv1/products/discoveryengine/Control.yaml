@@ -19,14 +19,14 @@ references:
   guides:
     'Configure serving controls': 'https://cloud.google.com/gemini/enterprise/docs/configure-serving-controls'
   api: 'https://cloud.google.com/gemini/enterprise/docs/reference/rest/v1/projects.locations.collections.engines.controls'
-base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/engines/{{engine_id}}/controls'
-self_link: 'projects/{{project}}/locations/{{location}}/collections/default_collection/engines/{{engine_id}}/controls/{{control_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/engines/{{engine_id}}/controls?controlId={{control_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/controls'
+self_link: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/controls/{{control_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/controls?controlId={{control_id}}'
 update_verb: 'PATCH'
 update_mask: true
-delete_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/engines/{{engine_id}}/controls/{{control_id}}'
+delete_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/controls/{{control_id}}'
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/collections/default_collection/engines/{{engine_id}}/controls/{{control_id}}'
+  - 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/controls/{{control_id}}'
 timeouts:
   insert_minutes: 5
   update_minutes: 5
@@ -48,6 +48,12 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+  - name: 'collectionId'
+    type: String
+    description: 'The collection ID.'
+    url_param_only: true
+    immutable: true
+    default_value: 'default_collection'
   - name: 'engineId'
     type: String
     description: 'The engine to add the control to.'
@@ -65,7 +71,7 @@ properties:
     type: String
     description: |
       The unique full resource name of the control. Values are of the format
-      `projects/{project}/locations/{location}/collections/default_collection/engines/{engine_id}/controls/{control_id}`.
+      `projects/{project}/locations/{location}/collections/{collection_id}/engines/{engine_id}/controls/{control_id}`.
       This field must be a UTF-8 encoded string with a length limit of 1024
       characters.
     output: true
