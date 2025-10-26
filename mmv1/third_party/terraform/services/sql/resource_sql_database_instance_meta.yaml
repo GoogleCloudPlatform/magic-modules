@@ -64,6 +64,7 @@ fields:
   - field: 'settings.activation_policy'
   - field: 'settings.active_directory_config.domain'
   - field: 'settings.advanced_machine_features.threads_per_core'
+  - field: 'settings.auto_upgrade_enabled'
   - field: 'settings.availability_type'
   - field: 'settings.backup_configuration.backup_retention_settings.retained_backups'
   - field: 'settings.backup_configuration.backup_retention_settings.retention_unit'
