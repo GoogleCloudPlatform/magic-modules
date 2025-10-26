@@ -210,7 +210,7 @@ properties:
   - name: 'isLiveMigration'
     type: Boolean
     description: If true, the prefix will be live migrated.
-    deprecation_message: |
+    deprecation_message: >-
       `isLiveMigration` is deprecated and will be removed in a future
       major release.
     output: true
