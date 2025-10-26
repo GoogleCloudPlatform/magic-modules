@@ -265,7 +265,7 @@ resource "google_compute_public_delegated_prefix" "prefix" {
     name              = "tf-test-sub-1%{random_suffix}"
     description       = "My delegated sub-prefix 1"
     ip_cidr_range     = "127.127.0.0/25"
-    delegatee_project = data.google_project.project.id
+    delegatee_project = data.google_project.project.project_id
     is_address        = true
   }
 
@@ -273,7 +273,7 @@ resource "google_compute_public_delegated_prefix" "prefix" {
     name              = "tf-test-sub-2%{random_suffix}"
     description       = "My delegated sub-prefix 2"
     ip_cidr_range     = "127.127.0.128/25"
-    delegatee_project = data.google_project.project.id
+    delegatee_project = data.google_project.project.project_id
   }
 }
 //
@@ -282,7 +282,7 @@ resource "google_compute_public_delegated_prefix" "prefix" {
 //   description   = "my description"
 //   region        = "us-central1"
 //   ip_cidr_range = "127.127.0.0/26"
-//   parent_prefix = google_compute_public_delegated_prefix.prefix.id
+//   parent_prefix = google_compute_public_delegated_prefix.prefix.project_id
 // }
 
 data "google_project" "project" {}
@@ -376,7 +376,7 @@ resource "google_compute_public_delegated_prefix" "prefix" {
     name              				= "tf-test-sub-pdp-1%{random_suffix}"
     description       				= "My delegated IPv6 sub-prefix 1"
     ip_cidr_range     				= "2001:db8:1::/48"
-    delegatee_project 				= data.google_project.project.id
+    delegatee_project 				= data.google_project.project.project_id
     is_address        				= true
     mode              				= "EXTERNAL_IPV6_FORWARDING_RULE_CREATION"
     allocatable_prefix_length = 49

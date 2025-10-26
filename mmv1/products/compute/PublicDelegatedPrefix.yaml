@@ -207,8 +207,10 @@ properties:
       otherwise the request will fail with error 412 conditionNotMet.
       A base64-encoded string.
     output: true
-  # This is deprecated but we should keep it for now for back compatibility.
   - name: 'isLiveMigration'
     type: Boolean
     description: If true, the prefix will be live migrated.
+    deprecation_message: |
+      `isLiveMigration` is deprecated and will be removed in a future
+      major release.
     output: true
