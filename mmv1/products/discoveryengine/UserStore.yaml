@@ -18,16 +18,16 @@ description: |
 references:
   api: 'https://cloud.google.com/gemini/enterprise/docs/reference/rest/v1/projects.locations.userStores'
 base_url: 'projects/{{project}}/locations/{{location}}/userStores'
-self_link: 'projects/{{project}}/locations/{{location}}/userStores/default_user_store'
+self_link: 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}'
 # Update API is also used as create API.
-create_url: 'projects/{{project}}/locations/{{location}}/userStores/default_user_store?updateMask=displayName,defaultLicenseConfig,enableLicenseAutoRegister,enableExpiredLicenseAutoUpdate'
+create_url: 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}?updateMask=displayName,defaultLicenseConfig,enableLicenseAutoRegister,enableExpiredLicenseAutoUpdate'
 create_verb: 'PATCH'
-update_url: 'projects/{{project}}/locations/{{location}}/userStores/default_user_store'
+update_url: 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}'
 update_verb: 'PATCH'
 update_mask: true
 exclude_delete: true
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/userStores/default_user_store'
+  - 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}'
 timeouts:
   insert_minutes: 5
   update_minutes: 5
@@ -45,12 +45,18 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+  - name: 'user_store_id'
+    type: String
+    description: 'The ID of the user store. Currently only accepts "default_user_store".'
+    url_param_only: true
+    immutable: true
+    default_value: 'default_user_store'
 properties:
   - name: 'name'
     type: String
     description: |
       The unique full resource name of the user store. Values are of the format
-      `projects/{project}/locations/{location}/userStores/default_user_store`.
+      `projects/{project}/locations/{location}/userStores/{user_store_id}`.
     output: true
   - name: 'displayName'
     type: String
