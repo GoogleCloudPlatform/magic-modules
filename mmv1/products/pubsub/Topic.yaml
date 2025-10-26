@@ -48,7 +48,6 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'topic'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
   encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/pubsub_topic.tmpl'
@@ -470,6 +469,7 @@ properties:
           description: |
             Javascript User Defined Function. If multiple Javascript UDFs are specified on a resource,
             each one must have a unique `function_name`.
+          is_missing_in_cai: true
           properties:
             - name: functionName
               type: String

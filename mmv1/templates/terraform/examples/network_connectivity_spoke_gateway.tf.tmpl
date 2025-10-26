@@ -1,0 +1,41 @@
+resource "google_compute_network" "network" {
+  provider = google-beta
+  name        = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnetwork" {
+  provider = google-beta
+  name          = "tf-test-subnet%{random_suffix}"
+  ip_cidr_range = "10.0.0.0/28"
+  region        = "us-central1"
+  network       = google_compute_network.network.self_link
+}
+
+resource "google_network_connectivity_hub" "basic_hub" {
+  provider = google-beta
+  name        = "{{index $.Vars "hub_name"}}"
+  description = "A sample hub"
+  labels = {
+    label-two = "value-one"
+  }
+  preset_topology = "HYBRID_INSPECTION"
+}
+
+resource "google_network_connectivity_spoke" "primary" {
+  provider = google-beta
+  name        = "{{index $.Vars "spoke_name"}}"
+  location = "us-central1"
+  description = "A sample spoke of type Gateway"
+  labels = {
+    label-one = "value-one"
+  }
+  hub =  google_network_connectivity_hub.basic_hub.id
+  gateway {
+    ip_range_reservations {
+      ip_range = "10.0.0.0/23"
+    }
+    capacity = "CAPACITY_1_GBPS"
+  }
+  group = "gateways"
+}
