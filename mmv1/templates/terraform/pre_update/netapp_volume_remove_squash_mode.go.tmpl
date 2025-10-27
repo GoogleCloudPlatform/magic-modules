@@ -64,8 +64,7 @@ if v, ok := d.GetOk("export_policy"); ok {
             newExportPolicy = append(newExportPolicy, ruleSet)
         }
     }
-    log.Printf("new export_policy %v", newExportPolicy)
-    //if len(newExportPolicy) > 0 {
+    if len(newExportPolicy) > 0 {
         obj["exportPolicy"] = newExportPolicy[0]
-    //}
+    }
 }
