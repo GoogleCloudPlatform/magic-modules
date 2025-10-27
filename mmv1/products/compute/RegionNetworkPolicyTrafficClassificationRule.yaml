@@ -49,38 +49,13 @@ async:
 custom_diff:
   - 'tpgresource.DefaultProviderRegion'
 examples:
-  # - name: 'region_network_firewall_policy_rule'
-  #   primary_resource_id: 'primary'
-  #   vars:
-  #     address_group: 'address-group'
-  #     fw_policy: 'fw-policy'
-  #     network: 'network'
-  #     tag_key: 'tag-key'
-  #     tag_value: 'tag-value'
-  #   test_env_vars:
-  #     org_id: 'ORG_ID'
-  #     project_name: 'PROJECT_NAME'
-  #     region: 'REGION'
-  #     service_acct: 'SERVICE_ACCT'
-  # - name: 'region_network_firewall_policy_rule_network_scope_egress'
-  #   primary_resource_id: 'primary'
-  #   vars:
-  #     fw_policy: 'fw-policy'
-  #   test_env_vars:
-  #     org_id: 'ORG_ID'
-  #     project_name: 'PROJECT_NAME'
-  #     region: 'REGION'
-  #   min_version: beta
-  # - name: 'region_network_firewall_policy_rule_network_scope_ingress'
-  #   primary_resource_id: 'primary'
-  #   vars:
-  #     fw_policy: 'fw-policy'
-  #     network: 'network'
-  #   test_env_vars:
-  #     org_id: 'ORG_ID'
-  #     project_name: 'PROJECT_NAME'
-  #     region: 'REGION'
-  #   min_version: beta
+  - name: 'region_network_policy_traffic_classification_rule_basic'
+    primary_resource_id: 'primary'
+    vars:
+      nw_policy: 'nw-policy'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+      region: 'REGION'
 parameters:
   - name: 'networkPolicy'
     type: ResourceRef
@@ -144,33 +119,6 @@ properties:
           CIDR IP address range. Maximum number of destination CIDR IP ranges allowed is 5000.
         item_type:
           type: String
-      # - name: 'srcNetworkScope'
-      #   type: Enum
-      #   description: |
-      #     Network scope of the traffic source.
-      #   min_version: beta
-      #   enum_values:
-      #     - 'INTERNET'
-      #     - 'INTRA_VPC'
-      #     - 'NON_INTERNET'
-      #     - 'VPC_NETWORKS'
-      # - name: 'srcNetworks'
-      #   type: Array
-      #   description: |
-      #     Networks of the traffic source. It can be either a full or partial url.
-      #   min_version: beta
-      #   item_type:
-      #     type: String
-      # - name: 'destNetworkScope'
-      #   type: Enum
-      #   description: |
-      #     Network scope of the traffic destination.
-      #   min_version: beta
-      #   enum_values:
-      #     - 'INTERNET'
-      #     - 'INTRA_VPC'
-      #     - 'NON_INTERNET'
-      #     - 'VPC_NETWORKS'
       - name: 'layer4Configs'
         type: Array
         send_empty_value: true
@@ -193,88 +141,17 @@ properties:
                 Example inputs include: ["22"], ["80","443"], and ["12345-12349"].
               item_type:
                 type: String
-      # - name: 'srcSecureTags'
-      #   type: Array
-      #   send_empty_value: true
-      #   description: |
-      #     List of secure tag values, which should be matched at the source of the traffic. For INGRESS rule, if all the srcSecureTag are INEFFECTIVE, and there is no srcIpRange, this rule will be ignored. Maximum number of source tag values allowed is 256.
-      #   item_type:
-      #     type: NestedObject
-      #     properties:
-      #       - name: 'name'
-      #         type: String
-      #         description: |
-      #           Name of the secure tag, created with TagManager's TagValue API.
-      #         diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-      #       - name: 'state'
-      #         type: Enum
-      #         description: |
-      #           State of the secure tag, either EFFECTIVE or INEFFECTIVE. A secure tag is INEFFECTIVE when it is deleted or its network is deleted.
-      #         output: true
-      #         enum_values:
-      #           - 'EFFECTIVE'
-      #           - 'INEFFECTIVE'
-      # - name: 'destAddressGroups'
-      #   type: Array
-      #   send_empty_value: true
-      #   description: |
-      #     Address groups which should be matched against the traffic destination. Maximum number of destination address groups is 10.
-      #   item_type:
-      #     type: String
-      # - name: 'srcAddressGroups'
-      #   type: Array
-      #   send_empty_value: true
-      #   description: |
-      #     Address groups which should be matched against the traffic source. Maximum number of source address groups is 10.
-      #   item_type:
-      #     type: String
-      # - name: 'srcFqdns'
-      #   type: Array
-      #   send_empty_value: true
-      #   description: |
-      #     Fully Qualified Domain Name (FQDN) which should be matched against traffic source. Maximum number of source fqdn allowed is 100.
-      #   item_type:
-      #     type: String
-      # - name: 'destFqdns'
-      #   type: Array
-      #   send_empty_value: true
-      #   description: |
-      #     Fully Qualified Domain Name (FQDN) which should be matched against traffic destination. Maximum number of destination fqdn allowed is 100.
-      #   item_type:
-      #     type: String
-      # - name: 'srcRegionCodes'
-      #   type: Array
-      #   send_empty_value: true
-      #   description: |
-      #     Region codes whose IP addresses will be used to match for source of traffic. Should be specified as 2 letter country code defined as per ISO 3166 alpha-2 country codes. ex."US" Maximum number of source region codes allowed is 5000.
-      #   item_type:
-      #     type: String
-      # - name: 'destRegionCodes'
-      #   type: Array
-      #   send_empty_value: true
-      #   description: |
-      #     Region codes whose IP addresses will be used to match for destination of traffic. Should be specified as 2 letter country code defined as per ISO 3166 alpha-2 country codes. ex."US" Maximum number of dest region codes allowed is 5000.
-      #   item_type:
-      #     type: String
-      # - name: 'destThreatIntelligences'
-      #   type: Array
-      #   send_empty_value: true
-      #   description: |
-      #     Names of Network Threat Intelligence lists. The IPs in these lists will be matched against traffic destination.
-      #   item_type:
-      #     type: String
-      # - name: 'srcThreatIntelligences'
-      #   type: Array
-      #   send_empty_value: true
-      #   description: |
-      #     Names of Network Threat Intelligence lists. The IPs in these lists will be matched against traffic source.
-      #   item_type:
-      #     type: String
   - name: 'action'
     type: NestedObject
     description: 'The Action to perform when the client connection triggers the rule.'
-    required: true
     properties:
+      - name: 'type'
+        type: Enum
+        description: |
+          Always APPLY_TRAFFIC_CLASSIFICATION for Traffic Classification Rules.
+        enum_values:
+          - 'apply_traffic_classification'
+        default_value: 'apply_traffic_classification'
       - name: 'trafficClass'
         type: Enum
         description: |
@@ -297,35 +174,6 @@ properties:
         type: Integer
         description: |
           Custom DSCP value from 0-63 range.
-  # - name: 'securityProfileGroup'
-  #   type: String
-  #   description: |
-  #     A fully-qualified URL of a SecurityProfile resource instance.
-  #     Example: https://networksecurity.googleapis.com/v1/projects/{project}/locations/{location}/securityProfileGroups/my-security-profile-group
-  #     Must be specified if action = 'apply_security_profile_group' and cannot be specified for other actions.
-
-  #     Security Profile Group and Firewall Policy Rule must be in the same scope.
-  # - name: 'tlsInspect'
-  #   type: Boolean
-  #   description: |
-  #     Boolean flag indicating if the traffic should be TLS decrypted.
-  #     Can be set only if action = 'apply_security_profile_group' and cannot be set for other actions.
-  # - name: 'direction'
-  #   type: Enum
-  #   description: |
-  #     The direction in which this rule applies.
-  #   required: true
-  #   enum_values:
-  #     - 'INGRESS'
-  #     - 'EGRESS'
-  # - name: 'enableLogging'
-  #   type: Boolean
-  #   send_empty_value: true
-  #   description: |
-  #     Denotes whether to enable logging for a particular rule.
-  #     If logging is enabled, logs will be exported to the configured export destination in Stackdriver.
-  #     Logs may be exported to BigQuery or Pub/Sub.
-  #     Note: you cannot enable logging on "goto_next" rules.
   - name: 'ruleTupleCount'
     type: Integer
     description: |
