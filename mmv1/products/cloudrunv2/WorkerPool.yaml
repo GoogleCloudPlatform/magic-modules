@@ -424,6 +424,7 @@ properties:
               type: Array
               description: |-
                 Names of the containers that must start before this container.
+              immutable: true
               item_type:
                 type: String
             - name: 'env'
