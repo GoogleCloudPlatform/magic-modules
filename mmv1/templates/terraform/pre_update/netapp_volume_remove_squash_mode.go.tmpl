@@ -34,7 +34,7 @@ if v, ok := d.GetOk("export_policy"); ok {
 
                 // Only send if the user explicitly added it.
                 // If not added, send as null.
-                if squashModeExists && squashModeVal != nil && squashModeVal != "" {
+                if squashModeExists && squashModeVal == "ALL_SQUASH" {
                     // User provided the field, send their value
                     newRuleMapItemSet["squashMode"] = squashModeVal
                 } else {
