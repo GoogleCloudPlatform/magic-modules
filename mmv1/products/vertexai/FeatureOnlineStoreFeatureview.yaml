@@ -130,7 +130,7 @@ properties:
           If true, syncs the FeatureView in a continuous manner to Online Store.
         conflicts:
           - cron
-        -default_from_api: true
+      - default_from_api: true
   - name: 'bigQuerySource'
     type: NestedObject
     description: |
