@@ -205,7 +205,25 @@ func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicTest(t *tes
 				ImportStateVerifyIgnore: []string{"region"},
 			},
 			{
-				Config: testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicExampleUpdate(context),
+				Config: testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicExampleUpdateOneSub(context),
+			},
+			{
+				ResourceName:            "google_compute_public_delegated_prefix.prefix",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"region"},
+			},
+			{
+				Config: testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicExampleUpdateTwoSub(context),
+			},
+			{
+				ResourceName:            "google_compute_public_delegated_prefix.prefix",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"region"},
+			},
+			{
+				Config: testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicExampleUpdateOneSub(context),
 			},
 			{
 				ResourceName:            "google_compute_public_delegated_prefix.prefix",
@@ -244,8 +262,48 @@ resource "google_compute_public_delegated_prefix" "prefix" {
 `, context)
 }
 
-// public_delegated_sub_prefixs blocks can only be defined during updates
-func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicExampleUpdate(context map[string]interface{}) string {
+// public_delegated_sub_prefixs blocks can only be defined during updates.
+// Only one block at the time can be added/removed
+func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicExampleUpdateOneSub(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_public_advertised_prefix" "advertised" {
+  name 								= "tf-test-my-prefix%{random_suffix}"
+  description 				= "%{description}"
+  dns_verification_ip = "127.127.0.0"
+  ip_cidr_range 			= "127.127.0.0/16"
+}
+
+resource "google_compute_public_delegated_prefix" "prefix" {
+  name          = "tf-test-my-prefix%{random_suffix}"
+  description   = "my description"
+  region        = "us-central1"
+  ip_cidr_range = "127.127.0.0/24"
+  parent_prefix = google_compute_public_advertised_prefix.advertised.id
+
+  public_delegated_sub_prefixs {
+    name              = "tf-test-sub-1%{random_suffix}"
+    description       = "My delegated sub-prefix 1"
+    ip_cidr_range     = "127.127.0.0/25"
+    delegatee_project = split("/", data.google_project.project.id)[1]
+    is_address        = true
+  }
+}
+//
+// resource "google_compute_public_delegated_prefix" "sub_prefix" {
+//   name = "tf-test-my-sub-prefix%{random_suffix}"
+//   description   = "my description"
+//   region        = "us-central1"
+//   ip_cidr_range = "127.127.0.0/26"
+//   parent_prefix = google_compute_public_delegated_prefix.prefix.project_id
+// }
+
+data "google_project" "project" {}
+`, context)
+}
+
+// public_delegated_sub_prefixs blocks can only be defined during updates.
+// Only one block at the time can be added/removed
+func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicExampleUpdateTwoSub(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_public_advertised_prefix" "advertised" {
   name 								= "tf-test-my-prefix%{random_suffix}"
@@ -377,7 +435,7 @@ resource "google_compute_public_delegated_prefix" "prefix" {
     description       				= "My delegated IPv6 sub-prefix 1"
     ip_cidr_range     				= "2001:db8:1::/48"
     delegatee_project 				= split("/", data.google_project.project.id)[1]
-    is_address        				= true
+    is_address        				= false
     mode              				= "EXTERNAL_IPV6_FORWARDING_RULE_CREATION"
     allocatable_prefix_length = 49
   }
