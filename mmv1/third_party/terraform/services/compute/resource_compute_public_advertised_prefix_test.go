@@ -285,7 +285,7 @@ resource "google_compute_public_delegated_prefix" "prefix" {
     description       = "My delegated sub-prefix 1"
     ip_cidr_range     = "127.127.0.0/25"
     delegatee_project = split("/", data.google_project.project.id)[1]
-    is_address        = true
+    is_address        = false
   }
 }
 //
@@ -437,7 +437,7 @@ resource "google_compute_public_delegated_prefix" "prefix" {
     delegatee_project 				= split("/", data.google_project.project.id)[1]
     is_address        				= false
     mode              				= "EXTERNAL_IPV6_FORWARDING_RULE_CREATION"
-    allocatable_prefix_length = 48
+    allocatable_prefix_length = 56
   }
 }
 //
