@@ -60,7 +60,7 @@ In addition to the arguments listed above, the following computed attributes are
 
 * `self_link_with_id` - Server-defined URL for this resource with the resource id.
 
-* `count` - The number of resources that are allocated in this reservation block.
+* `block_count` - The number of resources that are allocated in this reservation block.
 
 * `in_use_count` - The number of instances that are currently in use on this reservation block.
 
