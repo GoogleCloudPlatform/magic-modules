@@ -122,13 +122,13 @@ properties:
         description: |
           Cron schedule (https://en.wikipedia.org/wiki/Cron) to launch scheduled runs.
           To explicitly set a timezone to the cron tab, apply a prefix in the cron tab: "CRON_TZ=${IANA_TIME_ZONE}" or "TZ=${IANA_TIME_ZONE}".
-        conflicts_with:
+        conflicts:
           - continuous
       - name: 'continuous'
         type: Boolean
         description: |
           If true, syncs the FeatureView in a continuous manner to Online Store.
-        conflicts_with:
+        conflicts:
           - cron
         -default_from_api: true
   - name: 'bigQuerySource'
