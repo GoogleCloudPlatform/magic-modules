@@ -30,6 +30,7 @@ examples:
       network_name: test-md-network
       domain_name: test-md-domain
 autogen_async: true
+immutable: true
 async:
   operation:
     timeouts:
@@ -73,11 +74,13 @@ properties:
       Use the following format:
       `projects/{project}/locations/global/networks/{network}`.
     required: true
+    immutable: true
   - name: connectionConfig
     type: NestedObject
     api_name: connection
     description: VPC connectivity information.
     required: true
+    immutable: true
     properties:
       - name: connectionType
         type: String
@@ -87,6 +90,7 @@ properties:
           NCC
           SAME_VPC
         required: true
+        immutable: true
       - name: nccHub
         type: String
         description: |-
@@ -94,6 +98,7 @@ properties:
           [NCC](https://cloud.google.com/network-connectivity-center) hub.
           Use the following format:
           `projects/{project}/locations/global/hubs/{hub}`.
+        immutable: true
   - name: createTime
     type: String
     description: '[Output only] The timestamp when the multicast domain was created.'
@@ -110,6 +115,7 @@ properties:
       The multicast domain group this domain should be associated with.
       Use the following format:
       `projects/{project}/locations/global/multicastDomainGroups/{multicast_domain_group}`.
+    immutable: true
   - name: name
     type: String
     description: |-
