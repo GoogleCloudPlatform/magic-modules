@@ -42,7 +42,6 @@ examples:
     primary_resource_id: 'pipelineJob'
     vars:
       display_name: 'example-pipeline-job'
-      project: 'fld-cfio-victorsantos-test'
 parameters:
   - name: 'region'
     type: String
