@@ -391,8 +391,13 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		}
 
 		field.Type = "NestedObject"
-
-		field.Properties = buildProperties(obj.Value.Properties, obj.Value.Required)
+		if obj.Value.AdditionalProperties.Schema != nil {
+			field.Properties = buildProperties(obj.Value.AdditionalProperties.Schema.Value.Properties, obj.Value.AdditionalProperties.Schema.Value.Required)
+			field.KeyName = "TODO: CHANGEME"
+			field.KeyDescription = "TODO: CHANGEME"
+		} else {
+			field.Properties = buildProperties(obj.Value.Properties, obj.Value.Required)
+		}
 	case "array":
 		field.Type = "Array"
 		var subField api.Type
