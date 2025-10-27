@@ -154,9 +154,6 @@ properties:
               description: |-
                  If enabled, the root user (UID = 0) of the specified clients doesn't get mapped to nobody (UID = 65534). This is also known as no_root_squash.
               default_from_api: true
-              conflicts:
-                - squash_mode   ## this does not work. Needs fixing
-                - anon_uid    ## this does not work. Needs fixing
             - name: 'accessType'
               type: Enum
               description: |
@@ -207,15 +204,11 @@ properties:
                 - 'NO_ROOT_SQUASH'
                 - 'ROOT_SQUASH'
                 - 'ALL_SQUASH'
-              conflicts:
-                - has_root_access
               diff_suppress_func: 'suppressSquashModeDiff'
             - name: 'anonUid'
               type: Integer
               description: |-
                 An integer representing the anonymous user ID. Range is 0 to 4294967295. Required when `squash_mode` is `ROOT_SQUASH` or `ALL_SQUASH`.
-              conflicts:
-                - has_root_access
   - name: 'protocols'
     type: Array
     description: |
