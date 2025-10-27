@@ -83,6 +83,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
+    external_providers: ["time"]
   - name: 'shared_reservation_beta'
     primary_resource_id: 'gce_reservation'
     vars:
@@ -93,6 +94,7 @@ examples:
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
     min_version: 'beta'
+    external_providers: ["time"]
 parameters:
   - name: 'zone'
     type: ResourceRef
