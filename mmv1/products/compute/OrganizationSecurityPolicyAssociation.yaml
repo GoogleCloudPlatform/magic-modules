@@ -14,6 +14,7 @@
 ---
 name: 'OrganizationSecurityPolicyAssociation'
 api_resource_type_kind: SecurityPolicy
+api_resource_field: 'associations'
 description: |
   An association for the OrganizationSecurityPolicy.
 min_version: 'beta'

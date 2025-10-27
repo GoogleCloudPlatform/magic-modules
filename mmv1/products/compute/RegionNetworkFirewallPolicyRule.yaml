@@ -14,6 +14,7 @@
 ---
 name: 'RegionNetworkFirewallPolicyRule'
 api_resource_type_kind: FirewallPolicy
+api_resource_field: 'rules'
 kind: 'compute#firewallPolicyRule'
 description: |
   Represents a rule that describes one or more match conditions along with the action to be taken when traffic matches this condition (allow or deny).
