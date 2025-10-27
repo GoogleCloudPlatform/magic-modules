@@ -448,6 +448,7 @@ properties:
       true pauses replication
       false enables replication
     default_value: false
+    url_param_only: true
   - name: 'directoryServices'
     type: NestedObject
     min_version: beta
