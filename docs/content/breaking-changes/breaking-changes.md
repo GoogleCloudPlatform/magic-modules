@@ -91,6 +91,8 @@ For more information, see
   * For MMv1 resources, removing `diff_suppress_func` from a field.
   * For handwritten resources, removing `DiffSuppressFunc` from a field.
 * Removing update support from a field.
+* Removing drift detection from a field - that is, ignoring the field's value as returned by the API when previously it was stored in state.
+  * For MMv1 resources, adding `ignore_read: true`.
 
 
 ### Making validation more strict
