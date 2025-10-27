@@ -22,28 +22,12 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/assessmentRules/{{assessment_rule_id}}
 import_format:
 - projects/{{project}}/locations/{{location}}/assessmentRules/{{assessment_rule_id}}
-examples:
-- name: name_of_example_file
-  primary_resource_id: example
-  vars:
-    resource_name: test-resource
-autogen_async: true
-async:
-  operation:
-    timeouts:
-      insert_minutes: 20
-      update_minutes: 20
-      delete_minutes: 20
-    base_url: '{{op_id}}'
-  actions:
-  - create
-  - delete
-  - update
-  type: OpAsync
-  result:
-    resource_inside_response: true
-  include_project: false
 autogen_status: QXNzZXNzbWVudFJ1bGU=
+examples:
+  - name: 'contact_center_insights_assessment_rule_basic'
+    primary_resource_id: 'assessment_rule_basic'
+  - name: 'contact_center_insights_assessment_rule_full'
+    primary_resource_id: 'assessment_rule_full'
 parameters:
 - name: location
   type: String
