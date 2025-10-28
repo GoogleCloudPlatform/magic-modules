@@ -60,7 +60,7 @@ values will be stored in the raw state as plain text: {{ $.SensitivePropsToStrin
 {{ end }}
 {{- if $.WriteOnlyProps }}
 -> **Note:**  All arguments marked as write-only values will not be stored in the state: {{ $.WriteOnlyPropsToString }}.
-[Read more about Write-only Arguements](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments).
+[Read more about Write-only Arguments](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments).
 {{ end }}
 {{- if $.Examples }}
 	{{- range $e := $.Examples }}
