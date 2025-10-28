@@ -6,7 +6,7 @@ description: |-
 
 # Write-only arguments in the Google Cloud provider
 
-The Google Cloud provider has introduced new write-only arguments for a more secure way to manage data. The new `WriteOnly` attribute accepts values from configuration and will not be stored in plan or state providing an additional layer of security and control over data access.
+The Google Cloud provider has introduced new write-only arguments for a more secure way to manage data. These arguments accept values from configuration and will not be stored in plan or state providing an additional layer of security and control over data access.
 
 For more information, see the [official HashiCorp documentation for Write-only Arguments](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments).
 
