@@ -65,6 +65,8 @@ examples:
   - name: 'vertex_ai_endpoint_private_service_connect'
     primary_resource_id: 'endpoint'
     primary_resource_name: 'fmt.Sprintf("endpoint-name%s", context["random_suffix"])'
+    vars:
+      network_name: 'psc-network'
   - name: 'vertex_ai_endpoint_dedicated_endpoint'
     primary_resource_id: 'endpoint'
     primary_resource_name: 'fmt.Sprintf("endpoint-name%s", context["random_suffix"])'
@@ -497,7 +499,6 @@ properties:
               description:
                 'The state of the PSC service automation.'
               enum_values:
-                - PSC_AUTOMATION_STATE_UNSPECIFIED
                 - PSC_AUTOMATION_STATE_FAILED
                 - PSC_AUTOMATION_STATE_SUCCESSFUL
             - name: 'errorMessage'

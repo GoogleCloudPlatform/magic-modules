@@ -1,5 +1,5 @@
 resource "google_compute_network" "default" {
-  name = "network-%{random_suffix}"
+  name = "{{index $.Vars "network_name"}}-%{random_suffix}"
 }
 
 resource "google_vertex_ai_endpoint" "{{$.PrimaryResourceId}}" {
