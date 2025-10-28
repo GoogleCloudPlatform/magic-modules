@@ -17,7 +17,7 @@ legacy_name: 'gke_hub'
 display_name: 'GKEHub'
 versions:
   - name: 'beta'
-    base_url: 'https://gkehub.googleapis.com/v1beta1/'
+    base_url: 'https://gkehub.googleapis.com/v1beta/'
   - name: 'ga'
     base_url: 'https://gkehub.googleapis.com/v1/'
 scopes:

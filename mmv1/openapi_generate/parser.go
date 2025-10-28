@@ -45,7 +45,7 @@ type Parser struct {
 func NewOpenapiParser(folder, output string) Parser {
 	wd, err := os.Getwd()
 	if err != nil {
-		log.Fatalf(err.Error())
+		log.Fatalf("%v", err)
 	}
 
 	parser := Parser{
@@ -59,13 +59,13 @@ func NewOpenapiParser(folder, output string) Parser {
 func (parser Parser) Run() {
 	f, err := os.Open(parser.Folder)
 	if err != nil {
-		log.Fatalf(err.Error())
+		log.Fatalf("%v", err)
 		return
 	}
 	defer f.Close()
 	files, err := f.Readdirnames(0)
 	if err != nil {
-		log.Fatalf(err.Error())
+		log.Fatalf("%v", err)
 	}
 
 	// check if folder is empty
@@ -375,6 +375,12 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		if field.Name == "labels" {
 			// Standard labels implementation
 			field.Type = "KeyValueLabels"
+			break
+		}
+
+		if field.Name == "annotations" {
+			// Standard annotations implementation
+			field.Type = "KeyValueAnnotations"
 			break
 		}
 

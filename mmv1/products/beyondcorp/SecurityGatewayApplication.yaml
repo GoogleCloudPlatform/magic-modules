@@ -43,6 +43,18 @@ examples:
     vars:
       security_gateway_name: default-sg
       application_name: my-vm-service2
+  - name: beyondcorp_security_gateway_application_spa_api
+    primary_resource_id: example-spa
+    primary_resource_name: 'fmt.Sprintf("tf-test-default-sg-spa-api%s", context["random_suffix"]), fmt.Sprintf("tf-test-google-sga%s", context["random_suffix"])'
+    vars:
+      security_gateway_name: default-sg-spa-api
+      application_discovery_name: app-discovery
+  - name: beyondcorp_security_gateway_application_spa_proxy
+    primary_resource_id: example-spa
+    primary_resource_name: 'fmt.Sprintf("tf-test-default-sg-spa-proxy%s", context["random_suffix"]), fmt.Sprintf("tf-test-google-sga%s", context["random_suffix"])'
+    vars:
+      security_gateway_name: default-sg-spa-proxy
+      application_proxy_name: app-proxy
 autogen_async: true
 async:
   operation:
@@ -102,7 +114,6 @@ properties:
       EXAMPLES:
       Hostname - ("*.abc.com"), ("xyz.abc.com")
       Hostname and Ports - ("abc.com" and "22"), ("abc.com" and "22,33") etc
-    required: true
     item_type:
       type: NestedObject
       properties:
@@ -113,6 +124,7 @@ properties:
         - name: ports
           type: Array
           description: Optional. Ports of the application.
+          required: true
           item_type:
             type: Integer
   - name: upstreams
@@ -141,6 +153,100 @@ properties:
                 Required. Network name is of the format:
                 `projects/{project}/global/networks/{network}`
               required: true
+        - name: external
+          type: NestedObject
+          description: List of the external endpoints to forward traffic to.
+          properties:
+            - name: endpoints
+              type: Array
+              description: List of the endpoints to forward traffic to.
+              required: true
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: hostname
+                    type: String
+                    description: Hostname of the endpoint.
+                    required: true
+                  - name: port
+                    type: Integer
+                    description: Port of the endpoint.
+                    required: true
+        - name: proxyProtocol
+          type: NestedObject
+          description: Shared proxy configuration for all apps.
+          properties:
+            - name: allowedClientHeaders
+              type: Array
+              description: The configuration for the proxy.
+              item_type:
+                type: string
+            - name: contextualHeaders
+              type: NestedObject
+              description: Configuration for the contextual headers.
+              properties:
+                - name: userInfo
+                  type: NestedObject
+                  description: User info configuration.
+                  properties:
+                    - name: outputType
+                      type: Enum
+                      description: The output type of the delegated user info.
+                      enum_values:
+                        - 'PROTOBUF'
+                        - 'JSON'
+                        - 'NONE'
+                - name: groupInfo
+                  type: NestedObject
+                  description: Group info configuration.
+                  properties:
+                    - name: outputType
+                      type: Enum
+                      description: The output type of the delegated group info.
+                      enum_values:
+                        - 'PROTOBUF'
+                        - 'JSON'
+                        - 'NONE'
+                - name: deviceInfo
+                  type: NestedObject
+                  description: Device info configuration.
+                  properties:
+                    - name: outputType
+                      type: Enum
+                      description: The output type of the delegated device info.
+                      enum_values:
+                        - 'PROTOBUF'
+                        - 'JSON'
+                        - 'NONE'
+                - name: outputType
+                  type: Enum
+                  description: Default output type for all enabled headers.
+                  enum_values:
+                    - 'PROTOBUF'
+                    - 'JSON'
+                    - 'NONE'
+            - name: metadataHeaders
+              type: KeyValuePairs
+              description: |-
+                Custom resource specific headers along with the values.
+                The names should conform to RFC 9110:
+                > Field names SHOULD constrain themselves to alphanumeric characters, "-",
+                  and ".", and SHOULD begin with a letter.
+                > Field values SHOULD contain only ASCII printable characters and tab.
+            - name: gatewayIdentity
+              type: Enum
+              description: Gateway identity configuration.
+              enum_values:
+                - 'RESOURCE_NAME'
+            - name: clientIp
+              type: Boolean
+              description: Client IP configuration. The client IP address is included if true.
+  - name: schema
+    type: Enum
+    description: Type of the external application.
+    enum_values:
+      - 'PROXY_GATEWAY'
+      - 'API_GATEWAY'
   - name: name
     type: String
     description: Identifier. Name of the resource.

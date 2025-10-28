@@ -102,3 +102,18 @@ func run(t *testing.T, cmd *exec.Cmd, wantError bool) ([]byte, []byte) {
 	}
 	return stdout.Bytes(), stderr.Bytes()
 }
+
+// Creates a deep copy of a source map using JSON marshalling and unmarshalling.
+func DeepCopyMap(source interface{}, destination interface{}) error {
+	marshalled, err := json.Marshal(source)
+	if err != nil {
+		return fmt.Errorf("failed to marshal source map: %w", err)
+	}
+
+	err = json.Unmarshal(marshalled, destination)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal JSON into destination map: %w", err)
+	}
+
+	return nil
+}

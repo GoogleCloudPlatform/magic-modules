@@ -38,7 +38,6 @@ collection_url_key: 'repos'
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'repository'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   custom_diff_suppress: 'templates/terraform/iam/sourcerepo_diff_suppress.go.tmpl'
 custom_code:
   constants: 'templates/terraform/constants/source_repo_repository.go.tmpl'

@@ -26,6 +26,10 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
+timeouts:
+  insert_minutes: 40
+  update_minutes: 20
+  delete_minutes: 20
 sweeper:
   url_substitutions:
     - location: "us-central1-a"

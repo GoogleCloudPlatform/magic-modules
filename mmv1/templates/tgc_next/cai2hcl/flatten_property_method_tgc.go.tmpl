@@ -19,6 +19,10 @@
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return tgcresource.RemoveTerraformAttributionLabel(v)
 }
+  {{- else if $.IsA "KeyValueAnnotations" }}
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
 	{{- else if or (and (eq $.Name "zone") $.ResourceMetadata.HasZone) (and (eq $.Name "region") $.ResourceMetadata.HasRegion) -}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {

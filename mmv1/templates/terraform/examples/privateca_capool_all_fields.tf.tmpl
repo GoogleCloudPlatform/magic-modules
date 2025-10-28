@@ -1,4 +1,17 @@
+resource "google_project_service_identity" "privateca_sa" {
+  provider = google-beta
+  service = "privateca.googleapis.com"
+}
+
+resource "google_kms_crypto_key_iam_member" "privateca_sa_keyuser_encrypterdecrypter" {
+  provider = google-beta
+  crypto_key_id = "{{index $.Vars "cloud_kms_key"}}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member = google_project_service_identity.privateca_sa.member
+}
+
 resource "google_privateca_ca_pool" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
   name = "{{index $.Vars "name"}}"
   location = "us-central1"
   tier = "ENTERPRISE"
@@ -9,6 +22,9 @@ resource "google_privateca_ca_pool" "{{$.PrimaryResourceId}}" {
   }
   labels = {
     foo = "bar"
+  }
+  encryption_spec {
+    cloud_kms_key = "{{index $.Vars "cloud_kms_key"}}"
   }
   issuance_policy {
     allowed_key_types {
@@ -87,4 +103,8 @@ resource "google_privateca_ca_pool" "{{$.PrimaryResourceId}}" {
       }
     }
   }
+
+  depends_on = [
+    google_kms_crypto_key_iam_member.privateca_sa_keyuser_encrypterdecrypter,
+  ]
 }

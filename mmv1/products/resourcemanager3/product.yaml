@@ -16,7 +16,7 @@ name: 'ResourceManager3'
 legacy_name: 'resource_manager'
 display_name: 'Resource Manager'
 versions:
-  - name: 'beta'
+  - name: 'ga'
     base_url: 'https://cloudresourcemanager.googleapis.com/v3/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'

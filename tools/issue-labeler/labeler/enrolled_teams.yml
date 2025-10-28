@@ -7,6 +7,9 @@ service/accessapproval:
 service/accesscontextmanager:
   resources:
   - google_access_context_manager_.*
+service/aiplatform-agent-engine:
+  resources:
+  - google_vertex_ai_reasoning_engine
 service/aiplatform-colab-enterprise:
   resources:
   - google_colab_.*
@@ -152,6 +155,9 @@ service/cloudresourcemanager-tags:
 service/cloudscheduler:
   resources:
   - google_cloud_scheduler_.*
+service/cloudsecuritycompliance:
+  resources:
+  - google_cloudsecuritycompliance_.*
 service/cloudtasks:
   resources:
   - google_cloud_tasks_.*
@@ -173,7 +179,10 @@ service/compute-health:
   - google_compute_health_check
   - google_compute_http_health_check
   - google_compute_https_health_check
+  - google_compute_region_composite_health_check
+  - google_compute_region_health_aggregation_policy
   - google_compute_region_health_check
+  - google_compute_region_health_source
   - google_network_services_service_lb_policies
 service/compute-instances:
   resources:
@@ -348,7 +357,15 @@ service/developerconnect:
   - google_developer_connect_.*
 service/dialogflow:
   resources:
-  - google_dialogflow_.*
+  - google_dialogflow_conversation_profile
+service/dialogflow-cx:
+  resources:
+  - google_dialogflow_cx_.*
+  - google_dialogflow_agent
+  - google_dialogflow_encryption_spec
+  - google_dialogflow_entity_type
+  - google_dialogflow_fulfillment
+  - google_dialogflow_intent
 service/discoveryengine:
   resources:
   - google_discovery_engine_.*
@@ -403,6 +420,7 @@ service/firestore-controlplane:
   resources:
   - google_firestore_backup_schedule
   - google_firestore_database
+  - google_firestore_user_creds
 service/firestore-dataplane:
   resources:
   - google_datastore_index
@@ -472,6 +490,7 @@ service/integrations:
 service/logging:
   resources:
   - google_logging_.*
+  - google_observability_.*
 service/looker-core:
   resources:
   - google_looker_instance

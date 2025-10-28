@@ -40,7 +40,6 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'schema'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
   update_encoder: 'templates/terraform/update_encoder/pubsub_schema.tmpl'
 examples:

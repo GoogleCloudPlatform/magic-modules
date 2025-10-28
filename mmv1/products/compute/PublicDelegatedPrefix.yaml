@@ -122,3 +122,58 @@ properties:
       The IP address range, in CIDR format, represented by this public
       delegated prefix.
     required: true
+  - name: 'publicDelegatedSubPrefixs'
+    type: Array
+    output: true
+    description: |
+      List of sub public delegated fixes for BYO IP functionality.
+      Each item in this array represents a sub prefix that can be
+      used to create addresses or further allocations.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'name'
+          type: String
+          description: |
+            The name of the sub public delegated prefix.
+        - name: 'description'
+          type: String
+          description: |
+            An optional description of this sub public delegated prefix.
+        - name: 'region'
+          type: String
+          description: |
+            Output-only. The region of the sub public delegated prefix if it is regional. If absent, the sub prefix is global.
+        - name: 'status'
+          type: Enum
+          description: |
+            The status of the sub public delegated prefix.
+          enum_values:
+            - 'INITIALIZING'
+            - 'READY_TO_ANNOUNCE'
+            - 'ANNOUNCED'
+            - 'DELETING'
+        - name: 'ipCidrRange'
+          type: String
+          description: |
+            The IP address range in the CIDR format represented by this sub prefix.
+        - name: 'isAddress'
+          type: Boolean
+          description: |
+            Whether the sub prefix is delegated for address creation.
+        - name: 'mode'
+          type: Enum
+          description: |
+            The PublicDelegatedSubPrefix mode for IPv6 only.
+          enum_values:
+            - 'DELEGATION'
+            - 'EXTERNAL_IPV6_FORWARDING_RULE_CREATION'
+            - 'EXTERNAL_IPV6_SUBNETWORK_CREATION'
+        - name: 'allocatablePrefixLength'
+          type: Integer
+          description: |
+            The allocatable prefix length supported by this PublicDelegatedSubPrefix.
+        - name: 'delegatee_project'
+          type: String
+          description: |
+            Name of the project scoping this PublicDelegatedSubPrefix.
