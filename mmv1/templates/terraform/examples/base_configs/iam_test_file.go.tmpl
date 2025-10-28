@@ -97,7 +97,7 @@ func TestAcc{{ $.ResourceName }}IamMemberGenerated(t *testing.T) {
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_member.foo",
-				ImportStateIdFunc: generate{{ $.ResourceName }}IAMMemberStateID("{{ $.IamTerraformName }}_member.foo")
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMMemberStateID("{{ $.IamTerraformName }}_member.foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
