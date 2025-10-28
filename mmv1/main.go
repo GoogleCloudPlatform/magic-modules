@@ -92,9 +92,9 @@ func GenerateProducts(product, resource, providerName, version, outputPath, over
 		productsToGenerate = []string{productToGenerate}
 	}
 
-	for _, productFile := range loadedProducts {
+	for _, productApi := range loadedProducts {
 		wg.Add(1)
-		go GenerateProduct(version, providerName, productFile, outputPath, startTime, productsToGenerate, resource, generateCode, generateDocs)
+		go GenerateProduct(version, providerName, productApi, outputPath, startTime, productsToGenerate, resource, generateCode, generateDocs)
 	}
 	wg.Wait()
 
