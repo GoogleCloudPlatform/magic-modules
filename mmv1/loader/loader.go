@@ -12,7 +12,6 @@ import (
 )
 
 type Loader struct {
-	Product           string
 	OverrideDirectory string
 	Version           string
 }
@@ -103,12 +102,17 @@ func (l *Loader) batchLoadProducts(productNames []string) map[string]*api.Produc
 	close(productChan)
 
 	// Collect results as they complete
+	loadFailureCount := 0
 	for result := range productChan {
 		if result.err != nil {
+			loadFailureCount++
 			log.Printf("Error loading %s: %v", result.name, result.err)
 			continue
 		}
 		products[result.name] = result.product
+	}
+	if loadFailureCount > 0 {
+		log.Fatalf("Failed to load %d products", loadFailureCount)
 	}
 
 	return products
