@@ -171,7 +171,14 @@ type Type struct {
 
 	Sensitive bool `yaml:"sensitive,omitempty"` // Adds `Sensitive: true` to the schema
 
-	WriteOnly bool `yaml:"write_only,omitempty"` // Adds `WriteOnly: true` to the schema
+	// If true, write-only arguments will be automatically generated for this field.
+	// (`[field_name]_wo` and `[field_name]_wo_version`).
+	// For more information, see: https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments
+	WriteOnly bool `yaml:"write_only,omitempty"`
+
+	// TODO: remove this field after all references are migrated
+	// see: https://github.com/GoogleCloudPlatform/magic-modules/pull/14933#pullrequestreview-3166578379
+	WriteOnlyLegacy bool `yaml:"write_only_legacy,omitempty"` // Adds `WriteOnlyLegacy: true` to the schema
 
 	// Does not set this value to the returned API value.  Useful for fields
 	// like secrets where the returned API value is not helpful.
@@ -311,8 +318,22 @@ type Type struct {
 	// just as they are in the standard flattener template.
 	CustomTgcFlatten string `yaml:"custom_tgc_flatten,omitempty"`
 
-	// If true, we will include the empty value of this attribute in CAI asset.
+	// If true, the empty value of this attribute in CAI asset is included.
 	IncludeEmptyValueInCai bool `yaml:"include_empty_value_in_cai,omitempty"`
+
+	// If the property is type of bool and has `defaul_from_api: true`,
+	// include empty value in CAI asset by default during tfplan2cai conversion.
+	// Use `exclude_false_in_cai` to override the default behavior
+	// when the default value on API side is true.
+	//
+	// If a property is missing in CAI asset, use `is_missing_in_cai: true`
+	// and `exclude_false_in_cai: true` is not needed
+	ExcludeFalseInCai bool `yaml:"exclude_false_in_cai,omitempty"`
+
+	// If true, the custom flatten function is not applied during cai2hcl
+	TGCIgnoreTerraformCustomFlatten bool `yaml:"tgc_ignore_terraform_custom_flatten,omitempty"`
+
+	TGCIgnoreRead bool `yaml:"tgc_ignore_read,omitempty"`
 }
 
 const MAX_NAME = 20
@@ -383,11 +404,11 @@ func (t *Type) Validate(rName string) {
 		log.Fatalf("'default_value' and 'default_from_api' cannot be both set in resource %s", rName)
 	}
 
-	if t.WriteOnly && (t.DefaultFromApi || t.Output) {
+	if (t.WriteOnlyLegacy || t.WriteOnly) && (t.DefaultFromApi || t.Output) {
 		log.Fatalf("Property %s cannot be write_only and default_from_api or output at the same time in resource %s", t.Name, rName)
 	}
 
-	if t.WriteOnly && t.Sensitive {
+	if (t.WriteOnlyLegacy || t.WriteOnly) && t.Sensitive {
 		log.Fatalf("Property %s cannot be write_only and sensitive at the same time in resource %s", t.Name, rName)
 	}
 
@@ -448,18 +469,35 @@ func (t Type) MetadataLineage() string {
 
 // Returns a dot notation path to where the field is nested within the parent
 // object. eg: parent.meta.label.foo
-// This format is intended for to represent an API type.
-func (t Type) MetadataApiLineage() string {
+// This format converts the API field names directly to snake_case, which can be compared against the MetadataLineage
+// to determine whether to include an explicit Terraform field name.
+func (t Type) MetadataDefaultLineage() string {
 	apiName := t.ApiName
 	if t.ParentMetadata == nil {
 		return google.Underscore(apiName)
 	}
 
 	if t.ParentMetadata.IsA("Array") {
+		return t.ParentMetadata.MetadataDefaultLineage()
+	}
+
+	return fmt.Sprintf("%s.%s", t.ParentMetadata.MetadataDefaultLineage(), google.Underscore(apiName))
+}
+
+// Returns a dot notation path to where the field is nested within the parent
+// object. eg: parent.meta.label.foo
+// This format is intended for to represent an API type.
+func (t Type) MetadataApiLineage() string {
+	apiName := t.ApiName
+	if t.ParentMetadata == nil {
+		return apiName
+	}
+
+	if t.ParentMetadata.IsA("Array") {
 		return t.ParentMetadata.MetadataApiLineage()
 	}
 
-	return fmt.Sprintf("%s.%s", t.ParentMetadata.MetadataApiLineage(), google.Underscore(apiName))
+	return fmt.Sprintf("%s.%s", t.ParentMetadata.MetadataApiLineage(), apiName)
 }
 
 // Returns the lineage in snake case
@@ -499,6 +537,10 @@ func (t Type) TitlelizeProperty() string {
 	return google.Camelize(t.Name, "upper")
 }
 
+func (t Type) CamelizeProperty() string {
+	return google.Camelize(t.Name, "lower")
+}
+
 // If the Prefix field is already set, returns the value.
 // Otherwise, set the Prefix field and returns the value.
 func (t *Type) GetPrefix() string {
@@ -506,7 +548,7 @@ func (t *Type) GetPrefix() string {
 		if t.ParentMetadata == nil {
 			nestedPrefix := ""
 			// TODO: Use the nestedPrefix for tgc provider to be consistent with terraform provider
-			if t.ResourceMetadata.NestedQuery != nil && t.ResourceMetadata.Compiler != "terraformgoogleconversion-codegen" {
+			if t.ResourceMetadata.NestedQuery != nil && !strings.Contains(t.ResourceMetadata.Compiler, "terraformgoogleconversion") {
 				nestedPrefix = "Nested"
 			}
 
@@ -527,6 +569,15 @@ func (t *Type) GetPrefix() string {
 }
 
 func (t Type) ResourceType() string {
+	r := t.ResourceRef()
+	if r == nil {
+		return ""
+	}
+	path := strings.Split(r.BaseUrl, "/")
+	return path[len(path)-1]
+}
+
+func (t Type) FWResourceType() string {
 	r := t.ResourceRef()
 	if r == nil {
 		return ""
@@ -725,7 +776,7 @@ func (t Type) WriteOnlyProperties() []*Type {
 		}
 	case t.IsA("NestedObject"):
 		props = google.Select(t.UserProperties(), func(p *Type) bool {
-			return p.WriteOnly
+			return p.WriteOnlyLegacy || p.WriteOnly
 		})
 	case t.IsA("Map"):
 		props = google.Reject(t.ValueType.WriteOnlyProperties(), func(p *Type) bool {
@@ -803,6 +854,45 @@ func (t Type) TFType(s string) string {
 	}
 
 	return "schema.TypeString"
+}
+
+func (t Type) GetFWType() string {
+	switch t.Type {
+	case "Boolean":
+		return "Bool"
+	case "Double":
+		return "Float64"
+	case "Integer":
+		return "Int64"
+	case "String":
+		return "String"
+	case "Time":
+		return "String"
+	case "Enum":
+		return "String"
+	case "ResourceRef":
+		return "String"
+	case "NestedObject":
+		return "Object"
+	case "Array":
+		return "List"
+	case "KeyValuePairs":
+		return "Map"
+	case "KeyValueLabels":
+		return "Map"
+	case "KeyValueTerraformLabels":
+		return "Map"
+	case "KeyValueEffectiveLabels":
+		return "Map"
+	case "KeyValueAnnotations":
+		return "Map"
+	case "Map":
+		return "Map"
+	case "Fingerprint":
+		return "String"
+	}
+
+	return "String"
 }
 
 // TODO rewrite: validation
@@ -1005,6 +1095,54 @@ func propertyWithIgnoreWrite(ignoreWrite bool) func(*Type) {
 	}
 }
 
+func propertyWithRequired(required bool) func(*Type) {
+	return func(p *Type) {
+		p.Required = required
+	}
+}
+
+func propertyWithWriteOnly(writeOnly bool) func(*Type) {
+	return func(p *Type) {
+		p.WriteOnly = writeOnly
+	}
+}
+
+func propertyWithIgnoreRead(ignoreRead bool) func(*Type) {
+	return func(p *Type) {
+		p.IgnoreRead = ignoreRead
+	}
+}
+
+func propertyWithConflicts(conflicts []string) func(*Type) {
+	return func(p *Type) {
+		p.Conflicts = conflicts
+	}
+}
+
+func propertyWithRequiredWith(requiredWith []string) func(*Type) {
+	return func(p *Type) {
+		p.RequiredWith = requiredWith
+	}
+}
+
+func propertyWithExactlyOneOf(exactlyOneOf []string) func(*Type) {
+	return func(p *Type) {
+		p.ExactlyOneOf = exactlyOneOf
+	}
+}
+
+func propertyWithAtLeastOneOf(atLeastOneOf []string) func(*Type) {
+	return func(p *Type) {
+		p.AtLeastOneOf = atLeastOneOf
+	}
+}
+
+func propertyWithApiName(apiName string) func(*Type) {
+	return func(p *Type) {
+		p.ApiName = apiName
+	}
+}
+
 func (t *Type) validateLabelsField() {
 	productName := t.ResourceMetadata.ProductMetadata.Name
 	resourceName := t.ResourceMetadata.Name
@@ -1160,8 +1298,8 @@ func (t *Type) IsForceNew() bool {
 		return t.Immutable
 	}
 
-	// WriteOnly fields are never immutable
-	if t.WriteOnly {
+	// WriteOnlyLegacy fields are never immutable
+	if t.WriteOnlyLegacy || t.WriteOnly {
 		return false
 	}
 
@@ -1273,4 +1411,32 @@ func (t Type) GetPropertySchemaPathList(propertyList []string) []string {
 		}
 	}
 	return list
+}
+
+func (t Type) IsJsonField() bool {
+	if t.CustomFlatten == "templates/terraform/custom_flatten/json_schema.tmpl" {
+		return true
+	}
+	if t.CustomExpand == "templates/terraform/custom_expand/json_schema.tmpl" || t.CustomExpand == "templates/terraform/custom_expand/json_value.tmpl" {
+		return true
+	}
+	return false
+}
+
+// Checks if the empty value should be set in CAI assets during tfplan2cai conversion
+func (t Type) TGCSendEmptyValue() bool {
+	if t.IncludeEmptyValueInCai {
+		return true
+	}
+
+	// Automatically check if false value should be set in CAI assets
+	if t.IsA("Boolean") {
+		return t.Required || (t.DefaultFromApi && !t.IsMissingInCai && !t.ExcludeFalseInCai)
+	}
+
+	return false
+}
+
+func (t Type) ShouldIgnoreCustomFlatten() bool {
+	return t.ResourceMetadata.IsTgcCompiler() && (t.IgnoreRead || t.TGCIgnoreTerraformCustomFlatten)
 }

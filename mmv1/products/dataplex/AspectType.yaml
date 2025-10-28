@@ -43,7 +43,6 @@ iam_policy:
   exclude_import_test: true
   method_name_separator: ':'
   parent_resource_attribute: 'aspect_type_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/aspectTypes/{{aspect_type_id}}'
     - '{{aspect_type_id}}'
@@ -128,3 +127,15 @@ properties:
       - 'TRANSFER_STATUS_UNSPECIFIED'
       - 'TRANSFER_STATUS_MIGRATED'
       - 'TRANSFER_STATUS_TRANSFERRED'
+  - name: 'dataClassification'
+    type: Enum
+    description: |
+      Classifies the data stored by the aspect.
+      `DATA_CLASSIFICATION_UNSPECIFIED` denotes that the aspect contains only metadata
+      while `METADATA_AND_DATA` indicates data derived content.
+      <br><br>
+    enum_values:
+      - 'DATA_CLASSIFICATION_UNSPECIFIED'
+      - 'METADATA_AND_DATA'
+    immutable: true
+    diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("DATA_CLASSIFICATION_UNSPECIFIED")'

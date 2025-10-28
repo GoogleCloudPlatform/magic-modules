@@ -36,7 +36,6 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'policy_tag'
   base_url: '{{%policy_tag}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - '{{%policy_tag}}'
 custom_code:

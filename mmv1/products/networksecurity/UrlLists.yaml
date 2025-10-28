@@ -45,6 +45,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+include_in_tgc_next_DO_NOT_USE: true
 examples:
   - name: 'network_security_url_lists_basic'
     primary_resource_id: 'default'

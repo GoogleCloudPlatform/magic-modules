@@ -35,6 +35,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+  constants: 'templates/terraform/constants/google_cloud_quotas_quota_preference.go.tmpl'
 examples:
   - name: 'cloudquotas_quota_preference_basic'
     primary_resource_id: 'preference'
@@ -91,6 +92,7 @@ properties:
         description: |
           The preferred value. Must be greater than or equal to -1. If set to -1, it means the value is "unlimited".
         required: true
+        diff_suppress_func: 'QuotaPreferredValueDiffSuppress'
       - name: 'stateDetail'
         type: String
         description: Optional details about the state of this quota preference.

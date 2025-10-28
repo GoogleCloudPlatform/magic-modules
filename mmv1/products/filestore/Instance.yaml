@@ -41,6 +41,7 @@ async:
     resource_inside_response: true
 custom_code:
   pre_create: 'templates/terraform/pre_create/filestore_instance.go.tmpl'
+include_in_tgc_next_DO_NOT_USE: true
 error_abort_predicates:
 
   - 'transport_tpg.Is429QuotaError'
@@ -211,7 +212,6 @@ properties:
                   if this field is specified for other squashMode settings.
               - name: 'network'
                 type: String
-                min_version: beta
                 description: |
                   The source VPC network for `ip_ranges`.
                   Required for instances using Private Service Connect, optional otherwise.
@@ -282,7 +282,6 @@ properties:
             - 'PRIVATE_SERVICE_CONNECT'
         - name: 'pscConfig'
           type: NestedObject
-          min_version: beta
           description: |
             Private Service Connect configuration.
             Should only be set when connect_mode is PRIVATE_SERVICE_CONNECT.

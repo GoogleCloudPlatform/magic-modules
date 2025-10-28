@@ -65,7 +65,7 @@ examples:
       subnet_name: 'my-subnet'
       network_name: 'my-network'
       prevent_destroy: 'true'
-      kms_key_name: "my-key"
+      kms_key_name: 'my-key'
     test_vars_overrides:
       'prevent_destroy': 'false'
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
@@ -108,8 +108,8 @@ examples:
       'secondary_instance_prevent_destroy': 'false'
 virtual_fields:
   - name: 'desired_psc_auto_connections'
-    description: "`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead."
-    deprecation_message: '`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead.'
+    description: "`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead `terraform import` will only work with desired_auto_created_endpoints`."
+    deprecation_message: '`desired_psc_auto_connections` is deprecated. Use `desired_auto_created_endpoints` instead. `terraform import` will only work with desired_auto_created_endpoints`.'
     type: Array
     immutable: true
     conflicts:
@@ -480,6 +480,23 @@ properties:
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
         output: true
+  - name: 'maintenanceVersion'
+    type: String
+    description: |
+      This field can be used to trigger self service update to indicate the desired maintenance version. The input to this field can be determined by the available_maintenance_versions field.
+      *Note*: This field can only be specified when updating an existing cluster to a newer version. Downgrades are currently not supported!
+  - name: 'effectiveMaintenanceVersion'
+    type: String
+    description: |
+      This field represents the actual maintenance version of the cluster.
+    output: true
+  - name: 'availableMaintenanceVersions'
+    type: Array
+    description: |
+     This field is used to determine the available maintenance versions for the self service update.
+    item_type:
+      type: String
+    output: true
   - name: 'engineVersion'
     type: String
     description: "Optional. Engine version of the instance."

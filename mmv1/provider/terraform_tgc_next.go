@@ -23,11 +23,13 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/otiai10/copy"
 )
@@ -53,10 +55,12 @@ type TerraformGoogleConversionNext struct {
 }
 
 type ResourceIdentifier struct {
-	ServiceName   string
-	TerraformName string
-	ResourceName  string
-	AliasName     string // It can be "Default" or the same with ResourceName
+	ServiceName        string
+	TerraformName      string
+	ResourceName       string
+	AliasName          string // It can be "Default" or the same with ResourceName
+	CaiAssetNameFormat string
+	IdentityParam      string
 }
 
 func NewTerraformGoogleConversionNext(product *api.Product, versionName string, startTime time.Time) TerraformGoogleConversionNext {
@@ -100,6 +104,7 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 
 	if !object.IsExcluded() {
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
+		tgc.addTestsFromExamples(&object)
 		tgc.GenerateResourceTests(object, *templateData, outputFolder)
 	}
 }
@@ -127,16 +132,7 @@ func (tgc TerraformGoogleConversionNext) GenerateCaiToHclObjects(outputFolder, r
 }
 
 func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
-	eligibleExample := false
-	for _, example := range object.Examples {
-		if !example.ExcludeTest {
-			if object.ProductMetadata.VersionObjOrClosest(tgc.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
-				eligibleExample = true
-				break
-			}
-		}
-	}
-	if !eligibleExample {
+	if len(object.TGCTests) == 0 {
 		return
 	}
 
@@ -170,6 +166,7 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 
 		// cai2hcl
 		"pkg/cai2hcl/converters/resource_converters.go": "templates/tgc_next/cai2hcl/resource_converters.go.tmpl",
+		"pkg/cai2hcl/converters/convert_resource.go":    "templates/tgc_next/cai2hcl/convert_resource.go.tmpl",
 	}
 
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
@@ -310,6 +307,21 @@ func (tgc TerraformGoogleConversionNext) replaceImportPath(outputFolder, target 
 	}
 }
 
+func (tgc TerraformGoogleConversionNext) addTestsFromExamples(object *api.Resource) {
+	for _, example := range object.Examples {
+		if example.ExcludeTest {
+			continue
+		}
+		if object.ProductMetadata.VersionObjOrClosest(tgc.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) < 0 {
+			continue
+		}
+		object.TGCTests = append(object.TGCTests, resource.TGCTest{
+			Name: "TestAcc" + example.TestSlug(object.ProductMetadata.Name, object.Name),
+			Skip: example.TGCSkipTest,
+		})
+	}
+}
+
 // Generates the list of resources, and gets the count of resources.
 // The resource object has the format
 //
@@ -337,14 +349,15 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 			tgc.ResourceCount++
 
 			resourceIdentifier := ResourceIdentifier{
-				ServiceName:   service,
-				TerraformName: object.TerraformName(),
-				ResourceName:  object.ResourceName(),
-				AliasName:     object.ResourceName(),
+				ServiceName:        service,
+				TerraformName:      object.TerraformName(),
+				ResourceName:       object.ResourceName(),
+				AliasName:          object.ResourceName(),
+				CaiAssetNameFormat: object.GetCaiAssetNameFormat(),
 			}
 			tgc.ResourcesForVersion = append(tgc.ResourcesForVersion, resourceIdentifier)
 
-			caiResourceType := fmt.Sprintf("%s.%s", service, object.CaiResourceType())
+			caiResourceType := object.CaiAssetType()
 			if _, ok := resourcesByCaiResourceType[caiResourceType]; !ok {
 				resourcesByCaiResourceType[caiResourceType] = make([]ResourceIdentifier, 0)
 			}
@@ -360,9 +373,107 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 				tgc.ResourcesByCaiResourceType[caiResourceType] = []ResourceIdentifier{resourceIdentifier}
 			}
 		} else {
-			tgc.ResourcesByCaiResourceType[caiResourceType] = resources
+			tgc.ResourcesByCaiResourceType[caiResourceType] = FindIdentityParams(resources)
 		}
 	}
+}
+
+// Analyzes a list of CAI asset names and finds the single path segment
+// (by index) that contains different values across all names.
+// Example:
+// "folders/{{folder}}/feeds/{{feed_id}}" -> folders
+// "organizations/{{org_id}}/feeds/{{feed_id}} -> organizations
+// "projects/{{project}}/feeds/{{feed_id}}" -> projects
+func FindIdentityParams(rids []ResourceIdentifier) []ResourceIdentifier {
+	segmentsList := make([][]string, len(rids))
+	for i, rid := range rids {
+		urlPath := rid.CaiAssetNameFormat
+		urlPath = strings.Trim(urlPath, "/")
+
+		processedURL := regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(urlPath, "")
+		segments := strings.Split(processedURL, "/")
+		var cleanSegments []string
+		for _, seg := range segments {
+			if seg != "" {
+				cleanSegments = append(cleanSegments, seg)
+			}
+		}
+
+		segmentsList[i] = cleanSegments
+	}
+
+	segmentsList = removeSharedElements(segmentsList)
+
+	for i, segments := range segmentsList {
+		if len(segments) == 0 {
+			rids[i].IdentityParam = ""
+		} else {
+			rids[i].IdentityParam = segments[0]
+		}
+	}
+
+	// Move the id with empty IdentityParam to the end of the list
+	for i, ids := range rids {
+		if ids.IdentityParam == "" {
+			temp := ids
+			lastIndex := len(rids) - 1
+			if i != lastIndex {
+				rids[i] = rids[lastIndex]
+				rids[lastIndex] = temp
+			}
+			break
+		}
+	}
+
+	return rids
+}
+
+// Finds elements common to ALL lists in a list of lists
+// and returns a new list of lists with those common elements removed.
+func removeSharedElements(list_of_lists [][]string) [][]string {
+	if len(list_of_lists) <= 1 {
+		return list_of_lists
+	}
+
+	sharedSet := make(map[string]bool)
+	for _, element := range list_of_lists[0] {
+		sharedSet[element] = true
+	}
+
+	for i := 1; i < len(list_of_lists); i++ {
+		currentListSet := make(map[string]bool)
+		for _, element := range list_of_lists[i] {
+			currentListSet[element] = true
+		}
+
+		newSharedSet := make(map[string]bool)
+
+		for element := range sharedSet {
+			if currentListSet[element] {
+				newSharedSet[element] = true
+			}
+		}
+
+		sharedSet = newSharedSet
+
+		if len(sharedSet) == 0 {
+			break
+		}
+	}
+
+	var new_list_of_lists [][]string
+
+	for _, sublist := range list_of_lists {
+		var newSublist []string
+		for _, element := range sublist {
+			if !sharedSet[element] {
+				newSublist = append(newSublist, element)
+			}
+		}
+		new_list_of_lists = append(new_list_of_lists, newSublist)
+	}
+
+	return new_list_of_lists
 }
 
 type TgcWithProducts struct {

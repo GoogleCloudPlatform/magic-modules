@@ -15,6 +15,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"crypto/sha256"
 	"encoding/base64"
@@ -150,8 +151,7 @@ func ResourceStorageBucketObject() *schema.Resource {
 
 			// Detect changes to local file or changes made outside of Terraform to the file stored on the server.
 			"detect_md5hash": {
-				Type:       schema.TypeString,
-				Deprecated: "`detect_md5hash` is deprecated and will be removed in future release. Start using `source_md5hash` instead",
+				Type: schema.TypeString,
 				// This field is not Computed because it needs to trigger a diff.
 				Optional: true,
 				// Makes the diff message nicer:
@@ -306,6 +306,13 @@ func ResourceStorageBucketObject() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: `A url reference to download this object.`,
+			},
+
+			"deletion_policy": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Description:  `The deletion policy for the object. Setting ABANDON allows the resource to be abandoned rather than deleted when removed from your Terraform configuration.`,
+				ValidateFunc: validation.StringInSlice([]string{"ABANDON"}, false),
 			},
 		},
 		UseJSONNumber: true,
@@ -569,6 +576,12 @@ func resourceStorageBucketObjectDelete(d *schema.ResourceData, meta interface{})
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
+	}
+
+	if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "ABANDON" {
+		log.Printf("[WARN] Object %q deletion_policy is set to 'ABANDON', object deletion has been abandoned", d.Id())
+		d.SetId("")
+		return nil
 	}
 
 	bucket := d.Get("bucket").(string)
