@@ -20,7 +20,7 @@ references:
 base_url: 'projects/{{project}}/locations/{{location}}/userStores'
 self_link: 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}'
 # Update API is also used as create API.
-create_url: 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}?updateMask=displayName,defaultLicenseConfig,enableLicenseAutoRegister,enableExpiredLicenseAutoUpdate'
+create_url: 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}?updateMask=defaultLicenseConfig,enableLicenseAutoRegister,enableExpiredLicenseAutoUpdate'
 create_verb: 'PATCH'
 update_url: 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}'
 update_verb: 'PATCH'
@@ -58,9 +58,6 @@ properties:
       The unique full resource name of the user store. Values are of the format
       `projects/{project}/locations/{location}/userStores/{user_store_id}`.
     output: true
-  - name: 'displayName'
-    type: String
-    description: 'The display name of the user store.'
   - name: 'defaultLicenseConfig'
     type: String
     description: |

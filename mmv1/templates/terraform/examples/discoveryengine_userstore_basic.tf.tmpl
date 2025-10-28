@@ -20,7 +20,6 @@ data "google_project" "project" {}
 
 resource "google_discovery_engine_user_store" "basic" {
   location = google_discovery_engine_license_config.basic.location
-  display_name = "tf-test-userstore"
   default_license_config = "projects/${data.google_project.project.number}/locations/${google_discovery_engine_license_config.basic.location}/licenseConfigs/${google_discovery_engine_license_config.basic.license_config_id}"
   enable_license_auto_register = true
 }
