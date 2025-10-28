@@ -173,7 +173,7 @@ properties:
           type: Integer
           description: |
             The allocatable prefix length supported by this PublicDelegatedSubPrefix.
-        - name: 'delegatee_project'
+        - name: 'delegateeProject'
           type: String
           description: |
             Name of the project scoping this PublicDelegatedSubPrefix.
