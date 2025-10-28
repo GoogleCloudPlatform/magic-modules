@@ -313,6 +313,9 @@ type Resource struct {
 	// control if a resource is continuously generated from public OpenAPI docs
 	AutogenStatus string `yaml:"autogen_status"`
 
+	// If true, this resource generates with the new plugin framework resource template
+	FrameworkResource bool `yaml:"plugin_framework,omitempty"`
+
 	// The three groups of []*Type fields are expected to be strictly ordered within a yaml file
 	// in the sequence of Virtual Fields -> Parameters -> Properties
 
@@ -387,6 +390,18 @@ type TGCResource struct {
 
 	// If true, the Terraform custom encoder is not applied during tfplan2cai
 	TGCIgnoreTerraformEncoder bool `yaml:"tgc_ignore_terraform_encoder,omitempty"`
+
+	// If true, the Terraform custom decoder is not applied during cai2hcl
+	TGCIgnoreTerraformDecoder bool `yaml:"tgc_ignore_terraform_decoder,omitempty"`
+
+	// [Optional] The parameter that uniquely identifies the resource.
+	// Generally, it shouldn't be set when the identity can be decided.
+	// Otherswise, it should be set.
+	CaiIdentity string `yaml:"cai_identity,omitempty"`
+
+	// Tests for TGC, will automatically be filled with resource's examples
+	// and handwritten tests. Can be specified in order to skip specific tests.
+	TGCTests []resource.TGCTest `yaml:"tgc_tests,omitempty"`
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
@@ -633,7 +648,7 @@ func (r Resource) SensitiveProps() []*Type {
 func (r Resource) WriteOnlyProps() []*Type {
 	props := r.AllNestedProperties(r.RootProperties())
 	return google.Select(props, func(p *Type) bool {
-		return p.WriteOnly
+		return p.WriteOnlyLegacy || p.WriteOnly
 	})
 }
 
@@ -765,14 +780,101 @@ func (r Resource) GetIdentity() []*Type {
 	})
 }
 
-func (r *Resource) AddLabelsRelatedFields(props []*Type, parent *Type) []*Type {
+func deduplicateSliceOfStrings(slice []string) []string {
+	seen := make(map[string]bool, len(slice))
+	result := make([]string, 0, len(slice))
+
+	for _, str := range slice {
+		if !seen[str] {
+			seen[str] = true
+			result = append(result, str)
+		}
+	}
+
+	return result
+}
+
+func buildWriteOnlyField(name string, versionFieldName string, originalField *Type) *Type {
+	description := fmt.Sprintf("%s Note: This property is write-only and will not be read from the API. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", originalField.Description)
+	originalFieldLineage := originalField.TerraformLineage()
+	fieldPathCurrentField := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(name))
+	requiredWith := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(versionFieldName))
+
+	apiName := originalField.ApiName
+	if apiName == "" {
+		apiName = originalField.Name
+	}
+
+	options := []func(*Type){
+		propertyWithType("String"),
+		propertyWithRequired(false),
+		propertyWithDescription(description),
+		propertyWithWriteOnly(true),
+		propertyWithApiName(apiName),
+		propertyWithIgnoreRead(true),
+		propertyWithRequiredWith([]string{requiredWith}),
+	}
+
+	if originalField.Required {
+		originalField.Required = false
+		exactlyOneOf := append(originalField.ExactlyOneOf, originalFieldLineage, fieldPathCurrentField)
+		options = append(options, propertyWithExactlyOneOf(deduplicateSliceOfStrings(exactlyOneOf)))
+		originalField.ExactlyOneOf = deduplicateSliceOfStrings(exactlyOneOf)
+	} else {
+		conflicts := append(originalField.Conflicts, originalFieldLineage)
+		options = append(options, propertyWithConflicts(deduplicateSliceOfStrings(conflicts)))
+	}
+
+	if len(originalField.AtLeastOneOf) > 0 {
+		atLeastOneOf := append(originalField.AtLeastOneOf, originalFieldLineage, fieldPathCurrentField)
+		options = append(options, propertyWithAtLeastOneOf(deduplicateSliceOfStrings(atLeastOneOf)))
+	}
+
+	return NewProperty(name, originalField.ApiName, options)
+}
+
+func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField *Type) *Type {
+	description := fmt.Sprintf("Triggers update of %s write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", google.Underscore(writeOnlyField.Name))
+	requiredWith := strings.ReplaceAll(originalField.TerraformLineage(), google.Underscore(originalField.Name), google.Underscore(writeOnlyField.Name))
+
+	options := []func(*Type){
+		propertyWithType("Int"),
+		propertyWithImmutable(originalField.IsForceNew()),
+		propertyWithDescription(description),
+		propertyWithRequiredWith([]string{requiredWith}),
+		propertyWithClientSide(true),
+	}
+
+	return NewProperty(name, name, options)
+}
+
+func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type) []*Type {
+	propWithWoConfigured.WriteOnly = false
+	propWithWoConfigured.Sensitive = true
+	if len(propWithWoConfigured.RequiredWith) > 0 {
+		log.Fatalf("WriteOnly property '%s' in resource '%s' cannot have RequiredWith set. This combination is not supported.", propWithWoConfigured.Name, r.Name)
+	}
+	woFieldName := fmt.Sprintf("%sWo", propWithWoConfigured.Name)
+	woVersionFieldName := fmt.Sprintf("%sVersion", woFieldName)
+	writeOnlyField := buildWriteOnlyField(woFieldName, woVersionFieldName, propWithWoConfigured)
+	writeOnlyVersionField := buildWriteOnlyVersionField(woVersionFieldName, propWithWoConfigured, writeOnlyField)
+	props = append(props, writeOnlyField, writeOnlyVersionField)
+	return props
+}
+
+// AddExtraFields processes properties and adds supplementary fields based on property types.
+// It handles write-only properties, labels, and annotations.
+func (r *Resource) AddExtraFields(props []*Type, parent *Type) []*Type {
 	for _, p := range props {
+		if p.WriteOnly && !strings.HasSuffix(p.Name, "Wo") {
+			props = r.addWriteOnlyFields(props, p)
+		}
 		if p.IsA("KeyValueLabels") {
 			props = r.addLabelsFields(props, parent, p)
 		} else if p.IsA("KeyValueAnnotations") {
 			props = r.addAnnotationsFields(props, parent, p)
 		} else if p.IsA("NestedObject") && len(p.AllProperties()) > 0 {
-			p.Properties = r.AddLabelsRelatedFields(p.AllProperties(), p)
+			p.Properties = r.AddExtraFields(p.AllProperties(), p)
 		}
 	}
 	return props
@@ -1223,29 +1325,40 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 	return uniq
 }
 
-func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
+// IgnoreReadProperties returns a sorted slice of property names (snake_case) that should be ignored when reading.
+// This is useful for downstream code that needs to iterate over these properties.
+func (r Resource) IgnoreReadProperties(e resource.Examples) []string {
 	var props []string
 	for _, tp := range r.AllUserProperties() {
 		if tp.UrlParamOnly || tp.IsA("ResourceRef") {
-			props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp.Name)))
+			props = append(props, google.Underscore(tp.Name))
 		}
 	}
-	for _, tp := range e.IgnoreReadExtra {
-		props = append(props, fmt.Sprintf("\"%s\"", tp))
-	}
-	for _, tp := range r.IgnoreReadLabelsFields(r.PropertiesWithExcluded()) {
-		props = append(props, fmt.Sprintf("\"%s\"", tp))
-	}
-	for _, tp := range ignoreReadFields(r.AllUserProperties()) {
-		props = append(props, fmt.Sprintf("\"%s\"", tp))
-	}
+	props = append(props, e.IgnoreReadExtra...)
+	props = append(props, r.IgnoreReadLabelsFields(r.PropertiesWithExcluded())...)
+	props = append(props, ignoreReadFields(r.AllUserProperties())...)
 
 	slices.Sort(props)
+	return props
+}
 
+// IgnoreReadPropertiesToString returns the ignore read properties as a Go-syntax string slice.
+// This is a wrapper around IgnoreReadProperties for backwards compatibility.
+func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
+	props := r.IgnoreReadProperties(e)
 	if len(props) > 0 {
-		return fmt.Sprintf("[]string{%s}", strings.Join(props, ", "))
+		return fmt.Sprintf("[]string{%s}", strings.Join(quoteStrings(props), ", "))
 	}
 	return ""
+}
+
+// quoteStrings returns a new slice with each string quoted.
+func quoteStrings(strs []string) []string {
+	quoted := make([]string, len(strs))
+	for i, s := range strs {
+		quoted[i] = fmt.Sprintf("\"%s\"", s)
+	}
+	return quoted
 }
 
 func ignoreReadFields(props []*Type) []string {
@@ -1930,20 +2043,79 @@ func (r Resource) DefineAssetTypeForResourceInProduct() bool {
 	return true
 }
 
-// Gets the Cai asset name template, which could include version
-// For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
-func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
+// Gets the Cai asset name format
+func (r Resource) GetCaiAssetNameFormat() string {
 	caiBaseUrl := ""
+	caiId := ""
+	if r.CaiIdentity != "" {
+		caiId = r.CaiIdentity
+	} else {
+		caiId = r.getCaiId()
+	}
+	caiIdTemplate := fmt.Sprintf("{{%s}}", caiId)
 	if r.CaiBaseUrl != "" {
-		caiBaseUrl = fmt.Sprintf("%s/{{name}}", r.CaiBaseUrl)
+		if caiId == "" || strings.Contains(r.CaiBaseUrl, caiIdTemplate) {
+			caiBaseUrl = r.CaiBaseUrl
+		} else {
+			caiBaseUrl = fmt.Sprintf("%s/%s", r.CaiBaseUrl, caiIdTemplate)
+		}
 	}
 	if caiBaseUrl == "" {
 		caiBaseUrl = r.SelfLink
 	}
 	if caiBaseUrl == "" {
-		caiBaseUrl = fmt.Sprintf("%s/{{name}}", r.BaseUrl)
+		if caiId == "" || strings.Contains(r.BaseUrl, caiIdTemplate) {
+			caiBaseUrl = r.BaseUrl
+		} else {
+			caiBaseUrl = fmt.Sprintf("%s/%s", r.BaseUrl, caiIdTemplate)
+		}
 	}
-	return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, caiBaseUrl)
+	return caiBaseUrl
+}
+
+// Gets the Cai asset name template, which could include version
+// For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
+func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
+	return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, r.GetCaiAssetNameFormat())
+}
+
+// Guesses the identifier of the resource, as "name" is not always the identifier
+// For example, the cai identifier is feed_id in google_cloud_asset_folder_feed
+func (r Resource) getCaiId() string {
+	for _, p := range r.AllUserProperties() {
+		if p.Name == "name" && !p.Output {
+			return "name"
+		}
+	}
+
+	// Get the last identifier extracted from selfLink
+	id := r.getCandidateCaiId(r.SelfLink)
+	if id != "" {
+		return id
+	}
+
+	// Get the last identifier extracted from createUrl
+	id = r.getCandidateCaiId(r.CreateUrl)
+	if id != "" {
+		return id
+	}
+
+	return ""
+}
+
+// Extracts the last identifier from the url, if it is not computed,
+// then it is the candidate identifier
+func (r Resource) getCandidateCaiId(url string) string {
+	identifiers := r.ExtractIdentifiers(url)
+	if len(identifiers) > 0 {
+		id := identifiers[len(identifiers)-1]
+		for _, p := range r.AllUserProperties() {
+			if google.Underscore(p.Name) == id && !p.Output {
+				return id
+			}
+		}
+	}
+	return ""
 }
 
 // Gets the Cai asset name template, which doesn't include version
@@ -2052,6 +2224,13 @@ func (r *Resource) ShouldGenerateSingularDataSource() bool {
 	return r.Datasource.Generate
 }
 
+func (r *Resource) ShouldGenerateSingularDataSourceTests() bool {
+	if r.Datasource == nil {
+		return false
+	}
+	return !r.Datasource.ExcludeTest
+}
+
 func (r Resource) ShouldDatasourceSetLabels() bool {
 	for _, p := range r.Properties {
 		if p.Name == "labels" && p.Type == "KeyValueLabels" {
@@ -2074,7 +2253,7 @@ func (r Resource) ShouldDatasourceSetAnnotations() bool {
 // that should be marked as "Required".
 func (r Resource) DatasourceRequiredFields() []string {
 	requiredFields := []string{}
-	uriParts := strings.Split(r.SelfLink, "/")
+	uriParts := strings.Split(r.IdFormat, "/")
 
 	for _, part := range uriParts {
 		if strings.HasPrefix(part, "{{") && strings.HasSuffix(part, "}}") {
@@ -2091,7 +2270,7 @@ func (r Resource) DatasourceRequiredFields() []string {
 // that should be marked as "Optional".
 func (r Resource) DatasourceOptionalFields() []string {
 	optionalFields := []string{}
-	uriParts := strings.Split(r.SelfLink, "/")
+	uriParts := strings.Split(r.IdFormat, "/")
 
 	for _, part := range uriParts {
 		if strings.HasPrefix(part, "{{") && strings.HasSuffix(part, "}}") {
@@ -2150,7 +2329,7 @@ func (r Resource) MarkdownHeader(templatePath string) string {
 // TGC Methods
 // ====================
 // Lists fields that test.BidirectionalConversion should ignore
-func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string {
+func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 	props := []string{
 		"depends_on",
 		"count",
@@ -2166,9 +2345,10 @@ func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string
 			props = append(props, google.Underscore(tp.Name))
 		} else if tp.IsMissingInCai {
 			props = append(props, tp.MetadataLineage())
+		} else if tp.IgnoreRead {
+			props = append(props, tp.MetadataLineage())
 		}
 	}
-	props = append(props, e.TGCTestIgnoreExtra...)
 
 	slices.Sort(props)
 	return props
@@ -2177,7 +2357,7 @@ func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string
 // Filters out computed properties during cai2hcl
 func (r Resource) ReadPropertiesForTgc() []*Type {
 	return google.Reject(r.AllUserProperties(), func(v *Type) bool {
-		return v.Output || v.UrlParamOnly
+		return v.Output || v.UrlParamOnly || v.TGCIgnoreRead
 	})
 }
 

@@ -42,7 +42,6 @@ iam_policy:
   allowed_iam_role: 'roles/logging.admin'
   parent_resource_attribute: 'name'
   iam_conditions_request_type: 'REQUEST_BODY'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - '{{%parent}}/locations/{{location}}/buckets/{{bucket}}/views/{{name}}'
     - '{{name}}'
