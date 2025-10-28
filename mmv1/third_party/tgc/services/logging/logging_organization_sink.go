@@ -29,7 +29,7 @@ func GetLogOrganizationSinkCaiObject(d tpgresource.TerraformResourceData, config
 		Type: logSinkAssetType,
 		Resource: &cai.AssetResource{
 			Version:              "v2",
-			DiscoveryDocumentURI: "https://logging.googleapis.com/$discovery/rest?version=v2",
+			DiscoveryDocumentURI: "https://logging.googleapis.com/$discovery/rest",
 			DiscoveryName:        "LogSink",
 			Data:                 obj,
 		},
