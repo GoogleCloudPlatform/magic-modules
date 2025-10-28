@@ -96,8 +96,6 @@ These fields remain at the top level, moving from the old `examples` object to t
 | `examples.skip_vcr` | `sample.skip_vcr` | Remains at the sample level. |
 | `examples.skip_test` | `sample.skip_test` | Remains at the sample level. |
 | `examples.external_providers` | `sample.external_providers` | Remains at the sample level. |
-| `examples.tgc_test_ignore_extra` | `sample.tgc_test_ignore_extra` | Remains at the sample level. |
-| `examples.tgc_test_ignore_in_asset` | `sample.tgc_test_ignore_in_asset` | Remains at the sample level. |
 | `examples.tgc_skip_test` | `sample.tgc_skip_test` | Remains at the sample level. |
 
 ---
