@@ -2072,18 +2072,6 @@ func (r Resource) getCandidateCaiId(url string) string {
 	return ""
 }
 
-// Gets the Cai asset name template, which doesn't include version
-// For example: //monitoring.googleapis.com/projects/{{project}}/services/{{service_id}}
-func (r Resource) CaiAssetNameTemplate(productBackendName string) string {
-	template := r.rawCaiAssetNameTemplate(productBackendName)
-	versionRegex, err := regexp.Compile(`\/(v\d[^\/]*)\/`)
-	if err != nil {
-		log.Fatalf("Cannot compile the regular expression: %v", err)
-	}
-
-	return versionRegex.ReplaceAllString(template, "/")
-}
-
 // Gets a format string that is used to override the default format from resource id format
 func (r Resource) CAIFormatOverride() string {
 	caiAssetService := strings.Trim(r.ProductMetadata.CaiAssetService, "/")
@@ -2108,7 +2096,7 @@ func (r Resource) GetCaiAssetNameTemplate() string {
 		return caiAssetNameFormat
 	}
 
-	return fmt.Sprintf("//%s/%s", r.ProductMetadata.ServiceName(), r.IdFormat)
+	return fmt.Sprintf("//%s.googleapis.com/%s", r.CaiProductBackendName(r.CaiProductBaseUrl()), r.IdFormat)
 }
 
 // Gets the Cai API version

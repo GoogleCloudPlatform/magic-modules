@@ -59,7 +59,7 @@ type Product struct {
 	CaiBaseUrl string
 
 	// The service name from CAI asset name, e.g. bigtable.googleapis.com.
-	CaiAssetService string
+	CaiAssetService string `yaml:"cai_asset_service,omitempty"`
 
 	// CaiResourceType of resources that already have an AssetType constant defined in the product.
 	ResourcesWithCaiAssetType map[string]struct{}
@@ -233,7 +233,6 @@ func (p *Product) ExistsAtVersion(name string) bool {
 func (p *Product) SetPropertiesBasedOnVersion(version *product.Version) {
 	p.BaseUrl = version.BaseUrl
 	p.CaiBaseUrl = version.CaiBaseUrl
-	p.CaiAssetService = version.CaiAssetService
 }
 
 func (p *Product) TerraformName() string {

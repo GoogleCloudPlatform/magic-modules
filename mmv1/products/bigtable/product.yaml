@@ -17,6 +17,6 @@ display_name: 'Cloud Bigtable'
 versions:
   - name: 'ga'
     base_url: 'https://bigtableadmin.googleapis.com/v2/'
-    cai_asset_service: 'bigtable.googleapis.com'
 scopes:
   - 'https://www.googleapis.com/auth/bigtable'
+cai_asset_service: 'bigtable.googleapis.com'
