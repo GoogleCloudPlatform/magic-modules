@@ -2013,7 +2013,7 @@ func TestAccComputeInstanceTemplate_gracefulShutdown(t *testing.T) {
 			},
 			{
 				Config:      testAccComputeInstanceTemplate_gracefulShutdown(invalid_4),
-				ExpectError: regexp.MustCompile("Must be less than or equal to 999999999, invalid"),
+				ExpectError: regexp.MustCompile("Must be less than or equal to 999999999"),
 			},
 			{
 				Config: testAccComputeInstanceTemplate_gracefulShutdown(acceptableByApi_1),

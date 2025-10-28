@@ -1,0 +1,50 @@
+resource "google_discovery_engine_data_connector" "servicenow-basic" {
+  location                     = "global"
+  collection_id                = "{{index $.Vars "collection_id"}}"
+  collection_display_name      = "tf-test-dataconnector-servicenow"
+  data_source                  = "servicenow"
+  params = {
+    auth_type                  = "OAUTH_PASSWORD_GRANT"
+    instance_uri               = "https://gcpconnector1.service-now.com/"
+    client_id                  = "SECRET_MANAGER_RESOURCE_NAME"
+    client_secret              = "SECRET_MANAGER_RESOURCE_NAME"
+    static_ip_enabled          = "false"
+    user_account               = "connectorsuserqa@google.com"
+    password                   = "SECRET_MANAGER_RESOURCE_NAME"
+  }
+  refresh_interval             = "86400s"
+  incremental_refresh_interval = "21600s"
+  entities {
+    entity_name                = "catalog"
+    params                     = jsonencode({
+      "inclusion_filters": {
+        "knowledgeBaseSysId": [
+          "123"
+        ]
+      }
+    })
+  }
+  entities {
+    entity_name                = "incident"
+    params                     = jsonencode({
+      "inclusion_filters": {
+        "knowledgeBaseSysId": [
+          "123"
+        ]
+      }
+    })
+  }
+  entities {
+    entity_name                = "knowledge_base"
+    params                     = jsonencode({
+      "inclusion_filters": {
+        "knowledgeBaseSysId": [
+          "123"
+        ]
+      }
+    })
+  }
+  static_ip_enabled            = false
+  connector_modes              = ["DATA_INGESTION"]
+  sync_mode                    = "PERIODIC"
+}

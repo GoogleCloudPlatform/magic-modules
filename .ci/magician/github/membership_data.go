@@ -75,9 +75,16 @@ var (
 					startDate: newDate(2025, 4, 9),
 					endDate:   newDate(2025, 4, 15),
 				},
+				{
+					startDate: newDate(2025, 9, 26),
+					endDate:   newDate(2025, 10, 4),
+				},
 			},
 		},
 		"hao-nan-li": {
+			vacations: []Vacation{},
+		},
+		"malhotrasagar2212": {
 			vacations: []Vacation{},
 		},
 		"melinath": {
@@ -89,7 +96,12 @@ var (
 			},
 		},
 		"NickElliot": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 10, 22),
+					endDate:   newDate(2025, 10, 28),
+				},
+			},
 		},
 		"rileykarson": {
 			vacations: []Vacation{
@@ -105,10 +117,19 @@ var (
 					startDate: newDate(2025, 8, 1),
 					endDate:   newDate(2025, 8, 11),
 				},
+				{
+					startDate: newDate(2025, 9, 23),
+					endDate:   newDate(2025, 9, 29),
+				},
 			},
 		},
 		"ScottSuarez": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 9, 26),
+					endDate:   newDate(2025, 10, 5),
+				},
+			},
 		},
 		"shuyama1": {
 			vacations: []Vacation{
@@ -158,7 +179,6 @@ var (
 
 	// This is for new team members who are onboarding
 	trustedContributors = map[string]struct{}{
-		"bbasata":           struct{}{},
-		"malhotrasagar2212": struct{}{},
+		"bbasata": struct{}{},
 	}
 )

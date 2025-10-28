@@ -6,9 +6,9 @@ To view locally:
    [Go](https://go.dev/doc/install), and [Dart Sass](https://gohugo.io/hugo-pipes/transpile-sass-to-css/#dart-sass).
    You require these prerequisites for installing Hugo.
 
-1. Install Hugo v0.136.5:
+1. Install Hugo v0.150.0:
    ```bash
-   CGO_ENABLED=1 go install -tags extended github.com/gohugoio/hugo@v0.136.5
+   CGO_ENABLED=1 go install -tags extended github.com/gohugoio/hugo@v0.150.0
    ```
 
 1. Restart your terminal.
@@ -38,10 +38,17 @@ If you are having deployment issues, try to reset your hugo module cache.
 * `hugo mod clean`
 
 To upgrade the theme version:
-1. find the version you want at https://github.com/alex-shpak/hugo-book/commits/master
+1. Find the version you want at https://github.com/alex-shpak/hugo-book/releases
 2. Run the following
-```bash
-go get github.com/alex-shpak/hugo-book@{{commit_hash}}
-## example
-## go get github.com/alex-shpak/hugo-book@d86d5e70c7c0d787675b13d9aee749c1a8b34776
-```
+   ```bash
+   hugo mod get github.com/alex-shpak/hugo-book/${module_version}
+   ```
+   Example:
+   ```
+   hugo mod get github.com/alex-shpak/hugo-book/v12
+   ```
+   Or to get specific commit tagged with v12.0.0
+   ```bash
+   hugo mod get github.com/alex-shpak/hugo-book/v12@v12.0.0
+   ```
+
