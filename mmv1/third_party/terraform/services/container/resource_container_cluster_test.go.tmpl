@@ -6894,9 +6894,11 @@ func TestAccContainerCluster_network_tier_config(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_network_tier_config(clusterName, networkName, subnetworkName, "NETWORK_TIER_PREMIUM"),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_container_cluster.primary", "ip_allocation_policy.0.network_tier_config.0.network_tier", "NETWORK_TIER_PREMIUM"),
-				),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
@@ -6906,9 +6908,11 @@ func TestAccContainerCluster_network_tier_config(t *testing.T) {
 			},
 			{
 				Config: testAccContainerCluster_network_tier_config(clusterName, networkName, subnetworkName, "NETWORK_TIER_STANDARD"),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_container_cluster.primary", "ip_allocation_policy.0.network_tier_config.0.network_tier", "NETWORK_TIER_STANDARD"),
-				),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",

@@ -1884,9 +1884,7 @@ func ResourceContainerCluster() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"network_tier": {
 										Type:         schema.TypeString,
-										Optional:     true,
-										Default:	  "NETWORK_TIER_DEFAULT",
-										ValidateFunc: validation.StringInSlice([]string{"NETWORK_TIER_DEFAULT", "NETWORK_TIER_STANDARD", "NETWORK_TIER_PREMIUM"}, false),
+										Required:     true,
 										Description:  `Network tier configuration.`,
 									},
 								},

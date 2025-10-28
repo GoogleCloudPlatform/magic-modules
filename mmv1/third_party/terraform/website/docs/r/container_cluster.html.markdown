@@ -851,9 +851,9 @@ Structure is [documented below](#nested_additional_ip_ranges_config).
 
 <a name="nested_network_tier_config"></a>The `network_tier_config` block supports:
 
-* `network_tier` - (Optional) Network tier configuration.
+* `network_tier` - (Required) Network tier configuration.
     Accepted values are:
-    * `NETWORK_TIER_DEFAULT`: Use project-level configuration.
+    * `NETWORK_TIER_DEFAULT`: (Default) Use project-level configuration.
     * `NETWORK_TIER_PREMIUM`: Premium network tier.
     * `NETWORK_TIER_STANDARD`: Standard network tier.
 
