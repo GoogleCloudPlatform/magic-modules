@@ -1,12 +1,11 @@
 package networkmanagement_test
 
-{{ if ne $.TargetVersionName "ga" -}}
 import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-    "github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccNetworkManagementOrganizationVpcFlowLogsConfig_update(t *testing.T) {
@@ -70,4 +69,3 @@ resource "google_network_management_organization_vpc_flow_logs_config" "org-test
 }
 `, context)
 }
-{{ end }}
