@@ -662,7 +662,7 @@ func generate{{ $.ResourceName }}IAMPolicyStateID(iamResourceName string) func (
 		fmt.Printf("raw state %s", rawState)
 		var values []string
 		for _, param := range {{ $.IamResourceParams }} {
-			values = append(values, rawState[param])
+			values = append(values, shortNameFromURL(rawState[param]))
 		}
 		return strings.Join(values, " "), nil
 	}
@@ -681,7 +681,7 @@ func generate{{ $.ResourceName }}IAMBindingStateID(iamResourceAddr string) func 
 		fmt.Printf("raw state %s", rawState)
 		var values []string
 		for _, param := range {{ $.IamResourceParams }} {
-			values = append(values, rawState[param])
+			values = append(values, shortNameFromURL(rawState[param]))
 		}
 		values = append(values, rawState["role"])
 		return strings.Join(values, " "), nil
@@ -702,10 +702,18 @@ func generate{{ $.ResourceName }}IAMMemberStateID(iamResourceName string) func (
 		fmt.Printf("raw state %s", rawState)
 		var values []string
 		for _, param := range {{ $.IamResourceParams }} {
-			values = append(values, rawState[param])
+			values = append(values, shortNameFromURL(rawState[param]))
 		}
 		values = append(values, rawState["role"])
 		values = append(values, rawState["member"])
 		return strings.Join(values, " "), nil
 	}
+}
+
+func shortNameFromURL(url string) string {
+	parts := strings.Split(url, "/")
+	if len(parts) > 1 {
+		return parts[len(parts)-1]
+	}
+	return url
 }
