@@ -25,6 +25,8 @@ create_verb: 'PATCH'
 update_verb: 'PATCH'
 update_mask: true
 exclude_delete: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}'
 timeouts:
   insert_minutes: 5
   update_minutes: 5
