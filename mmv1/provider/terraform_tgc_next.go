@@ -23,6 +23,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -39,9 +40,9 @@ type TerraformGoogleConversionNext struct {
 
 	ResourcesForVersion []ResourceIdentifier
 
-	// Multiple Terraform resources can share the same API resource type.
+	// Multiple Terraform resources can share the same CAI resource type.
 	// For example, "google_compute_region_autoscaler" and "google_region_autoscaler"
-	ResourcesGroupedByApiResourceType map[string][]ResourceIdentifier
+	ResourcesByCaiResourceType map[string][]ResourceIdentifier
 
 	TargetVersionName string
 
@@ -53,19 +54,21 @@ type TerraformGoogleConversionNext struct {
 }
 
 type ResourceIdentifier struct {
-	ServiceName   string
-	TerraformName string
-	ResourceName  string
-	AliasName     string // It can be "Default" or the same with ResourceName
+	ServiceName        string
+	TerraformName      string
+	ResourceName       string
+	AliasName          string // It can be "Default" or the same with ResourceName
+	CaiAssetNameFormat string
+	IdentityParam      string
 }
 
 func NewTerraformGoogleConversionNext(product *api.Product, versionName string, startTime time.Time) TerraformGoogleConversionNext {
 	t := TerraformGoogleConversionNext{
-		Product:                           product,
-		TargetVersionName:                 versionName,
-		Version:                           *product.VersionObjOrClosest(versionName),
-		StartTime:                         startTime,
-		ResourcesGroupedByApiResourceType: make(map[string][]ResourceIdentifier),
+		Product:                    product,
+		TargetVersionName:          versionName,
+		Version:                    *product.VersionObjOrClosest(versionName),
+		StartTime:                  startTime,
+		ResourcesByCaiResourceType: make(map[string][]ResourceIdentifier),
 	}
 
 	t.Product.SetPropertiesBasedOnVersion(&t.Version)
@@ -170,6 +173,7 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 
 		// cai2hcl
 		"pkg/cai2hcl/converters/resource_converters.go": "templates/tgc_next/cai2hcl/resource_converters.go.tmpl",
+		"pkg/cai2hcl/converters/convert_resource.go":    "templates/tgc_next/cai2hcl/convert_resource.go.tmpl",
 	}
 
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
@@ -321,7 +325,7 @@ func (tgc TerraformGoogleConversionNext) replaceImportPath(outputFolder, target 
 // The variable resources_for_version is used to generate resources in file
 // mmv1/templates/tgc_next/provider/provider_mmv1_resources.go.tmpl
 func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products []*api.Product) {
-	resourcesGroupedByApiResourceType := make(map[string][]ResourceIdentifier)
+	resourcesByCaiResourceType := make(map[string][]ResourceIdentifier)
 
 	for _, productDefinition := range products {
 		service := strings.ToLower(productDefinition.Name)
@@ -337,32 +341,99 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 			tgc.ResourceCount++
 
 			resourceIdentifier := ResourceIdentifier{
-				ServiceName:   service,
-				TerraformName: object.TerraformName(),
-				ResourceName:  object.ResourceName(),
-				AliasName:     object.ResourceName(),
+				ServiceName:        service,
+				TerraformName:      object.TerraformName(),
+				ResourceName:       object.ResourceName(),
+				AliasName:          object.ResourceName(),
+				CaiAssetNameFormat: object.GetCaiAssetNameFormat(),
 			}
 			tgc.ResourcesForVersion = append(tgc.ResourcesForVersion, resourceIdentifier)
 
-			apiResourceType := fmt.Sprintf("%s.%s", service, object.ApiResourceType())
-			if _, ok := resourcesGroupedByApiResourceType[apiResourceType]; !ok {
-				resourcesGroupedByApiResourceType[apiResourceType] = make([]ResourceIdentifier, 0)
+			caiResourceType := object.CaiAssetType()
+			if _, ok := resourcesByCaiResourceType[caiResourceType]; !ok {
+				resourcesByCaiResourceType[caiResourceType] = make([]ResourceIdentifier, 0)
 			}
-			resourcesGroupedByApiResourceType[apiResourceType] = append(resourcesGroupedByApiResourceType[apiResourceType], resourceIdentifier)
+			resourcesByCaiResourceType[caiResourceType] = append(resourcesByCaiResourceType[caiResourceType], resourceIdentifier)
 		}
 	}
 
-	for apiResourceType, resources := range resourcesGroupedByApiResourceType {
+	for caiResourceType, resources := range resourcesByCaiResourceType {
 		// If no other Terraform resources share the API resource type, override the alias name as "Default"
 		if len(resources) == 1 {
 			for _, resourceIdentifier := range resources {
 				resourceIdentifier.AliasName = "Default"
-				tgc.ResourcesGroupedByApiResourceType[apiResourceType] = []ResourceIdentifier{resourceIdentifier}
+				tgc.ResourcesByCaiResourceType[caiResourceType] = []ResourceIdentifier{resourceIdentifier}
 			}
 		} else {
-			tgc.ResourcesGroupedByApiResourceType[apiResourceType] = resources
+			tgc.ResourcesByCaiResourceType[caiResourceType] = FindIdentityParams(resources)
 		}
 	}
+}
+
+// Analyzes a list of CAI asset names and finds the single path segment
+// (by index) that contains different values across all names.
+// Example:
+// "folders/{{folder}}/feeds/{{feed_id}}" -> folders
+// "organizations/{{org_id}}/feeds/{{feed_id}} -> organizations
+// "projects/{{project}}/feeds/{{feed_id}}" -> projects
+func FindIdentityParams(rids []ResourceIdentifier) []ResourceIdentifier {
+	segmentsList := make([][]string, len(rids))
+	for i, rid := range rids {
+		urlPath := rid.CaiAssetNameFormat
+		urlPath = strings.Trim(urlPath, "/")
+
+		processedURL := regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(urlPath, "")
+		segments := strings.Split(processedURL, "/")
+		var cleanSegments []string
+		for _, seg := range segments {
+			if seg != "" {
+				cleanSegments = append(cleanSegments, seg)
+			}
+		}
+
+		segmentsList[i] = cleanSegments
+	}
+
+	if len(segmentsList[0]) == 0 {
+		return rids
+	}
+	expectedLength := len(segmentsList[0])
+
+	for i := 1; i < len(segmentsList); i++ {
+		if len(segmentsList[i]) != expectedLength {
+			return rids
+		}
+	}
+
+	varyingIndex := -1
+
+	for i := 0; i < expectedLength; i++ {
+		referenceSegment := segmentsList[0][i]
+		isVarying := false
+
+		for j := 1; j < len(segmentsList); j++ {
+			if segmentsList[j][i] != referenceSegment {
+				isVarying = true
+				break
+			}
+		}
+
+		if isVarying {
+			if varyingIndex != -1 {
+				return rids
+			}
+			varyingIndex = i
+		}
+	}
+
+	if varyingIndex != -1 {
+		for i, segments := range segmentsList {
+			rids[i].IdentityParam = segments[varyingIndex]
+		}
+		return rids
+	}
+
+	return rids
 }
 
 type TgcWithProducts struct {

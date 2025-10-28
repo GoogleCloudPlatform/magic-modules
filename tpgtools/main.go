@@ -77,9 +77,12 @@ func main() {
 	if *version == GA_VERSION {
 		terraformResourceDirectory = "google"
 		terraformProviderModule = "github.com/hashicorp/terraform-provider-google/google"
-	} else if *version == ALPHA_VERSION {
+	} else if *vFilter == ALPHA_VERSION.V {
 		terraformResourceDirectory = "google-private"
-		terraformProviderModule = "internal/terraform-next"
+		terraformProviderModule = "github.com/hashicorp/terraform-provider-google-private"
+	} else if *vFilter != "" {
+		terraformResourceDirectory = "google-" + *vFilter
+		terraformProviderModule = "github.com/hashicorp/terraform-provider-google-" + *vFilter
 	}
 
 	generatedResources := make([]*Resource, 0, len(resourcesForVersion))
@@ -110,7 +113,6 @@ func main() {
 	}
 
 	// product specific generation
-	generateProductsFile("provider_dcl_endpoints", productsForVersion)
 	generateProductsFile("provider_dcl_client_creation", productsForVersion)
 
 	if oPath == nil || *oPath == "" {

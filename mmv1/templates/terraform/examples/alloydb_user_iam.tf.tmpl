@@ -16,6 +16,8 @@ resource "google_alloydb_cluster" "default" {
   initial_user {
     password = "{{index $.Vars "alloydb_cluster_pass"}}"
   }
+
+  deletion_protection = false
 }
 
 data "google_project" "project" {}

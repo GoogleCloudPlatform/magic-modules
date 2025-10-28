@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 )
 
 // Remove the Terraform attribution label "goog-terraform-provisioned" from labels
@@ -60,4 +60,19 @@ func MergeFlattenedProperties(hclData map[string]interface{}, flattenedProp inte
 		hclData[k] = v
 	}
 	return nil
+}
+
+// Checks if all values in the map are nil
+func AllValuesAreNil(m map[string]interface{}) bool {
+	if len(m) == 0 {
+		return true
+	}
+
+	for _, v := range m {
+		if v != nil {
+			return false
+		}
+	}
+
+	return true
 }

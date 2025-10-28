@@ -254,6 +254,7 @@ properties:
               - 'patch_config.0.yum.0.excludes'
               - 'patch_config.0.yum.0.exclusive_packages'
           - name: 'minimal'
+            send_empty_value: true
             type: Boolean
             description: |
               Will cause patch to run yum update-minimal instead.

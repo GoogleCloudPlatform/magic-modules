@@ -111,6 +111,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Bigquerydatapolicy",
         "path" to "./google-beta/services/bigquerydatapolicy"
     ),
+    "bigquerydatapolicyv2" to mapOf(
+        "name" to "bigquerydatapolicyv2",
+        "displayName" to "Bigquerydatapolicyv2",
+        "path" to "./google-beta/services/bigquerydatapolicyv2"
+    ),
     "bigquerydatatransfer" to mapOf(
         "name" to "bigquerydatatransfer",
         "displayName" to "Bigquerydatatransfer",
@@ -562,12 +567,12 @@ var ServicesListBeta = mapOf(
         "path" to "./google-beta/services/mlengine"
     ),
     "modelarmor" to mapOf(
-        "name" to "ModelArmor",
+        "name" to "modelarmor",
         "displayName" to "ModelArmor",
         "path" to "./google-beta/services/modelarmor"
     ),
     "modelarmorglobal" to mapOf(
-        "name" to "ModelArmorGlobal",
+        "name" to "modelarmorglobal",
         "displayName" to "ModelArmorGlobal",
         "path" to "./google-beta/services/modelarmorglobal"
     ),
@@ -605,6 +610,11 @@ var ServicesListBeta = mapOf(
         "name" to "notebooks",
         "displayName" to "Notebooks",
         "path" to "./google-beta/services/notebooks"
+    ),
+    "observability" to mapOf(
+        "name" to "observability",
+        "displayName" to "Observability",
+        "path" to "./google-beta/services/observability"
     ),
     "oracledatabase" to mapOf(
         "name" to "oracledatabase",
@@ -695,6 +705,11 @@ var ServicesListBeta = mapOf(
         "name" to "runtimeconfig",
         "displayName" to "Runtimeconfig",
         "path" to "./google-beta/services/runtimeconfig"
+    ),
+    "saasruntime" to mapOf(
+        "name" to "saasruntime",
+        "displayName" to "SaaS Runtime",
+        "path" to "./google-beta/services/saasruntime"
     ),
     "secretmanager" to mapOf(
         "name" to "secretmanager",
@@ -810,11 +825,6 @@ var ServicesListBeta = mapOf(
         "name" to "tags",
         "displayName" to "Tags",
         "path" to "./google-beta/services/tags"
-    ),
-    "tpu" to mapOf(
-        "name" to "tpu",
-        "displayName" to "Tpu",
-        "path" to "./google-beta/services/tpu"
     ),
     "tpuv2" to mapOf(
         "name" to "tpuv2",

@@ -396,7 +396,7 @@ properties:
                 A description of a scaling schedule.
   - name: 'target'
     type: String
-    # TODO(#303): resourceref once RegionIGM exists
+    # TODO: #303 resourceref once RegionIGM exists
     # resource: 'RegionInstanceGroupManager'
     # imports: 'selfLink'
     description: |

@@ -7,6 +7,9 @@ service/accessapproval:
 service/accesscontextmanager:
   resources:
   - google_access_context_manager_.*
+service/aiplatform-agent-engine:
+  resources:
+  - google_vertex_ai_reasoning_engine
 service/aiplatform-colab-enterprise:
   resources:
   - google_colab_.*
@@ -29,6 +32,10 @@ service/aiplatform-prediction:
   - google_vertex_ai_endpoint
   - google_vertex_ai_deployment_resource_pool
   - google_ml_engine_model
+  - google_vertex_ai_endpoint_with_model_garden_deployment
+service/aiplatform-rag-engine:
+  resources:
+  - google_vertex_ai_rag_engine_config
 service/aiplatform-tensorboard:
   resources:
   - google_vertex_ai_tensorboard
@@ -344,7 +351,15 @@ service/developerconnect:
   - google_developer_connect_.*
 service/dialogflow:
   resources:
-  - google_dialogflow_.*
+  - google_dialogflow_conversation_profile
+service/dialogflow-cx:
+  resources:
+  - google_dialogflow_cx_.*
+  - google_dialogflow_agent
+  - google_dialogflow_encryption_spec
+  - google_dialogflow_entity_type
+  - google_dialogflow_fulfillment
+  - google_dialogflow_intent
 service/discoveryengine:
   resources:
   - google_discovery_engine_.*
@@ -399,6 +414,7 @@ service/firestore-controlplane:
   resources:
   - google_firestore_backup_schedule
   - google_firestore_database
+  - google_firestore_user_creds
 service/firestore-dataplane:
   resources:
   - google_datastore_index
@@ -468,6 +484,7 @@ service/integrations:
 service/logging:
   resources:
   - google_logging_.*
+  - google_observability_.*
 service/looker-core:
   resources:
   - google_looker_instance
@@ -645,6 +662,9 @@ service/run:
   team: cloud-run-control-plane
   resources:
   - google_cloud_run_.*
+service/saasservicemgmt:
+  resources:
+  - google_saas_runtime_.*
 service/secretmanager:
   resources:
   - google_secret_manager_.*

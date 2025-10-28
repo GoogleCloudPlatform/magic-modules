@@ -43,7 +43,6 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/locations/{{location}}/jobs/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/jobs/{{name}}'
     - '{{name}}'
@@ -440,6 +439,10 @@ properties:
                         description: |-
                           Path within the container at which the volume should be mounted. Must not contain ':'. For Cloud SQL volumes, it can be left empty, or must otherwise be /cloudsql. All instances defined in the Volume will be available as /cloudsql/[instance]. For more information on Cloud SQL volumes, visit https://cloud.google.com/sql/docs/mysql/connect-run
                         required: true
+                      - name: 'subPath'
+                        type: String
+                        description: |-
+                          Path within the volume from which the container's volume should be mounted.
                 - name: 'workingDir'
                   type: String
                   description: |-
@@ -666,7 +669,6 @@ properties:
                         If true, mount this volume as read-only in all mounts. If false, mount this volume as read-write.
                     - name: 'mountOptions'
                       type: Array
-                      min_version: 'beta'
                       description: |
                         A list of flags to pass to the gcsfuse command for configuring this volume.
                         Flags should be passed without leading dashes.
@@ -781,6 +783,9 @@ properties:
                 description:
                   The GPU to attach to an instance. See https://cloud.google.com/run/docs/configuring/jobs/gpu for configuring GPU.
                 required: true
+          - name: 'gpuZonalRedundancyDisabled'
+            type: Boolean
+            description: True if GPU zonal redundancy is disabled on this execution.
   - name: 'observedGeneration'
     type: String
     description: |

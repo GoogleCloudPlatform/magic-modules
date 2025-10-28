@@ -1,0 +1,7 @@
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	m, err := tpgresource.ReplaceVarsForId(d, config, "{{"projects/{{project}}/locations/{{location}}/connections/{{name}}"}}")
+	if err != nil {
+		return nil, fmt.Errorf("Error constructing name: %s", err)
+	}
+	return m, nil
+}

@@ -11,10 +11,10 @@ import (
 	crmv3 "google.golang.org/api/cloudresourcemanager/v3"
 	"google.golang.org/api/storage/v1"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 
 	"go.uber.org/zap"
 )
@@ -196,7 +196,13 @@ func (m *manager) fetchAncestors(config *transport_tpg.Config, tfData tpgresourc
 			return []string{unknownOrg}, nil
 		}
 		key = projectKey
-
+	case "apigee.googleapis.com/Instance":
+		// Project is used to find the ancestors.
+		// org_id in resource `google_apigee_instance` is the apigee org id under a project.
+		if projectKey == "" {
+			return []string{unknownOrg}, nil
+		}
+		key = projectKey
 	default:
 		switch {
 		case orgOK:
