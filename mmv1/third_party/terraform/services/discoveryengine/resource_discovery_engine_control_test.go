@@ -22,17 +22,17 @@ func TestAccDiscoveryEngineControl_discoveryengineControlBasicExample_update(t *
 				Config: testAccDiscoveryEngineControl_discoveryengineControlBasicExample_basic(context),
 			},
 			{
-				ResourceName:            "google_discovery_engine_control.basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_discovery_engine_control.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccDiscoveryEngineControl_discoveryengineControlBasicExample_update(context),
 			},
 			{
-				ResourceName:            "google_discovery_engine_control.basic",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_discovery_engine_control.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 		CheckDestroy: testAccCheckDiscoveryEngineControlDestroyProducer(t),
