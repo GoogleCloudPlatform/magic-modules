@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 ---
 name: 'HostGroup'
 description: |
-  Hostgroups define the hosts (aka initiators) that can access the specific GCNV volumes.
+  Hostgroups define the hosts (aka initiators) that can access the specific Google Cloud Netapp Volumes.
   Hostgroup is a regional resource and independent of the volumes or any other resource
 references:
   guides:
@@ -51,7 +51,6 @@ examples:
     primary_resource_id: 'test_host_group'
     vars:
       host_group_name: 'test-host-group'
-    exclude_test: true
 parameters:
   - name: 'location'
     type: String

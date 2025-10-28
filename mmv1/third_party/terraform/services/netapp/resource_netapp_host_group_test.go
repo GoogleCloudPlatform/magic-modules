@@ -1,6 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-
 package netapp_test
 
 import (
@@ -12,7 +9,7 @@ import (
 )
 
 func TestAccNetappHostGroup_HostGroupCreateExample_Update(t *testing.T) {
-	// t.Parallel()
+	t.Parallel()
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
@@ -61,9 +58,7 @@ func testAccNetappHostGroup_HostGroupCreateExample_Update(context map[string]int
 	resource "google_netapp_host_group" "test_host_group" {
 		name = "tf-test-test-host-group%{random_suffix}"
 		location = "us-central1"
-		os_type = "LINUX"
-		type = "ISCSI_INITIATOR"
-		hosts = ["iqn.1994-05.com.redhat:8518f79d5366"]
+		hosts = ["iqn.1994-05.com.redhat:8518f79d5366", "iqn.1993-08.org.debian:01:10ddd07f338"]
 		description = "Terraform created host group"
 		labels = { 
 			"creator": "terraform"
