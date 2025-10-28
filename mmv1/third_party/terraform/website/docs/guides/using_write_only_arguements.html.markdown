@@ -23,7 +23,7 @@ The following sections show how to use the new write-only argument in the Google
 
 ### Applying a write-only argument
 
-The following example shows how to apply a write-only argument. All write-only arguments are marked with the `wo` suffix and can not be used with the argument that it's mirroring. For example, `secret_data_wo` can not be used with `secret_data`.
+The following example shows how to apply a write-only argument. All write-only arguments are marked with the `wo` suffix and can't be used with the argument that it's mirroring. For example, `secret_data_wo` can not be used with `secret_data`.
 
 ```hcl
 resource "google_sql_database_instance" "instance" {
