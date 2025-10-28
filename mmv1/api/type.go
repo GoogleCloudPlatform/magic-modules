@@ -548,7 +548,7 @@ func (t *Type) GetPrefix() string {
 		if t.ParentMetadata == nil {
 			nestedPrefix := ""
 			// TODO: Use the nestedPrefix for tgc provider to be consistent with terraform provider
-			if t.ResourceMetadata.NestedQuery != nil && t.ResourceMetadata.Compiler != "terraformgoogleconversion-codegen" {
+			if t.ResourceMetadata.NestedQuery != nil && !strings.Contains(t.ResourceMetadata.Compiler, "terraformgoogleconversion") {
 				nestedPrefix = "Nested"
 			}
 
