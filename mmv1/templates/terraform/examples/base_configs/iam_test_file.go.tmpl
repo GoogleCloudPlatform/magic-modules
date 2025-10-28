@@ -369,7 +369,7 @@ func TestAcc{{ $.ResourceName }}IamPolicyGenerated_withCondition(t *testing.T) {
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_policy.foo",
-				ImportStateIdFunc: generate{{ $.ResourceName }}IAMPolicyStateID("foo"),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMPolicyStateID("{{ $.IamTerraformName }}_policy.foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
