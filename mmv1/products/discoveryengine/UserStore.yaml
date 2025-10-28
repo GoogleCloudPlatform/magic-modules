@@ -22,12 +22,9 @@ self_link: 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_
 # Update API is also used as create API.
 create_url: 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}?updateMask=defaultLicenseConfig,enableLicenseAutoRegister,enableExpiredLicenseAutoUpdate'
 create_verb: 'PATCH'
-update_url: 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}'
 update_verb: 'PATCH'
 update_mask: true
 exclude_delete: true
-import_format:
-  - 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}'
 timeouts:
   insert_minutes: 5
   update_minutes: 5
