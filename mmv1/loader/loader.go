@@ -1,6 +1,7 @@
 package loader
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -105,6 +106,12 @@ func (l *Loader) batchLoadProducts(productNames []string) map[string]*api.Produc
 	loadFailureCount := 0
 	for result := range productChan {
 		if result.err != nil {
+			// Check if the error is the specific "version not found" error
+			var versionErr *api.ErrProductVersionNotFound
+			if errors.As(result.err, &versionErr) {
+				continue
+			}
+
 			loadFailureCount++
 			log.Printf("Error loading %s: %v", result.name, result.err)
 			continue

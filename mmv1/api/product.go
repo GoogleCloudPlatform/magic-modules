@@ -120,7 +120,7 @@ func (p *Product) Load(productName string, version string, overrideDirectory str
 
 	// Check if product exists at the requested version
 	if !p.ExistsAtVersionOrLower(version) {
-		return fmt.Errorf("%s does not have a '%s' version", productName, version)
+		return &ErrProductVersionNotFound{ProductName: productName, Version: version}
 	}
 
 	// Compile all resources
