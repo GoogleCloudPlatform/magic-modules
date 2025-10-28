@@ -24,6 +24,8 @@ self_link: 'projects/{{project}}/locations/{{location}}/collections/{{collection
 create_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/controls?controlId={{control_id}}'
 update_verb: 'PATCH'
 update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/controls/{{control_id}}'
 timeouts:
   insert_minutes: 5
   update_minutes: 5
