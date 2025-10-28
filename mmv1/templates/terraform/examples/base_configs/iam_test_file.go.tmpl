@@ -654,7 +654,7 @@ func generate{{ $.ResourceName }}IAMPolicyStateID(iamResourceName string) func (
 		}
 		fmt.Printf("raw state %s", rawState)
 		var values []string
-		for _, param := range {{ $.IamResourceParams }} {
+		for _, param := range {{ printf "%#v" $.IamResourceParams }} {
 			values = append(values, tpgresource.GetResourceNameFromSelfLink(rawState[param]))
 		}
 		return strings.Join(values, " "), nil
@@ -673,7 +673,7 @@ func generate{{ $.ResourceName }}IAMBindingStateID(iamResourceAddr string) func 
 		}
 		fmt.Printf("raw state %s", rawState)
 		var values []string
-		for _, param := range {{ $.IamResourceParams }} {
+		for _, param := range {{ printf "%#v" $.IamResourceParams }} {
 			values = append(values, tpgresource.GetResourceNameFromSelfLink(rawState[param]))
 		}
 		values = append(values, rawState["role"])
@@ -694,7 +694,7 @@ func generate{{ $.ResourceName }}IAMMemberStateID(iamResourceName string) func (
 		}
 		fmt.Printf("raw state %s", rawState)
 		var values []string
-		for _, param := range {{ $.IamResourceParams }} {
+		for _, param := range {{ printf "%#v" $.IamResourceParams }} {
 			values = append(values, tpgresource.GetResourceNameFromSelfLink(rawState[param]))
 		}
 		values = append(values, rawState["role"])
