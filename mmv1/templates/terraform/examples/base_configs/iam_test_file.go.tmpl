@@ -50,7 +50,7 @@ func TestAcc{{ $.ResourceName }}IamBindingGenerated(t *testing.T) {
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_binding.foo",
-				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("foo")
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("{{ $.IamTerraformName }}_binding.foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -62,7 +62,7 @@ func TestAcc{{ $.ResourceName }}IamBindingGenerated(t *testing.T) {
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_binding.foo",
-				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("foo")
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("{{ $.IamTerraformName }}_binding.foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -97,7 +97,7 @@ func TestAcc{{ $.ResourceName }}IamMemberGenerated(t *testing.T) {
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_member.foo",
-				ImportStateIdFunc: generate{{ $.ResourceName }}IAMMemberStateID("foo")
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMMemberStateID("{{ $.IamTerraformName }}_member.foo")
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -138,7 +138,7 @@ func TestAcc{{ $.ResourceName }}IamPolicyGenerated(t *testing.T) {
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_policy.foo",
-				ImportStateIdFunc: generate{{ $.ResourceName }}IAMPolicyStateID("foo"),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMPolicyStateID("{{ $.IamTerraformName }}_policy.foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -149,7 +149,7 @@ func TestAcc{{ $.ResourceName }}IamPolicyGenerated(t *testing.T) {
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_policy.foo",
-				ImportStateIdFunc: generate{{ $.ResourceName }}IAMPolicyStateID("foo"),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMPolicyStateID("{{ $.IamTerraformName }}_policy.foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -183,7 +183,7 @@ func TestAcc{{ $.ResourceName }}IamBindingGenerated_withCondition(t *testing.T) 
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_binding.foo",
-				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("foo"),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("{{ $.IamTerraformName }}_binding.foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -219,19 +219,19 @@ func TestAcc{{ $.ResourceName }}IamBindingGenerated_withAndWithoutCondition(t *t
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_binding.foo",
-				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("foo"),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("{{ $.IamTerraformName }}_binding.foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_binding.foo2",
-				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("foo2"),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("{{ $.IamTerraformName }}_binding.foo2"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_binding.foo3",
-				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("foo3"),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("{{ $.IamTerraformName }}_binding.foo3"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -266,7 +266,7 @@ func TestAcc{{ $.ResourceName }}IamMemberGenerated_withCondition(t *testing.T) {
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_member.foo",
-				ImportStateIdFunc: generate{{ $.ResourceName }}IAMMemberStateID("foo"),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMMemberStateID("{{ $.IamTerraformName }}_member.foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -302,19 +302,19 @@ func TestAcc{{ $.ResourceName }}IamMemberGenerated_withAndWithoutCondition(t *te
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_member.foo",
-				ImportStateIdFunc: generate{{ $.ResourceName }}IAMMemberStateID("foo"),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMMemberStateID("{{ $.IamTerraformName }}_member.foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_member.foo2",
-				ImportStateIdFunc: generate{{ $.ResourceName }}IAMMemberStateID("foo2"),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMMemberStateID("{{ $.IamTerraformName }}_member.foo2"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_member.foo3",
-				ImportStateIdFunc: generate{{ $.ResourceName }}IAMMemberStateID("foo3"),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMMemberStateID("{{ $.IamTerraformName }}_member.foo3"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -668,9 +668,8 @@ func generate{{ $.ResourceName }}IAMPolicyStateID(iamResourceName string) func (
 	}
 }
 
-func generate{{ $.ResourceName }}IAMBindingStateID(iamResourceName string) func (*terraform.State) (string, error) {
+func generate{{ $.ResourceName }}IAMBindingStateID(iamResourceAddr string) func (*terraform.State) (string, error) {
 	return func (state *terraform.State) (string, error) {
-		iamResourceAddr := "{{ $.IamTerraformName }}_binding." + iamResourceName
 		var rawState map[string]string
 		for _, m := range state.Modules {
 			if len(m.Resources) > 0 {
