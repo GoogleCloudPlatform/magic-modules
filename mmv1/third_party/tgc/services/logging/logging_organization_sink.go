@@ -88,6 +88,13 @@ func GetLogOrganizationSinkApiObject(d tpgresource.TerraformResourceData, config
 		obj["includeChildren"] = includeChildrenProp
 	}
 
+	interceptChildrenProp, err := expandLogOrganizationSinkInterceptChildren(d.Get("intercept_children"), d, config)
+	if err != nil {
+		return nil, err
+	} else if v, ok := d.GetOkExists("intercept_children"); !tpgresource.IsEmptyValue(reflect.ValueOf(interceptChildrenProp)) && (ok || !reflect.DeepEqual(v, interceptChildrenProp)) {
+		obj["interceptChildren"] = interceptChildrenProp
+	}
+
 	bigqueryOptionsProp, err := expandLogOrganizationSinkBigqueryOptions(d.Get("bigquery_options"), d, config)
 	if err != nil {
 		return nil, err
@@ -119,6 +126,10 @@ func expandLogOrganizationSinkDisabled(v interface{}, d tpgresource.TerraformRes
 }
 
 func expandLogOrganizationSinkIncludeChildren(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandLogOrganizationSinkInterceptChildren(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 

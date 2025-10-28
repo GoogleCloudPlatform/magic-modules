@@ -17,6 +17,19 @@ resource "google_logging_organization_sink" "my_sink" {
   }
 }
 
+resource "google_logging_organization_sink" "my_sink_with_intercept" {
+  name             = "gg-asset-88093-71a3-sink-with-intercept"
+  org_id           = "{{.OrgID}}"
+  destination      = "bigquery.googleapis.com/projects/{{.Provider.project}}/datasets/${google_bigquery_dataset.my_dataset.dataset_id}"
+  intercept_children = true
+  exclusions {
+    name        = "gg-asset-88093-71a3-exclusion"
+    description = "Exclude all GCE instance logs"
+    filter      = "resource.type = gce_instance"
+    disabled    = true
+  }
+}
+
 resource "google_bigquery_dataset_iam_member" "my_iam" {
   project    = "{{.Provider.project}}"
   dataset_id = google_bigquery_dataset.my_dataset.dataset_id

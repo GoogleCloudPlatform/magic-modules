@@ -53,6 +53,33 @@
     ]
   },
   {
+    "name": "//logging.googleapis.com/organizations/{{.OrgID}}/sinks/gg-asset-88093-71a3-sink-with-intercept",
+    "asset_type": "logging.googleapis.com/LogSink",
+    "ancestry_path": "organizations/{{.OrgID}}",
+    "resource": {
+      "version": "v2",
+      "discovery_document_uri": "https://logging.googleapis.com/$discovery/rest",
+      "discovery_name": "LogSink",
+      "parent": "//cloudresourcemanager.googleapis.com/organizations/{{.OrgID}}",
+      "data": {
+        "destination": "bigquery.googleapis.com/projects/{{.Provider.project}}/datasets/my_dataset",
+        "exclusions": [
+          {
+            "description": "Exclude all GCE instance logs",
+            "disabled": true,
+            "filter": "resource.type = gce_instance",
+            "name": "gg-asset-88093-71a3-exclusion"
+          }
+        ],
+        "interceptChildren": true,
+        "name": "gg-asset-88093-71a3-sink-with-intercept"
+      }
+    },
+    "ancestors": [
+      "organizations/{{.OrgID}}"
+    ]
+  },
+  {
     "name": "//bigquery.googleapis.com/projects/{{.Provider.project}}/datasets/my_dataset",
     "asset_type": "bigquery.googleapis.com/Dataset",
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
