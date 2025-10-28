@@ -24,9 +24,6 @@ self_link: 'projects/{{project}}/locations/{{location}}/collections/{{collection
 create_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/controls?controlId={{control_id}}'
 update_verb: 'PATCH'
 update_mask: true
-delete_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/controls/{{control_id}}'
-import_format:
-  - 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/controls/{{control_id}}'
 timeouts:
   insert_minutes: 5
   update_minutes: 5
@@ -50,7 +47,7 @@ parameters:
     immutable: true
   - name: 'collectionId'
     type: String
-    description: 'The collection ID.'
+    description: 'The collection ID. Currently only accepts "default_collection".'
     url_param_only: true
     immutable: true
     default_value: 'default_collection'
