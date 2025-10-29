@@ -1,8 +1,8 @@
 package compute_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
+
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
@@ -25,19 +25,19 @@ func TestAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRule
 			{
 				Config: testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRulePreUpdateExample(context),
 			},
-                        {
-                                ResourceName:      "google_compute_organization_security_policy_rule.policy",
-                                ImportState:       true,
-                                ImportStateVerify: true,
-                        },
-                        {
-                                Config: testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRulePostUpdateExample(context),
-                        },
-                        {
-                                ResourceName:      "google_compute_organization_security_policy_rule.policy",
-                                ImportState:       true,
-                                ImportStateVerify: true,
-                        },
+			{
+				ResourceName:      "google_compute_organization_security_policy_rule.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRulePostUpdateExample(context),
+			},
+			{
+				ResourceName:      "google_compute_organization_security_policy_rule.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -110,4 +110,3 @@ resource "google_compute_organization_security_policy_rule" "policy" {
 }
 `, context)
 }
-{{- end }}

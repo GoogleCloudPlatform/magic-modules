@@ -2,6 +2,7 @@ package compute_test
 
 import (
 	"testing"
+
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
@@ -24,19 +25,21 @@ func TestAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyUpdateEx
 			{
 				Config: testAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyPreUpdateExample(context),
 			},
-                        {
-                                ResourceName:      "google_compute_organization_security_policy.policy",
-                                ImportState:       true,
-                                ImportStateVerify: true,
-                        },
-                        {
+			{
+				ResourceName:            "google_compute_organization_security_policy.policy",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
+			},
+			{
 				Config: testAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyPostUpdateExample(context),
-                        },
-                        {
-                                ResourceName:      "google_compute_organization_security_policy.policy",
-                                ImportState:       true,
-                                ImportStateVerify: true,
-                        },
+			},
+			{
+				ResourceName:            "google_compute_organization_security_policy.policy",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
+			},
 		},
 	})
 }
@@ -56,9 +59,10 @@ func TestAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyShortNam
 				Config: testAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyShortName(context),
 			},
 			{
-				ResourceName:      "google_compute_organization_security_policy.policy",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_organization_security_policy.policy",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent"},
 			},
 		},
 	})
@@ -67,8 +71,8 @@ func TestAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyShortNam
 func testAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyPreUpdateExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_organization_security_policy" "policy" {
-  display_name = "tf-test%{random_suffix}"
-  parent       = "organizations/%{org_id}"
+  short_name = "tf-test%{random_suffix}"
+  parent     = "organizations/%{org_id}"
 }
 `, context)
 }
@@ -76,9 +80,9 @@ resource "google_compute_organization_security_policy" "policy" {
 func testAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyPostUpdateExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_organization_security_policy" "policy" {
-  display_name = "tf-test%{random_suffix}"
-  parent       = "organizations/%{org_id}"
-  description  = "Updated description."
+  short_name  = "tf-test%{random_suffix}"
+  parent      = "organizations/%{org_id}"
+  description = "Updated description."
 }
 `, context)
 }
