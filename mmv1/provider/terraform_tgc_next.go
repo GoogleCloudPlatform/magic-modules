@@ -82,7 +82,7 @@ func NewTerraformGoogleConversionNext(product *api.Product, versionName string, 
 	return t
 }
 
-func (tgc TerraformGoogleConversionNext) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
+func (tgc TerraformGoogleConversionNext) Generate(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 	for _, object := range tgc.Product.Objects {
 		object.ExcludeIfNotInVersion(&tgc.Version)
 

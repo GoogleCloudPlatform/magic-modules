@@ -43,7 +43,6 @@ func TestAccComputeRegionHealthCheck_tcp_update(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeRegionHealthCheck_grpcWithTls_create(t *testing.T) {
 	t.Parallel()
 
@@ -51,7 +50,7 @@ func TestAccComputeRegionHealthCheck_grpcWithTls_create(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionHealthCheckDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -69,9 +68,7 @@ func TestAccComputeRegionHealthCheck_grpcWithTls_create(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeRegionHealthCheck_grpcWithTls_update(t *testing.T) {
 	t.Parallel()
 
@@ -79,7 +76,7 @@ func TestAccComputeRegionHealthCheck_grpcWithTls_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRegionHealthCheckDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -105,7 +102,6 @@ func TestAccComputeRegionHealthCheck_grpcWithTls_update(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func TestAccComputeRegionHealthCheck_ssl_port_spec(t *testing.T) {
 	t.Parallel()
@@ -281,11 +277,9 @@ resource "google_compute_region_health_check" "foobar" {
 `, hckName)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeRegionHealthCheck_grpcWithTls(hckName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_health_check" "foobar" {
-  provider            = "google-beta"
   check_interval_sec  = 3
   description         = "Resource created for Terraform acceptance testing"
   healthy_threshold   = 3
@@ -298,13 +292,10 @@ resource "google_compute_region_health_check" "foobar" {
 }
 `, hckName)
 }
-{{- end }}
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeRegionHealthCheck_grpcWithTls_update(hckName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_health_check" "foobar" {
-  provider            = "google-beta"
   check_interval_sec  = 3
   healthy_threshold   = 10
   name                = "tf-test-health-test-%s"
@@ -316,7 +307,6 @@ resource "google_compute_region_health_check" "foobar" {
 }
 `, hckName)
 }
-{{- end }}
 
 func testAccComputeRegionHealthCheck_ssl(hckName string) string {
 	return fmt.Sprintf(`
