@@ -15,6 +15,7 @@ require (
 
 require (
 	cloud.google.com/go/storage v1.50.0
+	github.com/fsnotify/fsnotify v1.9.0
 	github.com/google/go-cmp v0.6.0
 	github.com/google/go-github/v68 v68.0.0
 	github.com/otiai10/copy v1.12.0
