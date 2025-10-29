@@ -41,6 +41,8 @@ custom_code:
 examples:
   - name: 'organization_security_policy_basic'
     primary_resource_id: 'policy'
+    vars:
+      short_name: "my-short-name"
     test_env_vars:
       org_id: 'ORG_ID'
 parameters:
@@ -84,7 +86,7 @@ properties:
     description: |
       The type indicates the intended use of the security policy. This field can be set only at resource creation time.
 
-      **NOTE** : 'FIREWALL' type is deprecated. Please use 'google_compute_firewall_policy' instead."
+      **NOTE** : 'FIREWALL' type is deprecated and will be removed in a future major release. Please use 'google_compute_firewall_policy' instead."
     immutable: true
     default_from_api: true
     enum_values:

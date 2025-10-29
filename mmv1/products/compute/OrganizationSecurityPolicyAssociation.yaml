@@ -43,6 +43,8 @@ read_error_transform: 'transformSecurityPolicyAssociationReadError'
 examples:
   - name: 'organization_security_policy_association_basic'
     primary_resource_id: 'policy'
+    vars:
+      short_name: "my-short-name"
     test_env_vars:
       org_id: 'ORG_ID'
 parameters:

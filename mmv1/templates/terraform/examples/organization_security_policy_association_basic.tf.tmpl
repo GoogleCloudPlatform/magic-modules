@@ -5,7 +5,7 @@ resource "google_folder" "security_policy_target" {
 }
 
 resource "google_compute_organization_security_policy" "{{$.PrimaryResourceId}}" {
-  short_name = "tf-test%{random_suffix}"
+  short_name = "{{index $.Vars "short_name"}}"
   parent     = google_folder.security_policy_target.name
 }
 
