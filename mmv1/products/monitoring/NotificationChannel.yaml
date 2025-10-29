@@ -108,6 +108,7 @@ properties:
         description: |
           An authorization token for a notification channel. Channel types that support this field include: slack
         sensitive: true
+        write_only: true
         exactly_one_of:
           - 'sensitive_labels.0.auth_token'
           - 'sensitive_labels.0.password'
@@ -117,6 +118,7 @@ properties:
         description: |
           An password for a notification channel. Channel types that support this field include: webhook_basicauth
         sensitive: true
+        write_only: true
         exactly_one_of:
           - 'sensitive_labels.0.auth_token'
           - 'sensitive_labels.0.password'
