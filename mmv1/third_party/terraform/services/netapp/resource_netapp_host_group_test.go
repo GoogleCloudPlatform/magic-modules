@@ -58,6 +58,7 @@ func testAccNetappHostGroup_HostGroupCreateExample_Update(context map[string]int
 	resource "google_netapp_host_group" "test_host_group" {
 		name = "tf-test-test-host-group%{random_suffix}"
 		location = "us-central1"
+		os_type = "LINUX"
 		hosts = ["iqn.1994-05.com.redhat:8518f79d5366", "iqn.1993-08.org.debian:01:10ddd07f338"]
 		description = "Terraform created host group"
 		labels = { 
