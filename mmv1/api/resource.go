@@ -797,28 +797,31 @@ func (r *Resource) initializeConstraintGroups() {
 	r.constraintGroupRegistry = make(map[string]*[]string)
 
 	props := r.AllNestedProperties(google.Concat(r.RootProperties(), r.UserVirtualFields()))
-	for _, p := range props {
-		attach := func(groupType string, raw []string, target **[]string) {
-			if len(raw) == 0 {
-				return
-			}
-			sorted := slices.Clone(raw)
-			slices.Sort(sorted)
-			key := fmt.Sprintf("%s|%s", groupType, strings.Join(sorted, ","))
-			if existing, ok := r.constraintGroupRegistry[key]; ok {
-				*target = existing
-			} else {
-				copySlice := slices.Clone(raw)
-				r.constraintGroupRegistry[key] = &copySlice
-				*target = &copySlice
-			}
-		}
-		attach("conflicts", p.Conflicts, &p.ConflictsGroup)
-		attach("atleastoneof", p.AtLeastOneOf, &p.AtLeastOneOfGroup)
-		attach("exactlyoneof", p.ExactlyOneOf, &p.ExactlyOneOfGroup)
-		attach("requiredwith", p.RequiredWith, &p.RequiredWithGroup)
+	for _, prop := range props {
+		prop.ConflictsGroup = r.attachConstraintGroup("conflicts", prop.Conflicts)
+		prop.AtLeastOneOfGroup = r.attachConstraintGroup("at_least_one_of", prop.AtLeastOneOf)
+		prop.ExactlyOneOfGroup = r.attachConstraintGroup("exactly_one_of", prop.ExactlyOneOf)
+		prop.RequiredWithGroup = r.attachConstraintGroup("required_with", prop.RequiredWith)
 	}
 	r.constraintGroupsInitialized = true
+}
+
+func (r *Resource) attachConstraintGroup(groupType string, source []string) *[]string {
+	if len(source) == 0 {
+		return nil
+	}
+
+	sorted := slices.Clone(source)
+	slices.Sort(sorted)
+	key := fmt.Sprintf("%s|%s", groupType, strings.Join(sorted, ","))
+
+	if existing, ok := r.constraintGroupRegistry[key]; ok {
+		return existing
+	}
+
+	newGroup := slices.Clone(source)
+	r.constraintGroupRegistry[key] = &newGroup
+	return &newGroup
 }
 
 func buildWriteOnlyField(name string, versionFieldName string, originalField *Type) *Type {
