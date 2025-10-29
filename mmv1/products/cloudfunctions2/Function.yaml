@@ -600,7 +600,7 @@ properties:
         min_version: 'beta'
         type: Enum
         description: 'Egress settings for direct VPC. If not provided, it defaults to VPC_EGRESS_PRIVATE_RANGES_ONLY.'
-        default_value: 'VPC_EGRESS_PRIVATE_RANGES_ONLY'
+        default_from_api: true
         enum_values:
           - 'VPC_EGRESS_ALL_TRAFFIC'
           - 'VPC_EGRESS_PRIVATE_RANGES_ONLY'
