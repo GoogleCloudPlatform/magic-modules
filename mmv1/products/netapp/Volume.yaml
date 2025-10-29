@@ -652,6 +652,7 @@ properties:
             Device identifier of the Block volume. This represents lun_serial_number
             for iSCSI volumes
           default_from_api: true
+          output: true
         - name: 'sizeGib'
           type: Integer
           description: |
@@ -665,6 +666,7 @@ properties:
           description: |
             The OS type of the volume.
             This field can't be changed after the block device is created.
+          immutable: true
           enum_values:
             - 'LINUX'
             - 'WINDOWS'
