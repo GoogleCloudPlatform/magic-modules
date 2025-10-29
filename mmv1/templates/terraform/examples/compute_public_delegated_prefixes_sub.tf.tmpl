@@ -1,0 +1,34 @@
+# public_delegated_sub_prefixes blocks can only be defined
+# after the base google_compute_public_delegated_prefix has been created.
+
+resource "google_compute_public_advertised_prefix" "advertised" {
+  name                = "{{index $.Vars "prefixes_name"}}"
+  description         = "{{index $.TestEnvVars "desc"}}"
+  dns_verification_ip = "127.127.0.0"
+  ip_cidr_range       = "127.127.0.0/16"
+}
+
+resource "google_compute_public_delegated_prefix" "{{$.PrimaryResourceId}}" {
+  name          = "{{index $.Vars "prefixes_name"}}"
+  region        = "us-central1"
+  description   = "my description"
+  ip_cidr_range = "127.127.0.0/24"
+  parent_prefix = google_compute_public_advertised_prefix.advertised.id
+
+  # Delegated sub prefixes cannot be defined at creation time
+  # but can be defined during updates.
+
+  public_delegated_sub_prefixes {
+    name              = "{{index $.Vars "sub_prefixes_name"}}-1"
+    description       = "My delegated sub-prefix 1"
+    ip_cidr_range     = "127.127.0.0/25"
+    delegatee_project = "my-addresses-project"
+  }
+
+  public_delegated_sub_prefixes {
+    name              = "{{index $.Vars "sub_prefixes_name"}}-2"
+    description       = "My delegated sub-prefix 2"
+    ip_cidr_range     = "127.127.0.128/25"
+    delegatee_project = "my-addresses-project"
+  }
+}
