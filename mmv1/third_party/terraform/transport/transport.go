@@ -189,3 +189,90 @@ func IsApiNotEnabledError(err error) bool {
 	}
 	return false
 }
+
+type GetPaginatedItemsOptions struct {
+	ResourceData         *schema.ResourceData                                                                 // Data for the resource that is being paginated
+	Config               *Config                                                                              // Config for the provider
+	BillingProject       *string                                                                              // Billing project for the request
+	UserAgent            string                                                                               // User agent for the request
+	URL                  string                                                                               // URL for the request, e.g. "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a/instances"
+	ListFlattener        func(config *Config, res []map[string]interface{}) ([]map[string]interface{}, error) // Function to flatten the list of items
+	Params               map[string]string                                                                    // Parameters for the request
+	ResourceToList       string                                                                               // Resource to list, e.g. "items"
+	ErrorRetryPredicates []RetryErrorPredicateFunc                                                            // Predicates for retrying the request
+}
+
+func GetPaginatedItems(paginationOptions GetPaginatedItemsOptions) ([]map[string]interface{}, error) {
+	if paginationOptions.Params == nil {
+		paginationOptions.Params = make(map[string]string)
+	}
+
+	items := make([]map[string]interface{}, 0)
+	for {
+		url, err := AddQueryParams(paginationOptions.URL, paginationOptions.Params)
+		if err != nil {
+			return nil, err
+		}
+
+		headers := make(http.Header)
+		opts := SendRequestOptions{
+			Config:               paginationOptions.Config,
+			Method:               "GET",
+			RawURL:               url,
+			UserAgent:            paginationOptions.UserAgent,
+			Headers:              headers,
+			ErrorRetryPredicates: paginationOptions.ErrorRetryPredicates,
+		}
+		if paginationOptions.BillingProject != nil {
+			opts.Project = *paginationOptions.BillingProject
+		}
+		res, err := SendRequest(opts)
+		if err != nil {
+			return nil, HandleNotFoundError(err, paginationOptions.ResourceData, fmt.Sprintf("%s %q", paginationOptions.ResourceToList, paginationOptions.ResourceData.Id()))
+		}
+
+		var newItems []map[string]interface{}
+		if res[paginationOptions.ResourceToList] != nil {
+			itemsAsMap, err := InterfaceSliceToMapSlice(res[paginationOptions.ResourceToList])
+			if err != nil {
+				return nil, err
+			}
+
+			if paginationOptions.ListFlattener != nil {
+				log.Printf("[DEBUG] res[paginationOptions.ResourceToList]: %#v", res[paginationOptions.ResourceToList])
+				flattened, err := paginationOptions.ListFlattener(paginationOptions.Config, itemsAsMap)
+				if err != nil {
+					return nil, err
+				}
+				newItems = flattened
+			} else {
+				newItems = itemsAsMap
+			}
+		}
+		items = append(items, newItems...)
+
+		if v, ok := res["nextPageToken"]; ok && v != nil && v.(string) != "" {
+			paginationOptions.Params["pageToken"] = v.(string)
+		} else {
+			break
+		}
+	}
+	return items, nil
+}
+
+func InterfaceSliceToMapSlice(i interface{}) ([]map[string]interface{}, error) {
+	itemsAsInterface, ok := i.([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("cannot convert to slice of interfaces: got %T", i)
+	}
+
+	itemsAsMap := make([]map[string]interface{}, len(itemsAsInterface))
+	for idx, item := range itemsAsInterface {
+		var ok bool
+		itemsAsMap[idx], ok = item.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("cannot convert item to map[string]interface{}: got %T", item)
+		}
+	}
+	return itemsAsMap, nil
+}
