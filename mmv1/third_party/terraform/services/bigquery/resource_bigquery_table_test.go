@@ -2,6 +2,7 @@ package bigquery_test
 
 import (
 	"fmt"
+
 	"regexp"
 	"strings"
 	"testing"
