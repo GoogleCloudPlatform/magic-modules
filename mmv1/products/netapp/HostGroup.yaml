@@ -91,12 +91,15 @@ properties:
     type: Enum
     description: |
       Type of the host group.
+    required: true
+    immutable: true
     enum_values:
       - 'ISCSI_INITIATOR'
   - name: 'hosts'
     type: Array
     description: |
       The list of hosts associated with the host group
+    required: true
     item_type:
       type: String
   - name: 'osType'
