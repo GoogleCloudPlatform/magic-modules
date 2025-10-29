@@ -63,7 +63,7 @@ func testAccDataSourceGoogleBackupDRDataSourceReferences_basic(context map[strin
 data "google_project" "project" {}
 
 
- resource "google_service_account" "default" {
+resource "google_service_account" "default" {
  account_id   = "tf-test-my-custom-%{random_suffix}"
  display_name = "Custom SA for VM Instance"
 }
