@@ -603,13 +603,17 @@ func TestAccStorageObject_ResourceIdentity(t *testing.T) {
 	t.Parallel()
 
 	bucketName := acctest.TestBucketName(t)
-	objectName := acctest.TestObjectName(t)
+	data := []byte("data data data")
 
+	testFile := getNewTmpTestFile(t, "tf-test")
+	if err := ioutil.WriteFile(testFile.Name(), data, 0644); err != nil {
+		t.Errorf("error writing file: %v", err)
+	}
 	resource.Test(t, resource.TestCase{
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleStorageBucketsObjectBasic(bucketName, objectName),
+				Config: testGoogleStorageBucketsObjectBasic(bucketName, testFile.Name()),
 				ConfigStateChecks: []statecheck.StateCheck{
 					statecheck.ExpectIdentity(
 						"google_storage_bucket_object.object",
