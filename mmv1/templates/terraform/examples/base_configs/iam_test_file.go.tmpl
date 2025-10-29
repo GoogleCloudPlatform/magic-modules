@@ -648,9 +648,8 @@ resource "{{ $.IamTerraformName }}_policy" "foo" {
 }
 {{- end }}{{/* if $.IamPolicy.IamConditionsRequestType */}}
 
-func generate{{ $.ResourceName }}IAMPolicyStateID(iamResourceName string) func (*terraform.State) (string, error) {
+func generate{{ $.ResourceName }}IAMPolicyStateID(iamResourceAddr string) func (*terraform.State) (string, error) {
 	return func (state *terraform.State) (string, error) {
-		iamResourceAddr := "{{ $.IamTerraformName }}_policy." + iamResourceName
 		var rawState map[string]string
 		for _, m := range state.Modules {
 			if len(m.Resources) > 0 {
@@ -659,12 +658,18 @@ func generate{{ $.ResourceName }}IAMPolicyStateID(iamResourceName string) func (
 				}
 			}
 		}
-		fmt.Printf("raw state %s", rawState)
-		var values []string
-		for _, param := range {{ printf "%#v" $.IamResourceParams }} {
-			values = append(values, tpgresource.GetResourceNameFromSelfLink(rawState[param]))
+		fmt.Printf("raw state %s\n", rawState)
+		params := {{ printf "%#v" $.IamResourceParams }}
+		values := make(map[string]interface{}, len(params))
+		tmpl := "{{ $.IamResourceUri }}"
+		for _, param := range params {
+			if strings.Contains(tmpl, "%" + param) {
+				values[param] = rawState[param]
+			} else {
+				values[param] = tpgresource.GetResourceNameFromSelfLink(rawState[param])
+			}
 		}
-		return strings.Join(values, " "), nil
+		return acctest.Nprintf(strings.ReplaceAll(tmpl, "%", ""), values), nil
 	}
 }
 
@@ -678,19 +683,24 @@ func generate{{ $.ResourceName }}IAMBindingStateID(iamResourceAddr string) func 
 				}
 			}
 		}
-		fmt.Printf("raw state %s", rawState)
-		var values []string
-		for _, param := range {{ printf "%#v" $.IamResourceParams }} {
-			values = append(values, tpgresource.GetResourceNameFromSelfLink(rawState[param]))
+		fmt.Printf("raw state %s\n", rawState)
+		params := {{ printf "%#v" $.IamResourceParams }}
+		values := make(map[string]interface{}, len(params))
+		tmpl := "{{ $.IamResourceUri }}"
+		for _, param := range params {
+			if strings.Contains(tmpl, "%" + param) {
+				values[param] = rawState[param]
+			} else {
+				values[param] = tpgresource.GetResourceNameFromSelfLink(rawState[param])
+			}
 		}
-		values = append(values, rawState["role"])
-		return strings.Join(values, " "), nil
+		values["role"] = tpgresource.GetResourceNameFromSelfLink(rawState["role"])
+		return acctest.Nprintf(strings.ReplaceAll(tmpl, "%", ""), values), nil
 	}
 }
 
-func generate{{ $.ResourceName }}IAMMemberStateID(iamResourceName string) func (*terraform.State) (string, error) {
+func generate{{ $.ResourceName }}IAMMemberStateID(iamResourceAddr string) func (*terraform.State) (string, error) {
 	return func (state *terraform.State) (string, error) {
-		iamResourceAddr := "{{ $.IamTerraformName }}_member." + iamResourceName
 		var rawState map[string]string
 		for _, m := range state.Modules {
 			if len(m.Resources) > 0 {
@@ -699,13 +709,19 @@ func generate{{ $.ResourceName }}IAMMemberStateID(iamResourceName string) func (
 				}
 			}
 		}
-		fmt.Printf("raw state %s", rawState)
-		var values []string
-		for _, param := range {{ printf "%#v" $.IamResourceParams }} {
-			values = append(values, tpgresource.GetResourceNameFromSelfLink(rawState[param]))
+		fmt.Printf("raw state %s\n", rawState)
+		params := {{ printf "%#v" $.IamResourceParams }}
+		values := make(map[string]interface{}, len(params))
+		tmpl := "{{ $.IamResourceUri }}"
+		for _, param := range params {
+			if strings.Contains(tmpl, "%" + param) {
+				values[param] = rawState[param]
+			} else {
+				values[param] = tpgresource.GetResourceNameFromSelfLink(rawState[param])
+			}
 		}
-		values = append(values, rawState["role"])
-		values = append(values, rawState["member"])
-		return strings.Join(values, " "), nil
+		values["role"] = tpgresource.GetResourceNameFromSelfLink(rawState["role"])
+		values["member"] = tpgresource.GetResourceNameFromSelfLink(rawState["member"])
+		return acctest.Nprintf(strings.ReplaceAll(tmpl, "%", ""), values), nil
 	}
 }
