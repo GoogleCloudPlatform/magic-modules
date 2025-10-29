@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"log"
 	"net/url"
-	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -26,6 +25,7 @@ import (
 	"text/template"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/relative"
 	"github.com/golang/glog"
 )
 
@@ -325,9 +325,9 @@ func (e *Examples) SetHCLText() {
 }
 
 func (e *Examples) ExecuteTemplate() string {
-	templateContent, err := os.ReadFile(e.ConfigPath)
+	templateContent, err := relative.ReadFile(e.ConfigPath)
 	if err != nil {
-		glog.Exit(err)
+		panic(err)
 	}
 
 	fileContentString := string(templateContent)
