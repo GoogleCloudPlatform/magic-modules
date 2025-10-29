@@ -1,7 +1,6 @@
 package relative
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -14,12 +13,10 @@ import (
 var baseDirectory string
 
 func ReadFile(path string) ([]byte, error) {
-	fmt.Printf("basedir is : `%s`", baseDirectory)
 	absolutePath := filepath.Join(baseDirectory, path)
 	return os.ReadFile(absolutePath)
 }
 
 func SetBaseDir(dir string) {
 	baseDirectory = dir
-	fmt.Printf("set base dir to : `%s`", dir)
 }

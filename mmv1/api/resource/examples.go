@@ -327,7 +327,7 @@ func (e *Examples) SetHCLText() {
 func (e *Examples) ExecuteTemplate() string {
 	templateContent, err := relative.ReadFile(e.ConfigPath)
 	if err != nil {
-		panic(err)
+		glog.Exit(err)
 	}
 
 	fileContentString := string(templateContent)
