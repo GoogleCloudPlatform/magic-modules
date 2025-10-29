@@ -2,13 +2,14 @@ package bigquery_test
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"regexp"
-	"strings"
-	"testing"
 )
 
 func TestAccBigQueryTable_Basic(t *testing.T) {
@@ -2101,9 +2102,10 @@ func TestAccBigQueryTable_ResourceIdentity(t *testing.T) {
 				Config: testAccBigQueryTableBasicSchema(datasetID, tableID),
 			},
 			{
-				ResourceName:    "google_bigquery_table.test",
-				ImportState:     true,
-				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+				ResourceName:       "google_bigquery_table.test",
+				ImportState:        true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},
 		},
 	})
