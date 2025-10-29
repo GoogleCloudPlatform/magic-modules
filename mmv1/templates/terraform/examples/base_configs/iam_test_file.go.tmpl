@@ -659,17 +659,16 @@ func generate{{ $.ResourceName }}IAMPolicyStateID(iamResourceAddr string) func (
 			}
 		}
 		fmt.Printf("raw state %s\n", rawState)
-		params := {{ printf "%#v" $.IamResourceParams }}
-		values := make(map[string]interface{}, len(params))
 		tmpl := "{{ $.IamResourceUri }}"
-		for _, param := range params {
-			if strings.Contains(tmpl, "%" + param) {
-				values[param] = rawState[param]
-			} else {
-				values[param] = tpgresource.GetResourceNameFromSelfLink(rawState[param])
-			}
+		{{- range $p := $.IamResourceParams }}
+		var {{ $p }} string
+		if strings.Contains(tmpl, "%{{ $p }}") {
+			{{ $p }} = rawState["{{ $p }}"]
+		} else {
+			{{ $p }} = tpgresource.GetResourceNameFromSelfLink(rawState["{{ $p }}"])
 		}
-		return acctest.Nprintf(strings.ReplaceAll(tmpl, "%", ""), values), nil
+		{{- end }}
+		return fmt.Sprintf("{{ $.IamResourceUriFormat }}", {{ Join $.IamResourceParams ", " }}), nil
 	}
 }
 
@@ -684,18 +683,16 @@ func generate{{ $.ResourceName }}IAMBindingStateID(iamResourceAddr string) func 
 			}
 		}
 		fmt.Printf("raw state %s\n", rawState)
-		params := {{ printf "%#v" $.IamResourceParams }}
-		values := make(map[string]interface{}, len(params))
 		tmpl := "{{ $.IamResourceUri }}"
-		for _, param := range params {
-			if strings.Contains(tmpl, "%" + param) {
-				values[param] = rawState[param]
-			} else {
-				values[param] = tpgresource.GetResourceNameFromSelfLink(rawState[param])
-			}
+		{{- range $p := $.IamResourceParams }}
+		var {{ $p }} string
+		if strings.Contains(tmpl, "%{{ $p }}") {
+			{{ $p }} = rawState["{{ $p }}"]
+		} else {
+			{{ $p }} = tpgresource.GetResourceNameFromSelfLink(rawState["{{ $p }}"])
 		}
-		values["role"] = tpgresource.GetResourceNameFromSelfLink(rawState["role"])
-		return acctest.Nprintf(strings.ReplaceAll(tmpl, "%", ""), values), nil
+		{{- end }}
+		return fmt.Sprintf("{{ $.IamResourceUriFormat }} %s", {{ Join $.IamResourceParams ", " }}, rawState["role"]), nil
 	}
 }
 
@@ -710,18 +707,15 @@ func generate{{ $.ResourceName }}IAMMemberStateID(iamResourceAddr string) func (
 			}
 		}
 		fmt.Printf("raw state %s\n", rawState)
-		params := {{ printf "%#v" $.IamResourceParams }}
-		values := make(map[string]interface{}, len(params))
 		tmpl := "{{ $.IamResourceUri }}"
-		for _, param := range params {
-			if strings.Contains(tmpl, "%" + param) {
-				values[param] = rawState[param]
-			} else {
-				values[param] = tpgresource.GetResourceNameFromSelfLink(rawState[param])
-			}
+		{{- range $p := $.IamResourceParams }}
+		var {{ $p }} string
+		if strings.Contains(tmpl, "%{{ $p }}") {
+			{{ $p }} = rawState["{{ $p }}"]
+		} else {
+			{{ $p }} = tpgresource.GetResourceNameFromSelfLink(rawState["{{ $p }}"])
 		}
-		values["role"] = tpgresource.GetResourceNameFromSelfLink(rawState["role"])
-		values["member"] = tpgresource.GetResourceNameFromSelfLink(rawState["member"])
-		return acctest.Nprintf(strings.ReplaceAll(tmpl, "%", ""), values), nil
+		{{- end }}
+		return fmt.Sprintf("{{ $.IamResourceUriFormat }} %s %s", {{ Join $.IamResourceParams ", " }}, rawState["role"], rawState["member"]), nil
 	}
 }
