@@ -22,12 +22,9 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
 
-////////////////////////////////////////////////
-// TODO: comment out after example.go is removed
-////////////////////////////////////////////////
-// type IamMember struct {
-// 	Member, Role string
-// }
+type IamMember struct {
+	Member, Role string
+}
 
 type Sample struct {
 	Name string

@@ -139,24 +139,21 @@ func (s *Step) Validate(rName, sName string) {
 
 }
 
-////////////////////////////////////////////////
-// TODO: comment out after example.go is removed
-////////////////////////////////////////////////
-// func validateRegexForContents(r *regexp.Regexp, contents string, configPath string, objName string, vars map[string]string) {
-// 	matches := r.FindAllStringSubmatch(contents, -1)
-// 	for _, v := range matches {
-// 		found := false
-// 		for k, _ := range vars {
-// 			if k == v[1] {
-// 				found = true
-// 				break
-// 			}
-// 		}
-// 		if !found {
-// 			log.Fatalf("Failed to find %s environment variable defined in YAML file when validating the file %s. Please define this in %s", v[1], configPath, objName)
-// 		}
-// 	}
-// }
+func validateRegexForContents(r *regexp.Regexp, contents string, configPath string, objName string, vars map[string]string) {
+	matches := r.FindAllStringSubmatch(contents, -1)
+	for _, v := range matches {
+		found := false
+		for k, _ := range vars {
+			if k == v[1] {
+				found = true
+				break
+			}
+		}
+		if !found {
+			log.Fatalf("Failed to find %s environment variable defined in YAML file when validating the file %s. Please define this in %s", v[1], configPath, objName)
+		}
+	}
+}
 
 // Executes step configuration templates for documentation and tests
 func (s *Step) SetHCLText() {
@@ -297,26 +294,23 @@ func (s *Step) OiCSLink() string {
 	return u.String()
 }
 
-// //////////////////////////////////////////////
-// TODO: comment out after example.go is removed
-// //////////////////////////////////////////////
-// func SubstituteExamplePaths(config string) string {
-// 	config = strings.ReplaceAll(config, "../static/img/header-logo.png", "../static/header-logo.png")
-// 	config = strings.ReplaceAll(config, "path/to/private.key", "../static/ssl_cert/test.key")
-// 	config = strings.ReplaceAll(config, "path/to/id_rsa.pub", "../static/ssh_rsa.pub")
-// 	config = strings.ReplaceAll(config, "path/to/certificate.crt", "../static/ssl_cert/test.crt")
-// 	return config
-// }
+func SubstituteExamplePaths(config string) string {
+	config = strings.ReplaceAll(config, "../static/img/header-logo.png", "../static/header-logo.png")
+	config = strings.ReplaceAll(config, "path/to/private.key", "../static/ssl_cert/test.key")
+	config = strings.ReplaceAll(config, "path/to/id_rsa.pub", "../static/ssh_rsa.pub")
+	config = strings.ReplaceAll(config, "path/to/certificate.crt", "../static/ssl_cert/test.crt")
+	return config
+}
 
-// func SubstituteTestPaths(config string) string {
-// 	config = strings.ReplaceAll(config, "../static/img/header-logo.png", "test-fixtures/header-logo.png")
-// 	config = strings.ReplaceAll(config, "path/to/private.key", "test-fixtures/test.key")
-// 	config = strings.ReplaceAll(config, "path/to/certificate.crt", "test-fixtures/test.crt")
-// 	config = strings.ReplaceAll(config, "path/to/index.zip", "%{zip_path}")
-// 	config = strings.ReplaceAll(config, "verified-domain.com", "tf-test-domain%{random_suffix}.gcp.tfacc.hashicorptest.com")
-// 	config = strings.ReplaceAll(config, "path/to/id_rsa.pub", "test-fixtures/ssh_rsa.pub")
-// 	return config
-// }
+func SubstituteTestPaths(config string) string {
+	config = strings.ReplaceAll(config, "../static/img/header-logo.png", "test-fixtures/header-logo.png")
+	config = strings.ReplaceAll(config, "path/to/private.key", "test-fixtures/test.key")
+	config = strings.ReplaceAll(config, "path/to/certificate.crt", "test-fixtures/test.crt")
+	config = strings.ReplaceAll(config, "path/to/index.zip", "%{zip_path}")
+	config = strings.ReplaceAll(config, "verified-domain.com", "tf-test-domain%{random_suffix}.gcp.tfacc.hashicorptest.com")
+	config = strings.ReplaceAll(config, "path/to/id_rsa.pub", "test-fixtures/ssh_rsa.pub")
+	return config
+}
 
 // Executes step configuration templates for documentation and tests
 func (s *Step) SetOiCSHCLText() {
