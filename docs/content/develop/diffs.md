@@ -21,7 +21,7 @@ The sections below describe in more detail how to address a number of different 
 
 For new fields, if possible, set a client-side default that matches the API default. This will prevent the diff and will allow users to accurately see what the end state will be if the field is not set in their configuration. A client-side default should only be used if the API sets the same default value in all cases and the default value will be stable over time. Changing a client-side default is a [breaking change]({{< ref "/breaking-changes/breaking-changes" >}}).
 
-{{< tabs "default_value" >}}
+{{% tabs "default_value" %}}
 {{< tab "MMv1" >}}
 ```yaml
 default_value: DEFAULT_VALUE
@@ -48,11 +48,11 @@ See [SDKv2 Schema Behaviors - Default ↗](https://developer.hashicorp.com/terra
 
 See [SDKv2 Schema Behaviors - Default ↗](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#default) for more information.
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 For existing fields (or new fields that are not eligible for a client-side default), mark the field as having an API-side default. If the field is not set (or is set to an "empty" value such as zero, false, or an empty string) the provider will treat the most recent value returned by the API as the value for the field, and will send that value for the field on subsequent requests. The field will show as `(known after apply)` in plans and it will not be possible for the user to explicitly set the field to an "empty" value.
 
-{{< tabs "default_from_api" >}}
+{{% tabs "default_from_api" %}}
 {{< tab "MMv1" >}}
 ```yaml
 default_from_api: true
@@ -81,13 +81,13 @@ See [SDKv2 Schema Behaviors - Optional ↗](https://developer.hashicorp.com/terr
 
 See [SDKv2 Schema Behaviors - Optional ↗](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#optional) and [SDKv2 Schema Behaviors - Computed ↗](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#computed) for more information.
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 ## API returns an empty value if default value is sent {#default_if_empty}
 
 Use a flattener to store the default value in state if the response has an empty (or unset) value.
 
-{{< tabs "default_if_empty" >}}
+{{% tabs "default_if_empty" %}}
 {{< tab "MMv1" >}}
 Use the standard `default_if_empty` flattener.
 
@@ -106,7 +106,7 @@ func flattenResourceNameFieldName(v interface{}, d *schema.ResourceData, config 
 }
 ```
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 ## API normalizes a value {#normalized-value}
 
@@ -119,8 +119,7 @@ The `tpgresource` package in each provider supplies diff suppress functions for 
 - `tpgresource.ProjectNumberDiffSuppress`: Suppress diffs caused by the provider sending a project ID and the API returning a project number.
 
 
-{{< tabs "diff_suppress_simple" >}}
-
+{{% tabs "diff_suppress_simple" %}}
 {{< tab "MMv1" >}}
 ```yaml
 # Use a built-in function
@@ -172,7 +171,7 @@ Reference diff suppress functions from the field definition.
 
 See [SDKv2 Schema Behaviors - DiffSuppressFunc ↗](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#diffsuppressfunc) for more information.
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 ## API field that is never included in the response {#ignore_read}
 
@@ -180,7 +179,7 @@ This is common for fields that store credentials or similar information. Such fi
 
 In the flattener for the field, return the value of the field in the user's configuration.
 
-{{< tabs "ignore_read" >}}
+{{% tabs "ignore_read" %}}
 {{< tab "MMv1" >}}
 On top-level fields, this can be done with:
 
@@ -227,14 +226,13 @@ In tests, add the field to `ImportStateVerifyIgnore` on any relevant import step
 },
 ```
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 ## API returns a list in a different order than was sent {#list-order}
 
 For an Array of unique string values (or nested objects with unique string identifiers), use the `SortStringsByConfigOrder` or `SortMapsByConfigOrder` helper functions to sort the API response to match the order in the user's configuration. This will also simplify diffs if new values are added or removed. Imported resources will not have access to a configuration, so the field will be sorted alphabetically. This means that tests for the resource need to ignore the field's import behavior via `ignore_read_extra` (for MMv1 examples) or [`ImportStateVerifyIgnore`](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/import#importstateverifyignore-1) (for handwritten tests).
 
-{{< tabs "diff_suppress_list" >}}
-
+{{% tabs "diff_suppress_list" %}}
 {{< tab "MMv1" >}}
 Add a [custom flattener]({{< ref "/develop/custom-code#custom_flatten" >}}) for the field.
 
@@ -297,7 +295,7 @@ func flattenResourceNameFieldName(v interface{}, d *schema.ResourceData, config 
 }
 ```
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 For other Array fields, convert the field to a Set – this is a [breaking change]({{< ref "/breaking-changes/breaking-changes" >}}) and can only happen in a major release.
 

@@ -29,16 +29,16 @@ package google
 
 import (
 	"sort"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/services/appengine"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/services/container"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/services/compute"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/services/kms"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/services/resourcemanager"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/services/spanner"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/services/secretmanagerregional"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/services/securesourcemanager"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/services/securitycenterv2"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/services/storage"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/appengine"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/container"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/compute"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/kms"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/resourcemanager"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/spanner"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/secretmanagerregional"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/securesourcemanager"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/securitycenterv2"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/storage"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
 )
 
@@ -138,6 +138,8 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_logging_organization_bucket_config":       {logging.ResourceConverterLogOrganizationBucket()},
 		"google_logging_project_bucket_config":       	   {logging.ResourceConverterLogProjectBucket()},
 		"google_logging_billing_account_bucket_config":    {logging.ResourceConverterLogBillingAccountBucket()},
+		"google_logging_project_sink":                     {logging.ResourceConverterLogProjectSink()},
+		"google_logging_organization_sink":                {logging.ResourceConverterLogOrganizationSink()},
 		"google_cloud_tasks_queue":                        {cloudtasks.ResourceConverterCloudTasksQueue()},
 		"google_pubsub_topic":                             {pubsub.ResourceConverterPubsubTopic()},
 		"google_kms_crypto_key":                           {kms.ResourceConverterKMSCryptoKey()},
@@ -146,6 +148,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_access_context_manager_service_perimeter": {accesscontextmanager.ResourceConverterAccessContextManagerServicePerimeter()},
 		"google_access_context_manager_access_policy":     {accesscontextmanager.ResourceConverterAccessContextManagerAccessPolicy()},
 		"google_cloud_run_service":                        {cloudrun.ResourceConverterCloudRunService()},
+		"google_cloud_run_v2_service":                     {cloudrunv2.ResourceConverterCloudRunV2Service()},
 		"google_cloud_run_domain_mapping":                 {cloudrun.ResourceConverterCloudRunDomainMapping()},
 		"google_cloud_run_v2_job":                         {cloudrunv2.ResourceConverterCloudRunV2Job()},
 		"google_cloudfunctions_function":                  {cloudfunctions.ResourceConverterCloudFunctionsCloudFunction()},

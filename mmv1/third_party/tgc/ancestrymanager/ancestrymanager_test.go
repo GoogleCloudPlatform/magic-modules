@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/tfdata"
+	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/tfdata"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 
