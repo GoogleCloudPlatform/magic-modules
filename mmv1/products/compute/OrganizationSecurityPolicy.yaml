@@ -86,7 +86,7 @@ properties:
     description: |
       The type indicates the intended use of the security policy. This field can be set only at resource creation time.
     immutable: true
-    default_value: "FIREWALL"
+    default_from_api: true
     enum_values:
       - 'FIREWALL'
       - 'CLOUD_ARMOR'
