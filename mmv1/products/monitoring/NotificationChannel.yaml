@@ -128,6 +128,7 @@ properties:
         description: |
           An servicekey token for a notification channel. Channel types that support this field include: pagerduty
         sensitive: true
+        write_only: true
         exactly_one_of:
           - 'sensitive_labels.0.auth_token'
           - 'sensitive_labels.0.password'
