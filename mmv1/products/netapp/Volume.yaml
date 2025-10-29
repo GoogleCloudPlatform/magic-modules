@@ -153,7 +153,7 @@ properties:
               type: String
               description: |-
                  If enabled, the root user (UID = 0) of the specified clients doesn't get mapped to nobody (UID = 65534). This is also known as no_root_squash.
-                 It's overwritten by the squashMode parameter. Use either squashMode or hasRootAccess.
+                 It's overwritten by the squash_mode parameter. Use either squash_mode or has_root_access.
               default_from_api: true
             - name: 'accessType'
               type: Enum
@@ -199,7 +199,7 @@ properties:
               type: Enum
               description: |-
                 SquashMode defines how remote user privileges are restricted when accessing an NFS export. It controls how the user identities (like root) are mapped to anonymous users to limit access and enforce security.
-                It overwrites the hasRootAccess parameter. Use either squashMode or hasRootAccess.
+                It overwrites the has_root_access parameter. Use either squash_mode or has_root_access.
               default_value: 'SQUASH_MODE_UNSPECIFIED'
               enum_values:
                 - 'SQUASH_MODE_UNSPECIFIED'
@@ -210,7 +210,7 @@ properties:
             - name: 'anonUid'
               type: Integer
               description: |-
-                An integer representing the anonymous user ID. Range is 0 to 4294967295. Required when `squashMode` is `ALL_SQUASH`.
+                An integer representing the anonymous user ID. Range is 0 to 4294967295. Required when `squash_mode` is `ALL_SQUASH`.
   - name: 'protocols'
     type: Array
     description: |
