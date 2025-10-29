@@ -867,10 +867,6 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 	if originalField.AtLeastOneOfGroup != nil {
 		*originalField.AtLeastOneOfGroup = deduplicateSliceOfStrings(append(*originalField.AtLeastOneOfGroup, originalFieldLineage, newFieldLineage))
 		options = append(options, propertyWithAtLeastOneOfPointer(originalField.AtLeastOneOfGroup))
-	} else if len(originalField.AtLeastOneOf) > 0 {
-		extended := deduplicateSliceOfStrings(append(originalField.AtLeastOneOf, originalFieldLineage, newFieldLineage))
-		originalField.AtLeastOneOf = extended
-		options = append(options, propertyWithAtLeastOneOf(extended))
 	}
 
 	return NewProperty(name, originalField.ApiName, options)
