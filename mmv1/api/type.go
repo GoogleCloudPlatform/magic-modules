@@ -1149,11 +1149,15 @@ func propertyWithApiName(apiName string) func(*Type) {
 }
 
 func propertyWithExactlyOneOfPointer(ptr *[]string) func(*Type) {
-	return func(p *Type) { p.ExactlyOneOfGroup = ptr }
+	return func(p *Type) {
+		p.ExactlyOneOfGroup = ptr
+	}
 }
 
 func propertyWithAtLeastOneOfPointer(ptr *[]string) func(*Type) {
-	return func(p *Type) { p.AtLeastOneOfGroup = ptr }
+	return func(p *Type) {
+		p.AtLeastOneOfGroup = ptr
+	}
 }
 
 func (t *Type) validateLabelsField() {
