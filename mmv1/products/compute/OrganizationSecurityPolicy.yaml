@@ -44,8 +44,6 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
 parameters:
-  # Parent is a path parameter that _cannot_ be read or sent in the request at all.
-  # This must be done at the provider level.
   - name: 'parent'
     type: String
     description: |
