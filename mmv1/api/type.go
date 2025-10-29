@@ -134,6 +134,12 @@ type Type struct {
 	// A list of properties that are required to be set together.
 	RequiredWith []string `yaml:"required_with,omitempty"`
 
+	// Shared constraint group pointers (populated post-unmarshal)
+	ConflictsGroup    *([]string) `yaml:"-"`
+	AtLeastOneOfGroup *([]string) `yaml:"-"`
+	ExactlyOneOfGroup *([]string) `yaml:"-"`
+	RequiredWithGroup *([]string) `yaml:"-"`
+
 	// Can only be overridden - we should never set this ourselves.
 	NewType string `yaml:"-"`
 
@@ -623,7 +629,9 @@ func (t Type) Conflicting() []string {
 	if t.ResourceMetadata == nil {
 		return []string{}
 	}
-
+	if t.ConflictsGroup != nil {
+		return *t.ConflictsGroup
+	}
 	return t.Conflicts
 }
 
@@ -643,7 +651,9 @@ func (t Type) AtLeastOneOfList() []string {
 	if t.ResourceMetadata == nil {
 		return []string{}
 	}
-
+	if t.AtLeastOneOfGroup != nil {
+		return *t.AtLeastOneOfGroup
+	}
 	return t.AtLeastOneOf
 }
 
@@ -663,7 +673,9 @@ func (t Type) ExactlyOneOfList() []string {
 	if t.ResourceMetadata == nil {
 		return []string{}
 	}
-
+	if t.ExactlyOneOfGroup != nil {
+		return *t.ExactlyOneOfGroup
+	}
 	return t.ExactlyOneOf
 }
 
@@ -682,7 +694,9 @@ func (t Type) RequiredWithList() []string {
 	if t.ResourceMetadata == nil {
 		return []string{}
 	}
-
+	if t.RequiredWithGroup != nil {
+		return *t.RequiredWithGroup
+	}
 	return t.RequiredWith
 }
 
@@ -1122,12 +1136,6 @@ func propertyWithRequiredWith(requiredWith []string) func(*Type) {
 	}
 }
 
-func propertyWithExactlyOneOf(exactlyOneOf []string) func(*Type) {
-	return func(p *Type) {
-		p.ExactlyOneOf = exactlyOneOf
-	}
-}
-
 func propertyWithAtLeastOneOf(atLeastOneOf []string) func(*Type) {
 	return func(p *Type) {
 		p.AtLeastOneOf = atLeastOneOf
@@ -1138,6 +1146,14 @@ func propertyWithApiName(apiName string) func(*Type) {
 	return func(p *Type) {
 		p.ApiName = apiName
 	}
+}
+
+func propertyWithExactlyOneOfPointer(ptr *[]string) func(*Type) {
+	return func(p *Type) { p.ExactlyOneOfGroup = ptr }
+}
+
+func propertyWithAtLeastOneOfPointer(ptr *[]string) func(*Type) {
+	return func(p *Type) { p.AtLeastOneOfGroup = ptr }
 }
 
 func (t *Type) validateLabelsField() {
