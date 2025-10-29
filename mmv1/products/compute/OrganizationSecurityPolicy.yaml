@@ -33,11 +33,10 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  constants: 'templates/terraform/constants/org_security_policy_parent_diff.go.tmpl'
   post_create: 'templates/terraform/post_create/org_security_policy.go.tmpl'
   post_delete: 'templates/terraform/post_delete/org_security_policy.go.tmpl'
   post_update: 'templates/terraform/post_update/org_security_policy.go.tmpl'
-    # TODO: Remove once b/154369201 is closed.
+  # TODO: Remove once b/154369201 is closed.
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
 examples:
   - name: 'organization_security_policy_basic'
@@ -45,6 +44,8 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
 parameters:
+  # Parent is a path parameter that _cannot_ be read or sent in the request at all.
+  # This must be done at the provider level.
   - name: 'parent'
     type: String
     description: |
@@ -52,6 +53,7 @@ parameters:
       Format: organizations/{organization_id} or folders/{folder_id}
     required: true
     immutable: true
+    ignore_read: true
 properties:
   - name: 'displayName'
     type: String
