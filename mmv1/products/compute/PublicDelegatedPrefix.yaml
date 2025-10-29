@@ -191,9 +191,8 @@ properties:
         - name: 'allocatablePrefixLength'
           type: Integer
           description: |
-            The allocatable prefix length supported by this
-            PublicDelegatedSubPrefix.
-        - name: 'delegatee_project'
+            The allocatable prefix length supported by this PublicDelegatedSubPrefix.
+        - name: 'delegateeProject'
           type: String
           description: |
             Name of the project scoping this PublicDelegatedSubPrefix.
