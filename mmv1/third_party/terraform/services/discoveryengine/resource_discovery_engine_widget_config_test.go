@@ -63,10 +63,10 @@ resource "google_discovery_engine_search_engine" "basic" {
 }
 
 resource "google_discovery_engine_widget_config" "basic" {
-  location = google_discovery_engine_search_engine.basic.location
-  engine_id = google_discovery_engine_search_engine.basic.engine_id
+  location 					= google_discovery_engine_search_engine.basic.location
+  engine_id 				= google_discovery_engine_search_engine.basic.engine_id
   access_settings {
-    enable_web_app = true
+    enable_web_app 	= true
   }
 }
 `, context)
@@ -97,11 +97,11 @@ resource "google_discovery_engine_search_engine" "basic" {
 }
 
 resource "google_discovery_engine_widget_config" "basic" {
-  location = google_discovery_engine_search_engine.basic.location
-  engine_id = google_discovery_engine_search_engine.basic.engine_id
+  location 														= google_discovery_engine_search_engine.basic.location
+  engine_id 													= google_discovery_engine_search_engine.basic.engine_id
   access_settings {
-    enable_web_app = true
-    workforce_identity_pool_provider = "locations/global/workforcePools/workforce-pool-id/providers/workforce-pool-provider"
+    enable_web_app 										= true
+    workforce_identity_pool_provider 	= "locations/global/workforcePools/workforce-pool-id/providers/workforce-pool-provider"
   }
 }
 `, context)
