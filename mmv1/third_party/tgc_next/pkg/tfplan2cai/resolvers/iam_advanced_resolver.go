@@ -46,6 +46,13 @@ func (r *IamAdvancedPreResolver) Resolve(jsonPlan []byte) map[string][]*tfjson.R
 		return idToResourceChange
 	}
 
+	// Stores information about resources, address as key, expression as value
+	addressToExpressionMap := make(map[string]map[string]*tfjson.Expression)
+
+	for _, resource := range resourceConfig.RootModule.Resources {
+		addressToExpressionMap[resource.Address] = resource.Expressions
+	}
+
 	for _, rc := range planChanges {
 		// Silently skip non-google resources
 		if !strings.HasPrefix(rc.Type, "google_") {
@@ -88,13 +95,9 @@ func (r *IamAdvancedPreResolver) Resolve(jsonPlan []byte) map[string][]*tfjson.R
 
 				if _, ok = afterUnknownMap[key]; ok {
 					resourceId = resourceId + key + "/"
-					unknownValue := ""
-					for _, resource := range resourceConfig.RootModule.Resources {
-						if resource.Address == rc.Address {
-							unknownValue = resource.Expressions[key].References[0]
-						}
-					}
+					unknownValue := addressToExpressionMap[rc.Address][key].References[0]
 					resourceId = resourceId + unknownValue + "/"
+
 				}
 
 			}
