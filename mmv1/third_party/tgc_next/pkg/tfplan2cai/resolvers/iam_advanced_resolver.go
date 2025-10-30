@@ -17,21 +17,21 @@ import (
 // List of keyword to filter out in order to find the iam resource parent
 var filterList = []string{"etag", "policy_data", "id", "role", "members", "condition", "member"}
 
-type AdvancedPreResolver struct {
+type IamAdvancedPreResolver struct {
 	schema *schema.Provider
 
 	// For logging error / status information that doesn't warrant an outright failure
 	errorLogger *zap.Logger
 }
 
-func NewAdvancedResolver(errorLogger *zap.Logger) *AdvancedPreResolver {
-	return &AdvancedPreResolver{
+func NewIamAdvancedResolver(errorLogger *zap.Logger) *IamAdvancedPreResolver {
+	return &IamAdvancedPreResolver{
 		schema:      provider.Provider(),
 		errorLogger: errorLogger,
 	}
 }
 
-func (r *AdvancedPreResolver) Resolve(jsonPlan []byte) map[string][]*tfjson.ResourceChange {
+func (r *IamAdvancedPreResolver) Resolve(jsonPlan []byte) map[string][]*tfjson.ResourceChange {
 	// Keys are resource IDs, and values are resource change objects.
 	idToResourceChange := make(map[string][]*tfjson.ResourceChange)
 	// ReadChanges

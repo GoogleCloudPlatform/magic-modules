@@ -19,7 +19,7 @@ func TestConvert_iamBinding(t *testing.T) {
 		t.Fatalf("Error parsing %s: %s", f, err)
 	}
 
-	idToResourceChangeMap := NewAdvancedResolver(logger).Resolve(jsonPlan)
+	idToResourceChangeMap := NewIamAdvancedResolver(logger).Resolve(jsonPlan)
 
 	assert.Equal(t, 1, len(idToResourceChangeMap), "Expected map size is 1")
 	assert.Equal(t, 2, len(idToResourceChangeMap["instance_name/google_compute_instance.tgc-iam.name/project/terraform-dev-zhenhuali/zone/us-central1-a/"]), "Expected iam list to be size 2")
