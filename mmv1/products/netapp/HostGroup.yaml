@@ -109,6 +109,7 @@ properties:
       used by all of the hosts in the HostGroup. All hosts in a HostGroup must be
       of the same OS type. This can be set only when creating a HostGroup.
     immutable: true
+    required: true
     enum_values:
       - 'LINUX'
       - 'WINDOWS'
