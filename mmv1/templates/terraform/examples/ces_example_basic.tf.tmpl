@@ -2,6 +2,9 @@ resource "google_ces_app" "my-app" {
     location     = "us"
     display_name = "{{index $.Vars "app_display_name"}}"
     app_id       = "{{index $.Vars "app_id"}}"
+    time_zone_settings {
+        time_zone = "America/Los_Angeles"
+    }
 }
 resource "google_ces_example" "{{$.PrimaryResourceId}}" {
     location     = "us"
@@ -9,13 +12,7 @@ resource "google_ces_example" "{{$.PrimaryResourceId}}" {
     app          = google_ces_app.my-app.name
     example_id   = "{{index $.Vars "example_id"}}"
     description  = "example description"
-    entry_agent  = "projects/example-project/locations/us/apps/example-app/agents/example-agent"
     messages {
-        chunks {
-            agent_transfer {
-                target_agent = "projects/example-project/locations/us/apps/example-app/agents/example-agent2"
-            }
-        }
         chunks {
             image {
                 mime_type = "image/png"
@@ -26,189 +23,11 @@ resource "google_ces_example" "{{$.PrimaryResourceId}}" {
             text = "text_data"
         }
         chunks {
-            tool_call {
-                args = jsonencode({
-                    arg1 = "val1"
-                    arg2 = "val2"
-                })
-                id = "tool_call_id"
-                tool = "projects/example-project/locations/us/apps/example-app/tools/example-tool"
-            }
-        }
-        chunks {
-            tool_call {
-                args = jsonencode({
-                    arg1 = "val1"
-                    arg2 = "val2"
-                })
-                id = "tool_call_id1"
-                toolset_tool {
-                    toolset = "projects/example-project/locations/us/apps/example-app/toolsets/example-toolset"
-                    tool_predicate {
-                        connector_tool_predicate {
-                            action {
-                                input_fields = ["entity_input_field1","entity_input_field2"]
-                                output_fields = ["entity_output_field1","entity_output_field2"]
-                                connection_action_id = "connection_action_id"
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        chunks {
-            tool_call {
-                args = jsonencode({
-                    arg1 = "val1"
-                    arg2 = "val2"
-                })
-                id = "tool_call_id2"
-                toolset_tool {
-                    toolset = "projects/example-project/locations/us/apps/example-app/toolsets/example-toolset"
-                    tool_predicate {
-                        connector_tool_predicate {
-                            action {
-                                input_fields = ["entity_input_field1","entity_input_field2"]
-                                output_fields = ["entity_output_field1","entity_output_field2"]
-                                entity_operation {
-                                    entity_id = "entity_id"
-                                    operation = "LIST"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        chunks {
-            tool_call {
-                args = jsonencode({
-                    arg1 = "val1"
-                    arg2 = "val2"
-                })
-                id = "tool_call_id3"
-                toolset_tool {
-                    toolset = "projects/example-project/locations/us/apps/example-app/toolsets/example-toolset"
-                    tool_predicate {
-                        mcp_tool_predicate {
-                            tool_name = "mcp-tool"
-                        }
-                    }
-                }
-            }
-        }
-        chunks {
-            tool_call {
-                args = jsonencode({
-                    arg1 = "val1"
-                    arg2 = "val2"
-                })
-                id = "tool_call_id4"
-                toolset_tool {
-                    toolset = "projects/example-project/locations/us/apps/example-app/toolsets/example-toolset"
-                    tool_predicate {
-                        open_api_tool_predicate {
-                            operation_id = "operation_id"
-                            path = "example-path"
-                            method = "example-method"
-                        }
-                    }
-                }
-            }
-        }
-        chunks {
-            tool_response {
-                id = "tool_call_id"
-                response = jsonencode({
-                    output = "example-output"
-                })
-                tool = "projects/example-project/locations/us/apps/example-app/tools/example-tool"
-            }
-        }
-        chunks {
-            tool_response {
-                id = "tool_call_id1"
-                response = jsonencode({
-                    output = "example-output"
-                })
-                toolset_tool {
-                    toolset = "projects/example-project/locations/us/apps/example-app/toolsets/example-toolset"
-                    tool_predicate {
-                        connector_tool_predicate {
-                            action {
-                                input_fields = ["entity_input_field1","entity_input_field2"]
-                                output_fields = ["entity_output_field1","entity_output_field2"]
-                                connection_action_id = "connection_action_id"
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        chunks {
-            tool_response {
-                id = "tool_call_id2"
-                response = jsonencode({
-                    output = "example-output"
-                })
-                toolset_tool {
-                    toolset = "projects/example-project/locations/us/apps/example-app/toolsets/example-toolset"
-                    tool_predicate {
-                        connector_tool_predicate {
-                            action {
-                                input_fields = ["entity_input_field1","entity_input_field2"]
-                                output_fields = ["entity_output_field1","entity_output_field2"]
-                                entity_operation {
-                                    entity_id = "entity_id"
-                                    operation = "LIST"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        chunks {
-            tool_response {
-                id = "tool_call_id3"
-                response = jsonencode({
-                    output = "example-output"
-                })
-                toolset_tool {
-                    toolset = "projects/example-project/locations/us/apps/example-app/toolsets/example-toolset"
-                    tool_predicate {
-                        mcp_tool_predicate {
-                            tool_name = "mcp-tool"
-                        }
-                    }
-                }
-            }
-        }
-        chunks {
-            tool_response {
-                id = "tool_call_id4"
-                response = jsonencode({
-                    output = "example-output"
-                })
-                toolset_tool {
-                    toolset = "projects/example-project/locations/us/apps/example-app/toolsets/example-toolset"
-                    tool_predicate {
-                        open_api_tool_predicate {
-                            operation_id = "operation_id"
-                            path = "example-path"
-                            method = "example-method"
-                        }
-                    }
-                }
-            }
-        }
-        chunks {
             updated_variables = jsonencode({
                 var1 = "val1"
-                var2 = "var2"
+                var2 = "val2"
             })
-        } 
-        event_time = "2025-10-02T15:01:23+05:30"
+        }
         role = "agent"
     }
 }
