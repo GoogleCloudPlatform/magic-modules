@@ -52,8 +52,8 @@ resource "google_folder" "security_policy_target" {
 }
 
 resource "google_compute_organization_security_policy" "policy" {
-  display_name = "tf-test%{random_suffix}"
-  parent       = google_folder.security_policy_target.name
+  short_name = "tf-test%{random_suffix}"
+  parent     = google_folder.security_policy_target.name
 }
 resource "google_compute_organization_security_policy_rule" "policy" {
   policy_id = google_compute_organization_security_policy.policy.id
@@ -87,8 +87,8 @@ resource "google_folder" "security_policy_target" {
 }
 
 resource "google_compute_organization_security_policy" "policy" {
-  display_name = "tf-test%{random_suffix}"
-  parent       = google_folder.security_policy_target.name
+  short_name = "tf-test%{random_suffix}"
+  parent     = google_folder.security_policy_target.name
 }
 
 resource "google_compute_organization_security_policy_rule" "policy" {

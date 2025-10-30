@@ -20,10 +20,14 @@ if err != nil {
 	return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComputeOrganizationSecurityPolicy %q", d.Get("policy_id")))
 }
 
-parent := policyRes["parent"]
+parentRaw := policyRes["parent"]
+parent := ""
+if parentRaw != nil {
+   parent = parentRaw.(string)
+}
 var opRes map[string]interface{}
 err = ComputeOrgOperationWaitTimeWithResponse(
-	config, res, &opRes, parent.(string), "Creating OrganizationSecurityPolicyAssociation", userAgent,
+config, res, &opRes, parent, "Creating OrganizationSecurityPolicyAssociation", userAgent,
 	d.Timeout(schema.TimeoutCreate))
 
 if err != nil {
