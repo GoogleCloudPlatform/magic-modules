@@ -176,6 +176,8 @@ type Examples struct {
 	// TGC
 	// ====================
 	TGCSkipTest string `yaml:"tgc_skip_test,omitempty"`
+	// When a test is generated from a handwritten provider test, its name will be stored here
+	TGCHandwrittenTestName string `yaml:"-"`
 }
 
 // Set default value for fields
