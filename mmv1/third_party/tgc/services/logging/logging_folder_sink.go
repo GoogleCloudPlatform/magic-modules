@@ -3,6 +3,7 @@ package logging
 import (
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/cai"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
@@ -29,7 +30,7 @@ func GetLogFolderSinkCaiObject(d tpgresource.TerraformResourceData, config *tran
 			Type: LogSinkAssetType,
 			Resource: &cai.AssetResource{
 				Version:              "v2",
-				DiscoveryDocumentURI: "https://logging.googleapis.com/$discovery/rest?version=v2",
+				DiscoveryDocumentURI: "https://logging.googleapis.com/$discovery/rest",
 				DiscoveryName:        "LogSink",
 				Data:                 obj,
 			},
@@ -99,18 +100,10 @@ func GetLogFolderSinkApiObject(d tpgresource.TerraformResourceData, config *tran
 
 	folder, ok := d.GetOk("folder")
 	if !ok {
-		if val, ok := d.GetOk("folder_id"); ok {
-			folder = val
-		} else {
-			return nil, fmt.Errorf("required field 'folder' is not set")
-		}
+		return nil, fmt.Errorf("required field 'folder' is not set")
 	}
-	if folder.(string) == "" {
-		if val, ok := d.GetOk("after_unknown.folder"); ok {
-			folder = val
-		}
-	}
-	obj["parent"] = fmt.Sprintf("//cloudresourcemanager.googleapis.com/folders/%s", folder.(string))
+	folderId := strings.TrimPrefix(folder.(string), "folders/")
+	obj["parent"] = fmt.Sprintf("//cloudresourcemanager.googleapis.com/folders/%s", folderId)
 
 	return obj, nil
 }
