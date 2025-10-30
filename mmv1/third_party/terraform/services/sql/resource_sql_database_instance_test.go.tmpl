@@ -2,6 +2,7 @@ package sql_test
 
 import (
 	"fmt"
+	"maps"
 	"regexp"
 	"strconv"
 	"strings"
@@ -2550,6 +2551,56 @@ func TestAccSqlDatabaseInstance_sqlMysqlInstancePvpExample(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_PvpAndPasswordOrder(t *testing.T) {
+	t.Parallel()
+
+	databaseName := "tf-test-pvp-order-" + acctest.RandString(t, 10)
+	initialPassword10 := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_pvpAndPasswordOrder(map[string]interface{}{
+					"name":     databaseName,
+					"password": initialPassword10,
+				}),
+			},
+			{
+				Config: testAccSqlDatabaseInstance_pvpAndPasswordOrder(map[string]interface{}{
+					"name":       databaseName,
+					"password":   initialPassword10,
+					"min_length": 12,
+				}),
+			},
+			{
+				// This will set the new password validation policy, but will fail to update the password.
+				Config: testAccSqlDatabaseInstance_pvpAndPasswordOrder(map[string]interface{}{
+					"name":       databaseName,
+					"password":   acctest.RandString(t, 10),
+					"min_length": 16,
+				}),
+				ExpectError: regexp.MustCompile("password is not long enough"),
+			},
+			{
+				Config: testAccSqlDatabaseInstance_pvpAndPasswordOrder(map[string]interface{}{
+					"name":       databaseName,
+					"password":   acctest.RandString(t, 16),
+					"min_length": 16,
+				}),
+			},
+			{
+				Config: testAccSqlDatabaseInstance_pvpAndPasswordOrder(map[string]interface{}{
+					"name":       databaseName,
+					"password":   acctest.RandString(t, 10),
+					"min_length": 8,
+				}),
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_updateReadReplicaWithBinaryLogEnabled(t *testing.T) {
 	t.Parallel()
 
@@ -4116,6 +4167,35 @@ resource "google_sql_database_instance" "mysql_pvp_instance_name" {
   deletion_protection =  "%{deletion_protection}"
 }
 `, context)
+}
+
+func testAccSqlDatabaseInstance_pvpAndPasswordOrder(context map[string]interface{}) string {
+	pvp := ""
+	if _, ok := context["min_length"]; ok {
+		pvp = acctest.Nprintf(`
+	password_validation_policy {
+		enable_password_policy = true
+		min_length = %{min_length}
+	}
+`, context)
+	}
+
+	newContext := maps.Clone(context)
+	newContext["password_validation_policy"] = pvp
+
+	return acctest.Nprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "%{name}"
+  region              = "us-central1"
+  database_version    = "POSTGRES_15"
+  root_password       = "%{password}"
+  deletion_protection = false
+  settings {
+	tier = "db-f1-micro"
+	%{password_validation_policy}
+  }
+}
+`, newContext)
 }
 
 var testGoogleSqlDatabaseInstance_basic2 = `
