@@ -29,10 +29,6 @@ import (
 	"github.com/golang/glog"
 )
 
-type IamMember struct {
-	Member, Role string
-}
-
 // Generates configs to be shown as examples in docs and outputted as tests
 // from a shared template
 type Examples struct {
@@ -179,14 +175,6 @@ type Examples struct {
 	// ====================
 	// TGC
 	// ====================
-	// Extra properties to ignore test.
-	// These properties are present in Terraform resources schema, but not in CAI assets.
-	// Virtual Fields and url parameters are already ignored by default and do not need to be duplicated here.
-	TGCTestIgnoreExtra []string `yaml:"tgc_test_ignore_extra,omitempty"`
-	// The properties ignored in CAI assets. It is rarely used.
-	TGCTestIgnoreInAsset []string `yaml:"tgc_test_ignore_in_asset,omitempty"`
-	// The reason to skip a test. For example, a link to a ticket explaining the issue that needs to be resolved before
-	// unskipping the test. If this is not empty, the test will be skipped.
 	TGCSkipTest string `yaml:"tgc_skip_test,omitempty"`
 }
 
@@ -213,22 +201,6 @@ func (e *Examples) Validate(rName string) {
 		log.Fatalf("Missing `name` for one example in resource %s", rName)
 	}
 	e.ValidateExternalProviders()
-}
-
-func validateRegexForContents(r *regexp.Regexp, contents string, configPath string, objName string, vars map[string]string) {
-	matches := r.FindAllStringSubmatch(contents, -1)
-	for _, v := range matches {
-		found := false
-		for k, _ := range vars {
-			if k == v[1] {
-				found = true
-				break
-			}
-		}
-		if !found {
-			log.Fatalf("Failed to find %s environment variable defined in YAML file when validating the file %s. Please define this in %s", v[1], configPath, objName)
-		}
-	}
 }
 
 func (e *Examples) ValidateExternalProviders() {
@@ -394,24 +366,6 @@ func (e *Examples) ResourceType(terraformName string) string {
 		return e.PrimaryResourceType
 	}
 	return terraformName
-}
-
-func SubstituteExamplePaths(config string) string {
-	config = strings.ReplaceAll(config, "../static/img/header-logo.png", "../static/header-logo.png")
-	config = strings.ReplaceAll(config, "path/to/private.key", "../static/ssl_cert/test.key")
-	config = strings.ReplaceAll(config, "path/to/id_rsa.pub", "../static/ssh_rsa.pub")
-	config = strings.ReplaceAll(config, "path/to/certificate.crt", "../static/ssl_cert/test.crt")
-	return config
-}
-
-func SubstituteTestPaths(config string) string {
-	config = strings.ReplaceAll(config, "../static/img/header-logo.png", "test-fixtures/header-logo.png")
-	config = strings.ReplaceAll(config, "path/to/private.key", "test-fixtures/test.key")
-	config = strings.ReplaceAll(config, "path/to/certificate.crt", "test-fixtures/test.crt")
-	config = strings.ReplaceAll(config, "path/to/index.zip", "%{zip_path}")
-	config = strings.ReplaceAll(config, "verified-domain.com", "tf-test-domain%{random_suffix}.gcp.tfacc.hashicorptest.com")
-	config = strings.ReplaceAll(config, "path/to/id_rsa.pub", "test-fixtures/ssh_rsa.pub")
-	return config
 }
 
 // Executes example templates for documentation and tests
