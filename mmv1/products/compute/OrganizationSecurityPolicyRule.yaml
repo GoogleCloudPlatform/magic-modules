@@ -46,8 +46,6 @@ examples:
   - name: 'organization_security_policy_rule_basic'
     primary_resource_id: 'policy'
     min_version: 'beta'
-    vars:
-      short_name: "my-short-name"
     test_env_vars:
       org_id: 'ORG_ID'
 parameters:

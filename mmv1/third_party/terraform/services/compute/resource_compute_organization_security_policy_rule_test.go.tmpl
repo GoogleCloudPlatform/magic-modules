@@ -26,19 +26,19 @@ func TestAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRule
 			{
 				Config: testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRulePreUpdateExample(context),
 			},
-			{
-				ResourceName:      "google_compute_organization_security_policy_rule.policy",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRulePostUpdateExample(context),
-			},
-			{
-				ResourceName:      "google_compute_organization_security_policy_rule.policy",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
+      {
+        ResourceName:      "google_compute_organization_security_policy_rule.policy",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccComputeOrganizationSecurityPolicyRule_organizationSecurityPolicyRulePostUpdateExample(context),
+      },
+      {
+        ResourceName:      "google_compute_organization_security_policy_rule.policy",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
 		},
 	})
 }
@@ -52,8 +52,9 @@ resource "google_folder" "security_policy_target" {
 }
 
 resource "google_compute_organization_security_policy" "policy" {
-  short_name = "tf-test%{random_suffix}"
-  parent     = google_folder.security_policy_target.name
+  display_name = "tf-test%{random_suffix}"
+  parent       = google_folder.security_policy_target.name
+  type         = "FIREWALL"
 }
 resource "google_compute_organization_security_policy_rule" "policy" {
   policy_id = google_compute_organization_security_policy.policy.id
@@ -87,8 +88,9 @@ resource "google_folder" "security_policy_target" {
 }
 
 resource "google_compute_organization_security_policy" "policy" {
-  short_name = "tf-test%{random_suffix}"
-  parent     = google_folder.security_policy_target.name
+  display_name = "tf-test%{random_suffix}"
+  parent       = google_folder.security_policy_target.name
+  type         = "FIREWALL"
 }
 
 resource "google_compute_organization_security_policy_rule" "policy" {
