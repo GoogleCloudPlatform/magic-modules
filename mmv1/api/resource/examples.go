@@ -175,6 +175,11 @@ type Examples struct {
 	DocumentationHCLText string `yaml:"-"`
 	TestHCLText          string `yaml:"-"`
 	OicsHCLText          string `yaml:"-"`
+
+	// ====================
+	// TGC
+	// ====================
+	TGCSkipTest string `yaml:"tgc_skip_test,omitempty"`
 }
 
 // Set default value for fields

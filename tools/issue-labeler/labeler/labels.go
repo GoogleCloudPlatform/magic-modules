@@ -14,7 +14,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var sectionRegexp = regexp.MustCompile(`### (New or )?Affected Resource\(s\)[^#]+`)
+var sectionRegexp = regexp.MustCompile(`#+ (New or )?Affected Resource\(s\)[^#]+`)
 var commentRegexp = regexp.MustCompile(`<!--.*?-->`)
 var resourceRegexp = regexp.MustCompile(`google_[\w*.]+`)
 

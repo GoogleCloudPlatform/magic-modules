@@ -62,9 +62,7 @@ resource "google_secure_source_manager_instance" "{{$.PrimaryResourceId}}" {
   }
 
   # Prevent accidental deletions.
-  lifecycle {
-    prevent_destroy = "{{index $.Vars "prevent_destroy"}}"
-  }
+  deletion_policy = "{{index $.Vars "deletion_policy"}}"
 
   depends_on = [
     google_privateca_certificate_authority.root_ca,

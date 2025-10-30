@@ -35,6 +35,8 @@ timeouts:
   delete_minutes: 20
 custom_code:
   pre_create: 'templates/terraform/pre_create/firebasehosting_site.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/firebasehosting_site.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/firebasehosting_default_site.go.tmpl'
 examples:
   - name: 'firebasehosting_site_basic'
     primary_resource_id: 'default'
@@ -53,6 +55,11 @@ examples:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
       'display_name': '"tf-test Test web app for Firebase Hosting"'
+  - name: 'firebasehosting_site_default'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
 parameters:
   - name: 'site_id'
     type: String
@@ -88,3 +95,7 @@ properties:
       The default URL for the site in the form of https://{name}.web.app
     min_version: 'beta'
     output: true
+  - name: 'type'
+    type: String
+    output: true
+    description: The type of Hosting site, either 'DEFAULT_SITE' or `USER_SITE`

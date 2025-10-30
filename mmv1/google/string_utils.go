@@ -83,7 +83,8 @@ func Plural(source string) string {
 	}
 
 	// mesh -> meshes
-	if strings.HasSuffix(source, "esh") {
+	// messageBus -> messageBuses
+	if strings.HasSuffix(source, "esh") || strings.HasSuffix(source, "s") {
 		return fmt.Sprintf("%ses", source)
 	}
 

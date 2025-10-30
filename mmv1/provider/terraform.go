@@ -107,6 +107,8 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 			// log.Printf("Generating %s tests", object.Name)
 			t.GenerateResourceTests(object, *templateData, outputFolder)
 			t.GenerateResourceSweeper(object, *templateData, outputFolder)
+			t.GenerateSingularDataSource(object, *templateData, outputFolder)
+			t.GenerateSingularDataSourceTests(object, *templateData, outputFolder)
 			// log.Printf("Generating %s metadata", object.Name)
 			t.GenerateResourceMetadata(object, *templateData, outputFolder)
 		}
@@ -127,8 +129,13 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 			log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 		}
-		targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s.go", t.ResourceGoFilename(object)))
-		templateData.GenerateResourceFile(targetFilePath, object)
+		if object.FrameworkResource {
+			targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_fw_%s.go", t.ResourceGoFilename(object)))
+			templateData.GenerateFWResourceFile(targetFilePath, object)
+		} else {
+			targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s.go", t.ResourceGoFilename(object)))
+			templateData.GenerateResourceFile(targetFilePath, object)
+		}
 	}
 
 	if generateDocs {
@@ -186,6 +193,35 @@ func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData Te
 	}
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_sweeper.go", t.ResourceGoFilename(object)))
 	templateData.GenerateSweeperFile(targetFilePath, object)
+}
+
+func (t *Terraform) GenerateSingularDataSource(object api.Resource, templateData TemplateData, outputFolder string) {
+	if !object.ShouldGenerateSingularDataSource() {
+		return
+	}
+
+	productName := t.Product.ApiName
+	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s.go", t.ResourceGoFilename(object)))
+	templateData.GenerateDataSourceFile(targetFilePath, object)
+}
+
+func (t *Terraform) GenerateSingularDataSourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
+	if !object.ShouldGenerateSingularDataSourceTests() {
+		return
+	}
+
+	productName := t.Product.ApiName
+	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s_test.go", t.ResourceGoFilename(object)))
+	templateData.GenerateDataSourceTestFile(targetFilePath, object)
+
 }
 
 // GenerateProduct creates the product.go file for a given service directory.
@@ -266,10 +302,8 @@ func (t *Terraform) GenerateIamDocumentation(object api.Resource, templateData T
 func (t *Terraform) FolderName() string {
 	if t.TargetVersionName == "ga" {
 		return "google"
-	} else if t.TargetVersionName == "beta" {
-		return "google-beta"
 	}
-	return "google-private"
+	return "google-" + t.TargetVersionName
 }
 
 // Similar to FullResourceName, but override-aware to prevent things like ending in _test.
@@ -423,7 +457,9 @@ func (t Terraform) CopyFileList(outputFolder string, files map[string]string, ge
 		if filepath.Ext(target) == ".go" || (filepath.Ext(target) == ".mod" && generateCode) {
 			t.replaceImportPath(outputFolder, target)
 		}
-
+		if filepath.Ext(target) == ".go" || filepath.Ext(target) == ".markdown" {
+			t.addCopyfileHeader(source, outputFolder, target)
+		}
 		if filepath.Ext(target) == ".go" {
 			t.addHashicorpCopyRightHeader(outputFolder, target)
 		}
@@ -523,7 +559,67 @@ func (t Terraform) CompileFileList(outputFolder string, files map[string]string,
 			continue
 		}
 		t.replaceImportPath(outputFolder, target)
+		if filepath.Ext(targetFile) == ".go" || filepath.Ext(targetFile) == ".markdown" {
+			t.addCopyfileHeader(source, outputFolder, target)
+		}
 		t.addHashicorpCopyRightHeader(outputFolder, target)
+	}
+}
+
+func (t Terraform) addCopyfileHeader(srcpath, outputFolder, target string) {
+	githubPrefix := "https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/"
+	if !strings.HasPrefix(srcpath, githubPrefix) {
+		srcpath = githubPrefix + srcpath
+	}
+
+	targetFile := filepath.Join(outputFolder, target)
+	sourceByte, err := os.ReadFile(targetFile)
+	if err != nil {
+		log.Fatalf("Cannot read file %s to add copy file header: %s", targetFile, err)
+	}
+
+	srcStr := string(sourceByte)
+	if strings.Contains(srcStr, "***     AUTO GENERATED CODE    ***    Type: Handwritten     ***") {
+		return
+	}
+
+	templateFormat := `// ----------------------------------------------------------------------------
+//
+//     ***     AUTO GENERATED CODE    ***    Type: Handwritten     ***
+//
+// ----------------------------------------------------------------------------
+//
+//     This code is generated by Magic Modules using the following:
+//
+//     Source file: %s
+//
+//     DO NOT EDIT this file directly. Any changes made to this file will be
+//     overwritten during the next generation cycle.
+//
+// ----------------------------------------------------------------------------
+%s`
+	content := srcStr
+	if filepath.Ext(target) == ".markdown" {
+		// insert the header after ---
+		templateFormat = "---\n" + strings.Replace(templateFormat, "//", "#", -1)
+		content = strings.TrimPrefix(srcStr, "---\n")
+	}
+
+	fileStr := fmt.Sprintf(templateFormat, srcpath, content)
+
+	sourceByte = []byte(fileStr)
+	// format go file
+	if filepath.Ext(targetFile) == ".go" {
+		sourceByte, err = format.Source(sourceByte)
+		if err != nil {
+			log.Printf("error formatting %s: %s\n", targetFile, err)
+			return
+		}
+	}
+
+	err = os.WriteFile(targetFile, sourceByte, 0644)
+	if err != nil {
+		log.Fatalf("Cannot write file %s to add copy file header: %s", target, err)
 	}
 }
 
@@ -634,9 +730,8 @@ func (t Terraform) replaceImportPath(outputFolder, target string) {
 		tpg = TERRAFORM_PROVIDER_BETA
 		dir = RESOURCE_DIRECTORY_BETA
 	default:
-		tpg = TERRAFORM_PROVIDER_PRIVATE
-		dir = RESOURCE_DIRECTORY_PRIVATE
-
+		tpg = "github.com/hashicorp/terraform-provider-google-" + t.TargetVersionName
+		dir = "google-" + t.TargetVersionName
 	}
 
 	sourceByte = bytes.Replace(sourceByte, []byte(gaImportPath), []byte(tpg+"/"+dir), -1)
@@ -666,7 +761,7 @@ func (t Terraform) ProviderFromVersion() string {
 	case "beta":
 		dir = RESOURCE_DIRECTORY_BETA
 	default:
-		dir = RESOURCE_DIRECTORY_PRIVATE
+		dir = "google-" + t.TargetVersionName
 	}
 	return dir
 }

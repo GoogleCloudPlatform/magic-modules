@@ -1,0 +1,19 @@
+//If a mutable field is added later in the subscription resource, an update API endpoint will be created 
+//and this custom_update will have to be changed and will call a Update API as well as done by mutable resources.
+// all other fields are immutable for now, don't do anything else
+
+_ = config
+
+// We can get here if 'refresh_policy' was updated in the HCL config.
+// Since 'refresh_policy' has a default, d.Get("refresh_policy") will always return a string.
+// We check if its value has actually changed from the prior state.
+if d.HasChange("refresh_policy") {
+    // If 'refresh_policy' was changed by the user, ensure its new value is set in the state.
+	// For an Optional+Computed-false field like this, Terraform usually handles this,
+	// but this explicit Set operation mirrors the previous boolean field handling.
+	if err := d.Set("refresh_policy", d.Get("refresh_policy")); err != nil {
+		return fmt.Errorf("Error updating refresh_policy: %s", err)
+	}
+}
+
+return nil

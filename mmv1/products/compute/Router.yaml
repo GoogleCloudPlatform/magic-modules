@@ -74,6 +74,14 @@ examples:
     exclude_docs: true
     ignore_read_extra:
       - 'advertisedIpRanges'
+  - name: 'router_ncc_gw'
+    min_version: beta
+    primary_resource_id: 'foobar'
+    vars:
+      router_name: 'my-router'
+      network_name: 'net-spoke'
+      hub_name: 'hub'
+      ncc_gw_name: 'my-ncc-gw'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -112,7 +120,6 @@ properties:
     type: ResourceRef
     description: |
       A reference to the network to which this router belongs.
-    required: true
     immutable: true
   # TODO: Figure out the story for interfaces/bgpPeers. Right
   # now in Terraform we have three separate resources: router,
@@ -124,6 +131,8 @@ properties:
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
+    conflicts:
+      - nccGateway
   - name: 'bgp'
     type: NestedObject
     description: |
@@ -159,7 +168,7 @@ properties:
 
           This enum field has the one valid value: ALL_SUBNETS
         send_empty_value: true
- # TODO(#324): enum?
+ # TODO: #324 enum?
         item_type:
           type: String
       - name: 'advertisedIpRanges'
@@ -171,7 +180,7 @@ properties:
           ranges will be advertised in addition to any specified groups.
           Leave this field blank to advertise no custom IP ranges.
         send_empty_value: true
-        custom_flatten: 'templates/terraform/custom_flatten/compute_router_range.go.tmpl'
+        is_set: true
         item_type:
           type: NestedObject
           properties:
@@ -233,3 +242,28 @@ properties:
         description: |
           Value of the key used for MD5 authentication.
         required: true
+  - name: 'nccGateway'
+    type: ResourceRef
+    description: |
+      A URI of an NCC Gateway spoke
+    min_version: 'beta'
+    immutable: true
+    resource: 'Spoke'
+    custom_expand: 'templates/terraform/custom_expand/self_link_from_name_network_connectivity.tmpl'
+    conflicts:
+      - network
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the router. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        api_name: resourceManagerTags
+        ignore_read: true

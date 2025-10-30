@@ -1,12 +1,12 @@
 ---
 subcategory: "Cloud (Stackdriver) Logging"
 description: |-
-  Manages a organization-level logging sink.
+  Manages an organization-level logging sink.
 ---
 
 # google_logging_organization_sink
 
-Manages a organization-level logging sink. For more information see:
+Manages an organization-level logging sink. For more information see:
 * [API documentation](https://cloud.google.com/logging/docs/reference/v2/rest/v2/organizations.sinks)
 * How-to Guides
     * [Exporting Logs](https://cloud.google.com/logging/docs/export)
@@ -64,7 +64,7 @@ The following arguments are supported:
 
 * `disabled` - (Optional) If set to True, then this sink is disabled and it does not export any log entries.
 
-* `include_children` - (Optional) Whether or not to include children organizations in the sink export. If true, logs
+* `include_children` - (Optional) Whether or not to include child folders or projects in the sink export. If true, logs
     associated with child projects are also exported; otherwise only logs relating to the provided organization are included.
 
 * `intercept_children` - (Optional) Whether or not to intercept logs from child projects. If true, matching logs will not

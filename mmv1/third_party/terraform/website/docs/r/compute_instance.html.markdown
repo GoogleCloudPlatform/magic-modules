@@ -85,7 +85,7 @@ resource "google_compute_instance" "confidential_instance" {
 
   boot_disk {
     initialize_params {
-      image = "ubuntu-os-cloud/ubuntu-2004-lts"
+      image = "ubuntu-os-cloud/ubuntu-2204-lts"
       labels = {
         my_label = "value"
       }
@@ -585,6 +585,8 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 * `local_ssd_recovery_timeout` -  (Optional) (https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the maximum amount of time a Local Ssd Vm should wait while recovery of the Local Ssd state is attempted. Its value should be in between 0 and 168 hours with hour granularity and the default value being 1 hour. Structure is [documented below](#nested_local_ssd_recovery_timeout).
 
 * `graceful_shutdown` -  (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Settings for the instance to perform a graceful shutdown. Structure is [documented below](#nested_graceful_shutdown).
+
+* `skip_guest_os_shutdown` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Boolean parameter. Default is false and there will be 120 seconds between GCE ACPI G2 Soft Off and ACPI G3 Mechanical Off for Standard VMs and 30 seconds for Spot VMs.
 
 <a name="nested_graceful_shutdown"></a>The `graceful_shutdown` block supports:
 

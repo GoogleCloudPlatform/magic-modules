@@ -64,8 +64,8 @@ var (
 		"BBBmau": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 4, 7),
-					endDate:   newDate(2025, 4, 11),
+					startDate: newDate(2025, 7, 1),
+					endDate:   newDate(2025, 7, 17),
 				},
 			},
 		},
@@ -75,16 +75,33 @@ var (
 					startDate: newDate(2025, 4, 9),
 					endDate:   newDate(2025, 4, 15),
 				},
+				{
+					startDate: newDate(2025, 9, 26),
+					endDate:   newDate(2025, 10, 4),
+				},
 			},
 		},
 		"hao-nan-li": {
 			vacations: []Vacation{},
 		},
-		"melinath": {
+		"malhotrasagar2212": {
 			vacations: []Vacation{},
 		},
+		"melinath": {
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 9, 17),
+					endDate:   newDate(2025, 9, 22),
+				},
+			},
+		},
 		"NickElliot": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 10, 22),
+					endDate:   newDate(2025, 10, 28),
+				},
+			},
 		},
 		"rileykarson": {
 			vacations: []Vacation{
@@ -95,16 +112,30 @@ var (
 			},
 		},
 		"roaks3": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 8, 1),
+					endDate:   newDate(2025, 8, 11),
+				},
+				{
+					startDate: newDate(2025, 9, 23),
+					endDate:   newDate(2025, 9, 29),
+				},
+			},
 		},
 		"ScottSuarez": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 9, 26),
+					endDate:   newDate(2025, 10, 5),
+				},
+			},
 		},
 		"shuyama1": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 3, 26),
-					endDate:   newDate(2025, 4, 1),
+					startDate: newDate(2025, 5, 23),
+					endDate:   newDate(2025, 5, 30),
 				},
 			},
 		},
@@ -117,16 +148,30 @@ var (
 			},
 		},
 		"slevenick": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 5, 22),
+					endDate:   newDate(2025, 6, 7),
+				},
+			},
 		},
 		"trodge": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 8, 7),
+					endDate:   newDate(2025, 8, 10),
+				},
+				{
+					startDate: newDate(2025, 9, 18),
+					endDate:   newDate(2025, 9, 28),
+				},
+			},
 		},
 		"zli82016": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 1, 15),
-					endDate:   newDate(2025, 2, 9),
+					startDate: newDate(2025, 8, 27),
+					endDate:   newDate(2025, 9, 2),
 				},
 			},
 		},
@@ -134,8 +179,6 @@ var (
 
 	// This is for new team members who are onboarding
 	trustedContributors = map[string]struct{}{
-		"bbasata":           struct{}{},
-		"jaylonmcshan03":    struct{}{},
-		"malhotrasagar2212": struct{}{},
+		"bbasata": struct{}{},
 	}
 )

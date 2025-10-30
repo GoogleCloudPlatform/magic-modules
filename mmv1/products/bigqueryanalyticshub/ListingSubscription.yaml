@@ -32,6 +32,7 @@ import_format:
 custom_code:
   decoder: 'templates/terraform/decoders/bigqueryanalyticshub_listing_subscription.go.tmpl'
   pre_read: 'templates/terraform/pre_read/bigqueryanalyticshub_listing_subscription.tmpl'
+  post_read: 'templates/terraform/post_read/bigqueryanalyticshub_listing_subscription.go.tmpl'
   pre_delete: 'templates/terraform/pre_read/bigqueryanalyticshub_listing_subscription.tmpl'
   post_import: templates/terraform/post_import/analytics_hub_subscription.go.tmpl
 sweeper:
@@ -76,7 +77,6 @@ properties:
   - name: 'destinationDataset'
     type: NestedObject
     required: true
-    ignore_read: true
     description:
       The destination dataset for this subscription.
     properties:
@@ -194,3 +194,23 @@ properties:
           type: string
           description: Output only. Name of the linked dataset, e.g. projects/subscriberproject/datasets/linkedDataset
           output: true
+  - name: 'logLinkedDatasetQueryUserEmail'
+    type: Boolean
+    description: 'Output only. By default, false. If true, the Subscriber agreed to the email sharing mandate that is enabled for Listing.'
+    output: true
+  - name: 'commercialInfo'
+    type: NestedObject
+    description: |
+      Commercial info metadata for this subscription. This is set if this is a commercial subscription i.e. if this subscription was created from subscribing to a commercial listing.
+    output: true
+    properties:
+      - name: 'cloudMarketplace'
+        type: NestedObject
+        description: Cloud Marketplace commercial metadata for this subscription.
+        output: true
+        properties:
+          - name: 'order'
+            type: String
+            description: |
+              Resource name of the Marketplace Order.
+            output: true

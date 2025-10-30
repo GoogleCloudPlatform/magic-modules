@@ -52,6 +52,7 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/alloydb_instance.go.tmpl'
 # Skipping the sweeper because instances will be deleted during cluster sweeps
 exclude_sweeper: true
+include_in_tgc_next_DO_NOT_USE: true
 examples:
   - name: 'alloydb_instance_basic'
     primary_resource_id: 'default'
@@ -82,7 +83,7 @@ examples:
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
@@ -96,7 +97,7 @@ examples:
       alloydb_secondary_instance_name: 'alloydb-secondary-instance'
       network_name: 'alloydb-secondary-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
@@ -248,9 +249,11 @@ properties:
       - name: 'recordApplicationTags'
         type: Boolean
         description: 'Record application tags for an instance. This flag is turned "on" by default.'
+        include_empty_value_in_cai: true  # Default value is false in CAI asset
       - name: 'recordClientAddress'
         type: Boolean
         description: 'Record client address for an instance. Client address is PII information. This flag is turned "on" by default.'
+        include_empty_value_in_cai: true  # Default value is false in CAI asset
       - name: 'queryPlansPerMinute'
         type: Integer
         description: 'Number of query execution plans captured by Insights per minute for all queries combined. The default value is 5. Any integer between 0 and 20 is considered valid.'
@@ -263,9 +266,11 @@ properties:
       - name: 'enabled'
         type: Boolean
         description: 'Observability feature status for an instance.'
+        include_empty_value_in_cai: true  # Default value is false in CAI asset
       - name: 'preserveComments'
         type: Boolean
         description: 'Preserve comments in the query string.'
+        include_empty_value_in_cai: true  # Default value is false in CAI asset
       - name: 'trackWaitEvents'
         type: Boolean
         description: 'Record wait events during query execution for an instance.'
@@ -278,12 +283,14 @@ properties:
       - name: 'recordApplicationTags'
         type: Boolean
         description: 'Record application tags for an instance. This flag is turned "on" by default.'
+        include_empty_value_in_cai: true  # Default value is false in CAI asset
       - name: 'queryPlansPerMinute'
         type: Integer
         description: 'Number of query execution plans captured by Insights per minute for all queries combined. The default value is 5. Any integer between 0 and 200 is considered valid.'
       - name: 'trackActiveQueries'
         type: Boolean
         description: 'Track actively running queries. If not set, default value is "off".'
+        include_empty_value_in_cai: true  # Default value is false in CAI asset
       - name: 'assistiveExperiencesEnabled'
         type: Boolean
         description: 'Whether assistive experiences are enabled for this AlloyDB instance.'
@@ -443,6 +450,13 @@ properties:
         type: Boolean
         description: |
           Enabling outbound public ip for the instance.
+      - name: 'allocatedIpRangeOverride'
+        type: String
+        immutable: true
+        description: |
+          Name of the allocated IP range for the private IP AlloyDB instance, for example: "google-managed-services-default".
+          If set, the instance IPs will be created from this allocated range and will override the IP range used by the parent cluster.
+          The range name must comply with RFC 1035. Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.
   - name: 'publicIpAddress'
     type: String
     description: |

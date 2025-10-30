@@ -18,6 +18,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -547,6 +548,91 @@ func TestPathChanged(t *testing.T) {
 
 			got := pathChanged(tc.path, tc.changedFiles)
 			assert.Equal(t, tc.want, got)
+		})
+	}
+}
+
+func TestCheckDocumentFrontmatter(t *testing.T) {
+	tmpDir := t.TempDir()
+	files := map[string]string{
+		"malformed.markdown": `
+subcategory: Example Subcategory
+---	
+`,
+		"sample.markdown": `
+---
+subcategory: Example Subcategory
+---	
+`,
+		"missingsubcategory.markdown": `
+---
+random: Example Subcategory
+---	
+`,
+	}
+
+	folderPath := filepath.Join(tmpDir, "website", "docs", "r")
+	if err := os.MkdirAll(folderPath, 0755); err != nil {
+		t.Fatal(err)
+	}
+	for name, content := range files {
+		fullPath := filepath.Join(folderPath, name)
+		err := os.WriteFile(fullPath, []byte(content), 0644)
+		if err != nil {
+			t.Fatalf("Failed to create file %s: %v", name, err)
+		}
+	}
+
+	// write a file in other folders
+	if err := os.WriteFile(filepath.Join(tmpDir, "abc.md"), []byte("random"), 0644); err != nil {
+		t.Fatalf("Failed to create file %s: %v", filepath.Join(tmpDir, "abc.md"), err)
+	}
+
+	tests := []struct {
+		name         string
+		changedFiles []string
+		wantErr      bool
+	}{
+		{
+			name:         "not in relevant doc folder",
+			changedFiles: []string{"abc.md"},
+			wantErr:      false,
+		},
+		{
+			name:         "not markdown files",
+			changedFiles: []string{"website/docs/r/abc.txt"},
+			wantErr:      false,
+		},
+		{
+			name:         "malformed markdown",
+			changedFiles: []string{"website/docs/r/malformed.markdown"},
+			wantErr:      true,
+		},
+		{
+			name:         "markdown not exist",
+			changedFiles: []string{"website/docs/d/sample.markdown"},
+			wantErr:      true,
+		},
+		{
+			name:         "correct format",
+			changedFiles: []string{"website/docs/r/sample.markdown"},
+			wantErr:      false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			repo := source.Repo{
+				Path:         tmpDir,
+				ChangedFiles: tc.changedFiles,
+			}
+			got := checkDocumentFrontmatter(repo)
+			if tc.wantErr && len(got) == 0 {
+				t.Errorf("checkDocumentFrontmatter() = %v, want error", got)
+			}
+			if !tc.wantErr && len(got) > 0 {
+				t.Errorf("checkDocumentFrontmatter() = %v, want no error", got)
+			}
 		})
 	}
 }

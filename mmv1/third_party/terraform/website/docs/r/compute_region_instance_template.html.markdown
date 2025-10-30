@@ -409,10 +409,9 @@ The following arguments are supported:
 * `disk_name` - (Optional) Name of the disk. When not provided, this defaults
     to the name of the instance.
 
-* `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk. This
-    sets the number of I/O operations per second that the disk can handle.
-    Values must be between 10,000 and 120,000. For more details, see the
-    [Extreme persistent disk documentation](https://cloud.google.com/compute/docs/disks/extreme-persistent-disk).
+* `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle. For more details, see the [Extreme persistent disk documentation](https://cloud.google.com/compute/docs/disks/extreme-persistent-disk) or the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks) depending on the selected disk_type.
+
+* `provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk, in MB/s. This sets the amount of data that can be read or written from the disk per second. Values must greater than or equal to 1. For more details, see the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks).
 
 * `resource_manager_tags` - (Optional) A set of key/value resource manager tag pairs to bind to this disk. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456.
 
@@ -670,6 +669,8 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `graceful_shutdown` -  (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Settings for the instance to perform a graceful shutdown. Structure is [documented below](#nested_graceful_shutdown).
 
+* `skip_guest_os_shutdown` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Boolean parameter. Default is false and there will be 120 seconds between GCE ACPI G2 Soft Off and ACPI G3 Mechanical Off for Standard VMs and 30 seconds for Spot VMs.
+
 <a name="nested_graceful_shutdown"></a>The `graceful_shutdown` block supports:
 
 * `enabled` - (Required) Opts-in for graceful shutdown.
@@ -756,6 +757,8 @@ exported:
 * `creation_timestamp` - Creation timestamp in RFC3339 text format.
 
 * `metadata_fingerprint` - The unique fingerprint of the metadata.
+
+* `numeric_id` - numeric identifier of the resource.
 
 * `self_link` - The URI of the created resource.
 

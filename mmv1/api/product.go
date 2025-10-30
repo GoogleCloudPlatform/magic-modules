@@ -58,6 +58,9 @@ type Product struct {
 	// base URL. Specific to defining the resource as a CAI asset.
 	CaiBaseUrl string
 
+	// CaiResourceType of resources that already have an AssetType constant defined in the product.
+	ResourcesWithCaiAssetType map[string]struct{}
+
 	// A function reference designed for the rare case where you
 	// need to use retries in operation calls. Used for the service api
 	// as it enables itself (self referential) and can result in occasional
@@ -279,9 +282,20 @@ func (p Product) Lineage() string {
 	return p.Name
 }
 
-func Merge(self, otherObj reflect.Value) {
-
+func Merge(self, otherObj reflect.Value, version string) {
 	selfObj := reflect.Indirect(self)
+
+	// Skip merge if otherObj targets a higher version than what is being generated
+	for i := 0; i < otherObj.NumField(); i++ {
+		if otherObj.Type().Field(i).Name == "MinVersion" {
+			for j := slices.Index(product.ORDER, version) + 1; j < len(product.ORDER); j++ {
+				if otherObj.Field(i).String() == product.ORDER[j] {
+					return
+				}
+			}
+		}
+	}
+
 	for i := 0; i < selfObj.NumField(); i++ {
 
 		// skip if the override is the "empty" value
@@ -292,14 +306,14 @@ func Merge(self, otherObj reflect.Value) {
 		}
 
 		if selfObj.Field(i).Kind() == reflect.Slice {
-			DeepMerge(selfObj.Field(i), otherObj.Field(i))
+			DeepMerge(selfObj.Field(i), otherObj.Field(i), version)
 		} else {
 			selfObj.Field(i).Set(otherObj.Field(i))
 		}
 	}
 }
 
-func DeepMerge(arr1, arr2 reflect.Value) {
+func DeepMerge(arr1, arr2 reflect.Value, version string) {
 	if arr1.Len() == 0 {
 		arr1.Set(arr2)
 		return
@@ -338,7 +352,7 @@ func DeepMerge(arr1, arr2 reflect.Value) {
 			}
 		}
 		if otherVal.IsValid() {
-			Merge(currentVal, otherVal)
+			Merge(currentVal, otherVal, version)
 		}
 	}
 
