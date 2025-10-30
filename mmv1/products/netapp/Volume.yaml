@@ -49,6 +49,7 @@ async:
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/netapp_volume_force_delete.go.tmpl'
   pre_update: 'templates/terraform/pre_update/netapp_volume_custom_block_devices_update.tmpl'
+  constants: 'templates/terraform/constants/netapp_volume.go.tmpl'
 examples:
   - name: 'netapp_volume_basic'
     primary_resource_id: 'test_volume'
@@ -646,6 +647,7 @@ properties:
             `projects/{project_id}/locations/{location}/hostGroups/{host_group_id}`
             This field can be updated after the block device is created.
           default_from_api: true
+          diff_suppress_func: 'ProjectIDDiffSuppress'
           item_type:
             type: String
         - name: 'identifier'
