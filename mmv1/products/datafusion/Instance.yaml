@@ -209,6 +209,11 @@ properties:
     description: |
       Current version of the Data Fusion.
     default_from_api: true
+  - name: 'patchRevision'
+    type: String
+    description: |
+      Current patch revision of the Data Fusion.
+    default_from_api: true
   - name: 'serviceAccount'
     type: String
     description: |
