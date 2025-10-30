@@ -650,7 +650,7 @@ properties:
           type: String
           description: |
             Device identifier of the Block volume. This represents lun_serial_number
-            for iSCSI volumes
+            for ISCSI volumes
           default_from_api: true
           output: true
         - name: 'sizeGib'

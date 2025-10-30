@@ -1378,7 +1378,7 @@ func testAccNetappBlockVolume_volumeBasicExample_basic(context map[string]interf
 
     resource "google_netapp_volume" "test_volume" {
         location = "us-central1-a"
-        name = "tf-test-test-volume%{random_suffix}"
+        name = "tf_test_test_volume%{random_suffix}"
         capacity_gib = "100"
         storage_pool = google_netapp_storage_pool.default.name
         protocols = ["ISCSI"]
@@ -1415,14 +1415,12 @@ func testAccNetappBlockVolume_volumeBasicExample_full(context map[string]interfa
 
     resource "google_netapp_volume" "test_volume" {
         location = "us-central1-a"
-        name = "tf-test-test-volume%{random_suffix}"
+        name = "tf_test_test_volume%{random_suffix}"
         capacity_gib = "100"
         storage_pool = google_netapp_storage_pool.default.name
         protocols = ["ISCSI"]
         block_devices {
             name = "block-device-1"
-            size_gib = 100
-            identifier = "lun_1"
             host_groups = ["projects/{project_name}/locations/us-central1/hostGroups/tf-test-test-host-group%{random_suffix}"]
             os_type = "LINUX"
         }
@@ -1455,7 +1453,7 @@ func testAccNetappBlockVolume_volumeBasicExample_update(context map[string]inter
 
     resource "google_netapp_volume" "test_volume" {
         location = "us-central1-a"
-        name = "tf-test-test-volume%{random_suffix}"
+        name = "tf_test_test_volume%{random_suffix}"
         capacity_gib = "200"
         storage_pool = google_netapp_storage_pool.default.name
         protocols = ["ISCSI"]
