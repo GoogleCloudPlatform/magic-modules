@@ -1415,7 +1415,7 @@ func testAccNetappBlockVolume_volumeBasicExample_update(context map[string]inter
     resource "google_netapp_volume" "test_volume" {
         location = "us-central1-a"
         name = "tf_test_test_volume%{random_suffix}"
-        capacity_gib = "200"
+        capacity_gib = "100"
         storage_pool = google_netapp_storage_pool.default.name
         protocols = ["ISCSI"]
         block_devices {
