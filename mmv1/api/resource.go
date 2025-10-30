@@ -373,9 +373,6 @@ type TGCResource struct {
 	// If true, include resource in the new package of TGC (terraform-provider-conversion)
 	IncludeInTGCNext bool `yaml:"include_in_tgc_next_DO_NOT_USE,omitempty"`
 
-	// Name of the hcl resource block used in TGC
-	TgcHclBlockName string `yaml:"tgc_hcl_block_name,omitempty"`
-
 	// The resource kind in CAI.
 	// If this is not set, then :name is used instead.
 	// For example: compute.googleapis.com/Address has Address for CaiResourceKind,
@@ -2307,14 +2304,12 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 		"lifecycle",
 	}
 	for _, tp := range r.VirtualFields {
-		props = append(props, google.Underscore(tp.Name))
+		props = append(props, tp.MetadataLineage())
 	}
 	for _, tp := range r.AllNestedProperties(r.RootProperties()) {
 		if tp.UrlParamOnly {
 			props = append(props, google.Underscore(tp.Name))
-		} else if tp.IsMissingInCai {
-			props = append(props, tp.MetadataLineage())
-		} else if tp.IgnoreRead {
+		} else if tp.IsMissingInCai || tp.IgnoreRead || tp.ClientSide || tp.WriteOnlyLegacy {
 			props = append(props, tp.MetadataLineage())
 		}
 	}
