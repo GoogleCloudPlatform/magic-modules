@@ -2401,12 +2401,14 @@ func expandExternalDataConfiguration(cfg interface{}) (*bigquery.ExternalDataCon
 		edc.SourceUris = sourceUris
 	}
 
-	decimalTargetTypes := []string{}
-	for _, rawDecimalTargetType := range raw["decimal_target_types"].([]interface{}) {
-		decimalTargetTypes = append(decimalTargetTypes, rawDecimalTargetType.(string))
-	}
-	if len(decimalTargetTypes) > 0 {
-		edc.DecimalTargetTypes = decimalTargetTypes
+	if v, ok := raw["decimal_target_types"]; ok {
+		decimalTargetTypes := []string{}
+		for _, rawDecimalTargetType := range v.(*schema.Set).List() {
+			decimalTargetTypes = append(decimalTargetTypes, rawDecimalTargetType.(string))
+		}
+		if len(decimalTargetTypes) > 0 {
+			edc.DecimalTargetTypes = decimalTargetTypes
+		}
 	}
 
 	if v, ok := raw["file_set_spec_type"]; ok {
@@ -2481,7 +2483,14 @@ func flattenExternalDataConfiguration(edc *bigquery.ExternalDataConfiguration) (
 
 	result["autodetect"] = edc.Autodetect
 	result["source_uris"] = edc.SourceUris
-	result["decimal_target_types"] = edc.DecimalTargetTypes
+
+	if edc.DecimalTargetTypes != nil {
+		interfaceSlice := make([]interface{}, len(edc.DecimalTargetTypes))
+		for i, v := range edc.DecimalTargetTypes {
+			interfaceSlice[i] = v
+		}
+		result["decimal_target_types"] = schema.NewSet(schema.HashString, interfaceSlice)
+	}
 
 	if edc.FileSetSpecType != "" {
 		result["file_set_spec_type"] = edc.FileSetSpecType
