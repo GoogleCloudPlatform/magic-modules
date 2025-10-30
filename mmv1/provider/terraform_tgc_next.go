@@ -369,10 +369,10 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 	}
 
 	// Skip adding handwritten tests that are already defined in yaml (because they have custom overrides etc.)
-	handwrittenTestNamesInYAML := make(map[string]struct{})
-	for _, example := range object.TGCTests {
-		if example.TGCHandwrittenTestName != "" {
-			handwrittenTestNamesInYAML[example.TGCHandwrittenTestName] = struct{}{}
+	testNamesInYAML := make(map[string]struct{})
+	for _, test := range object.TGCTests {
+		if test.Name != "" {
+			testNamesInYAML[test.Name] = struct{}{}
 		}
 	}
 
@@ -380,11 +380,11 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 	tests := make([]resource.TGCTest, len(matches))
 	for i, match := range matches {
 		if len(match) == 2 {
-			if _, ok := handwrittenTestNamesInYAML[string(match[1])]; ok {
+			if _, ok := testNamesInYAML[string(match[1])]; ok {
 				continue
 			}
 			tests[i] = resource.TGCTest{
-				TGCHandwrittenTestName: string(match[1]),
+				Name: string(match[1]),
 			}
 		}
 	}
