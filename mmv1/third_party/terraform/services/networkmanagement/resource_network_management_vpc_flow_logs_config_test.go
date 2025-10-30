@@ -182,7 +182,6 @@ resource "google_network_management_vpc_flow_logs_config" "example" {
 	return fmt.Sprintf("%s\n\n%s\n\n", vpcFlowLogsCfg, testAccNetworkManagementVpcFlowLogsConfig_baseResources(context))
 }
 
-{{ if ne $.TargetVersionName "ga" -}}
 func TestAccNetworkManagementVpcFlowLogsConfig_network(t *testing.T) {
 	t.Parallel()
 
@@ -192,7 +191,7 @@ func TestAccNetworkManagementVpcFlowLogsConfig_network(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkManagementVpcFlowLogsConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -220,16 +219,13 @@ func TestAccNetworkManagementVpcFlowLogsConfig_network(t *testing.T) {
 func testAccNetworkManagementVpcFlowLogsConfig_network(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
-	provider = google-beta
 }
 
 resource "google_compute_network" "network" {
-	provider = google-beta
 	name     = "tf-test-flow-logs-network-%{random_suffix}"
 }
 
 resource "google_network_management_vpc_flow_logs_config" "network-test" {
-	provider              = google-beta
 	vpc_flow_logs_config_id = "tf-test-network-id-%{random_suffix}"
 	location              = "global"
 	network               = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.network.name}"
@@ -241,21 +237,17 @@ resource "google_network_management_vpc_flow_logs_config" "network-test" {
 func testAccNetworkManagementVpcFlowLogsConfig_networkUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
-	provider = google-beta
 }
 
 resource "google_compute_network" "network" {
-	provider = google-beta
 	name     = "tf-test-flow-logs-network-%{random_suffix}"
 }
 
 resource "google_compute_network" "network_update" {
-	provider = google-beta
 	name     = "tf-test-flow-logs-network-update-%{random_suffix}"
 }
 
 resource "google_network_management_vpc_flow_logs_config" "network-test" {
-	provider                = google-beta
 	vpc_flow_logs_config_id   = "tf-test-network-id-%{random_suffix}"
 	location                = "global"
 	network                 = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.network_update.name}"
@@ -277,7 +269,7 @@ func TestAccNetworkManagementVpcFlowLogsConfig_subnet(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkManagementVpcFlowLogsConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -305,17 +297,14 @@ func TestAccNetworkManagementVpcFlowLogsConfig_subnet(t *testing.T) {
 func testAccNetworkManagementVpcFlowLogsConfig_subnet(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
-	provider = google-beta
 }
 
 resource "google_compute_network" "network" {
 	name                    = "tf-test-subnet-network-%{random_suffix}"
 	auto_create_subnetworks = false
-	provider                = google-beta
 }
 
 resource "google_compute_subnetwork" "subnet" {
-	provider      = google-beta
 	name          = "tf-test-flow-logs-subnet-%{random_suffix}"
 	ip_cidr_range = "10.2.0.0/16"
 	region        = "us-central1"
@@ -323,7 +312,6 @@ resource "google_compute_subnetwork" "subnet" {
 }
 
 resource "google_network_management_vpc_flow_logs_config" "subnet-test" {
-	provider              = google-beta
 	vpc_flow_logs_config_id = "tf-test-subnet-id-%{random_suffix}"
 	location              = "global"
 	subnet                = "projects/${data.google_project.project.number}/regions/${google_compute_subnetwork.subnet.region}/subnetworks/${google_compute_subnetwork.subnet.name}"
@@ -334,17 +322,14 @@ resource "google_network_management_vpc_flow_logs_config" "subnet-test" {
 func testAccNetworkManagementVpcFlowLogsConfig_subnetUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
-	provider = google-beta
 }
 
 resource "google_compute_network" "network" {
-	provider                = google-beta
 	name                    = "tf-test-subnet-network-%{random_suffix}"
 	auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "subnet" {
-	provider      = google-beta
 	name          = "tf-test-flow-logs-subnet-%{random_suffix}"
 	ip_cidr_range = "10.2.0.0/16"
 	region        = "us-central1"
@@ -352,7 +337,6 @@ resource "google_compute_subnetwork" "subnet" {
 }
 
 resource "google_compute_subnetwork" "subnet_update" {
-	provider      = google-beta
 	name          = "tf-test-flow-logs-subnet-update-%{random_suffix}"
 	ip_cidr_range = "10.3.0.0/16"
 	region        = "us-central1"
@@ -360,7 +344,6 @@ resource "google_compute_subnetwork" "subnet_update" {
 }
 
 resource "google_network_management_vpc_flow_logs_config" "subnet-test" {
-	provider              = google-beta
 	vpc_flow_logs_config_id = "tf-test-subnet-id-%{random_suffix}"
 	location              = "global"
 	subnet                = "projects/${data.google_project.project.number}/regions/${google_compute_subnetwork.subnet_update.region}/subnetworks/${google_compute_subnetwork.subnet_update.name}"
@@ -368,7 +351,6 @@ resource "google_network_management_vpc_flow_logs_config" "subnet-test" {
 }
 `, context)
 }
-{{ end }}
 
 func testAccNetworkManagementVpcFlowLogsConfig_baseResources(context map[string]interface{}) string {
 	return acctest.Nprintf(`
