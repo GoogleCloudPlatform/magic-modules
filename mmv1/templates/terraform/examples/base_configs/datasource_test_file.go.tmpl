@@ -68,12 +68,12 @@ func TestAccDataSource{{ $.Res.ResourceName }}_basic(t *testing.T) {
 			{
 				Config: testAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}DataSource(context),
 				Check: resource.ComposeTestCheckFunc(
-					{{- if gt (len ($.Res.IgnoreReadProperties $e)) 0 }}
+					{{- if gt (len ($.Res.IgnoreReadPropertiesLegacy $e)) 0 }}
 						acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 							"data.{{ $e.ResourceType $.Res.TerraformName }}.default",
 							"{{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}",
 							[]string{
-								{{- range $prop := $.Res.IgnoreReadProperties $e }}
+								{{- range $prop := $.Res.IgnoreReadPropertiesLegacy $e }}
 								"{{ $prop }}",
 								{{- end }}
 							},
