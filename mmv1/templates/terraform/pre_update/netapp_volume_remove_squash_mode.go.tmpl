@@ -48,7 +48,7 @@ if v, ok := d.GetOk("export_policy"); ok {
 
                 // Only send if the user explicitly added it.
                 // If not added, send as null.
-                if anonUidExists && anonUidVal != nil {
+                if anonUidExists && anonUidVal != nil && anonUidVal != 0 {
                     // User provided the field, send their value
                     newRuleMapItemSet["anonUid"] = anonUidVal
                 } else {
