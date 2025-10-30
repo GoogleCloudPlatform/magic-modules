@@ -37,6 +37,7 @@ timeouts:
   delete_minutes: 20
 custom_code:
   custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
+include_in_tgc_next_DO_NOT_USE: true
 examples:
   - name: 'logging_metric_basic'
     primary_resource_id: 'logging_metric'
