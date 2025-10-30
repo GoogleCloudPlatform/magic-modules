@@ -1287,7 +1287,7 @@ func testAccNetappVolume_volumeExportPolicyWithSquashMode_noRootSquash_hasRootAc
   `, context)
 }
 
-func testAccNetappVolume_volumeExportPolicyWithSquashMode_mutipleExportRules(context map[string]interface{}) string {
+func testAccNetappVolume_volumeExportPolicyWithSquashMode_switchMutipleExportRules(context map[string]interface{}) string {
 	return acctest.Nprintf(`
   resource "google_netapp_storage_pool" "default" {
       provider = google-beta
