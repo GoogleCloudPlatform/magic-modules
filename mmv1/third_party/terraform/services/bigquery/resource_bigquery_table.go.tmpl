@@ -964,7 +964,7 @@ func ResourceBigQueryTable() *schema.Resource {
 							ConflictsWith: []string{"external_data_configuration.0.source_format"},
 						},
 						"decimal_target_types": {
-							Type:        schema.TypeList,
+							Type:        schema.TypeSet,
 							Optional:    true,
 							Description: `The data types that could be used as a target type when converting decimal values.`,
 							Elem:        &schema.Schema{Type: schema.TypeString},
