@@ -629,6 +629,7 @@ func ResourceBigQueryTable() *schema.Resource {
 								json, _ := structure.NormalizeJsonString(v)
 								return json
 							},
+							DiffSuppressFunc: bigQueryTableSchemaDiffSuppress,
 							Description: `A JSON schema for the external table. Schema is required for CSV and JSON formats and is disallowed for Google Cloud Bigtable, Cloud Datastore backups, and Avro formats when using external tables.`,
 						},
 						// CsvOptions: [Optional] Additional properties to set if
