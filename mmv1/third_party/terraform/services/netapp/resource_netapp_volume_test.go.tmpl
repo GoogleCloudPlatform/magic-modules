@@ -1409,7 +1409,7 @@ func testAccNetappBlockVolume_volumeBasicExample_update(context map[string]inter
 		location = "us-central1"
 		os_type = "LINUX"
 		type = "ISCSI_INITIATOR"
-		hosts = ["iqn.1994-05.com.redhat:8518f79d5366"]
+		hosts = ["iqn.1994-05.com.debian:8518f79d5366"]
 	}
 
     resource "google_netapp_volume" "test_volume" {
@@ -1419,7 +1419,7 @@ func testAccNetappBlockVolume_volumeBasicExample_update(context map[string]inter
         storage_pool = google_netapp_storage_pool.default.name
         protocols = ["ISCSI"]
         block_devices {
-            host_groups = [google_netapp_host_group.test_host_group.id, google_netapp_host_group.test_host_group2.id,]
+            host_groups = [google_netapp_host_group.test_host_group.id, google_netapp_host_group.test_host_group2.id]
             os_type = "LINUX"
         }
     }
