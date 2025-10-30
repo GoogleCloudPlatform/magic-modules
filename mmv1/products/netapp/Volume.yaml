@@ -651,7 +651,6 @@ properties:
           description: |
             Device identifier of the Block volume. This represents lun_serial_number
             for ISCSI volumes
-          default_from_api: true
           output: true
         - name: 'sizeGib'
           type: Integer

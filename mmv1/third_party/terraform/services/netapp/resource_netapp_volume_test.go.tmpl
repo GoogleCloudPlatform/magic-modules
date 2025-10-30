@@ -1383,7 +1383,7 @@ func testAccNetappBlockVolume_volumeBasicExample_basic(context map[string]interf
         storage_pool = google_netapp_storage_pool.default.name
         protocols = ["ISCSI"]
         block_devices {
-            host_groups = ["projects/{project_name}/locations/us-central1/hostGroups/tf-test-test-host-group%{random_suffix}"]
+            host_groups = [google_netapp_host_group.test_host_group.id]
             os_type = "LINUX"
         }
     }
@@ -1421,7 +1421,9 @@ func testAccNetappBlockVolume_volumeBasicExample_full(context map[string]interfa
         protocols = ["ISCSI"]
         block_devices {
             name = "block-device-1"
-            host_groups = ["projects/{project_name}/locations/us-central1/hostGroups/tf-test-test-host-group%{random_suffix}"]
+            size_gib = 100
+            identifier = "lun_1"
+            host_groups = [google_netapp_host_group.test_host_group.id]
             os_type = "LINUX"
         }
     }
@@ -1458,7 +1460,7 @@ func testAccNetappBlockVolume_volumeBasicExample_update(context map[string]inter
         storage_pool = google_netapp_storage_pool.default.name
         protocols = ["ISCSI"]
         block_devices {
-            host_groups = ["projects/{project_name}/locations/us-central1/hostGroups/tf-test-test-host-group%{random_suffix}"]
+            host_groups = [google_netapp_host_group.test_host_group.id]
             os_type = "LINUX"
         }
     }
