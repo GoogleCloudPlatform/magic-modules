@@ -14,6 +14,10 @@ func suppressSquashModeDiff(k, old, new string, d *schema.ResourceData) bool {
         return false
     }
 
+    if new == "SQUASH_MODE_UNSPECIFIED" {
+        reuturn true
+    }
+
     // 2. The user did not specify squash_mode in the configuration ('new' is empty).
     // Now, we suppress the diff if the API/state value ('old') is one of the
     // specific values that should be treated as equivalent to an unset field.
