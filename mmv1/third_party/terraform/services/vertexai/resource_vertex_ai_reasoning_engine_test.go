@@ -84,6 +84,14 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
     service_account = google_service_account.service_account.email
 
     deployment_spec {
+      min_instances         = 1
+      max_instances         = 3
+      container_concurrency = 5
+
+      resource_limits = {
+        cpu    = "2"
+        memory = "2Gi"
+      }
 
       env {
         name  = "var_1"
@@ -255,6 +263,14 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
     service_account = google_service_account.service_account_new.email
 
     deployment_spec {
+      min_instances         = 2
+      max_instances         = 4
+      container_concurrency = 6
+
+      resource_limits = {
+        cpu    = "4"
+        memory = "4Gi"
+      }
 
       env {
         name  = "var_1"
