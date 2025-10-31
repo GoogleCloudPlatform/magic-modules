@@ -84,7 +84,7 @@ type Product struct {
 	Compiler string `yaml:"-"`
 }
 
-func (p *Product) UnmarshalYAML(value yaml.Node) error {
+func (p *Product) UnmarshalYAML(value *yaml.Node) error {
 	type productAlias Product
 	aliasObj := (*productAlias)(p)
 
