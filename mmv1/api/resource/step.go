@@ -111,7 +111,6 @@ type Step struct {
 	TestHCLText          string `yaml:"-"`
 	OicsHCLText          string `yaml:"-"`
 	PrimaryResourceId    string `yaml:"-"`
-	ProductName          string `yaml:"-"`
 }
 
 func (s *Step) UnmarshalYAML(unmarshal func(any) error) error {

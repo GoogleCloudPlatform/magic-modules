@@ -241,6 +241,7 @@ func (p *Product) loadResource(baseResourcePath string, overrideResourcePath str
 	// SetDefault after AddExtraFields to ensure relevant metadata is available for the newly generated fields
 	resource.SetDefault(p)
 	resource.Validate()
+	resource.TestSampleSetUp()
 
 	return resource
 }

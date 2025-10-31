@@ -18,52 +18,39 @@
 package {{ $.Res.PackageName }}_test
 
 import (
+{{- if not $.Res.ExcludeDelete }}
+	{{- if not $.Res.CustomCode.TestCheckDestroy }}
 	"fmt"
-	"log"
-	"strconv"
+	{{- end }}
 	"strings"
+{{- end }}
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+{{- if not $.Res.ExcludeDelete }}
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+{{- end }}
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath  }}/envvar"
 	"{{ $.ImportPath  }}/tpgresource"
 	transport_tpg "{{ $.ImportPath  }}/transport"
-
-    "google.golang.org/api/googleapi"
 )
 
-var (
-    _ = fmt.Sprintf
-    _ = log.Print
-    _ = strconv.Atoi
-    _ = strings.Trim
-    _ = time.Now
-	_ = resource.TestMain
-	_ = terraform.NewState
-    _ = envvar.TestEnvVar
-    _ = tpgresource.SetLabels
-    _ = transport_tpg.Config{}
-    _ = googleapi.Error{}
-)
-
-{{ range $e := $.Res.TestExamples }}
-func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T) {
-	{{- if $e.SkipTest }}
-	t.Skip("{{$e.SkipTest}}")
+{{ range $s := $.Res.TestSamples }}
+func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T) {
+	{{- if $s.SkipTest }}
+	t.Skip("{{$s.SkipTest}}")
 	{{- end }}
 
-	{{- if $e.SkipVcr }}
+	{{- if $s.SkipVcr }}
 	acctest.SkipIfVcr(t)
 	{{- end }}
 	t.Parallel()
 
-	{{- if $e.BootstrapIam }}
+	{{- if $s.BootstrapIam }}
 	acctest.BootstrapIamMembers(t, []acctest.IamMember{
-	{{- range $iam := $e.BootstrapIam }}
+	{{- range $iam := $s.BootstrapIam }}
 		{
 			Member: "{{$iam.Member}}",
 			Role:   "{{$iam.Role}}",
@@ -72,24 +59,31 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 	})
 	{{- end }}
 
+	{{- range $i, $st := $s.TestSteps }}
+	{{- if eq $i 0 }}
+
 	context := map[string]interface{}{
-	{{- template "EnvVarContext" dict "TestEnvVars" $e.TestEnvVars "HasNewLine" false}}
-	{{- range $varKey, $varVal := $e.TestVarsOverrides }}
-		"{{$varKey}}": {{$varVal}},
+	{{- else }}
+	context_{{ $i }} := map[string]interface{}{
 	{{- end }}
+		{{- template "EnvVarContext" dict "TestEnvVars" $st.TestEnvVars "HasNewLine" false}}
+		{{- range $varKey, $varVal := $st.TestVarsOverrides }}
+		"{{$varKey}}": {{$varVal}},
+		{{- end }}
 		"random_suffix": acctest.RandString(t, 10),
 	}
+	{{- end }}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-	{{- if $.Res.VersionedProvider $e.MinVersion }}
+	{{- if $.Res.VersionedProvider $s.MinVersion }}
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 	{{- else }}
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 	{{- end }}
-	{{- if $e.ExternalProviders }}
+	{{- if $s.ExternalProviders }}
 		ExternalProviders: map[string]resource.ExternalProvider{
-		{{- range $provider := $e.ExternalProviders }}
+		{{- range $provider := $s.ExternalProviders }}
 			"{{$provider}}": {},
 		{{- end }}
 		},
@@ -98,30 +92,45 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 		CheckDestroy: testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t),
 	{{- end }}
 		Steps: []resource.TestStep{
+		{{- range $i, $st := $s.TestSteps }}
 			{
-				Config: testAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(context),
+			{{- if eq $i 0 }}
+				Config: testAcc{{ $st.TestStepSlug $.Res.ProductMetadata.Name $.Res.Name }}(context),
+			{{- else }}
+			 Config: testAcc{{ $st.TestStepSlug $.Res.ProductMetadata.Name $.Res.Name }}(context_{{ $i }}),
+			 ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("{{ $s.ResourceType $.Res.TerraformName }}.{{ $s.PrimaryResourceId }}", plancheck.ResourceActionUpdate),
+					},
+				},
+			{{- end }}
 			},
-	{{- if not $e.ExcludeImportTest }}
+			{{- if not $st.ExcludeImportTest }}
 			{
-				ResourceName:      "{{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}",
+				ResourceName:      "{{ $s.ResourceType $.Res.TerraformName }}.{{ $s.PrimaryResourceId }}",
 				ImportState:       true,
 				ImportStateVerify: true,
-		{{- if $.Res.IgnoreReadPropertiesToStringLegacy $e }}
-				ImportStateVerifyIgnore: {{ $.Res.IgnoreReadPropertiesToStringLegacy $e }},
-		{{- end }}
+			{{- if $.Res.IgnoreReadPropertiesToString $st }}
+				ImportStateVerifyIgnore: {{ $.Res.IgnoreReadPropertiesToString $st }},
+			{{- end }}
 			},
-	{{- end }}
+			{{- end }}
+		{{- end }}
 		},
 	})
 }
 
-func testAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(context map[string]interface{}) string {
-  return acctest.Nprintf(`
-{{ $e.TestHCLText -}}
+{{ range $st := $s.NewConfigFuncs }}
+func testAcc{{ $st.TestStepSlug $.Res.ProductMetadata.Name $.Res.Name }}(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+{{ $st.TestHCLText -}}
 `, context)
 }
+{{ end }}
+
 
 {{ end }}
+
 
 {{ if not $.Res.ExcludeDelete }}
 func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *terraform.State) error {
