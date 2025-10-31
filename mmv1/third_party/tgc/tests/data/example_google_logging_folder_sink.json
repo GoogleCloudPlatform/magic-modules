@@ -1,7 +1,7 @@
 [{
     "name": "//logging.googleapis.com/folders/{{.FolderID}}/sinks/tf-test-sink",
     "asset_type": "logging.googleapis.com/LogSink",
-    "ancestry_path": "{{.Ancestry}}/folder/{{.FolderID}}",
+    "ancestry_path": "{{.Ancestry}}",
     "resource": {
         "version": "v2",
         "discovery_document_uri": "https://logging.googleapis.com/$discovery/rest",
