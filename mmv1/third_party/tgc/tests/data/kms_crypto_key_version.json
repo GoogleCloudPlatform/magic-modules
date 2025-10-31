@@ -2,16 +2,39 @@
   {
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
     "assetType": "cloudkms.googleapis.com/CryptoKeyVersion",
-    "name": "//cloudkms.googleapis.com/projects/{{.Provider.project}}/locations/global/keyRings/gg-asset-key-ring-43576-f7a1/cryptoKeys/gg-asset-crypto-key-43576-f7a1/cryptoKeyVersions/1",
+    "name": "//cloudkms.googleapis.com/placeholder-foobar",
     "resource": {
       "data": {
         "state": "ENABLED"
       },
-      "discoveryDocumentUri": "https://cloudkms.googleapis.com/$discovery/rest",
       "discoveryName": "CryptoKeyVersion",
-      "location": "global",
-      "parent": "//cloudkms.googleapis.com/projects/{{.Provider.project}}/locations/global/keyRings/gg-asset-key-ring-43576-f7a1/cryptoKeys/gg-asset-crypto-key-43576-f7a1",
-      "version": "v1"
+      "parent": "//cloudresourcemanager.googleapis.com/projects/foobar"
+    }
+  },
+  {
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "assetType": "cloudkms.googleapis.com/CryptoKey",
+    "name": "//cloudkms.googleapis.com/placeholder-foobar/cryptoKeys/gg-asset-crypto-key-43576-f7a1",
+    "resource": {
+      "data": {
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "purpose": "ENCRYPT_DECRYPT",
+        "rotationPeriod": "100000s"
+      },
+      "discoveryName": "CryptoKey",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/foobar"
+    }
+  },
+  {
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "assetType": "cloudkms.googleapis.com/KeyRing",
+    "name": "//cloudkms.googleapis.com/projects/foobar/locations/global/keyRings/gg-asset-key-ring-43576-f7a1",
+    "resource": {
+        "data": {},
+        "discoveryName": "KeyRing",
+        "parent": "//cloudresourcemanager.googleapis.com/projects/foobar"
     }
   }
 ]
