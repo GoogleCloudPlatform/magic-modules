@@ -26,7 +26,7 @@ func TestAccSecretManagerSecretVersion_update(t *testing.T) {
 				ResourceName:            "google_secret_manager_secret_version.secret-version-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"secret_data", "secret_data_wo_version"},
+				ImportStateVerifyIgnore: []string{"secret_data", "secret_data_wo_version", "project"},
 			},
 			{
 				Config: testAccSecretManagerSecretVersion_disable(context),
@@ -37,7 +37,7 @@ func TestAccSecretManagerSecretVersion_update(t *testing.T) {
 				ImportStateVerify: true,
 				// at this point the secret data is disabled and so reading the data on import will
 				// give an empty string
-				ImportStateVerifyIgnore: []string{"secret_data", "secret_data_wo_version"},
+				ImportStateVerifyIgnore: []string{"secret_data", "secret_data_wo_version", "project"},
 			},
 			{
 				Config: testAccSecretManagerSecretVersion_byName(context),
@@ -46,7 +46,7 @@ func TestAccSecretManagerSecretVersion_update(t *testing.T) {
 				ResourceName:            "google_secret_manager_secret_version.secret-version-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"secret_data", "secret_data_wo_version"},
+				ImportStateVerifyIgnore: []string{"secret_data", "secret_data_wo_version", "project"},
 			},
 		},
 	})
