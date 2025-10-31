@@ -57,6 +57,10 @@ resource "google_alloydb_cluster" "default" {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
 
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+
   deletion_protection = false
 }
 
@@ -115,6 +119,10 @@ resource "google_alloydb_cluster" "default" {
   }
   database_version = "POSTGRES_14"
 
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+
   deletion_protection = false
 }
 
@@ -144,6 +152,10 @@ resource "google_alloydb_cluster" "default" {
     network = data.google_compute_network.default.id
   }
   database_version = "POSTGRES_15"
+
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
 
   deletion_protection = false
 }
@@ -199,6 +211,10 @@ resource "google_alloydb_cluster" "default" {
   	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
 
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+
   deletion_protection = false
 }
 
@@ -242,6 +258,10 @@ resource "google_alloydb_cluster" "default" {
   subscription_type = "STANDARD"
   network_config {
   	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  }
+
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
   }
 
   deletion_protection = false
@@ -433,6 +453,10 @@ resource "google_alloydb_cluster" "default" {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
 
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+
   deletion_protection = false
 
   lifecycle {
@@ -482,6 +506,9 @@ resource "google_alloydb_cluster" "default" {
   location   = "us-central1"
   network_config {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  }
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
   }
   automated_backup_policy {
     location      = "us-central1"
@@ -590,6 +617,9 @@ resource "google_alloydb_cluster" "default" {
   network_config {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
   automated_backup_policy {
     location      = "us-central1"
     backup_window = "1800s"
@@ -635,6 +665,9 @@ resource "google_alloydb_cluster" "default" {
   location   = "us-central1"
   network_config {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  }
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
   }
   automated_backup_policy {
     location      = "us-central1"
@@ -703,6 +736,9 @@ resource "google_alloydb_cluster" "default" {
   location   = "us-central1"
   network_config {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  }
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
   }
   encryption_config {
     kms_key_name = "%{kms_key_name}"
@@ -776,6 +812,9 @@ resource "google_alloydb_cluster" "default" {
   network_config {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
   encryption_config {
     kms_key_name = "%{kms_key_name1}"
   }
@@ -820,6 +859,9 @@ resource "google_alloydb_cluster" "default" {
   location   = "us-central1"
   network_config {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  }
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
   }
   encryption_config {
     kms_key_name = "%{kms_key_name1}"
@@ -871,6 +913,9 @@ resource "google_alloydb_cluster" "default" {
   location   = "us-central1"
   network_config {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  }
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
   }
   encryption_config {
     kms_key_name = "%{kms_key_name1}"
@@ -1109,6 +1154,10 @@ resource "google_alloydb_cluster" "default" {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
 
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+
   deletion_protection = false
 
   lifecycle {
@@ -1132,6 +1181,10 @@ resource "google_alloydb_cluster" "default" {
   location   = "us-central1"
   network_config {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  }
+
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
   }
 
   continuous_backup_config {
@@ -1217,6 +1270,9 @@ resource "google_alloydb_cluster" "default" {
   network_config {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
   continuous_backup_config {
     enabled       		 = true
 	recovery_window_days = 20
@@ -1254,6 +1310,9 @@ resource "google_alloydb_cluster" "default" {
   location   = "us-central1"
   network_config {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  }
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
   }
   continuous_backup_config {
     enabled       		 = true
@@ -1316,6 +1375,10 @@ resource "google_alloydb_cluster" "default" {
 		network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
 
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+
   deletion_protection = false
 }
 data "google_project" "project" {}
@@ -1359,6 +1422,10 @@ resource "google_alloydb_cluster" "default" {
   network_config {
 		network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
 		allocated_ip_range = google_compute_global_address.private_ip_alloc.name
+  }
+
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
   }
 
   deletion_protection = false
@@ -1411,6 +1478,9 @@ resource "google_alloydb_cluster" "default" {
   location   = "us-central1"
   network_config {
 		network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  }
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
   }
   maintenance_update_policy {
     maintenance_windows {
@@ -1467,6 +1537,9 @@ resource "google_alloydb_cluster" "default" {
   network_config {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
   
   maintenance_update_policy {
     maintenance_windows {
@@ -1492,6 +1565,9 @@ resource "google_alloydb_cluster" "default" {
   location   = "us-central1"
   network_config {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  }
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
   }
   
   maintenance_update_policy {
@@ -1547,6 +1623,10 @@ resource "google_alloydb_cluster" "default" {
   location   = "us-central1"
   psc_config {
     psc_enabled = true
+  }
+
+	initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
   }
 
   deletion_protection = false
