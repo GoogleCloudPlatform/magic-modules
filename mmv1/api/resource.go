@@ -220,6 +220,9 @@ type Resource struct {
 	// corresponding OiCS walkthroughs.
 	Examples []resource.Examples
 
+	// Samples for generating tests and documentation
+	Samples []*resource.Sample
+
 	// If true, generates product operation handling logic.
 	AutogenAsync bool `yaml:"autogen_async,omitempty"`
 
