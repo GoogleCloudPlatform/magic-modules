@@ -152,7 +152,7 @@ properties:
       - 'STATE_RUNNING'
       - 'STATE_STOPPING'
       - 'STATE_STOPPED'
-  - name: 'source_workstation'
+  - name: 'sourceWorkstation'
     type: String
     description: |
       Full resource name of the source workstation from which the workstation's persistent
