@@ -28,6 +28,7 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"golang.org/x/exp/slices"
+	"gopkg.in/yaml.v3"
 )
 
 // Represents a product to be managed
@@ -242,7 +243,7 @@ func (p *Product) loadResource(baseResourcePath string, overrideResourcePath str
 	return resource
 }
 
-func (p *Product) UnmarshalYAML(unmarshal func(any) error) error {
+func (p *Product) UnmarshalYAML(value *yaml.Node) error {
 	type productAlias Product
 	aliasObj := (*productAlias)(p)
 
