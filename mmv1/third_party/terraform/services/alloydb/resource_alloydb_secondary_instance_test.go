@@ -52,7 +52,7 @@ resource "google_alloydb_cluster" "primary" {
     network = data.google_compute_network.default.id
   }
 
-	initial_user {
+  initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 
@@ -119,7 +119,7 @@ resource "google_alloydb_cluster" "primary" {
     network = data.google_compute_network.default.id
   }
 
-	initial_user {
+  initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 
@@ -213,7 +213,7 @@ resource "google_alloydb_cluster" "primary" {
     network = data.google_compute_network.default.id
   }
 
-	initial_user {
+  initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 
@@ -319,7 +319,7 @@ resource "google_alloydb_cluster" "primary" {
     allocated_ip_range = data.google_compute_global_address.private_ip_alloc.name
   }
 
-	initial_user {
+  initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 
@@ -427,7 +427,7 @@ resource "google_alloydb_cluster" "primary" {
     network = data.google_compute_network.default.id
   }
 
-	initial_user {
+  initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 
@@ -534,7 +534,7 @@ resource "google_alloydb_cluster" "primary" {
     network = data.google_compute_network.default.id
   }
 
-	initial_user {
+  initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 
@@ -635,7 +635,7 @@ resource "google_alloydb_cluster" "primary" {
     network = data.google_compute_network.default.id
   }
 
-	initial_user {
+  initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 

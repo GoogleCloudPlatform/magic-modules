@@ -90,7 +90,7 @@ resource "google_alloydb_cluster" "source" {
     network = data.google_compute_network.default.id
   }
 
-	initial_user {
+  initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
 
@@ -129,7 +129,7 @@ resource "google_alloydb_cluster" "source" {
     network = data.google_compute_network.default.id
   }
 
-	initial_user {
+  initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
 
@@ -156,7 +156,7 @@ resource "google_alloydb_cluster" "restored" {
   network_config {
     network = data.google_compute_network.default.id
   }
-	initial_user {
+  initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
   restore_backup_source {
@@ -192,7 +192,7 @@ resource "google_alloydb_cluster" "source" {
     network = data.google_compute_network.default.id
   }
 
-	initial_user {
+  initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
 
@@ -220,7 +220,7 @@ resource "google_alloydb_cluster" "restored" {
     network = data.google_compute_network.default.id
   }
 
-	initial_user {
+  initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
 
@@ -252,7 +252,7 @@ resource "google_alloydb_cluster" "source" {
     network = data.google_compute_network.default.id
   }
 
-	initial_user {
+  initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
 
@@ -279,7 +279,7 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   network_config {
     network = data.google_compute_network.default.id
   }
-	initial_user {
+  initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
   restore_backup_source {
@@ -312,7 +312,7 @@ resource "google_alloydb_cluster" "source" {
     network = data.google_compute_network.default.id
   }
 
-	initial_user {
+  initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
 
@@ -339,7 +339,7 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   network_config {
     network = data.google_compute_network.default.id
   }
-	initial_user {
+  initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
   restore_backup_source {
@@ -359,7 +359,7 @@ resource "google_alloydb_cluster" "restored_from_point_in_time" {
   network_config {
     network = data.google_compute_network.default.id
   }
-	initial_user {
+  initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
   restore_continuous_backup_source {
@@ -393,7 +393,7 @@ resource "google_alloydb_cluster" "source" {
     network = data.google_compute_network.default.id
   }
 
-	initial_user {
+  initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
 
@@ -420,7 +420,7 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   network_config {
     network = data.google_compute_network.default.id
   }
-	initial_user {
+  initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
   restore_backup_source {
@@ -445,7 +445,7 @@ resource "google_alloydb_cluster" "restored_from_point_in_time" {
   network_config {
     network = data.google_compute_network.default.id
   }
-	initial_user {
+  initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
   restore_continuous_backup_source {
@@ -483,7 +483,7 @@ resource "google_alloydb_cluster" "source" {
   network_config {
     network = data.google_compute_network.default.id
   }
-	initial_user {
+  initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
 
@@ -518,7 +518,7 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   network_config {
     network = data.google_compute_network.default.id
   }
-	initial_user {
+  initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
   restore_backup_source {
@@ -545,7 +545,7 @@ resource "google_alloydb_cluster" "restored_from_point_in_time" {
   network_config {
     network = data.google_compute_network.default.id
   }
-	initial_user {
+  initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
   restore_continuous_backup_source {
@@ -583,7 +583,7 @@ resource "google_alloydb_cluster" "source" {
   network_config {
     network = data.google_compute_network.default.id
   }
-	initial_user {
+  initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
 
@@ -610,7 +610,7 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   network_config {
     network = data.google_compute_network.default.id
   }
-	initial_user {
+  initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
   restore_backup_source {
@@ -626,7 +626,7 @@ resource "google_alloydb_cluster" "restored_from_point_in_time" {
   network_config {
     network = data.google_compute_network.default.id
   }
-	initial_user {
+  initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
   restore_continuous_backup_source {

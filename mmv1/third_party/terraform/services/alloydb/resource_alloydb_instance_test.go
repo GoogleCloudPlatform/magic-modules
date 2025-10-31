@@ -216,7 +216,7 @@ resource "google_alloydb_cluster" "default" {
     network = data.google_compute_network.default.id
   }
 
-	initial_user {
+  initial_user {
 		password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 
@@ -246,7 +246,7 @@ resource "google_alloydb_cluster" "default" {
     network = data.google_compute_network.default.id
   }
 
-	initial_user {
+  initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 
@@ -323,7 +323,7 @@ resource "google_alloydb_cluster" "default" {
   network_config {
     network = data.google_compute_network.default.id
   }
-	initial_user {
+  initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 }
@@ -382,7 +382,7 @@ resource "google_alloydb_cluster" "default" {
     network = data.google_compute_network.default.id
   }
 
-	initial_user {
+  initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 
@@ -443,7 +443,7 @@ resource "google_alloydb_cluster" "default" {
   network_config {
     network = data.google_compute_network.default.id
   }
-	initial_user {
+  initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 }
@@ -474,7 +474,7 @@ resource "google_alloydb_cluster" "default" {
     network = data.google_compute_network.default.id
   }
 
-	initial_user {
+  initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 
@@ -531,7 +531,7 @@ resource "google_alloydb_cluster" "default" {
     allocated_ip_range = data.google_compute_global_address.private_ip_alloc.name
   }
 
-	initial_user {
+  initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 
@@ -676,7 +676,7 @@ resource "google_alloydb_cluster" "default" {
     network = data.google_compute_network.default.id
   }
 
-	initial_user {
+  initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 
@@ -713,7 +713,7 @@ resource "google_alloydb_cluster" "default" {
     network = data.google_compute_network.default.id
   }
 
-	initial_user {
+  initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 
@@ -1199,7 +1199,7 @@ resource "google_alloydb_cluster" "default" {
     network = data.google_compute_network.default.id
   }
 
-	initial_user {
+  initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
 
