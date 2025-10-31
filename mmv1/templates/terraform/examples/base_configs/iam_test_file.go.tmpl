@@ -668,7 +668,7 @@ func generate{{ $.ResourceName }}IAMPolicyStateID(iamResourceAddr string) func (
 			{{ $p }} = tpgresource.GetResourceNameFromSelfLink(rawState["{{ $p }}"])
 		}
 		{{- end }}
-		return fmt.Sprintf("{{ $.IamResourceUriFormat }}", {{ Join $.IamResourceParams ", " }}), nil
+		return fmt.Sprintf("{{ $.IamResourceUriFormat }}", {{ join $.IamResourceParams ", " }}), nil
 	}
 }
 
@@ -692,7 +692,7 @@ func generate{{ $.ResourceName }}IAMBindingStateID(iamResourceAddr string) func 
 			{{ $p }} = tpgresource.GetResourceNameFromSelfLink(rawState["{{ $p }}"])
 		}
 		{{- end }}
-		return fmt.Sprintf("{{ $.IamResourceUriFormat }} %s", {{ Join $.IamResourceParams ", " }}, rawState["role"]), nil
+		return fmt.Sprintf("{{ $.IamResourceUriFormat }} %s", {{ join $.IamResourceParams ", " }}, rawState["role"]), nil
 	}
 }
 
@@ -716,6 +716,6 @@ func generate{{ $.ResourceName }}IAMMemberStateID(iamResourceAddr string) func (
 			{{ $p }} = tpgresource.GetResourceNameFromSelfLink(rawState["{{ $p }}"])
 		}
 		{{- end }}
-		return fmt.Sprintf("{{ $.IamResourceUriFormat }} %s %s", {{ Join $.IamResourceParams ", " }}, rawState["role"], rawState["member"]), nil
+		return fmt.Sprintf("{{ $.IamResourceUriFormat }} %s %s", {{ join $.IamResourceParams ", " }}, rawState["role"], rawState["member"]), nil
 	}
 }
