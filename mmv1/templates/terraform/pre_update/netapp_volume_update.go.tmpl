@@ -17,7 +17,6 @@ if v, ok := d.GetOk("block_devices"); ok {
         newBlockDevices = append(newBlockDevices, newblockDevice)
     }
 
-    log.Printf("newBlockDevices %v", newBlockDevices)
     if len(newBlockDevices) > 0 {
         obj["blockDevices"] = newBlockDevices
     }
@@ -65,7 +64,7 @@ if v, ok := d.GetOk("export_policy"); ok {
                 } else {
                     // User did NOT provide the field, or provided an empty value.
                     // Explicitly send null to the API.
-                    newRuleMapItemSet["squashMode"] = "SQUASH_MODE_UNSPECIFIED"
+                    newRuleMapItemSet["squashMode"] = ""
                 }
 
                 // Handle "anon_uid"
