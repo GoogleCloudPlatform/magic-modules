@@ -246,7 +246,7 @@ func (p *Product) UnmarshalYAML(unmarshal func(any) error) error {
 	type productAlias Product
 	aliasObj := (*productAlias)(p)
 
-	if err := unmarshal(aliasObj); err != nil {
+	if err := value.Decode(aliasObj); err != nil {
 		return err
 	}
 

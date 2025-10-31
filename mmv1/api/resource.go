@@ -25,6 +25,7 @@ import (
 	"text/template"
 
 	"github.com/golang/glog"
+	"gopkg.in/yaml.v3"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
@@ -55,6 +56,7 @@ type Resource struct {
 	//		api: 'rest_api_reference_url/version'
 	//
 	References resource.ReferenceLinks `yaml:"references,omitempty"`
+	Docs       resource.Docs           `yaml:"docs,omitempty"`
 
 	// [Required] The GCP "relative URI" of a resource, relative to the product
 	// base URL. It can often be inferred from the `create` path.
@@ -205,8 +207,6 @@ type Resource struct {
 
 	CustomCode resource.CustomCode `yaml:"custom_code,omitempty"`
 
-	Docs resource.Docs `yaml:"docs,omitempty"`
-
 	// This block inserts entries into the customdiff.All() block in the
 	// resource schema -- the code for these custom diff functions must
 	// be included in the resource constants or come from tpgresource
@@ -218,7 +218,7 @@ type Resource struct {
 
 	// Examples in documentation. Backed by generated tests, and have
 	// corresponding OiCS walkthroughs.
-	Examples []resource.Examples
+	Examples []*resource.Examples
 
 	// If true, generates product operation handling logic.
 	AutogenAsync bool `yaml:"autogen_async,omitempty"`
@@ -399,11 +399,11 @@ type TGCResource struct {
 	TGCTests []resource.TGCTest `yaml:"tgc_tests,omitempty"`
 }
 
-func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
+func (r *Resource) UnmarshalYAML(value *yaml.Node) error {
 	type resourceAlias Resource
 	aliasObj := (*resourceAlias)(r)
 
-	err := unmarshal(aliasObj)
+	err := value.Decode(aliasObj)
 	if err != nil {
 		return err
 	}
@@ -1599,11 +1599,11 @@ func (r Resource) IamAttributes() []string {
 
 // Since most resources define a "basic" config as their first example,
 // we can reuse that config to create a resource to test IAM resources with.
-func (r Resource) FirstTestExample() resource.Examples {
-	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
+func (r Resource) FirstTestExample() *resource.Examples {
+	examples := google.Reject(r.Examples, func(e *resource.Examples) bool {
 		return e.ExcludeTest
 	})
-	examples = google.Reject(examples, func(e resource.Examples) bool {
+	examples = google.Reject(examples, func(e *resource.Examples) bool {
 		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
 	})
 
@@ -1611,15 +1611,15 @@ func (r Resource) FirstTestExample() resource.Examples {
 }
 
 func (r Resource) ExamplePrimaryResourceId() string {
-	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
+	examples := google.Reject(r.Examples, func(e *resource.Examples) bool {
 		return e.ExcludeTest
 	})
-	examples = google.Reject(examples, func(e resource.Examples) bool {
+	examples = google.Reject(examples, func(e *resource.Examples) bool {
 		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
 	})
 
 	if len(examples) == 0 {
-		examples = google.Reject(r.Examples, func(e resource.Examples) bool {
+		examples = google.Reject(r.Examples, func(e *resource.Examples) bool {
 			return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
 		})
 	}
@@ -1920,10 +1920,10 @@ func (r Resource) IsExcluded() bool {
 	return r.Exclude || r.ExcludeResource
 }
 
-func (r Resource) TestExamples() []resource.Examples {
-	return google.Reject(google.Reject(r.Examples, func(e resource.Examples) bool {
+func (r Resource) TestExamples() []*resource.Examples {
+	return google.Reject(google.Reject(r.Examples, func(e *resource.Examples) bool {
 		return e.ExcludeTest
-	}), func(e resource.Examples) bool {
+	}), func(e *resource.Examples) bool {
 		return e.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, e.MinVersion)
 	})
 }

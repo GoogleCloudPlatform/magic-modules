@@ -34,7 +34,7 @@ import (
 	r "github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/getkin/kin-openapi/openapi3"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 type Parser struct {
@@ -94,8 +94,6 @@ func (parser Parser) WriteYaml(filePath string) {
 	resourcePaths := findResources(doc)
 	productPath := buildProduct(filePath, parser.Output, doc, header)
 
-	// Disables line wrap for long strings
-	yaml.FutureLineWrap()
 	log.Printf("Generated product %+v/product.yaml", productPath)
 	for _, pathArray := range resourcePaths {
 		resource := buildResource(filePath, pathArray[0], pathArray[1], doc)
@@ -266,7 +264,7 @@ func buildResource(filePath, resourcePath, resourceName string, root *openapi3.T
 	example.PrimaryResourceId = "example"
 	example.Vars = map[string]string{"resource_name": "test-resource"}
 
-	resource.Examples = []r.Examples{example}
+	resource.Examples = []*r.Examples{&example}
 
 	resourceNameBytes := []byte(resourceName)
 	// Write the status as an encoded string to flag when a YAML file has been
