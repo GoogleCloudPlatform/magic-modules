@@ -61,6 +61,9 @@ type Product struct {
 	// base URL. Specific to defining the resource as a CAI asset.
 	CaiBaseUrl string
 
+	// The service name from CAI asset name, e.g. bigtable.googleapis.com.
+	CaiAssetService string `yaml:"cai_asset_service,omitempty"`
+
 	// CaiResourceType of resources that already have an AssetType constant defined in the product.
 	ResourcesWithCaiAssetType map[string]struct{}
 

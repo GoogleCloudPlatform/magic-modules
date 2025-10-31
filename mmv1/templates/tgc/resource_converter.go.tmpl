@@ -57,7 +57,7 @@ func ResourceConverter{{ $.ResourceName -}}() cai.ResourceConverter {
 }
 
 func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
-    name, err := cai.AssetName(d, config, "{{ $.CaiAssetNameTemplate $productBackendName }}")
+    name, err := cai.AssetName(d, config, "{{ $.GetCaiAssetNameTemplate }}")
     if err != nil {
         return []cai.Asset{}, err
     }
