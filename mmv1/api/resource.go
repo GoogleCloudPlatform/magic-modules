@@ -218,7 +218,7 @@ type Resource struct {
 
 	// Examples in documentation. Backed by generated tests, and have
 	// corresponding OiCS walkthroughs.
-	Examples []resource.Examples
+	Examples []*resource.Examples
 
 	// If true, generates product operation handling logic.
 	AutogenAsync bool `yaml:"autogen_async,omitempty"`
@@ -1301,7 +1301,7 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 
 // IgnoreReadProperties returns a sorted slice of property names (snake_case) that should be ignored when reading.
 // This is useful for downstream code that needs to iterate over these properties.
-func (r Resource) IgnoreReadProperties(e resource.Examples) []string {
+func (r Resource) IgnoreReadProperties(e *resource.Examples) []string {
 	var props []string
 	for _, tp := range r.AllUserProperties() {
 		if tp.UrlParamOnly || tp.IsA("ResourceRef") {
@@ -1318,7 +1318,7 @@ func (r Resource) IgnoreReadProperties(e resource.Examples) []string {
 
 // IgnoreReadPropertiesToString returns the ignore read properties as a Go-syntax string slice.
 // This is a wrapper around IgnoreReadProperties for backwards compatibility.
-func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
+func (r Resource) IgnoreReadPropertiesToString(e *resource.Examples) string {
 	props := r.IgnoreReadProperties(e)
 	if len(props) > 0 {
 		return fmt.Sprintf("[]string{%s}", strings.Join(quoteStrings(props), ", "))
@@ -1602,11 +1602,11 @@ func (r Resource) IamAttributes() []string {
 
 // Since most resources define a "basic" config as their first example,
 // we can reuse that config to create a resource to test IAM resources with.
-func (r Resource) FirstTestExample() resource.Examples {
-	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
+func (r Resource) FirstTestExample() *resource.Examples {
+	examples := google.Reject(r.Examples, func(e *resource.Examples) bool {
 		return e.ExcludeTest
 	})
-	examples = google.Reject(examples, func(e resource.Examples) bool {
+	examples = google.Reject(examples, func(e *resource.Examples) bool {
 		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
 	})
 
@@ -1614,15 +1614,15 @@ func (r Resource) FirstTestExample() resource.Examples {
 }
 
 func (r Resource) ExamplePrimaryResourceId() string {
-	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
+	examples := google.Reject(r.Examples, func(e *resource.Examples) bool {
 		return e.ExcludeTest
 	})
-	examples = google.Reject(examples, func(e resource.Examples) bool {
+	examples = google.Reject(examples, func(e *resource.Examples) bool {
 		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
 	})
 
 	if len(examples) == 0 {
-		examples = google.Reject(r.Examples, func(e resource.Examples) bool {
+		examples = google.Reject(r.Examples, func(e *resource.Examples) bool {
 			return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
 		})
 	}
@@ -1923,10 +1923,10 @@ func (r Resource) IsExcluded() bool {
 	return r.Exclude || r.ExcludeResource
 }
 
-func (r Resource) TestExamples() []resource.Examples {
-	return google.Reject(google.Reject(r.Examples, func(e resource.Examples) bool {
+func (r Resource) TestExamples() []*resource.Examples {
+	return google.Reject(google.Reject(r.Examples, func(e *resource.Examples) bool {
 		return e.ExcludeTest
-	}), func(e resource.Examples) bool {
+	}), func(e *resource.Examples) bool {
 		return e.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, e.MinVersion)
 	})
 }
