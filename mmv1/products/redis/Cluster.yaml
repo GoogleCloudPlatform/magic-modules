@@ -115,6 +115,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+include_in_tgc_next_DO_NOT_USE: true
 custom_code:
   encoder: 'templates/terraform/encoders/redis_cluster.go.tmpl'
   decoder: 'templates/terraform/decoders/redis_cluster.go.tmpl'
@@ -385,6 +386,7 @@ properties:
       network addresses will be designated to the cluster for client access.
       Currently, only one PscConfig is supported.
     ignore_read: true
+    is_missing_in_cai: true
     item_type:
       type: NestedObject
       properties:
@@ -698,6 +700,13 @@ properties:
     type: String
     description: |
       This field represents the actual maintenance version of the cluster.
+    output: true
+  - name: 'availableMaintenanceVersions'
+    type: Array
+    description: |
+     This field is used to determine the available maintenance versions for the self service update.
+    item_type:
+      type: String
     output: true
   - name: 'crossClusterReplicationConfig'
     type: NestedObject

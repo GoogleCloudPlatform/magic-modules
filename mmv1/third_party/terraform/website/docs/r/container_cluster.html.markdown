@@ -831,6 +831,8 @@ Structure is [documented below](#nested_additional_ip_ranges_config).
 
 * `auto_ipam_config` - (Optional) All the information related to Auto IPAM. Structure is [documented below](#nested_auto_ipam_config)
 
+* `network_tier_config` - (Optional) Contains network tier information. Structure is [documented below](#nested_network_tier_config)
+
 <a name="nested_auto_ipam_config"></a>The auto ipam config supports:
 
 * `enabled` - (Required) The flag that enables Auto IPAM on this cluster.
@@ -846,6 +848,14 @@ Structure is [documented below](#nested_additional_ip_ranges_config).
 * `subnetwork` - (Required) Name of the subnetwork. This can be the full path of the subnetwork or just the name.
 
 * `pod_ipv4_range_names`- (Required) List of secondary ranges names within this subnetwork that can be used for pod IPs.
+
+<a name="nested_network_tier_config"></a>The `network_tier_config` block supports:
+
+* `network_tier` - (Required) Network tier configuration.
+    Accepted values are:
+    * `NETWORK_TIER_DEFAULT`: (Default) Use project-level configuration.
+    * `NETWORK_TIER_PREMIUM`: Premium network tier.
+    * `NETWORK_TIER_STANDARD`: Standard network tier.
 
 
 <a name="nested_master_auth"></a>The `master_auth` block supports:
@@ -1320,6 +1330,10 @@ The `control_plane_endpoints_config.dns_endpoint_config` block supports:
 
 * `allow_external_traffic` - (Optional) Controls whether user traffic is allowed over this endpoint. Note that GCP-managed services may still use the endpoint even if this is false.
 
+* `enable_k8s_tokens_via_dns` - (Optional) Controls whether the k8s token auth is allowed via Dns.
+
+* `enable_k8s_certs_via_dns` - (Optional) Controls whether the k8s certs auth is allowed via Dns.
+
 The `control_plane_endpoints_config.ip_endpoints_config` block supports:
 
 * `enabled` - (Optional) Controls whether to allow direct IP access. Defaults to `true`.
@@ -1661,6 +1675,8 @@ linux_node_config {
 <a name="nested_fleet"></a>The `fleet` block supports:
 
 * `project` - (Optional) The name of the Fleet host project where this cluster will be registered.
+
+* `membership_type` - (Optional) Sets the membership type of the cluster.  Available option is `LIGHTWEIGHT` to support only lightweight compatible features.  If unspecified, the membership_type will be a regular membership that supports all features.
 
 <a name="nested_workload_alts_config"></a>The `workload_alts_config` block supports:
 

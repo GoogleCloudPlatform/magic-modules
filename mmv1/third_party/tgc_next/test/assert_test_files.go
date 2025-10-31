@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -33,7 +34,7 @@ var (
 	tmpDir     = os.TempDir()
 )
 
-func BidirectionalConversion(t *testing.T, ignoredFields []string, ignoredAssetFields []string) {
+func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 	testName := t.Name()
 	stepNumbers, err := getStepNumbers(testName)
 	if err != nil {
@@ -76,13 +77,13 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string, ignoredAssetF
 				tName := fmt.Sprintf("%s_%s", testName, subtestName)
 				if primaryResource != "" {
 					t.Logf("Test for the primary resource %s begins.", primaryResource)
-					err = testSingleResource(t, tName, resourceTestData[primaryResource], tfDir, ignoredFields, ignoredAssetFields, logger, true)
+					err = testSingleResource(t, tName, resourceTestData[primaryResource], tfDir, ignoredFields, logger, true)
 					if err != nil {
 						return err
 					}
 				} else {
 					for _, testData := range resourceTestData {
-						err = testSingleResource(t, tName, testData, tfDir, ignoredFields, ignoredAssetFields, logger, false)
+						err = testSingleResource(t, tName, testData, tfDir, ignoredFields, logger, false)
 						if err != nil {
 							return err
 						}
@@ -109,7 +110,7 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string, ignoredAssetF
 }
 
 // Tests a single resource
-func testSingleResource(t *testing.T, testName string, testData ResourceTestData, tfDir string, ignoredFields []string, ignoredAssetFields []string, logger *zap.Logger, primaryResource bool) error {
+func testSingleResource(t *testing.T, testName string, testData ResourceTestData, tfDir string, ignoredFields []string, logger *zap.Logger, primaryResource bool) error {
 	resourceType := testData.ResourceType
 	var tfplan2caiSupported, cai2hclSupported bool
 	if _, tfplan2caiSupported = tfplan2caiconverters.ConverterMap[resourceType]; !tfplan2caiSupported {
@@ -212,7 +213,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 
 	// Convert the export config to roundtrip assets and then convert the roundtrip assets back to roundtrip config
 	ancestryCache, defaultProject := getAncestryCache(assets)
-	roundtripAssets, roundtripConfigData, err := getRoundtripConfig(t, testName, tfDir, ancestryCache, defaultProject, logger, ignoredAssetFields)
+	roundtripAssets, roundtripConfigData, err := getRoundtripConfig(t, testName, tfDir, ancestryCache, defaultProject, logger)
 	if err != nil {
 		return fmt.Errorf("error when converting the round-trip config: %#v", err)
 	}
@@ -344,26 +345,26 @@ func compareHCLFields(map1, map2, ignoredFields map[string]any) []string {
 			continue
 		}
 
-		if _, ok := map2[key]; !ok {
-			// If a field is an empty map in map1, it is possible that its children are in map2.
-			// In this case, the field is not missing in map2.
-			// map1 = {a: {}}, map2 = {a.b: {}}
-			if vMap, ok := val.(map[string]interface{}); ok {
-				childrenFound := false
-				if len(vMap) == 0 {
-					for key := range map2 {
-						if strings.HasPrefix(key, key) {
-							childrenFound = true
-							break
-						}
-					}
-				}
-				if !childrenFound {
-					missingKeys = append(missingKeys, key)
-				}
-			} else {
-				missingKeys = append(missingKeys, key)
+		if rVal := reflect.ValueOf(val); !rVal.IsValid() || rVal.IsZero() {
+			continue
+		}
+
+		if sVal, ok := val.(string); ok {
+			// TODO: convert to correct type when parsing HCL to fix the edge case where the field type is String and the only values are "false", "00", etc.
+			if bVal, err := strconv.ParseBool(sVal); err == nil && !bVal {
+				continue
 			}
+			if iVal, err := strconv.Atoi(sVal); err == nil && iVal == 0 {
+				continue
+			}
+		}
+
+		if vMap, ok := val.(map[string]any); ok && len(vMap) == 0 {
+			continue
+		}
+
+		if _, ok := map2[key]; !ok {
+			missingKeys = append(missingKeys, key)
 		}
 	}
 	sort.Strings(missingKeys)
@@ -403,7 +404,7 @@ func isIgnored(key string, ignoredFields map[string]any) bool {
 }
 
 // Converts a tfplan to CAI asset, and then converts the CAI asset into HCL
-func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCache map[string]string, defaultProject string, logger *zap.Logger, ignoredAssetFields []string) ([]caiasset.Asset, []byte, error) {
+func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCache map[string]string, defaultProject string, logger *zap.Logger) ([]caiasset.Asset, []byte, error) {
 	fileName := fmt.Sprintf("%s_export", testName)
 	roundtripAssetFile := fmt.Sprintf("%s_roundtrip.json", testName)
 
@@ -420,7 +421,6 @@ func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCac
 		return nil, nil, err
 	}
 
-	deleteFieldsFromAssets(roundtripAssetsCopy, ignoredAssetFields)
 	roundtripConfig, err := cai2hcl.Convert(roundtripAssetsCopy, &cai2hcl.Options{
 		ErrorLogger: logger,
 	})
