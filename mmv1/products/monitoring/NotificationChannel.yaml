@@ -108,28 +108,73 @@ properties:
         description: |
           An authorization token for a notification channel. Channel types that support this field include: slack
         sensitive: true
+        conflicts:
+          - 'sensitive_labels.0.auth_token_wo'
         exactly_one_of:
           - 'sensitive_labels.0.auth_token'
           - 'sensitive_labels.0.password'
           - 'sensitive_labels.0.service_key'
+      - name: 'authTokenWo'
+        type: String
+        description: |
+          An authorization token for a notification channel. Channel types that support this field include: slack. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
+        write_only_legacy: true
+        required_with:
+          - 'authTokenWoVersion'
+        conflicts:
+          - 'sensitive_labels.0.auth_token'
+      - name: 'authTokenWoVersion'
+        type: Integer
+        description: Triggers update of auth_token_wo write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
+        url_param_only: true
       - name: 'password'
         type: String
         description: |
           An password for a notification channel. Channel types that support this field include: webhook_basicauth
         sensitive: true
+        conflicts:
+          - 'sensitive_labels.0.password_wo'
         exactly_one_of:
           - 'sensitive_labels.0.auth_token'
           - 'sensitive_labels.0.password'
           - 'sensitive_labels.0.service_key'
+      - name: 'passwordWo'
+        type: String
+        description: |
+          An password for a notification channel. Channel types that support this field include: webhook_basicauth. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
+        write_only_legacy: true
+        required_with:
+          - 'passwordWoVersion'
+        conflicts:
+          - 'sensitive_labels.0.password'
+      - name: 'passwordWoVersion'
+        type: Integer
+        description: Triggers update of password_wo write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
+        url_param_only: true
       - name: 'serviceKey'
         type: String
         description: |
           An servicekey token for a notification channel. Channel types that support this field include: pagerduty
         sensitive: true
+        conflicts:
+          - 'sensitive_labels.0.service_key_wo'
         exactly_one_of:
           - 'sensitive_labels.0.auth_token'
           - 'sensitive_labels.0.password'
           - 'sensitive_labels.0.service_key'
+      - name: 'serviceKeyWo'
+        type: String
+        description: |
+          An servicekey token for a notification channel. Channel types that support this field include: pagerduty. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
+        write_only_legacy: true
+        required_with:
+          - 'serviceKeyWoVersion'
+        conflicts:
+          - 'sensitive_labels.0.service_key'
+      - name: 'serviceKeyWoVersion'
+        type: Integer
+        description: Triggers update of service_key_wo write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
+        url_param_only: true
   - name: 'name'
     type: String
     description: |
