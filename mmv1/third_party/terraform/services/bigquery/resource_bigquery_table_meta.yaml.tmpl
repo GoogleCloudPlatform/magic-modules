@@ -19,30 +19,14 @@ fields:
   - field: 'encryption_configuration.kms_key_version'
   - api_field: 'etag'
   - api_field: 'expirationTime'
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'externalCatalogTableOptions.connectionId'
-{{- end }}
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'externalCatalogTableOptions.parameters'
-{{- end }}
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'externalCatalogTableOptions.storageDescriptor.inputFormat'
-{{- end }}
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'externalCatalogTableOptions.storageDescriptor.locationUri'
-{{- end }}
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'externalCatalogTableOptions.storageDescriptor.outputFormat'
-{{- end }}
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'externalCatalogTableOptions.storageDescriptor.serdeInfo.name'
-{{- end }}
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'externalCatalogTableOptions.storageDescriptor.serdeInfo.parameters'
-{{- end }}
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'externalCatalogTableOptions.storageDescriptor.serdeInfo.serializationLibrary'
-{{- end }}
   - api_field: 'externalDataConfiguration.autodetect'
   - api_field: 'externalDataConfiguration.avroOptions.useAvroLogicalTypes'
   - field: 'external_data_configuration.bigtable_options.column_family.column.encoding'
@@ -106,6 +90,12 @@ fields:
   - api_field: 'resourceTags'
   - api_field: 'schema'
     json: true
+  - api_field: 'schema'
+    field: 'generated_schema_columns'
+  - field: 'ignore_auto_generated_schema'
+    provider_only: true
+  - field: 'ignore_schema_changes'
+    provider_only: true
 {{- if ne $.TargetVersionName "ga" }}
   - field: 'schema_foreign_type_info.type_system'
 {{- end }}
