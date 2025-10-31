@@ -1,9 +1,7 @@
 package logging
 
 import (
-	"fmt"
 	"reflect"
-	"strings"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/cai"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
