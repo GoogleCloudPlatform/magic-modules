@@ -1,0 +1,117 @@
+[
+  {
+    "ancestors": [
+      "projects/{{.Project.Number}}",
+      "organizations/{{.OrgID}}"
+    ],
+    "assetType": "compute.googleapis.com/Disk",
+    "name": "//compute.googleapis.com/projects/{{.Provider.project}}/zones/us-central1-a/disks/gg-asset-source-disk-42745-fa77",
+    "resource": {
+      "data": {
+        "architecture": "X86_64",
+        "creationTimestamp": "2025-10-31T13:32:53.347-07:00",
+        "enableConfidentialCompute": false,
+        "guestOsFeatures": [
+          {
+            "type": "UEFI_COMPATIBLE"
+          },
+          {
+            "type": "VIRTIO_SCSI_MULTIQUEUE"
+          },
+          {
+            "type": "GVNIC"
+          }
+        ],
+        "id": "1795891860089643546",
+        "labelFingerprint": "R6tryrCGGHs=",
+        "labels": {
+          "gg-asset-key-42745-fa77": "gg-asset-value-42745-fa77",
+          "goog-terraform-provisioned": "true"
+        },
+        "licenseCodes": [
+          "3853522013536123851"
+        ],
+        "licenses": [
+          "https://www.googleapis.com/compute/v1/projects/debian-cloud/global/licenses/debian-11-bullseye"
+        ],
+        "name": "gg-asset-source-disk-42745-fa77",
+        "physicalBlockSizeBytes": "4096",
+        "selfLink": "https://www.googleapis.com/compute/v1/projects/{{.Provider.project}}/zones/us-central1-a/disks/gg-asset-source-disk-42745-fa77",
+        "sizeGb": "20",
+        "sourceImage": "https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-11-bullseye-v20251014",
+        "sourceImageId": "7370728366252263286",
+        "status": "READY",
+        "type": "https://www.googleapis.com/compute/v1/projects/{{.Provider.project}}/zones/us-central1-a/diskTypes/pd-standard",
+        "zone": "https://www.googleapis.com/compute/v1/projects/{{.Provider.project}}/zones/us-central1-a"
+      },
+      "discoveryDocumentUri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+      "discoveryName": "Disk",
+      "location": "us-central1-a",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Project.Number}}",
+      "version": "v1"
+    },
+    "updateTime": "2025-10-31T20:32:53.859776Z"
+  },
+  {
+    "ancestors": [
+      "projects/{{.Project.Number}}",
+      "organizations/{{.OrgID}}"
+    ],
+    "assetType": "compute.googleapis.com/Image",
+    "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/images/gg-asset-42745-fa77",
+    "resource": {
+      "data": {
+        "architecture": "X86_64",
+        "archiveSizeBytes": "744988672",
+        "creationTimestamp": "2025-10-31T13:32:56.760-07:00",
+        "description": "Description for gg-asset-42745-fa77",
+        "diskSizeGb": "20",
+        "enableConfidentialCompute": false,
+        "family": "gg-asset-family-42745-fa77",
+        "guestOsFeatures": [
+          {
+            "type": "UEFI_COMPATIBLE"
+          },
+          {
+            "type": "MULTI_IP_SUBNET"
+          },
+          {
+            "type": "VIRTIO_SCSI_MULTIQUEUE"
+          },
+          {
+            "type": "GVNIC"
+          }
+        ],
+        "id": "8576338055767040535",
+        "labelFingerprint": "chixLqmyz58=",
+        "labels": {
+          "gg-asset-label-42745-fa77": "gg-asset-value-42745-fa77",
+          "goog-terraform-provisioned": "true"
+        },
+        "licenseCodes": [
+          "3853522013536123851",
+          "1002001"
+        ],
+        "licenses": [
+          "https://www.googleapis.com/compute/v1/projects/debian-cloud/global/licenses/debian-11-bullseye",
+          "https://www.googleapis.com/compute/v1/projects/vm-options/global/licenses/enable-vmx"
+        ],
+        "name": "gg-asset-42745-fa77",
+        "selfLink": "https://www.googleapis.com/compute/v1/projects/{{.Provider.project}}/global/images/gg-asset-42745-fa77",
+        "sourceDisk": "https://www.googleapis.com/compute/v1/projects/{{.Provider.project}}/zones/us-central1-a/disks/gg-asset-source-disk-42745-fa77",
+        "sourceDiskId": "1795891860089643546",
+        "sourceType": "RAW",
+        "status": "READY",
+        "storageLocations": [
+          "us-central1"
+        ]
+      },
+      "discoveryDocumentUri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+      "discoveryName": "Image",
+      "location": "us-central1",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Project.Number}}",
+      "version": "v1"
+    },
+    "updateTime": "2025-10-31T20:34:04.087302Z"
+  }
+]
