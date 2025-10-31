@@ -397,6 +397,9 @@ type TGCResource struct {
 	// Tests for TGC, will automatically be filled with resource's examples
 	// and handwritten tests. Can be specified in order to skip specific tests.
 	TGCTests []resource.TGCTest `yaml:"tgc_tests,omitempty"`
+
+	// [Optional] It overrides the default Cai asset name format, which is the resource id format
+	CaiAssetNameFormat string `yaml:"cai_asset_name_format,omitempty"`
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
@@ -1949,12 +1952,7 @@ func (r Resource) StateUpgradersCount() []int {
 }
 
 func (r Resource) CaiProductBaseUrl() string {
-	version := r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName)
-	baseUrl := version.CaiBaseUrl
-	if baseUrl == "" {
-		baseUrl = version.BaseUrl
-	}
-	return baseUrl
+	return r.ProductMetadata.ServiceBaseUrl()
 }
 
 // Gets the CAI product legacy base url.
@@ -2074,16 +2072,31 @@ func (r Resource) getCandidateCaiId(url string) string {
 	return ""
 }
 
-// Gets the Cai asset name template, which doesn't include version
-// For example: //monitoring.googleapis.com/projects/{{project}}/services/{{service_id}}
-func (r Resource) CaiAssetNameTemplate(productBackendName string) string {
-	template := r.rawCaiAssetNameTemplate(productBackendName)
-	versionRegex, err := regexp.Compile(`\/(v\d[^\/]*)\/`)
-	if err != nil {
-		log.Fatalf("Cannot compile the regular expression: %v", err)
+// Gets a format string that is used to override the default format from resource id format
+func (r Resource) CAIFormatOverride() string {
+	caiAssetService := strings.Trim(r.ProductMetadata.CaiAssetService, "/")
+	if r.CaiAssetNameFormat != "" || caiAssetService != "" {
+		if caiAssetService == "" {
+			caiAssetService = r.ProductMetadata.ServiceName()
+		}
+
+		caiAssetName := r.CaiAssetNameFormat
+		if caiAssetName == "" {
+			caiAssetName = r.IdFormat
+		}
+		return fmt.Sprintf("//%s/%s", caiAssetService, caiAssetName)
+	}
+	return ""
+}
+
+// Gets a format string for CAI asset name
+func (r Resource) GetCaiAssetNameTemplate() string {
+	caiAssetNameFormat := r.CAIFormatOverride()
+	if caiAssetNameFormat != "" {
+		return caiAssetNameFormat
 	}
 
-	return versionRegex.ReplaceAllString(template, "/")
+	return fmt.Sprintf("//%s.googleapis.com/%s", r.CaiProductBackendName(r.CaiProductBaseUrl()), r.IdFormat)
 }
 
 // Gets the Cai API version

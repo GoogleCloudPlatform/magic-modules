@@ -24,7 +24,7 @@ func ParseFieldValue(url string, name string) string {
 }
 
 /*
-	ParseUrlParamValuesFromAssetName uses CaiAssetNameTemplate to parse hclData from assetName, filtering out all outputFields
+	ParseUrlParamValuesFromAssetName uses GetCaiAssetNameTemplate to parse hclData from assetName, filtering out all outputFields
 
 template: //bigquery.googleapis.com/projects/{{project}}/datasets/{{dataset_id}}
 assetName: //bigquery.googleapis.com/projects/my-project/datasets/my-dataset
