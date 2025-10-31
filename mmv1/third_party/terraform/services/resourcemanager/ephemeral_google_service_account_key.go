@@ -107,10 +107,12 @@ func (p *googleEphemeralServiceAccountKey) Schema(ctx context.Context, req ephem
 			"key_algorithm": schema.StringAttribute{
 				Description: "The algorithm used to generate the key.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"public_key": schema.StringAttribute{
 				Description: "The public key, base64 encoded.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"private_key": schema.StringAttribute{
 				Description: "The private key, base64 encoded.",
