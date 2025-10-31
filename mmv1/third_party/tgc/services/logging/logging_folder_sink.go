@@ -98,13 +98,6 @@ func GetLogFolderSinkApiObject(d tpgresource.TerraformResourceData, config *tran
 		obj["bigqueryOptions"] = bigqueryOptionsProp
 	}
 
-	folder, ok := d.GetOk("folder")
-	if !ok {
-		return nil, fmt.Errorf("required field 'folder' is not set")
-	}
-	folderId := strings.TrimPrefix(folder.(string), "folders/")
-	obj["parent"] = fmt.Sprintf("//cloudresourcemanager.googleapis.com/folders/%s", folderId)
-
 	return obj, nil
 }
 
