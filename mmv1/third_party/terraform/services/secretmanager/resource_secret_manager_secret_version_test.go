@@ -71,7 +71,7 @@ func TestAccSecretManagerSecretVersion_byName(t *testing.T) {
 				ResourceName:            "google_secret_manager_secret_version.secret-version-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"secret_data", "secret_data_wo_version", "project"},
+				ImportStateVerifyIgnore: []string{"secret_data", "secret_data_wo_version", "project", "secret"},
 			},
 		},
 	})
