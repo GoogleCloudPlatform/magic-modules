@@ -6,7 +6,7 @@ resource "google_alloydb_cluster" "primary" {
   }
 
   initial_user {
-    password = "{{index $.Vars "alloydb_cluster_name"}}"
+    password = "{{index $.Vars "alloydb_primary_cluster_name"}}"
   }
 
   deletion_protection = false
