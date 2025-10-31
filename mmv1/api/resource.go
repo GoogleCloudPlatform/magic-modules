@@ -356,6 +356,11 @@ type Resource struct {
 	// organization variant, however most resources do not need it.
 	ApiVariantPatterns []string `yaml:"api_variant_patterns,omitempty"`
 
+	// ApiResourceField indicates what field on the API resource is managed by a resource.
+	// This is generally relevant for fine-grained resources. For example,
+	// google_compute_router_nat manages the `nat` field on the `Router` resource.
+	ApiResourceField string `yaml:"api_resource_field,omitempty"`
+
 	ImportPath     string `yaml:"-"`
 	SourceYamlFile string `yaml:"-"`
 
