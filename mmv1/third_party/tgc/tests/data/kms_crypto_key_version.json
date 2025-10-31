@@ -1,0 +1,17 @@
+[
+  {
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "assetType": "cloudkms.googleapis.com/CryptoKeyVersion",
+    "name": "//cloudkms.googleapis.com/projects/{{.Provider.project}}/locations/global/keyRings/gg-asset-key-ring-43576-f7a1/cryptoKeys/gg-asset-crypto-key-43576-f7a1/cryptoKeyVersions/1",
+    "resource": {
+      "data": {
+        "state": "ENABLED"
+      },
+      "discoveryDocumentUri": "https://cloudkms.googleapis.com/$discovery/rest",
+      "discoveryName": "CryptoKeyVersion",
+      "location": "global",
+      "parent": "//cloudkms.googleapis.com/projects/{{.Provider.project}}/locations/global/keyRings/gg-asset-key-ring-43576-f7a1/cryptoKeys/gg-asset-crypto-key-43576-f7a1",
+      "version": "v1"
+    }
+  }
+]
