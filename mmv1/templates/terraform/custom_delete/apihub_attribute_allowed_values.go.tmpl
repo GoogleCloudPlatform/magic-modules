@@ -1,0 +1,11 @@
+	// Delete is suppose to be an update to clear the allowed_values for the attribute
+	// However, the API does not allow empty allowed_values and there's no way to clear it without deleting the attribute.
+	// Potential improvement on API side to allow empty allowed_values so that empty attributes can be reset to initial state.
+	// `exclude_delete` can be set but creating this hook in case the suggested API change is implemented.
+	
+	// This resource performs a no-op for delete - the resource is simply removed from Terraform state
+	// userAgent is required by Magic Modules but not used since we're not making API calls
+	_ = userAgent
+	log.Printf("[DEBUG] System attribute values resource '%s' removed from Terraform state. System attributes continue to exist in API Hub.", d.Id())
+	d.SetId("")
+	return nil
