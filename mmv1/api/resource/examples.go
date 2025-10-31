@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -25,7 +26,6 @@ import (
 	"text/template"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/relative"
 	"github.com/golang/glog"
 )
 
@@ -191,7 +191,6 @@ func (e *Examples) UnmarshalYAML(unmarshal func(any) error) error {
 	if e.ConfigPath == "" {
 		e.ConfigPath = fmt.Sprintf("templates/terraform/examples/%s.tf.tmpl", e.Name)
 	}
-	e.SetHCLText()
 
 	return nil
 }
@@ -224,7 +223,7 @@ func (e *Examples) ValidateExternalProviders() {
 }
 
 // Executes example templates for documentation and tests
-func (e *Examples) SetHCLText() {
+func (e *Examples) LoadHCLText(baseDir string) {
 	originalVars := e.Vars
 	originalTestEnvVars := e.TestEnvVars
 	docTestEnvVars := make(map[string]string)
@@ -251,7 +250,7 @@ func (e *Examples) SetHCLText() {
 		docTestEnvVars[key] = docs_defaults[e.TestEnvVars[key]]
 	}
 	e.TestEnvVars = docTestEnvVars
-	e.DocumentationHCLText = e.ExecuteTemplate()
+	e.DocumentationHCLText = e.ExecuteTemplate(baseDir)
 	e.DocumentationHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.DocumentationHCLText, "\n")
 
 	// Remove region tags
@@ -292,7 +291,7 @@ func (e *Examples) SetHCLText() {
 
 	e.Vars = testVars
 	e.TestEnvVars = testTestEnvVars
-	e.TestHCLText = e.ExecuteTemplate()
+	e.TestHCLText = e.ExecuteTemplate(baseDir)
 	e.TestHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.TestHCLText, "\n")
 	// Remove region tags
 	e.TestHCLText = re1.ReplaceAllString(e.TestHCLText, "")
@@ -304,8 +303,8 @@ func (e *Examples) SetHCLText() {
 	e.TestEnvVars = originalTestEnvVars
 }
 
-func (e *Examples) ExecuteTemplate() string {
-	templateContent, err := relative.ReadFile(e.ConfigPath)
+func (e *Examples) ExecuteTemplate(baseDir string) string {
+	templateContent, err := os.ReadFile(filepath.Join(baseDir, e.ConfigPath))
 	if err != nil {
 		glog.Exit(err)
 	}
@@ -319,7 +318,6 @@ func (e *Examples) ExecuteTemplate() string {
 	validateRegexForContents(varRegex, fileContentString, e.ConfigPath, "vars", e.Vars)
 
 	templateFileName := filepath.Base(e.ConfigPath)
-
 	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).Parse(fileContentString)
 	if err != nil {
 		glog.Exit(err)
@@ -388,7 +386,9 @@ func (e *Examples) SetOiCSHCLText() {
 	}
 
 	e.Vars = testVars
-	e.OicsHCLText = e.ExecuteTemplate()
+	// SetOiCSHCLText is generated from the provider, assume base directory is
+	// always relative for this case
+	e.OicsHCLText = e.ExecuteTemplate("")
 	e.OicsHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.OicsHCLText, "\n")
 
 	// Remove region tags

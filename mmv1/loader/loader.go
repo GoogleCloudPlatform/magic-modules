@@ -11,7 +11,6 @@ import (
 	"sync"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/relative"
 	"golang.org/x/exp/slices"
 )
 
@@ -22,18 +21,24 @@ type Loader struct {
 	Version           string
 }
 
+type Config struct {
+	BaseDirectory     string // optional, defaults to current working directory
+	OverrideDirectory string // optional
+	Version           string // required
+}
+
 // NewLoader creates a new Loader instance, applying any
 // provided options.
-func NewLoader(version string, opts ...Option) *Loader {
-	l := &Loader{
-		BaseDirectory:     "",
-		OverrideDirectory: "",
-		Version:           version,
+func NewLoader(config Config) *Loader {
+	// Validation
+	if config.Version == "" {
+		panic("version is required")
 	}
 
-	// Loop through all provided options and apply them
-	for _, opt := range opts {
-		opt(l)
+	l := &Loader{
+		BaseDirectory:     config.BaseDirectory,
+		OverrideDirectory: config.OverrideDirectory,
+		Version:           config.Version,
 	}
 
 	// Normalize override dir to a path that is relative to the magic-modules directory
@@ -51,8 +56,6 @@ func NewLoader(version string, opts ...Option) *Loader {
 		log.Printf("Override directory normalized to relative path %s", l.OverrideDirectory)
 	}
 
-	relative.SetBaseDir(l.BaseDirectory)
-
 	return l
 }
 
@@ -64,7 +67,7 @@ func (l *Loader) LoadProducts() map[string]*api.Product {
 
 	var allProductFiles []string = make([]string, 0)
 
-	files, err := GlobWithBase(l.BaseDirectory, "products/**/product.yaml")
+	files, err := filepath.Glob(filepath.Join(l.BaseDirectory, "products/**/product.yaml"))
 	if err != nil {
 		panic(err)
 	}
@@ -75,7 +78,7 @@ func (l *Loader) LoadProducts() map[string]*api.Product {
 
 	if l.OverrideDirectory != "" {
 		log.Printf("Using override directory %s", l.OverrideDirectory)
-		overrideFiles, err := GlobWithBase(l.OverrideDirectory, "products/**/product.yaml")
+		overrideFiles, err := filepath.Glob(filepath.Join(l.OverrideDirectory, "products/**/product.yaml"))
 		if err != nil {
 			panic(err)
 		}
@@ -209,7 +212,7 @@ func (l *Loader) loadResources(product *api.Product) ([]*api.Resource, error) {
 	var resources []*api.Resource = make([]*api.Resource, 0)
 
 	// Get base resource files
-	resourceFiles, err := GlobWithBase(l.BaseDirectory, fmt.Sprintf("%s/*", product.PackagePath))
+	resourceFiles, err := filepath.Glob(filepath.Join(l.BaseDirectory, product.PackagePath, "*"))
 	if err != nil {
 		return nil, fmt.Errorf("cannot get resource files: %v", err)
 	}
@@ -248,7 +251,7 @@ func (l *Loader) reconcileOverrideResources(product *api.Product, resources []*a
 	productOverridePath := filepath.Join(l.OverrideDirectory, product.PackagePath, "product.yaml")
 	productOverrideDir := filepath.Dir(productOverridePath)
 
-	overrideFiles, err := GlobWithBase(productOverrideDir, "*")
+	overrideFiles, err := filepath.Glob(filepath.Join(productOverrideDir, "*"))
 	if err != nil {
 		return nil, fmt.Errorf("cannot get override files: %v", err)
 	}
@@ -304,6 +307,10 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 	// SetDefault after AddExtraFields to ensure relevant metadata is available for the newly generated fields
 	resource.SetDefault(product)
 	resource.Validate()
+
+	for _, e := range resource.Examples {
+		e.LoadHCLText(l.BaseDirectory)
+	}
 
 	return resource
 }
