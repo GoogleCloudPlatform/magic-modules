@@ -29,9 +29,9 @@ func TestAccCESTool_cesToolClientFunctionBasicExample_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"app", "location", "tool_id"},
 			},
-            {
+			{
 				Config: testAccCESTool_cesToolClientFunctionBasicExample_update(context),
-                ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_ces_tool.ces_tool_client_function_basic", plancheck.ResourceActionUpdate),
 					},
@@ -270,9 +270,9 @@ func TestAccCESTool_cesToolDataStoreToolEngineSourceBasicExample_update(t *testi
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"app", "location", "tool_id"},
 			},
-            {
+			{
 				Config: testAccCESTool_cesToolDataStoreToolEngineSourceBasicExample_update(context),
-                ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_ces_tool.ces_tool_data_store_tool_engine_source_basic", plancheck.ResourceActionUpdate),
 					},
@@ -533,9 +533,9 @@ func TestAccCESTool_cesToolGoogleSearchToolBasicExample_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"app", "location", "tool_id"},
 			},
-            {
+			{
 				Config: testAccCESTool_cesToolGoogleSearchToolBasicExample_update(context),
-                ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_ces_tool.ces_tool_google_search_tool_basic", plancheck.ResourceActionUpdate),
 					},
@@ -620,9 +620,9 @@ func TestAccCESTool_cesToolPythonFunctionBasicExample_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"app", "location", "tool_id"},
 			},
-            {
+			{
 				Config: testAccCESTool_cesToolPythonFunctionBasicExample_update(context),
-                ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_ces_tool.ces_tool_python_function_basic", plancheck.ResourceActionUpdate),
 					},
@@ -683,4 +683,3 @@ resource "google_ces_tool" "ces_tool_python_function_basic" {
 }
 `, context)
 }
-
