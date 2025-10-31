@@ -1,9 +1,6 @@
 [
   {
-    "ancestors": [
-      "projects/{{.Project.Number}}",
-      "organizations/{{.OrgID}}"
-    ],
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
     "assetType": "compute.googleapis.com/Disk",
     "name": "//compute.googleapis.com/projects/{{.Provider.project}}/zones/us-central1-a/disks/gg-asset-source-disk-42745-fa77",
     "resource": {
@@ -53,10 +50,7 @@
     "updateTime": "2025-10-31T20:32:53.859776Z"
   },
   {
-    "ancestors": [
-      "projects/{{.Project.Number}}",
-      "organizations/{{.OrgID}}"
-    ],
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
     "assetType": "compute.googleapis.com/Image",
     "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/images/gg-asset-42745-fa77",
     "resource": {
