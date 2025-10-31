@@ -18,6 +18,7 @@ import (
 	"strings"
 
 	"golang.org/x/exp/slices"
+	"gopkg.in/yaml.v3"
 )
 
 // Base class from which other Async classes can inherit.
@@ -109,12 +110,12 @@ type PollAsync struct {
 	TargetOccurrences int `yaml:"target_occurrences,omitempty"`
 }
 
-func (a *Async) UnmarshalYAML(unmarshal func(any) error) error {
+func (a *Async) UnmarshalYAML(value *yaml.Node) error {
 	a.Actions = []string{"create", "delete", "update"}
 	type asyncAlias Async
 	aliasObj := (*asyncAlias)(a)
 
-	err := unmarshal(aliasObj)
+	err := value.Decode(aliasObj)
 	if err != nil {
 		return err
 	}
