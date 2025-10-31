@@ -64,7 +64,7 @@ if v, ok := d.GetOk("export_policy"); ok {
                 } else {
                     // User did NOT provide the field, or provided an empty value.
                     // Explicitly send null to the API.
-                    newRuleMapItemSet["squashMode"] = ""
+                    newRuleMapItemSet["squashMode"] = nil
                 }
 
                 // Handle "anon_uid"
