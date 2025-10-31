@@ -1,0 +1,452 @@
+package privilegedaccessmanager_test
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_basic(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+        ExternalProviders: map[string]resource.ExternalProvider{
+            "time": {},
+        },
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_basic(context),
+			},
+			{
+				ResourceName:            "google_privileged_access_manager_settings.settings",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "parent"},
+			},
+			{
+				Config: testAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_basic_update(context),
+			},
+			{
+				ResourceName:            "google_privileged_access_manager_settings.settings",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "parent"},
+			},
+		},
+	})
+}
+
+func TestAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_full(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+        ExternalProviders: map[string]resource.ExternalProvider{
+            "time": {},
+        },
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_full(context),
+			},
+			{
+				ResourceName:            "google_privileged_access_manager_settings.settings",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "parent"},
+			},
+			{
+				Config: testAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_full_update(context),
+			},
+			{
+				ResourceName:            "google_privileged_access_manager_settings.settings",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "parent"},
+			},
+		},
+	})
+}
+
+func TestAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_partial(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+        ExternalProviders: map[string]resource.ExternalProvider{
+            "time": {},
+        },
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_partial(context),
+			},
+			{
+				ResourceName:            "google_privileged_access_manager_settings.settings",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "parent"},
+			},
+		},
+	})
+}
+
+func TestAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_disable_all_notifications(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+        ExternalProviders: map[string]resource.ExternalProvider{
+            "time": {},
+        },
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_disable_all_notifications(context),
+			},
+			{
+				ResourceName:            "google_privileged_access_manager_settings.settings",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "parent"},
+			},
+		},
+	})
+}
+
+func TestAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_empty(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+        ExternalProviders: map[string]resource.ExternalProvider{
+            "time": {},
+        },
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_empty(context),
+			},
+		},
+	})
+}
+
+func testAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_folder" "folder" {
+    provider            = google-beta
+    display_name        = "tf-test-%{random_suffix}"
+    parent              = "organizations/%{org_id}"
+    deletion_protection = false
+}
+
+resource "time_sleep" "wait_120s" {
+    depends_on = [google_folder.folder]
+    create_duration = "120s"
+}
+
+resource "google_privileged_access_manager_settings" "settings" {
+    provider = google-beta
+    location = "global"
+    parent   = "folders/${google_folder.folder.folder_id}"
+    service_account_approver_settings {
+        enabled = false
+    }
+    email_notification_settings {
+        custom_notification_behavior {
+            requester_notifications {
+                entitlement_assigned = "DISABLED"
+                grant_activated = "DISABLED"
+                grant_denied = "ENABLED"
+                grant_expired = "DISABLED"
+                grant_ended = "DISABLED"
+                grant_revoked = "DISABLED"
+                grant_externally_modified = "DISABLED"
+                grant_activation_failed = "DISABLED"
+            }
+        }
+    }
+
+    depends_on = [time_sleep.wait_120s]
+}
+`, context)
+}
+
+func testAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_basic_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_folder" "folder" {
+    provider            = google-beta
+    display_name        = "tf-test-%{random_suffix}"
+    parent              = "organizations/%{org_id}"
+    deletion_protection = false
+}
+
+resource "time_sleep" "wait_120s" {
+    depends_on = [google_folder.folder]
+    create_duration = "120s"
+}
+
+resource "google_privileged_access_manager_settings" "settings" {
+    provider = google-beta
+    location = "global"
+    parent   = "folders/${google_folder.folder.folder_id}"
+    service_account_approver_settings {
+        enabled = true
+    }
+    email_notification_settings {
+        custom_notification_behavior {
+            requester_notifications {
+                entitlement_assigned = "ENABLED"
+                grant_activated = "ENABLED"
+                grant_denied = "DISABLED"
+                grant_expired = "ENABLED"
+                grant_ended = "ENABLED"
+                grant_revoked = "ENABLED"
+                grant_externally_modified = "ENABLED"
+                grant_activation_failed = "ENABLED"
+            }
+        }
+    }
+
+    depends_on = [time_sleep.wait_120s]
+}
+`, context)
+}
+
+func testAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_full_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_folder" "folder" {
+    provider            = google-beta
+    display_name        = "tf-test-%{random_suffix}"
+    parent              = "organizations/%{org_id}"
+    deletion_protection = false
+}
+
+resource "time_sleep" "wait_120s" {
+    depends_on = [google_folder.folder]
+    create_duration = "120s"
+}
+
+resource "google_privileged_access_manager_settings" "settings" {
+    provider = google-beta
+    location = "global"
+    parent   = "folders/${google_folder.folder.folder_id}"
+    service_account_approver_settings {
+        enabled = false
+    }
+    email_notification_settings {
+        custom_notification_behavior {
+            requester_notifications {
+                entitlement_assigned = "ENABLED"
+                grant_activated = "ENABLED"
+                grant_denied = "DISABLED"
+                grant_expired = "ENABLED"
+                grant_ended = "ENABLED"
+                grant_revoked = "ENABLED"
+                grant_externally_modified = "ENABLED"
+                grant_activation_failed = "ENABLED"
+            }
+            admin_notifications {
+                grant_activated = "DISABLED"
+                grant_ended = "DISABLED"
+                grant_externally_modified = "DISABLED"
+                grant_activation_failed = "ENABLED"
+            }
+            approver_notifications {
+                pending_approval = "DISABLED"
+            }
+        }
+    }
+
+    depends_on = [time_sleep.wait_120s]
+}
+`, context)
+}
+
+
+
+func testAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_full(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_folder" "folder" {
+    provider            = google-beta
+    display_name        = "tf-test-%{random_suffix}"
+    parent              = "organizations/%{org_id}"
+    deletion_protection = false
+}
+
+resource "time_sleep" "wait_120s" {
+    depends_on = [google_folder.folder]
+    create_duration = "120s"
+}
+
+resource "google_privileged_access_manager_settings" "settings" {
+    provider = google-beta
+    location = "global"
+    parent   = "folders/${google_folder.folder.folder_id}"
+    service_account_approver_settings {
+        enabled = true
+    }
+    email_notification_settings {
+        custom_notification_behavior {
+            requester_notifications {
+                entitlement_assigned = "DISABLED"
+                grant_activated = "DISABLED"
+                grant_denied = "ENABLED"
+                grant_expired = "DISABLED"
+                grant_ended = "DISABLED"
+                grant_revoked = "DISABLED"
+                grant_externally_modified = "DISABLED"
+                grant_activation_failed = "DISABLED"
+            }
+            admin_notifications {
+                grant_activated = "ENABLED"
+                grant_ended = "ENABLED"
+                grant_externally_modified = "ENABLED"
+                grant_activation_failed = "DISABLED"
+            }
+            approver_notifications {
+                pending_approval = "ENABLED"
+            }
+        }
+    }
+
+    depends_on = [time_sleep.wait_120s]
+}
+`, context)
+}
+
+func testAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_partial(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_folder" "folder" {
+    provider            = google-beta
+    display_name        = "tf-test-%{random_suffix}"
+    parent              = "organizations/%{org_id}"
+    deletion_protection = false
+}
+
+resource "time_sleep" "wait_120s" {
+    depends_on = [google_folder.folder]
+    create_duration = "120s"
+}
+
+resource "google_privileged_access_manager_settings" "settings" {
+    provider = google-beta
+    location = "global"
+    parent   = "folders/${google_folder.folder.folder_id}"
+    service_account_approver_settings {
+        enabled = false
+    }
+    email_notification_settings {
+        custom_notification_behavior {
+            # partial of the available settings have ENABLED / DISABLED values set
+            requester_notifications {
+                entitlement_assigned = "DISABLED"
+                grant_externally_modified = "ENABLED"
+                grant_activation_failed = "DISABLED"
+            }
+            admin_notifications {
+                grant_activated = "ENABLED"
+                grant_externally_modified = "ENABLED"
+            }
+            approver_notifications {
+                pending_approval = "ENABLED"
+            }
+        }
+    }
+
+    depends_on = [time_sleep.wait_120s]
+}
+`, context)
+}
+
+func testAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_disable_all_notifications(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_folder" "folder" {
+    provider            = google-beta
+    display_name        = "tf-test-%{random_suffix}"
+    parent              = "organizations/%{org_id}"
+    deletion_protection = false
+}
+
+resource "time_sleep" "wait_120s" {
+    depends_on = [google_folder.folder]
+    create_duration = "120s"
+}
+
+resource "google_privileged_access_manager_settings" "settings" {
+    provider = google-beta
+    location = "global"
+    parent   = "folders/${google_folder.folder.folder_id}"
+    service_account_approver_settings {
+        enabled = true
+    }
+    email_notification_settings {
+        disable_all_notifications {}
+    }
+
+    depends_on = [time_sleep.wait_120s]
+}
+`, context)
+}
+
+func testAccPrivilegedAccessManagerSettings_privilegedAccessManagerSettings_empty(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_folder" "folder" {
+    provider            = google-beta
+    display_name        = "tf-test-%{random_suffix}"
+    parent              = "organizations/%{org_id}"
+    deletion_protection = false
+}
+
+resource "time_sleep" "wait_120s" {
+    depends_on = [google_folder.folder]
+    create_duration = "120s"
+}
+
+resource "google_privileged_access_manager_settings" "settings" {
+    provider = google-beta
+    location = "global"
+    parent   = "folders/${google_folder.folder.folder_id}"
+
+    depends_on = [time_sleep.wait_120s]
+}
+`, context)
+}
+
+{{- end }}

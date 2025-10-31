@@ -1,6 +1,8 @@
 ---
 title: "Update dependencies"
 weight: 90
+params:
+  bookToC: true
 aliases:
   - /docs/update-dependencies
 ---
@@ -12,9 +14,9 @@ The Magic Modules repository does not contain a complete Go module, preventing t
 Below are the steps you can follow to make the change:
 
 1. Navigate to the local `google` provider directory:
-```bash
-cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-``` 
+   ```bash
+   cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+   ``` 
 2. Open the [`go.mod`](https://github.com/hashicorp/terraform-provider-google/blob/main/go.mod) file and add the new entries or modify the versions of existing entries as needed
 3. Update dependencies using either of the following methods
    * run the following commands to update all dependencies: 

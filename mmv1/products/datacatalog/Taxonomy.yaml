@@ -36,7 +36,6 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'taxonomy'
   base_url: 'projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}'
     - '{{taxonomy}}'
