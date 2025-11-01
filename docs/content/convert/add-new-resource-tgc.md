@@ -232,7 +232,7 @@ export WRITE_FILES=true
 To run the unit tests locally, run the following from the root of the `terraform-google-conversion` repository:
 
 ```
-make test
+make test-local
 ```
 
 #### Run integration tests
