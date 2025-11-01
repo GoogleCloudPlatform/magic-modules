@@ -42,7 +42,7 @@
         ],
         "name": "gg-asset-42745-fa77",
         "selfLink": "https://www.googleapis.com/compute/v1/projects/{{.Provider.project}}/global/images/gg-asset-42745-fa77",
-        "sourceDisk": "https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-11-bullseye-v20251014",
+        "sourceDisk": "https://www.googleapis.com/compute/v1/projects/{{.Provider.project}}/zones/us-central1-a/disks/gg-asset-source-disk-42745-fa77",
         "sourceDiskId": "1795891860089643546",
         "sourceType": "RAW",
         "status": "READY",
