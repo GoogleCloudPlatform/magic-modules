@@ -199,11 +199,11 @@ properties:
               description: |-
                 SquashMode defines how remote user privileges are restricted when accessing an NFS export. It controls how the user identities (like root) are mapped to anonymous users to limit access and enforce security.
                 It overwrites the has_root_access parameter. Use either squash_mode or has_root_access.
-              default_from_api: true
               enum_values:
                 - 'NO_ROOT_SQUASH'
                 - 'ROOT_SQUASH'
                 - 'ALL_SQUASH'
+              default_from_api: true
               diff_suppress_func: 'suppressSquashModeDiff'
             - name: 'anonUid'
               type: Integer
