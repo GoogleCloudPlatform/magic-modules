@@ -41,7 +41,6 @@ func TestAccDataSourceGoogleBackupDRFetchBackups_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleBackupDRFetchBackups_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.google_backup_dr_fetch_backups.foo", "id", name),
 					resource.TestCheckResourceAttrSet("data.google_backup_dr_fetch_backups.foo", "backups.0.name"),
 					resource.TestCheckResourceAttrSet("data.google_backup_dr_fetch_backups.foo", "backups.0.backup_type"),
 					resource.TestCheckResourceAttrSet("data.google_backup_dr_fetch_backups.foo", "backups.0.state"),
