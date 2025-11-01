@@ -199,6 +199,28 @@ func forceNewIfNetworkIPNotUpdatableFunc(d tpgresource.TerraformResourceDiff) er
 	return nil
 }
 
+{{- if ne $.TargetVersionName "ga" }}
+func forceNewIfNicNotDynamic(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	// separate func to allow unit testing
+	return forceNewIfNicNotDynamicFunc(d)
+}
+
+func forceNewIfNicNotDynamicFunc(d tpgresource.TerraformResourceDiff) error {
+	_, newCount := d.GetChange("network_interface.#")
+	for i := 0; i < newCount.(int); i++ {
+		prefix := fmt.Sprintf("network_interface.%d", i)
+		vlanKey := prefix + ".vlan"
+
+		if d.HasChange(prefix) && d.Get(vlanKey).(int) == 0 {
+			if err := d.ForceNew("network_interface"); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+{{- end }}
+
 // User may specify AUTOMATIC using any case; the API will accept it and return an empty string.
 func ComputeInstanceMinCpuPlatformEmptyOrAutomaticDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	old = strings.ToLower(old)
@@ -606,7 +628,9 @@ func ResourceComputeInstance() *schema.Resource {
 			"network_interface": {
 				Type:        schema.TypeList,
 				Required:    true,
+				{{ if eq $.TargetVersionName `ga` }}
 				ForceNew:    true,
+				{{- end }}
 				Description: `The networks attached to the instance.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -625,6 +649,14 @@ func ResourceComputeInstance() *schema.Resource {
 							DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 							Description:      `The name or self_link of the subnetwork attached to this interface.`,
 						},
+						{{ if ne $.TargetVersionName `ga` }}
+						"vlan": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Computed:    false,
+							Description: `The VLAN ID of the network interface. This changes a NIC to become a Dynamic Nic. The VLAN cannot be set on the primary network interface.`,
+						},
+						{{- end }}
 
 						"network_attachment": {
 							Type:             schema.TypeString,
@@ -1633,6 +1665,9 @@ be from 0 to 999,999,999 inclusive.`,
 			}),
 			validateSubnetworkProject,
 			forceNewIfNetworkIPNotUpdatable,
+			{{- if ne $.TargetVersionName "ga" }}
+			forceNewIfNicNotDynamic,
+			{{- end }}
 			tpgresource.SetLabelsDiff,
 		),
 		UseJSONNumber: true,
@@ -2528,10 +2563,59 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Error getting network interface from config: %s", err)
 	}
 
+	{{ if eq $.TargetVersionName `ga` }}
 	// Sanity check
 	if len(networkInterfaces) != len(instance.NetworkInterfaces) {
 		return fmt.Errorf("Instance had unexpected number of network interfaces: %d", len(instance.NetworkInterfaces))
 	}
+	{{- else }}
+	// Dynamic NIC adding and deleting. Not supported for regular NICs
+	if len(networkInterfaces) != len(instance.NetworkInterfaces) {
+		targetNics := []*compute.NetworkInterface{}
+		if len(networkInterfaces) > len(instance.NetworkInterfaces) {
+			targetNics = networkInterfaces
+		} else {
+			targetNics = instance.NetworkInterfaces
+		}
+		for i, nic := range targetNics {
+			if d.HasChange(fmt.Sprintf("network_interface.%d", i)) && nic.Vlan != 0 {
+				old, new := d.GetChange(fmt.Sprintf("network_interface.%d", i))
+
+				if len(old.(map[string]interface{})) == 0 {
+					instance.NetworkInterfaces = append(instance.NetworkInterfaces, nic)
+				} else if old.(map[string]interface{})["vlan"].(int) != 0 && new.(map[string]interface{})["vlan"].(int) == 0 {
+					instance.NetworkInterfaces[i] = nil
+				}
+			}
+		}
+
+		op, err := config.NewComputeClient(userAgent).Instances.Update(project, zone, instance.Name, instance).Do()
+		if err != nil {
+			return fmt.Errorf("Error updating instance for dynamic NIC change: %s", err)
+		}
+
+		opErr := ComputeOperationWaitTime(config, op, project, "dynamic NIC update", userAgent, d.Timeout(schema.TimeoutUpdate))
+		if opErr != nil {
+			return opErr
+		}
+
+		instance, err = config.NewComputeClient(userAgent).Instances.Get(project, zone, d.Get("name").(string)).Do()
+		if err != nil {
+			return err
+		}
+
+		// Sanity check
+		if len(networkInterfaces) != len(instance.NetworkInterfaces) {
+			return fmt.Errorf("Instance had unexpected number of network interfaces: %d", len(instance.NetworkInterfaces))
+		}
+
+		// Network interface names are assigned by the API after dynamic NIC creation
+		// so we match them to not break the sanity checks that come after this
+		for i := 0; i < len(networkInterfaces); i++ {
+			networkInterfaces[i].Name = instance.NetworkInterfaces[i].Name
+		}
+	}
+	{{- end }}
 
 	{{ if ne $.TargetVersionName `ga` -}}
 	updateSecurityPolicy := false
@@ -2563,7 +2647,10 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		networkInterface := networkInterfaces[i]
 		instNetworkInterface := instance.NetworkInterfaces[i]
 
-		networkName := d.Get(prefix + ".name").(string)
+		networkName := ""
+		if networkName = d.Get(prefix + ".name").(string); networkName == "" {
+			networkName = networkInterfaces[i].Name
+		}
 		subnetwork := networkInterface.Subnetwork
 		updateDuringStop := d.HasChange(prefix+".subnetwork") || d.HasChange(prefix+".network") || d.HasChange(prefix+".subnetwork_project")
 
@@ -2683,6 +2770,27 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				return opErr
 			}
 		}
+		{{- if ne $.TargetVersionName "ga" }}
+		if !updateDuringStop && d.HasChange(prefix+".vlan") {
+			instance.NetworkInterfaces[i].Vlan = int64(d.Get(prefix + ".vlan").(int))
+			instance.NetworkInterfaces[i].ParentNicName = ""
+			op, err := config.NewComputeClient(userAgent).Instances.Update(project, zone, instance.Name, instance).Do()
+			if err != nil {
+				return errwrap.Wrapf("Error updating network interface: {{"{{"}}err{{"}}"}}", err)
+			}
+			opErr := ComputeOperationWaitTime(config, op, project, "instance to update vlan", userAgent, d.Timeout(schema.TimeoutUpdate))
+			if opErr != nil {
+				return opErr
+			}
+
+			// re-read fingerprint
+			instance, err = config.NewComputeClient(userAgent).Instances.Get(project, zone, instance.Name).Do()
+			if err != nil {
+				return err
+			}
+			instNetworkInterface = instance.NetworkInterfaces[i]
+		}
+		{{- end }}
 
 		if !updateDuringStop && d.HasChange(prefix+".ipv6_address") {
 

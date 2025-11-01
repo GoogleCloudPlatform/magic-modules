@@ -520,6 +520,9 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 			"ipv6_address":        iface.Ipv6Address,
 			"queue_count":         iface.QueueCount,
 			"internal_ipv6_prefix_length": iface.InternalIpv6PrefixLength,
+			{{- if ne $.TargetVersionName "ga" }}
+			"vlan":                        iface.Vlan,
+			{{- end }}
 		}
 		// Instance template interfaces never have names, so they're absent
 		// in the instance template network_interface schema. We want to use the
@@ -626,6 +629,12 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 		if err != nil {
 			return nil, fmt.Errorf("cannot determine self_link for subnetwork %q: %s", subnetwork, err)
 		}
+		{{- if ne $.TargetVersionName "ga" }}
+		if i == 0 && data["vlan"].(int) != 0 {
+			return nil, fmt.Errorf("VLAN can only be specified on additional network interfaces. Not the primary one.")
+		}
+		{{- end }}
+
 
 		ifaces[i] = &compute.NetworkInterface{
 			NetworkIP:         data["network_ip"].(string),
@@ -640,6 +649,10 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 			Ipv6AccessConfigs: expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{})),
 			Ipv6Address:       data["ipv6_address"].(string),
 			InternalIpv6PrefixLength: int64(data["internal_ipv6_prefix_length"].(int)),
+			{{- if ne $.TargetVersionName "ga" }}
+			Vlan:                     int64(data["vlan"].(int)),
+			NullFields:               []string{"ParentNicName"},
+			{{- end }}
 		}
 	}
 	return ifaces, nil
