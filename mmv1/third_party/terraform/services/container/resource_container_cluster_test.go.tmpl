@@ -6437,11 +6437,35 @@ resource "google_container_cluster" "with_cpa_features" {
 `, context)
 }
 
+func TestAccContainerCluster_kubeDns_minimal(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withDNSConfig(clusterName, "KUBE_DNS", "cluster.local", "DNS_SCOPE_UNSPECIFIED", networkName, subnetworkName),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 func TestAccContainerCluster_autopilot_minimal(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-  networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
