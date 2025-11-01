@@ -20,8 +20,7 @@
         "labels": {
           "goog-terraform-provisioned": "true"
         },
-        "purpose": "ENCRYPT_DECRYPT",
-        "rotationPeriod": "100000s"
+        "purpose": "ENCRYPT_DECRYPT"
       },
       "discovery_name": "CryptoKey",
       "parent": "//cloudresourcemanager.googleapis.com/projects/foobar"
@@ -32,7 +31,6 @@
     "asset_type": "cloudkms.googleapis.com/KeyRing",
     "name": "//cloudkms.googleapis.com/projects/foobar/locations/global/keyRings/gg-asset-key-ring-43576-f7a1",
     "resource": {
-        "data": {},
         "discovery_name": "KeyRing",
         "parent": "//cloudresourcemanager.googleapis.com/projects/foobar"
     }
