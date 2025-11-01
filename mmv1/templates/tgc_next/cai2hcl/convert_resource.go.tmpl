@@ -17,11 +17,6 @@ package converters
 import (
 	"strings"
 
-{{- range $resourceType, $resources := $.ResourcesByCaiResourceType}}
-	{{- if gt (len $resources) 1 }}
-	  "github.com/hashicorp/terraform-provider-google/google/services/{{ (index $resources 0).ServiceName }}"
-	{{- end }}
-{{- end }}
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/models"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
 )
