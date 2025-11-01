@@ -195,6 +195,7 @@ properties:
       - name: 'privateEndpointIp'
         type: String
         description: 'The private endpoint IP address for the Autonomous Database. '
+        output: true
         default_from_api: true
       - name: 'privateEndpointLabel'
         type: String
