@@ -121,6 +121,10 @@ func testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateMetalLbStart(context
         service_address_cidr_blocks = ["172.26.0.0/16"]
         pod_address_cidr_blocks = ["10.240.0.0/13"]
       }
+      advanced_networking = true
+      multiple_network_interfaces_config {
+      	enabled = true
+      }
     }
     control_plane {
       control_plane_node_pool_config {
@@ -199,6 +203,10 @@ func testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateMetalLb(context map[
         service_address_cidr_blocks = ["172.26.0.0/20"]
         pod_address_cidr_blocks = ["10.240.0.0/14"]
       }
+      advanced_networking = true
+      multiple_network_interfaces_config {
+      	enabled = true
+      }
     }
     control_plane {
       control_plane_node_pool_config {
@@ -271,6 +279,10 @@ func testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateManualLbStart(contex
       island_mode_cidr {
         service_address_cidr_blocks = ["172.26.0.0/20"]
         pod_address_cidr_blocks = ["10.240.0.0/14"]
+      }
+      advanced_networking = true
+      multiple_network_interfaces_config {
+      	enabled = true
       }
     }
     control_plane {
@@ -351,6 +363,10 @@ func testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateManualLb(context map
         service_address_cidr_blocks = ["172.26.0.0/20"]
         pod_address_cidr_blocks = ["10.240.0.0/14"]
       }
+      advanced_networking = true
+      multiple_network_interfaces_config {
+      	enabled = true
+      }
     }
     control_plane {
       control_plane_node_pool_config {
@@ -418,6 +434,10 @@ func testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateBgpLbStart(context m
       island_mode_cidr {
         service_address_cidr_blocks = ["172.26.0.0/20"]
         pod_address_cidr_blocks = ["10.240.0.0/14"]
+      }
+      advanced_networking = true
+      multiple_network_interfaces_config {
+      	enabled = true
       }
     }
     control_plane {
@@ -503,6 +523,10 @@ func testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateBgpLb(context map[st
       island_mode_cidr {
         service_address_cidr_blocks = ["172.26.0.0/20"]
         pod_address_cidr_blocks = ["10.240.0.0/14"]
+      }
+      advanced_networking = true
+      multiple_network_interfaces_config {
+      	enabled = true
       }
     }
     control_plane {
