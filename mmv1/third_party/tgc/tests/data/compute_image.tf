@@ -14,7 +14,7 @@ provider "google" {
 resource "google_compute_image" "gg-asset-42745-fa77" {
   name        = "gg-asset-42745-fa77"
   project     = "{{.Provider.project}}"
-  source_disk = "test-google-compute-disk-self-link"
+  source_disk = "https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-11-bullseye-v20251014"
   family      = "gg-asset-family-42745-fa77"
   description = "Description for gg-asset-42745-fa77"
   labels = {
