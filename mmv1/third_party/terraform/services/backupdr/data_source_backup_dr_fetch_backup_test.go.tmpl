@@ -25,7 +25,7 @@ func TestAccDataSourceGoogleBackupDRFetchBackups_basic(t *testing.T) {
 	dataSourceId := "56b93b14529b77d764b21b2251e1ea8f0006e8dd"
 	{{- end }}
 
-	name := fmt.Sprintf("projects/%s/locations/%s/backupVaults/%s/dataSources/%s/backups:fetchForResourceType?resourceType=%s", project, location, backupVaultId, dataSourceId,resource_type)
+	name := fmt.Sprintf("projects/%s/locations/%s/backupVaults/%s/dataSources/%s/backups:fetchForResourceType?resourceType=%s", project, location, backupVaultId, dataSourceId,resourceType)
 
 	context := map[string]interface{}{
 		"backup_vault_id": backupVaultId,
