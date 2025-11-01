@@ -32,6 +32,7 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/appengine"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/container"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/compute"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/iambeta"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/kms"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/resourcemanager"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/spanner"
@@ -85,6 +86,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_compute_target_https_proxy":               {compute.ResourceConverterComputeTargetHttpsProxy()},
 		"google_compute_target_ssl_proxy":                 {compute.ResourceConverterComputeTargetSslProxy()},
 		"google_compute_target_pool":                      {compute.ResourceConverterComputeTargetPool()},
+		"google_iam_workload_identity_pool_provider": {iambeta.ResourceConverterIAMBetaWorkloadIdentityPoolProvider()},
 		"google_composer_environment":                     {composer.ResourceConverterComposerEnvironment()},
 		"google_compute_region_commitment":                {compute.ResourceConverterCommitment()},
 		"google_dataflow_job":                             {dataflow.ResourceDataflowJob()},
