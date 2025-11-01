@@ -1,0 +1,33 @@
+resource "google_vmwareengine_cluster" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.PrefixedVars "name"}}"
+  parent   = google_vmwareengine_private_cloud.cluster-pc.id
+  node_type_configs {
+    node_type_id = "standard-72"
+    node_count   = 3
+  }
+}
+
+resource "google_vmwareengine_private_cloud" "cluster-pc" {
+  location    = "{{index $.TestEnvVars "region"}}-a"
+  name        = "{{index $.PrefixedVars "private_cloud_id"}}"
+  description = "Sample test PC."
+  network_config {
+    management_cidr       = "192.168.30.0/24"
+    vmware_engine_network = google_vmwareengine_network.cluster-nw.id
+  }
+
+  management_cluster {
+    cluster_id = "{{index $.PrefixedVars "management_cluster_id"}}"
+    node_type_configs {
+      node_type_id = "standard-72"
+      node_count   = 3
+    }
+  }
+}
+
+resource "google_vmwareengine_network" "cluster-nw" {
+  name        = "{{index $.PrefixedVars "network_id"}}"
+  type        = "STANDARD"
+  location    = "global"
+  description = "PC network description."
+}

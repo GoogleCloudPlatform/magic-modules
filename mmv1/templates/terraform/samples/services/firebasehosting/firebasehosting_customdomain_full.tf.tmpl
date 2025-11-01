@@ -1,0 +1,18 @@
+resource "google_firebase_hosting_site" "default" {
+  provider = google-beta
+  project  = "{{index $.TestEnvVars "project_id"}}"
+
+  site_id = "{{index $.PrefixedVars "site_id"}}"
+}
+
+resource "google_firebase_hosting_custom_domain" "default" {
+  provider = google-beta
+
+  project  = "{{index $.TestEnvVars "project_id"}}"
+  site_id = google_firebase_hosting_site.default.site_id
+  custom_domain = "{{index $.PrefixedVars "custom_domain"}}"
+  cert_preference = "GROUPED"
+  redirect_target = "{{index $.PrefixedVars "redirect_target"}}"
+
+  wait_dns_verification = false
+}
