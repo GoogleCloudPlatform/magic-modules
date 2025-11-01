@@ -110,8 +110,8 @@ func dataSourceGoogleCloudBackupDRFetchBackupsRead(d *schema.ResourceData, meta 
 	if err := d.Set("backups", flattenedBackups); err != nil {
 		return fmt.Errorf("Error setting backups: %s", err)
 	}
-
-	d.SetId(url)
+	id := fmt.Sprintf("projects/%s/locations/%s/backupVaults/%s/dataSources/%s/backups:fetchForResourceType?resourceType=%s", project, location, backupVaultId, dataSourceId, resourceType)
+	d.SetId(id)
 	return nil
 }
 
