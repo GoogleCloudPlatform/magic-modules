@@ -1,47 +1,35 @@
 resource "google_project" "project" {
-    provider     = google-beta
-    name       = "your-project-name"
-    project_id = "your-project-id"
-    org_id     = "1234567"
+  provider   = google-beta
+  name       = "your-project-name"
+  project_id = "your-project-id"
+  org_id     = "1234567"
 }
 
 resource "google_vertex_ai_pipeline_job" "{{$.PrimaryResourceId}}" {
   display_name = "{{index $.Vars "display_name"}}"
   provider     = google-beta
+  region       = "us-central1"
 
-  network                  = "projects/${google_project.project.project_id}/global/networks/default"
+  network                = "projects/${google_project.project.project_id}/global/networks/default"
   original_pipeline_job_id = "projects/${google_project.project.project_id}/locations/us-central1/pipelineJobs/sample-original-job"
-  preflight_validations    = jsonencode({ enabled = true, checks = ["DATASET_ACCESS", "SERVICE_ACCOUNT_PERMISSIONS"] })
-  region                   = "us-central1"
-  reserved_ip_ranges       = ["psc-vertex-ai-range"]
-  satisfies_pzi            = false
-  service_account          = "vertex-sa@${google_project.project.project_id}.iam.gserviceaccount.com"
-
-  psc_interface_config {
-    raw = jsonencode({
-      interface = "psc-interface-1"
-      subnet    = "projects/${google_project.project.project_id}/regions/us-central1/subnetworks/default"
-    })
-  }
+  preflight_validations  = true
+  reserved_ip_ranges     = ["psc-vertex-ai-range"]
+  satisfies_pzi          = false
+  service_account        = "vertex-sa@${google_project.project.project_id}.iam.gserviceaccount.com"
 
   template_uri = "gs://google-cloud-aiplatform/pipeline-templates/train-bq-automl-tabular.json"
 
-  pipeline_spec {
-    parameter_values = jsonencode({
-      project              = "${google_project.project.project_id}"
-      location             = "us-central1"
-      targetColumn         = "species"
-      predictionType       = "classification"
-      datasetId            = "bigquery-public-data.ml_datasets.iris"
-      modelDisplayName     = "iris-automl-model"
-      budgetMilliNodeHours = 1000
-    })
-
-    additional_properties = jsonencode({
-      enable_explainability = true
-      data_split_method     = "AUTO_SPLIT"
-      model_type            = "CLOUD_AUTOML"
-    })
+  parameter_values = {
+    project              = google_project.project.project_id
+    location             = "us-central1"
+    targetColumn         = "species"
+    predictionType       = "classification"
+    datasetId            = "bigquery-public-data.ml_datasets.iris"
+    modelDisplayName     = "iris-automl-model"
+    budgetMilliNodeHours = 1000
+    enable_explainability = true
+    data_split_method     = "AUTO_SPLIT"
+    model_type            = "CLOUD_AUTOML"
   }
 
   labels = {
