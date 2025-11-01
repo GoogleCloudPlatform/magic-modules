@@ -23,6 +23,9 @@ func TestAccDataSourceGoogleBackupDRFetchBackupsForResourceType_basic(t *testing
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleBackupDRFetchBackupsForResourceType_basic(context),
@@ -33,7 +36,6 @@ func TestAccDataSourceGoogleBackupDRFetchBackupsForResourceType_basic(t *testing
 					}
 					projectID = project.Primary.Attributes["project_id"]
 
-					// Basic check - more checks can be added if a backup is created
 					return resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr("data.google_backup_dr_fetch_backups.default", "project", projectID),
 						resource.TestCheckResourceAttr("data.google_backup_dr_fetch_backups.default", "location", context["location"].(string)),
