@@ -1,19 +1,19 @@
 [
   {
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
-    "assetType": "cloudkms.googleapis.com/CryptoKeyVersion",
+    "asset_type": "cloudkms.googleapis.com/CryptoKeyVersion",
     "name": "//cloudkms.googleapis.com/placeholder-foobar",
     "resource": {
       "data": {
         "state": "ENABLED"
       },
-      "discoveryName": "CryptoKeyVersion",
+      "discovery_name": "CryptoKeyVersion",
       "parent": "//cloudresourcemanager.googleapis.com/projects/foobar"
     }
   },
   {
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
-    "assetType": "cloudkms.googleapis.com/CryptoKey",
+    "asset_type": "cloudkms.googleapis.com/CryptoKey",
     "name": "//cloudkms.googleapis.com/placeholder-foobar/cryptoKeys/gg-asset-crypto-key-43576-f7a1",
     "resource": {
       "data": {
@@ -23,17 +23,17 @@
         "purpose": "ENCRYPT_DECRYPT",
         "rotationPeriod": "100000s"
       },
-      "discoveryName": "CryptoKey",
+      "discovery_name": "CryptoKey",
       "parent": "//cloudresourcemanager.googleapis.com/projects/foobar"
     }
   },
   {
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
-    "assetType": "cloudkms.googleapis.com/KeyRing",
+    "asset_type": "cloudkms.googleapis.com/KeyRing",
     "name": "//cloudkms.googleapis.com/projects/foobar/locations/global/keyRings/gg-asset-key-ring-43576-f7a1",
     "resource": {
         "data": {},
-        "discoveryName": "KeyRing",
+        "discovery_name": "KeyRing",
         "parent": "//cloudresourcemanager.googleapis.com/projects/foobar"
     }
   }
