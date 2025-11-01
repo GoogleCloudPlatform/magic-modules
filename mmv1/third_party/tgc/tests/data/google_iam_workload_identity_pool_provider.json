@@ -7,15 +7,13 @@
       "version": "v1",
       "discovery_document_uri": "https://iam.googleapis.com/$discovery/rest",
       "discovery_name": "WorkloadIdentityPoolProvider",
-      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "parent": "//iam.googleapis.com/projects/{{.Provider.project}}/locations/global/workloadIdentityPools/gg-asset-44602-7df7",
       "data": {
         "aws": {
           "accountId": "111111111111"
         },
         "description": "AWS provider for gg-asset-44602-7df7",
-        "displayName": "gg-asset-44602-7df7",
-        "name": "projects/{{.Provider.project}}/locations/global/workloadIdentityPools/gg-asset-44602-7df7/providers/gg-asset-44602-7df7",
-        "state": "ACTIVE"
+        "displayName": "gg-asset-44602-7df7"
       },
       "location": "global"
     }
