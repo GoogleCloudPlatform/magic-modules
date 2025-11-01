@@ -1,7 +1,7 @@
 [
   {
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
-    "assetType": "compute.googleapis.com/Disk",
+    "asset_type": "compute.googleapis.com/Disk",
     "name": "//compute.googleapis.com/projects/{{.Provider.project}}/zones/us-central1-a/disks/gg-asset-source-disk-42745-fa77",
     "resource": {
       "data": {
@@ -41,8 +41,8 @@
         "type": "https://www.googleapis.com/compute/v1/projects/{{.Provider.project}}/zones/us-central1-a/diskTypes/pd-standard",
         "zone": "https://www.googleapis.com/compute/v1/projects/{{.Provider.project}}/zones/us-central1-a"
       },
-      "discoveryDocumentUri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
-      "discoveryName": "Disk",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+      "discovery_name": "Disk",
       "location": "us-central1-a",
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Project.Number}}",
       "version": "v1"
@@ -51,7 +51,7 @@
   },
   {
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
-    "assetType": "compute.googleapis.com/Image",
+    "asset_type": "compute.googleapis.com/Image",
     "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/images/gg-asset-42745-fa77",
     "resource": {
       "data": {
@@ -100,8 +100,8 @@
           "us-central1"
         ]
       },
-      "discoveryDocumentUri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
-      "discoveryName": "Image",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+      "discovery_name": "Image",
       "location": "us-central1",
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Project.Number}}",
       "version": "v1"
