@@ -1,56 +1,6 @@
 [
   {
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
-    "asset_type": "compute.googleapis.com/Disk",
-    "name": "//compute.googleapis.com/projects/{{.Provider.project}}/zones/us-central1-a/disks/gg-asset-source-disk-42745-fa77",
-    "resource": {
-      "data": {
-        "architecture": "X86_64",
-        "creationTimestamp": "2025-10-31T13:32:53.347-07:00",
-        "enableConfidentialCompute": false,
-        "guestOsFeatures": [
-          {
-            "type": "UEFI_COMPATIBLE"
-          },
-          {
-            "type": "VIRTIO_SCSI_MULTIQUEUE"
-          },
-          {
-            "type": "GVNIC"
-          }
-        ],
-        "id": "1795891860089643546",
-        "labelFingerprint": "R6tryrCGGHs=",
-        "labels": {
-          "gg-asset-key-42745-fa77": "gg-asset-value-42745-fa77",
-          "goog-terraform-provisioned": "true"
-        },
-        "licenseCodes": [
-          "3853522013536123851"
-        ],
-        "licenses": [
-          "https://www.googleapis.com/compute/v1/projects/debian-cloud/global/licenses/debian-11-bullseye"
-        ],
-        "name": "gg-asset-source-disk-42745-fa77",
-        "physicalBlockSizeBytes": "4096",
-        "selfLink": "https://www.googleapis.com/compute/v1/projects/{{.Provider.project}}/zones/us-central1-a/disks/gg-asset-source-disk-42745-fa77",
-        "sizeGb": "20",
-        "sourceImage": "https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-11-bullseye-v20251014",
-        "sourceImageId": "7370728366252263286",
-        "status": "READY",
-        "type": "https://www.googleapis.com/compute/v1/projects/{{.Provider.project}}/zones/us-central1-a/diskTypes/pd-standard",
-        "zone": "https://www.googleapis.com/compute/v1/projects/{{.Provider.project}}/zones/us-central1-a"
-      },
-      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
-      "discovery_name": "Disk",
-      "location": "us-central1-a",
-      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Project.Number}}",
-      "version": "v1"
-    },
-    "updateTime": "2025-10-31T20:32:53.859776Z"
-  },
-  {
-    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
     "asset_type": "compute.googleapis.com/Image",
     "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/images/gg-asset-42745-fa77",
     "resource": {
@@ -92,7 +42,7 @@
         ],
         "name": "gg-asset-42745-fa77",
         "selfLink": "https://www.googleapis.com/compute/v1/projects/{{.Provider.project}}/global/images/gg-asset-42745-fa77",
-        "sourceDisk": "https://www.googleapis.com/compute/v1/projects/{{.Provider.project}}/zones/us-central1-a/disks/gg-asset-source-disk-42745-fa77",
+        "sourceDisk": "test-google-compute-disk-self-link",
         "sourceDiskId": "1795891860089643546",
         "sourceType": "RAW",
         "status": "READY",

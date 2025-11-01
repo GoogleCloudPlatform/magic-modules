@@ -11,21 +11,10 @@ provider "google" {
   project = "{{.Provider.project}}"
 }
 
-resource "google_compute_disk" "gg-asset-42745-fa77" {
-  name  = "gg-asset-source-disk-42745-fa77"
-  image = "debian-cloud/debian-11"
-  size  = 20
-  type  = "pd-standard"
-  zone  = "us-central1-a"
-  labels = {
-    "gg-asset-key-42745-fa77" = "gg-asset-value-42745-fa77"
-  }
-}
-
 resource "google_compute_image" "gg-asset-42745-fa77" {
   name        = "gg-asset-42745-fa77"
   project     = "{{.Provider.project}}"
-  source_disk = google_compute_disk.gg-asset-42745-fa77.self_link
+  source_disk = "test-google-compute-disk-self-link"
   family      = "gg-asset-family-42745-fa77"
   description = "Description for gg-asset-42745-fa77"
   labels = {
