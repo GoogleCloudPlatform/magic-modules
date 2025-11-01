@@ -34,7 +34,6 @@ project = "{{.Provider.project}}"
 resource "google_kms_crypto_key" "gg_asset_crypto_key_43576_f7a1" {
 name = "gg-asset-crypto-key-43576-f7a1"
 key_ring = google_kms_key_ring.gg_asset_key_ring_43576_f7a1.id
-rotation_period = "100000s"
 }
 
 resource "google_kms_crypto_key_version" "gg_asset_crypto_key_version_43576_f7a1" {
