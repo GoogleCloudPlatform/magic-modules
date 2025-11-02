@@ -152,6 +152,26 @@ examples:
       ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
     test_vars_overrides:
       ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
+  - name: 'subnetwork_with_internal_subnet_mode_pdp'
+    primary_resource_id: 'subnetwork-with-internal-subnet-mode-pdp'
+    exclude_docs: true
+    vars:
+      subnetwork_name: 'internal-subnet-mode-pdp-subnet'
+      network_name: 'network-byoipv6-internal'
+      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp"'
+    test_vars_overrides:
+      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp"'
+  - name: 'subnetwork_with_internal_subnet_mode_pdp_explicit_ip_prefix'
+    primary_resource_id: 'subnetwork-with-internal-subnet-mode-pdp-explicit-ip-prefix'
+    exclude_docs: true
+    vars:
+      subnetwork_name: 'subnet-mode-pdp-subnet-internal-prefix'
+      network_name: 'network-byoipv6-internal-prefix'
+      internal_ipv6_prefix: '"2001:db8:1::/64"'
+      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp-explicit-prefix"'
+    test_vars_overrides:
+      internal_ipv6_prefix: 'fmt.Sprintf("2001:db8:1:%d::/64", acctest.RandIntRange(t, 0, 9999))'
+      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp-explicit-prefix"'
   - name: 'subnetwork_ipv6_only_external'
     primary_resource_id: 'subnetwork-ipv6-only'
     exclude_docs: true
@@ -461,9 +481,12 @@ properties:
     output: true
   - name: 'internalIpv6Prefix'
     type: String
+    diff_suppress_func: 'IpDiffSuppress'
     description: |
       The internal IPv6 address range that is assigned to this subnetwork.
-    output: true
+    default_from_api: true
+    validation:
+      function: 'verify.ValidateIpCidrRange'
   - name: 'externalIpv6Prefix'
     type: String
     description: |
