@@ -2020,6 +2020,51 @@ func TestAccComputeInstance_advancedMachineFeatures(t *testing.T) {
 	})
 }
 
+{{- if ne $.TargetVersionName "ga" }}
+func TestAccComputeInstance_nic_DynamicNics(t *testing.T) {
+	var instance compute.Instance
+	context := map[string]interface{}{
+		"suffix":        acctest.RandString(t, 10),
+		"env_region":    "us-central1",
+		"instance_name": "test-instance-" + acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_nic_DynamicNic_Create(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceHasStatus(&instance, "RUNNING"),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.1.vlan", "50"),
+				),
+			},
+			{
+				Config: testAccComputeInstance_nic_DynamicNic_Update(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceHasStatus(&instance, "RUNNING"),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.1.vlan", "30"),
+				),
+			},
+			{
+				Config: testAccComputeInstance_nic_DynamicNic_Delete(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceHasStatus(&instance, "RUNNING"),
+				),
+			},
+		},
+	})
+}
+{{- end }}
+
 func TestAccComputeInstance_performanceMonitoringUnit(t *testing.T) {
 	t.Parallel()
 
@@ -11000,6 +11045,170 @@ func testAccComputeInstance_networkIpUpdateWithComputeAddress(suffix, instance s
 	}
 `, suffix, suffix, suffix, instance)
 }
+
+{{- if ne $.TargetVersionName "ga" }}
+func testAccComputeInstance_nic_DynamicNic_Create(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+	family  = "debian-11"
+	project = "debian-cloud"
+}
+
+resource "google_compute_network" "inst-test-network1" {
+	name = "tf-test-network-1-%{suffix}"
+	auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "inst-test-subnetwork1" {
+	name          = "tf-test-compute-subnet-1-%{suffix}"
+	region        = "%{env_region}"
+	network       = google_compute_network.inst-test-network1.id
+	ip_cidr_range = "192.168.1.0/24"
+}
+
+resource "google_compute_network" "inst-test-network2" {
+	name = "tf-test-network-2-%{suffix}"
+	auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "inst-test-subnetwork2" {
+	name          = "tf-test-compute-subnet-2-%{suffix}"
+	region        = "%{env_region}"
+	network       = google_compute_network.inst-test-network2.id
+	ip_cidr_range = "192.168.2.0/24"
+}
+
+resource "google_compute_instance" "foobar" {
+	name         = "%{instance_name}"
+	machine_type = "e2-medium"
+	zone         = "%{env_region}-a"
+
+	boot_disk {
+		initialize_params {
+			image = data.google_compute_image.my_image.self_link
+		}
+	}
+
+	network_interface {
+        network = google_compute_network.inst-test-network1.self_link
+        subnetwork = google_compute_subnetwork.inst-test-subnetwork1.self_link
+    }
+
+	network_interface {
+        network = google_compute_network.inst-test-network2.self_link
+        subnetwork = google_compute_subnetwork.inst-test-subnetwork2.self_link
+        vlan = 50
+    }
+}
+`, context)
+}
+
+func testAccComputeInstance_nic_DynamicNic_Update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+	family  = "debian-11"
+	project = "debian-cloud"
+}
+
+resource "google_compute_network" "inst-test-network1" {
+	name = "tf-test-network-1-%{suffix}"
+	auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "inst-test-subnetwork1" {
+	name          = "tf-test-compute-subnet-1-%{suffix}"
+	region        = "%{env_region}"
+	network       = google_compute_network.inst-test-network1.id
+	ip_cidr_range = "192.168.1.0/24"
+}
+
+resource "google_compute_network" "inst-test-network2" {
+	name = "tf-test-network-2-%{suffix}"
+	auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "inst-test-subnetwork2" {
+	name          = "tf-test-compute-subnet-2-%{suffix}"
+	region        = "%{env_region}"
+	network       = google_compute_network.inst-test-network2.id
+	ip_cidr_range = "192.168.2.0/24"
+}
+
+resource "google_compute_instance" "foobar" {
+	name         = "%{instance_name}"
+	machine_type = "e2-medium"
+	zone         = "%{env_region}-a"
+
+	boot_disk {
+		initialize_params {
+			image = data.google_compute_image.my_image.self_link
+		}
+	}
+
+	network_interface {
+        network = google_compute_network.inst-test-network1.self_link
+        subnetwork = google_compute_subnetwork.inst-test-subnetwork1.self_link
+    }
+
+	network_interface {
+        network = google_compute_network.inst-test-network2.self_link
+        subnetwork = google_compute_subnetwork.inst-test-subnetwork2.self_link
+        vlan = 30
+    }
+}
+`, context)
+}
+
+func testAccComputeInstance_nic_DynamicNic_Delete(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+	family  = "debian-11"
+	project = "debian-cloud"
+}
+
+resource "google_compute_network" "inst-test-network1" {
+	name = "tf-test-network-1-%{suffix}"
+	auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "inst-test-subnetwork1" {
+	name          = "tf-test-compute-subnet-1-%{suffix}"
+	region        = "%{env_region}"
+	network       = google_compute_network.inst-test-network1.id
+	ip_cidr_range = "192.168.1.0/24"
+}
+
+resource "google_compute_network" "inst-test-network2" {
+	name = "tf-test-network-2-%{suffix}"
+	auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "inst-test-subnetwork2" {
+	name          = "tf-test-compute-subnet-2-%{suffix}"
+	region        = "%{env_region}"
+	network       = google_compute_network.inst-test-network2.id
+	ip_cidr_range = "192.168.2.0/24"
+}
+
+resource "google_compute_instance" "foobar" {
+	name         = "%{instance_name}"
+	machine_type = "e2-medium"
+	zone         = "%{env_region}-a"
+
+	boot_disk {
+		initialize_params {
+			image = data.google_compute_image.my_image.self_link
+		}
+	}
+
+	network_interface {
+        network = google_compute_network.inst-test-network1.self_link
+        subnetwork = google_compute_subnetwork.inst-test-subnetwork1.self_link
+    }
+}
+`, context)
+}
+{{- end }}
 
 func testAccComputeInstance_queueCountSet(instance string) string {
 	return fmt.Sprintf(`
