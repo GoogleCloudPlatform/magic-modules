@@ -508,13 +508,14 @@ Google Cloud KMS. Only one of kms_key_self_link, rsa_encrypted_key and raw_key m
 							DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 							Description:      `The name of the subnetwork to attach this interface to. The subnetwork must exist in the same region this instance will be created in. Either network or subnetwork must be provided.`,
 						},
+						
 						{{- if ne $.TargetVersionName "ga" }}
 						"vlan": {
 							Type: schema.TypeInt,
 							Optional: true,
 							ForceNew: true,
 							Description: `The VLAN ID of the network interface. This changes a NIC to become a Dynamic Nic. The VLAN cannot be set on the primary network interface.`,
-						}
+						},
 						{{- end }}
 
 						{{ if ne $.TargetVersionName `ga` -}}
