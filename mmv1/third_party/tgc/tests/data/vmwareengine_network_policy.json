@@ -9,7 +9,6 @@
       "discovery_name": "NetworkPolicy",
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
-        "name": "projects/{{.Provider.project}}/locations/us-central1/networkPolicies/gg-asset-17806-51c7",
         "edgeServicesCidr": "192.168.30.0/26",
         "externalIp": {
           "enabled": true
