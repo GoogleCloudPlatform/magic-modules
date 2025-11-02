@@ -1,19 +1,19 @@
 resource "google_dataplex_entry_group" "entry-group-full" {
   location = "us-central1"
   entry_group_id = "tf-test-entry-group%{random_suffix}"
-  project = "%{project_number}"
+  project = "{{index $.TestEnvVars "project_number"}}"
 }
 resource "google_dataplex_entry" "source" {
   location = "us-central1"
   entry_group_id = google_dataplex_entry_group.entry-group-full.entry_group_id
   entry_id = "tf-test-source-entry%{random_suffix}"
   entry_type = google_dataplex_entry_type.entry-type-full.name
-  project = "%{project_number}"
+  project = "{{index $.TestEnvVars "project_number"}}"
 }
 resource "google_dataplex_entry_type" "entry-type-full" {
   entry_type_id = "tf-test-entry-type%{random_suffix}"
   location = "us-central1"
-  project = "%{project_number}"
+  project = "{{index $.TestEnvVars "project_number"}}"
 }
 resource "google_dataplex_glossary" "term_test_id_full" {
   glossary_id = "tf-test-glossary%{random_suffix}"
@@ -29,7 +29,7 @@ resource "google_dataplex_glossary_term" "term_test_id_full" {
   description = "term created by Terraform"
 }
 resource "google_dataplex_entry_link" "full_entry_link" {
-  project = "%{project_number}"
+  project = "{{index $.TestEnvVars "project_number"}}"
   location = "us-central1"
   entry_group_id = google_dataplex_entry_group.entry-group-full.entry_group_id
   entry_link_id = "tf-test-entry-link%{random_suffix}"
