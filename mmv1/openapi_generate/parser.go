@@ -266,7 +266,7 @@ func buildResource(filePath, resourcePath, resourceName string, root *openapi3.T
 	example.PrimaryResourceId = "example"
 	example.Vars = map[string]string{"resource_name": "test-resource"}
 
-	resource.Examples = []r.Examples{example}
+	resource.Examples = []*r.Examples{&example}
 
 	resourceNameBytes := []byte(resourceName)
 	// Write the status as an encoded string to flag when a YAML file has been
