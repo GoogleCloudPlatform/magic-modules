@@ -49,7 +49,7 @@ func NewTerraformOiCS(product *api.Product, versionName string, startTime time.T
 	return toics
 }
 
-func (toics TerraformOiCS) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
+func (toics TerraformOiCS) Generate(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 	toics.GenerateObjects(outputFolder, resourceToGenerate, generateCode, generateDocs)
 }
 

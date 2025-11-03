@@ -37,6 +37,7 @@ import_format:
   - 'instances/{{instance}}/databases/{{name}}'
   - '{{project}}/{{instance}}/{{name}}'
   - '{{instance}}/{{name}}'
+cai_asset_name_format: 'projects/{{project}}/instances/{{instance}}/databases/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20

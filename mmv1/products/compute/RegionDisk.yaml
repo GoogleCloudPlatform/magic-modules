@@ -58,6 +58,7 @@ iam_policy:
     - 'projects/{{project}}/regions/{{region}}/disks/{{name}}'
     - '{{name}}'
 custom_code:
+  constants: 'templates/terraform/constants/region_disk.go.tmpl'
   encoder: 'templates/terraform/encoders/disk.tmpl'
   decoder: 'templates/terraform/decoders/disk.tmpl'
   update_encoder: 'templates/terraform/update_encoder/hyper_disk.go.tmpl'
