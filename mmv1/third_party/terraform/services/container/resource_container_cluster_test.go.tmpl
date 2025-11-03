@@ -6615,7 +6615,7 @@ func TestAccContainerCluster_cloudDns_nil_scope(t *testing.T) {
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withDNSConfigWithoutScope(clusterName, networkName, subnetworkName),
+				Config: testAccContainerCluster_withDNSConfig(clusterName, "CLOUD_DNS", "", "", networkName, subnetworkName),
 			},
 			{
 				ResourceName:            "google_container_cluster.primary",
@@ -6624,7 +6624,7 @@ func TestAccContainerCluster_cloudDns_nil_scope(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_withDNSConfigWithUnspecifiedScope(clusterName, networkName, subnetworkName),
+				Config: testAccContainerCluster_withDNSConfig(clusterName, "CLOUD_DNS", "", "DNS_SCOPE_UNSPECIFIED", networkName, subnetworkName),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionNoop),
@@ -6641,42 +6641,6 @@ func TestAccContainerCluster_cloudDns_nil_scope(t *testing.T) {
 	})
 }
 
-func testAccContainerCluster_withDNSConfigWithoutScope(clusterName, networkName, subnetworkName string) string {
-	return fmt.Sprintf(`
-resource "google_container_cluster" "primary" {
-  name               = "%s"
-  location           = "us-central1-a"
-  initial_node_count = 2
-  dns_config {
-    cluster_dns      = "CLOUD_DNS"
-  }
-
-  network    = "%s"
-  subnetwork = "%s"
-
-  deletion_protection = false
-}
-`, clusterName, networkName, subnetworkName)
-}
-
-func testAccContainerCluster_withDNSConfigWithUnspecifiedScope(clusterName, networkName, subnetworkName string) string {
-	return fmt.Sprintf(`
-resource "google_container_cluster" "primary" {
-  name                = "%s"
-  location            = "us-central1-a"
-  initial_node_count  = 2
-  dns_config {
-    cluster_dns       = "CLOUD_DNS"
-    cluster_dns_scope = "DNS_SCOPE_UNSPECIFIED"
-  }
-
-  network    = "%s"
-  subnetwork = "%s"
-
-  deletion_protection = false
-}
-`, clusterName, networkName, subnetworkName)
-}
 
 func TestAccContainerCluster_autopilot_withAdditiveVPCMutation(t *testing.T) {
 	t.Parallel()
