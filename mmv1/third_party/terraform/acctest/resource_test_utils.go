@@ -111,6 +111,14 @@ func TestCheckAttributeValuesEqual(i *string, j *string) resource.TestCheckFunc 
 	}
 }
 
+// ConditionIfPresent returns empty string if condition is not preset and " {condition}" if it is.
+func ConditionIfPresent(state map[string]string) string {
+	if condition, ok := state["condition"]; ok {
+		return " " + condition
+	}
+	return ""
+}
+
 // testStringValue returns string values from string pointers, handling nil pointers.
 func testStringValue(sPtr *string) string {
 	if sPtr == nil {
