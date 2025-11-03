@@ -24,7 +24,7 @@ resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryRes
   organization            = "{{index $.TestEnvVars "org_id"}}"
   location                = "global"
   framework_deployment_id = "{{index $.Vars "deployment_name"}}"
-  description             = "A framework deployment for cloud security compliance"
+  description             = "A framework deployment with project creation config"
   
   framework {
     framework         = google_cloud_security_compliance_framework.example.name
@@ -32,7 +32,13 @@ resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryRes
   }
   
   target_resource_config {
-    existing_target_resource = "organizations/{{index $.TestEnvVars "org_id"}}"
+    target_resource_creation_config {
+      project_creation_config {
+        billing_account_id   = "{{index $.TestEnvVars "billing_account"}}"
+        parent               = "organizations/{{index $.TestEnvVars "org_id"}}"
+        project_display_name = "{{index $.Vars "project_display_name"}}"
+      }
+    }
   }
   
   cloud_control_metadata {
@@ -41,29 +47,6 @@ resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryRes
     cloud_control_details {
       name              = google_cloud_security_compliance_framework.example.cloud_control_details[0].name
       major_revision_id = "1"
-      
-      parameters {
-        name = "enabled"
-        parameter_value {
-          bool_value = true
-        }
-      }
-      
-      parameters {
-        name = "threshold"
-        parameter_value {
-          number_value = 100.5
-        }
-      }
-      
-      parameters {
-        name = "regions"
-        parameter_value {
-          string_list_value {
-            values = ["us-central1", "us-west1", "us-east1"]
-          }
-        }
-      }
       
       parameters {
         name = "location"

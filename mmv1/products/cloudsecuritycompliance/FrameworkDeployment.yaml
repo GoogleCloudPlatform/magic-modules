@@ -36,6 +36,23 @@ examples:
       framework_name: "example-framework"
     test_env_vars:
       org_id: "ORG_ID"
+  - name: "cloudsecuritycompliance_framework_deployment_folder_creation"
+    primary_resource_id: "example"
+    vars:
+      deployment_name: "example-deployment-folder"
+      framework_name: "example-framework-folder"
+      folder_display_name: "cm-folder"
+    test_env_vars:
+      org_id: "ORG_ID"
+  - name: "cloudsecuritycompliance_framework_deployment_project_creation"
+    primary_resource_id: "example"
+    vars:
+      deployment_name: "example-deployment-project"
+      framework_name: "example-framework-project"
+      project_display_name: "cm-project"
+    test_env_vars:
+      org_id: "ORG_ID"
+      billing_account: "BILLING_ACCT"
 autogen_async: true
 async:
   operation:
@@ -210,6 +227,7 @@ properties:
       provide the `etag` when you delete a FrameworkDeployment, to help
       ensure that you're deleting the intended version of the
       FrameworkDeployment.
+    output: true
   - name: framework
     type: NestedObject
     description: FrameworkReference contains the reference of a framework.
