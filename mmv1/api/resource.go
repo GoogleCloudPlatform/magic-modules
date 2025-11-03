@@ -1992,9 +1992,9 @@ func (r Resource) TestSampleSetUp() {
 				continue
 			}
 			step.PrimaryResourceId = sample.PrimaryResourceId
-			pachageName := filepath.Base(filepath.Dir(r.SourceYamlFile))
+			packageName := filepath.Base(filepath.Dir(r.SourceYamlFile))
 			if step.ConfigPath == "" {
-				step.ConfigPath = fmt.Sprintf("templates/terraform/samples/services/%s/%s.tf.tmpl", pachageName, step.Name)
+				step.ConfigPath = fmt.Sprintf("templates/terraform/samples/services/%s/%s.tf.tmpl", packageName, step.Name)
 			}
 			step.SetHCLText()
 			configName := step.Name
