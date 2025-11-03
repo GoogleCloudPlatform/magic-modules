@@ -40,9 +40,8 @@ examples:
       app_display_name: 'my-app'
       tool_id: 'ces_tool_basic2'
       app_id: 'app-id'
-      data_store_id: "data_store_id"
-      data_store_id_2: "data_store_id_2"
-      engine_id: "engine_id"
+      data_store_id: "tool_data_store_id"
+      engine_id: "tool_engine_id"
   - name: "ces_tool_google_search_tool_basic"
     primary_resource_id: "ces_tool_google_search_tool_basic"
     vars:
@@ -503,6 +502,7 @@ properties:
                     - name: connectorConfig
                       type: NestedObject
                       description: The connector config for the data store connection.
+                      output: true
                       properties:
                         - name: collection
                           type: String
@@ -731,14 +731,17 @@ properties:
   - name: openApiTool
     type: NestedObject
     description: A remote API tool defined by an OpenAPI schema.
+    output: true
     properties:
       - name: apiAuthentication
         type: NestedObject
         description: Authentication information required for API calls.
+        output: true
         properties:
           - name: apiKeyConfig
             type: NestedObject
             description: Configurations for authentication with API key.
+            output: true
             properties:
               - name: apiKeySecretVersion
                 type: String
@@ -766,6 +769,7 @@ properties:
           - name: oauthConfig
             type: NestedObject
             description: Configurations for authentication with OAuth.
+            output: true
             properties:
               - name: clientId
                 type: String
@@ -803,6 +807,7 @@ properties:
             type: NestedObject
             description: Configurations for authentication using a custom service
               account.
+            output: true
             properties:
               - name: serviceAccount
                 type: String
@@ -850,6 +855,7 @@ properties:
       - name: serviceDirectoryConfig
         type: NestedObject
         description: Configuration for tools using Service Directory.
+        output: true
         properties:
           - name: service
             type: String
@@ -864,6 +870,7 @@ properties:
       - name: tlsConfig
         type: NestedObject
         description: The TLS configuration.
+        output: true
         properties:
           - name: caCerts
             type: Array
@@ -931,6 +938,7 @@ properties:
   - name: systemTool
     type: NestedObject
     description: The system tool.
+    output: true
     properties:
       - name: description
         type: String

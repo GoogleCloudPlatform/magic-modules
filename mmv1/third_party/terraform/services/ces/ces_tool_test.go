@@ -290,38 +290,22 @@ func TestAccCESTool_cesToolDataStoreToolEngineSourceBasicExample_update(t *testi
 
 func testAccCESTool_cesToolDataStoreToolEngineSourceBasicExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_discovery_engine_data_store" "test_data_store" {
+resource "google_discovery_engine_data_store" "basic" {
   location                    = "global"
-  data_store_id               = "tf_test_data_store_id%{random_suffix}"
-  display_name                = "Structured datastore"
+  data_store_id               = "tf_test_tool_data_store_id%{random_suffix}"
+  display_name                = "tf-test-structured-datastore"
   industry_vertical           = "GENERIC"
   content_config              = "NO_CONTENT"
-  solution_types              = ["SOLUTION_TYPE_CHAT"]
+  solution_types              = ["SOLUTION_TYPE_SEARCH"]
+  create_advanced_site_search = false
 }
-resource "google_discovery_engine_data_store" "test_data_store_2" {
-  location                    = google_discovery_engine_data_store.test_data_store.location
-  data_store_id               = "tf_test_data_store_id_2%{random_suffix}"
-  display_name                = "Structured datastore 2"
-  industry_vertical           = "GENERIC"
-  content_config              = "NO_CONTENT"
-  solution_types              = ["SOLUTION_TYPE_CHAT"]
-}
-resource "google_discovery_engine_chat_engine" "primary" {
-  engine_id = "tf_test_engine_id%{random_suffix}"
+resource "google_discovery_engine_search_engine" "basic" {
+  engine_id = "tf_test_tool_engine_id%{random_suffix}"
   collection_id = "default_collection"
-  location = google_discovery_engine_data_store.test_data_store.location
-  display_name = "Chat engine 2"
-  industry_vertical = "GENERIC"
-  data_store_ids = [google_discovery_engine_data_store.test_data_store.data_store_id, google_discovery_engine_data_store.test_data_store_2.data_store_id]
-  common_config {
-    company_name = "test-company"
-  }
-  chat_engine_config {
-    agent_creation_config {
-    business = "test business name"
-    default_language_code = "en"
-    time_zone = "America/Los_Angeles"
-    }
+  location = google_discovery_engine_data_store.basic.location
+  display_name = "Example Display Name"
+  data_store_ids = [google_discovery_engine_data_store.basic.data_store_id]
+  search_engine_config {
   }
 }
 resource "google_ces_app" "my-app" {
@@ -342,7 +326,7 @@ resource "google_ces_tool" "ces_tool_data_store_tool_engine_source_basic" {
         description = "example-description"
         boost_specs {
             data_stores = [
-                google_discovery_engine_data_store.test_data_store_2.name,
+                google_discovery_engine_data_store.basic.name,
             ]
             spec {
                 condition_boost_specs {
@@ -385,11 +369,11 @@ resource "google_ces_tool" "ces_tool_data_store_tool_engine_source_basic" {
         }
 
         engine_source {
-            engine = google_discovery_engine_chat_engine.primary.name
+            engine = google_discovery_engine_search_engine.basic.name
             data_store_sources {
                 filter = "example_field: ANY(\"specific_example\")"
                 data_store {
-                    name = google_discovery_engine_data_store.test_data_store_2.name
+                    name = google_discovery_engine_data_store.basic.name
                 }
             }
             filter = "example_field: ANY(\"specific_example\")"
@@ -402,38 +386,22 @@ resource "google_ces_tool" "ces_tool_data_store_tool_engine_source_basic" {
 
 func testAccCESTool_cesToolDataStoreToolEngineSourceBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_discovery_engine_data_store" "test_data_store" {
+resource "google_discovery_engine_data_store" "basic" {
   location                    = "global"
-  data_store_id               = "tf_test_data_store_id%{random_suffix}"
-  display_name                = "Structured datastore"
+  data_store_id               = "tf_test_tool_data_store_id%{random_suffix}"
+  display_name                = "tf-test-structured-datastore"
   industry_vertical           = "GENERIC"
   content_config              = "NO_CONTENT"
-  solution_types              = ["SOLUTION_TYPE_CHAT"]
+  solution_types              = ["SOLUTION_TYPE_SEARCH"]
+  create_advanced_site_search = false
 }
-resource "google_discovery_engine_data_store" "test_data_store_2" {
-  location                    = google_discovery_engine_data_store.test_data_store.location
-  data_store_id               = "tf_test_data_store_id_2%{random_suffix}"
-  display_name                = "Structured datastore 2"
-  industry_vertical           = "GENERIC"
-  content_config              = "NO_CONTENT"
-  solution_types              = ["SOLUTION_TYPE_CHAT"]
-}
-resource "google_discovery_engine_chat_engine" "primary" {
-  engine_id = "tf_test_engine_id%{random_suffix}"
+resource "google_discovery_engine_search_engine" "basic" {
+  engine_id = "tf_test_tool_engine_id%{random_suffix}"
   collection_id = "default_collection"
-  location = google_discovery_engine_data_store.test_data_store.location
-  display_name = "Chat engine 2"
-  industry_vertical = "GENERIC"
-  data_store_ids = [google_discovery_engine_data_store.test_data_store.data_store_id, google_discovery_engine_data_store.test_data_store_2.data_store_id]
-  common_config {
-    company_name = "test-company"
-  }
-  chat_engine_config {
-    agent_creation_config {
-    business = "test business name"
-    default_language_code = "en"
-    time_zone = "America/Los_Angeles"
-    }
+  location = google_discovery_engine_data_store.basic.location
+  display_name = "Example Display Name"
+  data_store_ids = [google_discovery_engine_data_store.basic.data_store_id]
+  search_engine_config {
   }
 }
 resource "google_ces_app" "my-app" {
@@ -451,10 +419,10 @@ resource "google_ces_tool" "ces_tool_data_store_tool_engine_source_basic" {
     execution_type = "SYNCHRONOUS"
     data_store_tool {
         name = "example-tool"
-        description = "example-description-updated"
+        description = "updated-description"
         boost_specs {
             data_stores = [
-                google_discovery_engine_data_store.test_data_store_2.name,
+                google_discovery_engine_data_store.basic.name,
             ]
             spec {
                 condition_boost_specs {
@@ -497,14 +465,14 @@ resource "google_ces_tool" "ces_tool_data_store_tool_engine_source_basic" {
         }
 
         engine_source {
-            engine = google_discovery_engine_chat_engine.primary.name
+            engine = google_discovery_engine_search_engine.basic.name
             data_store_sources {
-                filter = "example_field: ANY(\"updated_example\")"
+                filter = "example_field: ANY(\"specific_example\")"
                 data_store {
-                    name = google_discovery_engine_data_store.test_data_store_2.name
+                    name = google_discovery_engine_data_store.basic.name
                 }
             }
-            filter = "example_field: ANY(\"updated_example\")"
+            filter = "example_field: ANY(\"specific_example\")"
         }
         max_results = 5
     }
