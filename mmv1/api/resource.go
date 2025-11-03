@@ -220,6 +220,9 @@ type Resource struct {
 	// corresponding OiCS walkthroughs.
 	Examples []*resource.Examples
 
+	// Samples for generating tests and documentation
+	Samples []*resource.Sample
+
 	// If true, generates product operation handling logic.
 	AutogenAsync bool `yaml:"autogen_async,omitempty"`
 
@@ -529,6 +532,10 @@ func (r *Resource) Validate() {
 
 	for _, example := range r.Examples {
 		example.Validate(r.Name)
+	}
+
+	for _, sample := range r.Samples {
+		sample.Validate(r.Name)
 	}
 
 	if r.Async != nil {
@@ -1301,9 +1308,10 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 	return uniq
 }
 
+// IgnoreReadPropertiesLegacy is the legacy version of IgnoreReadProperties for Examples
 // IgnoreReadProperties returns a sorted slice of property names (snake_case) that should be ignored when reading.
 // This is useful for downstream code that needs to iterate over these properties.
-func (r Resource) IgnoreReadProperties(e *resource.Examples) []string {
+func (r Resource) IgnoreReadPropertiesLegacy(e *resource.Examples) []string {
 	var props []string
 	for _, tp := range r.AllUserProperties() {
 		if tp.UrlParamOnly || tp.IsA("ResourceRef") {
@@ -1318,10 +1326,38 @@ func (r Resource) IgnoreReadProperties(e *resource.Examples) []string {
 	return props
 }
 
+// IgnoreReadPropertiesToStringLegacy is the legacy version of IgnoreReadPropertiesToString for Examples
 // IgnoreReadPropertiesToString returns the ignore read properties as a Go-syntax string slice.
 // This is a wrapper around IgnoreReadProperties for backwards compatibility.
-func (r Resource) IgnoreReadPropertiesToString(e *resource.Examples) string {
-	props := r.IgnoreReadProperties(e)
+func (r Resource) IgnoreReadPropertiesToStringLegacy(e *resource.Examples) string {
+	props := r.IgnoreReadPropertiesLegacy(e)
+	if len(props) > 0 {
+		return fmt.Sprintf("[]string{%s}", strings.Join(quoteStrings(props), ", "))
+	}
+	return ""
+}
+
+// IgnoreReadProperties returns a sorted slice of property names (snake_case) that should be ignored when reading.
+// This is useful for downstream code that needs to iterate over these properties.
+func (r Resource) IgnoreReadProperties(s *resource.Step) []string {
+	var props []string
+	for _, tp := range r.AllUserProperties() {
+		if tp.UrlParamOnly || tp.IsA("ResourceRef") {
+			props = append(props, google.Underscore(tp.Name))
+		}
+	}
+	props = append(props, s.IgnoreReadExtra...)
+	props = append(props, r.IgnoreReadLabelsFields(r.PropertiesWithExcluded())...)
+	props = append(props, ignoreReadFields(r.AllUserProperties())...)
+
+	slices.Sort(props)
+	return props
+}
+
+// IgnoreReadPropertiesToString returns the ignore read properties as a Go-syntax string slice.
+// This is a wrapper around IgnoreReadProperties for backwards compatibility.
+func (r Resource) IgnoreReadPropertiesToString(s *resource.Step) string {
+	props := r.IgnoreReadProperties(s)
 	if len(props) > 0 {
 		return fmt.Sprintf("[]string{%s}", strings.Join(quoteStrings(props), ", "))
 	}
@@ -1931,6 +1967,40 @@ func (r Resource) TestExamples() []*resource.Examples {
 	}), func(e *resource.Examples) bool {
 		return e.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, e.MinVersion)
 	})
+}
+
+func (r Resource) TestSamples() []*resource.Sample {
+	return google.Reject(google.Reject(r.Samples, func(s *resource.Sample) bool {
+		return s.ExcludeTest
+	}), func(s *resource.Sample) bool {
+		return s.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, s.MinVersion)
+	})
+}
+
+func (r Resource) TestSampleSetUp() {
+	res := make(map[string]string)
+	for _, sample := range r.Samples {
+		sample.TargetVersionName = r.TargetVersionName
+		if sample.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, sample.MinVersion) {
+			continue
+		}
+		for _, step := range sample.Steps {
+			if step.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, step.MinVersion) {
+				continue
+			}
+			step.PrimaryResourceId = sample.PrimaryResourceId
+			packageName := filepath.Base(filepath.Dir(r.SourceYamlFile))
+			if step.ConfigPath == "" {
+				step.ConfigPath = fmt.Sprintf("templates/terraform/samples/services/%s/%s.tf.tmpl", packageName, step.Name)
+			}
+			step.SetHCLText()
+			configName := step.Name
+			if _, ok := res[step.Name]; !ok {
+				res[configName] = sample.Name
+				sample.NewConfigFuncs = append(sample.NewConfigFuncs, step)
+			}
+		}
+	}
 }
 
 func (r Resource) VersionedProvider(exampleVersion string) bool {
