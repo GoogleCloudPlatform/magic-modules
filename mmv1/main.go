@@ -75,11 +75,7 @@ func GenerateProducts(product, resource, providerName, version, outputPath, over
 	log.Printf("Building %s version", version)
 	log.Printf("Building %s provider", providerName)
 
-	loader := loader.Loader{
-		OverrideDirectory: overrideDirectory,
-		Version:           version,
-	}
-
+	loader := loader.NewLoader(loader.Config{Version: version, OverrideDirectory: overrideDirectory})
 	loadedProducts := loader.LoadProducts()
 
 	var productsToGenerate []string
