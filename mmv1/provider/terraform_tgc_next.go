@@ -329,7 +329,6 @@ func (tgc TerraformGoogleConversionNext) addTestsFromExamples(object *api.Resour
 	}
 }
 
-<<<<<<< HEAD
 func (tgc TerraformGoogleConversionNext) addTestsFromSamples(object *api.Resource) {
 	if object.Examples != nil {
 		tgc.addTestsFromExamples(object)
@@ -347,7 +346,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromSamples(object *api.Resourc
 			Skip: sample.TGCSkipTest,
 		})
 	}
-=======
+}
 func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *api.Resource) error {
 	if object.ProductMetadata == nil {
 		return nil
@@ -394,7 +393,6 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 	object.TGCTests = append(object.TGCTests, tests...)
 
 	return nil
->>>>>>> 9e5740c6d (WIP generate TGC tests from handwritten)
 }
 
 // Generates the list of resources, and gets the count of resources.
