@@ -28,6 +28,12 @@ import (
 	"{{ $.ImportPath }}/tpgresource"
 )
 
+var (
+    _ = fmt.Sprintf
+    _ = envvar.TestEnvVar
+    _ = tpgresource.SetLabels
+)
+
 {{ if $.Res.TestExamples }}
 {{ $e := index $.Res.TestExamples 0 }}
 func TestAccDataSource{{ $.Res.ResourceName }}_basic(t *testing.T) {
@@ -66,9 +72,9 @@ func TestAccDataSource{{ $.Res.ResourceName }}_basic(t *testing.T) {
 						acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 							"data.{{ $e.ResourceType $.Res.TerraformName }}.default",
 							"{{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}",
-							map[string]struct{}{
+							[]string{
 								{{- range $prop := $.Res.IgnoreReadProperties $e }}
-								"{{ $prop }}": {},
+								"{{ $prop }}",
 								{{- end }}
 							},
 						),

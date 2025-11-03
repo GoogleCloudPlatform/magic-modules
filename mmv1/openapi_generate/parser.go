@@ -45,7 +45,7 @@ type Parser struct {
 func NewOpenapiParser(folder, output string) Parser {
 	wd, err := os.Getwd()
 	if err != nil {
-		log.Fatalf(err.Error())
+		log.Fatalf("%v", err)
 	}
 
 	parser := Parser{
@@ -59,13 +59,13 @@ func NewOpenapiParser(folder, output string) Parser {
 func (parser Parser) Run() {
 	f, err := os.Open(parser.Folder)
 	if err != nil {
-		log.Fatalf(err.Error())
+		log.Fatalf("%v", err)
 		return
 	}
 	defer f.Close()
 	files, err := f.Readdirnames(0)
 	if err != nil {
-		log.Fatalf(err.Error())
+		log.Fatalf("%v", err)
 	}
 
 	// check if folder is empty
@@ -266,7 +266,7 @@ func buildResource(filePath, resourcePath, resourceName string, root *openapi3.T
 	example.PrimaryResourceId = "example"
 	example.Vars = map[string]string{"resource_name": "test-resource"}
 
-	resource.Examples = []r.Examples{example}
+	resource.Examples = []*r.Examples{&example}
 
 	resourceNameBytes := []byte(resourceName)
 	// Write the status as an encoded string to flag when a YAML file has been
@@ -375,6 +375,12 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		if field.Name == "labels" {
 			// Standard labels implementation
 			field.Type = "KeyValueLabels"
+			break
+		}
+
+		if field.Name == "annotations" {
+			// Standard annotations implementation
+			field.Type = "KeyValueAnnotations"
 			break
 		}
 

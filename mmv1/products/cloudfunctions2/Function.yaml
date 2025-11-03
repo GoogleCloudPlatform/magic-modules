@@ -49,7 +49,6 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'cloud_function'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/functions/{{cloud_function}}'
     - '{{cloud_function}}'
@@ -303,6 +302,23 @@ examples:
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
+  - name: 'cloudfunctions2_directvpc'
+    primary_resource_id: 'function'
+    primary_resource_name: 'fmt.Sprintf("tf-test-function-v2%s", context["random_suffix"])'
+    vars:
+      function: 'function-v2'
+      bucket_name: 'gcf-source'
+      zip_path: 'function-source.zip'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    test_vars_overrides:
+      'location': '"us-central1"'
+      'zip_path': '"./test-fixtures/function-source.zip"'
+        # ignore these fields during import step
+    ignore_read_extra:
+      - 'build_config.0.source.0.storage_source.0.object'
+      - 'build_config.0.source.0.storage_source.0.bucket'
+    min_version: 'beta'
 parameters:
   - name: 'location'
     type: String
@@ -560,6 +576,34 @@ properties:
           - 'VPC_CONNECTOR_EGRESS_SETTINGS_UNSPECIFIED'
           - 'PRIVATE_RANGES_ONLY'
           - 'ALL_TRAFFIC'
+      - name: 'directVpcNetworkInterface'
+        min_version: 'beta'
+        type: Array
+        description: 'The Direct VPC network interface for the Cloud Function. Currently only a single Direct VPC is supported.'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: network
+              type: String
+              description: |
+                The name of the VPC network to which the function will be connected. Specify either a VPC network or a subnet, or both. If you specify only a network, the subnet uses the same name as the network.
+            - name: subnetwork
+              type: String
+              description: |
+                The name of the VPC subnetwork that the Cloud Function resource will get IPs from. Specify either a VPC network or a subnet, or both. If both network and subnetwork are specified, the given VPC subnetwork must belong to the given VPC network. If subnetwork is not specified, the subnetwork with the same name with the network will be used.
+            - name: tags
+              type: Array
+              description: 'Network tags applied to this Cloud Function resource.'
+              item_type:
+                type: String
+      - name: 'directVpcEgress'
+        min_version: 'beta'
+        type: Enum
+        description: 'Egress settings for direct VPC. If not provided, it defaults to VPC_EGRESS_PRIVATE_RANGES_ONLY.'
+        default_from_api: true
+        enum_values:
+          - 'VPC_EGRESS_ALL_TRAFFIC'
+          - 'VPC_EGRESS_PRIVATE_RANGES_ONLY'
       - name: 'ingressSettings'
         type: Enum
         description:

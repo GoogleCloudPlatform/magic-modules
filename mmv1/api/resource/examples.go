@@ -29,10 +29,6 @@ import (
 	"github.com/golang/glog"
 )
 
-type IamMember struct {
-	Member, Role string
-}
-
 // Generates configs to be shown as examples in docs and outputted as tests
 // from a shared template
 type Examples struct {
@@ -179,18 +175,6 @@ type Examples struct {
 	// ====================
 	// TGC
 	// ====================
-	// Extra properties to ignore test.
-	// These properties are present in Terraform resources schema, but not in CAI assets.
-	// Virtual Fields and url parameters are already ignored by default and do not need to be duplicated here.
-	TGCTestIgnoreExtra []string `yaml:"tgc_test_ignore_extra,omitempty"`
-	// The properties ignored in CAI assets. It is rarely used and only used
-	// when the nested field has sent_empty_value: true.
-	// But its parent field is C + O and not specified in raw_config.
-	// Example: ['RESOURCE.cdnPolicy.signedUrlCacheMaxAgeSec'].
-	// "RESOURCE" means that the property is for resource data in CAI asset.
-	TGCTestIgnoreInAsset []string `yaml:"tgc_test_ignore_in_asset,omitempty"`
-	// The reason to skip a test. For example, a link to a ticket explaining the issue that needs to be resolved before
-	// unskipping the test. If this is not empty, the test will be skipped.
 	TGCSkipTest string `yaml:"tgc_skip_test,omitempty"`
 }
 
@@ -207,7 +191,6 @@ func (e *Examples) UnmarshalYAML(unmarshal func(any) error) error {
 	if e.ConfigPath == "" {
 		e.ConfigPath = fmt.Sprintf("templates/terraform/examples/%s.tf.tmpl", e.Name)
 	}
-	e.SetHCLText()
 
 	return nil
 }
@@ -217,22 +200,6 @@ func (e *Examples) Validate(rName string) {
 		log.Fatalf("Missing `name` for one example in resource %s", rName)
 	}
 	e.ValidateExternalProviders()
-}
-
-func validateRegexForContents(r *regexp.Regexp, contents string, configPath string, objName string, vars map[string]string) {
-	matches := r.FindAllStringSubmatch(contents, -1)
-	for _, v := range matches {
-		found := false
-		for k, _ := range vars {
-			if k == v[1] {
-				found = true
-				break
-			}
-		}
-		if !found {
-			log.Fatalf("Failed to find %s environment variable defined in YAML file when validating the file %s. Please define this in %s", v[1], configPath, objName)
-		}
-	}
 }
 
 func (e *Examples) ValidateExternalProviders() {
@@ -256,7 +223,7 @@ func (e *Examples) ValidateExternalProviders() {
 }
 
 // Executes example templates for documentation and tests
-func (e *Examples) SetHCLText() {
+func (e *Examples) LoadHCLText(baseDir string) {
 	originalVars := e.Vars
 	originalTestEnvVars := e.TestEnvVars
 	docTestEnvVars := make(map[string]string)
@@ -283,7 +250,7 @@ func (e *Examples) SetHCLText() {
 		docTestEnvVars[key] = docs_defaults[e.TestEnvVars[key]]
 	}
 	e.TestEnvVars = docTestEnvVars
-	e.DocumentationHCLText = e.ExecuteTemplate()
+	e.DocumentationHCLText = e.ExecuteTemplate(baseDir)
 	e.DocumentationHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.DocumentationHCLText, "\n")
 
 	// Remove region tags
@@ -324,7 +291,7 @@ func (e *Examples) SetHCLText() {
 
 	e.Vars = testVars
 	e.TestEnvVars = testTestEnvVars
-	e.TestHCLText = e.ExecuteTemplate()
+	e.TestHCLText = e.ExecuteTemplate(baseDir)
 	e.TestHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.TestHCLText, "\n")
 	// Remove region tags
 	e.TestHCLText = re1.ReplaceAllString(e.TestHCLText, "")
@@ -336,8 +303,8 @@ func (e *Examples) SetHCLText() {
 	e.TestEnvVars = originalTestEnvVars
 }
 
-func (e *Examples) ExecuteTemplate() string {
-	templateContent, err := os.ReadFile(e.ConfigPath)
+func (e *Examples) ExecuteTemplate(baseDir string) string {
+	templateContent, err := os.ReadFile(filepath.Join(baseDir, e.ConfigPath))
 	if err != nil {
 		glog.Exit(err)
 	}
@@ -351,7 +318,6 @@ func (e *Examples) ExecuteTemplate() string {
 	validateRegexForContents(varRegex, fileContentString, e.ConfigPath, "vars", e.Vars)
 
 	templateFileName := filepath.Base(e.ConfigPath)
-
 	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).Parse(fileContentString)
 	if err != nil {
 		glog.Exit(err)
@@ -400,24 +366,6 @@ func (e *Examples) ResourceType(terraformName string) string {
 	return terraformName
 }
 
-func SubstituteExamplePaths(config string) string {
-	config = strings.ReplaceAll(config, "../static/img/header-logo.png", "../static/header-logo.png")
-	config = strings.ReplaceAll(config, "path/to/private.key", "../static/ssl_cert/test.key")
-	config = strings.ReplaceAll(config, "path/to/id_rsa.pub", "../static/ssh_rsa.pub")
-	config = strings.ReplaceAll(config, "path/to/certificate.crt", "../static/ssl_cert/test.crt")
-	return config
-}
-
-func SubstituteTestPaths(config string) string {
-	config = strings.ReplaceAll(config, "../static/img/header-logo.png", "test-fixtures/header-logo.png")
-	config = strings.ReplaceAll(config, "path/to/private.key", "test-fixtures/test.key")
-	config = strings.ReplaceAll(config, "path/to/certificate.crt", "test-fixtures/test.crt")
-	config = strings.ReplaceAll(config, "path/to/index.zip", "%{zip_path}")
-	config = strings.ReplaceAll(config, "verified-domain.com", "tf-test-domain%{random_suffix}.gcp.tfacc.hashicorptest.com")
-	config = strings.ReplaceAll(config, "path/to/id_rsa.pub", "test-fixtures/ssh_rsa.pub")
-	return config
-}
-
 // Executes example templates for documentation and tests
 func (e *Examples) SetOiCSHCLText() {
 	originalVars := e.Vars
@@ -438,7 +386,9 @@ func (e *Examples) SetOiCSHCLText() {
 	}
 
 	e.Vars = testVars
-	e.OicsHCLText = e.ExecuteTemplate()
+	// SetOiCSHCLText is generated from the provider, assume base directory is
+	// always relative for this case
+	e.OicsHCLText = e.ExecuteTemplate("")
 	e.OicsHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.OicsHCLText, "\n")
 
 	// Remove region tags

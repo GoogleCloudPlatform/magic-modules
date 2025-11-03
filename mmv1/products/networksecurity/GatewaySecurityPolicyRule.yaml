@@ -51,15 +51,11 @@ examples:
     vars:
       gateway_security_policy_id: 'my-gateway-security-policy'
       resource_name: 'my-gateway-security-policy-rule'
-    tgc_skip_test: 'It takes time to fix it.'
   - name: 'network_security_gateway_security_policy_rules_advanced'
     primary_resource_id: 'default'
     vars:
       gateway_security_policy_id: 'my-gateway-security-policy'
       resource_name: 'my-gateway-security-policy-rule'
-    tgc_test_ignore_extra:
-      - 'tls_inspection_enabled' # Ignore its false value in Terraform configuration
-    tgc_skip_test: 'It takes time to fix it.'
 parameters:
   - name: 'name'
     type: String

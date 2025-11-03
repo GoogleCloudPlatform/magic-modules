@@ -218,7 +218,7 @@ type Resource struct {
 
 	// Examples in documentation. Backed by generated tests, and have
 	// corresponding OiCS walkthroughs.
-	Examples []resource.Examples
+	Examples []*resource.Examples
 
 	// If true, generates product operation handling logic.
 	AutogenAsync bool `yaml:"autogen_async,omitempty"`
@@ -356,6 +356,11 @@ type Resource struct {
 	// organization variant, however most resources do not need it.
 	ApiVariantPatterns []string `yaml:"api_variant_patterns,omitempty"`
 
+	// ApiResourceField indicates what field on the API resource is managed by a resource.
+	// This is generally relevant for fine-grained resources. For example,
+	// google_compute_router_nat manages the `nat` field on the `Router` resource.
+	ApiResourceField string `yaml:"api_resource_field,omitempty"`
+
 	ImportPath     string `yaml:"-"`
 	SourceYamlFile string `yaml:"-"`
 
@@ -386,10 +391,20 @@ type TGCResource struct {
 	// If true, the Terraform custom encoder is not applied during tfplan2cai
 	TGCIgnoreTerraformEncoder bool `yaml:"tgc_ignore_terraform_encoder,omitempty"`
 
+	// If true, the Terraform custom decoder is not applied during cai2hcl
+	TGCIgnoreTerraformDecoder bool `yaml:"tgc_ignore_terraform_decoder,omitempty"`
+
 	// [Optional] The parameter that uniquely identifies the resource.
 	// Generally, it shouldn't be set when the identity can be decided.
 	// Otherswise, it should be set.
 	CaiIdentity string `yaml:"cai_identity,omitempty"`
+
+	// Tests for TGC, will automatically be filled with resource's examples
+	// and handwritten tests. Can be specified in order to skip specific tests.
+	TGCTests []resource.TGCTest `yaml:"tgc_tests,omitempty"`
+
+	// [Optional] It overrides the default Cai asset name format, which is the resource id format
+	CaiAssetNameFormat string `yaml:"cai_asset_name_format,omitempty"`
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
@@ -818,6 +833,7 @@ func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField
 
 func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type) []*Type {
 	propWithWoConfigured.WriteOnly = false
+	propWithWoConfigured.Sensitive = true
 	if len(propWithWoConfigured.RequiredWith) > 0 {
 		log.Fatalf("WriteOnly property '%s' in resource '%s' cannot have RequiredWith set. This combination is not supported.", propWithWoConfigured.Name, r.Name)
 	}
@@ -1290,7 +1306,7 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 
 // IgnoreReadProperties returns a sorted slice of property names (snake_case) that should be ignored when reading.
 // This is useful for downstream code that needs to iterate over these properties.
-func (r Resource) IgnoreReadProperties(e resource.Examples) []string {
+func (r Resource) IgnoreReadProperties(e *resource.Examples) []string {
 	var props []string
 	for _, tp := range r.AllUserProperties() {
 		if tp.UrlParamOnly || tp.IsA("ResourceRef") {
@@ -1307,7 +1323,7 @@ func (r Resource) IgnoreReadProperties(e resource.Examples) []string {
 
 // IgnoreReadPropertiesToString returns the ignore read properties as a Go-syntax string slice.
 // This is a wrapper around IgnoreReadProperties for backwards compatibility.
-func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
+func (r Resource) IgnoreReadPropertiesToString(e *resource.Examples) string {
 	props := r.IgnoreReadProperties(e)
 	if len(props) > 0 {
 		return fmt.Sprintf("[]string{%s}", strings.Join(quoteStrings(props), ", "))
@@ -1591,11 +1607,11 @@ func (r Resource) IamAttributes() []string {
 
 // Since most resources define a "basic" config as their first example,
 // we can reuse that config to create a resource to test IAM resources with.
-func (r Resource) FirstTestExample() resource.Examples {
-	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
+func (r Resource) FirstTestExample() *resource.Examples {
+	examples := google.Reject(r.Examples, func(e *resource.Examples) bool {
 		return e.ExcludeTest
 	})
-	examples = google.Reject(examples, func(e resource.Examples) bool {
+	examples = google.Reject(examples, func(e *resource.Examples) bool {
 		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
 	})
 
@@ -1603,15 +1619,15 @@ func (r Resource) FirstTestExample() resource.Examples {
 }
 
 func (r Resource) ExamplePrimaryResourceId() string {
-	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
+	examples := google.Reject(r.Examples, func(e *resource.Examples) bool {
 		return e.ExcludeTest
 	})
-	examples = google.Reject(examples, func(e resource.Examples) bool {
+	examples = google.Reject(examples, func(e *resource.Examples) bool {
 		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
 	})
 
 	if len(examples) == 0 {
-		examples = google.Reject(r.Examples, func(e resource.Examples) bool {
+		examples = google.Reject(r.Examples, func(e *resource.Examples) bool {
 			return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
 		})
 	}
@@ -1912,10 +1928,10 @@ func (r Resource) IsExcluded() bool {
 	return r.Exclude || r.ExcludeResource
 }
 
-func (r Resource) TestExamples() []resource.Examples {
-	return google.Reject(google.Reject(r.Examples, func(e resource.Examples) bool {
+func (r Resource) TestExamples() []*resource.Examples {
+	return google.Reject(google.Reject(r.Examples, func(e *resource.Examples) bool {
 		return e.ExcludeTest
-	}), func(e resource.Examples) bool {
+	}), func(e *resource.Examples) bool {
 		return e.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, e.MinVersion)
 	})
 }
@@ -1941,12 +1957,7 @@ func (r Resource) StateUpgradersCount() []int {
 }
 
 func (r Resource) CaiProductBaseUrl() string {
-	version := r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName)
-	baseUrl := version.CaiBaseUrl
-	if baseUrl == "" {
-		baseUrl = version.BaseUrl
-	}
-	return baseUrl
+	return r.ProductMetadata.ServiceBaseUrl()
 }
 
 // Gets the CAI product legacy base url.
@@ -1991,9 +2002,8 @@ func (r Resource) DefineAssetTypeForResourceInProduct() bool {
 	return true
 }
 
-// Gets the Cai asset name template, which could include version
-// For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
-func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
+// Gets the Cai asset name format
+func (r Resource) GetCaiAssetNameFormat() string {
 	caiBaseUrl := ""
 	caiId := ""
 	if r.CaiIdentity != "" {
@@ -2019,7 +2029,13 @@ func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
 			caiBaseUrl = fmt.Sprintf("%s/%s", r.BaseUrl, caiIdTemplate)
 		}
 	}
-	return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, caiBaseUrl)
+	return caiBaseUrl
+}
+
+// Gets the Cai asset name template, which could include version
+// For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
+func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
+	return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, r.GetCaiAssetNameFormat())
 }
 
 // Guesses the identifier of the resource, as "name" is not always the identifier
@@ -2061,16 +2077,31 @@ func (r Resource) getCandidateCaiId(url string) string {
 	return ""
 }
 
-// Gets the Cai asset name template, which doesn't include version
-// For example: //monitoring.googleapis.com/projects/{{project}}/services/{{service_id}}
-func (r Resource) CaiAssetNameTemplate(productBackendName string) string {
-	template := r.rawCaiAssetNameTemplate(productBackendName)
-	versionRegex, err := regexp.Compile(`\/(v\d[^\/]*)\/`)
-	if err != nil {
-		log.Fatalf("Cannot compile the regular expression: %v", err)
+// Gets a format string that is used to override the default format from resource id format
+func (r Resource) CAIFormatOverride() string {
+	caiAssetService := strings.Trim(r.ProductMetadata.CaiAssetService, "/")
+	if r.CaiAssetNameFormat != "" || caiAssetService != "" {
+		if caiAssetService == "" {
+			caiAssetService = r.ProductMetadata.ServiceName()
+		}
+
+		caiAssetName := r.CaiAssetNameFormat
+		if caiAssetName == "" {
+			caiAssetName = r.IdFormat
+		}
+		return fmt.Sprintf("//%s/%s", caiAssetService, caiAssetName)
+	}
+	return ""
+}
+
+// Gets a format string for CAI asset name
+func (r Resource) GetCaiAssetNameTemplate() string {
+	caiAssetNameFormat := r.CAIFormatOverride()
+	if caiAssetNameFormat != "" {
+		return caiAssetNameFormat
 	}
 
-	return versionRegex.ReplaceAllString(template, "/")
+	return fmt.Sprintf("//%s.googleapis.com/%s", r.CaiProductBackendName(r.CaiProductBaseUrl()), r.IdFormat)
 }
 
 // Gets the Cai API version
@@ -2272,7 +2303,7 @@ func (r Resource) MarkdownHeader(templatePath string) string {
 // TGC Methods
 // ====================
 // Lists fields that test.BidirectionalConversion should ignore
-func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string {
+func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 	props := []string{
 		"depends_on",
 		"count",
@@ -2289,13 +2320,9 @@ func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string
 		} else if tp.IsMissingInCai {
 			props = append(props, tp.MetadataLineage())
 		} else if tp.IgnoreRead {
-			if tp.Sensitive || tp.Name == "tags" {
-				// TODO: handle tags conversion, which are separate Cai assets with resources.
-				props = append(props, tp.MetadataLineage())
-			}
+			props = append(props, tp.MetadataLineage())
 		}
 	}
-	props = append(props, e.TGCTestIgnoreExtra...)
 
 	slices.Sort(props)
 	return props
