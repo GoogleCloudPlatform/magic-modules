@@ -659,26 +659,26 @@ func TestAccPubsubSubscription_bigquery_config_update(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
-			"time":   {},
+			"time": {},
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPubsubSubscription_bigquery_config(context),
 			},
 			{
-				ResourceName:            "google_pubsub_subscription.foo",
-				ImportStateId:           subscription,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscription,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccPubsubSubscription_bigquery_config_update(context),
 			},
 			{
-				ResourceName:            "google_pubsub_subscription.foo",
-				ImportStateId:           subscription,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscription,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
