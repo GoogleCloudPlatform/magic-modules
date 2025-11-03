@@ -257,7 +257,7 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
 
     obj := make(map[string]interface{})
 
-{{- range $prop := $.OrderProperties $.AllUserProperties }}
+{{- range $prop := $.SettableProperties }}
     {{$prop.ApiName}}Prop, diags := data.{{camelize $prop.Name "upper"}}.To{{$prop.GetFWType}}Value(ctx)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -345,7 +345,7 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
         {{/* if $.HasPostCreateComputedFields */}}
 		{{/* This may have caused the ID to update - update it if so. */}}
 {{    else -}}{{/* $.GetAsync.Result.ResourceInsideResponse */}}
-    err := {{ $.ClientNamePascal -}}OperationWaitTime(
+    err = {{ $.ClientNamePascal -}}OperationWaitTime(
     r.providerConfig, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project.ValueString()){{ else }}project.ValueString(){{ end }}, {{ end -}} "Creating {{ $.Name -}}", userAgent,
         createTimeout)
 
@@ -369,7 +369,7 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
 
 
 	// read back {{$.Name}}
-	r.{{$.ResourceName}}FWRefresh(ctx, &data, &resp.State, req, &resp.Diagnostics)
+	r.{{$.ResourceName}}FWRefresh(ctx, &data, &resp.State, req, &resp.Diagnostics, createTimeout)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -401,7 +401,7 @@ func (r *{{$.ResourceName}}FWResource) Read(ctx context.Context, req resource.Re
 	tflog.Trace(ctx, "read {{$.Name}} resource")
 
     // read back {{$.Name}}
-	r.{{$.ResourceName}}FWRefresh(ctx, &data, &resp.State, req, &resp.Diagnostics)
+	r.{{$.ResourceName}}FWRefresh(ctx, &data, &resp.State, req, &resp.Diagnostics, 0)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -432,7 +432,7 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
 
 	var project, billingProject types.String
 {{ if $.HasProject -}}
-    project = fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
+    project = fwresource.GetProjectFramework(plan.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -482,7 +482,7 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
 	}
 {{- end }}
 
-    updateTimeout, diags := data.Timeouts.Update(ctx, {{ $.Timeouts.UpdateMinutes }}*time.Minute)
+    updateTimeout, diags := plan.Timeouts.Update(ctx, {{ $.Timeouts.UpdateMinutes }}*time.Minute)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -549,7 +549,7 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
 	tflog.Trace(ctx, "updated {{$.Name}} resource")
 
     // read back {{$.Name}}
-	r.{{$.ResourceName}}FWRefresh(ctx, &plan, &resp.State, req, &resp.Diagnostics)
+	r.{{$.ResourceName}}FWRefresh(ctx, &plan, &resp.State, req, &resp.Diagnostics, updateTimeout)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -634,6 +634,7 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
         return
     }
 
+	var err error
 {{ if $.CustomCode.CustomDelete }} 
 {{ $.CustomTemplate $.CustomCode.CustomDelete false -}}
 {{- else }}
@@ -643,7 +644,7 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
     {{- end }}
 
     log.Printf("[DEBUG] Deleting {{ $.Name }} %q", data.Id.ValueString())
-    _, _ := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+    res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.DeleteVerb -}}",
         Project: billingProject.ValueString(),
@@ -665,7 +666,7 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
     }
 {{if and $.GetAsync ($.GetAsync.Allow "Delete") -}}
 {{  if $.GetAsync.IsA "PollAsync" }}
-    err := transport_tpg.PollingWaitTime(resource{{ $.ResourceName }}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncAbsence }}, "Deleting {{ $.Name }}", d.Timeout(schema.TimeoutCreate), {{ $.Async.TargetOccurrences }})
+    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName }}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncAbsence }}, "Deleting {{ $.Name }}", d.Timeout(schema.TimeoutCreate), {{ $.Async.TargetOccurrences }})
     if err != nil {
 {{-   if $.Async.SuppressError }}
 		log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", data.Id.ValueString(), err)
@@ -675,7 +676,7 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
 {{-   end }}
     }
 {{- else }}
-    err := {{ $.ClientNamePascal }}OperationWaitTime(
+    err = {{ $.ClientNamePascal }}OperationWaitTime(
         r.providerConfig, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project.ValueString()){{ else }}project.ValueString(){{ end }}, {{ end -}} "Deleting {{ $.Name -}}", userAgent,
         deleteTimeout)
 
@@ -722,24 +723,24 @@ func (r *{{$.ResourceName}}FWResource) ImportState(ctx context.Context, req reso
 	}
 }
 
-func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.Context, data *{{$.ResourceName}}FWModel, state *tfsdk.State, req interface{}, diag *diag.Diagnostics) {
+func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.Context, data *{{$.ResourceName}}FWModel, state *tfsdk.State, req interface{}, diags *diag.Diagnostics, timeout time.Duration) {
 	var metaData *fwmodels.ProviderMetaModel
     //load default values
 {{ if $.HasProject -}}
-    project := fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
+    project := fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), diags)
+	if diags.HasError() {
 		return
 	}
 {{- end }}
 {{ if $.HasRegion -}}
-	region := fwresource.GetRegionFramework(data.Region, types.StringValue(r.providerConfig.Region), &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
+	region := fwresource.GetRegionFramework(data.Region, types.StringValue(r.providerConfig.Region), diags)
+	if diags.HasError() {
 		return
 	}
 {{- end }}
 {{ if $.HasZone -}}
-	zone := fwresource.GetZoneFramework(data.Zone, types.StringValue(r.providerConfig.Zone), &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
+	zone := fwresource.GetZoneFramework(data.Zone, types.StringValue(r.providerConfig.Zone), diags)
+	if diags.HasError() {
 		return
 	}
 {{- end }}
@@ -758,8 +759,8 @@ func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.C
 	// Use provider_meta to set User-Agent
 	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, r.providerConfig.UserAgent)
 
-	url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
-    if resp.Diagnostics.HasError() {
+	url := fwtransport.ReplaceVars(ctx, req, diags, schemaDefaultVals, r.providerConfig, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
+    if diags.HasError() {
         return
     }
 
@@ -772,10 +773,10 @@ func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.C
     res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.ReadVerb -}}",
-        Project: billingProject.ValueString(),
+        Project: project.ValueString(),
         RawURL: url,
         UserAgent: userAgent,
-        Timeout: createTimeout,
+        Timeout: timeout,
         Headers: headers,
 {{- if $.ErrorRetryPredicates }}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
@@ -783,19 +784,19 @@ func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.C
 {{- if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{ join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
-    }, &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
-		fwtransport.HandleNotFoundError(ctx, err, &resp.State, fmt.Sprintf("{{ $.ResourceName }} %s", data.Id.ValueString()), &resp.Diagnostics)
-		if resp.Diagnostics.HasError() {
+    }, diags)
+	if diags.HasError() {
+		fwtransport.HandleNotFoundError(ctx, err, state, fmt.Sprintf("{{ $.ResourceName }} %s", data.Id.ValueString()), diags)
+		if diags.HasError() {
 			return
 		}
     }
 
-{{ range $prop := $.OrderProperties $.AllUserProperties }}
+{{ range $prop := $.ReadProperties }}
 	data.{{camelize $prop.Name "upper"}} = res["{{ $prop.ApiName -}}"]
-    {{$prop.ApiName}}Prop, diags := data.{{camelize $prop.Name "upper"}}.To{{$prop.GetFWType}}Value(ctx)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
+    {{$prop.ApiName}}Prop, d := data.{{camelize $prop.Name "upper"}}.To{{$prop.GetFWType}}Value(ctx)
+	diags.Append(d...)
+	if diags.HasError() {
 		return
 	}
 {{ end }}
