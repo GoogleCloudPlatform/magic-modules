@@ -160,6 +160,7 @@ properties:
   - name: description
     type: String
     description: The description of the ExascaleDbStorageVault.
+    default_from_api: true
   - name: exascaleDbStorageDetails
     type: NestedObject
     description: The storage details of the ExascaleDbStorageVault.
@@ -202,13 +203,16 @@ properties:
     description: |-
       Represents a time zone from the
       [IANA Time Zone Database](https://www.iana.org/time-zones).
+    default_from_api: true
     properties:
     - name: id
       type: String
       description: IANA Time Zone Database time zone. For example "America/New_York".
+      default_from_api: true
     - name: version
       type: String
       description: IANA Time Zone Database version number. For example "2019a".
+      default_from_api: true
   - name: vmClusterCount
     type: Integer
     description: The number of VM clusters associated with the ExascaleDbStorageVault.
