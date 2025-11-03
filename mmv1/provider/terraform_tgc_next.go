@@ -107,8 +107,10 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 	if !object.IsExcluded() {
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 		tgc.addTestsFromSamples(&object)
-		if err := tgc.addTestsFromHandwrittenTests(&object); err != nil {
-			log.Printf("Error adding examples from handwritten tests: %v", err)
+		if object.TGCIncludeHandwrittenTests {
+			if err := tgc.addTestsFromHandwrittenTests(&object); err != nil {
+				log.Printf("Error adding examples from handwritten tests: %v", err)
+			}
 		}
 		tgc.GenerateResourceTests(object, *templateData, outputFolder)
 	}
