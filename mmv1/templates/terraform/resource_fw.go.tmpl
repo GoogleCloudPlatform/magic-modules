@@ -186,6 +186,8 @@ func (d *{{$.ResourceName}}FWResource) Schema(ctx context.Context, _ resource.Sc
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+        },
+		Blocks: map[string]schema.Block{
 			"timeouts": timeouts.Block(ctx, timeouts.Opts{
 				Create: true,
 				{{- if or $.Updatable $.RootLabels }}
@@ -193,7 +195,7 @@ func (d *{{$.ResourceName}}FWResource) Schema(ctx context.Context, _ resource.Sc
 				{{- end }}
 				Delete: true,
 				}),
-        },
+		},
 	}
 }
 
