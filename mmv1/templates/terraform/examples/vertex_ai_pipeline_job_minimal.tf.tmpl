@@ -10,23 +10,23 @@ resource "google_vertex_ai_pipeline_job" "{{$.PrimaryResourceId}}" {
   provider     = google-beta
   region       = "us-central1"
 
-  network                = "projects/${google_project.project.project_id}/global/networks/default"
-  original_pipeline_job_id = "projects/${google_project.project.project_id}/locations/us-central1/pipelineJobs/sample-original-job"
-  preflight_validations  = true
-  reserved_ip_ranges     = ["psc-vertex-ai-range"]
-  satisfies_pzi          = false
-  service_account        = "vertex-sa@${google_project.project.project_id}.iam.gserviceaccount.com"
+  network                  = "projects/${google_project.project.project_id}/global/networks/default"
+  original_pipeline_job_id  = "projects/${google_project.project.project_id}/locations/us-central1/pipelineJobs/sample-original-job"
+  preflight_validations     = true
+  reserved_ip_ranges        = ["psc-vertex-ai-range"]
+  satisfies_pzi             = false
+  service_account           = "vertex-sa@${google_project.project.project_id}.iam.gserviceaccount.com"
 
   template_uri = "gs://google-cloud-aiplatform/pipeline-templates/train-bq-automl-tabular.json"
 
   parameter_values = {
-    project              = google_project.project.project_id
-    location             = "us-central1"
-    targetColumn         = "species"
-    predictionType       = "classification"
-    datasetId            = "bigquery-public-data.ml_datasets.iris"
-    modelDisplayName     = "iris-automl-model"
-    budgetMilliNodeHours = 1000
+    project               = google_project.project.project_id
+    location              = "us-central1"
+    targetColumn          = "species"
+    predictionType        = "classification"
+    datasetId             = "bigquery-public-data.ml_datasets.iris"
+    modelDisplayName      = "iris-automl-model"
+    budgetMilliNodeHours  = 1000
     enable_explainability = true
     data_split_method     = "AUTO_SPLIT"
     model_type            = "CLOUD_AUTOML"
@@ -34,5 +34,31 @@ resource "google_vertex_ai_pipeline_job" "{{$.PrimaryResourceId}}" {
 
   labels = {
     env = "demo"
+  }
+  
+  pipeline_spec {
+    additional_properties = jsonencode({
+      template_uri     = "gs://google-cloud-aiplatform/pipeline-templates/train-bq-automl-tabular.json"
+      parameter_values = {
+        project               = google_project.project.project_id
+        location              = "us-central1"
+        targetColumn          = "species"
+        predictionType        = "classification"
+        datasetId             = "bigquery-public-data.ml_datasets.iris"
+        modelDisplayName      = "iris-automl-model"
+        budgetMilliNodeHours  = 1000
+        enable_explainability = true
+        data_split_method     = "AUTO_SPLIT"
+        model_type            = "CLOUD_AUTOML"
+      }
+    })
+  }
+
+  psc_interface_config {
+    raw = jsonencode({
+      network            = "projects/${google_project.project.project_id}/global/networks/default"
+      reservedIpRanges   = ["psc-vertex-ai-range"]
+      satisfiesPzi       = false
+    })
   }
 }
