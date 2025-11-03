@@ -70,7 +70,7 @@ func resourceStorageRoleEntityCustomizeDiff(_ context.Context, diff *schema.Reso
 
 	newSet := make(map[string]struct{})
 	for _, item := range newList {
-		newSet[fmt.Sprint(item)] = struct{}{}
+		newSet[item.(string)] = struct{}{}
 	}
 
 	visited := make(map[string]struct{})
@@ -80,7 +80,7 @@ func resourceStorageRoleEntityCustomizeDiff(_ context.Context, diff *schema.Reso
 	// Preserve order from oldList and handle removals, this will help avoid permadiff
 	// Iterate through the original list to maintain its order.
 	for _, item := range oldList {
-		key := fmt.Sprint(item)
+		key := item.(string)
 		if _, exists := newSet[key]; exists || isDefaultGcpAcl(key) {
 			visited[key] = struct{}{}
 			finalAcls = append(finalAcls, item)
@@ -90,7 +90,7 @@ func resourceStorageRoleEntityCustomizeDiff(_ context.Context, diff *schema.Reso
 	// Append any new additions
 	// Iterate through the new config to find items that weren't in the old list or newly added
 	for _, item := range newList {
-		key := fmt.Sprint(item)
+		key := item.(string)
 		if _, exists := visited[key]; !exists {
 			visited[key] = struct{}{}
 			finalAcls = append(finalAcls, item)
@@ -105,16 +105,9 @@ func resourceStorageRoleEntityCustomizeDiff(_ context.Context, diff *schema.Reso
 }
 
 func isDefaultGcpAcl(key string) bool {
-	if strings.HasPrefix(key, "OWNER:project-owners-") {
-		return true
-	}
-	if strings.HasPrefix(key, "OWNER:project-editors-") {
-		return true
-	}
-	if strings.HasPrefix(key, "READER:project-viewers-") {
-		return true
-	}
-	return false
+	return strings.HasPrefix(key, "OWNER:project-owners-") ||
+		strings.HasPrefix(key, "OWNER:project-editors-") ||
+		strings.HasPrefix(key, "READER:project-viewers-")
 }
 
 type RoleEntity struct {
@@ -415,12 +408,12 @@ func resourceStorageBucketAclDelete(d *schema.ResourceData, meta interface{}) er
 		}
 
 		if res.Entity == fmt.Sprintf("project-editors-%s", project) && res.Role == "OWNER" {
-			log.Printf("[WARN]: Skipping %s-%s; not deleting owner ACL.", res.Role, res.Entity)
+			log.Printf("[WARN]: Skipping %s-%s; not deleting editors ACL.", res.Role, res.Entity)
 			continue
 		}
 
 		if res.Entity == fmt.Sprintf("project-viewers-%s", project) && res.Role == "READER" {
-			log.Printf("[WARN]: Skipping %s-%s; not deleting owner ACL.", res.Role, res.Entity)
+			log.Printf("[WARN]: Skipping %s-%s; not deleting viewers ACL.", res.Role, res.Entity)
 			continue
 		}
 
