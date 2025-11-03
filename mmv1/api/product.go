@@ -34,6 +34,9 @@ type Product struct {
 	// Example inputs: "Compute", "AccessContextManager"
 	Name string
 
+	// This is the name of the package path relative to mmv1 root repo
+	PackagePath string
+
 	// original value of :name before the provider override happens
 	// same as :name if not overridden in provider
 	ApiName string `yaml:"api_name,omitempty"`
@@ -57,6 +60,9 @@ type Product struct {
 	// The validator "relative URI" of a resource, relative to the product
 	// base URL. Specific to defining the resource as a CAI asset.
 	CaiBaseUrl string
+
+	// The service name from CAI asset name, e.g. bigtable.googleapis.com.
+	CaiAssetService string `yaml:"cai_asset_service,omitempty"`
 
 	// CaiResourceType of resources that already have an AssetType constant defined in the product.
 	ResourcesWithCaiAssetType map[string]struct{}
