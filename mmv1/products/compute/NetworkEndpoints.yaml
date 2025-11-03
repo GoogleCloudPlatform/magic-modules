@@ -117,7 +117,7 @@ properties:
             The name for a specific VM instance that the IP address belongs to.
             This is required for network endpoints of type GCE_VM_IP_PORT.
             The instance must be in the same zone as the network endpoint group.
-          custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/resource_from_self_link_nullable.go.tmpl'
           resource: 'Instance'
           imports: 'name'
         - name: 'port'

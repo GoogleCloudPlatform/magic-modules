@@ -34,7 +34,9 @@ func NetworkEndpointsNetworkEndpointConvertToAny(endpoint NetworkEndpointsNetwor
 	m := make(map[string]interface{})
 	m["ip_address"] = endpoint.IPAddress
 	m["port"] = endpoint.Port
-	m["instance"] = endpoint.Instance
+  if endpoint.Instance != "" {
+    m["instance"] = endpoint.Instance
+  }
 	return m
 }
 
