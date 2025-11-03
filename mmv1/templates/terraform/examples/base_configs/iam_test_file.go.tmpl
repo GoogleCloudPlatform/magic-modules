@@ -7,16 +7,23 @@ package {{ lower $.ProductMetadata.Name }}_test
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath }}/envvar"
-	{{- if $.IamPolicy.IamConditionsRequestType }}
 	"{{ $.ImportPath }}/tpgresource"
-	{{- end }}
 )
+
+var (
+    _ = fmt.Sprintf
+    _ = strings.Trim
+    _ = envvar.TestEnvVar
+    _ = tpgresource.SetLabels
+)
+
 {{ $example := $.FirstTestExample }}
 func TestAcc{{ $.ResourceName }}IamBindingGenerated(t *testing.T) {
 	t.Parallel()
