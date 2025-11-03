@@ -19,6 +19,7 @@ package {{ lower $.ProductMetadata.Name }}
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 
 {{/* We list all the v2 imports here and unstable imports, because we run 'goimports' to guess the correct
