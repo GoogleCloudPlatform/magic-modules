@@ -16,6 +16,7 @@
 package openapi_generate
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
@@ -34,7 +35,7 @@ import (
 	r "github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/getkin/kin-openapi/openapi3"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 type Parser struct {
@@ -94,17 +95,19 @@ func (parser Parser) WriteYaml(filePath string) {
 	resourcePaths := findResources(doc)
 	productPath := buildProduct(filePath, parser.Output, doc, header)
 
-	// Disables line wrap for long strings
-	yaml.FutureLineWrap()
 	log.Printf("Generated product %+v/product.yaml", productPath)
 	for _, pathArray := range resourcePaths {
 		resource := buildResource(filePath, pathArray[0], pathArray[1], doc)
 
 		// marshal method
+		var yamlContent bytes.Buffer
 		resourceOutPathMarshal := filepath.Join(productPath, fmt.Sprintf("%s.yaml", resource.Name))
-		bytes, err := yaml.Marshal(resource)
+		encoder := yaml.NewEncoder(&yamlContent)
+		encoder.SetIndent(2)
+
+		err := encoder.Encode(&resource)
 		if err != nil {
-			log.Fatalf("error marshalling yaml %v: %v", resourceOutPathMarshal, err)
+			log.Fatalf("Failed to encode: %v", err)
 		}
 
 		f, err := os.Create(resourceOutPathMarshal)
@@ -115,7 +118,7 @@ func (parser Parser) WriteYaml(filePath string) {
 		if err != nil {
 			log.Fatalf("error writing resource file header %v", err)
 		}
-		_, err = f.Write(bytes)
+		_, err = f.Write(yamlContent.Bytes())
 		if err != nil {
 			log.Fatalf("error writing resource file %v", err)
 		}

@@ -25,6 +25,7 @@ import (
 	"text/template"
 
 	"github.com/golang/glog"
+	"gopkg.in/yaml.v3"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
@@ -55,6 +56,7 @@ type Resource struct {
 	//		api: 'rest_api_reference_url/version'
 	//
 	References resource.ReferenceLinks `yaml:"references,omitempty"`
+	Docs       resource.Docs           `yaml:"docs,omitempty"`
 
 	// [Required] The GCP "relative URI" of a resource, relative to the product
 	// base URL. It can often be inferred from the `create` path.
@@ -204,8 +206,6 @@ type Resource struct {
 	ImportFormat []string `yaml:"import_format,omitempty"`
 
 	CustomCode resource.CustomCode `yaml:"custom_code,omitempty"`
-
-	Docs resource.Docs `yaml:"docs,omitempty"`
 
 	// This block inserts entries into the customdiff.All() block in the
 	// resource schema -- the code for these custom diff functions must
@@ -407,11 +407,11 @@ type TGCResource struct {
 	CaiAssetNameFormat string `yaml:"cai_asset_name_format,omitempty"`
 }
 
-func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
+func (r *Resource) UnmarshalYAML(value *yaml.Node) error {
 	type resourceAlias Resource
 	aliasObj := (*resourceAlias)(r)
 
-	err := unmarshal(aliasObj)
+	err := value.Decode(aliasObj)
 	if err != nil {
 		return err
 	}
