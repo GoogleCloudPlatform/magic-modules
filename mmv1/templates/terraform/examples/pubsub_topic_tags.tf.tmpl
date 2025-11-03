@@ -10,9 +10,11 @@ data "google_project" "project" {}
 resource "google_tags_tag_key" "tag_key" {
   parent     = data.google_project.project.id
   short_name = "{{index $.Vars "tag_key"}}"
+  depends_on = [google_pubsub_topic.{{$.PrimaryResourceId}}]
 }
 
 resource "google_tags_tag_value" "tag_value" {
   parent     = google_tags_tag_key.tag_key.id
   short_name = "{{index $.Vars "tag_value"}}"
+  depends_on = [google_pubsub_topic.{{$.PrimaryResourceId}}]
 }
