@@ -244,7 +244,7 @@ func findInstanceName(d *schema.ResourceData, config *transport_tpg.Config) (str
 			}
 		}
 
-		tokenRaw, paginate := res[""]
+		tokenRaw, paginate := res["nextPageToken"]
 		if paginate {
 			token = tokenRaw.(string)
 		}
