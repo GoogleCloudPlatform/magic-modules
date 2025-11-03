@@ -83,26 +83,45 @@ func dataSourceGoogleCloudBackupDRFetchBackupsRead(d *schema.ResourceData, meta 
 	dataSourceId := d.Get("data_source_id").(string)
 	resourceType := d.Get("resource_type").(string)
 
-	url := fmt.Sprintf("%sprojects/%s/locations/%s/backupVaults/%s/dataSources/%s/backups:fetchForResourceType?resourceType=%s",
-		config.BackupDRBasePath, project, location, backupVaultId, dataSourceId, resourceType)
+	params := make(map[string]string)
+	params["resourceType"] = resourceType
+	var allItems []interface{}
 
-	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		Project:   project,
-		RawURL:    url,
-		UserAgent: userAgent,
-	})
-	if err != nil {
-		return fmt.Errorf("Error fetching backups for resource type: %s", err)
+	for {
+		url, err := tpgresource.ReplaceVars(d, config, "{{BackupDRBasePath}}projects/{{project}}/locations/{{location}}/backupVaults/{{backup_vault_id}}/dataSources/{{data_source_id}}/backups:fetchForResourceType")
+		if err != nil {
+			return err
+		}
+
+		url, err = transport_tpg.AddQueryParams(url, params)
+		if err != nil {
+			return err
+		}
+
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			RawURL:    url,
+			UserAgent: userAgent,
+		})
+		if err != nil {
+			return fmt.Errorf("Error fetching backups for resource type: %s", err)
+		}
+
+		items, ok := res["backups"].([]interface{})
+		if ok {
+			allItems = append(allItems, items...)
+		}
+
+		pToken, ok := res["nextPageToken"]
+		if ok && pToken != nil && pToken.(string) != "" {
+			params["pageToken"] = pToken.(string)
+		} else {
+			break
+		}
 	}
 
-	items, ok := res["backups"].([]interface{})
-	if !ok {
-		items = make([]interface{}, 0)
-	}
-
-	flattenedBackups, err := flattenFetchBackups(items)
+	flattenedBackups, err := flattenFetchBackups(allItems)
 	if err != nil {
 		return err
 	}
@@ -110,7 +129,8 @@ func dataSourceGoogleCloudBackupDRFetchBackupsRead(d *schema.ResourceData, meta 
 	if err := d.Set("backups", flattenedBackups); err != nil {
 		return fmt.Errorf("Error setting backups: %s", err)
 	}
-	id := fmt.Sprintf("projects/%s/locations/%s/backupVaults/%s/dataSources/%s/backups:fetchForResourceType?resourceType=%s", project, location, backupVaultId, dataSourceId, resourceType)
+
+	id := fmt.Sprintf("projects/%s/locations/%s/backupVaults/%s/dataSources/%s/backupTypes/%s", project, location, backupVaultId, dataSourceId, resourceType)
 	d.SetId(id)
 	return nil
 }

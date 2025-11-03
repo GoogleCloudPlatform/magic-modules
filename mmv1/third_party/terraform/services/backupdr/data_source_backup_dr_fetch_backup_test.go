@@ -35,7 +35,6 @@ func TestAccDataSourceGoogleBackupDRFetchBackupsForResourceType_basic(t *testing
 						return fmt.Errorf("project data source not found: %s", projectDsName)
 					}
 					projectID = project.Primary.Attributes["project_id"]
-
 					return resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr("data.google_backup_dr_fetch_backups.default", "project", projectID),
 						resource.TestCheckResourceAttr("data.google_backup_dr_fetch_backups.default", "location", context["location"].(string)),
