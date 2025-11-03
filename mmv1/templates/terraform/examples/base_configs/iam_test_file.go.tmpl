@@ -659,7 +659,6 @@ func generate{{ $.ResourceName }}IAMPolicyStateID(iamResourceAddr string) func (
 			}
 		}
 		fmt.Printf("raw state %s\n", rawState)
-		tmpl := "{{ $.IamResourceUri }}"
 		{{- range $p := $.IamResourceParams }}
 			{{- if contains $.IamResourceUri (printf "{{%%%s}}" $p) }}
 		{{ $p }} := rawState["{{ underscore $p }}"]
@@ -682,7 +681,6 @@ func generate{{ $.ResourceName }}IAMBindingStateID(iamResourceAddr string) func 
 			}
 		}
 		fmt.Printf("raw state %s\n", rawState)
-		tmpl := "{{ $.IamResourceUri }}"
 		{{- range $p := $.IamResourceParams }}
 			{{- if contains $.IamResourceUri (printf "{{%%%s}}" $p) }}
 		{{ $p }} := rawState["{{ underscore $p }}"]
@@ -705,7 +703,6 @@ func generate{{ $.ResourceName }}IAMMemberStateID(iamResourceAddr string) func (
 			}
 		}
 		fmt.Printf("raw state %s\n", rawState)
-		tmpl := "{{ $.IamResourceUri }}"
 		{{- range $p := $.IamResourceParams }}
 			{{- if contains $.IamResourceUri (printf "{{%%%s}}" $p) }}
 		{{ $p }} := rawState["{{ underscore $p }}"]
