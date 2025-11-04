@@ -93,7 +93,6 @@ examples:
     vars:
       zone_name: 'private-zone'
       network_1_name: 'network-1'
-    exclude_test: true
   - name: 'dns_managed_zone_private_gke'
     primary_resource_id: 'private-zone-gke'
     vars:

@@ -4,10 +4,6 @@ resource "google_dns_managed_zone" "{{$.PrimaryResourceId}}" {
   description = "Example private DNS zone"
   visibility  = "private"
 
-  labels = {
-    foo = "bar"
-  }
-
   private_visibility_config {
     networks {
       network_url = google_compute_network.network_1.id
