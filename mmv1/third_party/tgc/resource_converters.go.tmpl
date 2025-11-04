@@ -194,6 +194,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_logging_project_bucket_config":       	   {logging.ResourceConverterLogProjectBucket()},
 		"google_logging_billing_account_bucket_config":    {logging.ResourceConverterLogBillingAccountBucket()},
 		"google_logging_project_sink":                     {logging.ResourceConverterLogProjectSink()},
+		"google_logging_folder_sink":                      {logging.ResourceConverterLogFolderSink()},
 		"google_logging_organization_sink":                {logging.ResourceConverterLogOrganizationSink()},
 		"google_cloud_tasks_queue":                        {cloudtasks.ResourceConverterCloudTasksQueue()},
 		"google_pubsub_topic":                             {pubsub.ResourceConverterPubsubTopic()},
