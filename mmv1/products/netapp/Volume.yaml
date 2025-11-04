@@ -204,7 +204,6 @@ properties:
                 - 'NO_ROOT_SQUASH'
                 - 'ROOT_SQUASH'
                 - 'ALL_SQUASH'
-              default_from_api: true
               diff_suppress_func: 'suppressSquashModeDiff'
             - name: 'anonUid'
               type: Integer
