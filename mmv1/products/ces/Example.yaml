@@ -12,7 +12,7 @@
 # limitations under the License.
 ---
 name: Example
-description: Description
+description: An example represents a sample conversation between the user and the agent(s).
 base_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/examples
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/apps/{{app}}/examples/{{name}}
@@ -33,13 +33,13 @@ autogen_status: RXhhbXBsZQ==
 parameters:
   - name: location
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    description: Resource ID segment making up resource `name`, defining what region the parent app is in. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
     required: true
   - name: app
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    description: Resource ID segment making up resource `name`, defining the app the example belongs to. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
     required: true
@@ -47,8 +47,7 @@ parameters:
     type: String
     description: |-
       The ID to use for the example, which will become the final component of
-      the example's resource name. If not provided, a unique ID will be
-      automatically assigned for the example.
+      the example's resource name. In Terraform, this field is required.
     immutable: true
     url_param_only: true
     required: true
@@ -65,7 +64,7 @@ properties:
     description: Display name of the example.
     required: true
   - name: etag
-    type: String
+    type: Fingerprint
     description: |-
       Etag used to ensure the object hasn't changed during a read-modify-write
       operation. If the etag is empty, the update will overwrite any concurrent

@@ -6,6 +6,7 @@ resource "google_ces_app" "my-app" {
         time_zone = "America/Los_Angeles"
     }
 }
+
 resource "google_ces_example" "{{$.PrimaryResourceId}}" {
     location     = "us"
     display_name = "{{index $.Vars "example_display_name"}}"
