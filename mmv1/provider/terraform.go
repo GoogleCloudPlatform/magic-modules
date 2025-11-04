@@ -158,7 +158,7 @@ func (t *Terraform) GenerateResourceMetadata(object api.Resource, templateData T
 	templateData.GenerateMetadataFile(targetFilePath, object)
 }
 
-func (t *Terraform) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
+func (t *Terraform) GenerateResourceTestsLegacy(object api.Resource, templateData TemplateData, outputFolder string) {
 	eligibleExample := false
 	for _, example := range object.Examples {
 		if !example.ExcludeTest {
@@ -169,6 +169,36 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 		}
 	}
 	if !eligibleExample {
+		return
+	}
+
+	productName := t.Product.ApiName
+	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_test.go", t.ResourceGoFilename(object)))
+	templateData.GenerateTestFileLegacy(targetFilePath, object)
+}
+
+func (t *Terraform) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
+	if object.Samples != nil && object.Examples != nil {
+		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
+	}
+	if object.Examples != nil {
+		t.GenerateResourceTestsLegacy(object, templateData, outputFolder)
+	}
+
+	eligibleSample := false
+	for _, sample := range object.Samples {
+		if !sample.ExcludeTest {
+			if object.ProductMetadata.VersionObjOrClosest(t.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
+				eligibleSample = true
+				break
+			}
+		}
+	}
+	if !eligibleSample {
 		return
 	}
 
