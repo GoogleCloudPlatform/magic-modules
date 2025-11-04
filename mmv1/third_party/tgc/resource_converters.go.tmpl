@@ -210,7 +210,8 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_cloudfunctions_function":                  {cloudfunctions.ResourceConverterCloudFunctionsCloudFunction()},
 		"google_monitoring_notification_channel":          {monitoring.ResourceConverterMonitoringNotificationChannel()},
 		"google_monitoring_alert_policy":                  {monitoring.ResourceConverterMonitoringAlertPolicy()},
-		"google_vertex_ai_dataset":                        {vertexai.ResourceConverterVertexAIDataset()},		
+		"google_vertex_ai_dataset":                        {vertexai.ResourceConverterVertexAIDataset()},
+		"google_workbench_instance":                       {workbench.ResourceConverterWorkbenchInstance()},
 	{{- range $object := $.IamResources }}
 	{{- if $object.IamClassName }}
 		"{{ $object.TerraformName }}_iam_policy": { {{- $object.IamClassName }}IamPolicy()},
