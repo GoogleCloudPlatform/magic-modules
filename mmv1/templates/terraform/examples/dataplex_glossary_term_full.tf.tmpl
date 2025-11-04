@@ -21,10 +21,12 @@ resource "google_dataplex_entry" "glossary-term-system-generated-entry" {
   entry_id      = "${google_dataplex_glossary_term.term_test_id_full.name}"
   entry_type    = "projects/655216118709/locations/global/entryTypes/glossary-term" # System type project number used for glossary terms
   aspects {
-    key = "655216118709.global.overview" # Use dataplex-types project number for 1P types aspects.
-    value {
+    aspect_key = "655216118709.global.overview" # Use dataplex-types project number for 1P types aspects.
+    aspect {
       aspect_type = "projects/655216118709/locations/global/aspectTypes/overview"
-      data: { content: "Example to attach overview aspects to the terms."}
+      data = <<EOF
+          {"content": "Example to attach overview aspects to the terms."}
+        EOF
     }
   }
 }
