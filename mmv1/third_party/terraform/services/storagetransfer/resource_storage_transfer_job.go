@@ -302,6 +302,13 @@ func ResourceStorageTransferJob() *schema.Resource {
 							ExactlyOneOf: transferSpecDataSourceKeys,
 							Description:  `An AWS S3 Compatible data source.`,
 						},
+						"transfer_manifest": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Elem:        transferManifest(),
+							Description: `A manifest file listing specific objects to transfer.`,
+						},
 					},
 				},
 				Description: `Transfer specification.`,
@@ -827,6 +834,19 @@ func hdfsDataSchema() *schema.Resource {
 	}
 }
 
+func transferManifest() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"location": {
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  `Cloud Storage path to the manifest CSV.`,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^gs://[^/]+/.+`), "must be a Cloud path like gs://BUCKET/path/manifest.csv"),
+			},
+		},
+	}
+}
+
 func azureBlobStorageDataSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -989,11 +1009,22 @@ func resourceStorageTransferJobCreate(d *schema.ResourceData, meta interface{}) 
 		ServiceAccount:     d.Get("service_account").(string),
 	}
 
+	billingProject := project
+
+	// err == nil indicates that the billing_project value was found
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
 	var res *storagetransfer.TransferJob
 
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
-			res, err = config.NewStorageTransferClient(userAgent).TransferJobs.Create(transferJob).Do()
+			createCall := config.NewStorageTransferClient(userAgent).TransferJobs.Create(transferJob)
+			if config.UserProjectOverride {
+				createCall.Header().Add("X-Goog-User-Project", billingProject)
+			}
+			res, err = createCall.Do()
 			return err
 		},
 	})
@@ -1025,8 +1056,19 @@ func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
+	billingProject := project
+	// err == nil indicates that the billing_project value was found
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
 	name := d.Get("name").(string)
-	res, err := config.NewStorageTransferClient(userAgent).TransferJobs.Get(name, project).Do()
+	readCall := config.NewStorageTransferClient(userAgent).TransferJobs.Get(name, project)
+	if config.UserProjectOverride {
+		readCall.Header().Add("X-Goog-User-Project", billingProject)
+	}
+
+	res, err := readCall.Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Transfer Job %q", name))
 	}
@@ -1184,7 +1226,18 @@ func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) 
 
 	updateRequest.UpdateTransferJobFieldMask = strings.Join(fieldMask, ",")
 
-	res, err := config.NewStorageTransferClient(userAgent).TransferJobs.Patch(d.Get("name").(string), updateRequest).Do()
+	billingProject := project
+	// err == nil indicates that the billing_project value was found
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	updateCall := config.NewStorageTransferClient(userAgent).TransferJobs.Patch(d.Get("name").(string), updateRequest)
+	if config.UserProjectOverride {
+		updateCall.Header().Add("X-Goog-User-Project", billingProject)
+	}
+
+	res, err := updateCall.Do()
 	if err != nil {
 		return err
 	}
@@ -1220,10 +1273,21 @@ func resourceStorageTransferJobDelete(d *schema.ResourceData, meta interface{}) 
 
 	updateRequest.UpdateTransferJobFieldMask = fieldMask
 
+	billingProject := project
+
+	// err == nil indicates that the billing_project value was found
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
 	// Update transfer job with status set to DELETE
 	log.Printf("[DEBUG] Setting status to DELETE for: %v\n\n", transferJobName)
 	err = retry.Retry(1*time.Minute, func() *retry.RetryError {
-		_, err := config.NewStorageTransferClient(userAgent).TransferJobs.Patch(transferJobName, updateRequest).Do()
+		deleteCall := config.NewStorageTransferClient(userAgent).TransferJobs.Patch(transferJobName, updateRequest)
+		if config.UserProjectOverride {
+			deleteCall.Header().Add("X-Goog-User-Project", billingProject)
+		}
+		_, err := deleteCall.Do()
 		if err != nil {
 			return retry.RetryableError(err)
 		}
@@ -1573,6 +1637,26 @@ func flattenHdfsData(hdfsData *storagetransfer.HdfsData) []map[string]interface{
 	return []map[string]interface{}{data}
 }
 
+func expandTransferManifest(manifest []interface{}) *storagetransfer.TransferManifest {
+	if len(manifest) == 0 || manifest[0] == nil {
+		return nil
+	}
+
+	manifestFile := manifest[0].(map[string]interface{})
+	return &storagetransfer.TransferManifest{
+		Location: manifestFile["location"].(string),
+	}
+}
+
+func flattenTransferManifest(manifest *storagetransfer.TransferManifest) []map[string]interface{} {
+
+	return []map[string]interface{}{
+		{
+			"location": manifest.Location,
+		},
+	}
+}
+
 func expandAwsS3CompatibleData(awsS3CompatibleDataSchema []interface{}) *storagetransfer.AwsS3CompatibleData {
 	if len(awsS3CompatibleDataSchema) == 0 || awsS3CompatibleDataSchema[0] == nil {
 		return nil
@@ -1805,6 +1889,7 @@ func expandTransferSpecs(transferSpecs []interface{}) *storagetransfer.TransferS
 		PosixDataSource:            expandPosixData(transferSpec["posix_data_source"].([]interface{})),
 		HdfsDataSource:             expandHdfsData(transferSpec["hdfs_data_source"].([]interface{})),
 		AwsS3CompatibleDataSource:  expandAwsS3CompatibleData(transferSpec["aws_s3_compatible_data_source"].([]interface{})),
+		TransferManifest:           expandTransferManifest(transferSpec["transfer_manifest"].([]interface{})),
 	}
 }
 
@@ -1847,6 +1932,9 @@ func flattenTransferSpec(transferSpec *storagetransfer.TransferSpec, d *schema.R
 		data["hdfs_data_source"] = flattenHdfsData(transferSpec.HdfsDataSource)
 	} else if transferSpec.AwsS3CompatibleDataSource != nil {
 		data["aws_s3_compatible_data_source"] = flattenAwsS3CompatibleData(transferSpec.AwsS3CompatibleDataSource, d)
+	}
+	if transferSpec.TransferManifest != nil && transferSpec.TransferManifest.Location != "" {
+		data["transfer_manifest"] = flattenTransferManifest(transferSpec.TransferManifest)
 	}
 
 	return []map[string]interface{}{data}

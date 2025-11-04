@@ -46,6 +46,7 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
+  constants: 'templates/terraform/constants/reservation.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/reservation.go.tmpl'
   pre_update: 'templates/terraform/pre_update/shared_reservation_update.go.tmpl'
 sweeper:
@@ -82,6 +83,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
+    external_providers: ["time"]
   - name: 'shared_reservation_beta'
     primary_resource_id: 'gce_reservation'
     vars:
@@ -92,6 +94,7 @@ examples:
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
     min_version: 'beta'
+    external_providers: ["time"]
 parameters:
   - name: 'zone'
     type: ResourceRef

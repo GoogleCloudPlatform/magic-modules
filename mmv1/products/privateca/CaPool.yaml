@@ -58,11 +58,11 @@ examples:
     primary_resource_id: 'default'
     vars:
       name: 'my-pool'
-      pool_location: 'asia-east1'
-      cloud_kms_key: 'projects/keys-project/locations/asia-east1/keyRings/key-ring/cryptoKeys/crypto-key'
+      cloud_kms_key: 'projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key'
     test_vars_overrides:
-      'pool_location': '"asia-east1"'
-      'cloud_kms_key': 'acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "asia-east1").CryptoKey.Name'
+      'cloud_kms_key': 'acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "us-central1").CryptoKey.Name'
+    # Test requires a beta-only resource
+    min_version: beta
   - name: 'privateca_quickstart'
     primary_resource_id: 'default'
     vars:
@@ -105,7 +105,7 @@ properties:
         type: Array
         description: |
           If any AllowedKeyType is specified, then the certificate request's public key must match one of the key types listed here.
-          Otherwise, any key may be used.
+          Otherwise, any key may be used. You can specify only one key type of those listed here.
         item_type:
           type: NestedObject
           properties:

@@ -6,11 +6,11 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/ancestrymanager"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/resolvers"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/ancestrymanager"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/converters"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/resolvers"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/transport"
 )
 
 // Options struct to avoid updating function signatures all along the pipe.
@@ -33,12 +33,15 @@ func Convert(ctx context.Context, jsonPlan []byte, o *Options) ([]caiasset.Asset
 		return nil, fmt.Errorf("logger is not initialized")
 	}
 
+	// IAM resource resolver, do not run until IAM resources included
+	resolvers.NewIamAdvancedResolver(o.ErrorLogger).Resolve(jsonPlan)
 	resourceDataMap := resolvers.NewDefaultPreResolver(o.ErrorLogger).Resolve(jsonPlan)
 
-	// TODO: add advanced resolvers for resources
+	// TODO: add remaining advanced resolvers for resources
 
 	// Set up config and ancestry manager using the same user agent.
 	// Config and ancestry manager are shared among resources.
+
 	cfg, err := transport.NewConfig(ctx, o.DefaultProject, o.DefaultZone, o.DefaultRegion, o.Offline, o.UserAgent)
 	if err != nil {
 		return nil, fmt.Errorf("building config: %w", err)

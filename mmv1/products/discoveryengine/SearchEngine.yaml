@@ -158,3 +158,18 @@ properties:
       This is the application type this engine resource represents.
       The supported values: 'APP_TYPE_UNSPECIFIED', 'APP_TYPE_INTRANET'.
     immutable: true
+  - name: 'features'
+    type: KeyValuePairs
+    description: |
+      A map of the feature config for the engine to opt in or opt out of features.
+  - name: 'kmsKeyName'
+    ignore_read: true
+    type: String
+    description: |
+      The KMS key to be used to protect this Engine at creation time.
+
+      Must be set for requests that need to comply with CMEK Org Policy
+      protections.
+
+      If this field is set and processed successfully, the Engine will be
+      protected by the KMS key, as indicated in the cmek_config field.
