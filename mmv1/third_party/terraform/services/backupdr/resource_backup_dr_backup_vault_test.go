@@ -74,3 +74,29 @@ resource "google_backup_dr_backup_vault" "backup-vault-test" {
 }
 `, context)
 }
+
+func testAccBackupDRBackupVault_fullUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_backup_dr_backup_vault" "backup-vault-test" {
+  location = "us-central1"
+  backup_vault_id    = "tf-test-backup-vault-test%{random_suffix}"
+  description = "This is a second backup vault built by Terraform."
+  backup_minimum_enforced_retention_duration = "200000s"
+  effective_time = "%{effective_time}" 
+  labels = {
+	foo = "bar1"
+	bar = "baz1"
+  }
+  annotations = {
+    annotations1 = "bar1"
+	annotations2 = "baz1"
+  }
+  force_update = "true"
+  access_restriction = "WITHIN_ORGANIZATION"
+  backup_retention_inheritance = "INHERIT_VAULT_RETENTION"
+  ignore_inactive_datasources = "true"
+  ignore_backup_plan_references = "true"
+  allow_missing = "true"
+}
+`, context)
+}
