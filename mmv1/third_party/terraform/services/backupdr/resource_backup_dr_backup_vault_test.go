@@ -67,7 +67,7 @@ func TestAccBackupDRBackupVault_createUsingCMEK(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBackupDRBackupVault_createUsingCMEK(context),
@@ -137,7 +137,6 @@ resource "google_backup_dr_backup_vault" "backup-vault-test" {
 func testAccBackupDRBackupVault_createUsingCMEK(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_backup_dr_backup_vault" "backup-vault-test-cmek" {
-  provider      = google-beta
   location = "us-central1"
   backup_vault_id    = "tf-test-backup-vault-test%{random_suffix}"
   description = "This is a second backup vault built by Terraform."
@@ -152,7 +151,7 @@ resource "google_backup_dr_backup_vault" "backup-vault-test-cmek" {
 	annotations2 = "baz1"
   }
   encryption_config {
-    kms_key_name = "%{{kms_key_name}}"
+    kms_key_name = "%{kms_key_name}"
   }
   force_update = "true"
   access_restriction = "WITHIN_ORGANIZATION"
@@ -168,7 +167,6 @@ resource "google_backup_dr_backup_vault" "backup-vault-test-cmek" {
 
 # Grant the BackupDR P4SA permission to use the key
 resource "google_kms_crypto_key_iam_member" "backupdr_sa_crypto_access" {
-  provider      = google-beta
   crypto_key_id = "%{{kms_key_name}}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:service-${data.google_project.test_project.number}@gcp-sa-backupdr.iam.gserviceaccount.com"
