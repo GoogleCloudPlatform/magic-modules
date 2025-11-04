@@ -528,7 +528,6 @@ var schemaNodePool = map[string]*schema.Schema{
 					Description: "The accelerator network profile to use for this node pool.",
 					Optional:    true,
 					ForceNew: 	 true,
-					ConflictsWith: []string{"additional_node_network_config"},
 				},
 			{{- end }}
 				"create_pod_range": {
@@ -569,12 +568,14 @@ var schemaNodePool = map[string]*schema.Schema{
 							"network": {
 								Type:         schema.TypeString,
 								Optional:     true,
+								Computed: 	  true,
 								ForceNew:	  true,
 								Description:  `Name of the VPC where the additional interface belongs.`,
 							},
 							"subnetwork": {
 								Type:         schema.TypeString,
 								Optional:     true,
+								Computed: 	  true,
 								ForceNew:	  true,
 								Description:  `Name of the subnetwork where the additional interface belongs.`,
 							},
