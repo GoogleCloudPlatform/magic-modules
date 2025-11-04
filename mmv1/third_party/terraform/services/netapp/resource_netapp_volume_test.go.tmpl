@@ -1127,7 +1127,7 @@ func testAccNetappVolume_volumeExportPolicyWithSquashMode_allSquash(context map[
   resource "google_netapp_storage_pool" "default" {
       provider = google-beta
       name = "tf-test-pool%{random_suffix}"
-      location = "us-west2"
+      location = "northamerica-northeast1"
       service_level = "PREMIUM"
       capacity_gib = "2048"
       network = data.google_compute_network.default.id
@@ -1138,7 +1138,7 @@ func testAccNetappVolume_volumeExportPolicyWithSquashMode_allSquash(context map[
     }
   resource "google_netapp_volume" "test_volume" {
       provider = google-beta
-      location = "us-west2"
+      location = "northamerica-northeast1"
       name = "tf-test-test-volume%{random_suffix}"
       capacity_gib = "100"
       share_name = "tf-test-test-volume%{random_suffix}"
@@ -1154,7 +1154,7 @@ func testAccNetappVolume_volumeExportPolicyWithSquashMode_allSquash(context map[
           }
       }
   }
-
+ 
   data "google_compute_network" "default" {
       provider = google-beta
       name = "%{network_name}"
@@ -1167,7 +1167,7 @@ func testAccNetappVolume_volumeExportPolicyWithSquashMode_mutipleExportRules(con
   resource "google_netapp_storage_pool" "default" {
       provider = google-beta
       name = "tf-test-pool%{random_suffix}"
-      location = "us-west2"
+      location = "northamerica-northeast1"
       service_level = "PREMIUM"
       capacity_gib = "2048"
       network = data.google_compute_network.default.id
@@ -1178,7 +1178,7 @@ func testAccNetappVolume_volumeExportPolicyWithSquashMode_mutipleExportRules(con
     }
   resource "google_netapp_volume" "test_volume" {
       provider = google-beta
-      location = "us-west2"
+      location = "northamerica-northeast1"
       name = "tf-test-test-volume%{random_suffix}"
       capacity_gib = "100"
       share_name = "tf-test-test-volume%{random_suffix}"
@@ -1213,7 +1213,7 @@ func testAccNetappVolume_volumeExportPolicyWithSquashMode_switchMutipleExportRul
   resource "google_netapp_storage_pool" "default" {
       provider = google-beta
       name = "tf-test-pool%{random_suffix}"
-      location = "us-west2"
+      location = "northamerica-northeast1"
       service_level = "PREMIUM"
       capacity_gib = "2048"
       network = data.google_compute_network.default.id
@@ -1224,7 +1224,7 @@ func testAccNetappVolume_volumeExportPolicyWithSquashMode_switchMutipleExportRul
     }
   resource "google_netapp_volume" "test_volume" {
       provider = google-beta
-      location = "us-west2"
+      location = "northamerica-northeast1"
       name = "tf-test-test-volume%{random_suffix}"
       capacity_gib = "100"
       share_name = "tf-test-test-volume%{random_suffix}"

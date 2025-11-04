@@ -37,7 +37,7 @@ func suppressSquashModeDiff(k, old, new string, d *schema.ResourceData) bool {
         return false
     }
 
-    if new == "" {
+    if new == "" && old != "ALL_SQUASH" {
         return true
     }
 
