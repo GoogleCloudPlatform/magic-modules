@@ -198,7 +198,7 @@ properties:
               type: Enum
               description: |-
                 SquashMode defines how remote user privileges are restricted when accessing an NFS export. It controls how the user identities (like root) are mapped to anonymous users to limit access and enforce security.
-                It overwrites the has_root_access parameter. Use either squash_mode or has_root_access.
+                It overwrites the has_root_access parameter. Use either squash_mode or has_root_access. For ALL_SQUASH, access_type needs to be set to READ_WRITE.
               enum_values:
                 - 'SQUASH_MODE_UNSPECIFIED'
                 - 'NO_ROOT_SQUASH'
