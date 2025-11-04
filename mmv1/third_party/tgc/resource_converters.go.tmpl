@@ -92,9 +92,9 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/sql"
     "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/storage"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/vertexai"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/vmwareengine"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/vpcaccess"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/workbench"
-    "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/vmwareengine"
 )
 
 
@@ -215,6 +215,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_vertex_ai_dataset":                        {vertexai.ResourceConverterVertexAIDataset()},
 		"google_vmwareengine_network_peering":             {vmwareengine.ResourceConverterVmwareengineNetworkPeering()},
 		"google_workbench_instance":                       {workbench.ResourceConverterWorkbenchInstance()},
+		"google_vmwareengine_private_cloud":               {vmwareengine.ResourceConverterVmwareenginePrivateCloud()},
 	{{- range $object := $.IamResources }}
 	{{- if $object.IamClassName }}
 		"{{ $object.TerraformName }}_iam_policy": { {{- $object.IamClassName }}IamPolicy()},
