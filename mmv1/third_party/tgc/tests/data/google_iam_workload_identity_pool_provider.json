@@ -27,7 +27,7 @@
       "version": "v1",
       "discovery_document_uri": "https://iam.googleapis.com/$discovery/rest",
       "discovery_name": "WorkloadIdentityPoolProvider",
-      "parent": "//iam.googleapis.com/projects/{{.Provider.project}}/locations/global/workloadIdentityPools/gg-asset-45050-bcd4",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
         "attributeCondition": "assertion.repository_owner == 'google'",
         "attributeMapping": {
@@ -38,11 +38,9 @@
         "description": "OIDC provider for gg-asset-45050-bcd4",
         "disabled": true,
         "displayName": "gg-asset-45050-bcd4",
-        "name": "projects/{{.Provider.project}}/locations/global/workloadIdentityPools/gg-asset-45050-bcd4/providers/gg-asset-45050-bcd4",
         "oidc": {
           "issuerUri": "https://oidc.gg-asset-45050-bcd4.com"
-        },
-        "state": "ACTIVE"
+        }
       }
     }
   }
