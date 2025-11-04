@@ -1,6 +1,6 @@
 resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
   name = "{{index $.Vars "topic_name"}}"
-  project = data.google_project.project.id
+  project = data.google_project.project.project_id
 }
 
 data "google_project" "project" {}
