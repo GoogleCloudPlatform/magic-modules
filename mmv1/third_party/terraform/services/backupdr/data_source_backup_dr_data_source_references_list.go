@@ -141,7 +141,7 @@ func dataSourceGoogleCloudBackupDRListDataSourceReferencesRead(d *schema.Resourc
 	if err := d.Set("data_source_references", flattenedDataSourceReferences); err != nil {
 		return fmt.Errorf("Error setting data_source_references: %s", err)
 	}
-	id := fmt.Sprintf("projects/%s/locations/%s/dataSourceReferences", config.BackupDRBasePath, project, location)
+	id := fmt.Sprintf("projects/%s/locations/%s/dataSourceReferences", project, location)
 	d.SetId(id)
 	return nil
 }
