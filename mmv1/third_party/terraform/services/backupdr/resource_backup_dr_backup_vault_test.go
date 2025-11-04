@@ -62,7 +62,7 @@ func TestAccBackupDRBackupVault_createUsingCMEK(t *testing.T) {
 		"project":        envvar.GetTestProjectFromEnv(),
 		"effective_time": referenceTime.Add(24 * time.Hour).Format(time.RFC3339),
 		"random_suffix":  acctest.RandString(t, 10),
-		"kms_key_name":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bv-cmek").CryptoKey.Name,
+		"kms_key_name":   acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bv-cmek").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
