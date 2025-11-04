@@ -36,7 +36,12 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/getkin/kin-openapi/openapi3"
 	"gopkg.in/yaml.v3"
+
+	_ "embed"
 )
+
+//go:embed header.txt
+var header []byte
 
 type Parser struct {
 	Folder string
@@ -86,11 +91,6 @@ func (parser Parser) WriteYaml(filePath string) {
 	loader := &openapi3.Loader{Context: ctx, IsExternalRefsAllowed: true}
 	doc, _ := loader.LoadFromFile(filePath)
 	_ = doc.Validate(ctx)
-
-	header, err := os.ReadFile("openapi_generate/header.txt")
-	if err != nil {
-		log.Fatalf("error reading header %v", err)
-	}
 
 	resourcePaths := findResources(doc)
 	productPath := buildProduct(filePath, parser.Output, doc, header)
