@@ -23,7 +23,6 @@ resource "google_dataplex_entry" "glossary-term-system-generated-entry" {
   aspects {
     aspect_key = "655216118709.global.overview" # Use dataplex-types project number for 1P types aspects.
     aspect {
-      aspect_type = "projects/655216118709/locations/global/aspectTypes/overview"
       data = <<EOF
           {"content": "Example to attach overview aspects to the terms."}
         EOF
