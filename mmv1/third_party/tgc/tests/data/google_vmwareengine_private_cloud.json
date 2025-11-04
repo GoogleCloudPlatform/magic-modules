@@ -10,7 +10,6 @@
       "discovery_name": "PrivateCloud",
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
-        "name": "projects/{{.Provider.project}}/locations/us-central1-a/privateClouds/gg-asset-pc-00563-8560",
         "description": "Standard Private Cloud",
         "managementCluster": {
           "clusterId": "gg-asset-mgmt-cl-00563-8560",
@@ -21,11 +20,9 @@
           }
         },
         "networkConfig": {
-          "managementCidr": "192.168.0.0/24",
-          "vmwareEngineNetwork": "projects/{{.Provider.project}}/locations/global/vmwareEngineNetworks/gg-asset-vmw-net-00563-8560"
+          "managementCidr": "192.168.0.0/24"
         }
-      },
-      "location": "us-central1-a"
+      }
     }
   }
 ]
