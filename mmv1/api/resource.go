@@ -223,9 +223,6 @@ type Resource struct {
 	// Samples for generating tests and documentation
 	Samples []*resource.Sample
 
-	// Samples for generating tests and documentation
-	Samples []*resource.Sample
-
 	// If true, generates product operation handling logic.
 	AutogenAsync bool `yaml:"autogen_async,omitempty"`
 
