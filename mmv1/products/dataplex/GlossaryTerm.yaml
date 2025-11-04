@@ -31,11 +31,15 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-term-basic%s", context["random_suffix"]), fmt.Sprintf("tf-test-glossary%s", context["random_suffix"])'
     vars:
       term_name: 'term-basic'
+    test_env_vars:
+      project_number: 'PROJECT_NUMBER'
   - name: 'dataplex_glossary_term_full'
     primary_resource_id: 'term_test_id_full'
     primary_resource_name: 'fmt.Sprintf("tf-test-term-full%s", context["random_suffix"]), fmt.Sprintf("tf-test-glossary%s", context["random_suffix"])'
     vars:
       term_name: 'term-full'
+    test_env_vars:
+      project_number: 'PROJECT_NUMBER'
 parameters:
   - name: 'location'
     type: String
