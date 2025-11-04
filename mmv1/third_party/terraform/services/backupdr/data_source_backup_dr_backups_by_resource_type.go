@@ -8,7 +8,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func DataSourceGoogleCloudBackupDRFetchBackups() *schema.Resource {
+func DataSourceGoogleCloudBackupDRBackupsByResourceType() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleCloudBackupDRFetchBackupsRead,
 		Schema: map[string]*schema.Schema{

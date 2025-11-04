@@ -11,13 +11,13 @@ A list of Backup and DR backups.
 ## Example Usage
 
 ```hcl
-data "google_backup_dr_fetch_backups" "my_backups" {
+data "google_backup_dr_backups_by_resource_type" "my_backups" {
   location = "us-central1"
   resource_type = "sqladmin.googleapis.com/Instance"
 }
 
 output "backup_name" {
-  value = data.google_backup_dr_fetch_backups.my_backups.backups[0].name
+  value = data.google_backup_dr_backups_by_resource_type.my_backups.backups[0].name
 }
 ```
 

@@ -36,10 +36,10 @@ func TestAccDataSourceGoogleBackupDRFetchBackupsForResourceType_basic(t *testing
 					}
 					projectID = project.Primary.Attributes["project_id"]
 					return resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr("data.google_backup_dr_fetch_backups.default", "project", projectID),
-						resource.TestCheckResourceAttr("data.google_backup_dr_fetch_backups.default", "location", context["location"].(string)),
-						resource.TestCheckResourceAttr("data.google_backup_dr_fetch_backups.default", "resource_type", context["resource_type"].(string)),
-						resource.TestCheckResourceAttrSet("data.google_backup_dr_fetch_backups.default", "backups.#"),
+						resource.TestCheckResourceAttr("data.google_backup_dr_backups_by_resource_type.default", "project", projectID),
+						resource.TestCheckResourceAttr("data.google_backup_dr_backups_by_resource_type.default", "location", context["location"].(string)),
+						resource.TestCheckResourceAttr("data.google_backup_dr_backups_by_resource_type.default", "resource_type", context["resource_type"].(string)),
+						resource.TestCheckResourceAttrSet("data.google_backup_dr_backups_by_resource_type.default", "backups.#"),
 					)(s)
 				},
 			},
@@ -118,7 +118,7 @@ resource "time_sleep" "wait_for_data_source" {
 }
 
 // The actual data source under test
-data "google_backup_dr_fetch_backups" "default" {
+data "google_backup_dr_backups_by_resource_type" "default" {
   project         = data.google_project.project.project_id
   location        = "%{location}"
   backup_vault_id = google_backup_dr_backup_vault.my-backup-vault.backup_vault_id
