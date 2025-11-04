@@ -16,6 +16,6 @@ resource "google_tags_tag_value" "tag_value" {
 }
 
 resource "google_tags_tag_binding" "binding" {
-  parent    = "//pubsub.googleapis.com/projects/${data.google_project.project.project_id}/topics/${google_pubsub_topic.{{$.PrimaryResourceId}}.name}"
+  parent    = "//pubsub.googleapis.com/projects/${data.google_project.project.number}/topics/${google_pubsub_topic.{{$.PrimaryResourceId}}.name}"
   tag_value = google_tags_tag_value.tag_value.id
 }
