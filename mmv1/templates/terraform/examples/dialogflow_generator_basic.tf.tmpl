@@ -1,0 +1,8 @@
+resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
+  location = "global"
+  summarization_context {
+    summarization_sections {
+        type = "RESOLUTION"
+    }
+  }
+}
