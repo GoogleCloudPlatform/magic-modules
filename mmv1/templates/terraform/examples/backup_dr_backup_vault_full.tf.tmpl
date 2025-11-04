@@ -28,14 +28,12 @@ resource "google_backup_dr_backup_vault" "{{$.PrimaryResourceId}}" {
 
 # Grant the BackupDR P4SA permission to use the key
 resource "google_kms_crypto_key_iam_member" "backupdr_sa_crypto_access" {
-  provider      = google-beta
   crypto_key_id = google_kms_crypto_key.key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:service-${data.google_project.test_project.number}@gcp-sa-backupdr.iam.gserviceaccount.com"
 }
 
 resource "google_kms_crypto_key" "key" {
-  provider = google-beta
   name     = "{{index $.Vars "kms_key_name"}}"
   key_ring = google_kms_key_ring.keyring.id
   purpose  = "ENCRYPT_DECRYPT"
@@ -47,7 +45,6 @@ resource "google_kms_crypto_key" "key" {
 }
 
 resource "google_kms_key_ring" "keyring" {
-  provider = google-beta
   name     = "bkpvault-keyring"
   location = "us-central1"
   project  = data.google_project.test_project.number
