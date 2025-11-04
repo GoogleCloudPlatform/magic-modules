@@ -164,12 +164,13 @@ resource "google_backup_dr_backup_vault" "backup-vault-test-cmek" {
     google_kms_crypto_key_iam_member.backupdr_sa_crypto_access
   ]
 }
+data "google_project" "project" {}
 
 # Grant the BackupDR P4SA permission to use the key
 resource "google_kms_crypto_key_iam_member" "backupdr_sa_crypto_access" {
   crypto_key_id = "%{{kms_key_name}}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.test_project.number}@gcp-sa-backupdr.iam.gserviceaccount.com"
+  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-backupdr.iam.gserviceaccount.com"
 }
 `, context)
 }
