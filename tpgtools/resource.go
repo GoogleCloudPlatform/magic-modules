@@ -87,9 +87,6 @@ type Resource struct {
 	// Properties are the fields of a resource. Properties may be nested.
 	Properties []Property
 
-	// Identities is the list of resource properties that are used to identify the resource.
-	Identities []IdentityProperty
-
 	// InsertTimeoutMinutes is the timeout value in minutes for the resource
 	// create operation
 	InsertTimeoutMinutes int
@@ -333,11 +330,6 @@ func (r Resource) SchemaProperties() (props []Property) {
 	return collapsedProperties(r.Properties)
 }
 
-// IdentityProperties is the list of resource properties that are used to identify the resource.
-func (r Resource) IdentityProperties() (props []IdentityProperty) {
-	return r.Identities
-}
-
 // Enum arrays are not arrays of strings in the DCL and require special
 // conversion
 func (r Resource) EnumArrays() (props []Property) {
@@ -498,6 +490,7 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 	}
 	res.ID = id
 	res.UseTerraformID = customID
+
 	// Resource Override: Custom Import Function
 	cifd := CustomImportFunctionDetails{}
 	cifdOk, err := overrides.ResourceOverrideWithDetails(CustomImport, &cifd, location)
@@ -540,13 +533,12 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 		res.Mutex = md.Mutex
 	}
 
-	identities, props, err := createPropertiesFromSchema(schema, typeFetcher, overrides, &res, nil, location)
+	props, err := createPropertiesFromSchema(schema, typeFetcher, overrides, &res, nil, location)
 	if err != nil {
 		return nil, err
 	}
 
 	res.Properties = props
-	res.Identities = identities
 
 	onlyLongFormFormat := shouldAllowForwardSlashInFormat(res.ID, res.Properties)
 	// Resource Override: Import formats

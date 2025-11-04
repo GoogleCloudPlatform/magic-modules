@@ -38,20 +38,6 @@ func idParts(id string) (parts []string) {
 	return parts
 }
 
-func createIdentityProperty(p Property) IdentityProperty {
-	requiredIdentity := true
-	if p.Name() == "project" || p.Name() == "region" || p.Name() == "zone" {
-		requiredIdentity = false
-	}
-
-	return IdentityProperty{
-		Name:        p.Name(),
-		Required:    requiredIdentity,
-		Optional:    !requiredIdentity,
-		Description: p.Description,
-	}
-}
-
 // PatternToRegex formats a pattern string into a Python-compatible regex.
 func PatternToRegex(s string, allowForwardSlash bool) string {
 	re := regexp.MustCompile(PatternPart)
@@ -62,7 +48,7 @@ func PatternToRegex(s string, allowForwardSlash bool) string {
 }
 
 // Finds the correct resource id based on the schema and any overrides. Returns whether a custom ID override was used.
-func findResourceID(schema *openapi.Schema, overrides Overrides, location string) (id string, customID bool, err error) {
+func findResourceID(schema *openapi.Schema, overrides Overrides, location string) (string, bool, error) {
 	id, ok := schema.Extension["x-dcl-id"].(string)
 	if !ok {
 		return "", false, fmt.Errorf("Malformed or missing x-dcl-id: %v", schema.Extension["x-dcl-id"])
