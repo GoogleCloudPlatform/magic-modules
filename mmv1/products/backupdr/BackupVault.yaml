@@ -204,14 +204,6 @@ properties:
     type: NestedObject
     description: 'Optional. Encryption configuration for the backup vault.'
     properties:
-      - name: 'encryptionMode'
-        type: Enum
-        description: 'Output only. The encryption mode used to encrypt the data in the backup vault.'
-        output: true
-        enum_values:
-          - 'ENCRYPTION_MODE_UNSPECIFIED'
-          - 'GOOGLE_DEFAULT_ENCRYPTION'
-          - 'CUSTOMER_MANAGED_ENCRYPTION'
       - name: 'kmsKeyName'
         type: String
         description: 'Optional. The Resource name of the Cloud KMS key to be used to encrypt new backups. The key must be in the same location as the backup vault. The key must be a Cloud KMS CryptoKey.'
