@@ -6,7 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 
 	"magician/provider"
@@ -579,52 +578,4 @@ func TestRecordReplay(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestUnitTest(t *testing.T) {
-	tests := []struct {
-		testName string
-		testDirs []string
-		want     map[string][]ParameterList
-	}{
-		{
-			"not empty test dir",
-			[]string{"test-dir"},
-			map[string][]ParameterList{
-				"Run": {
-					{"repo-path", "go", []string{"test", "-p", "4", "-cover", "test-dir", "-args", "-test.gocoverdir=cov-dir"}, map[string]string(nil)},
-				},
-			},
-		},
-		{
-			"empty test dir",
-			[]string{},
-			map[string][]ParameterList{
-				"Run": {
-					{"repo-path", "go", []string{"list", "./..."}, map[string]string(nil)},
-					{"repo-path", "go", []string{"test", "-p", "4", "-cover", "pkg1", "pkg2", "-args", "-test.gocoverdir=cov-dir"}, map[string]string(nil)},
-				},
-			},
-		},
-	}
-	for _, tc := range tests {
-		t.Run(tc.testName, func(t *testing.T) {
-			mr := &mockRunner{
-				cwd:           "cwd",
-				calledMethods: make(map[string][]ParameterList),
-				cmdResults: map[string]string{
-					"repo-path go [list ./...] map[]": "pkg1\npkg2",
-				},
-			}
-			err := unitTest(mr, "repo-path", "cov-dir", tc.testDirs)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if diff := cmp.Diff(tc.want, mr.calledMethods); diff != "" {
-				t.Errorf("unitTest triggered different called methods(-want, +got): %s", diff)
-			}
-
-		})
-	}
-
 }

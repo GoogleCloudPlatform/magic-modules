@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/url"
 	"regexp"
 	"strings"
 	"testing"
@@ -55,7 +54,6 @@ var serviceWithProjectNumber = map[string]struct{}{
 	"discoveryengine":       {},
 	"documentai":            {},
 	"healthcare":            {},
-	"iambeta":               {},
 	"iap":                   {},
 	"identityplatform":      {},
 	"logging":               {},
@@ -142,11 +140,6 @@ func CollectAllTgcMetadata(tgcPayload TgcMetadataPayload) resource.TestCheckFunc
 				}
 
 				caiAssetName := replacePlaceholders(caiAssetNameFormat, paramsMap)
-
-				if _, ok := serviceWithProjectNumber[metadata.Service]; ok {
-					caiAssetName = strings.Replace(caiAssetName, projectId, projectNumber, 1)
-				}
-
 				metadata.CaiAssetNames = []string{caiAssetName}
 			}
 
@@ -189,19 +182,13 @@ func extractIdentifiers(url string) []string {
 // It replaces all instances of {{key}} in the template with the
 // corresponding value from the parameters map.
 func replacePlaceholders(template string, params map[string]any) string {
-	re := regexp.MustCompile("{{([%[:word:]]+)}}")
+	re := regexp.MustCompile(`\{\{([a-zA-Z0-9_]+)\}\}`)
 
 	result := re.ReplaceAllStringFunc(template, func(match string) string {
 		key := strings.Trim(match, "{}")
 
-		// The % indicates that the name value should be URL-encoded.
-		key, shouldBeEncoded := strings.CutPrefix(key, "%")
 		if value, ok := params[key]; ok {
-			v := value.(string)
-			if !shouldBeEncoded {
-				return v
-			}
-			return url.PathEscape(v)
+			return value.(string)
 		}
 
 		return match

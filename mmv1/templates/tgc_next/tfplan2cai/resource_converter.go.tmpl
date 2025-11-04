@@ -17,22 +17,21 @@
 package {{ lower $.ProductMetadata.Name }}
 
 import (
-  "fmt"
-  "log"
-  "reflect"
-  "regexp"
-  "strconv"
-  "strings"
-
-  "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+{{/* We list all the v2 imports here and unstable imports, because we run 'goimports' to guess the correct
+     set of imports, which will never guess the major version correctly. */ -}}
+  "github.com/apparentlymart/go-cidr/cidr"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
   "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+  "google.golang.org/api/bigtableadmin/v2"
+  "google.golang.org/api/googleapi"
 
   "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
   "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/converters/cai"
@@ -41,31 +40,6 @@ import (
   "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
   transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
   "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
-
-  "google.golang.org/api/googleapi"
-)
-
-var (
-    _ = fmt.Sprintf
-    _ = log.Print
-    _ = reflect.ValueOf
-    _ = regexp.Match
-    _ = strconv.Atoi
-    _ = strings.Trim
-    _ = diag.Diagnostic{}
-    _ = customdiff.All
-    _ = id.UniqueId
-    _ = logging.LogLevel
-    _ = retry.Retry
-    _ = schema.Noop
-    _ = structure.ExpandJsonFromString
-    _ = validation.All
-    _ = terraform.State{}
-    _ = tgcresource.RemoveTerraformAttributionLabel
-    _ = tpgresource.GetRegion
-    _ = transport_tpg.Config{}
-    _ = verify.ProjectRegex
-    _ = googleapi.Error{}
 )
 
 {{- $caiProductBaseUrl := $.CaiProductBaseUrl }}
@@ -79,7 +53,7 @@ func {{ $.ResourceName -}}Tfplan2caiConverter() cai.Tfplan2caiConverter {
 }
 
 func Get{{ $.ResourceName -}}CaiAssets(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]caiasset.Asset, error) {
-    name, err := cai.AssetName(d, config, "{{ $.GetCaiAssetNameTemplate }}")
+    name, err := cai.AssetName(d, config, "{{ $.CaiAssetNameTemplate $productBackendName }}")
     if err != nil {
         return []caiasset.Asset{}, err
     }

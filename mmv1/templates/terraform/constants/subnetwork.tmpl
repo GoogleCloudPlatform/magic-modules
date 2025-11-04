@@ -1,8 +1,3 @@
-import (
-	"net"
-	"github.com/apparentlymart/go-cidr/cidr"
-)
-
 // Whether the IP CIDR change shrinks the block.
 func IsShrinkageIpCidr(_ context.Context, old, new, _ interface{}) bool {
 	_, oldCidr, oldErr := net.ParseCIDR(old.(string))

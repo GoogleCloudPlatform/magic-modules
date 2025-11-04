@@ -28,12 +28,6 @@ import (
 	"{{ $.ImportPath }}/tpgresource"
 )
 
-var (
-    _ = fmt.Sprintf
-    _ = envvar.TestEnvVar
-    _ = tpgresource.SetLabels
-)
-
 {{ if $.Res.TestExamples }}
 {{ $e := index $.Res.TestExamples 0 }}
 func TestAccDataSource{{ $.Res.ResourceName }}_basic(t *testing.T) {

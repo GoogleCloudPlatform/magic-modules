@@ -23,9 +23,8 @@ import (
 
 func Compile(yamlPath string, obj interface{}, overrideDir string) {
 	objYaml, err := os.ReadFile(yamlPath)
-
 	if err != nil {
-		log.Fatalf("Cannot open the file: %s", yamlPath)
+		log.Fatalf("Cannot open the file: %v", objYaml)
 	}
 
 	if overrideDir != "" {

@@ -19,4 +19,3 @@ versions:
     base_url: 'https://bigtableadmin.googleapis.com/v2/'
 scopes:
   - 'https://www.googleapis.com/auth/bigtable'
-cai_asset_service: 'bigtable.googleapis.com'

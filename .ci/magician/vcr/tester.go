@@ -193,12 +193,10 @@ func (vt *Tester) LogPath(mode Mode, version provider.Version) string {
 }
 
 type RunOptions struct {
-	Mode               Mode
-	Version            provider.Version
-	TestDirs           []string
-	Tests              []string
-	EnableTestCoverage bool
-	TestCovDir         string
+	Mode     Mode
+	Version  provider.Version
+	TestDirs []string
+	Tests    []string
 }
 
 // Run the vcr tests in the given mode and provider version and return the result.
@@ -254,13 +252,6 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 		"-ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc",
 		"-vet=off",
 	)
-	if opt.Mode == Replaying && opt.EnableTestCoverage {
-		args = append(args, []string{
-			"-cover",
-			"-args",
-			"-test.gocoverdir=" + opt.TestCovDir,
-		}...)
-	}
 	env := map[string]string{
 		"VCR_PATH":                 cassettePath,
 		"VCR_MODE":                 opt.Mode.Upper(),
@@ -365,7 +356,7 @@ func (vt *Tester) RunParallel(opt RunOptions) (Result, error) {
 	for _, testDir := range opt.TestDirs {
 		for _, test := range opt.Tests {
 			running <- struct{}{}
-			go vt.runInParallel(opt, testDir, test, logPath, cassettePath, running, wg, outputs, errs)
+			go vt.runInParallel(opt.Mode, opt.Version, testDir, test, logPath, cassettePath, running, wg, outputs, errs)
 		}
 	}
 
@@ -396,7 +387,7 @@ func (vt *Tester) RunParallel(opt RunOptions) (Result, error) {
 	return collectResult(output), testErr
 }
 
-func (vt *Tester) runInParallel(opt RunOptions, testDir, test, logPath, cassettePath string, running <-chan struct{}, wg *sync.WaitGroup, outputs chan<- string, errs chan<- error) {
+func (vt *Tester) runInParallel(mode Mode, version provider.Version, testDir, test, logPath, cassettePath string, running <-chan struct{}, wg *sync.WaitGroup, outputs chan<- string, errs chan<- error) {
 	args := []string{
 		"test",
 		testDir,
@@ -408,14 +399,6 @@ func (vt *Tester) runInParallel(opt RunOptions, testDir, test, logPath, cassette
 		replayingTimeout,
 		"-ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc",
 		"-vet=off",
-	}
-	mode := opt.Mode
-	if mode == Replaying && opt.EnableTestCoverage {
-		args = append(args, []string{
-			"-cover",
-			"-args",
-			"-test.gocoverdir=" + opt.TestCovDir,
-		}...)
 	}
 	env := map[string]string{
 		"VCR_PATH":                 cassettePath,

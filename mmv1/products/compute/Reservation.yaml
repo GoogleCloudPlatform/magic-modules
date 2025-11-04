@@ -46,7 +46,6 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
-  constants: 'templates/terraform/constants/reservation.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/reservation.go.tmpl'
   pre_update: 'templates/terraform/pre_update/shared_reservation_update.go.tmpl'
 sweeper:

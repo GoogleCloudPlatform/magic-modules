@@ -27,7 +27,6 @@ docs:
 id_format: 'locations/{{location}}/namespaces/{{project}}/services/{{name}}'
 base_url: 'apis/serving.knative.dev/v1/namespaces/{{project}}/services'
 cai_base_url: 'projects/{{project}}/locations/{{location}}/services'
-cai_asset_name_format: 'projects/{{project}}/locations/{{location}}/services/{{name}}'
 import_format:
   - 'locations/{{location}}/namespaces/{{project}}/services/{{name}}'
 datasource:

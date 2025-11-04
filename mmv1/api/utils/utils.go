@@ -1,8 +1,6 @@
 package utils
 
-import (
-	"reflect"
-)
+import "reflect"
 
 // IsEmpty checks if a value is meaningfully empty in a recursive way
 func IsEmpty(v interface{}) bool {

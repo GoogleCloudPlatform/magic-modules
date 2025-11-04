@@ -269,7 +269,7 @@ func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData Template
 		templateData.GenerateIamPolicyFile(targetFilePath, object)
 
 		// Only generate test if testable examples exist.
-		examples := google.Reject(object.Examples, func(e *resource.Examples) bool {
+		examples := google.Reject(object.Examples, func(e resource.Examples) bool {
 			return e.ExcludeTest
 		})
 		if len(examples) != 0 {

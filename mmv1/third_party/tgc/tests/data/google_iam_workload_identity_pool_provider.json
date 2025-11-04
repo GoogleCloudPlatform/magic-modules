@@ -18,3 +18,32 @@
     }
   }
 ]
+,
+  {
+    "name": "//iam.googleapis.com/projects/{{.Provider.project}}/locations/global/workloadIdentityPools/gg-asset-45050-bcd4/providers/gg-asset-45050-bcd4",
+    "asset_type": "iam.googleapis.com/WorkloadIdentityPoolProvider",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://iam.googleapis.com/$discovery/rest",
+      "discovery_name": "WorkloadIdentityPoolProvider",
+      "parent": "//iam.googleapis.com/projects/{{.Provider.project}}/locations/global/workloadIdentityPools/gg-asset-45050-bcd4",
+      "data": {
+        "attributeCondition": "assertion.repository_owner == 'google'",
+        "attributeMapping": {
+          "attribute.actor": "assertion.actor",
+          "attribute.repository": "assertion.repository",
+          "google.subject": "assertion.sub"
+        },
+        "description": "OIDC provider for gg-asset-45050-bcd4",
+        "disabled": true,
+        "displayName": "gg-asset-45050-bcd4",
+        "name": "projects/{{.Provider.project}}/locations/global/workloadIdentityPools/gg-asset-45050-bcd4/providers/gg-asset-45050-bcd4",
+        "oidc": {
+          "issuerUri": "https://oidc.gg-asset-45050-bcd4.com"
+        },
+        "state": "ACTIVE"
+      }
+    }
+  }
+]

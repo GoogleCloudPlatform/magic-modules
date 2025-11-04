@@ -14,7 +14,6 @@
 ---
 name: 'OrganizationSecurityPolicyRule'
 api_resource_type_kind: SecurityPolicy
-api_resource_field: 'rules'
 description: |
   A rule for the OrganizationSecurityPolicy.
 min_version: 'beta'

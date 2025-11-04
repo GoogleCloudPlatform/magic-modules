@@ -37,7 +37,6 @@ iam_policy:
     - 'projects/{{project}}/managedZones/{{managed_zone}}'
     - '{{project}}/{{managed_zone}}'
 custom_code:
-  constants: 'templates/terraform/constants/managed_dns_zone.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/managed_dns_zone.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/managed_dns_zone.go.tmpl'
 examples:
