@@ -200,7 +200,6 @@ properties:
       - 'INHERIT_VAULT_RETENTION'
       - 'MATCH_BACKUP_EXPIRE_TIME'
   - name: 'encryptionConfig'
-    min_version: beta
     type: NestedObject
     description: 'Optional. Encryption configuration for the backup vault.'
     properties:
