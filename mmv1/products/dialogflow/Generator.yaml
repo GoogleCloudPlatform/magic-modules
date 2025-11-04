@@ -95,7 +95,7 @@ properties:
               properties:
                 - name: messageEntries
                   type: Array
-                  description: 
+                  description:
                     Optional. List of message transcripts in the conversation.
                   item_type:
                     type: NestedObject
@@ -115,7 +115,7 @@ properties:
                       - name: languageCode
                         type: String
                         description: |
-                          Optional. The language of the text. 
+                          Optional. The language of the text.
                       - name: createTime
                         type: Time
                         description: |
@@ -177,7 +177,7 @@ properties:
                           - name: tool
                             type: String
                             description: |
-                              Optional. The tool associated with this call. Format: projects/<ProjectID>/locations/<LocationID>/tools/<ToolID>.       
+                              Optional. The tool associated with this call. Format: projects/<ProjectID>/locations/<LocationID>/tools/<ToolID>.
   - name: inferenceParameter
     type: NestedObject
     description: |
@@ -204,10 +204,10 @@ properties:
     description: |
       Optional. The trigger event of the generator. It defines when the generator is triggered in a conversation.
     enum_values:
-    - 'END_OF_UTTERANCE'
-    - 'MANUAL_CALL'
-    - 'CUSTOMER_MESSAGE'
-    - 'AGENT_MESSAGE'
+      - 'END_OF_UTTERANCE'
+      - 'MANUAL_CALL'
+      - 'CUSTOMER_MESSAGE'
+      - 'AGENT_MESSAGE'
   - name: publishedModel
     type: String
     description: |
