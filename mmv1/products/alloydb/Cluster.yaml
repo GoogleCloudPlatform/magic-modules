@@ -59,6 +59,9 @@ custom_code:
   pre_create: 'templates/terraform/pre_create/alloydb_cluster.go.tmpl'
   pre_update: 'templates/terraform/pre_update/alloydb_cluster.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/alloydb_cluster.go.tmpl'
+  constants: 'templates/terraform/constants/alloydb_cluster.go.tmpl'
+custom_diff:
+  - 'alloydbClusterCustomizeDiff'
 # Skipping the sweeper because we need to force-delete clusters.
 exclude_sweeper: true
 include_in_tgc_next_DO_NOT_USE: true
@@ -321,7 +324,7 @@ properties:
   - name: 'initialUser'
     type: NestedObject
     description: |
-      Initial user to setup during cluster creation.
+      Initial user to setup during cluster creation. This must be set for all new Clusters.
     ignore_read: true
     custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_input_user_flatten.go.tmpl'
     properties:
