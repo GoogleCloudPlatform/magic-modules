@@ -21,5 +21,4 @@ resource "google_tags_tag_key" "tag_key" {
 resource "google_tags_tag_value" "tag_value" {
   parent     = google_tags_tag_key.tag_key.id
   short_name = "{{index $.Vars "tag_value"}}"
-  depends_on = [google_pubsub_topic.{{$.PrimaryResourceId}}]
 }
