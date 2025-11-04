@@ -26,7 +26,7 @@ fields:
   - api_field: 'name'
   - field: 'name_prefix'
     provider_only: true
-  {{- if eq $.TargetVersionName "alpha" }}
+  {{- if eq $.TargetVersionName "v1beta1" }}
   - field: 'network_config.accelerator_network_profile'
   {{- end }}
   - api_field: 'networkConfig.additionalNodeNetworkConfigs.network'
