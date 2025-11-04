@@ -16,9 +16,7 @@
         "displayName": "gg-asset-44602-7df7"
       }
     }
-  }
-]
-,
+  },
   {
     "name": "//iam.googleapis.com/projects/{{.Provider.project}}/locations/global/workloadIdentityPools/gg-asset-45050-bcd4/providers/gg-asset-45050-bcd4",
     "asset_type": "iam.googleapis.com/WorkloadIdentityPoolProvider",
