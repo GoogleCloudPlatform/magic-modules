@@ -24,32 +24,4 @@ resource "google_backup_dr_backup_vault" "{{$.PrimaryResourceId}}" {
   ignore_inactive_datasources = "true"
   ignore_backup_plan_references = "true"
   allow_missing = "true"
-  # Ensure IAM binding is created before the vault attempts to use the key
-  depends_on = [
-    google_kms_crypto_key_iam_member.backupdr_sa_crypto_access
-  ]
-}
-
-# Grant the BackupDR P4SA permission to use the key
-resource "google_kms_crypto_key_iam_member" "backupdr_sa_crypto_access" {
-  crypto_key_id = google_kms_crypto_key.key.id
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.test_project.number}@gcp-sa-backupdr.iam.gserviceaccount.com"
-}
-
-resource "google_kms_crypto_key" "key" {
-  name     = "{{index $.Vars "kms_key_name"}}"
-  key_ring = google_kms_key_ring.keyring.id
-  purpose  = "ENCRYPT_DECRYPT"
-
-  # Optional: To prevent key deletion while the vault might still be using it
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
-}
-
-resource "google_kms_key_ring" "keyring" {
-  name     = "bkpvault-keyring"
-  location = "us-central1"
-  project  = data.google_project.test_project.number
 }

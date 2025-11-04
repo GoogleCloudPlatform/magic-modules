@@ -49,11 +49,16 @@ examples:
       project: 'PROJECT_NAME'
   - name: 'backup_dr_backup_vault_full'
     primary_resource_id: 'backup-vault-test2'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-backupdr.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     vars:
       backup_vault_id: 'backup-vault-test2'
       kms_key_name: 'bkpvault-key'
     test_env_vars:
       project: 'PROJECT_NAME'
+    test_vars_overrides:
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 parameters:
   - name: 'location'
     type: String
