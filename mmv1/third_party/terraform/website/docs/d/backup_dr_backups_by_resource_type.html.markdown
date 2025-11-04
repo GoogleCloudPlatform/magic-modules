@@ -6,7 +6,7 @@ description: |-
 
 # google_backup_dr_fetch_backups
 
-A list of Backup and DR backups.
+A list of Backup and DR backups for a particular resource type.
 
 ## Example Usage
 
