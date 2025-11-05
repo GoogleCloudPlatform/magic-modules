@@ -230,7 +230,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		return fmt.Errorf("error posting pending status: %w", err)
 	}
 
-	replayingResult, testDirs, replayingErr := runReplaying(runFullVCR, provider.Beta, services, vt, true, covMerger.VcrTestCovDir)
+	replayingResult, testDirs, replayingErr := runReplaying(runFullVCR, provider.Beta, services, vt, false, covMerger.VcrTestCovDir)
 	testState := "success"
 	if replayingErr != nil {
 		testState = "failure"
@@ -318,7 +318,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 				Version:            provider.Beta,
 				TestDirs:           testDirs,
 				Tests:              recordingResult.PassedTests,
-				EnableTestCoverage: true,
+				EnableTestCoverage: false,
 				TestCovDir:         covMerger.VcrTestCovDir,
 			})
 			if replayingAfterRecordingErr != nil {
