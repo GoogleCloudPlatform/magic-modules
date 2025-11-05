@@ -20,7 +20,8 @@
           }
         },
         "networkConfig": {
-          "managementCidr": "192.168.0.0/24"
+          "managementCidr": "192.168.0.0/24",
+          "vmwareEngineNetwork": "projects/{{.Provider.project}}/locations/global/vmwareEngineNetworks/test_vmware_network"
         }
       }
     }

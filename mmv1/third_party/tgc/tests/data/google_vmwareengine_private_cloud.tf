@@ -1,12 +1,3 @@
-
-resource "google_vmwareengine_network" "main" {
-  name        = "gg-asset-vmw-net-00563-8560"
-  location    = "global"
-  type        = "STANDARD"
-  description = "Standard VMware Engine Network"
-  project     = "{{.Provider.project}}"
-}
-
 resource "google_vmwareengine_private_cloud" "main" {
   name        = "gg-asset-pc-00563-8560"
   location    = "us-central1-a"
@@ -15,7 +6,7 @@ resource "google_vmwareengine_private_cloud" "main" {
 
   network_config {
     management_cidr       = "192.168.0.0/24"
-    vmware_engine_network = google_vmwareengine_network.main.id
+    vmware_engine_network = "projects/{{.Provider.project}}/locations/global/vmwareEngineNetworks/test_vmware_network"
   }
 
   management_cluster {
