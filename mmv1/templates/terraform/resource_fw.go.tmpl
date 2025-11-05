@@ -219,16 +219,17 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
 		return
 	}
 
-	var project, billingProject types.String
+	billingProject := ""
+	var project types.String
 {{ if $.HasProject -}}
     project = fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 {{ if $.LegacyLongFormProject -}}
-    billingProject = strings.TrimPrefix(project, "projects/")
+    billingProject = strings.TrimPrefix(project.ValueString(), "projects/")
 {{      else -}}
-    billingProject = project
+    billingProject = project.ValueString()
 {{- end }}
 {{- end }}
 {{ if $.HasRegion -}}
@@ -291,7 +292,7 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
     res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.CreateVerb -}}",
-        Project: billingProject.ValueString(),
+        Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
         Body: obj,
@@ -433,16 +434,17 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-	var project, billingProject types.String
+	billingProject := ""
+	var project types.String
 {{ if $.HasProject -}}
     project = fwresource.GetProjectFramework(plan.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 {{ if $.LegacyLongFormProject -}}
-    billingProject = strings.TrimPrefix(project, "projects/")
+    billingProject = strings.TrimPrefix(project.ValueString(), "projects/")
 {{      else -}}
-    billingProject = project
+    billingProject = project.ValueString()
 {{- end }}
 {{- end }}
 {{ if $.HasRegion -}}
@@ -510,7 +512,7 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
     res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.UpdateVerb -}}",
-        Project: billingProject.ValueString(),
+        Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
         Body: obj,
@@ -585,16 +587,17 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
 		return
 	}
 
-	var project, billingProject types.String
+	billingProject := ""
+	var project types.String
 {{ if $.HasProject -}}
     project = fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 {{ if $.LegacyLongFormProject -}}
-    billingProject = strings.TrimPrefix(project, "projects/")
+    billingProject = strings.TrimPrefix(project.ValueString(), "projects/")
 {{      else -}}
-    billingProject = project
+    billingProject = project.ValueString()
 {{- end }}
 {{- end }}
 {{ if $.HasRegion -}}
@@ -650,7 +653,7 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
     res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.DeleteVerb -}}",
-        Project: billingProject.ValueString(),
+        Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
         Body: obj,
@@ -728,12 +731,19 @@ func (r *{{$.ResourceName}}FWResource) ImportState(ctx context.Context, req reso
 
 func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.Context, data *{{$.ResourceName}}FWModel, state *tfsdk.State, req interface{}, diags *diag.Diagnostics, timeout time.Duration) {
 	var metaData *fwmodels.ProviderMetaModel
+    billingProject := ""
     //load default values
 {{ if $.HasProject -}}
     project := fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), diags)
 	if diags.HasError() {
 		return
 	}
+
+{{if $.LegacyLongFormProject -}}
+    billingProject = strings.TrimPrefix(project.ValueString(), "projects/")
+{{      else -}}
+    billingProject = project.ValueString()
+{{- end }}
 {{- end }}
 {{ if $.HasRegion -}}
 	region := fwresource.GetRegionFramework(data.Region, types.StringValue(r.providerConfig.Region), diags)
@@ -776,7 +786,7 @@ func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.C
     res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.ReadVerb -}}",
-        Project: project.ValueString(),
+        Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
         Timeout: timeout,
