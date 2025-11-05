@@ -1820,6 +1820,8 @@ resource "google_compute_network" "default" {
 
 // Ensures cluster update does not throw errors for not specifying initial user after create
 func TestAccAlloydbCluster_randomPassword(t *testing.T) {
+	// Random provider causes VCR to fail
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
