@@ -16,10 +16,10 @@ import (
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl"
 	cai2hclconverters "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/converters"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/converters/utils"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai"
 	tfplan2caiconverters "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/converters"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tgcresource"
 	"github.com/sethvargo/go-retry"
 
 	"go.uber.org/zap"
@@ -320,7 +320,7 @@ func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 				}
 			}
 
-			project := utils.ParseFieldValue(asset.Name, "projects")
+			project := tgcresource.ParseFieldValue(asset.Name, "projects")
 			if project != "" {
 				projectKey := fmt.Sprintf("projects/%s", project)
 				if strings.HasPrefix(ancestors[0], "projects") && ancestors[0] != projectKey {

@@ -1,8 +1,7 @@
 resource "google_vmwareengine_cluster" "main" {
   provider = google-beta
   name = "gg-asset-cl-38930-c6db"
-  # Add parent = "projects/{{.Provider.project}}/locations/us-central1-a/privateClouds/gg-asset-pc-38930-c6db" when parent issue is fixed
-  parent = ""
+  parent = "projects/{{.Provider.project}}/locations/us-central1-a/privateClouds/gg-asset-pc-38930-c6db"
 
   node_type_configs {
     node_type_id = "standard-72"
