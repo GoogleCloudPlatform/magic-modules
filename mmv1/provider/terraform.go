@@ -14,6 +14,7 @@
 package provider
 
 import (
+	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
@@ -130,8 +131,21 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 			log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 		}
 		if object.FrameworkResource {
-			targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_fw_%s.go", t.ResourceGoFilename(object)))
-			templateData.GenerateFWResourceFile(targetFilePath, object)
+			fmt.Printf("\n\x1b[1;33mWARNING:\x1b[0m\n")
+			fmt.Printf("The plugin framework generation code is considered a WIP and experimental.\nAre you sure you want to use it for %s? (y/n) ", t.ResourceGoFilename(object))
+
+			reader := bufio.NewReader(os.Stdin)
+			input, err := reader.ReadString('\n')
+			if err != nil {
+				log.Fatalf("Error reading input: %v", err)
+			}
+
+			if strings.ToLower(strings.TrimSpace(input)) == "y" {
+				targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_fw_%s.go", t.ResourceGoFilename(object)))
+				templateData.GenerateFWResourceFile(targetFilePath, object)
+			} else {
+				log.Fatalf("please remove \"plugin_framework: true\" from the YAML configuration.")
+			}
 		} else {
 			targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s.go", t.ResourceGoFilename(object)))
 			templateData.GenerateResourceFile(targetFilePath, object)
