@@ -163,7 +163,7 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir string, rnr ExecRu
 	if err := vt.FetchCassettes(provider.Private, "main", head); err != nil {
 		return fmt.Errorf("error fetching cassettes: %w", err)
 	}
-	replayingResult, testDirs, replayingErr := runReplaying(runFullVCR, provider.Private, services, vt, false, "")
+	replayingResult, testDirs, replayingErr := runReplaying(runFullVCR, provider.Private, services, vt)
 	if err := vt.UploadLogs(vcr.UploadLogsOptions{
 		Head:    head,
 		Mode:    vcr.Replaying,
