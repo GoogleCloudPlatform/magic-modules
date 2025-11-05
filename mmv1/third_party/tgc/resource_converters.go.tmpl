@@ -253,6 +253,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_organization_iam_custom_role": {resourcemanager.ResourceConverterOrganizationIAMCustomRole()},
 		"google_vpc_access_connector": {vpcaccess.ResourceConverterVPCAccessConnector()},
 		"google_logging_metric": {logging.ResourceConverterLoggingMetric()},
+		"google_iam_workload_identity_pool_provider": {iambeta.ResourceConverterIAMBetaWorkloadIdentityPoolProvider()},
 		"google_service_account": {resourcemanager.ResourceConverterServiceAccount()},
 		"google_service_account_key": {resourcemanager.ResourceConverterServiceAccountKey()},
 		
