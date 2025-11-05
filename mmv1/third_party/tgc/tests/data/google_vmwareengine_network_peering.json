@@ -25,6 +25,8 @@
         "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
         "data": {
             "peerNetworkType": "STANDARD",
+            "peerNetwork" : "projects/{{.Provider.Project}}/locations/global/vmwareEngineNetworks/network-peering-test-nw",
+            "vmwareEngineNetwork" : "projects/{{.Provider.Project}}/locations/global/vmwareEngineNetworks/network-peering-test-ven",
             "exportCustomRoutes": true,
             "exportCustomRoutesWithPublicIp": true,
             "importCustomRoutes": true,
