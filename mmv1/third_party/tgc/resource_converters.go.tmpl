@@ -200,6 +200,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_pubsub_topic":                             {pubsub.ResourceConverterPubsubTopic()},
 		"google_kms_crypto_key":                           {kms.ResourceConverterKMSCryptoKey()},
 		"google_kms_key_ring":                             {kms.ResourceConverterKMSKeyRing()},
+		"google_kms_crypto_key_version":                   {kms.ResourceConverterKMSCryptoKeyVersion()},
 		"google_filestore_instance":                       {filestore.ResourceConverterFilestoreInstance()},
 		"google_access_context_manager_service_perimeter": {accesscontextmanager.ResourceConverterAccessContextManagerServicePerimeter()},
 		"google_access_context_manager_access_policy":     {accesscontextmanager.ResourceConverterAccessContextManagerAccessPolicy()},
