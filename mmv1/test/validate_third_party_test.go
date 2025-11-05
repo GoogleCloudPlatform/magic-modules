@@ -1,4 +1,4 @@
-package main
+package test
 
 import (
 	"os"
@@ -14,10 +14,10 @@ func TestTemplatesStillNeedToBeTemplates(t *testing.T) {
 	if !ok {
 		t.Fatal("Failed to get current test file path")
 	}
-	testDir := filepath.Dir(testFilePath)
+	thirdPartyDir := filepath.Join(filepath.Dir(filepath.Dir(testFilePath)), "third_party")
 
 	// Define the third_party directory relative to the test file
-	thirdPartyDir := filepath.Join(testDir, "third_party", "terraform")
+	terraformDir := filepath.Join(thirdPartyDir, "terraform")
 
 	// Regular expression to match Go template syntax
 	templateSyntaxRegex := regexp.MustCompile(`\{\{.*?\}\}`)
@@ -26,11 +26,11 @@ func TestTemplatesStillNeedToBeTemplates(t *testing.T) {
 	unnecessaryTemplates := []string{}
 
 	// Walk through the third_party directory
-	err := filepath.Walk(thirdPartyDir, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(terraformDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			// Handle case where third_party directory doesn't exist
-			if os.IsNotExist(err) && path == thirdPartyDir {
-				t.Logf("Warning: third_party directory not found at %s", thirdPartyDir)
+			if os.IsNotExist(err) && path == terraformDir {
+				t.Logf("Warning: third_party/terraform directory not found at %s", terraformDir)
 				return nil
 			}
 			return err
@@ -59,7 +59,7 @@ func TestTemplatesStillNeedToBeTemplates(t *testing.T) {
 		// If no template syntax found, add to the list
 		if !hasTemplateSyntax {
 			// Get relative path for cleaner output
-			relPath, _ := filepath.Rel(testDir, path)
+			relPath, _ := filepath.Rel(thirdPartyDir, path)
 			unnecessaryTemplates = append(unnecessaryTemplates, relPath)
 		}
 
