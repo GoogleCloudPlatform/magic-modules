@@ -19,6 +19,7 @@ package {{ lower $.ProductMetadata.Name }}
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 
 {{/* We list all the v2 imports here and unstable imports, because we run 'goimports' to guess the correct
@@ -106,14 +107,13 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 	}
 	d := fakeResource.TestResourceData()
 
-{{	if $.TgcHclBlockName -}}
-	hclBlockName := res["{{ $.TgcHclBlockName -}}"].(string)
-
-	{{- else -}}
 	assetNameParts := strings.Split(asset.Name, "/")
-	hclBlockName := assetNameParts[len(assetNameParts)-1]
-{{ end}}
 
+	hclBlockName := assetNameParts[len(assetNameParts)-1]
+	digitRegex := regexp.MustCompile(`^\d+$`)
+	if digitRegex.MatchString(hclBlockName) {
+		hclBlockName = fmt.Sprintf("resource%s", utils.RandString(8))
+	}
 	hclData := make(map[string]interface{})
 
 {{ if $.CustomCode.TgcDecoder -}}
