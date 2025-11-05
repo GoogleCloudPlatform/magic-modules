@@ -1,4 +1,3 @@
-
 [
   {
     "name": "//vmwareengine.googleapis.com/projects/{{.Provider.project}}/locations/us-central1-a/privateClouds/gg-asset-pc-00563-8560",
@@ -15,8 +14,35 @@
           "clusterId": "gg-asset-mgmt-cl-00563-8560",
           "nodeTypeConfigs": {
             "standard-72": {
+              "nodeCount": 3,
+              "customCoreCount": 36
+            },
+            "standard-128": {
               "nodeCount": 3
             }
+          },
+          "autoscalingSettings": {
+            "autoscalingPolicies": {
+              "autoscaling-policy": {
+                "nodeTypeId": "standard-72",
+                "scaleOutSize": 1,
+                "cpuThresholds": {
+                  "scaleOut": 80,
+                  "scaleIn": 15
+                },
+                "consumedMemoryThresholds": {
+                  "scaleOut": 75,
+                  "scaleIn": 20
+                },
+                "storageThresholds": {
+                  "scaleOut": 80,
+                  "scaleIn": 20
+                }
+              }
+            },
+            "minClusterNodeCount": 3,
+            "maxClusterNodeCount": 8,
+            "coolDownPeriod": "1800s"
           }
         },
         "networkConfig": {
