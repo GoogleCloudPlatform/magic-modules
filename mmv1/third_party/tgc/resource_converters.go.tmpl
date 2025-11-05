@@ -216,6 +216,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_vmwareengine_network_policy":              {vmwareengine.ResourceConverterVmwareengineNetworkPolicy()},
 		"google_vmwareengine_network_peering":             {vmwareengine.ResourceConverterVmwareengineNetworkPeering()},
 		"google_workbench_instance":                       {workbench.ResourceConverterWorkbenchInstance()},
+		"google_vmwareengine_private_cloud":               {vmwareengine.ResourceConverterVmwareenginePrivateCloud()},
 	{{- range $object := $.IamResources }}
 	{{- if $object.IamClassName }}
 		"{{ $object.TerraformName }}_iam_policy": { {{- $object.IamClassName }}IamPolicy()},
