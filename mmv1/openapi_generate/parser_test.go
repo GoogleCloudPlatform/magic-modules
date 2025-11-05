@@ -2,8 +2,8 @@ package openapi_generate
 
 import (
 	"context"
-	"testing"
 	"github.com/getkin/kin-openapi/openapi3"
+	"testing"
 )
 
 func TestMapType(t *testing.T) {
