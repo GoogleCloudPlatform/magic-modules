@@ -201,6 +201,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_pubsub_topic":                             {pubsub.ResourceConverterPubsubTopic()},
 		"google_kms_crypto_key":                           {kms.ResourceConverterKMSCryptoKey()},
 		"google_kms_key_ring":                             {kms.ResourceConverterKMSKeyRing()},
+		"google_kms_crypto_key_version":                   {kms.ResourceConverterKMSCryptoKeyVersion()},
 		"google_filestore_instance":                       {filestore.ResourceConverterFilestoreInstance()},
 		"google_access_context_manager_service_perimeter": {accesscontextmanager.ResourceConverterAccessContextManagerServicePerimeter()},
 		"google_access_context_manager_access_policy":     {accesscontextmanager.ResourceConverterAccessContextManagerAccessPolicy()},
@@ -213,6 +214,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_monitoring_alert_policy":                  {monitoring.ResourceConverterMonitoringAlertPolicy()},
 		"google_vertex_ai_dataset":                        {vertexai.ResourceConverterVertexAIDataset()},
 		"google_vmwareengine_network_policy":              {vmwareengine.ResourceConverterVmwareengineNetworkPolicy()},
+		"google_vmwareengine_network_peering":             {vmwareengine.ResourceConverterVmwareengineNetworkPeering()},
 		"google_workbench_instance":                       {workbench.ResourceConverterWorkbenchInstance()},
 	{{- range $object := $.IamResources }}
 	{{- if $object.IamClassName }}
