@@ -187,6 +187,7 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 	}
 	if object.Examples != nil {
 		t.GenerateResourceTestsLegacy(object, templateData, outputFolder)
+		return
 	}
 
 	eligibleSample := false
@@ -239,7 +240,30 @@ func (t *Terraform) GenerateSingularDataSource(object api.Resource, templateData
 	templateData.GenerateDataSourceFile(targetFilePath, object)
 }
 
+func (t *Terraform) GenerateSingularDataSourceTestsLegacy(object api.Resource, templateData TemplateData, outputFolder string) {
+	if !object.ShouldGenerateSingularDataSourceTests() {
+		return
+	}
+
+	productName := t.Product.ApiName
+	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s_test.go", t.ResourceGoFilename(object)))
+	templateData.GenerateDataSourceTestFileLegacy(targetFilePath, object)
+
+}
+
 func (t *Terraform) GenerateSingularDataSourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
+	if object.Samples != nil && object.Examples != nil {
+		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
+	}
+	if object.Examples != nil {
+		t.GenerateSingularDataSourceTestsLegacy(object, templateData, outputFolder)
+		return
+	}
+
 	if !object.ShouldGenerateSingularDataSourceTests() {
 		return
 	}
