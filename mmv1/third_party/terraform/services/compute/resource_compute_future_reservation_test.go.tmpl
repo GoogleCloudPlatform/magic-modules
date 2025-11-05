@@ -19,8 +19,6 @@ func TestAccComputeFutureReservation_update(t *testing.T) {
 		"project":       envvar.GetTestProjectFromEnv(),
 		"end_time":        time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339),
 		"start_time":      time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 1).Format(time.RFC3339),
-		"updated_end_time":        time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 11).Format(time.RFC3339),
-		"updated_start_time":      time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 2).Format(time.RFC3339),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -90,8 +88,8 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
   auto_delete_auto_created_reservations = false
   description      = "test updated future reservation"
   time_window {
-    start_time = "%{updated_start_time}"
-    end_time   = "%{updated_end_time}"
+    start_time = "%{start_time}"
+    end_time   = "%{end_time}"
   }
   specific_sku_properties {
     total_count = "1"
