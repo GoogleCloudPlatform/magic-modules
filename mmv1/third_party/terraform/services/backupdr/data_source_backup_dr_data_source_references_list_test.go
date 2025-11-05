@@ -119,8 +119,6 @@ resource "google_backup_dr_backup_plan_association" "bpa" {
 data "google_backup_dr_list_data_source_references" "all" {
   project    = data.google_project.project.project_id
   location   = "%{location}"
-  filter	 = "resource_type=sqladmin.googleapis.com/Instance"
-  order_by   = "name"
   depends_on = [google_backup_dr_backup_plan_association.bpa]
 }
 `, context)

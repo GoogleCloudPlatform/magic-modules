@@ -24,16 +24,6 @@ func DataSourceGoogleCloudBackupDRListDataSourceReferences() *schema.Resource {
 				Computed:    true,
 				Description: "The ID of the project in which the resource belongs.",
 			},
-			"filter": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The filter to apply to the list results.",
-			},
-			"order_by": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The order to sort results by.",
-			},
 			"data_source_references": {
 				Type:        schema.TypeList,
 				Computed:    true,
@@ -98,24 +88,6 @@ func dataSourceGoogleCloudBackupDRListDataSourceReferencesRead(d *schema.Resourc
 
 	location := d.Get("location").(string)
 	url := fmt.Sprintf("%sprojects/%s/locations/%s/dataSourceReferences", config.BackupDRBasePath, project, location)
-
-	params := make(map[string]string)
-	if v, ok := d.GetOk("filter"); ok {
-		params["filter"] = v.(string)
-	}
-	if v, ok := d.GetOk("order_by"); ok {
-		// API expects `orderBy` as the query parameter name
-		params["orderBy"] = v.(string)
-	}
-
-	// Attach query params to the URL so the API receives filter/orderBy
-	if len(params) > 0 {
-		var err error
-		url, err = transport_tpg.AddQueryParams(url, params)
-		if err != nil {
-			return fmt.Errorf("Error adding query params to URL: %s", err)
-		}
-	}
 
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
