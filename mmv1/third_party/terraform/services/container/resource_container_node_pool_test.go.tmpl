@@ -6080,7 +6080,7 @@ resource "google_container_node_pool" "np" {
 `, cluster, np, networkName, subnetworkName, storagePoolResourceName, location)
 }
 
-func testAccContainerNodePool_acceleratorNetworkProfile_zonal(clusterName, npName string) string {
+func testAccContainerNodePool_acceleratorNetworkProfile(clusterName, npName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "cluster" {
   name     = "%s"
@@ -6124,7 +6124,7 @@ func TestAccContainerNodePool_acceleratorNetworkProfile(t *testing.T) {
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerNodePool_acceleratorNetworkProfile_zonal(clusterName, npName),
+				Config: testAccContainerNodePool_acceleratorNetworkProfile(clusterName, npName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", npName),
 					resource.TestCheckResourceAttr(resourceName, "node_config.0.machine_type", "e2-medium"),
@@ -6135,10 +6135,25 @@ func TestAccContainerNodePool_acceleratorNetworkProfile(t *testing.T) {
 	})
 }
 
-func testAccContainerNodePool_acceleratorNetworkProfile_zonal_conflict(clusterName, npName string) string {
-    return fmt.Sprintf(`
+func testAccContainerNodePool_acceleratorNetworkProfile_conflict(clusterName, npName string) string {
+	return fmt.Sprintf(`
+// 1. Create the "additional" network
+resource "google_compute_network" "additional_net" {
+  name                    = "%[1]s-net" // Based on clusterName
+  auto_create_subnetworks = false
+}
+
+// 2. Create the "additional" subnetwork
+resource "google_compute_subnetwork" "additional_sub" {
+  name          = "%[1]s-sub" // Based on clusterName
+  network       = google_compute_network.additional_net.id
+  ip_cidr_range = "10.2.0.0/16"
+  region        = "us-central1"
+}
+
+// 3. Create the cluster (this will use the 'default' network)
 resource "google_container_cluster" "cluster" {
-  name     = "%s"
+  name     = "%[1]s" // clusterName
   location = "us-central1-a"
 
   datapath_provider       = "ADVANCED_DATAPATH"
@@ -6149,8 +6164,9 @@ resource "google_container_cluster" "cluster" {
   deletion_protection = false
 }
 
+// 4. Create the node pool with the conflicting config
 resource "google_container_node_pool" "np" {
-  name     = "%s"
+  name     = "%[2]s" // npName
   cluster  = google_container_cluster.cluster.id
   location = "us-central1-a"
   node_count = 1
@@ -6162,9 +6178,11 @@ resource "google_container_node_pool" "np" {
   network_config {
     // --- This is the conflict ---
     accelerator_network_profile = "auto"
+
     additional_node_network_configs {
-	  network    = "some-network-value"
-      subnetwork = "some-subnetwork-value" 
+      // Use the REAL network and subnetwork IDs
+      network    = google_compute_network.additional_net.id
+      subnetwork = google_compute_subnetwork.additional_sub.name 
     }
   }
 }
@@ -6184,11 +6202,8 @@ func TestAccContainerNodePool_acceleratorNetworkProfile_conflict(t *testing.T) {
         Steps: []resource.TestStep{
             {
                 // Use the new conflicting config
-                Config: testAccContainerNodePool_acceleratorNetworkProfile_zonal_conflict(clusterName, npName),
-                
-                // This tells the test to PASS only if Terraform returns an error
-                // that matches this regular expression.
-                ExpectError: regexp.MustCompile("accelerator_network_profile.*conflicts with.*additional_node_network_configs"),
+                Config: testAccContainerNodePool_acceleratorNetworkProfile_conflict(clusterName, npName),
+				ExpectError: regexp.MustCompile("(?i)Accelerator network profile.*not supported.*additional node interfaces"),
             },
         },
     })

@@ -1,4 +1,4 @@
-module github.com/hashicorp/terraform-provider-google-beta-beta
+module github.com/hashicorp/terraform-provider-google
 
 go 1.24.0
 
