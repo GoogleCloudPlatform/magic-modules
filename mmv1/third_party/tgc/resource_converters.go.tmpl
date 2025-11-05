@@ -117,6 +117,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_compute_autoscaler":                       {compute.ResourceConverterComputeAutoscaler()},
 		"google_compute_firewall":                         {compute.ResourceConverterComputeFirewall()},
 		"google_compute_disk":                             {compute.ResourceConverterComputeDisk()},
+		"google_compute_image":                            {compute.ResourceConverterComputeImage()},
 		"google_compute_forwarding_rule":                  {compute.ResourceConverterComputeForwardingRule()},
 		"google_gke_hub_membership":                       {gkehub.ResourceConverterGKEHubMembership()},
 		"google_compute_global_address":                   {compute.ResourceConverterComputeGlobalAddress()},
@@ -194,6 +195,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_logging_project_bucket_config":       	   {logging.ResourceConverterLogProjectBucket()},
 		"google_logging_billing_account_bucket_config":    {logging.ResourceConverterLogBillingAccountBucket()},
 		"google_logging_project_sink":                     {logging.ResourceConverterLogProjectSink()},
+		"google_logging_folder_sink":                      {logging.ResourceConverterLogFolderSink()},
 		"google_logging_organization_sink":                {logging.ResourceConverterLogOrganizationSink()},
 		"google_cloud_tasks_queue":                        {cloudtasks.ResourceConverterCloudTasksQueue()},
 		"google_pubsub_topic":                             {pubsub.ResourceConverterPubsubTopic()},
@@ -211,6 +213,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_monitoring_alert_policy":                  {monitoring.ResourceConverterMonitoringAlertPolicy()},
 		"google_vertex_ai_dataset":                        {vertexai.ResourceConverterVertexAIDataset()},
 		"google_vmwareengine_network_peering":             {vmwareengine.ResourceConverterVmwareengineNetworkPeering()},
+		"google_workbench_instance":                       {workbench.ResourceConverterWorkbenchInstance()},
 	{{- range $object := $.IamResources }}
 	{{- if $object.IamClassName }}
 		"{{ $object.TerraformName }}_iam_policy": { {{- $object.IamClassName }}IamPolicy()},

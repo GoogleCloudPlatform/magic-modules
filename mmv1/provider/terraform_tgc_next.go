@@ -104,7 +104,7 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 
 	if !object.IsExcluded() {
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
-		tgc.addTestsFromExamples(&object)
+		tgc.addTestsFromSamples(&object)
 		tgc.GenerateResourceTests(object, *templateData, outputFolder)
 	}
 }
@@ -318,6 +318,25 @@ func (tgc TerraformGoogleConversionNext) addTestsFromExamples(object *api.Resour
 		object.TGCTests = append(object.TGCTests, resource.TGCTest{
 			Name: "TestAcc" + example.TestSlug(object.ProductMetadata.Name, object.Name),
 			Skip: example.TGCSkipTest,
+		})
+	}
+}
+
+func (tgc TerraformGoogleConversionNext) addTestsFromSamples(object *api.Resource) {
+	if object.Examples != nil {
+		tgc.addTestsFromExamples(object)
+		return
+	}
+	for _, sample := range object.Samples {
+		if sample.ExcludeTest {
+			continue
+		}
+		if object.ProductMetadata.VersionObjOrClosest(tgc.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0 {
+			continue
+		}
+		object.TGCTests = append(object.TGCTests, resource.TGCTest{
+			Name: "TestAcc" + sample.TestSampleSlug(object.ProductMetadata.Name, object.Name),
+			Skip: sample.TGCSkipTest,
 		})
 	}
 }

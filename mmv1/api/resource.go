@@ -25,6 +25,7 @@ import (
 	"text/template"
 
 	"github.com/golang/glog"
+	"gopkg.in/yaml.v3"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
@@ -55,6 +56,7 @@ type Resource struct {
 	//		api: 'rest_api_reference_url/version'
 	//
 	References resource.ReferenceLinks `yaml:"references,omitempty"`
+	Docs       resource.Docs           `yaml:"docs,omitempty"`
 
 	// [Required] The GCP "relative URI" of a resource, relative to the product
 	// base URL. It can often be inferred from the `create` path.
@@ -205,8 +207,6 @@ type Resource struct {
 
 	CustomCode resource.CustomCode `yaml:"custom_code,omitempty"`
 
-	Docs resource.Docs `yaml:"docs,omitempty"`
-
 	// This block inserts entries into the customdiff.All() block in the
 	// resource schema -- the code for these custom diff functions must
 	// be included in the resource constants or come from tpgresource
@@ -219,6 +219,9 @@ type Resource struct {
 	// Examples in documentation. Backed by generated tests, and have
 	// corresponding OiCS walkthroughs.
 	Examples []*resource.Examples
+
+	// Samples for generating tests and documentation
+	Samples []*resource.Sample
 
 	// If true, generates product operation handling logic.
 	AutogenAsync bool `yaml:"autogen_async,omitempty"`
@@ -378,9 +381,6 @@ type TGCResource struct {
 	// If true, include resource in the new package of TGC (terraform-provider-conversion)
 	IncludeInTGCNext bool `yaml:"include_in_tgc_next_DO_NOT_USE,omitempty"`
 
-	// Name of the hcl resource block used in TGC
-	TgcHclBlockName string `yaml:"tgc_hcl_block_name,omitempty"`
-
 	// The resource kind in CAI.
 	// If this is not set, then :name is used instead.
 	// For example: compute.googleapis.com/Address has Address for CaiResourceKind,
@@ -407,11 +407,11 @@ type TGCResource struct {
 	CaiAssetNameFormat string `yaml:"cai_asset_name_format,omitempty"`
 }
 
-func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
+func (r *Resource) UnmarshalYAML(value *yaml.Node) error {
 	type resourceAlias Resource
 	aliasObj := (*resourceAlias)(r)
 
-	err := unmarshal(aliasObj)
+	err := value.Decode(aliasObj)
 	if err != nil {
 		return err
 	}
@@ -532,6 +532,10 @@ func (r *Resource) Validate() {
 
 	for _, example := range r.Examples {
 		example.Validate(r.Name)
+	}
+
+	for _, sample := range r.Samples {
+		sample.Validate(r.Name)
 	}
 
 	if r.Async != nil {
@@ -1304,9 +1308,10 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 	return uniq
 }
 
+// IgnoreReadPropertiesLegacy is the legacy version of IgnoreReadProperties for Examples
 // IgnoreReadProperties returns a sorted slice of property names (snake_case) that should be ignored when reading.
 // This is useful for downstream code that needs to iterate over these properties.
-func (r Resource) IgnoreReadProperties(e *resource.Examples) []string {
+func (r Resource) IgnoreReadPropertiesLegacy(e *resource.Examples) []string {
 	var props []string
 	for _, tp := range r.AllUserProperties() {
 		if tp.UrlParamOnly || tp.IsA("ResourceRef") {
@@ -1321,10 +1326,38 @@ func (r Resource) IgnoreReadProperties(e *resource.Examples) []string {
 	return props
 }
 
+// IgnoreReadPropertiesToStringLegacy is the legacy version of IgnoreReadPropertiesToString for Examples
 // IgnoreReadPropertiesToString returns the ignore read properties as a Go-syntax string slice.
 // This is a wrapper around IgnoreReadProperties for backwards compatibility.
-func (r Resource) IgnoreReadPropertiesToString(e *resource.Examples) string {
-	props := r.IgnoreReadProperties(e)
+func (r Resource) IgnoreReadPropertiesToStringLegacy(e *resource.Examples) string {
+	props := r.IgnoreReadPropertiesLegacy(e)
+	if len(props) > 0 {
+		return fmt.Sprintf("[]string{%s}", strings.Join(quoteStrings(props), ", "))
+	}
+	return ""
+}
+
+// IgnoreReadProperties returns a sorted slice of property names (snake_case) that should be ignored when reading.
+// This is useful for downstream code that needs to iterate over these properties.
+func (r Resource) IgnoreReadProperties(s *resource.Step) []string {
+	var props []string
+	for _, tp := range r.AllUserProperties() {
+		if tp.UrlParamOnly || tp.IsA("ResourceRef") {
+			props = append(props, google.Underscore(tp.Name))
+		}
+	}
+	props = append(props, s.IgnoreReadExtra...)
+	props = append(props, r.IgnoreReadLabelsFields(r.PropertiesWithExcluded())...)
+	props = append(props, ignoreReadFields(r.AllUserProperties())...)
+
+	slices.Sort(props)
+	return props
+}
+
+// IgnoreReadPropertiesToString returns the ignore read properties as a Go-syntax string slice.
+// This is a wrapper around IgnoreReadProperties for backwards compatibility.
+func (r Resource) IgnoreReadPropertiesToString(s *resource.Step) string {
+	props := r.IgnoreReadProperties(s)
 	if len(props) > 0 {
 		return fmt.Sprintf("[]string{%s}", strings.Join(quoteStrings(props), ", "))
 	}
@@ -1936,6 +1969,40 @@ func (r Resource) TestExamples() []*resource.Examples {
 	})
 }
 
+func (r Resource) TestSamples() []*resource.Sample {
+	return google.Reject(google.Reject(r.Samples, func(s *resource.Sample) bool {
+		return s.ExcludeTest
+	}), func(s *resource.Sample) bool {
+		return s.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, s.MinVersion)
+	})
+}
+
+func (r Resource) TestSampleSetUp() {
+	res := make(map[string]string)
+	for _, sample := range r.Samples {
+		sample.TargetVersionName = r.TargetVersionName
+		if sample.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, sample.MinVersion) {
+			continue
+		}
+		for _, step := range sample.Steps {
+			if step.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, step.MinVersion) {
+				continue
+			}
+			step.PrimaryResourceId = sample.PrimaryResourceId
+			packageName := filepath.Base(filepath.Dir(r.SourceYamlFile))
+			if step.ConfigPath == "" {
+				step.ConfigPath = fmt.Sprintf("templates/terraform/samples/services/%s/%s.tf.tmpl", packageName, step.Name)
+			}
+			step.SetHCLText()
+			configName := step.Name
+			if _, ok := res[step.Name]; !ok {
+				res[configName] = sample.Name
+				sample.NewConfigFuncs = append(sample.NewConfigFuncs, step)
+			}
+		}
+	}
+}
+
 func (r Resource) VersionedProvider(exampleVersion string) bool {
 	var vp string
 	if exampleVersion != "" {
@@ -2312,14 +2379,12 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 		"lifecycle",
 	}
 	for _, tp := range r.VirtualFields {
-		props = append(props, google.Underscore(tp.Name))
+		props = append(props, tp.MetadataLineage())
 	}
 	for _, tp := range r.AllNestedProperties(r.RootProperties()) {
 		if tp.UrlParamOnly {
 			props = append(props, google.Underscore(tp.Name))
-		} else if tp.IsMissingInCai {
-			props = append(props, tp.MetadataLineage())
-		} else if tp.IgnoreRead {
+		} else if tp.IsMissingInCai || tp.IgnoreRead || tp.ClientSide || tp.WriteOnlyLegacy {
 			props = append(props, tp.MetadataLineage())
 		}
 	}
