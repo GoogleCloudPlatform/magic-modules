@@ -10,6 +10,7 @@
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
         "edgeServicesCidr": "192.168.30.0/26",
+        "vmwareEngineNetwork": "projects/{{.Provider.project}}/locations/global/vmwareEngineNetworks/gg-asset-17806-51c7-network",
         "externalIp": {
           "enabled": true
         },
