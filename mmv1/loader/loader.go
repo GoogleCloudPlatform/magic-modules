@@ -307,6 +307,7 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 	// SetDefault after AddExtraFields to ensure relevant metadata is available for the newly generated fields
 	resource.SetDefault(product)
 	resource.Validate()
+	resource.TestSampleSetUp()
 
 	for _, e := range resource.Examples {
 		e.LoadHCLText(l.BaseDirectory)

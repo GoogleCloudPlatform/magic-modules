@@ -293,9 +293,9 @@ type Type struct {
 	// just as they are in the standard flattener template.
 	CustomFlatten string `yaml:"custom_flatten,omitempty"`
 
-	ResourceMetadata *Resource `yaml:"resource_metadata,omitempty"`
+	ResourceMetadata *Resource `yaml:"-"`
 
-	ParentMetadata *Type `yaml:"parent_metadata,omitempty"` // is nil for top-level properties
+	ParentMetadata *Type `yaml:"-"`
 
 	// The prefix used as part of the property expand/flatten function name
 	// flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}
