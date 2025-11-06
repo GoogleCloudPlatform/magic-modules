@@ -179,8 +179,37 @@ func (td *TemplateData) GenerateTestFile(filePath string, resource api.Resource)
 	td.GenerateFile(filePath, templatePath, tmplInput, true, templates...)
 }
 
-func (td *TemplateData) GenerateDataSourceTestFile(filePath string, resource api.Resource) {
+func (td *TemplateData) GenerateDataSourceTestFileLegacy(filePath string, resource api.Resource) {
 	templatePath := "templates/terraform/examples/base_configs/datasource_test_file.go.tmpl"
+	templates := []string{
+		"templates/terraform/env_var_context.go.tmpl",
+		templatePath,
+	}
+	tmplInput := TestInput{
+		Res:                  resource,
+		ImportPath:           resource.ImportPath,
+		PROJECT_NAME:         "my-project-name",
+		CREDENTIALS:          "my/credentials/filename.json",
+		REGION:               "us-west1",
+		ORG_ID:               "123456789",
+		ORG_DOMAIN:           "example.com",
+		ORG_TARGET:           "123456789",
+		PROJECT_NUMBER:       "1111111111111",
+		BILLING_ACCT:         "000000-0000000-0000000-000000",
+		MASTER_BILLING_ACCT:  "000000-0000000-0000000-000000",
+		SERVICE_ACCT:         "my@service-account.com",
+		CUST_ID:              "A01b123xz",
+		IDENTITY_USER:        "cloud_identity_user",
+		PAP_DESCRIPTION:      "description",
+		CHRONICLE_ID:         "00000000-0000-0000-0000-000000000000",
+		VMWAREENGINE_PROJECT: "my-vmwareengine-project",
+	}
+
+	td.GenerateFile(filePath, templatePath, tmplInput, true, templates...)
+}
+
+func (td *TemplateData) GenerateDataSourceTestFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/samples/base_configs/datasource_test_file.go.tmpl"
 	templates := []string{
 		"templates/terraform/env_var_context.go.tmpl",
 		templatePath,
