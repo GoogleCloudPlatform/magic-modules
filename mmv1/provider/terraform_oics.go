@@ -75,7 +75,7 @@ func (toics TerraformOiCS) GenerateObject(object api.Resource, outputFolder, res
 	}
 }
 
-func (toics TerraformOiCS) GenerateResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
+func (toics TerraformOiCS) GenerateResourceLegacy(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
 	if !generateDocs {
 		return
 	}
@@ -116,6 +116,60 @@ func (toics TerraformOiCS) GenerateResource(object api.Resource, templateData Te
 			motdTemplatePath,
 		}
 		templateData.GenerateFile(path.Join(targetFolder, "motd"), motdTemplatePath, example, false, motdTemplates...)
+	}
+}
+
+func (toics TerraformOiCS) GenerateResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
+	if object.Samples != nil && object.Examples != nil {
+		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
+	}
+	if object.Examples != nil {
+		toics.GenerateResourceLegacy(object, templateData, outputFolder, generateCode, generateDocs)
+		return
+	}
+
+	if !generateDocs {
+		return
+	}
+
+	for _, sample := range object.TestSamples() {
+		for _, step := range sample.NewConfigFuncs {
+			if len(step.TestEnvVars) > 0 {
+				continue
+			}
+
+			step.SetOiCSHCLText()
+
+			targetFolder := path.Join(outputFolder, step.Name)
+
+			if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+				log.Println(fmt.Errorf("error creating oics example directory %v: %v", targetFolder, err))
+			}
+
+			oicsExampleTemplatePath := "templates/terraform/samples/base_configs/oics_example_file.tf.tmpl"
+			oicsExampleTemplates := []string{
+				oicsExampleTemplatePath,
+			}
+			templateData.GenerateFile(path.Join(targetFolder, "main.tf"), oicsExampleTemplatePath, step, false, oicsExampleTemplates...)
+
+			tutorialTemplatePath := "templates/terraform/samples/base_configs/tutorial.md.tmpl"
+			tutorialTemplates := []string{
+				tutorialTemplatePath,
+			}
+			templateData.GenerateFile(path.Join(targetFolder, "tutorial.md"), tutorialTemplatePath, step, false, tutorialTemplates...)
+
+			backingTemplatePath := "templates/terraform/samples/base_configs/example_backing_file.tf.tmpl"
+			backingTemplates := []string{
+				backingTemplatePath,
+			}
+			templateData.GenerateFile(path.Join(targetFolder, "backing_file.tf"), backingTemplatePath, step, false, backingTemplates...)
+
+			motdTemplatePath := "templates/terraform/samples/static/motd.tmpl"
+			motdTemplates := []string{
+				motdTemplatePath,
+			}
+			templateData.GenerateFile(path.Join(targetFolder, "motd"), motdTemplatePath, step, false, motdTemplates...)
+		}
 	}
 }
 
