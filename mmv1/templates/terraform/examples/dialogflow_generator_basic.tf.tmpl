@@ -2,7 +2,15 @@ resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
   location = "global"
   summarization_context {
     summarization_sections {
+        type = "SITUATION"
+    }
+    summarization_sections {
+        type = "ACTION"
+    }
+    summarization_sections {
         type = "RESOLUTION"
     }
+    version = "1.0"
+    output_language_code = "en"
   }
 }

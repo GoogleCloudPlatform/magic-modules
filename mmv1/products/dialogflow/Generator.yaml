@@ -24,6 +24,14 @@ self_link: '{{name}}'
 update_verb: 'PATCH'
 update_mask: true
 
+custom_code:
+  pre_create: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
+  pre_read: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
+  pre_update: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
+  pre_delete: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project_and_location.go.tmpl'
+
 examples:
   - name: 'dialogflow_generator_basic'
     primary_resource_id: 'basic_generator'
@@ -47,6 +55,12 @@ properties:
     type: String
     description: |
       Optional. Human readable description of the generator.
+  - name: tools
+    type: Array
+    description: |
+      Optional. Resource names of the tools that the generator can choose from. Format: projects/<Project ID>/locations/<Location ID>/tools/<tool ID>.
+    item_type:
+      type: String
   - name: summarizationContext
     type: NestedObject
     description: |
