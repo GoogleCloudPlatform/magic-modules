@@ -51,6 +51,11 @@ examples:
     primary_resource_id: 'function_tool'
     vars:
       agent_name: 'dialogflowcx-agent-fucntion'
+  - name: 'dialogflowcx_tool_connector'
+    primary_resource_id: 'connector_tool'
+    vars:
+      agent_name: 'dialogflowcx-agent-connector'
+    min_version: beta
 parameters:
   - name: 'parent'
     type: String
@@ -305,3 +310,103 @@ properties:
         custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
         validation:
           function: 'validation.StringIsJSON'
+  - name: 'connectorSpec'
+    type: NestedObject
+    description: |
+      Integration connectors tool specification.
+      This field is part of a union field `specification`: Only one of `openApiSpec`, `dataStoreSpec`, `functionSpec`, or `connectorSpec` may be set.
+    min_version: beta
+    properties:
+      - name: 'name'
+        type: String
+        required: true
+        description: |
+          The full resource name of the referenced Integration Connectors Connection.
+          Format: projects/*/locations/*/connections/*
+      - name: 'actions'
+        type: Array
+        required: true
+        description: |
+          Actions for the tool to use.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'inputFields'
+              type: Array
+              description: |
+                Entity fields to use as inputs for the operation.
+                If no fields are specified, all fields of the Entity will be used.
+              item_type:
+                type: String
+            - name: 'outputFields'
+              type: Array
+              description: |
+                Entity fields to return from the operation.
+                If no fields are specified, all fields of the Entity will be returned.
+              item_type:
+                type: String
+            - name: 'connectionActionId'
+              type: String
+              description: |
+                ID of a Connection action for the tool to use. This field is part of a required union field `action_spec`.
+            - name: 'entityOperation'
+              type: NestedObject
+              description: |
+                Entity operation configuration for the tool to use. This field is part of a required union field `action_spec`.
+              properties:
+                - name: 'entityId'
+                  type: String
+                  description: |
+                    ID of the entity.
+                  required: true
+                - name: 'operation'
+                  type: Enum
+                  description: |
+                    The operation to perform on the entity.
+                  enum_values:
+                    - 'LIST'
+                    - 'CREATE'
+                    - 'UPDATE'
+                    - 'DELETE'
+                    - 'GET'
+                  required: true
+      - name: 'endUserAuthConfig'
+        type: NestedObject
+        description: |
+          Integration Connectors end-user authentication configuration.
+          If configured, the end-user authentication fields will be passed in the Integration Connectors API request
+          and override the admin, default authentication configured for the Connection.
+          Note: The Connection must have authentication override enabled in order to specify an EUC configuration here - otherwise,
+          the ConnectorTool creation will fail.
+          See: https://cloud.google.com/application-integration/docs/configure-connectors-task#configure-authentication-override        properties:
+        properties:
+          - name: 'oauth2AuthCodeConfig'
+            type: NestedObject
+            description: |
+              Oauth 2.0 Authorization Code authentication. This field is part of a union field `end_user_auth_config`. Only one of `oauth2AuthCodeConfig` or `oauth2JwtBearerConfig` may be set.
+            properties:
+              - name: 'oauthToken'
+                type: String
+                description: |
+                  Oauth token value or parameter name to pass it through.
+                required: true
+          - name: 'oauth2JwtBearerConfig'
+            type: NestedObject
+            description: |
+              JWT Profile Oauth 2.0 Authorization Grant authentication.. This field is part of a union field `end_user_auth_config`. Only one of `oauth2AuthCodeConfig` or `oauth2JwtBearerConfig` may be set.
+            properties:
+              - name: 'issuer'
+                type: String
+                description: |
+                  Issuer value or parameter name to pass it through.
+                required: true
+              - name: 'subject'
+                type: String
+                description: |
+                  Subject value or parameter name to pass it through.
+                required: true
+              - name: 'clientKey'
+                type: String
+                description: |
+                  Client key value or parameter name to pass it through.
+                required: true
