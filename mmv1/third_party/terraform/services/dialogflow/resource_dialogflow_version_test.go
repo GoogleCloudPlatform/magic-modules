@@ -76,7 +76,7 @@ func testAccDialogflowVersion_full1(context map[string]interface{}) string {
 
 	resource "google_dialogflow_version" "foobar" {
 		depends_on = [google_dialogflow_agent.agent]
-		project = google_project.agent_project.project_id
+		parent = "projects/${google_project.agent_project.project_id}/agent"
 		description = "tf-test-description-%{random_suffix}"
 	}
 	`, context)
@@ -118,7 +118,7 @@ func testAccDialogflowVersion_full2(context map[string]interface{}) string {
 
 	resource "google_dialogflow_version" "foobar" {
 		depends_on = [google_dialogflow_agent.agent]
-		project = google_project.agent_project.project_id
+		parent = "projects/${google_project.agent_project.project_id}/agent"
 		description = "tf-test-version-%{random_suffix}2"
 	}
 	`, context)
