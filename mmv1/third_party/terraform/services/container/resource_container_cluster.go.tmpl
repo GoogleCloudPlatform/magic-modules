@@ -1215,6 +1215,12 @@ func ResourceContainerCluster() *schema.Resource {
 										Description: `Maintenance exclusion related options.`,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
+												"end_time_behavior": {
+													Type:         schema.TypeString,
+													Optional:     true,
+													ValidateFunc: validation.StringInSlice([]string{"UNTIL_END_OF_SUPPORT"}, false),
+													Description: `The behavior of the exclusion end time.`,
+												},
 												"scope": {
 													Type:         schema.TypeString,
 													Required:     true,
