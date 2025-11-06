@@ -1,0 +1,134 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+name: Example
+description: An example represents a sample conversation between the user and the agent(s).
+base_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/examples
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/apps/{{app}}/examples/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/examples?exampleId={{example_id}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/apps/{{app}}/examples/{{name}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/apps/{{app}}/examples/{{name}}
+examples:
+  - name: "ces_example_basic"
+    primary_resource_id: "my-example"
+    vars:
+      example_display_name: 'my-example'
+      app_display_name: 'my-app'
+      example_id: 'example-id'
+      app_id: 'app-id'
+autogen_status: RXhhbXBsZQ==
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`, defining what region the parent app is in. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: app
+    type: String
+    description: Resource ID segment making up resource `name`, defining the app the example belongs to. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: exampleId
+    type: String
+    description: |-
+      The ID to use for the example, which will become the final component of
+      the example's resource name. In Terraform, this field is required.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: createTime
+    type: String
+    description: Timestamp when the example was created.
+    output: true
+  - name: description
+    type: String
+    description: Human-readable description of the example.
+  - name: displayName
+    type: String
+    description: Display name of the example.
+    required: true
+  - name: etag
+    type: Fingerprint
+    description: |-
+      Etag used to ensure the object hasn't changed during a read-modify-write
+      operation. If the etag is empty, the update will overwrite any concurrent
+      changes.
+    output: true
+  - name: invalid
+    type: Boolean
+    description: |-
+      The example may become invalid if referencing resources are deleted.
+      Invalid examples will not be used as few-shot examples.
+    output: true
+  - name: messages
+    type: Array
+    description: The collection of messages that make up the conversation.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: chunks
+          type: Array
+          description: Content of the message as a series of chunks.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: image
+                type: NestedObject
+                description: Represents an image input or output in the conversation.
+                properties:
+                  - name: data
+                    type: String
+                    description: Raw bytes of the image.
+                    required: true
+                  - name: mimeType
+                    type: String
+                    description: |-
+                      The IANA standard MIME type of the source data.
+                      Supported image types includes:
+                      * image/png
+                      * image/jpeg
+                      * image/webp
+                    required: true
+              - name: text
+                type: String
+                description: Text data.
+              - name: updatedVariables
+                type: String
+                description: |-
+                  A struct represents variables that were updated in the conversation,
+                  keyed by variable names.
+                custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                validation:
+                  function: 'validation.StringIsJSON'
+        - name: role
+          type: String
+          description: The role within the conversation, e.g., user, agent.
+  - name: name
+    type: String
+    description: |-
+      Identifier. The unique identifier of the example.
+      Format:
+      `projects/{project}/locations/{location}/apps/{app}/examples/{example}`
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: updateTime
+    type: String
+    description: Timestamp when the example was last updated.
+    output: true
