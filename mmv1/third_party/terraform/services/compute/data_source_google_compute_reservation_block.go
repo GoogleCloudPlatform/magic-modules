@@ -343,7 +343,6 @@ func dataSourceGoogleComputeReservationBlockRead(d *schema.ResourceData, meta in
 	if err := d.Set("sub_block_names", subBlockNames); err != nil {
 		return fmt.Errorf("Error setting sub_block_names: %s", err)
 	}
-
 	d.SetId(fmt.Sprintf("projects/%s/zones/%s/reservations/%s/reservationBlocks/%s", project, zone, reservation, block_name))
 	return nil
 }
