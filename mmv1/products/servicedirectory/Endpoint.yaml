@@ -33,7 +33,7 @@ timeouts:
   delete_minutes: 20
 custom_code:
   custom_import: 'templates/terraform/custom_import/service_directory_endpoint.go.tmpl'
-  encoder: 'templates/terraform/custom_encoder/service_directory_metadata_to_annotations.go.tmpl'
+  encoder: 'templates/terraform/encoders/service_directory_metadata_to_annotations.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'service_directory_endpoint_basic'
