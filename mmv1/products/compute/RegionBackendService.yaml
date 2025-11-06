@@ -1640,4 +1640,4 @@ properties:
         description: |
           Reference to the BackendAuthenticationConfig resource from the networksecurity.googleapis.com namespace.
           Can be used in authenticating TLS connections to the backend, as specified by the authenticationMode field.
-          Can only be specified if authenticationMode is not NONE. 
+          Can only be specified if authenticationMode is not NONE.
