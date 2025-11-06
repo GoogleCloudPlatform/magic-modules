@@ -373,6 +373,11 @@ type Resource struct {
 	TGCResource `yaml:",inline"`
 }
 
+type TestConfig struct {
+	Sample *resource.Sample
+	Step   *resource.Step
+}
+
 type TGCResource struct {
 	// If true, exclude resource from Terraform Validator
 	// (i.e. terraform-provider-conversion)
@@ -1649,6 +1654,24 @@ func (r Resource) FirstTestExample() *resource.Examples {
 	})
 
 	return examples[0]
+}
+
+// Use the first valid config to create datasource and IAM resource test
+func (r Resource) FirstTestConfig() TestConfig {
+	for _, sample := range r.Samples {
+		if sample.ExcludeTest || (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0) {
+			continue
+		}
+		for _, step := range sample.Steps {
+			if r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
+				return TestConfig{
+					Sample: sample,
+					Step:   step,
+				}
+			}
+		}
+	}
+	return TestConfig{}
 }
 
 func (r Resource) ExamplePrimaryResourceId() string {
