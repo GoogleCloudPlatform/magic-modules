@@ -38,6 +38,7 @@ iam_policy:
   parent_resource_attribute: 'name'
 custom_code:
   custom_import: 'templates/terraform/custom_import/service_directory_service.go.tmpl'
+  encoder: 'templates/terraform/custom_encoder/service_directory_metadata_to_annotations.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'service_directory_service_basic'
@@ -70,7 +71,10 @@ properties:
       The resource name for the service in the
       format `projects/*/locations/*/namespaces/*/services/*`.
     output: true
-  - name: 'annotations'
-    type: KeyValueAnnotations
+  - name: 'metadata'
+    type: KeyValuePairs
     description: |
-      Annotations for the service. This data can be consumed by service clients.
+      Metadata for the service. This data can be consumed
+      by service clients. The entire metadata dictionary may contain
+      up to 2000 characters, spread across all key-value pairs.
+      Metadata that goes beyond any these limits will be rejected.
