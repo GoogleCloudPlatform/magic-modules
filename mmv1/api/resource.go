@@ -2109,7 +2109,7 @@ func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
 // For example, the cai identifier is feed_id in google_cloud_asset_folder_feed
 func (r Resource) getCaiId() string {
 	for _, p := range r.AllUserProperties() {
-		if p.Name == "name" && !p.Output {
+		if p.Name == "name" {
 			return "name"
 		}
 	}
@@ -2206,23 +2206,22 @@ func (r Resource) CaiIamResourceParams() []string {
 
 // Gets the Cai IAM asset name template
 // For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
-func (r Resource) CaiIamAssetNameTemplate(productBackendName string) string {
-	iamImportFormat := r.IamImportFormats()
-	if len(iamImportFormat) > 0 {
-		name := strings.ReplaceAll(iamImportFormat[0], "{{name}}", fmt.Sprintf("{{%s}}", r.IamParentResourceName()))
-		name = strings.ReplaceAll(name, "%", "")
-		return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, name)
+func (r Resource) CaiIamAssetNameTemplate() string {
+	idField := fmt.Sprintf("{{%s}}", r.getCaiId())
+
+	rName := fmt.Sprintf("{{%s}}", r.IamParentResourceName())
+
+	if r.Name == "Asset" {
+		log.Printf("idfield %s, rName %s", idField, rName)
 	}
 
-	caiBaseUrl := r.CaiBaseUrl
+	caiAssetNameFormat := r.CAIFormatOverride()
+	if caiAssetNameFormat != "" {
+		return strings.ReplaceAll(caiAssetNameFormat, idField, rName)
+	}
 
-	if caiBaseUrl == "" {
-		caiBaseUrl = r.SelfLink
-	}
-	if caiBaseUrl == "" {
-		caiBaseUrl = r.BaseUrl
-	}
-	return fmt.Sprintf("//%s.googleapis.com/%s/{{%s}}", productBackendName, caiBaseUrl, r.IamParentResourceName())
+	caiAssetName := strings.ReplaceAll(r.IdFormat, idField, rName)
+	return fmt.Sprintf("//%s.googleapis.com/%s", r.CaiProductBackendName(r.CaiProductBaseUrl()), caiAssetName)
 }
 
 func urlContainsOnlyAllowedKeys(templateURL string, allowedKeys []string) bool {

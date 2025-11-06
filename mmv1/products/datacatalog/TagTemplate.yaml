@@ -33,6 +33,8 @@ update_verb: 'PATCH'
 delete_url: '{{name}}?force={{force_delete}}'
 import_format:
   - '{{name}}'
+# This resource has not been supported in CAI yet
+cai_asset_name_format: 'projects/{{project}}/locations/{{region}}/tagTemplates/{{tag_template_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20

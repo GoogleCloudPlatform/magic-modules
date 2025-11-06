@@ -18,7 +18,6 @@ description: |
   A Table that belongs to a Dataset
 exclude_resource: true
 docs:
-id_format: '{{table_id}}'
 base_url: 'projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}'
 self_link: 'projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}'
 import_format:

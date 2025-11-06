@@ -42,4 +42,3 @@ properties:
     type: String
     description: |
       Dummy property.
-    output: true

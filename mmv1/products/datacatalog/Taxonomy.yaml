@@ -35,6 +35,7 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'taxonomy'
+  cai_asset_name_format: 'projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}'
   base_url: 'projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}'
   import_format:
     - 'projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}'

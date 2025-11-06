@@ -15,7 +15,6 @@
 {{$.CodeHeader TemplatePath}}
 
 {{- $productBackendName := $.CaiProductBackendName $.CaiProductBaseUrl }}
-{{- $assetNameTemplate := $.CaiIamAssetNameTemplate $productBackendName }}
 
 package {{ lower $.ProductMetadata.Name }}
 
@@ -101,7 +100,7 @@ func new{{ $.ResourceName -}}IamAsset(
 		return []cai.Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
-	name, err := cai.AssetName(d, config, "{{ $assetNameTemplate }}")
+	name, err := cai.AssetName(d, config, "{{ $.CaiIamAssetNameTemplate }}")
 	if err != nil {
 		return []cai.Asset{}, err
 	}
@@ -127,7 +126,7 @@ func Fetch{{ $.ResourceName -}}IamPolicy(d tpgresource.TerraformResourceData, co
 		{{ $.ResourceName -}}IamUpdaterProducer,
 		d,
 		config,
-		"{{ $assetNameTemplate }}",
+		"{{ $.CaiIamAssetNameTemplate }}",
 		{{ $.ResourceName -}}IAMAssetType,
 	)
 }
