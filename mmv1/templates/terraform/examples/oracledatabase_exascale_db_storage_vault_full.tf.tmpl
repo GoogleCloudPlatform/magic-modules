@@ -9,8 +9,7 @@ resource "google_oracle_database_exascale_db_storage_vault" "{{$.PrimaryResource
         id = "UTC"
     }
     exascale_db_storage_details {
-        additional_flash_cache_percent = 300
-        total_size_gbs = 300
+        total_size_gbs = 512
     }
   }
 
