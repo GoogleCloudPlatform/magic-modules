@@ -357,10 +357,18 @@ func TestAccDataprocCluster_withResourceManagerTags(t *testing.T) {
 
 	var cluster dataproc.Cluster
 	pid := envvar.GetTestProjectFromEnv()
+	projectNumber := envvar.GetTestProjectNumberFromEnv()
 	rnd := acctest.RandString(t, 10)
 	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
 	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+	// TODO: remove this IAM binding once tagUser permissions are present in Dataproc Service Agent role.
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: fmt.Sprintf("serviceAccount:service-%s@dataproc-accounts.iam.gserviceaccount.com", projectNumber),
+			Role:   "roles/resourcemanager.tagUser",
+		},
+	})
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
