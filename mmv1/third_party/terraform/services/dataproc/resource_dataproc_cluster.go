@@ -689,7 +689,7 @@ func ResourceDataprocCluster() *schema.Resource {
 										AtLeastOneOf: gceClusterConfigKeys,
 										Elem:         &schema.Schema{Type: schema.TypeString},
 										ForceNew:     true,
-										Description:  `A map of resource manager tags to add to the Dataproc cluster. Keys must be in the format tagKeys/{tag_key_id} and values in the format tagValues/{tag_value_id}.`,
+										Description:  `A map of resource manager tags to add to all instances. Keys must be in the format tagKeys/{tag_key_id} and values in the format tagValues/{tag_value_id}.`,
 									},
 
 									"shielded_instance_config": {
