@@ -570,6 +570,6 @@ properties:
       'Configures subnet mask resolution for this subnetwork.'
     enum_values:
       - 'ARP_ALL_RANGES'
-      - 'ARP_PRIMARY_RANGES'
+      - 'ARP_PRIMARY_RANGE'
     min_version: beta
     immutable: true
