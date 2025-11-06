@@ -352,6 +352,33 @@ func TestAccDataprocCluster_withMetadataAndTags(t *testing.T) {
 	})
 }
 
+func TestAccDataprocCluster_withResourceManagerTags(t *testing.T) {
+	t.Parallel()
+
+	var cluster dataproc.Cluster
+	rnd := acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_withResourceManagerTags(rnd, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.basic", &cluster),
+
+					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.resource_manager_tags.foo", "bar"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.resource_manager_tags.baz", "qux"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDataprocCluster_withMinNumInstances(t *testing.T) {
 	t.Parallel()
 
@@ -1800,6 +1827,25 @@ resource "google_dataproc_cluster" "basic" {
         baz = "qux"
       }
       tags = ["my-tag", "your-tag", "our-tag", "their-tag"]
+    }
+  }
+}
+`, rnd, subnetworkName)
+}
+
+func testAccDataprocCluster_withResourceManagerTags(rnd, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "basic" {
+  name   = "tf-test-dproc-%s"
+  region = "us-central1"
+
+  cluster_config {
+    gce_cluster_config {
+      subnetwork = "%s"
+      resource_manager_tags = {
+		foo = "bar"
+		baz = "qux"
+      }
     }
   }
 }
