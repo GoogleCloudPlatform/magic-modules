@@ -6084,7 +6084,7 @@ func testAccContainerNodePool_acceleratorNetworkProfile(clusterName, npName stri
 	return fmt.Sprintf(`
 resource "google_container_cluster" "cluster" {
   name     = "%s"
-  location = "us-central1-a"
+  location = "us-central1-c"
 
   datapath_provider       = "ADVANCED_DATAPATH"
   ip_allocation_policy    {} // Enables IP aliasing
@@ -6097,7 +6097,7 @@ resource "google_container_cluster" "cluster" {
 resource "google_container_node_pool" "np" {
   name     = "%s"
   cluster  = google_container_cluster.cluster.id
-  location = "us-central1-a"
+  location = "us-central1-c"
   node_count = 1
 
   node_config {
@@ -6135,6 +6135,7 @@ func TestAccContainerNodePool_acceleratorNetworkProfile(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -6159,7 +6160,7 @@ resource "google_compute_subnetwork" "additional_sub" {
 // 3. Create the cluster (this will use the 'default' network)
 resource "google_container_cluster" "cluster" {
   name     = "%[1]s" // clusterName
-  location = "us-central1-a"
+  location = "us-central1-c"
 
   datapath_provider       = "ADVANCED_DATAPATH"
   ip_allocation_policy    {} // Enables IP aliasing
@@ -6173,7 +6174,7 @@ resource "google_container_cluster" "cluster" {
 resource "google_container_node_pool" "np" {
   name     = "%[2]s" // npName
   cluster  = google_container_cluster.cluster.id
-  location = "us-central1-a"
+  location = "us-central1-c"
   node_count = 1
 
   node_config {
@@ -6218,7 +6219,7 @@ func testAccContainerCluster_nodePool_acceleratorNetworkProfile(clusterName stri
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name     = "%s"
-  location = "us-central1-a"
+  location = "us-central1-c"
 
   datapath_provider       = "ADVANCED_DATAPATH"
   enable_multi_networking = true
@@ -6268,7 +6269,7 @@ func TestAccContainerCluster_nodePool_acceleratorNetworkProfile(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"terraform_labels"},
+				ImportStateVerifyIgnore: []string{"terraform_labels","deletion_protection"},
 			},
 		},
 	})
