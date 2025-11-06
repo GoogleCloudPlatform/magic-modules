@@ -27,4 +27,6 @@ The following arguments are supported:
 
 ## Attributes Reference
 
+* `block_names` - A List of all block names in the parent reservetion.
+
 See [google_compute_reservation](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_reservation) resource for details of the available attributes.
