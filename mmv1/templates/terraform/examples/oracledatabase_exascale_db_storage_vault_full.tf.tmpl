@@ -5,8 +5,12 @@ resource "google_oracle_database_exascale_db_storage_vault" "{{$.PrimaryResource
   gcp_oracle_zone = "us-east4-b-r1"
   project = "{{index $.Vars "project"}}"
   properties {
+    time_zone {
+        id = "UTC"
+    }
     exascale_db_storage_details {
-        total_size_gbs = 512
+        additional_flash_cache_percent = 300
+        total_size_gbs = 300
     }
   }
 
