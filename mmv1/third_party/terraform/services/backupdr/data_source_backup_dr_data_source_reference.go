@@ -25,11 +25,6 @@ func DataSourceGoogleCloudBackupDRDataSourceReferences() *schema.Resource {
 				Computed:    true,
 				Description: "The ID of the project in which the resource belongs.",
 			},
-			"resource_type": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: `The resource type to get the data source references for. Examples include, "compute.googleapis.com/Instance", "sqladmin.googleapis.com/Instance".`,
-			},
 
 			// Output: a computed list of the data source references found
 			"data_source_references": {
@@ -96,9 +91,8 @@ func dataSourceGoogleCloudBackupDRDataSourceReferencesRead(d *schema.ResourceDat
 	}
 
 	location := d.Get("location").(string)
-	resourceType := d.Get("resource_type").(string)
 
-	url := fmt.Sprintf("%sprojects/%s/locations/%s/dataSourceReferences:fetchForResourceType?resourceType=%s", config.BackupDRBasePath, project, location, resourceType)
+	url := fmt.Sprintf("%sprojects/%s/locations/%s/dataSourceReferences", config.BackupDRBasePath, project, location)
 
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,

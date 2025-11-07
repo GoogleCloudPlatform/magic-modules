@@ -38,7 +38,6 @@ func TestAccDataSourceGoogleBackupDRDataSourceReferences_basic(t *testing.T) {
 						// Basic attribute checks
 						resource.TestCheckResourceAttr("data.google_backup_dr_data_source_references.default", "project", projectID),
 						resource.TestCheckResourceAttr("data.google_backup_dr_data_source_references.default", "location", context["location"].(string)),
-						resource.TestCheckResourceAttr("data.google_backup_dr_data_source_references.default", "resource_type", context["resource_type"].(string)),
 
 						// Check that the list itself is populated
 						resource.TestCheckResourceAttrSet("data.google_backup_dr_data_source_references.default", "data_source_references.#"),
@@ -141,7 +140,6 @@ resource "google_backup_dr_backup_plan_association" "bpa" {
 data "google_backup_dr_data_source_references" "default" {
    project       = data.google_project.project.project_id
    location      = "%{location}"
-   resource_type = "%{resource_type}"
    depends_on= [ google_backup_dr_backup_plan_association.bpa ]
    }
 `, context)

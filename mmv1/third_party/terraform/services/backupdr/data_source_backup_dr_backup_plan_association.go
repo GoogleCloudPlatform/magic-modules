@@ -62,11 +62,6 @@ func DataSourceGoogleCloudBackupDRBackupPlanAssociations() *schema.Resource {
 				Computed:    true,
 				Description: "The ID of the project in which the resource belongs.",
 			},
-			"resource_type": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: `The resource type of workload on which backup plan is applied. Examples include, "compute.googleapis.com/Instance", "compute.googleapis.com/Disk".`,
-			},
 
 			"associations": {
 				Type:        schema.TypeList,
@@ -157,9 +152,8 @@ func dataSourceGoogleCloudBackupDRBackupPlanAssociationsRead(d *schema.ResourceD
 	}
 
 	location := d.Get("location").(string)
-	resourceType := d.Get("resource_type").(string)
 
-	url := fmt.Sprintf("%sprojects/%s/locations/%s/backupPlanAssociations:fetchForResourceType?resourceType=%s", config.BackupDRBasePath, project, location, resourceType)
+	url := fmt.Sprintf("%sprojects/%s/locations/%s/backupPlanAssociations", config.BackupDRBasePath, project, location)
 
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
