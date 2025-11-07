@@ -3373,7 +3373,7 @@ func TestAccContainerCluster_withMaintenanceExclusionOptions(t *testing.T) {
 	})
 }
 
-func TestAccContainerCluster_withMaintenanceExclusionOptions(t *testing.T) {
+func TestAccContainerCluster_withMaintenanceExclusionOptions_untilEndOfSupport(t *testing.T) {
 	t.Parallel()
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	resourceName := "google_container_cluster.with_maintenance_exclusion_options"
@@ -3386,8 +3386,8 @@ func TestAccContainerCluster_withMaintenanceExclusionOptions(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withExclusionOptions_RecurringMaintenanceWindow(
-					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z", "NO_MINOR_UPGRADES", "NO_MINOR_OR_NODE_UPGRADES", networkName, subnetworkName),
+				Config: testAccContainerCluster_withExclusionOptions_RecurringMaintenanceWindow_untilEndOfSupport(
+					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "NO_MINOR_UPGRADES", "NO_MINOR_OR_NODE_UPGRADES", networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr(resourceName,
 							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope", "NO_MINOR_UPGRADES"),
@@ -3456,7 +3456,7 @@ func TestAccContainerCluster_deleteMaintenanceExclusionOptions(t *testing.T) {
 	})
 }
 
-func TestAccContainerCluster_deleteMaintenanceExclusionOptions(t *testing.T) {
+func TestAccContainerCluster_deleteMaintenanceExclusionOptions_untilEndOfSupport(t *testing.T) {
 	t.Parallel()
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	resourceName := "google_container_cluster.with_maintenance_exclusion_options"
@@ -3469,11 +3469,11 @@ func TestAccContainerCluster_deleteMaintenanceExclusionOptions(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withExclusionOptions_RecurringMaintenanceWindow(
-					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z", "NO_UPGRADES", "NO_MINOR_OR_NODE_UPGRADES", networkName, subnetworkName),
+				Config: testAccContainerCluster_withExclusionOptions_RecurringMaintenanceWindow_untilEndOfSupport(
+					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "NO_MINOR_UPGRADES", "NO_MINOR_OR_NODE_UPGRADES", networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope", "NO_UPGRADES"),
+							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope", "NO_MINOR_UPGRADES"),
 						resource.TestCheckResourceAttr(resourceName,
 							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.scope", "NO_MINOR_OR_NODE_UPGRADES"),
 				),
@@ -3576,7 +3576,7 @@ func TestAccContainerCluster_updateMaintenanceExclusionOptions(t *testing.T) {
 	})
 }
 
-func TestAccContainerCluster_updateMaintenanceExclusionOptions(t *testing.T) {
+func TestAccContainerCluster_updateMaintenanceExclusionOptions_untilEndOfSupport(t *testing.T) {
 	t.Parallel()
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	resourceName := "google_container_cluster.with_maintenance_exclusion_options"
@@ -3609,8 +3609,8 @@ func TestAccContainerCluster_updateMaintenanceExclusionOptions(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_withExclusionOptions_RecurringMaintenanceWindow(
-					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z", "NO_MINOR_UPGRADES", "NO_MINOR_OR_NODE_UPGRADES", networkName, subnetworkName),
+				Config: testAccContainerCluster_withExclusionOptions_RecurringMaintenanceWindow_untilEndOfSupport(
+					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "NO_MINOR_UPGRADES", "NO_MINOR_OR_NODE_UPGRADES", networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr(resourceName,
 							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope", "NO_MINOR_UPGRADES"),
@@ -3626,11 +3626,11 @@ func TestAccContainerCluster_updateMaintenanceExclusionOptions(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_updateExclusionOptions_RecurringMaintenanceWindow(
-					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z", "NO_UPGRADES", "NO_MINOR_UPGRADES", networkName, subnetworkName),
+				Config: testAccContainerCluster_updateExclusionOptions_RecurringMaintenanceWindow_untilEndOfSupport(
+					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z", "NO_MINOR_OR_NODE_UPGRADES", "NO_MINOR_UPGRADES", networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope", "NO_UPGRADES"),
+							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope", "NO_MINOR_OR_NODE_UPGRADES"),
 						resource.TestCheckResourceAttr(resourceName,
 							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.scope", "NO_MINOR_UPGRADES"),
 				),
@@ -10430,7 +10430,7 @@ resource "google_container_cluster" "with_maintenance_exclusion_options" {
 `, cclusterName, w1startTime, w1endTime, w1startTime, w1endTime, scope1, w2startTime, w2endTime, scope2, networkName, subnetworkName)
 }
 
-func testAccContainerCluster_withExclusionOptions_RecurringMaintenanceWindow(cclusterName, w1startTime, w1endTime, w2startTime, w2endTime, scope1, scope2, networkName, subnetworkName string) string {
+func testAccContainerCluster_withExclusionOptions_RecurringMaintenanceWindow_untilEndOfSupport(cclusterName, w1startTime, w1endTime, w2startTime, scope1, scope2, networkName, subnetworkName string) string {
 
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_maintenance_exclusion_options" {
@@ -10455,9 +10455,9 @@ resource "google_container_cluster" "with_maintenance_exclusion_options" {
     maintenance_exclusion {
       exclusion_name = "holiday data load"
       start_time     = "%s"
-      end_time       = "%s"
       exclusion_options {
         scope = "%s"
+        end_time_behavior = "UNTIL_END_OF_SUPPORT"
       }
     }
   }
@@ -10466,7 +10466,7 @@ resource "google_container_cluster" "with_maintenance_exclusion_options" {
 
   deletion_protection = false
 }
-`, cclusterName, w1startTime, w1endTime, w1startTime, w1endTime, scope1, w2startTime, w2endTime, scope2, networkName, subnetworkName)
+`, cclusterName, w1startTime, w1endTime, w1startTime, w1endTime, scope1, w2startTime, scope2, networkName, subnetworkName)
 }
 
 func testAccContainerCluster_NoExclusionOptions_RecurringMaintenanceWindow(cclusterName, w1startTime, w1endTime, w2startTime, w2endTime, networkName, subnetworkName string) string {
@@ -10541,7 +10541,7 @@ resource "google_container_cluster" "with_maintenance_exclusion_options" {
 `, cclusterName, w1startTime, w1endTime, w1startTime, w1endTime, scope1, w2startTime, w2endTime, scope2, networkName, subnetworkName)
 }
 
-func testAccContainerCluster_updateExclusionOptions_RecurringMaintenanceWindow(cclusterName, w1startTime, w1endTime, w2startTime, w2endTime, scope1, scope2, networkName, subnetworkName string) string {
+func testAccContainerCluster_updateExclusionOptions_RecurringMaintenanceWindow_untilEndOfSupport(cclusterName, w1startTime, w1endTime, w2startTime, w2endTime, scope1, scope2, networkName, subnetworkName string) string {
 
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_maintenance_exclusion_options" {
@@ -10558,9 +10558,9 @@ resource "google_container_cluster" "with_maintenance_exclusion_options" {
     maintenance_exclusion {
       exclusion_name = "batch job"
       start_time     = "%s"
-      end_time       = "%s"
       exclusion_options {
         scope = "%s"
+        end_time_behavior = "UNTIL_END_OF_SUPPORT"
       }
     }
     maintenance_exclusion {
@@ -10577,7 +10577,7 @@ resource "google_container_cluster" "with_maintenance_exclusion_options" {
 
   deletion_protection = false
 }
-`, cclusterName, w1startTime, w1endTime, w1startTime, w1endTime, scope1, w2startTime, w2endTime, scope2, networkName, subnetworkName)
+`, cclusterName, w1startTime, w1endTime, w1startTime, scope1, w2startTime, w2endTime, scope2, networkName, subnetworkName)
 }
 
 func testAccContainerCluster_withExclusion_NoMaintenanceWindow(clusterName string, w1startTime, w1endTime, networkName, subnetworkName string) string {
