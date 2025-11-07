@@ -2294,14 +2294,44 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
+    // Fetch the instance to check if it is GCBDR managed or not
+	var instanceLookup *sqladmin.DatabaseInstance
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (rerr error) {
-			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Update(project, d.Get("name").(string), instance).Do()
+			instance1, rerr = config.NewSqlAdminClient(userAgent).Instances.Get(project, d.Get("name").(string)).Do()
 			return rerr
 		},
-		Timeout:              d.Timeout(schema.TimeoutUpdate),
+		Timeout:              d.Timeout(schema.TimeoutRead),
 		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
 	})
+	if err != nil {
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("SQL Database Instance %q", d.Get("name").(string)))
+	}
+	// In instance.setting.backup_configuration check if backup_tier is ENHANCED
+	backupConfig := instanceLookup.Settings.BackupConfiguration
+	if backupConfig != nil && backupConfig.BackupTier == "ENHANCED" {
+		log.Printf("[DEBUG] Instance is managed by GCBDR, performing patch instead of update")
+			// Perform patch instead of update for GCBDR managed instances
+			err = transport_tpg.Retry(transport_tpg.RetryOptions{
+				RetryFunc: func() (rerr error) {
+					op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+					return rerr
+				},
+				Timeout:              d.Timeout(schema.TimeoutUpdate),
+				ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+			})
+	} else {
+		log.Printf("[DEBUG] Instance is not managed by GCBDR, performing update")
+
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() (rerr error) {
+				op, rerr = config.NewSqlAdminClient(userAgent).Instances.Update(project, d.Get("name").(string), instance).Do()
+				return rerr
+			},
+			Timeout:              d.Timeout(schema.TimeoutUpdate),
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+		})
+	}
 	if err != nil {
 		return fmt.Errorf("Error, failed to update instance settings for %s: %s", instance.Name, err)
 	}

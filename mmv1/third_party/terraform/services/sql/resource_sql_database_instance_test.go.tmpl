@@ -3581,6 +3581,122 @@ func TestAccSqlDatabaseInstance_useCustomerManagedServerCa(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_updateTier(t *testing.T) {
+    t.Parallel()
+
+    databaseName := "tf-test-" + acctest.RandString(t, 10)
+    resourceName := "google_sql_database_instance.instance"
+
+    acctest.VcrTest(t, resource.TestCase{
+        PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+        ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+        CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+        Steps: []resource.TestStep{
+            {
+                Config: fmt.Sprintf(testGoogleSqlDatabaseInstance_tier, databaseName, "db-g1-small"),
+                Check: resource.ComposeTestCheckFunc(
+                    resource.TestCheckResourceAttr(resourceName, "settings.0.tier", "db-g1-small"),
+                ),
+            },
+            {
+                Config: fmt.Sprintf(testGoogleSqlDatabaseInstance_tier, databaseName, "db-f1-micro"),
+                Check: resource.ComposeTestCheckFunc(
+                    resource.TestCheckResourceAttr(resourceName, "settings.0.tier", "db-f1-micro"),
+                ),
+            },
+            {
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+        },
+    })
+}
+
+func TestAccSqlDatabaseInstance_updateTierForGcbdrManagedInstance(t *testing.T) {
+    t.Parallel()
+    backupVaultID := "bv-test"
+    location := "us-central1"
+    backupVault := acctest.BootstrapBackupDRVault(t, backupVaultID, location)
+    resourceName := "google_sql_database_instance.instance"
+    randomSuffix := acctest.RandString(t, 10)
+    databaseName := "tf-test-" + randomSuffix
+    project := envvar.GetTestProjectFromEnv()
+    context := map[string]interface{}{
+        "random_suffix":   randomSuffix,
+        "project":        project,
+        "backup_vault_id": backupVaultID,
+        "backup_vault":   backupVault,
+    }
+
+    acctest.VcrTest(t, resource.TestCase{
+        PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+        ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+        CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+        Steps: []resource.TestStep{
+            // Create instance with db-g1-small tier
+            {
+                Config: fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "POSTGRES_13"
+  deletion_protection = false
+  settings {
+    tier = "db-g1-small"
+  }
+}`, databaseName),
+            },
+            // Add GCBDR config while keeping the same instance and tier
+            {
+                Config: fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "POSTGRES_13"
+  deletion_protection = false
+  settings {
+    tier = "db-g1-small"
+  }
+}
+%s`, databaseName, testAccSqlDatabaseInstance_createGCBDRManagedInstance(context)),
+            },
+            // Update tier to db-f1-micro while keeping GCBDR config
+            {
+                Config: fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "POSTGRES_13"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+  }
+}`, databaseName),
+            },
+            {
+                ResourceName:            resourceName,
+                ImportState:             true,
+                ImportStateVerify:       true,
+                ImportStateVerifyIgnore: []string{"deletion_protection"},
+            },
+        },
+    })
+}
+
+var testGoogleSqlDatabaseInstance_tier = `
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "POSTGRES_13"
+  deletion_protection = false
+  settings {
+    tier = "%s"
+  }
+}
+`
+
 func testGoogleSqlDatabaseInstance_setCustomSubjectAlternateName(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
@@ -6660,6 +6776,45 @@ resource "google_sql_database_instance" "instance" {
 
   deletion_protection 	= false
 }
+`, context)
+}
+
+func testAccSqlDatabaseInstance_createGCBDRManagedInstance(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+
+// Create a backup plan
+resource "google_backup_dr_backup_plan" "plan" {
+  location       = "us-central1"
+  backup_plan_id = "tf-test-bp-test-%{random_suffix}"
+  resource_type  = "sqladmin.googleapis.com/Instance"
+  backup_vault   = "%{backup_vault}"
+
+  backup_rules {
+    rule_id                = "rule-1"
+    backup_retention_days  = 7
+
+    standard_schedule {
+      recurrence_type     = "DAILY"
+      hourly_frequency    = 6
+      time_zone           = "UTC"
+
+      backup_window {
+        start_hour_of_day = 0
+        end_hour_of_day   = 23
+      }
+    }
+  }
+}
+
+// Associate backup plan with SQL instance
+resource "google_backup_dr_backup_plan_association" "association" { 
+  location 						= "us-central1" 
+  backup_plan_association_id 	= "tf-test-bpa-test-%{random_suffix}"
+  resource 						= "projects/%{project}/instances/tf-test-%{random_suffix}"
+  resource_type					= "sqladmin.googleapis.com/Instance"
+  backup_plan 					= google_backup_dr_backup_plan.plan.name
+}
+
 `, context)
 }
 
