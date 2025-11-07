@@ -1,6 +1,6 @@
 [
   {
-    "name": "//vmwareengine.googleapis.com/placeholder-foobar/clusters/gg-asset-cl-38930-c6db",
+    "name": "//vmwareengine.googleapis.com/projects/{{.Provider.project}}/locations/us-central1-a/privateClouds/gg-asset-pc-38930-c6db/clusters/gg-asset-cl-38930-c6db",
     "asset_type": "vmwareengine.googleapis.com/Cluster",
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
     "resource": {
