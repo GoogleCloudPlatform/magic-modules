@@ -82,7 +82,7 @@ func NewTerraformGoogleConversionNext(product *api.Product, versionName string, 
 	return t
 }
 
-func (tgc TerraformGoogleConversionNext) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
+func (tgc TerraformGoogleConversionNext) Generate(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 	for _, object := range tgc.Product.Objects {
 		object.ExcludeIfNotInVersion(&tgc.Version)
 
@@ -104,7 +104,7 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 
 	if !object.IsExcluded() {
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
-		tgc.addTestsFromExamples(&object)
+		tgc.addTestsFromSamples(&object)
 		tgc.GenerateResourceTests(object, *templateData, outputFolder)
 	}
 }
@@ -322,6 +322,25 @@ func (tgc TerraformGoogleConversionNext) addTestsFromExamples(object *api.Resour
 	}
 }
 
+func (tgc TerraformGoogleConversionNext) addTestsFromSamples(object *api.Resource) {
+	if object.Examples != nil {
+		tgc.addTestsFromExamples(object)
+		return
+	}
+	for _, sample := range object.Samples {
+		if sample.ExcludeTest {
+			continue
+		}
+		if object.ProductMetadata.VersionObjOrClosest(tgc.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0 {
+			continue
+		}
+		object.TGCTests = append(object.TGCTests, resource.TGCTest{
+			Name: "TestAcc" + sample.TestSampleSlug(object.ProductMetadata.Name, object.Name),
+			Skip: sample.TGCSkipTest,
+		})
+	}
+}
+
 // Generates the list of resources, and gets the count of resources.
 // The resource object has the format
 //
@@ -353,7 +372,7 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 				TerraformName:      object.TerraformName(),
 				ResourceName:       object.ResourceName(),
 				AliasName:          object.ResourceName(),
-				CaiAssetNameFormat: object.GetCaiAssetNameFormat(),
+				CaiAssetNameFormat: object.GetCaiAssetNameTemplate(),
 			}
 			tgc.ResourcesForVersion = append(tgc.ResourcesForVersion, resourceIdentifier)
 

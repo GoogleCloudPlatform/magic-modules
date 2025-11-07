@@ -23,6 +23,7 @@ references:
 docs:
 id_format: 'projects/{{project}}'
 base_url: 'projects/{{project}}/billingInfo'
+cai_asset_name_format: 'projects/{{project}}/billingInfo'
 create_verb: 'PUT'
 delete_verb: 'PUT'
 import_format:

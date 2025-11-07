@@ -29,6 +29,7 @@ update_url: 'projects/{{project}}/zones/{{zone}}/instanceSettings?update_mask=*'
 update_verb: 'PATCH'
 import_format:
   - 'projects/{{project}}/zones/{{zone}}/instanceSettings'
+cai_asset_name_format: 'projects/{{project}}/zones/{{zone}}/instanceSettings/InstanceSettings'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
