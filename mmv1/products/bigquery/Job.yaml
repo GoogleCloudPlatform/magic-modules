@@ -161,6 +161,18 @@ examples:
       - 'status.0.state'
  # there are a lot of examples for this resource, so omitting some that are similar to others
     exclude_docs: true
+  - name: 'bigquery_job_query_reservation'
+    exclude_docs: true
+    ignore_read_extra:
+      - 'etag'
+      - 'status.0.state'
+    min_version: beta
+    primary_resource_id: 'job'
+    vars:
+      job_id: 'job_query_reservation'
+      reservation_name: 'my-reservation'
+    test_env_vars:
+      project: 'PROJECT_NAME'
 parameters:
 properties:
   - name: 'user_email'
@@ -406,6 +418,30 @@ properties:
             description: |
               Whether to run the query as continuous or a regular query.
             min_version: beta
+          - name: 'connectionProperties'
+            type: Array
+            description: |
+              Connection properties to customize query behavior. Under JDBC, these correspond
+              directly to connection properties passed to the DriverManager. Under ODBC, these
+              correspond to properties in the connection string.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'key'
+                  type: String
+                  description: |
+                    The key of the property to set. Currently supported connection properties:
+                    * `dataset_project_id`: represents the default project for datasets that are used in the query
+                    * `time_zone`: represents the default timezone used to run the query
+                    * `session_id`: associates the query with a given session
+                    * `query_label`: associates the query with a given job label
+                    * `service_account`: indicates the service account to use to run a continuous query
+                  required: true
+                - name: 'value'
+                  type: String
+                  description: |
+                    The value of the property to set.
+                  required: true
       - name: 'load'
         type: NestedObject
         description: 'Configures a load job.'
@@ -835,6 +871,12 @@ properties:
                 type: String
                 description: 'The ID of the model.'
                 required: true
+      - name: 'reservation'
+        type: String
+        description: |
+          The reservation that job would use. User can specify a reservation to execute the job. If this field is not set, reservation is determined based on the rules defined by the reservation assignments.
+          The expected format is `projects/{project}/locations/{location}/reservations/{reservation}`.
+        min_version: beta
   - name: 'jobReference'
     type: NestedObject
     description: |

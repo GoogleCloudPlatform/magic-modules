@@ -10,7 +10,6 @@ resource "google_project" "owner_project" {
 resource "google_project_service" "compute" {
   project = google_project.owner_project.project_id
   service = "compute.googleapis.com"
-  disable_on_destroy = false
 }
 
 resource "google_project" "guest_project" {
@@ -29,6 +28,11 @@ resource "google_org_policy_policy" "shared_reservation_org_policy" {
       allow_all = "TRUE"
     }
   }
+}
+
+resource "time_sleep" "wait_orgpolicy" {
+  depends_on = [google_org_policy_policy.shared_reservation_org_policy]
+  create_duration = "60s"
 }
 
 resource "google_compute_reservation" "{{$.PrimaryResourceId}}" {
@@ -50,5 +54,5 @@ resource "google_compute_reservation" "{{$.PrimaryResourceId}}" {
       project_id = google_project.guest_project.project_id
     }
   }
-  depends_on = [google_org_policy_policy.shared_reservation_org_policy,google_project_service.compute]
+  depends_on = [time_sleep.wait_orgpolicy,google_project_service.compute]
 }

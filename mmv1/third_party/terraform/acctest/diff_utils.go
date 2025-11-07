@@ -20,7 +20,7 @@ const diffTag = "[Diff]"
 
 func isReleaseDiffEnabled() bool {
 	releaseDiff := os.Getenv("RELEASE_DIFF")
-	return releaseDiff != ""
+	return releaseDiff == "true"
 }
 
 func initializeReleaseDiffTest(c resource.TestCase, testName string, tempOutputFile *os.File) resource.TestCase {
@@ -197,7 +197,7 @@ func writeOutputFileDeferFunction(tempOutputFile *os.File, failed bool) {
 			fmt.Fprintf(os.Stdout, "%s Breaking Change Detected] \n", diffTag)
 			fmt.Fprintf(diffFailureFile, "%s %s\n", diffTag, testOutput)
 		} else {
-			fmt.Fprintf(regularFailureFile, testOutput)
+			fmt.Fprintf(regularFailureFile, "%s", testOutput)
 			fmt.Fprintf(regularFailureFile, "FAILED --- %s\n", testOutput)
 		}
 	}

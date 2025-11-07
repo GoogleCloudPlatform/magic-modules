@@ -246,10 +246,27 @@ properties:
           - name: 'password'
             type: String
             description: The password to authenticate.
-            required: true
-            write_only: true
+            exactly_one_of:
+              - 'password'
+              - 'password_wo'
             sensitive: true
             custom_flatten: 'templates/terraform/custom_flatten/uptime_check_http_password.tmpl'
+          - name: 'passwordWo'
+            type: String
+            description: The password to authenticate.
+            exactly_one_of:
+              - 'passwordWo'
+              - 'password'
+            required_with:
+              - 'http_check.0.auth_info.0.password_wo_version'
+            write_only_legacy: true
+          - name: 'passwordWoVersion'
+            type: String
+            immutable: true
+            ignore_read: true
+            description: The password write-only version.
+            required_with:
+              - 'http_check.0.auth_info.0.password_wo'
           - name: 'username'
             type: String
             description: The username to authenticate.

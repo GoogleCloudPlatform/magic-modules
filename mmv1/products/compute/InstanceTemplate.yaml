@@ -17,7 +17,6 @@ properties:
 iam_policy:
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/global/instanceTemplates/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   iam_conditions_request_type: 'QUERY_PARAM'
   allowed_iam_role: 'roles/compute.instanceAdmin'
 custom_code:

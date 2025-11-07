@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"strings"
 
 	hashicorpcty "github.com/hashicorp/go-cty/cty"
@@ -24,7 +25,7 @@ func ParseFieldValue(url string, name string) string {
 }
 
 /*
-	ParseUrlParamValuesFromAssetName uses CaiAssetNameTemplate to parse hclData from assetName, filtering out all outputFields
+	ParseUrlParamValuesFromAssetName uses GetCaiAssetNameTemplate to parse hclData from assetName, filtering out all outputFields
 
 template: //bigquery.googleapis.com/projects/{{project}}/datasets/{{dataset_id}}
 assetName: //bigquery.googleapis.com/projects/my-project/datasets/my-dataset
@@ -196,4 +197,13 @@ func convertToMarshallableObj(node interface{}) interface{} {
 	default:
 		return node
 	}
+}
+
+func RandString(n int) string {
+	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return string(b)
 }

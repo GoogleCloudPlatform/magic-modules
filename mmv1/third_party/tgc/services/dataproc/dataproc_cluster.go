@@ -3,7 +3,7 @@ package dataproc
 import (
 	"reflect"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/cai"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/cai"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
@@ -19,7 +19,7 @@ func ResourceConverterDataprocCluster() cai.ResourceConverter {
 }
 
 func GetDataprocClusterCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
-	name, err := cai.AssetName(d, config, "//compute.googleapis.com/projects/{{project}}/regions/{{region}}/clusters/{{name}}")
+	name, err := cai.AssetName(d, config, "//dataproc.googleapis.com/projects/{{project}}/regions/{{region}}/clusters/{{name}}")
 	if err != nil {
 		return []cai.Asset{}, err
 	}

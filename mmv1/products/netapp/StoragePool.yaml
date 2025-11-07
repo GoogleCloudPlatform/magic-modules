@@ -54,8 +54,8 @@ import_format:
   - 'projects/{{project}}/locations/{{location}}/storagePools/{{name}}'
 timeouts:
   insert_minutes: 45
-  update_minutes: 20
-  delete_minutes: 20
+  update_minutes: 60
+  delete_minutes: 45
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
@@ -184,21 +184,23 @@ properties:
     type: Boolean
     description: |
       Optional. True if using Independent Scaling of capacity and performance (Hyperdisk). Default is false.
+    default_from_api: true
     immutable: true
   - name: 'totalThroughputMibps'
     type: String
     description: |
       Optional. Custom Performance Total Throughput of the pool (in MiB/s).
+    default_from_api: true
   - name: 'totalIops'
     type: String
     description: |
       Optional. Custom Performance Total IOPS of the pool If not provided, it will be calculated based on the totalThroughputMibps
+    default_from_api: true
   - name: 'hotTierSizeGib'
     type: String
     description: |
       Total hot tier capacity for the Storage Pool. It is applicable only to Flex service level.
       It should be less than the minimum storage pool size and cannot be more than the current storage pool size. It cannot be decreased once set.
-    min_version: 'beta'
   - name: 'enableHotTierAutoResize'
     type: Boolean
     send_empty_value: true
@@ -206,4 +208,40 @@ properties:
     description: |
       Flag indicating that the hot-tier threshold will be auto-increased by 10% of the hot-tier when it hits 100%. Default is true.
       The increment will kick in only if the new size after increment is still less than or equal to storage pool size.
-    min_version: 'beta'
+  - name: 'qosType'
+    type: Enum
+    description: |
+      QoS (Quality of Service) type of the storage pool.
+      Possible values are: AUTO, MANUAL.
+    enum_values:
+      - 'QOS_TYPE_UNSPECIFIED'
+      - 'AUTO'
+      - 'MANUAL'
+    default_from_api: true
+  - name: 'availableThroughputMibps'
+    type: Double
+    description: |
+      Available throughput of the storage pool (in MiB/s).
+    output: true
+  - name: 'coldTierSizeUsedGib'
+    type: String
+    description: |
+      Total cold tier data rounded down to the nearest GiB used by the storage pool.
+    output: true
+  - name: 'hotTierSizeUsedGib'
+    type: String
+    description: |
+      Total hot tier data rounded down to the nearest GiB used by the storage pool.
+    output: true
+  - name: 'type'
+    type: Enum
+    description: |
+      Type of the storage pool.
+      This field is used to control whether the pool supports FILE based volumes only or UNIFIED (both FILE and BLOCK) volumes.
+      If not specified during creation, it defaults to FILE.
+    enum_values:
+      - 'STORAGE_POOL_TYPE_UNSPECIFIED'
+      - 'FILE'
+      - 'UNIFIED'
+    immutable: true
+    default_from_api: true

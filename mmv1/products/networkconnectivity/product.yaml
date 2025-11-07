@@ -17,5 +17,7 @@ display_name: 'Network Connectivity'
 versions:
   - name: 'ga'
     base_url: 'https://networkconnectivity.googleapis.com/v1/'
+  - name: 'beta'
+    base_url: 'https://networkconnectivity.googleapis.com/v1beta/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'

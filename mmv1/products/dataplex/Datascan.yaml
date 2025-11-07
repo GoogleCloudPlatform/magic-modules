@@ -52,7 +52,6 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'data_scan_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}'
     - '{{data_scan_id}}'
@@ -103,6 +102,13 @@ examples:
     primary_resource_id: 'full_discovery'
     vars:
       datascan_name: 'datadiscovery-full'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+      location: 'REGION'
+  - name: 'dataplex_datascan_documentation'
+    primary_resource_id: 'documentation'
+    vars:
+      datascan_name: 'datadocumentation'
     test_env_vars:
       project_name: 'PROJECT_NAME'
       location: 'REGION'
@@ -257,6 +263,7 @@ properties:
       - 'DATA_QUALITY'
       - 'DATA_PROFILE'
       - 'DATA_DISCOVERY'
+      - 'DATA_DOCUMENTATION'
   - name: 'dataQualitySpec'
     type: NestedObject
     description: |
@@ -265,6 +272,7 @@ properties:
       - 'data_quality_spec'
       - 'data_profile_spec'
       - 'data_discovery_spec'
+      - 'data_documentation_spec'
     properties:
       - name: 'samplingPercent'
         type: Double
@@ -520,6 +528,7 @@ properties:
       - 'data_quality_spec'
       - 'data_profile_spec'
       - 'data_discovery_spec'
+      - 'data_documentation_spec'
     properties:
       - name: 'samplingPercent'
         type: Double
@@ -584,6 +593,7 @@ properties:
       - 'data_quality_spec'
       - 'data_profile_spec'
       - 'data_discovery_spec'
+      - 'data_documentation_spec'
     properties:
       - name: 'bigqueryPublishingConfig'
         type: NestedObject
@@ -665,3 +675,16 @@ properties:
                 type: Boolean
                 description: |
                   Whether to disable the inference of data types for JSON data. If true, all columns are registered as their primitive types (strings, number, or boolean).
+  - name: 'dataDocumentationSpec'
+    type: NestedObject
+    description: |
+      DataDocumentationScan related setting.
+    send_empty_value: true
+    allow_empty_object: true
+    exactly_one_of:
+      - 'data_quality_spec'
+      - 'data_profile_spec'
+      - 'data_discovery_spec'
+      - 'data_documentation_spec'
+    properties:
+      []
