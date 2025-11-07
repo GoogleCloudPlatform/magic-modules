@@ -37,6 +37,7 @@ var doNotGenerateCode = flag.Bool("no-code", false, "do not generate code")
 var doNotGenerateDocs = flag.Bool("no-docs", false, "do not generate docs")
 
 var providerFlag = flag.String("provider", "", "optional provider name. If specified, a non-default provider will be used.")
+var overwrite = flag.Bool("overwrite", false, "overwrite existing files")
 
 var openapiGenerate = flag.Bool("openapi-generate", false, "Generate MMv1 YAML from openapi directory (Experimental)")
 
@@ -111,7 +112,9 @@ func GenerateProducts(product, resource, providerName, version, outputPath, over
 		providerToGenerate.CompileCommonFiles(outputPath, productsForVersion, "")
 	}
 
-	provider.FixImports(outputPath, showImportDiffs)
+	if *providerFlag != provider.ANSIBLE_PROVIDER {
+		provider.FixImports(outputPath, showImportDiffs)
+	}
 }
 
 // GenerateProduct generates code and documentation for a product
@@ -141,6 +144,8 @@ func newProvider(providerName, version string, productApi *api.Product, startTim
 		return provider.NewTerraformGoogleConversionNext(productApi, version, startTime)
 	case "oics":
 		return provider.NewTerraformOiCS(productApi, version, startTime)
+	case provider.ANSIBLE_PROVIDER:
+		return provider.NewAnsible(productApi, version, startTime, *overwrite)
 	default:
 		return provider.NewTerraform(productApi, version, startTime)
 	}
