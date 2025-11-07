@@ -256,7 +256,7 @@ func TestMetadataLineage(t *testing.T) {
 	}
 }
 
-func TestMetadataApiLineage(t *testing.T) {
+func TestMetadataDefaultLineage(t *testing.T) {
 	t.Parallel()
 
 	root := Type{
@@ -320,6 +320,144 @@ func TestMetadataApiLineage(t *testing.T) {
 			description: "with api name",
 			obj:         *root.Properties[1],
 			expected:    "root.bazbaz",
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+
+			got := tc.obj.MetadataDefaultLineage()
+			if got != tc.expected {
+				t.Errorf("expected %q to be %q", got, tc.expected)
+			}
+		})
+	}
+}
+
+func TestMetadataApiLineage(t *testing.T) {
+	t.Parallel()
+
+	root := Type{
+		Name: "root",
+		Type: "NestedObject",
+		Properties: []*Type{
+			{
+				Name: "foo",
+				Type: "NestedObject",
+				Properties: []*Type{
+					{
+						Name: "bars",
+						Type: "Array",
+						ItemType: &Type{
+							Type: "NestedObject",
+							Properties: []*Type{
+								{
+									Name: "fooBar",
+									Type: "String",
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				Name:    "baz",
+				ApiName: "bazbaz",
+				Type:    "String",
+			},
+		},
+	}
+	root.SetDefault(&Resource{})
+
+	fineGrainedRoot := Type{
+		Name: "root",
+		Type: "NestedObject",
+		Properties: []*Type{
+			{
+				Name: "foo",
+				Type: "NestedObject",
+				Properties: []*Type{
+					{
+						Name: "bars",
+						Type: "Array",
+						ItemType: &Type{
+							Type: "NestedObject",
+							Properties: []*Type{
+								{
+									Name: "fooBar",
+									Type: "String",
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				Name:    "baz",
+				ApiName: "bazbaz",
+				Type:    "String",
+			},
+		},
+	}
+	fineGrainedRoot.SetDefault(&Resource{ApiResourceField: "whatever"})
+
+	cases := []struct {
+		description string
+		obj         Type
+		expected    string
+	}{
+		{
+			description: "root type",
+			obj:         root,
+			expected:    "root",
+		},
+		{
+			description: "sub type",
+			obj:         *root.Properties[0],
+			expected:    "root.foo",
+		},
+		{
+			description: "array",
+			obj:         *root.Properties[0].Properties[0],
+			expected:    "root.foo.bars",
+		},
+		{
+			description: "array of objects",
+			obj:         *root.Properties[0].Properties[0].ItemType.Properties[0],
+			expected:    "root.foo.bars.fooBar",
+		},
+		{
+			description: "with api name",
+			obj:         *root.Properties[1],
+			expected:    "root.bazbaz",
+		},
+		{
+			description: "fine-grained root type",
+			obj:         fineGrainedRoot,
+			expected:    "whatever.root",
+		},
+		{
+			description: "fine-grained sub type",
+			obj:         *fineGrainedRoot.Properties[0],
+			expected:    "whatever.root.foo",
+		},
+		{
+			description: "fine-grained array",
+			obj:         *fineGrainedRoot.Properties[0].Properties[0],
+			expected:    "whatever.root.foo.bars",
+		},
+		{
+			description: "fine-grained array of objects",
+			obj:         *fineGrainedRoot.Properties[0].Properties[0].ItemType.Properties[0],
+			expected:    "whatever.root.foo.bars.fooBar",
+		},
+		{
+			description: "fine-grained with api name",
+			obj:         *fineGrainedRoot.Properties[1],
+			expected:    "whatever.root.bazbaz",
 		},
 	}
 

@@ -97,18 +97,12 @@ examples:
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
-    tgc_test_ignore_in_asset:
-      - 'RESOURCE.enableCDN' # It has false value in CAI asset
   - name: 'backend_service_traffic_director_ring_hash'
     primary_resource_id: 'default'
     min_version: 'beta'
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
-    tgc_test_ignore_extra:
-      - outlier_detection.enforcing_consecutive_gateway_failure # Ignore the 0 value in config
-    tgc_test_ignore_in_asset:
-      - 'RESOURCE.enableCDN' # It has false value in CAI asset
   - name: 'backend_service_stateful_session_affinity'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -159,8 +153,6 @@ examples:
     min_version: 'beta'
     vars:
       backend_service_name: 'backend-service'
-    tgc_test_ignore_in_asset:
-      - 'RESOURCE.enableCDN' # It has false value in CAI asset
 parameters:
 properties:
   - name: 'affinityCookieTtlSec'

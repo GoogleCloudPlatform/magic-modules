@@ -1,6 +1,4 @@
 resource "google_compute_health_check" "grpc-with-tls-health-check" {
-  provider = google-beta
-
   name        = "{{index $.Vars "health_check_name"}}"
   description = "Health check via grpc with TLS"
 

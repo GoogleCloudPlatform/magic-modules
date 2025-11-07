@@ -469,6 +469,7 @@ properties:
           description: |
             Javascript User Defined Function. If multiple Javascript UDFs are specified on a resource,
             each one must have a unique `function_name`.
+          is_missing_in_cai: true
           properties:
             - name: functionName
               type: String

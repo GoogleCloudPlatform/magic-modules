@@ -54,27 +54,19 @@ examples:
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-server-tls-policy'
-    tgc_test_ignore_extra:
-      - 'allow_open' # Ignore its false value in Terraform configuration
   - name: 'network_security_server_tls_policy_advanced'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-server-tls-policy'
-    tgc_test_ignore_extra:
-      - 'allow_open' # Ignore its false value in Terraform configuration
   - name: 'network_security_server_tls_policy_server_cert'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-server-tls-policy'
-    tgc_test_ignore_extra:
-      - 'allow_open' # Ignore its false value in Terraform configuration
   - name: 'network_security_server_tls_policy_mtls'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-server-tls-policy'
       trust_config_name: 'my-trust-config'
-    tgc_test_ignore_extra:
-      - 'allow_open' # Ignore its false value in Terraform configuration
 parameters:
   - name: 'name'
     type: String
