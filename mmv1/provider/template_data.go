@@ -15,15 +15,10 @@ package provider
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"go/format"
-	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"strings"
-	"sync"
 	"text/template"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
@@ -45,8 +40,6 @@ var GA_VERSION = "ga"
 var BETA_VERSION = "beta"
 var ALPHA_VERSION = "alpha"
 var PRIVATE_VERSION = "private"
-
-var goimportFiles sync.Map
 
 func NewTemplateData(outputFolder string, versionName string) *TemplateData {
 	td := TemplateData{OutputFolder: outputFolder, VersionName: versionName}
@@ -342,53 +335,11 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 		} else {
 			sourceByte = formattedByte
 		}
-		if !strings.Contains(templatePath, "third_party/terraform") {
-			goimportFiles.Store(filePath, struct{}{})
-		}
 	}
 
 	err = os.WriteFile(filePath, sourceByte, 0644)
 	if err != nil {
 		glog.Exit(err)
-	}
-}
-
-func FixImports(outputPath string, dumpDiffs bool) {
-	log.Printf("Fixing go import paths")
-
-	baseArgs := []string{"-w"}
-	if dumpDiffs {
-		baseArgs = []string{"-d", "-w"}
-	}
-
-	// -w and -d are mutually exclusive; if dumpDiffs is requested we need to run twice.
-	for _, base := range baseArgs {
-		hasFiles := false
-		args := []string{base}
-		goimportFiles.Range(func(filePath, _ any) bool {
-			p, err := filepath.Rel(outputPath, filePath.(string))
-			if err != nil {
-				log.Fatal(err)
-			}
-			args = append(args, p)
-			hasFiles = true
-			return true
-		})
-
-		if hasFiles {
-			log.Printf("Fixing go import paths")
-			cmd := exec.Command("echo", args...)
-			cmd.Dir = outputPath
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			if err := cmd.Run(); err != nil {
-				var exitErr *exec.ExitError
-				if errors.As(err, &exitErr) && len(exitErr.Stderr) > 0 {
-					glog.Error(string(exitErr.Stderr))
-				}
-				log.Fatal(err)
-			}
-		}
 	}
 }
 
