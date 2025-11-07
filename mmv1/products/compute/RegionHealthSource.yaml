@@ -160,4 +160,3 @@ examples:
     min_version: 'beta'
     test_env_vars:
       project: 'PROJECT_NAME'
-
