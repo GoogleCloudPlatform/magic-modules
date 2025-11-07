@@ -4776,29 +4776,23 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 {{ if ne $.TargetVersionName `ga` -}}
 	if d.HasChange("secret_sync_config") {
-		c := d.Get("secret_sync_config")
-		req := &container.UpdateClusterRequest{
-			Update: &container.ClusterUpdate{
+		req := &container.UpdateClusterRequest{}
+		if c, ok := d.GetOk("secret_sync_config"); !ok {
+			req.Update = &container.ClusterUpdate{
+				DesiredSecretSyncConfig: &container.SecretSyncConfig{
+					Enabled: false,
+				},
+			}
+		} else {
+			req.Update = &container.ClusterUpdate{
 				DesiredSecretSyncConfig: expandSecretSyncConfig(c),
-			},
-		}
-		updateF := func() error {
-			name := containerClusterFullName(project, location, clusterName)
-			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
-			if config.UserProjectOverride {
-				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
 			}
-			op, err := clusterUpdateCall.Do()
-			if err != nil {
-				return err
-			}
-			// Wait until it's updated
-			return ContainerOperationWait(config, op, project, location, "updating secret sync config", userAgent, d.Timeout(schema.TimeoutUpdate))
 		}
+		updateF := updateFunc(req, "updating GKE secret sync add-on")
+		// Call update serially.
 		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
-			return err
+		return err
 		}
-		log.Printf("[INFO] GKE cluster %s secret sync add-on has been updated", d.Id())
 	}
 {{- end }}
 
