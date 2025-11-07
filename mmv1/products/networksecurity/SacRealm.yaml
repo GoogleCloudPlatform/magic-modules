@@ -14,7 +14,6 @@
 ---
 name: 'SacRealm'
 description: "Secure Access Connect Realm resource"
-  
 references:
   guides:
     'QUICKSTART_TITLE': 'https://cloud.google.com/secure-access-connect/docs/overview'
@@ -53,7 +52,7 @@ properties:
     output: true
   - name: 'labels'
     type: KeyValueLabels
-    description: | 
+    description: |
       Optional labels in key:value format. For more information about labels, see [Requirements for labels](https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements).
   - name: 'pairingKey'
     type: NestedObject
@@ -106,18 +105,8 @@ properties:
         type: Enum
         description: Connection status to Symantec API
         output: true
-        enum_values: 
+        enum_values:
           - 'SYMANTEC_CONNECTION_STATE_UNSPECIFIED'
           - 'SUCCEEDED'
           - 'READ_SECRET_FAILED'
           - 'REQUEST_TO_SYMANTEC_FAILED'
-
-
-
-
-  
-
-  
-
-        
-    
