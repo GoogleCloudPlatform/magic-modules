@@ -111,10 +111,10 @@ func TestCheckAttributeValuesEqual(i *string, j *string) resource.TestCheckFunc 
 	}
 }
 
-// ConditionIfPresent returns empty string if condition is not preset and " {condition}" if it is.
-func ConditionIfPresent(state map[string]string) string {
-	if condition, ok := state["condition"]; ok {
-		return " " + condition
+// ConditionTitleIfPresent returns empty string if condition is not preset and " {condition.0.title}" if it is.
+func ConditionTitleIfPresent(state map[string]string) string {
+	if conditionTitle, ok := state["condition.0.title"]; ok {
+		return " " + conditionTitle
 	}
 	return ""
 }
