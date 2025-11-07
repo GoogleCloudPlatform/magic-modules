@@ -276,6 +276,7 @@ func testAccDataplexDatascan_dataplexDatascanFullProfile_full(context map[string
 resource "google_bigquery_dataset" "tf_test_dataset" {
   dataset_id = "tf_test_dataset_id_%{random_suffix}"
   default_table_expiration_ms = 3600000
+  delete_contents_on_destroy = true
 }
 
 resource "google_bigquery_table" "tf_test_table" {
@@ -340,7 +341,7 @@ resource "google_dataplex_datascan" "full_profile_test" {
     }
     post_scan_actions {
       bigquery_export {
-        results_table = "//bigquery.googleapis.com/projects/%{project_name}/datasets/tf_test_dataplex_dataset%{random_suffix}/tables/profile_export"
+        results_table = "//bigquery.googleapis.com/projects/%{project_name}/datasets/${google_bigquery_dataset.tf_test_dataset.dataset_id}/tables/profile_export_%{random_suffix}"
       }
     }
   }
@@ -359,6 +360,7 @@ func testAccDataplexDatascan_dataplexDatascanFullProfile_update(context map[stri
 resource "google_bigquery_dataset" "tf_test_dataset" {
   dataset_id = "tf_test_dataset_id_%{random_suffix}"
   default_table_expiration_ms = 3600000
+  delete_contents_on_destroy = true
 }
 
 resource "google_bigquery_table" "tf_test_table" {
@@ -423,7 +425,7 @@ resource "google_dataplex_datascan" "full_profile_test" {
     }
     post_scan_actions {
       bigquery_export {
-        results_table = "//bigquery.googleapis.com/projects/%{project_name}/datasets/tf_test_dataplex_dataset%{random_suffix}/tables/profile_export"
+        results_table = "//bigquery.googleapis.com/projects/%{project_name}/datasets/${google_bigquery_dataset.tf_test_dataset.dataset_id}/tables/profile_export_%{random_suffix}"
       }
     }
     catalog_publishing_enabled = true
