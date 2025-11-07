@@ -6,7 +6,7 @@
 		bgpAlwaysCompareMed := d.Get("bgp_always_compare_med").(bool)
 		if d.Get("delete_bgp_always_compare_med").(bool) {
 			if bgpAlwaysCompareMed {
-				return nil, fmt.Errorf("Error cannot set BgpAlwaysCompareMed to true while DeleteBgpAlwaysCompareMed is also true")
+				return nil, fmt.Errorf("Cannot set BgpAlwaysCompareMed to true while DeleteBgpAlwaysCompareMed is also true")
 			}
 			obj["routingConfig"].(map[string]interface{})["bgpAlwaysCompareMed"] = nil
 		} else {

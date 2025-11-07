@@ -82,6 +82,12 @@ examples:
       network_name: 'vpc-network'
     test_env_vars:
       project: 'PROJECT_NAME'
+  - name: 'network_bgp_standard_mode_delete_med'
+    primary_resource_id: 'vpc_network'
+    vars:
+      network_name: 'vpc-network'
+    test_env_vars:
+      project: 'PROJECT_NAME'
 virtual_fields:
   - name: 'delete_default_routes_on_create'
     description: |
@@ -201,15 +207,16 @@ properties:
           - 'ADD_COST_TO_MED'
         is_missing_in_cai: true
       - name: 'delete_bgp_always_compare_med'
-        update_verb: 'PATCH'
-        update_url: 'projects/{{project}}/global/networks/{{name}}'
-        description: |
-            If set to `true`, this field clears the `bgp_always_compare_med` field.
-            Otherwise, `bgp_always_compare_med` will take the value from its own field in the configuration.
-            Defaults to `false`.
         type: Boolean
         default_value: false
+        update_verb: 'PATCH'
+        update_url: 'projects/{{project}}/global/networks/{{name}}'
         custom_flatten: 'templates/terraform/custom_flatten/compute_network_delete_bgp_always_compare_med.go.tmpl'
+        description: |
+          If set to `true`, the `bgp_always_compare_med` field will be cleared, reverting it to the service default.
+          If set to `false` (the default), `bgp_always_compare_med` will be set to the value specified in the configuration.
+          This helper field is not read back from the API.
+        ignore_read: true
   - name: 'mtu'
     type: Integer
     description: |
