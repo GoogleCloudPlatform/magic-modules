@@ -311,6 +311,7 @@ type Resource struct {
 	// control if a resource is continuously generated from public OpenAPI docs
 	AutogenStatus string `yaml:"autogen_status"`
 
+	// WARNING: this is an incomplete feature and may have several build errors.
 	// If true, this resource generates with the new plugin framework resource template
 	FrameworkResource bool `yaml:"plugin_framework,omitempty"`
 
