@@ -125,3 +125,14 @@ properties:
     description: |
       Project to bill on endpoint uptime usage.
     required: true
+  - name: 'endpointSettings'
+    type: NestedObject
+    description: |
+      Settings for the endpoint.
+    properties:
+      - name: 'jumboFramesEnabled'
+        type: Boolean
+        send_empty_value: true
+        immutable: true
+        description: |
+          Indicates whether Jumbo Frames are enabled for the firewall endpoint.
