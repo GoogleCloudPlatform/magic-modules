@@ -6101,7 +6101,7 @@ resource "google_container_node_pool" "np" {
   node_count = 1
 
   node_config {
-    machine_type = "a2-highgpu-1g"
+    machine_type = "a3-ultragpu-8g"
   }
 
   network_config {
@@ -6127,7 +6127,7 @@ func TestAccContainerNodePool_acceleratorNetworkProfile(t *testing.T) {
 				Config: testAccContainerNodePool_acceleratorNetworkProfile(clusterName, npName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", npName),
-					resource.TestCheckResourceAttr(resourceName, "node_config.0.machine_type", "a2-highgpu-1g"),
+					resource.TestCheckResourceAttr(resourceName, "node_config.0.machine_type", "a3-ultragpu-8g"),
 					resource.TestCheckResourceAttr(resourceName, "network_config.0.accelerator_network_profile", "auto"),
 				),
 			},
@@ -6178,7 +6178,7 @@ resource "google_container_node_pool" "np" {
   node_count = 1
 
   node_config {
-    machine_type = "a2-highgpu-1g"
+    machine_type = "a3-ultragpu-8g"
   }
 
   network_config {
@@ -6232,7 +6232,7 @@ resource "google_container_cluster" "primary" {
     node_count = 1
 
     node_config {
-      machine_type = "a2-highgpu-1g"
+      machine_type = "a3-ultragpu-8g"
     }
 
     network_config {
@@ -6261,7 +6261,7 @@ func TestAccContainerCluster_nodePool_acceleratorNetworkProfile(t *testing.T) {
 					// Verify the inline node pool attributes
 					resource.TestCheckResourceAttr(resourceName, "node_pool.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "node_pool.0.name", "anp-pool"),
-					resource.TestCheckResourceAttr(resourceName, "node_pool.0.node_config.0.machine_type", "a2-highgpu-1g"),
+					resource.TestCheckResourceAttr(resourceName, "node_pool.0.node_config.0.machine_type", "a3-ultragpu-8g"),
 					resource.TestCheckResourceAttr(resourceName, "node_pool.0.network_config.0.accelerator_network_profile", "auto"),
 				),
 			},
