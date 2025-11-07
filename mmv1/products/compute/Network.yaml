@@ -200,6 +200,16 @@ properties:
           - 'DEFAULT'
           - 'ADD_COST_TO_MED'
         is_missing_in_cai: true
+      - name: 'delete_bgp_always_compare_med'
+        update_verb: 'PATCH'
+        update_url: 'projects/{{project}}/global/networks/{{name}}'
+        description: |
+            If set to `true`, this field clears the `bgp_always_compare_med` field.
+            Otherwise, `bgp_always_compare_med` will take the value from its own field in the configuration.
+            Defaults to `false`.
+        type: Boolean
+        default_value: false
+        custom_flatten: 'templates/terraform/custom_flatten/compute_network_delete_bgp_always_compare_med.go.tmpl'
   - name: 'mtu'
     type: Integer
     description: |
@@ -264,3 +274,4 @@ properties:
           and values are in the format tagValues/456.
         api_name: resourceManagerTags
         ignore_read: true
+  
