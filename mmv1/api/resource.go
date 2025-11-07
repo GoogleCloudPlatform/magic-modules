@@ -2195,6 +2195,28 @@ func (r Resource) GetCaiAssetNameTemplate() string {
 	return fmt.Sprintf("//%s.googleapis.com/%s", r.CaiProductBackendName(r.CaiProductBaseUrl()), r.IdFormat)
 }
 
+// Ignores verifying CAI asset name if it is one computed field
+// For example, the CAI asset name format is //monitoring.googleapis.com/{{name}}
+// for google_monitoring_notification_channel
+func (r Resource) IgnoreCaiAssetName() bool {
+	nameTemplate := r.GetCaiAssetNameTemplate()
+	parts := strings.Split(nameTemplate, "/")
+	if len(parts) > 4 {
+		return false
+	}
+
+	params := r.ExtractIdentifiers(nameTemplate)
+	if len(params) == 1 {
+		param := params[0]
+		for _, p := range r.GettableProperties() {
+			if google.Underscore(p.Name) == param {
+				return p.Output
+			}
+		}
+	}
+	return false
+}
+
 // Gets the Cai API version
 func (r Resource) CaiApiVersion(productBackendName, caiProductBaseUrl string) string {
 	template := r.rawCaiAssetNameTemplate(productBackendName)
@@ -2411,6 +2433,10 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 		} else if tp.IsMissingInCai || tp.IgnoreRead || tp.ClientSide || tp.WriteOnlyLegacy {
 			props = append(props, tp.MetadataLineage())
 		}
+	}
+
+	if r.IgnoreCaiAssetName() {
+		props = append(props, "ASSETNAME")
 	}
 
 	slices.Sort(props)
