@@ -309,7 +309,7 @@ resource "google_bigquery_table" "tf_test_table" {
   EOF
 }
 
-resource "google_dataplex_datascan" "full_profile_test" {
+resource "google_dataplex_datascan" "full_profile" {
   location = "us-central1"
   display_name = "Full Datascan Quality Publishing"
   data_scan_id = "tf-test-dataprofile-full-test%{random_suffix}"
@@ -393,7 +393,7 @@ resource "google_bigquery_table" "tf_test_table" {
   EOF
 }
 
-resource "google_dataplex_datascan" "full_profile_test" {
+resource "google_dataplex_datascan" "full_profile" {
   location = "us-central1"
   display_name = "Full Datascan Quality Publishing"
   data_scan_id = "tf-test-dataprofile-full-test%{random_suffix}"
