@@ -16,7 +16,6 @@ func TestAccDataSourceGoogleBackupDRDataSourceReferences_basic(t *testing.T) {
 	var projectID string
 	context := map[string]interface{}{
 		"location":      "us-central1",
-		"resource_type": "sqladmin.googleapis.com/Instance",
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -249,7 +248,6 @@ resource "google_backup_dr_backup_plan_association" "bpa" {
 data "google_backup_dr_data_source_references" "all_refs" {
 	project       = data.google_project.project.project_id
 	location      = "us-central1"
-	resource_type = "sqladmin.googleapis.com/Instance"
 	depends_on    = [google_backup_dr_backup_plan_association.bpa]
 }
 
