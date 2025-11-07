@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 func mergeYaml(fileA, fileB string) ([]byte, error) {

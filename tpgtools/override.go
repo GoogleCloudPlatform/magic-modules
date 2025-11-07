@@ -18,7 +18,7 @@ import (
 	"fmt"
 
 	"github.com/golang/glog"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // When adding a new override, write a doc about it using go/tpgtools-new-feature and add it to go/tpgtools-overrides.
