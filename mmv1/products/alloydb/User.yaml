@@ -140,7 +140,8 @@ properties:
     default_value: 0
     url_param_only: true
     ignore_read: true
-    description: Triggers update of password write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
+    description: |
+      Triggers update of password write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
     immutable: true
   - name: 'databaseRoles'
     type: Array
