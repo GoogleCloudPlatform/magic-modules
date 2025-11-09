@@ -34,6 +34,13 @@ examples:
     primary_resource_id: 'default'
     vars:
       resource_name: 'sac-realm-name'
+  - name: 'sac_realm_symantec_cloud_swg'
+    min_version: beta
+    exclude_test: true
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'sac-realm-name'
+      secret_path: 'secret-path'
 properties:
   - name: 'name'
     type: String
