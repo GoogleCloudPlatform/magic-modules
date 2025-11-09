@@ -33,6 +33,7 @@ timeouts:
 autogen_async: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/alloydb_user.go.tmpl'
+  encoder: 'templates/terraform/encoders/alloydb_user.tmpl'
 # Skipping the sweeper because instances will be deleted during cluster sweeps
 exclude_sweeper: true
 examples:
@@ -121,7 +122,26 @@ properties:
       Password for this database user.
     sensitive: true
     ignore_read: true
-    write_only: true
+    conflicts:
+      - 'password_wo'
+  - name: 'password_wo'
+    type: String
+    description: |
+      Password for this database user. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
+    api_name: password
+    required_with:
+      - 'password_wo_version'
+    conflicts:
+      - 'password'
+    write_only_legacy: true
+    ignore_read: true
+  - name: 'password_wo_version'
+    type: Integer
+    default_value: 0
+    url_param_only: true
+    ignore_read: true
+    description: Triggers update of password write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
+    immutable: true
   - name: 'databaseRoles'
     type: Array
     description: |
