@@ -580,8 +580,11 @@ func TestResourceAddExtraFields(t *testing.T) {
 			}
 			if prop.Name == "passwordWoVersion" {
 				foundVersionField = true
-				if !prop.ClientSide {
-					t.Error("passwordWoVersion field should have ClientSide=true")
+				if !prop.IgnoreRead {
+					t.Error("passwordWoVersion field should have IgnoreRead=true")
+				}
+				if !prop.IgnoreWrite {
+					t.Error("passwordWoVersion field should have IgnoreWrite=true")
 				}
 			}
 		}
