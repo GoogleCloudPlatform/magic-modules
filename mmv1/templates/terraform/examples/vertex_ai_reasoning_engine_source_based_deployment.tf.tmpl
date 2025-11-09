@@ -1,0 +1,18 @@
+resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
+  display_name = "{{index $.Vars "name"}}"
+  description  = "A basic reasoning engine"
+  region       = "us-central1"
+
+  source_code_spec {
+    inline_source {
+      source_archive = filebase64("./test-fixtures/source.tar.gz")
+    }
+  }
+
+  python_spec {
+    entry_point_module = "simple_agent"
+    entry_point_object = "fixed_name_generator"
+    requirements_file  = "requirements.txt"
+    version            = "3.11"
+  }
+}
