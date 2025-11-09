@@ -5679,7 +5679,7 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 				}
 				if  len(meo["end_time_behavior"].(string)) > 0 {
 					mex.MaintenanceExclusionOptions.EndTimeBehavior =  meo["end_time_behavior"].(string)
-					mex.EndTime =  ""
+					mex.EndTime = ""
 				}
 				exclusions[exclusion["exclusion_name"].(string)] = mex
 			}
@@ -7309,9 +7309,11 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 				"start_time":  window.StartTime,
 				"exclusion_name": wName,
 			}
+			/*
 			if window.EndTime != "" {
 				exclusion["end_time"] = window.EndTime
 			}
+			*/
 			if window.MaintenanceExclusionOptions != nil {
 				// When the scope is set to NO_UPGRADES which is the default value,
 				// the maintenance exclusion returned by GCP will be empty.
@@ -7333,6 +7335,13 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 							"scope": scope,
 						},
 					}
+					if window.EndTime != "" {
+						exclusion["end_time"] = window.EndTime
+					}
+				} 
+			} else {
+				if window.EndTime != "" {
+					exclusion["end_time"] = window.EndTime
 				}
 			}
 			exclusions = append(exclusions, exclusion)
