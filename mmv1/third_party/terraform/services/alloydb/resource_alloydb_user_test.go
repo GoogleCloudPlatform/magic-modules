@@ -238,9 +238,7 @@ func TestAccAlloydbUser_alloydbUserBuiltinWithPasswordWo(t *testing.T) {
 			{
 				Config: testAccAlloydbUser_alloydbUserBuiltinWithPasswordWo(context),
 				Check: resource.ComposeTestCheckFunc(
-					// password_wo should not be stored in state
 					resource.TestCheckNoResourceAttr("google_alloydb_user.user1", "password_wo"),
-					// password_wo_version should be stored in state
 					resource.TestCheckResourceAttr("google_alloydb_user.user1", "password_wo_version", "1"),
 				),
 			},
@@ -248,7 +246,7 @@ func TestAccAlloydbUser_alloydbUserBuiltinWithPasswordWo(t *testing.T) {
 				ResourceName:            "google_alloydb_user.user1",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"password", "password_wo", "password_wo_version"},
+				ImportStateVerifyIgnore: []string{"password"},
 			},
 		},
 	})
