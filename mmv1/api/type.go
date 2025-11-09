@@ -237,9 +237,12 @@ type Type struct {
 	KeyDescription string `yaml:"key_description,omitempty"`
 
 	// ====================
-	// KeyValuePairs Fields
+	// Request Control Fields
 	// ====================
-	// Ignore writing the "effective_labels" and "effective_annotations" fields to API.
+	// IgnoreWrite prevents this field from being included in API requests.
+	// When true, the expand function for this field will not be generated.
+	// Originally designed for labels/annotations (effective_labels/effective_annotations),
+	// now available for all field types including write-only version fields (*_wo_version).
 	IgnoreWrite bool `yaml:"ignore_write,omitempty"`
 
 	// ====================

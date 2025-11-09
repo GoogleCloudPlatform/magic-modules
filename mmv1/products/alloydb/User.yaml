@@ -119,8 +119,8 @@ properties:
     type: String
     description: |
       Password for this database user.
-    sensitive: true
     ignore_read: true
+    write_only: true
   - name: 'databaseRoles'
     type: Array
     description: |
