@@ -649,3 +649,12 @@ func IsSiteVerificationRetryableError(err error) (bool, string) {
 	}
 	return false, ""
 }
+
+func IsServiceNetworkingConnectionRetryableError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 16 && strings.Contains(strings.ToLower(gerr.Body), "Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential.") {
+			return true, "Waiting"
+		}
+	}
+	return false, ""
+}
