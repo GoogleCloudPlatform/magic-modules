@@ -96,6 +96,12 @@ func ResourceMonitoringDashboard() *schema.Resource {
 				ForceNew:    true,
 				Description: `The ID of the project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
+			"tags": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Description: "A map of resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/{tag_value_id}.",
+				Elem: &schema.Schema{Type: schema.TypeString},
+			},
 		},
 		UseJSONNumber: true,
 	}
