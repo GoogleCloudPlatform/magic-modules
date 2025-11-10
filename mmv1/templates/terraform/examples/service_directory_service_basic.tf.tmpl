@@ -7,7 +7,7 @@ resource "google_service_directory_service" "{{$.PrimaryResourceId}}" {
   service_id = "{{index $.Vars "service_id"}}"
   namespace  = google_service_directory_namespace.{{$.PrimaryResourceId}}.id
 
-  annotations = {
+  metadata = {
     stage  = "prod"
     region = "us-central1"
   }
