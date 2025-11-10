@@ -13,7 +13,6 @@
 
 ---
 name: 'Instance'
-# plugin_framework: true
 description: |
   Represents a Data Fusion instance.
 references:

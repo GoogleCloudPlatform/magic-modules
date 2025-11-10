@@ -663,7 +663,7 @@ resource "google_ces_guardrail" "ces_guardrail_llm_policy" {
   }
   enabled = true
   llm_policy {
-    max_conversation_messages = 8
+    max_conversation_messages = 9
     model_settings {
         model = "gemini-2.0-flash"
         temperature = 45
