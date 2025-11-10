@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -95,6 +95,23 @@ properties:
       Use the following format:
       `projects/*/locations/global/multicastDomainGroups/*`
     output: true
+  - name: state
+    type: NestedObject
+    description: The multicast resource's state.
+    output: true  
+    properties:
+      - name: state
+        type: String
+        description: |-
+          The state of the multicast resource.
+          Possible values:
+          CREATING
+          ACTIVE
+          DELETING
+          DELETE_FAILED
+          UPDATING
+          UPDATE_FAILED
+          INACTIVE
   - name: uniqueId
     type: String
     description: |-
