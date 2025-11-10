@@ -72,9 +72,14 @@ resource "google_model_armor_floorsetting" "test-resource" {
 
   enable_floor_setting_enforcement = true
   
-  integrated_services =  [ "AI_PLATFORM" ]
+  integrated_services =  [ "AI_PLATFORM", "GOOGLE_MCP_SERVER" ]
 
   ai_platform_floor_setting {
+    inspect_only            = true
+    enable_cloud_logging    = true
+  }
+
+  google_mcp_server_floor_setting {
     inspect_only            = true
     enable_cloud_logging    = true
   }
@@ -115,6 +120,8 @@ resource "google_model_armor_floorsetting" "test-resource" {
       filter_enforcement = "ENABLED"
     }
   }
+  
+  integrated_services 
 
   ai_platform_floor_setting {
     inspect_and_block       = false
