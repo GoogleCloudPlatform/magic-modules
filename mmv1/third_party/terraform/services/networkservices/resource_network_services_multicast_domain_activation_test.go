@@ -29,7 +29,7 @@ import (
 	"testing"
 )
 
-func TestAccNetworkServicesMulticastDomainActivation_networkServicesMulticastDomainActivationBasicExampleWithUpdate(t *testing.T) {
+func TestAccNetworkServicesMulticastDomainActivation_networkServicesMulticastDomainActivationUpdateExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -119,43 +119,4 @@ resource "google_network_services_multicast_domain_activation" mda_test {
 	}
 }
 `, context)
-}
-
-func testAccCheckNetworkServicesMulticastDomainActivationDestroyProducer(t *testing.T) func(s *terraform.State) error {
-	return func(s *terraform.State) error {
-		for name, rs := range s.RootModule().Resources {
-			if rs.Type != "google_network_services_multicast_domain_activation" {
-				continue
-			}
-			if strings.HasPrefix(name, "data.") {
-				continue
-			}
-
-			config := acctest.GoogleProviderConfig(t)
-
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{NetworkServicesBasePath}}projects/{{project}}/locations/{{location}}/multicastDomainActivations/{{multicast_domain_activation_id}}")
-			if err != nil {
-				return err
-			}
-
-			billingProject := ""
-
-			if config.BillingProject != "" {
-				billingProject = config.BillingProject
-			}
-
-			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-				Config:    config,
-				Method:    "GET",
-				Project:   billingProject,
-				RawURL:    url,
-				UserAgent: config.UserAgent,
-			})
-			if err == nil {
-				return fmt.Errorf("NetworkServicesMulticastDomainActivation still exists at %s", url)
-			}
-		}
-
-		return nil
-	}
 }
