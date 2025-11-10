@@ -3391,6 +3391,8 @@ func TestAccContainerCluster_withMaintenanceExclusionOptions_untilEndOfSupport(t
    				Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr(resourceName,
 							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.end_time_behavior", "UNTIL_END_OF_SUPPORT"),
+						resource.TestCheckResourceAttr(resourceName,
+							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.end_time_behavior", "UNTIL_END_OF_SUPPORT"),
 					),
 			},
 			{
@@ -3472,6 +3474,8 @@ func TestAccContainerCluster_deleteMaintenanceExclusionOptions_untilEndOfSupport
 				Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr(resourceName,
 							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.end_time_behavior", "UNTIL_END_OF_SUPPORT"),
+						resource.TestCheckResourceAttr(resourceName,
+							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.end_time_behavior", "UNTIL_END_OF_SUPPORT"),
 				),
 			},
 			{
@@ -3486,9 +3490,9 @@ func TestAccContainerCluster_deleteMaintenanceExclusionOptions_untilEndOfSupport
 					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z", networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckNoResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope"),
+							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.end_time_behavior"),
 						resource.TestCheckNoResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.scope"),
+							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.end_time_behavior"),
 				),
 			},
 			{
@@ -3592,9 +3596,9 @@ func TestAccContainerCluster_updateMaintenanceExclusionOptions_untilEndOfSupport
 					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z", networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckNoResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope"),
+							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.end_time_behavior"),
 						resource.TestCheckNoResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.scope"),
+							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.end_time_behavior"),
 				),
 			},
 			{
@@ -3610,6 +3614,8 @@ func TestAccContainerCluster_updateMaintenanceExclusionOptions_untilEndOfSupport
 				Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr(resourceName,
 							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.end_time_behavior", "UNTIL_END_OF_SUPPORT"),
+						resource.TestCheckResourceAttr(resourceName,
+							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.end_time_behavior", "UNTIL_END_OF_SUPPORT"),
 				),
 			},
 			{
@@ -3625,6 +3631,8 @@ func TestAccContainerCluster_updateMaintenanceExclusionOptions_untilEndOfSupport
 				Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr(resourceName,
 							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.end_time_behavior", "UNTIL_END_OF_SUPPORT"),
+						resource.TestCheckResourceAttr(resourceName,
+							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.end_time_behavior", "UNTIL_END_OF_SUPPORT"),
 				),
 			},
 			{
