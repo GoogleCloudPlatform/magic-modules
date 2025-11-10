@@ -609,3 +609,26 @@ properties:
           custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
           validation:
            function: 'validation.StringIsJSON'
+ - name: clientCertificateSettings
+   type: NestedObject
+   description: |-
+    The default client certificate settings for the app.
+   properties:
+    - name: tlsCertificate
+      type: String
+      description: |-
+       The TLS certificate encoded in PEM format.
+       This string must include the begin header and end footer lines.
+      required: true
+    - name: privateKey
+      type: String
+      description: |-
+       The name of the SecretManager secret version resource
+       storing the private key encoded in PEM format.
+       Format: projects/{project}/secrets/{secret}/versions/{version}
+      required: true
+    - name: passphrase
+      type: String
+      description: |-
+       The passphrase to decrypt the private key.
+       Should be left unset if the private key is not encrypted.
