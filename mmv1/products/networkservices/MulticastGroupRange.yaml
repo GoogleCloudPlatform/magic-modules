@@ -23,13 +23,13 @@ id_format: projects/{{project}}/locations/{{location}}/multicastGroupRanges/{{mu
 import_format:
   - projects/{{project}}/locations/{{location}}/multicastGroupRanges/{{multicast_group_range_id}}
 examples:
-- name: network_services_multicast_group_range_basic
-  primary_resource_id: mgr_test
-  vars:
-    network_name: test-mgr-network
-    domain_name: test-mgr-domain
-    internal_range_name: test-mgr-internal-range
-    group_range_name: test-mgr-group-range
+  - name: network_services_multicast_group_range_basic
+    primary_resource_id: mgr_test
+    vars:
+      network_name: test-mgr-network
+      domain_name: test-mgr-domain
+      internal_range_name: test-mgr-internal-range
+      group_range_name: test-mgr-group-range
 autogen_async: true
 async:
   operation:
