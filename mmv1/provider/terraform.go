@@ -14,6 +14,7 @@
 package provider
 
 import (
+	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
@@ -130,8 +131,21 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 			log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 		}
 		if object.FrameworkResource {
-			targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_fw_%s.go", t.ResourceGoFilename(object)))
-			templateData.GenerateFWResourceFile(targetFilePath, object)
+			fmt.Printf("\n\x1b[1;33mWARNING:\x1b[0m\n")
+			fmt.Printf("The plugin framework generation code is considered a WIP and experimental.\nAre you sure you want to use it for %s? (y/n) ", t.ResourceGoFilename(object))
+
+			reader := bufio.NewReader(os.Stdin)
+			input, err := reader.ReadString('\n')
+			if err != nil {
+				log.Fatalf("Error reading input: %v", err)
+			}
+
+			if strings.ToLower(strings.TrimSpace(input)) == "y" {
+				targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_fw_%s.go", t.ResourceGoFilename(object)))
+				templateData.GenerateFWResourceFile(targetFilePath, object)
+			} else {
+				log.Fatalf("please remove \"plugin_framework: true\" from the YAML configuration.")
+			}
 		} else {
 			targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s.go", t.ResourceGoFilename(object)))
 			templateData.GenerateResourceFile(targetFilePath, object)
@@ -187,6 +201,7 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 	}
 	if object.Examples != nil {
 		t.GenerateResourceTestsLegacy(object, templateData, outputFolder)
+		return
 	}
 
 	eligibleSample := false
@@ -239,7 +254,30 @@ func (t *Terraform) GenerateSingularDataSource(object api.Resource, templateData
 	templateData.GenerateDataSourceFile(targetFilePath, object)
 }
 
+func (t *Terraform) GenerateSingularDataSourceTestsLegacy(object api.Resource, templateData TemplateData, outputFolder string) {
+	if !object.ShouldGenerateSingularDataSourceTests() {
+		return
+	}
+
+	productName := t.Product.ApiName
+	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s_test.go", t.ResourceGoFilename(object)))
+	templateData.GenerateDataSourceTestFileLegacy(targetFilePath, object)
+
+}
+
 func (t *Terraform) GenerateSingularDataSourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
+	if object.Samples != nil && object.Examples != nil {
+		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
+	}
+	if object.Examples != nil {
+		t.GenerateSingularDataSourceTestsLegacy(object, templateData, outputFolder)
+		return
+	}
+
 	if !object.ShouldGenerateSingularDataSourceTests() {
 		return
 	}

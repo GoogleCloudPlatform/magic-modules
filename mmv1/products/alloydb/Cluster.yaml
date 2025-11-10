@@ -60,6 +60,7 @@ custom_code:
   pre_update: 'templates/terraform/pre_update/alloydb_cluster.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/alloydb_cluster.go.tmpl'
   constants: 'templates/terraform/constants/alloydb_cluster.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/alloydb_cluster.go.tmpl'
 custom_diff:
   - 'alloydbClusterCustomizeDiff'
 # Skipping the sweeper because we need to force-delete clusters.

@@ -311,6 +311,7 @@ type Resource struct {
 	// control if a resource is continuously generated from public OpenAPI docs
 	AutogenStatus string `yaml:"autogen_status"`
 
+	// WARNING: this is an incomplete feature and may have several build errors.
 	// If true, this resource generates with the new plugin framework resource template
 	FrameworkResource bool `yaml:"plugin_framework,omitempty"`
 
@@ -373,6 +374,11 @@ type Resource struct {
 	TGCResource `yaml:",inline"`
 }
 
+type TestConfig struct {
+	Sample *resource.Sample
+	Step   *resource.Step
+}
+
 type TGCResource struct {
 	// If true, exclude resource from Terraform Validator
 	// (i.e. terraform-provider-conversion)
@@ -398,6 +404,9 @@ type TGCResource struct {
 	// Generally, it shouldn't be set when the identity can be decided.
 	// Otherswise, it should be set.
 	CaiIdentity string `yaml:"cai_identity,omitempty"`
+
+	// If true, create TGC tests automatically for all handwritten provider tests.
+	TGCIncludeHandwrittenTests bool `yaml:"tgc_include_handwritten_tests,omitempty"`
 
 	// Tests for TGC, will automatically be filled with resource's examples
 	// and handwritten tests. Can be specified in order to skip specific tests.
@@ -1651,6 +1660,24 @@ func (r Resource) FirstTestExample() *resource.Examples {
 	return examples[0]
 }
 
+// Use the first valid config to create datasource and IAM resource test
+func (r Resource) FirstTestConfig() TestConfig {
+	for _, sample := range r.Samples {
+		if sample.ExcludeTest || (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0) {
+			continue
+		}
+		for _, step := range sample.Steps {
+			if r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
+				return TestConfig{
+					Sample: sample,
+					Step:   step,
+				}
+			}
+		}
+	}
+	return TestConfig{}
+}
+
 func (r Resource) ExamplePrimaryResourceId() string {
 	examples := google.Reject(r.Examples, func(e *resource.Examples) bool {
 		return e.ExcludeTest
@@ -2171,6 +2198,28 @@ func (r Resource) GetCaiAssetNameTemplate() string {
 	return fmt.Sprintf("//%s.googleapis.com/%s", r.CaiProductBackendName(r.CaiProductBaseUrl()), r.IdFormat)
 }
 
+// Ignores verifying CAI asset name if it is one computed field
+// For example, the CAI asset name format is //monitoring.googleapis.com/{{name}}
+// for google_monitoring_notification_channel
+func (r Resource) IgnoreCaiAssetName() bool {
+	nameTemplate := r.GetCaiAssetNameTemplate()
+	parts := strings.Split(nameTemplate, "/")
+	if len(parts) > 4 {
+		return false
+	}
+
+	params := r.ExtractIdentifiers(nameTemplate)
+	if len(params) == 1 {
+		param := params[0]
+		for _, p := range r.GettableProperties() {
+			if google.Underscore(p.Name) == param {
+				return p.Output
+			}
+		}
+	}
+	return false
+}
+
 // Gets the Cai API version
 func (r Resource) CaiApiVersion(productBackendName, caiProductBaseUrl string) string {
 	template := r.rawCaiAssetNameTemplate(productBackendName)
@@ -2387,6 +2436,10 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 		} else if tp.IsMissingInCai || tp.IgnoreRead || tp.ClientSide || tp.WriteOnlyLegacy {
 			props = append(props, tp.MetadataLineage())
 		}
+	}
+
+	if r.IgnoreCaiAssetName() {
+		props = append(props, "ASSETNAME")
 	}
 
 	slices.Sort(props)
