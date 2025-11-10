@@ -14,7 +14,8 @@
 ---
 name: 'ServingConfig'
 description: |
-  Represents a user store.
+  Represents a serving config which is a singleton resource under engine. A default
+  serving config is automatically provisioned and deleted with its parent engine.
 references:
   api: 'https://cloud.google.com/gemini/enterprise/docs/reference/rest/v1/projects.locations.collections.engines.servingConfigs'
 base_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/engines/{{engine_id}}/servingConfigs'
