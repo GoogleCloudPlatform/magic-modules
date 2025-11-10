@@ -90,7 +90,7 @@ resource "google_iap_settings" "iap_settings" {
       login_page_uri = "https://test.com/?apiKey=abc"
     }
     oauth_settings {
-      login_hint = "test"
+      login_hint    = "test"
       client_id     = "test-client-id"
       client_secret = "test-client-secret"
     }
