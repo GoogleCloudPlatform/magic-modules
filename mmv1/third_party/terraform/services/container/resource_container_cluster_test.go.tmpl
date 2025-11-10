@@ -3388,14 +3388,10 @@ func TestAccContainerCluster_withMaintenanceExclusionOptions_untilEndOfSupport(t
 			{
 				Config: testAccContainerCluster_withExclusionOptions_RecurringMaintenanceWindow_untilEndOfSupport(
 					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "NO_MINOR_UPGRADES", "NO_MINOR_OR_NODE_UPGRADES", networkName, subnetworkName),
-				/*
-				Check: resource.ComposeTestCheckFunc(
+   				Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope", "NO_MINOR_UPGRADES"),
-						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.scope", "NO_MINOR_OR_NODE_UPGRADES"),
-				),
-				*/
+							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.end_time_behavior", "UNTIL_END_OF_SUPPORT"),
+					),
 			},
 			{
 				ResourceName:        resourceName,
@@ -3473,14 +3469,10 @@ func TestAccContainerCluster_deleteMaintenanceExclusionOptions_untilEndOfSupport
 			{
 				Config: testAccContainerCluster_withExclusionOptions_RecurringMaintenanceWindow_untilEndOfSupport(
 					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "NO_MINOR_UPGRADES", "NO_MINOR_OR_NODE_UPGRADES", networkName, subnetworkName),
-				/*
 				Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope", "NO_MINOR_UPGRADES"),
-						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.scope", "NO_MINOR_OR_NODE_UPGRADES"),
+							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.end_time_behavior", "UNTIL_END_OF_SUPPORT"),
 				),
-				*/
 			},
 			{
 				ResourceName:        resourceName,
@@ -3615,14 +3607,10 @@ func TestAccContainerCluster_updateMaintenanceExclusionOptions_untilEndOfSupport
 			{
 				Config: testAccContainerCluster_withExclusionOptions_RecurringMaintenanceWindow_untilEndOfSupport(
 					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "NO_MINOR_UPGRADES", "NO_MINOR_OR_NODE_UPGRADES", networkName, subnetworkName),
-				/*
 				Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope", "NO_MINOR_UPGRADES"),
-						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.scope", "NO_MINOR_OR_NODE_UPGRADES"),
+							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.end_time_behavior", "UNTIL_END_OF_SUPPORT"),
 				),
-				*/
 			},
 			{
 				ResourceName:        resourceName,
@@ -3636,9 +3624,7 @@ func TestAccContainerCluster_updateMaintenanceExclusionOptions_untilEndOfSupport
 					cluster, "2019-01-01T00:00:00Z", "2019-01-02T00:00:00Z", "2019-05-01T00:00:00Z", "2019-05-02T00:00:00Z", "NO_MINOR_OR_NODE_UPGRADES", "NO_MINOR_UPGRADES", networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.scope", "NO_MINOR_OR_NODE_UPGRADES"),
-						resource.TestCheckResourceAttr(resourceName,
-							"maintenance_policy.0.maintenance_exclusion.1.exclusion_options.0.scope", "NO_MINOR_UPGRADES"),
+							"maintenance_policy.0.maintenance_exclusion.0.exclusion_options.0.end_time_behavior", "UNTIL_END_OF_SUPPORT"),
 				),
 			},
 			{

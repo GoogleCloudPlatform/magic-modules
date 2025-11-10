@@ -7309,11 +7309,6 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 				"start_time":  window.StartTime,
 				"exclusion_name": wName,
 			}
-			/*
-			if window.EndTime != "" {
-				exclusion["end_time"] = window.EndTime
-			}
-			*/
 			if window.MaintenanceExclusionOptions != nil {
 				// When the scope is set to NO_UPGRADES which is the default value,
 				// the maintenance exclusion returned by GCP will be empty.
