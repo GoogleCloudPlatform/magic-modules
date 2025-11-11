@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"slices"
 	"strings"
 	"testing"
@@ -325,11 +326,12 @@ func TestLeafProperties(t *testing.T) {
 // to files relative to this location will remain valid even if the repository structure
 // changes or the source is downloaded without git metadata.
 func TestMagicianLocation(t *testing.T) {
-	// Get the current working directory of the test
-	pwd, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("Failed to get working directory: %v", err)
+	// Get the path where this test file is located
+	_, testFilePath, _, ok := runtime.Caller(0)
+	if !ok {
+		t.Fatal("Failed to get current test file path")
 	}
+	pwd := filepath.Dir(testFilePath)
 
 	// Walk up directories until we either:
 	// 1. Find the mmv1 directory
