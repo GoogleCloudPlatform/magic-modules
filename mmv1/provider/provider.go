@@ -8,7 +8,7 @@ import (
 )
 
 type Provider interface {
-	Generate(string, string, string, bool, bool)
+	Generate(string, string, bool, bool)
 	CopyCommonFiles(outputFolder string, generateCode, generateDocs bool)
 	CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string)
 }

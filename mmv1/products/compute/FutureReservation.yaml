@@ -53,6 +53,11 @@ examples:
     primary_resource_id: 'gce_future_reservation'
     vars:
       future_reservation_name: 'gce-future-reservation'
+      start_time: '2025-11-01T00:00:00Z'
+      end_time: '2025-11-02T00:00:00Z'
+    test_vars_overrides:
+      start_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 1).Format(time.RFC3339)'
+      end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339)'
     test_env_vars:
       project: 'PROJECT_NAME'
       org_id: 'ORG_ID'
@@ -61,6 +66,11 @@ examples:
     primary_resource_id: 'gce_future_reservation'
     vars:
       future_reservation_name: 'gce-future-reservation-aggregate-reservation'
+      start_time: '2025-11-01T00:00:00Z'
+      end_time: '2025-11-02T00:00:00Z'
+    test_vars_overrides:
+      start_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 1).Format(time.RFC3339)'
+      end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339)'
     test_env_vars:
       project: 'PROJECT_NAME'
       org_id: 'ORG_ID'
@@ -69,12 +79,16 @@ examples:
     primary_resource_id: 'gce_future_reservation'
     vars:
       future_reservation_name: 'gce-shared-future-reservation'
+      start_time: '2025-08-01T00:00:00Z'
+      end_time: '2025-08-02T00:00:00Z'
+    test_vars_overrides:
+      start_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 1).Format(time.RFC3339)'
+      end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339)'
     test_env_vars:
       project: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
+      org_id: 'ORG_TARGET'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
-    skip_vcr: true
 parameters:
   - name: 'name'
     type: String

@@ -3227,6 +3227,7 @@ resource "google_bigquery_table" "test" {
   external_data_configuration {
     autodetect    = true
     source_format = "%s"
+    decimal_target_types = ["NUMERIC", "BIGNUMERIC"]
     csv_options {
       encoding = "UTF-8"
       quote    = "%s"
@@ -3304,7 +3305,7 @@ resource "google_bigquery_table" "test" {
   max_staleness = "%s"
 
   depends_on = [
-	google_project_iam_member.test
+    google_project_iam_member.test
   ]
 }
 `, connectionID, datasetID, bucketName, objectName, tableID, metadataCacheMode, maxStaleness)
@@ -3373,7 +3374,8 @@ resource "google_bigquery_table" "test" {
   external_data_configuration {
     autodetect    = false
     source_format = "PARQUET"
-	reference_file_schema_uri = "gs://${google_storage_bucket.test.name}/${google_storage_bucket_object.test.name}"
+    decimal_target_types = ["NUMERIC", "BIGNUMERIC"]
+    reference_file_schema_uri = "gs://${google_storage_bucket.test.name}/${google_storage_bucket_object.test.name}"
 
     source_uris = [
       "gs://${google_storage_bucket.test.name}/*",
@@ -3462,15 +3464,15 @@ resource "google_bigquery_table" "test" {
   external_data_configuration {
     autodetect    = false
     source_format = "ICEBERG"
-	# Point to metadata.json.
+    # Point to metadata.json.
     source_uris = [
       "gs://${google_storage_bucket.test.name}/simple/metadata/00000-1114da6b-bb88-4b5a-94bd-370f286c858a.metadata.json",
     ]
   }
   # Depends on Iceberg Table Files
   depends_on = [
-	google_storage_bucket_object.empty_data_folder,
-	google_storage_bucket_object.metadata,
+    google_storage_bucket_object.empty_data_folder,
+    google_storage_bucket_object.metadata,
   ]
 }
 `, datasetID, bucketName, tableID)
@@ -3511,9 +3513,9 @@ resource "google_bigquery_table" "test" {
   external_data_configuration {
     autodetect    = false
     source_format = "PARQUET"
-	# Specify URI is a manifest.
-	file_set_spec_type = "FILE_SET_SPEC_TYPE_NEW_LINE_DELIMITED_MANIFEST"
-	# Point to metadata.json.
+    # Specify URI is a manifest.
+    file_set_spec_type = "FILE_SET_SPEC_TYPE_NEW_LINE_DELIMITED_MANIFEST"
+    # Point to metadata.json.
     source_uris = [
       "gs://${google_storage_bucket.test.name}/${google_storage_bucket_object.manifest.name}",
     ]
@@ -3567,12 +3569,12 @@ resource "google_bigquery_table" "test" {
   dataset_id = google_bigquery_dataset.test.dataset_id
   external_data_configuration {
 
-	# Feature Under Test
-	connection_id   = %s
+    # Feature Under Test
+    connection_id   = %s
 
     autodetect      = false
-	object_metadata = "SIMPLE"
-	metadata_cache_mode = "MANUAL"
+    object_metadata = "SIMPLE"
+    metadata_cache_mode = "MANUAL"
 
     source_uris = [
       "gs://${google_storage_bucket.test.name}/*",
@@ -3624,10 +3626,10 @@ resource "google_bigquery_table" "test" {
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
   external_data_configuration {
-	connection_id   = local.connection_id_reformatted
+    connection_id   = local.connection_id_reformatted
     autodetect      = false
-	object_metadata = "SIMPLE"
-	metadata_cache_mode = "MANUAL"
+    object_metadata = "SIMPLE"
+    metadata_cache_mode = "MANUAL"
 
     source_uris = [
       "gs://${google_storage_bucket.test.name}/*",
@@ -3641,22 +3643,22 @@ resource "google_bigquery_table" "test" {
 func testAccBigQueryTableFromGCSObjectTableMetadata(connectionID, datasetID, tableID, bucketName, objectName, maxStaleness string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_connection" "test" {
-   connection_id = "%s"
-   location = "US"
-   cloud_resource {}
+  connection_id = "%s"
+  location = "US"
+  cloud_resource {}
 }
 
 locals {
-   connection_id_split = split("/", google_bigquery_connection.test.name)
-   connection_id_reformatted = "${local.connection_id_split[1]}.${local.connection_id_split[3]}.${local.connection_id_split[5]}"
+  connection_id_split = split("/", google_bigquery_connection.test.name)
+  connection_id_reformatted = "${local.connection_id_split[1]}.${local.connection_id_split[3]}.${local.connection_id_split[5]}"
 }
 
 data "google_project" "project" {}
 
 resource "google_project_iam_member" "test" {
-   role = "roles/storage.objectViewer"
-   project = data.google_project.project.id
-   member = "serviceAccount:${google_bigquery_connection.test.cloud_resource[0].service_account_id}"
+  role = "roles/storage.objectViewer"
+  project = data.google_project.project.id
+  member = "serviceAccount:${google_bigquery_connection.test.cloud_resource[0].service_account_id}"
 }
 
 resource "google_bigquery_dataset" "test" {
@@ -3680,10 +3682,10 @@ resource "google_bigquery_table" "test" {
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
   external_data_configuration {
-	connection_id       = local.connection_id_reformatted
+    connection_id       = local.connection_id_reformatted
     autodetect          = false
-	object_metadata     = "SIMPLE"
-	metadata_cache_mode = "MANUAL"
+    object_metadata     = "SIMPLE"
+    metadata_cache_mode = "MANUAL"
 
     source_uris = [
       "gs://${google_storage_bucket.test.name}/*",
@@ -3714,18 +3716,18 @@ EOF
   bucket = google_storage_bucket.test.name
 }
 resource "google_bigquery_connection" "test" {
-   connection_id = "%s"
-   location = "US"
-   cloud_resource {}
+  connection_id = "%s"
+  location = "US"
+  cloud_resource {}
 }
 locals {
-   connection_id_split = split("/", google_bigquery_connection.test.name)
-   connection_id_reformatted = "${local.connection_id_split[1]}.${local.connection_id_split[3]}.${local.connection_id_split[5]}"
+  connection_id_split = split("/", google_bigquery_connection.test.name)
+  connection_id_reformatted = "${local.connection_id_split[1]}.${local.connection_id_split[3]}.${local.connection_id_split[5]}"
 }
 resource "google_project_iam_member" "test" {
-   role = "roles/storage.objectViewer"
-   project = "%s"
-   member = "serviceAccount:${google_bigquery_connection.test.cloud_resource[0].service_account_id}"
+  role = "roles/storage.objectViewer"
+  project = "%s"
+  member = "serviceAccount:${google_bigquery_connection.test.cloud_resource[0].service_account_id}"
 }
 resource "google_bigquery_table" "test" {
   deletion_protection = false
@@ -3778,18 +3780,18 @@ EOF
   bucket = google_storage_bucket.test.name
 }
 resource "google_bigquery_connection" "test" {
-   connection_id = "%s"
-   location = "US"
-   cloud_resource {}
+  connection_id = "%s"
+  location = "US"
+  cloud_resource {}
 }
 locals {
-   connection_id_split = split("/", google_bigquery_connection.test.name)
-   connection_id_reformatted = "${local.connection_id_split[1]}.${local.connection_id_split[3]}.${local.connection_id_split[5]}"
+  connection_id_split = split("/", google_bigquery_connection.test.name)
+  connection_id_reformatted = "${local.connection_id_split[1]}.${local.connection_id_split[3]}.${local.connection_id_split[5]}"
 }
 resource "google_project_iam_member" "test" {
-   role = "roles/storage.objectViewer"
-   project = "%s"
-   member = "serviceAccount:${google_bigquery_connection.test.cloud_resource[0].service_account_id}"
+  role = "roles/storage.objectViewer"
+  project = "%s"
+  member = "serviceAccount:${google_bigquery_connection.test.cloud_resource[0].service_account_id}"
 }
 resource "google_bigquery_table" "test" {
   deletion_protection = false
@@ -3833,17 +3835,17 @@ EOF
   bucket = google_storage_bucket.test.name
 }
 resource "google_bigquery_connection" "test" {
-   connection_id = "%s"
-   location = "US"
-   cloud_resource {}
+  connection_id = "%s"
+  location = "US"
+  cloud_resource {}
 }
 locals {
-   connection_id_reformatted = google_bigquery_connection.test.name
+  connection_id_reformatted = google_bigquery_connection.test.name
 }
 resource "google_project_iam_member" "test" {
-   role = "roles/storage.objectViewer"
-   project = "%s"
-   member = "serviceAccount:${google_bigquery_connection.test.cloud_resource[0].service_account_id}"
+  role = "roles/storage.objectViewer"
+  project = "%s"
+  member = "serviceAccount:${google_bigquery_connection.test.cloud_resource[0].service_account_id}"
 }
 resource "google_bigquery_table" "test" {
   deletion_protection = false
@@ -3896,12 +3898,13 @@ resource "google_bigquery_table" "test" {
     source_format = "NEWLINE_DELIMITED_JSON"
     autodetect = false
     source_uris= ["gs://${google_storage_bucket.test.name}/*"]
+    decimal_target_types = ["NUMERIC", "BIGNUMERIC"]
 
     json_options {
       encoding = "%s"
     }
 
-	json_extension = "GEOJSON"
+    json_extension = "GEOJSON"
 
     hive_partitioning_options {
       mode = "CUSTOM"
@@ -4038,7 +4041,7 @@ resource "google_bigquery_table" "test" {
     csv_options {
       encoding = "UTF-8"
       quote = ""
-	  allow_quoted_newlines = "false"
+      allow_quoted_newlines = "false"
       allow_jagged_rows     = "false"
     }
     source_uris = [
@@ -4079,7 +4082,7 @@ resource "google_bigquery_table" "table" {
     source_format         = "BIGTABLE"
     ignore_unknown_values = true
     source_uris = [
-    "https://googleapis.com/bigtable/${google_bigtable_table.table.id}",
+      "https://googleapis.com/bigtable/${google_bigtable_table.table.id}",
     ]
   }
 }
@@ -4126,31 +4129,31 @@ resource "google_bigquery_table" "table" {
     source_format         = "BIGTABLE"
     ignore_unknown_values = true
     source_uris = [
-    "https://googleapis.com/bigtable/${google_bigtable_table.table.id}",
+      "https://googleapis.com/bigtable/${google_bigtable_table.table.id}",
     ]
-	bigtable_options {
+    bigtable_options {
       column_family {
         family_id        = "cf-%{random_suffix}-first"
-		column {
-			field_name       = "cf-%{random_suffix}-first"
-			type             = "STRING"
-			encoding         = "TEXT"
-			only_read_latest = true
-		  }
-		type             = "STRING"
-		encoding         = "TEXT"
-		only_read_latest = true
-	  }
+        column {
+          field_name       = "cf-%{random_suffix}-first"
+          type             = "STRING"
+          encoding         = "TEXT"
+          only_read_latest = true
+        }
+        type             = "STRING"
+        encoding         = "TEXT"
+        only_read_latest = true
+      }
       column_family {
         family_id        = "cf-%{random_suffix}-second"
-		type             = "STRING"
-		encoding         = "TEXT"
-		only_read_latest = false
-	  }
+        type             = "STRING"
+        encoding         = "TEXT"
+        only_read_latest = false
+      }
       ignore_unspecified_column_families = true
       read_rowkey_as_string              = true
       output_column_families_as_json     = true
-	}
+	  }
   }
 }
 resource "google_bigquery_dataset" "dataset" {
@@ -4169,27 +4172,27 @@ resource "google_bigquery_dataset" "dataset" {
 
 func testAccBigQueryTableFromSheet(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-  resource "google_bigquery_table" "table" {
-	  deletion_protection = false
-    dataset_id = google_bigquery_dataset.dataset.dataset_id
-    table_id   = "tf_test_sheet_%{random_suffix}"
+resource "google_bigquery_table" "table" {
+  deletion_protection = false
+  dataset_id = google_bigquery_dataset.dataset.dataset_id
+  table_id   = "tf_test_sheet_%{random_suffix}"
 
-    external_data_configuration {
-      autodetect            = true
-      source_format         = "GOOGLE_SHEETS"
-      ignore_unknown_values = true
+  external_data_configuration {
+    autodetect            = true
+    source_format         = "GOOGLE_SHEETS"
+    ignore_unknown_values = true
 
-      google_sheets_options {
+    google_sheets_options {
       skip_leading_rows = 1
-      }
-
-      source_uris = [
-      "https://drive.google.com/open?id=xxxx",
-      ]
     }
 
-    schema = <<EOF
-    [
+    source_uris = [
+      "https://drive.google.com/open?id=xxxx",
+    ]
+  }
+
+  schema = <<EOF
+  [
     {
       "name": "permalink",
       "type": "STRING",
@@ -4202,21 +4205,21 @@ func testAccBigQueryTableFromSheet(context map[string]interface{}) string {
       "mode": "NULLABLE",
       "description": "State where the head office is located"
     }
-    ]
-    EOF
-    }
+  ]
+  EOF
+}
 
-    resource "google_bigquery_dataset" "dataset" {
-    dataset_id                  = "tf_test_ds_%{random_suffix}"
-    friendly_name               = "test"
-    description                 = "This is a test description"
-    location                    = "EU"
-    default_table_expiration_ms = 3600000
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id                  = "tf_test_ds_%{random_suffix}"
+  friendly_name               = "test"
+  description                 = "This is a test description"
+  location                    = "EU"
+  default_table_expiration_ms = 3600000
 
-    labels = {
-      env = "default"
-    }
-    }
+  labels = {
+    env = "default"
+  }
+}
 `, context)
 }
 

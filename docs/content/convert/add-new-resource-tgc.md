@@ -232,7 +232,7 @@ export WRITE_FILES=true
 To run the unit tests locally, run the following from the root of the `terraform-google-conversion` repository:
 
 ```
-make test
+make test-local
 ```
 
 #### Run integration tests
@@ -303,6 +303,10 @@ To resolve integration test failures, you need to apply the correct override con
 	* Ignore Default Terraform Encoder
 
 		If the default Terraform encoding applied during conversion is causing issues, disable it by adding `tgc_ignore_terraform_encoder: true` to the Resource.yaml file.
+
+	* Ignore Default Terraform Decoder
+
+		If the default Terraform decoding applied during conversion is causing issues, disable it by adding `tgc_ignore_terraform_decoder: true` to the Resource.yaml file.
 
 	* Custom Decoder (CAI → GET API object Mismatch)
 

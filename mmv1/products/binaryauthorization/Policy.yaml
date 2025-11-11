@@ -23,6 +23,7 @@ docs:
 id_format: 'projects/{{project}}'
 base_url: 'projects/{{project}}/policy'
 self_link: 'projects/{{project}}/policy'
+cai_asset_name_format: 'projects/{{project}}/policy'
 create_verb: 'PUT'
 delete_verb: 'PUT'
 import_format:

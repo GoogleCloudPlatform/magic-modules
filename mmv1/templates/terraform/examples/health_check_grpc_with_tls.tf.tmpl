@@ -1,6 +1,4 @@
 resource "google_compute_health_check" "grpc-with-tls-health-check" {
-  provider = google-beta
-
   name = "{{index $.Vars "health_check_name"}}"
 
   timeout_sec        = 1
