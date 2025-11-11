@@ -527,7 +527,7 @@ func TestAccComputeServiceAttachment_withNatIps(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeServiceAttachmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				
+
 				Config: testAccComputeServiceAttachment_withNatIps(context, false),
 			},
 			{
@@ -543,19 +543,19 @@ func TestAccComputeServiceAttachment_withNatIps(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"target_service", "region", "show_nat_ips", "connected_endpoints.0.nat_ips"},
 			},
-                        {
-        			Config: testAccComputeServiceAttachment_withNatIps(context, false),
-        			Check: resource.ComposeTestCheckFunc(
-            				resource.TestCheckResourceAttr("google_compute_service_attachment.psc_ilb_service_attachment", "show_nat_ips", "false"),
-            				resource.TestCheckResourceAttr("google_compute_service_attachment.psc_ilb_service_attachment", "connected_endpoints.0.nat_ips.#", "0"),
-        ),
-    },
+			{
+				Config: testAccComputeServiceAttachment_withNatIps(context, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_service_attachment.psc_ilb_service_attachment", "show_nat_ips", "false"),
+					resource.TestCheckResourceAttr("google_compute_service_attachment.psc_ilb_service_attachment", "connected_endpoints.0.nat_ips.#", "0"),
+				),
+			},
 		},
 	})
 }
 
 func testAccComputeServiceAttachment_withNatIps(context map[string]interface{}, showNatIps bool) string {
- 	context["show_nat_ips"] = showNatIps
+	context["show_nat_ips"] = showNatIps
 	return acctest.Nprintf(`
 resource "google_compute_service_attachment" "psc_ilb_service_attachment" {
   name                  = "tf-test-my-psc-ilb%{random_suffix}"
@@ -644,4 +644,3 @@ resource "google_compute_subnetwork" "psc_ilb_nat" {
 }
 `, context)
 }
-
