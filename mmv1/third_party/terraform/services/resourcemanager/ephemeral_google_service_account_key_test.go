@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccEphemeralServiceAccountKey_basic(t *testing.T) {
+func TestAccEphemeralServiceAccountKey_create(t *testing.T) {
 	t.Parallel()
 
 	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
@@ -20,102 +20,127 @@ func TestAccEphemeralServiceAccountKey_basic(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEphemeralServiceAccountKey_setup(targetServiceAccountEmail),
-			},
-			{
-				Config: testAccEphemeralServiceAccountKey_basic(targetServiceAccountEmail),
+				Config: testAccEphemeralServiceAccountKey_create(targetServiceAccountEmail),
 			},
 		},
 	})
 }
 
-func TestAccEphemeralServiceAccountKey_publicKey(t *testing.T) {
-	t.Parallel()
-
-	echoResourceName := "echo.test_public_key"
-	accountID := "a" + acctest.RandString(t, 10)
-	displayName := "Terraform Test"
-	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccEphemeralServiceAccountKey_publicKey(accountID, displayName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(echoResourceName, "data"),
-				),
-			},
-		},
-	})
-}
-
-func testAccEphemeralServiceAccountKey_publicKey(account, name string) string {
+func testAccEphemeralServiceAccountKey_create(serviceAccount string) string {
 	return fmt.Sprintf(`
-resource "google_service_account" "acceptance" {
-  account_id   = "%s"
-  display_name = "%s"
-}
-
 ephemeral "google_service_account_key" "key" {
-  service_account_id            = google_service_account.acceptance.email
-  public_key    = filebase64("test-fixtures/public_key.pem")
-}
-`, account, name)
-}
-
-func TestAccEphemeralServiceAccountKey_privateKey(t *testing.T) {
-	t.Parallel()
-	echoResourceName := "echo.test_private_key"
-	accountID := "a" + acctest.RandString(t, 10)
-	displayName := "Terraform Test"
-	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccEphemeralServiceAccountKey_privateKey(accountID, displayName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(echoResourceName, "data"),
-				),
-			},
-		},
-	})
-}
-
-func testAccEphemeralServiceAccountKey_privateKey(account, name string) string {
-	return fmt.Sprintf(`
-resource "google_service_account" "acceptance" {
-  account_id   = "%s"
-  display_name = "%s"
-}
-
-ephemeral "google_service_account_key" "key" {
-  service_account_id            = google_service_account.acceptance.email
-  private_key_type = "TYPE_GOOGLE_CREDENTIALS_FILE"
-  key_algorithm = "KEY_ALG_RSA_2048"
-}
-`, account, name)
-}
-
-func testAccEphemeralServiceAccountKey_setup(serviceAccount string) string {
-	return fmt.Sprintf(`
-resource "google_service_account_key" "key" {
   service_account_id = "%s"
   public_key_type = "TYPE_X509_PEM_FILE"
 }
 `, serviceAccount)
 }
 
-func testAccEphemeralServiceAccountKey_basic(serviceAccount string) string {
+func TestAccEphemeralServiceAccountKey_upload(t *testing.T) {
+	t.Parallel()
+
+	accountID := "a" + acctest.RandString(t, 10)
+	displayName := "Terraform Test"
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEphemeralServiceAccountKey_upload_setup(accountID, displayName),
+			},
+			{
+				Config: testAccEphemeralServiceAccountKey_upload(accountID, displayName),
+			},
+		},
+	})
+}
+
+func testAccEphemeralServiceAccountKey_upload_setup(accountID, name string) string {
 	return fmt.Sprintf(`
-resource "google_service_account_key" "key" {
-  service_account_id = "%s"
-  public_key_type = "TYPE_X509_PEM_FILE"
+resource "google_service_account" "acceptance" {
+  account_id   = "%s"
+  display_name = "%s"
+}
+
+resource "time_sleep" "wait_10_seconds" {
+  create_duration = "10s"
+  depends_on = [google_service_account.acceptance]
+}
+`, accountID, name)
+}
+
+func testAccEphemeralServiceAccountKey_upload(serviceAccount, name string) string {
+	return fmt.Sprintf(`
+resource "google_service_account" "acceptance" {
+  account_id   = "%s"
+  display_name = "%s"
+}
+
+resource "time_sleep" "wait_10_seconds" {
+  create_duration = "10s"
+  depends_on = [google_service_account.acceptance]
 }
 
 ephemeral "google_service_account_key" "key" {
-  name            = google_service_account_key.key.name
-  public_key_type = "TYPE_X509_PEM_FILE"
+  service_account_id = google_service_account.acceptance.email
+  public_key_data    = filebase64("test-fixtures/public_key.pem")
 }
-`, serviceAccount)
+`, serviceAccount, name)
+}
+
+func TestAccEphemeralServiceAccountKey_fetch(t *testing.T) {
+	t.Parallel()
+
+	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
+	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "key-basic", serviceAccount)
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEphemeralServiceAccountKey_fetch_setup(targetServiceAccountEmail),
+			},
+			{
+				Config: testAccEphemeralServiceAccountKey_fetch(targetServiceAccountEmail),
+			},
+		},
+	})
+}
+
+func testAccEphemeralServiceAccountKey_fetch_setup(accountID string) string {
+	return fmt.Sprintf(`
+resource "google_service_account_key" "acceptance" {
+  service_account_id = "%s"
+  public_key_type    = "TYPE_X509_PEM_FILE"
+}
+
+resource "time_sleep" "wait_10_seconds" {
+  create_duration = "10s"
+  depends_on = [google_service_account_key.acceptance]
+}
+`, accountID)
+}
+
+func testAccEphemeralServiceAccountKey_fetch(accountID string) string {
+	return fmt.Sprintf(`
+resource "google_service_account_key" "acceptance" {
+  service_account_id = "%s"
+  public_key_type    = "TYPE_X509_PEM_FILE"
+}
+
+resource "time_sleep" "wait_10_seconds" {
+  create_duration = "10s"
+  depends_on = [google_service_account_key.acceptance]
+}
+
+ephemeral "google_service_account_key" "key" {
+  name = google_service_account_key.acceptance.name
+  fetch_key = true
+}
+`, accountID)
 }
