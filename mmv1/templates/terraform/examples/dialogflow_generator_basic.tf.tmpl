@@ -67,6 +67,6 @@ resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
     version = "4.0"
     output_language_code = "en"
   }
-  tools         = "projects/your-project-id/locations/global/tools/your-tool-id"
+  tools         = ["projects/your-project-id/locations/global/tools/your-tool-id"]
   trigger_event = "MANUAL_CALL"
 }
