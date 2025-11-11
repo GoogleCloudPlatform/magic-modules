@@ -1,6 +1,7 @@
 resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
   location = "global"
   description = "A summarization generator with customized section."
+  published_model = "gemini-2.0-flash-001"
   inference_parameter {
     max_output_tokens = 1024
     temperature       = 0
@@ -8,6 +9,41 @@ resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
     top_p             = 0.95
   }
   summarization_context {
+    few_shot_examples {
+      conversation_context {
+        message_entries {
+          create_time   = "2025-12-31T23:58:59Z"
+          language_code = "en-us"
+          role          = "HUMAN_AGENT"
+          text          = "Hello, what can I help you with?"
+        }
+        message_entries {
+          create_time   = "2025-12-31T23:59:59Z"
+          language_code = "en-us"
+          role          = "END_USER"
+          text          = "I want to cancel my order."
+        }
+      }
+      extra_info = {
+        "Customer Name" = "Jack"
+      }
+      output {
+        tool_call_info {
+          tool_call {
+            action               = "TrackOrder"
+            answer_record        = "projects/your-project-id/locations/global/answerRecords/your-answer-record-id"
+            tool                 = "projects/your-project-id/locations/global/tools/your-tool-id"
+            tool_display_details = "TrackOrder"
+            tool_display_name    = "Find and track a user's order."
+          }
+          tool_call_result {
+            action        = "TrackOrder"
+            answer_record = "projects/your-project-id/locations/global/answerRecords/your-answer-record-id"
+            tool          = "projects/your-project-id/locations/global/tools/your-tool-id"
+          }
+        }
+      }
+    }
     summarization_sections {
       definition = "Always return John as the Customer name."
       key        = "Redaction"
@@ -25,5 +61,6 @@ resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
     version = "4.0"
     output_language_code = "en"
   }
+  tools         = "projects/your-project-id/locations/global/tools/your-tool-id"
   trigger_event = "MANUAL_CALL"
 }

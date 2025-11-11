@@ -132,7 +132,7 @@ properties:
                         description: |
                           Optional. The language of the text.
                       - name: createTime
-                        type: Time
+                        type: String
                         description: |
                           Optional. Create time of the message entry.
             - name: extraInfo
