@@ -23,7 +23,7 @@ references:
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.pipelineJobs'
 docs:
 base_url: 'projects/{{project}}/locations/{{region}}/pipelineJobs'
-self_link: '{{name}}'
+self_link: 'projects/{{project}}/locations/{{region}}/pipelineJobs'
 update_verb: 'PATCH'
 update_mask: true
 timeouts:
@@ -82,6 +82,13 @@ properties:
     type: String
     description: Timestamp when this PipelineJob was most recently updated.
     output: true
+  - name: 'runtimeConfig'
+    min_version: 'beta'
+    type: NestedObject
+    description: Optional. Runtime config controlling the runtime behavior of this Extension.
+    properties:
+      - name: 'gcsOutputDirectory'
+        type: String
   - name: 'pipelineSpec'
     min_version: 'beta'
     type: NestedObject
