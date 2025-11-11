@@ -221,7 +221,7 @@ type Resource struct {
 	Examples []*resource.Examples
 
 	// Samples for generating tests and documentation
-	Samples []*resource.Sample
+	Samples []*resource.Sample `yaml:"samples,omitempty"`
 
 	// If true, generates product operation handling logic.
 	AutogenAsync bool `yaml:"autogen_async,omitempty"`
@@ -540,7 +540,9 @@ func (r *Resource) Validate() {
 	}
 
 	for _, example := range r.Examples {
-		example.Validate(r.Name)
+		if err := example.Validate(r.Name); err != nil {
+			log.Fatalln(err)
+		}
 	}
 
 	for _, sample := range r.Samples {
