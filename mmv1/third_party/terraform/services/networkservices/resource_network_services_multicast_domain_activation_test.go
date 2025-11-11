@@ -105,6 +105,10 @@ resource "google_network_services_multicast_domain_activation" mda_test {
   multicast_domain_activation_id                    = "tf-test-test-domain-activation-mda%{random_suffix}"
   location = "us-central1-b"
   multicast_domain = google_network_services_multicast_domain.multicast_domain.id
+  description = "my description"
+  labels = {
+    fake_label = "label123"
+  }
   traffic_spec {
 		aggr_egress_pps = "1000"
 		aggr_ingress_pps = "500"
