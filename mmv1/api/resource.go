@@ -540,7 +540,9 @@ func (r *Resource) Validate() {
 	}
 
 	for _, example := range r.Examples {
-		example.Validate(r.Name)
+		if err := example.Validate(r.Name); err != nil {
+			log.Fatalln(err)
+		}
 	}
 
 	for _, sample := range r.Samples {
