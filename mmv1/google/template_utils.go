@@ -73,6 +73,7 @@ func templateFunctions() template.FuncMap {
 		"dict":           wrapMultipleParams,
 		"format2regex":   Format2Regex,
 		"hasPrefix":      strings.HasPrefix,
+		"split":          strings.Split,
 		"sub":            subtract,
 		"plus":           plus,
 		"firstSentence":  FirstSentence,
