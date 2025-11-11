@@ -19,5 +19,3 @@ scopes:
 versions:
   - base_url: https://cloudsecuritycompliance.googleapis.com/v1/
     name: ga
-caibaseurl: ""
-resourceswithcaiassettype: {}

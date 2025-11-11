@@ -29,13 +29,6 @@ examples:
       framework_name: "example-framework"
     test_env_vars:
       org_id: "ORG_ID"
-
-  - name: "cloudsecuritycompliance_framework_update"
-    primary_resource_id: "example"
-    vars:
-      framework_name: "example-framework"
-    test_env_vars:
-      org_id: "ORG_ID"
 autogen_status: RnJhbWV3b3Jr
 parameters:
   - name: organization
@@ -82,8 +75,7 @@ properties:
           type: String
           description: |-
             The name of the CloudControl in the format:
-            “organizations/{organization}/locations/{location}/
-            cloudControls/{cloud-control}”
+            “organizations/{organization}/locations/{location}/cloudControls/{cloud-control}”
           required: true
         - name: parameters
           type: Array
@@ -138,6 +130,7 @@ properties:
       Identifier. The name of the framework.
       Format:
       organizations/{organization}/locations/{{location}}/frameworks/{framework_id}
+    output: true
   - name: supportedCloudProviders
     type: Array
     description: cloud providers supported
