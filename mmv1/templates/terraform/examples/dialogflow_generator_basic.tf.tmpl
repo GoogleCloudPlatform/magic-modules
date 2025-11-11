@@ -42,6 +42,12 @@ resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
             tool          = "projects/your-project-id/locations/global/tools/your-tool-id"
           }
         }
+        summary_suggestion {
+          summary_sections {
+            section = "RESOLUTION"
+            summary = "No resolution."
+          }
+        }
       }
     }
     summarization_sections {

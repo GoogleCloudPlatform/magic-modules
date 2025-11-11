@@ -144,8 +144,8 @@ properties:
               description: |
                 Required. Example output of the model.
               properties:
-                - type: Array
-                  name: toolCallInfo
+                - name: toolCallInfo
+                  type: Array
                   description: |
                     Optional. List of request and response for tool calls executed.
                   item_type:
@@ -193,6 +193,27 @@ properties:
                             type: String
                             description: |
                               Optional. The tool associated with this call. Format: projects/<ProjectID>/locations/<LocationID>/tools/<ToolID>.
+                - name: summarySuggestion
+                  type: NestedObject
+                  description: |
+                    Optional. Suggested summary.
+                  properties:
+                    - type: Array
+                      name: summarySections
+                      description: |
+                        Required. All the parts of generated summary.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - type: String
+                            name: section
+                            description: |
+                              Required. Name of the section.
+                          - type: String
+                            name: summary
+                            description: |
+                              Required. Summary text for the section.
+                      
       - name: version
         type: String
         description: |
