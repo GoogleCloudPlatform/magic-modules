@@ -29,7 +29,7 @@ import (
 	"github.com/golang/glog"
 
 	"github.com/nasa9084/go-openapi"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 var fPath = flag.String("path", "", "to be removed - path to the root service directory holding samples")
@@ -231,7 +231,7 @@ func addInfoExtensionsToSchemaObjects(document *openapi.Document, b []byte) erro
 	if err := yaml.Unmarshal(b, &m); err != nil {
 		return err
 	}
-	info := m["info"].(map[interface{}]interface{})
+	info := m["info"].(map[string]interface{})
 	for _, s := range document.Components.Schemas {
 		s.Extension["x-dcl-ref"] = info["x-dcl-ref"]
 		s.Extension["x-dcl-guides"] = info["x-dcl-guides"]
@@ -357,7 +357,10 @@ func loadOverrides(packagePath Filepath, fileName string) Overrides {
 				glog.Exit(err)
 			}
 		} else {
-			err = yaml.UnmarshalStrict(b, &overrides)
+			// Create a new decoder to enable strict validation with KnownFields(true)
+			decoder := yaml.NewDecoder(bytes.NewReader(b))
+			decoder.KnownFields(true)
+			err = decoder.Decode(&overrides)
 			if err != nil {
 				glog.Exit(err)
 			}

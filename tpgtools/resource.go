@@ -15,6 +15,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -25,7 +26,7 @@ import (
 	"bitbucket.org/creachadair/stringset"
 	"github.com/golang/glog"
 	"github.com/nasa9084/go-openapi"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 const GoPkgTerraformSdkValidation = "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -206,7 +207,7 @@ func (r *Resource) fillLinksFromExtensionsMap(m map[string]interface{}) {
 	gs, ok := m["x-dcl-guides"].([]interface{})
 	if ok {
 		for _, g := range gs {
-			guide := g.(map[interface{}]interface{})
+			guide := g.(map[string]interface{})
 			r.Guides = append(r.Guides, Link{url: guide["url"].(string), text: guide["text"].(string)})
 		}
 	}
@@ -838,7 +839,10 @@ func (r *Resource) loadHandWrittenSamples() []Sample {
 		if err != nil {
 			glog.Exit(err)
 		}
-		err = yaml.UnmarshalStrict(tc, &sample)
+		// Create a new decoder to enable strict validation with KnownFields(true)
+		decoder := yaml.NewDecoder(bytes.NewReader(tc))
+		decoder.KnownFields(true)
+		err = decoder.Decode(&sample)
 		if err != nil {
 			glog.Exit(err)
 		}
@@ -931,7 +935,10 @@ func (r *Resource) loadDCLSamples() []Sample {
 			glog.Exit(err)
 		}
 
-		err = yaml.UnmarshalStrict(tc, &sample)
+		// Create a new decoder to enable strict validation with KnownFields(true)
+		decoder := yaml.NewDecoder(bytes.NewReader(tc))
+		decoder.KnownFields(true)
+		err = decoder.Decode(&sample)
 		if err != nil {
 			glog.Exit(err)
 		}

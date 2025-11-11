@@ -2,11 +2,10 @@ module github.com/GoogleCloudPlatform/magic-modules/tools/template-check
 
 go 1.24.0
 
-
 require (
 	github.com/google/go-cmp v0.7.0
 	github.com/spf13/cobra v1.9.1
-	gopkg.in/yaml.v2 v2.4.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
