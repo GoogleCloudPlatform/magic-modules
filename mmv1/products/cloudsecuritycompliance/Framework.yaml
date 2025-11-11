@@ -14,6 +14,8 @@
 ---
 name: Framework
 description: Frameworks allow you to monitor and enforce compliance and security requirements. Manage compliance by assigning built-in or custom frameworks to resources.
+references:
+  api: "https://docs.cloud.google.com/security-command-center/docs/reference/cloudsecuritycompliance/rest/v1/organizations.locations.frameworks"
 base_url: organizations/{{organization}}/locations/{{location}}/frameworks
 update_mask: true
 self_link: organizations/{{organization}}/locations/{{location}}/frameworks/{{framework_id}}
@@ -130,7 +132,6 @@ properties:
       Identifier. The name of the framework.
       Format:
       organizations/{organization}/locations/{{location}}/frameworks/{framework_id}
-    output: true
   - name: supportedCloudProviders
     type: Array
     description: cloud providers supported
