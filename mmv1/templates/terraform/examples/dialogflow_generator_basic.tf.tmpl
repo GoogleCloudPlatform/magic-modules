@@ -55,18 +55,6 @@ resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
       key        = "Redaction"
       type       = "CUSTOMER_DEFINED"
     }
-    summarization_sections {
-        key  = "situation"
-        type = "SITUATION"
-    }
-    summarization_sections {
-        key  = "action"
-        type = "ACTION"
-    }
-    summarization_sections {
-        key  = "resolution"
-        type = "RESOLUTION"
-    }
     version = "4.0"
     output_language_code = "en"
   }
