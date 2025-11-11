@@ -14,7 +14,7 @@ func DataSourceGoogleCloudBackupDRBackupPlanAssociation() *schema.Resource {
 	// Set 'Required' schema elements
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "backup_plan_association_id", "location")
 
-	// Set 'Optional' schema elements
+	// Set 'Optional' schema elements.
 	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
 	return &schema.Resource{
 		Read:   dataSourceGoogleCloudBackupDRBackupPlanAssociationRead,
@@ -62,7 +62,13 @@ func DataSourceGoogleCloudBackupDRBackupPlanAssociations() *schema.Resource {
 				Computed:    true,
 				Description: "The ID of the project in which the resource belongs.",
 			},
-
+			"resource_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `The resource type of workload on which backup plan is applied. Examples include, "compute.googleapis.com/Instance", "compute.googleapis.com/Disk".`,
+				Deprecated:  "`resource_type` is deprecated and will be removed in a future major release.",
+			},
+			// Output: a computed list of the backup plan associations found
 			"associations": {
 				Type:        schema.TypeList,
 				Computed:    true,
