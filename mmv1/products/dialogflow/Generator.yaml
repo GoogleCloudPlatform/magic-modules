@@ -213,7 +213,6 @@ properties:
                             name: summary
                             description: |
                               Required. Summary text for the section.
-                      
       - name: version
         type: String
         description: |
