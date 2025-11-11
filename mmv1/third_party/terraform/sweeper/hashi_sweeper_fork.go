@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 	"testing"
 
@@ -115,7 +114,7 @@ func ExecuteSweepers(t *testing.T) {
 		sweepers := filterSweepers(*flagSweepRun, sweeperInventory)
 
 		if err := runSweepers(t, regions, sweepers, *flagSweepAllowFailures); err != nil {
-			os.Exit(1)
+			t.Errorf("error running sweepers: %v", err)
 		}
 	} else {
 		t.Skip("skipping sweeper run. No region supplied")

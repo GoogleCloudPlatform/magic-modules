@@ -39,6 +39,7 @@ custom_code:
   custom_update: 'templates/terraform/custom_update/vertex_ai_index.go.tmpl'
 examples:
   - name: 'vertex_ai_index'
+    min_version: beta
     primary_resource_id: 'index'
     vars:
       display_name: 'test-index'

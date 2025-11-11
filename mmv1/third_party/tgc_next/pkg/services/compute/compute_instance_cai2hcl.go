@@ -46,7 +46,7 @@ func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Ass
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
 
-	project := utils.ParseFieldValue(asset.Name, "projects")
+	project := tgcresource.ParseFieldValue(asset.Name, "projects")
 
 	var instance *compute.Instance
 	if err := utils.DecodeJSON(asset.Resource.Data, &instance); err != nil {

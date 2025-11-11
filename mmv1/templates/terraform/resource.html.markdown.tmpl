@@ -41,7 +41,7 @@ To get more information about {{$.Name}}, see:
     * [{{$title}}]({{$link}})
 		{{- end }}
 	{{- end }}
-	{{- if gt (len $.Examples) 0}}
+	{{- if or (gt (len $.Examples) 0) (gt (len $.Samples) 0) }}
 {{ "" }}
 	{{- end }}
 {{- else }}
@@ -78,6 +78,28 @@ values will be stored in the raw state as plain text: {{ $.SensitivePropsToStrin
 ```hcl
 {{ $e.DocumentationHCLText -}}
 ```
+		{{- end }}
+	{{- end }}
+{{- end }}
+
+{{- if $.Samples }}
+	{{- range $sample := $.Samples }}
+		{{- range $step := $sample.Steps }}
+			{{- if not $step.ExcludeDocs }}
+				{{- if not (or $sample.ExcludeTest $step.TestEnvVars) }}
+<div class = "oics-button" style="float: right; margin: 0 0 -15px">
+  <a href="{{ $step.OiCSLink }}" target="_blank">
+    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
+  </a>
+</div>
+				{{- end }}
+## Example Usage - {{ title (camelize $step.Name "upper" )}}
+
+
+```hcl
+{{ $step.DocumentationHCLText -}}
+	```
+			{{- end }}
 		{{- end }}
 	{{- end }}
 {{- end }}
