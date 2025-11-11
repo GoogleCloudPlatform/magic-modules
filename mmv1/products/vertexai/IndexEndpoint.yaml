@@ -145,22 +145,22 @@ properties:
               type: String
               required: true
               description: 'The full name of the Google Compute Engine [network](https://cloud.google.com/compute/docs/networks-and-firewalls#networks). [Format](https://cloud.google.com/compute/docs/reference/rest/v1/networks/get): projects/{project}/global/networks/{network}.'
-            - name: 'projectId'
+            - name: 'ipAddress'
               type: String
               output: true
               description: IP address rule created by the PSC service automation.
-            - name: 'projectId'
+            - name: 'forwadringRule'
               type: String
               output: true
               description: Forwarding rule created by the PSC service automation.
-            - name: 'projectId'
+            - name: 'state'
               type: Enum
               output: true
               description: The state of the PSC service automation.
               enum_values:
                 - PSC_AUTOMATION_STATE_SUCCESSFUL
                 - PSC_AUTOMATION_STATE_FAILED
-            - name: 'projectId'
+            - name: 'errorMessage'
               type: String
               output: true
               description: Error message if the PSC service automation failed.
