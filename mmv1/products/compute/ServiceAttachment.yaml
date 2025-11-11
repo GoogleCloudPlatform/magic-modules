@@ -40,7 +40,6 @@ custom_code:
   update_encoder: 'templates/terraform/update_encoder/compute_service_attachment.go.tmpl'
   encoder: 'templates/terraform/encoders/compute_service_attachment.go.tmpl'
   pre_read: 'templates/terraform/pre_read/service_attachment_show_nat_ips.go.tmpl'
-  #post_read: 'templates/terraform/post_read/service_attachment_show_nat_ips.go.tmpl'
 sweeper:
   url_substitutions:
     - region: "us-west2"
