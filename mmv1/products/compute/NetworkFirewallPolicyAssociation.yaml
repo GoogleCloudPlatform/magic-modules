@@ -14,6 +14,7 @@
 ---
 name: 'NetworkFirewallPolicyAssociation'
 api_resource_type_kind: FirewallPolicy
+api_resource_field: 'associations'
 kind: 'compute#firewallPolicyAssociation'
 description: |
   The Compute NetworkFirewallPolicyAssociation resource
