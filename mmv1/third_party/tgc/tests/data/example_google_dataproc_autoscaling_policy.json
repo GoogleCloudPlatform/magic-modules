@@ -1,6 +1,6 @@
 [
     {
-        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/regions/us-central1/clusters/dataproc-policy1",
+        "name": "//dataproc.googleapis.com/projects/{{.Provider.project}}/regions/us-central1/clusters/dataproc-policy1",
         "asset_type": "dataproc.googleapis.com/Cluster",
         "resource": {
             "version": "v1",

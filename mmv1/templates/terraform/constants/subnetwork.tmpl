@@ -53,3 +53,35 @@ func sendSecondaryIpRangeIfEmptyDiff(_ context.Context, diff *schema.ResourceDif
 
 	return nil
 }
+
+func IpDiffSuppress(_, old, new string, d *schema.ResourceData) bool {
+	if d.Id() == "" {
+		return false
+	}
+	if old == "" || new == "" {
+		return old == new
+	}
+	addr_equality := false
+	netmask_equality := false
+
+	addr_netmask_old := strings.Split(old, "/")
+	addr_netmask_new := strings.Split(new, "/")
+
+	if (!((len(addr_netmask_old)) == 2 && (len(addr_netmask_new) == 2))) {
+		return false
+	}
+
+	var addr_old net.IP = net.ParseIP(addr_netmask_old[0])
+	if addr_old == nil {
+		return false
+	}
+	var addr_new net.IP = net.ParseIP(addr_netmask_new[0])
+	if addr_new == nil {
+		return false
+	}
+
+	addr_equality = net.IP.Equal(addr_old, addr_new)
+	netmask_equality = addr_netmask_old[1] == addr_netmask_new[1]
+
+	return addr_equality && netmask_equality
+}

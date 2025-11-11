@@ -92,6 +92,7 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/sql"
     "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/storage"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/vertexai"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/vmwareengine"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/vpcaccess"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources/services/workbench"
 )
@@ -116,6 +117,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_compute_autoscaler":                       {compute.ResourceConverterComputeAutoscaler()},
 		"google_compute_firewall":                         {compute.ResourceConverterComputeFirewall()},
 		"google_compute_disk":                             {compute.ResourceConverterComputeDisk()},
+		"google_compute_image":                            {compute.ResourceConverterComputeImage()},
 		"google_compute_forwarding_rule":                  {compute.ResourceConverterComputeForwardingRule()},
 		"google_gke_hub_membership":                       {gkehub.ResourceConverterGKEHubMembership()},
 		"google_compute_global_address":                   {compute.ResourceConverterComputeGlobalAddress()},
@@ -193,11 +195,13 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_logging_project_bucket_config":       	   {logging.ResourceConverterLogProjectBucket()},
 		"google_logging_billing_account_bucket_config":    {logging.ResourceConverterLogBillingAccountBucket()},
 		"google_logging_project_sink":                     {logging.ResourceConverterLogProjectSink()},
+		"google_logging_folder_sink":                      {logging.ResourceConverterLogFolderSink()},
 		"google_logging_organization_sink":                {logging.ResourceConverterLogOrganizationSink()},
 		"google_cloud_tasks_queue":                        {cloudtasks.ResourceConverterCloudTasksQueue()},
 		"google_pubsub_topic":                             {pubsub.ResourceConverterPubsubTopic()},
 		"google_kms_crypto_key":                           {kms.ResourceConverterKMSCryptoKey()},
 		"google_kms_key_ring":                             {kms.ResourceConverterKMSKeyRing()},
+		"google_kms_crypto_key_version":                   {kms.ResourceConverterKMSCryptoKeyVersion()},
 		"google_filestore_instance":                       {filestore.ResourceConverterFilestoreInstance()},
 		"google_access_context_manager_service_perimeter": {accesscontextmanager.ResourceConverterAccessContextManagerServicePerimeter()},
 		"google_access_context_manager_access_policy":     {accesscontextmanager.ResourceConverterAccessContextManagerAccessPolicy()},
@@ -208,7 +212,13 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_cloudfunctions_function":                  {cloudfunctions.ResourceConverterCloudFunctionsCloudFunction()},
 		"google_monitoring_notification_channel":          {monitoring.ResourceConverterMonitoringNotificationChannel()},
 		"google_monitoring_alert_policy":                  {monitoring.ResourceConverterMonitoringAlertPolicy()},
-		"google_vertex_ai_dataset":                        {vertexai.ResourceConverterVertexAIDataset()},		
+		"google_vertex_ai_dataset":                        {vertexai.ResourceConverterVertexAIDataset()},
+		"google_vmwareengine_cluster":                     {vmwareengine.ResourceConverterVmwareengineCluster()},
+		"google_vmwareengine_network_policy":              {vmwareengine.ResourceConverterVmwareengineNetworkPolicy()},
+		"google_vmwareengine_network_peering":             {vmwareengine.ResourceConverterVmwareengineNetworkPeering()},
+		"google_workbench_instance":                       {workbench.ResourceConverterWorkbenchInstance()},
+		"google_vmwareengine_private_cloud":               {vmwareengine.ResourceConverterVmwareenginePrivateCloud()},
+		"google_vmwareengine_external_address":            {vmwareengine.ResourceConverterVmwareengineExternalAddress()},
 	{{- range $object := $.IamResources }}
 	{{- if $object.IamClassName }}
 		"{{ $object.TerraformName }}_iam_policy": { {{- $object.IamClassName }}IamPolicy()},
@@ -247,6 +257,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_organization_iam_custom_role": {resourcemanager.ResourceConverterOrganizationIAMCustomRole()},
 		"google_vpc_access_connector": {vpcaccess.ResourceConverterVPCAccessConnector()},
 		"google_logging_metric": {logging.ResourceConverterLoggingMetric()},
+		"google_iam_workload_identity_pool_provider": {iambeta.ResourceConverterIAMBetaWorkloadIdentityPoolProvider()},
 		"google_service_account": {resourcemanager.ResourceConverterServiceAccount()},
 		"google_service_account_key": {resourcemanager.ResourceConverterServiceAccountKey()},
 		

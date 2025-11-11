@@ -13,7 +13,7 @@
 
 ---
 name: Framework
-description: Description
+description: Frameworks allow you to monitor and enforce compliance and security requirements. Manage compliance by assigning built-in or custom frameworks to resources.
 base_url: organizations/{{organization}}/locations/{{location}}/frameworks
 update_mask: true
 self_link: organizations/{{organization}}/locations/{{location}}/frameworks/{{framework_id}}
