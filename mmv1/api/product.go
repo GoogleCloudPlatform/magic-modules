@@ -24,6 +24,7 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"golang.org/x/exp/slices"
+	"gopkg.in/yaml.v3"
 )
 
 // Represents a product to be managed
@@ -33,6 +34,9 @@ type Product struct {
 	// words in the api name - "accesscontextmanager" vs "AccessContextManager"
 	// Example inputs: "Compute", "AccessContextManager"
 	Name string
+
+	// This is the name of the package path relative to mmv1 root repo
+	PackagePath string
 
 	// original value of :name before the provider override happens
 	// same as :name if not overridden in provider
@@ -58,6 +62,9 @@ type Product struct {
 	// base URL. Specific to defining the resource as a CAI asset.
 	CaiBaseUrl string
 
+	// The service name from CAI asset name, e.g. bigtable.googleapis.com.
+	CaiAssetService string `yaml:"cai_asset_service,omitempty"`
+
 	// CaiResourceType of resources that already have an AssetType constant defined in the product.
 	ResourcesWithCaiAssetType map[string]struct{}
 
@@ -77,11 +84,11 @@ type Product struct {
 	Compiler string `yaml:"-"`
 }
 
-func (p *Product) UnmarshalYAML(unmarshal func(any) error) error {
+func (p *Product) UnmarshalYAML(value *yaml.Node) error {
 	type productAlias Product
 	aliasObj := (*productAlias)(p)
 
-	if err := unmarshal(aliasObj); err != nil {
+	if err := value.Decode(aliasObj); err != nil {
 		return err
 	}
 

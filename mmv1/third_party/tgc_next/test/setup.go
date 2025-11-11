@@ -42,7 +42,7 @@ type TgcMetadataPayload struct {
 }
 
 type ResourceTestData struct {
-	ParsedRawConfig  map[string]struct{} `json:"parsed_raw_config"`
+	ParsedRawConfig  map[string]any `json:"parsed_raw_config"`
 	ResourceMetadata `json:"resource_metadata"`
 }
 
@@ -53,9 +53,9 @@ type StepTestData struct {
 }
 
 type Resource struct {
-	Type       string              `json:"type"`
-	Name       string              `json:"name"`
-	Attributes map[string]struct{} `json:"attributes"`
+	Type       string         `json:"type"`
+	Name       string         `json:"name"`
+	Attributes map[string]any `json:"attributes"`
 }
 
 const (
@@ -70,8 +70,7 @@ var (
 
 func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 	if !setupDone {
-		// bucketName := "cai_assets_metadata"
-		bucketName := "cai_assets" // Use the bucket in testing project for tansition
+		bucketName := "cai_assets_metadata"
 		currentDate := time.Now()
 		ctx := context.Background()
 		client, err := storage.NewClient(ctx)
@@ -107,15 +106,14 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 					Date:                  currentDate,
 				}
 			}
+			if os.Getenv("WRITE_FILES") != "" {
+				writeJSONFile(fmt.Sprintf("../../tests_metadata_%s.json", currentDate.Format(ymdFormat)), metadata)
+			}
 			currentDate = currentDate.AddDate(0, 0, -1)
 		}
 
 		if allErrs != nil {
 			return nil, allErrs
-		}
-
-		if os.Getenv("WRITE_FILES") != "" {
-			writeJSONFile("../../tests_metadata.json", TestsMetadata)
 		}
 		setupDone = true
 	}
@@ -205,7 +203,11 @@ func prepareTestData(testName string, stepNumber int, retries int) (*StepTestDat
 		}
 
 		if len(rawResourceConfigs) == 0 {
-			return nil, fmt.Errorf("Test %s fails: raw config is unavailable", testName)
+			return nil, fmt.Errorf("test %s fails: raw config is unavailable", testName)
+		}
+
+		if os.Getenv("WRITE_FILES") != "" {
+			writeJSONFile(fmt.Sprintf("%s_attrs", testName), rawResourceConfigs)
 		}
 
 		rawConfigMap := convertToConfigMap(rawResourceConfigs)
@@ -255,8 +257,8 @@ func parseResourceConfigs(filePath string) ([]Resource, error) {
 }
 
 // Converts the slice to map with resource address as the key
-func convertToConfigMap(resources []Resource) map[string]map[string]struct{} {
-	configMap := make(map[string]map[string]struct{}, 0)
+func convertToConfigMap(resources []Resource) map[string]map[string]any {
+	configMap := make(map[string]map[string]any, 0)
 
 	for _, r := range resources {
 		addr := fmt.Sprintf("%s.%s", r.Type, r.Name)

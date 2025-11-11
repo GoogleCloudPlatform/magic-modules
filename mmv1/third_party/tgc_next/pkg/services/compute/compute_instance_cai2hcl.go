@@ -11,7 +11,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	compute "google.golang.org/api/compute/v0.beta"
+	"google.golang.org/api/compute/v1"
 )
 
 // ComputeInstanceCai2hclConverter for compute instance resource.
@@ -46,7 +46,7 @@ func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Ass
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
 
-	project := utils.ParseFieldValue(asset.Name, "projects")
+	project := tgcresource.ParseFieldValue(asset.Name, "projects")
 
 	var instance *compute.Instance
 	if err := utils.DecodeJSON(asset.Resource.Data, &instance); err != nil {
@@ -100,12 +100,6 @@ func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Ass
 	hclData["reservation_affinity"] = flattenReservationAffinityTgc(instance.ReservationAffinity)
 	hclData["key_revocation_action_type"] = strings.TrimSuffix(instance.KeyRevocationActionType, "_ON_KEY_REVOCATION")
 	hclData["instance_encryption_key"] = flattenComputeInstanceEncryptionKey(instance.InstanceEncryptionKey)
-
-	partnerMetadata, err := flattenPartnerMetadata(instance.PartnerMetadata)
-	if err != nil {
-		return nil, fmt.Errorf("Error parsing partner metadata: %s", err)
-	}
-	hclData["partner_metadata"] = partnerMetadata
 
 	// TODO: convert details from the boot disk assets (separate disk assets) into initialize_params in cai2hcl?
 	// It needs to integrate the disk assets into instance assets with the resolver.

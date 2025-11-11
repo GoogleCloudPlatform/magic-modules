@@ -14,6 +14,7 @@
 ---
 name: 'NetworkFirewallPolicyPacketMirroringRule'
 api_resource_type_kind: FirewallPolicy
+api_resource_field: 'packetMirroringRules'
 kind: 'compute#packetMirroringRule'
 min_version: 'beta'
 description: |

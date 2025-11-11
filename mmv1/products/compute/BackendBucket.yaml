@@ -42,6 +42,7 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 include_in_tgc_next_DO_NOT_USE: true
+tgc_include_handwritten_tests: true
 iam_policy:
   parent_resource_attribute: 'name'
   import_format:
@@ -59,7 +60,6 @@ examples:
     vars:
       backend_bucket_name: 'image-backend-bucket'
       bucket_name: 'image-store-bucket'
-    tgc_test_ignore_in_asset: ['RESOURCE.cdnPolicy.signedUrlCacheMaxAgeSec']
   - name: 'backend_bucket_full'
     primary_resource_id: 'image_backend_full'
     vars:
@@ -71,7 +71,6 @@ examples:
     vars:
       backend_bucket_name: 'image-backend-bucket'
       bucket_name: 'image-store-bucket'
-    tgc_test_ignore_in_asset: ['RESOURCE.cdnPolicy.signedUrlCacheMaxAgeSec']
   - name: 'backend_bucket_query_string_whitelist'
     primary_resource_id: 'image_backend'
     vars:
