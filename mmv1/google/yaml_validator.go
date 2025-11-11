@@ -14,16 +14,21 @@
 package google
 
 import (
+	"bytes"
 	"log"
 
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // A helper class to validate contents coming from YAML files.
 type YamlValidator struct{}
 
 func (v *YamlValidator) Parse(content []byte, obj interface{}, yamlPath string) {
-	if err := yaml.UnmarshalStrict(content, obj); err != nil {
+	// Create a new decoder to enable strict validation with KnownFields(true)
+	decoder := yaml.NewDecoder(bytes.NewReader(content))
+	decoder.KnownFields(true)
+
+	if err := decoder.Decode(obj); err != nil {
 		log.Fatalf("Cannot unmarshal data from file %s: %v", yamlPath, err)
 	}
 }
