@@ -171,7 +171,14 @@ type Type struct {
 
 	Sensitive bool `yaml:"sensitive,omitempty"` // Adds `Sensitive: true` to the schema
 
-	WriteOnly bool `yaml:"write_only,omitempty"` // Adds `WriteOnly: true` to the schema
+	// If true, write-only arguments will be automatically generated for this field.
+	// (`[field_name]_wo` and `[field_name]_wo_version`).
+	// For more information, see: https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments
+	WriteOnly bool `yaml:"write_only,omitempty"`
+
+	// TODO: remove this field after all references are migrated
+	// see: https://github.com/GoogleCloudPlatform/magic-modules/pull/14933#pullrequestreview-3166578379
+	WriteOnlyLegacy bool `yaml:"write_only_legacy,omitempty"` // Adds `WriteOnlyLegacy: true` to the schema
 
 	// Does not set this value to the returned API value.  Useful for fields
 	// like secrets where the returned API value is not helpful.
@@ -286,9 +293,9 @@ type Type struct {
 	// just as they are in the standard flattener template.
 	CustomFlatten string `yaml:"custom_flatten,omitempty"`
 
-	ResourceMetadata *Resource `yaml:"resource_metadata,omitempty"`
+	ResourceMetadata *Resource `yaml:"-"`
 
-	ParentMetadata *Type `yaml:"parent_metadata,omitempty"` // is nil for top-level properties
+	ParentMetadata *Type `yaml:"-"`
 
 	// The prefix used as part of the property expand/flatten function name
 	// flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}
@@ -322,6 +329,11 @@ type Type struct {
 	// If a property is missing in CAI asset, use `is_missing_in_cai: true`
 	// and `exclude_false_in_cai: true` is not needed
 	ExcludeFalseInCai bool `yaml:"exclude_false_in_cai,omitempty"`
+
+	// If true, the custom flatten function is not applied during cai2hcl
+	TGCIgnoreTerraformCustomFlatten bool `yaml:"tgc_ignore_terraform_custom_flatten,omitempty"`
+
+	TGCIgnoreRead bool `yaml:"tgc_ignore_read,omitempty"`
 }
 
 const MAX_NAME = 20
@@ -392,11 +404,11 @@ func (t *Type) Validate(rName string) {
 		log.Fatalf("'default_value' and 'default_from_api' cannot be both set in resource %s", rName)
 	}
 
-	if t.WriteOnly && (t.DefaultFromApi || t.Output) {
+	if (t.WriteOnlyLegacy || t.WriteOnly) && (t.DefaultFromApi || t.Output) {
 		log.Fatalf("Property %s cannot be write_only and default_from_api or output at the same time in resource %s", t.Name, rName)
 	}
 
-	if t.WriteOnly && t.Sensitive {
+	if (t.WriteOnlyLegacy || t.WriteOnly) && t.Sensitive {
 		log.Fatalf("Property %s cannot be write_only and sensitive at the same time in resource %s", t.Name, rName)
 	}
 
@@ -438,10 +450,8 @@ func (t Type) Lineage() string {
 	return fmt.Sprintf("%s.%s", t.ParentMetadata.Lineage(), google.Underscore(t.Name))
 }
 
-// Returns a dot notation path to where the field is nested within the parent
-// object. eg: parent.meta.label.foo
-// This format is intended for resource metadata, to be used for connecting a Terraform
-// type with a corresponding API type.
+// Returns the actual Terraform lineage for the field, formatted for resource metadata.
+// This will return a simple dot notation path, like: foo_field.bar_field
 func (t Type) MetadataLineage() string {
 	if t.ParentMetadata == nil || t.ParentMetadata.FlattenObject {
 		return google.Underscore(t.Name)
@@ -455,20 +465,36 @@ func (t Type) MetadataLineage() string {
 	return fmt.Sprintf("%s.%s", t.ParentMetadata.MetadataLineage(), google.Underscore(t.Name))
 }
 
-// Returns a dot notation path to where the field is nested within the parent
-// object. eg: parent.meta.label.foo
+// Returns the default Terraform lineage for the field, based on converting MetadataApiLineage
+// to snake_case. This is used to determine whether an explicit Terraform field name is required.
+// This will return a simple dot notation path like: foo_field.bar_field
+func (t Type) MetadataDefaultLineage() string {
+	apiLineage := t.MetadataApiLineage()
+	parts := strings.Split(apiLineage, ".")
+	var snakeParts []string
+	for _, p := range parts {
+		snakeParts = append(snakeParts, google.Underscore(p))
+	}
+	return strings.Join(snakeParts, ".")
+}
+
+// Returns the actual API lineage for the field (that is, using API names), formatted for
+// resource metadata. This will return a simple dot notation path, like: fooField.barField
 // This format is intended for to represent an API type.
 func (t Type) MetadataApiLineage() string {
 	apiName := t.ApiName
 	if t.ParentMetadata == nil {
-		return google.Underscore(apiName)
+		if !t.UrlParamOnly && t.ResourceMetadata.ApiResourceField != "" {
+			apiName = fmt.Sprintf("%s.%s", t.ResourceMetadata.ApiResourceField, apiName)
+		}
+		return apiName
 	}
 
 	if t.ParentMetadata.IsA("Array") {
 		return t.ParentMetadata.MetadataApiLineage()
 	}
 
-	return fmt.Sprintf("%s.%s", t.ParentMetadata.MetadataApiLineage(), google.Underscore(apiName))
+	return fmt.Sprintf("%s.%s", t.ParentMetadata.MetadataApiLineage(), apiName)
 }
 
 // Returns the lineage in snake case
@@ -508,6 +534,10 @@ func (t Type) TitlelizeProperty() string {
 	return google.Camelize(t.Name, "upper")
 }
 
+func (t Type) CamelizeProperty() string {
+	return google.Camelize(t.Name, "lower")
+}
+
 // If the Prefix field is already set, returns the value.
 // Otherwise, set the Prefix field and returns the value.
 func (t *Type) GetPrefix() string {
@@ -515,7 +545,7 @@ func (t *Type) GetPrefix() string {
 		if t.ParentMetadata == nil {
 			nestedPrefix := ""
 			// TODO: Use the nestedPrefix for tgc provider to be consistent with terraform provider
-			if t.ResourceMetadata.NestedQuery != nil && t.ResourceMetadata.Compiler != "terraformgoogleconversion-codegen" {
+			if t.ResourceMetadata.NestedQuery != nil && !strings.Contains(t.ResourceMetadata.Compiler, "terraformgoogleconversion") {
 				nestedPrefix = "Nested"
 			}
 
@@ -536,6 +566,15 @@ func (t *Type) GetPrefix() string {
 }
 
 func (t Type) ResourceType() string {
+	r := t.ResourceRef()
+	if r == nil {
+		return ""
+	}
+	path := strings.Split(r.BaseUrl, "/")
+	return path[len(path)-1]
+}
+
+func (t Type) FWResourceType() string {
 	r := t.ResourceRef()
 	if r == nil {
 		return ""
@@ -624,6 +663,7 @@ func (t Type) ExactlyOneOfList() []string {
 	if t.ResourceMetadata == nil {
 		return []string{}
 	}
+
 	return t.ExactlyOneOf
 }
 
@@ -733,7 +773,7 @@ func (t Type) WriteOnlyProperties() []*Type {
 		}
 	case t.IsA("NestedObject"):
 		props = google.Select(t.UserProperties(), func(p *Type) bool {
-			return p.WriteOnly
+			return p.WriteOnlyLegacy || p.WriteOnly
 		})
 	case t.IsA("Map"):
 		props = google.Reject(t.ValueType.WriteOnlyProperties(), func(p *Type) bool {
@@ -811,6 +851,45 @@ func (t Type) TFType(s string) string {
 	}
 
 	return "schema.TypeString"
+}
+
+func (t Type) GetFWType() string {
+	switch t.Type {
+	case "Boolean":
+		return "Bool"
+	case "Double":
+		return "Float64"
+	case "Integer":
+		return "Int64"
+	case "String":
+		return "String"
+	case "Time":
+		return "String"
+	case "Enum":
+		return "String"
+	case "ResourceRef":
+		return "String"
+	case "NestedObject":
+		return "Object"
+	case "Array":
+		return "List"
+	case "KeyValuePairs":
+		return "Map"
+	case "KeyValueLabels":
+		return "Map"
+	case "KeyValueTerraformLabels":
+		return "Map"
+	case "KeyValueEffectiveLabels":
+		return "Map"
+	case "KeyValueAnnotations":
+		return "Map"
+	case "Map":
+		return "Map"
+	case "Fingerprint":
+		return "String"
+	}
+
+	return "String"
 }
 
 // TODO rewrite: validation
@@ -1216,8 +1295,8 @@ func (t *Type) IsForceNew() bool {
 		return t.Immutable
 	}
 
-	// WriteOnly fields are never immutable
-	if t.WriteOnly {
+	// WriteOnlyLegacy fields are never immutable
+	if t.WriteOnlyLegacy || t.WriteOnly {
 		return false
 	}
 
@@ -1353,4 +1432,8 @@ func (t Type) TGCSendEmptyValue() bool {
 	}
 
 	return false
+}
+
+func (t Type) ShouldIgnoreCustomFlatten() bool {
+	return t.ResourceMetadata.IsTgcCompiler() && (t.IgnoreRead || t.TGCIgnoreTerraformCustomFlatten)
 }

@@ -1,0 +1,82 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'UserStore'
+description: |
+  Represents a user store.
+references:
+  api: 'https://cloud.google.com/gemini/enterprise/docs/reference/rest/v1/projects.locations.userStores'
+base_url: 'projects/{{project}}/locations/{{location}}/userStores'
+self_link: 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}'
+# Update API is also used as create API.
+create_url: 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}?updateMask=defaultLicenseConfig,enableLicenseAutoRegister,enableExpiredLicenseAutoUpdate'
+create_verb: 'PATCH'
+update_verb: 'PATCH'
+update_mask: true
+exclude_delete: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/userStores/{{user_store_id}}'
+timeouts:
+  insert_minutes: 5
+  update_minutes: 5
+examples:
+  - name: 'discoveryengine_userstore_basic'
+    primary_resource_id: 'basic'
+    vars:
+      license_config_id: 'license-config-id'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The geographic location where the data store should reside. The value can
+      only be one of "global", "us" and "eu".
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'user_store_id'
+    type: String
+    description: 'The ID of the user store. Currently only accepts "default_user_store".'
+    url_param_only: true
+    immutable: true
+    default_value: 'default_user_store'
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The unique full resource name of the user store. Values are of the format
+      `projects/{project}/locations/{location}/userStores/{user_store_id}`.
+    output: true
+  - name: 'defaultLicenseConfig'
+    type: String
+    description: |
+      The resource name of the default license config assigned to users created in
+      this user store. Format:
+      `projects/{project}/locations/{location}/licenseConfigs/{license_config}`.
+      If `enableLicenseAutoRegister` is true, new users will automatically
+      register under the default subscription.
+      If the default license config doesn't have remaining license seats left,
+      new users will not be assigned with license.
+  - name: 'enableLicenseAutoRegister'
+    type: Boolean
+    description: |
+      Whether to enable automatic license registration for new users created in
+      this user store. If enabled, new users will automatically register under
+      the default subscription.
+  - name: 'enableExpiredLicenseAutoUpdate'
+    type: Boolean
+    description: |
+      Whether to enable automatic license update for users with expired licenses
+      in this user store. If enabled, users with expired licenses will
+      automatically be updated to the default subscription if there are
+      remaining license seats.

@@ -1,0 +1,69 @@
+---
+subcategory: "Cloud Platform"
+description: |-
+    Produces an ephemeral resource for a secret version of a Secret Manager secret
+---
+
+# google_secret_manager_secret_version
+This ephemeral resource provides a [Secret Manager secret version](https://cloud.google.com/secret-manager/docs/reference/rest/v1/projects.secrets.versions) that can be used to access the contents of a secret.
+
+## Example Usage
+
+Use an ephemeral resource to pass through secret data to a resource with write-only arguments, such as `google_monitoring_uptime_check_config`:
+
+```hcl
+ephemeral "google_secret_manager_secret_version" "example" {
+    project = "my-project"
+    secret  = "my-secret"
+    version = "latest"
+}
+
+resource "google_monitoring_uptime_check_config" "http" {
+  display_name = "my-protected-http-uptime-check"
+  timeout      = "60s"
+  period       = "300s"
+
+  http_check {
+    path = "/protected"
+    port = "8010"
+    request_method = "GET"
+    auth_info {
+      username            = "name"
+      password_wo         = ephemeral.google_secret_manager_secret_version.example.secret_data
+	  password_wo_version = "1"
+    }
+  }
+
+  monitored_resource {
+    type = "uptime_url"
+    labels = {
+      project_id = "my-project"
+      host       = "my-host"
+    }
+  }
+
+  content_matchers {
+    content = "example"
+    matcher = "CONTAINS_STRING"
+  }
+}
+```
+
+## Argument Reference
+
+The following arguments are supported:
+
+* `project` (Optional) - The project to get the secret version for. If it is not provided, the provider project is used.
+* `secret` (Required) - The secret to get the secret version for.
+* `version` (Requried) - The version of the secret to get. If it is not provided, the latest version is retrieved.
+* `is_secret_data_base64` (Optional) If true, the secret data returned will not get base64 decoded. Defaults to false.
+
+## Attributes Reference
+
+The following attribute is exported:
+
+* `secret_data` - The secret data. No larger than 64KiB.
+* `name` - The resource name of the SecretVersion. Format: `projects/{{project}}/secrets/{{secret_id}}/versions/{{version}}`.
+* `create_time` - The time at which the SecretVersion was created.
+* `destroy_time` - The time at which the Secret was destroyed. Only present if state is DESTROYED.
+* `enabled` - True if the current state of the SecretVersion is enabled.

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources"
+	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources"
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
@@ -83,7 +83,11 @@ func getProjectFromSchema(projectSchemaField string, d tpgresource.TerraformReso
 	}
 	res, ok = d.GetOk("parent")
 	if ok && strings.HasPrefix(res.(string), "projects/") {
-		return res.(string), nil
+		// It is possible that parent is not a project
+		// parent = "projects/project-test/locations/us-central1-a/privateClouds/test"
+		if project := ParseFieldValue(res.(string), "projects"); project != "" {
+			return project, nil
+		}
 	}
 	if config.Project != "" {
 		return config.Project, nil
@@ -126,4 +130,15 @@ func getFolderFromResource(tfData tpgresource.TerraformResourceData) (string, bo
 func isGoogleApiErrorWithCode(err error, errCode int) bool {
 	gerr, ok := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error)
 	return ok && gerr != nil && gerr.Code == errCode
+}
+
+// ParseFieldValue extracts named part from resource url.
+func ParseFieldValue(url string, name string) string {
+	fragments := strings.Split(url, "/")
+	for ix, item := range fragments {
+		if item == name && ix+1 < len(fragments) {
+			return fragments[ix+1]
+		}
+	}
+	return ""
 }

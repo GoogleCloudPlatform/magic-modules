@@ -44,13 +44,9 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'scope_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/global/scopes/{{scope_id}}'
     - '{{scope_id}}'
-custom_code:
-# Skip sweeper gen since this is a child resource.
-exclude_sweeper: true
 examples:
   - name: 'gkehub_scope_basic'
     primary_resource_id: 'scope'

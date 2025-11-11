@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters/utils"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/models"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tgcresource"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/converters/utils"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/models"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tgcresource"
 
 	tfschema "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -51,9 +51,9 @@ func (c *ProjectCai2hclConverter) convertResourceData(asset caiasset.Asset) (*mo
 	hclData["project_id"] = assetResourceData["projectId"]
 	hclData["labels"] = tgcresource.RemoveTerraformAttributionLabel(assetResourceData["labels"])
 	if strings.Contains(asset.Resource.Parent, "folders/") {
-		hclData["folder_id"] = utils.ParseFieldValue(asset.Resource.Parent, "folders")
+		hclData["folder_id"] = tgcresource.ParseFieldValue(asset.Resource.Parent, "folders")
 	} else if strings.Contains(asset.Resource.Parent, "organizations/") {
-		hclData["org_id"] = utils.ParseFieldValue(asset.Resource.Parent, "organizations")
+		hclData["org_id"] = tgcresource.ParseFieldValue(asset.Resource.Parent, "organizations")
 	}
 
 	ctyVal, err := utils.MapToCtyValWithSchema(hclData, c.schema)

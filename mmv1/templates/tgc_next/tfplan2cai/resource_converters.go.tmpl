@@ -28,11 +28,11 @@
 package converters
 
 import (
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters/cai"
-	{{- range $service := $.Products }}
-	  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/services/{{ lower $service.Name }}"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/converters/cai"
+	{{- range $object := $.ResourcesForVersion }}
+	  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/{{ $object.ServiceName }}"
 	{{- end }}
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/services/resourcemanager"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/resourcemanager"
 )
 
 var ConverterMap = map[string]cai.Tfplan2caiConverter{

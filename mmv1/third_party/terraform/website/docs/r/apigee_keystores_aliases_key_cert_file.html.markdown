@@ -66,15 +66,7 @@ In addition to the arguments listed above, the following computed attributes are
   Optional.Type of Alias
 
 
-<a name="nested_certs_info"></a>The `certs_info` block contains:
-
-* `cert_info` -
-  (Output)
-  List of all properties in the object.
-  Structure is [documented below](#nested_cert_info).
-
-
-<a name="nested_cert_info"></a>The `cert_info` block contains:
+<a name="nested_certs_info"></a>The `certs_info` list contains:
 
 * `version` -
   (Output)
