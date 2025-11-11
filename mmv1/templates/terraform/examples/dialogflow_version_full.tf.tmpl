@@ -29,6 +29,6 @@ resource "google_dialogflow_agent" "basic_agent" {
 }
 resource "google_dialogflow_version" "full_version" {
   description = "Dialogflow Version"
-  parent = "projects/${google_project.agent_project.project_id}/agent"
+  parent = "projects/${google_project.project.project_id}/agent"
   depends_on = [google_dialogflow_agent.basic_agent]
 }
