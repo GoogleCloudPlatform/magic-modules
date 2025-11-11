@@ -34,6 +34,8 @@ import (
 	"github.com/otiai10/copy"
 )
 
+var testRegex = regexp.MustCompile("func (TestAcc[^(]+)")
+
 // TerraformGoogleConversionNext is for both tfplan2cai and cai2hcl conversions
 // and copying other files, such as transport.go
 type TerraformGoogleConversionNext struct {
@@ -105,6 +107,11 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 	if !object.IsExcluded() {
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 		tgc.addTestsFromSamples(&object)
+		if object.TGCIncludeHandwrittenTests {
+			if err := tgc.addTestsFromHandwrittenTests(&object); err != nil {
+				log.Printf("Error adding examples from handwritten tests: %v", err)
+			}
+		}
 		tgc.GenerateResourceTests(object, *templateData, outputFolder)
 	}
 }
@@ -339,6 +346,53 @@ func (tgc TerraformGoogleConversionNext) addTestsFromSamples(object *api.Resourc
 			Skip: sample.TGCSkipTest,
 		})
 	}
+}
+func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *api.Resource) error {
+	if object.ProductMetadata == nil {
+		return nil
+	}
+	product := object.ProductMetadata
+	productName := google.Underscore(product.Name)
+	resourceFullName := fmt.Sprintf("%s_%s", productName, google.Underscore(object.Name))
+	handwrittenTestFilePath := fmt.Sprintf("third_party/terraform/services/%s/resource_%s_test.go", productName, resourceFullName)
+	data, err := os.ReadFile(handwrittenTestFilePath)
+	for err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			if strings.HasSuffix(handwrittenTestFilePath, ".tmpl") {
+				log.Printf("no handwritten test file found for %s", resourceFullName)
+				return nil
+			}
+			handwrittenTestFilePath += ".tmpl"
+			data, err = os.ReadFile(handwrittenTestFilePath)
+		} else {
+			return fmt.Errorf("error reading handwritten test file %s: %v", handwrittenTestFilePath, err)
+		}
+	}
+
+	// Skip adding handwritten tests that are already defined in yaml (because they have custom overrides etc.)
+	testNamesInYAML := make(map[string]struct{})
+	for _, test := range object.TGCTests {
+		if test.Name != "" {
+			testNamesInYAML[test.Name] = struct{}{}
+		}
+	}
+
+	matches := testRegex.FindAllSubmatch(data, -1)
+	tests := make([]resource.TGCTest, len(matches))
+	for i, match := range matches {
+		if len(match) == 2 {
+			if _, ok := testNamesInYAML[string(match[1])]; ok {
+				continue
+			}
+			tests[i] = resource.TGCTest{
+				Name: string(match[1]),
+			}
+		}
+	}
+
+	object.TGCTests = append(object.TGCTests, tests...)
+
+	return nil
 }
 
 // Generates the list of resources, and gets the count of resources.
