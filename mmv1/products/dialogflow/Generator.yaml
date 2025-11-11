@@ -34,7 +34,7 @@ custom_code:
 
 examples:
   - name: 'dialogflow_generator_basic'
-    primary_resource_id: 'basic_generator'
+    primary_resource_id: 'summarization_basic_generator'
     vars:
       profile_name: 'dialogflow-profile'
 
@@ -51,6 +51,7 @@ properties:
     type: String
     description: |
       The resource name of the generator.
+    output: true
   - name: description
     type: String
     description: |
@@ -192,6 +193,14 @@ properties:
                             type: String
                             description: |
                               Optional. The tool associated with this call. Format: projects/<ProjectID>/locations/<LocationID>/tools/<ToolID>.
+      - name: version
+        type: String
+        description: |
+          Optional. Version of the feature. If not set, default to latest version. Current candidates are ["1.0"].
+      - name: outputLanguageCode
+        type: String
+        description: |
+          Optional. The target language of the generated summary. The language code for conversation will be used if this field is empty. Supported 2.0 and later versions.
   - name: inferenceParameter
     type: NestedObject
     description: |

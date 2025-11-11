@@ -1,6 +1,18 @@
 resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
   location = "global"
+  description = "A summarization generator with customized section."
+  inference_parameter {
+    max_output_tokens = 1024
+    temperature       = 0
+    top_k             = 40
+    top_p             = 0.95
+  }
   summarization_context {
+    summarization_sections {
+      definition = "Always return John as the Customer name."
+      key        = "Redaction"
+      type       = "CUSTOMER_DEFINED"
+    }
     summarization_sections {
         type = "SITUATION"
     }
@@ -10,7 +22,8 @@ resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
     summarization_sections {
         type = "RESOLUTION"
     }
-    version = "1.0"
+    version = "4.0"
     output_language_code = "en"
   }
+  trigger_event = "MANUAL_CALL"
 }
