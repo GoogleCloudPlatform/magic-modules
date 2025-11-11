@@ -44,7 +44,7 @@ resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
         }
         summary_suggestion {
           summary_sections {
-            section = "RESOLUTION"
+            section = "resolution"
             summary = "No resolution."
           }
         }
@@ -56,12 +56,15 @@ resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
       type       = "CUSTOMER_DEFINED"
     }
     summarization_sections {
+        key  = "situation"
         type = "SITUATION"
     }
     summarization_sections {
+        key  = "action"
         type = "ACTION"
     }
     summarization_sections {
+        key  = "resolution"
         type = "RESOLUTION"
     }
     version = "4.0"
