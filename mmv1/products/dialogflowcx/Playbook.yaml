@@ -26,7 +26,7 @@ self_link: '{{parent}}/playbooks/{{name}}'
 create_url: '{{parent}}/playbooks'
 
 update_verb: 'PATCH'
-update_mask: true
+update_mask: false
 
 custom_code:
   pre_create: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
