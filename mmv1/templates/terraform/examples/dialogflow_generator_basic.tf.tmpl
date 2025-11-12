@@ -44,8 +44,8 @@ resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
         }
         summary_suggestion {
           summary_sections {
-            section = "resolution"
-            summary = "No resolution."
+            section = "action_needed"
+            summary = "N"
           }
         }
       }
@@ -56,9 +56,9 @@ resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
       type       = "CUSTOMER_DEFINED"
     }
     summarization_sections {
-      definition = "Determine whether the customer's issues are resolved and return your answer following the rules below."
-      key        = "resolution"
-      type       = "RESOLUTION"
+      definition = "Determine whether the agent's action is needed and return your answer following the rules below.\n  - Y: The agent's action is needed.\n  - N: The agent's action isn't needed.\n"
+      key        = "action_needed"
+      type       = "ACTION"
     }
     version = "4.0"
     output_language_code = "en"
