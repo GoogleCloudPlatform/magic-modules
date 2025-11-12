@@ -14,6 +14,8 @@
 ---
 name: Framework
 description: Frameworks allow you to monitor and enforce compliance and security requirements. Manage compliance by assigning built-in or custom frameworks to resources.
+references:
+  api: "https://docs.cloud.google.com/security-command-center/docs/reference/cloudsecuritycompliance/rest/v1/organizations.locations.frameworks"
 base_url: organizations/{{organization}}/locations/{{location}}/frameworks
 update_mask: true
 self_link: organizations/{{organization}}/locations/{{location}}/frameworks/{{framework_id}}
@@ -29,14 +31,9 @@ examples:
       framework_name: "example-framework"
     test_env_vars:
       org_id: "ORG_ID"
-
-  - name: "cloudsecuritycompliance_framework_update"
-    primary_resource_id: "example"
-    vars:
-      framework_name: "example-framework"
-    test_env_vars:
-      org_id: "ORG_ID"
 autogen_status: RnJhbWV3b3Jr
+custom_code:
+  encoder: "templates/terraform/encoders/cloudsecuritycompliance_framework.go.tmpl"
 parameters:
   - name: organization
     type: String
@@ -82,8 +79,7 @@ properties:
           type: String
           description: |-
             The name of the CloudControl in the format:
-            “organizations/{organization}/locations/{location}/
-            cloudControls/{cloud-control}”
+            “organizations/{organization}/locations/{location}/cloudControls/{cloud-control}”
           required: true
         - name: parameters
           type: Array
@@ -138,6 +134,7 @@ properties:
       Identifier. The name of the framework.
       Format:
       organizations/{organization}/locations/{{location}}/frameworks/{framework_id}
+    output: true
   - name: supportedCloudProviders
     type: Array
     description: cloud providers supported
