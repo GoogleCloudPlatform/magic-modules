@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -56,6 +57,11 @@ func TestAccNetworkServicesLbEdgeExtension_networkServicesLbEdgeExtensionBasicUp
 			},
 			{
 				Config: testAccNetworkServicesLbEdgeExtension_networkServicesLbEdgeExtensionBasicUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_network_services_lb_edge_extension.default", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_network_services_lb_edge_extension.default",
