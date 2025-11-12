@@ -1,6 +1,10 @@
 resource "google_network_services_multicast_domain_group" "{{$.PrimaryResourceId}}"{
   multicast_domain_group_id                    = "{{index $.Vars "domain_group_name"}}"
   location = "global"
+  description = "my description"
+  labels = {
+    fake_label = "label123"
+  }
 }
 
 resource "google_compute_network" "network" {
