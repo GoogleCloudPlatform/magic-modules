@@ -29,8 +29,10 @@ package converters
 
 import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/models"
-	{{- range $service := $.Products }}
-	  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/{{ lower $service.Name }}"
+	{{- range $caiResourceType, $resources := $.ResourcesByCaiResourceType}}
+		{{- range $object := $resources }}
+	  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/{{ $object.ServiceName }}"
+		{{- end }}
 	{{- end }}
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/resourcemanager"
 

@@ -293,9 +293,9 @@ type Type struct {
 	// just as they are in the standard flattener template.
 	CustomFlatten string `yaml:"custom_flatten,omitempty"`
 
-	ResourceMetadata *Resource `yaml:"resource_metadata,omitempty"`
+	ResourceMetadata *Resource `yaml:"-"`
 
-	ParentMetadata *Type `yaml:"parent_metadata,omitempty"` // is nil for top-level properties
+	ParentMetadata *Type `yaml:"-"`
 
 	// The prefix used as part of the property expand/flatten function name
 	// flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}
@@ -450,10 +450,8 @@ func (t Type) Lineage() string {
 	return fmt.Sprintf("%s.%s", t.ParentMetadata.Lineage(), google.Underscore(t.Name))
 }
 
-// Returns a dot notation path to where the field is nested within the parent
-// object. eg: parent.meta.label.foo
-// This format is intended for resource metadata, to be used for connecting a Terraform
-// type with a corresponding API type.
+// Returns the actual Terraform lineage for the field, formatted for resource metadata.
+// This will return a simple dot notation path, like: foo_field.bar_field
 func (t Type) MetadataLineage() string {
 	if t.ParentMetadata == nil || t.ParentMetadata.FlattenObject {
 		return google.Underscore(t.Name)
@@ -467,29 +465,28 @@ func (t Type) MetadataLineage() string {
 	return fmt.Sprintf("%s.%s", t.ParentMetadata.MetadataLineage(), google.Underscore(t.Name))
 }
 
-// Returns a dot notation path to where the field is nested within the parent
-// object. eg: parent.meta.label.foo
-// This format converts the API field names directly to snake_case, which can be compared against the MetadataLineage
-// to determine whether to include an explicit Terraform field name.
+// Returns the default Terraform lineage for the field, based on converting MetadataApiLineage
+// to snake_case. This is used to determine whether an explicit Terraform field name is required.
+// This will return a simple dot notation path like: foo_field.bar_field
 func (t Type) MetadataDefaultLineage() string {
-	apiName := t.ApiName
-	if t.ParentMetadata == nil {
-		return google.Underscore(apiName)
+	apiLineage := t.MetadataApiLineage()
+	parts := strings.Split(apiLineage, ".")
+	var snakeParts []string
+	for _, p := range parts {
+		snakeParts = append(snakeParts, google.Underscore(p))
 	}
-
-	if t.ParentMetadata.IsA("Array") {
-		return t.ParentMetadata.MetadataDefaultLineage()
-	}
-
-	return fmt.Sprintf("%s.%s", t.ParentMetadata.MetadataDefaultLineage(), google.Underscore(apiName))
+	return strings.Join(snakeParts, ".")
 }
 
-// Returns a dot notation path to where the field is nested within the parent
-// object. eg: parent.meta.label.foo
+// Returns the actual API lineage for the field (that is, using API names), formatted for
+// resource metadata. This will return a simple dot notation path, like: fooField.barField
 // This format is intended for to represent an API type.
 func (t Type) MetadataApiLineage() string {
 	apiName := t.ApiName
 	if t.ParentMetadata == nil {
+		if !t.UrlParamOnly && t.ResourceMetadata.ApiResourceField != "" {
+			apiName = fmt.Sprintf("%s.%s", t.ResourceMetadata.ApiResourceField, apiName)
+		}
 		return apiName
 	}
 
