@@ -90,6 +90,8 @@ type IamPolicy struct {
 	// config with the test/example attributes of the IAM resource.
 	ExampleConfigBody string `yaml:"example_config_body,omitempty"`
 
+	SampleConfigBody string `yaml:"sample_config_body"`
+
 	// How the API supports IAM conditions
 	IamConditionsRequestType string `yaml:"iam_conditions_request_type,omitempty"`
 
@@ -130,7 +132,6 @@ func (p *IamPolicy) UnmarshalYAML(value *yaml.Node) error {
 	p.WrappedPolicyObj = true
 	p.AllowedIamRole = "roles/viewer"
 	p.ParentResourceAttribute = "id"
-	p.ExampleConfigBody = "templates/terraform/iam/iam_attributes.go.tmpl"
 	p.SubstituteZoneValue = true
 
 	type iamPolicyAlias IamPolicy
