@@ -33,7 +33,7 @@ func ResourceStorageBucketObject() *schema.Resource {
 		Read:   resourceStorageBucketObjectRead,
 		Update: resourceStorageBucketObjectUpdate,
 		Delete: resourceStorageBucketObjectDelete,
-		customdiff.All(
+		CustomizeDiff: customdiff.All(
 			resourceStorageBucketObjectCustomizeDiff,
 			validateContexts,
 		),
