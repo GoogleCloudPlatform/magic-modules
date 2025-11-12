@@ -14,6 +14,8 @@
 ---
 name: CloudControl
 description: Cloud controls are the building blocks that make up frameworks. Each cloud control is a unit encapsulating various platform-specific logic for prevention, detection, and audit.
+references:
+  api: https://docs.cloud.google.com/security-command-center/docs/reference/cloudsecuritycompliance/rest/v1/organizations.locations.cloudControls
 base_url: organizations/{{organization}}/locations/{{location}}/cloudControls
 update_mask: true
 self_link: organizations/{{organization}}/locations/{{location}}/cloudControls/{{cloud_control_id}}
