@@ -227,7 +227,7 @@ var ServicesListBeta = mapOf(
         "path" to "./google-beta/services/cloudscheduler"
     ),
     "cloudsecuritycompliance" to mapOf(
-        "name" to "cloudsecuritycompliance"
+        "name" to "cloudsecuritycompliance",
         "displayName" to "Cloud Security Compliance",
         "path" to "./google-beta/services/cloudsecuritycompliance"
     ),
