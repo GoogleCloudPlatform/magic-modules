@@ -11,7 +11,6 @@ resource "google_oracle_database_exascale_db_storage_vault" "{{$.PrimaryResource
     time_zone {
         id = "UTC"
     }
-    description = "A storage vault"
     additional_flash_cache_percent = 100
     exascale_db_storage_details {
         total_size_gbs = 300
