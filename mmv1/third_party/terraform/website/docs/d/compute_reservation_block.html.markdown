@@ -1,7 +1,7 @@
 ---
 subcategory: "Compute Engine"
 description: |-
-  Get information about a Google Compute Engine Reservation Block.
+  Get information about a Google Compute Engine Reservation Block. Currnelty only relevent for B200/A4 + reservetions
 ---
 
 # google_compute_reservation_block
