@@ -31,13 +31,6 @@ examples:
       framework_name: "example-framework"
     test_env_vars:
       org_id: "ORG_ID"
-  - name: "cloudsecuritycompliance_framework_deployment_update"
-    primary_resource_id: "example"
-    vars:
-      deployment_name: "example-deployment"
-      framework_name: "example-framework"
-    test_env_vars:
-      org_id: "ORG_ID"
   - name: "cloudsecuritycompliance_framework_deployment_folder_creation"
     primary_resource_id: "example"
     vars:
@@ -60,13 +53,11 @@ async:
   operation:
     timeouts:
       insert_minutes: 20
-      update_minutes: 20
       delete_minutes: 20
     base_url: "{{op_id}}"
   actions:
     - create
     - delete
-    - update
   type: OpAsync
   result:
     resource_inside_response: true
