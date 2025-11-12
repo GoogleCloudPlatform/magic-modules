@@ -12,21 +12,15 @@ policyRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 	RawURL: url,
 	UserAgent: userAgent,
 })
-
 if err != nil {
 	return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComputeOrganizationSecurityPolicy %q", d.Get("policy_id")))
 }
 
-parentRaw := policyRes["parent"]
-parent := ""
-if parentRaw == nil {
-   parentRaw = d.Get("attachment_id")
-} 
-parent = parentRaw.(string)
+parent := flattenComputeOrganizationSecurityPolicyParent(policyRes["parent"], d, config)
 
 var opRes map[string]interface{}
 err = ComputeOrgOperationWaitTimeWithResponse(
-config, res, &opRes, parent, "Creating OrganizationSecurityPolicyAssociation", userAgent,
+	config, res, &opRes, parent.(string), "Creating OrganizationSecurityPolicyAssociation", userAgent,
 	d.Timeout(schema.TimeoutCreate))
 
 if err != nil {
