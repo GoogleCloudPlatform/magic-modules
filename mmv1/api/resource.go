@@ -1798,7 +1798,7 @@ func (r Resource) IamParentSourceType() string {
 	return t
 }
 
-func (r Resource) IamImportFormat() string {
+func (r Resource) IamImportFormatTemplate() string {
 	var importFormat string
 	if len(r.IamPolicy.ImportFormat) > 0 {
 		importFormat = r.IamPolicy.ImportFormat[0]
@@ -1808,23 +1808,24 @@ func (r Resource) IamImportFormat() string {
 			importFormat = r.SelfLinkUrl()
 		}
 	}
+	return importFormat
+}
+
+func (r Resource) IamImportFormat() string {
+	importFormat := r.IamImportFormatTemplate()
 
 	importFormat = regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(importFormat, "%s")
 	return strings.ReplaceAll(importFormat, r.ProductMetadata.BaseUrl, "")
 }
 
-func (r Resource) IamImportQualifiersForTest() string {
-	var importFormat string
-	if len(r.IamPolicy.ImportFormat) > 0 {
-		importFormat = r.IamPolicy.ImportFormat[0]
-	} else {
-		importFormat = r.IamPolicy.SelfLink
-		if importFormat == "" {
-			importFormat = r.SelfLinkUrl()
-		}
-	}
+func (r Resource) IamImportParams() []string {
+	importFormat := r.IamImportFormatTemplate()
 
-	params := r.ExtractIdentifiers(importFormat)
+	return r.ExtractIdentifiers(importFormat)
+}
+
+func (r Resource) IamImportQualifiersForTest() string {
+	params := r.IamImportParams()
 	var importQualifiers []string
 	for i, param := range params {
 		if param == "project" {

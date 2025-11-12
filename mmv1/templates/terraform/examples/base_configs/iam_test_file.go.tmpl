@@ -660,14 +660,14 @@ func generate{{ $.ResourceName }}IAMPolicyStateID(iamResourceAddr string) func (
 			}
 		}
 		fmt.Printf("raw state %s\n", rawState)
-		{{- range $p := (split $.IamImportQualifiersForTest ", ") }}
-			{{- if contains $.IamResourceUri (printf "{{%%%s}}" $p) }}
+		{{- range $p := $.IamImportParams }}
+			{{- if contains $.IamImportFormat (printf "{{%%%s}}" $p) }}
 		{{ $p }} := rawState["{{ underscore $p }}"]
 			{{- else }}
 		{{ $p }} := tpgresource.GetResourceNameFromSelfLink(rawState["{{ underscore $p }}"])
 			{{- end }}
 		{{- end }}
-		return fmt.Sprintf("{{ $.IamImportFormat }}", {{ $.IamImportQualifiersForTest }}) + acctest.ConditionTitleIfPresent(rawState), nil
+		return fmt.Sprintf("{{ $.IamImportFormat }}", {{ join $.IamImportParams ", " }}) + acctest.ConditionTitleIfPresent(rawState), nil
 	}
 }
 
@@ -682,14 +682,14 @@ func generate{{ $.ResourceName }}IAMBindingStateID(iamResourceAddr string) func 
 			}
 		}
 		fmt.Printf("raw state %s\n", rawState)
-		{{- range $p := (split $.IamImportQualifiersForTest ", ") }}
-			{{- if contains $.IamResourceUri (printf "{{%%%s}}" $p) }}
+		{{- range $p := $.IamImportParams }}
+			{{- if contains $.IamImportFormat (printf "{{%%%s}}" $p) }}
 		{{ $p }} := rawState["{{ underscore $p }}"]
 			{{- else }}
 		{{ $p }} := tpgresource.GetResourceNameFromSelfLink(rawState["{{ underscore $p }}"])
 			{{- end }}
 		{{- end }}
-		return fmt.Sprintf("{{ $.IamImportFormat }} %s", {{ $.IamImportQualifiersForTest }}, rawState["role"]) + acctest.ConditionTitleIfPresent(rawState), nil
+		return fmt.Sprintf("{{ $.IamImportFormat }} %s", {{ join $.IamImportParams ", " }}, rawState["role"]) + acctest.ConditionTitleIfPresent(rawState), nil
 	}
 }
 
@@ -704,13 +704,13 @@ func generate{{ $.ResourceName }}IAMMemberStateID(iamResourceAddr string) func (
 			}
 		}
 		fmt.Printf("raw state %s\n", rawState)
-		{{- range $p := (split $.IamImportQualifiersForTest ", ") }}
-			{{- if contains $.IamResourceUri (printf "{{%%%s}}" $p) }}
+		{{- range $p := $.IamImportParams }}
+			{{- if contains $.IamImportFormat (printf "{{%%%s}}" $p) }}
 		{{ $p }} := rawState["{{ underscore $p }}"]
 			{{- else }}
 		{{ $p }} := tpgresource.GetResourceNameFromSelfLink(rawState["{{ underscore $p }}"])
 			{{- end }}
 		{{- end }}
-		return fmt.Sprintf("{{ $.IamImportFormat }} %s %s", {{ $.IamImportQualifiersForTest }}, rawState["role"], rawState["member"]) + acctest.ConditionTitleIfPresent(rawState), nil
+		return fmt.Sprintf("{{ $.IamImportFormat }} %s %s", {{ join $.IamImportParams ", " }}, rawState["role"], rawState["member"]) + acctest.ConditionTitleIfPresent(rawState), nil
 	}
 }
