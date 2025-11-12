@@ -5,34 +5,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
-
-func TestAccCloudSecurityComplianceFrameworkDeployment_basic(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCloudSecurityComplianceFrameworkDeployment_basic(context),
-			},
-			{
-				ResourceName:            "google_cloud_security_compliance_framework_deployment.example",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"framework_deployment_id", "location", "organization"},
-			},
-		},
-	})
-}
 
 func testAccCloudSecurityComplianceFrameworkDeployment_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -120,6 +96,11 @@ func TestAccCloudSecurityComplianceFrameworkDeployment_update(t *testing.T) {
 			},
 			{
 				Config: testAccCloudSecurityComplianceFrameworkDeployment_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_cloud_security_compliance_framework_deployment.example", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_cloud_security_compliance_framework_deployment.example",

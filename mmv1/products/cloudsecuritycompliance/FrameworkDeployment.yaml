@@ -13,7 +13,9 @@
 
 ---
 name: FrameworkDeployment
-description: Description
+description: Framework deployments represent the assignment of a framework to a target resource. Supported target resources are organizations, folders, and projects.
+references:
+  api: https://docs.cloud.google.com/security-command-center/docs/reference/cloudsecuritycompliance/rest/v1/organizations.locations.frameworkDeployments
 base_url: organizations/{{organization}}/locations/{{location}}/frameworkDeployments
 immutable: true
 self_link: organizations/{{organization}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}
