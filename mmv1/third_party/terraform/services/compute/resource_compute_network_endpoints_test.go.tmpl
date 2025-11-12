@@ -69,6 +69,16 @@ func TestAccComputeNetworkEndpoints_networkEndpointsBasic(t *testing.T) {
 				ImportStateId:     negId,
 			},
 			{
+				// no network_endpoints blocks
+				Config: testAccComputeNetworkEndpoints_networkEndpointsOmit(context),
+			},
+			{
+				ResourceName:      "google_compute_network_endpoints.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateId:     negId,
+			},
+			{
 				// Add enough endpoints to trigger pagination
 				Config: testAccComputeNetworkEndpoints_networkEndpointsPaginated(context, 100, 1300),
 			},
@@ -165,6 +175,15 @@ resource "google_compute_network_endpoints" "default" {
     ip_address = google_compute_instance.default.network_interface[0].network_ip
     port       = "%{add5_port}"
   }
+}
+`, context) + testAccComputeNetworkEndpoints_noNetworkEndpoints(context)
+}
+
+func testAccComputeNetworkEndpoints_networkEndpointsOmit(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_network_endpoints" "default" {
+  zone                   = "us-central1-a"
+  network_endpoint_group = google_compute_network_endpoint_group.neg.id
 }
 `, context) + testAccComputeNetworkEndpoints_noNetworkEndpoints(context)
 }
