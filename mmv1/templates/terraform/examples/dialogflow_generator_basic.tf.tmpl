@@ -44,8 +44,8 @@ resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
         }
         summary_suggestion {
           summary_sections {
-            section = "action_needed"
-            summary = "N"
+            section = "Redaction"
+            summary = "John"
           }
         }
       }
@@ -54,11 +54,6 @@ resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
       definition = "Always return John as the Customer name."
       key        = "Redaction"
       type       = "CUSTOMER_DEFINED"
-    }
-    summarization_sections {
-      definition = "Determine whether the agent's action is needed and return your answer following the rules below.\n  - Y: The agent's action is needed.\n  - N: The agent's action isn't needed.\n"
-      key        = "action_needed"
-      type       = "ACTION"
     }
     version = "4.0"
     output_language_code = "en"
