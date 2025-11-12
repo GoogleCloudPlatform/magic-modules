@@ -276,13 +276,15 @@ func (p *googleEphemeralServiceAccountKey) Close(ctx context.Context, req epheme
 	}
 	var data ServiceAccountKeyPrivateData
 	json.Unmarshal(dataBytes, &data)
-	log.Printf("[DEBUG] Deleting Service Account Key %q\n", data.Name)
-	_, err := p.providerConfig.NewIamClient(p.providerConfig.UserAgent).Projects.ServiceAccounts.Keys.Delete(data.Name).Do()
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error deleting Service Account Key",
-			fmt.Sprintf("Error deleting Service Account Key %q: %s", data.Name, err.Error()),
-		)
-		return
+	if data.Name != "" {
+		log.Printf("[DEBUG] Deleting Service Account Key %q\n", data.Name)
+		_, err := p.providerConfig.NewIamClient(p.providerConfig.UserAgent).Projects.ServiceAccounts.Keys.Delete(data.Name).Do()
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Error deleting Service Account Key",
+				fmt.Sprintf("Error deleting Service Account Key %q: %s", data.Name, err.Error()),
+			)
+			return
+		}
 	}
 }
