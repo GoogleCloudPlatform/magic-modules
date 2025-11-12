@@ -11,35 +11,145 @@
 	limitations under the License.
 */ -}}
 func upstreamPoliciesDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-  o, n := d.GetChange("virtual_repository_config.0.upstream_policies")
-  oldPolicies, ok := o.([]any)
+	o, n := d.GetChange("virtual_repository_config.0.upstream_policies")
+	oldPolicies, ok := o.([]any)
+	if !ok {
+		return false
+	}
+	newPolicies, ok := n.([]any)
+	if !ok {
+		return false
+	}
+
+	var oldHashes, newHashes []interface{}
+	for _, policy := range oldPolicies {
+		data, ok := policy.(map[string]any)
+		if !ok {
+			return false
+		}
+		hashStr := fmt.Sprintf("[id:%v priority:%v repository:%v]", data["id"], data["priority"], data["repository"])
+		oldHashes = append(oldHashes, hashStr)
+	}
+	for _, policy := range newPolicies {
+		data, ok := policy.(map[string]any)
+		if !ok {
+			return false
+		}
+		hashStr := fmt.Sprintf("[id:%v priority:%v repository:%v]", data["id"], data["priority"], data["repository"])
+		newHashes = append(newHashes, hashStr)
+	}
+
+	oldSet := schema.NewSet(schema.HashString, oldHashes)
+	newSet := schema.NewSet(schema.HashString, newHashes)
+	return oldSet.Equal(newSet)
+}
+
+func parseDurationAsSeconds(v string) (int, bool) {
+	if len(v) == 0 {
+		return 0, false
+	}
+	n, err := strconv.Atoi(v[:len(v)-1])
+	if err != nil {
+		return 0, false
+	}
+	switch v[len(v)-1] {
+	case 's':
+		return n, true
+	case 'm':
+		return n * 60, true
+	case 'h':
+		return n * 3600, true
+	case 'd':
+		return n * 86400, true
+	default:
+		return 0, false
+	}
+}
+
+// Like tpgresource.DurationDiffSuppress, but supports 'd'
+func durationDiffSuppress(k, oldr, newr string, d *schema.ResourceData) bool {
+	oldSeconds, ok := parseDurationAsSeconds(oldr)
+	if !ok {
+		return false
+	}
+	newSeconds, ok := parseDurationAsSeconds(newr)
+	if !ok {
+		return false
+	}
+	return oldSeconds == newSeconds
+}
+
+func mapHashID(v any) int {
+	replaceNestedValue(v, []string{"condition", "older_than"}, expandDuration)
+	replaceNestedValue(v, []string{"condition", "newer_than"}, expandDuration)
+	return schema.HashString(fmt.Sprintf("%v", v))
+}
+
+func expandDuration(v any) (any, bool) {
+	if val, ok := v.(string); ok {
+		if secs, ok := parseDurationAsSeconds(val); ok {
+			return fmt.Sprintf("%ds", secs), true
+		}
+	}
+	return nil, false
+
+}
+
+// Replace a value in a schema object, if it exists.
+// Nested maps follow the pattern map[string]any -> [1]any -> map[string]any
+func replaceNestedValue(obj any, keys []string, replaceFunc func(any) (any, bool)) {
+	if len(keys) == 0 {
+		return
+	}
+	next := obj
+	for _, key := range keys[:len(keys)-1] {
+		nextMap, ok := next.(map[string]any)
+		if !ok {
+			return
+		}
+		arrObj, ok := nextMap[key]
+		if !ok {
+			return
+		}
+		arr, ok := arrObj.([]any)
+		if !ok {
+			return
+		}
+		if len(arr) != 1 {
+			return
+		}
+		next = arr[0]
+	}
+	lastMap, ok := next.(map[string]any)
+	if !ok {
+		return
+	}
+	lastKey := keys[len(keys)-1]
+	last, ok := lastMap[lastKey]
+	if !ok {
+		return
+	}
+	result, ok := replaceFunc(last)
+	if ok {
+		lastMap[lastKey] = result
+	}
+}
+
+func isDefaultEnum(val any) bool {
+  s, ok := val.(string)
   if !ok {
     return false
   }
-  newPolicies, ok := n.([]any)
-  if !ok {
+  return s == "" || strings.HasSuffix(s, "_UNSPECIFIED")
+}
+
+// emptyMavenConfigDiffSuppress generates a config from defaults if it or any
+// properties are unset. Missing, empty and default configs are all equivalent.
+func emptyMavenConfigDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+  oSnap, nSnap := d.GetChange("maven_config.0.allow_snapshot_overwrites")
+  if oSnap.(bool) != nSnap.(bool) {
     return false
   }
-
-  var oldHashes, newHashes []interface{}
-  for _, policy := range oldPolicies {
-    data, ok := policy.(map[string]any)
-    if !ok {
-      return false
-    }
-    hashStr := fmt.Sprintf("[id:%v priority:%v repository:%v]", data["id"], data["priority"], data["repository"])
-    oldHashes = append(oldHashes, hashStr)
-  }
-  for _, policy := range newPolicies {
-    data, ok := policy.(map[string]any)
-    if !ok {
-      return false
-    }
-    hashStr := fmt.Sprintf("[id:%v priority:%v repository:%v]", data["id"], data["priority"], data["repository"])
-    newHashes = append(newHashes, hashStr)
-  }
-
-  oldSet := schema.NewSet(schema.HashString, oldHashes)
-  newSet := schema.NewSet(schema.HashString, newHashes)
-  return oldSet.Equal(newSet)
+  oPolicy, nPolicy := d.GetChange("maven_config.0.version_policy")
+  return isDefaultEnum(oPolicy) && isDefaultEnum(nPolicy)
 }

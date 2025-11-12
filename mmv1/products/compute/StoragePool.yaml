@@ -1,0 +1,294 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: "StoragePool"
+description: |
+  A Hyperdisk Storage Pool is a pre-purchased collection of capacity, throughput, and IOPS
+  which you can then provision to your applications as needed.
+  You can use Hyperdisk Storage Pools to create and manage disks in pools and use the disks across multiple workloads.
+references:
+  guides:
+    "Create Hyperdisk Storage Pools": "https://cloud.google.com/compute/docs/disks/create-storage-pools"
+  api: "https://cloud.google.com/compute/docs/reference/rest/v1/storagePools"
+base_url: "projects/{{project}}/zones/{{zone}}/storagePools"
+self_link: "projects/{{project}}/zones/{{zone}}/storagePools/{{name}}"
+immutable: false
+create_url: "projects/{{project}}/zones/{{zone}}/storagePools"
+update_verb: "PATCH"
+update_mask: false
+autogen_async: true
+async:
+  type: 'OpAsync'
+  operation:
+    base_url: "{{op_id}}"
+iam_policy:
+  parent_resource_attribute: "name"
+  method_name_separator: "/"
+  import_format:
+    - "projects/{{project}}/zones/{{zone}}/storagePools/{{name}}"
+  iam_conditions_request_type: "QUERY_PARAM"
+  allowed_iam_role: "roles/compute.viewer"
+examples:
+  - name: "compute_storage_pool_basic"
+    primary_resource_id: "test-storage-pool-basic"
+    primary_resource_name: 'fmt.Sprintf("tf-test-storage-pool-basic%s", context["random_suffix"])'
+    vars:
+      storage_pool_name: "storage-pool-basic"
+    ignore_read_extra:
+      - 'deletion_protection'
+    exclude_test: true
+  - name: "compute_storage_pool_full"
+    primary_resource_id: "test-storage-pool-full"
+    primary_resource_name: 'fmt.Sprintf("tf-test-storage-pool-full%s", context["random_suffix"])'
+    vars:
+      storage_pool_name: "storage-pool-full"
+    ignore_read_extra:
+      - 'deletion_protection'
+    exclude_test: true
+parameters:
+  - name: "zone"
+    type: ResourceRef
+    description: "A reference to the zone where the storage pool resides."
+    required: false
+    default_from_api: true
+    custom_expand: "templates/terraform/custom_expand/resourceref_with_validation.go.tmpl"
+    custom_flatten: "templates/terraform/custom_flatten/name_from_self_link.tmpl"
+    resource: "Zone"
+    imports: "name"
+properties:
+  - name: "kind"
+    type: String
+    description: |
+      Type of the resource.
+    output: true
+  - name: "id"
+    type: String
+    description: |
+      The unique identifier for the resource. This identifier is defined by the server.
+    output: true
+  - name: "creationTimestamp"
+    type: String
+    description: |
+      Creation timestamp in RFC3339 text format.
+    output: true
+  - name: "name"
+    type: String
+    description: |
+      Name of the resource. Provided by the client when the resource is created.
+      The name must be 1-63 characters long, and comply with RFC1035.
+      Specifically, the name must be 1-63 characters long and match
+      the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?`
+      which means the first character must be a lowercase letter,
+      and all following characters must be a dash, lowercase letter, or digit,
+      except the last character, which cannot be a dash.
+    immutable: true
+    required: true
+  - name: "description"
+    type: String
+    description: |
+      A description of this resource. Provide this property when you create the resource.
+    immutable: true
+    required: false
+  - name: "poolProvisionedCapacityGb"
+    type: String
+    description: |
+      Size, in GiB, of the storage pool. For more information about the size limits,
+      see https://cloud.google.com/compute/docs/disks/storage-pools.
+    required: true
+  - name: "poolProvisionedIops"
+    type: String
+    description: |
+      Provisioned IOPS of the storage pool.
+      Only relevant if the storage pool type is `hyperdisk-balanced`.
+    required: false
+  - name: "poolProvisionedThroughput"
+    type: String
+    description: |
+      Provisioned throughput, in MB/s, of the storage pool.
+      Only relevant if the storage pool type is `hyperdisk-balanced` or `hyperdisk-throughput`.
+    required: true
+  - name: "labelFingerprint"
+    type: Fingerprint
+    description: |
+      The fingerprint used for optimistic locking of this resource.
+      Used internally during updates.
+    output: true
+  - name: "resourceStatus"
+    type: NestedObject
+    description: |
+      Status information for the storage pool resource.
+    output: true
+    properties:
+      - name: "lastResizeTimestamp"
+        type: String
+        description: |
+          Timestamp of the last successful resize in RFC3339 text format.
+        output: true
+      - name: "diskCount"
+        type: String
+        description: |
+          Number of disks used.
+        output: true
+      - name: "poolUsedCapacityBytes"
+        type: String
+        description: |
+          Space used by data stored in disks within the storage pool (in bytes).
+          This will reflect the total number of bytes written to the disks in the pool,
+          in contrast to the capacity of those disks.
+        output: true
+      - name: "poolUserWrittenBytes"
+        type: String
+        description: |
+          Amount of data written into the pool, before it is compacted.
+        output: true
+      - name: "totalProvisionedDiskCapacityGb"
+        type: String
+        description: |
+          Sum of all the capacity provisioned in disks in this storage pool.
+          A disk's provisioned capacity is the same as its total capacity.
+        output: true
+      - name: "maxTotalProvisionedDiskCapacityGb"
+        type: String
+        description: |
+          Maximum allowed aggregate disk size in gigabytes.
+        output: true
+      - name: "poolUsedIops"
+        type: String
+        description: |
+          Sum of all the disks' provisioned IOPS, minus some amount
+          that is allowed per disk that is not counted towards pool's IOPS capacity.
+          For more information, see https://cloud.google.com/compute/docs/disks/storage-pools.
+        output: true
+      - name: "totalProvisionedDiskIops"
+        type: String
+        description: |
+          Sum of all the disks' provisioned IOPS.
+        output: true
+      - name: "poolUsedThroughput"
+        type: String
+        description: |
+          Sum of all the disks' provisioned throughput in MB/s.
+        output: true
+      - name: "totalProvisionedDiskThroughput"
+        type: String
+        description: |
+          Sum of all the disks' provisioned throughput in MB/s,
+          minus some amount that is allowed per disk that is not counted towards pool's throughput capacity.
+        output: true
+  - name: "storagePoolType"
+    type: ResourceRef
+    description: |
+      Type of the storage pool. For example, the
+      following are valid values:
+
+      * `https://www.googleapis.com/compute/v1/projects/{project_id}/zones/{zone}/storagePoolTypes/hyperdisk-balanced`
+      * `hyperdisk-throughput`
+    required: true
+    immutable: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'StoragePoolType'
+    imports: 'selfLink'
+  - name: "status"
+    type: NestedObject
+    description: |
+      Status information for the storage pool resource.
+    output: true
+    properties:
+      - name: "lastResizeTimestamp"
+        type: String
+        description: |
+          Timestamp of the last successful resize in RFC3339 text format.
+        output: true
+      - name: "diskCount"
+        type: String
+        description: |
+          Number of disks used.
+        output: true
+      - name: "poolUsedCapacityBytes"
+        type: String
+        description: |
+          Space used by data stored in disks within the storage pool (in bytes).
+          This will reflect the total number of bytes written to the disks in the pool, in contrast to the capacity of those disks.
+        output: true
+      - name: "poolUserWrittenBytes"
+        type: String
+        description: |
+          Amount of data written into the pool, before it is compacted.
+        output: true
+      - name: "totalProvisionedDiskCapacityGb"
+        type: String
+        description: |
+          Sum of all the capacity provisioned in disks in this storage pool.
+          A disk's provisioned capacity is the same as its total capacity.
+        output: true
+      - name: "maxTotalProvisionedDiskCapacityGb"
+        type: String
+        description: |
+          Maximum allowed aggregate disk size in gigabytes.
+        output: true
+      - name: "poolUsedIops"
+        type: String
+        description: |
+          Sum of all the disks' provisioned IOPS, minus some amount that is allowed per disk that is not counted towards pool's IOPS capacity. For more information, see https://cloud.google.com/compute/docs/disks/storage-pools.
+        output: true
+      - name: "totalProvisionedDiskIops"
+        type: String
+        description: |
+          Sum of all the disks' provisioned IOPS.
+        output: true
+      - name: "poolUsedThroughput"
+        type: String
+        description: |
+          Sum of all the disks' provisioned throughput in MB/s.
+        output: true
+      - name: "totalProvisionedDiskThroughput"
+        type: String
+        description: |
+          Sum of all the disks' provisioned throughput in MB/s,
+          minus some amount that is allowed per disk that is not counted towards pool's throughput capacity.
+        output: true
+  - name: "capacityProvisioningType"
+    type: Enum
+    description: |
+      Provisioning type of the byte capacity of the pool.
+    immutable: true
+    enum_values:
+      - "STANDARD"
+      - "ADVANCED"
+    default_from_api: true
+  - name: "performanceProvisioningType"
+    type: Enum
+    description: |
+      Provisioning type of the performance-related parameters of the pool, such as throughput and IOPS.
+    immutable: true
+    required: false
+    enum_values:
+      - "STANDARD"
+      - "ADVANCED"
+    default_from_api: true
+  - name: "labels"
+    type: KeyValueLabels
+    description: |
+      Labels to apply to this storage pool. These can be later modified by the setLabels method.
+virtual_fields:
+  - name: "deletion_protection"
+    type: Boolean
+    default_value: true
+    description: |
+      Whether Terraform will be prevented from destroying the StoragePool.
+      When the field is set to true or unset in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the StoragePool will fail.
+      When the field is set to false, deleting the StoragePool is allowed.
+custom_code:
+  pre_delete: templates/terraform/pre_delete/compute_storage_pool.go.tmpl

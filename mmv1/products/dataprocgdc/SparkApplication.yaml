@@ -100,6 +100,7 @@ id_format: projects/{{project}}/locations/{{location}}/serviceInstances/{{servic
 import_format:
   - projects/{{project}}/locations/{{location}}/serviceInstances/{{serviceinstance}}/sparkApplications/{{spark_application_id}}
 autogen_async: true
+autogen_status: U3BhcmtBcHBsaWNhdGlvbg==
 properties:
   - name: pysparkApplicationConfig
     type: NestedObject

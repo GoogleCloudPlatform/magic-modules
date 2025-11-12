@@ -1,0 +1,12 @@
+resource "google_compute_instance_template" "{{$.PrimaryResourceId}}" {
+  name         = "{{index $.Vars "instance_name"}}"
+  machine_type = "e2-medium"
+
+  disk {
+    source_image = "debian-cloud/debian-11"
+  }
+
+  network_interface {
+    network = "default"
+  }
+}

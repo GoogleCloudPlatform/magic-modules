@@ -1,0 +1,36 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2024 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	detailsArray := v.([]interface{})
+	for i, raw := range detailsArray {
+		m := raw.(map[string]interface{})
+		if len(m) < 1 {
+			// Do not include empty json objects coming back from the api
+			continue
+		}
+		for k, val := range m {
+			if _, ok := val.(string); !ok {
+				b, err := json.Marshal(v)
+				if err != nil {
+					return err
+				}
+				m[k] = string(b)
+			}
+		}
+		detailsArray[i] = m
+	}
+	return detailsArray
+}

@@ -88,6 +88,7 @@ resource "google_database_migration_service_connection_profile" "source_cp" {
       client_key         = google_sql_ssl_cert.source_sql_client_cert.private_key
       client_certificate = google_sql_ssl_cert.source_sql_client_cert.cert
       ca_certificate     = google_sql_ssl_cert.source_sql_client_cert.server_ca_cert
+      type = "SERVER_CLIENT"
     }
     cloud_sql_id = "tf-test-source-csql%{random_suffix}"
   }
@@ -195,6 +196,7 @@ resource "google_database_migration_service_connection_profile" "source_cp" {
       client_key         = google_sql_ssl_cert.source_sql_client_cert.private_key
       client_certificate = google_sql_ssl_cert.source_sql_client_cert.cert
       ca_certificate     = google_sql_ssl_cert.source_sql_client_cert.server_ca_cert
+      type = "SERVER_CLIENT"
     }
     cloud_sql_id = "tf-test-source-csql%{random_suffix}"
   }

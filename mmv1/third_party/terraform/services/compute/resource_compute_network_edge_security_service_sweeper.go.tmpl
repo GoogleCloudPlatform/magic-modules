@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	sweeper.AddTestSweepers("ComputeNetworkEdgeSecurityService", testSweepComputeNetworkEdgeSecurityService)
+	sweeper.AddTestSweepersLegacy("ComputeNetworkEdgeSecurityService", testSweepComputeNetworkEdgeSecurityService)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region

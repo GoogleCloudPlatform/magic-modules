@@ -19,7 +19,7 @@ For more information about types of resources and the generation process overall
 1. Complete the steps in [Set up your development environment]({{< ref "/develop/set-up-dev-environment" >}}) to set up your environment and your Google Cloud project.
 1. [Ensure the resource to which you want to add the fields exists in the provider]({{< ref "/develop/add-resource" >}}).
 1. Ensure that your `magic-modules`, `terraform-provider-google`, and `terraform-provider-google-beta` repositories are up to date.
-   ```
+   ```bash
    cd ~/magic-modules
    git checkout main && git clean -f . && git checkout -- . && git pull
    cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
@@ -30,7 +30,7 @@ For more information about types of resources and the generation process overall
 
 ## Add fields
 
-{{< tabs "fields" >}}
+{{% tabs "fields" %}}
 {{< tab "MMv1" >}}
 1. For each API field, copy the following template into the resource's `properties` attribute. Be sure to indent appropriately.
 
@@ -164,9 +164,15 @@ Replace `String` in the field type with one of the following options:
     type: Map
     description: |
       MULTILINE_FIELD_DESCRIPTION
-    key_name: 'KEY_NAME'
+    key_name: 'key_name'
     key_description: |
       MULTILINE_KEY_FIELD_DESCRIPTION
+  # Map of primitive values
+    value_type:
+      name: mapIntegerName
+      type: Integer
+
+  # Map of complex values
     value_type:
       name: mapObjectName
       type: NestedObject
@@ -177,7 +183,7 @@ Replace `String` in the field type with one of the following options:
           MULTI_LINE_FIELD_DESCRIPTION
 ```
 
-This type is only used for string -> complex type mappings, use "KeyValuePairs" for simple mappings. Complex maps can't be represented natively in Terraform, and this type is transformed into an associative array (TypeSet) with the key merged into the object alongside other top-level fields.
+This type is used for general-case string -> non-string type mappings, use "KeyValuePairs" for string -> string mappings. Complex maps can't be represented natively in Terraform, and this type is transformed into an associative array (TypeSet) with the key merged into the object alongside other top-level fields.
 
 For `key_name` and `key_description`, provide a domain-appropriate name and description. For example, a map that references a specific type of resource would generally use the singular resource kind as the key name (such as "topic" for PubSub Topic) and a descriptor of the expected format depending on the context (such as resourceId vs full resource name).
 
@@ -205,7 +211,7 @@ For `key_name` and `key_description`, provide a domain-appropriate name and desc
 4. If any of the added Go code (including any imports) is beta-only, change the file suffix to `.go.tmpl` and wrap the beta-only code in a version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`.
    - Add a new guard rather than adding the field to an existing guard; it is easier to read.
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 ## What's next?
 

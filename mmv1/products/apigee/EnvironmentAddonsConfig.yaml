@@ -1,0 +1,65 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'EnvironmentAddonsConfig'
+api_resource_type_kind: AddonsConfig
+description: Enable/Disable add-ons for an Apigee environment.
+references:
+  guides:
+    'Enable Analytics Add-On': 'https://cloud.google.com/apigee/docs/api-platform/reference/manage-analytics-add-on'
+  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.addonsConfig/setAddonEnablement'
+docs:
+base_url: '{{env_id}}'
+self_link: '{{env_id}}/addonsConfig'
+create_url: '{{env_id}}/addonsConfig:setAddonEnablement'
+update_url: '{{env_id}}/addonsConfig:setAddonEnablement'
+update_verb: 'POST'
+exclude_delete: true
+timeouts:
+  insert_minutes: 5
+  update_minutes: 5
+async:
+  actions: ['create', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+import_format:
+  - '{{env_id}}'
+id_format: '{{env_id}}'
+custom_code:
+  custom_import: 'templates/terraform/custom_import/apigee_env_addons.go.tmpl'
+  decoder: 'templates/terraform/decoders/apigee_env_addons.go.tmpl'
+examples:
+  - name: 'apigee_env_addons_analytics_test'
+    primary_resource_id: 'apigee_org_addons'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
+    external_providers: ["time"]
+  - name: 'apigee_env_addons_enable_analytics'
+    exclude_test: true
+parameters:
+  - name: 'envId'
+    type: String
+    description: |
+      The Apigee environment group associated with the Apigee environment,
+      in the format `organizations/{{org_name}}/environments/{{env_name}}`.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'analyticsEnabled'
+    type: Boolean
+    description: Flag to enable/disable Analytics.

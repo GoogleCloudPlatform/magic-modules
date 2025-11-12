@@ -62,6 +62,7 @@ examples:
     test_env_vars:
       project: 'PROJECT_NAME'
       organization: 'ORG_ID'
+      location: 'REGION'
   - name: 'dlp_discovery_config_conditions_cadence'
     primary_resource_id: 'conditions_cadence'
     test_env_vars:
@@ -125,6 +126,25 @@ properties:
           - name: 'folderId'
             type: String
             description: The ID for the folder within an organization to scan
+  - name: 'otherCloudStartingLocation'
+    type: NestedObject
+    properties:
+      - name: 'awsLocation'
+        type: NestedObject
+        properties:
+          - name: 'accountId'
+            type: String
+            conflicts:
+              - other_cloud_starting_location.aws_location.all_assets_inventory_assets
+            description: 'The AWS account ID that this discovery config applies to.
+              Within an organization, you can find the AWS account ID inside an AWS account ARN.
+              Example:
+              arn:<partition>:organizations::<management-account-id>:account/<organization-id>/<account-id>'
+          - name: 'allAssetInventoryAssets'
+            type: Boolean
+            conflicts:
+              - other_cloud_starting_location.aws_location.account_id
+            description: All AWS assets stored in Asset Inventory that didn't match other AWS discovery configs.
   - name: 'inspectTemplates'
     type: Array
     description: Detection logic for profile generation
@@ -208,7 +228,7 @@ properties:
                 - 'RESOURCE_NAME'
         - name: 'tagResources'
           type: NestedObject
-          description: Publish a message into the Pub/Sub topic.
+          description: Tag the profiled resources with the specified tag values.
           properties:
             - name: 'tagConditions'
               type: Array
@@ -236,6 +256,7 @@ properties:
                           - 'SENSITIVITY_LOW'
                           - 'SENSITIVITY_MODERATE'
                           - 'SENSITIVITY_HIGH'
+                          - 'SENSITIVITY_UNKNOWN'
             - name: 'profileGenerationsToTag'
               type: Array
               description: The profile generations for which the tag should be attached to resources. If you attach a tag to only new profiles, then if the sensitivity score of a profile subsequently changes, its tag doesn't change. By default, this field includes only new profiles. To include both new and updated profiles for tagging, this field should explicitly include both `PROFILE_GENERATION_NEW` and `PROFILE_GENERATION_UPDATE`.
@@ -250,6 +271,14 @@ properties:
             - name: 'lowerDataRiskToLow'
               type: Boolean
               description: Whether applying a tag to a resource should lower the risk of the profile for that resource. For example, in conjunction with an [IAM deny policy](https://cloud.google.com/iam/docs/deny-overview), you can deny all principals a permission if a tag value is present, mitigating the risk of the resource. This also lowers the data risk of resources at the lower levels of the resource hierarchy. For example, reducing the data risk of a table data profile also reduces the data risk of the constituent column data profiles.
+        - name: 'publishToDataplexCatalog'
+          type: NestedObject
+          description: Publish a portion of each profile to Dataplex Universal Catalog with the aspect type Sensitive Data Protection Profile.
+          send_empty_value: true
+          allow_empty_object: true
+          properties:
+            # Meant to be an empty object with no properties.
+            []
   - name: 'targets'
     type: Array
     description: Target to match against for determining what to scan and how frequently
@@ -290,11 +319,11 @@ properties:
                 - name: 'otherTables'
                   type: NestedObject
                   description: Catch-all. This should always be the last filter in the list because anything above it will apply first.
-                    # The fields below are necessary to include the "otherTables" filter in the payload
+                  # The fields below are necessary to include the "otherTables" filter in the payload
                   send_empty_value: true
                   allow_empty_object: true
                   properties:
- # Meant to be an empty object with no properties - see here : https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/organizations.locations.discoveryConfigs#allotherbigquerytables
+                    # Meant to be an empty object with no properties - see here : https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/organizations.locations.discoveryConfigs#allotherbigquerytables
                     []
                 - name: 'tableReference'
                   type: NestedObject
@@ -407,11 +436,11 @@ properties:
             - name: 'disabled'
               type: NestedObject
               description: 'Tables that match this filter will not have profiles created.'
-                # The fields below are necessary to include the "disabled" filter in the payload
+              # The fields below are necessary to include the "disabled" filter in the payload
               send_empty_value: true
               allow_empty_object: true
               properties:
- # Meant to be an empty object with no properties - see here : https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/organizations.locations.discoveryConfigs#disabled
+                # Meant to be an empty object with no properties - see here : https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/organizations.locations.discoveryConfigs#disabled
                 []
         - name: 'cloudSqlTarget'
           type: NestedObject
@@ -454,7 +483,7 @@ properties:
                   send_empty_value: true
                   allow_empty_object: true
                   properties:
- # Meant to be an empty object with no properties. The fields below are necessary to include the "others" filter in the payload
+                    # Meant to be an empty object with no properties. The fields below are necessary to include the "others" filter in the payload
                     []
                 - name: 'databaseResourceReference'
                   type: NestedObject
@@ -558,11 +587,11 @@ properties:
         - name: 'secretsTarget'
           type: NestedObject
           description: Discovery target that looks for credentials and secrets stored in cloud resource metadata and reports them as vulnerabilities to Security Command Center. Only one target of this type is allowed.
-            # The fields below are necessary to include the "secretsDiscoveryTarget" target in the payload
+          # The fields below are necessary to include the "secretsDiscoveryTarget" target in the payload
           send_empty_value: true
           allow_empty_object: true
           properties:
- # Meant to be an empty object with no properties - see here : https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/organizations.locations.discoveryConfigs#DiscoveryConfig.SecretsDiscoveryTarget
+            # Meant to be an empty object with no properties - see here : https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/organizations.locations.discoveryConfigs#DiscoveryConfig.SecretsDiscoveryTarget
             []
         - name: 'cloudStorageTarget'
           type: NestedObject
@@ -613,7 +642,7 @@ properties:
                   send_empty_value: true
                   allow_empty_object: true
                   properties:
- # Meant to be an empty object with no properties. The fields below are necessary to include the "others" filter in the payload
+                    # Meant to be an empty object with no properties. The fields below are necessary to include the "others" filter in the payload
                     []
             - name: 'conditions'
               type: NestedObject
@@ -687,6 +716,144 @@ properties:
               allow_empty_object: true
               properties:
                 []
+        - name: 'otherCloudTarget'
+          type: NestedObject
+          description: Other clouds target for discovery. The first target to match a resource will be the one applied.
+          properties:
+            - name: 'dataSourceType'
+              type: NestedObject
+              description: 'Required. The type of data profiles generated by this discovery target. Supported values are: aws/s3/bucket'
+              properties:
+                - name: 'dataSource'
+                  type: String
+            - name: 'filter'
+              type: NestedObject
+              description: 'Required. The resources that the discovery cadence applies to. The
+                first target with a matching filter will be the one to apply to a resource.'
+              required: true
+              properties:
+                - name: 'collection'
+                  type: NestedObject
+                  description: A collection of resources for this filter to apply to.
+                  properties:
+                    - name: 'includeRegexes'
+                      type: NestedObject
+                      description: A collection of regular expressions to match a resource against.
+                      properties:
+                        - name: 'patterns'
+                          type: Array
+                          description: The group of regular expression patterns to match against one or more resources. Maximum of 100 entries. The sum of all lengths of regular expressions can't exceed 10 KiB.
+                          item_type:
+                            type: NestedObject
+                            properties:
+                              - name: 'amazonS3BucketRegex'
+                                type: NestedObject
+                                description: Regex for Cloud Storage.
+                                properties:
+                                  - name: 'awsAccountRegex'
+                                    type: NestedObject
+                                    description: 'The AWS account regex'
+                                    properties:
+                                      - name: 'accountIdRegex'
+                                        type: String
+                                        description: 'Regex to test the AWS account ID against.
+                                          If empty, all accounts match.
+                                          Example: arn:aws:organizations::123:account/o-b2c3d4/345'
+                                  - name: 'bucketNameRegex'
+                                    type: String
+                                    description: 'Regex to test the bucket name against. If empty, all buckets match.'
+                - name: 'singleResource'
+                  type: NestedObject
+                  description: The resource to scan. Configs using this filter can only have one target (the target with this single resource reference).
+                  properties:
+                    - name: 'amazonS3Bucket'
+                      type: NestedObject
+                      description: Amazon S3 bucket.
+                      properties:
+                        - name: 'awsAccount'
+                          type: NestedObject
+                          description: The AWS account.
+                          properties:
+                            - name: 'accountId'
+                              type: String
+                              description: AWS account ID.
+                        - name: 'bucketName'
+                          type: String
+                          description: The bucket name.
+                - name: 'others'
+                  type: NestedObject
+                  description: Match discovery resources not covered by any other filter.
+                  send_empty_value: true
+                  allow_empty_object: true
+                  properties:
+                    # Meant to be an empty object with no properties. The fields below are necessary to include the "others" filter in the payload
+                    []
+            - name: 'conditions'
+              type: NestedObject
+              description: In addition to matching the filter, these conditions must be true before a profile is generated.
+              properties:
+                - name: 'minAge'
+                  type: String
+                  description: Duration format.  Minimum age a resource must be before a profile can be generated. Value must be 1 hour or greater. Minimum age is not supported for Azure Blob Storage containers.
+                - name: 'amazonS3BucketConditions'
+                  type: NestedObject
+                  description: Amazon S3 bucket conditions.
+                  properties:
+                    - name: 'bucketTypes'
+                      type: Array
+                      description: Bucket types that should be profiled. Optional. Defaults to TYPE_ALL_SUPPORTED if unspecified.
+                      item_type:
+                        type: Enum
+                        description: |
+                          This field only has a name and description because of MM
+                          limitations. It should not appear in downstreams.
+                        enum_values:
+                          - 'TYPE_ALL_SUPPORTED'
+                          - 'TYPE_GENERAL_PURPOSE'
+                    - name: 'objectStorageClasses'
+                      type: Array
+                      description: Object classes that should be profiled. Optional. Defaults to ALL_SUPPORTED_CLASSES if unspecified.
+                      item_type:
+                        type: Enum
+                        description: |
+                          This field only has a name and description because of MM
+                          limitations. It should not appear in downstreams.
+                        enum_values:
+                          - 'ALL_SUPPORTED_CLASSES'
+                          - 'STANDARD'
+                          - 'STANDARD_INFREQUENT_ACCESS'
+                          - 'GLACIER_INSTANT_RETRIEVAL'
+                          - 'INTELLIGENT_TIERING'
+            - name: 'generationCadence'
+              type: NestedObject
+              description: How often and when to update profiles. New resources that match both the filter and conditions are scanned as quickly as possible depending on system capacity.
+              properties:
+                - name: 'refreshFrequency'
+                  type: Enum
+                  description: Frequency to update profiles regardless of whether the underlying resource has changes. Defaults to never.
+                  enum_values:
+                    - 'UPDATE_FREQUENCY_NEVER'
+                    - 'UPDATE_FREQUENCY_DAILY'
+                    - 'UPDATE_FREQUENCY_MONTHLY'
+                - name: 'inspectTemplateModifiedCadence'
+                  type: NestedObject
+                  description: Governs when to update data profiles when the inspection rules defined by the `InspectTemplate` change. If not set, changing the template will not cause a data profile to update.
+                  properties:
+                    - name: 'frequency'
+                      type: Enum
+                      description: How frequently data profiles can be updated when the template is modified. Defaults to never.
+                      enum_values:
+                        - 'UPDATE_FREQUENCY_NEVER'
+                        - 'UPDATE_FREQUENCY_DAILY'
+                        - 'UPDATE_FREQUENCY_MONTHLY'
+            - name: 'disabled'
+              type: NestedObject
+              description: Disable profiling for resources that match this filter.
+              send_empty_value: true
+              allow_empty_object: true
+              properties:
+                []
+
   - name: 'errors'
     type: Array
     description: Output only. A stream of errors encountered when the config was activated. Repeated errors may result in the config automatically being paused. Output only field. Will return the last 100 errors. Whenever the config is modified this list will be cleared.

@@ -1,0 +1,43 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2024 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	if v == nil {
+		return nil, nil
+	}
+	val, ok := v.(string)
+	if !ok {
+		return nil, fmt.Errorf("unexpected value is not string: %v", v)
+	}
+	if len(val) == 0 {
+		return nil, nil
+	}
+	n, err := strconv.Atoi(val[:len(val)-1])
+	if err != nil {
+		return nil, fmt.Errorf("unexpected value is not duration: %v", v)
+	}
+	// time.ParseDuration does not support 'd'
+	var seconds int
+	switch val[len(val)-1] {
+	case 's':
+		seconds = n
+	case 'm':
+		seconds = n * 60
+	case 'h':
+		seconds = n * 3600
+	case 'd':
+		seconds = n * 86400
+	default:
+		return nil, fmt.Errorf("unexpected duration has unknown unit: %c", val[len(val)-1])
+	}
+	return fmt.Sprintf("%ds", seconds), nil
+}

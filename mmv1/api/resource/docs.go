@@ -24,13 +24,15 @@ type Docs struct {
 	// template.
 	// The text will be injected at the bottom of the specified
 	// section.
-	Warning string
+	Warning string `yaml:"warning,omitempty"`
 
-	Note string
+	Note string `yaml:"note,omitempty"`
 
-	RequiredProperties string `yaml:"required_properties"`
+	RequiredProperties string `yaml:"required_properties,omitempty"`
 
-	OptionalProperties string `yaml:"optional_properties"`
+	OptionalProperties string `yaml:"optional_properties,omitempty"`
 
-	Attributes string
+	WriteOnlyProperties string `yaml:"write_only_properties,omitempty"`
+
+	Attributes string `yaml:"attributes,omitempty"`
 }

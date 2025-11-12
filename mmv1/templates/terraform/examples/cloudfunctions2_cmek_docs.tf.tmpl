@@ -88,7 +88,7 @@ resource "google_cloudfunctions2_function" "{{$.PrimaryResourceId}}" {
   kms_key_name = "{{index $.Vars "kms_key_name"}}"
 
   build_config {
-    runtime = "nodejs16"
+    runtime = "nodejs20"
     entry_point = "helloHttp"  # Set the entry point
     docker_repository = google_artifact_registry_repository.encoded-ar-repo.id
 

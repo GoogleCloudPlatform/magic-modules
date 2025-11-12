@@ -1,0 +1,10 @@
+_ = config
+// we can only get here if delete_protection was updated
+if d.Get("delete_protection") != nil {
+    if err := d.Set("delete_protection", d.Get("delete_protection")); err != nil {
+        return fmt.Errorf("Error updating delete_protection: %s", err)
+    }
+}
+
+// all other fields are immutable, don't do anything else
+return nil

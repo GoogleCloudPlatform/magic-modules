@@ -40,9 +40,9 @@ if [ $found -eq 0 ]; then
 else
     version=($(go version))
     version=${version[2]}
-    if [[ "$version" < "go1.23.0" ]]; then
+    if [[ "$version" < "go1.24.0" ]]; then
         exitcode=1
-        warn "yel" "   $version is installed, but go 1.23 or later is required. See https://golang.org/doc/install for information on installing it."
+        warn "yel" "   $version is installed, but go 1.24 or later is required. See https://golang.org/doc/install for information on installing it."
     fi
     if [[ -z "${GOPATH}" ]]; then
         exitcode=1
@@ -51,14 +51,6 @@ else
     if [ $exitcode -eq 0 ]; then
         warn "grn" "   found!"
     fi
-fi
-
-count_in_path "goimports"
-if [ $found -eq 0 ]; then
-    exitcode=1
-    warn "yel" "   goimports not found. Run 'go install golang.org/x/tools/cmd/goimports@latest' to install it."
-else
-    warn "grn" "   found!"
 fi
 
 count_in_path "git"

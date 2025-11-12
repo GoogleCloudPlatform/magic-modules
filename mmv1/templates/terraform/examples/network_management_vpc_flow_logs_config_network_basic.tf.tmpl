@@ -1,0 +1,12 @@
+data "google_project" "project" {
+}
+
+resource "google_network_management_vpc_flow_logs_config" "{{$.PrimaryResourceId}}" {
+  vpc_flow_logs_config_id = "{{index $.Vars "vpc_flow_logs_config_id"}}"
+  location                = "global"
+  network                 = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.network.name}"
+}
+
+resource "google_compute_network" "network" {
+  name     = "{{index $.Vars "network_name"}}"
+}

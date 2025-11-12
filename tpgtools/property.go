@@ -67,6 +67,7 @@ type Property struct {
 	Optional  bool
 	Computed  bool
 	Sensitive bool
+	WriteOnly bool
 
 	ForceNew    bool
 	Description string
@@ -480,6 +481,10 @@ func (p Property) IsResourceAnnotations() bool {
 	return p.Name() == "annotations" && p.parent == nil
 }
 
+func (p Property) IsTopLevel() bool {
+	return p.parent == nil
+}
+
 func (p Property) ShouldShowUpInSamples() bool {
 	return (p.Settable && p.Name() != "effective_labels" && p.Name() != "effective_annotations") || p.IsResourceLabels() || p.IsResourceAnnotations()
 }
@@ -598,7 +603,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 
 		if v, ok := v.Extension["x-dcl-conflicts"].([]interface{}); ok {
 			// NOTE: DCL not label x-dcl-conflicts for reused types
-			// TODO(shuya): handle nested field when b/213503595 got fixed
+			// TODO: handle nested field when b/213503595 got fixed
 
 			if parent == nil {
 				for _, ci := range v {

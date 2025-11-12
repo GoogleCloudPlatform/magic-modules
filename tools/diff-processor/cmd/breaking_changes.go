@@ -3,8 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	newProvider "google/provider/new/google/provider"
-	oldProvider "google/provider/old/google/provider"
 
 	"io"
 	"os"
@@ -27,7 +25,7 @@ func newBreakingChangesCmd(rootOptions *rootOptions) *cobra.Command {
 	o := &breakingChangesOptions{
 		rootOptions: rootOptions,
 		computeSchemaDiff: func() diff.SchemaDiff {
-			return diff.ComputeSchemaDiff(oldProvider.ResourceMap(), newProvider.ResourceMap())
+			return schemaDiff
 		},
 		stdout: os.Stdout,
 	}

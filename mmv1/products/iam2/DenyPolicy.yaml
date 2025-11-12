@@ -13,6 +13,7 @@
 
 ---
 name: 'DenyPolicy'
+api_resource_type_kind: Policy
 description: |
   Represents a collection of denial policies to apply to a given resource.
 references:
@@ -25,6 +26,7 @@ base_url: 'policies/{{parent}}/denypolicies'
 create_url: 'policies/{{parent}}/denypolicies?policyId={{name}}'
 import_format:
   - '{{parent}}/{{name}}'
+cai_asset_name_format: '{{parent}}/denypolicies/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20

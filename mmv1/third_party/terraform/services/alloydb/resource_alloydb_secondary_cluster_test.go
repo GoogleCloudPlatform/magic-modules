@@ -12,7 +12,7 @@ import (
 func TestAccAlloydbCluster_secondaryClusterMandatoryFields(t *testing.T) {
 	t.Parallel()
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -28,7 +28,7 @@ func TestAccAlloydbCluster_secondaryClusterMandatoryFields(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 		},
 	})
@@ -42,6 +42,12 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -70,6 +76,8 @@ resource "google_alloydb_cluster" "secondary" {
     primary_cluster_name = google_alloydb_cluster.primary.name
   }
 
+  deletion_protection = false
+
   depends_on = [google_alloydb_instance.primary]
 }
 
@@ -86,7 +94,7 @@ func TestAccAlloydbCluster_secondaryClusterMissingSecondaryConfig(t *testing.T) 
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -111,6 +119,12 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -135,6 +149,8 @@ resource "google_alloydb_cluster" "secondary" {
     enabled = false
   }
 
+  deletion_protection = false
+
   depends_on = [google_alloydb_instance.primary]
 }
 
@@ -151,7 +167,7 @@ func TestAccAlloydbCluster_secondaryClusterDefinedSecondaryConfigButMissingClust
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -176,6 +192,12 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -195,6 +217,10 @@ resource "google_alloydb_cluster" "secondary" {
     network = data.google_compute_network.default.id
   }
 
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
   continuous_backup_config {
     enabled = false
   }
@@ -202,6 +228,8 @@ resource "google_alloydb_cluster" "secondary" {
   secondary_config {
     primary_cluster_name = google_alloydb_cluster.primary.name
   }
+
+  deletion_protection = false
 
   depends_on = [google_alloydb_instance.primary]
 }
@@ -219,7 +247,7 @@ func TestAccAlloydbCluster_secondaryClusterDefinedSecondaryConfigButClusterTypeI
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -244,6 +272,12 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -264,6 +298,10 @@ resource "google_alloydb_cluster" "secondary" {
   }
   cluster_type = "PRIMARY"
 
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
   continuous_backup_config {
     enabled = false
   }
@@ -271,6 +309,8 @@ resource "google_alloydb_cluster" "secondary" {
   secondary_config {
     primary_cluster_name = google_alloydb_cluster.primary.name
   }
+
+  deletion_protection = false
 
   depends_on = [google_alloydb_instance.primary]
 }
@@ -288,7 +328,7 @@ func TestAccAlloydbCluster_secondaryClusterUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -304,7 +344,7 @@ func TestAccAlloydbCluster_secondaryClusterUpdate(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 			{
 				Config: testAccAlloydbCluster_secondaryClusterUpdate(context),
@@ -313,7 +353,7 @@ func TestAccAlloydbCluster_secondaryClusterUpdate(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 		},
 	})
@@ -327,6 +367,12 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -359,6 +405,8 @@ resource "google_alloydb_cluster" "secondary" {
     foo = "bar"
   }
 
+  deletion_protection = false
+
   depends_on = [google_alloydb_instance.primary]
 }
 
@@ -374,7 +422,7 @@ func TestAccAlloydbCluster_secondaryClusterUsingCMEK(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 		"kms_key_name":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-bootstrap-alloydb-secondary-key1").CryptoKey.Name,
 	}
@@ -391,7 +439,7 @@ func TestAccAlloydbCluster_secondaryClusterUsingCMEK(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 		},
 	})
@@ -405,6 +453,12 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -437,6 +491,8 @@ resource "google_alloydb_cluster" "secondary" {
     kms_key_name = "%{kms_key_name}"
   }
 
+  deletion_protection = false
+
   depends_on = [
     google_alloydb_instance.primary,
     google_kms_crypto_key_iam_member.crypto_key
@@ -462,7 +518,7 @@ func TestAccAlloydbCluster_secondaryClusterWithNetworkConfig(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -478,7 +534,7 @@ func TestAccAlloydbCluster_secondaryClusterWithNetworkConfig(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 		},
 	})
@@ -492,6 +548,12 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
 		network    = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.default.name}"
   }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -519,6 +581,8 @@ resource "google_alloydb_cluster" "secondary" {
   secondary_config {
     primary_cluster_name = google_alloydb_cluster.primary.name
   }
+
+  deletion_protection = false
 
   depends_on = [google_alloydb_instance.primary]
 }
@@ -536,8 +600,8 @@ func TestAccAlloydbCluster_secondaryClusterWithNetworkConfigAndAllocatedIPRange(
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"address_name":  acctest.BootstrapSharedTestGlobalAddress(t, "alloydbinstance-network-config-1"),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"address_name":  acctest.BootstrapSharedTestGlobalAddress(t, "alloydb-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -553,7 +617,7 @@ func TestAccAlloydbCluster_secondaryClusterWithNetworkConfigAndAllocatedIPRange(
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 		},
 	})
@@ -568,6 +632,12 @@ resource "google_alloydb_cluster" "primary" {
 		network    = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.default.name}"
 		allocated_ip_range = data.google_compute_global_address.private_ip_alloc.name
   }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -596,6 +666,8 @@ resource "google_alloydb_cluster" "secondary" {
   secondary_config {
     primary_cluster_name = google_alloydb_cluster.primary.name
   }
+
+  deletion_protection = false
 
   depends_on = [google_alloydb_instance.primary]
 }
@@ -619,7 +691,7 @@ func TestAccAlloydbCluster_secondaryClusterPromote(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix":              acctest.RandString(t, 10),
 		"secondary_cluster_location": "us-east1",
-		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -634,7 +706,7 @@ func TestAccAlloydbCluster_secondaryClusterPromote(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 			{
 				Config: testAccAlloydbCluster_secondaryClusterPromote(context),
@@ -643,7 +715,7 @@ func TestAccAlloydbCluster_secondaryClusterPromote(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 		},
 	})
@@ -657,6 +729,12 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -686,6 +764,8 @@ resource "google_alloydb_cluster" "secondary" {
   }
 
   deletion_policy = "FORCE"
+
+  deletion_protection = false
 
   depends_on = [google_alloydb_instance.primary]
 }
@@ -720,6 +800,12 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -743,6 +829,8 @@ resource "google_alloydb_cluster" "secondary" {
   continuous_backup_config {
     enabled = false
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "secondary" {
@@ -774,7 +862,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndSimultaneousUpdate(t *testi
 	context := map[string]interface{}{
 		"random_suffix":              acctest.RandString(t, 10),
 		"secondary_cluster_location": "us-east1",
-		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -789,7 +877,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndSimultaneousUpdate(t *testi
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 			{
 				Config: testAccAlloydbCluster_secondaryClusterPromoteAndSimultaneousUpdate(context),
@@ -798,7 +886,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndSimultaneousUpdate(t *testi
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 		},
 	})
@@ -812,6 +900,12 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -839,6 +933,8 @@ resource "google_alloydb_cluster" "secondary" {
   labels = {
     foo = "bar" 
   }  
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "secondary" {
@@ -870,7 +966,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndDeleteOriginalPrimary(t *te
 	context := map[string]interface{}{
 		"random_suffix":              acctest.RandString(t, 10),
 		"secondary_cluster_location": "us-east1",
-		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -885,7 +981,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndDeleteOriginalPrimary(t *te
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 			{
 				Config: testAccAlloydbCluster_secondaryClusterPromote(context),
@@ -894,7 +990,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndDeleteOriginalPrimary(t *te
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 			{
 				Config: testAccAlloydbCluster_secondaryClusterPromoteAndDeleteOriginalPrimary(context),
@@ -903,7 +999,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndDeleteOriginalPrimary(t *te
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 		},
 	})
@@ -919,9 +1015,15 @@ resource "google_alloydb_cluster" "secondary" {
   }
   cluster_type = "PRIMARY"
 
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
   continuous_backup_config {
     enabled = false
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "secondary" {
@@ -953,7 +1055,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndUpdate(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix":              acctest.RandString(t, 10),
 		"secondary_cluster_location": "us-east1",
-		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -968,7 +1070,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndUpdate(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 			{
 				Config: testAccAlloydbCluster_secondaryClusterPromote(context),
@@ -977,7 +1079,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndUpdate(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 			{
 				Config: testAccAlloydbCluster_secondaryClusterPromoteAndUpdate(context),
@@ -986,7 +1088,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndUpdate(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 		},
 	})
@@ -1000,6 +1102,12 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -1028,6 +1136,7 @@ resource "google_alloydb_cluster" "secondary" {
     foo = "bar"
   }
 
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "secondary" {
@@ -1058,8 +1167,8 @@ func TestAccAlloydbCluster_secondaryClusterPromoteWithNetworkConfigAndAllocatedI
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
-		"address_name":  acctest.BootstrapSharedTestGlobalAddress(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"address_name":  acctest.BootstrapSharedTestGlobalAddress(t, "alloydb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1074,7 +1183,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteWithNetworkConfigAndAllocatedI
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 			{
 				Config: testAccAlloydbCluster_secondaryClusterPromoteWithNetworkConfigAndAllocatedIPRange(context),
@@ -1083,7 +1192,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteWithNetworkConfigAndAllocatedI
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 		},
 	})
@@ -1098,6 +1207,12 @@ resource "google_alloydb_cluster" "primary" {
     network    = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.default.name}"
     allocated_ip_range = data.google_compute_global_address.private_ip_alloc.name
   }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -1128,6 +1243,8 @@ resource "google_alloydb_cluster" "secondary" {
   }
 
   deletion_policy = "FORCE"
+
+  deletion_protection = false
 
   depends_on = [google_alloydb_instance.primary]
 }
@@ -1167,6 +1284,12 @@ resource "google_alloydb_cluster" "primary" {
     network    = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.default.name}"
     allocated_ip_range = data.google_compute_global_address.private_ip_alloc.name
   }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -1186,11 +1309,16 @@ resource "google_alloydb_cluster" "secondary" {
     network    = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.default.name}"
     allocated_ip_range = data.google_compute_global_address.private_ip_alloc.name
   }
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
   cluster_type = "PRIMARY"
 
   continuous_backup_config {
     enabled = false
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "secondary" {
@@ -1226,7 +1354,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndAddAndDeleteAutomatedBackup
 	context := map[string]interface{}{
 		"random_suffix":              acctest.RandString(t, 10),
 		"secondary_cluster_location": "us-south1",
-		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"hour":                       23,
 	}
 
@@ -1242,7 +1370,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndAddAndDeleteAutomatedBackup
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 			{
 				Config: testAccAlloydbCluster_secondaryClusterPromote(context),
@@ -1251,7 +1379,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndAddAndDeleteAutomatedBackup
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 			{
 				Config: testAccAlloydbCluster_secondaryClusterPromoteAndAddAutomatedBackupPolicyAndInitialUser(context),
@@ -1260,7 +1388,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndAddAndDeleteAutomatedBackup
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 			{
 				Config: testAccAlloydbCluster_secondaryClusterPromote(context),
@@ -1269,7 +1397,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndAddAndDeleteAutomatedBackup
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 		},
 	})
@@ -1283,6 +1411,13 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  initial_user {
+    user     = "tf-test-alloydb-secondary-cluster%{random_suffix}"
+    password = "tf-test-alloydb-secondary-cluster%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -1336,6 +1471,8 @@ resource "google_alloydb_cluster" "secondary" {
       test = "tf-test-alloydb-secondary-cluster%{random_suffix}"
     }
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "secondary" {
@@ -1367,7 +1504,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndDeleteTimeBasedRetentionPol
 	context := map[string]interface{}{
 		"random_suffix":              acctest.RandString(t, 10),
 		"secondary_cluster_location": "us-south1",
-		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1382,7 +1519,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndDeleteTimeBasedRetentionPol
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 			{
 				Config: testAccAlloydbCluster_secondaryClusterPromote(context),
@@ -1391,7 +1528,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndDeleteTimeBasedRetentionPol
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 			{
 				Config: testAccAlloydbCluster_secondaryClusterPromoteWithTimeBasedRetentionPolicy(context),
@@ -1400,7 +1537,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndDeleteTimeBasedRetentionPol
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 			{
 				Config: testAccAlloydbCluster_secondaryClusterPromoteWithoutTimeBasedRetentionPolicy(context),
@@ -1409,7 +1546,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndDeleteTimeBasedRetentionPol
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 		},
 	})
@@ -1423,6 +1560,13 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  initial_user {
+    user     = "tf-test-alloydb-secondary-cluster%{random_suffix}"
+    password = "tf-test-alloydb-secondary-cluster%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -1471,6 +1615,9 @@ resource "google_alloydb_cluster" "secondary" {
       retention_period = "4.5s"
     }
   }
+
+  deletion_protection = false
+
   lifecycle {
     ignore_changes = [
       automated_backup_policy[0].time_based_retention
@@ -1508,6 +1655,13 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  initial_user {
+    user     = "tf-test-alloydb-secondary-cluster%{random_suffix}"
+    password = "tf-test-alloydb-secondary-cluster%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -1553,6 +1707,9 @@ resource "google_alloydb_cluster" "secondary" {
       }
     }
   }
+
+  deletion_protection = false
+
   lifecycle {
     ignore_changes = [
       automated_backup_policy[0].time_based_retention
@@ -1589,7 +1746,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndAddContinuousBackupConfig(t
 	context := map[string]interface{}{
 		"random_suffix":              acctest.RandString(t, 10),
 		"secondary_cluster_location": "us-south1",
-		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1604,7 +1761,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndAddContinuousBackupConfig(t
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 			{
 				Config: testAccAlloydbCluster_secondaryClusterPromote(context),
@@ -1613,7 +1770,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndAddContinuousBackupConfig(t
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 			{
 				Config: testAccAlloydbCluster_secondaryClusterPromoteAndAddContinuousBackupConfig(context),
@@ -1622,7 +1779,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndAddContinuousBackupConfig(t
 				ResourceName:            "google_alloydb_cluster.secondary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "restore_backup_source", "restore_continuous_backup_source", "cluster_id", "location", "deletion_policy", "labels", "annotations", "terraform_labels", "reconciling"},
 			},
 		},
 	})
@@ -1636,6 +1793,12 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -1656,11 +1819,16 @@ resource "google_alloydb_cluster" "secondary" {
   }
   cluster_type = "PRIMARY"
 
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+
   continuous_backup_config {
     enabled              = true
     recovery_window_days = 14
   }
 
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "secondary" {

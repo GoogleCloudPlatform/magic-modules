@@ -1,0 +1,18 @@
+resource "google_pubsub_topic" "topic" {
+  name = "{{index $.Vars "topic_name"}}"
+}
+
+resource "google_eventarc_pipeline" "{{$.PrimaryResourceId}}" {
+  location    = "us-central1"
+  pipeline_id = "{{index $.Vars "pipeline_name"}}"
+  destinations {
+    topic = google_pubsub_topic.topic.id
+  }
+  labels = {
+    test_label = "test-eventarc-label"
+  }
+  annotations = {
+    test_annotation = "test-eventarc-annotation"
+  }
+  display_name = "Testing Pipeline"
+}

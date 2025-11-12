@@ -21,6 +21,7 @@ The following types of PRs may require additional scrutiny and/or multiple revie
 1. Read the PR description to understand the context and ensure the PR either
    * is linked to a GitHub issue or an internal bug
       * if not, check the [issue tracker](https://github.com/hashicorp/terraform-provider-google/issues) to see whether the feature has already been requested and add the issues in the description, if any.
+      * "Fixes {github_issue_link}" is preferred if an external issue is available because it will [auto-close the issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue) when the PR is merged. However, there's no need to create an external issue solely for this purpose.
    * establishes clear context itself via title or description.
 2. If the PR adds any new resource, ensure that the resource does not already exist in the [GA provider](https://github.com/hashicorp/terraform-provider-google) or [beta provider](https://github.com/hashicorp/terraform-provider-google-beta)
 1. Read through all the changes in the PR, generated code in the downstreams and the API documentation to ensure that:
@@ -38,21 +39,20 @@ The following types of PRs may require additional scrutiny and/or multiple revie
    1. all resources in the acceptance tests have a `tf-test` or `tf_test` prefix in their primary id field.
    1. all handwritten test Config steps include import steps following them
    1. all related tests pass in GA for features promoted from beta to GA.
-      {{< hint info >}}Note:
-      Presubmit VCR tests do not run in GA. Manual testing is required for promoted GA features.
-      {{< /hint >}}
+      > [!NOTE]
+      > Note:
+      > Presubmit VCR tests do not run in GA. Manual testing is required for promoted GA features.
    1. newly added or modified diff suppress functions are tested in at least one unit test.
    1. the linked issue (if any) is covered by at least one test that reproduces the issue
       * for example - a bugfix should test the bug (or explain why it's not feasible to do so in the description, including manual results when possible) and an enhancement should test the new behaviour(s).
    1. all related PR presubmit tests have been completed successfully, including:
       * terraform-provider-breaking-change-test
-      * presubmit-rake-tests
       * terraform-provider-google-build-and-unit-tests
       * terraform-provider-google-beta-build-and-unit-tests
       * VCR-test
-      {{< hint info >}}Note:
-      Some acceptance tests may be skipped in VCR and manual testing is required.
-      {{< /hint >}}
+      > [!NOTE]
+      > Note:
+      > Some acceptance tests may be skipped in VCR and manual testing is required.
    1. a significant number of preexisting tests have not been modified. Changing old tests often indicates a change is backwards incompatible.
 1. Check documentation to ensure
    1. resource-level and field-level documentation are generated correctly for MMv1-based resource

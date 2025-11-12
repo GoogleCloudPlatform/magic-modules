@@ -47,7 +47,7 @@ create_verb: 'PATCH'
 update_mask: true
 delete_verb: 'PATCH'
 immutable: true
-mutex: '{{access_level}}'
+mutex: '{{access_policy_id}}'
 import_format:
   - '{{access_level}}'
  # no unique way to specify
@@ -78,6 +78,7 @@ nested_query:
   is_list_of_ids: false
   modify_by_patch: true
 custom_code:
+  encoder: 'templates/terraform/encoders/access_context_manager_access_level_condition.go.tmpl'
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under AccessLevel
 exclude_sweeper: true
@@ -248,3 +249,9 @@ properties:
               description: 'CIDR block IP subnetwork specification. Must be IPv4.'
               item_type:
                 type: String
+  - name: 'accessPolicyId'
+    type: String
+    description: |
+      The name of the Access Policy this resource belongs to.
+    ignore_read: true
+    output: true

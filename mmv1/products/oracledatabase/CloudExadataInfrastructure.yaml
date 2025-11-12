@@ -30,6 +30,7 @@ timeouts:
   update_minutes: 120
   delete_minutes: 120
 autogen_async: true
+autogen_status: Q2xvdWRFeGFkYXRhSW5mcmFzdHJ1Y3R1cmU=
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -53,7 +54,7 @@ examples:
     ignore_read_extra:
       - 'deletion_protection'
     test_vars_overrides:
-      'project': '"oci-terraform-testing"'
+      'project': '"oci-terraform-testing-prod"'
       'deletion_protection': 'false'
       # ofake- prefix is needed to create a dummy resource for testing purposes only
       # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
@@ -69,7 +70,7 @@ examples:
     ignore_read_extra:
       - 'deletion_protection'
     test_vars_overrides:
-      'project': '"oci-terraform-testing"'
+      'project': '"oci-terraform-testing-prod"'
       'deletion_protection': 'false'
       # ofake- prefix is needed to create a dummy resource for testing purposes only
       # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770

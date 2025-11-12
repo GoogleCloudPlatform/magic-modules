@@ -1,0 +1,8 @@
+// Always force-send some attributes even if they were not modified. This works around extra API-side requirements.
+obj["scope"] = d.Get("scope")
+if d.Get("type") == "SECURE_WEB_GATEWAY" {
+    obj["name"] = d.Get("name")
+    obj["type"] = d.Get("type")
+    obj["routingMode"] = d.Get("routingMode")
+}
+return obj, nil

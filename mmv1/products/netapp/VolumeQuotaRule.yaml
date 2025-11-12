@@ -1,0 +1,125 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'VolumeQuotaRule'
+api_resource_type_kind: QuotaRule
+description: |
+ QuotaRule specifies the maximum capacity a user or group can use within a volume. They can be used for creating default and individual quota rules.
+references:
+  guides:
+    'Documentation': https://cloud.google.com/netapp/volumes/docs/configure-and-use/volumes/overview#volume_user_and_group_quotas
+  api: https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.volumes.quotaRules
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/quotaRules'
+self_link: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/quotaRules/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/quotaRules?quotaRuleId={{name}}'
+update_url: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/quotaRules/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/quotaRules/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+custom_code:
+# Skipping the sweeper since we need to sweep multiple regions
+exclude_sweeper: true
+examples:
+  - name: 'netapp_volume_quota_rule_basic'
+    primary_resource_id: 'test_quota_rule'
+    vars:
+      volume_name: 'test-volume'
+      pool_name: 'test-pool'
+      network_name: 'test-network'
+      quota_rule_name: 'test-volume-quota-rule'
+    test_vars_overrides:
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      Loction of the quotaRule. QuotaRules are child resources of volumes and live in the same location.
+    url_param_only: true
+    immutable: true
+  - name: 'volume_name'
+    type: String
+    description: |
+      Name of the volume to create the quotaRule in.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'name'
+    type: String
+    description:
+      The resource name of the quotaRule.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'target'
+    type: String
+    description: |
+      The quota rule applies to the specified user or group.
+      Valid targets for volumes with NFS protocol enabled:
+        - UNIX UID for individual user quota
+        - UNIX GID for individual group quota
+      Valid targets for volumes with SMB protocol enabled:
+        - Windows SID for individual user quota
+      Leave empty for default quotas
+  - name: 'type'
+    type: Enum
+    description: |
+      Types of Quota Rule.
+    required: true
+    enum_values:
+      - 'INDIVIDUAL_USER_QUOTA'
+      - 'INDIVIDUAL_GROUP_QUOTA'
+      - 'DEFAULT_USER_QUOTA'
+      - 'DEFAULT_GROUP_QUOTA'
+  - name: 'diskLimitMib'
+    type: Integer
+    description:
+      The maximum allowed capacity in MiB.
+    required: true
+  - name: 'state'
+    type: String
+    description: |
+      The state of the quota rule. Possible Values : [STATE_UNSPECIFIED, CREATING, UPDATING, READY, DELETING, ERROR]
+    output: true
+  - name: 'stateDetails'
+    type: String
+    description: |
+      State details of the quota rule
+    output: true
+  - name: 'createTime'
+    type: String
+    description: |
+      Create time of the quota rule. A timestamp in RFC3339 UTC "Zulu" format. Examples: "2023-06-22T09:13:01.617Z".
+    output: true
+  - name: 'description'
+    type: String
+    description: |
+      Description for the quota rule.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Labels as key value pairs of the quota rule. Example: `{ "owner": "Bob", "department": "finance", "purpose": "testing" }`.

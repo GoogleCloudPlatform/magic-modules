@@ -1,0 +1,43 @@
+resource "google_eventarc_pipeline" "{{$.PrimaryResourceId}}" {
+  location        = "us-central1"
+  pipeline_id     = "{{index $.Vars "pipeline_name"}}"
+  crypto_key_name = "{{index $.Vars "key_name"}}"
+  destinations {
+    http_endpoint {
+      uri                      = "https://10.77.0.0:80/route"
+      message_binding_template = "{\"headers\":{\"new-header-key\": \"new-header-value\"}}"
+    }
+    network_config {
+      network_attachment = "projects/{{index $.TestEnvVars "project_id"}}/regions/us-central1/networkAttachments/{{index $.Vars "network_attachment_name"}}"
+    }
+    output_payload_format {
+      avro {
+        schema_definition = "{\"type\": \"record\", \"name\": \"my_record\", \"fields\": [{\"name\": \"my_field\", \"type\": \"string\"}]}"
+      }
+    }
+  }
+  input_payload_format {
+    avro {
+      schema_definition = "{\"type\": \"record\", \"name\": \"my_record\", \"fields\": [{\"name\": \"my_field\", \"type\": \"string\"}]}"
+    }
+  }
+  retry_policy {
+    max_retry_delay = "50s"
+    max_attempts    = 2
+    min_retry_delay = "40s"
+  }
+  mediations {
+    transformation {
+      transformation_template = <<-EOF
+{
+"id": message.id,
+"datacontenttype": "application/json",
+"data": "{ \"scrubbed\": \"true\" }"
+}
+EOF
+    }
+  }
+  logging_config {
+    log_severity = "DEBUG"
+  }
+}

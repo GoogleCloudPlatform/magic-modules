@@ -1,0 +1,4 @@
+resource "google_dataplex_glossary" "{{$.PrimaryResourceId}}" {
+  glossary_id = "{{index $.Vars "glossary_name"}}"
+  location = "us-central1"
+}

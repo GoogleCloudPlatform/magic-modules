@@ -1,0 +1,91 @@
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_compute_network" "default" {
+  provider                = google-beta
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_network_firewall_policy" "basic_network_firewall_policy" {
+  provider    = google-beta
+  name        = "{{index $.Vars "fw_policy"}}"
+  description = "Sample global network firewall policy"
+  project     = "{{index $.TestEnvVars "project_name"}}"
+}
+
+resource "google_compute_network_firewall_policy_packet_mirroring_rule" "{{$.PrimaryResourceId}}" {
+  provider                = google-beta
+  action                  = "mirror"
+  description             = "This is a simple packet mirroring rule description"
+  direction               = "INGRESS"
+  disabled                = false
+  firewall_policy         = google_compute_network_firewall_policy.basic_network_firewall_policy.name
+  priority                = 1000
+  rule_name               = "test-rule"
+
+  match {
+    src_ip_ranges = ["10.100.0.1/32"]
+    layer4_configs {
+      ip_protocol = "all"
+    }
+  }
+  security_profile_group = "//networksecurity.googleapis.com/${google_network_security_security_profile_group.security_profile_group_1.id}"
+
+  target_secure_tags {
+    name = "tagValues/${google_tags_tag_value.secure_tag_value_1.name}"
+  }
+}
+
+resource "google_network_security_mirroring_deployment_group" "default" {
+  provider                      = google-beta
+  mirroring_deployment_group_id = "{{index $.Vars "deployment_group_id"}}"
+  location                      = "global"
+  network                       = google_compute_network.default.id
+}
+
+resource "google_network_security_mirroring_endpoint_group" "default" {
+  provider                      = google-beta
+  mirroring_endpoint_group_id   = "{{index $.Vars "endpoint_group_id"}}"
+  location                      = "global"
+  mirroring_deployment_group    = google_network_security_mirroring_deployment_group.default.id
+}
+
+resource "google_network_security_security_profile" "default" {
+  provider    = google-beta
+  name        = "{{index $.Vars "security_profile_name"}}"
+  parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
+  description = "my description"
+  type        = "CUSTOM_MIRRORING"
+
+  custom_mirroring_profile {
+    mirroring_endpoint_group = google_network_security_mirroring_endpoint_group.default.id
+  }
+}
+
+resource "google_network_security_security_profile_group" "security_profile_group_1" {
+  provider                 = google-beta
+  name                     = "{{index $.Vars "security_profile_group_name"}}"
+  parent                   = "organizations/{{index $.TestEnvVars "org_id"}}"
+  description              = "my description"
+  custom_mirroring_profile = google_network_security_security_profile.default.id
+}
+
+resource "google_tags_tag_key" "secure_tag_key_1" {
+  provider    = google-beta
+  description = "Test tag key description"
+  parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
+  purpose     = "GCE_FIREWALL"
+  short_name  = "{{index $.Vars "tag_key"}}"
+  purpose_data = {
+    network = "{{index $.TestEnvVars "project_name"}}/${google_compute_network.default.name}"
+  }
+}
+
+resource "google_tags_tag_value" "secure_tag_value_1" {
+  provider    = google-beta
+  description = "Test tag value description."
+  parent      = google_tags_tag_key.secure_tag_key_1.id
+  short_name  = "{{index $.Vars "tag_value"}}"
+}

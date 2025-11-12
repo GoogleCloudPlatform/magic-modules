@@ -1,0 +1,21 @@
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+	return nil, err
+}
+
+projectNumber := d.Get("project").(string)
+resourceManager := config.NewResourceManagerV3Client(userAgent)
+projectData, err := resourceManager.Projects.Get("projects/" + d.Get("project").(string)).Do()
+if err != nil {
+	return nil, err
+}
+
+d.Set("project", projectData.ProjectId)
+
+id = fmt.Sprintf("projects/%s/locations/%s/subscriptions/%s",
+	projectNumber,
+	d.Get("location"),
+	d.Get("subscription_id"))
+
+d.SetId(id)
+d.Set("name", id)

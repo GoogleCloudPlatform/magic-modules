@@ -43,7 +43,7 @@ import(
 )
 
 func init() {
-	sweeper.AddTestSweepers("{{$.TitleCaseFullName}}", testSweep{{$.TitleCaseFullName}})
+	sweeper.AddTestSweepersLegacy("{{$.TitleCaseFullName}}", testSweep{{$.TitleCaseFullName}})
 }
 
 func testSweep{{$.TitleCaseFullName}}(region string) error {

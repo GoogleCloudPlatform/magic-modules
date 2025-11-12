@@ -1,0 +1,18 @@
+	// list attestation_rules
+	ruleUrl := url + ":listAttestationRules"
+
+	ruleRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    ruleUrl,
+		UserAgent: userAgent,
+		Headers:   headers,
+	})
+	if err != nil {
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("IAMBetaWorkloadIdentityPoolManagedIdentity %q", d.Id()))
+	}
+
+	for k, v := range ruleRes {
+		res[k] = v
+	}

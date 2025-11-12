@@ -22,7 +22,10 @@ func TestAccApigeeInstance_updateConsumerAcceptList(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckApigeeInstanceDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckApigeeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApigeeInstance_basic(context),
@@ -71,10 +74,15 @@ resource "google_project_service" "servicenetworking" {
   service = "servicenetworking.googleapis.com"
 }
 
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_project_service.compute]
+}
+
 resource "google_compute_network" "apigee_network" {
   name       = "apigee-network"
   project    = google_project.project1.project_id
-  depends_on = [google_project_service.compute]
+  depends_on = [time_sleep.wait_120_seconds]
 }
 
 resource "google_compute_global_address" "apigee_range" {
@@ -112,6 +120,11 @@ resource "google_apigee_instance" "apigee_instance" {
   consumer_accept_list = [
     google_project.project1.project_id,
   ]
+
+  access_logging_config {
+    enabled = false
+    filter  = "status_code >= 0 && status_code < 600"
+  }
 }
 `, context)
 }
@@ -149,10 +162,15 @@ resource "google_project_service" "servicenetworking" {
   service = "servicenetworking.googleapis.com"
 }
 
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_project_service.compute]
+}
+
 resource "google_compute_network" "apigee_network" {
   name       = "apigee-network"
   project    = google_project.project1.project_id
-  depends_on = [google_project_service.compute]
+  depends_on = [time_sleep.wait_120_seconds]
 }
 
 resource "google_compute_global_address" "apigee_range" {
@@ -191,6 +209,11 @@ resource "google_apigee_instance" "apigee_instance" {
     google_project.project1.project_id,
     google_project.project2.project_id,
   ]
+
+  access_logging_config {
+    enabled = false
+    filter  = "status_code >= 0 && status_code < 600"
+  }
 }
 `, context)
 }

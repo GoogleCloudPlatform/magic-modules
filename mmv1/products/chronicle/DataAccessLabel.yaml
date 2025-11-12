@@ -14,11 +14,10 @@
 ---
 name: DataAccessLabel
 description: A DataAccessLabel is a label on events to define user access to data.
-min_version: 'beta'
 references:
   guides:
     'Introduction to data RBAC': 'https://cloud.google.com/chronicle/docs/onboard/onboard-datarbac'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.dataAccessLabels'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.dataAccessLabels'
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataAccessLabels
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataAccessLabels/{{data_access_label_id}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataAccessLabels?dataAccessLabelId={{data_access_label_id}}
@@ -27,11 +26,11 @@ import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataAccessLabels/{{data_access_label_id}}
 update_verb: PATCH
 update_mask: true
+autogen_status: RGF0YUFjY2Vzc0xhYmVs
 
 examples:
   - name: 'chronicle_dataaccesslabel_basic'
     primary_resource_id: 'example'
-    min_version: 'beta'
     vars:
       data_access_label_id: label-id
       description: label-description
@@ -55,9 +54,9 @@ parameters:
     type: String
     description: |-
       Required. The ID to use for the data access label, which will become the label's
-      display name and the final component of the label's resource name. It must
-      only contain ASCII lowercase letters, numbers, and dashes; it must begin
-      with a letter, and it must not exceed 1000 characters.
+      display name and the final component of the label's resource name. The
+      maximum number of characters should be 63. Regex pattern is as per AIP:
+      https://google.aip.dev/122#resource-id-segments
     immutable: true
     url_param_only: true
     required: true

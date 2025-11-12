@@ -1,0 +1,59 @@
+			
+			config := acctest.GoogleProviderConfig(t)
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}DiscoveryEngineBasePath{{"}}"}}projects/{{"{{"}}project}}/locations/{{"{{"}}location{{"}}"}}/collections/default_collection/dataStores/{{"{{"}}data_store_id{{"}}"}}/siteSearchEngine/sitemaps:fetch")
+			if err != nil {
+				return err
+			}
+			
+			billingProject := ""
+			if config.BillingProject != "" {
+				billingProject = config.BillingProject
+			}
+			
+			// Get the resource name from the resource state
+			resourceName := rs.Primary.Attributes["name"]
+			
+			// Make the request to fetch all sitemaps
+			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
+			
+			if err != nil {
+				// If the entire request fails, it could be that the sitemap engine doesn't exist,
+				// which is the expected state after destruction
+				continue
+			}
+			
+			// Check if our specific sitemap exists in the response
+			sitemapExists := false
+			if sitemapsMetadata, ok := res["sitemapsMetadata"].([]interface{}); ok {
+				for _, metadata := range sitemapsMetadata {
+					metadataMap, ok := metadata.(map[string]interface{})
+					if !ok {
+						continue
+					}
+					
+					sitemap, ok := metadataMap["sitemap"].(map[string]interface{})
+					if !ok {
+						continue
+					}
+					
+					name, ok := sitemap["name"].(string)
+					if !ok {
+						continue
+					}
+					
+					if name == resourceName {
+						sitemapExists = true
+						break
+					}
+				}
+			}
+			
+			if sitemapExists {
+				return fmt.Errorf("DiscoveryEngineSitemap %s still exists", resourceName)
+			}

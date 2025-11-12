@@ -1,0 +1,18 @@
+resource "google_chronicle_data_access_scope" "data_access_scope_test" {
+ location = "us"
+ instance = "{{index $.TestEnvVars "chronicle_id"}}"
+ data_access_scope_id = "{{index $.Vars "data_access_scope_id"}}"
+ description = "scope-description"
+ allowed_data_access_labels {
+   log_type = "GCP_CLOUDAUDIT"
+ }
+}
+
+resource "google_chronicle_rule" "{{$.PrimaryResourceId}}" {
+ location = "us"
+ instance = "{{index $.TestEnvVars "chronicle_id"}}"
+ scope = resource.google_chronicle_data_access_scope.data_access_scope_test.name
+ text = <<-EOT
+             rule test_rule { meta: events:  $userid = $e.principal.user.userid  match: $userid over 10m condition: $e }
+         EOT
+}

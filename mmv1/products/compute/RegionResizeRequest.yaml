@@ -57,9 +57,11 @@ parameters:
   - name: 'region'
     type: ResourceRef
     description: |
-      The reference of the compute region scoping this request.
-    url_param_only: true
-    required: true
+      The reference of the compute region scoping this request. If it is not provided, the provider region is used.
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    default_from_api: true
+    required: false
     resource: 'Region'
     imports: 'name'
   - name: 'instanceGroupManager'

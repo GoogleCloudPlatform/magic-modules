@@ -21,6 +21,7 @@ description: |
 references:
   guides:
     'Create and deploy a posture': 'https://cloud.google.com/security-command-center/docs/how-to-use-security-posture'
+  api: 'https://cloud.google.com/security-command-center/docs/reference/securityposture/rest/v1/Posture'
 docs:
 base_url: '{{parent}}/locations/{{location}}/postures'
 self_link: '{{parent}}/locations/{{location}}/postures/{{posture_id}}'

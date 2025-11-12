@@ -35,7 +35,7 @@ resource "google_redis_instance" "{{$.PrimaryResourceId}}" {
   authorized_network = google_compute_network.redis-network.id
   connect_mode       = "PRIVATE_SERVICE_ACCESS"
 
-  redis_version     = "REDIS_4_0"
+  redis_version     = "REDIS_7_2"
   display_name      = "Terraform Test Instance"
 
   depends_on = [google_service_networking_connection.private_service_connection]

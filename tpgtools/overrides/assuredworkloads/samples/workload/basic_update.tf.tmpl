@@ -13,6 +13,12 @@ resource "google_assured_workloads_workload" "primary" {
     display_name = "folder-display-name"
   }
   violation_notifications_enabled = true
+  depends_on = [time_sleep.wait_120_seconds]
+}
+
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_folder.folder1]
 }
 
 resource "google_folder" "folder1" {

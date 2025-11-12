@@ -35,7 +35,11 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+autogen_status: SW5zdGFuY2U=
 custom_code:
+sweeper:
+  url_substitutions:
+    - region: "us-central1-a"
 examples:
   - name: 'parallelstore_instance_basic_beta'
     primary_resource_id: 'instance'
@@ -44,12 +48,16 @@ examples:
       name: 'instance'
       network_name: 'network'
       address_name: 'address'
+    ignore_read_extra:
+      - "update_time"
   - name: 'parallelstore_instance_basic'
     primary_resource_id: 'instance'
     vars:
       name: 'instance'
       network_name: 'network'
       address_name: 'address'
+    ignore_read_extra:
+      - "update_time"
 parameters:
   - name: 'location'
     type: String

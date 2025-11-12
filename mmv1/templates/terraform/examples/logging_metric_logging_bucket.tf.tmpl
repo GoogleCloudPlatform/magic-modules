@@ -7,5 +7,5 @@ resource "google_logging_project_bucket_config" "{{$.PrimaryResourceId}}" {
 resource "google_logging_metric" "{{$.PrimaryResourceId}}" {
   name        = "{{index $.Vars "logging_metric_name"}}"
   filter      = "resource.type=gae_app AND severity>=ERROR"
-  bucket_name = google_logging_project_bucket_config.{{$.PrimaryResourceId}}.id
+  bucket_name = google_logging_project_bucket_config.{{$.PrimaryResourceId}}.name
 }

@@ -13,12 +13,15 @@
 
 ---
 name: 'MirroringDeployment'
-description: MirroringDeployment represents the collectors within a Zone and is associated with a deployment group.
-min_version: 'beta'
+description: |-
+  A deployment represents a zonal mirroring backend ready to accept
+  GENEVE-encapsulated replica traffic, e.g. a zonal instance group fronted by
+  an internal passthrough load balancer. Deployments are always part of a
+  global deployment group which represents a global mirroring service.
 references:
   guides:
     'Mirroring deployment overview': 'https://cloud.google.com/network-security-integration/docs/out-of-band/deployments-overview'
-  api: 'https://cloud.google.com/network-security-integration/docs/reference/rest/v1beta1/projects.locations.mirroringDeployments'
+  api: 'https://cloud.google.com/network-security-integration/docs/reference/rest/v1/projects.locations.mirroringDeployments'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/mirroringDeployments/{{mirroring_deployment_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/mirroringDeployments'
@@ -37,6 +40,9 @@ async:
   result:
     resource_inside_response: true
 custom_code:
+sweeper:
+  url_substitutions:
+    - region: "us-central1-a"
 examples:
   - name: 'network_security_mirroring_deployment_basic'
     config_path: 'templates/terraform/examples/network_security_mirroring_deployment_basic.tf.tmpl'
@@ -52,65 +58,83 @@ examples:
 parameters:
   - name: 'location'
     type: String
-    description: 'Resource ID segment making up resource `name`. It identifies the resource
-    within its parent collection as described in https://google.aip.dev/122. See documentation
-    for resource type `networksecurity.googleapis.com/MirroringDeployment`. '
-    min_version: 'beta'
+    description: |-
+      The cloud location of the deployment, e.g. `us-central1-a` or `asia-south1-b`.
     url_param_only: true
     required: true
     immutable: true
   - name: 'mirroringDeploymentId'
     type: String
-    description: "Required. Id of the requesting object\nIf auto-generating Id server-side,
-    remove this field and\nmirroring_deployment_id from the method_signature of Create
-    RPC "
-    min_version: 'beta'
+    description: |-
+      The ID to use for the new deployment, which will become the final
+      component of the deployment's resource name.
     url_param_only: true
     required: true
     immutable: true
 properties:
   - name: 'name'
     type: String
-    description: 'Immutable. Identifier. The name of the MirroringDeployment. '
-    min_version: 'beta'
+    description: |-
+      The resource name of this deployment, for example:
+      `projects/123456789/locations/us-central1-a/mirroringDeployments/my-dep`.
+      See https://google.aip.dev/122 for more details.
     immutable: true
     output: true
   - name: 'createTime'
     type: String
-    description: 'Output only. [Output only] Create time stamp '
-    min_version: 'beta'
+    description: |-
+      The timestamp when the resource was created.
+      See https://google.aip.dev/148#timestamps.
     output: true
   - name: 'updateTime'
     type: String
-    description: 'Output only. [Output only] Update time stamp '
-    min_version: 'beta'
+    description: |-
+      The timestamp when the resource was most recently updated.
+      See https://google.aip.dev/148#timestamps.
     output: true
   - name: 'labels'
     type: KeyValueLabels
-    description: 'Optional. Labels as key value pairs '
-    min_version: 'beta'
+    description: |-
+      Labels are key/value pairs that help to organize and filter resources.
   - name: 'forwardingRule'
     type: String
-    description: "Required. Immutable. The regional load balancer which the mirrored
-    traffic should be forwarded\nto. Format is:\nprojects/{project}/regions/{region}/forwardingRules/{forwardingRule} "
-    min_version: 'beta'
+    description: |-
+      The regional forwarding rule that fronts the mirroring collectors, for
+      example: `projects/123456789/regions/us-central1/forwardingRules/my-rule`.
+      See https://google.aip.dev/124.
     required: true
     immutable: true
   - name: 'mirroringDeploymentGroup'
     type: String
-    description: "Required. Immutable. The Mirroring Deployment Group that this resource
-    is part of. Format is:\n`projects/{project}/locations/global/mirroringDeploymentGroups/{mirroringDeploymentGroup}` "
-    min_version: 'beta'
+    description: |-
+      The deployment group that this deployment is a part of, for example:
+      `projects/123456789/locations/global/mirroringDeploymentGroups/my-dg`.
+      See https://google.aip.dev/124.
     required: true
     immutable: true
   - name: 'state'
     type: String
-    description: "Output only. Current state of the deployment. \n Possible values:\n
-    STATE_UNSPECIFIED\nACTIVE\nCREATING\nDELETING\nOUT_OF_SYNC\nDELETE_FAILED"
-    min_version: 'beta'
+    description: |-
+      The current state of the deployment.
+      See https://google.aip.dev/216.
+      Possible values:
+      STATE_UNSPECIFIED
+      ACTIVE
+      CREATING
+      DELETING
+      OUT_OF_SYNC
+      DELETE_FAILED
     output: true
   - name: 'reconciling'
     type: Boolean
-    description: "Output only. Whether reconciling is in progress, recommended per\nhttps://google.aip.dev/128. "
-    min_version: 'beta'
+    description: |-
+      The current state of the resource does not match the user's intended state,
+      and the system is working to reconcile them. This part of the normal
+      operation (e.g. linking a new association to the parent group).
+      See https://google.aip.dev/128.
     output: true
+  - name: description
+    type: String
+    description: |-
+      User-provided description of the deployment.
+      Used as additional context for the deployment.

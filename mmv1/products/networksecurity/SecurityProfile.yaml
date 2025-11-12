@@ -40,6 +40,11 @@ async:
     resource_inside_response: false
   include_project: true
 custom_code:
+include_in_tgc_next_DO_NOT_USE: true
+sweeper:
+  url_substitutions:
+    - parent: "organizations/${ORG_ID}"
+      region: "global"
 examples:
   - name: 'network_security_security_profile_basic'
     primary_resource_id: 'default'
@@ -53,6 +58,34 @@ examples:
       resource_name: 'my-security-profile'
     test_env_vars:
       org_id: 'ORG_ID'
+  - name: 'network_security_security_profile_mirroring'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-security-profile'
+      network_name: 'my-network'
+      deployment_group_id: 'my-dg'
+      endpoint_group_id: 'my-eg'
+    test_env_vars:
+      org_id: 'ORG_ID'
+  - name: 'network_security_security_profile_intercept'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-security-profile'
+      network_name: 'my-network'
+      deployment_group_id: 'my-dg'
+      endpoint_group_id: 'my-eg'
+    test_env_vars:
+      org_id: 'ORG_ID'
+  - name: 'network_security_security_profile_url_filtering'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-security-profile'
+    test_env_vars:
+      org_id: 'ORG_ID'
+    tgc_skip_test: The ENUM value URL_FILTERING in type field is transformed to UNKNOWN_ENUM_VALUE_ProfileType_5 in CAI asset. The reason could be that URL_FILTERING is not supported in CAI yet. Will check if the value in CAI assets will be correct later.
 parameters:
   - name: 'name'
     type: String
@@ -111,6 +144,7 @@ properties:
     properties:
       - name: 'severityOverrides'
         type: Array
+        is_set: true
         description: The configuration for overriding threats actions by severity match.
         item_type:
           type: NestedObject
@@ -136,6 +170,7 @@ properties:
                 - 'MEDIUM'
       - name: 'threatOverrides'
         type: Array
+        is_set: true
         description: |
           The configuration for overriding threats actions by threat id match.
           If a threat is matched both by configuration provided in severity overrides
@@ -166,6 +201,113 @@ properties:
                 - 'UNKNOWN'
                 - 'VULNERABILITY'
                 - 'SPYWARE'
+      - name: 'antivirusOverrides'
+        type: Array
+        is_set: true
+        description: |
+          Defines what action to take for antivirus threats per protocol.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'protocol'
+              type: Enum
+              description: Required protocol to match.
+              required: true
+              enum_values:
+                - 'SMTP'
+                - 'SMB'
+                - 'POP3'
+                - 'IMAP'
+                - 'HTTP2'
+                - 'HTTP'
+                - 'FTP'
+            - name: 'action'
+              type: Enum
+              description: Threat action override. For some threat types, only a subset of actions applies.
+              required: true
+              enum_values:
+                - 'ALERT'
+                - 'ALLOW'
+                - 'DEFAULT_ACTION'
+                - 'DENY'
+    conflicts:
+      - 'urlFilteringProfile'
+      - 'customMirroringProfile'
+      - 'customInterceptProfile'
+  - name: 'urlFilteringProfile'
+    min_version: 'beta'
+    type: NestedObject
+    is_missing_in_cai: true
+    description: The url filtering configuration for the security profile.
+    custom_flatten: 'templates/terraform/custom_flatten/network_security_security_profile_url_filters_flatten.go.tmpl'
+    properties:
+      - name: 'urlFilters'
+        type: Array
+        is_set: true
+        description: |
+          The configuration for action to take based on domain name match.
+          A domain name would be checked for matching filters through the list in order of highest to lowest priority,
+          and the first filter that a domain name matches with is the one whose actions gets applied.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'filteringAction'
+              type: Enum
+              description: The action to take when the filter is applied.
+              required: true
+              enum_values:
+                - 'ALLOW'
+                - 'DENY'
+            - name: 'urls'
+              type: Array
+              description: |
+                A list of domain matcher strings that a domain name gets compared with to determine if the filter is applicable.
+                A domain name must match with at least one of the strings in the list for a filter to be applicable.
+              item_type:
+                type: String
+            - name: 'priority'
+              type: Integer
+              description: |
+                The priority of the filter within the URL filtering profile.
+                Must be an integer from 0 and 2147483647, inclusive. Lower integers indicate higher priorities.
+                The priority of a filter must be unique within a URL filtering profile.
+              required: true
+    conflicts:
+      - 'threatPreventionProfile'
+      - 'customMirroringProfile'
+      - 'customInterceptProfile'
+  - name: 'customMirroringProfile'
+    type: NestedObject
+    description: |
+      The configuration for defining the Mirroring Endpoint Group used to
+      mirror traffic to third-party collectors.
+    properties:
+      - name: mirroringEndpointGroup
+        type: String
+        description: |
+          The Mirroring Endpoint Group to which matching traffic should be mirrored.
+          Format: projects/{project_id}/locations/global/mirroringEndpointGroups/{endpoint_group_id}
+        required: true
+    conflicts:
+      - 'threatPreventionProfile'
+      - 'urlFilteringProfile'
+      - 'customInterceptProfile'
+  - name: 'customInterceptProfile'
+    type: NestedObject
+    description: |
+      The configuration for defining the Intercept Endpoint Group used to
+      intercept traffic to third-party firewall appliances.
+    properties:
+      - name: interceptEndpointGroup
+        type: String
+        description: |
+          The Intercept Endpoint Group to which matching traffic should be intercepted.
+          Format: projects/{project_id}/locations/global/interceptEndpointGroups/{endpoint_group_id}
+        required: true
+    conflicts:
+      - 'threatPreventionProfile'
+      - 'urlFilteringProfile'
+      - 'customMirroringProfile'
   - name: 'type'
     type: Enum
     description: The type of security profile.
@@ -173,3 +315,6 @@ properties:
     immutable: true
     enum_values:
       - 'THREAT_PREVENTION'
+      - 'URL_FILTERING'
+      - 'CUSTOM_MIRRORING'
+      - 'CUSTOM_INTERCEPT'

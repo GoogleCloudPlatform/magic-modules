@@ -155,6 +155,7 @@ properties:
         description: |
           A list of messages that carry the error details.
         output: true
+        custom_flatten: 'templates/terraform/custom_flatten/dms_migration_job_error_details.tmpl'
         item_type:
           type: KeyValuePairs
   - name: 'type'

@@ -1,8 +1,10 @@
 package tpgresource
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"log"
 	"net/url"
 	"regexp"
 	"strings"
@@ -71,6 +73,40 @@ func CompareSelfLinkOrResourceName(_, old, new string, _ *schema.ResourceData) b
 	return CompareSelfLinkRelativePaths("", old, new, nil)
 }
 
+// canonicalizeSelfLink normalizes Compute API self-links by removing the version prefix (v1/beta),
+// ensuring a leading "/", collapsing duplicate slashes, trimming any trailing "/",
+// and lowercasing the result so logically identical links compare equal.
+func CompareSelfLinkCanonicalPaths(_, old, new string, _ *schema.ResourceData) bool {
+	return canonicalizeSelfLink(old) == canonicalizeSelfLink(new)
+}
+
+var (
+	rePrefix           = regexp.MustCompile(`(?i)^https?://[a-z0-9.-]*/compute/(v1|beta)/`)
+	reDuplicateSlashes = regexp.MustCompile(`/+`)
+)
+
+func canonicalizeSelfLink(link string) string {
+	if link == "" {
+		return ""
+	}
+
+	// Remove "https://…/compute/v1/" or "https://…/compute/beta/"
+	path := rePrefix.ReplaceAllString(link, "/")
+
+	// Ensure leading "/"
+	if !strings.HasPrefix(path, "/") {
+		path = "/" + path
+	}
+
+	// Collapse "//"
+	path = reDuplicateSlashes.ReplaceAllString(path, "/")
+
+	// Remove trailing "/"
+	path = strings.TrimSuffix(path, "/")
+
+	return strings.ToLower(path)
+}
+
 // Hash the relative path of a self link.
 func SelfLinkRelativePathHash(selfLink interface{}) int {
 	path, _ := GetRelativePath(selfLink.(string))
@@ -92,6 +128,34 @@ func SelfLinkNameHash(selfLink interface{}) int {
 	return Hashcode(name)
 }
 
+// Hash based on relative url for a nested object containing a URL field.
+func NestedUrlSetHashFunc(v interface{}) int {
+	if v == nil {
+		return 0
+	}
+
+	var buf bytes.Buffer
+	m := v.(map[string]interface{})
+	log.Printf("[DEBUG] hashing %v", m)
+
+	if v, ok := m["url"]; ok {
+		if v == nil {
+			v = ""
+		} else {
+			if relUrl, err := GetRelativePath(v.(string)); err != nil {
+				log.Printf("[WARN] Error on retrieving relative path of network url: %s", err)
+			} else {
+				v = relUrl
+			}
+		}
+
+		buf.WriteString(fmt.Sprintf("%v-", v))
+	}
+
+	log.Printf("[DEBUG] computed hash value of %v from %v", Hashcode(buf.String()), buf.String())
+	return Hashcode(buf.String())
+}
+
 func ConvertSelfLinkToV1(link string) string {
 	reg := regexp.MustCompile("/compute/[a-zA-Z0-9]*/projects/")
 	return reg.ReplaceAllString(link, "/compute/v1/projects/")
@@ -100,14 +164,6 @@ func ConvertSelfLinkToV1(link string) string {
 func GetResourceNameFromSelfLink(link string) string {
 	parts := strings.Split(link, "/")
 	return parts[len(parts)-1]
-}
-
-func NameFromSelfLinkStateFunc(v interface{}) string {
-	return GetResourceNameFromSelfLink(v.(string))
-}
-
-func StoreResourceName(resourceLink interface{}) string {
-	return GetResourceNameFromSelfLink(resourceLink.(string))
 }
 
 type LocationType int
@@ -189,7 +245,7 @@ func GetRegionFromRegionalSelfLink(selfLink string) string {
 }
 
 func GetProjectFromRegionalSelfLink(selfLink string) string {
-	re := regexp.MustCompile("projects/([a-zA-Z0-9-:]*)/(?:locations|regions)/[a-zA-Z0-9-:]*")
+	re := regexp.MustCompile("projects/([a-zA-Z0-9-:.]*)/(?:locations|regions)/[a-zA-Z0-9-:]*")
 	switch {
 	case re.MatchString(selfLink):
 		if res := re.FindStringSubmatch(selfLink); len(res) == 2 && res[1] != "" {

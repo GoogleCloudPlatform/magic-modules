@@ -35,9 +35,9 @@ update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/volumes/{{name}}'
 timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
+  insert_minutes: 50
+  update_minutes: 30
+  delete_minutes: 30
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
@@ -48,6 +48,8 @@ async:
     resource_inside_response: false
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/netapp_volume_force_delete.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/netapp_volume_update.go.tmpl'
+  constants: 'templates/terraform/constants/netapp_volume.go.tmpl'
 examples:
   - name: 'netapp_volume_basic'
     primary_resource_id: 'test_volume'
@@ -56,7 +58,7 @@ examples:
       pool_name: 'test-pool'
       network_name: 'test-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
     ignore_read_extra:
       - 'deletion_policy'
 virtual_fields:
@@ -103,7 +105,6 @@ properties:
     type: String
     description: |
       Share name (SMB) or export path (NFS) of the volume. Needs to be unique per location.
-    required: true
     immutable: true
   - name: 'psaRange'
     type: String
@@ -151,6 +152,8 @@ properties:
               type: String
               description: |-
                  If enabled, the root user (UID = 0) of the specified clients doesn't get mapped to nobody (UID = 65534). This is also known as no_root_squash.
+                 It's overwritten by the squash_mode parameter. Use either squash_mode or has_root_access.
+              default_from_api: true
             - name: 'accessType'
               type: Enum
               description: |
@@ -191,6 +194,21 @@ properties:
               type: Boolean
               description: |
                 If enabled (true) the rule defines read and write access for clients matching the 'allowedClients' specification. It enables nfs clients to mount using 'privacy' kerberos security mode. The 'kerberos5pReadOnly' value is ignored if this is enabled.
+            - name: 'squashMode'
+              type: Enum
+              description: |-
+                SquashMode defines how remote user privileges are restricted when accessing an NFS export. It controls how the user identities (like root) are mapped to anonymous users to limit access and enforce security.
+                It overwrites the has_root_access parameter. Use either squash_mode or has_root_access. For ALL_SQUASH, access_type needs to be set to READ_WRITE.
+              enum_values:
+                - 'SQUASH_MODE_UNSPECIFIED'
+                - 'NO_ROOT_SQUASH'
+                - 'ROOT_SQUASH'
+                - 'ALL_SQUASH'
+              diff_suppress_func: 'suppressSquashModeDiff'
+            - name: 'anonUid'
+              type: Integer
+              description: |-
+                An integer representing the anonymous user ID. Range is 0 to 4294967295. Required when `squash_mode` is `ALL_SQUASH`.
   - name: 'protocols'
     type: Array
     description: |
@@ -205,6 +223,7 @@ properties:
         - 'NFSV3'
         - 'NFSV4'
         - 'SMB'
+        - 'ISCSI'
   - name: 'smbSettings'
     type: Array
     description: |
@@ -293,7 +312,7 @@ properties:
       - name: 'sourceBackup'
         type: String
         description: |-
-          Full name of the snapshot to use for creating this volume.
+          Full name of the backup to use for creating this volume.
           `source_snapshot` and `source_backup` cannot be used simultaneously.
           Format: `projects/{{project}}/locations/{{location}}/backupVaults/{{backupVaultId}}/backups/{{backup}}`.
         immutable: true
@@ -353,6 +372,11 @@ properties:
           type: String
           description: |
               Protocol to mount with.
+          output: true
+        - name: 'ipAddress'
+          type: String
+          description: |
+              IP Address.
           output: true
   - name: 'snapshotPolicy'
     type: NestedObject
@@ -490,6 +514,7 @@ properties:
     type: Boolean
     description: |
       Optional. Flag indicating if the volume will be a large capacity volume or a regular volume.
+    immutable: true
   - name: 'multipleEndpoints'
     type: Boolean
     description: |
@@ -507,11 +532,12 @@ properties:
     update_mask_fields:
       - 'tiering_policy.cooling_threshold_days'
       - 'tiering_policy.tier_action'
+      - 'tiering_policy.hot_tier_bypass_mode_enabled'
     properties:
       - name: 'coolingThresholdDays'
         type: Integer
         description: |
-          Optional. Time in days to mark the volume's data block as cold and make it eligible for tiering, can be range from 7-183.
+          Optional. Time in days to mark the volume's data block as cold and make it eligible for tiering, can be range from 2-183.
           Default is 31.
       - name: 'tierAction'
         type: Enum
@@ -521,3 +547,195 @@ properties:
         enum_values:
           - 'ENABLED'
           - 'PAUSED'
+      - name: 'hotTierBypassModeEnabled'
+        type: Boolean
+        description: |
+          Optional. Flag indicating that the hot tier bypass mode is enabled. Default is false.
+          Only applicable to Flex service level.
+  - name: 'hybridReplicationParameters'
+    type: NestedObject
+    description: |-
+      The Hybrid Replication parameters for the volume.
+    properties:
+      - name: 'replication'
+        type: String
+        description: |
+          Required. Desired name for the replication of this volume.
+      - name: 'peerVolumeName'
+        type: String
+        description: |
+          Required. Name of the user's local source volume to be peered with the destination volume.
+      - name: 'peerClusterName'
+        type: String
+        description: |
+          Required. Name of the user's local source cluster to be peered with the destination cluster.
+      - name: 'peerSvmName'
+        type: String
+        description: |
+          Required. Name of the user's local source vserver svm to be peered with the destination vserver svm.
+      - name: 'peerIpAddresses'
+        type: Array
+        description: |
+          Required. List of node ip addresses to be peered with.
+        item_type:
+          type: String
+      - name: 'clusterLocation'
+        type: String
+        description: |
+          Optional. Name of source cluster location associated with the Hybrid replication. This is a free-form field for the display purpose only.
+      - name: 'description'
+        type: String
+        description: |
+          Optional. Description of the replication.
+      - name: 'labels'
+        type: KeyValuePairs
+        description: |
+          Optional. Labels to be added to the replication as the key value pairs.
+          An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+      - name: 'replicationSchedule'
+        type: Enum
+        description: |
+          Optional. Replication Schedule for the replication created.
+        enum_values:
+          - 'EVERY_10_MINUTES'
+          - 'HOURLY'
+          - 'DAILY'
+      - name: 'hybridReplicationType'
+        type: Enum
+        description: |
+          Optional. Type of the volume's hybrid replication.
+        enum_values:
+          - 'MIGRATION'
+          - 'CONTINUOUS_REPLICATION'
+          - 'ONPREM_REPLICATION'
+          - 'REVERSE_ONPREM_REPLICATION'
+      - name: 'largeVolumeConstituentCount'
+        type: Integer
+        description: |
+          Optional. Constituent volume count for large volume.
+  - name: 'throughputMibps'
+    type: Double
+    description: |
+      Optional. Custom Performance Total Throughput of the pool (in MiB/s).
+    default_from_api: true
+  - name: 'hotTierSizeUsedGib'
+    type: String
+    description: |
+      Total hot tier data rounded down to the nearest GiB used by the volume. This field is only used for flex Service Level
+    output: true
+  - name: 'cacheParameters'
+    type: NestedObject
+    description: |-
+      Cache parameters for the volume.
+    properties:
+      - name: 'peerVolumeName'
+        type: String
+        description: |
+          Required. Name of the origin volume for the cache volume.
+      - name: 'peerClusterName'
+        type: String
+        description: |
+          Required. Name of the origin volume's ONTAP cluster.
+      - name: 'peerSvmName'
+        type: String
+        description: |
+          Required. Name of the origin volume's SVM.
+      - name: 'peerIpAddresses'
+        type: Array
+        description: |
+          Required. List of IC LIF addresses of the origin volume's ONTAP cluster.
+        item_type:
+          type: String
+      - name: 'enableGlobalFileLock'
+        type: Boolean
+        description: |
+          Optional. Field indicating whether cache volume as global file lock enabled.
+      - name: 'peeringCommandExpiryTime'
+        type: String
+        description: |
+          Optional. Expiration time for the peering command to be executed on user's ONTAP. A timestamp in RFC3339 UTC "Zulu" format. Examples: "2023-06-22T09:13:01.617Z".
+        default_from_api: true
+      - name: 'cacheState'
+        type: String
+        description: |
+          State of the cache volume indicating the peering status.
+        output: true
+      - name: 'command'
+        type: String
+        description: |
+          Copy-paste-able commands to be used on user's ONTAP to accept peering requests.
+        output: true
+      - name: 'passphrase'
+        type: String
+        description: |
+          Temporary passphrase generated to accept cluster peering command.
+        output: true
+      - name: 'stateDetails'
+        type: String
+        description: |
+          Detailed description of the current cache state.
+        output: true
+      - name: 'cacheConfig'
+        type: NestedObject
+        description: |-
+          Optional. Configuration of the cache volume.
+        properties:
+          - name: 'cifsChangeNotifyEnabled'
+            type: Boolean
+            description: |
+              Optional. Flag indicating whether a CIFS change notification is enabled for the FlexCache volume.
+  - name: 'blockDevices'
+    type: Array
+    description: |
+      Block device represents the device(s) which are stored in the block volume.
+      Currently, only one block device is permitted per Volume.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'name'
+          type: String
+          description: |
+            User-defined name for the block device, unique within the Volume. In case
+            no user input is provided, name will be autogenerated in the backend.
+            The name must meet the following requirements:
+            *   Be between 1 and 255 characters long.
+            *   Contain only uppercase or lowercase letters (A-Z, a-z), numbers (0-9),
+                and the following special characters: "-", "_", "}", "{", ".".
+            *   Spaces are not allowed.
+          default_from_api: true
+        - name: 'hostGroups'
+          type: Array
+          description: |
+            A list of host groups that identify hosts that can mount the block volume.
+            Format:
+            `projects/{project_id}/locations/{location}/hostGroups/{host_group_id}`
+            This field can be updated after the block device is created.
+          default_from_api: true
+          diff_suppress_func: 'ProjectIDDiffSuppress'
+          item_type:
+            type: String
+        - name: 'identifier'
+          type: String
+          description: |
+            Device identifier of the Block volume. This represents lun_serial_number
+            for ISCSI volumes
+          output: true
+        - name: 'sizeGib'
+          type: Integer
+          description: |
+            The size of the block device in GiB.
+            Any value provided in this field during Volume creation is IGNORED.
+            The block device's size is system-managed and will be set to match
+            the parent Volume's `capacity_gib`.
+          output: true
+        - name: 'osType'
+          type: Enum
+          description: |
+            The OS type of the volume.
+            This field can't be changed after the block device is created.
+          immutable: true
+          required: true
+          enum_values:
+            - 'LINUX'
+            - 'WINDOWS'
+            - 'ESXI'

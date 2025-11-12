@@ -1,0 +1,199 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'ReasoningEngine'
+description: |-
+  ReasoningEngine provides a customizable runtime for models to determine which actions to take and in which order.
+references:
+  guides:
+    'Develop and deploy agents on Vertex AI Agent Engine': 'https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/quickstart'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.reasoningEngines/'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/reasoningEngines'
+self_link: 'projects/{{project}}/locations/{{region}}/reasoningEngines/{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/reasoningEngines'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+examples:
+  - name: 'vertex_ai_reasoning_engine_basic'
+    primary_resource_id: 'reasoning_engine'
+    exclude_docs: true
+    vars:
+      name: 'reasoning-engine'
+  - name: 'vertex_ai_reasoning_engine_full'
+    primary_resource_id: 'reasoning_engine'
+    vars:
+      name: 'reasoning-engine'
+      bucket_name: 'reasoning-engine'
+      kms_key_name: 'example-key'
+      secret_name: 'secret'
+      service_account_id: 'sa'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+    test_vars_overrides:
+      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name'
+    external_providers: ["time"]
+parameters:
+  - name: 'region'
+    type: String
+    description: The region of the reasoning engine. eg us-central1
+    url_param_only: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |-
+      The generated name of the ReasoningEngine, in the format
+      'projects/{project}/locations/{location}/reasoningEngines/{reasoningEngine}'
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'displayName'
+    type: String
+    description: The display name of the ReasoningEngine.
+    required: true
+  - name: 'description'
+    type: String
+    description: The description of the ReasoningEngine.
+  - name: 'createTime'
+    type: String
+    description: |-
+      The timestamp of when the Index was created in RFC3339 UTC "Zulu" format,
+      with nanosecond resolution and up to nine fractional digits.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |-
+      The timestamp of when the Index was last updated in RFC3339 UTC "Zulu" format,
+      with nanosecond resolution and up to nine fractional digits.
+    output: true
+  - name: 'encryptionSpec'
+    type: NestedObject
+    description: |-
+      Optional. Customer-managed encryption key spec for a ReasoningEngine.
+      If set, this ReasoningEngine and all sub-resources of this ReasoningEngine will be secured by this key.
+    immutable: true
+    properties:
+      - name: 'kmsKeyName'
+        type: String
+        description: |-
+          Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
+          Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key.
+          The key needs to be in the same region as where the compute resource is created.
+        required: true
+  - name: 'spec'
+    type: NestedObject
+    description: |-
+      Optional. Configurations of the ReasoningEngine.
+    properties:
+      - name: 'agentFramework'
+        type: String
+        description: Optional. The OSS agent framework used to develop the agent.
+      - name: 'classMethods'
+        type: String
+        description: Optional. Declarations for object class methods in OpenAPI specification format.
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+        validation:
+          function: 'validation.StringIsJSON'
+      - name: 'deploymentSpec'
+        type: NestedObject
+        description: |-
+          Optional. The specification of a Reasoning Engine deployment.
+        properties:
+          - name: 'env'
+            type: Array
+            description: |-
+              Optional. Environment variables to be set with the Reasoning Engine deployment.
+            is_set: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'name'
+                  type: String
+                  description: |-
+                    The name of the environment variable. Must be a valid C identifier.
+                  required: true
+                - name: 'value'
+                  type: String
+                  description: |-
+                    Variables that reference a $(VAR_NAME) are expanded using the previous defined environment variables in the container and any service environment variables. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not.
+                  required: true
+          - name: 'secretEnv'
+            type: Array
+            description: |-
+              Optional. Environment variables where the value is a secret in Cloud Secret Manager. To use this feature, add 'Secret Manager Secret Accessor' role (roles/secretmanager.secretAccessor) to AI Platform Reasoning Engine service Agent.
+            is_set: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'name'
+                  type: String
+                  description: |-
+                    The name of the environment variable. Must be a valid C identifier.
+                  required: true
+                - name: 'secretRef'
+                  type: NestedObject
+                  description: |-
+                    Reference to a secret stored in the Cloud Secret Manager that will provide the value for this environment variable.
+                  required: true
+                  properties:
+                    - name: 'secret'
+                      type: String
+                      description: |-
+                        The name of the secret in Cloud Secret Manager. Format: {secret_name}.
+                      required: true
+                    - name: 'version'
+                      type: String
+                      description: |-
+                        The Cloud Secret Manager secret version. Can be 'latest' for the latest version, an integer for a specific version, or a version alias.
+      - name: 'packageSpec'
+        type: NestedObject
+        description: |-
+          Optional. User provided package spec of the ReasoningEngine.
+          Ignored when users directly specify a deployment image through
+          deploymentSpec.first_party_image_override, but keeping the
+          field_behavior to avoid introducing breaking changes.
+        properties:
+          - name: 'dependencyFilesGcsUri'
+            type: String
+            description: Optional. The Cloud Storage URI of the dependency files in tar.gz format.
+          - name: 'pickleObjectGcsUri'
+            type: String
+            description: Optional. The Cloud Storage URI of the pickled python object.
+          - name: 'pythonVersion'
+            type: String
+            description: Optional. The Python version.
+          - name: 'requirementsGcsUri'
+            type: String
+            description: Optional. The Cloud Storage URI of the requirements.txt file
+      - name: 'serviceAccount'
+        type: String
+        description: |-
+          Optional. The service account that the Reasoning Engine artifact runs as.
+          It should have "roles/storage.objectViewer" for reading the user project's
+          Cloud Storage and "roles/aiplatform.user" for using Vertex extensions.
+          If not specified, the Vertex AI Reasoning Engine service Agent in the project will be used.

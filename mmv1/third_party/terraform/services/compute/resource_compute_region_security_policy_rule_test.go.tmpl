@@ -1,11 +1,9 @@
 package compute_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
   "fmt"
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
@@ -24,19 +22,27 @@ func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleBasicUpdate(
 			{
 				Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRulePreUpdate(context),
 			},
-      {
-        ResourceName:      "google_compute_region_security_policy_rule.policy_rule",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-      {
-        Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRulePostUpdate(context),
-      },
-      {
-        ResourceName:      "google_compute_region_security_policy_rule.policy_rule",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
+			{
+				ResourceName:      "google_compute_region_security_policy_rule.policy_rule",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRulePostUpdate(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy_rule.policy_rule",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRulePreUpdate(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy_rule.policy_rule",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -232,6 +238,7 @@ resource "google_compute_region_security_policy_rule" "policy_rule" {
 `, context)
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchUpdate(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
@@ -456,6 +463,7 @@ resource "google_compute_region_security_policy_rule" "policy_rule_network_match
 }
 `, context)
 }
+{{- end }}
 
 func TestAccComputeRegionSecurityPolicyRule_withPreconfiguredWafConfig(t *testing.T) {
 	t.Parallel()
@@ -1114,4 +1122,3 @@ resource "google_compute_region_security_policy_rule" "policy_rule" {
 }
 `, spName)
 }
-{{- end }}

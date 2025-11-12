@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	sweeper.AddTestSweepers("KMSAutokeyConfig", testSweepKMSAutokeyConfig)
+	sweeper.AddTestSweepersLegacy("KMSAutokeyConfig", testSweepKMSAutokeyConfig)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region

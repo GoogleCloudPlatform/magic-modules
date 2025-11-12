@@ -1,0 +1,100 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'AnywhereCache'
+kind: 'storage#anywhereCache'
+description: |
+  The Google Cloud Storage (GCS) Anywhere Cache feature allows users to
+  create SSD backed zonal read cache for their buckets. These zonal
+  caches are co-located with the customers compute engines to provide
+  cost efficiency.
+base_url: 'b/{{bucket}}/anywhereCaches'
+self_link: 'b/{{bucket}}/anywhereCaches/{{anywhere_cache_id}}'
+create_url: 'b/{{bucket}}/anywhereCaches/'
+delete_url: 'b/{{bucket}}/anywhereCaches/{{anywhere_cache_id}}/disable'
+update_verb: 'PATCH'
+delete_verb: 'POST'
+import_format: ['b/{{bucket}}/anywhereCaches/{{anywhere_cache_id}}']
+id_format: '{{bucket}}/{{anywhere_cache_id}}'
+examples:
+  - name: 'storage_anywhere_cache_basic'
+    primary_resource_id: 'cache'
+    vars:
+      bucket_name: 'bucket-name'
+    external_providers: ["time"]
+identity:
+  - bucket
+  - anywhereCacheId
+custom_code:
+  custom_create: templates/terraform/custom_create/storage_anywhere_cache.go.tmpl
+  custom_update: templates/terraform/custom_update/storage_anywhere_cache.go.tmpl
+autogen_async: false
+timeouts:
+  insert_minutes: 240
+  update_minutes: 240
+  delete_minutes: 20
+async:
+  type: 'OpAsync'
+  actions:
+    - create
+    - update
+  operation:
+    full_url: 'selfLink'
+  result:
+    resource_inside_response: true
+parameters:
+  - name: 'bucket'
+    type: ResourceRef
+    required: true
+    immutable: true
+    url_param_only: true
+    resource: 'Bucket'
+    imports: 'name'
+properties:
+  - name: 'zone'
+    type: String
+    required: true
+    immutable: true
+    description: The zone in which the cache instance needs to be created. For example, `us-central1-a.`
+  - name: 'admissionPolicy'
+    type: Enum
+    enum_values:
+      - 'admit-on-first-miss'
+      - 'admit-on-second-miss'
+    default_value: 'admit-on-first-miss'
+    description: The cache admission policy dictates whether a block should be inserted upon a cache miss.
+  - name: 'ttl'
+    type: String
+    default_value: '86400s'
+    description: The TTL of all cache entries in whole seconds. e.g., "7200s". It defaults to `86400s`
+  - name: 'anywhereCacheId'
+    type: String
+    output: true
+    description: The ID of the Anywhere cache instance.
+  - name: 'createTime'
+    type: Time
+    output: true
+    description: The creation time of the cache instance in RFC 3339 format.
+  - name: 'updateTime'
+    type: Time
+    output: true
+    description: The modification time of the cache instance metadata in RFC 3339 format.
+  - name: 'pendingUpdate'
+    type: Boolean
+    output: true
+    description: True if the cache instance has an active Update long-running operation.
+  - name: 'state'
+    type: String
+    output: true
+    description: The current state of the cache instance.

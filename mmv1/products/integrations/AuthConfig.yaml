@@ -13,6 +13,8 @@
 
 ---
 name: 'AuthConfig'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/authConfigs/{authConfig}'
 description: |
   The AuthConfig resource use to hold channels and connection config data.
 references:
@@ -35,9 +37,13 @@ timeouts:
   delete_minutes: 20
 custom_code:
   pre_create: 'templates/terraform/pre_create/integrations_auth_config.go.tmpl'
-  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   pre_update: 'templates/terraform/pre_update/integrations_auth_config.go.tmpl'
   custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
+sweeper:
+  url_substitutions:
+    - region: "us-east4"
+    - region: "southamerica-west1"
+    - region: "asia-east2"
 examples:
   - name: 'integrations_auth_config_basic'
     primary_resource_id: 'basic_example'
@@ -54,43 +60,59 @@ examples:
     primary_resource_id: 'username_and_password_example'
     vars:
       auth_config_name: 'test-authconfig-username-and-password'
+    test_vars_overrides:
+      client: 'acctest.BootstrapIntegrationsClient(t, "us-east4")'
     exclude_docs: true
   - name: 'integrations_auth_config_oauth2_authorization_code'
     primary_resource_id: 'oauth2_authotization_code_example'
     vars:
       auth_config_name: 'test-authconfig-oauth2-authorization-code'
+    test_vars_overrides:
+      client: 'acctest.BootstrapIntegrationsClient(t, "us-east4")'
     exclude_docs: true
   - name: 'integrations_auth_config_oauth2_client_credentials'
     primary_resource_id: 'oauth2_client_credentials_example'
     vars:
       auth_config_name: 'test-authconfig-oauth2-client-credentials'
+    test_vars_overrides:
+      client: 'acctest.BootstrapIntegrationsClient(t, "us-east4")'
     exclude_docs: true
   - name: 'integrations_auth_config_jwt'
     primary_resource_id: 'jwt_example'
     vars:
       auth_config_name: 'test-authconfig-jwt'
+    test_vars_overrides:
+      client: 'acctest.BootstrapIntegrationsClient(t, "us-east4")'
     exclude_docs: true
   - name: 'integrations_auth_config_auth_token'
     primary_resource_id: 'auth_token_example'
     vars:
       auth_config_name: 'test-authconfig-auth-token'
+    test_vars_overrides:
+      client: 'acctest.BootstrapIntegrationsClient(t, "us-east4")'
     exclude_docs: true
   - name: 'integrations_auth_config_service_account'
     primary_resource_id: 'service_account_example'
     vars:
       auth_config_name: 'test-authconfig-service-account'
       service_account_id: 'sa'
+    test_vars_overrides:
+      client: 'acctest.BootstrapIntegrationsClient(t, "us-east4")'
     exclude_docs: true
   - name: 'integrations_auth_config_oidc_token'
     primary_resource_id: 'oidc_token_example'
     vars:
       auth_config_name: 'test-authconfig-oidc-token'
       service_account_id: 'sa'
+    test_vars_overrides:
+      client: 'acctest.BootstrapIntegrationsClient(t, "us-east4")'
     exclude_docs: true
   - name: 'integrations_auth_config_client_certificate_only'
     primary_resource_id: 'client_certificate_example'
     vars:
       auth_config_name: 'test-authconfig-client-certificate'
+    test_vars_overrides:
+      client: 'acctest.BootstrapIntegrationsClient(t, "us-east4")'
     exclude_docs: true
 parameters:
   - name: 'location'

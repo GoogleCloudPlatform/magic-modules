@@ -45,6 +45,24 @@ examples:
     # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
     # resource_compute_public_advertised_prefix_test.go
     exclude_test: true
+  - name: 'public_advertised_prefixes_pdp_scope'
+    primary_resource_id: 'prefixes'
+    vars:
+      prefixes_name: 'my-pap'
+    test_env_vars:
+      desc: 'PAP_DESCRIPTION'
+    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
+    # resource_compute_public_advertised_prefix_test.go
+    exclude_test: true
+  - name: 'public_advertised_prefixes_ipv6_access_type'
+    primary_resource_id: 'prefixes'
+    vars:
+      prefixes_name: 'my-pap'
+    test_env_vars:
+      desc: 'PAP_DESCRIPTION'
+    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
+    # resource_compute_public_advertised_prefix_test.go
+    exclude_test: true
 parameters:
 properties:
   - name: 'description'
@@ -63,13 +81,38 @@ properties:
   - name: 'dnsVerificationIp'
     type: String
     description: The IPv4 address to be used for reverse DNS verification.
-    required: true
   - name: 'ipCidrRange'
     type: String
     description:
-      The IPv4 address range, in CIDR format, represented by this public
-      advertised prefix.
+      The address range, in CIDR format, represented by this public advertised
+      prefix.
     required: true
+  - name: 'pdpScope'
+    type: Enum
+    description: |
+      Specifies how child public delegated prefix will be scoped. pdpScope
+      must be one of: GLOBAL, REGIONAL
+      * REGIONAL: The public delegated prefix is regional only. The
+      provisioning will take a few minutes.
+      * GLOBAL: The public delegated prefix is global only. The provisioning
+      will take ~4 weeks.
+    enum_values:
+      - 'GLOBAL'
+      - 'REGIONAL'
+  - name: 'ipv6AccessType'
+    type: Enum
+    description: |
+      The internet access type for IPv6 Public Advertised Prefixes. It can be
+      set to one of following:
+        * EXTERNAL: Default access type. The prefix will be announced to the
+        internet. All children PDPs will have access type as EXTERNAL.
+        * INTERNAL: The prefix won’t be announced to the internet. Prefix will
+        be used privately within Google Cloud. All children PDPs will have
+        access type as INTERNAL.
+    default_from_api: true
+    enum_values:
+      - 'EXTERNAL'
+      - 'INTERNAL'
   - name: 'sharedSecret'
     type: String
     description: |

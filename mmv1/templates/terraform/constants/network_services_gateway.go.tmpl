@@ -12,11 +12,7 @@
 */ -}}
 
 import (
-{{ if eq $.TargetVersionName `ga` }}
-	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
-{{- else }}
-	tpgcompute "github.com/hashicorp/terraform-provider-google-beta/google-beta/services/compute"
-{{- end }}
+	tpgcompute "{{ $.ImportPath }}/services/compute"
 )
 
 // Checks if there is another gateway under the same location.

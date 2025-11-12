@@ -1,0 +1,147 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'RegionalParameterVersion'
+api_resource_type_kind: ParameterVersion
+description: |
+  A Regional Parameter Version resource that stores the actual value of the regional parameter.
+references:
+  guides:
+  api: 'https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.parameters.versions'
+docs:
+base_url: '{{parameter}}/versions'
+self_link: '{{parameter}}/versions/{{parameter_version_id}}'
+create_url: '{{parameter}}/versions?parameter_version_id={{parameter_version_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{%project}}/locations/{{%location}}/parameters/{{%parameter_id}}/versions/{{%parameter_version_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+examples:
+  - name: 'regional_parameter_version_basic'
+    primary_resource_id: 'regional-parameter-version-basic'
+    vars:
+      parameter_id: 'regional_parameter'
+      parameter_version_id: 'regional_parameter_version'
+  - name: 'regional_parameter_version_with_json_format'
+    primary_resource_id: 'regional-parameter-version-with-json-format'
+    vars:
+      parameter_id: 'regional_parameter'
+      parameter_version_id: 'regional_parameter_version'
+  - name: 'regional_parameter_version_with_yaml_format'
+    primary_resource_id: 'regional-parameter-version-with-yaml-format'
+    vars:
+      parameter_id: 'regional_parameter'
+      parameter_version_id: 'regional_parameter_version'
+  - name: 'regional_parameter_version_with_kms_key'
+    primary_resource_id: 'regional-parameter-version-with-kms-key'
+    vars:
+      parameter_id: 'regional_parameter'
+      parameter_version_id: 'regional_parameter_version'
+      kms_key: 'kms-key'
+    test_vars_overrides:
+      'kms_key': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  - name: 'regional_parameter_version_with_json_format_with_file'
+    primary_resource_id: 'regional-parameter-version-with-json-format-with-file'
+    vars:
+      parameter_id: 'regional_parameter'
+      parameter_version_id: 'regional_parameter_version'
+      data: regional-parameter-json-data.json
+    test_vars_overrides:
+      'data': '"./test-fixtures/regional_parameter_data_json_format.json"'
+  - name: 'regional_parameter_version_with_yaml_format_with_file'
+    primary_resource_id: 'regional-parameter-version-with-yaml-format-with-file'
+    vars:
+      parameter_id: 'regional_parameter'
+      parameter_version_id: 'regional_parameter_version'
+      data: regional-parameter-yaml-data.yaml
+    test_vars_overrides:
+      'data': '"./test-fixtures/regional_parameter_data_yaml_format.yaml"'
+custom_code:
+  pre_create: 'templates/terraform/pre_create/parameter_manager_regional_parameter_version.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/parameter_manager_regional_parameter_version.go.tmpl'
+parameters:
+  - name: 'parameter'
+    type: ResourceRef
+    description: |
+      Parameter Manager Regional Parameter resource.
+    url_param_only: true
+    required: true
+    immutable: true
+    resource: 'RegionalParameter'
+    imports: 'name'
+  - name: 'parameter_version_id'
+    type: String
+    description: |
+      Version ID of the Regional Parameter Version Resource. This must be unique within the Regional Parameter.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      Location of Parameter Manager Regional parameter resource.
+    url_param_only: true
+    output: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the Regional Parameter Version. Format:
+      `projects/{{project}}/locations/{{location}}/parameters/{{parameter_id}}/versions/{{parameter_version_id}}`
+    output: true
+  - name: 'createTime'
+    type: String
+    description: |
+      The time at which the Regional Parameter Version was created.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      The time at which the Regional Parameter Version was updated.
+    output: true
+  - name: 'disabled'
+    type: Boolean
+    description: |
+      The current state of Regional Parameter Version. This field is only applicable for updating Regional Parameter Version.
+  - name: 'payload'
+    type: NestedObject
+    description: |
+      The parameter payload of the RegionalParameterVersion.
+    flatten_object: true
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/parameter_version_parameter_data.go.tmpl'
+    properties:
+      - name: 'parameter_data'
+        type: String
+        description: |
+          The Regional Parameter data.
+        api_name: data
+        required: true
+        immutable: true
+        sensitive: true
+        custom_expand: 'templates/terraform/custom_expand/base64.go.tmpl'
+  - name: 'kmsKeyVersion'
+    type: String
+    output: true
+    description: |
+      The resource name of the Cloud KMS CryptoKeyVersion used to decrypt regional parameter version payload. Format
+      `projects/{{project}}/locations/{{location}}/keyRings/{{key_ring}}/cryptoKeys/{{crypto_key}}/cryptoKeyVersions/{{crypto_key_version}}`

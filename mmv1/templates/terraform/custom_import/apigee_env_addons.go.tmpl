@@ -1,0 +1,14 @@
+config := meta.(*transport_tpg.Config)
+
+// current import_formats cannot import fields with forward slashes in their value
+if err := tpgresource.ParseImportId([]string{"(?P<env_id>.+)"}, d, config); err != nil {
+	return nil, err
+}
+
+id := d.Get("env_id").(string)
+nameParts := strings.Split(id, "/")
+if len(nameParts) != 4 {
+	return nil, fmt.Errorf("env is expected to have shape organizations/{{"{{"}}org_id{{"}}"}}/environments/{{"{{"}}env{{"}}"}}, got %s instead", id)
+}
+d.SetId(id)
+return []*schema.ResourceData{d}, nil

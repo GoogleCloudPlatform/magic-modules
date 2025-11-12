@@ -37,6 +37,7 @@ update_url: '{{parent}}/accessLevels:replaceAll'
 update_verb: 'POST'
 import_format:
   - '{{parent}}/accessLevels'
+mutex: '{{parent}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20

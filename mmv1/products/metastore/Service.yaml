@@ -28,9 +28,9 @@ update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
 timeouts:
-  insert_minutes: 60
-  update_minutes: 60
-  delete_minutes: 60
+  insert_minutes: 75
+  update_minutes: 75
+  delete_minutes: 75
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
@@ -38,15 +38,14 @@ async:
   operation:
     base_url: '{{op_id}}'
     timeouts:
-      insert_minutes: 60
-      update_minutes: 60
-      delete_minutes: 60
+      insert_minutes: 75
+      update_minutes: 75
+      delete_minutes: 75
   result:
     resource_inside_response: false
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'service_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
     - '{{service_id}}'
@@ -71,6 +70,8 @@ examples:
     primary_resource_id: 'default'
     vars:
       metastore_service_name: 'example-service'
+      kms_key_name: 'example-key'
+    test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-metastore-service-key1").CryptoKey.Name'
     exclude_docs: true
     skip_vcr: true
@@ -135,22 +136,18 @@ examples:
       metastore_service_name: 'backup'
   - name: 'dataproc_metastore_service_autoscaling_max_scaling_factor'
     primary_resource_id: 'test_resource'
-    min_version: 'beta'
     vars:
       metastore_service_name: 'test-service'
   - name: 'dataproc_metastore_service_autoscaling_min_and_max_scaling_factor'
     primary_resource_id: 'test_resource'
-    min_version: 'beta'
     vars:
       metastore_service_name: 'test-service'
   - name: 'dataproc_metastore_service_autoscaling_min_scaling_factor'
     primary_resource_id: 'test_resource'
-    min_version: 'beta'
     vars:
       metastore_service_name: 'test-service'
   - name: 'dataproc_metastore_service_autoscaling_no_limit_config'
     primary_resource_id: 'test_resource'
-    min_version: 'beta'
     vars:
       metastore_service_name: 'test-service'
 parameters:
@@ -176,6 +173,16 @@ properties:
     type: String
     description: |
       The relative resource name of the metastore service.
+    output: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      Output only. The time when the metastore service was created.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Output only. The time when the metastore service was last updated.
     output: true
   - name: 'labels'
     type: KeyValueLabels
@@ -255,13 +262,17 @@ properties:
         type: NestedObject
         description: |
           Represents the autoscaling configuration of a metastore service.
-        min_version: 'beta'
         required: false
         properties:
           - name: 'autoscalingEnabled'
             type: Boolean
             description: |
               Defines whether autoscaling is enabled. The default value is false.
+          - name: 'autoscalingFactor'
+            type: Double
+            description: |
+              Output only. The scaling factor of a service with autoscaling enabled.
+            output: true
           - name: 'limitConfig'
             type: NestedObject
             description: |
@@ -510,3 +521,11 @@ properties:
         enum_values:
           - 'LEGACY'
           - 'JSON'
+  - name: 'tags'
+    type: KeyValuePairs
+    description: |
+      A map of resource manager tags.
+      Resource manager tag keys and values have the same definition as resource manager tags.
+      Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/{tag_value_id}.
+    immutable: true
+    ignore_read: true

@@ -16,11 +16,13 @@
 package cmd
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -34,6 +36,9 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler/labeler"
 
 	"github.com/spf13/cobra"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/parser"
+	"go.abhg.dev/goldmark/frontmatter"
 	"golang.org/x/exp/maps"
 
 	_ "embed"
@@ -45,9 +50,11 @@ var (
 )
 
 type Diff struct {
-	Title     string
-	Repo      string
-	ShortStat string
+	Title        string
+	Repo         string
+	ShortStat    string
+	CommitSHA    string
+	OldCommitSHA string
 }
 
 type BreakingChange struct {
@@ -60,20 +67,39 @@ type MissingTestInfo struct {
 	Tests         []string
 }
 
+type MissingDocInfo struct {
+	Name     string
+	FilePath string
+	Fields   []string
+}
+
+type MissingDocsSummary struct {
+	Resource   []MissingDocInfo
+	DataSource []MissingDocInfo
+}
+
 type Errors struct {
 	Title  string
 	Errors []string
 }
 
 type diffCommentData struct {
-	PrNumber        int
-	Diffs           []Diff
-	BreakingChanges []BreakingChange
-	MissingTests    map[string]*MissingTestInfo
-	Errors          []Errors
+	Diffs                []Diff
+	BreakingChanges      []BreakingChange
+	MissingServiceLabels []string
+	MissingTests         map[string]*MissingTestInfo
+	MissingDocs          *MissingDocsSummary
+	AddedResources       []string
+	Errors               []Errors
+}
+
+type simpleSchemaDiff struct {
+	AddedResources, ModifiedResources, RemovedResources []string
 }
 
 const allowBreakingChangesLabel = "override-breaking-change"
+const allowMissingServiceLabelsLabel = "override-missing-service-labels"
+const allowMultipleResourcesLabel = "override-multiple-resources"
 
 var gcEnvironmentVariables = [...]string{
 	"BUILD_ID",
@@ -154,7 +180,7 @@ func listGCEnvironmentVariables() string {
 func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, projectId, commitSha string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) error {
 	errors := map[string][]string{"Other": []string{}}
 
-	// TODO(ScottSuarez) - temporary fix to ensure the label is removed.
+	// TODO - temporary fix to ensure the label is removed.
 	// Once we migrate to the new trigger there is an explicit task
 	// for this and this line can be removed.
 	gh.RemoveLabel(fmt.Sprint(prNumber), "awaiting-approval")
@@ -196,32 +222,32 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	}
 
 	// Initialize repos
-	data := diffCommentData{
-		PrNumber: prNumber,
-	}
+	data := diffCommentData{}
 	for _, repo := range []*source.Repo{&tpgRepo, &tpgbRepo, &tgcRepo, &tfoicsRepo} {
 		errors[repo.Title] = []string{}
 		repo.Branch = newBranch
 		repo.Cloned = true
 		if err := ctlr.Clone(repo); err != nil {
-			fmt.Println("Failed to clone repo at new branch: ", err)
+			fmt.Printf("Failed to clone repo %q at branch %q: %s\n", repo.Name, newBranch, err)
 			errors[repo.Title] = append(errors[repo.Title], "Failed to clone repo at new branch")
 			repo.Cloned = false
 		}
 		if err := ctlr.Fetch(repo, oldBranch); err != nil {
-			fmt.Println("Failed to fetch old branch: ", err)
+			fmt.Printf("Failed to fetch branch %q for repo %q: %s\n", oldBranch, repo.Name, err)
 			errors[repo.Title] = append(errors[repo.Title], "Failed to clone repo at old branch")
 			repo.Cloned = false
 			continue
 		}
 		if repo.Name == "terraform-provider-google-beta" || repo.Name == "terraform-provider-google" {
 			if err := ctlr.Checkout(repo, oldBranch); err != nil {
+				fmt.Printf("Failed to checkout branch %q for repo %q: %s\n", oldBranch, repo.Name, err)
 				errors[repo.Title] = append(errors[repo.Title], fmt.Sprintf("Failed to checkout branch %s", oldBranch))
 				repo.Cloned = false
 				continue
 			}
 			rnr.PushDir(repo.Path)
 			if _, err := rnr.Run("make", []string{"build"}, nil); err != nil {
+				fmt.Printf("Failed to build branch %q for repo %q: %s\n", oldBranch, repo.Name, err)
 				errors[repo.Title] = append(errors[repo.Title], fmt.Sprintf("Failed to build branch %s", oldBranch))
 				repo.Cloned = false
 			}
@@ -242,10 +268,24 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			errors[repo.Title] = append(errors[repo.Title], "Failed to compute repo diff shortstats")
 		}
 		if shortStat != "" {
+			variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo.Name)
+			oldVariablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo.Name)
+			commitSHA, err := rnr.ReadFile(variablePath)
+			if err != nil {
+				errors[repo.Title] = append(errors[repo.Title], "Failed to read commit sha from file")
+				continue
+			}
+			oldCommitSHA, err := rnr.ReadFile(oldVariablePath)
+			if err != nil {
+				errors[repo.Title] = append(errors[repo.Title], "Failed to read old commit sha from file")
+				continue
+			}
 			diffs = append(diffs, Diff{
-				Title:     repo.Title,
-				Repo:      repo.Name,
-				ShortStat: shortStat,
+				Title:        repo.Title,
+				Repo:         repo.Name,
+				ShortStat:    shortStat,
+				CommitSHA:    commitSHA,
+				OldCommitSHA: oldCommitSHA,
 			})
 			repo.ChangedFiles, err = ctlr.DiffNameOnly(repo, oldBranch, newBranch)
 			if err != nil {
@@ -257,6 +297,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	data.Diffs = diffs
 
 	// The breaking changes are unique across both provider versions
+	uniqueAddedResources := map[string]struct{}{}
 	uniqueAffectedResources := map[string]struct{}{}
 	uniqueBreakingChanges := map[string]BreakingChange{}
 	diffProcessorPath := filepath.Join(mmLocalPath, "tools", "diff-processor")
@@ -301,14 +342,30 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 				errors[repo.Title] = append(errors[repo.Title], "The missing test detector failed to run.")
 			}
 			data.MissingTests = missingTests
+
+			missingDocs, err := detectMissingDocs(diffProcessorPath, repo.Path, rnr)
+			if err != nil {
+				fmt.Println("Error running missing doc detector: ", err)
+				errors[repo.Title] = append(errors[repo.Title], "The missing doc detector failed to run.")
+			}
+			data.MissingDocs = missingDocs
+
+			errStrs := checkDocumentFrontmatter(repo)
+			if len(errStrs) > 0 {
+				errors[repo.Title] = append(errors[repo.Title], errStrs...)
+			}
 		}
 
-		affectedResources, err := changedSchemaResources(diffProcessorPath, rnr)
+		simpleDiff, err := computeAffectedResources(diffProcessorPath, rnr, repo)
 		if err != nil {
 			fmt.Println("computing changed resource schemas: ", err)
 			errors[repo.Title] = append(errors[repo.Title], "The diff processor crashed while computing changed resource schemas.")
 		}
-		for _, resource := range affectedResources {
+		for _, resource := range simpleDiff.AddedResources {
+			uniqueAddedResources[resource] = struct{}{}
+			uniqueAffectedResources[resource] = struct{}{}
+		}
+		for _, resource := range append(simpleDiff.ModifiedResources, simpleDiff.RemovedResources...) {
 			uniqueAffectedResources[resource] = struct{}{}
 		}
 	}
@@ -317,6 +374,25 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		return breakingChangesSlice[i].Message < breakingChangesSlice[j].Message
 	})
 	data.BreakingChanges = breakingChangesSlice
+
+	// Check if multiple resources were added.
+	multipleResourcesState := "success"
+	if len(uniqueAddedResources) > 1 {
+		multipleResourcesState = "failure"
+		for _, label := range pullRequest.Labels {
+			if label.Name == allowMultipleResourcesLabel {
+				multipleResourcesState = "success"
+				break
+			}
+		}
+	}
+	targetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildId, buildStep, projectId)
+	if err = gh.PostBuildStatus(strconv.Itoa(prNumber), "terraform-provider-multiple-resources", multipleResourcesState, targetURL, commitSha); err != nil {
+		fmt.Printf("Error posting terraform-provider-multiple-resources build status for pr %d commit %s: %v\n", prNumber, commitSha, err)
+		errors["Other"] = append(errors["Other"], "Failed to update missing-service-labels status check with state: "+multipleResourcesState)
+	}
+	data.AddedResources = maps.Keys(uniqueAddedResources)
+	slices.Sort(data.AddedResources)
 
 	// Compute affected resources based on changed files
 	changedFilesAffectedResources := map[string]struct{}{}
@@ -382,11 +458,43 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			}
 		}
 	}
-	targetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildId, buildStep, projectId)
 	if err = gh.PostBuildStatus(strconv.Itoa(prNumber), "terraform-provider-breaking-change-test", breakingState, targetURL, commitSha); err != nil {
-		fmt.Printf("Error posting build status for pr %d commit %s: %v\n", prNumber, commitSha, err)
+		fmt.Printf("Error posting terraform-provider-breaking-change-test build status for pr %d commit %s: %v\n", prNumber, commitSha, err)
 		errors["Other"] = append(errors["Other"], "Failed to update breaking-change status check with state: "+breakingState)
 	}
+
+	// Flag missing service labels for added resources
+	missingServiceLabels := []string{}
+	if len(regexpLabels) > 0 {
+		for resource, _ := range uniqueAddedResources {
+			found := false
+			for _, rl := range regexpLabels {
+				if rl.Regexp.MatchString(resource) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				missingServiceLabels = append(missingServiceLabels, resource)
+			}
+		}
+		missingServiceLabelsState := "success"
+		if len(missingServiceLabels) > 0 {
+			missingServiceLabelsState = "failure"
+			for _, label := range pullRequest.Labels {
+				if label.Name == allowMissingServiceLabelsLabel {
+					missingServiceLabelsState = "success"
+					break
+				}
+			}
+		}
+		if err = gh.PostBuildStatus(strconv.Itoa(prNumber), "terraform-provider-missing-service-labels", missingServiceLabelsState, targetURL, commitSha); err != nil {
+			fmt.Printf("Error posting terraform-provider-missing-service-labels build status for pr %d commit %s: %v\n", prNumber, commitSha, err)
+			errors["Other"] = append(errors["Other"], "Failed to update missing-service-labels status check with state: "+missingServiceLabelsState)
+		}
+	}
+	sort.Strings(missingServiceLabels)
+	data.MissingServiceLabels = missingServiceLabels
 
 	// Add errors to data as an ordered list
 	errorsList := []Errors{}
@@ -460,27 +568,27 @@ func computeBreakingChanges(diffProcessorPath string, rnr ExecRunner) ([]Breakin
 	return changes, rnr.PopDir()
 }
 
-func changedSchemaResources(diffProcessorPath string, rnr ExecRunner) ([]string, error) {
+func computeAffectedResources(diffProcessorPath string, rnr ExecRunner, repo source.Repo) (simpleSchemaDiff, error) {
 	if err := rnr.PushDir(diffProcessorPath); err != nil {
-		return nil, err
+		return simpleSchemaDiff{}, err
 	}
 
-	output, err := rnr.Run("bin/diff-processor", []string{"changed-schema-resources"}, nil)
+	output, err := rnr.Run("bin/diff-processor", []string{"schema-diff"}, nil)
 	if err != nil {
-		return nil, err
+		return simpleSchemaDiff{}, err
 	}
 
-	fmt.Println("Resources with changed schemas: " + output)
+	fmt.Printf("Schema diff for %q: %s\n", repo.Name, output)
 
-	var labels []string
-	if err = json.Unmarshal([]byte(output), &labels); err != nil {
-		return nil, err
+	var simpleDiff simpleSchemaDiff
+	if err = json.Unmarshal([]byte(output), &simpleDiff); err != nil {
+		return simpleSchemaDiff{}, err
 	}
 
 	if err = rnr.PopDir(); err != nil {
-		return nil, err
+		return simpleSchemaDiff{}, err
 	}
-	return labels, nil
+	return simpleDiff, nil
 }
 
 // Run the missing test detector and return the results.
@@ -501,6 +609,24 @@ func detectMissingTests(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner)
 		return nil, err
 	}
 	return missingTests, rnr.PopDir()
+}
+
+// Run the missing doc detector and return the results.
+func detectMissingDocs(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner) (*MissingDocsSummary, error) {
+	if err := rnr.PushDir(diffProcessorPath); err != nil {
+		return nil, err
+	}
+
+	output, err := rnr.Run("bin/diff-processor", []string{"detect-missing-docs", tpgbLocalPath}, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var missingDocs *MissingDocsSummary
+	if err = json.Unmarshal([]byte(output), &missingDocs); err != nil {
+		return nil, err
+	}
+	return missingDocs, rnr.PopDir()
 }
 
 func formatDiffComment(data diffCommentData) (string, error) {
@@ -552,4 +678,49 @@ func pathChanged(path string, changedFiles []string) bool {
 
 func init() {
 	rootCmd.AddCommand(generateCommentCmd)
+}
+
+// checkDocumentFrontmatter checks changed markdown files' frontmatter
+// structure in the repo and returns error strings when applicable.
+func checkDocumentFrontmatter(repo source.Repo) []string {
+	var errs []string
+	for _, f := range repo.ChangedFiles {
+		if !strings.HasPrefix(f, "website/docs/r/") && !strings.HasPrefix(f, "website/docs/d/") {
+			continue
+		}
+		if !strings.HasSuffix(f, ".markdown") {
+			continue
+		}
+		src, err := os.ReadFile(filepath.Join(repo.Path, f))
+		if err != nil {
+			errs = append(errs, "Error reading file "+f)
+			continue
+		}
+
+		md := goldmark.New(
+			goldmark.WithExtensions(&frontmatter.Extender{}),
+		)
+
+		ctx := parser.NewContext()
+		var buff bytes.Buffer
+
+		err = md.Convert(src, &buff, parser.WithContext(ctx))
+		if err != nil {
+			errs = append(errs, "Error parsing file "+f)
+			continue
+		}
+		data := frontmatter.Get(ctx)
+		if data == nil {
+			errs = append(errs, fmt.Sprintf("No frontmatter found in file %s. This is usually due to an incorrect structure in the frontmatter.", f))
+			continue
+		}
+
+		var metadata struct {
+			Subcategory string
+		}
+		if err := data.Decode(&metadata); err != nil {
+			errs = append(errs, fmt.Sprintf("Failed to decode frontmatter in file %s. This is usually due to an incorrect structure in the frontmatter.", f))
+		}
+	}
+	return errs
 }

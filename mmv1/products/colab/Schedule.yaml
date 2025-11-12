@@ -1,0 +1,213 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+name: 'Schedule'
+description: |
+  'Colab Enterprise Notebook Execution Schedules.'
+references:
+  guides:
+    'Schedule a notebook run': 'https://cloud.google.com/colab/docs/schedule-notebook-run'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.schedules'
+base_url: 'projects/{{project}}/locations/{{location}}/schedules'
+self_link: 'projects/{{project}}/locations/{{location}}/schedules/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/schedules'
+update_url: 'projects/{{project}}/locations/{{location}}/schedules/{{name}}'
+update_mask: true
+update_verb: 'PATCH'
+async:
+  type: 'OpAsync'
+  actions: ['delete']
+  operation:
+    full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
+custom_code:
+  encoder: 'templates/terraform/encoders/colab_schedule.go.tmpl'
+  post_create: 'templates/terraform/post_create/colab_schedule.go.tmpl'
+  post_update: 'templates/terraform/post_update/colab_schedule.go.tmpl'
+  constants: 'templates/terraform/constants/colab_schedule.go.tmpl'
+sweeper:
+  identifier_field: 'displayName'
+examples:
+  - name: 'colab_schedule_basic'
+    primary_resource_id: 'schedule'
+    vars:
+      display_name: 'basic-schedule'
+      bucket: 'my_bucket'
+      runtime_template_name: 'runtime-template'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+      location: 'REGION'
+      service_account: 'SERVICE_ACCT'
+  - name: 'colab_schedule_paused'
+    primary_resource_id: 'schedule'
+    vars:
+      display_name: 'paused-schedule'
+      bucket: 'my_bucket'
+      runtime_template_name: 'runtime-template'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+      location: 'REGION'
+      service_account: 'SERVICE_ACCT'
+    ignore_read_extra:
+      - desired_state
+  - name: 'colab_schedule_full'
+    min_version: "beta"
+    primary_resource_id: 'schedule'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-dataform.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+    vars:
+      display_name: 'full-schedule'
+      bucket: 'my_bucket'
+      network_name: 'colab-test-default'
+      runtime_template_name: 'runtime-template'
+      secret: 'secret'
+      dataform_repository: 'dataform-repository'
+      start_time: '2014-10-02T15:01:23Z'
+      end_time: '2014-10-10T15:01:23Z'
+      key_name: 'my-key'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+      location: 'REGION'
+      service_account: 'SERVICE_ACCT'
+    test_vars_overrides:
+      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      # Tests use a (relatively static) future date so that VCR cassettes can stay valid for a long time
+      start_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 1).Format(time.RFC3339)'
+      end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339)'
+virtual_fields:
+  - name: 'desired_state'
+    description: |
+      Desired state of the Colab Schedule. Set this field to `ACTIVE` to start/resume the schedule, and `PAUSED` to pause the schedule.
+    type: String
+    default_value: "ACTIVE"
+parameters:
+  - name: 'location'
+    type: String
+    required: true
+    url_param_only: true
+    description: 'The location for the resource: https://cloud.google.com/colab/docs/locations'
+properties:
+  - name: 'name'
+    type: String
+    description: 'The resource name of the Schedule'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    output: true
+  - name: 'displayName'
+    type: String
+    description:
+      Required. The display name of the Schedule.
+    required: true
+  - name: 'startTime'
+    type: String
+    description:
+      The timestamp after which the first run can be scheduled. Defaults to the schedule creation time. Must be in the RFC 3339 (https://www.ietf.org/rfc/rfc3339.txt) format.
+    default_from_api: true
+  - name: 'endTime'
+    type: String
+    description:
+      Timestamp after which no new runs can be scheduled. If specified, the schedule will be completed when either end_time is reached or when scheduled_run_count >= max_run_count. Must be in the RFC 3339 (https://www.ietf.org/rfc/rfc3339.txt) format.
+  - name: 'maxRunCount'
+    type: int
+    description:
+      Maximum run count of the schedule. If specified, The schedule will be completed when either startedRunCount >= maxRunCount or when endTime is reached. If not specified, new runs will keep getting scheduled until this Schedule is paused or deleted. Already scheduled runs will be allowed to complete. Unset if not specified.
+  - name: 'cron'
+    type: string
+    description: |
+      Cron schedule (https://en.wikipedia.org/wiki/Cron) to launch scheduled runs.
+    required: true
+  - name: 'maxConcurrentRunCount'
+    type: int
+    required: true
+    description:
+      Maximum number of runs that can be started concurrently for this Schedule. This is the limit for starting the scheduled requests and not the execution of the notebook execution jobs created by the requests.
+  - name: 'allowQueueing'
+    type: Boolean
+    send_empty_value: true
+    description:
+      Whether new scheduled runs can be queued when max_concurrent_runs limit is reached. If set to true, new runs will be queued instead of skipped. Default to false.
+  - name: 'state'
+    type: String
+    description: |
+      Output only. The state of the schedule.
+    output: true
+  - name: 'createNotebookExecutionJobRequest'
+    immutable: true
+    type: NestedObject
+    description: Request for google_colab_notebook_execution.
+    required: true
+    properties:
+      - name: 'notebookExecutionJob'
+        type: NestedObject
+        required: true
+        description:
+          The NotebookExecutionJob to create.
+        properties:
+          - name: 'displayName'
+            type: String
+            description:
+              Required. The display name of the Notebook Execution.
+            required: true
+          - name: 'dataformRepositorySource'
+            type: NestedObject
+            description: 'The Dataform Repository containing the input notebook.'
+            exactly_one_of:
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.dataform_repository_source
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.gcs_notebook_source
+            properties:
+              - name: 'dataformRepositoryResourceName'
+                type: String
+                required: true
+                description: 'The resource name of the Dataform Repository.'
+                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+              - name: 'commitSha'
+                type: String
+                description: 'The commit SHA to read repository with. If unset, the file will be read at HEAD.'
+          - name: 'gcsNotebookSource'
+            type: NestedObject
+            description: 'The Cloud Storage uri for the input notebook.'
+            exactly_one_of:
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.dataform_repository_source
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.gcs_notebook_source
+            properties:
+              - name: 'uri'
+                type: String
+                required: true
+                description: 'The Cloud Storage uri pointing to the ipynb file. Format: gs://bucket/notebook_file.ipynb'
+              - name: 'generation'
+                type: String
+                description: 'The version of the Cloud Storage object to read. If unset, the current version of the object is read. See https://cloud.google.com/storage/docs/metadata#generation-number.'
+          - name: executionTimeout
+            type: String
+            description: 'Max running time of the execution job in seconds (default 86400s / 24 hrs). A duration in seconds with up to nine fractional digits, ending with "s". Example: "3.5s".'
+          - name: 'notebookRuntimeTemplateResourceName'
+            type: String
+            description: 'The NotebookRuntimeTemplate to source compute configuration from.'
+            required: true
+          - name: 'gcsOutputUri'
+            required: true
+            type: String
+            description: 'The Cloud Storage location to upload the result to. Format:`gs://bucket-name`'
+          - name: 'executionUser'
+            type: String
+            exactly_one_of:
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.execution_user
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.service_account
+            description: 'The user email to run the execution as.'
+          - name: 'serviceAccount'
+            type: String
+            exactly_one_of:
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.execution_user
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.service_account
+            description: 'The service account to run the execution as.'

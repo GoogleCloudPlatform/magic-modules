@@ -15,7 +15,7 @@ func TestAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_update(
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -85,6 +85,7 @@ resource "google_netapp_storage_pool" "destination_pool" {
   service_level = "PREMIUM"
   capacity_gib  = 2048
   network       = data.google_compute_network.default.id
+  allow_auto_tiering = true
 }
 
 resource "google_netapp_volume" "source_volume" {
@@ -112,6 +113,10 @@ resource "google_netapp_volume_replication" "test_replication" {
     # simplifies implementing client failover concepts
     share_name  = "tf-test-source-volume%{random_suffix}"
     description = "This is a replicated volume"
+    tiering_policy {
+      cooling_threshold_days = 20
+      tier_action = "ENABLED"
+    }
   }
   delete_destination_volume = true
   wait_for_mirror = true
@@ -140,6 +145,7 @@ resource "google_netapp_storage_pool" "destination_pool" {
   service_level = "PREMIUM"
   capacity_gib  = 2048
   network       = data.google_compute_network.default.id
+  allow_auto_tiering = true
 }
 
 resource "google_netapp_volume" "source_volume" {
@@ -172,6 +178,10 @@ resource "google_netapp_volume_replication" "test_replication" {
     # simplifies implementing client failover concepts
     share_name  = "tf-test-source-volume%{random_suffix}"
     description = "This is a replicated volume"
+    tiering_policy {
+      cooling_threshold_days = 20
+      tier_action = "ENABLED"
+    }
   }
   replication_enabled = true
   delete_destination_volume = true
@@ -202,6 +212,7 @@ resource "google_netapp_storage_pool" "destination_pool" {
   service_level = "PREMIUM"
   capacity_gib  = 2048
   network       = data.google_compute_network.default.id
+  allow_auto_tiering = true
 }
 
 resource "google_netapp_volume" "source_volume" {
@@ -234,6 +245,10 @@ resource "google_netapp_volume_replication" "test_replication" {
     # simplifies implementing client failover concepts
     share_name  = "tf-test-source-volume%{random_suffix}"
     description = "This is a replicated volume"
+    tiering_policy {
+      cooling_threshold_days = 20
+      tier_action = "ENABLED"
+    }
   }
   replication_enabled = false
   delete_destination_volume = true
@@ -264,6 +279,7 @@ resource "google_netapp_storage_pool" "destination_pool" {
   service_level = "PREMIUM"
   capacity_gib  = 2048
   network       = data.google_compute_network.default.id
+  allow_auto_tiering = true
 }
 
 resource "google_netapp_volume" "source_volume" {
@@ -296,6 +312,10 @@ resource "google_netapp_volume_replication" "test_replication" {
     # simplifies implementing client failover concepts
     share_name  = "tf-test-source-volume%{random_suffix}"
     description = "This is a replicated volume"
+    tiering_policy {
+      cooling_threshold_days = 20
+      tier_action = "ENABLED"
+    }
   }
   replication_enabled = true
   delete_destination_volume = true
