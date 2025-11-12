@@ -49,7 +49,7 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 
 	for _, stepN := range stepNumbers {
 		// Create a temporary directory for running terraform.
-		tfDir, err := os.MkdirTemp(tmpDir, "terraform")
+		tfDir, err := os.MkdirTemp(tmpDir, fmt.Sprintf("terraform%d", stepN))
 		if err != nil {
 			t.Fatalf("error creating a temporary directory for running terraform: %v", err)
 		}
