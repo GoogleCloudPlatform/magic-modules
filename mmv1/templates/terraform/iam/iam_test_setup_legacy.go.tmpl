@@ -1,10 +1,7 @@
-{{- define "IamTestSetupSample" }}
-{{ $config := $.FirstTestConfig }}
-{{ $sample := $config.Sample }}
-{{ $step := $config.Step }}
-{{- if $sample.BootstrapIam }}
+{{- define "IamTestSetup" }}
+{{- if $.FirstTestExample.BootstrapIam }}
 	acctest.BootstrapIamMembers(t, []acctest.IamMember{
-{{- range $iam := $sample.BootstrapIam }}
+{{- range $iam := $.FirstTestExample.BootstrapIam }}
 		{
 			Member: "{{$iam.Member}}",
 			Role:   "{{$iam.Role}}",
@@ -21,9 +18,9 @@
 {{- if $.IamPolicy.TestProjectName }}
 		"project_id" :   fmt.Sprintf("{{ $.IamPolicy.TestProjectName }}%s", acctest.RandString(t, 10)),
 {{- end }}
-{{- template "EnvVarContext" dict "TestEnvVars" $step.TestEnvVars "HasNewLine" true}}
-{{- if $step.TestVarsOverrides }}
-{{-    range $varName, $override := $step.TestVarsOverrides }}
+{{- template "EnvVarContext" dict "TestEnvVars" $.FirstTestExample.TestEnvVars "HasNewLine" true}}
+{{- if $.FirstTestExample.TestVarsOverrides }}
+{{-    range $varName, $override := $.FirstTestExample.TestVarsOverrides }}
 		"{{ $varName }}": {{ $override }},
 {{-   end }}
 {{- end }}
