@@ -101,10 +101,10 @@ properties:
 
       Credentials may not be specified in both locations and will cause an error. Changing from one location
       to a different credential configuration in the config will require an apply to update state.
-    url_param_only: true
     properties:
       - name: 'authToken'
         type: String
+        api_name: 'auth_token'
         description: |
           An authorization token for a notification channel. Channel types that support this field include: slack
         sensitive: true
@@ -125,6 +125,7 @@ properties:
           - 'sensitive_labels.0.service_key'
       - name: 'serviceKey'
         type: String
+        api_name: 'service_key'
         description: |
           An servicekey token for a notification channel. Channel types that support this field include: pagerduty
         sensitive: true

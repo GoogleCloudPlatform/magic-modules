@@ -10,20 +10,24 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
-labelmap, ok := obj["labels"]
-if !ok {
-	labelmap = make(map[string]string)
+sensitiveLabels, hasSensitiveLabels := obj["sensitiveLabels"].(map[string]interface{})
+if !hasSensitiveLabels {
+	return obj, nil
 }
 
-var labels map[string]string
-labels = labelmap.(map[string]string)
+// Merge sensitiveLabels into labels (write-only and sensitive fields)
+labels, ok := obj["labels"].(map[string]string)
+if !ok {
+    labels = make(map[string]string)
+}
 
-for _, sl := range sensitiveLabels {
-	if auth, _ := d.GetOkExists("sensitive_labels.0." + sl); auth != "" {
-		labels[sl] = auth.(string)
+for k, v := range sensitiveLabels {
+	if sLabel, ok := v.(string); ok {
+        labels[k] = sLabel
 	}
 }
 
 obj["labels"] = labels
+delete(obj, "sensitiveLabels")
 
 return obj, nil
