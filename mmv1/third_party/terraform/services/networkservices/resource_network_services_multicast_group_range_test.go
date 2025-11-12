@@ -54,7 +54,7 @@ func TestAccNetworkServicesMulticastGroupRange_networkServicesMulticastGroupRang
 					},
 				},
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrStrings("google_network_services_multicast_group_range.mgr_test", "consumer_accept_list", []string{"fake-project-id"}),
+					resource.TestCheckTypeSetElemAttr("google_network_services_multicast_group_range.mgr_test", "consumer_accept_list", "fake-project-id"),
     				resource.TestCheckResourceAttr("google_network_services_multicast_group_range.mgr_test", "require_explicit_accept", "false"),
 				),
 			},
@@ -94,6 +94,10 @@ resource "google_network_connectivity_internal_range" "internal_range" {
 resource "google_network_services_multicast_group_range" mgr_test {
   multicast_group_range_id                   = "tf-test-test-mgr-group-range%{random_suffix}"
   location = "global"
+  description = "my description"
+  labels = {
+  	fake_label = "label123"
+  }
   reserved_internal_range = google_network_connectivity_internal_range.internal_range.id
   multicast_domain = google_network_services_multicast_domain.multicast_domain.id
 }
