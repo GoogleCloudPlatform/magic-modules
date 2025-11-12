@@ -116,7 +116,7 @@ One of the following is required:
 
 * `deletion_policy` - (Optional) When set to ABANDON, the object won't be deleted from storage bucket. Instead, it will only be removed from terraform's state file.
 
-* `contexts` - (Optional) Object contexts let you attach descriptive information as key-value pairs to your Cloud Storage objects. You can embed contexts in your objects to improve how you categorize, track, and search your data. You can apply contexts when you create new objects or add contexts to existing objects. Structure is [documented below](#nested_custom).
+* `contexts` - (Optional) Object contexts let you attach descriptive information as key-value pairs to your Cloud Storage objects. You can embed contexts in your objects to improve how you categorize, track, and search your data. You can apply contexts when you create new objects or add contexts to existing objects. Structure is [documented below](#nested_contexts).
 
 ---
 
@@ -132,15 +132,19 @@ One of the following is required:
 
 * `retain_until_time` - (Required) The time to retain the object until in RFC 3339 format, for example 2012-11-15T16:19:00.094Z.
 
-<a name="nested_custom"></a>The `custom` block supports:
+<a name="nested_contexts"></a> The `contexts` block supports - 
+
+* `custom` - (Optional) User-provided object contexts. Structure is [documented below](#nested_custom_key_value).
+
+<a name="nested_custom_key_value"></a>The `custom` block supports:
 
 * `key` - (Required) An individual object context. Context keys and their corresponding values must start with an alphanumeric character.
 
 * `value` - (Required) The value associated with this context. This field holds the primary information for the given context key.
 
-* `createTime` - (Computed) The time when context was first added to the storage object in RFC#3399 format.
+* `create_time` - (Computed) The time when context was first added to the storage object in RFC#3399 format.
 
-* `updateTime` - (Computed) The time when context was first added to the storage object in RFC#3399 format.
+* `update_time` - (Computed) The time when context was first added to the storage object in RFC#3399 format.
 
 <a name>
 
