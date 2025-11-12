@@ -33,11 +33,6 @@ resource "google_compute_organization_security_policy_rule" "{{$.PrimaryResource
   priority = 100
 }
 
-resource "google_compute_organization_security_policy" "{{$.PrimaryResourceId}}" {
-  short_name = "{{index $.Vars "short_name"}}"
-  parent     = google_folder.security_policy_target.name
-}
-
 resource "google_compute_organization_security_policy_association" "{{$.PrimaryResourceId}}" {
   provider = google-beta
   name          = "tf-test%{random_suffix}"
