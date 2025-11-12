@@ -56,12 +56,6 @@ properties:
     type: String
     description: |
       Optional. Human readable description of the generator.
-  - name: tools
-    type: Array
-    description: |
-      Optional. Resource names of the tools that the generator can choose from. Format: projects/<Project ID>/locations/<Location ID>/tools/<tool ID>.
-    item_type:
-      type: String
   - name: summarizationContext
     type: NestedObject
     description: |
@@ -144,55 +138,6 @@ properties:
               description: |
                 Required. Example output of the model.
               properties:
-                - name: toolCallInfo
-                  type: Array
-                  description: |
-                    Optional. List of request and response for tool calls executed.
-                  item_type:
-                    type: NestedObject
-                    properties:
-                      - name: toolCall
-                        type: NestedObject
-                        description: |
-                          Required. Request for a tool call.
-                        properties:
-                          - name: toolDisplayName
-                            type: String
-                            description: |
-                              Optional. A human readable short name of the tool, to be shown on the UI.
-                          - name: toolDisplayDetails
-                            type: String
-                            description: |
-                              Optional. A human readable description of the tool.
-                          - name: action
-                            type: String
-                            description: |
-                              Optional. The name of the tool's action associated with this call.
-                          - name: answerRecord
-                            type: String
-                            description: |
-                              Optional. The answer record associated with this tool call.
-                          - name: tool
-                            type: String
-                            description: |
-                              Optional. The tool associated with this call. Format: projects/<ProjectID>/locations/<LocationID>/tools/<ToolID>.
-                      - name: toolCallResult
-                        type: NestedObject
-                        description: |
-                          Required. Response for a tool call.
-                        properties:
-                          - name: action
-                            type: String
-                            description: |
-                              Optional. The name of the tool's action associated with this call.
-                          - name: answerRecord
-                            type: String
-                            description: |
-                              Optional. The answer record associated with this tool call result.
-                          - name: tool
-                            type: String
-                            description: |
-                              Optional. The tool associated with this call. Format: projects/<ProjectID>/locations/<LocationID>/tools/<ToolID>.
                 - name: summarySuggestion
                   type: NestedObject
                   description: |
@@ -213,6 +158,40 @@ properties:
                             name: summary
                             description: |
                               Required. Summary text for the section.
+            - name: summarizationSectionList
+              type: NestedObject
+              description: |
+                Summarization sections.
+              properties:
+                - type: Array
+                  name: summarizationSections
+                  description: |
+                    Optional. Summarization sections.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - type: String
+                        name: key
+                        description: |
+                          Optional. Name of the section, for example, "situation".
+                      - type: String
+                        name: definition
+                        description: |
+                          Optional. Definition of the section, for example, "what the customer needs help with or has question about."
+                      - type: Enum
+                        name: type
+                        description: |
+                          Optional. Type of the summarization section.
+                        enum_values:
+                          - 'SITUATION'
+                          - 'ACTION'
+                          - 'RESOLUTION'
+                          - 'REASON_FOR_CANCELLATION'
+                          - 'CUSTOMER_SATISFACTION'
+                          - 'ENTITIES'
+                          - 'CUSTOMER_DEFINED'
+                          - 'SITUATION_CONCISE'
+                          - 'ACTION_CONCISE'
       - name: version
         type: String
         description: |

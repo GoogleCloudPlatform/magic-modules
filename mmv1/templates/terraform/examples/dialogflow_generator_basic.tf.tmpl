@@ -28,25 +28,18 @@ resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
         "Customer Name" = "Jack"
       }
       output {
-        tool_call_info {
-          tool_call {
-            action               = "TrackOrder"
-            answer_record        = "projects/your-project-id/locations/global/answerRecords/your-answer-record-id"
-            tool                 = "projects/your-project-id/locations/global/tools/your-tool-id"
-            tool_display_details = "TrackOrder"
-            tool_display_name    = "Find and track a user's order."
-          }
-          tool_call_result {
-            action        = "TrackOrder"
-            answer_record = "projects/your-project-id/locations/global/answerRecords/your-answer-record-id"
-            tool          = "projects/your-project-id/locations/global/tools/your-tool-id"
-          }
-        }
         summary_suggestion {
           summary_sections {
             section = "Redaction"
             summary = "John"
           }
+        }
+      }
+      summarization_section_list {
+        summarization_sections {
+          definition = "Always return John as the Customer name."
+          key        = "Redaction"
+          type       = "CUSTOMER_DEFINED"
         }
       }
     }
@@ -58,6 +51,5 @@ resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
     version = "4.0"
     output_language_code = "en"
   }
-  tools         = ["projects/your-project-id/locations/global/tools/your-tool-id"]
   trigger_event = "MANUAL_CALL"
 }
