@@ -99,6 +99,13 @@ parameters:
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Region'
     imports: 'name'
+  - name: 'eraseWindowsVssSignature'
+    type: Boolean
+    description: |
+      Specifies whether the disk restored from a source snapshot should erase Windows specific VSS signature.
+    min_version: 'beta'
+    ignore_read: true
+    default_value: false
   - name: 'snapshot'
     type: ResourceRef
     description: |
