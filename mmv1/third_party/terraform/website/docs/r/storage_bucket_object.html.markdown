@@ -40,6 +40,27 @@ resource "google_storage_bucket_object" "empty_folder" {
 }
 ```
 
+Example creating an contexts for an object.
+
+```hcl
+resource "google_storage_bucket_object" "bucket_object" {
+    depends_on=[google_storage_bucket.bucket_acl]
+  bucket  = "image-store"
+  name    = "hello1"
+  content = "hello_hi"
+  contexts{
+    custom{
+      key   ="testKey"
+      value ="test"
+    }
+    custom{
+      key   ="testKey1"
+      value ="test"
+    }
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -95,6 +116,8 @@ One of the following is required:
 
 * `deletion_policy` - (Optional) When set to ABANDON, the object won't be deleted from storage bucket. Instead, it will only be removed from terraform's state file.
 
+* `contexts` - (Optional) Object contexts let you attach descriptive information as key-value pairs to your Cloud Storage objects. You can embed contexts in your objects to improve how you categorize, track, and search your data. You can apply contexts when you create new objects or add contexts to existing objects. Structure is [documented below](#nested_custom).
+
 ---
 
 <a name="nested_customer_encryption"></a>The `customer_encryption` block supports:
@@ -108,6 +131,16 @@ One of the following is required:
 * `mode` - (Required) The retention policy mode. Either `Locked` or `Unlocked`.
 
 * `retain_until_time` - (Required) The time to retain the object until in RFC 3339 format, for example 2012-11-15T16:19:00.094Z.
+
+<a name="nested_custom"></a>The `custom` block supports:
+
+* `key` - (Required) An individual object context. Context keys and their corresponding values must start with an alphanumeric character.
+
+* `value` - (Required) The value associated with this context. This field holds the primary information for the given context key.
+
+* `createTime` - (Computed) The time when context was first added to the storage object in RFC#3399 format.
+
+* `updateTime` - (Computed) The time when context was first added to the storage object in RFC#3399 format.
 
 <a name>
 
