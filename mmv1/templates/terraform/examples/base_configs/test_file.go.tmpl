@@ -18,24 +18,38 @@
 package {{ $.Res.PackageName }}_test
 
 import (
-{{- if not $.Res.ExcludeDelete }}
-	{{- if not $.Res.CustomCode.TestCheckDestroy }}
 	"fmt"
-	{{- end }}
+	"log"
+	"strconv"
 	"strings"
-{{- end }}
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-{{- if not $.Res.ExcludeDelete }}
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-{{- end }}
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath  }}/envvar"
 	"{{ $.ImportPath  }}/tpgresource"
 	transport_tpg "{{ $.ImportPath  }}/transport"
+
+    "google.golang.org/api/googleapi"
 )
+
+var (
+    _ = fmt.Sprintf
+    _ = log.Print
+    _ = strconv.Atoi
+    _ = strings.Trim
+    _ = time.Now
+	_ = resource.TestMain
+	_ = terraform.NewState
+    _ = envvar.TestEnvVar
+    _ = tpgresource.SetLabels
+    _ = transport_tpg.Config{}
+    _ = googleapi.Error{}
+)
+
 {{ range $e := $.Res.TestExamples }}
 func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T) {
 	{{- if $e.SkipTest }}
@@ -92,8 +106,8 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 				ResourceName:      "{{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}",
 				ImportState:       true,
 				ImportStateVerify: true,
-		{{- if $.Res.IgnoreReadPropertiesToString $e }}
-				ImportStateVerifyIgnore: {{ $.Res.IgnoreReadPropertiesToString $e }},
+		{{- if $.Res.IgnoreReadPropertiesToStringLegacy $e }}
+				ImportStateVerifyIgnore: {{ $.Res.IgnoreReadPropertiesToStringLegacy $e }},
 		{{- end }}
 			},
 	{{- end }}

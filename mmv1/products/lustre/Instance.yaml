@@ -150,3 +150,8 @@ properties:
     type: String
     description: Identifier. The name of the instance.
     output: true
+  - name: placementPolicy
+    type: String
+    description: |-
+        The placement policy name for the instance in the format of
+        projects/{project}/locations/{location}/resourcePolicies/{resource_policy}

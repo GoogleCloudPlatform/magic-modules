@@ -151,6 +151,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Certificatemanager",
         "path" to "./google/services/certificatemanager"
     ),
+    "ces" to mapOf(
+        "name" to "ces",
+        "displayName" to "Customerengagementsuite",
+        "path" to "./google/services/ces"
+    ),
     "chronicle" to mapOf(
         "name" to "chronicle",
         "displayName" to "Chronicle",
@@ -220,6 +225,11 @@ var ServicesListGa = mapOf(
         "name" to "cloudscheduler",
         "displayName" to "Cloudscheduler",
         "path" to "./google/services/cloudscheduler"
+    ),
+     "cloudsecuritycompliance" to mapOf(
+        "name" to "cloudsecuritycompliance",
+        "displayName" to "Cloud Security Compliance",
+        "path" to "./google/services/cloudsecuritycompliance"
     ),
     "cloudtasks" to mapOf(
         "name" to "cloudtasks",

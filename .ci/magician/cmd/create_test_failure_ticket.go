@@ -200,7 +200,7 @@ func lastNDaysTestFailureMap(pVersion provider.Version, n int, now time.Time, gc
 				if _, ok := testFailuresToday[testName]; !ok {
 					testFailuresToday[testName] = &testFailure{
 						TestName:          testName,
-						AffectedResource:  convertTestNameToResource(testName),
+						AffectedResource:  testInfo.Resource,
 						ErrorMessageLinks: map[provider.Version]string{provider.GA: "", provider.Beta: ""},
 						DebugLogLinks:     map[provider.Version]string{provider.GA: "", provider.Beta: ""},
 						FailureRates:      map[provider.Version]string{provider.GA: "N/A", provider.Beta: "N/A"},
@@ -523,10 +523,23 @@ func init() {
 var (
 	// TODO: add all mismatch resource names
 	resourceNameConverter = map[string]string{
-		"google_iam3_projects_policy_binding":        "google_iam_projects_policy_binding",
-		"google_iam3_organizations_policy_binding":   "google_iam_organizations_policy_binding",
-		"google_cloud_backup_dr_data_source":         "google_backup_dr_data_source",
-		"google_cloud_backup_dr_backup":              "google_backup_dr_backup",
-		"google_security_posture_posture_deployment": "google_securityposture_posture_deployment",
+		"google_iam3_projects_policy_binding":             "google_iam_projects_policy_binding",
+		"google_iam3_organizations_policy_binding":        "google_iam_organizations_policy_binding",
+		"google_cloud_backup_dr_data_source":              "google_backup_dr_data_source",
+		"google_cloud_backup_dr_backup":                   "google_backup_dr_backup",
+		"google_security_posture_posture_deployment":      "google_securityposture_posture_deployment",
+		"google_container_cluster_custom_service_account": "google_container_cluster",
+		"iap_client":                                                      "google_iap_client",
+		"compute_node_types":                                              "google_compute_node_types",
+		"google_big_query_table":                                          "google_bigquery_table",
+		"google_sql_user_fw":                                              "google_fw_sql_user",
+		"google_resource_fw_pubsub_lite_reservation":                      "google_fwprovider_pubsub_lite_reservation",
+		"google_compute_router_bgp_peer":                                  "google_compute_router_peer",
+		"google_resource_manager3_capability":                             "google_resource_manager_capability",
+		"google_datafusion_instance":                                      "google_data_fusion_instance",
+		"google_iam_beta_workload_identity_pool_iam_policy":               "google_iam_workload_identity_pool_iam_policy",
+		"google_resource_google_project_default_service_accounts_disable": "google_project_default_service_accounts",
+		"google_datasource_google_service_networking_peered_dns_domain":   "google_service_networking_peered_dns_domain",
+		"google_resource_google_project_default_service_accounts_delete":  "google_project_default_service_accounts",
 	}
 )

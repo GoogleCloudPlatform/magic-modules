@@ -33,6 +33,9 @@ fields:
   - api_field: 'instanceLifecyclePolicy.onFailedHealthCheck'
 {{- end }}
   - api_field: 'instanceLifecyclePolicy.forceUpdateOnRepair'
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'instanceLifecyclePolicy.onRepair.allowChangingZone'
+{{- end }}
   - api_field: 'listManagedInstancesResults'
   - api_field: 'name'
   - api_field: 'namedPorts.name'
