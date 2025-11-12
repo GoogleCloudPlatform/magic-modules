@@ -289,7 +289,8 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 			overrideResource := &api.Resource{}
 			api.Compile(overrideResourcePath, overrideResource, l.OverrideDirectory)
 			api.Merge(reflect.ValueOf(resource).Elem(), reflect.ValueOf(*overrideResource), l.Version)
-			resource.SourceYamlFile = baseResourcePath
+			relPath, _ := filepath.Rel(l.BaseDirectory, baseResourcePath)
+			resource.SourceYamlFile = relPath
 		} else {
 			// Override only
 			api.Compile(overrideResourcePath, resource, l.OverrideDirectory)
@@ -298,6 +299,8 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 		// Base only
 		api.Compile(baseResourcePath, resource, l.OverrideDirectory)
 		resource.SourceYamlFile = baseResourcePath
+		relPath, _ := filepath.Rel(l.BaseDirectory, baseResourcePath)
+		resource.SourceYamlFile = relPath
 	}
 
 	// Set resource defaults and validate
