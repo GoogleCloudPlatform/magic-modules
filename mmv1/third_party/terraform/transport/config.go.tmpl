@@ -1399,7 +1399,7 @@ func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bo
 			log.Printf("[INFO]   -- Sending EnableJwtWithScope option")
 			return *creds, nil
 		} else {
-			creds, err := transport.Creds(c.Context, option.WithCredentialsJSON([]byte(contents)), option.WithScopes(clientScopes...), internaloption.EnableNewAuthLibrary())
+			creds, err := transport.Creds(c.Context, option.WithCredentialsJSON([]byte(contents)), option.WithScopes(clientScopes...))
 			if err != nil {
 				return googleoauth.Credentials{}, fmt.Errorf("unable to parse credentials from '%s': %s", contents, err)
 			}
@@ -1451,9 +1451,16 @@ func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bo
 				return googleoauth.Credentials{}, fmt.Errorf("Attempted to load application default credentials since neither `credentials` nor `access_token` was set in the provider block.  No credentials loaded. To use your gcloud credentials, run 'gcloud auth application-default login'.  Original error: %w", err)
 			}
 		} else {
-			creds, err = transport.Creds(context.Background(), option.WithScopes(clientScopes...))
-			if err != nil {
-				return googleoauth.Credentials{}, fmt.Errorf("Attempted to load application default credentials since neither `credentials` nor `access_token` was set in the provider block.  No credentials loaded. To use your gcloud credentials, run 'gcloud auth application-default login'.  Original error: %w", err)
+			if AreCredentialsX509() {
+				creds, err = transport.Creds(context.Background(), option.WithScopes(clientScopes...), internaloption.EnableNewAuthLibrary())
+				if err != nil {
+					return googleoauth.Credentials{}, fmt.Errorf("Attempted to load application default credentials since neither `credentials` nor `access_token` was set in the provider block.  No credentials loaded. To use your gcloud credentials, run 'gcloud auth application-default login'.  Original error: %w", err)
+				}
+			} else {
+				creds, err = transport.Creds(context.Background(), option.WithScopes(clientScopes...))
+				if err != nil {
+					return googleoauth.Credentials{}, fmt.Errorf("Attempted to load application default credentials since neither `credentials` nor `access_token` was set in the provider block.  No credentials loaded. To use your gcloud credentials, run 'gcloud auth application-default login'.  Original error: %w", err)
+				}
 			}
 		}
 	}
@@ -1479,6 +1486,35 @@ func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bo
 	}
 
 	return *creds, nil
+}
+
+// parse application default credentials to determine if they are X.509 certs
+func AreCredentialsX509() bool {
+	adcCreds := MultiEnvSearch([]string{
+		"GOOGLE_APPLICATION_CREDENTIALS",
+	})
+	if adcCreds != "" {
+		contents, _, err := verify.PathOrContents(adcCreds)
+		if err != nil {
+			return false
+		}
+
+		var content map[string]any
+		if err := json.Unmarshal([]byte(contents), &content); err != nil {
+			return false
+		}
+		if content["credential_source"] != nil {
+			if content["credential_source"].(map[string]any)["certificate"] != nil {
+				return true
+			} else {
+				return false
+			}
+		} else {
+			//ADC file does not contain x509 attribute
+			return false
+		}
+	}
+	return false
 }
 
 // Remove the `/{{"{{"}}version{{"}}"}}/` from a base path if present.
