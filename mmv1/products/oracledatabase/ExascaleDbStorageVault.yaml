@@ -159,10 +159,6 @@ properties:
         output: true
         item_type:
           type: String
-      - name: description
-        type: String
-        description: The description of the ExascaleDbStorageVault.
-        default_from_api: true
       - name: exascaleDbStorageDetails
         type: NestedObject
         description: The storage details of the ExascaleDbStorageVault.
