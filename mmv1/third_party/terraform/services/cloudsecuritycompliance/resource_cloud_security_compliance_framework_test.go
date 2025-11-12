@@ -13,7 +13,6 @@ import (
 func testAccCloudSecurityComplianceFramework_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_cloud_security_compliance_framework" "example" {
-  name 		   = "organizations/%{org_id}/locations/global/frameworks/tf-test-example-framework%{random_suffix}"
   organization = "%{org_id}"
   location     = "global"
   framework_id = "tf-test-example-framework%{random_suffix}"
@@ -78,7 +77,6 @@ func TestAccCloudSecurityComplianceFramework_update(t *testing.T) {
 func testAccCloudSecurityComplianceFramework_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_cloud_security_compliance_framework" "example" {
-  name 		   = "organizations/%{org_id}/locations/global/frameworks/tf-test-example-framework%{random_suffix}"
   organization = "%{org_id}"
   location     = "global"
   framework_id = "tf-test-example-framework%{random_suffix}"

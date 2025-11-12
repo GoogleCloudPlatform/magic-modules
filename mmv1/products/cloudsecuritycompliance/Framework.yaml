@@ -32,6 +32,8 @@ examples:
     test_env_vars:
       org_id: "ORG_ID"
 autogen_status: RnJhbWV3b3Jr
+custom_code:
+  encoder: "templates/terraform/encoders/cloudsecuritycompliance_framework.go.tmpl"
 parameters:
   - name: organization
     type: String
@@ -132,6 +134,7 @@ properties:
       Identifier. The name of the framework.
       Format:
       organizations/{organization}/locations/{{location}}/frameworks/{framework_id}
+    output: true
   - name: supportedCloudProviders
     type: Array
     description: cloud providers supported
