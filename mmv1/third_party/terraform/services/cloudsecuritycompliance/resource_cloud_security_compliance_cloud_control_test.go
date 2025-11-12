@@ -14,7 +14,6 @@ func testAccCloudSecurityComplianceCloudControl_basic(context map[string]interfa
 	return acctest.Nprintf(`
 resource "google_cloud_security_compliance_cloud_control" "example" {
 	organization      = "%{org_id}"
-	name              = "organizations/%{org_id}/locations/global/cloudControls/tf-test-%{random_suffix}"
 	location          = "global"
 	cloud_control_id  = "tf-test-%{random_suffix}"
 	display_name      = "TF Test CloudControl"
@@ -102,7 +101,6 @@ func TestAccCloudSecurityComplianceCloudControl_update(t *testing.T) {
 func testAccCloudSecurityComplianceCloudControl_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_cloud_security_compliance_cloud_control" "example" {
-  name              = "organizations/%{org_id}/locations/global/cloudControls/tf-test-%{random_suffix}"
   organization      = "%{org_id}"
   location          = "global"
   cloud_control_id  = "tf-test-%{random_suffix}"
