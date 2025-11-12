@@ -13,17 +13,6 @@ import (
 	ctyjson "github.com/zclconf/go-cty/cty/json"
 )
 
-// ParseFieldValue extracts named part from resource url.
-func ParseFieldValue(url string, name string) string {
-	fragments := strings.Split(url, "/")
-	for ix, item := range fragments {
-		if item == name && ix+1 < len(fragments) {
-			return fragments[ix+1]
-		}
-	}
-	return ""
-}
-
 /*
 	ParseUrlParamValuesFromAssetName uses GetCaiAssetNameTemplate to parse hclData from assetName, filtering out all outputFields
 

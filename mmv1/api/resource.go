@@ -221,7 +221,7 @@ type Resource struct {
 	Examples []*resource.Examples
 
 	// Samples for generating tests and documentation
-	Samples []*resource.Sample
+	Samples []*resource.Sample `yaml:"samples,omitempty"`
 
 	// If true, generates product operation handling logic.
 	AutogenAsync bool `yaml:"autogen_async,omitempty"`
@@ -311,6 +311,7 @@ type Resource struct {
 	// control if a resource is continuously generated from public OpenAPI docs
 	AutogenStatus string `yaml:"autogen_status"`
 
+	// WARNING: this is an incomplete feature and may have several build errors.
 	// If true, this resource generates with the new plugin framework resource template
 	FrameworkResource bool `yaml:"plugin_framework,omitempty"`
 
@@ -403,6 +404,9 @@ type TGCResource struct {
 	// Generally, it shouldn't be set when the identity can be decided.
 	// Otherswise, it should be set.
 	CaiIdentity string `yaml:"cai_identity,omitempty"`
+
+	// If true, create TGC tests automatically for all handwritten provider tests.
+	TGCIncludeHandwrittenTests bool `yaml:"tgc_include_handwritten_tests,omitempty"`
 
 	// Tests for TGC, will automatically be filled with resource's examples
 	// and handwritten tests. Can be specified in order to skip specific tests.
@@ -536,7 +540,9 @@ func (r *Resource) Validate() {
 	}
 
 	for _, example := range r.Examples {
-		example.Validate(r.Name)
+		if err := example.Validate(r.Name); err != nil {
+			log.Fatalln(err)
+		}
 	}
 
 	for _, sample := range r.Samples {
@@ -2194,6 +2200,28 @@ func (r Resource) GetCaiAssetNameTemplate() string {
 	return fmt.Sprintf("//%s.googleapis.com/%s", r.CaiProductBackendName(r.CaiProductBaseUrl()), r.IdFormat)
 }
 
+// Ignores verifying CAI asset name if it is one computed field
+// For example, the CAI asset name format is //monitoring.googleapis.com/{{name}}
+// for google_monitoring_notification_channel
+func (r Resource) IgnoreCaiAssetName() bool {
+	nameTemplate := r.GetCaiAssetNameTemplate()
+	parts := strings.Split(nameTemplate, "/")
+	if len(parts) > 4 {
+		return false
+	}
+
+	params := r.ExtractIdentifiers(nameTemplate)
+	if len(params) == 1 {
+		param := params[0]
+		for _, p := range r.GettableProperties() {
+			if google.Underscore(p.Name) == param {
+				return p.Output
+			}
+		}
+	}
+	return false
+}
+
 // Gets the Cai API version
 func (r Resource) CaiApiVersion(productBackendName, caiProductBaseUrl string) string {
 	template := r.rawCaiAssetNameTemplate(productBackendName)
@@ -2410,6 +2438,10 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 		} else if tp.IsMissingInCai || tp.IgnoreRead || tp.ClientSide || tp.WriteOnlyLegacy {
 			props = append(props, tp.MetadataLineage())
 		}
+	}
+
+	if r.IgnoreCaiAssetName() {
+		props = append(props, "ASSETNAME")
 	}
 
 	slices.Sort(props)
