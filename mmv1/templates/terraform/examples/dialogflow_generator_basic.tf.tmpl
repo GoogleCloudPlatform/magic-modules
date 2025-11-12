@@ -55,6 +55,11 @@ resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
       key        = "Redaction"
       type       = "CUSTOMER_DEFINED"
     }
+    summarization_sections {
+      definition = "Determine whether the customer's issues are resolved and return your answer following the rules below."
+      key        = "resolution"
+      type       = "RESOLUTION"
+    }
     version = "4.0"
     output_language_code = "en"
   }
