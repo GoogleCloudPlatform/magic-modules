@@ -736,10 +736,12 @@ properties:
       - name: apiAuthentication
         type: NestedObject
         description: Authentication information required for API calls.
+        output: true
         properties:
           - name: apiKeyConfig
             type: NestedObject
             description: Configurations for authentication with API key.
+            output: true
             properties:
               - name: apiKeySecretVersion
                 type: String
@@ -749,11 +751,13 @@ properties:
                   Note: You should grant `roles/secretmanager.secretAccessor` role to the CES
                   service agent
                   `service-<PROJECT-NUMBER>@gcp-sa-ces.iam.gserviceaccount.com`.
+                output: true
               - name: keyName
                 type: String
                 description: |-
                   The parameter name or the header name of the API key.
                   E.g., If the API request is "https://example.com/act?X-Api-Key=", "X-Api-Key" would be the parameter name.
+                output: true
               - name: requestLocation
                 type: String
                 description: |-
@@ -761,13 +765,16 @@ properties:
                   Possible values:
                   HEADER
                   QUERY_STRING
+                output: true
           - name: oauthConfig
             type: NestedObject
             description: Configurations for authentication with OAuth.
+            output: true
             properties:
               - name: clientId
                 type: String
                 description: The client ID from the OAuth provider.
+                output: true
               - name: clientSecretVersion
                 type: String
                 description: |-
@@ -777,25 +784,30 @@ properties:
                   Note: You should grant `roles/secretmanager.secretAccessor` role to the CES
                   service agent
                   `service-<PROJECT-NUMBER>@gcp-sa-ces.iam.gserviceaccount.com`.
+                output: true
               - name: oauthGrantType
                 type: String
                 description: |-
                   OAuth grant types.
                   Possible values:
                   CLIENT_CREDENTIAL
+                output: true
               - name: scopes
                 type: Array
                 description: The OAuth scopes to grant.
+                output: true
                 item_type:
                   type: String
               - name: tokenEndpoint
                 type: String
                 description: The token endpoint in the OAuth provider to exchange for an
                   access token.
+                output: true
           - name: serviceAccountAuthConfig
             type: NestedObject
             description: Configurations for authentication using a custom service
               account.
+            output: true
             properties:
               - name: serviceAccount
                 type: String
@@ -807,6 +819,7 @@ properties:
                   `roles/iam.serviceAccountTokenCreator` role granted to the
                   CES service agent
                   `service-<PROJECT-NUMBER>@gcp-sa-ces.iam.gserviceaccount.com`.
+                output: true
           - name: serviceAgentIdTokenAuthConfig
             type: NestedObject
             description: |-
@@ -815,6 +828,7 @@ properties:
               from service agent.
             allow_empty_object: true
             send_empty_value: true
+            output: true
             properties: []  # Explicitly show no properties
       - name: description
         type: String
@@ -822,21 +836,26 @@ properties:
           The description of the tool. If not provided, the description of the tool
           will be derived from the OpenAPI schema, from `operation.description` or
           `operation.summary`.
+        output: true
       - name: ignoreUnknownFields
         type: Boolean
         description: If true, the agent will ignore unknown fields in the API
           response.
+        output: true
       - name: name
         type: String
         description: |-
           The name of the tool. If not provided, the name of the tool will be
           derived from the OpenAPI schema, from `operation.operationId`.
+        output: true
       - name: openApiSchema
         type: String
         description: The OpenAPI schema in JSON or YAML format.
+        output: true
       - name: serviceDirectoryConfig
         type: NestedObject
         description: Configuration for tools using Service Directory.
+        output: true
         properties:
           - name: service
             type: String
@@ -847,15 +866,18 @@ properties:
               `projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}`.
               Location of the service directory must be the same as the location of the
               app.
+            output: true
       - name: tlsConfig
         type: NestedObject
         description: The TLS configuration.
+        output: true
         properties:
           - name: caCerts
             type: Array
             description: |-
               Specifies a list of allowed custom CA certificates for HTTPS
               verification.
+            output: true
             item_type:
               type: NestedObject
               properties:
@@ -874,11 +896,13 @@ properties:
                     -extfile <(printf "\nsubjectAltName='DNS:www.example.com'")
 
                     A base64-encoded string.
+                  output: true
                 - name: displayName
                   type: String
                   description: |-
                     The name of the allowed custom CA certificates. This
                     can be used to disambiguate the custom CA certificates.
+                  output: true
       - name: url
         type: String
         description: |-
@@ -887,6 +911,7 @@ properties:
           server url. During the import process, if this url is present in the environment
           dependencies and the schema has the $env_var placeholder, it will replace the
           placeholder in the schema.
+        output: true
   - name: pythonFunction
     type: NestedObject
     description: A Python function tool.
