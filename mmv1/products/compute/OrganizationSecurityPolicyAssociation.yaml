@@ -21,7 +21,7 @@ min_version: 'beta'
 references:
   guides:
     'Associating a policy with the organization or folder': 'https://cloud.google.com/vpc/docs/using-firewall-policies#associate'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/organizationSecurityPolicies/addAssociation'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/organizationSecurityPolicies/addAssociation'
 docs:
 id_format: '{{policy_id}}/association/{{name}}'
 base_url: '{{policy_id}}'
