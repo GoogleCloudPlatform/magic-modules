@@ -26,8 +26,8 @@ resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryRes
   description             = "A framework deployment with folder creation config"
   
   framework {
-    framework         = google_cloud_security_compliance_framework.example.name
-    major_revision_id = "1"
+    framework             = google_cloud_security_compliance_framework.example.name
+    major_revision_id     = "1"
   }
   
   target_resource_config {

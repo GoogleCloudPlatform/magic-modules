@@ -26,8 +26,8 @@ resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryRes
   description             = "A framework deployment with project creation config"
   
   framework {
-    framework         = google_cloud_security_compliance_framework.example.name
-    major_revision_id = "1"
+    framework             = google_cloud_security_compliance_framework.example.name
+    major_revision_id     = "1"
   }
   
   target_resource_config {
@@ -44,7 +44,7 @@ resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryRes
     enforcement_mode = "DETECTIVE"
     
     cloud_control_details {
-      name              = google_cloud_security_compliance_framework.example.cloud_control_details[0].name
+  name              = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/builtin-detective-policy-for-vertex-ai-runtime-template-idle-shutdown"
       major_revision_id = "1"
       
       parameters {

@@ -38,8 +38,8 @@ resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryRes
     enforcement_mode = "DETECTIVE"
     
     cloud_control_details {
-      name              = google_cloud_security_compliance_framework.example.cloud_control_details[0].name
-      major_revision_id = "1"
+      name                  = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/builtin-detective-policy-for-vertex-ai-runtime-template-idle-shutdown"
+      major_revision_id     = "1"
       
       parameters {
         name = "enabled"
@@ -48,6 +48,31 @@ resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryRes
         }
       }
       
+      parameters {
+        name = "regions"
+        parameter_value {
+          string_list_value {
+            values = ["us-central1", "us-west1", "us-east1"]
+          }
+        }
+      }
+      
+      parameters {
+        name = "location"
+        parameter_value {
+          string_value = "us-central1"
+        }
+      }
+    }
+  }
+
+  cloud_control_metadata {
+    enforcement_mode = "AUDIT"
+    
+    cloud_control_details {
+      name                  = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/builtin-assign-correct-bucket-label"
+      major_revision_id     = "1"
+
       parameters {
         name = "threshold"
         parameter_value {

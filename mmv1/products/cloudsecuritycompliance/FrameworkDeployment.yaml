@@ -237,6 +237,7 @@ properties:
         description: |-
           Major revision id of the framework. If not specified, corresponds to the
           latest revision of the framework.
+        required: true
   - name: name
     type: String
     description: |-
@@ -255,17 +256,26 @@ properties:
         description: |-
           CRM node in format organizations/{organization}, folders/{folder},
           or projects/{project}
+        exactly_one_of:
+          - "target_resource_config.0.existing_target_resource"
+          - "target_resource_config.0.target_resource_creation_config"
       - name: targetResourceCreationConfig
         type: NestedObject
         description: |-
           TargetResourceCreationConfig contains the config to create a new resource to
           be used as the target_resource of a deployment.
+        exactly_one_of:
+          - "target_resource_config.0.existing_target_resource"
+          - "target_resource_config.0.target_resource_creation_config"
         properties:
           - name: folderCreationConfig
             type: NestedObject
             description: |-
               FolderCreationConfig contains the config to create a new folder to be used
               as the target_resource of a deployment.
+            exactly_one_of:
+              - "target_resource_config.0.target_resource_creation_config.0.folder_creation_config"
+              - "target_resource_config.0.target_resource_creation_config.0.project_creation_config"
             properties:
               - name: folderDisplayName
                 type: String
@@ -282,6 +292,9 @@ properties:
             description: |-
               ProjectCreationConfig contains the config to create a new project to be used
               as the target_resource of a deployment.
+            exactly_one_of:
+              - "target_resource_config.0.target_resource_creation_config.0.folder_creation_config"
+              - "target_resource_config.0.target_resource_creation_config.0.project_creation_config"
             properties:
               - name: billingAccountId
                 type: String
