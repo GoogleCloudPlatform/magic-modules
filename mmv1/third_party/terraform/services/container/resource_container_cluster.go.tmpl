@@ -5806,8 +5806,8 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 				meo := exclusionOptions.([]interface{})[0].(map[string]interface{})
 				mex := exclusions[exclusion["exclusion_name"].(string)]
 				mex.MaintenanceExclusionOptions = &container.MaintenanceExclusionOptions{
-					Scope:             meo["scope"].(string),
-					ForceSendFields:   []string{"Scope"},
+					Scope:           meo["scope"].(string),
+					ForceSendFields: []string{"Scope"},
 				}
 				if  len(meo["end_time_behavior"].(string)) > 0 {
 					mex.MaintenanceExclusionOptions.EndTimeBehavior =  meo["end_time_behavior"].(string)
