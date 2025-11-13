@@ -1,16 +1,20 @@
 package openapi_generate
 
 import (
-	"context"
-	"github.com/getkin/kin-openapi/openapi3"
+	_ "embed"
 	"testing"
+
+	"github.com/getkin/kin-openapi/openapi3"
 )
+
+//go:embed test_data/test_api.yaml
+var testData []byte
 
 func TestMapType(t *testing.T) {
 	_ = NewOpenapiParser("/fake", "/fake")
-	ctx := context.Background()
+	ctx := t.Context()
 	loader := &openapi3.Loader{Context: ctx, IsExternalRefsAllowed: true}
-	doc, _ := loader.LoadFromFile("./test_data/test_api.yaml")
+	doc, _ := loader.LoadFromData(testData)
 	_ = doc.Validate(ctx)
 
 	petSchema := doc.Paths.Map()["/pets"].Post.Parameters[0].Value.Schema

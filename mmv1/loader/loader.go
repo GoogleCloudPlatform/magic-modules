@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/golang/glog"
 	"golang.org/x/exp/slices"
 )
 
@@ -310,7 +311,9 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 	resource.TestSampleSetUp()
 
 	for _, e := range resource.Examples {
-		e.LoadHCLText(l.BaseDirectory)
+		if err := e.LoadHCLText(l.BaseDirectory); err != nil {
+			glog.Exit(err)
+		}
 	}
 
 	return resource
