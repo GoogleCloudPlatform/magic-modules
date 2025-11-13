@@ -60,6 +60,7 @@ properties:
   - name: categories
     type: Array
     description: The categories of the cloud control.
+    immutable: true
     item_type:
       type: String
   - name: createTime
@@ -282,6 +283,7 @@ properties:
   - name: supportedCloudProviders
     type: Array
     description: cloud providers supported
+    immutable: true
     item_type:
       type: String
   - name: supportedEnforcementModes
