@@ -11,7 +11,6 @@ resource "google_cloud_security_compliance_cloud_control" "example" {
   remediation_steps = "Review and update the security configuration according to best practices."
   
   supported_cloud_providers        = ["GCP"]
-  supported_target_resource_types = []
   
   rules {
     description         = "Ensure compute instances have secure boot enabled"

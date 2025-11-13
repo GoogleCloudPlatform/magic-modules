@@ -296,5 +296,6 @@ properties:
   - name: supportedTargetResourceTypes
     type: Array
     description: target resource types supported by the CloudControl.
+    output: true
     item_type:
       type: String
