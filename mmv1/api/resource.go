@@ -221,7 +221,7 @@ type Resource struct {
 	Examples []*resource.Examples
 
 	// Samples for generating tests and documentation
-	Samples []*resource.Sample
+	Samples []*resource.Sample `yaml:"samples,omitempty"`
 
 	// If true, generates product operation handling logic.
 	AutogenAsync bool `yaml:"autogen_async,omitempty"`
@@ -405,6 +405,9 @@ type TGCResource struct {
 	// Otherswise, it should be set.
 	CaiIdentity string `yaml:"cai_identity,omitempty"`
 
+	// If true, create TGC tests automatically for all handwritten provider tests.
+	TGCIncludeHandwrittenTests bool `yaml:"tgc_include_handwritten_tests,omitempty"`
+
 	// Tests for TGC, will automatically be filled with resource's examples
 	// and handwritten tests. Can be specified in order to skip specific tests.
 	TGCTests []resource.TGCTest `yaml:"tgc_tests,omitempty"`
@@ -537,7 +540,9 @@ func (r *Resource) Validate() {
 	}
 
 	for _, example := range r.Examples {
-		example.Validate(r.Name)
+		if err := example.Validate(r.Name); err != nil {
+			log.Fatalln(err)
+		}
 	}
 
 	for _, sample := range r.Samples {
@@ -1691,6 +1696,22 @@ func (r Resource) ExamplePrimaryResourceId() string {
 	return examples[0].PrimaryResourceId
 }
 
+func (r Resource) SamplePrimaryResourceId() string {
+	samples := google.Reject(r.Samples, func(s *resource.Sample) bool {
+		return s.ExcludeTest
+	})
+	samples = google.Reject(samples, func(s *resource.Sample) bool {
+		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(s.MinVersion)) < 0)
+	})
+
+	if len(samples) == 0 {
+		samples = google.Reject(r.Samples, func(s *resource.Sample) bool {
+			return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(s.MinVersion)) < 0)
+		})
+	}
+	return samples[0].PrimaryResourceId
+}
+
 func (r Resource) IamParentSourceType() string {
 	t := r.IamPolicy.ParentResourceType
 	if t == "" {
@@ -1745,6 +1766,53 @@ func (r Resource) IamImportQualifiersForTest() string {
 				importQualifiers = append(importQualifiers, "envvar.GetTestRegionFromEnv()")
 			} else {
 				importQualifiers = append(importQualifiers, fmt.Sprintf("\"%s\"", example.RegionOverride))
+			}
+		} else if param == "universe_domain" {
+			importQualifiers = append(importQualifiers, "envvar.GetTestUniverseDomainFromEnv()")
+		} else {
+			break
+		}
+	}
+
+	if len(importQualifiers) == 0 {
+		return ""
+	}
+
+	return strings.Join(importQualifiers, ", ")
+}
+
+func (r Resource) IamImportQualifiersForTestSample() string {
+	var importFormat string
+	if len(r.IamPolicy.ImportFormat) > 0 {
+		importFormat = r.IamPolicy.ImportFormat[0]
+	} else {
+		importFormat = r.IamPolicy.SelfLink
+		if importFormat == "" {
+			importFormat = r.SelfLinkUrl()
+		}
+	}
+
+	params := r.ExtractIdentifiers(importFormat)
+	var importQualifiers []string
+	for i, param := range params {
+		if param == "project" {
+			if i != len(params)-1 {
+				// If the last parameter is project then we want to create a new project to use for the test, so don't default from the environment
+				if r.IamPolicy.TestProjectName == "" {
+					importQualifiers = append(importQualifiers, "envvar.GetTestProjectFromEnv()")
+				} else {
+					importQualifiers = append(importQualifiers, `context["project_id"]`)
+				}
+			}
+		} else if param == "zone" && r.IamPolicy.SubstituteZoneValue {
+			importQualifiers = append(importQualifiers, "envvar.GetTestZoneFromEnv()")
+		} else if param == "region" || param == "location" {
+			testConfig := r.FirstTestConfig()
+			sample := testConfig.Sample
+			if sample.RegionOverride == "" {
+				importQualifiers = append(importQualifiers, "envvar.GetTestRegionFromEnv()")
+			} else {
+				importQualifiers = append(importQualifiers, fmt.Sprintf("\"%s\"", sample.RegionOverride))
 			}
 		} else if param == "universe_domain" {
 			importQualifiers = append(importQualifiers, "envvar.GetTestUniverseDomainFromEnv()")

@@ -1,0 +1,37 @@
+
+	zone, err := tpgresource.GetZone(d, config)
+	if err != nil {
+		return err
+	}
+	name := d.Get("name").(string)
+
+	// Fetch the list of all reservation blocks from this reservation
+	listUrl := fmt.Sprintf("https://compute.googleapis.com/compute/v1/projects/%s/zones/%s/reservations/%s/reservationBlocks?alt=json&maxResults=500", project, zone, name)
+
+	listRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    listUrl,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return fmt.Errorf("Error listing ReservationBlocks: %s", err)
+	}
+
+	blockNames := []string{}
+	if listRes != nil {
+		if items, ok := listRes["items"].([]interface{}); ok {
+			for _, item := range items {
+				if block, ok := item.(map[string]interface{}); ok {
+					if blockName, ok := block["name"].(string); ok {
+						blockNames = append(blockNames, blockName)
+					}
+				}
+			}
+		}
+	}
+
+	if err := d.Set("block_names", blockNames); err != nil {
+		return fmt.Errorf("Error setting block_names: %s", err)
+	}
