@@ -17,7 +17,6 @@ if err != nil {
 }
 
 parent := flattenComputeOrganizationSecurityPolicyParent(policyRes["parent"], d, config)
-
 var opRes map[string]interface{}
 err = ComputeOrgOperationWaitTimeWithResponse(
 	config, res, &opRes, parent.(string), "Creating OrganizationSecurityPolicyAssociation", userAgent,
