@@ -155,3 +155,8 @@ properties:
     description: |-
         The placement policy name for the instance in the format of
         projects/{project}/locations/{location}/resourcePolicies/{resource_policy}
+  - name: kmsKey
+    type: String
+    description: |-
+      The KMS key id to use for encryption of the Lustre instance.
+    immutable: true
