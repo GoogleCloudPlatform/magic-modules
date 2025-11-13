@@ -58,7 +58,7 @@ func TestAccComputeSslCertificate_update_wo(t *testing.T) {
 				ResourceName:            "google_compute_ssl_certificate.foobar",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"private_key_wo_version", "certificate_wo_version"},
+				ImportStateVerifyIgnore: []string{"private_key", "private_key_wo_version", "certificate", "certificate_wo_version"},
 			},
 			{
 				Config: testAccComputeSslCertificate_update_wo(),
@@ -71,7 +71,7 @@ func TestAccComputeSslCertificate_update_wo(t *testing.T) {
 				ResourceName:            "google_compute_ssl_certificate.foobar",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"private_key_wo_version", "certificate_wo_version"},
+				ImportStateVerifyIgnore: []string{"private_key", "private_key_wo_version", "certificate", "certificate_wo_version"},
 			},
 		},
 	})
