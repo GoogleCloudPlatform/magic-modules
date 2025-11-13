@@ -163,7 +163,6 @@ func nodeCountCustomDiff(ctx context.Context, d *schema.ResourceDiff, meta inter
 	// Otherwise when autoscaling is enabled, ignore the node count in config.
 	return d.Clear("node_count")
 }
-
 func diskSizeCutomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	key := "settings.0.disk_size"
 
