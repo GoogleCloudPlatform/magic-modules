@@ -54,7 +54,7 @@ examples:
       lb_edge_extension_name: 'elb-edge-ext'
       wasm_plugin_name: 'elb-wasm-plugin-data'
       repository_name: 'repository-standard'
-    skip_test: https://github.com/GoogleCloudPlatform/magic-modules/pull/12275#discussion_r2283175770
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String
@@ -135,10 +135,6 @@ properties:
                   and can have a maximum length of 63 characters. Additionally, the first character must be a letter
                   and the last a letter or a number.
                 required: true
-              - name: 'authority'
-                type: String
-                description: |
-                  The :authority header in the gRPC request sent from Envoy to the extension service.
               - name: 'service'
                 type: String
                 description: |
@@ -148,12 +144,6 @@ properties:
                   * To configure a plugin extension, service must be a reference to a WasmPlugin resource.
                 required: true
                 diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-              - name: 'timeout'
-                type: String
-                description: |
-                  Specifies the timeout for each individual message on the stream. The timeout must be between 10-1000 milliseconds.
-                  A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
-                diff_suppress_func: 'tpgresource.DurationDiffSuppress'
               - name: 'failOpen'
                 type: Boolean
                 description: |
