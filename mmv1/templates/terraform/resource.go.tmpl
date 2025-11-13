@@ -676,7 +676,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     }
 {{-    else -}}
 {{- if $prop.WriteOnlyPaired -}}
-  if _, ok := d.GetOk("{{ underscore $prop.Name }}_wo_version"); ok {
+  if _, ok := d.GetOk("{{ underscore $prop.Name }}_wo_version"); !ok {
 {{ end -}}
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
         return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
