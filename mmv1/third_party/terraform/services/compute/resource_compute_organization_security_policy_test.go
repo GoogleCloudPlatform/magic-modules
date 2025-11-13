@@ -29,7 +29,7 @@ func TestAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyUpdateEx
 				ResourceName:            "google_compute_organization_security_policy.policy",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent"},
+				ImportStateVerifyIgnore: []string{"display_name", "parent"},
 			},
 			{
 				Config: testAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyPostUpdateExample(context),
@@ -38,7 +38,7 @@ func TestAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyUpdateEx
 				ResourceName:            "google_compute_organization_security_policy.policy",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent"},
+				ImportStateVerifyIgnore: []string{"display_name", "parent"},
 			},
 		},
 	})
@@ -62,7 +62,7 @@ func TestAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyShortNam
 				ResourceName:            "google_compute_organization_security_policy.policy",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent"},
+				ImportStateVerifyIgnore: []string{"display_name", "parent"},
 			},
 		},
 	})
