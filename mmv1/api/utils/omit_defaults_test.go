@@ -157,7 +157,7 @@ func TestOmitDefaultsForMarshaling(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Make a copy of the original 'current' value to check for mutation
-			originalCurrent := deepCopy(tt.current)
+			originalCurrent := shallowCopy(tt.current)
 
 			// Run the function
 			result := OmitDefaultsForMarshaling(tt.current, tt.defaults)
@@ -186,10 +186,10 @@ func TestOmitDefaultsForMarshaling(t *testing.T) {
 	}
 }
 
-// deepCopy creates a shallow copy of an interface value.
+// shallowCopy creates a shallow copy of an interface value.
 // This is sufficient for the test cases to verify that the top-level
 // input struct is not mutated.
-func deepCopy(src interface{}) interface{} {
+func shallowCopy(src interface{}) interface{} {
 	if src == nil {
 		return nil
 	}

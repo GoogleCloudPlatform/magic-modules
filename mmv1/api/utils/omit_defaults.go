@@ -8,6 +8,9 @@ import (
 // that match the corresponding field in a 'defaults' struct to their zero value.
 // This is used in custom MarshalYAML implementations to allow `omitempty` to work
 // for fields that have non-zero default values.
+
+// defaults will only replace the top-level struct elements on the clone and does
+// not work for nested values
 //
 // The `current` and `defaults` arguments must be structs of the same type.
 // The function returns a pointer to the new, modified struct.
@@ -20,7 +23,6 @@ func OmitDefaultsForMarshaling(current, defaults interface{}) interface{} {
 
 	// Ensure we are working with a struct.
 	if currentVal.Kind() != reflect.Struct {
-		// Or panic, depending on desired behavior for incorrect usage.
 		return &current
 	}
 
