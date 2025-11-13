@@ -235,8 +235,7 @@ properties:
       - name: majorRevisionId
         type: String
         description: |-
-          Major revision id of the framework. If not specified, corresponds to the
-          latest revision of the framework.
+          Major revision id of the framework.
         required: true
   - name: name
     type: String
