@@ -28,6 +28,9 @@ resource "google_firebase_extensions_instance" "resize_image" {
       DO_BACKFILL          = false
       IMG_SIZES            = "200x200"
       IMG_BUCKET           = google_storage_bucket.images.name
+      BACKFILL_BATCH_SIZE  = 3
+      CONTENT_FILTER_LEVEL = "OFF"
+      REGENERATE_TOKEN     = "true"
     }
 
     system_params = {
