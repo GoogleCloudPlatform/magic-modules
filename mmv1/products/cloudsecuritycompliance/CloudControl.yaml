@@ -83,6 +83,7 @@ properties:
     description: |-
       The finding_category of the cloud control. The maximum length is 255
       characters.
+    immutable: true
   - name: majorRevisionId
     type: String
     description: Major revision of the cloud control incremented in ascending order.
