@@ -25,7 +25,7 @@ self_link: 'projects/{{project}}/instances/{{instance_id}}'
 create_url: 'projects/{{project}}/instances?instanceId={{instance_id}}'
 update_verb: 'PATCH'
 update_mask: true
-  # TODO: add API field once documentation is ready
+# TODO: add API field once documentation is ready
 import_format:
   - 'projects/{{project}}/instances/{{instance_id}}'
   - '{{project}}/{{instance_id}}'
@@ -44,7 +44,7 @@ async:
     resource_inside_response: true
 custom_code:
 examples:
-  - name: 'firebase_extentions_instance_resize_image'
+  - name: 'firebase_extensions_instance_resize_image'
     primary_resource_id: 'resize_image'
     min_version: 'beta'
     vars:
