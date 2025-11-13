@@ -1,0 +1,96 @@
+resource "google_ces_app" "my-app" {
+    location     = "us"
+    display_name = "{{index $.Vars "app_display_name"}}"
+    app_id       = "{{index $.Vars "app_id"}}"
+    time_zone_settings {   
+        time_zone = "America/Los_Angeles"
+    }
+}
+resource "google_ces_tool" "{{$.PrimaryResourceId}}" {
+    location     = "us"
+    app          = google_ces_app.my-app.name
+    tool_id      = "{{index $.Vars "tool_id"}}"
+    execution_type = "SYNCHRONOUS"
+    client_function {
+        name = "{{index $.Vars "tool_display_name"}}"
+        description = "example-description"
+        parameters {
+            description = "schema description"
+            type        = "ARRAY"
+            nullable    = true
+            required = ["some_property"]
+            enum = ["VALUE_A", "VALUE_B"]
+            ref = "#/defs/MyDefinition"
+            unique_items = true
+            defs = jsonencode({
+                SimpleString = {
+                type        = "STRING"
+                description = "A simple string definition"
+            }})
+            any_of = jsonencode([
+                {
+                type        = "STRING"
+                description = "any_of option 1: string"
+                },])
+            default = jsonencode(
+                false)
+            prefix_items = jsonencode([
+                {
+                type        = "ARRAY"
+                description = "prefix item 1"
+                },])
+            additional_properties = jsonencode(
+                {
+                type        = "BOOLEAN"
+                })
+            properties = jsonencode({
+                name = {
+                type        = "STRING"
+                description = "A name"
+            }})
+            items = jsonencode({
+                type        = "ARRAY"
+                description = "An array"
+            })
+        }
+        response {
+            description = "schema description"
+            type        = "ARRAY"
+            nullable    = true
+            required = ["some_property"]
+            enum = ["VALUE_A", "VALUE_B"]
+            ref = "#/defs/MyDefinition"
+            unique_items = true
+            defs = jsonencode({
+                SimpleString = {
+                type        = "STRING"
+                description = "A simple string definition"
+            }})
+            any_of = jsonencode([
+                {
+                type        = "STRING"
+                description = "any_of option 1: string"
+                },])
+            default = jsonencode(
+                false)
+            prefix_items = jsonencode([
+                {
+                type        = "ARRAY"
+                description = "prefix item 1"
+                },])
+            additional_properties = jsonencode(
+                {
+                type        = "BOOLEAN"
+                })
+            properties = jsonencode({
+                name = {
+                type        = "STRING"
+                description = "A name"
+            }})
+            items = jsonencode({
+                type        = "ARRAY"
+                description = "An array"
+            })
+        }
+    }
+}

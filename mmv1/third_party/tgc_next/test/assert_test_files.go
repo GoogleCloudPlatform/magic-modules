@@ -16,10 +16,10 @@ import (
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl"
 	cai2hclconverters "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/converters"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/converters/utils"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai"
 	tfplan2caiconverters "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/converters"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tgcresource"
 	"github.com/sethvargo/go-retry"
 
 	"go.uber.org/zap"
@@ -45,16 +45,16 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 		t.Skipf("test steps are unavailable")
 	}
 
-	// Create a temporary directory for running terraform.
-	tfDir, err := os.MkdirTemp(tmpDir, "terraform")
-	if err != nil {
-		t.Fatalf("error creating a temporary directory for running terraform: %v", err)
-	}
-	defer os.RemoveAll(tfDir)
-
 	logger := zaptest.NewLogger(t)
 
 	for _, stepN := range stepNumbers {
+		// Create a temporary directory for running terraform.
+		tfDir, err := os.MkdirTemp(tmpDir, fmt.Sprintf("terraform%d", stepN))
+		if err != nil {
+			t.Fatalf("error creating a temporary directory for running terraform: %v", err)
+		}
+		defer os.RemoveAll(tfDir)
+
 		subtestName := fmt.Sprintf("step%d", stepN)
 		t.Run(subtestName, func(t *testing.T) {
 			retries := 0
@@ -251,13 +251,16 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		if roundtripAsset, ok := roundtripAssetMap[assetType]; !ok {
 			return fmt.Errorf("roundtrip asset for type %s is missing", assetType)
 		} else {
-			if err := compareAssetName(asset.Name, roundtripAsset.Name); err != nil {
-				return err
+			if _, ok := ignoredFieldSet["ASSETNAME"]; !ok {
+				if err := compareAssetName(asset.Name, roundtripAsset.Name); err != nil {
+					return err
+				}
 			}
 			if diff := cmp.Diff(
 				asset.Resource,
 				roundtripAsset.Resource,
-				cmpopts.IgnoreFields(caiasset.AssetResource{}, "Version", "Data", "Location", "DiscoveryDocumentURI"),
+				// secretmanager.googleapis.com/SecretVersion has secret as parent, not project
+				cmpopts.IgnoreFields(caiasset.AssetResource{}, "Version", "Data", "Location", "Parent", "DiscoveryDocumentURI"),
 				// Consider DiscoveryDocumentURI equal if they have the same number of path segments when split by "/".
 				cmp.FilterPath(func(p cmp.Path) bool {
 					return p.Last().String() == ".DiscoveryDocumentURI"
@@ -319,7 +322,7 @@ func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 				}
 			}
 
-			project := utils.ParseFieldValue(asset.Name, "projects")
+			project := tgcresource.ParseFieldValue(asset.Name, "projects")
 			if project != "" {
 				projectKey := fmt.Sprintf("projects/%s", project)
 				if strings.HasPrefix(ancestors[0], "projects") && ancestors[0] != projectKey {
@@ -434,7 +437,7 @@ func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCac
 // Converts tf file to CAI assets
 func tfplan2caiConvert(t *testing.T, tfFileName, jsonFileName string, tfDir string, ancestryCache map[string]string, defaultProject string, logger *zap.Logger) ([]caiasset.Asset, error) {
 	// Run terraform init and terraform apply to generate tfplan.json files
-	terraformWorkflow(t, tfDir, tfFileName)
+	terraformWorkflow(t, tfDir, tfFileName, defaultProject)
 
 	planFile := fmt.Sprintf("%s.tfplan.json", tfFileName)
 	planfilePath := filepath.Join(tfDir, planFile)

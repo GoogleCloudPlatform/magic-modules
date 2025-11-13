@@ -761,6 +761,7 @@ maintenance_policy {
 
 <a name="nested_exclusion_options"></a>The `exclusion_options` block supports:
 * `scope` - (Required) The scope of automatic upgrades to restrict in the exclusion window. One of: **NO_UPGRADES | NO_MINOR_UPGRADES | NO_MINOR_OR_NODE_UPGRADES**
+* `end_time_behavior` - (Optional) The exclusion window end time behavior. One of: **UNTIL_END_OF_SUPPORT**
 
 Specify `start_time` and `end_time` in [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) "Zulu" date format.  The start time's date is
 the initial date that the window starts, and the end time is used for calculating duration.Specify `recurrence` in
@@ -831,6 +832,8 @@ Structure is [documented below](#nested_additional_ip_ranges_config).
 
 * `auto_ipam_config` - (Optional) All the information related to Auto IPAM. Structure is [documented below](#nested_auto_ipam_config)
 
+* `network_tier_config` - (Optional) Contains network tier information. Structure is [documented below](#nested_network_tier_config)
+
 <a name="nested_auto_ipam_config"></a>The auto ipam config supports:
 
 * `enabled` - (Required) The flag that enables Auto IPAM on this cluster.
@@ -846,6 +849,14 @@ Structure is [documented below](#nested_additional_ip_ranges_config).
 * `subnetwork` - (Required) Name of the subnetwork. This can be the full path of the subnetwork or just the name.
 
 * `pod_ipv4_range_names`- (Required) List of secondary ranges names within this subnetwork that can be used for pod IPs.
+
+<a name="nested_network_tier_config"></a>The `network_tier_config` block supports:
+
+* `network_tier` - (Required) Network tier configuration.
+    Accepted values are:
+    * `NETWORK_TIER_DEFAULT`: (Default) Use project-level configuration.
+    * `NETWORK_TIER_PREMIUM`: Premium network tier.
+    * `NETWORK_TIER_STANDARD`: Standard network tier.
 
 
 <a name="nested_master_auth"></a>The `master_auth` block supports:
@@ -1633,7 +1644,7 @@ linux_node_config {
 
 * `additive_vpc_scope_dns_domain` - (Optional) This will enable Cloud DNS additive VPC scope. Must provide a domain name that is unique within the VPC. For this to work `cluster_dns = "CLOUD_DNS"` and `cluster_dns_scope = "CLUSTER_SCOPE"` must both be set as well.
 
-* `cluster_dns` - (Optional) Which in-cluster DNS provider should be used. `PROVIDER_UNSPECIFIED` (default) or `PLATFORM_DEFAULT` or `CLOUD_DNS`.
+* `cluster_dns` - (Optional) Which in-cluster DNS provider should be used. `PROVIDER_UNSPECIFIED` (default) or `PLATFORM_DEFAULT` or `CLOUD_DNS` or `KUBE_DNS`.
 
 * `cluster_dns_scope` - (Optional) The scope of access to cluster DNS records. `DNS_SCOPE_UNSPECIFIED` or `CLUSTER_SCOPE` or `VPC_SCOPE`. If the `cluster_dns` field is set to `CLOUD_DNS`, `DNS_SCOPE_UNSPECIFIED` and empty/null behave like `CLUSTER_SCOPE`.
 
