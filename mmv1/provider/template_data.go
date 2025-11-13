@@ -254,8 +254,18 @@ func (td *TemplateData) GenerateIamDatasourceDocumentationFile(filePath string, 
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
-func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.Resource) {
+func (td *TemplateData) GenerateIamPolicyTestFileLegacy(filePath string, resource api.Resource) {
 	templatePath := "templates/terraform/examples/base_configs/iam_test_file.go.tmpl"
+	templates := []string{
+		templatePath,
+		"templates/terraform/env_var_context.go.tmpl",
+		"templates/terraform/iam/iam_test_setup_legacy.go.tmpl",
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
+func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/samples/base_configs/iam_test_file.go.tmpl"
 	templates := []string{
 		templatePath,
 		"templates/terraform/env_var_context.go.tmpl",
