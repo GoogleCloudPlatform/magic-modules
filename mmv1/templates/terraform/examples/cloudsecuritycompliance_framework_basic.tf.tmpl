@@ -1,0 +1,60 @@
+resource "google_cloud_security_compliance_framework" "{{$.PrimaryResourceId}}" {
+  organization = "{{index $.TestEnvVars "org_id"}}"
+  location     = "global"
+  framework_id = "{{index $.Vars "framework_name"}}"
+  
+  display_name = "Terraform Framework Name"
+  description  = "An Terraform description for the framework"
+  
+  cloud_control_details {
+		name              = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/builtin-assess-resource-availability"
+		major_revision_id = "1"
+    
+    parameters {
+      name = "location"
+      parameter_value {
+        string_value = "us-central1"
+      }
+    }
+  }
+
+    cloud_control_details {
+		name              = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/builtin-cmek-key-in-use-for-bigquery-table"
+		major_revision_id = "1"
+    
+    parameters {
+      name = "location"
+      parameter_value {
+        string_list_value {
+          values = ["us-central1", "us-west1"]
+        }
+      }
+    }
+  }
+
+  cloud_control_details {
+		name              = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/builtin-enable-automatic-backups-cloud-sql"
+		major_revision_id = "1"
+    
+    parameters {
+      name = "location"
+      parameter_value {
+        bool_value = true
+      }
+    }
+  }
+
+  cloud_control_details {
+		name              = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/cloudControls/builtin-require-cmek-on-bigquery-datasets"
+		major_revision_id = "1"
+    
+    parameters {
+      name = "location"
+      parameter_value {
+        number_value = 1
+      }
+    }
+  }
+
+  
+}
