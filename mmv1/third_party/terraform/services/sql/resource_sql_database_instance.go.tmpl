@@ -163,7 +163,7 @@ func nodeCountCustomDiff(ctx context.Context, d *schema.ResourceDiff, meta inter
 	// Otherwise when autoscaling is enabled, ignore the node count in config.
 	return d.Clear("node_count")
 }
- 
+
 func diskSizeCutomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	key := "settings.0.disk_size"
 
@@ -227,6 +227,7 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 			}),
 			customdiff.IfValueChange("instance_type", isReplicaPromoteRequested, checkPromoteConfigurationsAndUpdateDiff),
 			privateNetworkCustomizeDiff,
+			enhancedBackupManagerCustomizeDiff,
 			pitrSupportDbCustomizeDiff,
 			nodeCountCustomDiff,
 		),
@@ -1432,6 +1433,62 @@ func stringContainsSlice(arr []string, str string) bool {
 		}
 	}
 	return false
+}
+
+// enhancedBackupManagerCustomizeDiff suppresses diff changes to settings.backup_configuration
+// when the SQL instance is managed by Google Cloud Backup and Disaster Recovery (DR) Service.
+func enhancedBackupManagerCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	project := ""
+	if v := d.Get("project"); v != nil {
+		project = v.(string)
+	}
+
+	name := ""
+	if v := d.Get("name"); v != nil {
+		name = v.(string)
+	}
+
+	if project == "" || name == "" {
+		return nil
+	}
+
+	config := meta.(*transport_tpg.Config)
+	client := config.NewSqlAdminClient(config.UserAgent)
+	instance, err := client.Instances.Get(project, name).Do()
+    if err != nil {
+        // If we can't read the remote instance, don't fail the plan; just skip suppression.
+        var gerr *googleapi.Error
+        if errors.As(err, &gerr) {
+            return nil
+        }
+        return nil
+    }
+
+    if instance == nil || instance.Settings == nil || instance.Settings.BackupConfiguration == nil {
+        return nil
+    }
+
+    // Only suppress when backend reports ENHANCED backup manager.
+    if !strings.EqualFold(instance.Settings.BackupConfiguration.BackupTier, "ENHANCED") {
+        return nil
+    }
+
+	// Clear the diff since ENHANCED backup manager is enabled
+	if d.HasChange("settings.0.backup_configuration") {
+		lifecycleBlock := `lifecycle { ignore_changes = [settings[0].backup_configuration] }`
+	    warningMessage := fmt.Sprintf(
+            "[WARN] Instance %s is managed by Google Cloud Backup and Disaster Recovery (BackupDR). "+
+            "Terraform will not manage the 'settings.0.backup_configuration' block. "+
+            "Any changes to this block in your Terraform configuration will be ignored."+
+            "To suppress this warning permanently, add the following lifecycle block to your Terraform configuration: %s",
+            name, lifecycleBlock,
+        )
+        log.Printf(warningMessage)
+		if err := d.Clear("settings.0.backup_configuration"); err != nil {
+			return err
+		}
+	}
+    return nil
 }
 
 // Point in time recovery for MySQL database instances needs binary_log_enabled set to true and
