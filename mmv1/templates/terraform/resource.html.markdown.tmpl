@@ -110,7 +110,7 @@ The following arguments are supported:
 {{ "" }}
 {{ "" }}
 {{- range $p := $.RootProperties }}
-	{{- if and $p.Required }}
+	{{- if $p.Required }}
 {{- trimTemplate "property_documentation.html.markdown.tmpl" $p -}}
 	{{- end }}
 {{- end }}
