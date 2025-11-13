@@ -92,6 +92,8 @@ properties:
       function: 'validation.IntBetween(0, 65535)'
   - name: 'metadata'
     type: KeyValuePairs
+    update_mask_fields:
+      - 'annotations'
     description: |
       Metadata for the endpoint. This data can be consumed
       by service clients. The entire metadata dictionary may contain

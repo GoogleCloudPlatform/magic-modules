@@ -75,6 +75,8 @@ properties:
     output: true
   - name: 'metadata'
     type: KeyValuePairs
+    update_mask_fields:
+      - 'annotations'
     description: |
       Metadata for the service. This data can be consumed
       by service clients. The entire metadata dictionary may contain
