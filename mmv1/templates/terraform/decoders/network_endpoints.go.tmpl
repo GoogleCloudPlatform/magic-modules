@@ -42,7 +42,6 @@ if err != nil {
 // listNetworkEndpoints returns data in a different structure, so we need to
 // convert to the Terraform schema.
 var transformed []interface{}
-
 for _, e := range allEndpoints {
 	if item, ok := e.(map[string]interface{}); ok {
 		if t, ok := item["networkEndpoint"]; ok {
