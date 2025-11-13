@@ -1,0 +1,301 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: CloudControl
+description: Cloud controls are the building blocks that make up frameworks. Each cloud control is a unit encapsulating various platform-specific logic for prevention, detection, and audit.
+references:
+  api: https://docs.cloud.google.com/security-command-center/docs/reference/cloudsecuritycompliance/rest/v1/organizations.locations.cloudControls
+base_url: organizations/{{organization}}/locations/{{location}}/cloudControls
+update_mask: true
+self_link: organizations/{{organization}}/locations/{{location}}/cloudControls/{{cloud_control_id}}
+create_url: organizations/{{organization}}/locations/{{location}}/cloudControls?cloudControlId={{cloud_control_id}}
+update_verb: PATCH
+id_format: organizations/{{organization}}/locations/{{location}}/cloudControls/{{cloud_control_id}}
+import_format:
+  - organizations/{{organization}}/locations/{{location}}/cloudControls/{{cloud_control_id}}
+examples:
+  - name: "cloudsecuritycompliance_cloudcontrol_basic"
+    primary_resource_id: "example"
+    vars:
+      cloudcontrol_name: "example-cloudcontrol"
+    test_env_vars:
+      org_id: "ORG_ID"
+autogen_status: Q2xvdWRDb250cm9s
+custom_code:
+  encoder: "templates/terraform/encoders/cloudsecuritycompliance_cloudcontrol.go.tmpl"
+parameters:
+  - name: organization
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122. Currently, only "global" is supported as a location.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: cloudControlId
+    type: String
+    description: |-
+      ID of the CloudControl.
+      This is the last segment of the CloudControl resource name.
+      Format: `^a-zA-Z{0,61}[a-zA-Z0-9]$`.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: categories
+    type: Array
+    description: The categories of the cloud control.
+    immutable: true
+    item_type:
+      type: String
+  - name: createTime
+    type: String
+    description: |-
+      The last updated time of the cloud control.
+      The create_time is used because a new CC is created whenever we update an
+      existing CC.
+    output: true
+  - name: description
+    type: String
+    description: A description of the cloud control. The maximum length is 2000 characters.
+  - name: displayName
+    type: String
+    description: |-
+      The display name of the cloud control. The maximum length is 200
+      characters.
+  - name: findingCategory
+    type: String
+    description: |-
+      The finding_category of the cloud control. The maximum length is 255
+      characters.
+    immutable: true
+  - name: majorRevisionId
+    type: String
+    description: Major revision of the cloud control incremented in ascending order.
+    output: true
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the cloud control.
+      Format:
+      organizations/{organization}/locations/{location}/cloudControls/{cloud_control_id}
+    output: true
+  - name: parameterSpec
+    type: Array
+    description: The parameter spec of the cloud control.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: defaultValue
+          type: NestedObject
+          description: Possible parameter value types.
+          properties:
+            - name: boolValue
+              type: Boolean
+              description: Represents a boolean value.
+            - name: numberValue
+              type: Double
+              description: Represents a double value.
+            - name: stringListValue
+              type: NestedObject
+              description: A list of strings.
+              properties:
+                - name: values
+                  type: Array
+                  description: The strings in the list.
+                  required: true
+                  item_type:
+                    type: String
+            - name: stringValue
+              type: String
+              description: Represents a string value.
+        - name: description
+          type: String
+          description: The description of the parameter. The maximum length is 2000 characters.
+        - name: displayName
+          type: String
+          description: The display name of the parameter. The maximum length is 200 characters.
+        - name: isRequired
+          type: Boolean
+          description: if the parameter is required
+          required: true
+        - name: name
+          type: String
+          description: The name of the parameter.
+          required: true
+        - name: substitutionRules
+          type: Array
+          description: List of parameter substitutions.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: attributeSubstitutionRule
+                type: NestedObject
+                description: Attribute at the given path is substituted entirely.
+                properties:
+                  - name: attribute
+                    type: String
+                    description: |-
+                      Fully qualified proto attribute path (in dot notation).
+                      Example: rules[0].cel_expression.resource_types_values
+              - name: placeholderSubstitutionRule
+                type: NestedObject
+                description: Placeholder is substituted in the rendered string.
+                properties:
+                  - name: attribute
+                    type: String
+                    description: Fully qualified proto attribute path (e.g., dot notation)
+        - name: validation
+          type: NestedObject
+          description: Validation of the parameter.
+          properties:
+            - name: allowedValues
+              type: NestedObject
+              description: Allowed set of values for the parameter.
+              properties:
+                - name: values
+                  type: Array
+                  description: List of allowed values for the parameter.
+                  required: true
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: boolValue
+                        type: Boolean
+                        description: Represents a boolean value.
+                      - name: numberValue
+                        type: Double
+                        description: Represents a double value.
+                      - name: stringListValue
+                        type: NestedObject
+                        description: A list of strings.
+                        properties:
+                          - name: values
+                            type: Array
+                            description: The strings in the list.
+                            required: true
+                            item_type:
+                              type: String
+                      - name: stringValue
+                        type: String
+                        description: Represents a string value.
+            - name: intRange
+              type: NestedObject
+              description: Number range for number parameters.
+              properties:
+                - name: max
+                  type: String
+                  description: Maximum allowed value for the numeric parameter (inclusive).
+                  required: true
+                - name: min
+                  type: String
+                  description: Minimum allowed value for the numeric parameter (inclusive).
+                  required: true
+            - name: regexpPattern
+              type: NestedObject
+              description: Regular Expression Validator for parameter values.
+              properties:
+                - name: pattern
+                  type: String
+                  description: Regex Pattern to match the value(s) of parameter.
+                  required: true
+        - name: valueType
+          type: String
+          description: |-
+            Parameter value type.
+            Possible values:
+            STRING
+            BOOLEAN
+            STRINGLIST
+            NUMBER
+            ONEOF
+          required: true
+  - name: relatedFrameworks
+    type: Array
+    description: The Frameworks that include this CloudControl
+    output: true
+    item_type:
+      type: String
+  - name: remediationSteps
+    type: String
+    description: |-
+      The remediation steps for the findings generated by the cloud control. The
+      maximum length is 400 characters.
+  - name: rules
+    type: Array
+    description: The Policy to be enforced to prevent/detect resource non-compliance.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: celExpression
+          type: NestedObject
+          description: |-
+            A [CEL
+            expression](https://cloud.google.com/certificate-authority-service/docs/using-cel).
+          properties:
+            - name: expression
+              type: String
+              description: |-
+                Logic expression in CEL language.
+                The max length of the condition is 1000 characters.
+              required: true
+            - name: resourceTypesValues
+              type: NestedObject
+              description: A list of strings.
+              properties:
+                - name: values
+                  type: Array
+                  description: The strings in the list.
+                  required: true
+                  item_type:
+                    type: String
+        - name: description
+          type: String
+          description: Description of the Rule. The maximum length is 2000 characters.
+        - name: ruleActionTypes
+          type: Array
+          description: The functionality enabled by the Rule.
+          required: true
+          item_type:
+            type: String
+  - name: severity
+    type: String
+    description: |-
+      Possible values:
+      CRITICAL
+      HIGH
+      MEDIUM
+      LOW
+  - name: supportedCloudProviders
+    type: Array
+    description: cloud providers supported
+    immutable: true
+    item_type:
+      type: String
+  - name: supportedEnforcementModes
+    type: Array
+    description: The supported enforcement mode of the cloud control. Default is DETECTIVE.
+    output: true
+    item_type:
+      type: String
+  - name: supportedTargetResourceTypes
+    type: Array
+    description: target resource types supported by the CloudControl.
+    output: true
+    item_type:
+      type: String
