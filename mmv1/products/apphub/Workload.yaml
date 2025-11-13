@@ -165,8 +165,8 @@ properties:
               output: true
               properties:
                 - name: 'metadataStruct'
-                  type: NestedObject
-                  description: "The metadata contents."
+                  type: String
+                  description: "The metadata contents as a JSON string."
                   output: true
                 - name: 'extendedMetadataSchema'
                   type: String
