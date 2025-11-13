@@ -103,17 +103,17 @@ properties:
                   Represents an event indicating the transfer of a conversation to a different
                   agent.
                 properties:
-                - name: displayName
-                  type: String
-                  description: Display name of the agent.
-                  output: true
-                - name: targetAgent
-                  type: String
-                  description: |-
-                    The agent to which the conversation is being transferred. The agent will
-                    handle the conversation from this point forward.
-                    Format: `projects/{project}/locations/{location}/apps/{app}/agents/{agent}`
-                  required: true
+                  - name: displayName
+                    type: String
+                    description: Display name of the agent.
+                    output: true
+                  - name: targetAgent
+                    type: String
+                    description: |-
+                      The agent to which the conversation is being transferred. The agent will
+                      handle the conversation from this point forward.
+                      Format: `projects/{project}/locations/{location}/apps/{app}/agents/{agent}`
+                    required: true
               - name: image
                 type: NestedObject
                 description: Represents an image input or output in the conversation.
@@ -138,84 +138,84 @@ properties:
                 type: NestedObject
                 description: Request for the client or the agent to execute the specified tool.
                 properties:
-                - name: args
-                  type: String
-                  description: The input parameters and values for the tool in JSON object format.
-                  custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                  custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
-                  validation:
-                    function: 'validation.StringIsJSON'
-                - name: displayName
-                  type: String
-                  description: Display name of the tool.
-                  output: true
-                - name: id
-                  type: String
-                  description: |-
-                    The unique identifier of the tool call. If populated, the client should
-                    return the execution result with the matching ID in
-                    ToolResponse.
-                - name: tool
-                  type: String
-                  description: |-
-                    The name of the tool to execute.
-                    Format: `projects/{project}/locations/{location}/apps/{app}/tools/{tool}`
-                - name: toolsetTool
-                  type: NestedObject
-                  description: A tool that is created from a toolset.
-                  properties:
-                  - name: toolset
+                  - name: args
+                    type: String
+                    description: The input parameters and values for the tool in JSON object format.
+                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                    validation:
+                      function: 'validation.StringIsJSON'
+                  - name: displayName
+                    type: String
+                    description: Display name of the tool.
+                    output: true
+                  - name: id
                     type: String
                     description: |-
-                      The resource name of the Toolset from which this tool is derived.
-                      Format:
-                      `projects/{project}/locations/{location}/apps/{app}/toolsets/{toolset}`
-                    required: true
-                  - name: toolId
+                      The unique identifier of the tool call. If populated, the client should
+                      return the execution result with the matching ID in
+                      ToolResponse.
+                  - name: tool
+                    type: String
                     description: |-
-                      The tool ID to filter the tools to retrieve the schema for.
+                      The name of the tool to execute.
+                      Format: `projects/{project}/locations/{location}/apps/{app}/tools/{tool}`
+                  - name: toolsetTool
+                    type: NestedObject
+                    description: A tool that is created from a toolset.
+                    properties:
+                      - name: toolset
+                        type: String
+                        description: |-
+                          The resource name of the Toolset from which this tool is derived.
+                          Format:
+                          `projects/{project}/locations/{location}/apps/{app}/toolsets/{toolset}`
+                        required: true
+                      - name: toolId
+                        description: |-
+                          The tool ID to filter the tools to retrieve the schema for.
               - name: toolResponse
                 type: NestedObject
                 description: The execution result of a specific tool from the client or the agent.
                 properties:
-                - name: displayName
-                  type: String
-                  description: Display name of the tool.
-                  output: true
-                - name: id
-                  type: String
-                  description: The matching ID of the tool call the response is for.
-                - name: response
-                  type: String
-                  description: |-
-                    The tool execution result in JSON object format.
-                    Use "output" key to specify tool response and "error" key to specify
-                    error details (if any). If "output" and "error" keys are not specified,
-                    then whole "response" is treated as tool execution result.
-                  required: true
-                  custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                  custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
-                  validation:
-                    function: 'validation.StringIsJSON'
-                - name: tool
-                  type: String
-                  description: |-
-                    The name of the tool to execute.
-                    Format: `projects/{project}/locations/{location}/apps/{app}/tools/{tool}`
-                - name: toolsetTool
-                  type: NestedObject
-                  description: A tool that is created from a toolset.
-                  properties:
-                  - name: toolset
+                  - name: displayName
+                    type: String
+                    description: Display name of the tool.
+                    output: true
+                  - name: id
+                    type: String
+                    description: The matching ID of the tool call the response is for.
+                  - name: response
                     type: String
                     description: |-
-                      The resource name of the Toolset from which this tool is derived.
-                      Format:
-                      `projects/{project}/locations/{location}/apps/{app}/toolsets/{toolset}`
+                      The tool execution result in JSON object format.
+                      Use "output" key to specify tool response and "error" key to specify
+                      error details (if any). If "output" and "error" keys are not specified,
+                      then whole "response" is treated as tool execution result.
                     required: true
-                  - name: toolId
+                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                    validation:
+                      function: 'validation.StringIsJSON'
+                  - name: tool
+                    type: String
                     description: |-
-                      The tool ID to filter the tools to retrieve the schema for.
+                      The name of the tool to execute.
+                      Format: `projects/{project}/locations/{location}/apps/{app}/tools/{tool}`
+                  - name: toolsetTool
+                    type: NestedObject
+                    description: A tool that is created from a toolset.
+                    properties:
+                      - name: toolset
+                        type: String
+                        description: |-
+                          The resource name of the Toolset from which this tool is derived.
+                          Format:
+                          `projects/{project}/locations/{location}/apps/{app}/toolsets/{toolset}`
+                        required: true
+                      - name: toolId
+                        description: |-
+                          The tool ID to filter the tools to retrieve the schema for.
               - name: updatedVariables
                 type: String
                 description: |-

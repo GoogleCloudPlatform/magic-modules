@@ -48,7 +48,7 @@ func TestAccCESExample_update(t *testing.T) {
 }
 
 func testAccCESExample_cesExampleBasicExample_full(context map[string]interface{}) string {
-    return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_ces_app" "my-app" {
     location     = "us"
     display_name = "tf-test-my-app%{random_suffix}"
