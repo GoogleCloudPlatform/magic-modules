@@ -1451,7 +1451,7 @@ func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bo
 				return googleoauth.Credentials{}, fmt.Errorf("Attempted to load application default credentials since neither `credentials` nor `access_token` was set in the provider block.  No credentials loaded. To use your gcloud credentials, run 'gcloud auth application-default login'.  Original error: %w", err)
 			}
 		} else {
-			if AreCredentialsX509() {
+			if AreADCCredentialsX509() {
 				log.Printf("[INFO] Authenticating using EnableNewAuthLibrary")
 				creds, err = transport.Creds(context.Background(), option.WithScopes(clientScopes...), internaloption.EnableNewAuthLibrary())
 				if err != nil {
@@ -1491,7 +1491,7 @@ func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bo
 }
 
 // parse application default credentials to determine if they are X.509 certs
-func AreCredentialsX509() bool {
+func AreADCCredentialsX509() bool {
 	adcCreds := MultiEnvSearch([]string{
 		"GOOGLE_APPLICATION_CREDENTIALS",
 	})
