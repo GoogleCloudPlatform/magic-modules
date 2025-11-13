@@ -21,6 +21,13 @@ type ComplexStructOmit struct {
 }
 
 func TestOmitDefaultsForMarshaling(t *testing.T) {
+	// Note: These tests verify that OmitDefaultsForMarshaling operates only on
+	// top-level, primitive-like fields. Nested structs, slices, and maps are
+	// intentionally ignored. This is because the function is designed to be
+	// called from within a MarshalYAML method. The standard YAML marshaler
+	// handles traversal, and nested objects are expected to have their own
+	// MarshalYAML methods if they also require default omission.
+
 	// Define common structs for use in tests
 	defaultSimple := SimpleStructOmit{
 		Name:    "default-name",
@@ -114,7 +121,7 @@ func TestOmitDefaultsForMarshaling(t *testing.T) {
 			},
 		},
 		{
-			name: "Complex types are ignored even if they match",
+			name: "Ignores slice and map fields (non-primitive)",
 			current: ComplexStructOmit{
 				ID:   "default-id", // Match -> zero
 				Tags: []string{"default"},
@@ -123,7 +130,7 @@ func TestOmitDefaultsForMarshaling(t *testing.T) {
 				},
 			},
 			defaults: defaultComplex,
-			expected: ComplexStructOmit{ // Only ID should be zeroed
+			expected: ComplexStructOmit{ // Only primitive 'ID' field should be zeroed
 				ID:   "",
 				Tags: []string{"default"}, // Ignored, so it remains
 				Metadata: map[string]string{
@@ -132,7 +139,7 @@ func TestOmitDefaultsForMarshaling(t *testing.T) {
 			},
 		},
 		{
-			name: "Pointer to struct field is ignored",
+			name: "Ignores pointer to struct field (non-primitive)",
 			current: ComplexStructOmit{
 				ID:     "current-id",
 				Simple: &SimpleStructOmit{Name: "test"}, // This field should be ignored
@@ -177,11 +184,6 @@ func TestOmitDefaultsForMarshaling(t *testing.T) {
 			if !reflect.DeepEqual(tt.current, originalCurrent) {
 				t.Errorf("Original input was mutated.\n original: %#v\n after:    %#v", originalCurrent, tt.current)
 			}
-
-			// The problematic assertion block was here. It has been removed because
-			// the primary assertion (step 2) already correctly handles all cases,
-			// including non-structs, by checking the value inside the returned pointer.
-			// The original block caused a panic due to an incorrect type assertion.
 		})
 	}
 }
