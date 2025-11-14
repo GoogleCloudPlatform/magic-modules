@@ -796,6 +796,43 @@ func (t *Type) GetDescription() string {
 	return strings.TrimSpace(strings.TrimRight(t.Description, "\n"))
 }
 
+func (t *Type) FieldType() string {
+	ret := ""
+	if t.Required {
+		ret += "\n  (Required"
+	} else if !t.Output {
+		ret += "\n  (Optional"
+	} else if t.Output && t.ParentMetadata != nil {
+		ret += "\n  (Output"
+	}
+
+	if t.WriteOnlyLegacy || t.WriteOnly {
+		ret += ", Write-Only"
+	}
+
+	if t.MinVersion == "beta" && t.ResourceMetadata.MinVersion != "beta" {
+		if ret == "" {
+			ret = "\n  ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)"
+		} else {
+			ret += ", [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)"
+		}
+	}
+
+	if t.DeprecationMessage != "" {
+		if ret == "" {
+			ret = "\n  (Deprecated"
+		} else {
+			ret += ", Deprecated"
+		}
+	}
+
+	if ret != "" {
+		ret += ")"
+	}
+
+	return ret
+}
+
 // TODO rewrite: validation
 // class Array < Composite
 //     check :item_type, type: [::String, NestedObject, ResourceRef, Enum], required: true
