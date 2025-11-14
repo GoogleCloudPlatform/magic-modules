@@ -100,35 +100,27 @@ func TestSpannerDatabase_resourceSpannerEncryptionConfigCustomDiffFuncForceNew(t
 	t.Parallel()
 
 	cases := map[string]struct {
-		before   interface{}
-		after    interface{}
+		before   map[string]interface{}
+		after    map[string]interface{}
 		forcenew bool
 	}{
 		"kms_key_name_and_kms_key_names_are_same": {
-			before: []interface{}{
-				map[string]interface{}{
-					"kms_key_name": "key1",
-				},
+			before: map[string]interface{}{
+				"encryption_config.0.kms_key_name": "key1",
 			},
-			after: []interface{}{
-				map[string]interface{}{
-					"kms_key_name":  "key1",
-					"kms_key_names": []interface{}{"key1"},
-				},
+			after: map[string]interface{}{
+				"encryption_config.0.kms_key_name":  "key1",
+				"encryption_config.0.kms_key_names": []interface{}{"key1"},
 			},
 			forcenew: false,
 		},
 		"kms_key_name_and_kms_key_names_are_different": {
-			before: []interface{}{
-				map[string]interface{}{
-					"kms_key_name": "key1",
-				},
+			before: map[string]interface{}{
+				"encryption_config.0.kms_key_name": "key1",
 			},
-			after: []interface{}{
-				map[string]interface{}{
-					"kms_key_name":  "key1",
-					"kms_key_names": []interface{}{"key2"},
-				},
+			after: map[string]interface{}{
+				"encryption_config.0.kms_key_name":  "key1",
+				"encryption_config.0.kms_key_names": []interface{}{"key2"},
 			},
 			forcenew: true,
 		},
@@ -136,14 +128,10 @@ func TestSpannerDatabase_resourceSpannerEncryptionConfigCustomDiffFuncForceNew(t
 
 	for tn, tc := range cases {
 		d := &tpgresource.ResourceDiffMock{
-			Before: map[string]interface{}{
-				"encryption_config": tc.before,
-			},
-			After: map[string]interface{}{
-				"encryption_config": tc.after,
-			},
+			Before: tc.before,
+			After:  tc.after,
 		}
-		err := resourceSpannerEncryptionConfigCustomDiff(d)
+		err := resourceSpannerEncryptionConfigCustomDiffFunc(d)
 		if err != nil {
 			t.Errorf("failed, expected no error but received - %s for the condition %s", err, tn)
 		}
@@ -152,3 +140,4 @@ func TestSpannerDatabase_resourceSpannerEncryptionConfigCustomDiffFuncForceNew(t
 		}
 	}
 }
+
