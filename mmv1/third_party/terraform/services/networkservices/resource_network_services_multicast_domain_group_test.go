@@ -49,7 +49,7 @@ func TestAccNetworkServicesMulticastDomainGroup_networkServicesMulticastDomainGr
 				Config: testAccNetworkServicesMulticastDomainGroup_networkServicesMulticastDomainGroupUpdateExample_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_network_services_multicast_domain_activation.mda_test", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_network_services_multicast_domain_group.mdg_test", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
