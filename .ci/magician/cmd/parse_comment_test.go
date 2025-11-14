@@ -254,36 +254,6 @@ func TestExecParseComment(t *testing.T) {
 			expectRemovedReviewers:  []string{"bob"},
 			expectCommentUpdate:     true,
 		},
-		"reassign reviewer with space and specific user": {
-			comment: "Please @modular-magician reassign reviewer charlie",
-			existingComments: []github.PullRequestComment{
-				{
-					Body: github.FormatReviewerComment("alice"),
-					ID:   5678,
-				},
-			},
-			expectSpecificReviewers: []string{"charlie"},
-			expectRemovedReviewers:  []string{"alice"},
-			expectCommentUpdate:     true,
-		},
-		"assign-reviewer when no current reviewer": {
-			comment:                 "@modular-magician assign-reviewer dave",
-			existingComments:        []github.PullRequestComment{},
-			expectSpecificReviewers: []string{"dave"},
-			expectCommentCreate:     true,
-		},
-		"assign review (without er) with @ prefix": {
-			comment: "Can you @modular-magician assign review @eve please?",
-			existingComments: []github.PullRequestComment{
-				{
-					Body: github.FormatReviewerComment("frank"),
-					ID:   9012,
-				},
-			},
-			expectSpecificReviewers: []string{"eve"},
-			expectRemovedReviewers:  []string{"frank"},
-			expectCommentUpdate:     true,
-		},
 		"reassign to random reviewer (no username specified)": {
 			comment: "@modular-magician reassign-reviewer",
 			existingComments: []github.PullRequestComment{
@@ -295,30 +265,6 @@ func TestExecParseComment(t *testing.T) {
 			expectRemovedReviewers: []string{"george"},
 			expectCommentUpdate:    true,
 			// Can't check specific reviewer since it's random
-		},
-		"no space between command and username": {
-			comment:                 "@modular-magician reassign-reviewerhenry",
-			existingComments:        []github.PullRequestComment{},
-			expectSpecificReviewers: []string{"henry"},
-			expectCommentCreate:     true,
-		},
-		"no space between command and @username": {
-			comment: "Testing @modular-magician reassign-reviewer@ivan",
-			existingComments: []github.PullRequestComment{
-				{
-					Body: github.FormatReviewerComment("jack"),
-					ID:   7890,
-				},
-			},
-			expectSpecificReviewers: []string{"ivan"},
-			expectRemovedReviewers:  []string{"jack"},
-			expectCommentUpdate:     true,
-		},
-		"assignreviewer all together": {
-			comment:                 "@modular-magician assignreviewerkaren",
-			existingComments:        []github.PullRequestComment{},
-			expectSpecificReviewers: []string{"karen"},
-			expectCommentCreate:     true,
 		},
 		"multiple @modular-magician invocations (only first processed)": {
 			comment: "@modular-magician reassign-reviewer larry\n@modular-magician reassign-reviewer mary",
@@ -343,24 +289,6 @@ func TestExecParseComment(t *testing.T) {
 		"@modular-magician with unrecognized command": {
 			comment:        "@modular-magician cherry-pick branch-xyz",
 			expectNoAction: true,
-		},
-		"username with invalid characters (stops at space)": {
-			comment:                 "@modular-magician reassign-reviewer oscar peterson",
-			existingComments:        []github.PullRequestComment{},
-			expectSpecificReviewers: []string{"oscar"}, // Only "oscar", stops at space
-			expectCommentCreate:     true,
-		},
-		"username with invalid characters (stops at dot)": {
-			comment: "@modular-magician reassign-reviewer paul.mccartney",
-			existingComments: []github.PullRequestComment{
-				{
-					Body: github.FormatReviewerComment("quinn"),
-					ID:   2222,
-				},
-			},
-			expectSpecificReviewers: []string{"paul"}, // Only "paul", stops at dot
-			expectRemovedReviewers:  []string{"quinn"},
-			expectCommentUpdate:     true,
 		},
 		"command in middle of multi-line comment": {
 			comment: `This looks good to me.

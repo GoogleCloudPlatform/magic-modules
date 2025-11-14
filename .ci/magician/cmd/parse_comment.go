@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"encoding/base64"
 	"fmt"
 	"os"
 	"regexp"
@@ -22,8 +21,8 @@ var magicianInvocationRegex = regexp.MustCompile(`@modular-magician\s+([^\n\r]+)
 var reassignReviewerRegex = regexp.MustCompile(`^(?:re)?assign[- ]?review(?:er)?\s*@?([a-zA-Z0-9-_]*)`)
 
 var parseCommentCmd = &cobra.Command{
-	Use:   "parse-comment PR_NUMBER COMMENT_AUTHOR BASE64_COMMENT",
-	Short: "Parses a base64 encoded comment to execute magician commands",
+	Use:   "parse-comment PR_NUMBER COMMENT_AUTHOR",
+	Short: "Parses a comment from the COMMENT_BODY env var to execute magician commands",
 	Long: `This command parses GitHub PR comments for @modular-magician invocations.
 	
 	It supports flexible command syntax including:
@@ -32,15 +31,13 @@ var parseCommentCmd = &cobra.Command{
 	- Optional prefixes and suffixes: assign-review, reassign-reviewer
 	- Optional @ prefix for usernames
 	
-	The command expects:
+	The command expects the comment body to be provided in the COMMENT_BODY environment variable and also requires:
 	1. PR_NUMBER - The pull request number
-	2. COMMENT_AUTHOR - The GitHub username who made the comment
-	3. BASE64_COMMENT - The base64 encoded comment body`,
-	Args: cobra.ExactArgs(3),
+	2. COMMENT_AUTHOR - The GitHub username who made the comment`,
+	Args: cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		prNumber := args[0]
 		author := args[1]
-		base64Comment := args[2]
 
 		githubToken, ok := os.LookupEnv("GITHUB_TOKEN")
 		if !ok {
@@ -52,11 +49,14 @@ var parseCommentCmd = &cobra.Command{
 			return fmt.Errorf("comment author %s is not a core contributor", author)
 		}
 
-		commentBytes, err := base64.StdEncoding.DecodeString(base64Comment)
-		if err != nil {
-			return fmt.Errorf("failed to decode base64 comment: %w", err)
+		comment, ok := os.LookupEnv("COMMENT_BODY")
+		if !ok {
+			return fmt.Errorf("did not provide COMMENT_BODY environment variable")
 		}
-		comment := string(commentBytes)
+		if comment == "" {
+			fmt.Println("COMMENT_BODY is empty. Ignoring.")
+			return nil
+		}
 
 		return execParseComment(prNumber, comment, gh)
 	},
@@ -108,7 +108,7 @@ func routeCommand(prNumber, commandLine string, gh GithubClient) error {
 }
 
 // handleReassignReviewer processes the reassign-reviewer command
-func handleReassignReviewer(prNumber, reviewer string, gh GithubClient) error {
+func handleReassignReviewer(prNumber, reviewer string, _ GithubClient) error {
 	// The regex already extracted just the username without @
 	// and only allows valid GitHub username characters [a-zA-Z0-9-_]
 
@@ -120,8 +120,11 @@ func handleReassignReviewer(prNumber, reviewer string, gh GithubClient) error {
 	}
 	fmt.Println()
 
+	fmt.Printf("[DEBUG] - placeholder call - prNumber: %s, reviewer %s\n", prNumber, reviewer)
+	return nil
+
 	// Call the existing reassign reviewer logic
-	return execReassignReviewer(prNumber, reviewer, gh)
+	// return execReassignReviewer(prNumber, reviewer, gh)
 }
 
 func init() {

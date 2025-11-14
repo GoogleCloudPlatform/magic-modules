@@ -45,13 +45,11 @@ jobs:
       
       - name: Run Magician Command Parser
         if: steps.check-invocation.outputs.invoked == 'true'
+        env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
         run: |
-          # Base64 encode the comment body to safely pass it as an argument
-          # The -w 0 flag ensures no line wrapping in the base64 output
-          COMMENT_BODY_B64=$(echo -n "${{ github.event.comment.body }}" | base64 -w 0)
-          
-          # Execute the parse-comment subcommand with the encoded comment
+          # Execute the parse-comment subcommand
+          # The comment body is passed via the COMMENT_BODY environment variable
           .ci/magician/magician parse-comment \
             ${{ github.event.issue.number }} \
-            ${{ github.event.comment.user.login }} \
-            "$COMMENT_BODY_B64"
+            ${{ github.event.comment.user.login }}
