@@ -876,6 +876,31 @@ func (t *Type) GetDescription() string {
 	return strings.TrimSpace(strings.TrimRight(t.Description, "\n"))
 }
 
+func (t *Type) FieldType() []string {
+	ret := []string{}
+	if t.Required {
+		ret = append(ret, "Required")
+	} else if !t.Output {
+		ret = append(ret, "Optional")
+	} else if t.Output && t.ParentMetadata != nil {
+		ret = append(ret, "Output")
+	}
+
+	if t.WriteOnlyLegacy || t.WriteOnly {
+		ret = append(ret, "Write-Only")
+	}
+
+	if t.MinVersion == "beta" && t.ResourceMetadata.MinVersion != "beta" {
+		ret = append(ret, "[Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)")
+	}
+
+	if t.DeprecationMessage != "" {
+		ret = append(ret, "Deprecated")
+	}
+
+	return ret
+}
+
 // TODO rewrite: validation
 // class Array < Composite
 //     check :item_type, type: [::String, NestedObject, ResourceRef, Enum], required: true
