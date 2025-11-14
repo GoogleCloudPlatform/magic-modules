@@ -41,7 +41,7 @@ examples:
     vars:
       workforce_pool_id: 'example-pool'
       provider_id: 'example-prvdr'
-      scim_tenant_id: 'example-scim-tenant'
+      scim_tenant_id: 'example-tenant'
       scim_token_id: 'example-scim-token'
     test_env_vars:
       org_id: 'ORG_ID'
