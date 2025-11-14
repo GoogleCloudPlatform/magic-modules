@@ -27,12 +27,12 @@ import_format:
   - projects/{{project}}/locations/{{location}}/multicastDomainGroups/{{multicast_domain_group_id}}
 examples:
   - name: network_services_multicast_domain_group_basic
-    primary_resource_id: mgd_test
+    primary_resource_id: mdg_test
     vars:
-      domain_group_name: test-mgd-resource
-      network_name: test-mgd-network
-      domain_a_name: test-mgd-domain-a
-      domain_b_name: test-mgd-domain-b
+      domain_group_name: test-mdg-resource
+      network_name: test-mdg-network
+      domain_a_name: test-mdg-domain-a
+      domain_b_name: test-mdg-domain-b
 autogen_async: true
 async:
   operation:
