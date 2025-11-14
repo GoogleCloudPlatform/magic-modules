@@ -15,6 +15,11 @@ resource "google_project_service" "apigee" {
   service = "apigee.googleapis.com"
 }
 
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_project_service.apigee]
+}
+
 resource "google_apigee_organization" "{{$.PrimaryResourceId}}" {
   description                = "Terraform-provisioned basic Apigee Org under European Union hosting jurisdiction."
   project_id                 = google_project.project.project_id
@@ -22,6 +27,6 @@ resource "google_apigee_organization" "{{$.PrimaryResourceId}}" {
   billing_type               = "PAYG"
   disable_vpc_peering        = true
   depends_on                 = [
-    google_project_service.apigee,
+    time_sleep.wait_120_seconds,
   ]
 }
