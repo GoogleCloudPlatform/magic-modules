@@ -95,3 +95,60 @@ func TestDatabaseNameForApi(t *testing.T) {
 	expected := "projects/project123/instances/instance456/databases/db789"
 	expectEquals(t, expected, actual)
 }
+
+func TestSpannerDatabase_resourceSpannerEncryptionConfigCustomDiffFuncForceNew(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		before   interface{}
+		after    interface{}
+		forcenew bool
+	}{
+		"kms_key_name_and_kms_key_names_are_same": {
+			before: []interface{}{
+				map[string]interface{}{
+					"kms_key_name": "key1",
+				},
+			},
+			after: []interface{}{
+				map[string]interface{}{
+					"kms_key_name":  "key1",
+					"kms_key_names": []interface{}{"key1"},
+				},
+			},
+			forcenew: false,
+		},
+		"kms_key_name_and_kms_key_names_are_different": {
+			before: []interface{}{
+				map[string]interface{}{
+					"kms_key_name": "key1",
+				},
+			},
+			after: []interface{}{
+				map[string]interface{}{
+					"kms_key_name":  "key1",
+					"kms_key_names": []interface{}{"key2"},
+				},
+			},
+			forcenew: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		d := &tpgresource.ResourceDiffMock{
+			Before: map[string]interface{}{
+				"encryption_config": tc.before,
+			},
+			After: map[string]interface{}{
+				"encryption_config": tc.after,
+			},
+		}
+		err := resourceSpannerEncryptionConfigCustomDiff(d)
+		if err != nil {
+			t.Errorf("failed, expected no error but received - %s for the condition %s", err, tn)
+		}
+		if d.IsForceNew != tc.forcenew {
+			t.Errorf("ForceNew not setup correctly for the condition-'%s', expected:%v;actual:%v", tn, tc.forcenew, d.IsForceNew)
+		}
+	}
+}

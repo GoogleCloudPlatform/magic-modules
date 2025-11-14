@@ -60,6 +60,7 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/resource_spanner_database.go.tmpl'
 custom_diff:
   - 'resourceSpannerDBDdlCustomDiff'
+  - 'resourceSpannerEncryptionConfigCustomDiff'
 # Sweeper skipped as this resource has customized deletion.
 exclude_sweeper: true
 examples:
