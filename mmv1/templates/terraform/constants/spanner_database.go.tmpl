@@ -77,7 +77,7 @@ func resourceSpannerEncryptionConfigCustomDiffFunc(diff tpgresource.TerraformRes
             return diff.Clear("encryption_config.0.kms_key_names")
         }
     }
-    return nil
+    return diff.ForceNew("encryption_config.0.kms_key_names")
 }
 
 func resourceSpannerEncryptionConfigCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
