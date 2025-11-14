@@ -96,13 +96,22 @@ var (
 			},
 		},
 		"NickElliot": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 10, 22),
+					endDate:   newDate(2025, 10, 28),
+				},
+			},
 		},
 		"rileykarson": {
 			vacations: []Vacation{
 				{
 					startDate: newDate(2025, 2, 25),
 					endDate:   newDate(2025, 3, 10),
+				},
+				{
+					startDate: newDate(2025, 11, 11),
+					endDate:   newDate(2025, 11, 24),
 				},
 			},
 		},

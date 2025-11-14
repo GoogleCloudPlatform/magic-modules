@@ -48,26 +48,11 @@ examples:
     vars:
       policy: "cd-policy"
       delivery_pipeline: "cd-pipeline"
-    tgc_test_ignore_extra: # These values have 0 value in TF config
-      - rules.rollout_restriction.time_windows.weekly_windows.end_time.minutes
-      - rules.rollout_restriction.time_windows.weekly_windows.start_time.hours
-      - rules.rollout_restriction.time_windows.weekly_windows.start_time.minutes
   - name: "clouddeploy_deploy_policy_full"
     primary_resource_id: "f-deploy-policy"
     vars:
       policy: "cd-policy"
       delivery_pipeline: "cd-pipeline"
-    tgc_test_ignore_extra: # These values have 0 value in TF config
-      - rules.0.rollout_restriction.time_windows.one_time_windows.end_time.minutes
-      - rules.0.rollout_restriction.time_windows.one_time_windows.start_time.hours
-      - rules.0.rollout_restriction.time_windows.one_time_windows.start_time.minutes
-      - rules.0.rollout_restriction.time_windows.weekly_windows.end_time.minutes
-      - rules.0.rollout_restriction.time_windows.weekly_windows.end_time.nanos
-      - rules.0.rollout_restriction.time_windows.weekly_windows.end_time.seconds
-      - rules.0.rollout_restriction.time_windows.weekly_windows.start_time.minutes
-      - rules.1.rollout_restriction.time_windows.weekly_windows.end_time.minutes
-      - rules.1.rollout_restriction.time_windows.weekly_windows.start_time.hours
-      - rules.1.rollout_restriction.time_windows.weekly_windows.start_time.minutes
 parameters:
   - name: "location"
     type: String

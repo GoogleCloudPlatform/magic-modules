@@ -74,3 +74,5 @@ Quotas that will need to be adjusted to support all tests:
 - compute.googleapis.com/n2_cpus (us-central1) to 36+
 - VMware Engine standard 72 vCPUs nodes per region - southamerica-east1 to 21
 - logging.googleapis.com/log_buckets_count to 200
+- "Reasoning engine write requests per minute" for us-central1 to 20+
+- aiplatform.googleapis.com/in_use_customer_managed_encryption_keys to 5+

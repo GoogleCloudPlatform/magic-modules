@@ -45,7 +45,6 @@ iam_policy:
   method_name_separator: ':'
   allowed_iam_role: 'roles/cloudbuild.connectionViewer'
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
 exclude_tgc: true
 legacy_long_form_project: true
@@ -60,8 +59,6 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
     vars:
       connection_name: 'tf-test-connection'
-    tgc_test_ignore_extra:
-      - github_config.app_installation_id # It has 0 in Terraform configuration
   - name: 'cloudbuildv2_connection_ghe'
     exclude_test: true
   - name: 'cloudbuildv2_connection_github'

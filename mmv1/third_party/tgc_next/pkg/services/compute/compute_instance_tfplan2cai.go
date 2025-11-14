@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	compute "google.golang.org/api/compute/v0.beta"
+	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/googleapi"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -132,11 +132,6 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating metadata: %s", err)
 	}
 
-	partnerMetadata, err := resourceInstancePartnerMetadata(d)
-	if err != nil {
-		return nil, fmt.Errorf("Error creating partner metadata: %s", err)
-	}
-
 	networkInterfaces, err := expandNetworkInterfacesTgc(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating network interfaces: %s", err)
@@ -164,7 +159,6 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		Disks:                      disks,
 		MachineType:                machineTypeUrl,
 		Metadata:                   metadata,
-		PartnerMetadata:            partnerMetadata,
 		Name:                       d.Get("name").(string),
 		Zone:                       d.Get("zone").(string),
 		NetworkInterfaces:          networkInterfaces,
@@ -504,21 +498,12 @@ func expandNetworkInterfacesTgc(d tpgresource.TerraformResourceData, config *tra
 	for i, raw := range configs {
 		data := raw.(map[string]interface{})
 
-		var networkAttachment = ""
 		network := data["network"].(string)
 		subnetwork := data["subnetwork"].(string)
-		if networkAttachmentObj, ok := data["network_attachment"]; ok {
-			networkAttachment = networkAttachmentObj.(string)
-		}
-		// Checks if networkAttachment is not specified in resource, network or subnetwork have to be specified.
-		if networkAttachment == "" && network == "" && subnetwork == "" {
-			return nil, fmt.Errorf("exactly one of network, subnetwork, or network_attachment must be provided")
-		}
 
 		ifaces[i] = &compute.NetworkInterface{
 			NetworkIP:                data["network_ip"].(string),
 			Network:                  network,
-			NetworkAttachment:        networkAttachment,
 			Subnetwork:               subnetwork,
 			AccessConfigs:            expandAccessConfigs(data["access_config"].([]interface{})),
 			AliasIpRanges:            expandAliasIpRanges(data["alias_ip_range"].([]interface{})),
@@ -621,24 +606,7 @@ func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
 		scheduling.OnInstanceStopAction = transformedOnInstanceStopAction
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "OnInstanceStopAction")
 	}
-	if v, ok := original["host_error_timeout_seconds"]; ok {
-		if v != nil && v != 0 {
-			scheduling.HostErrorTimeoutSeconds = int64(v.(int))
-		}
-	}
 
-	if v, ok := original["maintenance_interval"]; ok {
-		scheduling.MaintenanceInterval = v.(string)
-	}
-
-	if v, ok := original["graceful_shutdown"]; ok {
-		transformedGracefulShutdown, err := expandGracefulShutdown(v)
-		if err != nil {
-			return nil, err
-		}
-		scheduling.GracefulShutdown = transformedGracefulShutdown
-		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "GracefulShutdown")
-	}
 	if v, ok := original["local_ssd_recovery_timeout"]; ok {
 		transformedLocalSsdRecoveryTimeout, err := expandComputeLocalSsdRecoveryTimeout(v)
 		if err != nil {

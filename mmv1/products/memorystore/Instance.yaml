@@ -480,6 +480,23 @@ properties:
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
         output: true
+  - name: 'maintenanceVersion'
+    type: String
+    description: |
+      This field can be used to trigger self service update to indicate the desired maintenance version. The input to this field can be determined by the available_maintenance_versions field.
+      *Note*: This field can only be specified when updating an existing cluster to a newer version. Downgrades are currently not supported!
+  - name: 'effectiveMaintenanceVersion'
+    type: String
+    description: |
+      This field represents the actual maintenance version of the cluster.
+    output: true
+  - name: 'availableMaintenanceVersions'
+    type: Array
+    description: |
+     This field is used to determine the available maintenance versions for the self service update.
+    item_type:
+      type: String
+    output: true
   - name: 'engineVersion'
     type: String
     description: "Optional. Engine version of the instance."

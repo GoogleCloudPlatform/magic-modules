@@ -124,6 +124,7 @@ properties:
         - name: ports
           type: Array
           description: Optional. Ports of the application.
+          required: true
           item_type:
             type: Integer
   - name: upstreams

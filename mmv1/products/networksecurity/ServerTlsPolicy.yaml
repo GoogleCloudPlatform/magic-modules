@@ -17,6 +17,7 @@ description: |
   ServerTlsPolicy is a resource that specifies how a server should authenticate incoming requests. This resource itself does not affect configuration unless it is attached to a target HTTPS proxy or endpoint config selector resource.
 references:
   guides:
+    'Use ServerTlsPolicy': 'https://cloud.google.com/load-balancing/docs/mtls'
   api: 'https://cloud.google.com/traffic-director/docs/reference/network-security/rest/v1beta1/projects.locations.serverTlsPolicies'
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/serverTlsPolicies'
@@ -53,27 +54,19 @@ examples:
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-server-tls-policy'
-    tgc_test_ignore_extra:
-      - 'allow_open' # Ignore its false value in Terraform configuration
   - name: 'network_security_server_tls_policy_advanced'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-server-tls-policy'
-    tgc_test_ignore_extra:
-      - 'allow_open' # Ignore its false value in Terraform configuration
   - name: 'network_security_server_tls_policy_server_cert'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-server-tls-policy'
-    tgc_test_ignore_extra:
-      - 'allow_open' # Ignore its false value in Terraform configuration
   - name: 'network_security_server_tls_policy_mtls'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-server-tls-policy'
       trust_config_name: 'my-trust-config'
-    tgc_test_ignore_extra:
-      - 'allow_open' # Ignore its false value in Terraform configuration
 parameters:
   - name: 'name'
     type: String
