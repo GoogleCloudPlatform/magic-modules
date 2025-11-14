@@ -1,6 +1,8 @@
 {{ "" }}
 * `{{ underscore $.Name }}` -
-  {{- $.FieldType -}}
+  {{- if not (eq (len $.FieldType) 0) }}
+  ({{- join $.FieldType ", " -}})
+  {{- end }}
   {{- $.ResourceMetadata.FormatDocDescription $.GetDescription true -}}
   {{- if and (and ($.IsA "Array") ($.ItemType.IsA "Enum")) (and (not $.Output) (not $.ItemType.ExcludeDocsValues))}}
     {{- if $.ItemType.DefaultValue }}

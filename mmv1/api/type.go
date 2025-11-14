@@ -796,38 +796,26 @@ func (t *Type) GetDescription() string {
 	return strings.TrimSpace(strings.TrimRight(t.Description, "\n"))
 }
 
-func (t *Type) FieldType() string {
-	ret := ""
+func (t *Type) FieldType() []string {
+	ret := []string{}
 	if t.Required {
-		ret += "\n  (Required"
+		ret = append(ret, "Required")
 	} else if !t.Output {
-		ret += "\n  (Optional"
+		ret = append(ret, "Optional")
 	} else if t.Output && t.ParentMetadata != nil {
-		ret += "\n  (Output"
+		ret = append(ret, "Output")
 	}
 
 	if t.WriteOnlyLegacy || t.WriteOnly {
-		ret += ", Write-Only"
+		ret = append(ret, "Write-Only")
 	}
 
 	if t.MinVersion == "beta" && t.ResourceMetadata.MinVersion != "beta" {
-		if ret == "" {
-			ret = "\n  ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)"
-		} else {
-			ret += ", [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)"
-		}
+		ret = append(ret, "[Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)")
 	}
 
 	if t.DeprecationMessage != "" {
-		if ret == "" {
-			ret = "\n  (Deprecated"
-		} else {
-			ret += ", Deprecated"
-		}
-	}
-
-	if ret != "" {
-		ret += ")"
+		ret = append(ret, "Deprecated")
 	}
 
 	return ret
