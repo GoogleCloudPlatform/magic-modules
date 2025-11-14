@@ -20,8 +20,10 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"golang.org/x/exp/slices"
+	"gopkg.in/yaml.v3"
 )
 
 // Represents a property type
@@ -34,6 +36,10 @@ type Type struct {
 
 	// TODO rewrite: improve the parsing of properties based on type in resource yaml files.
 	Type string
+
+	// For nested fields, this only applies within the parent.
+	// For example, an optional parent can contain a required child.
+	Required bool `yaml:"required,omitempty"`
 
 	DefaultValue interface{} `yaml:"default_value,omitempty"`
 
@@ -76,10 +82,6 @@ type Type struct {
 	// not attempt to read the field from the API response.
 	// NOTE - this doesn't work for nested fields
 	UrlParamOnly bool `yaml:"url_param_only,omitempty"`
-
-	// For nested fields, this only applies within the parent.
-	// For example, an optional parent can contain a required child.
-	Required bool `yaml:"required,omitempty"`
 
 	// Additional query Parameters to append to GET calls.
 	ReadQueryParams string `yaml:"read_query_params,omitempty"`
@@ -338,56 +340,134 @@ type Type struct {
 
 const MAX_NAME = 20
 
-func (t *Type) SetDefault(r *Resource) {
+func (t *Type) MarshalYAML() (interface{}, error) {
+	// Use a type alias to prevent the marshaller from recursively calling this method.
+	type typeAlias Type
+
+	resourceMetadata := t.ResourceMetadata
+	if resourceMetadata == nil {
+		resourceMetadata = &Resource{}
+	}
+
+	// Calculate the default values for a Type struct.
+	// setShallowDefaults is safe to call with a nil ResourceMetadata.
+	defaults := Type{}
+	// Pre-populate fields that the default calculation depends on.
+	defaults.Name = t.Name
+	defaults.Type = t.Type
+	defaults.Resource = t.Resource
+	defaults.ParentName = t.ParentName
+	defaults.setShallowDefaults(resourceMetadata)
+	defaults.Name = ""
+	defaults.Type = ""
+	defaults.Resource = ""
+	defaults.ParentName = ""
+
+	// OmitDefaultsForMarshaling creates a clone of the struct where any field
+	// matching its default value is set to its zero-value, allowing `omitempty` to work.
+	// It returns a pointer to the clone.
+	clone, err := utils.OmitDefaultsForMarshaling(*t, defaults)
+	if err != nil {
+		return nil, err
+	}
+
+	clonePtr := clone.(*Type)
+
+	// Explicitly break the parent cycle in the clone to prevent deep recursion.
+	clonePtr.ParentMetadata = nil
+
+	// Encode the cleaned-up struct into a yaml.Node.
+	var node yaml.Node
+	err = node.Encode((*typeAlias)(clonePtr)) // Use the alias to prevent recursion
+	if err != nil {
+		return nil, err
+	}
+
+	// Special handling for `properties` field.
+	// If the original `properties` slice was explicitly empty (`[]`), `omitempty`
+	// would have removed it during the node encoding. We need to add it back in.
+	if t.Properties != nil && len(t.Properties) == 0 {
+		// Check if the key was omitted.
+		found := false
+		for i := 0; i < len(node.Content); i += 2 { // Iterate over key nodes
+			if node.Content[i].Value == "properties" {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			// Add the key and an empty sequence node to the mapping.
+			keyNode := &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: "properties"}
+			valueNode := &yaml.Node{Kind: yaml.SequenceNode, Tag: "!!seq"}
+			node.Content = append(node.Content, keyNode, valueNode)
+		}
+	}
+
+	return &node, nil
+}
+
+// SetShallowDefaults calculates and sets default values for the immediate fields
+// of this Type, without recursing into its children (like ItemType or Properties).
+// This is used by MarshalYAML to create a "defaults" object for comparison.
+func (t *Type) setShallowDefaults(r *Resource) {
 	t.ResourceMetadata = r
 	if t.UpdateVerb == "" {
-		t.UpdateVerb = t.ResourceMetadata.UpdateVerb
+		t.UpdateVerb = r.UpdateVerb
 	}
 
 	switch {
-	case t.IsA("Array"):
-		t.ItemType.Name = t.Name
-		t.ItemType.ParentName = t.Name
-		t.ItemType.ParentMetadata = t
-		t.ItemType.SetDefault(r)
 	case t.IsA("Map"):
 		if t.KeyExpander == "" {
 			t.KeyExpander = "tpgresource.ExpandString"
 		}
-		t.ValueType.ParentName = t.Name
-		t.ValueType.ParentMetadata = t
-		t.ValueType.SetDefault(r)
 	case t.IsA("NestedObject"):
 		if t.Name == "" {
 			t.Name = t.ParentName
 		}
-
 		if t.Description == "" {
 			t.Description = "A nested object resource."
-		}
-
-		for _, p := range t.Properties {
-			p.ParentMetadata = t
-			p.SetDefault(r)
 		}
 	case t.IsA("ResourceRef"):
 		if t.Name == "" {
 			t.Name = t.Resource
 		}
-
 		if t.Description == "" {
 			t.Description = fmt.Sprintf("A reference to %s resource", t.Resource)
 		}
 	case t.IsA("Fingerprint"):
-		// Represents a fingerprint.  A fingerprint is an output-only
-		// field used for optimistic locking during updates.
-		// They are fetched from the GCP response.
 		t.Output = true
-	default:
 	}
 
 	if t.ApiName == "" {
 		t.ApiName = t.Name
+	}
+}
+
+// SetDefault recursively sets default values for this Type and all its children.
+// This is used during the initial unmarshalling/compilation phase.
+func (t *Type) SetDefault(r *Resource) {
+	t.setShallowDefaults(r) // First, set defaults for the current level.
+
+	switch {
+	case t.IsA("Array"):
+		if t.ItemType != nil {
+			t.ItemType.Name = t.Name
+			t.ItemType.ParentName = t.Name
+			t.ItemType.ParentMetadata = t
+			t.ItemType.SetDefault(r) // Recurse
+		}
+	case t.IsA("Map"):
+		if t.ValueType != nil {
+			t.ValueType.ParentName = t.Name
+			t.ValueType.ParentMetadata = t
+			t.ValueType.SetDefault(r) // Recurse
+		}
+	case t.IsA("NestedObject"):
+		for _, p := range t.Properties {
+			p.ParentMetadata = t
+			p.SetDefault(r) // Recurse
+		}
 	}
 }
 
