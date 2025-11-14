@@ -39,9 +39,9 @@ examples:
   - name: 'iam_workforce_pool_provider_scim_tenant_basic'
     primary_resource_id: "example"
     vars:
-      workforce_pool_id: 'example-pool'
-      provider_id: 'example-prvdr'
-      scim_tenant_id: 'example-scim-tenant'
+      workforce_pool_id: 'pool'
+      provider_id: 'provider'
+      scim_tenant_id: 'tenant'
     test_env_vars:
       org_id: 'ORG_ID'
 properties:
