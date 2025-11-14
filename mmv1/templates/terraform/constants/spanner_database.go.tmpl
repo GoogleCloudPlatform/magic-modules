@@ -73,9 +73,6 @@ func resourceSpannerEncryptionConfigCustomDiffFunc(diff tpgresource.TerraformRes
 		}
 		oldKeys := old.([]interface{})
 		newKeys := new.([]interface{})
-		if len(oldKeys) == 0 && len(newKeys) == 1 && newKeys[0] == kmsKeyName {
-			return diff.Clear("encryption_config.0.kms_key_names")
-		}
 		if len(newKeys) == 0 && len(oldKeys) == 1 && oldKeys[0] == kmsKeyName {
 			return diff.Clear("encryption_config.0.kms_key_names")
 		}
