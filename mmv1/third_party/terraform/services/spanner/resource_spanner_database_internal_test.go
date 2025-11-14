@@ -140,5 +140,3 @@ func TestSpannerDatabase_resourceSpannerEncryptionConfigCustomDiffFuncForceNew(t
 		}
 	}
 }
-
-
