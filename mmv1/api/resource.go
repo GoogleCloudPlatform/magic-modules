@@ -446,7 +446,10 @@ func (r *Resource) MarshalYAML() (interface{}, error) {
 	defaults.SelfLink = ""
 	defaults.MinVersion = ""
 
-	clone := utils.OmitDefaultsForMarshaling(*r, defaults)
+	clone, err := utils.OmitDefaultsForMarshaling(*r, defaults)
+	if err != nil {
+		return nil, err
+	}
 
 	return (*resourceAlias)(clone.(*Resource)), nil
 }

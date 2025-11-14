@@ -23,6 +23,7 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"golang.org/x/exp/slices"
+	"gopkg.in/yaml.v3"
 )
 
 // Represents a property type
@@ -343,6 +344,11 @@ func (t *Type) MarshalYAML() (interface{}, error) {
 	// Use a type alias to prevent the marshaller from recursively calling this method.
 	type typeAlias Type
 
+	resourceMetadata := t.ResourceMetadata
+	if resourceMetadata == nil {
+		resourceMetadata = &Resource{}
+	}
+
 	// Calculate the default values for a Type struct.
 	// setShallowDefaults is safe to call with a nil ResourceMetadata.
 	defaults := Type{}
@@ -351,7 +357,7 @@ func (t *Type) MarshalYAML() (interface{}, error) {
 	defaults.Type = t.Type
 	defaults.Resource = t.Resource
 	defaults.ParentName = t.ParentName
-	defaults.setShallowDefaults(t.ResourceMetadata)
+	defaults.setShallowDefaults(resourceMetadata)
 	defaults.Name = ""
 	defaults.Type = ""
 	defaults.Resource = ""
@@ -360,13 +366,45 @@ func (t *Type) MarshalYAML() (interface{}, error) {
 	// OmitDefaultsForMarshaling creates a clone of the struct where any field
 	// matching its default value is set to its zero-value, allowing `omitempty` to work.
 	// It returns a pointer to the clone.
-	clone := utils.OmitDefaultsForMarshaling(*t, defaults).(*Type)
+	clone, err := utils.OmitDefaultsForMarshaling(*t, defaults)
+	if err != nil {
+		return nil, err
+	}
+
+	clonePtr := clone.(*Type)
 
 	// Explicitly break the parent cycle in the clone to prevent deep recursion.
-	clone.ParentMetadata = nil
+	clonePtr.ParentMetadata = nil
 
-	// Return the cleaned-up clone for marshalling
-	return (*typeAlias)(clone), nil
+	// Encode the cleaned-up struct into a yaml.Node.
+	var node yaml.Node
+	err = node.Encode((*typeAlias)(clonePtr)) // Use the alias to prevent recursion
+	if err != nil {
+		return nil, err
+	}
+
+	// Special handling for `properties` field.
+	// If the original `properties` slice was explicitly empty (`[]`), `omitempty`
+	// would have removed it during the node encoding. We need to add it back in.
+	if t.Properties != nil && len(t.Properties) == 0 {
+		// Check if the key was omitted.
+		found := false
+		for i := 0; i < len(node.Content); i += 2 { // Iterate over key nodes
+			if node.Content[i].Value == "properties" {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			// Add the key and an empty sequence node to the mapping.
+			keyNode := &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: "properties"}
+			valueNode := &yaml.Node{Kind: yaml.SequenceNode, Tag: "!!seq"}
+			node.Content = append(node.Content, keyNode, valueNode)
+		}
+	}
+
+	return &node, nil
 }
 
 // SetShallowDefaults calculates and sets default values for the immediate fields

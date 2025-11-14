@@ -167,7 +167,10 @@ func TestOmitDefaultsForMarshaling(t *testing.T) {
 			originalCurrent := shallowCopy(tt.current)
 
 			// Run the function
-			result := OmitDefaultsForMarshaling(tt.current, tt.defaults)
+			result, err := OmitDefaultsForMarshaling(tt.current, tt.defaults)
+			if err != nil {
+				t.Fatalf("Unable to execute marshalling %s", err)
+			}
 
 			// 1. Verify the result is a pointer
 			if reflect.ValueOf(result).Kind() != reflect.Ptr {

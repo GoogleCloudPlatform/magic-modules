@@ -91,7 +91,7 @@ type IamPolicy struct {
 	// config with the test/example attributes of the IAM resource.
 	ExampleConfigBody string `yaml:"example_config_body,omitempty"`
 
-	SampleConfigBody string `yaml:"sample_config_body"`
+	SampleConfigBody string `yaml:"sample_config_body,omitempty"`
 
 	// How the API supports IAM conditions
 	IamConditionsRequestType string `yaml:"iam_conditions_request_type,omitempty"`
@@ -162,7 +162,10 @@ func (p *IamPolicy) MarshalYAML() (interface{}, error) {
 	// Create a defaults object and then use the generic helper to create a
 	// clone with default values zeroed out for marshaling.
 	defaults := newIamPolicyWithDefaults()
-	clone := utils.OmitDefaultsForMarshaling(*p, defaults)
+	clone, err := utils.OmitDefaultsForMarshaling(*p, defaults)
+	if err != nil {
+		return nil, err
+	}
 
 	// The helper returns an interface{} containing a pointer to the clone.
 	// We cast it to the alias type to ensure the marshaller uses the default

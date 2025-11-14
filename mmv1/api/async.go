@@ -148,7 +148,11 @@ func (a *Async) MarshalYAML() (interface{}, error) {
 	defaults := newAsyncWithDefaults()
 
 	// Use the generic helper for simple types. It returns a pointer to a clone.
-	clonePtr := utils.OmitDefaultsForMarshaling(*a, defaults).(*Async)
+	clone, err := utils.OmitDefaultsForMarshaling(*a, defaults)
+	if err != nil {
+		return nil, err
+	}
+	clonePtr := clone.(*Async)
 
 	// The helper ignores slices, so we handle `Actions` manually on the clone.
 	if reflect.DeepEqual(clonePtr.Actions, defaults.Actions) {

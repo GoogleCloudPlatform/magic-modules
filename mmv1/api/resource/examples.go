@@ -210,7 +210,10 @@ func (e *Examples) MarshalYAML() (interface{}, error) {
 	}
 
 	// Use the generic helper to create a clone with default values zeroed out.
-	clone := utils.OmitDefaultsForMarshaling(*e, defaults)
+	clone, err := utils.OmitDefaultsForMarshaling(*e, defaults)
+	if err != nil {
+		return nil, err
+	}
 
 	return (*exampleAlias)(clone.(*Examples)), nil
 }

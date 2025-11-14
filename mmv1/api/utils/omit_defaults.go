@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"reflect"
 )
 
@@ -19,7 +20,7 @@ import (
 // The `current` and `defaults` arguments must be structs of the same type.
 // The function returns a pointer to the new, modified struct. If `current` is
 // not a struct, it is returned unmodified in a pointer.
-func OmitDefaultsForMarshaling(current, defaults interface{}) interface{} {
+func OmitDefaultsForMarshaling(current, defaults interface{}) (interface{}, error) {
 	// Get the reflect.Value of the current struct.
 	currentVal := reflect.ValueOf(current)
 	if currentVal.Kind() == reflect.Ptr {
@@ -28,9 +29,7 @@ func OmitDefaultsForMarshaling(current, defaults interface{}) interface{} {
 
 	// Ensure we are working with a struct.
 	if currentVal.Kind() != reflect.Struct {
-		// If we are not working with a struct we are working with a nil
-		// or generic. This is effectively a noop.
-		return &current
+		return nil, fmt.Errorf("OmitDefaultsForMarshaling expects the current object to be a struct")
 	}
 
 	// Create a new pointer to a struct of the same type as 'current'.
@@ -80,5 +79,5 @@ func OmitDefaultsForMarshaling(current, defaults interface{}) interface{} {
 	}
 
 	// Return the pointer to the modified clone.
-	return clonePtr.Interface()
+	return clonePtr.Interface(), nil
 }
