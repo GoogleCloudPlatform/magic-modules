@@ -40,7 +40,7 @@ func TestAccNetworkServicesMulticastDomainGroup_networkServicesMulticastDomainGr
 				Config: testAccNetworkServicesMulticastDomainGroup_networkServicesMulticastDomainGroupUpdateExample_full(context),
 			},
 			{
-				ResourceName:            "google_network_services_multicast_domain_group.mgd_test",
+				ResourceName:            "google_network_services_multicast_domain_group.mdg_test",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "multicast_domain_group_id", "terraform_labels"},
@@ -54,7 +54,7 @@ func TestAccNetworkServicesMulticastDomainGroup_networkServicesMulticastDomainGr
 				},
 			},
 			{
-				ResourceName:            "google_network_services_multicast_domain_group.mgd_test",
+				ResourceName:            "google_network_services_multicast_domain_group.mdg_test",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "multicast_domain_group_id", "terraform_labels"},
@@ -65,16 +65,16 @@ func TestAccNetworkServicesMulticastDomainGroup_networkServicesMulticastDomainGr
 
 func testAccNetworkServicesMulticastDomainGroup_networkServicesMulticastDomainGroupUpdateExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_network_services_multicast_domain_group" "mgd_test"{
-  multicast_domain_group_id                    = "tf-test-test-mgd-resource%{random_suffix}"
+resource "google_network_services_multicast_domain_group" "mdg_test"{
+  multicast_domain_group_id                    = "tf-test-test-mdg-resource%{random_suffix}"
   location = "global"
 }
 `, context)
 }
 func testAccNetworkServicesMulticastDomainGroup_networkServicesMulticastDomainGroupUpdateExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_network_services_multicast_domain_group" "mgd_test"{
-  multicast_domain_group_id                    = "tf-test-test-mgd-resource%{random_suffix}"
+resource "google_network_services_multicast_domain_group" "mdg_test"{
+  multicast_domain_group_id                    = "tf-test-test-mdg-resource%{random_suffix}"
   location = "global"
 	description = "Updated description"
 	labels = {
