@@ -19,6 +19,11 @@ resource "google_project" "guest_project" {
   deletion_policy = "DELETE"
 }
 
+resource "google_project_service" "compute_guest" {
+  project = google_project.guest_project.project_id
+  service = "compute.googleapis.com"
+}
+
 resource "google_org_policy_policy" "shared_reservation_org_policy" {
   name   = "projects/${google_project.owner_project.project_id}/policies/compute.sharedReservationsOwnerProjects"
   parent = "projects/${google_project.owner_project.project_id}"
