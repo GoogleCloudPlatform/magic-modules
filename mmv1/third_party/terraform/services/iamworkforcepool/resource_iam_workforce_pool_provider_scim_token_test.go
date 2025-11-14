@@ -83,7 +83,7 @@ resource "google_iam_workforce_pool_provider_scim_tenant" "scim_tenant" {
   location          = "global"
   workforce_pool_id = google_iam_workforce_pool.pool.workforce_pool_id
   provider_id       = google_iam_workforce_pool_provider.provider.provider_id
-  scim_tenant_id    = "example-scim-tenant"
+  scim_tenant_id    = "tf-test-tenant-%{random_suffix}"
   display_name      = "SCIM Tenant Display Name"
   description       = "A sample SCIM tenant for IAM Workforce Pool Provider"
   claim_mapping       = {
@@ -97,7 +97,7 @@ resource "google_iam_workforce_pool_provider_scim_token" "scim_token" {
   location          = "global"
   workforce_pool_id = google_iam_workforce_pool.pool.workforce_pool_id
   provider_id       = google_iam_workforce_pool_provider.provider.provider_id
-  scim_tenant_id    = "google_iam_workforce_pool_provider_scim_tenant.scim_tenant"
+  scim_tenant_id    = "google_iam_workforce_pool_provider_scim_tenant.scim_tenant.scim_tenant_id"
   scim_token_id     = "example-scim-token"
   display_name      = "SCIM Token Display Name"
   # security_token and state are output only, not settable
@@ -145,7 +145,7 @@ resource "google_iam_workforce_pool_provider_scim_tenant" "scim_tenant" {
   location          = "global"
   workforce_pool_id = google_iam_workforce_pool.pool.workforce_pool_id
   provider_id       = google_iam_workforce_pool_provider.provider.provider_id
-  scim_tenant_id    = "example-scim-tenant"
+  scim_tenant_id    = "tf-test-tenant-%{random_suffix}"
   display_name      = "SCIM Tenant Display Name"
   description       = "A sample SCIM tenant for IAM Workforce Pool Provider"
   claim_mapping       = {
@@ -159,7 +159,7 @@ resource "google_iam_workforce_pool_provider_scim_token" "scim_token" {
   location          = "global"
   workforce_pool_id = google_iam_workforce_pool.pool.workforce_pool_id
   provider_id       = google_iam_workforce_pool_provider.provider.provider_id
-  scim_tenant_id    = "google_iam_workforce_pool_provider_scim_tenant.scim_tenant"
+  scim_tenant_id    = "google_iam_workforce_pool_provider_scim_tenant.scim_tenant.scim_tenant_id"
   scim_token_id     = "example-scim-token"
   display_name      = "SCIM Token Display Name - Updated"
   # security_token and state are output only, not settable
