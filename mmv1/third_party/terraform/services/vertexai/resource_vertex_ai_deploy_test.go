@@ -280,6 +280,36 @@ data "google_project" "project" {}
 `, context)
 }
 
+func TestAccVertexAIEndpointWithModelGardenDeployment_dedicatedEndpointDisabled(t *testing.T) {
+	t.Parallel()
+	context := map[string]interface{}{"random_suffix": acctest.RandString(t, 10)}
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAIEndpointWithModelGardenDeploymentDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIEndpointWithModelGardenDeployment_dedicatedEndpointDisabled(context),
+			},
+		},
+	})
+}
+
+func testAccVertexAIEndpointWithModelGardenDeployment_dedicatedEndpointDisabled(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_endpoint_with_model_garden_deployment" "test" {
+  publisher_model_name = "publishers/google/models/paligemma@paligemma-224-float32"
+  location             = "us-central1"
+  model_config {
+    accept_eula =  true
+  }
+  endpoint_config {
+    dedicated_endpoint_disabled = true
+  }
+}
+`, context)
+}
+
 func testAccCheckVertexAIEndpointWithModelGardenDeploymentDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {

@@ -852,6 +852,16 @@ properties:
         description: |-
           The user-specified display name of the endpoint. If not set, a
           default name will be used.
+      - name: dedicatedEndpointEnabled
+        type: Boolean
+        description: |-
+          If true, the endpoint will be exposed through a dedicated
+          DNS [Endpoint.dedicated_endpoint_dns]. Your request to the dedicated DNS
+          will be isolated from other users' traffic and will have better
+          performance and reliability. Note: Once you enabled dedicated endpoint,
+          you won't be able to send request to the shared DNS {region}-aiplatform.googleapis.com.
+          The limitations will be removed soon.
+        deprecation_message: "This field is deprecated. Please use `dedicated_endpoint_disabled` instead."
       - name: dedicatedEndpointDisabled
         type: Boolean
         description: |-
