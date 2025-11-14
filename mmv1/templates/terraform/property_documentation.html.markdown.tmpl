@@ -26,6 +26,7 @@
   {{- if and (not $.FlattenObject) $.NestedProperties }}
   Structure is [documented below](#nested_{{ $.LineageAsSnakeCase}}).
   {{- end }}
+
   {{- if $.DeprecationMessage }}
   ~> **Warning:** {{ $.DeprecationMessage }}
   {{- end -}}
