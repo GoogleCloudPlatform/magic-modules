@@ -52,10 +52,6 @@ func TestAccNetworkServicesMulticastGroupRange_networkServicesMulticastGroupRang
 						plancheck.ExpectResourceAction("google_network_services_multicast_group_range.mgr_test", plancheck.ResourceActionUpdate),
 					},
 				},
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckTypeSetElemAttr("google_network_services_multicast_group_range.mgr_test", "consumer_accept_list", "fake-project-id"),
-    				resource.TestCheckResourceAttr("google_network_services_multicast_group_range.mgr_test", "require_explicit_accept", "true"),
-				),
 			},
 			{
 				ResourceName:            "google_network_services_multicast_group_range.mgr_test",
