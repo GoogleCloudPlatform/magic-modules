@@ -31,6 +31,10 @@ update_mask: true
 timeouts:
   insert_minutes: 20
   delete_minutes: 20
+custom_code:
+  decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
+  post_create: 'templates/terraform/post_create/sleep.go.tmpl'
+  post_update: 'templates/terraform/post_create/sleep.go.tmpl'
 examples:
   - name: 'iam_workforce_pool_provider_scim_token_basic'
     primary_resource_id: "example"
