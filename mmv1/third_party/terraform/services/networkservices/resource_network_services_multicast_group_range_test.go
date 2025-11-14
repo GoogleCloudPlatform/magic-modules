@@ -29,7 +29,6 @@ func TestAccNetworkServicesMulticastGroupRange_networkServicesMulticastGroupRang
 
 	context := map[string]interface{}{
 		"random_suffix":   acctest.RandString(t, 10),
-		"fake_project_id": "fake-project-id",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -132,9 +131,8 @@ resource "google_network_services_multicast_group_range" mgr_test {
   location = "global"
   reserved_internal_range = google_network_connectivity_internal_range.internal_range.id
   multicast_domain = google_network_services_multicast_domain.multicast_domain.id
-		consumer_accept_list = ["%{fake_project_id}"]
-	require_explicit_accept = true
-
+  consumer_accept_list = ["fake-project-id"]
+  require_explicit_accept = true
 }
 `, context)
 }
