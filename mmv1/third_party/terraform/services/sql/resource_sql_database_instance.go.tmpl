@@ -1476,14 +1476,13 @@ func enhancedBackupManagerCustomizeDiff(ctx context.Context, d *schema.ResourceD
 	// Clear the diff since ENHANCED backup manager is enabled
 	if d.HasChange("settings.0.backup_configuration") {
 		lifecycleBlock := `lifecycle { ignore_changes = [settings[0].backup_configuration] }`
-	    warningMessage := fmt.Sprintf(
-            "[WARN] Instance %s is managed by Google Cloud Backup and Disaster Recovery (BackupDR). "+
-            "Terraform will not manage the 'settings.0.backup_configuration' block. "+
-            "Any changes to this block in your Terraform configuration will be ignored."+
-            "To suppress this warning permanently, add the following lifecycle block to your Terraform configuration: %s",
-            name, lifecycleBlock,
-        )
-        log.Printf(warningMessage)
+	    log.Printf(
+		"[WARN] Instance %s is managed by Google Cloud Backup and Disaster Recovery (BackupDR). "+
+		"Terraform will not manage the 'settings.0.backup_configuration' block. "+
+		"Any changes to this block in your Terraform configuration will be ignored. "+
+		"To suppress this warning permanently, add the following lifecycle block to your Terraform configuration: %s",
+		name, lifecycleBlock,
+		)
 		if err := d.Clear("settings.0.backup_configuration"); err != nil {
 			return err
 		}
