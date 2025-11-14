@@ -254,7 +254,7 @@ resource "google_compute_backend_service" "default" {
 
 resource "google_network_services_lb_edge_extension" "default" {
   name        = "tf-test-elb-edge-ext%{random_suffix}"
-  description = "my edge extension"
+  description = "my edge extension updated"
   location    = "global"
 
   load_balancing_scheme = "EXTERNAL_MANAGED"
@@ -280,7 +280,7 @@ resource "google_network_services_lb_edge_extension" "default" {
     name = "chain2"
 
     match_condition {
-      cel_expression = "request.host == 'example.com'"
+      cel_expression = "request.host == 'testing.com'"
     }
 
     extensions {
@@ -288,7 +288,7 @@ resource "google_network_services_lb_edge_extension" "default" {
       service   = google_network_services_wasm_plugin.wasm-plugin-2.id
       fail_open = true
       supported_events = ["REQUEST_HEADERS"]
-      forward_headers  = ["custom-header"]
+      forward_headers  = ["testing-header"]
     }
   }
 
