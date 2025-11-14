@@ -45,7 +45,6 @@ func TestAccVertexAIIndexEndpoint_updated(t *testing.T) {
 }
 
 func TestAccVertexAIIndexEndpoint_psc_automation_config(t *testing.T) {
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
