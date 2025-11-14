@@ -83,10 +83,14 @@ resource "google_iam_workforce_pool_provider_scim_tenant" "scim_tenant" {
   location          = "global"
   workforce_pool_id = google_iam_workforce_pool.pool.workforce_pool_id
   provider_id       = google_iam_workforce_pool_provider.provider.provider_id
-  scim_tenant_id    = "tf-test-tenant-%{random_suffix}"
+  scim_tenant_id    = "example-scim-tenant"
   display_name      = "SCIM Tenant Display Name"
   description       = "A sample SCIM tenant for IAM Workforce Pool Provider"
-  # state is output only, not settable
+  claim_mapping       = {
+    "google.subject"  = "user.externalId",
+    "google.group"    = "group.externalId"
+  }
+  # state, base_uri, purge_time and service_agent are output only, not settable
 }
 
 resource "google_iam_workforce_pool_provider_scim_token" "scim_token" {
@@ -141,10 +145,14 @@ resource "google_iam_workforce_pool_provider_scim_tenant" "scim_tenant" {
   location          = "global"
   workforce_pool_id = google_iam_workforce_pool.pool.workforce_pool_id
   provider_id       = google_iam_workforce_pool_provider.provider.provider_id
-  scim_tenant_id    = "tf-test-tenant-%{random_suffix}"
+  scim_tenant_id    = "example-scim-tenant"
   display_name      = "SCIM Tenant Display Name"
   description       = "A sample SCIM tenant for IAM Workforce Pool Provider"
-  # state is output only, not settable
+  claim_mapping       = {
+    "google.subject"  = "user.externalId",
+    "google.group"    = "group.externalId"
+  }
+  # state, base_uri, purge_time and service_agent are output only, not settable
 }
 
 resource "google_iam_workforce_pool_provider_scim_token" "scim_token" {

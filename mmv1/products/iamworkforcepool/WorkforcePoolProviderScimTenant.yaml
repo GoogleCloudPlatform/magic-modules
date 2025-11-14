@@ -74,7 +74,7 @@ properties:
       - 'STATE_UNSPECIFIED'
       - 'ACTIVE'
       - 'DELETED'
-  - name: 'baseURI'
+  - name: 'baseUri'
     type: String
     description: |
       Represents the base URI as defined in [RFC 7644, Section
@@ -82,6 +82,20 @@ properties:
       must use this as the root address for managing resources under the tenant.
       Format:
       https://iamscim.googleapis.com/{version}/{tenant_id}/
+    output: true
+  - name: 'claimMapping'
+    type: KeyValuePairs
+    description: Maps BYOID claims to SCIM claims.
+    required: true
+  - name: 'purgeTime'
+    type: Time
+    description: The timestamp that represents the time when the SCIM tenant is purged.
+    output: true
+  - name: service_agent
+    type: String
+    description: |
+      Service Agent created by SCIM Tenant API. SCIM tokens created under
+      this tenant will be attached to this service agent.
     output: true
 parameters:
   - name: 'location'
