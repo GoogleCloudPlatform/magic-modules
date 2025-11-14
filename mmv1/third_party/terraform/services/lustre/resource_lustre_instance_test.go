@@ -86,7 +86,7 @@ func TestAccLustreInstance_withKmsKey(t *testing.T) {
 	context := map[string]interface{}{
 		"network_name":  acctest.BootstrapSharedTestNetwork(t, "default-vpc"),
 		"random_suffix": acctest.RandString(t, 10),
-		"kms":           acctest.BootstrapKMSKey(t).CryptoKey.id,
+		"kms":           acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
