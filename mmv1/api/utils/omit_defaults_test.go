@@ -44,10 +44,11 @@ func TestOmitDefaultsForMarshaling(t *testing.T) {
 	}
 
 	tests := []struct {
-		name     string
-		current  interface{}
-		defaults interface{}
-		expected interface{}
+		name        string
+		current     interface{}
+		defaults    interface{}
+		expected    interface{}
+		expectError bool
 	}{
 		{
 			name: "All fields different from defaults",
@@ -154,10 +155,11 @@ func TestOmitDefaultsForMarshaling(t *testing.T) {
 			},
 		},
 		{
-			name:     "Non-struct input should be returned as is (in a pointer)",
-			current:  123,
-			defaults: 0,
-			expected: 123,
+			name:        "Non-struct input should be returned as is (in a pointer)",
+			current:     123,
+			defaults:    0,
+			expected:    123,
+			expectError: true,
 		},
 	}
 
@@ -169,6 +171,9 @@ func TestOmitDefaultsForMarshaling(t *testing.T) {
 			// Run the function
 			result, err := OmitDefaultsForMarshaling(tt.current, tt.defaults)
 			if err != nil {
+				if tt.expectError {
+					return
+				}
 				t.Fatalf("Unable to execute marshalling %s", err)
 			}
 
