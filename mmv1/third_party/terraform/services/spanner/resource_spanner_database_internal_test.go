@@ -106,11 +106,11 @@ func TestSpannerDatabase_resourceSpannerEncryptionConfigCustomDiffFuncForceNew(t
 	}{
 		"kms_key_name_and_kms_key_names_are_same": {
 			before: map[string]interface{}{
-				"encryption_config.0.kms_key_name": "key1",
-			},
-			after: map[string]interface{}{
 				"encryption_config.0.kms_key_name":  "key1",
 				"encryption_config.0.kms_key_names": []interface{}{"key1"},
+			},
+			after: map[string]interface{}{
+				"encryption_config.0.kms_key_name": "key1",
 			},
 			forcenew: false,
 		},
