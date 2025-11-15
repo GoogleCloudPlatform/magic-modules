@@ -130,6 +130,9 @@ resource "google_network_services_multicast_group_range" mgr_test {
   multicast_domain = google_network_services_multicast_domain.multicast_domain.id
   consumer_accept_list = ["fake-project-id"]
   require_explicit_accept = true
+  log_config {
+    enabled = true
+  }
 }
 `, context)
 }
