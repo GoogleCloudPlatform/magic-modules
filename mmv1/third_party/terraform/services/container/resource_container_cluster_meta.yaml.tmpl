@@ -345,9 +345,7 @@ fields:
   - api_field: 'nodeConfig.resourceLabels'
   - field: 'node_config.resource_manager_tags'
     api_field: 'nodeConfig.resourceManagerTags.tags'
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'nodeConfig.sandboxConfig.sandboxType'
-{{- end }}
   - api_field: 'nodeConfig.secondaryBootDisks.diskImage'
   - api_field: 'nodeConfig.secondaryBootDisks.mode'
   - api_field: 'nodeConfig.serviceAccount'
@@ -612,10 +610,8 @@ fields:
     api_field: 'nodePools.config.resourceLabels'
   - field: 'node_pool.node_config.resource_manager_tags'
     api_field: 'nodePools.config.resourceManagerTags.tags'
-{{- if ne $.TargetVersionName "ga" }}
   - field: 'node_pool.node_config.sandbox_config.sandbox_type'
     api_field: 'nodePools.config.sandboxConfig.sandboxType'
-{{- end }}
   - field: 'node_pool.node_config.secondary_boot_disks.disk_image'
     api_field: 'nodePools.config.secondaryBootDisks.diskImage'
   - field: 'node_pool.node_config.secondary_boot_disks.mode'
