@@ -108,7 +108,7 @@ func routeCommand(prNumber, commandLine string, gh GithubClient) error {
 }
 
 // handleReassignReviewer processes the reassign-reviewer command
-func handleReassignReviewer(prNumber, reviewer string, _ GithubClient) error {
+func handleReassignReviewer(prNumber, reviewer string, gh GithubClient) error {
 	// The regex already extracted just the username without @
 	// and only allows valid GitHub username characters [a-zA-Z0-9-_]
 
@@ -119,12 +119,7 @@ func handleReassignReviewer(prNumber, reviewer string, _ GithubClient) error {
 		fmt.Printf(" (selecting random reviewer)")
 	}
 	fmt.Println()
-
-	fmt.Printf("[DEBUG] - placeholder call - prNumber: %s, reviewer %s\n", prNumber, reviewer)
-	return nil
-
-	// Call the existing reassign reviewer logic
-	// return execReassignReviewer(prNumber, reviewer, gh)
+	return execReassignReviewer(prNumber, reviewer, gh)
 }
 
 func init() {
