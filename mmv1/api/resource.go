@@ -25,7 +25,6 @@ import (
 	"text/template"
 
 	"github.com/golang/glog"
-	"gopkg.in/yaml.v3"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
@@ -414,18 +413,6 @@ type TGCResource struct {
 
 	// [Optional] It overrides the default Cai asset name format, which is the resource id format
 	CaiAssetNameFormat string `yaml:"cai_asset_name_format,omitempty"`
-}
-
-func (r *Resource) UnmarshalYAML(value *yaml.Node) error {
-	type resourceAlias Resource
-	aliasObj := (*resourceAlias)(r)
-
-	err := value.Decode(aliasObj)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // // MarshalYAML implements a custom marshaller to omit dynamic default values.
