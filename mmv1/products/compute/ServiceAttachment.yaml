@@ -166,7 +166,6 @@ properties:
     description: |
       If true, show NAT IPs of all connected endpoints.
     optional: true
-    input: true
     url_param_only: true
   - name: 'connectionPreference'
     type: String
