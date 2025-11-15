@@ -242,42 +242,42 @@ func TestExecParseComment(t *testing.T) {
 		expectCommentUpdate     bool
 		expectCommentCreate     bool
 	}{
-		// "reassign-reviewer with hyphen and specific user": {
-		// 	comment: "LGTM! @modular-magician reassign-reviewer alice",
-		// 	existingComments: []github.PullRequestComment{
-		// 		{
-		// 			Body: github.FormatReviewerComment("bob"),
-		// 			ID:   1234,
-		// 		},
-		// 	},
-		// 	expectSpecificReviewers: []string{"alice"},
-		// 	expectRemovedReviewers:  []string{"bob"},
-		// 	expectCommentUpdate:     true,
-		// },
-		// "reassign to random reviewer (no username specified)": {
-		// 	comment: "@modular-magician reassign-reviewer",
-		// 	existingComments: []github.PullRequestComment{
-		// 		{
-		// 			Body: github.FormatReviewerComment("george"),
-		// 			ID:   3456,
-		// 		},
-		// 	},
-		// 	expectRemovedReviewers: []string{"george"},
-		// 	expectCommentUpdate:    true,
-		// 	// Can't check specific reviewer since it's random
-		// },
-		// "multiple @modular-magician invocations (only first processed)": {
-		// 	comment: "@modular-magician reassign-reviewer larry\n@modular-magician reassign-reviewer mary",
-		// 	existingComments: []github.PullRequestComment{
-		// 		{
-		// 			Body: github.FormatReviewerComment("nancy"),
-		// 			ID:   1111,
-		// 		},
-		// 	},
-		// 	expectSpecificReviewers: []string{"larry"}, // Only larry, not mary
-		// 	expectRemovedReviewers:  []string{"nancy"},
-		// 	expectCommentUpdate:     true,
-		// },
+		"reassign-reviewer with hyphen and specific user": {
+			comment: "LGTM! @modular-magician reassign-reviewer alice",
+			existingComments: []github.PullRequestComment{
+				{
+					Body: github.FormatReviewerComment("bob"),
+					ID:   1234,
+				},
+			},
+			expectSpecificReviewers: []string{"alice"},
+			expectRemovedReviewers:  []string{"bob"},
+			expectCommentUpdate:     true,
+		},
+		"reassign to random reviewer (no username specified)": {
+			comment: "@modular-magician reassign-reviewer",
+			existingComments: []github.PullRequestComment{
+				{
+					Body: github.FormatReviewerComment("george"),
+					ID:   3456,
+				},
+			},
+			expectRemovedReviewers: []string{"george"},
+			expectCommentUpdate:    true,
+			// Can't check specific reviewer since it's random
+		},
+		"multiple @modular-magician invocations (only first processed)": {
+			comment: "@modular-magician reassign-reviewer larry\n@modular-magician reassign-reviewer mary",
+			existingComments: []github.PullRequestComment{
+				{
+					Body: github.FormatReviewerComment("nancy"),
+					ID:   1111,
+				},
+			},
+			expectSpecificReviewers: []string{"larry"}, // Only larry, not mary
+			expectRemovedReviewers:  []string{"nancy"},
+			expectCommentUpdate:     true,
+		},
 		"no @modular-magician invocation": {
 			comment:        "Just a regular comment without magician",
 			expectNoAction: true,
@@ -290,23 +290,23 @@ func TestExecParseComment(t *testing.T) {
 			comment:        "@modular-magician cherry-pick branch-xyz",
 			expectNoAction: true,
 		},
-		// 		"command in middle of multi-line comment": {
-		// 			comment: `This looks good to me.
-		// LGTM!
+		"command in middle of multi-line comment": {
+			comment: `This looks good to me.
+		LGTM!
 
-		// @modular-magician reassign-reviewer rachel
+		@modular-magician reassign-reviewer rachel
 
-		// Thanks for the great work!`,
-		// 	existingComments: []github.PullRequestComment{
-		// 		{
-		// 			Body: github.FormatReviewerComment("steve"),
-		// 			ID:   3333,
-		// 		},
-		// 	},
-		// 	expectSpecificReviewers: []string{"rachel"},
-		// 	expectRemovedReviewers:  []string{"steve"},
-		// 	expectCommentUpdate:     true,
-		// },
+		Thanks for the great work!`,
+			existingComments: []github.PullRequestComment{
+				{
+					Body: github.FormatReviewerComment("steve"),
+					ID:   3333,
+				},
+			},
+			expectSpecificReviewers: []string{"rachel"},
+			expectRemovedReviewers:  []string{"steve"},
+			expectCommentUpdate:     true,
+		},
 	}
 
 	for tn, tc := range cases {
