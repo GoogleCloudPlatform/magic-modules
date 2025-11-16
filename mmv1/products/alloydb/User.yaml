@@ -137,7 +137,6 @@ properties:
     ignore_read: true
   - name: 'password_wo_version'
     type: Integer
-    default_value: 0
     url_param_only: true
     ignore_read: true
     description: |
