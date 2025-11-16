@@ -478,7 +478,7 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"google_filestore_instance.replica_instance",
 						"effective_replication.0.replicas.0.peer_instance",
-						"projects/" + context["project"].(string) + "/locations/us-east1/instances/tf-test-source-instance-" + context["random_suffix"].(string),
+						"projects/"+context["project"].(string)+"/locations/us-east1/instances/tf-test-source-instance-"+context["random_suffix"].(string),
 					),
 					resource.TestCheckResourceAttr(
 						"google_filestore_instance.replica_instance",
@@ -568,18 +568,18 @@ func TestAccFilestoreInstance_directoryServices(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"zone"},
 			},
-      {
-        Config: testAccFilestoreInstance_nfs_v4(name, location, tier),
-        Check: resource.ComposeTestCheckFunc(
-          resource.TestCheckNoResourceAttr("google_filestore_instance.instance", "directory_services.0.ldap.0.domain"),
-        ),
-      },
-      {
-        ResourceName:            "google_filestore_instance.instance",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"zone"},
-      },
+			{
+				Config: testAccFilestoreInstance_nfs_v4(name, location, tier),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_filestore_instance.instance", "directory_services.0.ldap.0.domain"),
+				),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone"},
+			},
 			{
 				Config: testAccFilestoreInstance_ldap(name, location, tier, "example.com"),
 				Check: resource.ComposeTestCheckFunc(
@@ -595,10 +595,10 @@ func TestAccFilestoreInstance_directoryServices(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"zone"},
 			},
-      {
-        Config: testAccFilestoreInstance_ldap(name, location, tier, "other.com"),
-        ExpectError: regexp.MustCompile("cannot update existing directory services configuration"),
-      },
+			{
+				Config:      testAccFilestoreInstance_ldap(name, location, tier, "other.com"),
+				ExpectError: regexp.MustCompile("cannot update existing directory services configuration"),
+			},
 		},
 	})
 }
@@ -672,7 +672,7 @@ func TestAccFilestoreInstance_psc(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFilestoreInstance_psc(context),
-				Check:  resource.ComposeTestCheckFunc(
+				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_filestore_instance.instance", "networks.0.connect_mode", "PRIVATE_SERVICE_CONNECT"),
 				),
 			},
