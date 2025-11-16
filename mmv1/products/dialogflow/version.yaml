@@ -63,10 +63,6 @@ properties:
     description: |
       The sequential number of this version.
     output: true
-  - name: 'version_id'
-    type: String
-    description: 'The numeric ID of the version, used to construct the URL.'
-    url_param_only: true
   - name: 'description'
     type: String
     description: |
