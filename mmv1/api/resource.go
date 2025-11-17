@@ -844,7 +844,7 @@ func (r *Resource) attachConstraintGroup(groupType string, source []string) *[]s
 		return existing
 	}
 
-	newGroup := slices.Clone(source)
+	newGroup := slices.Clone(sorted)
 	r.constraintGroupRegistry[key] = &newGroup
 	return &newGroup
 }
