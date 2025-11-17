@@ -189,6 +189,15 @@ properties:
                   type: String
                   description: "The resource name for the Extended Metadata Schema."
                   output: true
+      - name: 'identity'
+        type: NestedObject
+        description: "Output only. The identity associated with the service."
+        output: true
+        properties:
+          - name: 'principal'
+            type: String
+            description: "Output only. The principal of the identity."
+            output: true
   - name: 'attributes'
     type: NestedObject
     description: 'Consumer provided attributes.'
