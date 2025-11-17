@@ -74,7 +74,6 @@ resource "google_looker_instance" "test" {
   platform_edition   = "LOOKER_CORE_ENTERPRISE_ANNUAL"
   region             = "us-central1"
   public_ip_enabled  = true
-  psc_enabled        = true
 
   oauth_config {
     client_id     = "my-client-id"
@@ -91,7 +90,6 @@ resource "google_looker_instance" "test" {
   platform_edition   = "LOOKER_CORE_ENTERPRISE_ANNUAL"
   region             = "us-central1"
   public_ip_enabled  = true
-  psc_enabled        = true
 
   controlled_egress_enabled = true
 
