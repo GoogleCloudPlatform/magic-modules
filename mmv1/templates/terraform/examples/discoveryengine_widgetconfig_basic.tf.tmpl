@@ -27,4 +27,12 @@ resource "google_discovery_engine_widget_config" "basic" {
     enable_web_app                    = true
     workforce_identity_pool_provider  = "locations/global/workforcePools/workforce-pool-id/providers/workforce-pool-provider"
   }
+  ui_settings {
+    interaction_type                  = "SEARCH_WITH_ANSWER"
+    enable_autocomplete               = true
+    enable_quality_feedback           = true
+    generative_answer_config {
+      result_count                    = 5
+    }
+  }
 }
