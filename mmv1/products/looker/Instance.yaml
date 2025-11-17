@@ -465,6 +465,7 @@ properties:
     type: NestedObject
     description: |
       Information for Private Service Connect (PSC) setup for a Looker instance.
+    default_from_api: true
     update_mask_fields:
       - 'psc_config.allowed_vpcs'
       - 'psc_config.service_attachments'
