@@ -1198,7 +1198,7 @@ properties:
               type: NestedObject
               description: |
                 Publish findings of a DlpJob to Data Catalog.
-              deprecation_message: '`publish_findings_to_cloud_data_catalog` is deprecated and will be removed in a future release. To publish findings to Dataplex Catalog, use `publish_findings_to_dataplex_catalog` instead.'
+              deprecation_message: '`publish_findings_to_cloud_data_catalog` is deprecated and will be removed in a future major release. To publish findings to Dataplex Catalog, use `publish_findings_to_dataplex_catalog` instead.'
               send_empty_value: true
               # TODO: uncomment here once they are supported(github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # exactly_one_of:
