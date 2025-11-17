@@ -43,28 +43,28 @@ func TestAccLookerInstance_update(t *testing.T) {
 }
 
 func TestAccLookerInstance_updateControlledEgress(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
-    // Step 1: Create instance WITHOUT controlled egress
-    context := map[string]interface{}{
-        "random_suffix": acctest.RandString(t, 10),
-    }
+	// Step 1: Create instance WITHOUT controlled egress
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-    acctest.VcrTest(t, resource.TestCase{
-        PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-        ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-        Steps: []resource.TestStep{
-            {
-                // Config A: Basic Instance
-                Config: testAccLookerInstance_basic(context),
-            },
-            {
-                // Config B: Update to ENABLE controlled egress
-                // This triggers the PATCH with your update_mask logic
-                Config: testAccLookerInstance_controlledEgress(context),
-            },
-        },
-    })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				// Config A: Basic Instance
+				Config: testAccLookerInstance_basic(context),
+			},
+			{
+				// Config B: Update to ENABLE controlled egress
+				// This triggers the PATCH with your update_mask logic
+				Config: testAccLookerInstance_controlledEgress(context),
+			},
+		},
+	})
 }
 
 func testAccLookerInstance_basic(context map[string]interface{}) string {
