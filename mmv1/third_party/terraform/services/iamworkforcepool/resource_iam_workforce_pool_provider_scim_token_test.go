@@ -99,7 +99,7 @@ resource "google_iam_workforce_pool_provider_scim_token" "scim_token" {
   provider_id       = google_iam_workforce_pool_provider.provider.provider_id
   scim_tenant_id    = google_iam_workforce_pool_provider_scim_tenant.scim_tenant.scim_tenant_id
   scim_token_id     = "example-scim-token"
-  display_name      = "SCIM Token Display Name"
+  display_name      = "Token Display Name"
   # security_token and state are output only, not settable
 }
 
@@ -161,7 +161,7 @@ resource "google_iam_workforce_pool_provider_scim_token" "scim_token" {
   provider_id       = google_iam_workforce_pool_provider.provider.provider_id
   scim_tenant_id    = google_iam_workforce_pool_provider_scim_tenant.scim_tenant.scim_tenant_id
   scim_token_id     = "example-scim-token"
-  display_name      = "SCIM Token Display Name - Updated"
+  display_name      = "Token Display Name - Updated"
   # security_token and state are output only, not settable
 }
 
