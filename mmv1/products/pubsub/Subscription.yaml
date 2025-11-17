@@ -42,6 +42,7 @@ async:
   target_occurrences: 1
   actions: ['create']
 custom_code:
+  pre_update: 'templates/terraform/pre_update/pubsub_subscription.go.tmpl'
   constants: 'templates/terraform/constants/subscription.go.tmpl'
   encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/pubsub_subscription.tmpl'
