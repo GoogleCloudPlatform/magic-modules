@@ -18,8 +18,8 @@ resource "google_oracle_database_exadb_vm_cluster" "{{$.PrimaryResourceId}}"{
         node_count = 1
         enaled_ecpu_count_per_node = 8
         additional_flash_cache_percent = 100
-        vm_file_system_storage: {
-            size_in_gbs_per_node: 220
+        vm_file_system_storage {
+            size_in_gbs_per_node = 220
         }
         exascale_db_storage_vault_id = "{{index $.Vars "exascale_db_storage_vault_id"}}"
         exascale_db_storage_details {
