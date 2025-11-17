@@ -46,7 +46,7 @@ examples:
       exascale_db_storage_vault_id: 'fmt.Sprintf("projects/oci-terraform-testing-prod/locations/us-east4/exascaleDbStorageVaults/ofake-tf-test-storage-vault-basic-%s", acctest.RandString(t, 10))'
       odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
       odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
-      backup_odb_subnet: "projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-backup-odbsubnet"
+      backup_odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-backup-odbsubnet"'
 virtual_fields:
   - name: "deletion_protection"
     type: Boolean
