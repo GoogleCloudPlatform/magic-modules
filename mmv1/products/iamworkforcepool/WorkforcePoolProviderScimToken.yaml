@@ -88,7 +88,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'ProviderId'
+  - name: 'providerId'
     type: String
     description: |
       The ID of the Provider.

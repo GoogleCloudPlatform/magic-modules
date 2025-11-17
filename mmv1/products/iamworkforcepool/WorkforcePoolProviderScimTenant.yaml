@@ -91,7 +91,7 @@ properties:
     type: Time
     description: The timestamp that represents the time when the SCIM tenant is purged.
     output: true
-  - name: service_agent
+  - name: 'serviceAgent'
     type: String
     description: |
       Service Agent created by SCIM Tenant API. SCIM tokens created under
@@ -112,7 +112,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'ProviderId'
+  - name: 'providerId'
     type: String
     description: |
       The ID of the provider.
