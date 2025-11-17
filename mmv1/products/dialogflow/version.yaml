@@ -67,14 +67,12 @@ properties:
     type: String
     description: |
       The developer-provided description of this version.
-    required: false
   - name: 'status'
     type: Enum
     description: |
       The status of this version.
     output: true
     enum_values:
-      - 'VERSION_STATUS_UNSPECIFIED'
       - 'IN_PROGRESS'
       - 'READY'
       - 'FAILED'
