@@ -30,30 +30,36 @@ const (
 	defaultProject      = "ci-test-project-nightly-beta"
 )
 
-func terraformWorkflow(t *testing.T, dir, name string) {
-	terraformInit(t, "terraform", dir)
-	terraformPlan(t, "terraform", dir, name+".tfplan")
-	payload := terraformShow(t, "terraform", dir, name+".tfplan")
+func terraformWorkflow(t *testing.T, dir, name, project string) {
+	defer os.Remove(filepath.Join(dir, fmt.Sprintf("%s.tf", name)))
+	defer os.Remove(filepath.Join(dir, fmt.Sprintf("%s.tfplan", name)))
+
+	terraformInit(t, "terraform", dir, project)
+	terraformPlan(t, "terraform", dir, project, name+".tfplan")
+	payload := terraformShow(t, "terraform", dir, project, name+".tfplan")
 	saveFile(t, dir, name+".tfplan.json", payload)
 }
 
-func terraformInit(t *testing.T, executable, dir string) {
-	terraformExec(t, executable, dir, "init", "-input=false")
+func terraformInit(t *testing.T, executable, dir, project string) {
+	terraformExec(t, executable, dir, project, "init", "-input=false")
 }
 
-func terraformPlan(t *testing.T, executable, dir, tfplan string) {
-	terraformExec(t, executable, dir, "plan", "-input=false", "-refresh=false", "-out", tfplan)
+func terraformPlan(t *testing.T, executable, dir, project, tfplan string) {
+	terraformExec(t, executable, dir, project, "plan", "-input=false", "-refresh=false", "-out", tfplan)
 }
 
-func terraformShow(t *testing.T, executable, dir, tfplan string) []byte {
-	return terraformExec(t, executable, dir, "show", "--json", tfplan)
+func terraformShow(t *testing.T, executable, dir, project, tfplan string) []byte {
+	return terraformExec(t, executable, dir, project, "show", "--json", tfplan)
 }
 
-func terraformExec(t *testing.T, executable, dir string, args ...string) []byte {
+func terraformExec(t *testing.T, executable, dir, project string, args ...string) []byte {
+	if project == "" {
+		project = defaultProject
+	}
 	cmd := exec.Command(executable, args...)
 	cmd.Env = []string{
 		"HOME=" + filepath.Join(dir, "fakehome"),
-		"GOOGLE_PROJECT=" + defaultProject,
+		"GOOGLE_PROJECT=" + project,
 		"GOOGLE_FOLDER=" + "",
 		"GOOGLE_ORG=" + defaultOrganization,
 		"GOOGLE_OAUTH_ACCESS_TOKEN=fake-token", // GOOGLE_OAUTH_ACCESS_TOKEN is required so terraform plan does not require the google authentication cert

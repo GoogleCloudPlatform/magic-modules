@@ -106,8 +106,8 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 				ResourceName:      "{{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}",
 				ImportState:       true,
 				ImportStateVerify: true,
-		{{- if $.Res.IgnoreReadPropertiesToString $e }}
-				ImportStateVerifyIgnore: {{ $.Res.IgnoreReadPropertiesToString $e }},
+		{{- if $.Res.IgnoreReadPropertiesToStringLegacy $e }}
+				ImportStateVerifyIgnore: {{ $.Res.IgnoreReadPropertiesToStringLegacy $e }},
 		{{- end }}
 			},
 	{{- end }}

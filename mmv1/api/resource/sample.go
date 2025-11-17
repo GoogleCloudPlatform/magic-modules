@@ -76,13 +76,13 @@ type Sample struct {
 	PrimaryResourceName string `yaml:"primary_resource_name,omitempty"`
 
 	// Steps
-	Steps []Step
+	Steps []*Step
 
 	// The version name provided by the user through CI
 	TargetVersionName string `yaml:"-"`
 
 	// Step configs that first appears
-	NewConfigFuncs []Step `yaml:"-"`
+	NewConfigFuncs []*Step `yaml:"-"`
 
 	// The name of the location/region override for use in IAM tests. IAM
 	// tests may need this if the location is not inherited on the resource
@@ -97,26 +97,13 @@ type Sample struct {
 	TGCSkipTest string `yaml:"tgc_skip_test,omitempty"`
 }
 
-// Set default value for fields
-func (s *Sample) UnmarshalYAML(unmarshal func(any) error) error {
-	type sampleAlias Sample
-	aliasObj := (*sampleAlias)(s)
-
-	err := unmarshal(aliasObj)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (s *Sample) TestSampleSlug(productName, resourceName string) string {
 	ret := fmt.Sprintf("%s%s_%sExample", productName, resourceName, google.Camelize(s.Name, "lower"))
 	return ret
 }
 
-func (s *Sample) TestSteps() []Step {
-	return google.Reject(s.Steps, func(st Step) bool {
+func (s *Sample) TestSteps() []*Step {
+	return google.Reject(s.Steps, func(st *Step) bool {
 		return st.MinVersion != "" && slices.Index(product.ORDER, s.TargetVersionName) < slices.Index(product.ORDER, st.MinVersion)
 	})
 }

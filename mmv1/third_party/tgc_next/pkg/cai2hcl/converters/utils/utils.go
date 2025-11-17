@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"strings"
 
 	hashicorpcty "github.com/hashicorp/go-cty/cty"
@@ -11,17 +12,6 @@ import (
 	"github.com/zclconf/go-cty/cty"
 	ctyjson "github.com/zclconf/go-cty/cty/json"
 )
-
-// ParseFieldValue extracts named part from resource url.
-func ParseFieldValue(url string, name string) string {
-	fragments := strings.Split(url, "/")
-	for ix, item := range fragments {
-		if item == name && ix+1 < len(fragments) {
-			return fragments[ix+1]
-		}
-	}
-	return ""
-}
 
 /*
 	ParseUrlParamValuesFromAssetName uses GetCaiAssetNameTemplate to parse hclData from assetName, filtering out all outputFields
@@ -196,4 +186,13 @@ func convertToMarshallableObj(node interface{}) interface{} {
 	default:
 		return node
 	}
+}
+
+func RandString(n int) string {
+	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return string(b)
 }
