@@ -212,7 +212,6 @@ properties:
   - name: aiPlatformFloorSetting
     type: NestedObject
     description: AI Platform floor setting.
-    allow_empty_object: true
     properties:
       - name: inspectOnly
         type: Boolean
@@ -236,7 +235,6 @@ properties:
   - name: googleMcpServerFloorSetting
     type: NestedObject
     description: Google MCP Server floor setting.
-    allow_empty_object: true
     properties:
       - name: inspectOnly
         type: Boolean

@@ -121,13 +121,6 @@ resource "google_model_armor_floorsetting" "test-resource" {
     }
   }
   
-  integrated_services 
-
-  ai_platform_floor_setting {
-    inspect_and_block       = false
-    enable_cloud_logging    = false
-  }
-  
   floor_setting_metadata {
     multi_language_detection {
       enable_multi_language_detection = false
