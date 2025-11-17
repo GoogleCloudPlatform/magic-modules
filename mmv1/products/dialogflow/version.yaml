@@ -18,7 +18,7 @@ description: |
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/dialogflow/docs/'
-  api: 'https://cloud.google.com/dialogflow/docs/reference/rest/v2/projects/agent/versions'
+  api: 'https://docs.cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.agent.versions'
 docs:
 id_format: '{{parent}}/versions/{{name}}'
 base_url: '{{parent}}/versions'
