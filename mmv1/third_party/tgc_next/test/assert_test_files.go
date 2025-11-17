@@ -46,14 +46,15 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 	}
 
 	logger := zaptest.NewLogger(t)
-	// Create a temporary directory for running terraform.
-	tfDir, err := os.MkdirTemp(tmpDir, "terraform")
-	if err != nil {
-		t.Fatalf("error creating a temporary directory for running terraform: %v", err)
-	}
-	defer os.RemoveAll(tfDir)
 
 	for _, stepN := range stepNumbers {
+		// Create a temporary directory for running terraform.
+		tfDir, err := os.MkdirTemp(tmpDir, fmt.Sprintf("terraform%d", stepN))
+		if err != nil {
+			t.Fatalf("error creating a temporary directory for running terraform: %v", err)
+		}
+		defer os.RemoveAll(tfDir)
+
 		subtestName := fmt.Sprintf("step%d", stepN)
 		t.Run(subtestName, func(t *testing.T) {
 			retries := 0
