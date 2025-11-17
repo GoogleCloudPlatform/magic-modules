@@ -16,7 +16,7 @@ if err != nil {
 	return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComputeOrganizationSecurityPolicy %q", d.Get("policy_id")))
 }
 
-parent := flattenComputeOrganizationSecurityPolicyParent(policyRes["parent"], d, config)
+parent := policyRes["parent"]
 var opRes map[string]interface{}
 err = ComputeOrgOperationWaitTimeWithResponse(
 	config, res, &opRes, parent.(string), "Creating OrganizationSecurityPolicyRule", userAgent,
