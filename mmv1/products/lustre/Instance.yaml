@@ -116,14 +116,7 @@ properties:
     type: String
     description: |-
       The state of the instance.
-      Possible values:
-      STATE_UNSPECIFIED
-      ACTIVE
-      CREATING
-      DELETING
-      UPGRADING
-      REPAIRING
-      STOPPED
+      Please see https://cloud.google.com/managed-lustre/docs/reference/rest/v1/projects.locations.instances#state for values
     output: true
   - name: mountPoint
     type: String
