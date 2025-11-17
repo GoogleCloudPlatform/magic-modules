@@ -69,7 +69,6 @@ func TestAccVertexAIIndexEndpoint_psc_automation_config(t *testing.T) {
 	})
 }
 
-
 func testAccVertexAIIndexEndpoint_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vertex_ai_index_endpoint" "index_endpoint" {
@@ -155,4 +154,3 @@ resource "google_compute_network" "network" {
 data "google_project" "project" {}
 `, context)
 }
-
