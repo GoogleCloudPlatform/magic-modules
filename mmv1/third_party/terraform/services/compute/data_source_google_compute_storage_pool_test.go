@@ -23,6 +23,13 @@ func TestAccDataSourceComputeStoragePool_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComputeStoragePool_basic(context),
+			},
+			{
+				ResourceName:      "google_compute_storage_pool.test-storage-pool",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceState("data.google_compute_storage_pool.test-storage-pool", "google_compute_storage_pool.my-storage-pool-data"),
 				),
