@@ -31,6 +31,9 @@ const (
 )
 
 func terraformWorkflow(t *testing.T, dir, name, project string) {
+	defer os.Remove(filepath.Join(dir, fmt.Sprintf("%s.tf", name)))
+	defer os.Remove(filepath.Join(dir, fmt.Sprintf("%s.tfplan", name)))
+
 	terraformInit(t, "terraform", dir, project)
 	terraformPlan(t, "terraform", dir, project, name+".tfplan")
 	payload := terraformShow(t, "terraform", dir, project, name+".tfplan")
