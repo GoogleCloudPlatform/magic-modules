@@ -1,5 +1,5 @@
 resource "google_oracle_database_exadb_vm_cluster" "{{$.PrimaryResourceId}}"{
-    exadb_vm_cluster_id = "{{index $.Vars "exadb_vm_cluster"}}"
+    exadb_vm_cluster_id = "{{index $.Vars "exadb_vm_cluster_id"}}"
     display_name = "{{index $.Vars "exadb_vm_cluster_id"}} displayname"
     location = "us-east4"
     project = "{{index $.Vars "project"}}"
