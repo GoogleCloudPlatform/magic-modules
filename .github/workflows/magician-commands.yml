@@ -1,0 +1,52 @@
+name: magician-commands
+
+permissions: read-all
+
+on:
+  issue_comment:
+    types:
+      - created
+
+jobs:
+  handle-comment-command:
+    runs-on: ubuntu-22.04
+    permissions:
+      pull-requests: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check for magician invocation
+        id: read-comment
+        uses: actions-ecosystem/action-regex-match@d50fd2e7a37d0e617aea3d7ada663bd56862b9cc # v2.0.2
+        with:
+          text: ${{ github.event.comment.body }}
+          regex: '.*@modular-magician .*'
+      
+      - name: Checkout Repository
+        if: steps.read-comment.outputs.match != ''
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+        with:
+          ref: main
+      
+      - name: Set up Go
+        if: steps.read-comment.outputs.match != ''
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: '^1.21'
+      
+      - name: Build magician
+        if: steps.read-comment.outputs.match != ''
+        run: |
+          cd .ci/magician
+          go build .
+      
+      - name: Run Magician Command Parser
+        if: steps.read-comment.outputs.match != ''
+        env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          # Execute the parse-comment subcommand
+          # The comment body is passed via the COMMENT_BODY environment variable
+          .ci/magician/magician parse-comment \
+            ${{ github.event.issue.number }} \
+            ${{ github.event.comment.user.login }}

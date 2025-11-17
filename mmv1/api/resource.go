@@ -25,7 +25,6 @@ import (
 	"text/template"
 
 	"github.com/golang/glog"
-	"gopkg.in/yaml.v3"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
@@ -218,7 +217,7 @@ type Resource struct {
 
 	// Examples in documentation. Backed by generated tests, and have
 	// corresponding OiCS walkthroughs.
-	Examples []*resource.Examples
+	Examples []*resource.Examples `yaml:"examples,omitempty"`
 
 	// Samples for generating tests and documentation
 	Samples []*resource.Sample `yaml:"samples,omitempty"`
@@ -239,6 +238,8 @@ type Resource struct {
 	Sweeper resource.Sweeper `yaml:"sweeper,omitempty"`
 
 	Timeouts *Timeouts `yaml:"timeouts,omitempty"`
+
+	Async *Async `yaml:"async,omitempty"`
 
 	// An array of function names that determine whether an error is retryable.
 	ErrorRetryPredicates []string `yaml:"error_retry_predicates,omitempty"`
@@ -304,8 +305,6 @@ type Resource struct {
 
 	// Add a deprecation message for a resource that's been deprecated in the API.
 	DeprecationMessage string `yaml:"deprecation_message,omitempty"`
-
-	Async *Async
 
 	// Tag autogen resources so that we can track them. In the future this will
 	// control if a resource is continuously generated from public OpenAPI docs
@@ -416,19 +415,35 @@ type TGCResource struct {
 	CaiAssetNameFormat string `yaml:"cai_asset_name_format,omitempty"`
 }
 
-func (r *Resource) UnmarshalYAML(value *yaml.Node) error {
+// // MarshalYAML implements a custom marshaller to omit dynamic default values.
+func (r *Resource) MarshalYAML() (interface{}, error) {
 	type resourceAlias Resource
-	aliasObj := (*resourceAlias)(r)
 
-	err := value.Decode(aliasObj)
+	defaults := Resource{}
+
+	// Pre-populate fields needed for shallow default calculation.
+	defaults.Name = r.Name
+	defaults.ApiResourceTypeKind = r.ApiResourceTypeKind
+	defaults.SelfLink = r.SelfLink
+	defaults.MinVersion = r.MinVersion
+	// Calculate shallow defaults.
+	defaults.setShallowDefaults()
+	defaults.Name = ""
+	defaults.ApiResourceTypeKind = ""
+	defaults.SelfLink = ""
+	defaults.MinVersion = ""
+
+	clone, err := utils.OmitDefaultsForMarshaling(*r, defaults)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return (*resourceAlias)(clone.(*Resource)), nil
 }
 
-func (r *Resource) SetDefault(product *Product) {
+// SetShallowDefaults calculates and sets default values for the immediate fields
+// of this Resource, without recursing into its children (Properties, etc.).
+func (r *Resource) setShallowDefaults() {
 	if r.CreateVerb == "" {
 		r.CreateVerb = "POST"
 	}
@@ -462,6 +477,18 @@ func (r *Resource) SetDefault(product *Product) {
 		}
 	}
 
+	if r.IamPolicy != nil && r.IamPolicy.MinVersion == "" {
+		r.IamPolicy.MinVersion = r.MinVersion
+	}
+	if r.Timeouts == nil {
+		r.Timeouts = NewTimeouts() // This only sets defaults if Timeouts is nil
+	}
+}
+
+// SetDefault sets default values for this Resource and all its properties.
+func (r *Resource) SetDefault(product *Product) {
+	r.setShallowDefaults() // Set defaults for the current level.
+
 	r.ProductMetadata = product
 	for _, property := range r.AllProperties() {
 		property.SetDefault(r)
@@ -469,13 +496,6 @@ func (r *Resource) SetDefault(product *Product) {
 	for _, vf := range r.VirtualFields {
 		vf.SetDefault(r)
 	}
-	if r.IamPolicy != nil && r.IamPolicy.MinVersion == "" {
-		r.IamPolicy.MinVersion = r.MinVersion
-	}
-	if r.Timeouts == nil {
-		r.Timeouts = NewTimeouts()
-	}
-
 }
 
 func (r *Resource) Validate() {
