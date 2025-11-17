@@ -33,16 +33,20 @@ func TestAccDataSourceComputeStoragePool_basic(t *testing.T) {
 func testAccDataSourceComputeStoragePool_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_storage_pool" "test-storage-pool" {
-  name                         = "tf-test-storage-pool-%{random_suffix}"
-  zone                         = "us-central1-a"
-  pool_provisioned_capacity_gb = "10240"
-  pool_provisioned_throughput  = "1024"
-  storage_pool_type            = "hyperdisk-throughput"
-}
+  name                          = "tf-test-storage-pool-%{random_suffix}"
+  zone                          = "us-central1-a"
+  capacity_provisioning_type    = "STANDARD"
+  pool_provisioned_capacity_gb  = "11264"
+  pool_provisioned_iops         = "20000"
+  pool_provisioned_throughput   = "2048"
+  storage_pool_type 			= "hyperdisk-balanced"
+  deletion_protection 			= false
+ }
+
 
 data "google_compute_storage_pool" "my-storage-pool-data" {
-  name = google_compute_storage_pool.test-storage-pool.name
-  zone = "us-central1-a"
+  name 							= google_compute_storage_pool.test-storage-pool.name
+  zone 							= "us-central1-a"
 }
 `, context)
 }
