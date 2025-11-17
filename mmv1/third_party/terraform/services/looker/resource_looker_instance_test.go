@@ -76,6 +76,10 @@ resource "google_looker_instance" "test" {
   public_ip_enabled  = true
   psc_enabled  = true
 
+  psc_config {
+    allowed_vpcs = []
+  }
+
   oauth_config {
     client_id     = "my-client-id"
     client_secret = "my-client-secret"
@@ -92,6 +96,10 @@ resource "google_looker_instance" "test" {
   region             = "us-central1"
   public_ip_enabled  = true
   psc_enabled  = true
+
+  psc_config {
+    allowed_vpcs = []
+  }
 
   controlled_egress_enabled = true
 
