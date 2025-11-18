@@ -127,3 +127,89 @@ resource "google_looker_instance" "test" {
 }
 `, context["random_suffix"])
 }
+
+func TestAccLookerInstance_updatePeriodicExport(t *testing.T) {
+	t.Parallel()
+
+	// Step 1: Create instance WITHOUT periodic export
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				// Config A: Basic Instance
+				Config: testAccLookerInstance_basic(context),
+			},
+			{
+				ResourceName:            "google_looker_instance.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"oauth_config", "region"},
+			},
+			{
+				// Config B: Update to ENABLE periodic export
+				// This triggers the PATCH with update_mask logic
+				Config: testAccLookerInstance_periodicExport(context),
+			},
+			{
+				ResourceName:            "google_looker_instance.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"oauth_config", "region"},
+			},
+		},
+	})
+}
+
+func testAccLookerInstance_periodicExport(context map[string]interface{}) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "export" {
+  name          = "tf-test-looker-export-%s"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_kms_key_ring" "keyring" {
+  name     = "tf-test-looker-keyring-%s"
+  location = "us-central1"
+}
+
+resource "google_kms_crypto_key" "key" {
+  name     = "tf-test-looker-key-%s"
+  key_ring = google_kms_key_ring.keyring.id
+}
+
+resource "google_looker_instance" "test" {
+  name              = "tf-test-looker-%s"
+  platform_edition  = "LOOKER_CORE_ENTERPRISE_ANNUAL"
+  region            = "us-central1"
+  public_ip_enabled = true
+  psc_enabled       = true
+
+  psc_config {
+    allowed_vpcs = []
+  }
+
+  periodic_export_config {
+    gcs_uri = "gs://${google_storage_bucket.export.name}"
+    kms_key = google_kms_crypto_key.key.id
+    
+    start_time {
+      hours   = 12
+      minutes = 30
+      seconds = 0
+      nanos   = 0
+    }
+  }
+
+  oauth_config {
+    client_id     = "my-client-id"
+    client_secret = "my-client-secret"
+  }
+}
+`, context["random_suffix"], context["random_suffix"], context["random_suffix"], context["random_suffix"])
+}
