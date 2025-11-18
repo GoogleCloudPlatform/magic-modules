@@ -24,7 +24,7 @@ func TestAccDataSourceComputeStoragePool_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceComputeStoragePool_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceState("data.google_compute_storage_pool.test-storage-pool", "google_compute_storage_pool.my-storage-pool-data"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_compute_storage_pool.my-storage-pool-data", "google_compute_storage_pool.test-storage-pool"),
 				),
 			},
 		},
