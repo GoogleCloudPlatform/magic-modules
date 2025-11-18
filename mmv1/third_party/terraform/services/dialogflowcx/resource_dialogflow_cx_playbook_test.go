@@ -1,0 +1,132 @@
+import "github.com/hashicorp/terraform-plugin-testing/plancheck"
+
+func TestAccDialogflowCXPlaybook_dialogflowcxPlaybookBasicExample_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDialogflowCXPlaybookDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDialogflowCXPlaybook_dialogflowcxPlaybookBasicExample_basic(context),
+			},
+			{
+				ResourceName:            "google_dialogflow_cx_playbook.my-playbook",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent", "playbook_type"},
+			},
+			{
+				Config: testAccDialogflowCXPlaybook_dialogflowcxPlaybookBasicExample_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+				PreApply: []plancheck.PlanCheck{
+					plancheck.ExpectResourceAction("google_pubsub_topic.foo", plancheck.ResourceActionUpdate),
+				},
+				},
+			},
+			{
+				ResourceName:            "google_dialogflow_cx_playbook.my-playbook",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"parent", "playbook_type"},
+			},
+		},
+	})
+}
+
+func testAccDialogflowCXPlaybook_dialogflowcxPlaybookBasicExample_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dialogflow_cx_agent" "agent" {
+  display_name          = "tf-test-dialogflowcx-agent-basic%{random_suffix}"
+  location              = "global"
+  default_language_code = "en"
+  time_zone             = "America/New_York"
+  description           = "Example description."
+}
+
+resource "google_dialogflow_cx_playbook" "my-playbook" {
+  parent        = google_dialogflow_cx_agent.agent.id
+  display_name  = "Example Display Name"
+  goal          = "Example Goal"
+  playbook_type = "ROUTINE"
+  instruction {
+    steps {
+      text = "step 1"
+      steps = jsonencode([
+        {
+          "text": "step 1 1"
+        },
+        {
+          "text": "step 1 2",
+          "steps": [
+            {
+              "text": "step 1 2 1"
+            },
+            {
+              "text": "step 1 2 2"
+            }
+          ]
+        },
+        {
+          "text": "step 1 3"
+        }
+      ])
+    }
+    steps {
+      text = "step 2"
+    }
+    steps {
+      text = "step 3"
+    }
+  }
+}
+`, context)
+}
+
+func testAccDialogflowCXPlaybook_dialogflowcxPlaybookBasicExample_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dialogflow_cx_agent" "agent" {
+  display_name          = "tf-test-dialogflowcx-agent-basic%{random_suffix}"
+  location              = "global"
+  default_language_code = "en"
+  time_zone             = "America/New_York"
+  description           = "Example description."
+}
+
+resource "google_dialogflow_cx_playbook" "my-playbook" {
+  parent        = google_dialogflow_cx_agent.agent.id
+  display_name  = "Example Display Name"
+  goal          = "Example Goal"
+  playbook_type = "ROUTINE"
+  instruction {
+    steps {
+      text = "step 1"
+      steps = jsonencode([
+        {
+          "text": "step 1 1"
+        },
+        {
+          "text": "step 1 2",
+          "steps": [
+            {
+              "text": "step 1 2 1"
+            },
+            {
+              "text": "step 1 2 2"
+            }
+          ]
+        },
+        {
+          "text": "step 1 3"
+        }
+      ])
+    }
+  }
+}
+`, context)
+}
