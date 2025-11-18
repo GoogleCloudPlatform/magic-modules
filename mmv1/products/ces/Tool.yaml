@@ -877,7 +877,7 @@ properties:
             description: |-
               Specifies a list of allowed custom CA certificates for HTTPS
               verification.
-            required: true
+            output: true
             item_type:
               type: NestedObject
               properties:
