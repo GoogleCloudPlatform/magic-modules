@@ -175,7 +175,7 @@ resource "google_storage_bucket" "export" {
 
 resource "google_kms_key_ring" "keyring" {
   name     = "tf-test-looker-keyring-%s"
-  location = "us-central1"
+  location = "us-west1"
 }
 
 resource "google_kms_crypto_key" "key" {
