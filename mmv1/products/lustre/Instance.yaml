@@ -156,5 +156,5 @@ properties:
   - name: stateReason
     type: String
     description: |-
-        The reason why the instance is in a certain state (e.g. SUSPENDED).
+        The reason why the instance is in a certain state.
     output: true
