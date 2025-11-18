@@ -59,9 +59,21 @@ func TestAccLookerInstance_updateControlledEgress(t *testing.T) {
 				Config: testAccLookerInstance_basic(context),
 			},
 			{
+				ResourceName:            "google_looker_instance.looker-instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"oauth_config", "region"},
+			},
+			{
 				// Config B: Update to ENABLE controlled egress
 				// This triggers the PATCH with your update_mask logic
 				Config: testAccLookerInstance_controlledEgress(context),
+			},
+			{
+				ResourceName:            "google_looker_instance.looker-instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"oauth_config", "region"},
 			},
 		},
 	})
