@@ -1808,7 +1808,7 @@ func (r Resource) IamImportFormatTemplate() string {
 			importFormat = r.SelfLinkUrl()
 		}
 	}
-	return importFormat
+	return strings.ReplaceAll(importFormat, "{{name}}", fmt.Sprintf("{{%s}}", r.IamParentResourceName()))
 }
 
 func (r Resource) IamImportFormat() string {
