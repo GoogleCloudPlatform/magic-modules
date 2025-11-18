@@ -31,6 +31,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
+include_in_tgc_next_DO_NOT_USE: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/alloydb_user.go.tmpl'
   encoder: 'templates/terraform/encoders/alloydb_user.tmpl'
@@ -122,6 +123,9 @@ properties:
       Password for this database user.
     sensitive: true
     ignore_read: true
+    is_missing_in_cai: true
+    custom_flatten: 'templates/terraform/custom_flatten/alloydb_user_password.go.tmpl'
+    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/alloydb_user_password.go.tmpl'
     conflicts:
       - 'password_wo'
   - name: 'password_wo'
@@ -135,10 +139,14 @@ properties:
       - 'password'
     write_only_legacy: true
     ignore_read: true
+    is_missing_in_cai: true
+    custom_flatten: 'templates/terraform/custom_flatten/alloydb_user_password_wo.go.tmpl'
+    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/alloydb_user_password_wo.go.tmpl'
   - name: 'password_wo_version'
     type: Integer
     url_param_only: true
     ignore_read: true
+    is_missing_in_cai: true
     description: |
       Triggers update of password write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
     immutable: true
