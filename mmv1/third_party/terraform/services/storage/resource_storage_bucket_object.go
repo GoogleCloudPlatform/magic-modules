@@ -114,37 +114,37 @@ func ResourceStorageBucketObject() *schema.Resource {
 			},
 
 			"contexts": {
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "Contexts attached to an object, in key-value pairs.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"custom": {
 							Type:        schema.TypeList,
-							Optional:    true,
-							Computed:    true,
+							Required:    true,
 							Description: "A list of custom context key-value pairs.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"key": {
 										Type:        schema.TypeString,
 										Required:    true,
-										Description: "The key of the custom context.",
+										Description: "An individual object context. Context keys and their corresponding values must start with an alphanumeric character.",
 									},
 									"value": {
 										Type:        schema.TypeString,
 										Required:    true,
-										Description: "The value of the custom context.",
+										Description: "The value associated with this context. This field holds the primary information for the given context key.",
 									},
 									"create_time": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The creation timestamp of the context.",
+										Description: "The time when context was first added to the storage#object in RFC 3339 format.",
 									},
 									"update_time": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The update timestamp of the context.",
+										Description: "The time when context was last updated in RFC 3339 format.",
 									},
 								},
 							},
@@ -712,27 +712,16 @@ func expandCustomObjectContexts(objectContexts []interface{}) *storage.ObjectCon
 		return nil
 	}
 
-	contextsObj, ok := objectContexts[0].(map[string]interface{})
-	if !ok {
-		return nil
-	}
+	contextsObj := objectContexts[0].(map[string]interface{})
 
-	customList, ok := contextsObj["custom"]
-	if !ok || customList == nil {
-		return nil
-	}
+	customList := contextsObj["custom"]
 
-	tfCustomList, ok := customList.([]interface{})
-	if !ok {
-		return nil
-	}
+	tfCustomList := customList.([]interface{})
 
 	objContextPayload := make(map[string]storage.ObjectCustomContextPayload)
 	for _, item := range tfCustomList {
-		itemMap, ok := item.(map[string]interface{})
-		if !ok {
-			continue
-		}
+		itemMap := item.(map[string]interface{})
+
 		key := itemMap["key"].(string)
 		value := itemMap["value"].(string)
 
@@ -768,30 +757,21 @@ func flattenContexts(d *schema.ResourceData, contexts *storage.ObjectContexts) i
 		return nil
 	}
 	c, _ := d.GetOk("contexts")
-	contextsList, ok := c.([]interface{})
-	if !ok || len(contextsList) == 0 {
-		return nil
-	}
-	contextsObj, ok := contextsList[0].(map[string]interface{})
-	if !ok {
+	contextsList := c.([]interface{})
+	if len(contextsList) == 0 {
 		return nil
 	}
 
-	customObjectList, ok := contextsObj["custom"]
-	if !ok {
-		return nil
-	}
-	customkeyValueList, ok := customObjectList.([]interface{})
-	if !ok {
-		return nil
-	}
+	contextsObj := contextsList[0].(map[string]interface{})
+
+	customObjectList := contextsObj["custom"]
+
+	customkeyValueList := customObjectList.([]interface{})
 
 	flattenKeyValueList := make([]interface{}, 0, len(contexts.Custom))
 	for _, customKv := range customkeyValueList {
-		customKvItem, ok := customKv.(map[string]interface{})
-		if !ok {
-			continue
-		}
+		customKvItem := customKv.(map[string]interface{})
+
 		k := customKvItem["key"].(string)
 		customItem, ok := contexts.Custom[k]
 		if !ok {
@@ -866,25 +846,16 @@ func validateContexts(ctx context.Context, d *schema.ResourceDiff, meta interfac
 
 	_, new := d.GetChange("contexts")
 
-	contextsList, ok := new.([]interface{})
-	if !ok || len(contextsList) == 0 {
+	contextsList := new.([]interface{})
+	if len(contextsList) == 0 {
 		return nil
 	}
 
-	contextsObj, ok := contextsList[0].(map[string]interface{})
-	if !ok {
-		return fmt.Errorf("invalid item in contexts list")
-	}
+	contextsObj := contextsList[0].(map[string]interface{})
 
-	customList, ok := contextsObj["custom"]
-	if !ok || customList == nil {
-		return nil
-	}
+	customList := contextsObj["custom"]
 
-	keyValueList, ok := customList.([]interface{})
-	if !ok {
-		return fmt.Errorf("invalid type for contexts.custom: expected []interface{}")
-	}
+	keyValueList := customList.([]interface{})
 
 	keys := make(map[string]bool)
 	for _, item := range keyValueList {
@@ -892,10 +863,7 @@ func validateContexts(ctx context.Context, d *schema.ResourceDiff, meta interfac
 		if !ok {
 			continue
 		}
-		key, ok := itemMap["key"].(string)
-		if !ok {
-			continue
-		}
+		key := itemMap["key"].(string)
 
 		if keys[key] {
 			return fmt.Errorf("duplicate key found in 'contexts' block: %s. Each 'key' must be unique", key)

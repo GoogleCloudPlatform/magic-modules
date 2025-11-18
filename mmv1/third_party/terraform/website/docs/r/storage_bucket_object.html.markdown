@@ -116,7 +116,7 @@ One of the following is required:
 
 * `deletion_policy` - (Optional) When set to ABANDON, the object won't be deleted from storage bucket. Instead, it will only be removed from terraform's state file.
 
-* `contexts` - (Optional) Object contexts let you attach descriptive information as key-value pairs to your Cloud Storage objects. You can embed contexts in your objects to improve how you categorize, track, and search your data. You can apply contexts when you create new objects or add contexts to existing objects. Structure is [documented below](#nested_contexts).
+* `contexts` - (Optional) Contexts attached to an object, in key-value pairs. For more information about object contexts, see [Object contexts overview](https://cloud.google.com/storage/docs/object-contexts). Structure is [documented below](#nested_contexts).
 
 ---
 
@@ -142,9 +142,9 @@ One of the following is required:
 
 * `value` - (Required) The value associated with this context. This field holds the primary information for the given context key.
 
-* `create_time` - (Computed) The time when context was first added to the storage object in RFC#3399 format.
+* `create_time` - (Computed) The time when context was first added to the storage object in RFC 3399 format.
 
-* `update_time` - (Computed) The time when context was first added to the storage object in RFC#3399 format.
+* `update_time` - (Computed) The time when context was last updated in RFC 3399 format.
 
 <a name>
 
