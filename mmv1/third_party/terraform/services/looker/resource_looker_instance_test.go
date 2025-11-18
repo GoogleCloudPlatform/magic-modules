@@ -59,7 +59,7 @@ func TestAccLookerInstance_updateControlledEgress(t *testing.T) {
 				Config: testAccLookerInstance_basic(context),
 			},
 			{
-				ResourceName:            "google_looker_instance.looker-instance",
+				ResourceName:            "google_looker_instance.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"oauth_config", "region"},
@@ -70,7 +70,7 @@ func TestAccLookerInstance_updateControlledEgress(t *testing.T) {
 				Config: testAccLookerInstance_controlledEgress(context),
 			},
 			{
-				ResourceName:            "google_looker_instance.looker-instance",
+				ResourceName:            "google_looker_instance.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"oauth_config", "region"},
