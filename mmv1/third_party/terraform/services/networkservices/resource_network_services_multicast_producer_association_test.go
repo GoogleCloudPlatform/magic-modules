@@ -114,7 +114,9 @@ resource "google_network_services_multicast_producer_association" mpa_test  {
   multicast_producer_association_id              = "tf-test-test-producer-association-mpa%{random_suffix}"
   location = "us-central1-b"
   description = "Updated description"
-  labels = {"test" = "value-updated"}
+  labels = {
+    fake_label = "label123"
+  }
   network = google_compute_network.network.id
   multicast_domain_activation = google_network_services_multicast_domain_activation.multicast_domain_activation.id
   depends_on = [google_compute_network.network]
