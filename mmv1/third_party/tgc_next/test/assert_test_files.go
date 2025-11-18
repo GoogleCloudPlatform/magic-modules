@@ -36,7 +36,8 @@ var (
 
 func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 	testName := t.Name()
-	stepNumbers, err := getStepNumbers(testName)
+	subTestName := GetSubTestName(testName)
+	stepNumbers, err := getStepNumbers(subTestName)
 	if err != nil {
 		t.Fatalf("error preparing the input data: %v", err)
 	}
@@ -56,11 +57,11 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 		}
 		defer os.RemoveAll(tfDir)
 
-		subtestName := fmt.Sprintf("step%d", stepN)
-		t.Run(subtestName, func(t *testing.T) {
+		stepName := fmt.Sprintf("step%d", stepN)
+		t.Run(stepName, func(t *testing.T) {
 			retries := 0
 			flakyAction := func(ctx context.Context) error {
-				testData, err := prepareTestData(testName, stepN, retries)
+				testData, err := prepareTestData(subTestName, stepN, retries)
 				retries++
 				log.Printf("Starting the attempt %d", retries)
 				if err != nil {
@@ -75,7 +76,7 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 				// Otherwise, test all of the resources in the test.
 				primaryResource := testData.PrimaryResource
 				resourceTestData := testData.ResourceTestData
-				tName := fmt.Sprintf("%s_%s", testName, subtestName)
+				tName := fmt.Sprintf("%s_%s", subTestName, stepName)
 				if primaryResource != "" {
 					t.Logf("Test for the primary resource %s begins.", primaryResource)
 					err = testSingleResource(t, tName, resourceTestData[primaryResource], tfDir, ignoredFields, logger, true)

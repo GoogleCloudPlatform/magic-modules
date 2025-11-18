@@ -149,3 +149,22 @@ func DeepCopyMap(source interface{}, destination interface{}) error {
 
 	return nil
 }
+
+type TestCase struct {
+	Name string
+	Skip string
+}
+
+func GetSubTestName(fullTestName string) string {
+	parts := strings.Split(fullTestName, "/")
+
+	// Get the index of the last element
+	lastIndex := len(parts) - 1
+
+	// Check for an empty or malformed string
+	if lastIndex < 0 {
+		return ""
+	}
+
+	return parts[lastIndex]
+}
