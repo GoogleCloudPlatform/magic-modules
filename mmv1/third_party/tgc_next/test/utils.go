@@ -4,13 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 )
 
 // Writes the data into a JSON file
@@ -90,35 +88,11 @@ func saveFile(t *testing.T, dir, filename string, payload []byte) {
 // run a command and call t.Fatal on non-zero exit.
 func run(t *testing.T, cmd *exec.Cmd, wantError bool) ([]byte, []byte) {
 	var stderr, stdout bytes.Buffer
-	const maxRetries = 3
-	const providerInitiationError = "failed to instantiate provider"
-	const providerTimeoutError = "timeout while waiting for plugin to start"
-
-	for attempt := 1; attempt <= maxRetries; attempt++ {
-		log.Printf("Attempt run %d", attempt)
-		time.Sleep(500 * time.Millisecond)
-
-		stdout.Reset()
-		stderr.Reset()
-		cmd.Stdout, cmd.Stderr = &stdout, &stderr
-		err := cmd.Run()
-		if err != nil && (strings.Contains(stderr.String(), providerInitiationError) || strings.Contains(stderr.String(), providerTimeoutError)) {
-			log.Printf("Attempt run %d", attempt)
-			log.Printf("running %s: \nerror=%v \nstderr=%s \nstdout=%s", cmd.String(), err, stderr.String(), stdout.String())
-			if attempt < maxRetries {
-				t.Logf("WARN: Attempt %d of %d failed with '%s' error. Retrying command: %s",
-					attempt, maxRetries, providerInitiationError, cmd.String())
-				continue
-			}
-		}
-
-		if gotError := (err != nil); gotError != wantError {
-			t.Fatalf("running %s: \nerror=%v \nstderr=%s \nstdout=%s",
-				cmd.String(), err, stderr.String(), stdout.String())
-		}
-		break
+	cmd.Stderr, cmd.Stdout = &stderr, &stdout
+	err := cmd.Run()
+	if gotError := (err != nil); gotError != wantError {
+		t.Fatalf("running %s: \nerror=%v \nstderr=%s \nstdout=%s", cmd.String(), err, stderr.String(), stdout.String())
 	}
-
 	// Print env, stdout and stderr if verbose flag is used.
 	if len(cmd.Env) != 0 {
 		t.Logf("=== Environment Variable of %s ===", cmd.String())

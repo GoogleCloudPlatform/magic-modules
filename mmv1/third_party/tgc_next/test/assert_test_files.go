@@ -37,6 +37,10 @@ var (
 func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 	testName := t.Name()
 	subTestName := GetSubTestName(testName)
+	if subTestName == "" {
+		t.Skipf("The subtest is unavailable")
+	}
+
 	stepNumbers, err := getStepNumbers(subTestName)
 	if err != nil {
 		t.Fatalf("error preparing the input data: %v", err)
@@ -46,17 +50,16 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 		t.Skipf("test steps are unavailable")
 	}
 
+	// Create a temporary directory for running terraform.
+	tfDir, err := os.MkdirTemp(tmpDir, "terraform")
+	if err != nil {
+		t.Fatalf("error creating a temporary directory for running terraform: %v", err)
+	}
+	defer os.RemoveAll(tfDir)
+
 	logger := zaptest.NewLogger(t)
 
 	for _, stepN := range stepNumbers {
-		// Create a temporary directory for running terraform.
-		tfDir, err := os.MkdirTemp(tmpDir, fmt.Sprintf("terraform%d", stepN))
-		log.Printf("creating a temporary directory for running terraform step")
-		if err != nil {
-			t.Fatalf("error creating a temporary directory for running terraform: %v", err)
-		}
-		defer os.RemoveAll(tfDir)
-
 		stepName := fmt.Sprintf("step%d", stepN)
 		t.Run(stepName, func(t *testing.T) {
 			retries := 0

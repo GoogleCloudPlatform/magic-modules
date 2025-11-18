@@ -34,7 +34,7 @@ func TestAcc{{$.ResourceName}}(t *testing.T) {
 		tt := tt
 
 		t.Run(tt.Name, func(t *testing.T) {
-			t.Parallel() // Still runs other subtests in parallel
+			t.Parallel()
 
 			if tt.Skip != "" {
 				t.Skipf("Skipping %s test case: This case is currently disabled due to Issue.", tt.Name)
