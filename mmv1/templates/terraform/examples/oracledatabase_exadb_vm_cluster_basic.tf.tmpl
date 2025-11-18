@@ -14,7 +14,7 @@ resource "google_oracle_database_exadb_vm_cluster" "{{$.PrimaryResourceId}}"{
         time_zone {
             id = "UTC"
         }
-        grid_image_id = "ocid1.dbpatch.oc1.uk-london-1.anwgiljrt5t4sqqapgxs2xfeqout5lwsw4cud24mhekq5zxmbkq3cjh3qrzq"
+        grid_image_id = "ocid1.dbpatch.oc1.uk-london-1.anwgiljrt5t4sqqa7anvfhtjk3kukfffjqwjyu2fv435wlcw3hzto6iqyngq"
         node_count = 1
         enabled_ecpu_count_per_node = 8
         vm_file_system_storage {
@@ -30,8 +30,8 @@ resource "google_oracle_database_exadb_vm_cluster" "{{$.PrimaryResourceId}}"{
 }
 
 resource "google_oracle_database_exascale_db_storage_vault" "exascaleDbStorageVaults"{
-  exascale_db_storage_vault_id = basename("{{index $.Vars "exascale_db_storage_vault_id"}}")
-  display_name = "basename({{index $.Vars "exascale_db_storage_vault_id"}}) displayname"
+  exascale_db_storage_vault_id = "{{index $.Vars "exascale_db_storage_vault_id"}}"
+  display_name = "{{index $.Vars "exascale_db_storage_vault_id"}} displayname"
   location = "europe-west2"
   project = "{{index $.Vars "project"}}"
   properties {
