@@ -1,7 +1,7 @@
 resource "google_oracle_database_exadb_vm_cluster" "{{$.PrimaryResourceId}}"{
     exadb_vm_cluster_id = "{{index $.Vars "exadb_vm_cluster_id"}}"
     display_name = "{{index $.Vars "exadb_vm_cluster_id"}} displayname"
-    location = "us-east4"
+    location = "europe-west2"
     project = "{{index $.Vars "project"}}"
     odb_network = "{{index $.Vars "odb_network"}}"
     odb_subnet = "{{index $.Vars "odb_subnet"}}"
@@ -32,7 +32,7 @@ resource "google_oracle_database_exadb_vm_cluster" "{{$.PrimaryResourceId}}"{
 resource "google_oracle_database_exascale_db_storage_vault" "exascaleDbStorageVaults"{
   exascale_db_storage_vault_id = basename("{{index $.Vars "exascale_db_storage_vault_id"}}")
   display_name = "basename({{index $.Vars "exascale_db_storage_vault_id"}}) displayname"
-  location = "us-east4"
+  location = "europe-west2"
   project = "{{index $.Vars "project"}}"
   properties {
     exascale_db_storage_details {
