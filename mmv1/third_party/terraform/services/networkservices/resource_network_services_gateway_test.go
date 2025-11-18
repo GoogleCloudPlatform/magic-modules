@@ -284,7 +284,7 @@ resource "google_network_services_gateway" "foobar" {
   name                                 = "%s"
   location                             = "us-east1"
   addresses                            = ["10.128.0.99"]
-  type                                 = "SECURE_WEB_GATEWAY"
+  type                                 = "OPEN_MESH"
   ports                                = [443]
   description                          = "my description"
   scope                                = "%s"
@@ -393,7 +393,7 @@ resource "google_network_services_gateway" "foobar" {
   name                                 = "%s"
   location                             = "us-east1"
   addresses                            = ["10.128.0.99"]
-  type                                 = "SECURE_WEB_GATEWAY"
+  type                                 = "OPEN_MESH"
   ports                                = [443]
   description                          = "updated description"
   scope                                = "%s"
