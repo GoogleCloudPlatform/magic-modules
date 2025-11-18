@@ -1,7 +1,7 @@
 package vertexai_test
 
 import (
-  "fmt"
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -54,36 +54,36 @@ func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineUpdate(t *testing.T) 
 }
 
 func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineSourceUpdate(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckVertexAIEndpointDestroyProducer(t),
-    ExternalProviders: map[string]resource.ExternalProvider{
-      "time": {},
-    },
-    Steps: []resource.TestStep{
-      {
-        Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineSourceBasic(),
-      },
-      {
-        ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.source_code_spec.0.inline_source"},
-      },
-      {
-        Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineSourceUpdate(),
-      },
-      {
-        ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.source_code_spec.0.inline_source"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAIEndpointDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineSourceBasic(),
+			},
+			{
+				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.source_code_spec.0.inline_source"},
+			},
+			{
+				Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineSourceUpdate(),
+			},
+			{
+				ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.source_code_spec.0.inline_source"},
+			},
+		},
+	})
 }
 
 func testAccVertexAIReasoningEngine_vertexAiReasoningEngineBasic(context map[string]interface{}) string {
@@ -508,7 +508,7 @@ data "google_project" "project" {}
 }
 
 func testAccVertexAIReasoningEngine_vertexAiReasoningEngineSourceBasic() string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
   display_name = "sample-reasoning-engine"
   description  = "A basic reasoning engine"
@@ -533,7 +533,7 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
 }
 
 func testAccVertexAIReasoningEngine_vertexAiReasoningEngineSourceUpdate() string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
   display_name = "sample-reasoning-engine"
   description  = "A basic reasoning engine"
