@@ -125,8 +125,12 @@ properties:
           - 'sensitive_labels.0.auth_token'
       - name: 'authTokenWoVersion'
         type: Integer
-        description: Triggers update of auth_token_wo write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
-        url_param_only: true
+        immutable: true
+        ignore_read: true
+        description: |
+          Triggers a new auth_token_wo to be written. Increment this to update auth_token_wo. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
+        required_with:
+          - 'sensitive_labels.0.auth_token_wo'
       - name: 'password'
         type: String
         description: |
@@ -149,8 +153,12 @@ properties:
           - 'sensitive_labels.0.password'
       - name: 'passwordWoVersion'
         type: Integer
-        description: Triggers update of password_wo write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
-        url_param_only: true
+        immutable: true
+        ignore_read: true
+        description: |
+          Triggers a new password_wo to be written. Increment this to update password_wo. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
+        required_with:
+          - 'sensitive_labels.0.password_wo'
       - name: 'serviceKey'
         type: String
         description: |
@@ -173,8 +181,12 @@ properties:
           - 'sensitive_labels.0.service_key'
       - name: 'serviceKeyWoVersion'
         type: Integer
-        description: Triggers update of service_key_wo write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
-        url_param_only: true
+        immutable: true
+        ignore_read: true
+        description: |
+          Triggers a new service_key_wo to be written. Increment this to update service_key_wo. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
+        required_with:
+          - 'sensitive_labels.0.service_key_wo'
   - name: 'name'
     type: String
     description: |

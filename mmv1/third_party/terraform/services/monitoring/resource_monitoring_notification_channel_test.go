@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -139,6 +140,91 @@ func TestAccMonitoringNotificationChannel_updateSensitiveLabels(t *testing.T) {
 	})
 }
 
+func TestAccMonitoringNotificationChannel_updateSensitiveLabelsWriteOnly_slack(t *testing.T) {
+	// Slack auth_token required for test not to fail, skipping test till internal testing slack can be created
+	t.Skip()
+	t.Parallel()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMonitoringNotificationChannelDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMonitoringNotificationChannel_sensitiveLabelsWriteOnly_slack("token1", 1),
+			},
+			{
+				ResourceName:            "google_monitoring_notification_channel.slack",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels.%", "labels.auth_token", "sensitive_labels"},
+			},
+			{
+				Config: testAccMonitoringNotificationChannel_sensitiveLabelsWriteOnly_slack("token2", 2),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_monitoring_notification_channel.slack", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_monitoring_notification_channel.slack",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels.%", "labels.auth_token", "sensitive_labels"},
+			},
+		},
+	})
+}
+
+func TestAccMonitoringNotificationChannel_updateSensitiveLabelsWriteOnly(t *testing.T) {
+	t.Parallel()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMonitoringNotificationChannelDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMonitoringNotificationChannel_sensitiveLabelsWriteOnly("key1", "pass1", 1),
+			},
+			{
+				ResourceName:            "google_monitoring_notification_channel.pagerduty",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels.%", "labels.service_key", "sensitive_labels"},
+			},
+			{
+				ResourceName:            "google_monitoring_notification_channel.basicauth",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels.%", "labels.password", "sensitive_labels"},
+			},
+			{
+				Config: testAccMonitoringNotificationChannel_sensitiveLabelsWriteOnly("key2", "pass2", 2),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_monitoring_notification_channel.pagerduty", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_monitoring_notification_channel.basicauth", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_monitoring_notification_channel.pagerduty",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels.%", "labels.service_key", "sensitive_labels"},
+			},
+			{
+				ResourceName:            "google_monitoring_notification_channel.basicauth",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels.%", "labels.password", "sensitive_labels"},
+			},
+		},
+	})
+}
+
 func testAccMonitoringNotificationChannel_update(channel, labels, enabled string) string {
 	return fmt.Sprintf(`
 resource "google_monitoring_notification_channel" "update" {
@@ -232,4 +318,49 @@ resource "google_monitoring_notification_channel" "pagerduty" {
 	}
 }
 `)
+}
+
+func testAccMonitoringNotificationChannel_sensitiveLabelsWriteOnly_slack(authToken string, version int) string {
+	return fmt.Sprintf(`
+resource "google_monitoring_notification_channel" "slack" {
+	display_name = "TFTest Slack Channel"
+	type         = "slack"
+	labels = {
+		"channel_name" = "#foobar"
+	}
+
+	sensitive_labels {
+		auth_token_wo         = "%s"
+		auth_token_wo_version = %d
+	}
+}
+`, authToken, version)
+}
+
+func testAccMonitoringNotificationChannel_sensitiveLabelsWriteOnly(serviceKey, password string, version int) string {
+	return fmt.Sprintf(`
+resource "google_monitoring_notification_channel" "basicauth" {
+	display_name = "TFTest Basicauth Channel"
+	type         = "webhook_basicauth"
+	labels = {
+		"username" = "username"
+		"url"      = "http://fakeurl.com"
+	}
+
+	sensitive_labels {
+		password_wo         = "%s"
+		password_wo_version = %d
+	}
+}
+
+resource "google_monitoring_notification_channel" "pagerduty" {
+	display_name = "TFTest Pagerduty Channel"
+	type         = "pagerduty"
+
+	sensitive_labels {
+		service_key_wo         = "%s"
+		service_key_wo_version = %d
+	}
+}
+`, password, version, serviceKey, version)
 }
