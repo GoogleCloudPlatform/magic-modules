@@ -28,3 +28,17 @@ resource "google_oracle_database_exadb_vm_cluster" "{{$.PrimaryResourceId}}"{
 
     deletion_protection = "{{index $.Vars "deletion_protection"}}"
 }
+
+resource "google_oracle_database_exascale_db_storage_vault" "exascaleDbStorageVaults"{
+  exascale_db_storage_vault_id = basename("{{index $.Vars "exascale_db_storage_vault_id"}}")
+  display_name = "basename({{index $.Vars "exascale_db_storage_vault_id"}}) displayname"
+  location = "us-east4"
+  project = "{{index $.Vars "project"}}"
+  properties {
+    exascale_db_storage_details {
+        total_size_gbs = 512
+    }
+  }
+
+  deletion_protection = "{{index $.Vars "deletion_protection"}}"
+}
