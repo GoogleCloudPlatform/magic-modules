@@ -20,20 +20,34 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/test"
 )
 
-{{ range $t := $.TGCTests }}
-func {{ $t.Name }}(t *testing.T) {
-	{{- if $t.Skip }}
-	t.Skip("{{$t.Skip}}")
-	{{- end }}
-	t.Parallel()
-
-	test.BidirectionalConversion(
-		t,
-		[]string{
-{{- range $field := $.TGCTestIgnorePropertiesToStrings }}
-	"{{ $field }}",
-{{- end }}
+func TestAcc{{$.ResourceName}}(t *testing.T) {
+	tests := []test.TestCase{
+{{- range $t := $.TGCTests }}
+		{
+			Name:  "{{ $t.Name }}",
+			Skip:  "{{ $t.Skip }}",
 		},
-	)
-}
 {{- end }}
+	}
+
+	for _, tt := range tests {
+		tt := tt
+
+		t.Run(tt.Name, func(t *testing.T) {
+			t.Parallel()
+
+			if tt.Skip != "" {
+				t.Skipf("Skipping %s test case: This case is currently disabled due to Issue.", tt.Name)
+			}
+
+			test.BidirectionalConversion(
+				t,
+				[]string{
+		{{- range $field := $.TGCTestIgnorePropertiesToStrings }}
+			"{{ $field }}",
+		{{- end }}
+				},
+			)
+		})
+	}
+}
