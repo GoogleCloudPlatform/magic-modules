@@ -10,24 +10,25 @@ if err != nil {
 	return nil, fmt.Errorf("Error fetching project for Instance: %s", err)
 }
 
-if d.HasChange("pause_replication") {
+if d.HasChange("replica_action") {
 		obj := make(map[string]interface{})
 		endpoint := ""
+		replica_action_value := ""
 
-		pauseReplicationProp, err := expandFilestoreInstancePauseReplication(d.Get("pause_replication"), d, config)
+		replicaActionProp := d.Get("replica_action")
 		if err != nil {
 			return nil, err
-		} else if v, ok := d.GetOkExists("pause_replication"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, pauseReplicationProp)) {
-			obj["pauseReplication"] = pauseReplicationProp
+		} else if v, ok := d.GetOkExists("replica_action"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, replicaActionProp)) {
+			obj["replicaAction"] = replicaActionProp
 		}
 
-		if d.Get("pause_replication") == true {
+		switch replicaActionProp {
+		case "PAUSE":
 			endpoint = "pauseReplica"
-
-		} else if d.Get("pause_replication") == false {
+			replica_action_value = "PAUSE"
+		case "RESUME":
 			endpoint = "resumeReplica"
-		} else {
-			endpoint = "resumeReplica"
+			replica_action_value = "RESUME"
 		}
 	    url, err := tpgresource.ReplaceVars(d, config,  fmt.Sprintf("{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}:%s",endpoint))
 
@@ -63,7 +64,9 @@ if d.HasChange("pause_replication") {
 		if err != nil {
 			return nil, err
 		}
-
+		
+		d.Set("replica_action", replica_action_value)
+		
 	}
 {{- end }}
 return obj, nil

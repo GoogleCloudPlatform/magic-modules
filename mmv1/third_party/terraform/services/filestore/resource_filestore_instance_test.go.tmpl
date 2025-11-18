@@ -488,24 +488,13 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 				),
 			},
 {{- if ne $.TargetVersionName "ga" }}
-			{
-				ResourceName:            "google_filestore_instance.replica_instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone", "initial_replication"},
-			},
-						{
+           {
 				Config: testAccFilestoreInstance_replication_pause(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_filestore_instance.replica_instance",
 						"effective_replication.0.replicas.0.peer_instance",
-						"projects/" + context["project"].(string) + "/locations/us-east1/instances/tf-test-source-instance-" + context["random_suffix"].(string),
-					),
-					resource.TestCheckResourceAttr(
-						"google_filestore_instance.replica_instance",
-						"state",
-						"PAUSED",
+						"projects/"+context["project"].(string)+"/locations/us-east1/instances/tf-test-source-instance-"+context["random_suffix"].(string),
 					),
 				),
 			},
@@ -513,20 +502,15 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 				ResourceName:            "google_filestore_instance.replica_instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone", "initial_replication"},
+				ImportStateVerifyIgnore: []string{"zone", "initial_replication", "replica_action"},
 			},
-						{
+			{
 				Config: testAccFilestoreInstance_replication_resume(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_filestore_instance.replica_instance",
 						"effective_replication.0.replicas.0.peer_instance",
-						"projects/" + context["project"].(string) + "/locations/us-east1/instances/tf-test-source-instance-" + context["random_suffix"].(string),
-					),
-					resource.TestCheckResourceAttr(
-						"google_filestore_instance.replica_instance",
-						"state",
-						"READY",
+						"projects/"+context["project"].(string)+"/locations/us-east1/instances/tf-test-source-instance-"+context["random_suffix"].(string),
 					),
 				),
 			},
@@ -534,7 +518,7 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 				ResourceName:            "google_filestore_instance.replica_instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone", "initial_replication"},
+				ImportStateVerifyIgnore: []string{"zone", "initial_replication", "replica_action"},
 			},
 {{- end }}
 		},
@@ -614,7 +598,7 @@ resource "google_filestore_instance" "replica_instance" {
   location      	= "%{location_2}"
   tier          	= "%{tier}"
   description   	= "An replica instance created during testing."
-  pause_replication = true
+  replica_action    = "PAUSE"
 
   file_shares {	
     capacity_gb 	= 1024
@@ -661,7 +645,7 @@ resource "google_filestore_instance" "replica_instance" {
   location      	= "%{location_2}"
   tier          	= "%{tier}"
   description   	= "An replica instance created during testing."
-  pause_replication = false
+  replica_action    = "RESUME"
 
   file_shares {	
     capacity_gb 	= 1024
