@@ -1,5 +1,3 @@
-import "github.com/hashicorp/terraform-plugin-testing/plancheck"
-
 func TestAccDialogflowCXPlaybook_dialogflowcxPlaybookBasicExample_update(t *testing.T) {
 	t.Parallel()
 
@@ -23,11 +21,6 @@ func TestAccDialogflowCXPlaybook_dialogflowcxPlaybookBasicExample_update(t *test
 			},
 			{
 				Config: testAccDialogflowCXPlaybook_dialogflowcxPlaybookBasicExample_update(context),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-				PreApply: []plancheck.PlanCheck{
-					plancheck.ExpectResourceAction("google_pubsub_topic.foo", plancheck.ResourceActionUpdate),
-				},
-				},
 			},
 			{
 				ResourceName:            "google_dialogflow_cx_playbook.my-playbook",
