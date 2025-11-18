@@ -30,7 +30,7 @@ func TestAccModelArmorGlobalFloorsetting_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "parent"},
 			},
-      {
+			{
 				// Update from inspect_only to inspect_and_block = true for both ai_platform and google_mcp_server
 				Config: testAccModelArmorGlobalFloorsetting_enableInspectAndBlock(context),
 			},
