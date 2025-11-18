@@ -1,6 +1,7 @@
 package vertexai_test
 
 import (
+  "fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -50,6 +51,39 @@ func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineUpdate(t *testing.T) 
 			},
 		},
 	})
+}
+
+func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineSourceUpdate(t *testing.T) {
+  t.Parallel()
+
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    CheckDestroy:             testAccCheckVertexAIEndpointDestroyProducer(t),
+    ExternalProviders: map[string]resource.ExternalProvider{
+      "time": {},
+    },
+    Steps: []resource.TestStep{
+      {
+        Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineSourceBasic(),
+      },
+      {
+        ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.source_code_spec.0.inline_source"},
+      },
+      {
+        Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineSourceUpdate(),
+      },
+      {
+        ResourceName:            "google_vertex_ai_reasoning_engine.reasoning_engine",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels", "spec.0.source_code_spec.0.inline_source"},
+      },
+    },
+  })
 }
 
 func testAccVertexAIReasoningEngine_vertexAiReasoningEngineBasic(context map[string]interface{}) string {
@@ -471,4 +505,54 @@ resource "google_project_iam_member" "sa_iam_viewer_new" {
 
 data "google_project" "project" {}
 `, context)
+}
+
+func testAccVertexAIReasoningEngine_vertexAiReasoningEngineSourceBasic() string {
+  return fmt.Sprintf(`
+resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
+  display_name = "sample-reasoning-engine"
+  description  = "A basic reasoning engine"
+  region       = "us-central1"
+
+  spec {
+    source_code_spec {
+      inline_source {
+        source_archive = filebase64("./test-fixtures/source.tar.gz")
+      }
+
+      python_spec {
+        entrypoint_module = "simple_agent"
+        entrypoint_object = "fixed_name_generator"
+        requirements_file = "./test-fixtures/source_requirements.txt"
+        version           = "3.11"
+      }
+    }
+  }
+}
+`)
+}
+
+func testAccVertexAIReasoningEngine_vertexAiReasoningEngineSourceUpdate() string {
+  return fmt.Sprintf(`
+resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
+  display_name = "sample-reasoning-engine"
+  description  = "A basic reasoning engine"
+  region       = "us-central1"
+
+  spec {
+    source_code_spec {
+      inline_source {
+        source_archive = filebase64("./test-fixtures/source_updated.tar.gz")
+      }
+
+      python_spec {
+        entrypoint_module = "updated_agent"
+        entrypoint_object = "updated_name_generator"
+        requirements_file = "./test-fixtures/source_updated_requirements.txt"
+        version           = "3.12"
+      }
+    }
+  }
+}
+`)
 }

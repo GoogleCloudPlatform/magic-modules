@@ -296,8 +296,9 @@ properties:
               Optional. The Cloud Storage URI of the pickled python object.
           - name: 'pythonVersion'
             type: String
-            description: Optional. The Python version. Currently support 3.8,
-            3.9, 3.10, 3.11, 3.12, 3.13. If not specified, default value is 3.10.
+            description: |
+              Optional. The Python version. Currently support 3.8, 3.9, 3.10,
+              3.11, 3.12, 3.13. If not specified, default value is 3.10.
           - name: 'requirementsGcsUri'
             type: String
             description: |
@@ -309,8 +310,8 @@ properties:
         properties:
           - name: 'inlineSource'
             type: NestedObject
-            description: |-
-              Source code is provided directly in the request.
+            description: Source code is provided directly in the request.
+            ignore_read: true
             properties:
               - name: 'sourceArchive'
                 type: String
@@ -318,12 +319,13 @@ properties:
                   Required. Input only.
                   The application source code archive, provided as a compressed
                   tarball (.tar.gz) file. A base64-encoded string.
+                ignore_read: true
           - name: 'pythonSpec'
             type: NestedObject
             description: |-
               Specification for running a Python application from source.
             properties:
-              - name: 'entryPointModule'
+              - name: 'entrypointModule'
                 type: String
                 description: |
                   Optional. The Python module to load as the entrypoint,
@@ -331,7 +333,7 @@ properties:
                   path.to.agent. If not specified, defaults to "agent".
                   The project root will be added to Python sys.path, allowing
                   imports to be specified relative to the root.
-              - name: 'entryPointObject'
+              - name: 'entrypointObject'
                 type: String
                 description: |
                   Optional. The name of the callable object within the
