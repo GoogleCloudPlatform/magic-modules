@@ -7,10 +7,12 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"reflect"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/sql"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 {{- if ne $.TargetVersionName "ga" }}
@@ -3879,6 +3881,127 @@ func TestAccSqlDatabaseInstance_DiskSizeAutoResizeWithDiskSize(t *testing.T) {
 			},
 		},
 	})
+}
+
+// CustomDiffMock embeds ResourceDiffMock to override HasChange
+type CustomDiffMock struct {
+	tpgresource.ResourceDiffMock
+}
+
+// HasChange overrides the default implementation to use DeepEqual for comparisons.
+func (m *CustomDiffMock) HasChange(key string) bool {
+	oldVal, oldOk := m.Before[key]
+	newVal, newOk := m.After[key]
+
+	if oldOk != newOk {
+		return true // Presence changed
+	}
+
+	return !reflect.DeepEqual(oldVal, newVal)
+}
+
+func TestEnhancedBackupManagerCustomizeDiffFunc(t *testing.T) {
+	cases := map[string]struct {
+		before      map[string]interface{}
+		after       map[string]interface{}
+		expectClear bool
+		description string
+	}{
+		"backup tier is enhanced with change in backup configuration": {
+			before: map[string]interface{}{
+				"name": "test-instance",
+				"settings.0.backup_configuration.0.backup_tier": "ENHANCED",
+				"settings.0.backup_configuration": []interface{}{
+					map[string]interface{}{
+						"backup_tier": "ENHANCED",
+						"enabled":     true,
+					},
+                },
+			},
+			after: map[string]interface{}{
+				"name": "test-instance",
+				"settings.0.backup_configuration.0.backup_tier": "ENHANCED",
+				"settings.0.backup_configuration": []interface{}{
+					map[string]interface{}{
+						"backup_tier": "ENHANCED",
+						"enabled":     false,
+					},
+                },
+			},
+			expectClear: true,
+		},
+		"backup tier is enhanced with no change in backup configuration": {
+			before: map[string]interface{}{
+				"name": "test-instance",
+				"settings.0.backup_configuration.0.backup_tier": "ENHANCED",
+				"settings.0.backup_configuration": []interface{}{
+					map[string]interface{}{
+						"backup_tier": "ENHANCED",
+						"enabled":     true,
+					},
+                },
+			},
+			after: map[string]interface{}{
+				"name": "test-instance",
+				"settings.0.backup_configuration.0.backup_tier": "ENHANCED",
+				"settings.0.backup_configuration": []interface{}{
+					map[string]interface{}{
+						"backup_tier": "ENHANCED",
+						"enabled":     true,
+					},
+                },
+			},
+			expectClear: false,
+		},
+		"backup tier is standard with change in backup configuration": {
+			before: map[string]interface{}{
+				"name": "test-instance",
+				"settings.0.backup_configuration.0.backup_tier": "STANDARD",
+				"settings.0.backup_configuration": []interface{}{
+					map[string]interface{}{
+						"backup_tier": "STANDARD",
+						"enabled":     false,
+					},
+                },
+			},
+			after: map[string]interface{}{
+				"name": "test-instance",
+				"settings.0.backup_configuration.0.backup_tier": "STANDARD",
+				"settings.0.backup_configuration": []interface{}{
+					map[string]interface{}{
+						"backup_tier": "STANDARD",
+						"enabled":     true,
+					},
+                },
+			},
+			expectClear: false,
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			// Use the CustomDiffMock
+			d := &CustomDiffMock{
+				ResourceDiffMock: tpgresource.ResourceDiffMock{
+					Before: tc.before,
+					After:  tc.after,
+					Cleared: make(map[string]interface{}),
+				},
+			}
+
+			err := sql.EnhancedBackupManagerCustomizeDiffFunc(d)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			clearKey := "settings.0.backup_configuration"
+			_, wasCleared := d.Cleared[clearKey]
+
+			if tc.expectClear != wasCleared {
+				t.Errorf("expected '%s' to be cleared: %v, but wasCleared is: %v. Desc: %s", clearKey, tc.expectClear, wasCleared, tc.description)
+			}
+		})
+	}
 }
 
 func TestAccSqlDatabaseInstance_backupConfigurationIgnoredForEnhancedBackupTier(t *testing.T) {
