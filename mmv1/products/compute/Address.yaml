@@ -50,6 +50,7 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 include_in_tgc_next_DO_NOT_USE: true
+tgc_include_handwritten_tests: true
 custom_code:
   post_create: 'templates/terraform/post_create/labels.tmpl'
 sweeper:

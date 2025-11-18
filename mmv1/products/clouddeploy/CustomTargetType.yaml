@@ -50,6 +50,7 @@ iam_policy:
     - '{{name}}'
 custom_code:
 include_in_tgc_next_DO_NOT_USE: true
+tgc_include_handwritten_tests: true
 examples:
   - name: 'clouddeploy_custom_target_type_basic'
     primary_resource_id: 'custom-target-type'
