@@ -28,7 +28,7 @@ update_mask: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
-  delete_minutes: 20
+  delete_minutes: 60
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
