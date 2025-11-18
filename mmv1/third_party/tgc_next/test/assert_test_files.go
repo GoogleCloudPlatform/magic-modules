@@ -34,7 +34,7 @@ var (
 	tmpDir     = os.TempDir()
 )
 
-func BidirectionalConversion(t *testing.T, ignoredFields []string) {
+func BidirectionalConversion(t *testing.T, ignoredFields []string, primaryResourceType string) {
 	testName := t.Name()
 	subTestName := GetSubTestName(testName)
 	if subTestName == "" {
@@ -87,7 +87,10 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 						return err
 					}
 				} else {
-					for _, testData := range resourceTestData {
+					for address, testData := range resourceTestData {
+						if !strings.HasPrefix(address, primaryResourceType) {
+							continue
+						}
 						err = testSingleResource(t, tName, testData, tfDir, ignoredFields, logger, false)
 						if err != nil {
 							return err
@@ -209,7 +212,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		log.Printf("missing fields in resource %s after cai2hcl conversion:\n%s", testData.ResourceAddress, missingKeys)
 		return retry.RetryableError(fmt.Errorf("missing fields"))
 	}
-	log.Printf("Step 1 passes for resource %s. All of the fields in raw config are in export config", testData.ResourceAddress)
+	log.Printf("%s: Step 1 passes for resource %s. All of the fields in raw config are in export config", testName, testData.ResourceAddress)
 
 	// Step 2
 	// Run a terraform plan using export_config.
@@ -252,14 +255,14 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 			return fmt.Errorf("test %s got diff (-want +got): %s", testName, diff)
 		}
 	}
-	log.Printf("Step 2 passes for resource %s. Roundtrip config and export config are identical", testData.ResourceAddress)
+	log.Printf("%s: Step 2 passes for resource %s. Roundtrip config and export config are identical", testName, testData.ResourceAddress)
 
 	// Step 3
 	// Compare most fields between the exported asset and roundtrip asset, except for "data" field for resource
 	if err = compareCaiAssets(assets, roundtripAssets, ignoredFieldSet); err != nil {
 		return err
 	}
-	log.Printf("Step 3 passes for resource %s. Exported asset and roundtrip asset are identical", testData.ResourceAddress)
+	log.Printf("%s: Step 3 passes for resource %s. Exported asset and roundtrip asset are identical", testName, testData.ResourceAddress)
 
 	return nil
 }

@@ -416,6 +416,11 @@ type TGCResource struct {
 
 	// [Optional] It overrides the default Cai asset name format, which is the resource id format
 	CaiAssetNameFormat string `yaml:"cai_asset_name_format,omitempty"`
+
+	// [Optional] It overrides the Cai asset name format during cai2hcl conversion.
+	// Its usage is strictly limited to scenarios requiring the extraction of parameters
+	// from the Google Cloud Asset Inventory (CAI) asset name format
+	Cai2hclNameFormat string `yaml:"cai2hcl_name_format,omitempty"`
 }
 
 // // MarshalYAML implements a custom marshaller to omit dynamic default values.
@@ -2331,6 +2336,15 @@ func (r Resource) GetCaiAssetNameTemplate() string {
 	}
 
 	return fmt.Sprintf("//%s.googleapis.com/%s", r.CaiProductBackendName(r.CaiProductBaseUrl()), r.IdFormat)
+}
+
+// Gets a format string for CAI asset name
+func (r Resource) Cai2hclAssetNameTemplate() string {
+	if r.Cai2hclNameFormat != "" {
+		return fmt.Sprintf("//%s.googleapis.com/%s", r.CaiProductBackendName(r.CaiProductBaseUrl()), r.Cai2hclNameFormat)
+	}
+
+	return r.GetCaiAssetNameTemplate()
 }
 
 // Ignores verifying CAI asset name if it is one computed field
