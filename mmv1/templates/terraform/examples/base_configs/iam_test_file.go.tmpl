@@ -649,6 +649,9 @@ resource "{{ $.IamTerraformName }}_policy" "foo" {
 }
 {{- end }}{{/* if $.IamPolicy.IamConditionsRequestType */}}
 
+{{- if $.IamPolicy.CustomStateIDFuncs }}
+	{{- $.CustomTemplate $.IamPolicy.CustomStateIDFuncs false }}
+{{- else }}
 func generate{{ $.ResourceName }}IAMPolicyStateID(iamResourceAddr string) func (*terraform.State) (string, error) {
 	return func (state *terraform.State) (string, error) {
 		var rawState map[string]string
@@ -714,3 +717,4 @@ func generate{{ $.ResourceName }}IAMMemberStateID(iamResourceAddr string) func (
 		return fmt.Sprintf("{{ $.IamImportFormat }} %s %s", {{ join $.IamImportParams ", " }}, rawState["role"], rawState["member"]) + acctest.ConditionTitleIfPresent(rawState), nil
 	}
 }
+{{- end }}
