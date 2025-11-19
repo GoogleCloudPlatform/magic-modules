@@ -859,10 +859,8 @@ func validateContexts(ctx context.Context, d *schema.ResourceDiff, meta interfac
 
 	keys := make(map[string]bool)
 	for _, item := range keyValueList {
-		itemMap, ok := item.(map[string]interface{})
-		if !ok {
-			continue
-		}
+		itemMap := item.(map[string]interface{})
+
 		key := itemMap["key"].(string)
 
 		if keys[key] {
