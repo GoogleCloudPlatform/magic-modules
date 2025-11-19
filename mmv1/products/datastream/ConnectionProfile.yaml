@@ -340,7 +340,6 @@ properties:
         type: NestedObject
         description: |
           SSL configuration for the PostgreSQL connection.
-        required: false
         properties:
           - name: 'serverVerification'
             type: NestedObject
