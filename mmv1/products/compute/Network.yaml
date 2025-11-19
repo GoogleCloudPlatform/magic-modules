@@ -213,9 +213,8 @@ properties:
         update_url: 'projects/{{project}}/global/networks/{{name}}'
         custom_flatten: 'templates/terraform/custom_flatten/compute_network_delete_bgp_always_compare_med.go.tmpl'
         description: |
-          If set to `true`, the `bgp_always_compare_med` field will be cleared, reverting it to the service default.
+          If set to `true`, the `bgp_always_compare_med` field will be cleared.
           If set to `false` (the default), `bgp_always_compare_med` will be set to the value specified in the configuration.
-          This helper field is not read back from the API.
         ignore_read: true
   - name: 'mtu'
     type: Integer
