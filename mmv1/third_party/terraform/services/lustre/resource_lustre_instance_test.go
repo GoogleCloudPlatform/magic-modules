@@ -108,8 +108,6 @@ func TestAccLustreInstance_withKmsKey(t *testing.T) {
 
 func testAccLustreInstance_withKmsKey(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-
-
 resource "google_lustre_instance" "instance" {
   instance_id                 = "tf-test-my-instance%{random_suffix}"
   location                    = "us-central1-a"
@@ -121,24 +119,24 @@ resource "google_lustre_instance" "instance" {
   kms_key                     = "%{kms}"
   
   timeouts {
-	create 					  = "120m"
+    create = "120m"
   }
-  DependsOn 				  = [google_kms_crypto_key_iam_member.lustre_sa_encrypter_decrypter]
+  
+  depends_on = [google_kms_crypto_key_iam_member.lustre_sa_encrypter_decrypter]
 }
 
 resource "google_kms_crypto_key_iam_member" "lustre_sa_encrypter_decrypter" {
-  crypto_key_id 			  = "%{kms}"
-  role 						  = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member 					  = join("",["serviceAccount:","service-", data.google_project.project.number,"@gcp-sa-lustre.iam.gserviceaccount.com"])
+  crypto_key_id = "%{kms}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-lustre.iam.gserviceaccount.com"
 }
 
 data "google_compute_network" "lustre-network" {
-  name 						  = "%{network_name}"
+  name = "%{network_name}"
 }
 
 data "google_project" "project" {
 }
-
 `, context)
 }
 
