@@ -45,9 +45,9 @@ func TestAccNetworkServicesMulticastConsumerAssociation_networkServicesMulticast
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "multicast_consumer_association_id", "terraform_labels"},
 			},
-      {
+			{
 				Config: testAccNetworkServicesMulticastConsumerAssociation_networkServicesMulticastConsumerAssociationUpdateExample_update(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_network_services_multicast_consumer_association.mca_test", plancheck.ResourceActionUpdate),
 					},
