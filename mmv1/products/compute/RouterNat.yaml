@@ -14,6 +14,7 @@
 ---
 name: 'RouterNat'
 api_resource_type_kind: Router
+api_resource_field: 'nats'
 description: |
   A NAT service created in a router.
 

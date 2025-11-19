@@ -40,6 +40,7 @@ async:
   result:
     resource_inside_response: true
 include_in_tgc_next_DO_NOT_USE: true
+tgc_include_handwritten_tests: true
 iam_policy:
   method_name_separator: ':'
   allowed_iam_role: 'roles/artifactregistry.reader'
@@ -110,8 +111,6 @@ examples:
     vars:
       repository_id: 'my-repository'
       desc: 'example docker repository with cleanup policies'
-    tgc_test_ignore_extra:
-      - cleanup_policy_dry_run
   - name: 'artifact_registry_repository_remote_dockerhub_auth'
     primary_resource_id: 'my-repo'
     vars:

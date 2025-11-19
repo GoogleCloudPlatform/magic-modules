@@ -90,6 +90,33 @@ resource "google_bigquery_dataset" "dataset" {
   }
 }
 `
+
+	boolFieldWithFalseHCL = `
+resource "google_compute_backend_bucket" "image_backend" {
+  name        = "tf-test-image-backend-bucket"
+  description = "Contains beautiful images"
+  bucket_name = "tf-test-image-backend-bucket"
+  enable_cdn  = false
+  cdn_policy {
+    cache_key_policy {
+        query_string_whitelist = ["image-version"]
+    }
+  }
+}
+`
+
+	boolFieldUnsetHCL = `
+resource "google_compute_backend_bucket" "image_backend" {
+  name        = "tf-test-image-backend-bucket"
+  description = "Contains beautiful images"
+  bucket_name = "tf-test-image-backend-bucket"
+  cdn_policy {
+    cache_key_policy {
+        query_string_whitelist = ["image-version"]
+    }
+  }
+}
+`
 )
 
 func TestParseHCLBytes(t *testing.T) {
@@ -175,6 +202,31 @@ func TestParseHCLBytes(t *testing.T) {
 					"location":      "EU",
 					"project":       "ci-test-project-nightly-beta",
 					"resource_tags": map[string]any{},
+				},
+			},
+		},
+		{
+			name: "resource with false bool field",
+			hcl:  boolFieldWithFalseHCL,
+			exp: map[string]map[string]any{
+				"google_compute_backend_bucket.image_backend": {
+					"name":        "tf-test-image-backend-bucket",
+					"description": "Contains beautiful images",
+					"bucket_name": "tf-test-image-backend-bucket",
+					"enable_cdn":  false,
+					"cdn_policy.cache_key_policy.query_string_whitelist": "image-version",
+				},
+			},
+		},
+		{
+			name: "resource with unset bool field",
+			hcl:  boolFieldUnsetHCL,
+			exp: map[string]map[string]any{
+				"google_compute_backend_bucket.image_backend": {
+					"name":        "tf-test-image-backend-bucket",
+					"description": "Contains beautiful images",
+					"bucket_name": "tf-test-image-backend-bucket",
+					"cdn_policy.cache_key_policy.query_string_whitelist": "image-version",
 				},
 			},
 		},
