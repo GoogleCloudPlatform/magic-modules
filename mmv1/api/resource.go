@@ -884,12 +884,10 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 		}
 		options = append(options, propertyWithExactlyOneOfPointer(originalField.ExactlyOneOfGroup))
 	} else {
-		if originalField.ConflictsGroup != nil {
-			*originalField.ConflictsGroup = deduplicateSliceOfStrings(append(*originalField.ConflictsGroup, newFieldLineage))
-		} else {
-			originalField.Conflicts = deduplicateSliceOfStrings(append(originalField.Conflicts, newFieldLineage))
-		}
-		newConflicts := deduplicateSliceOfStrings(append([]string{originalFieldLineage}, originalField.Conflicts...))
+		newConflicts := append(originalField.Conflicts, originalField.Name)
+		newConflicts = slices.DeleteFunc(newConflicts, func(s string) bool {
+			return s == name
+		})
 		options = append(options, propertyWithConflicts(newConflicts))
 	}
 
