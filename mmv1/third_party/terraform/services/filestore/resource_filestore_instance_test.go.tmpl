@@ -487,6 +487,12 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 					),
 				),
 			},
+			{
+				ResourceName:            "google_filestore_instance.replica_instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone", "initial_replication", "replica_action"},
+			},
 {{- if ne $.TargetVersionName "ga" }}
            {
 				Config: testAccFilestoreInstance_replication_pause(context),
@@ -524,6 +530,7 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 		},
 	})
 }
+
 
 func testAccFilestoreInstance_replication(context map[string]interface{}) string {
 	return acctest.Nprintf(`
