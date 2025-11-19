@@ -650,7 +650,7 @@ resource "{{ $.IamTerraformName }}_policy" "foo" {
 {{- end }}{{/* if $.IamPolicy.IamConditionsRequestType */}}
 
 {{- if $.IamPolicy.CustomStateIDFuncs }}
-	{{- $.CustomTemplate $.IamPolicy.CustomStateIDFuncs false }}
+{{ $.CustomTemplate $.IamPolicy.CustomStateIDFuncs true }}
 {{- else }}
 func generate{{ $.ResourceName }}IAMPolicyStateID(iamResourceAddr string) func (*terraform.State) (string, error) {
 	return func (state *terraform.State) (string, error) {
