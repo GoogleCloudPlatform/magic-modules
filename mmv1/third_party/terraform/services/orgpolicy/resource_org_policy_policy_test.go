@@ -104,6 +104,15 @@ func TestAccOrgPolicyPolicy_OrganizationPolicy(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "spec.0.rules.0.condition.0.expression"},
 			},
+			{
+				Config: testAccOrgPolicyPolicy_DryRunSpecHandWritten(context),
+			},
+			{
+				ResourceName:            "google_org_policy_policy.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "spec.0.rules.0.condition.0.expression"},
+			},
 		},
 	})
 }
@@ -140,31 +149,6 @@ func TestAccOrgPolicyPolicy_ProjectPolicy(t *testing.T) {
 			},
 			{
 				Config: testAccOrgPolicyPolicy_ProjectPolicyUpdate1(context),
-			},
-			{
-				ResourceName:            "google_org_policy_policy.primary",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "spec.0.rules.0.condition.0.expression"},
-			},
-		},
-	})
-}
-func TestAccOrgPolicyPolicy_DryRunSpecHandWritten(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgTargetFromEnv(t),
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckOrgPolicyPolicyDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccOrgPolicyPolicy_DryRunSpecHandWritten(context),
 			},
 			{
 				ResourceName:            "google_org_policy_policy.primary",
