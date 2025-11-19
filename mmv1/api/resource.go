@@ -1805,7 +1805,11 @@ func (r Resource) IamImportFormatTemplate() string {
 	} else {
 		importFormat = r.IamPolicy.SelfLink
 		if importFormat == "" {
-			importFormat = r.SelfLinkUrl()
+			if len(r.ImportFormat) > 0 {
+				importFormat = r.ImportFormat[0]
+			} else {
+				importFormat = r.SelfLinkUrl()
+			}
 		}
 	}
 	return strings.ReplaceAll(importFormat, "{{name}}", fmt.Sprintf("{{%s}}", r.IamParentResourceName()))
