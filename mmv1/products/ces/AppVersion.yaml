@@ -957,6 +957,7 @@ properties:
                     - name: uniqueItems
                       type: Boolean
                       description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
+                      output: true
                     - name: defs
                       type: String
                       description: A map of definitions for use by ref. Only allowed at the root of the schema.
@@ -2502,6 +2503,7 @@ properties:
               type: String
               description: The display name of the toolset. Must be unique within the same
                 app.
+              output: true
             - name: etag
               type: String
               output: true
