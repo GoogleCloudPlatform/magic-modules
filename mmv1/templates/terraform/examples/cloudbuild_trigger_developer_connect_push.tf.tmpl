@@ -1,0 +1,12 @@
+resource "google_cloudbuild_trigger" "{{$.PrimaryResourceId}}" {
+  location = "us-central1"
+
+  developer_connect_event_config {
+    git_repository_link = "projects/cryptic-tower-286020/locations/us-central1/connections/prod-bbs-push/gitRepositoryLinks/cbprob-prod-us-central1-push1"
+    push {
+        tag = "^0.1.*"
+        invert_regex = true
+    }
+  }
+  filename = "cloudbuild.yaml"
+}

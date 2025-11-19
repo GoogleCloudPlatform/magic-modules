@@ -1,0 +1,4 @@
+if siteType := d.Get("type"); siteType == "DEFAULT_SITE" {
+	log.Printf("[WARN] Skip deleting default hosting side: %q", d.Get("name").(string))
+	return nil
+}

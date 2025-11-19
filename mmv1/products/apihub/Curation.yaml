@@ -1,0 +1,165 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Curation
+description: Description
+base_url: projects/{{project}}/locations/{{location}}/curations
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/curations/{{curation_id}}
+create_url: projects/{{project}}/locations/{{location}}/curations?curationId={{curation_id}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/curations/{{curation_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/curations/{{curation_id}}
+autogen_async: true
+autogen_status: Q3VyYXRpb24=
+examples:
+  - name: apihub_curation_basic
+    primary_resource_id: apihub_curation_basic
+    vars:
+      curation_id: 'test'
+    # API hub instance needs to be created before this, and end to end creation of that resource using Terraform is not yet supported.
+    exclude_test: true
+    external_providers: ["time"]
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: curationId
+    type: String
+    description: |-
+      The ID to use for the curation resource, which will become the final
+      component of the curations's resource name. This field is optional.
+
+      * If provided, the same will be used. The service will throw an error if
+      the specified ID is already used by another curation resource in the API
+      hub.
+      * If not provided, a system generated ID will be used.
+
+      This value should be 4-500 characters, and valid characters
+      are /a-z[0-9]-_/.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: name
+    type: String
+    description: |-
+      Identifier. The name of the curation.
+
+      Format:
+      `projects/{project}/locations/{location}/curations/{curation}`
+    output: true
+  - name: displayName
+    type: String
+    description: The display name of the curation.
+    required: true
+  - name: endpoint
+    type: NestedObject
+    description: |-
+      The endpoint to be triggered for curation.
+      The endpoint will be invoked with a request payload containing
+      ApiMetadata.
+      Response should contain curated data in the form of
+      ApiMetadata.
+    required: true
+    immutable: true
+    properties:
+      - name: applicationIntegrationEndpointDetails
+        type: NestedObject
+        description: |-
+          The details of the Application Integration endpoint to be triggered for
+          curation.
+        required: true
+        immutable: true
+        properties:
+          - name: triggerId
+            type: String
+            description: The API trigger ID of the Application Integration workflow.
+            required: true
+            immutable: true
+          - name: uri
+            type: String
+            description: |-
+              The endpoint URI should be a valid REST URI for triggering an Application
+              Integration.
+              Format:
+              `https://integrations.googleapis.com/v1/{name=projects/*/locations/*/integrations/*}:execute`
+              or
+              `https://{location}-integrations.googleapis.com/v1/{name=projects/*/locations/*/integrations/*}:execute`
+            required: true
+            immutable: true
+  - name: lastExecutionState
+    type: String
+    description: |-
+      The last execution state of the curation.
+      Possible values:
+      LAST_EXECUTION_STATE_UNSPECIFIED
+      SUCCEEDED
+      FAILED
+    output: true
+  - name: lastExecutionErrorMessage
+    type: String
+    description: |-
+      Error message describing the failure, if any, during the last execution of
+      the curation.
+    output: true
+  - name: description
+    type: String
+    description: The description of the curation.
+  - name: pluginInstanceActions
+    type: Array
+    description: |-
+      The plugin instances and associated actions that are using the curation.
+      Note: A particular curation could be used by multiple plugin instances or
+      multiple actions in a plugin instance.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: pluginInstance
+          type: String
+          description: |-
+            Plugin instance that is using the curation.
+            Format is
+            `projects/{project}/locations/{locati on}/plugins/{plugin}/instances/{instance}`
+          output: true
+        - name: actionId
+          type: String
+          description: |-
+            The action ID that is using the curation.
+            This should map to one of the action IDs specified
+            in action configs in the plugin.
+          output: true
+  - name: lastExecutionErrorCode
+    type: String
+    description: |-
+      The error code of the last execution of the curation. The error code is
+      populated only when the last execution state is failed.
+      Possible values:
+      ERROR_CODE_UNSPECIFIED
+      INTERNAL_ERROR
+      UNAUTHORIZED
+    output: true
+  - name: createTime
+    type: String
+    description: The time at which the curation was created.
+    output: true
+  - name: updateTime
+    type: String
+    description: The time at which the curation was last updated.
+    output: true

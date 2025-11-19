@@ -22,6 +22,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"text/template"
 
@@ -30,11 +31,16 @@ import (
 
 	"github.com/nasa9084/go-openapi"
 	"gopkg.in/yaml.v2"
+
+	// Used by serialization.go.tmpl, included here to keep `go mod tidy` from removing
+	// the dependency from go.mod.
+	_ "github.com/hashicorp/hcl/hcl/fmtcmd"
 )
 
 var fPath = flag.String("path", "", "to be removed - path to the root service directory holding samples")
 var tPath = flag.String("overrides", "", "path to the root directory holding overrides files")
 var cPath = flag.String("handwritten", "handwritten", "path to the root directory holding handwritten files to copy")
+var gPath = flag.String("templates", "templates", "path to the templates directory")
 var oPath = flag.String("output", "", "path to output generated files to")
 
 var sFilter = flag.String("service", "", "optional service name. If specified, only this service is generated")
@@ -77,9 +83,12 @@ func main() {
 	if *version == GA_VERSION {
 		terraformResourceDirectory = "google"
 		terraformProviderModule = "github.com/hashicorp/terraform-provider-google/google"
-	} else if *version == ALPHA_VERSION {
+	} else if *vFilter == ALPHA_VERSION.V {
 		terraformResourceDirectory = "google-private"
-		terraformProviderModule = "internal/terraform-next"
+		terraformProviderModule = "github.com/hashicorp/terraform-provider-google-private"
+	} else if *vFilter != "" {
+		terraformResourceDirectory = "google-" + *vFilter
+		terraformProviderModule = "github.com/hashicorp/terraform-provider-google-" + *vFilter
 	}
 
 	generatedResources := make([]*Resource, 0, len(resourcesForVersion))
@@ -110,7 +119,6 @@ func main() {
 	}
 
 	// product specific generation
-	generateProductsFile("provider_dcl_endpoints", productsForVersion)
 	generateProductsFile("provider_dcl_client_creation", productsForVersion)
 
 	if oPath == nil || *oPath == "" {
@@ -298,7 +306,7 @@ type SerializationInput struct {
 func generateSerializationLogic(specs map[Version][]*Resource) {
 	buf := bytes.Buffer{}
 	tmpl, err := template.New("serialization.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
-		"templates/serialization.go.tmpl",
+		filepath.Join(*gPath, "serialization.go.tmpl"),
 	)
 	if err != nil {
 		glog.Exit(err)
@@ -379,7 +387,7 @@ func generateResourceFile(res *Resource) {
 	}
 
 	tmpl, err := template.New("resource.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
-		"templates/resource.go.tmpl",
+		filepath.Join(*gPath, "resource.go.tmpl"),
 	)
 	if err != nil {
 		glog.Exit(err)
@@ -421,7 +429,7 @@ func generateSweeperFile(res *Resource) {
 	}
 
 	tmpl, err := template.New("sweeper.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
-		"templates/sweeper.go.tmpl",
+		filepath.Join(*gPath, "sweeper.go.tmpl"),
 	)
 	if err != nil {
 		glog.Exit(err)
@@ -463,7 +471,7 @@ func generateResourceTestFile(res *Resource) {
 	}
 
 	tmpl, err := template.New("test_file.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
-		"templates/test_file.go.tmpl",
+		filepath.Join(*gPath, "test_file.go.tmpl"),
 	)
 	if err != nil {
 		glog.Exit(err)
@@ -498,7 +506,7 @@ func generateResourceTestFile(res *Resource) {
 
 func generateProviderResourcesFile(resources []*Resource) {
 	tmpl, err := template.New("provider_dcl_resources.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
-		"templates/provider_dcl_resources.go.tmpl",
+		filepath.Join(*gPath, "provider_dcl_resources.go.tmpl"),
 	)
 	if err != nil {
 		glog.Exit(err)
@@ -516,8 +524,13 @@ func generateProviderResourcesFile(resources []*Resource) {
 
 	if oPath == nil || *oPath == "" {
 		fmt.Print(string(formatted))
-	} else if err = ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, "provider", "provider_dcl_resources.go"), formatted, 0644); err != nil {
-		glog.Exit(err)
+	} else {
+		if err := os.MkdirAll(filepath.Join(*oPath, terraformResourceDirectory, "provider"), 0755); err != nil {
+			glog.Exit(err)
+		}
+		if err = ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, "provider", "provider_dcl_resources.go"), formatted, 0644); err != nil {
+			glog.Exit(err)
+		}
 	}
 }
 
@@ -528,7 +541,7 @@ func generateProductsFile(fileName string, products []*ProductMetadata) {
 	templateFileName := fileName + ".go.tmpl"
 	// Generate endpoints file
 	tmpl, err := template.New(templateFileName).Funcs(TemplateFunctions).ParseFiles(
-		"templates/" + templateFileName,
+		filepath.Join(*gPath, templateFileName),
 	)
 	if err != nil {
 		glog.Exit(err)

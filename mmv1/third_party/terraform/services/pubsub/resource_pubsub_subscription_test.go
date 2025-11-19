@@ -241,9 +241,16 @@ func TestAccPubsubSubscriptionBigQuery_serviceAccount(t *testing.T) {
 	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
 
-	if acctest.BootstrapPSARoles(t, "service-", "gcp-sa-pubsub", []string{"roles/bigquery.dataEditor", "roles/bigquery.metadataViewer"}) {
-		t.Fatal("Stopping the test because roles were added to IAM policy.")
-	}
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
+			Role:   "roles/bigquery.dataEditor",
+		},
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
+			Role:   "roles/bigquery.metadataViewer",
+		},
+	})
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -525,6 +532,151 @@ func TestAccPubsubSubscription_filter(t *testing.T) {
 			{
 				ResourceName:      "google_pubsub_subscription.foo",
 				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccPubsubSubscription_javascriptUdfUpdate(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
+	functionName := "my_func"
+	code := "function my_func(message, metadata) {return null;}"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// Initial transform
+			{
+				Config: testAccPubsubSubscription_javascriptUdfSettings(topic, subscriptionShort, functionName, code),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// Remove non-required field
+				Config: testAccPubsubSubscription_javascriptUdfSettings_noEnabled(topic, subscriptionShort, functionName, code),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Destroy transform
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestGetComputedTopicName(t *testing.T) {
+	type testData struct {
+		project  string
+		topic    string
+		expected string
+	}
+
+	var testCases = []testData{
+		{
+			project:  "my-project",
+			topic:    "my-topic",
+			expected: "projects/my-project/topics/my-topic",
+		},
+		{
+			project:  "my-project",
+			topic:    "projects/another-project/topics/my-topic",
+			expected: "projects/another-project/topics/my-topic",
+		},
+	}
+
+	for _, testCase := range testCases {
+		computedTopicName := pubsub.GetComputedTopicName(testCase.project, testCase.topic)
+		if computedTopicName != testCase.expected {
+			t.Fatalf("bad computed topic name: %s' => expected %s", computedTopicName, testCase.expected)
+		}
+	}
+}
+
+func TestAccPubsubSubscription_tags(t *testing.T) {
+	t.Parallel()
+
+	subscription := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "pubsub-subscription-tagkey", nil)
+	context := map[string]interface{}{
+		"topic":        fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10)),
+		"subscription": subscription,
+		"org":          envvar.GetTestOrgFromEnv(t),
+		"tagKey":       tagKey,
+		"tagValue":     acctest.BootstrapSharedTestOrganizationTagValue(t, "pubsub-subscription-tagvalue", tagKey),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubSubscription_tags(context),
+			},
+			{
+				ResourceName:            "google_pubsub_subscription.foo",
+				ImportStateId:           subscription,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"tags"},
+			},
+		},
+	})
+}
+
+func TestAccPubsubSubscription_bigquery_config_update(t *testing.T) {
+	// test that reproduces https://github.com/hashicorp/terraform-provider-google/issues/24891
+	t.Parallel()
+
+	subscription := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
+	suffix := acctest.RandString(t, 10)
+	context := map[string]interface{}{
+		"suffix":       suffix,
+		"subscription": subscription,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubSubscription_bigquery_config(context),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscription,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccPubsubSubscription_bigquery_config_update(context),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscription,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -910,34 +1062,6 @@ resource "google_pubsub_subscription" "foo" {
 `, topic, subscription)
 }
 
-func TestGetComputedTopicName(t *testing.T) {
-	type testData struct {
-		project  string
-		topic    string
-		expected string
-	}
-
-	var testCases = []testData{
-		{
-			project:  "my-project",
-			topic:    "my-topic",
-			expected: "projects/my-project/topics/my-topic",
-		},
-		{
-			project:  "my-project",
-			topic:    "projects/another-project/topics/my-topic",
-			expected: "projects/another-project/topics/my-topic",
-		},
-	}
-
-	for _, testCase := range testCases {
-		computedTopicName := pubsub.GetComputedTopicName(testCase.project, testCase.topic)
-		if computedTopicName != testCase.expected {
-			t.Fatalf("bad computed topic name: %s' => expected %s", computedTopicName, testCase.expected)
-		}
-	}
-}
-
 func testAccCheckPubsubSubscriptionCache404(t *testing.T, subName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
@@ -970,4 +1094,200 @@ resource "google_pubsub_subscription" "foo" {
   filter = "%s"
 }
 `, topic, subscription, filter)
+}
+
+func testAccPubsubSubscription_javascriptUdfSettings(topic, subscription, functionName, code string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+}
+
+resource "google_pubsub_subscription" "foo" {
+  name  = "%s"
+  topic = google_pubsub_topic.foo.id
+  message_transforms {
+    disabled = true
+    javascript_udf {
+      function_name = "%s"
+      code = "%s"
+    }
+  }
+}
+`, topic, subscription, functionName, code)
+}
+
+func testAccPubsubSubscription_javascriptUdfSettings_noEnabled(topic, subscription, functionName, code string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+}
+
+resource "google_pubsub_subscription" "foo" {
+  name  = "%s"
+  topic = google_pubsub_topic.foo.id
+	message_transforms {
+    javascript_udf {
+      function_name = "%s"
+      code = "%s"
+    }
+  }
+}
+`, topic, subscription, functionName, code)
+}
+
+func testAccPubsubSubscription_tags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%{topic}"
+}
+
+resource "google_pubsub_subscription" "foo" {
+  name  = "%{subscription}"
+  topic = google_pubsub_topic.foo.id
+
+  tags = {
+    "%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}
+`, context)
+}
+
+func testAccPubsubSubscription_bigquery_config(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "topic-%{suffix}"
+}
+
+resource "time_sleep" "wait_60_seconds" {
+  depends_on      = [google_bigquery_table_iam_policy.policy]
+  create_duration = "60s"
+}
+
+resource "google_pubsub_subscription" "foo" {
+  name  = "%{subscription}"
+  topic = google_pubsub_topic.foo.id
+
+  bigquery_config {
+    table                 = "${google_bigquery_table.test.project}.${google_bigquery_table.test.dataset_id}.${google_bigquery_table.test.table_id}"
+    service_account_email = google_service_account.bq_write_service_account.email
+  }
+
+  depends_on = [time_sleep.wait_60_seconds]
+}
+
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "tf_test_%{suffix}"
+}
+
+resource "google_bigquery_table" "test" {
+  table_id   = "tf_test_%{suffix}"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+
+  schema = <<EOF
+[
+  {
+    "name": "data",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "The data"
+  }
+]
+EOF
+
+  deletion_protection = false
+}
+
+resource "google_service_account" "bq_write_service_account" {
+  account_id   = "tf-test-%{suffix}"
+  display_name = "BQ Write Service Account"
+}
+
+data "google_iam_policy" "admin" {
+  binding {
+    role = "roles/bigquery.dataEditor"
+    members = [
+      google_service_account.bq_write_service_account.member,
+    ]
+  }
+}
+
+resource "google_bigquery_table_iam_policy" "policy" {
+  project     = google_bigquery_table.test.project
+  dataset_id  = google_bigquery_table.test.dataset_id
+  table_id    = google_bigquery_table.test.table_id
+  policy_data = data.google_iam_policy.admin.policy_data
+}
+`, context)
+}
+
+func testAccPubsubSubscription_bigquery_config_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "topic-%{suffix}"
+}
+
+resource "time_sleep" "wait_60_seconds" {
+  depends_on      = [google_bigquery_table_iam_policy.policy]
+  create_duration = "60s"
+}
+
+resource "google_pubsub_subscription" "foo" {
+  name  = "%{subscription}"
+  topic = google_pubsub_topic.foo.id
+
+  bigquery_config {
+    table                 = "${google_bigquery_table.test.project}.${google_bigquery_table.test.dataset_id}.${google_bigquery_table.test.table_id}"
+    service_account_email = google_service_account.bq_write_service_account.email
+  }
+
+  expiration_policy {
+    ttl = ""
+  }
+
+  depends_on = [time_sleep.wait_60_seconds]
+}
+
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "tf_test_%{suffix}"
+}
+
+resource "google_bigquery_table" "test" {
+  table_id   = "tf_test_%{suffix}"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+
+  schema = <<EOF
+[
+  {
+    "name": "data",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "The data"
+  }
+]
+EOF
+
+  deletion_protection = false
+}
+
+resource "google_service_account" "bq_write_service_account" {
+  account_id   = "tf-test-%{suffix}"
+  display_name = "BQ Write Service Account"
+}
+
+data "google_iam_policy" "admin" {
+  binding {
+    role = "roles/bigquery.dataEditor"
+    members = [
+      google_service_account.bq_write_service_account.member,
+    ]
+  }
+}
+
+resource "google_bigquery_table_iam_policy" "policy" {
+  project     = google_bigquery_table.test.project
+  dataset_id  = google_bigquery_table.test.dataset_id
+  table_id    = google_bigquery_table.test.table_id
+  policy_data = data.google_iam_policy.admin.policy_data
+}
+`, context)
 }

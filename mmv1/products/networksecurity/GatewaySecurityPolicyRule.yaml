@@ -31,6 +31,7 @@ timeouts:
   insert_minutes: 30
   update_minutes: 30
   delete_minutes: 30
+include_in_tgc_next_DO_NOT_USE: true
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
@@ -43,7 +44,7 @@ async:
       delete_minutes: 30
   result:
     resource_inside_response: false
-custom_code:
+mutex: 'gatewaySecurityPolicies/{{gateway_security_policy}}/rules'
 examples:
   - name: 'network_security_gateway_security_policy_rules_basic'
     primary_resource_id: 'default'

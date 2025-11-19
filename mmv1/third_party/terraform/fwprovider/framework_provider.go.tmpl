@@ -21,10 +21,13 @@ import (
     "github.com/hashicorp/terraform-provider-google/google/functions"
     "github.com/hashicorp/terraform-provider-google/google/fwmodels"
     "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
-	"github.com/hashicorp/terraform-provider-google/version"
+    "github.com/hashicorp/terraform-provider-google/google/services/apigee"
+    "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
+    "github.com/hashicorp/terraform-provider-google/version"
     {{- if ne $.TargetVersionName "ga" }}
     "github.com/hashicorp/terraform-provider-google/google/services/firebase"
     {{- end }}
+    "github.com/hashicorp/terraform-provider-google/google/services/storage"
 
     transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -222,7 +225,7 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                 },
             },
 
-            // dcl
+            // DCL
             "container_aws_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
                 Validators: []validator.String{
@@ -231,6 +234,36 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             },
             "container_azure_custom_endpoint": &schema.StringAttribute{
                 Optional:     true,
+                Validators: []validator.String{
+                    transport_tpg.CustomEndpointValidator(),
+                },
+            },
+            "apikeys_custom_endpoint": &schema.StringAttribute{
+                Optional: true,
+                Validators: []validator.String{
+                    transport_tpg.CustomEndpointValidator(),
+                },
+            },
+            "assured_workloads_custom_endpoint": &schema.StringAttribute{
+                Optional: true,
+                Validators: []validator.String{
+                    transport_tpg.CustomEndpointValidator(),
+                },
+            },
+            "cloud_resource_manager_custom_endpoint": &schema.StringAttribute{
+                Optional: true,
+                Validators: []validator.String{
+                    transport_tpg.CustomEndpointValidator(),
+                },
+            },
+            "firebaserules_custom_endpoint": &schema.StringAttribute{
+                Optional: true,
+                Validators: []validator.String{
+                    transport_tpg.CustomEndpointValidator(),
+                },
+            },
+            "recaptcha_enterprise_custom_endpoint": &schema.StringAttribute{
+                Optional: true,
                 Validators: []validator.String{
                     transport_tpg.CustomEndpointValidator(),
                 },
@@ -252,10 +285,32 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                     },
                 },
             },
+            "external_credentials": schema.ListNestedBlock{
+                NestedObject: schema.NestedBlockObject{
+                    Attributes: map[string]schema.Attribute{
+                        "audience": schema.StringAttribute{
+                            Required: true,
+                            Validators: []validator.String{
+                                fwvalidators.NonEmptyStringValidator(),
+                            },
+                        },
+                        "service_account_email": schema.StringAttribute{
+                            Required: true,
+                            Validators: []validator.String{
+                                fwvalidators.ServiceAccountEmailValidator{},
+                            },
+                        },
+                        "identity_token": schema.StringAttribute{
+                            Required: true,
+                            Validators: []validator.String{
+                                fwvalidators.JWTValidator(),
+                            },
+                        },
+                    },
+                },
+            },
         },
     }
-
-    transport_tpg.ConfigureDCLCustomEndpointAttributesFramework(&resp.Schema)
 }
 
 // Configure prepares the metadata/'meta' required for data sources and resources to function.
@@ -304,7 +359,10 @@ func (p *FrameworkProvider) DataSources(_ context.Context) []func() datasource.D
 
 // Resources defines the resources implemented in the provider.
 func (p *FrameworkProvider) Resources(_ context.Context) []func() resource.Resource {
-	return nil
+	return []func() resource.Resource{
+		apigee.NewApigeeKeystoresAliasesKeyCertFileResource,
+		storage.NewStorageNotificationResource,
+	}
 }
 
 // Functions defines the provider functions implemented in the provider.
@@ -322,9 +380,11 @@ func (p *FrameworkProvider) Functions(_ context.Context) []func() function.Funct
 // EphemeralResources defines the resources that are of ephemeral type implemented in the provider.
 func (p *FrameworkProvider) EphemeralResources(_ context.Context) []func() ephemeral.EphemeralResource {
 	return []func() ephemeral.EphemeralResource{
-        resourcemanager.GoogleEphemeralServiceAccountAccessToken,
-        resourcemanager.GoogleEphemeralServiceAccountIdToken,
-        resourcemanager.GoogleEphemeralServiceAccountJwt,
-        resourcemanager.GoogleEphemeralServiceAccountKey,
+		resourcemanager.GoogleEphemeralClientConfig,
+		resourcemanager.GoogleEphemeralServiceAccountAccessToken,
+		resourcemanager.GoogleEphemeralServiceAccountIdToken,
+		resourcemanager.GoogleEphemeralServiceAccountJwt,
+		resourcemanager.GoogleEphemeralServiceAccountKey,
+		secretmanager.GoogleEphemeralSecretManagerSecretVersion,
 	}
 }

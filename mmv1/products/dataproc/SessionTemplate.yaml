@@ -1,0 +1,256 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'SessionTemplate'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/sessionTemplates/{sessionTemplate}'
+description: |
+  A Dataproc Serverless session template defines the configuration settings for
+  creating one or more Dataproc Serverless interactive sessions.
+references:
+  guides:
+    'Dataproc Serverless Session Templates': 'https://cloud.google.com/dataproc-serverless/docs/guides/create-serverless-sessions-templates#create-dataproc-serverless-session-template'
+  api: 'https://cloud.google.com/dataproc-serverless/docs/reference/rest/v1/projects.locations.sessionTemplates'
+docs:
+id_format: '{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/sessionTemplates'
+self_link: '{{name}}'
+update_verb: 'PATCH'
+autogen_async: true
+import_format:
+  - '{{name}}'
+custom_code:
+  custom_import: 'templates/terraform/custom_import/set_id_name_with_slashes.go.tmpl'
+collection_url_key: 'sessionTemplates'
+examples:
+  - name: 'dataproc_session_templates_jupyter'
+    primary_resource_id: 'example_session_templates_jupyter'
+    primary_resource_name: 'fmt.Sprintf("projects/%s/locations/%s/sessionTemplates/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), fmt.Sprintf("tf-test-session-templates-jupyter%s", context["random_suffix"]))'
+    vars:
+      name: 'jupyter-session-template'
+      subnetwork_name: 'default'
+      prevent_destroy: 'true'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+    test_vars_overrides:
+      'subnetwork_name': 'acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "jupyer-session-test-network", "jupyter-session-test-subnetwork")'
+      'prevent_destroy': 'false'
+    ignore_read_extra:
+      - 'runtime_config.0.properties'
+  - name: 'dataproc_session_templates_jupyter_full'
+    primary_resource_id: 'dataproc_session_templates_jupyter_full'
+    primary_resource_name: 'fmt.Sprintf("projects/%s/locations/%s/sessionTemplates/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), fmt.Sprintf("tf-test-session-templates-jupyter%s", context["random_suffix"]))'
+    vars:
+      name: 'jupyter-session-template'
+      subnetwork_name: 'default'
+      prevent_destroy: 'true'
+      kms_key_name: 'example-key'
+      bucket_name: 'dataproc-bucket'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+    test_vars_overrides:
+      'subnetwork_name': 'acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "jupyer-session-test-network", "jupyter-session-test-subnetwork")'
+      'prevent_destroy': 'false'
+      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-dataproc-session-template-key1").CryptoKey.Name'
+    ignore_read_extra:
+      - 'runtime_config.0.properties'
+  - name: 'dataproc_session_templates_spark_connect'
+    primary_resource_id: 'example_session_templates_spark_connect'
+    primary_resource_name: 'fmt.Sprintf("projects/%s/locations/%s/sessionTemplates/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), fmt.Sprintf("tf-test-session-templates-jupyter%s", context["random_suffix"]))'
+    vars:
+      name: 'sc-session-template'
+      subnetwork_name: 'default'
+      prevent_destroy: 'true'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+    test_vars_overrides:
+      'subnetwork_name': 'acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "spark-connect-session-test-network", "spark-connect-session-test-subnetwork")'
+      'prevent_destroy': 'false'
+    ignore_read_extra:
+      - 'runtime_config.0.properties'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location in which the session template will be created in.
+    url_param_only: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the session template in the following format:
+      projects/{project}/locations/{location}/sessionTemplates/{template_id}
+    required: true
+    immutable: true
+  - name: 'uuid'
+    type: String
+    description: |
+      A session template UUID (Unique Universal Identifier). The service generates this value when it creates the session template.
+    output: true
+  - name: 'createTime'
+    type: String
+    description: |
+      The time when the session template was created.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      The time when the session template was updated.
+    output: true
+  - name: 'creator'
+    type: String
+    description: |
+      The email address of the user who created the session template.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      The labels to associate with this session template.
+  - name: 'runtimeConfig'
+    type: NestedObject
+    description: |
+      Runtime configuration for the session template.
+    properties:
+      - name: 'version'
+        type: String
+        description: |
+          Version of the session runtime.
+      - name: 'containerImage'
+        type: String
+        description: |
+          Optional custom container image for the job runtime environment. If not specified, a default container image will be used.
+      - name: 'properties'
+        type: KeyValuePairs
+        description: |
+          A mapping of property names to values, which are used to configure workload execution.
+      - name: 'effective_properties'
+        type: KeyValuePairs
+        description: |
+          A mapping of property names to values, which are used to configure workload execution.
+        output: true
+  - name: 'environmentConfig'
+    type: NestedObject
+    description: |
+      Environment configuration for the session execution.
+    properties:
+      - name: 'executionConfig'
+        type: NestedObject
+        description: |
+          Execution configuration for a workload.
+        properties:
+          - name: 'serviceAccount'
+            type: String
+            description: |
+              Service account that used to execute workload.
+            default_from_api: true
+          - name: 'networkTags'
+            type: Array
+            description: |
+              Tags used for network traffic control.
+            item_type:
+              type: String
+          - name: 'kmsKey'
+            type: String
+            description: |
+              The Cloud KMS key to use for encryption.
+          - name: 'idleTtl'
+            type: String
+            description: |
+              The duration to keep the session alive while it's idling.
+              Exceeding this threshold causes the session to terminate. Minimum value is 10 minutes; maximum value is 14 day.
+              Defaults to 1 hour if not set. If both ttl and idleTtl are specified for an interactive session, the conditions
+              are treated as OR conditions: the workload will be terminated when it has been idle for idleTtl or when ttl has
+              been exceeded, whichever occurs first.
+          - name: 'ttl'
+            type: String
+            description: |
+              The duration after which the workload will be terminated.
+              When the workload exceeds this duration, it will be unconditionally terminated without waiting for ongoing
+              work to finish. If ttl is not specified for a session workload, the workload will be allowed to run until it
+              exits naturally (or run forever without exiting). If ttl is not specified for an interactive session,
+              it defaults to 24 hours. If ttl is not specified for a batch that uses 2.1+ runtime version, it defaults to 4 hours.
+              Minimum value is 10 minutes; maximum value is 14 days. If both ttl and idleTtl are specified (for an interactive session),
+              the conditions are treated as OR conditions: the workload will be terminated when it has been idle for idleTtl or
+              when ttl has been exceeded, whichever occurs first.
+            default_from_api: true
+          - name: 'stagingBucket'
+            type: String
+            description: |
+              A Cloud Storage bucket used to stage workload dependencies, config files, and store
+              workload output and other ephemeral data, such as Spark history files. If you do not specify a staging bucket,
+              Cloud Dataproc will determine a Cloud Storage location according to the region where your workload is running,
+              and then create and manage project-level, per-location staging and temporary buckets.
+              This field requires a Cloud Storage bucket name, not a gs://... URI to a Cloud Storage bucket.
+          - name: 'subnetworkUri'
+            type: String
+            description: |
+              Subnetwork configuration for workload execution.
+          - name: 'authenticationConfig'
+            type: NestedObject
+            description: |
+              Authentication configuration for a workload is used to set the default identity for the workload execution.
+            properties:
+              - name: userWorkloadAuthenticationType
+                type: Enum
+                description: |
+                  Authentication type for the user workload running in containers.
+                enum_values:
+                  - SERVICE_ACCOUNT
+                  - END_USER_CREDENTIALS
+      - name: 'peripheralsConfig'
+        type: NestedObject
+        description: |
+          Peripherals configuration that workload has access to.
+        default_from_api: true
+        allow_empty_object: true
+        properties:
+          - name: 'metastoreService'
+            type: String
+            description: |
+              Resource name of an existing Dataproc Metastore service.
+          - name: 'sparkHistoryServerConfig'
+            type: NestedObject
+            description: |
+              The Spark History Server configuration for the workload.
+            properties:
+              - name: 'dataprocCluster'
+                type: String
+                description: |
+                  Resource name of an existing Dataproc Cluster to act as a Spark History Server for the workload.
+  - name: 'jupyterSession'
+    type: NestedObject
+    description: |
+      Jupyter configuration for an interactive session.
+    properties:
+      - name: 'kernel'
+        type: Enum
+        description: |
+          Kernel to be used with Jupyter interactive session.
+        enum_values:
+          - 'PYTHON'
+          - 'SCALA'
+      - name: 'displayName'
+        type: String
+        description: |
+          Display name, shown in the Jupyter kernelspec card.
+  - name: 'sparkConnectSession'
+    type: NestedObject
+    description: |
+      Spark connect configuration for an interactive session.
+    diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
+    allow_empty_object: true
+    send_empty_value: true
+    properties:
+      []   # Meant to be an empty object with no properties.

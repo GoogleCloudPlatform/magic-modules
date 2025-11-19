@@ -1,0 +1,162 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+name: 'NotebookExecution'
+api_resource_type_kind: NotebookExecutionJob
+description: |
+  'An instance of a notebook Execution'
+
+references:
+  guides:
+    'Schedule a notebook run': 'https://cloud.google.com/colab/docs/schedule-notebook-run'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.notebookExecutionJobs'
+base_url: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs'
+self_link: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs/{{notebook_execution_job_id}}'
+immutable: true
+create_url: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs?notebook_execution_job_id={{notebook_execution_job_id}}'
+async:
+  type: 'OpAsync'
+  operation:
+    full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs/{{notebook_execution_job_id}}'
+custom_code:
+  post_create: 'templates/terraform/post_create/colab_notebook_execution.go.tmpl'
+examples:
+  - name: 'colab_notebook_execution_basic'
+    primary_resource_id: 'notebook-execution'
+    vars:
+      runtime_template_name: 'runtime-template-name'
+      bucket: 'my_bucket'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+      service_account: 'SERVICE_ACCT'
+    ignore_read_extra:
+      - direct_notebook_source.0.content
+  - name: 'colab_notebook_execution_full'
+    min_version: beta
+    primary_resource_id: 'notebook-execution'
+    vars:
+      notebook_execution_job_id: 'colab-notebook-execution'
+      runtime_template_name: 'runtime-template-name'
+      bucket: 'my_bucket'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+      service_account: 'SERVICE_ACCT'
+  - name: 'colab_notebook_execution_dataform'
+    min_version: beta
+    primary_resource_id: 'notebook-execution'
+    primary_resource_name: 'fmt.Sprintf("tf-test-colab-notebook-execution%s", context["random_suffix"])'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-dataform.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+    vars:
+      secret: 'secret'
+      dataform_repository: 'dataform-repository'
+      runtime_template_name: 'runtime-template-name'
+      bucket: 'my_bucket'
+      key_name: 'my-crypto-key'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+      service_account: 'SERVICE_ACCT'
+    test_vars_overrides:
+      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+parameters:
+  - name: 'location'
+    type: String
+    required: true
+    url_param_only: true
+    description: 'The location for the resource: https://cloud.google.com/colab/docs/locations'
+  - name: 'notebookExecutionJobId'
+    type: String
+    url_param_only: true
+    description: 'User specified ID for the Notebook Execution Job'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    default_from_api: true
+properties:
+  - name: 'displayName'
+    type: String
+    description:
+      Required. The display name of the Notebook Execution.
+    required: true
+  - name: 'dataformRepositorySource'
+    type: NestedObject
+    description: 'The Dataform Repository containing the input notebook.'
+    exactly_one_of:
+      - dataform_repository_source
+      - gcs_notebook_source
+      - direct_notebook_source
+    properties:
+      - name: 'dataformRepositoryResourceName'
+        type: String
+        required: true
+        description: 'The resource name of the Dataform Repository.'
+        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+      - name: 'commitSha'
+        type: String
+        description: 'The commit SHA to read repository with. If unset, the file will be read at HEAD.'
+  - name: 'gcsNotebookSource'
+    type: NestedObject
+    description: 'The Cloud Storage uri for the input notebook.'
+    exactly_one_of:
+      - dataform_repository_source
+      - gcs_notebook_source
+      - direct_notebook_source
+    properties:
+      - name: 'uri'
+        type: String
+        description: 'The Cloud Storage uri pointing to the ipynb file.'
+        required: true
+      - name: 'generation'
+        type: String
+        description: 'The version of the Cloud Storage object to read. If unset, the current version of the object is read. See https://cloud.google.com/storage/docs/metadata#generation-number.'
+  - name: 'directNotebookSource'
+    type: NestedObject
+    description: 'The content of the input notebook in ipynb format.'
+    ignore_read: true
+    exactly_one_of:
+      - dataform_repository_source
+      - gcs_notebook_source
+      - direct_notebook_source
+    properties:
+      - name: 'content'
+        type: String
+        required: true
+        description: 'The base64-encoded contents of the input notebook file.'
+        custom_flatten: 'templates/terraform/custom_flatten/colab_notebook_execution_direct_content.go.tmpl'
+  - name: executionTimeout
+    type: String
+    description: 'Max running time of the execution job in seconds (default 86400s / 24 hrs).'
+  - name: 'notebookRuntimeTemplateResourceName'
+    type: String
+    description: 'The NotebookRuntimeTemplate to source compute configuration from.'
+    exactly_one_of:
+      - notebook_runtime_template_resource_name
+  - name: 'gcsOutputUri'
+    required: true
+    type: String
+    description: 'The Cloud Storage location to upload the result to. Format:`gs://bucket-name`'
+  - name: 'executionUser'
+    type: String
+    exactly_one_of:
+      - execution_user
+      - service_account
+    description: 'The user email to run the execution as.'
+  - name: 'serviceAccount'
+    type: String
+    exactly_one_of:
+      - execution_user
+      - service_account
+    description: 'The service account to run the execution as.'

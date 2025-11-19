@@ -154,3 +154,37 @@ properties:
       - 'incrementalBackupSpec'
     properties:
       []
+  - name: 'encryptionConfig'
+    type: NestedObject
+    description: |
+      Configuration for the encryption of the backup schedule.
+    default_from_api: true
+    properties:
+      - name: 'encryptionType'
+        type: Enum
+        description: |
+          The encryption type of backups created by the backup schedule.
+          Possible values are USE_DATABASE_ENCRYPTION, GOOGLE_DEFAULT_ENCRYPTION, or CUSTOMER_MANAGED_ENCRYPTION.
+          If you use CUSTOMER_MANAGED_ENCRYPTION, you must specify a kmsKeyName.
+          If your backup type is incremental-backup, the encryption type must be GOOGLE_DEFAULT_ENCRYPTION.
+        enum_values:
+          - 'USE_DATABASE_ENCRYPTION'
+          - 'GOOGLE_DEFAULT_ENCRYPTION'
+          - 'CUSTOMER_MANAGED_ENCRYPTION'
+        required: true
+      - name: 'kmsKeyName'
+        type: String
+        description: |
+          The resource name of the Cloud KMS key to use for encryption.
+          Format: 'projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{cryptoKey}'
+        conflicts:
+          - encryption_config.0.kms_key_names
+      - name: 'kmsKeyNames'
+        type: Array
+        description: |
+          Fully qualified name of the KMS keys to use to encrypt this database. The keys must exist
+          in the same locations as the Spanner Database.
+        item_type:
+          type: String
+        conflicts:
+          - encryption_config.0.kms_key_name

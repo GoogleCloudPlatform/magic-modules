@@ -1,5 +1,5 @@
 resource "google_network_security_address_group" "basic_regional_networksecurity_address_group" {
-  name        = "{{index $.Vars "address"}}"
+  name        = "{{index $.Vars "address_group"}}"
   parent      = "projects/{{index $.TestEnvVars "project_name"}}"
   description = "Sample regional networksecurity_address_group"
   location    = "{{index $.TestEnvVars "region"}}"
@@ -28,9 +28,10 @@ resource "google_compute_region_network_firewall_policy_rule" "{{$.PrimaryResour
   target_service_accounts = ["{{index $.TestEnvVars "service_acct"}}"]
 
   match {
-    src_ip_ranges = ["10.100.0.1/32"]
-    src_fqdns = ["example.com"]
-    src_region_codes = ["US"]
+    src_address_groups       = [google_network_security_address_group.basic_regional_networksecurity_address_group.id]
+    src_ip_ranges            = ["10.100.0.1/32"]
+    src_fqdns                = ["example.com"]
+    src_region_codes         = ["US"]
     src_threat_intelligences = ["iplist-known-malicious-ips"]
 
     layer4_configs {
@@ -40,8 +41,6 @@ resource "google_compute_region_network_firewall_policy_rule" "{{$.PrimaryResour
     src_secure_tags {
       name = google_tags_tag_value.basic_value.id
     }
-
-    src_address_groups = [google_network_security_address_group.basic_regional_networksecurity_address_group.id]
   }
 }
 
@@ -63,5 +62,5 @@ resource "google_tags_tag_key" "basic_key" {
 resource "google_tags_tag_value" "basic_value" {
   description = "For valuename resources."
   parent      = google_tags_tag_key.basic_key.id
-  short_name  = "tagvalue"
+  short_name  = "{{index $.Vars "tag_value"}}"
 }

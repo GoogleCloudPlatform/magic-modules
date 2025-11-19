@@ -1,0 +1,257 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'DataExchangeSubscription'
+min_version: beta
+api_resource_type_kind: Subscription
+description: A Bigquery Analytics Hub Data Exchange subscription
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/bigquery/docs/analytics-hub-introduction'
+  api: 'https://cloud.google.com/bigquery/docs/reference/analytics-hub/rest/v1/projects.locations.subscriptions'
+docs:
+  note: |-
+    When importing the resource with `terraform import`, provide the destination/subscriber's project and location
+    in the format projects/{{subscriber_project}}/locations/{{subscriber_location}}/subscriptions/{{subscription_id}}
+base_url: 'projects/{{project}}/locations/{{location}}/subscriptions'
+self_link: 'projects/{{project}}/locations/{{location}}/subscriptions/{{subscription_id}}'
+create_url: 'projects/{{data_exchange_project}}/locations/{{data_exchange_location}}/dataExchanges/{{data_exchange_id}}:subscribe'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/subscriptions/{{subscription_id}}'
+custom_code:
+  decoder: 'templates/terraform/decoders/bigqueryanalyticshub_data_exchange_subscription.go.tmpl'
+  encoder: 'templates/terraform/encoders/bigqueryanalyticshub_data_exchange_subscription.go.tmpl'
+  post_read: 'templates/terraform/post_read/bigqueryanalyticshub_data_exchange_subscription.go.tmpl'
+  custom_update: 'templates/terraform/custom_update/bigqueryanalyticshub_data_exchange_subscription.go.tmpl'
+sweeper:
+  url_substitutions:
+    - region: "us"
+examples:
+  - name: 'bigquery_analyticshub_dataexchange_subscription_basic'
+    primary_resource_id: 'subscription'
+    primary_resource_name: 'fmt.Sprintf("tf_test_subscription_%s", context["random_suffix"])'
+    region_override: 'us'
+    ignore_read_extra:
+      - 'last_modify_time'
+      - 'state'
+      - 'linked_dataset_map'
+      - 'linked_resources'
+    vars:
+      data_exchange_id: 'my_test_dataexchange'
+      listing_dataset_id: 'listing_src_dataset'
+      listing_table_id: 'listing_src_table'
+      listing_id: 'my_test_listing'
+      subscription_id: 'my_subscription_id'
+      subscriber_contact_email: 'testuser@example.com'
+      # Variables for the Destination Dataset created by the Subscription
+      destination_dataset_id: 'subscribed_dest_dataset'
+      destination_dataset_friendly_name: 'Subscribed Destination Dataset'
+virtual_fields:
+  - name: 'refresh_policy'
+    type: Enum
+    description: |-
+        Controls when the subscription is automatically refreshed by the provider.
+        * `ON_READ`: Default value if not specified. The subscription will be refreshed every time Terraform performs a read operation (e.g., `terraform plan`, `terraform apply`, `terraform refresh`). This ensures the state is always up-to-date.
+        * `ON_STALE`: The subscription will only be refreshed when its reported `state` (an output-only field from the API) is `STATE_STALE` during a Terraform read operation.
+        * `NEVER`: The provider will not automatically refresh the subscription.
+    default_value: 'ON_READ'
+    enum_values:
+      - 'ON_READ'
+      - 'ON_STALE'
+      - 'NEVER'
+parameters:
+  - name: 'dataExchangeId'
+    type: String
+    immutable: true
+    description: |-
+      The ID of the data exchange. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.
+    url_param_only: true
+    required: true
+  - name: 'dataExchangeProject'
+    type: String
+    immutable: true
+    description: |-
+      The ID of the Google Cloud project where the Data Exchange is located.
+    url_param_only: true
+    required: true
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+  - name: 'dataExchangeLocation'
+    type: String
+    immutable: true
+    description: |-
+      The name of the location of the Data Exchange.
+    url_param_only: true
+    required: true
+  - name: 'location'
+    type: String
+    immutable: true
+    description: |
+      The geographic location where the Subscription (and its linked dataset) should reside.
+      This is the subscriber's desired location for the created resources.
+      See https://cloud.google.com/bigquery/docs/locations for supported locations.
+    url_param_only: true
+    required: true
+    custom_flatten: 'templates/terraform/custom_flatten/bigquery_dataset_location.go.tmpl'
+    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
+  - name: 'subscriptionId'
+    type: String
+    immutable: true
+    description: |-
+      Name of the subscription to create.
+    required: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+  - name: 'subscriberContact'
+    type: String
+    immutable: true
+    description: |-
+      Email of the subscriber.
+  - name: 'destinationDataset'
+    type: NestedObject
+    immutable: true
+    description:
+      BigQuery destination dataset to create for the subscriber.
+    ignore_read: true
+    properties:
+      - name: 'location'
+        type: String
+        immutable: true
+        description: |
+          The geographic location where the dataset should reside.
+          See https://cloud.google.com/bigquery/docs/locations for supported locations.
+        required: true
+        custom_flatten: 'templates/terraform/custom_flatten/bigquery_dataset_location.go.tmpl'
+        diff_suppress_func: 'tpgresource.CaseDiffSuppress'
+      - name: 'datasetReference'
+        type: NestedObject
+        immutable: true
+        required: true
+        description: A reference that identifies the destination dataset.
+        properties:
+          - name: 'datasetId'
+            type: String
+            immutable: true
+            description: A unique ID for this dataset, without the project name. The ID must contain only letters (a-z, A-Z), numbers (0-9), or underscores (_). The maximum length is 1,024 characters.
+            required: true
+          - name: 'projectId'
+            type: String
+            immutable: true
+            description: The ID of the project containing this dataset.
+            required: true
+            diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+      - name: 'friendlyName'
+        type: String
+        immutable: true
+        description: A descriptive name for the dataset.
+      - name: 'description'
+        type: String
+        immutable: true
+        description: A user-friendly description of the dataset.
+      - name: 'labels'
+        type: KeyValuePairs
+        immutable: true
+        description: |
+          The labels associated with this dataset. You can use these to
+          organize and group your datasets.
+properties:
+  - name: 'name'
+    type: String
+    description: |-
+      The resource name of the subscription. e.g. "projects/myproject/locations/us/subscriptions/123"
+    output: true
+  - name: 'creationTime'
+    type: Time
+    description: |-
+      Timestamp when the subscription was created.
+    output: true
+  - name: 'lastModifyTime'
+    type: Time
+    description: |-
+      Timestamp when the subscription was last modified.
+    output: true
+  - name: 'organizationId'
+    type: String
+    description: |-
+      Organization of the project this subscription belongs to.
+    output: true
+  - name: 'organizationDisplayName'
+    type: String
+    description: |-
+      Display name of the project of this subscription.
+    output: true
+  - name: 'state'
+    type: String
+    description: |-
+      Current state of the subscription.
+    output: true
+  - name: 'resourceType'
+    type: String
+    description: |-
+      Listing shared asset type.
+    output: true
+  - name: 'linkedDatasetMap'
+    output: true
+    type: Map
+    description: |-
+      Output only. Map of listing resource names to associated linked resource,
+      e.g. projects/123/locations/us/dataExchanges/456/listings/789 -> projects/123/datasets/my_dataset
+      For Data Exchange subscriptions, this map may contain multiple entries if the Data Exchange has multiple listings.
+    key_name: resource_name
+    key_description: The associated linked resource
+    value_type:
+      name: linked_resource
+      type: NestedObject
+      properties:
+        - name: 'listing'
+          type: string
+          description: Output only. Listing for which linked resource is created.
+          output: true
+        - name: 'linkedDataset'
+          type: string
+          description: Output only. Name of the linked dataset, e.g. projects/subscriberproject/datasets/linkedDataset
+          output: true
+          exactly_one_of:
+            - 'linkedDataset'
+            - 'linkedPubsubSubscription'
+        - name: 'linkedPubsubSubscription'
+          type: string
+          description: Output only. Name of the Pub/Sub subscription, e.g. projects/subscriberproject/subscriptions/subscriptions/sub_id
+          output: true
+          exactly_one_of:
+            - 'linkedDataset'
+            - 'linkedPubsubSubscription'
+  - name: 'linkedResources'
+    type: Array
+    description: |
+      Output only. Linked resources created in the subscription. Only contains values if state = STATE_ACTIVE.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'listing'
+          type: string
+          description: Output only. Listing for which linked resource is created.
+          output: true
+        - name: 'linkedDataset'
+          type: string
+          description: Output only. Name of the linked dataset, e.g. projects/subscriberproject/datasets/linkedDataset
+          output: true
+  - name: 'dataExchange'
+    type: String
+    description: |-
+      Output only. Resource name of the source Data Exchange. e.g. projects/123/locations/us/dataExchanges/456
+    output: true
+  - name: 'logLinkedDatasetQueryUserEmail'
+    type: Boolean
+    description: 'Output only. By default, false. If true, the Subscriber agreed to the email sharing mandate that is enabled for DataExchange/Listing.'
+    output: true

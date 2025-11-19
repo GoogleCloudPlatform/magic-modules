@@ -1,0 +1,7 @@
+// check if this is a listing subscription instead of a data exchange subscription
+if _, ok := d.GetOk("listing_id"); ok {
+	url, err = tpgresource.ReplaceVars(d, config, "{{BigqueryAnalyticsHubBasePath}}projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}:subscribe")
+	if err != nil {
+		return err
+	}
+}

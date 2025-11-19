@@ -2,10 +2,14 @@ package fwvalidators
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
@@ -205,4 +209,136 @@ func (v BoundedDuration) ValidateString(ctx context.Context, req validator.Strin
 			fmt.Sprintf("Duration must be between %v and %v", v.MinDuration, v.MaxDuration),
 		)
 	}
+}
+
+type jwtValidator struct {
+}
+
+func (v jwtValidator) Description(_ context.Context) string {
+	return "value must be a valid JWT token"
+}
+
+func (v jwtValidator) MarkdownDescription(ctx context.Context) string {
+	return v.Description(ctx)
+}
+
+func (v jwtValidator) ValidateString(ctx context.Context, request validator.StringRequest, response *validator.StringResponse) {
+	if request.ConfigValue.IsNull() || request.ConfigValue.IsUnknown() {
+		return
+	}
+
+	value := request.ConfigValue.ValueString()
+
+	if value == "" {
+		response.Diagnostics.AddAttributeError(
+			request.Path,
+			"Invalid JWT Token",
+			"JWT token must not be empty",
+		)
+		return
+	}
+
+	// JWT consists of 3 parts separated by dots: header.payload.signature
+	parts := strings.Split(value, ".")
+	if len(parts) != 3 {
+		response.Diagnostics.AddAttributeError(
+			request.Path,
+			"Invalid JWT Format",
+			"JWT token must have 3 parts separated by dots (header.payload.signature)",
+		)
+		return
+	}
+
+	// Check that each part is base64 encoded
+	for i, part := range parts {
+		if _, err := base64.RawURLEncoding.DecodeString(part); err != nil {
+			response.Diagnostics.AddAttributeError(
+				request.Path,
+				"Invalid JWT Encoding",
+				fmt.Sprintf("Part %d of JWT is not valid base64: %v", i+1, err),
+			)
+		}
+	}
+}
+
+func JWTValidator() validator.String {
+	return jwtValidator{}
+}
+
+// stringValuesInSetValidator validates that all string elements in a set
+// are present in the configured list of valid strings.
+type stringValuesInSetValidator struct {
+	ValidStrings []string
+}
+
+func (v stringValuesInSetValidator) Description(_ context.Context) string {
+	return fmt.Sprintf("all elements must be one of: %q", v.ValidStrings)
+}
+
+func (v stringValuesInSetValidator) MarkdownDescription(ctx context.Context) string {
+	return v.Description(ctx)
+}
+
+func (v stringValuesInSetValidator) ValidateSet(ctx context.Context, req validator.SetRequest, resp *validator.SetResponse) {
+	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
+		return
+	}
+
+	valid := make(map[string]struct{}, len(v.ValidStrings))
+	for _, s := range v.ValidStrings {
+		valid[s] = struct{}{}
+	}
+
+	var elements []types.String
+	resp.Diagnostics.Append(req.ConfigValue.ElementsAs(ctx, &elements, false)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	for _, el := range elements {
+		if _, ok := valid[el.ValueString()]; !ok {
+			resp.Diagnostics.AddAttributeError(
+				req.Path,
+				"Invalid Set Element",
+				fmt.Sprintf("Element %q is not a valid value. %s.", el.ValueString(), v.Description(ctx)),
+			)
+		}
+	}
+}
+
+func StringValuesInSet(validStrings ...string) validator.Set {
+	return stringValuesInSetValidator{
+		ValidStrings: validStrings,
+	}
+}
+
+type TopicPrefixValidator struct{}
+
+func (v TopicPrefixValidator) Description(ctx context.Context) string {
+	return "ensures the topic does not start with '//pubsub.googleapis.com/'"
+}
+
+func (v TopicPrefixValidator) MarkdownDescription(ctx context.Context) string {
+	return "Ensures the topic does not start with `//pubsub.googleapis.com/`."
+}
+
+func (v TopicPrefixValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
+	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
+		return
+	}
+
+	value := req.ConfigValue.ValueString()
+	forbiddenPrefix := "//pubsub.googleapis.com/"
+
+	if strings.HasPrefix(value, forbiddenPrefix) {
+		resp.Diagnostics.AddAttributeError(
+			req.Path,
+			"Invalid Topic Format",
+			fmt.Sprintf("The topic must not start with '%s', please use the format projects/{project}/topics/{topic} instead.", forbiddenPrefix),
+		)
+	}
+}
+
+func NewTopicPrefixValidator() validator.String {
+	return TopicPrefixValidator{}
 }

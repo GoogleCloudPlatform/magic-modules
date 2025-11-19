@@ -26,18 +26,43 @@ func TestAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyUpdateEx
 				Config: testAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyPreUpdateExample(context),
 			},
                         {
-                                ResourceName:      "google_compute_organization_security_policy.policy",
-                                ImportState:       true,
-                                ImportStateVerify: true,
+                                ResourceName:            "google_compute_organization_security_policy.policy",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                                ImportStateVerifyIgnore: []string{"display_name"},
                         },
                         {
 				Config: testAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyPostUpdateExample(context),
                         },
                         {
-                                ResourceName:      "google_compute_organization_security_policy.policy",
-                                ImportState:       true,
-                                ImportStateVerify: true,
+                                ResourceName:            "google_compute_organization_security_policy.policy",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                                ImportStateVerifyIgnore: []string{"display_name"},
                         },
+		},
+	})
+}
+
+func TestAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyShortName(t *testing.T) {
+	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeOrganizationSecurityPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyShortName(context),
+			},
+			{
+				ResourceName:      "google_compute_organization_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -57,6 +82,17 @@ resource "google_compute_organization_security_policy" "policy" {
   display_name = "tf-test%{random_suffix}"
   parent       = "organizations/%{org_id}"
   description  = "Updated description."
+}
+`, context)
+}
+
+func testAccComputeOrganizationSecurityPolicy_organizationSecurityPolicyShortName(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_organization_security_policy" "policy" {
+  short_name  = "tf-test%{random_suffix}"
+  parent      = "organizations/%{org_id}"
+  description = "org security policy description"
+  type        = "CLOUD_ARMOR"
 }
 `, context)
 }

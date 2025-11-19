@@ -1,0 +1,4 @@
+deleteCommercial := d.Get("delete_commercial")
+if deleteCommercial != nil {
+    url = url + "?deleteCommercial=" + fmt.Sprintf("%v", deleteCommercial) 
+}

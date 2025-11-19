@@ -1,6 +1,7 @@
-if d.HasChange("oidc") || d.HasChange("extra_attributes_oauth2_client") {
+if d.HasChange("oidc") || d.HasChange("extra_attributes_oauth2_client") || d.HasChange("extended_attributes_oauth2_client") {
 	updatedOidcClientSecret := d.Get("oidc.0.client_secret.0.value.0.plain_text")
 	updatedExtraAttributesOauth2ClientSecret := d.Get("extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text")
+	updatedExtendedAttributesOauth2ClientSecret := d.Get("extended_attributes_oauth2_client.0.client_secret.0.value.0.plain_text")
 	// After the update, reading from the API returns a different thumbprint
 	// for the client secret value, which clears the plain_text. We set the plain_text since
 	// this case should not warrant a diff.
@@ -24,6 +25,16 @@ if d.HasChange("oidc") || d.HasChange("extra_attributes_oauth2_client") {
 		clientSecretValue := clientSecret.([]interface{})[0].(map[string]interface{})["value"]
 		clientSecretValue.([]interface{})[0].(map[string]interface{})["plain_text"] = updatedExtraAttributesOauth2ClientSecret
 		if err := d.Set("extra_attributes_oauth2_client", extraAttributesOauth2Client); err != nil {
+			return err
+		}
+	}
+
+	if updatedExtendedAttributesOauth2ClientSecret != nil && updatedExtendedAttributesOauth2ClientSecret != "" {
+		extendedAttributesOauth2Client := d.Get("extended_attributes_oauth2_client")
+		clientSecret := extendedAttributesOauth2Client.([]interface{})[0].(map[string]interface{})["client_secret"]
+		clientSecretValue := clientSecret.([]interface{})[0].(map[string]interface{})["value"]
+		clientSecretValue.([]interface{})[0].(map[string]interface{})["plain_text"] = updatedExtendedAttributesOauth2ClientSecret
+		if err := d.Set("extended_attributes_oauth2_client", extendedAttributesOauth2Client); err != nil {
 			return err
 		}
 	}

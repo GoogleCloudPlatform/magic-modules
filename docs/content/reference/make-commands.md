@@ -8,11 +8,11 @@ weight: 30
 
 ### `make` / `make provider`
 
-Generates the code for the downstream `google` and `google-beta` providers.
+Generates the code for the downstream `google` and `google-beta` providers
+into the `OUTPUT_PATH`, overriding and deleting any local changes.
 
-{{< hint info >}}
-**Note:** Generation works best if the downstream provider has a commit checked out corresponding to the latest `main` branch commit that is present in your `magic-modules` working branch. This can generally be identified based on matching commit messages.
-{{< /hint >}}
+> [!NOTE]
+> **Note:** Generation works best if the downstream provider has a commit checked out corresponding to the latest `main` branch commit that is present in your `magic-modules` working branch. This can generally be identified based on matching commit messages.
 
 Examples:
 
@@ -34,7 +34,8 @@ make provider VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform
 
 - `OUTPUT_PATH`: Required. The location you are generating provider code into.
 - `VERSION`: Required. The version of the provider you are building into. Valid values are `ga` and `beta`.
-- `PRODUCT`: Limits generations to the specified folder within `mmv1/products` or `tpgtools/api`. Handwritten files from `mmv1/third_party/terraform` are always generated into the downstream regardless of this setting, so you can provide a non-existent product name to generate only handwritten code. Required if `RESOURCE` is specified.
+- `PRODUCT`: Limits generations to the specified folder within `mmv1/products` or `tpgtools/api`. Handwritten files from `mmv1/third_party/terraform` are always generated into the downstream regardless of this setting, so you can provide a non-existent product name to generate only handwritten code. Required if `RESOURCE` is specified. **Using `PRODUCT` skips the pre-generation cleanup step. This is considered advanced usage; recommend running a full, clean build (`make provider` without `PRODUCT`) beforehand if repositories may be out of sync.**
+- `SKIP_CLEAN`: If set to `true`, skips the default pre-generation cleanup of `OUTPUT_PATH` during a full provider build. Has no effect if `PRODUCT` is specified (as cleanup is already skipped). Example: `make provider VERSION=ga OUTPUT_PATH=... SKIP_CLEAN=true`.
 - `RESOURCE`: Limits generation to the specified resource within a particular product. For `mmv1` resources, matches the resource's `name` field (set in its configuration file).For `tpgtools` resources, matches the terraform resource name.
 - `ENGINE`: Modifies `make provider` to only generate code using the specified engine. Valid values are `mmv1` or `tpgtools`. (Providing `tpgtools` will still generate any prerequisite mmv1 files required for tpgtools.)
 
@@ -51,7 +52,8 @@ git checkout -- . && git clean -f google/ google-beta/ website/
 
 ### Container-based environment
 
-{{< hint warning >}}This approach is in beta and still collecting feedback. Please [file an issue](https://github.com/hashicorp/terraform-provider-google/issues/new/choose) if you encounter challenges.{{< /hint >}}
+> [!WARNING]
+> This approach is in beta and still collecting feedback. Please [file an issue](https://github.com/hashicorp/terraform-provider-google/issues/new/choose) if you encounter challenges.
 
 [`./scripts/make-in-container.sh`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/scripts/make-in-container.sh) runs `make` with the provided arguments inside a container with all necessary dependencies preinstalled. It uses [Docker](https://docker.io/) if available and [Podman](https://podman.io/) otherwise. Like `make`, this script must be run in the root of a `magic-modules` repository clone.
 

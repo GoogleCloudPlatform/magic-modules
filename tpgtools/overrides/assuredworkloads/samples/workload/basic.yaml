@@ -10,4 +10,5 @@ variables:
     type: "org_id"
   - name: "billing_account"
     type: "billing_account"
-
+external_providers:
+  - "time"

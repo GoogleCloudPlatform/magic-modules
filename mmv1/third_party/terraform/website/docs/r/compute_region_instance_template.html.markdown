@@ -409,12 +409,13 @@ The following arguments are supported:
 * `disk_name` - (Optional) Name of the disk. When not provided, this defaults
     to the name of the instance.
 
-* `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk. This
-    sets the number of I/O operations per second that the disk can handle.
-    Values must be between 10,000 and 120,000. For more details, see the
-    [Extreme persistent disk documentation](https://cloud.google.com/compute/docs/disks/extreme-persistent-disk).
+* `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle. For more details, see the [Extreme persistent disk documentation](https://cloud.google.com/compute/docs/disks/extreme-persistent-disk) or the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks) depending on the selected disk_type.
+
+* `provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk, in MB/s. This sets the amount of data that can be read or written from the disk per second. Values must greater than or equal to 1. For more details, see the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks).
 
 * `resource_manager_tags` - (Optional) A set of key/value resource manager tag pairs to bind to this disk. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456.
+
+* `guest_os_features` - (optional) A list of features to enable on the guest operating system. Applicable only for bootable images. Read [Enabling guest operating system features](https://cloud.google.com/compute/docs/images/create-delete-deprecate-private-images#guest-os-features) to see a list of available options.
 
 * `source_image` - (Optional) The image from which to
     initialize this disk. This can be one of: the image's `self_link`,
@@ -449,6 +450,8 @@ The following arguments are supported:
     or READ_ONLY. If you are attaching or creating a boot disk, this must
     read-write mode.
 
+* `architecture` - (Optional) The architecture of the attached disk. Valid values are `ARM64` or `x86_64`.
+
 * `source` - (Optional) The name (**not self_link**)
     of the disk (such as those managed by `google_compute_disk`) to attach.
 ~> **Note:** Either `source`, `source_image`, or `source_snapshot` is **required** in a disk block unless the disk type is `local-ssd`. Check the API [docs](https://cloud.google.com/compute/docs/reference/rest/v1/instanceTemplates/insert) for details.
@@ -480,23 +483,49 @@ The following arguments are supported:
 
 <a name="nested_source_image_encryption_key"></a>The `source_image_encryption_key` block supports:
 
+* `raw_key` - (Optional)  A 256-bit [customer-supplied encryption key]
+    (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption),
+    encoded in [RFC 4648 base64](https://tools.ietf.org/html/rfc4648#section-4)
+    to decrypt the given image. Only one of `kms_key_self_link`, `rsa_encrypted_key` and `raw_key`
+    may be set.
+
+* `rsa_encrypted_key` - (Optional) Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit [customer-supplied encryption key]
+    (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption) to decrypt the given image. Only one of `kms_key_self_link`, `rsa_encrypted_key` and `raw_key`
+    may be set.
+
 * `kms_key_service_account` - (Optional) The service account being used for the
     encryption request for the given KMS key. If absent, the Compute Engine
     default service account is used.
 
 * `kms_key_self_link` - (Required) The self link of the encryption key that is
-    stored in Google Cloud KMS.
+    stored in Google Cloud KMS. Only one of `kms_key_self_link`, `rsa_encrypted_key` and `raw_key`
+    may be set.
 
 <a name="nested_source_snapshot_encryption_key"></a>The `source_snapshot_encryption_key` block supports:
 
+* `raw_key` - (Optional) A 256-bit [customer-supplied encryption key]
+    (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption),
+    encoded in [RFC 4648 base64](https://tools.ietf.org/html/rfc4648#section-4)
+    to decrypt this snapshot. Only one of `kms_key_self_link`, `rsa_encrypted_key` and `raw_key`
+    may be set.
+
+* `rsa_encrypted_key` - (Optional) Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit [customer-supplied encryption key]
+    (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption) to decrypt this snapshot. Only one of `kms_key_self_link`, `rsa_encrypted_key` and `raw_key`
+    may be set.
+
 * `kms_key_service_account` - (Optional) The service account being used for the
     encryption request for the given KMS key. If absent, the Compute Engine
     default service account is used.
 
 * `kms_key_self_link` - (Required) The self link of the encryption key that is
-    stored in Google Cloud KMS.
+    stored in Google Cloud KMS. Only one of `kms_key_self_link`, `rsa_encrypted_key` and `raw_key`
+    may be set.
 
 <a name="nested_disk_encryption_key"></a>The `disk_encryption_key` block supports:
+
+* `kms_key_service_account` - (Optional) The service account being used for the
+    encryption request for the given KMS key. If absent, the Compute Engine
+    default service account is used.
 
 * `kms_key_self_link` - (Required) The self link of the encryption key that is stored in Google Cloud KMS
 
@@ -527,7 +556,7 @@ The following arguments are supported:
     array of alias IP ranges for this network interface. Can only be specified for network
     interfaces on subnet-mode networks. Structure [documented below](#nested_alias_ip_range).
 
-* `nic_type` - (Optional) The type of vNIC to be used on this interface. Possible values: GVNIC, VIRTIO_NET. In the beta provider the additional values of MRDMA and IRDMA are supported.
+* `nic_type` - (Optional) The type of vNIC to be used on this interface. Possible values: GVNIC, VIRTIO_NET, MRDMA, IRDMA.
 
 * `stack_type` - (Optional) The stack type for this network interface to identify whether the IPv6 feature is enabled or not. Values are IPV4_IPV6, IPV6_ONLY or IPV4_ONLY. If not specified, IPV4_ONLY will be used.
 
@@ -605,6 +634,8 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `instance_termination_action` - (Optional) Describe the type of termination action for `SPOT` VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot)
 
+* `termination_time` - (Optional) Specifies the timestamp, when the instance will be terminated, in RFC3339 text format. If specified, the instance termination action will be performed at the termination time.
+
 * `availability_domain` - (Optional) Specifies the availability domain to place the instance in. The value must be a number between 1 and the number of availability domains specified in the spread placement policy attached to the instance.
 
 * `host_error_timeout_seconds` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the time in seconds for host error detection, the value must be within the range of [90, 330] with the increment of 30, if unset, the default behavior of host error recovery will be used.
@@ -635,6 +666,26 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 * `seconds` - (Required) Span of time at a resolution of a second. Must be from 0 to
    315,576,000,000 inclusive. Note: these bounds are computed from: 60
    sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years.
+
+* `graceful_shutdown` -  (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Settings for the instance to perform a graceful shutdown. Structure is [documented below](#nested_graceful_shutdown).
+
+* `skip_guest_os_shutdown` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Boolean parameter. Default is false and there will be 120 seconds between GCE ACPI G2 Soft Off and ACPI G3 Mechanical Off for Standard VMs and 30 seconds for Spot VMs.
+
+<a name="nested_graceful_shutdown"></a>The `graceful_shutdown` block supports:
+
+* `enabled` - (Required) Opts-in for graceful shutdown.
+
+* `max_duration` (Optional) The time allotted for the instance to gracefully shut down.
+    If the graceful shutdown isn't complete after this time, then the instance
+    transitions to the STOPPING state. Structure is documented below:
+
+    * `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
+        resolution. Durations less than one second are represented with a 0
+        `seconds` field and a positive `nanos` field. Must be from 0 to
+        999,999,999 inclusive.
+
+    * `seconds` - (Required) Span of time at a resolution of a second.
+        The value must be between 1 and 3600, which is 3,600 seconds (one hour).`
 
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
@@ -706,6 +757,8 @@ exported:
 * `creation_timestamp` - Creation timestamp in RFC3339 text format.
 
 * `metadata_fingerprint` - The unique fingerprint of the metadata.
+
+* `numeric_id` - numeric identifier of the resource.
 
 * `self_link` - The URI of the created resource.
 

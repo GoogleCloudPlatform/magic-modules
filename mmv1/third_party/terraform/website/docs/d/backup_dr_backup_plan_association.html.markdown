@@ -1,5 +1,5 @@
 ---
-subcategory: "Backup and DR BackupPlanAssociation"
+subcategory: "Backup and DR Service"
 description: |-
   Get information about a Backupdr BackupPlanAssociation.
 ---
@@ -7,9 +7,6 @@ description: |-
 # google_backup_dr_backup_plan_association
 
 A Backup and DR BackupPlanAssociation.
-
-~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
 
 ## Example Usage
 

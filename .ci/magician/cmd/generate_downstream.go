@@ -1,3 +1,18 @@
+/*
+* Copyright 2025 Google LLC. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+ */
 package cmd
 
 import (
@@ -15,7 +30,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var changelogExp = regexp.MustCompile("(?s)```release-note.*?```")
+var changelogExp = regexp.MustCompile("(?s)```release-note:(?P<noteType>[a-zA-Z]+).*```")
 
 var gdEnvironmentVariables = [...]string{
 	"BASE_BRANCH",
@@ -285,9 +300,11 @@ func runMake(downstreamRepo *source.Repo, command string, rnr ExecRunner) error 
 			return err
 		}
 	case "terraform":
+		// --- legacy -- can be cleaned up after go/mm-pull/13722 is submitted
 		if _, err := rnr.Run("make", []string{"clean-provider", "OUTPUT_PATH=" + downstreamRepo.Path}, nil); err != nil {
 			return err
 		}
+		// -------------------------------------------------------------------
 		if _, err := rnr.Run("make", []string{"provider", "OUTPUT_PATH=" + downstreamRepo.Path, fmt.Sprintf("VERSION=%s", downstreamRepo.Version)}, nil); err != nil {
 			return err
 		}
@@ -323,8 +340,9 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 		return "", err
 	}
 
-	if _, err := rnr.Run("git", []string{"commit", "--signoff", "-m", commitMessage}, nil); err != nil {
-		return "", err
+	_, commitErr := rnr.Run("git", []string{"commit", "--signoff", "-m", commitMessage}, nil)
+	if commitErr != nil && !strings.Contains(commitErr.Error(), "nothing to commit") {
+		return "", commitErr
 	}
 
 	commitSha, err := rnr.Run("git", []string{"rev-parse", "HEAD"}, nil)
@@ -337,8 +355,13 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 
 	// auto-pr's use commitSHA_modular-magician_<repo>_.txt file to communicate commmit hash
 	// across cloudbuild steps. Used in test-tpg to execute unit tests for the HEAD commit
-	if strings.HasPrefix(scratchRepo.Branch, "auto-pr-") && !strings.HasSuffix(scratchRepo.Branch, "-old") {
-		variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", scratchRepo.Name)
+	if strings.HasPrefix(scratchRepo.Branch, "auto-pr-") {
+		var variablePath string
+		if strings.HasSuffix(scratchRepo.Branch, "-old") {
+			variablePath = fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", scratchRepo.Name)
+		} else {
+			variablePath = fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", scratchRepo.Name)
+		}
 		fmt.Println("variablePath: ", variablePath)
 		err = rnr.WriteFile(variablePath, commitSha)
 		if err != nil {
@@ -346,7 +369,7 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 		}
 	}
 
-	return commitSha, err
+	return commitSha, commitErr
 }
 
 func addChangelogEntry(downstreamRepo *source.Repo, pullRequest *github.PullRequest, rnr ExecRunner) error {
@@ -354,8 +377,17 @@ func addChangelogEntry(downstreamRepo *source.Repo, pullRequest *github.PullRequ
 		return err
 	}
 	rnr.Mkdir(".changelog")
-	if err := rnr.WriteFile(filepath.Join(".changelog", fmt.Sprintf("%d.txt", pullRequest.Number)), strings.Join(changelogExp.FindAllString(pullRequest.Body, -1), "\n")); err != nil {
-		return err
+	matches := changelogExp.FindStringSubmatch(pullRequest.Body)
+	if matches != nil && matches[1] != "none" {
+		if err := rnr.WriteFile(filepath.Join(".changelog", fmt.Sprintf("%d.txt", pullRequest.Number)), strings.Join(changelogExp.FindAllString(pullRequest.Body, -1), "\n")); err != nil {
+			return err
+		}
+	}
+	// If changelog entry is missing, add an entry "unknown: <PR title>".
+	if matches == nil {
+		if err := rnr.WriteFile(filepath.Join(".changelog", fmt.Sprintf("%d.txt", pullRequest.Number)), "unknown: "+pullRequest.Title); err != nil {
+			return err
+		}
 	}
 	return rnr.PopDir()
 }

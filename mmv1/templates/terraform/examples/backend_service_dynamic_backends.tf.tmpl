@@ -1,0 +1,108 @@
+# This is a map which manages the number of backend and related resources.
+# You can comment any of the VMs in the list and terraform will update its configuration properly.
+
+locals {
+  instances = {
+    # name: zone
+    "a-vm" : "us-central1-b",
+    "b-vm" : "us-central1-a",
+    "c-vm" : "us-central1-c",
+    "d-vm" : "us-central1-b",
+    "e-vm" : "us-central1-a",
+  }
+}
+
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "default" {
+  for_each     = local.instances
+  name         = each.key
+  machine_type = "f1-micro"
+  zone         = each.value
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network    = "default"
+    subnetwork = "default"
+  }
+  metadata_startup_script = <<EOF
+#! /bin/bash
+apt-get update
+apt-get install apache2 -y
+a2ensite default-ssl
+a2enmod ssl
+vm_hostname="$(curl -H "Metadata-Flavor:Google" \
+http://169.254.169.254/computeMetadata/v1/instance/name)"
+echo "Page served from: $vm_hostname" | \
+tee /var/www/html/index.html
+systemctl restart apache2
+EOF
+
+}
+
+resource "google_compute_instance_group" "default" {
+  for_each = local.instances
+  name     = each.key
+  zone     = each.value
+
+  instances = [google_compute_instance.default[each.key].self_link]
+
+  named_port {
+    name = "http"
+    port = "80"
+  }
+}
+
+resource "google_compute_backend_service" "default" {
+  for_each = local.instances
+  name     = each.key
+
+  backend {
+    group = google_compute_instance_group.default[each.key].self_link
+  }
+
+  health_checks = [google_compute_http_health_check.default[each.key].self_link]
+  port_name     = "http"
+}
+
+resource "google_compute_http_health_check" "default" {
+  for_each           = local.instances
+  name               = "${each.key}-hc"
+  request_path       = "/"
+  check_interval_sec = 1
+  timeout_sec        = 1
+}
+
+
+resource "google_compute_url_map" "default" {
+  name            = "{{index $.Vars "url_map_name"}}"
+  default_service = google_compute_backend_service.default["a-vm"].self_link
+
+  dynamic "host_rule" {
+    for_each = keys(local.instances)
+    content {
+      hosts        = ["${host_rule.value}.example.com"]
+      path_matcher = host_rule.value
+    }
+  }
+
+  dynamic "path_matcher" {
+    for_each = keys(local.instances)
+    content {
+      name            = path_matcher.value
+      default_service = google_compute_backend_service.default[path_matcher.value].self_link
+    }
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}

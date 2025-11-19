@@ -1,0 +1,332 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: PluginInstance
+description: Description
+base_url: projects/{{project}}/locations/{{location}}/plugins/{{plugin}}/instances
+immutable: true
+self_link: projects/{{project}}/locations/{{location}}/plugins/{{plugin}}/instances/{{plugin_instance_id}}
+create_url: projects/{{project}}/locations/{{location}}/plugins/{{plugin}}/instances?pluginInstanceId={{plugin_instance_id}}
+id_format: projects/{{project}}/locations/{{location}}/plugins/{{plugin}}/instances/{{plugin_instance_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/plugins/{{plugin}}/instances/{{plugin_instance_id}}
+examples:
+  - name: apihub_plugin_instance_basic
+    primary_resource_id: apihub_plugin_instance_basic
+    vars:
+      curation_id: 'test'
+    # API hub instance needs to be created before this, and end to end creation of that resource using Terraform is not yet supported.
+    exclude_test: true
+    external_providers: ["time"]
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+    - update
+  type: OpAsync
+  result:
+    resource_inside_response: true
+  include_project: false
+autogen_status: UGx1Z2luSW5zdGFuY2U=
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: plugin
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: pluginInstanceId
+    type: String
+    description: |-
+      The ID to use for the plugin instance, which will become the final
+      component of the plugin instance's resource name. This field is optional.
+
+      * If provided, the same will be used. The service will throw an error if
+      the specified id is already used by another plugin instance in the plugin
+      resource.
+      * If not provided, a system generated id will be used.
+
+      This value should be 4-63 characters, and valid characters
+      are /a-z[0-9]-_/.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: name
+    type: String
+    description: |-
+      Identifier. The unique name of the plugin instance resource.
+      Format:
+      `projects/{project}/locations/{location}/plugins/{plugin}/instances/{instance}`
+    output: true
+  - name: disable
+    type: Boolean
+    default_value: false
+    update_url: projects/{{project}}/locations/{{location}}/plugins/{{plugin}}/instances/{{plugin_instance_id}}:enableAction
+    description: The display name for this plugin instance. Max length is 255 characters.
+  - name: authConfig
+    type: NestedObject
+    description: AuthConfig represents the authentication information.
+    properties:
+      - name: googleServiceAccountConfig
+        type: NestedObject
+        description: Config for Google service account authentication.
+        properties:
+          - name: serviceAccount
+            type: String
+            description: |-
+              The service account to be used for authenticating request.
+
+              The `iam.serviceAccounts.getAccessToken` permission should be granted on
+              this service account to the impersonator service account.
+            required: true
+      - name: userPasswordConfig
+        type: NestedObject
+        description: Parameters to support Username and Password Authentication.
+        properties:
+          - name: username
+            type: String
+            description: Username.
+            required: true
+          - name: password
+            type: NestedObject
+            description: Secret provides a reference to entries in Secret Manager.
+            required: true
+            properties:
+              - name: secretVersion
+                type: String
+                description: |-
+                  The resource name of the secret version in the format,
+                  format as: `projects/*/secrets/*/versions/*`.
+                required: true
+      - name: apiKeyConfig
+        type: NestedObject
+        description: Config for authentication with API key.
+        properties:
+          - name: name
+            type: String
+            description: |-
+              The parameter name of the API key.
+              E.g. If the API request is "https://example.com/act?api_key=",
+              "api_key" would be the parameter name.
+            required: true
+          - name: apiKey
+            type: NestedObject
+            description: Secret provides a reference to entries in Secret Manager.
+            required: true
+            properties:
+              - name: secretVersion
+                type: String
+                description: |-
+                  The resource name of the secret version in the format,
+                  format as: `projects/*/secrets/*/versions/*`.
+                required: true
+          - name: httpElementLocation
+            type: String
+            description: |-
+              The location of the API key.
+              The default value is QUERY.
+              Possible values:
+              HTTP_ELEMENT_LOCATION_UNSPECIFIED
+              QUERY
+              HEADER
+              PATH
+              BODY
+              COOKIE
+            required: true
+      - name: oauth2ClientCredentialsConfig
+        type: NestedObject
+        description: |-
+          Parameters to support Oauth 2.0 client credentials grant authentication.
+          See https://tools.ietf.org/html/rfc6749#section-1.3.4 for more details.
+        properties:
+          - name: clientSecret
+            type: NestedObject
+            description: Secret provides a reference to entries in Secret Manager.
+            required: true
+            properties:
+              - name: secretVersion
+                type: String
+                description: |-
+                  The resource name of the secret version in the format,
+                  format as: `projects/*/secrets/*/versions/*`.
+                required: true
+          - name: clientId
+            type: String
+            description: The client identifier.
+            required: true
+      - name: authType
+        type: String
+        description: |2-
+
+          Possible values:
+          AUTH_TYPE_UNSPECIFIED
+          NO_AUTH
+          GOOGLE_SERVICE_ACCOUNT
+          USER_PASSWORD
+          API_KEY
+          OAUTH2_CLIENT_CREDENTIALS
+        required: true
+  - name: state
+    type: String
+    description: |-
+      The current state of the plugin instance (e.g., enabled, disabled,
+      provisioning).
+      Possible values:
+      STATE_UNSPECIFIED
+      CREATING
+      ACTIVE
+      APPLYING_CONFIG
+      ERROR
+      FAILED
+      DELETING
+    output: true
+  - name: createTime
+    type: String
+    description: Timestamp indicating when the plugin instance was created.
+    output: true
+  - name: updateTime
+    type: String
+    description: Timestamp indicating when the plugin instance was last updated.
+    output: true
+  - name: displayName
+    type: String
+    description: The display name for this plugin instance. Max length is 255 characters.
+    required: true
+  - name: errorMessage
+    type: String
+    description: |-
+      Error message describing the failure, if any, during Create, Delete or
+      ApplyConfig operation corresponding to the plugin instance.This field will
+      only be populated if the plugin instance is in the ERROR or FAILED state.
+    output: true
+  - name: actions
+    type: Array
+    description: The action status for the plugin instance.
+    required: true
+    default_from_api: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: hubInstanceAction
+          type: NestedObject
+          output: true
+          description: The execution status for the plugin instance.
+          properties:
+            - name: currentExecutionState
+              type: String
+              description: |-
+                The current state of the execution.
+                Possible values:
+                CURRENT_EXECUTION_STATE_UNSPECIFIED
+                RUNNING
+                NOT_RUNNING
+              output: true
+            - name: lastExecution
+              type: NestedObject
+              description: The result of the last execution of the plugin instance.
+              output: true
+              properties:
+                - name: result
+                  type: String
+                  description: |-
+                    The result of the last execution of the plugin instance.
+                    Possible values:
+                    RESULT_UNSPECIFIED
+                    SUCCEEDED
+                    FAILED
+                  output: true
+                - name: errorMessage
+                  type: String
+                  description: |-
+                    Error message describing the failure, if any, during the last
+                    execution.
+                  output: true
+                - name: startTime
+                  type: String
+                  description: The last execution start time of the plugin instance.
+                  output: true
+                - name: endTime
+                  type: String
+                  description: The last execution end time of the plugin instance.
+                  output: true
+        - name: actionId
+          type: String
+          description: |-
+            This should map to one of the action id specified
+            in actions_config in the plugin.
+          required: true
+        - name: state
+          type: String
+          description: |-
+            The current state of the plugin action in the plugin instance.
+            Possible values:
+            STATE_UNSPECIFIED
+            ENABLED
+            DISABLED
+            ENABLING
+            DISABLING
+            ERROR
+          output: true
+        - name: scheduleCronExpression
+          type: String
+          default_from_api: true
+          description: |-
+            The schedule for this plugin instance action. This can only be set if the
+            plugin supports API_HUB_SCHEDULE_TRIGGER mode for this action.
+        - name: curationConfig
+          type: NestedObject
+          default_from_api: true
+          description: The curation information for this plugin instance.
+          properties:
+            - name: customCuration
+              type: NestedObject
+              description: Custom curation information for this plugin instance.
+              properties:
+                - name: curation
+                  type: String
+                  description: |-
+                    The unique name of the curation resource. This will be the name of the
+                    curation resource in the format:
+                    `projects/{project}/locations/{location}/curations/{curation}`
+                  required: true
+            - name: curationType
+              type: String
+              default_from_api: true
+              description: |2-
+
+                Possible values:
+                CURATION_TYPE_UNSPECIFIED
+                DEFAULT_CURATION_FOR_API_METADATA
+                CUSTOM_CURATION_FOR_API_METADATA
+              required: true
+        - name: scheduleTimeZone
+          type: String
+          default_from_api: true
+          description: |-
+            The time zone for the schedule cron expression. If not provided, UTC will
+            be used.

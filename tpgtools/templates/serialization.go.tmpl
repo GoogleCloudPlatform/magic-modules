@@ -172,7 +172,7 @@ func {{ $res.TitleCaseFullName }}{{$version.SerializationSuffix}}AsHCL(r {{$res.
 					{{- end }}
 	}
 				{{- else if eq $field.Type.String "TypeMap" }}
-		{{- /* TODO(magic-modules-eng): Implement maps with non-string values */}}
+		{{- /* TODO: Implement maps with non-string values */}}
 		outputConfig += "{{ if not $field.Collapsed }}\t{{end}}{{$field.Name}} = {"
 		keys{{$field.PackageName}} := []string{}
 		// golang range goes over maps in an arbitrary order- we've gotta order the
@@ -238,7 +238,7 @@ func convert{{$res.TitleCaseFullName}}{{$version.SerializationSuffix}}{{$v.Packa
 						{{- end }}
 	}
 					{{- else if eq $field.Type.String "TypeMap" }}
-		{{- /* TODO(magic-modules-eng): Implement maps with non-string values */}}
+		{{- /* TODO: Implement maps with non-string values */}}
 		outputConfig += "{{ if not $field.Collapsed }}\t{{end}}{{$field.Name}} = {"
 		keys{{$field.PackageName}} := []string{}
 		// golang range goes over maps in an arbitrary order- we've gotta order the

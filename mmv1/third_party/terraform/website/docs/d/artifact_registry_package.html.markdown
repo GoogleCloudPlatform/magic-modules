@@ -1,0 +1,41 @@
+---
+subcategory: "Artifact Registry"
+description: |-
+  Get information about a package within a Google Artifact Registry repository.
+---
+
+# google_artifact_registry_package
+This data source fetches information of a package from a provided Artifact Registry repository.
+
+## Example Usage
+
+```hcl
+resource "google_artifact_registry_package" "my_package" {
+  location      = "us-west1"
+  repository_id = "my-repository"
+}
+```
+
+## Argument Reference
+
+The following arguments are supported:
+
+* `location` - (Required) The location of the artifact registry.
+
+* `repository_id` - (Required) The last part of the repository name to fetch from.
+
+* `name` - (Required) The name of the package.
+
+* `project` - (Optional) The project ID in which the resource belongs. If it is not provided, the provider project is used.
+
+## Attributes Reference
+
+The following computed attributes are exported:
+
+* `display_name` - The display name of the package.
+
+* `create_time` - The time, as a RFC 3339 string, this package was created. 
+
+* `update_time` - The time, as a RFC 3339 string, this package was last updated. This includes publishing a new version of the package.
+
+* `annotations` - Client specified annotations.

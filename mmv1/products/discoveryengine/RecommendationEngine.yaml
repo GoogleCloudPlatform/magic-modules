@@ -1,0 +1,212 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'RecommendationEngine'
+api_resource_type_kind: Engine
+description: |
+  Vertex AI Search recommendation apps.
+references:
+  guides:
+    'Create a Recommendation Engine': 'https://cloud.google.com/generative-ai-app-builder/docs/create-generic-recommendations-app'
+  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.engines'
+base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/engines/{{engine_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/collections/default_collection/engines/{{engine_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/engines?engineId={{engine_id}}'
+update_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/engines/{{engine_id}}'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/engines/{{engine_id}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/collections/default_collection/engines/{{engine_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: false
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+custom_code:
+  encoder: 'templates/terraform/encoders/discovery_engine_recommendation_engine_hardcode_solution_type.go.tmpl'
+examples:
+  - name: 'discoveryengine_recommendationengine_generic'
+    primary_resource_id: 'generic'
+    vars:
+      engine_id: 'recommendation-engine-id'
+      data_store_id: 'recommendation-datastore-id'
+  - name: 'discoveryengine_recommendationengine_media'
+    primary_resource_id: 'media'
+    vars:
+      engine_id: 'recommendation-engine-id'
+      data_store_id: 'recommendation-datastore-id'
+parameters:
+  - name: 'engineId'
+    type: String
+    description: |
+      Unique ID to use for Recommendation Engine.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      The geographic location where the data store should reside. The value can
+      only be one of "global", "us" and "eu".
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The unique full resource name of the recommendation engine. Values are of the format
+      `projects/{project}/locations/{location}/collections/{collection}/engines/{engine_id}`.
+      This field must be a UTF-8 encoded string with a length limit of 1024 characters.
+    output: true
+  - name: 'displayName'
+    type: String
+    description: |
+      Required. The display name of the engine. Should be human readable. UTF-8 encoded string with limit of 1024 characters.
+    required: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      Timestamp the Engine was created at.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Timestamp the Engine was last updated.
+    output: true
+  - name: 'dataStoreIds'
+    type: Array
+    description: |
+      The data stores associated with this engine. For SOLUTION_TYPE_RECOMMENDATION type of engines, they can only associate with at most one data store.
+    required: true
+    item_type:
+      type: String
+  - name: 'industryVertical'
+    type: Enum
+    description: |
+      The industry vertical that the engine registers. The restriction of the Engine industry vertical is based on DataStore: If unspecified, default to GENERIC. Vertical on Engine has to match vertical of the DataStore liniked to the engine.
+    immutable: true
+    ignore_read: true
+    default_value: "GENERIC"
+    enum_values:
+      - 'GENERIC'
+      - 'MEDIA'
+  - name: 'mediaRecommendationEngineConfig'
+    type: NestedObject
+    description: |
+      Configurations for a Media Recommendation Engine. Only applicable on the data stores
+      with SOLUTION_TYPE_RECOMMENDATION solution type and MEDIA industry vertical.
+    properties:
+      - name: 'type'
+        type: String
+        description: |
+          The type of engine. e.g., `recommended-for-you`.
+          This field together with MediaRecommendationEngineConfig.optimizationObjective describes
+          engine metadata to use to control engine training and serving.
+          Currently supported values: `recommended-for-you`, `others-you-may-like`,
+          `more-like-this`, `most-popular-items`.
+      - name: 'optimizationObjective'
+        type: String
+        description: |
+          The optimization objective. e.g., `cvr`.
+          This field together with MediaRecommendationEngineConfig.type describes
+          engine metadata to use to control engine training and serving.
+          Currently supported values: `ctr`, `cvr`.
+          If not specified, we choose default based on engine type. Default depends on type of recommendation:
+          `recommended-for-you` => `ctr`
+          `others-you-may-like` => `ctr`
+      - name: 'optimizationObjectiveConfig'
+        type: NestedObject
+        description: |
+          Name and value of the custom threshold for cvr optimization_objective.
+          For target_field `watch-time`, target_field_value must be an integer
+          value indicating the media progress time in seconds between (0, 86400]
+          (excludes 0, includes 86400) (e.g., 90).
+          For target_field `watch-percentage`, the target_field_value must be a
+          valid float value between (0, 1.0] (excludes 0, includes 1.0) (e.g., 0.5).
+        properties:
+          - name: 'targetField'
+            type: String
+            description: |
+              The name of the field to target. Currently supported values: `watch-percentage`, `watch-time`.
+          - name: 'targetFieldValueFloat'
+            type: Double
+            description: |
+              The threshold to be applied to the target (e.g., 0.5).
+      - name: 'trainingState'
+        type: Enum
+        description: |
+          The training state that the engine is in (e.g. `TRAINING` or `PAUSED`).
+          Since part of the cost of running the service
+          is frequency of training - this can be used to determine when to train
+          engine in order to control cost. If not specified: the default value for
+          `CreateEngine` method is `TRAINING`. The default value for
+          `UpdateEngine` method is to keep the state the same as before.
+        enum_values:
+          - 'PAUSED'
+          - 'TRAINING'
+      - name: 'engineFeaturesConfig'
+        type: NestedObject
+        description: |
+          More feature configs of the selected engine type.
+        exactly_one_of:
+          - recommended_for_you_config
+          - most_popular_config
+        properties:
+          - name: 'recommendedForYouConfig'
+            type: NestedObject
+            description: |
+              Additional feature configurations for creating a `recommended-for-you` engine.
+            properties:
+              - name: 'contextEventType'
+                type: String
+                description: |
+                  The type of event with which the engine is queried at prediction time.
+                  If set to `generic`, only `view-item`, `media-play`,and
+                  `media-complete` will be used as `context-event` in engine training. If
+                  set to `view-home-page`, `view-home-page` will also be used as
+                  `context-events` in addition to `view-item`, `media-play`, and
+                  `media-complete`. Currently supported for the `recommended-for-you`
+                  engine. Currently supported values: `view-home-page`, `generic`.
+          - name: 'mostPopularConfig'
+            type: NestedObject
+            description: |
+              Feature configurations that are required for creating a Most Popular engine.
+            properties:
+              - name: 'timeWindowDays'
+                type: Integer
+                description: |
+                  The time window of which the engine is queried at training and
+                  prediction time. Positive integers only. The value translates to the
+                  last X days of events. Currently required for the `most-popular-items`
+                  engine.
+  - name: 'commonConfig'
+    type: NestedObject
+    description: |
+      Common config spec that specifies the metadata of the engine.
+    immutable: true
+    ignore_read: true
+    properties:
+      - name: 'companyName'
+        type: String
+        description: |
+          The name of the company, business or entity that is associated with the engine. Setting this may help improve LLM related features.cd

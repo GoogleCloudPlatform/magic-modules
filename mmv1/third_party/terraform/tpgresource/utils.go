@@ -912,3 +912,76 @@ func ReducedPrefixedUniqueId(prefix string) string {
 	date := uniqueId[2:8]
 	return prefix + date + counter
 }
+
+// GetRawConfigAttributeAsString retrieves an attribute directly from the raw config
+// This is useful for retrieving values that are not directly accessible via the
+// standard schema.ResourceData.Get method, such as write-only attributes.
+func GetRawConfigAttributeAsString(d *schema.ResourceData, key string) string {
+	// see https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments#retrieving-write-only-values
+	parts := strings.Split(key, ".")
+
+	var path cty.Path
+	if len(parts) > 0 {
+		path = cty.GetAttrPath(parts[0])
+	}
+
+	for i := 1; i < len(parts); i++ {
+		part := parts[i]
+
+		if index, err := strconv.Atoi(part); err == nil {
+			path = path.IndexInt(index)
+		} else {
+			path = path.GetAttr(part)
+		}
+	}
+
+	woCty, diags := d.GetRawConfigAt(path)
+	if len(diags) == 0 && !woCty.IsNull() && woCty.Type().Equals(cty.String) {
+		return woCty.AsString()
+	}
+
+	return ""
+}
+
+// IamPrincipalIsCaseSensitive returns true if the type of the IAM Principal is case sensitive
+func IamPrincipalIsCaseSensitive(principal string) bool {
+	// allAuthenticatedUsers and allUsers are special identifiers that are case sensitive. See:
+	// https://cloud.google.com/iam/docs/overview#all-authenticated-users
+	return strings.Contains(principal, "allAuthenticatedUsers") || strings.Contains(principal, "allUsers") ||
+		strings.HasPrefix(principal, "principalSet:") || strings.HasPrefix(principal, "principal:") ||
+		strings.HasPrefix(principal, "principalHierarchy:")
+}
+
+// NormalizeIamPrincipalCasing returns the case adjusted value of an IAM Principal
+// this is important as APIs will ignore casing unless it is one of the following
+// member types: principalSet, principal, principalHierarchy
+// members are in <type>:<value> format
+// <type> is case sensitive
+// <value> isn't in most cases
+// so lowercase the value unless IamPrincipalIsCaseSensitive and leave the type alone
+// since Dec '19 members can be prefixed with "deleted:" to indicate the principal
+// has been deleted
+func NormalizeIamPrincipalCasing(principal string) string {
+	var pieces []string
+	if strings.HasPrefix(principal, "deleted:") {
+		pieces = strings.SplitN(principal, ":", 3)
+		if len(pieces) > 2 && !IamPrincipalIsCaseSensitive(strings.TrimPrefix(principal, "deleted:")) {
+			pieces[2] = strings.ToLower(pieces[2])
+		}
+	} else if strings.HasPrefix(principal, "iamMember:") {
+		pieces = strings.SplitN(principal, ":", 3)
+		if len(pieces) > 2 && !IamPrincipalIsCaseSensitive(strings.TrimPrefix(principal, "iamMember:")) {
+			pieces[2] = strings.ToLower(pieces[2])
+		}
+	} else if !IamPrincipalIsCaseSensitive(principal) {
+		pieces = strings.SplitN(principal, ":", 2)
+		if len(pieces) > 1 {
+			pieces[1] = strings.ToLower(pieces[1])
+		}
+	}
+
+	if len(pieces) > 0 {
+		principal = strings.Join(pieces, ":")
+	}
+	return principal
+}

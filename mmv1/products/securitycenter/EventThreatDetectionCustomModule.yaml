@@ -13,6 +13,8 @@
 
 ---
 name: 'EventThreatDetectionCustomModule'
+api_variant_patterns:
+  - 'organizations/{organization}/eventThreatDetectionSettings/customModules/{customModule}'
 description: |
   Represents an instance of an Event Threat Detection custom module, including
   its full module name, display name, enablement state, andlast updated time.

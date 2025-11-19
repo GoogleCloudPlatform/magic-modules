@@ -23,6 +23,7 @@ docs:
 base_url: 'projects/{{project}}/locations/{{location}}/reportConfigs'
 self_link: 'projects/{{project}}/locations/{{location}}/reportConfigs/{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/reportConfigs'
+delete_url: projects/{{project}}/locations/{{location}}/reportConfigs/{{name}}?force={{force_destroy}}
 update_verb: 'PATCH'
 update_mask: true
 timeouts:
@@ -35,6 +36,8 @@ examples:
     primary_resource_id: 'config'
     vars:
       bucket_name: 'my-bucket'
+    ignore_read_extra:
+      - 'force_destroy'
 parameters:
   - name: 'location'
     type: String
@@ -44,6 +47,12 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+virtual_fields:
+  - name: 'force_destroy'
+    description: |
+       If set, all the inventory report details associated with this report configuration are deleted.
+    type: Boolean
+    default_value: false
 properties:
   - name: 'name'
     type: String
@@ -100,11 +109,23 @@ properties:
             type: Integer
             description: 'The year to stop generating inventory reports'
             required: true
+  - name: 'parquetOptions'
+    type: NestedObject
+    description: |
+      An option for outputting inventory reports as parquet files.
+    exactly_one_of:
+      - parquet_options
+      - csv_options
+    allow_empty_object: true
+    send_empty_value: true
+    properties: []
   - name: 'csvOptions'
     type: NestedObject
     description: |
       Options for configuring the format of the inventory report CSV file.
-    required: true
+    exactly_one_of:
+      - parquet_options
+      - csv_options
     properties:
       - name: 'recordSeparator'
         type: String

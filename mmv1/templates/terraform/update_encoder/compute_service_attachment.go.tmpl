@@ -23,4 +23,11 @@ if v, ok := d.GetOkExists("enable_proxy_protocol"); !tpgresource.IsEmptyValue(re
 	obj["enableProxyProtocol"] = enableProxyProtocolProp
 }
 
+propagatedConnectionLimitProp := d.Get("propagated_connection_limit")
+if sv, ok := d.GetOk("send_propagated_connection_limit_if_zero"); ok && sv.(bool) {
+  if v, ok := d.GetOkExists("propagated_connection_limit"); ok || !reflect.DeepEqual(v, propagatedConnectionLimitProp) {
+    obj["propagatedConnectionLimit"] = propagatedConnectionLimitProp
+  }
+}
+
 return obj, nil

@@ -2,10 +2,8 @@ resource "google_secure_source_manager_instance" "instance" {
     location = "us-central1"
     instance_id = "{{index $.Vars "instance_id"}}"
 
-    # For preventing accidental deletions
-    lifecycle {
-      prevent_destroy = "{{index $.Vars "prevent_destroy"}}"
-    }
+    # Prevent accidental deletions.
+    deletion_policy = "{{index $.Vars "deletion_policy"}}"
 }
 
 resource "google_secure_source_manager_repository" "{{$.PrimaryResourceId}}" {
@@ -22,7 +20,5 @@ resource "google_secure_source_manager_repository" "{{$.PrimaryResourceId}}" {
     }
 
     # Prevent accidental deletions.
-    lifecycle {
-      prevent_destroy = "{{index $.Vars "prevent_destroy"}}"
-    }
+    deletion_policy = "{{index $.Vars "deletion_policy"}}"
 }

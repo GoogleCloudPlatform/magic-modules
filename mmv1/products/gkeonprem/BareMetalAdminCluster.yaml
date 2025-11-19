@@ -14,6 +14,8 @@
 ---
 name: 'BareMetalAdminCluster'
 description: "A Google Bare Metal Admin Cluster."
+references:
+  api: 'https://cloud.google.com/kubernetes-engine/distributed-cloud/reference/on-prem-api/rest/v1/projects.locations.bareMetalAdminClusters'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/bareMetalAdminClusters/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/bareMetalAdminClusters'
@@ -173,6 +175,20 @@ properties:
             required: true
             item_type:
               type: String
+      - name: 'advancedNetworking'
+        type: Boolean
+        description: |
+          Enables the use of advanced Anthos networking features.
+      - name: 'multipleNetworkInterfacesConfig'
+        type: NestedObject
+        description: |
+          Configuration for multiple network interfaces.
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description: |
+              When set network_config.advanced_networking is automatically
+              set to true.
   - name: 'controlPlane'
     type: NestedObject
     description: |
@@ -308,6 +324,109 @@ properties:
             description: |
               Whether manual load balancing is enabled.
             required: true
+      - name: 'bgpLbConfig'
+        type: NestedObject
+        properties:
+          - name: 'asn'
+            type: Integer
+            description: |
+              BGP autonomous system number (ASN) of the cluster.
+          - name: 'bgpPeerConfigs'
+            type: Array
+            description: |
+              BGP autonomous system number (ASN) of the cluster.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'asn'
+                  type: Integer
+                - name: 'ipAddress'
+                  type: String
+                - name: 'controlPlaneNodes'
+                  type: Array
+                  description: |
+                    The IP address of the control plane node that
+                    connects to the external peer.
+                  item_type:
+                    type: String
+          - name: 'addressPools'
+            type: Array
+            description: |
+              a list of non-overlapping IP pools used
+              by load balancer typed services.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'pool'
+                  type: String
+                - name: 'addresses'
+                  type: Array
+                  description: |
+                    The addresses that are part of this pool.
+                  item_type:
+                    type: String
+                - name: 'avoidBuggyIps'
+                  type: Boolean
+                  description: |
+                    This avoids buggy consumer devices mistakenly
+                    dropping IPv4 traffic for those special IP addresses.
+                - name: 'manualAssign'
+                  type: Boolean
+                  description: |
+                    If true, prevent IP addresses from being automatically assigned.
+          - name: 'loadBalancerNodePoolConfig'
+            type: NestedObject
+            properties:
+              - name: 'nodePoolConfig'
+                type: NestedObject
+                properties:
+                  - name: 'nodeConfigs'
+                    type: Array
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'nodeIp'
+                          type: String
+                        - name: 'labels'
+                          type: KeyValuePairs
+                          description: |
+                              The labels assigned to nodes of this node pool.
+                              An object containing a list of key/value pairs.
+                              Example:
+                              { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+                  - name: 'operatingSystem'
+                    type: String
+                    description: |
+                      The available Operating Systems to be run in a Node.
+                  - name: 'taints'
+                    type: Array
+                    default_from_api: true
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'key'
+                          type: String
+                        - name: 'value'
+                          type: String
+                        - name: 'effect'
+                          type: String
+                          description: Available taint effects.
+                  - name: 'labels'
+                    type: KeyValuePairs
+                    description: |
+                      The labels assigned to nodes of this node pool.
+                      An object containing a list of key/value pairs.
+                      Example:
+                      { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+                  - name: 'kubeletConfig'
+                    type: NestedObject
+                    properties:
+                      - name: 'registryPullQps'
+                        type: Integer
+                      - name: 'registryBurst'
+                        type: Integer
+                      - name: 'serializeImagePullsDisabled'
+                        type: Boolean
   - name: 'storage'
     type: NestedObject
     description: |

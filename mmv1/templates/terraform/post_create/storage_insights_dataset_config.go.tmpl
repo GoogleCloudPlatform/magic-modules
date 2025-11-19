@@ -1,0 +1,33 @@
+if d.Get("link_dataset") == true {
+
+	linkUrl := strings.Replace(url, "?datasetConfigId=", "/", 1) + ":linkDataset"
+
+	// err == nil indicates that the billing_project value was found
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   billingProject,
+		RawURL:    linkUrl,
+		UserAgent: userAgent,
+		Timeout:   d.Timeout(schema.TimeoutUpdate),
+		Headers:   headers,
+	})
+
+	if err != nil {
+		return fmt.Errorf("Error Linking DatasetConfig %q: %s", d.Id(), err)
+	} else {
+		log.Printf("[DEBUG] Finished Linking DatasetConfig %q: %#v", d.Id(), res)
+	}
+
+	err = StorageInsightsOperationWaitTime(
+		config, res, project, "Linking DatasetConfig", userAgent,
+		d.Timeout(schema.TimeoutUpdate))
+
+	if err != nil {
+		return err
+	}
+}

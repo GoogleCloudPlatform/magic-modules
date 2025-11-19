@@ -1,0 +1,73 @@
+resource "google_project" "project" {
+  provider        = google-beta
+  project_id      = "{{index $.Vars "project_id"}}"
+  name            = "{{index $.Vars "project_id"}}"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_acct"}}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_project_service" "cloudkms" {
+  provider = google-beta
+  project  = google_project.project.project_id
+  service  = "cloudkms.googleapis.com"
+}
+
+resource "google_project_service" "dialogflow" {
+  provider = google-beta
+  project  = google_project.project.project_id
+  service  = "dialogflow.googleapis.com"
+}
+
+resource "time_sleep" "wait_enable_service_api" {
+  depends_on = [
+    google_project_service.cloudkms,
+    google_project_service.dialogflow
+  ]
+  create_duration = "30s"
+}
+
+resource "google_project_service_identity" "gcp_sa" {
+  provider   = google-beta
+  service    = "dialogflow.googleapis.com"
+  project    = google_project.project.project_id
+  depends_on = [time_sleep.wait_enable_service_api]
+}
+
+resource "time_sleep" "wait_create_sa" {
+  depends_on      = [google_project_service_identity.gcp_sa]
+  create_duration = "30s"
+}
+
+resource "google_kms_key_ring" "keyring" {
+  provider   = google-beta
+  name       = "{{index $.Vars "kms_keyring"}}"
+  location   = "us-central1"
+  project    = google_project.project.project_id
+  depends_on = [time_sleep.wait_enable_service_api]
+}
+
+resource "google_kms_crypto_key" "key" {
+  provider = google-beta
+  name     = "{{index $.Vars "kms_key"}}"
+  key_ring = google_kms_key_ring.keyring.id
+  purpose  = "ENCRYPT_DECRYPT"
+}
+
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
+  provider      = google-beta
+  crypto_key_id = google_kms_crypto_key.key.id
+  member        = "${replace(google_project_service_identity.gcp_sa.member, "@gcp-sa-dialogflow.iam", "@gcp-sa-ccai-cmek.iam")}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  depends_on    = [time_sleep.wait_create_sa]
+}
+
+resource "google_dialogflow_encryption_spec" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  project  = google_project.project.project_id
+  location = "us-central1"
+  encryption_spec {
+    kms_key = google_kms_crypto_key.key.id
+  }
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
+}

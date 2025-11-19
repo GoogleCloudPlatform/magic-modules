@@ -16,11 +16,10 @@ name: 'Namespace'
 description: |
   A container for `services`. Namespaces allow administrators to group services
   together and define permissions for a collection of services.
-min_version: 'beta'
 references:
   guides:
     'Configuring a namespace': 'https://cloud.google.com/service-directory/docs/configuring-service-directory#configuring_a_namespace'
-  api: 'https://cloud.google.com/service-directory/docs/reference/rest/v1beta1/projects.locations.namespaces'
+  api: 'https://cloud.google.com/service-directory/docs/reference/rest/v1/projects.locations.namespaces'
 docs:
 base_url: '{{name}}'
 self_link: '{{name}}'
@@ -38,14 +37,12 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
   custom_import: 'templates/terraform/custom_import/service_directory_namespace.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'service_directory_namespace_basic'
     primary_resource_id: 'example'
-    min_version: 'beta'
     vars:
       namespace_id: 'example-namespace'
 parameters:
@@ -53,9 +50,6 @@ parameters:
     type: String
     description: |
       The location for the Namespace.
-      A full list of valid locations can be found by running
-      `gcloud beta service-directory locations list`.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -65,7 +59,6 @@ parameters:
     description: |
       The Resource ID must be 1-63 characters long, including digits,
       lowercase letters or the hyphen character.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -77,7 +70,6 @@ properties:
     description: |
       The resource name for the namespace
       in the format `projects/*/locations/*/namespaces/*`.
-    min_version: 'beta'
     output: true
   - name: 'labels'
     type: KeyValueLabels
@@ -85,4 +77,3 @@ properties:
       Resource labels associated with this Namespace. No more than 64 user
       labels can be associated with a given resource. Label keys and values can
       be no longer than 63 characters.
-    min_version: 'beta'

@@ -1,0 +1,131 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'MirroringEndpoint'
+description: |-
+  An endpoint is a managed mirroring collector that provides enhanced packet
+  enrichment capabilities and support for multiple replica destinations.
+  Endpoints are always part of a global endpoint group which represents a
+  global "mirroring broker" service.
+min_version: 'beta'
+id_format: 'projects/{{project}}/locations/{{location}}/mirroringEndpoints/{{mirroring_endpoint_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/mirroringEndpoints'
+self_link: 'projects/{{project}}/locations/{{location}}/mirroringEndpoints/{{mirroring_endpoint_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/mirroringEndpoints?mirroringEndpointId={{mirroring_endpoint_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/mirroringEndpoints/{{mirroring_endpoint_id}}'
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+custom_code:
+examples:
+  - name: 'network_security_mirroring_endpoint_basic'
+    config_path: 'templates/terraform/examples/network_security_mirroring_endpoint_basic.tf.tmpl'
+    primary_resource_id: 'default'
+    vars:
+      network_name: 'example-network'
+      deployment_group_id: 'example-dg'
+      endpoint_group_id: 'example-eg'
+      endpoint_id: 'example-endpoint'
+parameters:
+  - name: 'location'
+    type: String
+    description: |-
+      The cloud location of the endpoint, e.g. `us-central1-a` or `asia-south1-b`.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'mirroringEndpointId'
+    type: String
+    description: |-
+      The ID to use for the new endpoint, which will become the final
+      component of the endpoint's resource name.
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |-
+      The resource name of this endpoint, for example:
+      `projects/123456789/locations/us-central1-a/mirroringEndpoints/my-endpoint`.
+      See https://google.aip.dev/122 for more details.
+    min_version: 'beta'
+    immutable: true
+    output: true
+  - name: 'createTime'
+    type: String
+    description: |-
+      The timestamp when the resource was created.
+      See https://google.aip.dev/148#timestamps.
+    min_version: 'beta'
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |-
+      The timestamp when the resource was most recently updated.
+      See https://google.aip.dev/148#timestamps.
+    min_version: 'beta'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |-
+      Labels are key/value pairs that help to organize and filter resources.
+    min_version: 'beta'
+  - name: 'mirroringEndpointGroup'
+    type: String
+    description: |-
+      The endpoint group that this endpoint belongs to.
+      Format is:
+      `projects/{project}/locations/{location}/mirroringEndpointGroups/{mirroringEndpointGroup}`
+    min_version: 'beta'
+    required: true
+    immutable: true
+  - name: 'state'
+    type: String
+    description: |-
+      The current state of the endpoint.
+      See https://google.aip.dev/216.
+      Possible values:
+      STATE_UNSPECIFIED
+      CREATING
+      ACTIVE
+      DELETING
+      DELETE_FAILED
+      OUT_OF_SYNC
+    min_version: 'beta'
+    output: true
+  - name: 'reconciling'
+    type: Boolean
+    description: |-
+      The current state of the resource does not match the user's intended state,
+      and the system is working to reconcile them. This part of the normal
+      operation (e.g. linking a new association to the parent group).
+      See https://google.aip.dev/128.
+    min_version: 'beta'
+    output: true
+  - name: 'description'
+    type: String
+    description: |-
+      User-provided description of the endpoint.
+      Used as additional context for the endpoint.
+    min_version: 'beta'

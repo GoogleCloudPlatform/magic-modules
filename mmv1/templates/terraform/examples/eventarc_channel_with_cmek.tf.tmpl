@@ -1,0 +1,6 @@
+resource "google_eventarc_channel" "{{$.PrimaryResourceId}}" {
+  location             = "us-central1"
+  name                 = "{{index $.Vars "channel_name"}}"
+  crypto_key_name      = "{{index $.Vars "key_name"}}"
+  third_party_provider = "projects/{{index $.TestEnvVars "project"}}/locations/us-central1/providers/datadog"
+}

@@ -14,6 +14,8 @@
 ---
 name: 'ProjectMuteConfig'
 api_resource_type_kind: MuteConfig
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/muteConfigs/{muteConfig}'
 description: |
   Mute Findings is a volume management feature in Security Command Center
   that lets you manually or programmatically hide irrelevant findings,
@@ -35,6 +37,9 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+sweeper:
+  url_substitutions:
+    - region: "global"
 examples:
   - name: 'scc_v2_project_mute_config_basic'
     primary_resource_id: 'default'

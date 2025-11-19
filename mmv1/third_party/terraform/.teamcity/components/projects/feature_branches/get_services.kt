@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 package components.projects.feature_branches
- 
+
 import generated.ServicesListGa
 import generated.ServicesListBeta
 

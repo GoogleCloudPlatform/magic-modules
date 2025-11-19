@@ -1,0 +1,7 @@
+if storageLocation, ok := obj["storageLocation"].(map[string]interface{}); ok {
+  if _, ok := storageLocation["locations"]; !ok {
+    storageLocation["locations"] = nil
+  }
+}
+
+return obj, nil

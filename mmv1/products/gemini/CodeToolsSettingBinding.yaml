@@ -1,0 +1,102 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: CodeToolsSettingBinding
+api_resource_type_kind: SettingBinding
+description: The resource for managing CodeTools setting bindings for Admin Control.
+references:
+  guides:
+    'Gemini Cloud Assist overview': 'https://cloud.google.com/gemini/docs/cloud-assist/overview'
+base_url: projects/{{project}}/locations/{{location}}/codeToolsSettings/{{code_tools_setting_id}}/settingBindings
+self_link: projects/{{project}}/locations/{{location}}/codeToolsSettings/{{code_tools_setting_id}}/settingBindings/{{setting_binding_id}}
+create_url: projects/{{project}}/locations/{{location}}/codeToolsSettings/{{code_tools_setting_id}}/settingBindings?settingBindingId={{setting_binding_id}}
+update_verb: PATCH
+update_mask: true
+id_format: projects/{{project}}/locations/{{location}}/codeToolsSettings/{{code_tools_setting_id}}/settingBindings/{{setting_binding_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/codeToolsSettings/{{code_tools_setting_id}}/settingBindings/{{setting_binding_id}}
+mutex: projects/{{project}}/locations/{{location}}/codeToolsSettings/{{code_tools_setting_id}}
+examples:
+  - name: gemini_code_tools_setting_binding_basic
+    primary_resource_id: example
+    exclude_test: true
+    vars:
+      code_tools_setting_id: ls-tf1
+      setting_binding_id: ls-tf1b1
+      target: projects/980109375338
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 90
+      update_minutes: 90
+      delete_minutes: 90
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+    - update
+  type: OpAsync
+  result:
+    resource_inside_response: true
+  include_project: false
+autogen_status: U2V0dGluZ0JpbmRpbmc=
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: codeToolsSettingId
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: settingBindingId
+    type: String
+    description: |-
+      Id of the setting binding.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: product
+    type: Enum
+    description: |-
+      Product type of the setting binding.
+    enum_values:
+      - 'GEMINI_CODE_ASSIST'
+    default_from_api: true
+  - name: name
+    type: String
+    description: |-
+      Identifier. Name of the resource.
+      Format:projects/{project}/locations/{location}/codeToolsSettings/{setting}/settingBindings/{setting_binding}
+    output: true
+  - name: createTime
+    type: String
+    description: Create time stamp.
+    output: true
+  - name: updateTime
+    type: String
+    description: Update time stamp.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Labels as key value pairs.
+  - name: target
+    type: String
+    description: Target of the binding.
+    required: true

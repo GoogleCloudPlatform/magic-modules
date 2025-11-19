@@ -1,0 +1,60 @@
+resource "google_folder" "folder" {
+  display_name        = "{{index $.Vars "folder"}}"
+  parent              = "organizations/{{index $.TestEnvVars "org_id"}}"
+  deletion_protection = false
+}
+
+resource "google_compute_firewall_policy" "default" {
+  parent      = google_folder.folder.id
+  short_name  = "{{index $.Vars "fw_policy"}}"
+  description = "Resource created for Terraform acceptance testing"
+}
+
+resource "google_compute_firewall_policy_rule" "{{$.PrimaryResourceId}}" {
+  firewall_policy         = google_compute_firewall_policy.default.name
+  description             = "Resource created for Terraform acceptance testing"
+  priority                = 9000
+  enable_logging          = true
+  action                  = "allow"
+  direction               = "INGRESS"
+  disabled                = false
+
+  target_secure_tags {
+    name = google_tags_tag_value.basic_value.id
+  }
+
+  match {
+    src_ip_ranges = ["11.100.0.1/32"]
+
+    src_secure_tags {
+      name = google_tags_tag_value.basic_value.id
+    }
+
+    layer4_configs {
+      ip_protocol = "tcp"
+      ports       = [8080]
+    }
+
+    layer4_configs {
+      ip_protocol = "udp"
+      ports       = [22]
+    }
+  }
+}
+
+resource "google_tags_tag_key" "basic_key" {
+  description = "For keyname resources."
+  parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
+  purpose     = "GCE_FIREWALL"
+  short_name  = "{{index $.Vars "tag_key"}}"
+
+  purpose_data = {
+    organization = "auto"
+  }
+}
+
+resource "google_tags_tag_value" "basic_value" {
+  description = "For valuename resources."
+  parent      = google_tags_tag_key.basic_key.id
+  short_name  = "{{index $.Vars "tag_value"}}"
+}

@@ -29,10 +29,6 @@ func DataSourceGoogleServiceAccountKey() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"TYPE_NONE", "TYPE_X509_PEM_FILE", "TYPE_RAW_PUBLIC_KEY"}, false),
 			},
-			"project": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"key_algorithm": {
 				Type:     schema.TypeString,
 				Computed: true,

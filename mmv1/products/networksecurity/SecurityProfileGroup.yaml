@@ -41,8 +41,39 @@ async:
     resource_inside_response: false
   include_project: true
 custom_code:
+include_in_tgc_next_DO_NOT_USE: true
 examples:
   - name: 'network_security_security_profile_group_basic'
+    primary_resource_id: 'default'
+    vars:
+      security_profile_group_name: 'sec-profile-group'
+      security_profile_name: 'sec-profile'
+    test_env_vars:
+      org_id: 'ORG_ID'
+  - name: 'network_security_security_profile_group_mirroring'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    vars:
+      network_name: 'network'
+      deployment_group_id: 'deployment-group'
+      endpoint_group_id: 'endpoint-group'
+      security_profile_name: 'sec-profile'
+      security_profile_group_name: 'sec-profile-group'
+    test_env_vars:
+      org_id: 'ORG_ID'
+  - name: 'network_security_security_profile_group_intercept'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    vars:
+      network_name: 'network'
+      deployment_group_id: 'deployment-group'
+      endpoint_group_id: 'endpoint-group'
+      security_profile_name: 'sec-profile'
+      security_profile_group_name: 'sec-profile-group'
+    test_env_vars:
+      org_id: 'ORG_ID'
+  - name: 'network_security_security_profile_group_url_filtering'
+    min_version: 'beta'
     primary_resource_id: 'default'
     vars:
       security_profile_group_name: 'sec-profile-group'
@@ -100,3 +131,17 @@ properties:
     type: String
     description: |
       Reference to a SecurityProfile with the threat prevention configuration for the SecurityProfileGroup.
+  - name: 'urlFilteringProfile'
+    min_version: 'beta'
+    type: String
+    description: |
+      Reference to a SecurityProfile with the URL filtering configuration for the SecurityProfileGroup.
+    is_missing_in_cai: true
+  - name: 'customMirroringProfile'
+    type: String
+    description: |
+      Reference to a SecurityProfile with the custom mirroring configuration for the SecurityProfileGroup.
+  - name: 'customInterceptProfile'
+    type: String
+    description: |
+      Reference to a SecurityProfile with the CustomIntercept configuration.

@@ -1,0 +1,17 @@
+resource "google_monitoring_alert_policy" "{{$.PrimaryResourceId}}" {
+  display_name = "{{index $.Vars "alert_policy_display_name"}}"
+  combiner     = "OR"
+  conditions {
+    display_name = "minutes row count"
+    condition_sql {
+      query = "SELECT severity, resource FROM my_project.global._Default._AllLogs WHERE severity IS NOT NULL"
+      minutes {
+        periodicity = 600
+      }
+      row_count_test {
+        comparison = "COMPARISON_GT"
+        threshold  = "0"
+      }
+    }
+  }
+}

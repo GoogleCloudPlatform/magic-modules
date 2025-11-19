@@ -1,0 +1,12 @@
+resource "google_saas_runtime_saas" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  saas_id  = "{{index $.Vars "saas_name"}}"
+  location = "global"
+
+  locations {
+    name = "us-central1"
+  }
+  locations {
+    name = "europe-west1"
+  }
+}

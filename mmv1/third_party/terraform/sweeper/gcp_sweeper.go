@@ -1,14 +1,9 @@
 package sweeper
 
 import (
-	"encoding/hex"
 	"fmt"
-	"hash/crc32"
 	"log"
-	"runtime"
 	"strings"
-
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -56,8 +51,14 @@ func SharedConfigForRegion(region string) (*transport_tpg.Config, error) {
 }
 
 func IsSweepableTestResource(resourceName string) bool {
-	for _, p := range testResourcePrefixes {
-		if strings.HasPrefix(resourceName, p) {
+	return hasAnyPrefix(resourceName, testResourcePrefixes)
+}
+
+// hasAnyPrefix checks if the input string begins with any prefix from the given slice.
+// Returns true if a match is found, false otherwise.
+func hasAnyPrefix(input string, prefixes []string) bool {
+	for _, p := range prefixes {
+		if strings.HasPrefix(input, p) {
 			return true
 		}
 	}
@@ -101,17 +102,4 @@ func ListParentResourcesInLocation(d *tpgresource.ResourceDataMock, config *tran
 
 	}
 	return names, nil
-}
-
-func AddTestSweepers(name string, sweeper func(region string) error) {
-	_, filename, _, _ := runtime.Caller(0)
-	hash := crc32.NewIEEE()
-	hash.Write([]byte(filename))
-	hashedFilename := hex.EncodeToString(hash.Sum(nil))
-	uniqueName := name + "_" + hashedFilename
-
-	resource.AddTestSweepers(uniqueName, &resource.Sweeper{
-		Name: name,
-		F:    sweeper,
-	})
 }

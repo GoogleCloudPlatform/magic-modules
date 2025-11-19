@@ -13,6 +13,8 @@
 
 ---
 name: 'Service'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/applications/{application}/services/{service}'
 description: 'Service is a network/api interface that exposes some functionality to clients for consumption over the network.
   Service typically has one or more Workloads behind it. It registers identified service to the Application.'
 docs:
@@ -29,6 +31,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
+autogen_status: U2VydmljZQ==
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -37,6 +40,8 @@ async:
   result:
     resource_inside_response: true
 custom_code:
+include_in_tgc_next_DO_NOT_USE: true
+tgc_include_handwritten_tests: true
 examples:
   - name: 'apphub_service_basic'
     primary_resource_id: 'example'
@@ -135,6 +140,56 @@ properties:
         description: "Output only. The location that the underlying resource resides in
           if it is zonal, for example, us-west1-a)."
         output: true
+      - name: 'functionalType'
+        type: NestedObject
+        description: "Output only. The type of the service."
+        output: true
+        properties:
+          - name: 'type'
+            type: Enum
+            description: "Output only. The functional type of a service or workload."
+            output: true
+            enum_values:
+              - 'TYPE_UNSPECIFIED'
+              - 'AGENT'
+              - 'MCP_SERVER'
+      - name: 'registrationType'
+        type: NestedObject
+        description: "Output only. The registration type of the service."
+        output: true
+        properties:
+          - name: 'type'
+            type: Enum
+            description: "Output only. The registration type of a service."
+            output: true
+            enum_values:
+              - 'TYPE_UNSPECIFIED'
+              - 'EXCLUSIVE'
+              - 'SHARED'
+      - name: 'extendedMetadata'
+        type: Array
+        description: "Output only. Additional metadata specific to the resource type."
+        output: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'key'
+              type: String
+              description: "The key of the extended metadata."
+              output: true
+            - name: 'value'
+              type: NestedObject
+              description: "The value of the extended metadata."
+              output: true
+              properties:
+                - name: 'metadataStruct'
+                  type: String
+                  description: "The metadata contents as a JSON string."
+                  output: true
+                - name: 'extendedMetadataSchema'
+                  type: String
+                  description: "The resource name for the Extended Metadata Schema."
+                  output: true
   - name: 'attributes'
     type: NestedObject
     description: 'Consumer provided attributes.'

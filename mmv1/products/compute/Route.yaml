@@ -263,3 +263,123 @@ properties:
       - 'next_hop_vpn_tunnel'
       - 'next_hop_ilb'
     diff_suppress_func: 'CompareIpAddressOrSelfLinkOrResourceName'
+  - name: 'creationTimestamp'
+    type: Time
+    description: 'Creation timestamp in RFC3339 text format.'
+    output: true
+  - name: 'nextHopPeering'
+    type: String
+    description: |
+      The network peering name that should handle matching packets, which should conform to RFC1035.
+    output: true
+  - name: 'warnings'
+    type: Array
+    description: |
+      If potential misconfigurations are detected for this route, this field will be populated with warning messages.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'code'
+          type: Enum
+          description: |
+            A warning code, if applicable. For example, Compute Engine returns
+            NO_RESULTS_ON_PAGE if there are no results in the response.
+          output: true
+        - name: 'message'
+          type: String
+          output: true
+          description: |
+            A human-readable description of the warning code.
+        - name: 'data'
+          type: Array
+          description: |
+            Metadata about this warning in key: value format. For example:
+            "data": [  {  "key": "scope",  "value": "zones/us-east1-d"  }
+          output: true
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'key'
+                type: String
+                output: true
+                description: |
+                  A key that provides more detail on the warning being returned. For example, for warnings where there are no results in a list request for a particular zone, this key might be scope and the key value might be the zone name. Other examples might be a key indicating a deprecated resource and a suggested replacement, or a warning about invalid network settings (for example, if an instance attempts to perform IP forwarding but is not enabled for IP forwarding).
+              - name: 'value'
+                type: String
+                output: true
+                description: |
+                  A warning data value corresponding to the key.
+  - name: 'nextHopHub'
+    type: String
+    description: |
+      The hub network that should handle matching packets, which should conform to RFC1035.
+    output: true
+  - name: 'routeType'
+    type: Enum
+    enum_values:
+      - 'TRANSIT'
+      - 'SUBNET'
+      - 'BGP'
+      - 'STATIC'
+    description: |
+      The type of this route, which can be one of the following values:
+      - 'TRANSIT' for a transit route that this router learned from another Cloud Router and will readvertise to one of its BGP peers
+      - 'SUBNET' for a route from a subnet of the VPC
+      - 'BGP' for a route learned from a BGP peer of this router
+      - 'STATIC' for a static route
+    output: true
+  - name: 'asPaths'
+    type: Array
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'pathSegmentType'
+          type: Enum
+          description: |
+            The type of the AS Path, which can be one of the following values:
+            - 'AS_SET': unordered set of autonomous systems that the route in has traversed
+            - 'AS_SEQUENCE': ordered set of autonomous systems that the route has traversed
+            - 'AS_CONFED_SEQUENCE': ordered set of Member Autonomous Systems in the local confederation that the route has traversed
+            - 'AS_CONFED_SET': unordered set of Member Autonomous Systems in the local confederation that the route has traversed
+          enum_values:
+            - 'AS_SET'
+            - 'AS_SEQUENCE'
+            - 'AS_CONFED_SEQUENCE'
+            - 'AS_CONFED_SET'
+          output: true
+        - name: 'asLists'
+          type: Array
+          description: |
+            The AS numbers of the AS Path.
+          output: true
+          item_type:
+            type: Integer
+  - name: 'routeStatus'
+    type: Enum
+    enum_values:
+      - 'ACTIVE'
+      - 'INACTIVE'
+    description: |
+      The status of the route, which can be one of the following values:
+      - 'ACTIVE' for an active route
+      - 'INACTIVE' for an inactive route
+    output: true
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the route. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456. The field is ignored when empty.
+          The field is immutable and causes resource replacement when mutated. This field is only
+          set at create time and modifying this field after creation will trigger recreation.
+          To apply tags to an existing resource, see the google_tags_tag_binding resource.
+        ignore_read: true

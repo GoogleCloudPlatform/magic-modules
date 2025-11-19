@@ -49,8 +49,16 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next_DO_NOT_USE: true
 custom_code:
   post_create: 'templates/terraform/post_create/labels.tmpl'
+sweeper:
+  url_substitutions:
+    - region: "us-west2"
+    - region: "us-central1"
+    - region: "us-east1"
+    - region: "europe-west1"
+    - region: "us-west1"
 examples:
   - name: 'address_basic'
     primary_resource_id: 'ip_address'
@@ -72,7 +80,7 @@ examples:
       address_name: 'my-internal-address'
  # It is almost identical to internal_with_gce_endpoint
     exclude_docs: true
-  # TODO(rileykarson): Remove this example when instance is supported
+  # TODO: Remove this example when instance is supported
   - name: 'instance_with_ip'
     primary_resource_id: 'static'
     vars:

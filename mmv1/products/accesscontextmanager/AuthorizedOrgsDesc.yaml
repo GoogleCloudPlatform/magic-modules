@@ -37,6 +37,7 @@ create_url: '{{parent}}/authorizedOrgsDescs'
 update_verb: 'PATCH'
 import_format:
   - '{{name}}'
+mutex: '{{parent}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -60,6 +61,8 @@ examples:
   - name: 'access_context_manager_authorized_orgs_desc_basic'
     primary_resource_id: 'authorized-orgs-desc'
     exclude_test: true
+    test_env_vars:
+      org_id: 'ORG_ID'
 parameters:
   - name: 'parent'
     type: String

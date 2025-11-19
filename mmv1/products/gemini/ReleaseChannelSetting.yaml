@@ -1,0 +1,74 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: ReleaseChannelSetting
+description: The resource for managing ReleaseChannel settings for Admin Control.
+base_url: projects/{{project}}/locations/{{location}}/releaseChannelSettings
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}
+create_url: projects/{{project}}/locations/{{location}}/releaseChannelSettings?releaseChannelSettingId={{release_channel_setting_id}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}
+mutex: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}
+sweeper:
+  url_substitutions:
+    - region: "global"
+examples:
+  - name: gemini_release_channel_setting_basic
+    primary_resource_id: example
+    vars:
+      release_channel_setting_id: ls1-tf
+autogen_async: false
+autogen_status: UmVsZWFzZUNoYW5uZWxTZXR0aW5n
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: releaseChannelSettingId
+    type: String
+    description: |-
+      Id of the Release Channel Setting.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: createTime
+    type: String
+    description: Create time stamp.
+    output: true
+  - name: updateTime
+    type: String
+    description: Update time stamp.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Labels as key value pairs.
+  - name: releaseChannel
+    type: String
+    description: |-
+      Release channel to be used.
+      Possible values:
+      STABLE
+      EXPERIMENTAL
+  - name: name
+    type: String
+    description: |-
+      Identifier. Name of the resource.
+      Format:projects/{project}/locations/{location}/releaseChannelSettings/{releaseChannelSetting}
+    output: true

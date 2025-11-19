@@ -33,11 +33,11 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'managed_zone'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/managedZones/{{managed_zone}}'
     - '{{project}}/{{managed_zone}}'
 custom_code:
+  constants: 'templates/terraform/constants/managed_dns_zone.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/managed_dns_zone.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/managed_dns_zone.go.tmpl'
 examples:
@@ -62,7 +62,7 @@ examples:
   - name: 'dns_managed_zone_basic'
     primary_resource_id: 'example-zone'
     external_providers: ["random", "time"]
-      # Randomness from random provider
+    # Randomness from random provider
     skip_vcr: true
   - name: 'dns_managed_zone_private'
     primary_resource_id: 'private-zone'
@@ -89,6 +89,11 @@ examples:
       network_1_name: 'network-1'
       network_2_name: 'network-2'
     exclude_test: true
+  - name: 'dns_managed_zone_private_forwarding_ipv6'
+    primary_resource_id: 'private-zone'
+    vars:
+      zone_name: 'private-zone'
+      network_1_name: 'network-1'
   - name: 'dns_managed_zone_private_gke'
     primary_resource_id: 'private-zone-gke'
     vars:
@@ -116,6 +121,9 @@ examples:
     primary_resource_id: 'cloud-logging-enabled-zone'
     vars:
       zone_name: 'cloud-logging-enabled-zone'
+      dns_name: 'services.example.com.'
+    test_vars_overrides:
+      'dns_name': '"services.example.com-" + acctest.RandString(t, 10) + "."'
 virtual_fields:
   - name: 'force_destroy'
     description: 'Set this true to delete all records in the zone.'
@@ -314,7 +322,7 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            # TODO(drebes): Make 'networkUrl' a ResourceRef once cross-module references
+            # TODO: Make 'networkUrl' a ResourceRef once cross-module references
             # are possible.
             - name: 'networkUrl'
               type: String
@@ -354,17 +362,33 @@ properties:
           properties:
             - name: 'ipv4Address'
               type: String
-              description: 'IPv4 address of a target name server.'
-              required: true
+              description: |
+                IPv4 address of a target name server.
+                Does not accept both fields (ipv4 & ipv6) being populated.
+            - name: 'ipv6Address'
+              type: String
+              description: |
+                IPv6 address of a target name server.
+                Does not accept both fields (ipv4 & ipv6) being populated.
+            - name: 'domainName'
+              type: String
+              description: |
+                Fully qualified domain name for the forwarding target.
             - name: 'forwardingPath'
               type: Enum
               description: |
-                Forwarding path for this TargetNameServer. If unset or `default` Cloud DNS will make forwarding
-                decision based on address ranges, i.e. RFC1918 addresses go to the VPC, Non-RFC1918 addresses go
-                to the Internet. When set to `private`, Cloud DNS will always send queries through VPC for this target
+                Forwarding path for this TargetNameServer. If unset or `default`
+                Cloud DNS will make forwarding decision based on address ranges,
+                i.e. RFC1918 addresses go to the VPC, Non-RFC1918 addresses go
+                to the Internet. When set to `private`, Cloud DNS will always
+                send queries through VPC for this target.
               enum_values:
                 - 'default'
                 - 'private'
+          exactly_one_of:
+            - 'ipv4_address'
+            - 'ipv6_address'
+            - 'domain_name'
   - name: 'peeringConfig'
     type: NestedObject
     description: |
@@ -376,7 +400,7 @@ properties:
         description: 'The network with which to peer.'
         required: true
         properties:
-          # TODO(drebes): Make 'networkUrl' a ResourceRef once cross-module references
+          # TODO: Make 'networkUrl' a ResourceRef once cross-module references
           # are possible.
           - name: 'networkUrl'
             type: String
@@ -397,7 +421,8 @@ properties:
     min_version: 'beta'
     immutable: true
     custom_flatten: 'templates/terraform/custom_flatten/object_to_bool.go.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/bool_to_object.go.tmpl'
+    # THIS TEMPLATE IS DEPRECATED, DO NOT USE FOR NEW FIELDS
+    custom_expand: 'templates/terraform/custom_expand/deprecated_bool_to_object.go.tmpl'
   - name: 'serviceDirectoryConfig'
     type: NestedObject
     description:

@@ -4,8 +4,6 @@ package sweeper_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-
 {{- range $product := $.Products }}
 	_ "github.com/hashicorp/terraform-provider-google/google/services/{{ lower $product.Name }}"
 {{- end }}
@@ -23,8 +21,15 @@ import (
 	_ "github.com/hashicorp/terraform-provider-google/google/services/firebaserules"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/networkconnectivity"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/recaptchaenterprise"
+
+ // TODO: remove dependency on hashicorp flags
+ // need to blank import hashicorp sweeper code to maintain the flags declared in their package
+	_ "github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 )
 
-func TestMain(m *testing.M) {
-	resource.TestMain(m)
+func TestAccExecuteSweepers(t *testing.T) {
+	sweeper.ExecuteSweepers(t)
 }
+

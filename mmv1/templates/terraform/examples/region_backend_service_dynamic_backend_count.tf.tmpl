@@ -1,0 +1,43 @@
+locals {
+  zones           = ["europe-west1-b", "europe-west1-c", "europe-west1-d"]
+  s1_count        = 3
+}
+
+resource "google_compute_network" "network" {
+  name    = "{{index $.Vars "network_name"}}"
+}
+
+resource "google_compute_region_backend_service" "default" {
+  name = "{{index $.Vars "region_backend_service_name"}}"
+  region = "europe-west1"
+
+  dynamic "backend" {
+    for_each = google_compute_instance_group.s1
+    content {
+      balancing_mode = "CONNECTION"
+      group = backend.value.self_link
+    }
+  }
+
+  health_checks = [
+    google_compute_health_check.default.self_link,
+  ]
+}
+
+resource "google_compute_health_check" "default" {
+  name = "{{index $.Vars "health_check_name"}}"
+  tcp_health_check {
+    port = "80"
+  }
+}
+
+resource "google_compute_instance_group" "s1" {
+  count   = local.s1_count
+  name    = "{{index $.Vars "instance_group_name"}}-${count.index}"
+  zone    = element(local.zones, count.index)
+  network = google_compute_network.network.self_link
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}

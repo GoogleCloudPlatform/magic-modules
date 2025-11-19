@@ -1,0 +1,29 @@
+resource "google_compute_network" "network" {
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_network_connectivity_hub" "basic_hub" {
+  name        = "{{index $.Vars "hub_name"}}"
+  description = "A sample hub"
+  labels = {
+    label-two = "value-one"
+  }
+}
+
+resource "google_network_connectivity_spoke" "{{$.PrimaryResourceId}}"  {
+  name = "{{index $.Vars "spoke_name"}}"
+  location = "global"
+  description = "A sample spoke with a linked VPC that include export ranges of all IPv6"
+  labels = {
+    label-one = "value-one"
+  }
+  hub = google_network_connectivity_hub.basic_hub.id
+  linked_vpc_network {
+    include_export_ranges = [
+      "ALL_IPV6_RANGES",
+      "ALL_PRIVATE_IPV4_RANGES"
+    ]
+    uri = google_compute_network.network.self_link
+  }
+}

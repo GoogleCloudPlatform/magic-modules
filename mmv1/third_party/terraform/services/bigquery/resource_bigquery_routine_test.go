@@ -50,6 +50,7 @@ resource "google_bigquery_routine" "sproc" {
   routine_id     = "%s"
   routine_type = "SCALAR_FUNCTION"
   language = "SQL"
+  security_mode = "INVOKER"
   definition_body = "1"
 }
 `, dataset, routine)
@@ -66,6 +67,7 @@ resource "google_bigquery_routine" "sproc" {
   routine_id     = "%s"
   routine_type = "SCALAR_FUNCTION"
   language = "JAVASCRIPT"
+  security_mode = "DEFINER"
   definition_body = "CREATE FUNCTION multiplyInputs return x*y;"
   arguments {
     name = "x"
@@ -227,7 +229,7 @@ resource "google_cloudfunctions2_function" "default" {
   description = "a new function"
 
   build_config {
-    runtime     = "nodejs18"
+    runtime     = "nodejs20"
     entry_point = "helloHttp"
     source {
       storage_source {
@@ -294,7 +296,7 @@ resource "google_cloudfunctions2_function" "default2" {
   description = "a new new function"
 
   build_config {
-    runtime     = "nodejs18"
+    runtime     = "nodejs20"
     entry_point = "helloHttp"
     source {
       storage_source {

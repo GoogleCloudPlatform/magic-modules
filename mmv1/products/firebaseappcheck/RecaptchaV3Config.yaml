@@ -14,6 +14,8 @@
 ---
 name: 'RecaptchaV3Config'
 api_resource_type_kind: RecaptchaConfig
+api_variant_patterns:
+  - 'projects/{project}/apps/{app}/recaptchaV3Config'
 description: |
   An app's reCAPTCHA V3 configuration object.
 references:

@@ -1,0 +1,15 @@
+resource: 'google_project_service'
+generation_type: 'handwritten'
+api_service_name: 'serviceusage.googleapis.com'
+api_version: 'v1'
+api_resource_type_kind: 'Service'
+api_variant_patterns:
+  - 'projects/{project}/services/{service}'
+fields:
+{{- if ne $.TargetVersionName "ga" }}
+  - field: 'check_if_service_has_usage_on_destroy'
+{{- end }}
+  - field: 'disable_dependent_services'
+  - field: 'disable_on_destroy'
+  - field: 'project'
+  - field: 'service'

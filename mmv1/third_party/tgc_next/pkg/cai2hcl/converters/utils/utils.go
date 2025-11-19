@@ -1,0 +1,198 @@
+package utils
+
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"math/rand"
+	"strings"
+
+	hashicorpcty "github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zclconf/go-cty/cty"
+	ctyjson "github.com/zclconf/go-cty/cty/json"
+)
+
+/*
+	ParseUrlParamValuesFromAssetName uses GetCaiAssetNameTemplate to parse hclData from assetName, filtering out all outputFields
+
+template: //bigquery.googleapis.com/projects/{{project}}/datasets/{{dataset_id}}
+assetName: //bigquery.googleapis.com/projects/my-project/datasets/my-dataset
+hclData: [project:my-project dataset_id:my-dataset]
+
+It also handles multi-fragment fields.
+template: {{cluster}}/instances/{{instance_id}}
+assetName: //alloydb.googleapis.com/projects/ci-test-project/locations/us-central1/clusters/tf-test-cluster/instances/tf-test-instance
+hclData: [cluster:projects/ci-test-project/locations/us-central1/clusters/tf-test-cluster instance_id:tf-test-instance]
+*/
+func ParseUrlParamValuesFromAssetName(assetName, template string, outputFields map[string]struct{}, hclData map[string]any) {
+	templateFragments := strings.Split(template, "/")
+	assetFragments := strings.Split(assetName, "/")
+
+	// Iterate through the fragments and match fields.
+	assetIx := 0
+	for templateIx := 0; templateIx < len(templateFragments); templateIx++ {
+		templateFragment := templateFragments[templateIx]
+
+		// Check if the template fragment is a field (e.g., {{project}})
+		if fieldName, isField := strings.CutPrefix(templateFragment, "{{"); isField {
+			if fieldName, hasEnd := strings.CutSuffix(fieldName, "}}"); hasEnd {
+				// Find the end of this field in the template. The end is the next non-field fragment.
+				endTemplateIx := templateIx + 1
+				for endTemplateIx < len(templateFragments) && strings.HasPrefix(templateFragments[endTemplateIx], "{{") {
+					endTemplateIx++
+				}
+
+				endAssetIx := getEndAssetIx(endTemplateIx, templateFragments, assetFragments)
+
+				valueFragments := assetFragments[assetIx:endAssetIx]
+				value := strings.Join(valueFragments, "/")
+
+				if _, isOutput := outputFields[fieldName]; !isOutput {
+					hclData[fieldName] = value
+				}
+
+				assetIx = endAssetIx
+				templateIx = endTemplateIx - 1
+			} else {
+				assetIx++
+			}
+		} else {
+			// This is a literal fragment, just advance the asset index if it matches.
+			if assetIx < len(assetFragments) && assetFragments[assetIx] == templateFragment {
+				assetIx++
+			} else {
+				log.Printf("Warning: Template literal '%s' does not match assetName at index %d.", templateFragment, assetIx)
+			}
+		}
+	}
+}
+
+// Finds the exclusive end index of a dynamic path segment within a Google Cloud asset name
+// by searching for the next literal segment from a template.
+func getEndAssetIx(endTemplateIx int, templateFragments []string, assetFragments []string) int {
+	if endTemplateIx >= len(templateFragments) {
+		return len(assetFragments)
+	}
+
+	// Find the index of the next non-field fragment in the asset name.
+	nextNonFieldFragment := templateFragments[endTemplateIx]
+	for ix, item := range assetFragments {
+		if item == nextNonFieldFragment {
+			return ix
+		}
+	}
+
+	// If the next non-field fragment is not found in the asset name,
+	// it means the dynamic field goes to the end of the asset name.
+	return len(assetFragments)
+}
+
+// DecodeJSON decodes the map object into the target struct.
+func DecodeJSON(data map[string]interface{}, v interface{}) error {
+	b, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(b, &v); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MapToCtyValWithSchema normalizes and converts resource from untyped map format to TF JSON.
+//
+// Normalization is a post-processing of the output map, which does the following:
+// * Converts unmarshallable "schema.Set" to marshallable counterpart.
+// * Strips out properties, which are not part ofthe resource TF schema.
+func MapToCtyValWithSchema(m map[string]interface{}, s map[string]*schema.Schema) (cty.Value, error) {
+	m = normalizeFlattenedObj(m, s).(map[string]interface{})
+
+	b, err := json.Marshal(&m)
+	if err != nil {
+		return cty.NilVal, fmt.Errorf("error marshaling map as JSON: %v", err)
+	}
+
+	ty, err := hashicorpCtyTypeToZclconfCtyType(schema.InternalMap(s).CoreConfigSchema().ImpliedType())
+	if err != nil {
+		return cty.NilVal, fmt.Errorf("error casting type: %v", err)
+	}
+	ret, err := ctyjson.Unmarshal(b, ty)
+	if err != nil {
+		return cty.NilVal, fmt.Errorf("error unmarshaling JSON as cty.Value: %v", err)
+	}
+	return ret, nil
+}
+
+func hashicorpCtyTypeToZclconfCtyType(t hashicorpcty.Type) (cty.Type, error) {
+	b, err := json.Marshal(t)
+	if err != nil {
+		return cty.NilType, err
+	}
+	var ret cty.Type
+	if err := json.Unmarshal(b, &ret); err != nil {
+		return cty.NilType, err
+	}
+	return ret, nil
+}
+
+// normalizeFlattenedObj traverses the output map recursively, removes fields which are
+// not a part of TF schema and converts unmarshallable "schema.Set" objects to arrays.
+func normalizeFlattenedObj(obj interface{}, schemaPerProp map[string]*schema.Schema) interface{} {
+	obj = convertToMarshallableObj(obj)
+
+	if schemaPerProp == nil {
+		// Schema for leaf nodes was already checked.
+		return obj
+	}
+
+	switch obj.(type) {
+	case map[string]interface{}:
+		objMap := obj.(map[string]interface{})
+		objMapNew := map[string]interface{}{}
+
+		for property, propertySchema := range schemaPerProp {
+			propertyValue := objMap[property]
+
+			switch propertySchema.Elem.(type) {
+			case *schema.Resource:
+				objMapNew[property] = normalizeFlattenedObj(propertyValue, propertySchema.Elem.(*schema.Resource).Schema)
+			case *schema.ValueType:
+			default:
+				objMapNew[property] = normalizeFlattenedObj(propertyValue, nil)
+			}
+		}
+		return objMapNew
+	case []interface{}:
+		arr := obj.([]interface{})
+		arrNew := make([]interface{}, len(arr))
+
+		for i := range arr {
+			arrNew[i] = normalizeFlattenedObj(arr[i], schemaPerProp)
+		}
+
+		return arrNew
+	default:
+		return obj
+	}
+}
+
+func convertToMarshallableObj(node interface{}) interface{} {
+	switch node.(type) {
+	case *schema.Set:
+		nodeSet := node.(*schema.Set)
+
+		return nodeSet.List()
+	default:
+		return node
+	}
+}
+
+func RandString(n int) string {
+	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return string(b)
+}

@@ -55,6 +55,8 @@ The following arguments are supported:
 * `parent` - (Required) The resource name of the parent Folder or Organization.
     Must be of the form `folders/{folder_id}` or `organizations/{org_id}`.
 
+* `deletion_protection` -  (Optional) Whether Terraform will be prevented from destroying or recreating the Folder. When the field is set to `true` or unset in Terraform state, a `terraform apply` or `terraform destroy` that would delete the folder will fail. When the field is set to `false`, deleting the folder is allowed. Default value is `true`.
+
 * `tags` - (Optional) A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored when empty. The field is immutable and causes resource replacement when  mutated. This field is only set at create time and modifying this field after creation will trigger recreation. To apply tags to an existing resource, see the `google_tags_tag_value` resource.
 
 ## Attributes Reference
@@ -67,6 +69,8 @@ exported:
 * `lifecycle_state` - The lifecycle state of the folder such as `ACTIVE` or `DELETE_REQUESTED`.
 * `create_time` - Timestamp when the Folder was created. Assigned by the server.
     A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
+* `configured_capabilities` - Optional capabilities configured for this folder.
+* `management_project` - Management Project associated with this folder (if capability is enabled).
 
 ## Import
 

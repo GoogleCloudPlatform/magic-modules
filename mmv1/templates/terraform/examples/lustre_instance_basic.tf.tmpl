@@ -1,0 +1,27 @@
+resource "google_lustre_instance" "{{$.PrimaryResourceId}}" {
+  instance_id                 = "{{index $.Vars "name"}}"
+  location                    = "us-central1-a"
+  description                 = "test lustre instance"
+  filesystem                  = "testfs"
+  capacity_gib                = 18000
+  network                     = data.google_compute_network.lustre-network.id
+  per_unit_storage_throughput = 1000
+  labels                      = {
+    test = "value"
+  }
+  timeouts {
+		create = "120m"
+	}
+}
+
+// This example assumes this network already exists.
+// The API creates a tenant network per network authorized for a
+// Lustre instance and that network is not deleted when the user-created
+// network (authorized_network) is deleted, so this prevents issues
+// with tenant network quota.
+// If this network hasn't been created and you are using this example in your
+// config, add an additional network resource or change
+// this from "data"to "resource"
+data "google_compute_network" "lustre-network" {
+  name = "{{index $.Vars "network_name"}}"
+}

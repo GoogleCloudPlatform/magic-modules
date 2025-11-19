@@ -54,6 +54,7 @@ resource "google_dataform_repository" "{{$.PrimaryResourceId}}" {
   display_name = "{{index $.Vars "dataform_repository_name"}}"
   npmrc_environment_variables_secret_version = google_secret_manager_secret_version.secret_version.id
   kms_key_name = google_kms_crypto_key.example_key.id
+  deletion_policy = "FORCE"
 
   labels = {
     label_foo1 = "label-bar1"

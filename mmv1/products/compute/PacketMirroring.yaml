@@ -144,6 +144,8 @@ properties:
     properties:
       - name: 'subnetworks'
         type: Array
+        is_set: true
+        set_hash_func: tpgresource.NestedUrlSetHashFunc
         description: |
           All instances in one of these subnetworks will be mirrored.
         at_least_one_of:
@@ -161,10 +163,13 @@ properties:
                 The URL of the subnetwork where this rule should be active.
               required: true
               custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+              diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
               resource: 'Subnetwork'
               imports: 'selfLink'
       - name: 'instances'
         type: Array
+        is_set: true
+        set_hash_func: tpgresource.NestedUrlSetHashFunc
         description: |
           All the listed instances will be mirrored.  Specify at most 50.
         at_least_one_of:
@@ -181,6 +186,7 @@ properties:
                 The URL of the instances where this rule should be active.
               required: true
               custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+              diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
               resource: 'Instance'
               imports: 'selfLink'
       - name: 'tags'

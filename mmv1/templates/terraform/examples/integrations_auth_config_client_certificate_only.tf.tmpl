@@ -1,9 +1,5 @@
-resource "google_integrations_client" "client" {
-  location = "us-west3"
-}
-
 resource "google_integrations_auth_config" "{{$.PrimaryResourceId}}" {
-    location = "us-west3"
+    location = "us-east4"
     display_name = "{{index $.Vars "auth_config_name"}}"
     description = "Test auth config created via terraform"
     decrypted_credential {
@@ -59,5 +55,4 @@ UwKadZbfwbVF5ipu59UxfVE3lipf/mYePDqMkHVWv/8p+OnnJt9uKnyW8VSOu5uk
 EOT
         passphrase = ""
     }
-    depends_on = [google_integrations_client.client]
 }

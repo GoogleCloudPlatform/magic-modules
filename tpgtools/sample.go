@@ -76,6 +76,9 @@ type Sample struct {
 	// ExtraDependencies are the additional golang dependencies the injected code may require
 	ExtraDependencies []string `yaml:"extra_dependencies"`
 
+	// ExternalProviders are the external providers needed for tests
+	ExternalProviders []string `yaml:"external_providers"`
+
 	// Type is the resource type.
 	Type string `yaml:"type"`
 
@@ -334,7 +337,7 @@ func (s *Sample) EnumerateWithUpdateSamples() []Sample {
 	for i, update := range s.Updates {
 		newSample := *s
 		primaryResource := update.Resource
-		// TODO(magic-modules-eng): Consume new dependency list.
+		// TODO: Consume new dependency list.
 		newSample.PrimaryResource = &primaryResource
 		if !newSample.isNativeHCL() {
 			var newDeps []Dependency

@@ -46,12 +46,21 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+sweeper:
+  url_substitutions:
+    - region: "global"
 examples:
   - name: 'network_services_service_lb_policies_basic'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-lb-policy'
   - name: 'network_services_service_lb_policies_advanced'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-lb-policy'
+      backend_name: 'my-lb-backend'
+  - name: 'network_services_service_lb_policies_beta'
+    min_version: 'beta'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-lb-policy'
@@ -126,3 +135,27 @@ properties:
           Optional. The percentage threshold that a load balancer will begin to send traffic to failover backends. If the percentage of endpoints in a MIG/NEG is smaller than this value, traffic would be sent to failover backends if possible. This field should be set to a value between 1 and 99. The default value is 50 for Global external HTTP(S) load balancer (classic) and Proxyless service mesh, and 70 for others.
         min_version: 'beta'
         required: true
+  - name: 'isolationConfig'
+    type: NestedObject
+    description: |
+      Configuration to provide isolation support for the associated Backend Service.
+    min_version: 'beta'
+    properties:
+      - name: 'isolationGranularity'
+        type: Enum
+        description: |
+          The isolation granularity of the load balancer.
+        min_version: 'beta'
+        enum_values:
+          - 'ISOLATION_GRANULARITY_UNSPECIFIED'
+          - 'REGION'
+      - name: 'isolationMode'
+        type: Enum
+        description: |
+          The isolation mode of the load balancer.
+        min_version: 'beta'
+        enum_values:
+          - 'ISOLATION_MODE_UNSPECIFIED'
+          - 'NEAREST'
+          - 'STRICT'
+        default_value: 'NEAREST'

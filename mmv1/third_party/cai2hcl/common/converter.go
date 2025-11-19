@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/caiasset"
 	"github.com/zclconf/go-cty/cty"
 )
 

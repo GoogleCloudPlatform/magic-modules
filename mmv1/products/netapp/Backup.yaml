@@ -13,6 +13,8 @@
 
 ---
 name: 'Backup'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/backupVaults/{backupVault}/backups/{backup}'
 description: |
   NetApp Volumes supports volume backups, which are copies of your volumes
   stored independently from the volume. Backups are stored in backup vaults,
@@ -66,8 +68,9 @@ examples:
       volume_name: 'backup-volume'
       backup_vault_name: 'backup-vault'
       backup_name: 'test-backup'
+      network_name: 'network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
 parameters:
   - name: 'location'
     type: String
@@ -141,3 +144,13 @@ properties:
       Format: `projects/{{projectId}}/locations/{{location}}/volumes/{{volumename}}/snapshots/{{snapshotname}}``
     required: false
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+  - name: 'volumeRegion'
+    type: String
+    description: |
+      Region of the volume from which the backup was created.
+    output: true
+  - name: 'backupRegion'
+    type: String
+    description: |
+      Region in which backup is stored.
+    output: true

@@ -7,3 +7,9 @@ api_version: 'beta'
 api_version: 'v1'
 {{- end }}
 api_resource_type_kind: 'Disk'
+fields:
+  - field: 'primary_disk'
+  - api_field: 'resourceStatus.asyncSecondaryDisks'
+    field: 'secondary_disk.disk'
+  - api_field: 'resourceStatus.asyncSecondaryDisks'
+    field: 'secondary_disk.state'

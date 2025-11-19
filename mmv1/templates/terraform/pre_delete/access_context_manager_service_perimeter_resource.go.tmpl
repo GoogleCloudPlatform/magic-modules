@@ -1,0 +1,15 @@
+etag := d.Get("etag").(string)
+
+if etag == "" {
+	log.Printf("[ERROR] Unable to get etag: %s", err)
+	return nil
+}
+obj["etag"] = etag
+
+// updateMask is a URL parameter but not present in the schema, so ReplaceVars
+// won't set it
+updateMask := []string{"status.resources", "etag"}
+url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+if err != nil {
+	return err
+}

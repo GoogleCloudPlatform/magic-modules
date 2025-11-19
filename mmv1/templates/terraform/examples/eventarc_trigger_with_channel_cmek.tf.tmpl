@@ -1,0 +1,46 @@
+resource "google_eventarc_channel" "test_channel" {
+  location             = "us-central1"
+  name                 = "{{index $.Vars "channel_name"}}"
+  crypto_key_name      = "{{index $.Vars "key_name"}}"
+  third_party_provider = "projects/{{index $.TestEnvVars "project_id"}}/locations/us-central1/providers/datadog"
+}
+
+resource "google_cloud_run_service" "default" {
+  name     = "{{index $.Vars "service_name"}}"
+  location = "us-central1"
+
+  template {
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+        ports {
+          container_port = 8080
+        }
+      }
+      container_concurrency = 50
+      timeout_seconds       = 100
+    }
+  }
+
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
+}
+
+resource "google_eventarc_trigger" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "trigger_name"}}"
+  location = "us-central1"
+  matching_criteria {
+    attribute = "type"
+    value     = "datadog.v1.alert"
+  }
+  destination {
+    cloud_run_service {
+      service = google_cloud_run_service.default.name
+      region  = "us-central1"
+    }
+  }
+  service_account = "{{index $.TestEnvVars "service_account"}}"
+  channel         = google_eventarc_channel.test_channel.id
+}

@@ -11,7 +11,7 @@ func TestAccAlloydbUser_updateRoles_BuiltIn(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -60,6 +60,8 @@ resource "google_alloydb_cluster" "default" {
   initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
+
+  deletion_protection = false
 }
 
 data "google_project" "project" {}
@@ -83,7 +85,7 @@ func TestAccAlloydbUser_updatePassword_BuiltIn(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -132,6 +134,8 @@ resource "google_alloydb_cluster" "default" {
   initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
+
+  deletion_protection = false
 }
 
 data "google_project" "project" {}
@@ -155,7 +159,7 @@ func TestAccAlloydbUser_updateRoles_IAM(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -202,6 +206,8 @@ resource "google_alloydb_cluster" "default" {
   initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
+
+  deletion_protection = false
 }
 data "google_project" "project" {}
 data "google_compute_network" "default" {

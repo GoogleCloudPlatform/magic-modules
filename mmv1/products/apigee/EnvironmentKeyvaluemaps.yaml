@@ -52,6 +52,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
+    external_providers: ["time"]
   - name: 'apigee_environment_keyvaluemaps_beta_test'
     primary_resource_id: 'apigee_environment_keyvaluemaps'
     min_version: 'beta'
@@ -59,6 +60,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
+    external_providers: ["time"]
 parameters:
   - name: 'envId'
     type: String
