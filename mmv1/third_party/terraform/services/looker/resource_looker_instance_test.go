@@ -141,7 +141,6 @@ func TestAccLookerInstance_updatePeriodicExport(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				// Config A: Basic Instance
 				Config: testAccLookerInstance_basic(context),
 			},
 			{
@@ -151,8 +150,6 @@ func TestAccLookerInstance_updatePeriodicExport(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"oauth_config", "region"},
 			},
 			{
-				// Config B: Update to ENABLE periodic export
-				// This triggers the PATCH with update_mask logic
 				Config: testAccLookerInstance_periodicExport(context),
 			},
 			{
