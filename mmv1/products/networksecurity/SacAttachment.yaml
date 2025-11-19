@@ -63,7 +63,7 @@ properties:
     output: true
   - name: 'labels'
     type: KeyValueLabels
-    description: | 
+    description: |
       Optional labels in key:value format. For more information about labels, see [Requirements for labels](https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements).
   - name: 'sacRealm'
     type: String
@@ -93,7 +93,7 @@ properties:
         immutable: true
       - name: 'symantecLocationName'
         type: String
-        description: | 
+        description: |
           Name to be used when creating a location on the customer's behalf in Symantec's Location API. Not to be confused with Google Cloud locations.
         immutable: true
   - name: 'state'
