@@ -40,6 +40,7 @@ resource "google_compute_storage_pool" "test-storage-pool" {
   pool_provisioned_iops         = "20000"
   pool_provisioned_throughput   = "2048"
   storage_pool_type 			= "hyperdisk-balanced"
+  deletion_protection           = false
  }
 
 
