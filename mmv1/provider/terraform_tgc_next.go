@@ -248,6 +248,7 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 		"pkg/services/compute/image.go":     "third_party/terraform/services/compute/image.go",
 		"pkg/services/compute/disk_type.go": "third_party/terraform/services/compute/disk_type.go",
 		"pkg/services/kms/kms_utils.go":     "third_party/terraform/services/kms/kms_utils.go",
+		"pkg/tpgresource/import.go":         "third_party/terraform/tpgresource/import.go",
 	}
 	tgc.CopyFileList(outputFolder, resourceConverters)
 }

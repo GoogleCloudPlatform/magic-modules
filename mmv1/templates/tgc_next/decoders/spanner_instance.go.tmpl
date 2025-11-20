@@ -1,0 +1,8 @@
+if _, ok := res["autoscalingConfig"]; ok {
+    res["processingUnits"] = nil
+    res["nodeCount"] = nil
+} else if _, ok := res["nodeCount"]; ok {
+    res["processingUnits"] = nil
+}
+
+return res, hclData, nil
