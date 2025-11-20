@@ -133,7 +133,7 @@ type CustomCode struct {
 	CustomIdentitySchema *string `yaml:"custom_identity_schema,omitempty"`
 
 	// This code is run in the Read method to set the identity.
-	CustomIdentityRead string `yaml:"custom_identity_read"`
+	CustomIdentityRead []string `yaml:"custom_identity_read,omitempty"`
 
 	// This code is run just after the import method succeeds - it
 	// is useful for parsing attributes that are necessary for
