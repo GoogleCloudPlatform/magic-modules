@@ -115,6 +115,12 @@ resource "google_colab_runtime_template" "my_template" {
   encryption_spec {
     kms_key_name = "%{key_name}"
   }
+
+  software_config {
+    colab_image {
+      release_name = "py311"
+    }
+  }
 }
 
 resource "google_colab_runtime" "runtime" {
@@ -182,6 +188,12 @@ resource "google_colab_runtime_template" "my_template" {
 
   encryption_spec {
     kms_key_name = "%{key_name}"
+  }
+
+  software_config {
+    colab_image {
+      release_name = "py310"
+    }
   }
 }
 
