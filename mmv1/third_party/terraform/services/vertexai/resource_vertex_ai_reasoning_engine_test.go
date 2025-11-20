@@ -523,7 +523,7 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
       python_spec {
         entrypoint_module = "simple_agent"
         entrypoint_object = "fixed_name_generator"
-        requirements_file = "./test-fixtures/source_requirements.txt"
+        requirements_file = "./requirements.txt"
         version           = "3.11"
       }
     }
@@ -548,7 +548,7 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
       python_spec {
         entrypoint_module = "updated_agent"
         entrypoint_object = "updated_name_generator"
-        requirements_file = "./test-fixtures/source_updated_requirements.txt"
+        requirements_file = "./updated_requirements.txt"
         version           = "3.12"
       }
     }
