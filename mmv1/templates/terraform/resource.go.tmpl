@@ -163,9 +163,6 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
         DeprecationMessage: "{{ $.DeprecationMessage -}}",
 {{- end}}
 
-{{ if $.CustomCode.CustomIdentitySchema }}
-    {{ $.CustomTemplate $.CustomCode.CustomIdentitySchema false -}}
-{{ else }}
         Identity: &schema.ResourceIdentity{
           Version: {{ $.GetIdentitySchemaVersion }},
           SchemaFunc: func() map[string]*schema.Schema {
@@ -194,7 +191,6 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
           },
 {{- end }}
         },
-{{- end }}
         Schema: map[string]*schema.Schema{
 			{{- range $prop := $.OrderProperties $.AllUserProperties }}
 {{template "SchemaFields" $prop -}}
@@ -750,9 +746,6 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     }
 {{- end}}
 
-{{- if ne (len $.CustomCode.CustomIdentityRead) 0 }}
-    {{ $.CustomTemplate "templates/terraform/custom_code_identity_read.go.tmpl" true -}}
-{{- else }}
 	identity, err := d.Identity()
     if err != nil && identity != nil {
     {{- range $p := $.IdentityProperties }}
@@ -767,7 +760,6 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         log.Printf("[DEBUG] identity not set: %s", err)
     }
 {{- end }}
-{{  end -}}
     return nil
 }
 

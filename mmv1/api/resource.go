@@ -656,6 +656,12 @@ func (r Resource) IdentityProperties() []*Type {
 		}
 	}
 
+	if len(r.CustomCode.CustomIdentity) > 0 {
+		for _, fieldName := range r.CustomCode.CustomIdentity {
+			props = append(props, &Type{Name: google.Underscore(fieldName), Type: "string", Required: true})
+		}
+	}
+
 	return props
 }
 
