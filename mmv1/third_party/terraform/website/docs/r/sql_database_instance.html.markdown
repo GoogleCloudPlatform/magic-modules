@@ -313,9 +313,11 @@ includes an up-to-date reference of supported versions.
 
 * `root_password` - (Optional) Initial root password. Can be updated. Required for MS SQL Server.
 
-* `root_password_wo` - (Optional) Initial root password. Can be updated. Required for MS SQL Server. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)
+* `root_password_wo` - (Optional) Initial root password. Can be updated. Required for MS SQL Server. **Note**: This property is write-only and will not be read from the API.
 
-* `root_password_wo_version` - (Optional) Triggers update of root password write-only. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)
+  ~> **Note:** One of `root_password` or `root_password_wo` can only be set.
+
+* `root_password_wo_version` - Triggers update of `root_password_wo` write-only. Increment this value when an update to `root_password_wo` is needed. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)
 
 * `encryption_key_name` - (Optional)
     The full path to the encryption key used for the CMEK disk encryption.  Setting
