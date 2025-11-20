@@ -134,6 +134,9 @@ func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, conf
     if err != nil {
         return nil, err
     }
+    if obj == nil {
+        obj = make(map[string]interface{})
+    }
 {{- end }}
 
 {{- if $.CustomCode.TgcEncoder }}
