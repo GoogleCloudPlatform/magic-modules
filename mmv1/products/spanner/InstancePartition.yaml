@@ -52,6 +52,7 @@ examples:
       partition_name: 'test-partition'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: 'templates/terraform/encoders/spanner_instance_partition.go.tmpl'
+  update_encoder: 'templates/terraform/encoders/spanner_instance_partition_update.go.tmpl'
   pre_update: 'templates/terraform/pre_update/spanner_instance_partition.go.tmpl'
 parameters:
   - name: 'instance'
@@ -88,25 +89,33 @@ properties:
   - name: 'nodeCount'
     description: |
       The number of nodes allocated to this instance partition. One node equals
-      1000 processing units. Exactly one of either node_count or processing_units
-      must be present.
+      1000 processing units. Exactly one of either node_count, processing_units, or
+      autoscaling_config must be present.
     type: Integer
     validation:
       function: 'validation.IntAtLeast(1)'
-    exactly_one_of:
+    at_least_one_of:
       - 'node_count'
       - 'processing_units'
+      - 'autoscaling_config'
+    conflicts:
+      - 'processing_units'
+      - 'autoscaling_config'
 
   - name: 'processingUnits'
     description: |
       The number of processing units allocated to this instance partition.
-      Exactly one of either node_count or processing_units must be present.
+      Exactly one of either node_count, processing_units, or autoscaling_config must be present.
     type: Integer
     validation:
       function: 'validation.IntAtLeast(1000)'
-    exactly_one_of:
+    at_least_one_of:
       - 'node_count'
       - 'processing_units'
+      - 'autoscaling_config'
+    conflicts:
+      - 'node_count'
+      - 'autoscaling_config'
 
   - name: 'config'
     description: |
@@ -130,3 +139,85 @@ properties:
     enum_values:
       - 'CREATING'
       - 'READY'
+
+  - name: 'autoscalingConfig'
+    type: NestedObject
+    description: |
+      The autoscaling configuration. Autoscaling is enabled if this field is set.
+      Exactly one of either node_count, processing_units or autoscaling_config must be present.
+      When autoscaling is enabled, node_count and processing_units are treated as,
+      OUTPUT_ONLY fields and reflect the current compute capacity allocated to
+      the instance partition.
+    at_least_one_of:
+      - 'node_count'
+      - 'processing_units'
+      - 'autoscaling_config'
+    conflicts:
+      - 'node_count'
+      - 'processing_units'
+    properties:
+      - name: 'autoscalingLimits'
+        type: NestedObject
+        description: |
+          Defines scale in controls to reduce the risk of response latency
+          and outages due to abrupt scale-in events. Users can define the minimum and
+          maximum compute capacity allocated to the instance partition, and the autoscaler will
+          only scale within that range. Users can either use nodes or processing
+          units to specify the limits, but should use the same unit to set both the
+          min_limit and max_limit.
+        properties:
+          - name: 'minProcessingUnits'
+            type: Integer
+            description: |
+              Specifies minimum number of processing units allocated to the instance partition.
+              If set, this number should be multiples of 1000.
+            exactly_one_of:
+              - 'min_processing_units'
+              - 'min_nodes'
+          - name: 'maxProcessingUnits'
+            type: Integer
+            description: |
+              Specifies maximum number of processing units allocated to the instance partition.
+              If set, this number should be multiples of 1000 and be greater than or equal to
+              min_processing_units.
+            exactly_one_of:
+              - 'max_processing_units'
+              - 'max_nodes'
+          - name: 'minNodes'
+            type: Integer
+            description: |
+              Specifies number of nodes allocated to the instance partition. If set, this number
+              should be greater than or equal to 1.
+            exactly_one_of:
+              - 'min_processing_units'
+              - 'min_nodes'
+            required_with:
+              - 'max_nodes'
+          - name: 'maxNodes'
+            type: Integer
+            description: |
+              Specifies maximum number of nodes allocated to the instance partition. If set, this number
+              should be greater than or equal to min_nodes.
+            exactly_one_of:
+              - 'max_processing_units'
+              - 'max_nodes'
+            required_with:
+              - 'min_nodes'
+      - name: 'autoscalingTargets'
+        type: NestedObject
+        description: |
+          Defines scale in controls to reduce the risk of response latency
+          and outages due to abrupt scale-in events
+        properties:
+          - name: 'highPriorityCpuUtilizationPercent'
+            type: Integer
+            description: |
+              Specifies the target high priority cpu utilization percentage that the autoscaler
+              should be trying to achieve for the instance partition.
+              This number is on a scale from 0 (no utilization) to 100 (full utilization)..
+          - name: 'storageUtilizationPercent'
+            type: Integer
+            description: |
+              Specifies the target storage utilization percentage that the autoscaler
+              should be trying to achieve for the instance partition.
+              This number is on a scale from 0 (no utilization) to 100 (full utilization).
