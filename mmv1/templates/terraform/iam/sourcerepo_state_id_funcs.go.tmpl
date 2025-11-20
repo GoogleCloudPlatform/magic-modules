@@ -1,0 +1,58 @@
+func generateSourceRepoRepositoryIAMPolicyStateID(iamResourceAddr string) func(*terraform.State) (string, error) {
+	return func(state *terraform.State) (string, error) {
+		var rawState map[string]string
+		for _, m := range state.Modules {
+			if len(m.Resources) > 0 {
+				if v, ok := m.Resources[iamResourceAddr]; ok {
+					rawState = v.Primary.Attributes
+				}
+			}
+		}
+		fmt.Printf("raw state %s\n", rawState)
+		project := tpgresource.GetResourceNameFromSelfLink(rawState["project"])
+		respository := repositoryShortName(rawState["respository"])
+		return fmt.Sprintf("projects/%s/repos/%s", project, respository) + acctest.ConditionTitleIfPresent(rawState), nil
+	}
+}
+
+func generateSourceRepoRepositoryIAMBindingStateID(iamResourceAddr string) func(*terraform.State) (string, error) {
+	return func(state *terraform.State) (string, error) {
+		var rawState map[string]string
+		for _, m := range state.Modules {
+			if len(m.Resources) > 0 {
+				if v, ok := m.Resources[iamResourceAddr]; ok {
+					rawState = v.Primary.Attributes
+				}
+			}
+		}
+		fmt.Printf("raw state %s\n", rawState)
+		project := tpgresource.GetResourceNameFromSelfLink(rawState["project"])
+		respository := repositoryShortName(rawState["respository"])
+		return fmt.Sprintf("projects/%s/repos/%s %s", project, respository, rawState["role"]) + acctest.ConditionTitleIfPresent(rawState), nil
+	}
+}
+
+func generateSourceRepoRepositoryIAMMemberStateID(iamResourceAddr string) func(*terraform.State) (string, error) {
+	return func(state *terraform.State) (string, error) {
+		var rawState map[string]string
+		for _, m := range state.Modules {
+			if len(m.Resources) > 0 {
+				if v, ok := m.Resources[iamResourceAddr]; ok {
+					rawState = v.Primary.Attributes
+				}
+			}
+		}
+		fmt.Printf("raw state %s\n", rawState)
+		project := tpgresource.GetResourceNameFromSelfLink(rawState["project"])
+		respository := repositoryShortName(rawState["respository"])
+		return fmt.Sprintf("projects/%s/repos/%s %s %s", project, respository, rawState["role"], rawState["member"]) + acctest.ConditionTitleIfPresent(rawState), nil
+	}
+}
+
+func repositoryShortName(respository string) string {
+	respositoryParts := strings.SplitN(respository, "/repos/", 2)
+	if len(respositoryParts) == 2 {
+		return respositoryParts[1]
+	}
+	return respository
+}
