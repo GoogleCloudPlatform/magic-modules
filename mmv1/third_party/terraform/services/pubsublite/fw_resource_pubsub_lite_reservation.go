@@ -17,6 +17,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/pubsublite/v1"
 )
+
 //resource is non-functional, preserved for reference with ongoing fwprovider work
 //any changes to `google_pubsublite_reservation` should be performed at mmv1/products/pubsublite/Reservation.yaml
 
