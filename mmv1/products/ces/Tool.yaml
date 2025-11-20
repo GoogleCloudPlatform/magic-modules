@@ -738,8 +738,8 @@ properties:
       - name: contextUrls
         type: Array
         description: |-
-          Content will be fetched directly from these URLs for context and grounding. 
-          More details: https://cloud.google.com/vertex-ai/generative-ai/docs/url-context. 
+          Content will be fetched directly from these URLs for context and grounding.
+          More details: https://cloud.google.com/vertex-ai/generative-ai/docs/url-context.
           Example: "https://example.com/path.html". A maximum of 20 URLs are allowed.
         item_type:
           type: String
@@ -761,12 +761,12 @@ properties:
       - name: preferredDomains
         type: Array
         description: |-
-          Specifies domain names to guide the search. 
-          The model will be instructed to prioritize these domains 
-          when formulating queries for google search. 
-          This is a best-effort hint and these domains may or may 
-          not be exclusively reflected in the final search results. 
-          Example: "example.com", "another.site". 
+          Specifies domain names to guide the search.
+          The model will be instructed to prioritize these domains
+          when formulating queries for google search.
+          This is a best-effort hint and these domains may or may
+          not be exclusively reflected in the final search results.
+          Example: "example.com", "another.site".
           A maximum of 20 domains can be specified.
         item_type:
           type: String
