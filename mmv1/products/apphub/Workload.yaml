@@ -41,6 +41,7 @@ async:
     resource_inside_response: true
 custom_code:
 include_in_tgc_next_DO_NOT_USE: true
+tgc_include_handwritten_tests: true
 examples:
   - name: 'apphub_workload_basic'
     primary_resource_id: 'example'
@@ -135,6 +136,43 @@ properties:
         description: "Output only. The location that the underlying compute resource resides
           in if it is zonal (e.g us-west1-a)."
         output: true
+      - name: 'functionalType'
+        type: NestedObject
+        description: "Output only. The functional type of a service or workload."
+        output: true
+        properties:
+          - name: 'type'
+            type: Enum
+            description: "Output only. The functional type of a service or workload."
+            output: true
+            enum_values:
+              - 'TYPE_UNSPECIFIED'
+              - 'AGENT'
+              - 'MCP_SERVER'
+      - name: 'extendedMetadata'
+        type: Array
+        description: "Output only. Additional metadata specific to the resource type."
+        output: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'key'
+              type: String
+              description: "The key of the extended metadata."
+              output: true
+            - name: 'value'
+              type: NestedObject
+              description: "The value of the extended metadata."
+              output: true
+              properties:
+                - name: 'metadataStruct'
+                  type: String
+                  description: "The metadata contents as a JSON string."
+                  output: true
+                - name: 'extendedMetadataSchema'
+                  type: String
+                  description: "The resource name for the Extended Metadata Schema."
+                  output: true
   - name: 'discoveredWorkload'
     type: String
     description: 'Immutable. The resource name of the original discovered workload.'

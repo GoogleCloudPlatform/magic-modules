@@ -36,6 +36,13 @@ var (
 		"_iam_binding",
 		"_iam_policy",
 	}
+
+	{{ if eq $.TargetVersionName `ga` -}}
+	providerName = "google"
+	{{- else }}
+	providerName = "google-beta"
+	{{- end }}
+
 )
 
 // PopulateMetadataCache walks through all metadata files once and populates
@@ -180,7 +187,7 @@ func getServicesDir() (string, error) {
 	// Try to find project root
 	root, err := findProjectRoot()
 	if err == nil {
-		servicesDir := filepath.Join(root, "google-beta", "services")
+		servicesDir := filepath.Join(root, providerName, "services")
 		if _, err := os.Stat(servicesDir); err == nil {
 			return servicesDir, nil
 		}
@@ -194,9 +201,9 @@ func getServicesDir() (string, error) {
 
 	// Try a few common relative paths
 	potentialPaths := []string{
-		filepath.Join(currentDir, "google-beta", "services"),
-		filepath.Join(currentDir, "..", "google-beta", "services"),
-		filepath.Join(currentDir, "..", "..", "google-beta", "services"),
+		filepath.Join(currentDir, providerName, "services"),
+		filepath.Join(currentDir, "..", providerName, "services"),
+		filepath.Join(currentDir, "..", "..", providerName, "services"),
 	}
 
 	for _, path := range potentialPaths {

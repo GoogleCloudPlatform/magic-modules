@@ -60,13 +60,13 @@ type Product struct {
 
 	// The validator "relative URI" of a resource, relative to the product
 	// base URL. Specific to defining the resource as a CAI asset.
-	CaiBaseUrl string
+	CaiBaseUrl string `yaml:"caibaseurl,omitempty"`
 
 	// The service name from CAI asset name, e.g. bigtable.googleapis.com.
 	CaiAssetService string `yaml:"cai_asset_service,omitempty"`
 
 	// CaiResourceType of resources that already have an AssetType constant defined in the product.
-	ResourcesWithCaiAssetType map[string]struct{}
+	ResourcesWithCaiAssetType map[string]struct{} `yaml:"resourceswithcaiassettype,omitempty"`
 
 	// A function reference designed for the rare case where you
 	// need to use retries in operation calls. Used for the service api
@@ -304,6 +304,11 @@ func Merge(self, otherObj reflect.Value, version string) {
 	}
 
 	for i := 0; i < selfObj.NumField(); i++ {
+
+		// skip unexported fields
+		if !selfObj.Field(i).CanSet() {
+			continue
+		}
 
 		// skip if the override is the "empty" value
 		emptyOverrideValue := reflect.DeepEqual(reflect.Zero(otherObj.Field(i).Type()).Interface(), otherObj.Field(i).Interface())

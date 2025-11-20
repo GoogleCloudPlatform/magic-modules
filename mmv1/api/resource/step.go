@@ -113,18 +113,6 @@ type Step struct {
 	PrimaryResourceId    string `yaml:"-"`
 }
 
-func (s *Step) UnmarshalYAML(unmarshal func(any) error) error {
-	type stepAlias Step
-	aliasObj := (*stepAlias)(s)
-
-	err := unmarshal(aliasObj)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (s *Step) TestStepSlug(productName, resourceName string) string {
 	ret := fmt.Sprintf("%s%s_%sExample", productName, resourceName, google.Camelize(s.Name, "lower"))
 	return ret
