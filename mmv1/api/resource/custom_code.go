@@ -128,6 +128,13 @@ type CustomCode struct {
 	// inserts that for you - do not include it in your custom code.
 	CustomImport string `yaml:"custom_import,omitempty"`
 
+	// This code replaces the entire identity schema method.  Since the identity schema method's function header can't be changed, the template
+	// inserts that for you - do not include it in your custom code.
+	CustomIdentitySchema *string `yaml:"custom_identity_schema,omitempty"`
+
+	// This code is run in the Read method to set the identity.
+	CustomIdentityRead string `yaml:"custom_identity_read"`
+
 	// This code is run just after the import method succeeds - it
 	// is useful for parsing attributes that are necessary for
 	// the Read() method to succeed.

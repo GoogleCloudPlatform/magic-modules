@@ -1,0 +1,11 @@
+Identity: &schema.ResourceIdentity{
+  Version: 1,
+  SchemaFunc: func() map[string]*schema.Schema {
+    return map[string]*schema.Schema{
+      "org": {
+        Type:     schema.TypeString,
+        RequiredForImport: true,
+      },
+    }
+  },
+},
