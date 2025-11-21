@@ -196,7 +196,7 @@ func TestAccNetworkServicesGateway_swpUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckNetworkServicesGatewayDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkServicesGateway_basicSwp(cmName, netName, subnetName, pSubnetName, policyName, ruleName, serverTlsName, gatewayName, gatewayScope),
+				Config: testAccNetworkServicesGateway_basicSwp(cmName, netName, subnetName, pSubnetName, policyName, ruleName, gatewayName, gatewayScope),
 			},
 			{
 				ResourceName:            "google_network_services_gateway.foobar",
@@ -205,7 +205,7 @@ func TestAccNetworkServicesGateway_swpUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"name", "location", "delete_swg_autogen_router_on_destroy"},
 			},
 			{
-				Config: testAccNetworkServicesGateway_updateSwp(cmName, newCmName, netName, subnetName, pSubnetName, policyName, newPolicyName, ruleName, newRuleName, serverTlsName, gatewayName, gatewayScope),
+				Config: testAccNetworkServicesGateway_updateSwp(cmName, newCmName, netName, subnetName, pSubnetName, policyName, newPolicyName, ruleName, newRuleName, gatewayName, gatewayScope),
 			},
 			{
 				ResourceName:            "google_network_services_gateway.foobar",
