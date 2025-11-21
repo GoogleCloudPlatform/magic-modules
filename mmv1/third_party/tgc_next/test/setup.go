@@ -84,9 +84,9 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 		var allErrs error
 		retries := 0
 		for i := 0; i < len(TestsMetadata); i++ {
+			filename := fmt.Sprintf("../../tests_metadata_%s.json", currentDate.Format(ymdFormat))
 			var metadata map[string]map[int]TgcMetadataPayload
 			if os.Getenv("WRITE_FILES") != "" {
-				filename := fmt.Sprintf("../../tests_metadata_%s.json", currentDate.Format(ymdFormat))
 				_, err := os.Stat(filename)
 				if !os.IsNotExist(err) {
 					metadata = readTestsDataFromLocalFile(filename)
@@ -95,7 +95,7 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 			if metadata == nil {
 				metadata, err = readTestsDataFromGCSForRun(ctx, currentDate, bucketName, bucket)
 				if os.Getenv("WRITE_FILES") != "" {
-					writeJSONFile(fmt.Sprintf("../../tests_metadata_%s.json", currentDate.Format(ymdFormat)), metadata)
+					writeJSONFile(filename, metadata)
 				}
 
 				if err != nil {

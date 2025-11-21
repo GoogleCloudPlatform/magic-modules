@@ -115,7 +115,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 custom_code:
   encoder: 'templates/terraform/encoders/redis_cluster.go.tmpl'
   decoder: 'templates/terraform/decoders/redis_cluster.go.tmpl'

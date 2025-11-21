@@ -25,7 +25,7 @@ create_url: 'projects/{{project}}/locations/global/networkPeerings?networkPeerin
 update_verb: 'PATCH'
 import_format:
   - 'projects/{{project}}/locations/global/networkPeerings/{{name}}'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
