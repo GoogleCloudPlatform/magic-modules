@@ -28,7 +28,7 @@ resource "google_oracle_database_exadb_vm_cluster" "{{$.PrimaryResourceId}}"{
             is_health_monitoring_enabled  = "true"
             is_incident_logs_enabled      = "true"
         }
-        license_model = LICENSE_INCLUDED
+        license_model = "LICENSE_INCLUDED"
         scan_listener_port_tcp = 1521
         additional_ecpu_count_per_node = 8
         cluster_name = "example"
