@@ -714,6 +714,10 @@ func (r Resource) SettableProperties() []*Type {
 	})
 
 	props = google.Reject(props, func(v *Type) bool {
+		return v.ClientSide
+	})
+
+	props = google.Reject(props, func(v *Type) bool {
 		return v.IsA("KeyValueLabels") || v.IsA("KeyValueAnnotations")
 	})
 
@@ -884,13 +888,17 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 		}
 		options = append(options, propertyWithExactlyOneOfPointer(originalField.ExactlyOneOfGroup))
 	} else {
+		newConflicts := deduplicateSliceOfStrings(append([]string{originalFieldLineage}, originalField.Conflicts...))
+		newConflicts = slices.DeleteFunc(newConflicts, func(s string) bool {
+			return s == newFieldLineage
+		})
+		options = append(options, propertyWithConflicts(newConflicts))
+
 		if originalField.ConflictsGroup != nil {
 			*originalField.ConflictsGroup = deduplicateSliceOfStrings(append(*originalField.ConflictsGroup, newFieldLineage))
 		} else {
 			originalField.Conflicts = deduplicateSliceOfStrings(append(originalField.Conflicts, newFieldLineage))
 		}
-		newConflicts := deduplicateSliceOfStrings(append([]string{originalFieldLineage}, originalField.Conflicts...))
-		options = append(options, propertyWithConflicts(newConflicts))
 	}
 
 	if originalField.AtLeastOneOfGroup != nil {
