@@ -34,6 +34,11 @@ func TestAccIAMWorkforcePoolWorkforcePoolProviderScimToken_update(t *testing.T) 
 			},
 			{
 				Config: testAccIAMWorkforcePoolWorkforcePoolProviderScimToken_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_iam_workforce_pool_provider_scim_token.scim_token", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_iam_workforce_pool_provider_scim_token.scim_token",
