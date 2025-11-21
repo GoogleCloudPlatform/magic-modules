@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+  "github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -33,6 +34,11 @@ func TestAccIAMWorkforcePoolWorkforcePoolProviderScimTenant_update(t *testing.T)
 			},
 			{
 				Config: testAccIAMWorkforcePoolWorkforcePoolProviderScimTenant_update(context),
+        ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_iam_workforce_pool_provider_scim_tenant.scim_tenant", plancheck.ResourceActionUpdate),
+          }
+        }
 			},
 			{
 				ResourceName:            "google_iam_workforce_pool_provider_scim_tenant.scim_tenant",

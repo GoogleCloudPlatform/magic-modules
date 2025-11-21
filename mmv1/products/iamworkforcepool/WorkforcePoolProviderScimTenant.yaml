@@ -66,7 +66,6 @@ properties:
     output: true
     description: |
       The current state of the scim tenant.
-      * STATE_UNSPECIFIED: State unspecified.
       * ACTIVE: The scim tenant is active and may be used to validate authentication credentials.
       * DELETED: The scim tenant is soft-deleted. Soft-deleted scim tenants are permanently
         deleted after approximately 30 days.
