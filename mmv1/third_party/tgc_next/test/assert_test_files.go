@@ -34,9 +34,14 @@ var (
 	tmpDir     = os.TempDir()
 )
 
-func BidirectionalConversion(t *testing.T, ignoredFields []string) {
+func BidirectionalConversion(t *testing.T, ignoredFields []string, primaryResourceType string) {
 	testName := t.Name()
-	stepNumbers, err := getStepNumbers(testName)
+	subTestName := GetSubTestName(testName)
+	if subTestName == "" {
+		t.Skipf("The subtest is unavailable")
+	}
+
+	stepNumbers, err := getStepNumbers(subTestName)
 	if err != nil {
 		t.Fatalf("error preparing the input data: %v", err)
 	}
@@ -45,7 +50,6 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 		t.Skipf("test steps are unavailable")
 	}
 
-	logger := zaptest.NewLogger(t)
 	// Create a temporary directory for running terraform.
 	tfDir, err := os.MkdirTemp(tmpDir, "terraform")
 	if err != nil {
@@ -53,12 +57,14 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 	}
 	defer os.RemoveAll(tfDir)
 
+	logger := zaptest.NewLogger(t)
+
 	for _, stepN := range stepNumbers {
-		subtestName := fmt.Sprintf("step%d", stepN)
-		t.Run(subtestName, func(t *testing.T) {
+		stepName := fmt.Sprintf("step%d", stepN)
+		t.Run(stepName, func(t *testing.T) {
 			retries := 0
 			flakyAction := func(ctx context.Context) error {
-				testData, err := prepareTestData(testName, stepN, retries)
+				testData, err := prepareTestData(subTestName, stepN, retries)
 				retries++
 				log.Printf("Starting the attempt %d", retries)
 				if err != nil {
@@ -73,7 +79,7 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 				// Otherwise, test all of the resources in the test.
 				primaryResource := testData.PrimaryResource
 				resourceTestData := testData.ResourceTestData
-				tName := fmt.Sprintf("%s_%s", testName, subtestName)
+				tName := fmt.Sprintf("%s_%s", subTestName, stepName)
 				if primaryResource != "" {
 					t.Logf("Test for the primary resource %s begins.", primaryResource)
 					err = testSingleResource(t, tName, resourceTestData[primaryResource], tfDir, ignoredFields, logger, true)
@@ -81,7 +87,10 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 						return err
 					}
 				} else {
-					for _, testData := range resourceTestData {
+					for address, testData := range resourceTestData {
+						if !strings.HasPrefix(address, primaryResourceType) {
+							continue
+						}
 						err = testSingleResource(t, tName, testData, tfDir, ignoredFields, logger, false)
 						if err != nil {
 							return err
@@ -203,7 +212,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		log.Printf("missing fields in resource %s after cai2hcl conversion:\n%s", testData.ResourceAddress, missingKeys)
 		return retry.RetryableError(fmt.Errorf("missing fields"))
 	}
-	log.Printf("Step 1 passes for resource %s. All of the fields in raw config are in export config", testData.ResourceAddress)
+	log.Printf("%s: Step 1 passes for resource %s. All of the fields in raw config are in export config", testName, testData.ResourceAddress)
 
 	// Step 2
 	// Run a terraform plan using export_config.
@@ -246,14 +255,14 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 			return fmt.Errorf("test %s got diff (-want +got): %s", testName, diff)
 		}
 	}
-	log.Printf("Step 2 passes for resource %s. Roundtrip config and export config are identical", testData.ResourceAddress)
+	log.Printf("%s: Step 2 passes for resource %s. Roundtrip config and export config are identical", testName, testData.ResourceAddress)
 
 	// Step 3
 	// Compare most fields between the exported asset and roundtrip asset, except for "data" field for resource
 	if err = compareCaiAssets(assets, roundtripAssets, ignoredFieldSet); err != nil {
 		return err
 	}
-	log.Printf("Step 3 passes for resource %s. Exported asset and roundtrip asset are identical", testData.ResourceAddress)
+	log.Printf("%s: Step 3 passes for resource %s. Exported asset and roundtrip asset are identical", testName, testData.ResourceAddress)
 
 	return nil
 }

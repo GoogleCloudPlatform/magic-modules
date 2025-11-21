@@ -367,6 +367,9 @@ type Resource struct {
 	ImportPath     string `yaml:"-"`
 	SourceYamlFile string `yaml:"-"`
 
+	constraintGroupRegistry     map[string]*[]string `yaml:"-"`
+	constraintGroupsInitialized bool                 `yaml:"-"`
+
 	// ====================
 	// TGC
 	// ====================
@@ -413,6 +416,11 @@ type TGCResource struct {
 
 	// [Optional] It overrides the default Cai asset name format, which is the resource id format
 	CaiAssetNameFormat string `yaml:"cai_asset_name_format,omitempty"`
+
+	// [Optional] It overrides the Cai asset name format during cai2hcl conversion.
+	// Its usage is strictly limited to scenarios requiring the extraction of parameters
+	// from the Google Cloud Asset Inventory (CAI) asset name format
+	Cai2hclNameFormat string `yaml:"cai2hcl_name_format,omitempty"`
 }
 
 // // MarshalYAML implements a custom marshaller to omit dynamic default values.
@@ -812,10 +820,43 @@ func deduplicateSliceOfStrings(slice []string) []string {
 	return result
 }
 
+func (r *Resource) initializeConstraintGroups() {
+	if r.constraintGroupsInitialized {
+		return
+	}
+	r.constraintGroupRegistry = make(map[string]*[]string)
+
+	props := r.AllNestedProperties(google.Concat(r.RootProperties(), r.UserVirtualFields()))
+	for _, prop := range props {
+		prop.ConflictsGroup = r.attachConstraintGroup("conflicts", prop.Conflicts)
+		prop.AtLeastOneOfGroup = r.attachConstraintGroup("at_least_one_of", prop.AtLeastOneOf)
+		prop.ExactlyOneOfGroup = r.attachConstraintGroup("exactly_one_of", prop.ExactlyOneOf)
+		prop.RequiredWithGroup = r.attachConstraintGroup("required_with", prop.RequiredWith)
+	}
+	r.constraintGroupsInitialized = true
+}
+
+func (r *Resource) attachConstraintGroup(groupType string, source []string) *[]string {
+	if len(source) == 0 {
+		return nil
+	}
+
+	sorted := slices.Clone(source)
+	slices.Sort(sorted)
+	key := fmt.Sprintf("%s|%s", groupType, strings.Join(sorted, ","))
+
+	if existing, ok := r.constraintGroupRegistry[key]; ok {
+		return existing
+	}
+
+	newGroup := slices.Clone(sorted)
+	r.constraintGroupRegistry[key] = &newGroup
+	return &newGroup
+}
+
 func buildWriteOnlyField(name string, versionFieldName string, originalField *Type) *Type {
-	description := fmt.Sprintf("%s Note: This property is write-only and will not be read from the API. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", originalField.Description)
 	originalFieldLineage := originalField.TerraformLineage()
-	fieldPathCurrentField := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(name))
+	newFieldLineage := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(name))
 	requiredWith := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(versionFieldName))
 
 	apiName := originalField.ApiName
@@ -826,33 +867,42 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 	options := []func(*Type){
 		propertyWithType("String"),
 		propertyWithRequired(false),
-		propertyWithDescription(description),
+		propertyWithDescription(originalField.Description),
 		propertyWithWriteOnly(true),
 		propertyWithApiName(apiName),
 		propertyWithIgnoreRead(true),
 		propertyWithRequiredWith([]string{requiredWith}),
 	}
 
-	if originalField.Required {
+	if originalField.Required || len(originalField.ExactlyOneOf) > 0 {
 		originalField.Required = false
-		exactlyOneOf := append(originalField.ExactlyOneOf, originalFieldLineage, fieldPathCurrentField)
-		options = append(options, propertyWithExactlyOneOf(deduplicateSliceOfStrings(exactlyOneOf)))
-		originalField.ExactlyOneOf = deduplicateSliceOfStrings(exactlyOneOf)
+		if originalField.ExactlyOneOfGroup == nil {
+			base := []string{originalFieldLineage, newFieldLineage}
+			originalField.ExactlyOneOfGroup = &base
+		} else {
+			*originalField.ExactlyOneOfGroup = deduplicateSliceOfStrings(append(*originalField.ExactlyOneOfGroup, originalFieldLineage, newFieldLineage))
+		}
+		options = append(options, propertyWithExactlyOneOfPointer(originalField.ExactlyOneOfGroup))
 	} else {
-		conflicts := append(originalField.Conflicts, originalFieldLineage)
-		options = append(options, propertyWithConflicts(deduplicateSliceOfStrings(conflicts)))
+		if originalField.ConflictsGroup != nil {
+			*originalField.ConflictsGroup = deduplicateSliceOfStrings(append(*originalField.ConflictsGroup, newFieldLineage))
+		} else {
+			originalField.Conflicts = deduplicateSliceOfStrings(append(originalField.Conflicts, newFieldLineage))
+		}
+		newConflicts := deduplicateSliceOfStrings(append([]string{originalFieldLineage}, originalField.Conflicts...))
+		options = append(options, propertyWithConflicts(newConflicts))
 	}
 
-	if len(originalField.AtLeastOneOf) > 0 {
-		atLeastOneOf := append(originalField.AtLeastOneOf, originalFieldLineage, fieldPathCurrentField)
-		options = append(options, propertyWithAtLeastOneOf(deduplicateSliceOfStrings(atLeastOneOf)))
+	if originalField.AtLeastOneOfGroup != nil {
+		*originalField.AtLeastOneOfGroup = deduplicateSliceOfStrings(append(*originalField.AtLeastOneOfGroup, originalFieldLineage, newFieldLineage))
+		options = append(options, propertyWithAtLeastOneOfPointer(originalField.AtLeastOneOfGroup))
 	}
 
 	return NewProperty(name, originalField.ApiName, options)
 }
 
 func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField *Type) *Type {
-	description := fmt.Sprintf("Triggers update of %s write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", google.Underscore(writeOnlyField.Name))
+	description := fmt.Sprintf("Triggers update of `%s` write-only. Increment this value when an update to `%s` is needed. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)", google.Underscore(writeOnlyField.Name), google.Underscore(writeOnlyField.Name))
 	requiredWith := strings.ReplaceAll(originalField.TerraformLineage(), google.Underscore(originalField.Name), google.Underscore(writeOnlyField.Name))
 
 	options := []func(*Type){
@@ -883,6 +933,10 @@ func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type)
 // AddExtraFields processes properties and adds supplementary fields based on property types.
 // It handles write-only properties, labels, and annotations.
 func (r *Resource) AddExtraFields(props []*Type, parent *Type) []*Type {
+	if !r.constraintGroupsInitialized {
+		r.initializeConstraintGroups()
+	}
+
 	for _, p := range props {
 		if p.WriteOnly && !strings.HasSuffix(p.Name, "Wo") {
 			props = r.addWriteOnlyFields(props, p)
@@ -2281,6 +2335,15 @@ func (r Resource) GetCaiAssetNameTemplate() string {
 	}
 
 	return fmt.Sprintf("//%s.googleapis.com/%s", r.CaiProductBackendName(r.CaiProductBaseUrl()), r.IdFormat)
+}
+
+// Gets a format string for CAI asset name
+func (r Resource) Cai2hclAssetNameTemplate() string {
+	if r.Cai2hclNameFormat != "" {
+		return fmt.Sprintf("//%s.googleapis.com/%s", r.CaiProductBackendName(r.CaiProductBaseUrl()), r.Cai2hclNameFormat)
+	}
+
+	return r.GetCaiAssetNameTemplate()
 }
 
 // Ignores verifying CAI asset name if it is one computed field

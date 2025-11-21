@@ -153,6 +153,31 @@ properties:
       Network name in the consumer project in the format of: projects/{project}/global/networks/{network}
       Note that the consumer network may be in a different GCP project than the consumer
       project that is hosting the Looker Instance.
+  # Controlled Egress Config Object
+  - name: 'controlledEgressConfig'
+    type: NestedObject
+    description: |
+      Controlled egress configuration.
+    update_mask_fields:
+      - 'controlled_egress_config.marketplace_enabled'
+      - 'controlled_egress_config.egress_fqdns'
+    properties:
+      - name: 'marketplaceEnabled'
+        type: Boolean
+        description: |
+          Whether the Looker Marketplace is enabled.
+      - name: 'egressFqdns'
+        type: Array
+        description: |
+          List of fully qualified domain names to be added to the allowlist for
+          outbound traffic.
+        item_type:
+          type: String
+  # Controlled Egress Config Object - End
+  - name: 'controlledEgressEnabled'
+    type: Boolean
+    description: |
+      Whether controlled egress is enabled on the Looker instance.
   - name: 'createTime'
     type: Time
     description: |
@@ -440,6 +465,7 @@ properties:
     type: NestedObject
     description: |
       Information for Private Service Connect (PSC) setup for a Looker instance.
+    default_from_api: true
     update_mask_fields:
       - 'psc_config.allowed_vpcs'
       - 'psc_config.service_attachments'

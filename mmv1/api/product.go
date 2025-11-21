@@ -305,6 +305,11 @@ func Merge(self, otherObj reflect.Value, version string) {
 
 	for i := 0; i < selfObj.NumField(); i++ {
 
+		// skip unexported fields
+		if !selfObj.Field(i).CanSet() {
+			continue
+		}
+
 		// skip if the override is the "empty" value
 		emptyOverrideValue := reflect.DeepEqual(reflect.Zero(otherObj.Field(i).Type()).Interface(), otherObj.Field(i).Interface())
 
