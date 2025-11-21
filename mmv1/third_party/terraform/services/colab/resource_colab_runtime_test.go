@@ -160,7 +160,6 @@ resource "google_colab_runtime" "runtime" {
 `, context)
 }
 
-
 func testAccColabRuntime_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_colab_runtime_template" "my_template" {
