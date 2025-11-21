@@ -78,7 +78,7 @@ func TestAccNetworkServicesLbEdgeExtension_networkServicesLbEdgeExtensionBasicUp
 }
 
 func testAccNetworkServicesLbEdgeExtension_networkServicesLbEdgeExtensionBasicCreate(context map[string]interface{}) string {
-	return fmt.Sprint(testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
+	return testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context) + acctest.Nprintf(`
 # forwarding rule
 resource "google_compute_global_forwarding_rule" "default" {
   name                  = "tf-test-elb-forwarding-rule%{random_suffix}"
@@ -203,11 +203,11 @@ resource "google_network_services_wasm_plugin" "wasm-plugin-2" {
     }
   }
 }
-`, context))
+`, context)
 }
 
 func testAccNetworkServicesLbEdgeExtension_networkServicesLbEdgeExtensionBasicUpdate(context map[string]interface{}) string {
-	return fmt.Sprint(testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
+	return testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context) + acctest.Nprintf(`
 # forwarding rule
 resource "google_compute_global_forwarding_rule" "default" {
   name                  = "tf-test-elb-forwarding-rule%{random_suffix}"
@@ -348,7 +348,7 @@ resource "google_network_services_wasm_plugin" "wasm-plugin-2" {
     }
   }
 }
-`, context))
+`, context)
 }
 
 func testAccCheckNetworkServicesLbEdgeExtensionDestroyProducer(t *testing.T) func(s *terraform.State) error {
