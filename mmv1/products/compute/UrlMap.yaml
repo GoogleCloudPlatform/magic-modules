@@ -36,7 +36,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 custom_code:
 examples:
   - name: 'url_map_bucket_and_service'

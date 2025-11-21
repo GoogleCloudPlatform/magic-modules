@@ -36,7 +36,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 sweeper:
   dependencies:
     # - "google_network_security_intercept_endpoint_group" (beta only)
