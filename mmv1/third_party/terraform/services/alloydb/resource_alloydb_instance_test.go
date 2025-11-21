@@ -666,7 +666,7 @@ resource "google_alloydb_instance" "default" {
 
   client_connection_config {
     require_connectors = %{require_connectors}
-  }	
+  }
 }
 
 resource "google_alloydb_cluster" "default" {
@@ -703,7 +703,7 @@ resource "google_alloydb_instance" "default" {
     ssl_config {
       ssl_mode = "%{ssl_mode}"
     }
-  }	
+  }
 }
 
 resource "google_alloydb_cluster" "default" {
@@ -837,7 +837,7 @@ resource "google_alloydb_instance" "default" {
     enable_public_ip = %{enable_public_ip}
     enable_outbound_public_ip = %{enable_outbound_public_ip}
     %{authorized_external_networks}
-  }	
+  }
 }
 
 resource "google_alloydb_cluster" "default" {
@@ -877,7 +877,7 @@ resource "google_alloydb_instance" "default" {
     authorized_external_networks {
       cidr_range = "%{cidr_range}"
     }
-  }	
+  }
 }
 
 resource "google_alloydb_cluster" "default" {
@@ -905,8 +905,14 @@ func TestAccAlloydbInstance_updatePscInstanceConfig(t *testing.T) {
 	t.Parallel()
 
 	random_suffix := acctest.RandString(t, 10)
-	context := map[string]interface{}{
+	context1 := map[string]interface{}{
 		"random_suffix": random_suffix,
+		"psc_enabled":   true,
+	}
+
+	context2 := map[string]interface{}{
+		"random_suffix": random_suffix,
+		"psc_enabled":   false,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -915,10 +921,24 @@ func TestAccAlloydbInstance_updatePscInstanceConfig(t *testing.T) {
 		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAlloydbInstance_pscInstanceConfig(context),
+				Config: testAccAlloydbInstance_pscInstanceConfig(context1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "psc_config.0.psc_enabled", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "psc_instance_config.0.allowed_consumer_projects.#", "1"),
+				),
 			},
 			{
-				Config: testAccAlloydbInstance_updatePscInstanceConfigAllowlist(context),
+				Config: testAccAlloydbInstance_pscInstanceConfig(context2),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "psc_config.0.psc_enabled", "false"),
+				),
+			},
+			{
+				Config: testAccAlloydbInstance_updatePscInstanceConfigAllowlist(context1), // context1 has psc_enabled: true
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "psc_config.0.psc_enabled", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "psc_instance_config.0.allowed_consumer_projects.#", "2"),
+				),
 			},
 		},
 	})
@@ -941,7 +961,7 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   psc_config {
-	psc_enabled = true
+    psc_enabled = %{psc_enabled}
   }
   initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
@@ -970,7 +990,7 @@ resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   psc_config {
-	psc_enabled = true
+    psc_enabled = %{psc_enabled}
   }
   initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
@@ -1049,6 +1069,7 @@ func TestAccAlloydbInstance_updateInstanceWithPscInterfaceConfigs(t *testing.T) 
 	context := map[string]interface{}{
 		"random_suffix":         random_suffix,
 		"networkAttachmentName": acctest.BootstrapNetworkAttachment(t, "tf-test-alloydb-update-na", subnetworkName),
+		"psc_enabled":           true, // Needed for the first step
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1061,6 +1082,10 @@ func TestAccAlloydbInstance_updateInstanceWithPscInterfaceConfigs(t *testing.T) 
 			},
 			{
 				Config: testAccAlloydbInstance_pscInterfaceConfigs(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "psc_instance_config.0.psc_interface_configs.#", "1"),
+					resource.TestCheckResourceAttrSet("google_alloydb_instance.default", "psc_instance_config.0.psc_interface_configs.0.network_attachment"),
+				),
 			},
 		},
 	})
@@ -1083,9 +1108,15 @@ func TestAccAlloydbInstance_updatePscAutoConnections(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAlloydbInstance_pscAutoConnections(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "psc_instance_config.0.psc_auto_connections.#", "1"),
+				),
 			},
 			{
 				Config: testAccAlloydbInstance_updatePscAutoConnections(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "psc_instance_config.#", "0"),
+				),
 			},
 		},
 	})
@@ -1215,5 +1246,227 @@ data "google_compute_network" "default" {
 data "google_compute_global_address" "private_ip_alloc" {
   name =  "%{address_name}"
 }
+`, context)
+}
+
+func TestAccAlloydbInstance_Update_ObservabilityConfig(t *testing.T) {
+	t.Parallel()
+	random_suffix := acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")
+
+	context1 := map[string]interface{}{
+		"random_suffix":                 random_suffix,
+		"network_name":                  networkName,
+		"enabled":                       true,
+		"preserve_comments":             true,
+		"track_wait_events":             true,
+		"track_wait_event_types":        true,
+		"max_query_string_length":       1024,
+		"record_application_tags":       true,
+		"query_plans_per_minute":        10,
+		"track_client_address":          true,
+		"track_active_queries":          true,
+		"assistive_experiences_enabled": true,
+	}
+
+	context2 := map[string]interface{}{
+		"random_suffix":                 random_suffix,
+		"network_name":                  networkName,
+		"enabled":                       false,
+		"preserve_comments":             false,
+		"track_wait_events":             false,
+		"track_wait_event_types":        false,
+		"max_query_string_length":       1023,
+		"record_application_tags":       false,
+		"query_plans_per_minute":        8,
+		"track_client_address":          false,
+		"track_active_queries":          false,
+		"assistive_experiences_enabled": false,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbInstance_ObservabilityConfig(context1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.preserve_comments", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.track_wait_events", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.track_wait_event_types", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.max_query_string_length", "1024"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.record_application_tags", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.query_plans_per_minute", "10"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.track_client_address", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.track_active_queries", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.assistive_experiences_enabled", "true"),
+				),
+			},
+			{
+				Config: testAccAlloydbInstance_ObservabilityConfig(context2),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.enabled", "false"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.preserve_comments", "false"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.track_wait_events", "false"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.track_wait_event_types", "false"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.max_query_string_length", "1023"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.record_application_tags", "false"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.query_plans_per_minute", "8"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.track_client_address", "false"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.track_active_queries", "false"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.assistive_experiences_enabled", "false"),
+				),
+			},
+			{
+				Config: testAccAlloydbInstance_ObservabilityConfig(context1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.preserve_comments", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.track_wait_events", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.track_wait_event_types", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.max_query_string_length", "1024"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.record_application_tags", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.query_plans_per_minute", "10"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.track_client_address", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.track_active_queries", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.assistive_experiences_enabled", "true"),
+				),
+			},
+		},
+	})
+}
+
+func testAccAlloydbInstance_ObservabilityConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_instance" "default" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+  machine_config {
+    cpu_count = 2
+  }
+  observability_config {
+    enabled                        = %{enabled}
+    preserve_comments              = %{preserve_comments}
+    track_wait_events              = %{track_wait_events}
+    track_wait_event_types         = %{track_wait_event_types}
+    max_query_string_length        = %{max_query_string_length}
+    record_application_tags        = %{record_application_tags}
+    query_plans_per_minute         = %{query_plans_per_minute}
+    track_client_address           = %{track_client_address}
+    track_active_queries           = %{track_active_queries}
+    assistive_experiences_enabled  = %{assistive_experiences_enabled}
+  }
+}
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  network_config {
+    network = data.google_compute_network.default.id
+  }
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+  deletion_protection = false
+}
+data "google_compute_network" "default" {
+  name = "%{network_name}"
+}
+data "google_project" "project" {}
+`, context)
+}
+
+func TestAccAlloydbInstance_Update_QueryInsightsConfig(t *testing.T) {
+	t.Parallel()
+	random_suffix := acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")
+
+	context1 := map[string]interface{}{
+		"random_suffix":           random_suffix,
+		"network_name":            networkName,
+		"query_string_length":     256,
+		"record_application_tags": true,
+		"record_client_address":   true,
+		"query_plans_per_minute":  5,
+	}
+
+	context2 := map[string]interface{}{
+		"random_suffix":           random_suffix,
+		"network_name":            networkName,
+		"query_string_length":     257,
+		"record_application_tags": false,
+		"record_client_address":   false,
+		"query_plans_per_minute":  10,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbInstance_QueryInsightsConfig(context1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "query_insights_config.0.query_string_length", "256"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "query_insights_config.0.record_application_tags", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "query_insights_config.0.record_client_address", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "query_insights_config.0.query_plans_per_minute", "5"),
+				),
+			},
+			{
+				Config: testAccAlloydbInstance_QueryInsightsConfig(context2),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "query_insights_config.0.query_string_length", "257"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "query_insights_config.0.record_application_tags", "false"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "query_insights_config.0.record_client_address", "false"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "query_insights_config.0.query_plans_per_minute", "10"),
+				),
+			},
+			{
+				Config: testAccAlloydbInstance_QueryInsightsConfig(context1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "query_insights_config.0.query_string_length", "256"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "query_insights_config.0.record_application_tags", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "query_insights_config.0.record_client_address", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "query_insights_config.0.query_plans_per_minute", "5"),
+				),
+			},
+		},
+	})
+}
+
+func testAccAlloydbInstance_QueryInsightsConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_instance" "default" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+  machine_config {
+    cpu_count = 2
+  }
+  query_insights_config {
+    query_string_length   = %{query_string_length}
+    record_application_tags = %{record_application_tags}
+    record_client_address = %{record_client_address}
+    query_plans_per_minute  = %{query_plans_per_minute}
+  }
+}
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  network_config {
+    network = data.google_compute_network.default.id
+  }
+  initial_user {
+    password = "tf-test-alloydb-cluster%{random_suffix}"
+  }
+  deletion_protection = false
+}
+data "google_compute_network" "default" {
+  name = "%{network_name}"
+}
+data "google_project" "project" {}
 `, context)
 }

@@ -317,6 +317,7 @@ properties:
       - name: 'pscEnabled'
         type: Boolean
         description: 'Create an instance that allows connections from Private Service Connect endpoints to the instance.'
+        send_empty_value: true
       - name: 'serviceOwnedProjectNumber'
         type: Integer
         description: |
@@ -517,6 +518,7 @@ properties:
         description: |
           Whether automated backups are enabled.
         default_from_api: true
+        send_empty_value: true
   - name: 'backupSource'
     type: NestedObject
     description: 'Cluster created from backup.'
