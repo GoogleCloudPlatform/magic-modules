@@ -19,7 +19,7 @@ description: |
 references:
   guides:
     'Create a SCIM Token for the SCIM Tenant': 'https://cloud.google.com/iam/docs/workforce-sign-in-microsoft-entra-id-scalable-groups?group_type=extended#extended-attributes'
-  api: 'https://cloud.google.com/sdk/gcloud/reference/iam/workforce-pools/providers/scim-tenants/tokens'
+  api: 'https://docs.cloud.google.com/iam/docs/reference/rest/v1/locations.workforcePools.providers.scimTenants.tokens'
 base_url: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants/{{scim_tenant_id}}/tokens'
 self_link: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants/{{scim_tenant_id}}/tokens/{{scim_token_id}}'
 create_url: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants/{{scim_tenant_id}}/tokens?workforcePoolProviderScimTokenId={{scim_token_id}}'
