@@ -25,8 +25,7 @@ create_url: 'projects/{{project}}/locations/global/serviceBindings?serviceBindin
 immutable: true
 import_format:
   - 'projects/{{project}}/locations/global/serviceBindings/{{name}}'
-deprecation_message: |
-  Cloud Service Mesh's integration with Service Directory is going to be deprecated. Creating new service binding resources will be disabled.
+deprecation_message: Cloud Service Mesh's integration with Service Directory is going to be deprecated. Creating new service binding resources will be disabled.
 timeouts:
   insert_minutes: 10
   update_minutes: 10
