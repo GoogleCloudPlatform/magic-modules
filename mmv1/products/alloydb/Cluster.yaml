@@ -332,13 +332,18 @@ properties:
         description: |
           The database username.
         is_missing_in_cai: true
+        at_least_one_of:
+          - 'initial_user.0.user'
+          - 'initial_user.0.password'
       - name: 'password'
         type: String
         description: |
           The initial password for the user.
-        required: true
         sensitive: true
         is_missing_in_cai: true
+        at_least_one_of:
+          - 'initial_user.0.user'
+          - 'initial_user.0.password'
   - name: 'restoreBackupSource'
     type: NestedObject
     description: |
