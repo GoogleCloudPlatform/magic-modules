@@ -24,9 +24,9 @@ resource "google_oracle_database_exadb_vm_cluster" "{{$.PrimaryResourceId}}"{
         hostname_prefix = "hostname1"
         shape_attribute = "SMART_STORAGE"
         data_collection_options {
-            is_diagnostics_events_enabled = true
-            is_health_monitoring_enabled  = true
-            is_incident_logs_enabled      = true
+            is_diagnostics_events_enabled = "true"
+            is_health_monitoring_enabled  = "true"
+            is_incident_logs_enabled      = "true"
         }
         license_model = LICENSE_INCLUDED
         scan_listener_port_tcp = 1521
