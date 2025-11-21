@@ -31,7 +31,8 @@ timeouts:
   delete_minutes: 45
 autogen_async: true
 async:
-  actions: ['create', 'delete']
+  # b/242358013 blocks adding delete operation support. Once that's resolved, we can also remove sleep-after-delete from tests.
+  actions: ['create']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
