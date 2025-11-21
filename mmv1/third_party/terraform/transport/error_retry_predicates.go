@@ -652,7 +652,9 @@ func IsSiteVerificationRetryableError(err error) (bool, string) {
 
 func IsServiceNetworkingConnectionRetryableError(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
-		if gerr.Code == 16 && strings.Contains(strings.ToLower(gerr.Body), "Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential.") {
+		log.Printf("[DEBUG] [DEBUG] Service Networking Connection error %s", err)
+		log.Sprintf("[DEBUG] [DEBUG] Service Networking Connection error code %d", gerr.Code)
+		if gerr.Code == 16  {
 			return true, "Waiting"
 		}
 	}
