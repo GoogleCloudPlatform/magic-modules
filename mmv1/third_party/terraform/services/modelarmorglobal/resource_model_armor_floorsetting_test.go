@@ -47,6 +47,11 @@ func TestAccModelArmorGlobalFloorsetting_update(t *testing.T) {
 			},
 			{
 				Config: testAccModelArmorGlobalFloorsetting_updated(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_model_armor_floorsetting.test-resource", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_model_armor_floorsetting.test-resource",
