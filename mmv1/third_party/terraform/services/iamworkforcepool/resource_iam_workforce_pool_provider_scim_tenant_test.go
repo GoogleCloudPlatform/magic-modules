@@ -34,11 +34,11 @@ func TestAccIAMWorkforcePoolWorkforcePoolProviderScimTenant_update(t *testing.T)
 			},
 			{
 				Config: testAccIAMWorkforcePoolWorkforcePoolProviderScimTenant_update(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_iam_workforce_pool_provider_scim_tenant.scim_tenant", plancheck.ResourceActionUpdate),
-          },
-        },
+					},
+				},
 			},
 			{
 				ResourceName:            "google_iam_workforce_pool_provider_scim_tenant.scim_tenant",
