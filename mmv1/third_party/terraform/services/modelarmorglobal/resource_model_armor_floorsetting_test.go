@@ -33,6 +33,11 @@ func TestAccModelArmorGlobalFloorsetting_update(t *testing.T) {
 			{
 				// Update from inspect_only to inspect_and_block = true for both ai_platform and google_mcp_server
 				Config: testAccModelArmorGlobalFloorsetting_enableInspectAndBlock(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_model_armor_floorsetting.test-resource", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_model_armor_floorsetting.test-resource",
