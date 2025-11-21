@@ -65,7 +65,6 @@ properties:
     type: Enum
     description: |
       The current state of the scim token.
-      * STATE_UNSPECIFIED: State unspecified.
       * ACTIVE: The token is active and may be used to provision users and groups.
       * DELETED: The token is soft-deleted. Soft-deleted tokens are permanently deleted after approximately 30 days.
     output: true
