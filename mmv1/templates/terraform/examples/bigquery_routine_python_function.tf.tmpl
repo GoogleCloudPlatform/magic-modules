@@ -24,7 +24,6 @@ resource "google_bigquery_routine" "{{$.PrimaryResourceId}}" {
   return_type = "{\"typeKind\" :  \"FLOAT64\"}"
   python_options {
     entry_point = "multiply"
-    packages = ["requests"]
   }
   external_runtime_options {
     container_memory = "512Mi"
