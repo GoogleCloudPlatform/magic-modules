@@ -15,6 +15,10 @@
 name: MulticastProducerAssociation
 description: Create a multicast producer association in the specified location
   of the current project.
+references:
+  guides:
+    'Create Multicast Producer Association': 'https://docs.cloud.google.com/vpc/docs/multicast/enable-producer-network#create-producer'
+  api: 'https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastProducerAssociations'
 base_url: projects/{{project}}/locations/{{location}}/multicastProducerAssociations
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/multicastProducerAssociations/{{multicast_producer_association_id}}
@@ -119,6 +123,7 @@ properties:
           UPDATING
           UPDATE_FAILED
           INACTIVE
+        output: true
   - name: uniqueId
     type: String
     description: |-
