@@ -1,0 +1,55 @@
+billingProject := ""
+
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+	return fmt.Errorf("Error fetching project for PublisherModelConfig: %s", err)
+}
+billingProject = project
+
+obj := make(map[string]interface{})
+publisherModelConfigProp, err := expandVertexAIPublisherModelConfigPublisherModelConfig(d.Get("publisher_model_config"), d, config)
+if err != nil {
+	return err
+} else if v, ok := d.GetOkExists("publisher_model_config"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, publisherModelConfigProp)) {
+	obj["publisherModelConfig"] = publisherModelConfigProp
+}
+
+// disable the loggingConfig instead of deleting the resource (there is no DELETE endpoint)
+if publisherConfig, ok := obj["publisherModelConfig"].(map[string]interface{}); ok {
+	if _, ok := publisherConfig["loggingConfig"].(map[string]interface{}); ok {
+		publisherConfig["loggingConfig"] = map[string]interface{}{
+      "enabled": false,
+    }
+	}
+}
+
+url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}VertexAIBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/publishers/{{"{{"}}publisher{{"}}"}}/models/{{"{{"}}model{{"}}"}}:setPublisherModelConfig")
+if err != nil {
+	return err
+}
+
+log.Printf("[DEBUG] Updating PublisherModelConfig %q: %#v", d.Id(), obj)
+headers := make(http.Header)
+
+// err == nil indicates that the billing_project value was found
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+	billingProject = bp
+}
+
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "POST",
+	Project:   billingProject,
+	RawURL:    url,
+	UserAgent: userAgent, Body:      obj,
+	Timeout:   d.Timeout(schema.TimeoutUpdate),
+	Headers:   headers,
+})
+
+if err != nil {
+	return fmt.Errorf("Error updating PublisherModelConfig %q: %s", d.Id(), err)
+} else {
+	log.Printf("[DEBUG] Finished updating PublisherModelConfig %q: %#v", d.Id(), res)
+}
+
+return resourceVertexAIPublisherModelConfigRead(d, meta)
