@@ -21,6 +21,7 @@ type IamMember struct {
 // test project. This should be used to avoid race conditions that can happen on the
 // default project due to parallel tests managing the same member/role pairings. Members
 // will have `{project_number}` replaced with the default test project's project number.
+// Add a comment to trigger all vcr tests.
 func BootstrapIamMembers(t *testing.T, members []IamMember) {
 	config := BootstrapConfig(t)
 	if config == nil {

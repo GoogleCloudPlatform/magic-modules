@@ -14,7 +14,7 @@
 ---
 name: 'Api'
 description: |
-  A consumable API that can be used by multiple Gateways.
+  A consumable API bilibala that can be used by multiple Gateways.
 min_version: 'beta'
 references:
   guides:
