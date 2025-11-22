@@ -1,0 +1,12 @@
+resource "google_contact_center_insights_assessment_rule" "{{$.PrimaryResourceId}}" {
+  location = "us-central1"
+  display_name = "assessment-rule-display-name"
+  conversation_filter = "agent_id = \"1\""
+  sample_rule {
+    sample_row = 5
+  }
+  schedule_info {
+    schedule_info = "every 24 hours"
+  }
+  active    = true
+}
