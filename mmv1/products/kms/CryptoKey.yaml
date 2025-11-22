@@ -38,7 +38,7 @@ update_verb: 'PATCH'
 update_mask: true
 import_format:
   - '{{key_ring}}/cryptoKeys/{{name}}'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 tgc_include_handwritten_tests: true
 timeouts:
   insert_minutes: 20
