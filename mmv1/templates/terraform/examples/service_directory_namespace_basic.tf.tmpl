@@ -1,5 +1,4 @@
 resource "google_service_directory_namespace" "{{$.PrimaryResourceId}}" {
-  provider     = google-beta
   namespace_id = "{{index $.Vars "namespace_id"}}"
   location     = "us-central1"
 

@@ -54,6 +54,13 @@ examples:
       app_id: 'app-id'
       toolset_id: 'toolset1'
       location: 'us'
+  - name: "ces_toolset_bearer_token_config"
+    primary_resource_id: "ces_toolset_bearer_token_config"
+    vars:
+      app_display_name: 'my-app'
+      app_id: 'app-id'
+      toolset_id: 'toolset1'
+      location: 'us'
 autogen_async: true
 autogen_status: VG9vbHNldA==
 parameters:
@@ -214,6 +221,12 @@ properties:
             allow_empty_object: true
             send_empty_value: true
             properties: []
+          - name: bearerTokenConfig
+            type: NestedObject
+            description: Configurations for authentication with a bearer token.
+            properties:
+              - name: token
+                type: String
       - name: ignoreUnknownFields
         type: Boolean
         description: |-

@@ -31,6 +31,9 @@ const (
 )
 
 func terraformWorkflow(t *testing.T, dir, name, project string) {
+	defer os.Remove(filepath.Join(dir, fmt.Sprintf("%s.tf", name)))
+	defer os.Remove(filepath.Join(dir, fmt.Sprintf("%s.tfplan", name)))
+
 	terraformInit(t, "terraform", dir, project)
 	terraformPlan(t, "terraform", dir, project, name+".tfplan")
 	payload := terraformShow(t, "terraform", dir, project, name+".tfplan")
@@ -119,4 +122,23 @@ func DeepCopyMap(source interface{}, destination interface{}) error {
 	}
 
 	return nil
+}
+
+type TestCase struct {
+	Name string
+	Skip string
+}
+
+func GetSubTestName(fullTestName string) string {
+	parts := strings.Split(fullTestName, "/")
+
+	// Get the index of the last element
+	lastIndex := len(parts) - 1
+
+	// Check for an empty or malformed string
+	if lastIndex < 0 {
+		return ""
+	}
+
+	return parts[lastIndex]
 }
