@@ -60,6 +60,7 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/resource_spanner_database.go.tmpl'
 custom_diff:
   - 'resourceSpannerDBDdlCustomDiff'
+  - 'resourceSpannerEncryptionConfigCustomDiff'
 # Sweeper skipped as this resource has customized deletion.
 exclude_sweeper: true
 examples:
@@ -167,6 +168,7 @@ properties:
           Fully qualified name of the KMS keys to use to encrypt this database. The keys must exist
           in the same locations as the Spanner Database.
         immutable: true
+        default_from_api: true
         custom_flatten: templates/terraform/custom_flatten/spanner_database_kms_key_names.go.tmpl
         item_type:
           type: String

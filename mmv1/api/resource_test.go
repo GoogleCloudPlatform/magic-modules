@@ -343,6 +343,11 @@ func TestMagicianLocation(t *testing.T) {
 			break
 		}
 
+		// When running under bazel runtime paths are relative
+		if dir == "." {
+			break
+		}
+
 		parentDir := filepath.Dir(dir)
 		if parentDir == dir {
 			t.Fatal("Could not find mmv1 directory in parent directories")
