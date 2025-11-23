@@ -1,0 +1,7 @@
+resource "google_compute_global_address" "default" {
+  name               = "{{index $.Vars "global_address_name"}}"
+  address_type       = "EXTERNAL"
+  ip_version         = "IPV6"
+  ipv6_endpoint_type = "NETLB"
+}
+
