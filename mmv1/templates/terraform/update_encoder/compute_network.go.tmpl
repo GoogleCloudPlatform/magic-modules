@@ -9,7 +9,7 @@
 				return nil, fmt.Errorf("Cannot set BgpAlwaysCompareMed to true while DeleteBgpAlwaysCompareMed is also true")
 			}
 			obj["routingConfig"].(map[string]interface{})["bgpAlwaysCompareMed"] = nil
-		} else d.HasChange("bgp_always_compare_med") {
+		} else if d.HasChange("bgp_always_compare_med") {
 			obj["routingConfig"].(map[string]interface{})["bgpAlwaysCompareMed"] = d.Get("bgp_always_compare_med").(bool)
 		}
 	}
