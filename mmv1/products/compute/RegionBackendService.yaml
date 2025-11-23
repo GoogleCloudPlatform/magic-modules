@@ -14,6 +14,7 @@
 ---
 name: 'RegionBackendService'
 api_resource_type_kind: BackendService
+cai_resource_kind: 'RegionBackendService'
 kind: 'compute#backendService'
 description: |
   A Region Backend Service defines a regionally-scoped group of virtual
@@ -52,6 +53,7 @@ custom_code:
   post_create: 'templates/terraform/post_create/compute_region_backend_service_security_policy.go.tmpl'
 custom_diff:
   - 'customDiffRegionBackendService'
+include_in_tgc_next_DO_NOT_USE: true
 schema_version: 1
 migrate_state: 'tpgresource.MigrateStateNoop'
 sweeper:
@@ -1555,6 +1557,7 @@ properties:
             description: |
               A boolean flag enabling IP:PORT based dynamic forwarding.
             immutable: true
+            # include_empty_value_in_cai: true
   - name: 'haPolicy'
     type: NestedObject
     description: |
@@ -1571,6 +1574,7 @@ properties:
       - connectionTrackingPolicy
       - failoverPolicy
       - healthChecks
+    is_missing_in_cai: true
     properties:
       - name: 'fastIPMove'
         type: Enum

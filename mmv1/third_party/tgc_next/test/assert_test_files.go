@@ -131,15 +131,22 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	}
 
 	assets := make([]caiasset.Asset, 0)
-	for assetName, assetData := range testData.Cai {
+	for _, assetData := range testData.Cai {
 		assets = append(assets, assetData.CaiAsset)
-		assetType := assetData.CaiAsset.Type
-		if assetType == "" {
-			log.Printf("cai asset is unavailable for %s", assetName)
+	}
+
+	if os.Getenv("WRITE_FILES") != "" {
+		assetFile := fmt.Sprintf("%s.json", testName)
+		writeJSONFile(assetFile, assets)
+	}
+
+	for _, asset := range assets {
+		if asset.Type == "" {
+			log.Printf("cai asset is unavailable for %s", asset.Name)
 			return retry.RetryableError(fmt.Errorf("fail: test data is unavailable"))
 		}
-		if _, cai2hclSupported = cai2hclconverters.ConverterMap[assetType]; !cai2hclSupported {
-			log.Printf("%s is not supported in cai2hcl conversion.", assetType)
+		if _, cai2hclSupported = cai2hclconverters.ConverterMap[asset.Type]; !cai2hclSupported {
+			log.Printf("%s is not supported in cai2hcl conversion.", asset.Type)
 		}
 	}
 
@@ -154,11 +161,6 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 
 	if !(tfplan2caiSupported && cai2hclSupported) {
 		return fmt.Errorf("resource %s is supported in either tfplan2cai or cai2hcl within tgc, but not in both", resourceType)
-	}
-
-	if os.Getenv("WRITE_FILES") != "" {
-		assetFile := fmt.Sprintf("%s.json", testName)
-		writeJSONFile(assetFile, assets)
 	}
 
 	// Step 1: Use cai2hcl to convert export assets into a Terraform configuration (export config).
