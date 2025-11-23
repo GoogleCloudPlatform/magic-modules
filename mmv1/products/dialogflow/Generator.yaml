@@ -45,6 +45,11 @@ parameters:
     url_param_only: true
     description: |
       desc
+  - name: 'generatorId'
+    type: String
+    url_param_only: true
+    description: |
+      Optional. The ID to use for the generator, which will become the final component of the generator's resource name.
 
 properties:
   - name: name
@@ -152,10 +157,12 @@ properties:
                         properties:
                           - type: String
                             name: section
+                            required: true
                             description: |
                               Required. Name of the section.
                           - type: String
                             name: summary
+                            required: true
                             description: |
                               Required. Summary text for the section.
             - name: summarizationSectionList
