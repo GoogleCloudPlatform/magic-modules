@@ -21,7 +21,7 @@ resource "google_oracle_database_exadb_vm_cluster" "{{$.PrimaryResourceId}}"{
             size_in_gbs_per_node = 220
         }
         exascale_db_storage_vault = google_oracle_database_exascale_db_storage_vault.exascaleDbStorageVaults.id
-        hostname_prefix = "hostname1"
+        hostname_prefix = "hostname6"
         shape_attribute = "SMART_STORAGE"
         data_collection_options {
             is_diagnostics_events_enabled = "true"
