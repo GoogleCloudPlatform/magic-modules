@@ -651,7 +651,11 @@ func IsSiteVerificationRetryableError(err error) (bool, string) {
 }
 
 func IsServiceNetworkingConnectionRetryableError(err error) (bool, string) {
+	fmt.Printf("[DEBUG] [DEBUG] [DEBUG] Service Networking Connection Retryable Error %s", err)
+	log.Printf("[DEBUG] [DEBUG] [DEBUG] Service Networking Connection Retryable Error %s", err)
 	if gerr, ok := err.(*googleapi.Error); ok {
+		fmt.Printf("[DEBUG] [DEBUG] Service Networking Connection error %s", err)
+		fmt.Printf("[DEBUG] [DEBUG] Service Networking Connection error code %d", gerr.Code)
 		log.Printf("[DEBUG] [DEBUG] Service Networking Connection error %s", err)
 		log.Printf("[DEBUG] [DEBUG] Service Networking Connection error code %d", gerr.Code)
 		if gerr.Code == 16 {
