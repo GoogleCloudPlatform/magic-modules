@@ -113,6 +113,7 @@ properties:
       properties:
         - name: 'instance'
           type: ResourceRef
+          default_from_api: true
           description: |
             The name for a specific VM instance that the IP address belongs to.
             This is required for network endpoints of type GCE_VM_IP_PORT.
