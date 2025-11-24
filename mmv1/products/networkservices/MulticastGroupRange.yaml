@@ -159,6 +159,7 @@ properties:
           UPDATING
           UPDATE_FAILED
           INACTIVE
+        output: true
   - name: uniqueId
     type: String
     description: |-
