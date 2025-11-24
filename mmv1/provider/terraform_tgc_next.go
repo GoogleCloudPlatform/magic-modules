@@ -34,6 +34,8 @@ import (
 	"github.com/otiai10/copy"
 )
 
+var testRegex = regexp.MustCompile("func (TestAcc[^(]+)")
+
 // TerraformGoogleConversionNext is for both tfplan2cai and cai2hcl conversions
 // and copying other files, such as transport.go
 type TerraformGoogleConversionNext struct {
@@ -82,7 +84,7 @@ func NewTerraformGoogleConversionNext(product *api.Product, versionName string, 
 	return t
 }
 
-func (tgc TerraformGoogleConversionNext) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
+func (tgc TerraformGoogleConversionNext) Generate(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 	for _, object := range tgc.Product.Objects {
 		object.ExcludeIfNotInVersion(&tgc.Version)
 
@@ -104,7 +106,12 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 
 	if !object.IsExcluded() {
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
-		tgc.addTestsFromExamples(&object)
+		tgc.addTestsFromSamples(&object)
+		if object.TGCIncludeHandwrittenTests {
+			if err := tgc.addTestsFromHandwrittenTests(&object); err != nil {
+				log.Printf("Error adding examples from handwritten tests: %v", err)
+			}
+		}
 		tgc.GenerateResourceTests(object, *templateData, outputFolder)
 	}
 }
@@ -240,6 +247,7 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 		// services
 		"pkg/services/compute/image.go":     "third_party/terraform/services/compute/image.go",
 		"pkg/services/compute/disk_type.go": "third_party/terraform/services/compute/disk_type.go",
+		"pkg/services/kms/kms_utils.go":     "third_party/terraform/services/kms/kms_utils.go",
 	}
 	tgc.CopyFileList(outputFolder, resourceConverters)
 }
@@ -322,6 +330,72 @@ func (tgc TerraformGoogleConversionNext) addTestsFromExamples(object *api.Resour
 	}
 }
 
+func (tgc TerraformGoogleConversionNext) addTestsFromSamples(object *api.Resource) {
+	if object.Examples != nil {
+		tgc.addTestsFromExamples(object)
+		return
+	}
+	for _, sample := range object.Samples {
+		if sample.ExcludeTest {
+			continue
+		}
+		if object.ProductMetadata.VersionObjOrClosest(tgc.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0 {
+			continue
+		}
+		object.TGCTests = append(object.TGCTests, resource.TGCTest{
+			Name: "TestAcc" + sample.TestSampleSlug(object.ProductMetadata.Name, object.Name),
+			Skip: sample.TGCSkipTest,
+		})
+	}
+}
+func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *api.Resource) error {
+	if object.ProductMetadata == nil {
+		return nil
+	}
+	product := object.ProductMetadata
+	productName := google.Underscore(product.Name)
+	resourceFullName := fmt.Sprintf("%s_%s", productName, google.Underscore(object.Name))
+	handwrittenTestFilePath := fmt.Sprintf("third_party/terraform/services/%s/resource_%s_test.go", productName, resourceFullName)
+	data, err := os.ReadFile(handwrittenTestFilePath)
+	for err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			if strings.HasSuffix(handwrittenTestFilePath, ".tmpl") {
+				log.Printf("no handwritten test file found for %s", resourceFullName)
+				return nil
+			}
+			handwrittenTestFilePath += ".tmpl"
+			data, err = os.ReadFile(handwrittenTestFilePath)
+		} else {
+			return fmt.Errorf("error reading handwritten test file %s: %v", handwrittenTestFilePath, err)
+		}
+	}
+
+	// Skip adding handwritten tests that are already defined in yaml (because they have custom overrides etc.)
+	testNamesInYAML := make(map[string]struct{})
+	for _, test := range object.TGCTests {
+		if test.Name != "" {
+			testNamesInYAML[test.Name] = struct{}{}
+		}
+	}
+
+	matches := testRegex.FindAllSubmatch(data, -1)
+	tests := make([]resource.TGCTest, len(matches))
+	for i, match := range matches {
+		if len(match) == 2 {
+			if _, ok := testNamesInYAML[string(match[1])]; ok {
+				continue
+			}
+			tests[i] = resource.TGCTest{
+				Name: string(match[1]),
+			}
+		}
+	}
+
+	object.TGCTests = append(object.TGCTests, tests...)
+
+	return nil
+}
+
 // Generates the list of resources, and gets the count of resources.
 // The resource object has the format
 //
@@ -353,7 +427,7 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 				TerraformName:      object.TerraformName(),
 				ResourceName:       object.ResourceName(),
 				AliasName:          object.ResourceName(),
-				CaiAssetNameFormat: object.GetCaiAssetNameFormat(),
+				CaiAssetNameFormat: object.GetCaiAssetNameTemplate(),
 			}
 			tgc.ResourcesForVersion = append(tgc.ResourcesForVersion, resourceIdentifier)
 

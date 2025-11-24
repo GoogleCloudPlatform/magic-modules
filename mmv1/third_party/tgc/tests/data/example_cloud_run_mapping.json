@@ -1,6 +1,6 @@
 [
   {
-    "name": "//run.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/DomainMappings/tf-test-domain-meep.gcp.tfacc.hashicorptest.com",
+    "name": "//run.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/domainmappings/tf-test-domain-meep.gcp.tfacc.hashicorptest.com",
     "asset_type": "run.googleapis.com/DomainMapping",
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
     "resource": {

@@ -61,6 +61,7 @@ properties:
       User-provided name of the organization security policy. The name should be unique in the organization in which the security policy is created. This should only be used when SecurityPolicyType is FIREWALL.
     min_version: 'beta'
     immutable: true
+    ignore_read: true
   - name: 'description'
     type: String
     description: |

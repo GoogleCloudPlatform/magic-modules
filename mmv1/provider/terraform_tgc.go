@@ -69,7 +69,7 @@ func NewTerraformGoogleConversion(product *api.Product, versionName string, star
 	return t
 }
 
-func (tgc TerraformGoogleConversion) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
+func (tgc TerraformGoogleConversion) Generate(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 	// Temporary shim to generate the missing resources directory. Can be removed
 	// once the folder exists downstream.
 	resourcesFolder := path.Join(outputFolder, "converters/google/resources")
@@ -435,6 +435,15 @@ func (tgc TerraformGoogleConversion) CopyCommonFiles(outputFolder string, genera
 		"converters/google/resources/services/logging/logging_billing_account_bucket_config.go": "third_party/tgc/services/logging/logging_billing_account_bucket_config.go",
 		"converters/google/resources/services/appengine/appengine_standard_version.go":          "third_party/tgc/services/appengine/appengine_standard_version.go",
 		"converters/google/resources/services/logging/logging_project_sink.go":                  "third_party/tgc/services/logging/logging_project_sink.go",
+		"converters/google/resources/services/logging/logging_folder_sink.go":                   "third_party/tgc/services/logging/logging_folder_sink.go",
+		"converters/google/resources/services/logging/logging_organization_sink.go":             "third_party/tgc/services/logging/logging_organization_sink.go",
+		"../cmd/tfplan2cai/convert.go":                                                          "third_party/tgc/cmd/tfplan2cai/convert.go",
+		"../cmd/tfplan2cai/convert_test.go":                                                     "third_party/tgc/cmd/tfplan2cai/convert_test.go",
+		"../cmd/tfplan2cai/list_supported_resources.go":                                         "third_party/tgc/cmd/tfplan2cai/list_supported_resources.go",
+		"../cmd/tfplan2cai/logger.go":                                                           "third_party/tgc/cmd/tfplan2cai/logger.go",
+		"../cmd/tfplan2cai/logger_test.go":                                                      "third_party/tgc/cmd/tfplan2cai/logger_test.go",
+		"../cmd/tfplan2cai/main.go":                                                             "third_party/tgc/cmd/tfplan2cai/main.go",
+		"../cmd/tfplan2cai/root.go":                                                             "third_party/tgc/cmd/tfplan2cai/root.go",
 	}
 	tgc.CopyFileList(outputFolder, resourceConverters)
 }

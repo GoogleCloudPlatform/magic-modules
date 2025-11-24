@@ -5,6 +5,10 @@ resource "google_alloydb_cluster" "primary" {
     network = google_compute_network.default.id
   }
 
+  initial_user {
+    password = "{{index $.Vars "alloydb_primary_cluster_name"}}"
+  }
+
   deletion_protection = false
 }
 

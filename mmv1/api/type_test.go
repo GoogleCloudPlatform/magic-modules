@@ -89,6 +89,154 @@ func TestTypeMinVersionObj(t *testing.T) {
 	}
 }
 
+func TestTypeFieldType(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		description string
+		obj         Type
+		expected    []string
+	}{
+		{
+			description: "Required field",
+			obj: Type{
+				Required: true,
+			},
+			expected: []string{"Required"},
+		},
+		{
+			description: "Optional field",
+			obj: Type{
+				Required: false,
+				Output:   false,
+			},
+			expected: []string{"Optional"},
+		},
+		{
+			description: "Output field with parent",
+			obj: Type{
+				Required:       false,
+				Output:         true,
+				ParentMetadata: &Type{},
+			},
+			expected: []string{"Output"},
+		},
+		{
+			description: "Output field without parent",
+			obj: Type{
+				Required:       false,
+				Output:         true,
+				ParentMetadata: nil,
+			},
+			expected: []string{},
+		},
+		{
+			description: "WriteOnlyLegacy field",
+			obj: Type{
+				WriteOnlyLegacy: true,
+			},
+			expected: []string{"Optional", "Write-Only"},
+		},
+		{
+			description: "WriteOnly field",
+			obj: Type{
+				WriteOnly: true,
+			},
+			expected: []string{"Optional", "Write-Only"},
+		},
+		{
+			description: "Beta field in GA resource",
+			obj: Type{
+				MinVersion: "beta",
+				ResourceMetadata: &Resource{
+					MinVersion: "ga",
+				},
+			},
+			expected: []string{"Optional", "[Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)"},
+		},
+		{
+			description: "Beta field in Beta resource",
+			obj: Type{
+				MinVersion: "beta",
+				ResourceMetadata: &Resource{
+					MinVersion: "beta",
+				},
+			},
+			expected: []string{"Optional"},
+		},
+		{
+			description: "GA field in GA resource",
+			obj: Type{
+				MinVersion: "ga",
+				ResourceMetadata: &Resource{
+					MinVersion: "ga",
+				},
+			},
+			expected: []string{"Optional"},
+		},
+		{
+			description: "Deprecated field",
+			obj: Type{
+				DeprecationMessage: "This field is deprecated.",
+			},
+			expected: []string{"Optional", "Deprecated"},
+		},
+		{
+			description: "All fields set for a required property",
+			obj: Type{
+				Required:           true,
+				WriteOnly:          true,
+				MinVersion:         "beta",
+				ResourceMetadata:   &Resource{MinVersion: "ga"},
+				DeprecationMessage: "This field is deprecated.",
+			},
+			expected: []string{"Required", "Write-Only", "[Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)", "Deprecated"},
+		},
+		{
+			description: "All fields set for an optional property",
+			obj: Type{
+				WriteOnly:          true,
+				MinVersion:         "beta",
+				ResourceMetadata:   &Resource{MinVersion: "ga"},
+				DeprecationMessage: "This field is deprecated.",
+			},
+			expected: []string{"Optional", "Write-Only", "[Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)", "Deprecated"},
+		},
+		{
+			description: "Output and deprecated",
+			obj: Type{
+				Output:             true,
+				ParentMetadata:     &Type{},
+				DeprecationMessage: "This field is deprecated.",
+			},
+			expected: []string{"Output", "Deprecated"},
+		},
+		{
+			description: "Required and deprecated",
+			obj: Type{
+				Required:           true,
+				ParentMetadata:     &Type{},
+				DeprecationMessage: "This field is deprecated.",
+			},
+			expected: []string{"Required", "Deprecated"},
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+
+			fieldType := tc.obj.FieldType()
+
+			if got, want := fieldType, tc.expected; !reflect.DeepEqual(got, want) {
+				t.Errorf("expected %v to be %v", got, want)
+			}
+		})
+	}
+}
+
 func TestTypeExcludeIfNotInVersion(t *testing.T) {
 	t.Parallel()
 
@@ -372,6 +520,38 @@ func TestMetadataApiLineage(t *testing.T) {
 	}
 	root.SetDefault(&Resource{})
 
+	fineGrainedRoot := Type{
+		Name: "root",
+		Type: "NestedObject",
+		Properties: []*Type{
+			{
+				Name: "foo",
+				Type: "NestedObject",
+				Properties: []*Type{
+					{
+						Name: "bars",
+						Type: "Array",
+						ItemType: &Type{
+							Type: "NestedObject",
+							Properties: []*Type{
+								{
+									Name: "fooBar",
+									Type: "String",
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				Name:    "baz",
+				ApiName: "bazbaz",
+				Type:    "String",
+			},
+		},
+	}
+	fineGrainedRoot.SetDefault(&Resource{ApiResourceField: "whatever"})
+
 	cases := []struct {
 		description string
 		obj         Type
@@ -401,6 +581,31 @@ func TestMetadataApiLineage(t *testing.T) {
 			description: "with api name",
 			obj:         *root.Properties[1],
 			expected:    "root.bazbaz",
+		},
+		{
+			description: "fine-grained root type",
+			obj:         fineGrainedRoot,
+			expected:    "whatever.root",
+		},
+		{
+			description: "fine-grained sub type",
+			obj:         *fineGrainedRoot.Properties[0],
+			expected:    "whatever.root.foo",
+		},
+		{
+			description: "fine-grained array",
+			obj:         *fineGrainedRoot.Properties[0].Properties[0],
+			expected:    "whatever.root.foo.bars",
+		},
+		{
+			description: "fine-grained array of objects",
+			obj:         *fineGrainedRoot.Properties[0].Properties[0].ItemType.Properties[0],
+			expected:    "whatever.root.foo.bars.fooBar",
+		},
+		{
+			description: "fine-grained with api name",
+			obj:         *fineGrainedRoot.Properties[1],
+			expected:    "whatever.root.bazbaz",
 		},
 	}
 
