@@ -1,0 +1,4 @@
+if v, ok := d.GetOkExists("entry_group_id"); ok && strings.HasPrefix(v.(string), "@") {
+      // Not deleting ingestion managed resources
+      return nil
+}
