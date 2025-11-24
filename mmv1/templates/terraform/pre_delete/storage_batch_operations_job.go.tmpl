@@ -1,0 +1,3 @@
+if d.Get("delete_protection").(bool) {
+    return fmt.Errorf("[ERROR] delete_protection set to true, existing resource on cloud will not be deleted")
+}

@@ -1,0 +1,25 @@
+resource "google_eventarc_enrollment" "{{$.PrimaryResourceId}}" {
+  location      = "us-central1"
+  enrollment_id = "{{index $.Vars "enrollment_id"}}"
+  message_bus   = google_eventarc_message_bus.primary.id
+  destination   = google_eventarc_pipeline.pipeline.id
+  cel_match     = "message.type == 'google.cloud.dataflow.job.v1beta3.statusChanged'"
+}
+
+resource "google_eventarc_pipeline" "pipeline" {
+  location    = "us-central1"
+  pipeline_id = "{{index $.Vars "pipeline_id"}}"
+  destinations {
+    http_endpoint {
+      uri = "https://10.77.0.0:80/route"
+    }
+    network_config {
+      network_attachment = "projects/{{index $.TestEnvVars "project_id"}}/regions/us-central1/networkAttachments/{{index $.Vars "network_attachment_name"}}"
+    }
+  }
+}
+
+resource "google_eventarc_message_bus" "message_bus" {
+  location       = "us-central1"
+  message_bus_id = "{{index $.Vars "message_bus_id"}}"
+}

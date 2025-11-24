@@ -1,8 +1,0 @@
-{{- if ne $.TargetVersionName "ga" -}}
-obj = make(map[string]interface{})
-if v, ok := d.GetOk("force_destroy"); ok {
-	if v == true {
-		obj["force"] = true
-	}
-}
-{{- end }}

@@ -131,6 +131,9 @@ func (ar *Runner) Run(name string, args []string, env map[string]string) (string
 		return "", fmt.Errorf("path error running %s: %v", name, typedErr)
 
 	}
+	if err != nil {
+		return "", fmt.Errorf("error running %q: %v", name, err)
+	}
 	return string(out), nil
 }
 

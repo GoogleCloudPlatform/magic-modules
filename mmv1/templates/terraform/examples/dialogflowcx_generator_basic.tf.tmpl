@@ -1,0 +1,24 @@
+resource "google_dialogflow_cx_agent" "agent" {
+  display_name = "{{index $.Vars "agent_name"}}"
+  location = "global"
+  default_language_code = "en"
+  supported_language_codes = ["fr","de","es"]
+  time_zone = "America/New_York"
+  description = "Example description."
+}
+
+resource "google_dialogflow_cx_generator" "{{$.PrimaryResourceId}}" {
+  parent = google_dialogflow_cx_agent.agent.id
+  language_code = "fr"
+  display_name = "TF Prompt generator"
+  llm_model_settings {
+    model = "gemini-2.0-flash-001"
+    prompt_text = "Return me some great results"
+  }
+  prompt_text {
+    text = "Send me great results in french"
+  }
+  model_parameter {
+    temperature = 0.55
+  }
+}

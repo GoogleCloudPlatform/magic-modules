@@ -41,8 +41,8 @@ timeouts:
 identity:
   - web_resource_id
 custom_code:
+exclude_sweeper: true
 error_retry_predicates:
-
   - 'transport_tpg.IsSiteVerificationRetryableError'
 supports_indirect_user_project_override: true
 examples:

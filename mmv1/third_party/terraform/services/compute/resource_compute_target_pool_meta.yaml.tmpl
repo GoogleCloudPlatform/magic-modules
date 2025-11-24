@@ -7,3 +7,17 @@ api_version: 'beta'
 api_version: 'v1'
 {{- end }}
 api_resource_type_kind: 'TargetPool'
+fields:
+  - api_field: 'backupPool'
+  - api_field: 'description'
+  - api_field: 'failoverRatio'
+  - api_field: 'healthChecks'
+  - api_field: 'instances'
+  - api_field: 'name'
+  - field: 'project'
+  - api_field: 'region'
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'securityPolicy'
+{{- end }}
+  - api_field: 'selfLink'
+  - api_field: 'sessionAffinity'

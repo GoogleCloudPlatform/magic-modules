@@ -1,0 +1,14 @@
+resource "google_parameter_manager_regional_parameter" "regional-parameter-basic" {
+  parameter_id = "{{index $.Vars "parameter_id"}}"
+  format = "JSON"
+  location = "us-central1"
+}
+
+resource "google_parameter_manager_regional_parameter_version" "{{$.PrimaryResourceId}}" {
+  parameter = google_parameter_manager_regional_parameter.regional-parameter-basic.id
+  parameter_version_id = "{{index $.Vars "parameter_version_id"}}"
+  parameter_data = jsonencode({
+    "key1": "val1",
+    "key2": "val2"
+  })
+}

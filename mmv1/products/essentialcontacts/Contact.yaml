@@ -13,6 +13,10 @@
 
 ---
 name: 'Contact'
+api_variant_patterns:
+  - 'folders/{folder}/contacts/{contact}'
+  - 'organizations/{organization}/contacts/{contact}'
+  - 'projects/{project}/contacts/{contact}'
 description: |
   A contact that will receive notifications from Google Cloud.
 references:

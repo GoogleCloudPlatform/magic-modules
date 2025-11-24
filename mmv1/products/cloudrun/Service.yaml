@@ -27,8 +27,12 @@ docs:
 id_format: 'locations/{{location}}/namespaces/{{project}}/services/{{name}}'
 base_url: 'apis/serving.knative.dev/v1/namespaces/{{project}}/services'
 cai_base_url: 'projects/{{project}}/locations/{{location}}/services'
+cai_asset_name_format: 'projects/{{project}}/locations/{{location}}/services/{{name}}'
 import_format:
   - 'locations/{{location}}/namespaces/{{project}}/services/{{name}}'
+datasource:
+  generate: true
+  exclude_test: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -44,7 +48,6 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'service'
   base_url: 'v1/projects/{{project}}/locations/{{location}}/services/{{service}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/services/{{service}}'
     - '{{service}}'
@@ -60,6 +63,11 @@ error_retry_predicates:
 schema_version: 2
 state_upgrade_base_schema_version: 1
 state_upgraders: true
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "europe-west1"
+    - region: "europe-north1"
 examples:
   - name: 'cloud_run_service_basic'
     primary_resource_id: 'default'
@@ -71,7 +79,6 @@ examples:
   - name: 'cloud_run_service_gpu'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    min_version: 'beta'
     vars:
       cloud_run_service_name: 'cloudrun-srv'
     test_env_vars:
@@ -132,10 +139,22 @@ examples:
     primary_resource_id: 'default'
     vars:
       cloud_run_service_name: 'cloudrun-srv'
+  - name: 'cloud_run_service_readiness_probe'
+    primary_resource_id: 'default'
+    vars:
+      cloud_run_service_name: 'cloudrun-srv-rp'
     test_env_vars:
       project: 'PROJECT_NAME'
   - name: 'cloud_run_service_multicontainer'
     primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      cloud_run_service_name: 'cloudrun-srv'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'cloud_run_service_iap'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       cloud_run_service_name: 'cloudrun-srv'
@@ -317,10 +336,15 @@ properties:
                     for connections to the Revision.
                   - `run.googleapis.com/startup-cpu-boost` sets whether to allocate extra CPU to containers on startup.
                     See https://cloud.google.com/sdk/gcloud/reference/run/deploy#--[no-]cpu-boost.
+                  - `run.googleapis.com/network-interfaces` sets [Direct VPC egress](https://cloud.google.com/run/docs/configuring/vpc-direct-vpc#yaml)
+                    for the Revision.
                   - `run.googleapis.com/vpc-access-connector` sets a [VPC connector](https://cloud.google.com/run/docs/configuring/connecting-vpc#terraform_1)
                     for the Revision.
                   - `run.googleapis.com/vpc-access-egress` sets the outbound traffic to send through the VPC connector for this resource.
                     See https://cloud.google.com/sdk/gcloud/reference/run/deploy#--vpc-egress.
+                  - `run.googleapis.com/gpu-zonal-redundancy-disabled` sets
+                    [GPU zonal redundancy](https://cloud.google.com/run/docs/configuring/services/gpu-zonal-redundancy) for the Revision.
+                  - `run.googleapis.com/health-check-disabled` disabled health checking containers during deployment.
                 default_from_api: true
                 diff_suppress_func: 'cloudrunTemplateAnnotationDiffSuppress'
               - name: 'name'
@@ -446,6 +470,10 @@ properties:
                             description: Name of the environment variable.
                           - name: 'value'
                             type: String
+                            # env is a set.
+                            # The env.value has value "" in Terraform state, but it has value nil in Terraform plan,
+                            # which causes the diffs for unchanged env. default_value: "" is to suppress the diffs.
+                            default_value: ""
                             description: |-
                               Defaults to "".
                           - name: 'valueFrom'
@@ -470,7 +498,8 @@ properties:
                                     description: |-
                                       The name of the secret in Cloud Secret Manager. By default, the secret is assumed to be in the same project.
                                       If the secret is in another project, you must define an alias.
-                                      An alias definition has the form: :projects/{project-id|project-number}/secrets/.
+                                      An alias definition has the form:
+                                      {alias}:projects/{project-id|project-number}/secrets/{secret-name}.
                                       If multiple alias definitions are needed, they must be separated by commas.
                                       The alias definitions must be set on the run.googleapis.com/secrets annotation.
                                     required: true
@@ -510,6 +539,10 @@ properties:
                           type: KeyValuePairs
                           description: |-
                             Limits describes the maximum amount of compute resources allowed.
+                            CPU Limit details:
+                            - For fractional CPU values (e.g. `0.5`, `0.75`, min `0.08`) are also supported.
+                            - CPU allocation must comply with memory limits and concurrency rules described in:
+                              https://cloud.google.com/run/docs/configuring/services/cpu
                             The values of the map is string form of the 'quantity' k8s type:
                             https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
                           default_from_api: true
@@ -535,6 +568,10 @@ properties:
                               Path within the container at which the volume should be mounted.  Must
                               not contain ':'.
                             required: true
+                          - name: 'subPath'
+                            type: String
+                            description: |-
+                              Path within the volume from which the container's volume should be mounted.
                           - name: 'name'
                             type: String
                             description: |-
@@ -654,6 +691,78 @@ properties:
                                 The name of the service to place in the gRPC HealthCheckRequest
                                 (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
                                 If this is not specified, the default behavior is defined by gRPC.
+                    - name: 'readinessProbe'
+                      type: NestedObject
+                      description: |-
+                        Periodic probe of container readiness.
+                      properties:
+                        - name: 'timeoutSeconds'
+                          type: Integer
+                          description: |-
+                            Number of seconds after which the probe times out.
+                            Defaults to 1 second. Must be smaller than period_seconds.
+                          default_from_api: true
+                        - name: 'periodSeconds'
+                          type: Integer
+                          description: |-
+                            How often (in seconds) to perform the probe.
+                            Default to 10 seconds.
+                          default_from_api: true
+                        - name: 'failureThreshold'
+                          type: Integer
+                          description: |-
+                            Minimum consecutive failures for the probe to be considered failed after
+                            having succeeded. Defaults to 3.
+                          default_from_api: true
+                        - name: 'successThreshold'
+                          type: Integer
+                          description: |-
+                            Minimum consecutive successes for the probe to be considered successful after having failed.
+                            Defaults to 2.
+                          default_from_api: true
+                        - name: 'httpGet'
+                          type: NestedObject
+                          description: |-
+                            HttpGet specifies the http request to perform.
+                          send_empty_value: true
+                          allow_empty_object: true
+                          exactly_one_of:
+                            - 'template.0.spec.0.containers.0.readiness_probe.0.http_get'
+                            - 'template.0.spec.0.containers.0.readiness_probe.0.grpc'
+                          properties:
+                            - name: 'path'
+                              type: String
+                              description: |-
+                                Path to access on the HTTP server. If set, it should not be empty string.
+                              default_from_api: true
+                            - name: 'port'
+                              type: Integer
+                              description: |-
+                                Port number to access on the container. Number must be in the range 1 to 65535.
+                                If not specified, defaults to the same value as container.ports[0].containerPort.
+                              default_from_api: true
+                        - name: 'grpc'
+                          type: NestedObject
+                          description: |-
+                            GRPC specifies an action involving a GRPC port.
+                          send_empty_value: true
+                          allow_empty_object: true
+                          exactly_one_of:
+                            - 'template.0.spec.0.containers.0.readiness_probe.0.http_get'
+                            - 'template.0.spec.0.containers.0.readiness_probe.0.grpc'
+                          properties:
+                            - name: 'port'
+                              type: Integer
+                              description: |-
+                                Port number to access on the container. Number must be in the range 1 to 65535.
+                                If not specified, defaults to the same value as container.ports[0].containerPort.
+                              default_from_api: true
+                            - name: 'service'
+                              type: String
+                              description: |-
+                                The name of the service to place in the gRPC HealthCheckRequest
+                                (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+                                If this is not specified, the default behavior is defined by gRPC.
                     - name: 'livenessProbe'
                       type: NestedObject
                       description: |-
@@ -752,7 +861,6 @@ properties:
                   Node Selector describes the hardware requirements of the resources.
                   Use the following node selector keys to configure features on a Revision:
                     - `run.googleapis.com/accelerator` sets the [type of GPU](https://cloud.google.com/run/docs/configuring/services/gpu) required by the Revision to run.
-                min_version: 'beta'
               - name: 'containerConcurrency'
                 type: Integer
                 description: |-
@@ -1086,3 +1194,6 @@ properties:
             for the Service. For example, `"run.googleapis.com/ingress" = "all"`.
           - `run.googleapis.com/launch-stage` sets the [launch stage](https://cloud.google.com/run/docs/troubleshooting#launch-stage-validation)
             when a preview feature is used. For example, `"run.googleapis.com/launch-stage": "BETA"`
+          - `run.googleapis.com/minScale` sets the [minimum number of container instances](https://cloud.google.com/sdk/gcloud/reference/run/deploy#--min) of the Service.
+          - `run.googleapis.com/scalingMode` sets the type of scaling mode for the service. The supported values for scaling mode are "manual" and "automatic". If not provided, it defaults to "automatic".
+          - `run.googleapis.com/manualInstanceCount` sets the total instance count for the service in manual scaling mode. This number of instances is divided among all revisions with specified traffic based on the percent of traffic they are receiving.

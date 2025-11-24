@@ -52,7 +52,7 @@ resource "google_compute_instance" "callouts_instance" {
   }
 
   metadata = {
-    gce-container-declaration = "# DISCLAIMER:\n# This container declaration format is not a public API and may change without\n# notice. Please use gcloud command-line tool or Google Cloud Console to run\n# Containers on Google Compute Engine.\n\nspec:\n  containers:\n  - image: us-docker.pkg.dev/service-extensions/ext-proc/service-callout-basic-example-python:latest\n    name: callouts-vm\n    securityContext:\n      privileged: false\n    stdin: false\n    tty: false\n    volumeMounts: []\n  restartPolicy: Always\n  volumes: []\n"
+    gce-container-declaration = "# DISCLAIMER:\n# This container declaration format is not a public API and may change without\n# notice. Please use gcloud command-line tool or Google Cloud Console to run\n# Containers on Google Compute Engine.\n\nspec:\n  containers:\n  - image: us-docker.pkg.dev/service-extensions-samples/callouts/python-example-basic:main\n    name: callouts-vm\n    securityContext:\n      privileged: false\n    stdin: false\n    tty: false\n    volumeMounts: []\n  restartPolicy: Always\n  volumes: []\n"
     google-logging-enabled = "true"
   }
 
@@ -203,8 +203,16 @@ resource "google_network_security_authz_policy" "{{$.PrimaryResourceId}}" {
   http_rules {
     from {
       not_sources {
+          ip_blocks {
+          length = 24
+          prefix = "10.1.5.0"
+        }
         principals {
-          exact = "dummy-principal"
+          principal_selector = "CLIENT_CERT_URI_SAN"
+          principal {
+            ignore_case = true
+            exact       = "exact"
+          }
         }
       }
     }

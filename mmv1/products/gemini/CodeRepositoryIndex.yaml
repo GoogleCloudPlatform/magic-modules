@@ -14,10 +14,15 @@
 ---
 name: CodeRepositoryIndex
 description: The resource for managing Code Repository Index for Gemini Code Assist.
-min_version: 'beta'
+references:
+  guides:
+    'Gemini Code Assist overview': 'https://cloud.google.com/gemini/docs/codeassist/overview'
+  api: 'https://cloud.google.com/gemini/docs/api/reference/rest/v1/projects.locations.codeRepositoryIndexes'
 base_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes
 self_link: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}
 create_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes?codeRepositoryIndexId={{code_repository_index_id}}
+delete_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}?force={{force_destroy}}
+collection_url_key: 'codeRepositoryIndexes'
 update_verb: 'PATCH'
 update_mask: true
 id_format: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}
@@ -26,7 +31,6 @@ import_format:
 mutex: 'projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}'
 examples:
   - name: "gemini_code_repository_index_basic"
-    min_version: 'beta'
     primary_resource_id: "example"
     test_vars_overrides:
       cri_id: '"cri-example"'
@@ -51,11 +55,12 @@ async:
   result:
     resource_inside_response: true
   include_project: false
-custom_code:
-  pre_delete: templates/terraform/pre_delete/code_repository_index_force_delete.go.tmpl
 error_retry_predicates:
   - 'transport_tpg.IsCodeRepositoryIndexUnreadyError'
   - 'transport_tpg.IsRepositoryGroupQueueError'
+sweeper:
+  url_substitutions:
+    - force_destroy: true
 virtual_fields:
   - name: 'force_destroy'
     description:
@@ -85,12 +90,7 @@ properties:
     type: String
     description: |-
       Output only. Code Repository Index instance State.
-      Possible values:
-      STATE_UNSPECIFIED
-      CREATING
-      ACTIVE
-      DELETING
-      SUSPENDED
+      Possible values are: `STATE_UNSPECIFIED`, `CREATING`, `ACTIVE`, `DELETING`, `SUSPENDED`.
     output: true
   - name: labels
     type: KeyValueLabels
@@ -99,7 +99,7 @@ properties:
     type: String
     description: |-
       Optional. Immutable. Customer-managed encryption key name, in the format
-      projects/*/locations/*/keyRings/*/cryptoKeys/*.
+      `projects/*/locations/*/keyRings/*/cryptoKeys/*`.
     immutable: true
   - name: name
     type: String

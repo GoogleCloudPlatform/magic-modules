@@ -47,9 +47,12 @@ examples:
     primary_resource_id: 'index_endpoint'
     vars:
       network_name: 'network-name'
+      kms_key_name: 'kms-name'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     exclude_docs: true
+    min_version: beta
   - name: 'vertex_ai_index_endpoint_with_psc'
     primary_resource_id: 'index_endpoint'
   - name: 'vertex_ai_index_endpoint_with_false_psc'
@@ -137,3 +140,19 @@ properties:
     type: String
     description: If publicEndpointEnabled is true, this field will be populated with the domain name to use for this index endpoint.
     output: true
+  - name: 'encryptionSpec'
+    type: NestedObject
+    description:
+      Customer-managed encryption key spec for an IndexEndpoint. If set, this IndexEndpoint and all sub-resources of this IndexEndpoint will be secured by this key.
+    immutable: true
+    properties:
+      - name: 'kmsKeyName'
+        type: String
+        description:
+          'Required. The Cloud KMS resource identifier of the customer managed
+          encryption key used to protect a resource. Has the form:
+          `projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key`.
+          The key needs to be in the same region as where the compute resource
+          is created.'
+        required: true
+        immutable: true

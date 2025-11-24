@@ -1,0 +1,6 @@
+// Wrap the request body in an instancePartition field
+wrapped := make(map[string]interface{})
+wrapped["instancePartitionId"] = obj["name"]
+wrapped["instancePartition"] = obj
+delete(obj, "name")
+return wrapped, nil

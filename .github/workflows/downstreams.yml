@@ -6,9 +6,12 @@ on:
     branches:
       - main
       - 'FEATURE-BRANCH-*'
+  merge_group:
+    types: [checks_requested]
+  pull_request:
 
 concurrency:
-  group: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || format('commit-{0}', github.sha) }}
+  group: ${{ github.event_name == 'merge_group' && format('merge-group-{0}', github.event.merge_group.head_sha) || github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || format('commit-{0}', github.sha) }}
   cancel-in-progress: true
 
 jobs:

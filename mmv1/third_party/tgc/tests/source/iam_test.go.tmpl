@@ -1,18 +1,20 @@
 package test
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	crmv1 "google.golang.org/api/cloudresourcemanager/v1"
 
-	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/tfdata"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/tfplan"
+	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/converters/google/resources"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/tfdata"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/tfplan2cai/tfplan"
 	provider "github.com/hashicorp/terraform-provider-google-beta/google-beta/provider"
 )
 

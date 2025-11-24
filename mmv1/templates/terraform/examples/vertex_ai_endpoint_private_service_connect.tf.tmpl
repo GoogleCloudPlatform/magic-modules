@@ -1,3 +1,7 @@
+resource "google_compute_network" "default" {
+  name = "{{index $.Vars "network_name"}}-%{random_suffix}"
+}
+
 resource "google_vertex_ai_endpoint" "{{$.PrimaryResourceId}}" {
   name         = "endpoint-name%{random_suffix}"
   display_name = "sample-endpoint"
@@ -12,7 +16,11 @@ resource "google_vertex_ai_endpoint" "{{$.PrimaryResourceId}}" {
     project_allowlist = [
       "${data.google_project.project.project_id}"
     ]
-    enable_secure_private_service_connect = false
+
+    psc_automation_configs {
+      project_id = data.google_project.project.project_id
+      network    = google_compute_network.default.id
+    }
   }
 }
 

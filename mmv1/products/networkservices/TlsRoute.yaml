@@ -15,7 +15,6 @@
 name: 'TlsRoute'
 description: |
   TlsRoute defines how traffic should be routed based on SNI and other matching L3 attributes.
-min_version: 'beta'
 references:
   guides:
   api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.tlsRoutes'
@@ -47,21 +46,18 @@ custom_code:
 examples:
   - name: 'network_services_tls_route_basic'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
       resource_name: 'my-tls-route'
       backend_service_name: 'my-backend-service'
       http_health_check_name: 'backend-service-health-check'
   - name: 'network_services_tls_route_mesh_basic'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
       resource_name: 'my-tls-route'
       backend_service_name: 'my-backend-service'
       http_health_check_name: 'backend-service-health-check'
   - name: 'network_services_tls_route_gateway_basic'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
       resource_name: 'my-tls-route'
       backend_service_name: 'my-backend-service'
@@ -71,7 +67,6 @@ parameters:
     type: String
     description: |
       Name of the TlsRoute resource.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -80,32 +75,27 @@ properties:
     type: String
     description: |
       Server-defined URL of this resource.
-    min_version: 'beta'
     output: true
   - name: 'createTime'
     type: Time
     description: |
       Time the TlsRoute was created in UTC.
-    min_version: 'beta'
     output: true
   - name: 'updateTime'
     type: Time
     description: |
       Time the TlsRoute was updated in UTC.
-    min_version: 'beta'
     output: true
   - name: 'description'
     type: String
     description: |
       A free-text description of the resource. Max length 1024 characters.
-    min_version: 'beta'
   - name: 'meshes'
     type: Array
     description: |
       Meshes defines a list of meshes this TlsRoute is attached to, as one of the routing rules to route the requests served by the mesh.
       Each mesh reference should match the pattern: projects/*/locations/global/meshes/<mesh_name>
       The attached Mesh should be of a type SIDECAR
-    min_version: 'beta'
     send_empty_value: true
     item_type:
       type: String
@@ -114,7 +104,6 @@ properties:
     description: |
       Gateways defines a list of gateways this TlsRoute is attached to, as one of the routing rules to route the requests served by the gateway.
       Each gateway reference should match the pattern: projects/*/locations/global/gateways/<gateway_name>
-    min_version: 'beta'
     send_empty_value: true
     item_type:
       type: String
@@ -122,7 +111,6 @@ properties:
     type: Array
     description: |
       Rules that define how traffic is routed and handled.
-    min_version: 'beta'
     required: true
     send_empty_value: true
     item_type:
@@ -132,7 +120,6 @@ properties:
           type: Array
           description: |
             Matches define the predicate used to match requests to a given action.
-          min_version: 'beta'
           required: true
           item_type:
             type: NestedObject
@@ -142,7 +129,6 @@ properties:
                 description: |
                   SNI (server name indicator) to match against. SNI will be matched against all wildcard domains, i.e. www.example.com will be first matched against www.example.com, then *.example.com, then *.com.
                   Partial wildcards are not supported, and values like *w.example.com are invalid. At least one of sniHost and alpn is required. Up to 5 sni hosts across all matches can be set.
-                min_version: 'beta'
                 send_empty_value: true
                 item_type:
                   type: String
@@ -150,7 +136,6 @@ properties:
                 type: Array
                 description: |
                   ALPN (Application-Layer Protocol Negotiation) to match against. Examples: "http/1.1", "h2". At least one of sniHost and alpn is required. Up to 5 alpns across all matches can be set.
-                min_version: 'beta'
                 send_empty_value: true
                 item_type:
                   type: String
@@ -158,14 +143,12 @@ properties:
           type: NestedObject
           description: |
             Required. A detailed rule defining how to route traffic.
-          min_version: 'beta'
           required: true
           properties:
             - name: 'destinations'
               type: Array
               description: |
                 The destination to which traffic should be forwarded.
-              min_version: 'beta'
               item_type:
                 type: NestedObject
                 properties:
@@ -173,9 +156,7 @@ properties:
                     type: String
                     description: |
                       The URL of a BackendService to route traffic to.
-                    min_version: 'beta'
                   - name: 'weight'
                     type: Integer
                     description: |
                       Specifies the proportion of requests forwarded to the backend referenced by the serviceName field.
-                    min_version: 'beta'

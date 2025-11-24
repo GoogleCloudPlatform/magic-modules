@@ -1,0 +1,166 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Playbook'
+description: |
+  Playbook is the basic building block to instruct the LLM how to execute a certain task.
+references:
+  guides:
+    'Official CX Documentation': 'https://cloud.google.com/dialogflow/cx/docs'
+  api: 'https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.playbooks'
+
+base_url: '{{parent}}/playbooks'
+self_link: '{{parent}}/playbooks/{{name}}'
+
+create_url: '{{parent}}/playbooks'
+
+update_verb: 'PATCH'
+update_mask: true
+
+custom_code:
+  pre_create: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
+  pre_read: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
+  pre_update: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
+  pre_delete: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/dialogflowcx_playbook.go.tmpl'
+
+examples:
+  - name: "dialogflowcx_playbook_basic"
+    primary_resource_id: "my-playbook"
+    vars:
+      agent_name: 'dialogflowcx-agent-basic'
+  - name: "dialogflowcx_playbook_fulfillment"
+    primary_resource_id: "my-playbook"
+    vars:
+      agent_name: 'dialogflowcx-agent'
+      bucket_name: 'dialogflowcx-bucket'
+
+parameters:
+  - name: 'parent'
+    type: String
+    description: |
+      The agent to create a Playbook for.
+      Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
+    url_param_only: true
+    immutable: true
+
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The unique identifier of the Playbook.
+      Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/playbooks/<Playbook ID>.
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'displayName'
+    type: String
+    description: |
+      The human-readable name of the playbook, unique within an agent.
+    required: true
+  - name: 'goal'
+    type: String
+    description: |
+      High level description of the goal the playbook intend to accomplish. A goal should be concise since it's visible to other playbooks that may reference this playbook.
+    required: true
+  - name: 'instruction'
+    type: NestedObject
+    description: |
+      Instruction to accomplish target goal.
+    properties:
+      - name: 'guidelines'
+        type: String
+        description: |
+          General guidelines for the playbook. These are unstructured instructions that are not directly part of the goal, e.g. "Always be polite". It's valid for this text to be long and used instead of steps altogether.
+      - name: 'steps'
+        type: Array
+        description: |
+          Ordered list of step by step execution instructions to accomplish target goal.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'steps'
+              type: String
+              description: |
+                Sub-processing needed to execute the current step.
+
+                This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Step](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.playbooks#step).
+              state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+              custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+              validation:
+                function: 'validation.StringIsJSON'
+            - name: 'text'
+              type: String
+              description: |
+                Step instruction in text format.
+  - name: 'tokenCount'
+    type: String
+    description: |
+      Estimated number of tokes current playbook takes when sent to the LLM.
+    output: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      The timestamp of initial playbook creation.
+
+      Uses RFC 3339, where generated output will always be Z-normalized and uses 0, 3, 6 or 9 fractional digits. Offsets other than "Z" are also accepted. Examples: "2014-10-02T15:01:23Z", "2014-10-02T15:01:23.045123456Z" or "2014-10-02T15:01:23+05:30".
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Last time the playbook version was updated.
+
+      Uses RFC 3339, where generated output will always be Z-normalized and uses 0, 3, 6 or 9 fractional digits. Offsets other than "Z" are also accepted. Examples: "2014-10-02T15:01:23Z", "2014-10-02T15:01:23.045123456Z" or "2014-10-02T15:01:23+05:30".
+    output: true
+  - name: 'referencedPlaybooks'
+    type: Array
+    description: |
+      The resource name of other playbooks referenced by the current playbook in the instructions.
+    output: true
+    item_type:
+      type: String
+  - name: 'referencedFlows'
+    type: Array
+    description: |
+      The resource name of flows referenced by the current playbook in the instructions.
+    output: true
+    item_type:
+      type: String
+  - name: 'referencedTools'
+    type: Array
+    description: |
+      The resource name of tools referenced by the current playbook in the instructions. If not provided explicitly, they are will be implied using the tool being referenced in goal and steps.
+    item_type:
+      type: String
+  - name: 'llmModelSettings'
+    type: NestedObject
+    description: |
+      Llm model settings for the playbook.
+    properties:
+      - name: 'model'
+        type: String
+        description: |
+          The selected LLM model.
+      - name: 'promptText'
+        type: String
+        description: |
+          The custom prompt to use.
+  - name: 'playbookType'
+    type: Enum
+    description: Type of the playbook.
+    ignore_read: true
+    enum_values:
+      - 'PLAYBOOK_TYPE_UNSPECIFIED'
+      - 'TASK'
+      - 'ROUTINE'

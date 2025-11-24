@@ -15,5 +15,10 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 	if err != nil {
 	return nil, fmt.Errorf("Invalid value for {{underscore $.Name}}: %s", err)
 	}
+	{{- if $.ResourceMetadata.IsTgcCompiler }}
+    url := tgcresource.GetFullUrl(config, f.RelativeLink(), "{{$.ResourceMetadata.CaiProductLegacyBaseUrl}}")
+	return url, nil
+	{{- else }}
 	return f.RelativeLink(), nil
+	{{- end }}
 }

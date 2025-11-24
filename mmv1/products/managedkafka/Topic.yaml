@@ -27,6 +27,7 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+autogen_status: VG9waWM=
 custom_code:
   post_create: 'templates/terraform/post_create/sleep.go.tmpl'
   post_update: 'templates/terraform/post_create/sleep.go.tmpl'

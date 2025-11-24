@@ -19,34 +19,13 @@ import (
 	"fmt"
 	utils "magician/utility"
 	"math/rand"
+	"slices"
 	"time"
 
 	"golang.org/x/exp/maps"
 )
 
 type UserType int64
-
-type date struct {
-	year  int
-	month int
-	day   int
-	loc   *time.Location
-}
-
-type onVacationReviewer struct {
-	id        string
-	startDate date
-	endDate   date
-}
-
-func newDate(year, month, day int, loc *time.Location) date {
-	return date{
-		year:  year,
-		month: month,
-		day:   day,
-		loc:   loc,
-	}
-}
 
 const (
 	CommunityUserType UserType = iota
@@ -71,12 +50,19 @@ func (gh *Client) GetUserType(user string) UserType {
 		return CoreContributorUserType
 	}
 
-	if isOrgMember(user, "GoogleCloudPlatform", gh.token) {
+	if gh.IsTeamMember("GoogleCloudPlatform", "terraform", user) {
+		fmt.Println("User is an active member of the 'terraform' team in 'GoogleCloudPlatform' organization")
+		return GooglerUserType
+	} else {
+		fmt.Printf("User '%s' is not an active member of the 'terraform' team in 'GoogleCloudPlatform' organization\n", user)
+	}
+
+	if gh.IsOrgMember(user, "GoogleCloudPlatform") {
 		fmt.Println("User is a GCP org member")
 		return GooglerUserType
 	}
 
-	if isOrgMember(user, "googlers", gh.token) {
+	if gh.IsOrgMember(user, "googlers") {
 		fmt.Println("User is a googlers org member")
 		return GooglerUserType
 	}
@@ -95,45 +81,33 @@ func IsCoreReviewer(user string) bool {
 	return isCoreReviewer
 }
 
-func isOrgMember(author, org, githubToken string) bool {
-	url := fmt.Sprintf("https://api.github.com/orgs/%s/members/%s", org, author)
-	err := utils.RequestCall(url, "GET", githubToken, nil, nil)
-
-	return err == nil
-}
-
-func GetRandomReviewer() string {
-	availableReviewers := AvailableReviewers()
+// GetRandomReviewer returns a random available reviewer (optionally excluding some people from the reviewer pool)
+func GetRandomReviewer(excludedReviewers []string) string {
+	availableReviewers := AvailableReviewers(excludedReviewers)
 	reviewer := availableReviewers[rand.Intn(len(availableReviewers))]
 	return reviewer
 }
 
-// Return a random reviewer other than the old reviewer
-func GetNewRandomReviewer(oldReviewer string) string {
-	availableReviewers := AvailableReviewers()
-	availableReviewers = utils.Removes(availableReviewers, []string{oldReviewer})
-	reviewer := availableReviewers[rand.Intn(len(availableReviewers))]
-	return reviewer
+func AvailableReviewers(excludedReviewers []string) []string {
+	return available(time.Now(), reviewerRotation, excludedReviewers)
 }
 
-func AvailableReviewers() []string {
-	return available(time.Now(), maps.Keys(reviewerRotation), onVacationReviewers)
+func available(nowTime time.Time, reviewerRotation map[string]ReviewerConfig, excludedReviewers []string) []string {
+	excludedReviewers = append(excludedReviewers, onVacation(nowTime, reviewerRotation)...)
+	ret := utils.Removes(maps.Keys(reviewerRotation), excludedReviewers)
+	slices.Sort(ret)
+	return ret
 }
 
-func available(nowTime time.Time, allReviewers []string, vacationList []onVacationReviewer) []string {
-	onVacationList := onVacation(nowTime, vacationList)
-	return utils.Removes(allReviewers, onVacationList)
-}
-
-func onVacation(nowTime time.Time, vacationList []onVacationReviewer) []string {
+func onVacation(nowTime time.Time, reviewerRotation map[string]ReviewerConfig) []string {
 	var onVacationList []string
-	for _, reviewer := range vacationList {
-		start := time.Date(reviewer.startDate.year, time.Month(reviewer.startDate.month), reviewer.startDate.day, 0, 0, 0, 0, reviewer.startDate.loc)
-		end := time.Date(reviewer.endDate.year, time.Month(reviewer.endDate.month), reviewer.endDate.day, 0, 0, 0, 0, reviewer.endDate.loc).AddDate(0, 0, 1).Add(-1 * time.Millisecond)
-		if nowTime.Before(start) || nowTime.After(end) {
-			continue
+	for reviewer, config := range reviewerRotation {
+		for _, v := range config.vacations {
+			if nowTime.Before(v.GetStart(config.timezone)) || nowTime.After(v.GetEnd(config.timezone)) {
+				continue
+			}
+			onVacationList = append(onVacationList, reviewer)
 		}
-		onVacationList = append(onVacationList, reviewer.id)
 	}
 	return onVacationList
 }

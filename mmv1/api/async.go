@@ -15,25 +15,26 @@ package api
 
 import (
 	"log"
+	"reflect"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"golang.org/x/exp/slices"
+	"gopkg.in/yaml.v3"
 )
 
 // Base class from which other Async classes can inherit.
 type Async struct {
+	// Describes an operation, one of "OpAsync", "PollAsync"
+	Type string `yaml:"type,omitempty"`
+
 	// Describes an operation
-	Operation *Operation
+	Operation *Operation `yaml:"operation,omitempty"`
 
 	// The list of methods where operations are used.
-	Actions []string
+	Actions []string `yaml:"actions,omitempty"`
 
-	// Describes an operation, one of "OpAsync", "PollAsync"
-	Type string
-
-	OpAsync `yaml:",inline"`
-
+	OpAsync   `yaml:",inline"`
 	PollAsync `yaml:",inline"`
 }
 
@@ -70,25 +71,15 @@ func NewAsync() *Async {
 
 // Represents an asynchronous operation definition
 type OpAsync struct {
-	Result OpAsyncResult
-
-	Status OpAsyncStatus `yaml:"status,omitempty"`
-
-	Error OpAsyncError
+	Result OpAsyncResult `yaml:"result,omitempty"`
 
 	// If true, include project as an argument to OperationWaitTime.
 	// It is intended for resources that calculate project/region from a selflink field
-	IncludeProject bool `yaml:"include_project"`
+	IncludeProject bool `yaml:"include_project,omitempty"`
 }
 
 type OpAsyncOperation struct {
-	Kind string `yaml:"kind,omitempty"`
-
-	Path string `yaml:"path,omitempty"`
-
 	BaseUrl string `yaml:"base_url,omitempty"`
-
-	WaitMs int `yaml:"wait_ms,omitempty"`
 
 	// Use this if the resource includes the full operation url.
 	FullUrl string `yaml:"full_url,omitempty"`
@@ -97,27 +88,6 @@ type OpAsyncOperation struct {
 // Represents the results of an Operation request
 type OpAsyncResult struct {
 	ResourceInsideResponse bool `yaml:"resource_inside_response,omitempty"`
-
-	Path string `yaml:"path,omitempty"`
-}
-
-// Provides information to parse the result response to check operation
-// status
-type OpAsyncStatus struct {
-	Path string `yaml:"path,omitempty"`
-
-	Complete bool `yaml:"complete,omitempty"`
-
-	Allowed []bool `yaml:"allowed,omitempty"`
-}
-
-// Provides information on how to retrieve errors of the executed operations
-type OpAsyncError struct {
-	google.YamlValidator `yaml:"-"`
-
-	Path string `yaml:"path,omitempty"`
-
-	Message string `yaml:"message,omitempty"`
 }
 
 // Async implementation for polling in Terraform
@@ -141,24 +111,55 @@ type PollAsync struct {
 	TargetOccurrences int `yaml:"target_occurrences,omitempty"`
 }
 
-func (a *Async) UnmarshalYAML(unmarshal func(any) error) error {
-	a.Actions = []string{"create", "delete", "update"}
+// newAsyncWithDefaults returns an Async object with default values set.
+func newAsyncWithDefaults() Async {
+	a := Async{
+		Actions: []string{"create", "delete", "update"},
+		Type:    "OpAsync",
+	}
+	return a
+}
+
+func (a *Async) UnmarshalYAML(value *yaml.Node) error {
+	// Start with a struct containing all the default values.
+	*a = newAsyncWithDefaults()
+
 	type asyncAlias Async
 	aliasObj := (*asyncAlias)(a)
 
-	err := unmarshal(aliasObj)
-	if err != nil {
+	if err := value.Decode(aliasObj); err != nil {
 		return err
 	}
 
-	if a.Type == "" {
-		a.Type = "OpAsync"
-	}
 	if a.Type == "PollAsync" && a.TargetOccurrences == 0 {
 		a.TargetOccurrences = 1
 	}
 
 	return nil
+}
+
+// MarshalYAML implements a custom marshaller for the Async struct.
+// It omits fields that are set to their default values.
+func (a *Async) MarshalYAML() (interface{}, error) {
+	// Use a type alias to prevent infinite recursion during marshaling.
+	type asyncAlias Async
+
+	// Create a defaults object that reflects the defaults for the current object's state.
+	defaults := newAsyncWithDefaults()
+
+	// Use the generic helper for simple types. It returns a pointer to a clone.
+	clone, err := utils.OmitDefaultsForMarshaling(*a, defaults)
+	if err != nil {
+		return nil, err
+	}
+	clonePtr := clone.(*Async)
+
+	// The helper ignores slices, so we handle `Actions` manually on the clone.
+	if reflect.DeepEqual(clonePtr.Actions, defaults.Actions) {
+		clonePtr.Actions = nil
+	}
+
+	return (*asyncAlias)(clonePtr), nil
 }
 
 func (a *Async) Validate() {

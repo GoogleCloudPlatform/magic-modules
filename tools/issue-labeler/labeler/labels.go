@@ -10,11 +10,11 @@ import (
 	_ "embed"
 
 	"github.com/golang/glog"
-	"github.com/google/go-github/v61/github"
+	"github.com/google/go-github/v68/github"
 	"gopkg.in/yaml.v2"
 )
 
-var sectionRegexp = regexp.MustCompile(`### (New or )?Affected Resource\(s\)[^#]+`)
+var sectionRegexp = regexp.MustCompile(`#+ (New or )?Affected Resource\(s\)[^#]+`)
 var commentRegexp = regexp.MustCompile(`<!--.*?-->`)
 var resourceRegexp = regexp.MustCompile(`google_[\w*.]+`)
 

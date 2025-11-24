@@ -39,7 +39,6 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   allowed_iam_role: 'roles/containeranalysis.notes.occurrences.viewer'
   parent_resource_attribute: 'note'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/notes/{{name}}'
     - '{{name}}'

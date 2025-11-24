@@ -31,6 +31,17 @@ timeouts:
   update_minutes: 40
   delete_minutes: 20
 custom_code:
+  # An engine resource https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.engines
+  # will be automatically created when we specify dataStoreConnections in Flow, Page, or Tool resources associated with the Agent.
+  # When delete_chat_engine_on_destroy is set to true, we must
+  # 1. extract the engine ID from the agent in pre_delete.
+  # 2. delete the agent.
+  # 3. delete the engine in post_delete.
+  # We can't delete the chat engine first because the agent depends on the chat engine. Deleting chat engine then allows deleting the
+  # data store. The chain of dependency is agent -> engine -> data store.
+  # TODO: remove pre_delete and post_delete after the delete API is updated to clean up the engine resource.
+  pre_delete: 'templates/terraform/pre_delete/dialogflowcx_agent.go.tmpl'
+  post_delete: 'templates/terraform/post_delete/dialogflowcx_agent.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'dialogflowcx_agent_full'
@@ -42,6 +53,25 @@ examples:
       - 'git_integration_settings.0.github_settings.0.access_token'
       - 'enable_stackdriver_logging'
       - 'advanced_settings.0.logging_settings'
+virtual_fields:
+  - name: 'delete_chat_engine_on_destroy'
+    description: |
+      If set to `true`, Terraform will delete the chat engine associated with the agent when the agent is destroyed.
+      Otherwise, the chat engine will persist.
+
+      This virtual field addresses a critical dependency chain: `agent` -> `engine` -> `data store`. The chat engine is automatically
+      provisioned when a data store is linked to the agent, meaning Terraform doesn't have direct control over its lifecycle as a managed
+      resource. This creates a problem when both the agent and data store are managed by Terraform and need to be destroyed. Without
+      delete_chat_engine_on_destroy set to true, the data store's deletion would fail because the unmanaged chat engine would still be
+      using it. This setting ensures that the entire dependency chain can be properly torn down.
+      See `mmv1/templates/terraform/examples/dialogflowcx_tool_data_store.tf.tmpl` as an example.
+
+      Data store can be linked to an agent through the `knowledgeConnectorSettings` field of a [flow](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.flows#resource:-flow)
+      or a [page](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.flows.pages#resource:-page)
+      or the `dataStoreSpec` field of a [tool](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.tools#resource:-tool).
+      The ID of the implicitly created engine is stored in the `genAppBuilderSettings` field of the [agent](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents#resource:-agent).
+    type: Boolean
+    default_value: false
 parameters:
 properties:
   - name: 'name'
@@ -267,3 +297,88 @@ properties:
         custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
         validation:
           function: 'validation.StringIsJSON'
+  - name: 'genAppBuilderSettings'
+    type: NestedObject
+    description: |
+      Gen App Builder-related agent-level settings.
+    default_from_api: true
+    properties:
+      - name: 'engine'
+        type: String
+        required: true
+        description: |
+          The full name of the Gen App Builder engine related to this agent if there is one.
+          Format: projects/{Project ID}/locations/{Location ID}/collections/{Collection ID}/engines/{Engine ID}
+  - name: 'startPlaybook'
+    type: String
+    ignore_read: true
+    description: |
+      Name of the start playbook in this agent. A start playbook will be automatically created when the agent is created, and can only be deleted by deleting the agent. Format: **projects/<ProjectID>/locations/<LocationID>/agents/<AgentID>/playbooks/<PlaybookID>**. Currently only the default playbook with id "00000000-0000-0000-0000-000000000000" is allowed.
+    conflicts:
+      - startFlow
+  - name: 'enableMultiLanguageTraining'
+    type: Boolean
+    description: |
+      Enable training multi-lingual models for this agent. These models will be trained on all the languages supported by the agent.
+  - name: 'locked'
+    type: Boolean
+    description: |
+      Indicates whether the agent is locked for changes. If the agent is locked, modifications to the agent will be rejected except for [agents.restore][].
+  - name: 'satisfiesPzs'
+    type: Boolean
+    output: true
+    description: |
+      A read only boolean field reflecting Zone Separation status of the agent.
+  - name: 'satisfiesPzi'
+    type: Boolean
+    output: true
+    description: |
+      A read only boolean field reflecting Zone Isolation status of the agent.
+  - name: 'answerFeedbackSettings'
+    type: NestedObject
+    ignore_read: true
+    description: |
+      Answer feedback collection settings.
+    properties:
+      - name: 'enableAnswerFeedback'
+        type: Boolean
+        description: |
+          If enabled, end users will be able to provide [answer feedback](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.sessions/submitAnswerFeedback#body.AnswerFeedback)
+          to Dialogflow responses. Feature works only if interaction logging is enabled in the Dialogflow agent.
+  - name: 'personalizationSettings'
+    type: NestedObject
+    description: |
+      Settings for end user personalization.
+    properties:
+      - name: 'defaultEndUserMetadata'
+        type: String
+        description: |
+          Default end user metadata, used when processing DetectIntent requests. Recommended to be filled as a template instead of hard-coded value, for example { "age": "$session.params.age" }.
+          The data will be merged with the [QueryParameters.end_user_metadata](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/QueryParameters#FIELDS.end_user_metadata)
+          in [DetectIntentRequest.query_params](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.sessions/detectIntent#body.request_body.FIELDS.query_params) during query processing.
+
+          This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Struct](https://protobuf.dev/reference/protobuf/google.protobuf/#struct).
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+        validation:
+          function: 'validation.StringIsJSON'
+  - name: 'clientCertificateSettings'
+    type: NestedObject
+    description: |
+      Settings for custom client certificates.
+    properties:
+      - name: 'sslCertificate'
+        type: String
+        required: true
+        description: |
+          The ssl certificate encoded in PEM format. This string must include the begin header and end footer lines.
+      - name: 'privateKey'
+        type: String
+        required: true
+        description: |
+          The name of the SecretManager secret version resource storing the private key encoded in PEM format. Format: **projects/{project}/secrets/{secret}/versions/{version}**
+      - name: 'passphrase'
+        type: String
+        description: |
+          The name of the SecretManager secret version resource storing the passphrase. 'passphrase' should be left unset if the private key is not encrypted. Format: **projects/{project}/secrets/{secret}/versions/{version}**

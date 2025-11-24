@@ -14,7 +14,7 @@
 ---
 name: 'SecurityCenterV2'
 legacy_name: 'scc_v2'
-display_name: 'Security Command Center (SCC)v2 API'
+display_name: 'Security Command Center (SCC) v2 API'
 versions:
   - name: 'ga'
     base_url: 'https://securitycenter.googleapis.com/v2/'

@@ -13,7 +13,7 @@
 
 ---
 name: 'DataCatalog'
-display_name: 'Data catalog'
+display_name: 'Data Catalog'
 versions:
   - name: 'ga'
     base_url: 'https://datacatalog.googleapis.com/v1/'

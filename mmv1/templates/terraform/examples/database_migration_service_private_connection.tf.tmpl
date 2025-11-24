@@ -11,6 +11,8 @@ resource "google_database_migration_service_private_connection" "{{$.PrimaryReso
 		vpc_name = resource.google_compute_network.default.id
 		subnet = "10.0.0.0/29"
 	}
+
+	create_without_validation = false
 }
 
 resource "google_compute_network" "default" {

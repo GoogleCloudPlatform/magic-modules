@@ -153,6 +153,31 @@ properties:
       Network name in the consumer project in the format of: projects/{project}/global/networks/{network}
       Note that the consumer network may be in a different GCP project than the consumer
       project that is hosting the Looker Instance.
+  # Controlled Egress Config Object
+  - name: 'controlledEgressConfig'
+    type: NestedObject
+    description: |
+      Controlled egress configuration.
+    update_mask_fields:
+      - 'controlled_egress_config.marketplace_enabled'
+      - 'controlled_egress_config.egress_fqdns'
+    properties:
+      - name: 'marketplaceEnabled'
+        type: Boolean
+        description: |
+          Whether the Looker Marketplace is enabled.
+      - name: 'egressFqdns'
+        type: Array
+        description: |
+          List of fully qualified domain names to be added to the allowlist for
+          outbound traffic.
+        item_type:
+          type: String
+  # Controlled Egress Config Object - End
+  - name: 'controlledEgressEnabled'
+    type: Boolean
+    description: |
+      Whether controlled egress is enabled on the Looker instance.
   - name: 'createTime'
     type: Time
     description: |
@@ -287,6 +312,10 @@ properties:
     type: Boolean
     description: |
       FIPS 140-2 Encryption enablement for Looker (Google Cloud Core).
+  - name: 'geminiEnabled'
+    type: Boolean
+    description: |
+      Gemini enablement for Looker (Google Cloud Core).
   - name: 'ingressPrivateIp'
     type: String
     description: |
@@ -409,6 +438,9 @@ properties:
       - LOOKER_CORE_NONPROD_STANDARD_ANNUAL: nonprod subscription standard instance
       - LOOKER_CORE_NONPROD_ENTERPRISE_ANNUAL: nonprod subscription enterprise instance
       - LOOKER_CORE_NONPROD_EMBED_ANNUAL: nonprod subscription embed instance
+      - LOOKER_CORE_TRIAL_STANDARD: A standard trial edition of Looker (Google Cloud core) product.
+      - LOOKER_CORE_TRIAL_ENTERPRISE: An enterprise trial edition of Looker (Google Cloud core) product.
+      - LOOKER_CORE_TRIAL_EMBED: An embed trial edition of Looker (Google Cloud core) product.
     immutable: true
     default_value: "LOOKER_CORE_TRIAL"
     enum_values:
@@ -420,6 +452,9 @@ properties:
       - 'LOOKER_CORE_NONPROD_STANDARD_ANNUAL'
       - 'LOOKER_CORE_NONPROD_ENTERPRISE_ANNUAL'
       - 'LOOKER_CORE_NONPROD_EMBED_ANNUAL'
+      - 'LOOKER_CORE_TRIAL_STANDARD'
+      - 'LOOKER_CORE_TRIAL_ENTERPRISE'
+      - 'LOOKER_CORE_TRIAL_EMBED'
   - name: 'privateIpEnabled'
     type: Boolean
     description: |
@@ -430,6 +465,7 @@ properties:
     type: NestedObject
     description: |
       Information for Private Service Connect (PSC) setup for a Looker instance.
+    default_from_api: true
     update_mask_fields:
       - 'psc_config.allowed_vpcs'
       - 'psc_config.service_attachments'

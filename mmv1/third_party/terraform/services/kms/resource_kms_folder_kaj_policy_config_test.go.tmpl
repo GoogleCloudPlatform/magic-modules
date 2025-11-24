@@ -1,0 +1,163 @@
+package kms_test
+
+{{- if ne $.TargetVersionName "ga" }}
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccKMSFolderKajPolicyConfig_update(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+			"time":   {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKMSFolderKajPolicyConfig_basic(context),
+			},
+			{
+				ResourceName:            "google_kms_folder_kaj_policy_config.example",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"folder"},
+			},
+			{
+				Config: testAccKMSFolderKajPolicyConfig_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply:	[]plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_kms_folder_kaj_policy_config.example", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_kms_folder_kaj_policy_config.example",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"folder"},
+			},
+		},
+	})
+}
+
+func testAccKMSFolderKajPolicyConfig_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+# Create Folder in GCP Organization.
+resource "google_folder" "kaj_folder" {
+	provider     = google-beta
+	display_name = "tf-test-my-folder%{random_suffix}"
+	parent       = "organizations/%{org_id}"
+	deletion_protection = false
+}
+
+resource "random_id" "project_suffix" {
+  byte_length = 4
+}
+
+# Create a project for enabling KMS API.
+resource "google_project" "kms_project" {
+  provider        = google-beta
+  project_id      = "kms-api-project${random_id.project_suffix.hex}"
+  name            = "kms-api-project${random_id.project_suffix.hex}"
+  folder_id       = google_folder.kaj_folder.folder_id
+  billing_account = "%{billing_account}"
+  depends_on      = [google_folder.kaj_folder]
+  deletion_policy = "DELETE"
+}
+
+# Enable the Cloud KMS API.
+resource "google_project_service" "kms_api_service" {
+  provider                   = google-beta
+  service                    = "cloudkms.googleapis.com"
+  project                    = google_project.kms_project.project_id
+  disable_dependent_services = true
+  depends_on                 = [google_project.kms_project]
+}
+
+resource "time_sleep" "wait_enable_service_api" {
+	depends_on	= [google_project_service.kms_api_service]
+	create_duration	= "30s"
+}
+# Update folder level KAJ default policy
+resource "google_kms_folder_kaj_policy_config" "example" {
+	provider 				= google-beta
+	folder 					= google_folder.kaj_folder.folder_id
+	default_key_access_justification_policy {
+		allowed_access_reasons = [
+			"CUSTOMER_INITIATED_ACCESS",
+			"GOOGLE_INITIATED_SYSTEM_OPERATION",
+		]
+	}
+	depends_on      = [time_sleep.wait_enable_service_api]
+}
+`, context)
+}
+
+func testAccKMSFolderKajPolicyConfig_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+# Create Folder in GCP Organization.
+resource "google_folder" "kaj_folder" {
+	provider     = google-beta
+	display_name = "tf-test-my-folder%{random_suffix}"
+	parent       = "organizations/%{org_id}"
+	deletion_protection = false
+}
+
+resource "random_id" "project_suffix" {
+  byte_length = 4
+}
+
+# Create a project for enabling KMS API.
+resource "google_project" "kms_project" {
+  provider        = google-beta
+  project_id      = "kms-api-project${random_id.project_suffix.hex}"
+  name            = "kms-api-project${random_id.project_suffix.hex}"
+  folder_id       = google_folder.kaj_folder.folder_id
+  billing_account = "%{billing_account}"
+  depends_on      = [google_folder.kaj_folder]
+  deletion_policy = "DELETE"
+}
+
+# Enable the Cloud KMS API.
+resource "google_project_service" "kms_api_service" {
+  provider                   = google-beta
+  service                    = "cloudkms.googleapis.com"
+  project                    = google_project.kms_project.project_id
+  disable_dependent_services = true
+  depends_on                 = [google_project.kms_project]
+}
+
+resource "time_sleep" "wait_enable_service_api" {
+	depends_on	= [google_project_service.kms_api_service]
+	create_duration	= "30s"
+}
+# Update folder level KAJ default policy
+resource "google_kms_folder_kaj_policy_config" "example" {
+	provider 				= google-beta
+	folder 					= google_folder.kaj_folder.folder_id
+	default_key_access_justification_policy {
+		allowed_access_reasons = [
+			"CUSTOMER_INITIATED_ACCESS",
+		]
+	}
+	depends_on      = [time_sleep.wait_enable_service_api]
+}
+`, context)
+}
+{{- end }}

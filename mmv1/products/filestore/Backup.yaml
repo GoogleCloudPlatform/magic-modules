@@ -19,7 +19,7 @@ references:
   guides:
     'Official Documentation': 'https://cloud.google.com/filestore/docs/backups'
     'Creating Backups': 'https://cloud.google.com/filestore/docs/create-backups'
-  api: 'https://cloud.google.com/filestore/docs/reference/rest/v1/projects.locations.instances.backups'
+  api: 'https://cloud.google.com/filestore/docs/reference/rest/v1/projects.locations.backups'
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/backups'
 self_link: 'projects/{{project}}/locations/{{location}}/backups/{{name}}'
@@ -39,6 +39,7 @@ async:
   result:
     resource_inside_response: true
 custom_code:
+include_in_tgc_next_DO_NOT_USE: true
 error_abort_predicates:
 
   - 'transport_tpg.Is429QuotaError'
@@ -46,8 +47,8 @@ examples:
   - name: 'filestore_backup_basic'
     primary_resource_id: 'backup'
     vars:
-      backup_name: 'tf-fs-bkup'
-      instance_name: 'tf-fs-inst'
+      backup_name: 'fs-bkup'
+      instance_name: 'fs-inst'
 parameters:
   - name: 'location'
     type: String

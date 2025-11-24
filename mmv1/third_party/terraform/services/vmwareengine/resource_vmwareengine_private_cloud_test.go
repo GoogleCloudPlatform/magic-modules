@@ -2,6 +2,7 @@ package vmwareengine_test
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 
@@ -14,15 +15,15 @@ import (
 )
 
 func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T) {
-	t.Skip("https://github.com/hashicorp/terraform-provider-google/issues/20719")
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"region":          "me-west1", // region with allocated quota
-		"random_suffix":   acctest.RandString(t, 10),
-		"org_id":          envvar.GetTestOrgFromEnv(t),
-		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"region":               "me-west1", // region with allocated quota
+		"random_suffix":        acctest.RandString(t, 10),
+		"org_id":               envvar.GetTestOrgFromEnv(t),
+		"billing_account":      envvar.GetTestBillingAccountFromEnv(t),
+		"vmwareengine_project": os.Getenv("GOOGLE_VMWAREENGINE_PROJECT"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -39,9 +40,9 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_vmwareengine_private_cloud.ds",
 						"google_vmwareengine_private_cloud.vmw-engine-pc",
-						map[string]struct{}{
-							"deletion_delay_hours":              {},
-							"send_deletion_delay_hours_if_zero": {},
+						[]string{
+							"deletion_delay_hours",
+							"send_deletion_delay_hours_if_zero",
 						}),
 					testAccCheckGoogleVmwareengineNsxCredentialsMeta("data.google_vmwareengine_nsx_credentials.nsx-ds"),
 					testAccCheckGoogleVmwareengineVcenterCredentialsMeta("data.google_vmwareengine_vcenter_credentials.vcenter-ds"),
@@ -60,9 +61,9 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_vmwareengine_private_cloud.ds",
 						"google_vmwareengine_private_cloud.vmw-engine-pc",
-						map[string]struct{}{
-							"deletion_delay_hours":              {},
-							"send_deletion_delay_hours_if_zero": {},
+						[]string{
+							"deletion_delay_hours",
+							"send_deletion_delay_hours_if_zero",
 						}),
 				),
 			},
@@ -79,9 +80,9 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_vmwareengine_private_cloud.ds",
 						"google_vmwareengine_private_cloud.vmw-engine-pc",
-						map[string]struct{}{
-							"deletion_delay_hours":              {},
-							"send_deletion_delay_hours_if_zero": {},
+						[]string{
+							"deletion_delay_hours",
+							"send_deletion_delay_hours_if_zero",
 						}),
 				),
 			},
@@ -108,9 +109,9 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_vmwareengine_private_cloud.ds",
 						"google_vmwareengine_private_cloud.vmw-engine-pc",
-						map[string]struct{}{
-							"deletion_delay_hours":              {},
-							"send_deletion_delay_hours_if_zero": {},
+						[]string{
+							"deletion_delay_hours",
+							"send_deletion_delay_hours_if_zero",
 						}),
 				),
 			},
@@ -124,7 +125,7 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 			{
 				Config: testVmwareengineSubnetImportConfig(context),
 				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores("data.google_vmwareengine_subnet.subnet-ds", "google_vmwareengine_subnet.vmw-engine-subnet", map[string]struct{}{}),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_vmwareengine_subnet.subnet-ds", "google_vmwareengine_subnet.vmw-engine-subnet"),
 				),
 			},
 			{
@@ -182,6 +183,7 @@ func testVmwareenginePrivateCloudConfig(context map[string]interface{}, descript
 	context["type"] = pcType
 	return acctest.Nprintf(`
 resource "google_vmwareengine_network" "vmw-engine-nw" {
+  project = "%{vmwareengine_project}"
   name              = "tf-test-pc-nw-%{random_suffix}"
   location          = "global"
   type              = "STANDARD"
@@ -189,6 +191,7 @@ resource "google_vmwareengine_network" "vmw-engine-nw" {
 }
 
 resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
+  project = "%{vmwareengine_project}"
   location = "%{region}-b"
   name = "tf-test-sample-pc%{random_suffix}"
   description = "%{description}"
@@ -210,6 +213,7 @@ resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
 }
 
 data "google_vmwareengine_private_cloud" "ds" {
+    project = "%{vmwareengine_project}"
 	location = "%{region}-b"
 	name = "tf-test-sample-pc%{random_suffix}"
 	depends_on = [
@@ -226,6 +230,7 @@ func testVmwareenginePrivateCloudAutoscaleConfig(context map[string]interface{},
 	context["type"] = pcType
 	return acctest.Nprintf(`
 resource "google_vmwareengine_network" "vmw-engine-nw" {
+  project = "%{vmwareengine_project}"
   name              = "tf-test-pc-nw-%{random_suffix}"
   location          = "global"
   type              = "STANDARD"
@@ -233,6 +238,7 @@ resource "google_vmwareengine_network" "vmw-engine-nw" {
 }
 
 resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
+  project = "%{vmwareengine_project}"
   location = "%{region}-b"
   name = "tf-test-sample-pc%{random_suffix}"
   description = "%{description}"
@@ -276,6 +282,7 @@ resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
 }
 
 data "google_vmwareengine_private_cloud" "ds" {
+    project = "%{vmwareengine_project}"
 	location = "%{region}-b"
 	name = "tf-test-sample-pc%{random_suffix}"
 	depends_on = [
@@ -288,6 +295,7 @@ data "google_vmwareengine_private_cloud" "ds" {
 func testVmwareenginePrivateCloudDeletedConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vmwareengine_network" "vmw-engine-nw" {
+  project = "%{vmwareengine_project}"
   name              = "tf-test-pc-nw-%{random_suffix}"
   location          = "global"
   type              = "STANDARD"

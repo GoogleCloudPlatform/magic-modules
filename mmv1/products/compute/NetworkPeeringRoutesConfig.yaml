@@ -63,19 +63,6 @@ examples:
       peering_secondary_name: 'secondary-peering'
       network_primary_name: 'primary-network'
       network_secondary_name: 'secondary-network'
-  - name: 'network_peering_routes_config_gke'
-    primary_resource_id: 'peering_gke_routes'
-    vars:
-      network_name: 'container-network'
-      subnetwork_name: 'container-subnetwork'
-      gke_cluster_name: 'private-cluster'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-    # currently failing
-    skip_vcr: true
 parameters:
   - name: 'network'
     type: ResourceRef
@@ -106,3 +93,19 @@ properties:
       Whether to import the custom routes to the peer network.
     required: true
     send_empty_value: true
+  - name: 'exportSubnetRoutesWithPublicIp'
+    type: Boolean
+    description: |
+      Whether subnet routes with public IP range are exported.
+      IPv4 special-use ranges are always exported to peers and
+      are not controlled by this field.
+    send_empty_value: true
+    default_from_api: true
+  - name: 'importSubnetRoutesWithPublicIp'
+    type: Boolean
+    description: |
+      Whether subnet routes with public IP range are imported.
+      IPv4 special-use ranges are always imported from peers and
+      are not controlled by this field.
+    send_empty_value: true
+    default_from_api: true

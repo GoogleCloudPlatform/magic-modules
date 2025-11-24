@@ -14,6 +14,7 @@
 package provider
 
 import (
+	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
@@ -61,6 +62,7 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time)
 	}
 
 	t.Product.SetPropertiesBasedOnVersion(&t.Version)
+	t.Product.SetCompiler(ProviderName(t))
 	for _, r := range t.Product.Objects {
 		r.SetCompiler(ProviderName(t))
 		r.ImportPath = ImportPathFromVersion(versionName)
@@ -69,7 +71,7 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time)
 	return t
 }
 
-func (t Terraform) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
+func (t Terraform) Generate(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 	if err := os.MkdirAll(outputFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating output directory %v: %v", outputFolder, err))
 	}
@@ -77,6 +79,7 @@ func (t Terraform) Generate(outputFolder, productPath, resourceToGenerate string
 	t.GenerateObjects(outputFolder, resourceToGenerate, generateCode, generateDocs)
 
 	if generateCode {
+		t.GenerateProduct(outputFolder)
 		t.GenerateOperation(outputFolder)
 	}
 }
@@ -105,6 +108,8 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 			// log.Printf("Generating %s tests", object.Name)
 			t.GenerateResourceTests(object, *templateData, outputFolder)
 			t.GenerateResourceSweeper(object, *templateData, outputFolder)
+			t.GenerateSingularDataSource(object, *templateData, outputFolder)
+			t.GenerateSingularDataSourceTests(object, *templateData, outputFolder)
 			// log.Printf("Generating %s metadata", object.Name)
 			t.GenerateResourceMetadata(object, *templateData, outputFolder)
 		}
@@ -125,8 +130,26 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 			log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 		}
-		targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s.go", t.FullResourceName(object)))
-		templateData.GenerateResourceFile(targetFilePath, object)
+		if object.FrameworkResource {
+			fmt.Printf("\n\x1b[1;33mWARNING:\x1b[0m\n")
+			fmt.Printf("The plugin framework generation code is considered a WIP and experimental.\nAre you sure you want to use it for %s? (y/n) ", t.ResourceGoFilename(object))
+
+			reader := bufio.NewReader(os.Stdin)
+			input, err := reader.ReadString('\n')
+			if err != nil {
+				log.Fatalf("Error reading input: %v", err)
+			}
+
+			if strings.ToLower(strings.TrimSpace(input)) == "y" {
+				targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_fw_%s.go", t.ResourceGoFilename(object)))
+				templateData.GenerateFWResourceFile(targetFilePath, object)
+			} else {
+				log.Fatalf("please remove \"plugin_framework: true\" from the YAML configuration.")
+			}
+		} else {
+			targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s.go", t.ResourceGoFilename(object)))
+			templateData.GenerateResourceFile(targetFilePath, object)
+		}
 	}
 
 	if generateDocs {
@@ -149,7 +172,7 @@ func (t *Terraform) GenerateResourceMetadata(object api.Resource, templateData T
 	templateData.GenerateMetadataFile(targetFilePath, object)
 }
 
-func (t *Terraform) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
+func (t *Terraform) GenerateResourceTestsLegacy(object api.Resource, templateData TemplateData, outputFolder string) {
 	eligibleExample := false
 	for _, example := range object.Examples {
 		if !example.ExcludeTest {
@@ -168,12 +191,29 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_test.go", t.FullResourceName(object)))
-	templateData.GenerateTestFile(targetFilePath, object)
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_test.go", t.ResourceGoFilename(object)))
+	templateData.GenerateTestFileLegacy(targetFilePath, object)
 }
 
-func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData TemplateData, outputFolder string) {
-	if object.ExcludeSweeper || object.CustomCode.CustomDelete != "" || object.CustomCode.PreDelete != "" || object.CustomCode.PostDelete != "" || object.ExcludeDelete {
+func (t *Terraform) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
+	if object.Samples != nil && object.Examples != nil {
+		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
+	}
+	if object.Examples != nil {
+		t.GenerateResourceTestsLegacy(object, templateData, outputFolder)
+		return
+	}
+
+	eligibleSample := false
+	for _, sample := range object.Samples {
+		if !sample.ExcludeTest {
+			if object.ProductMetadata.VersionObjOrClosest(t.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
+				eligibleSample = true
+				break
+			}
+		}
+	}
+	if !eligibleSample {
 		return
 	}
 
@@ -182,8 +222,88 @@ func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData Te
 	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_sweeper.go", t.FullResourceName(object)))
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_test.go", t.ResourceGoFilename(object)))
+	templateData.GenerateTestFile(targetFilePath, object)
+}
+
+func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData TemplateData, outputFolder string) {
+	if !object.ShouldGenerateSweepers() {
+		return
+	}
+
+	productName := t.Product.ApiName
+	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_sweeper.go", t.ResourceGoFilename(object)))
 	templateData.GenerateSweeperFile(targetFilePath, object)
+}
+
+func (t *Terraform) GenerateSingularDataSource(object api.Resource, templateData TemplateData, outputFolder string) {
+	if !object.ShouldGenerateSingularDataSource() {
+		return
+	}
+
+	productName := t.Product.ApiName
+	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s.go", t.ResourceGoFilename(object)))
+	templateData.GenerateDataSourceFile(targetFilePath, object)
+}
+
+func (t *Terraform) GenerateSingularDataSourceTestsLegacy(object api.Resource, templateData TemplateData, outputFolder string) {
+	if !object.ShouldGenerateSingularDataSourceTests() {
+		return
+	}
+
+	productName := t.Product.ApiName
+	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s_test.go", t.ResourceGoFilename(object)))
+	templateData.GenerateDataSourceTestFileLegacy(targetFilePath, object)
+
+}
+
+func (t *Terraform) GenerateSingularDataSourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
+	if object.Samples != nil && object.Examples != nil {
+		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
+	}
+	if object.Examples != nil {
+		t.GenerateSingularDataSourceTestsLegacy(object, templateData, outputFolder)
+		return
+	}
+
+	if !object.ShouldGenerateSingularDataSourceTests() {
+		return
+	}
+
+	productName := t.Product.ApiName
+	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s_test.go", t.ResourceGoFilename(object)))
+	templateData.GenerateDataSourceTestFile(targetFilePath, object)
+
+}
+
+// GenerateProduct creates the product.go file for a given service directory.
+// This will be used to seed the directory and add a package-level comment
+// specific to the product.
+func (t *Terraform) GenerateProduct(outputFolder string) {
+	targetFolder := path.Join(outputFolder, t.FolderName(), "services", t.Product.ApiName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+
+	targetFilePath := path.Join(targetFolder, "product.go")
+	templateData := NewTemplateData(outputFolder, t.TargetVersionName)
+	templateData.GenerateProductFile(targetFilePath, *t.Product)
 }
 
 func (t *Terraform) GenerateOperation(outputFolder string) {
@@ -206,22 +326,61 @@ func (t *Terraform) GenerateOperation(outputFolder string) {
 
 // Generate the IAM policy for this object. This is used to query and test
 // IAM policies separately from the resource itself
-func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
+func (t *Terraform) GenerateIamPolicyLegacy(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
+	if object.IamPolicy.ExampleConfigBody == "" {
+		object.IamPolicy.ExampleConfigBody = "templates/terraform/iam/iam_attributes_legacy.go.tmpl"
+	}
 	if generateCode && object.IamPolicy != nil && (object.IamPolicy.MinVersion == "" || slices.Index(product.ORDER, object.IamPolicy.MinVersion) <= slices.Index(product.ORDER, t.TargetVersionName)) {
 		productName := t.Product.ApiName
 		targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
 		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 			log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 		}
-		targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s.go", t.FullResourceName(object)))
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s.go", t.ResourceGoFilename(object)))
 		templateData.GenerateIamPolicyFile(targetFilePath, object)
 
 		// Only generate test if testable examples exist.
-		examples := google.Reject(object.Examples, func(e resource.Examples) bool {
+		examples := google.Reject(object.Examples, func(e *resource.Examples) bool {
 			return e.ExcludeTest
 		})
 		if len(examples) != 0 {
-			targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s_generated_test.go", t.FullResourceName(object)))
+			targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s_generated_test.go", t.ResourceGoFilename(object)))
+			templateData.GenerateIamPolicyTestFileLegacy(targetFilePath, object)
+		}
+	}
+	if generateDocs {
+		t.GenerateIamDocumentation(object, templateData, outputFolder, generateCode, generateDocs)
+	}
+}
+
+func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
+	if object.Samples != nil && object.Examples != nil {
+		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
+	}
+	if object.Examples != nil {
+		t.GenerateIamPolicyLegacy(object, templateData, outputFolder, generateCode, generateDocs)
+		return
+	}
+
+	if object.IamPolicy.SampleConfigBody == "" {
+		object.IamPolicy.SampleConfigBody = "templates/terraform/iam/iam_attributes.go.tmpl"
+	}
+
+	if generateCode && object.IamPolicy != nil && (object.IamPolicy.MinVersion == "" || slices.Index(product.ORDER, object.IamPolicy.MinVersion) <= slices.Index(product.ORDER, t.TargetVersionName)) {
+		productName := t.Product.ApiName
+		targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
+		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+			log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+		}
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s.go", t.ResourceGoFilename(object)))
+		templateData.GenerateIamPolicyFile(targetFilePath, object)
+
+		// Only generate test if testable example configs exist.
+		samples := google.Reject(object.Samples, func(s *resource.Sample) bool {
+			return s.ExcludeTest
+		})
+		if len(samples) != 0 {
+			targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s_generated_test.go", t.ResourceGoFilename(object)))
 			templateData.GenerateIamPolicyTestFile(targetFilePath, object)
 		}
 	}
@@ -250,22 +409,34 @@ func (t *Terraform) GenerateIamDocumentation(object api.Resource, templateData T
 func (t *Terraform) FolderName() string {
 	if t.TargetVersionName == "ga" {
 		return "google"
-	} else if t.TargetVersionName == "beta" {
-		return "google-beta"
 	}
-	return "google-private"
+	return "google-" + t.TargetVersionName
+}
+
+// Similar to FullResourceName, but override-aware to prevent things like ending in _test.
+// Non-Go files should just use FullResourceName.
+func (t *Terraform) ResourceGoFilename(object api.Resource) string {
+	// early exit if no override is set
+	if object.FilenameOverride == "" {
+		return t.FullResourceName(object)
+	}
+
+	resName := object.FilenameOverride
+
+	var productName string
+	if t.Product.LegacyName != "" {
+		productName = t.Product.LegacyName
+	} else {
+		productName = google.Underscore(t.Product.Name)
+	}
+
+	return fmt.Sprintf("%s_%s", productName, resName)
 }
 
 func (t *Terraform) FullResourceName(object api.Resource) string {
+	// early exit- resource-level legacy names override the product too
 	if object.LegacyName != "" {
 		return strings.Replace(object.LegacyName, "google_", "", 1)
-	}
-
-	var name string
-	if object.FilenameOverride != "" {
-		name = object.FilenameOverride
-	} else {
-		name = google.Underscore(object.Name)
 	}
 
 	var productName string
@@ -275,7 +446,7 @@ func (t *Terraform) FullResourceName(object api.Resource) string {
 		productName = google.Underscore(t.Product.Name)
 	}
 
-	return fmt.Sprintf("%s_%s", productName, name)
+	return fmt.Sprintf("%s_%s", productName, google.Underscore(object.Name))
 }
 
 func (t Terraform) CopyCommonFiles(outputFolder string, generateCode, generateDocs bool) {
@@ -330,7 +501,7 @@ func (t Terraform) getCommonCopyFiles(versionName string, generateCode, generate
 		"go.sum":                           "third_party/terraform/go.sum",
 		"go.mod":                           "third_party/terraform/go.mod",
 		".go-version":                      "third_party/terraform/.go-version",
-		"terraform-registry-manifest.json": "third_party/terraform/terraform-registry-manifest.json.tmpl",
+		"terraform-registry-manifest.json": "third_party/terraform/terraform-registry-manifest.json",
 	}
 	maps.Copy(commonCopyFiles, singleFiles)
 
@@ -393,7 +564,9 @@ func (t Terraform) CopyFileList(outputFolder string, files map[string]string, ge
 		if filepath.Ext(target) == ".go" || (filepath.Ext(target) == ".mod" && generateCode) {
 			t.replaceImportPath(outputFolder, target)
 		}
-
+		if filepath.Ext(target) == ".go" || filepath.Ext(target) == ".markdown" {
+			t.addCopyfileHeader(source, outputFolder, target)
+		}
 		if filepath.Ext(target) == ".go" {
 			t.addHashicorpCopyRightHeader(outputFolder, target)
 		}
@@ -493,7 +666,67 @@ func (t Terraform) CompileFileList(outputFolder string, files map[string]string,
 			continue
 		}
 		t.replaceImportPath(outputFolder, target)
+		if filepath.Ext(targetFile) == ".go" || filepath.Ext(targetFile) == ".markdown" {
+			t.addCopyfileHeader(source, outputFolder, target)
+		}
 		t.addHashicorpCopyRightHeader(outputFolder, target)
+	}
+}
+
+func (t Terraform) addCopyfileHeader(srcpath, outputFolder, target string) {
+	githubPrefix := "https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/"
+	if !strings.HasPrefix(srcpath, githubPrefix) {
+		srcpath = githubPrefix + srcpath
+	}
+
+	targetFile := filepath.Join(outputFolder, target)
+	sourceByte, err := os.ReadFile(targetFile)
+	if err != nil {
+		log.Fatalf("Cannot read file %s to add copy file header: %s", targetFile, err)
+	}
+
+	srcStr := string(sourceByte)
+	if strings.Contains(srcStr, "***     AUTO GENERATED CODE    ***    Type: Handwritten     ***") {
+		return
+	}
+
+	templateFormat := `// ----------------------------------------------------------------------------
+//
+//     ***     AUTO GENERATED CODE    ***    Type: Handwritten     ***
+//
+// ----------------------------------------------------------------------------
+//
+//     This code is generated by Magic Modules using the following:
+//
+//     Source file: %s
+//
+//     DO NOT EDIT this file directly. Any changes made to this file will be
+//     overwritten during the next generation cycle.
+//
+// ----------------------------------------------------------------------------
+%s`
+	content := srcStr
+	if filepath.Ext(target) == ".markdown" {
+		// insert the header after ---
+		templateFormat = "---\n" + strings.Replace(templateFormat, "//", "#", -1)
+		content = strings.TrimPrefix(srcStr, "---\n")
+	}
+
+	fileStr := fmt.Sprintf(templateFormat, srcpath, content)
+
+	sourceByte = []byte(fileStr)
+	// format go file
+	if filepath.Ext(targetFile) == ".go" {
+		sourceByte, err = format.Source(sourceByte)
+		if err != nil {
+			log.Printf("error formatting %s: %s\n", targetFile, err)
+			return
+		}
+	}
+
+	err = os.WriteFile(targetFile, sourceByte, 0644)
+	if err != nil {
+		log.Fatalf("Cannot write file %s to add copy file header: %s", target, err)
 	}
 }
 
@@ -604,9 +837,8 @@ func (t Terraform) replaceImportPath(outputFolder, target string) {
 		tpg = TERRAFORM_PROVIDER_BETA
 		dir = RESOURCE_DIRECTORY_BETA
 	default:
-		tpg = TERRAFORM_PROVIDER_PRIVATE
-		dir = RESOURCE_DIRECTORY_PRIVATE
-
+		tpg = "github.com/hashicorp/terraform-provider-google-" + t.TargetVersionName
+		dir = "google-" + t.TargetVersionName
 	}
 
 	sourceByte = bytes.Replace(sourceByte, []byte(gaImportPath), []byte(tpg+"/"+dir), -1)
@@ -636,7 +868,7 @@ func (t Terraform) ProviderFromVersion() string {
 	case "beta":
 		dir = RESOURCE_DIRECTORY_BETA
 	default:
-		dir = RESOURCE_DIRECTORY_PRIVATE
+		dir = "google-" + t.TargetVersionName
 	}
 	return dir
 }
@@ -787,5 +1019,6 @@ func (t Terraform) SupportedProviderVersions() []string {
 
 type ProviderWithProducts struct {
 	Terraform
+	Compiler string
 	Products []*api.Product
 }

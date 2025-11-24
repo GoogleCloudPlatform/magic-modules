@@ -1,0 +1,116 @@
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+    return err
+}
+
+obj := make(map[string]interface{})
+zoneProp, err := expandStorageAnywhereCacheZone(d.Get("zone"), d, config)
+if err != nil {
+    return err
+} else if v, ok := d.GetOkExists("zone"); !tpgresource.IsEmptyValue(reflect.ValueOf(zoneProp)) && (ok || !reflect.DeepEqual(v, zoneProp)) {
+    obj["zone"] = zoneProp
+}
+admissionPolicyProp, err := expandStorageAnywhereCacheAdmissionPolicy(d.Get("admission_policy"), d, config)
+if err != nil {
+    return err
+} else if v, ok := d.GetOkExists("admission_policy"); !tpgresource.IsEmptyValue(reflect.ValueOf(admissionPolicyProp)) && (ok || !reflect.DeepEqual(v, admissionPolicyProp)) {
+    obj["admissionPolicy"] = admissionPolicyProp
+}
+ttlProp, err := expandStorageAnywhereCacheTtl(d.Get("ttl"), d, config)
+if err != nil {
+    return err
+} else if v, ok := d.GetOkExists("ttl"); !tpgresource.IsEmptyValue(reflect.ValueOf(ttlProp)) && (ok || !reflect.DeepEqual(v, ttlProp)) {
+    obj["ttl"] = ttlProp
+}
+
+url, err := tpgresource.ReplaceVars(d, config, "{{"{{StorageBasePath}}b/{{bucket}}/anywhereCaches/"}}")
+if err != nil {
+    return err
+}
+
+log.Printf("[DEBUG] Creating new AnywhereCache: %#v", obj)
+billingProject := ""
+
+// err == nil indicates that the billing_project value was found
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+    billingProject = bp
+}
+
+headers := make(http.Header)
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    Config:    config,
+    Method:    "POST",
+    Project:   billingProject,
+    RawURL:    url,
+    UserAgent: userAgent,
+    Body:      obj,
+    Timeout:   d.Timeout(schema.TimeoutCreate),
+    Headers:   headers,
+})
+if err != nil {
+    return fmt.Errorf("Error creating AnywhereCache: %s", err)
+}
+
+// Store the ID now
+id, err := tpgresource.ReplaceVars(d, config, "{{"{{bucket}}/{{anywhere_cache_id}}"}}")
+if err != nil {
+    return fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
+
+// Use the resource in the operation response to populate
+// identity fields and d.Id() before read
+var opRes map[string]interface{}
+err = StorageOperationWaitTimeWithResponse(
+    config, res, &opRes, "Creating AnywhereCache", userAgent,
+    d.Timeout(schema.TimeoutCreate))
+
+if err != nil {
+    // The resource didn't actually create
+    d.SetId("")
+
+    // If any error comes due to LRO, cancel the LRO
+    opSelfLink, ok := res["selfLink"].(string)
+    if !ok {
+        return fmt.Errorf("Unable to parse selfLink from LRO metadata")
+    }
+    log.Printf("[DEBUG] Cancelling LRO: %s", opSelfLink)
+    opCancelUrl := fmt.Sprintf("%s/cancel", opSelfLink)
+    _, opCancelErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+        Config:    config,
+        Method:    "POST",
+        RawURL:    opCancelUrl,
+        UserAgent: userAgent,
+    })
+    if opCancelErr != nil {
+        return fmt.Errorf("Error cancelling the LRO: %s", opCancelErr)
+    }
+
+    return err
+}
+
+nameVal, ok := opRes["name"].(string)
+if !ok {
+    return fmt.Errorf("opRes['name'] is not a string: %v", opRes["name"])
+}
+
+nameParts := strings.Split(nameVal, "/")
+if len(nameParts) != 6 || nameParts[0] != "projects" || nameParts[2] != "buckets" || nameParts[4] != "anywhereCaches" {
+    return fmt.Errorf("error parsing the anywhereCacheId from %s", nameVal)
+}
+
+anywhereCacheID := nameParts[5]
+if err := d.Set("anywhere_cache_id", anywhereCacheID); err != nil {
+    return err
+}
+
+// This may have caused the ID to update - update it if so.
+id, err = tpgresource.ReplaceVars(d, config, "{{"{{bucket}}/{{anywhere_cache_id}}"}}")
+if err != nil {
+    return fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
+
+log.Printf("[DEBUG] Finished creating AnywhereCache %q: %#v", d.Id(), res)
+
+return resourceStorageAnywhereCacheRead(d, meta)

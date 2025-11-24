@@ -1,0 +1,6 @@
+
+  project = google_dataproc_metastore_service.dpms_service.project
+  location = google_dataproc_metastore_service.dpms_service.location
+  service_id = google_dataproc_metastore_service.dpms_service.service_id
+  database_id = google_dataproc_job.hive.hive_config[0].properties["database"]
+  table = google_dataproc_job.hive.hive_config[0].properties["table"]

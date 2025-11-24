@@ -25,6 +25,15 @@ const testFirestoreTriggerPath = "./test-fixtures/firestore_trigger.js"
 const testSecretEnvVarFunctionPath = "./test-fixtures/secret_environment_variables.js"
 const testSecretVolumesMountFunctionPath = "./test-fixtures/secret_volumes_mount.js"
 
+func bootstrapGcfAdminAgents(t *testing.T) {
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gcf-admin-robot.iam.gserviceaccount.com",
+			Role:   "roles/vpcaccess.admin",
+		},
+	})
+}
+
 func TestAccCloudFunctionsFunction_basic(t *testing.T) {
 	t.Parallel()
 
@@ -419,16 +428,16 @@ func TestAccCloudFunctionsFunction_vpcConnector(t *testing.T) {
 	networkName := fmt.Sprintf("tf-test-net-%d", acctest.RandInt(t))
 	vpcConnectorName := fmt.Sprintf("tf-test-conn-%s", acctest.RandString(t, 5))
 	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
-	projectNumber := os.Getenv("GOOGLE_PROJECT_NUMBER")
 	defer os.Remove(zipFilePath) // clean up
 
+	bootstrapGcfAdminAgents(t)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudFunctionsFunction_vpcConnector(projectNumber, networkName, functionName, bucketName, zipFilePath, "10.10.0.0/28", vpcConnectorName),
+				Config: testAccCloudFunctionsFunction_vpcConnector(networkName, functionName, bucketName, zipFilePath, "10.10.0.0/28", vpcConnectorName),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -437,7 +446,7 @@ func TestAccCloudFunctionsFunction_vpcConnector(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"build_environment_variables", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccCloudFunctionsFunction_vpcConnector(projectNumber, networkName, functionName, bucketName, zipFilePath, "10.20.0.0/28", vpcConnectorName+"-update"),
+				Config: testAccCloudFunctionsFunction_vpcConnector(networkName, functionName, bucketName, zipFilePath, "10.20.0.0/28", vpcConnectorName+"-update"),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -458,16 +467,16 @@ func TestAccCloudFunctionsFunction_vpcConnectorEgressSettings(t *testing.T) {
 	networkName := fmt.Sprintf("tf-test-net-%d", acctest.RandInt(t))
 	vpcConnectorName := fmt.Sprintf("tf-test-conn-%s", acctest.RandString(t, 5))
 	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
-	projectNumber := os.Getenv("GOOGLE_PROJECT_NUMBER")
 	defer os.Remove(zipFilePath) // clean up
 
+	bootstrapGcfAdminAgents(t)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudFunctionsFunction_vpcConnectorEgressSettings(projectNumber, networkName, functionName, bucketName, zipFilePath, "10.10.0.0/28", vpcConnectorName, "PRIVATE_RANGES_ONLY"),
+				Config: testAccCloudFunctionsFunction_vpcConnectorEgressSettings(networkName, functionName, bucketName, zipFilePath, "10.10.0.0/28", vpcConnectorName, "PRIVATE_RANGES_ONLY"),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -476,7 +485,7 @@ func TestAccCloudFunctionsFunction_vpcConnectorEgressSettings(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"build_environment_variables", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccCloudFunctionsFunction_vpcConnectorEgressSettings(projectNumber, networkName, functionName, bucketName, zipFilePath, "10.20.0.0/28", vpcConnectorName+"-update",  "ALL_TRAFFIC"),
+				Config: testAccCloudFunctionsFunction_vpcConnectorEgressSettings(networkName, functionName, bucketName, zipFilePath, "10.20.0.0/28", vpcConnectorName+"-update",  "ALL_TRAFFIC"),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -614,6 +623,70 @@ func TestAccCloudFunctionsFunction_buildServiceAccount(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"build_environment_variables"},
+			},
+		},
+	})
+}
+
+func TestAccCloudFunctionsFunction_abiuCRUD(t *testing.T) {
+	t.Parallel()
+
+	var function cloudfunctions.CloudFunction
+
+	funcResourceName := "google_cloudfunctions_function.function"
+	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt(t))
+	zipFilePath := acctest.CreateZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)
+	defer os.Remove(zipFilePath) // clean up
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudFunctionsFunction_abiuAutomatic(functionName, bucketName, zipFilePath),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCloudFunctionsFunctionExists(
+						t, funcResourceName, &function),
+					resource.TestCheckResourceAttrSet(funcResourceName,
+						"automatic_update_policy.#"),
+				),
+			},
+			{
+				ResourceName:            funcResourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"build_environment_variables", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccCloudFunctionsFunction_abiuOndeploy(functionName, bucketName, zipFilePath),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCloudFunctionsFunctionExists(
+						t, funcResourceName, &function),
+					resource.TestCheckResourceAttrSet(funcResourceName,
+						"on_deploy_update_policy.#"),
+				),
+			},
+			{
+				ResourceName:            funcResourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"build_environment_variables", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccCloudFunctionsFunction_basic(functionName, bucketName, zipFilePath),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCloudFunctionsFunctionExists(
+						t, funcResourceName, &function),
+					resource.TestCheckResourceAttrSet(funcResourceName,
+						"automatic_update_policy.#"),
+				),
+			},
+			{
+				ResourceName:            funcResourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"build_environment_variables", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -1053,15 +1126,9 @@ resource "google_cloudfunctions_function" "function" {
 `, bucketName, zipFilePath, functionName)
 }
 
-func testAccCloudFunctionsFunction_vpcConnector(projectNumber, networkName, functionName, bucketName, zipFilePath, vpcIp, vpcConnectorName string) string {
+func testAccCloudFunctionsFunction_vpcConnector(networkName, functionName, bucketName, zipFilePath, vpcIp, vpcConnectorName string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
-
-resource "google_project_iam_member" "gcfadmin" {
-  project = data.google_project.project.project_id
-  role     = "roles/editor"
-  member   = "serviceAccount:service-%s@gcf-admin-robot.iam.gserviceaccount.com"
-}
 
 resource "google_compute_network" "vpc" {
 	name = "%s"
@@ -1110,22 +1177,14 @@ resource "google_cloudfunctions_function" "function" {
   min_instances = 3
   vpc_connector = google_vpc_access_connector.%s.self_link
   vpc_connector_egress_settings = "PRIVATE_RANGES_ONLY"
-
-  depends_on = [google_project_iam_member.gcfadmin]
 }
-`, projectNumber, networkName, vpcConnectorName, vpcConnectorName, vpcIp, bucketName, zipFilePath, functionName, vpcConnectorName)
+`, networkName, vpcConnectorName, vpcConnectorName, vpcIp, bucketName, zipFilePath, functionName, vpcConnectorName)
 }
 
 
-func testAccCloudFunctionsFunction_vpcConnectorEgressSettings(projectNumber, networkName, functionName, bucketName, zipFilePath, vpcIp, vpcConnectorName, vpcConnectorEgressSettings string) string {
+func testAccCloudFunctionsFunction_vpcConnectorEgressSettings(networkName, functionName, bucketName, zipFilePath, vpcIp, vpcConnectorName, vpcConnectorEgressSettings string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
-
-resource "google_project_iam_member" "gcfadmin" {
-  project = data.google_project.project.project_id
-  role     = "roles/editor"
-  member   = "serviceAccount:service-%s@gcf-admin-robot.iam.gserviceaccount.com"
-}
 
 resource "google_compute_network" "vpc" {
 	name = "%s"
@@ -1174,10 +1233,8 @@ resource "google_cloudfunctions_function" "function" {
   min_instances = 3
   vpc_connector = google_vpc_access_connector.%s.self_link
   vpc_connector_egress_settings = "%s"
-
-  depends_on = [google_project_iam_member.gcfadmin]
 }
-`, projectNumber, networkName, vpcConnectorName, vpcConnectorName, vpcIp, bucketName, zipFilePath, functionName, vpcConnectorName, vpcConnectorEgressSettings)
+`, networkName, vpcConnectorName, vpcConnectorName, vpcIp, bucketName, zipFilePath, functionName, vpcConnectorName, vpcConnectorEgressSettings)
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
@@ -1362,7 +1419,7 @@ resource "google_storage_bucket_object" "cloud_function_zip_object" {
 
 resource "google_cloudfunctions_function" "function" {
   name                  = "%s"
-  runtime               = "nodejs14"
+  runtime               = "nodejs20"
   service_account_email = google_service_account.cloud_function_runner.email
   entry_point           = "echoSecret"
   source_archive_bucket = google_storage_bucket.cloud_functions.id
@@ -1427,7 +1484,7 @@ resource "google_storage_bucket_object" "cloud_function_zip_object" {
 
 resource "google_cloudfunctions_function" "function" {
   name                  = "%s"
-  runtime               = "nodejs14"
+  runtime               = "nodejs20"
   service_account_email = google_service_account.cloud_function_runner.email
   entry_point           = "echoSecret"
   source_archive_bucket = google_storage_bucket.cloud_functions.id
@@ -1509,4 +1566,88 @@ resource "google_cloudfunctions_function" "function" {
   entry_point  = "helloGET"
 }
 `, bucketName, zipFilePath, saName, serviceAccount, functionName)
+}
+
+func testAccCloudFunctionsFunction_abiuAutomatic(functionName string, bucketName string, zipFilePath string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name     = "%s"
+  location = "US"
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "archive" {
+  name   = "index.zip"
+  bucket = google_storage_bucket.bucket.name
+  source = "%s"
+}
+
+resource "google_cloudfunctions_function" "function" {
+  name                  = "%s"
+  runtime               = "nodejs20"
+  description           = "test function"
+  docker_registry       = "ARTIFACT_REGISTRY"
+  available_memory_mb   = 128
+  source_archive_bucket = google_storage_bucket.bucket.name
+  source_archive_object = google_storage_bucket_object.archive.name
+  trigger_http          = true
+  timeout               = 61
+  entry_point           = "helloGET"
+  ingress_settings      = "ALLOW_INTERNAL_ONLY"
+  labels = {
+    my-label = "my-label-value"
+  }
+  environment_variables = {
+    TEST_ENV_VARIABLE = "test-env-variable-value"
+  }
+  build_environment_variables = {
+    TEST_ENV_VARIABLE = "test-build-env-variable-value"
+  }
+  automatic_update_policy {}
+  max_instances = 10
+  min_instances = 3
+}
+`, bucketName, zipFilePath, functionName)
+}
+
+func testAccCloudFunctionsFunction_abiuOndeploy(functionName string, bucketName string, zipFilePath string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name     = "%s"
+  location = "US"
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "archive" {
+  name   = "index.zip"
+  bucket = google_storage_bucket.bucket.name
+  source = "%s"
+}
+
+resource "google_cloudfunctions_function" "function" {
+  name                  = "%s"
+  runtime               = "nodejs20"
+  description           = "test function"
+  docker_registry       = "ARTIFACT_REGISTRY"
+  available_memory_mb   = 128
+  source_archive_bucket = google_storage_bucket.bucket.name
+  source_archive_object = google_storage_bucket_object.archive.name
+  trigger_http          = true
+  timeout               = 61
+  entry_point           = "helloGET"
+  ingress_settings      = "ALLOW_INTERNAL_ONLY"
+  labels = {
+    my-label = "my-label-value"
+  }
+  environment_variables = {
+    TEST_ENV_VARIABLE = "test-env-variable-value"
+  }
+  build_environment_variables = {
+    TEST_ENV_VARIABLE = "test-build-env-variable-value"
+  }
+  on_deploy_update_policy {}
+  max_instances = 10
+  min_instances = 3
+}
+`, bucketName, zipFilePath, functionName)
 }

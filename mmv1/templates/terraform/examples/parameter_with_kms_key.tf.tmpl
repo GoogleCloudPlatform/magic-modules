@@ -1,0 +1,6 @@
+data "google_project" "project" {}
+
+resource "google_parameter_manager_parameter" "{{$.PrimaryResourceId}}" {
+  parameter_id = "{{index $.Vars "parameter_id"}}"
+  kms_key = "{{index $.Vars "kms_key"}}"
+}

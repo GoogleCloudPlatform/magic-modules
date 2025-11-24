@@ -36,14 +36,13 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'taxonomy'
   base_url: 'projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}'
     - '{{taxonomy}}'
 custom_code:
   custom_import: 'templates/terraform/custom_import/data_catalog_taxonomy.go.tmpl'
 sweeper:
-  sweepable_identifier_field: displayName
+  identifier_field: displayName
 examples:
   - name: 'data_catalog_taxonomy_basic'
     primary_resource_id: 'basic_taxonomy'

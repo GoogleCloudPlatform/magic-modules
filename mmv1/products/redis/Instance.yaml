@@ -43,10 +43,12 @@ custom_code:
   constants: 'templates/terraform/constants/redis_instance.go.tmpl'
   encoder: 'templates/terraform/encoders/redis_location_id_for_fallback_zone.go.tmpl'
   decoder: 'templates/terraform/decoders/redis_instance.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/redis_instance.go.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("redis_version", isRedisVersionDecreasing)'
   - 'tpgresource.DefaultProviderProject'
 exclude_default_cdiff: true
+include_in_tgc_next_DO_NOT_USE: true
 examples:
   - name: 'redis_instance_basic'
     primary_resource_id: 'cache'
@@ -57,6 +59,8 @@ examples:
       'prevent_destroy': 'false'
     oics_vars_overrides:
       'prevent_destroy': 'false'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'redis_instance_full'
     primary_resource_id: 'cache'
     vars:
@@ -126,6 +130,16 @@ examples:
     oics_vars_overrides:
       'prevent_destroy': 'false'
     exclude_test: true
+virtual_fields:
+  - name: 'deletion_protection'
+    description: |
+      Whether Terraform will be prevented from destroying the instance.
+      When a`terraform destroy` or `terraform apply` would delete the instance,
+      the command will fail if this field is not set to false in Terraform state.
+      When the field is set to true or unset in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the instance will fail.
+      When the field is set to false, deleting the instance is allowed.
+    type: Boolean
 parameters:
   # TODO: resourceref?
   - name: 'region'
@@ -445,6 +459,16 @@ properties:
     # but will be a subset of the range.
     ignore_read: true
     default_from_api: true
+  - name: 'effectiveReservedIpRange'
+    type: String
+    description: |
+      The CIDR range of internal addresses that are reserved for this
+      instance. If not provided, the service will choose an unused /29
+      block, for example, 10.0.0.0/29 or 192.168.0.0/29. Ranges must be
+      unique and non-overlapping with existing subnets in an authorized
+      network.
+    output: true
+    api_name: reservedIpRange
   - name: 'tier'
     type: Enum
     description: |

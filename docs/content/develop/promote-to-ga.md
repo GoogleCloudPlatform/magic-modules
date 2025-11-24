@@ -14,19 +14,19 @@ For more information about types of resources and the generation process overall
 ## Before you begin
 
 1. Complete the steps in [Set up your development environment]({{< ref "/develop/set-up-dev-environment" >}}) to set up your environment and your Google Cloud project.
-2. Ensure that your `magic-modules`, `terraform-provider-google`, and `terraform-provider-google-beta` repositories are up to date.
-   ```
-   cd ~/magic-modules
-   git checkout main && git clean -f . && git checkout -- . && git pull
-   cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-   git checkout main && git clean -f . && git checkout -- . && git pull
-   cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
-   git checkout main && git clean -f . && git checkout -- . && git pull
-   ```
+1. Ensure that your `magic-modules`, `terraform-provider-google`, and `terraform-provider-google-beta` repositories are up to date.
+    ```bash
+    cd ~/magic-modules
+    git checkout main && git clean -f . && git checkout -- . && git pull
+    cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+    git checkout main && git clean -f . && git checkout -- . && git pull
+    cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+    git checkout main && git clean -f . && git checkout -- . && git pull
+    ```
 
 ## Promote fields and resources
 
-{{< tabs "resources" >}}
+{{% tabs "resources" %}}
 {{< tab "MMv1" >}}
 1. Remove `min_version: 'beta'` from the resource's or field's configuration in `ResourceName.yaml`.
 2. If necessary, remove version guards from resource-level `custom_code`.
@@ -46,7 +46,7 @@ For more information about types of resources and the generation process overall
    - For other fields, expanders and flatteners
    - Any other resource-specific code
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 ## Promote tests
 

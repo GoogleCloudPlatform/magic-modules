@@ -17,6 +17,7 @@ description: |
   ServerTlsPolicy is a resource that specifies how a server should authenticate incoming requests. This resource itself does not affect configuration unless it is attached to a target HTTPS proxy or endpoint config selector resource.
 references:
   guides:
+    'Use ServerTlsPolicy': 'https://cloud.google.com/load-balancing/docs/mtls'
   api: 'https://cloud.google.com/traffic-director/docs/reference/network-security/rest/v1beta1/projects.locations.serverTlsPolicies'
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/serverTlsPolicies'
@@ -41,7 +42,13 @@ async:
       delete_minutes: 30
   result:
     resource_inside_response: false
+include_in_tgc_next_DO_NOT_USE: true
 custom_code:
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "global"
+    - region: "us-east1"
 examples:
   - name: 'network_security_server_tls_policy_basic'
     primary_resource_id: 'default'
@@ -89,6 +96,7 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: Set of label tags associated with the ServerTlsPolicy resource.
+    is_missing_in_cai: true
   - name: 'description'
     type: String
     description: |

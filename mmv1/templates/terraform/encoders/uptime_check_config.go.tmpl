@@ -1,0 +1,15 @@
+// remove passwordWoVersion from the request body
+if v, ok := obj["httpCheck"]; ok {
+    httpCheck := v.(map[string]interface{})
+    if authInfo, ok := httpCheck["authInfo"].(map[string]interface{}); ok {
+        delete(authInfo, "passwordWoVersion")
+        if len(authInfo) > 0 {
+            httpCheck["authInfo"] = authInfo
+        } else {
+            delete(httpCheck, "authInfo")
+        }
+        obj["httpCheck"] = httpCheck
+    }
+}
+
+return obj, nil

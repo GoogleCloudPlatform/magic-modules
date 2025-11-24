@@ -81,10 +81,15 @@ resource "google_project_service" "compute" {
   depends_on = [google_project_service.servicenetworking]
 }
 
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_project_service.compute]
+}
+
 resource "google_compute_network" "apigee_network" {
   name       = "apigee-network"
   project    = google_project.project.project_id
-  depends_on = [google_project_service.compute]
+  depends_on = [time_sleep.wait_120_seconds]
 }
 
 resource "google_compute_global_address" "apigee_range" {
@@ -118,6 +123,18 @@ resource "google_apigee_environment" "apigee_environment" {
   name         = "tf-test%{random_suffix}"
   description  = "Updated Apigee Environment Description"
   display_name = "environment-1-updated"
+  properties {
+	property {
+		name  = "property-1-key"
+        value = "property-1-value"
+	}
+  }
+  client_ip_resolution_config {
+    header_index_algorithm {
+      ip_header_name = "X-Forwarded-For"
+      ip_header_index = 1
+    }
+  }
 }
 `, context)
 }

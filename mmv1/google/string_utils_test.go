@@ -101,6 +101,11 @@ func TestStringPlural(t *testing.T) {
 			term:        "gateway",
 			expected:    "gateways",
 		},
+		{
+			description: "Plural camelcase string ending with s",
+			term:        "messageBus",
+			expected:    "messageBuses",
+		},
 	}
 
 	for _, tc := range cases {

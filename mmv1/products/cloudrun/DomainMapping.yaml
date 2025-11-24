@@ -24,6 +24,7 @@ docs:
 id_format: 'locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}'
 base_url: 'apis/domains.cloudrun.com/v1/namespaces/{{project}}/domainmappings'
 cai_base_url: 'projects/{{project}}/locations/{{location}}/DomainMappings'
+cai_asset_name_format: 'projects/{{project}}/locations/{{location}}/domainmappings/{{name}}'
 immutable: true
 import_format:
   - 'locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}'

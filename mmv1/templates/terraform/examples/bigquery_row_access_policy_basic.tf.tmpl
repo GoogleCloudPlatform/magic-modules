@@ -1,0 +1,22 @@
+resource "google_bigquery_dataset" "{{$.PrimaryResourceId}}" {
+  dataset_id = "{{index $.Vars "dataset_id"}}"
+  location = "US"
+}
+
+resource "google_bigquery_table" "{{$.PrimaryResourceId}}" {
+  deletion_protection = false
+
+  dataset_id = google_bigquery_dataset.{{$.PrimaryResourceId}}.dataset_id
+  table_id   = "{{index $.Vars "table_id"}}"
+}
+
+resource "google_bigquery_row_access_policy" "{{$.PrimaryResourceId}}" {
+  dataset_id = google_bigquery_dataset.{{$.PrimaryResourceId}}.dataset_id
+  table_id   = google_bigquery_table.{{$.PrimaryResourceId}}.table_id
+  policy_id = "{{index $.Vars "policy_id"}}"
+
+  filter_predicate = "nullable_field is not NULL"
+  grantees = [
+    "domain:google.com"
+  ]
+}

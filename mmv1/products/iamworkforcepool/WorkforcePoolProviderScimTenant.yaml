@@ -1,0 +1,114 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'WorkforcePoolProviderScimTenant'
+description: |
+  Represents a SCIM tenant configuration for a Workforce Pool Provider.
+  The SCIM tenant configuration allows for the synchronization of user/group identities from external identity provider into Google Cloud using the System for Cross-domain Identity Management (SCIM) protocol.
+references:
+  guides:
+    'QUICKSTART_TITLE': 'https://cloud.google.com/iam/docs/workforce-sign-in-microsoft-entra-id-scalable-groups?group_type=extended#extended-attributes'
+  api: 'https://cloud.google.com/sdk/gcloud/reference/iam/workforce-pools/providers/scim-tenants'
+base_url: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants'
+self_link: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants/{{scim_tenant_id}}'
+create_url: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants?workforcePoolProviderScimTenantId={{scim_tenant_id}}'
+
+import_format:
+  - 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants/{{scim_tenant_id}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  delete_minutes: 20
+custom_code:
+  decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
+  post_create: 'templates/terraform/post_create/sleep.go.tmpl'
+  post_update: 'templates/terraform/post_create/sleep.go.tmpl'
+examples:
+  - name: 'iam_workforce_pool_provider_scim_tenant_basic'
+    primary_resource_id: "example"
+    vars:
+      workforce_pool_id: 'example-pool'
+      provider_id: 'example-prvdr'
+      scim_tenant_id: 'example-scim-tenant'
+    test_env_vars:
+      org_id: 'ORG_ID'
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      Identifier. The resource name of the scim tenant.
+      Format: `locations/{location}/workforcePools/{workforce_pool}/providers/{workforce_pool_provider}/scimTenants/{scim_tenant_id}
+    output: true
+  - name: 'displayName'
+    type: String
+    description:
+      A user-specified display name for the scim tenant. Cannot exceed 32
+      characters.
+  - name: 'description'
+    type: String
+    description:
+      A user-specified description of the provider. Cannot exceed 256
+      characters.
+  - name: 'state'
+    type: Enum
+    output: true
+    description: |
+      The current state of the scim tenant.
+      * STATE_UNSPECIFIED: State unspecified.
+      * ACTIVE: The scim tenant is active and may be used to validate authentication credentials.
+      * DELETED: The scim tenant is soft-deleted. Soft-deleted scim tenants are permanently
+        deleted after approximately 30 days.
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'ACTIVE'
+      - 'DELETED'
+  - name: 'baseURI'
+    type: String
+    description: |
+      Represents the base URI as defined in [RFC 7644, Section
+      1.3](https://datatracker.ietf.org/doc/html/rfc7644#section-1.3). Clients
+      must use this as the root address for managing resources under the tenant.
+      Format:
+      https://iamscim.googleapis.com/{version}/{tenant_id}/
+    output: true
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location for the resource.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'workforcePoolId'
+    type: String
+    description: |
+      The ID of the workforce pool.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'ProviderId'
+    type: String
+    description: |
+      The ID of the provider.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'scimTenantId'
+    type: String
+    description: |
+      The ID to use for the SCIM tenant, which becomes the final component of the resource name. This value must be 4-32 characters, and may contain the characters [a-z0-9-].
+    url_param_only: true
+    required: true
+    immutable: true

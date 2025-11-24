@@ -13,6 +13,8 @@
 
 ---
 name: 'Autoscaler'
+api_variant_patterns:
+  - 'projects/{project}/zones/{zone}/autoscalers/{autoscaler}'
 kind: 'compute#autoscaler'
 description: |
   Represents an Autoscaler resource.
@@ -40,7 +42,12 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next_DO_NOT_USE: true
 custom_code:
+sweeper:
+  url_substitutions:
+    - zone: "us-central1-a"
+    - zone: "us-central1-f"
 examples:
   - name: 'autoscaler_single_instance'
     primary_resource_id: 'default'
@@ -298,7 +305,6 @@ properties:
                 latency, since this value can't include a chunk assignable to a
                 single instance, it could be better used with utilization_target
                 instead.
-              min_version: 'beta'
             - name: 'target'
               type: Double
               description: |
@@ -357,7 +363,6 @@ properties:
                 (if you are using gce_instance resource type). If multiple
                 TimeSeries are returned upon the query execution, the autoscaler
                 will sum their respective values to obtain its scaling value.
-              min_version: 'beta'
               default_value: "resource.type = gce_instance"
       - name: 'loadBalancingUtilization'
         type: NestedObject

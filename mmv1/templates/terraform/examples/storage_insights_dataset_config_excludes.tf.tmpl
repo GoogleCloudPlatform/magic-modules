@@ -1,0 +1,20 @@
+resource "google_storage_insights_dataset_config" "{{$.PrimaryResourceId}}" {
+    location = "us-central1"
+    dataset_config_id = "{{$.Vars.dataset_config_id}}"
+    retention_period_days = 1
+    organization_scope = true
+    identity {
+        type = "IDENTITY_TYPE_PER_PROJECT"
+    }
+    exclude_cloud_storage_locations {
+        locations = ["us-east1"]
+    }
+    exclude_cloud_storage_buckets {
+        cloud_storage_buckets {
+            bucket_name = "sample-bucket"
+        }
+        cloud_storage_buckets {
+            bucket_name = "sample-regex"
+        }
+    }
+}

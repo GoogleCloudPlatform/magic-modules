@@ -4,50 +4,20 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
-	"strconv"
 	"strings"
 	"testing"
 
-	"github.com/google/go-github/v61/github"
+	"github.com/google/go-github/v68/github"
 )
 
-// TestIssue represents a simplified issue structure for testing
-type TestIssue struct {
-	Number int
-	Body   string
-	Labels []string
-}
-
-// Convert TestIssue to github.Issue
-func (i TestIssue) toGithubIssue() *github.Issue {
-	var labels []*github.Label
-	for _, l := range i.Labels {
-		name := l
-		label := github.Label{Name: &name}
-		labels = append(labels, &label)
-	}
-
-	number := i.Number
-	body := i.Body
-	pullRequestURLstr := "https://api.github.com/repos/owner/repo/pulls/" + strconv.Itoa(number)
-	prLinks := &github.PullRequestLinks{URL: &pullRequestURLstr}
-
-	return &github.Issue{
-		Number:           &number,
-		Body:             &body,
-		Labels:           labels,
-		PullRequestLinks: prLinks,
-	}
-}
-
-func testIssueBodyWithResources(resources []string) string {
-	return fmt.Sprintf(`
+func testIssueBodyWithResources(resources []string) *string {
+	return github.Ptr(fmt.Sprintf(`
 ### New or Affected Resource(s):
 
 %s
 
 #
-`, strings.Join(resources, "\n"))
+`, strings.Join(resources, "\n")))
 }
 
 func TestComputeIssueUpdates(t *testing.T) {
@@ -66,40 +36,80 @@ func TestComputeIssueUpdates(t *testing.T) {
 		},
 	}
 
-	cases := map[string]struct {
-		issues               []TestIssue
+	cases := []struct {
+		name, description    string
+		issues               []*github.Issue
 		regexpLabels         []RegexpLabel
 		expectedIssueUpdates []IssueUpdate
 	}{
-		"no issues -> no updates": {
-			issues:               []TestIssue{},
+		{
+			name:                 "no issues",
+			description:          "no issues means no updates",
+			issues:               []*github.Issue{},
 			regexpLabels:         defaultRegexpLabels,
 			expectedIssueUpdates: []IssueUpdate{},
 		},
-		"exempt labels -> no updates": {
-			issues: []TestIssue{
+		{
+			name:        "nil body",
+			description: "gracefully handle a nil issue body",
+			issues: []*github.Issue{
 				{
-					Number: 1,
-					Body:   testIssueBodyWithResources([]string{"google_service1_resource1"}),
-					Labels: []string{"service/terraform"},
-				},
-				{
-					Number: 2,
-					Body:   testIssueBodyWithResources([]string{"google_service1_resource1"}),
-					Labels: []string{"forward/exempt"},
+					Number: github.Ptr(1),
 				},
 			},
 			regexpLabels:         defaultRegexpLabels,
 			expectedIssueUpdates: []IssueUpdate{},
 		},
-		"add resource & review labels": {
-			issues: []TestIssue{
+		{
+			name:        "nil number",
+			description: "gracefully handle a nil issue number",
+			issues: []*github.Issue{
 				{
-					Number: 1,
+					Body: testIssueBodyWithResources([]string{"google_service1_resource1"}),
+				},
+			},
+			regexpLabels:         defaultRegexpLabels,
+			expectedIssueUpdates: []IssueUpdate{},
+		},
+		{
+			name: "no listed resources",
+			issues: []*github.Issue{
+				{
+					Number: github.Ptr(1),
+					Body:   github.Ptr("Body with unusual structure"),
+				},
+			},
+			regexpLabels:         defaultRegexpLabels,
+			expectedIssueUpdates: []IssueUpdate{},
+		},
+		{
+			name:        "service/terraform",
+			description: "issues with service/terraform shouldn't get new labels",
+			issues: []*github.Issue{
+				{
+					Number: github.Ptr(1),
+					Body:   testIssueBodyWithResources([]string{"google_service1_resource1"}),
+					Labels: []*github.Label{{Name: github.Ptr("service/terraform")}},
+				},
+				{
+					Number: github.Ptr(2),
+					Body:   testIssueBodyWithResources([]string{"google_service1_resource1"}),
+					Labels: []*github.Label{{Name: github.Ptr("forward/exempt")}},
+				},
+			},
+			regexpLabels:         defaultRegexpLabels,
+			expectedIssueUpdates: []IssueUpdate{},
+		},
+		{
+			name:        "add resource & review labels",
+			description: "issues with affected resources should normally get new labels added",
+			issues: []*github.Issue{
+				{
+					Number: github.Ptr(1),
 					Body:   testIssueBodyWithResources([]string{"google_service1_resource1"}),
 				},
 				{
-					Number: 2,
+					Number: github.Ptr(2),
 					Body:   testIssueBodyWithResources([]string{"google_service2_resource1"}),
 				},
 			},
@@ -115,33 +125,37 @@ func TestComputeIssueUpdates(t *testing.T) {
 				},
 			},
 		},
-		"don't update issues if all service labels are already present": {
-			issues: []TestIssue{
+		{
+			name:        "labels already correct",
+			description: "don't update issues if all expected service labels are already present",
+			issues: []*github.Issue{
 				{
-					Number: 1,
+					Number: github.Ptr(1),
 					Body:   testIssueBodyWithResources([]string{"google_service1_resource1"}),
-					Labels: []string{"service/service1"},
+					Labels: []*github.Label{{Name: github.Ptr("service/service1")}},
 				},
 				{
-					Number: 2,
+					Number: github.Ptr(2),
 					Body:   testIssueBodyWithResources([]string{"google_service2_resource1"}),
-					Labels: []string{"service/service2-subteam1"},
+					Labels: []*github.Label{{Name: github.Ptr("service/service2-subteam1")}},
 				},
 			},
 			regexpLabels:         defaultRegexpLabels,
 			expectedIssueUpdates: []IssueUpdate{},
 		},
-		"add missing service labels": {
-			issues: []TestIssue{
+		{
+			name:        "missing labels",
+			description: "add missing service labels",
+			issues: []*github.Issue{
 				{
-					Number: 1,
+					Number: github.Ptr(1),
 					Body:   testIssueBodyWithResources([]string{"google_service1_resource1"}),
-					Labels: []string{"service/service2-subteam1"},
+					Labels: []*github.Label{{Name: github.Ptr("service/service2-subteam1")}},
 				},
 				{
-					Number: 2,
+					Number: github.Ptr(2),
 					Body:   testIssueBodyWithResources([]string{"google_service2_resource2"}),
-					Labels: []string{"service/service1"},
+					Labels: []*github.Label{{Name: github.Ptr("service/service1")}},
 				},
 			},
 			regexpLabels: defaultRegexpLabels,
@@ -158,33 +172,53 @@ func TestComputeIssueUpdates(t *testing.T) {
 				},
 			},
 		},
-		"don't add missing service labels if already linked": {
-			issues: []TestIssue{
+		{
+			name:        "forward/linked",
+			description: "don't add missing service labels if already linked",
+			issues: []*github.Issue{
 				{
-					Number: 1,
+					Number: github.Ptr(1),
 					Body:   testIssueBodyWithResources([]string{"google_service1_resource1"}),
-					Labels: []string{"service/service2-subteam1", "forward/linked"},
+					Labels: []*github.Label{{Name: github.Ptr("service/service2-subteam1")}, {Name: github.Ptr("forward/linked")}},
 				},
 			},
 			regexpLabels:         defaultRegexpLabels,
 			expectedIssueUpdates: []IssueUpdate{},
 		},
+		{
+			name:        "test failure",
+			description: "add service labels if missed but don't add forward/review label for test failure ticket",
+			issues: []*github.Issue{
+				{
+					Number: github.Ptr(1),
+					Body:   testIssueBodyWithResources([]string{"google_service1_resource1"}),
+					Labels: []*github.Label{{Name: github.Ptr("test-failure")}, {Name: github.Ptr("test-failure-100")}},
+				},
+				{
+					Number: github.Ptr(2),
+					Body:   testIssueBodyWithResources([]string{"google_service2_resource1"}),
+					Labels: []*github.Label{{Name: github.Ptr("test-failure")}, {Name: github.Ptr("test-failure-50")}, {Name: github.Ptr("service/service2-subteam1")}},
+				},
+			},
+			regexpLabels: defaultRegexpLabels,
+			expectedIssueUpdates: []IssueUpdate{
+				{
+					Number:    1,
+					Labels:    []string{"service/service1", "test-failure", "test-failure-100"},
+					OldLabels: []string{"test-failure", "test-failure-100"},
+				},
+			},
+		},
 	}
 
-	for tn, tc := range cases {
+	for _, tc := range cases {
 		tc := tc
-		t.Run(tn, func(t *testing.T) {
+		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			// Convert TestIssues to github.Issues
-			var githubIssues []*github.Issue
-			for _, issue := range tc.issues {
-				githubIssues = append(githubIssues, issue.toGithubIssue())
-			}
-
-			issueUpdates := ComputeIssueUpdates(githubIssues, tc.regexpLabels)
+			issueUpdates := ComputeIssueUpdates(tc.issues, tc.regexpLabels)
 			if !issueUpdatesEqual(issueUpdates, tc.expectedIssueUpdates) {
-				t.Errorf("Expected %v, got %v", tc.expectedIssueUpdates, issueUpdates)
+				t.Errorf("ComputeIssueUpdates(%s) expected %v, got %v", tc.name, tc.expectedIssueUpdates, issueUpdates)
 			}
 		})
 	}

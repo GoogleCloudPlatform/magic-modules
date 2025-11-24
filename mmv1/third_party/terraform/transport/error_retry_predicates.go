@@ -49,6 +49,12 @@ var defaultErrorRetryPredicates = []RetryErrorPredicateFunc{
 	// GCE returns the wrong error code, as this should be a 429, which we retry
 	// already.
 	is403QuotaExceededPerMinuteError,
+
+	// GCE Networks are considered unready for a brief period when certain
+	// operations are performed on them, and the scope is likely too broad to
+	// apply a mutex. If we attempt an operation w/ an unready network, retry
+	// it.
+	isNetworkUnreadyError,
 }
 
 /** END GLOBAL ERROR RETRY PREDICATES HERE **/
@@ -143,6 +149,19 @@ func isSubnetworkUnreadyError(err error) (bool, string) {
 	return false, ""
 }
 
+func isNetworkUnreadyError(err error) (bool, string) {
+	gerr, ok := err.(*googleapi.Error)
+	if !ok {
+		return false, ""
+	}
+
+	if gerr.Code == 400 && strings.Contains(gerr.Body, "resourceNotReady") && strings.Contains(gerr.Body, "networks") {
+		log.Printf("[DEBUG] Dismissed an error as retryable based on error code 400 and error reason 'resourceNotReady' w/ 'networks': %s", err)
+		return true, "Network not ready"
+	}
+	return false, ""
+}
+
 // GCE (and possibly other APIs) incorrectly return a 403 rather than a 429 on
 // rate limits.
 func is403QuotaExceededPerMinuteError(err error) (bool, string) {
@@ -175,6 +194,7 @@ func IsFingerprintError(err error) (bool, string) {
 	if gerr.Code != 412 {
 		return false, ""
 	}
+	log.Printf("[DEBUG] Got a 412 error, checking for fingerprint mismatch: %s", err)
 
 	for _, msg := range FINGERPRINT_FAIL_ERRORS {
 		if strings.Contains(err.Error(), msg) {
@@ -285,6 +305,17 @@ func IsRepositoryGroupQueueError(err error) (bool, string) {
 	return false, ""
 }
 
+// Retry if Workbench operation returns a 409 with a specific message for
+// enqueued operations.
+func IsWorkbenchQueueError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 409 && (strings.Contains(strings.ToLower(gerr.Body), "unable to queue the operation")) {
+			return true, "Waiting for other enqueued operations to finish"
+		}
+	}
+	return false, ""
+}
+
 // Retry if Monitoring operation returns a 409 with a specific message for
 // concurrent operations.
 func IsMonitoringConcurrentEditError(err error) (bool, string) {
@@ -302,6 +333,16 @@ func IsMonitoringPermissionError(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 403 {
 			return true, "Waiting for project to be ready for metrics scope"
+		}
+	}
+	return false, ""
+}
+
+// Retry if Eventarc Channel operation returns a 403
+func EventarcChannel403Retry(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 403 && strings.Contains(gerr.Body, "The caller does not have permission") {
+			return true, "Waiting for channel to be ready"
 		}
 	}
 	return false, ""
@@ -454,7 +495,7 @@ func PubsubTopicProjectNotReady(err error) (bool, string) {
 }
 
 // Retry on comon googleapi error codes for retryable errors.
-// TODO(#5609): This may not need to be applied globally - figure out
+// TODO: #5609 This may not need to be applied globally - figure out
 // what retryable error codes apply to which API.
 func isCommonRetryableErrorCode(err error) (bool, string) {
 	gerr, ok := err.(*googleapi.Error)

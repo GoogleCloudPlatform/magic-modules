@@ -11,7 +11,7 @@ import (
 
 // This will sweep BigqueryReservation Reservation and Assignment resources
 func init() {
-	sweeper.AddTestSweepers("BigqueryReservation", testSweepBigqueryReservation)
+	sweeper.AddTestSweepersLegacy("BigqueryReservation", testSweepBigqueryReservation)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region

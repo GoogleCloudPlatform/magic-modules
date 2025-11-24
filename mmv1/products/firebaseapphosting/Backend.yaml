@@ -1,0 +1,211 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Backend
+description: A Backend is the primary resource of App Hosting.
+base_url: projects/{{project}}/locations/{{location}}/backends
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/backends/{{backend_id}}
+create_url: projects/{{project}}/locations/{{location}}/backends?backendId={{backend_id}}
+# Always forces deletion because the child resource default `Domain` is always present.
+delete_url: projects/{{project}}/locations/{{location}}/backends/{{backend_id}}?force=true
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/backends/{{backend_id}}
+import_format:
+  - "projects/{{project}}/locations/{{location}}/backends/{{backend_id}}"
+  - "{{project}}/{{location}}/{{backend_id}}"
+  - "{{location}}/{{backend_id}}"
+examples:
+  - name: firebase_app_hosting_backend_minimal
+    primary_resource_id: example
+    vars:
+      backend_id: "mini"
+      service_act_id: "firebase-app-hosting-compute"
+    test_env_vars:
+      project_id: "PROJECT_NAME"
+    test_vars_overrides:
+      # prevent tests from colliding with each other
+      service_act_id: '"tf-test-fah-minimal"'
+  - name: firebase_app_hosting_backend_full
+    primary_resource_id: example
+    vars:
+      backend_id: "full"
+      service_act_id: "firebase-app-hosting-compute"
+    test_env_vars:
+      project_id: "PROJECT_NAME"
+    test_vars_overrides:
+      # prevent tests from colliding with each other
+      service_act_id: '"tf-test-fah-full"'
+  - name: firebase_app_hosting_backend_github
+    primary_resource_id: example
+    vars:
+      backend_id: "my-backend-gh"
+    test_env_vars:
+      project_id: "PROJECT_NAME"
+    exclude_test: true  # Can't establish a Github connection in automated tests.
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: "{{op_id}}"
+  actions:
+    - create
+    - delete
+    - update
+  type: OpAsync
+  result:
+    resource_inside_response: true
+  include_project: false
+autogen_status: QmFja2VuZA==
+parameters:
+  - name: location
+    type: String
+    description: The canonical IDs of a Google Cloud location such as "us-east1".
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: backendId
+    type: String
+    description: |-
+      Id of the backend. Also used as the service ID for Cloud Run, and as part
+      of the default domain name.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: servingLocality
+    type: Enum
+    description: |-
+      Immutable. Specifies how App Hosting will serve the content for this backend. It will
+      either be contained to a single region (REGIONAL_STRICT) or allowed to use
+      App Hosting's global-replicated serving infrastructure (GLOBAL_ACCESS).
+    enum_values:
+      - "REGIONAL_STRICT"
+      - "GLOBAL_ACCESS"
+    immutable: true
+    required: true
+  - name: appId
+    type: String
+    description: |-
+      The [ID of a Web
+      App](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.webApps#WebApp.FIELDS.app_id)
+      associated with the backend.
+    required: true
+  - name: serviceAccount
+    type: String
+    description: |-
+      The name of the service account used for Cloud Build and Cloud Run.
+      Should have the role roles/firebaseapphosting.computeRunner
+      or equivalent permissions.
+    required: true
+  - name: annotations
+    type: KeyValueAnnotations
+    description: |-
+      Unstructured key value map that may be set by external tools to
+      store and arbitrary metadata. They are not queryable and should be
+      preserved when modifying objects.
+  - name: displayName
+    type: String
+    description: Human-readable name. 63 character limit.
+  - name: environment
+    type: String
+    description: |-
+      The environment name of the backend, used to load environment variables
+      from environment specific configuration.
+  - name: labels
+    type: KeyValueLabels
+    description: |-
+      Unstructured key value map that can be used to organize and categorize
+      objects.
+  - name: etag
+    type: Fingerprint
+    description: |-
+      Server-computed checksum based on other values; may be sent
+      on update or delete to ensure operation is done on expected resource.
+    output: true
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the backend.
+
+      Format:
+
+      `projects/{project}/locations/{locationId}/backends/{backendId}`.
+    output: true
+  - name: createTime
+    type: Time
+    description: Time at which the backend was created.
+    output: true
+  - name: deleteTime
+    type: Time
+    description: Time at which the backend was deleted.
+    output: true
+  - name: updateTime
+    type: Time
+    description: Time at which the backend was last updated.
+    output: true
+  - name: uid
+    type: String
+    description: System-assigned, unique identifier.
+    output: true
+  - name: uri
+    type: String
+    description: The primary URI to communicate with the backend.
+    output: true
+  - name: codebase
+    type: NestedObject
+    description: |-
+      The connection to an external source repository to watch for event-driven
+      updates to the backend.
+    properties:
+      - name: repository
+        type: String
+        description: |-
+          The resource name for the Developer Connect
+          [`gitRepositoryLink`](https://cloud.google.com/developer-connect/docs/api/reference/rest/v1/projects.locations.connections.gitRepositoryLinks)
+          connected to this backend, in the format:
+
+          projects/{project}/locations/{location}/connections/{connection}/gitRepositoryLinks/{repositoryLink}
+        required: true
+      - name: rootDirectory
+        type: String
+        description: |-
+          If `repository` is provided, the directory relative to the root of the
+          repository to use as the root for the deployed web app.
+  - name: managedResources
+    type: Array
+    description: A list of the resources managed by this backend.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: runService
+          type: NestedObject
+          output: true
+          description: |-
+            A managed Cloud Run
+            [`service`](https://cloud.google.com/run/docs/reference/rest/v2/projects.locations.services#resource:-service).
+          properties:
+            - name: service
+              type: String
+              output: true
+              description: |-
+                The name of the Cloud Run
+                [`service`](https://cloud.google.com/run/docs/reference/rest/v2/projects.locations.services#resource:-service),
+                in the format:
+
+                projects/{project}/locations/{location}/services/{serviceId}

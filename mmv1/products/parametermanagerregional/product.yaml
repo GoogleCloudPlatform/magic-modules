@@ -19,5 +19,8 @@ versions:
   - name: 'beta'
     base_url: 'https://parametermanager.{{location}}.rep.googleapis.com/v1/'
     cai_base_url: 'https://parametermanager.googleapis.com/v1/'
+  - name: 'ga'
+    base_url: 'https://parametermanager.{{location}}.rep.googleapis.com/v1/'
+    cai_base_url: 'https://parametermanager.googleapis.com/v1/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'

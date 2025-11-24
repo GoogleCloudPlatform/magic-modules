@@ -14,6 +14,7 @@
 ---
 
 name: 'RuntimeTemplate'
+api_resource_type_kind: NotebookRuntimeTemplate
 description: |
   'A runtime template is a VM configuration that specifies a machine type and other characteristics of the VM,
    as well as common settings such as the network and whether public internet access is enabled. When you create
@@ -27,12 +28,20 @@ base_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates'
 self_link: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates/{{name}}'
 immutable: true
 create_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates?notebook_runtime_template_id={{name}}'
-autogen_async: true
 async:
+  type: 'OpAsync'
   operation:
-    base_url: '{{op_id}}'
-custom_code:
-  post_create: 'templates/terraform/post_create/colab_runtime_template.tmpl'
+    full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
+  result:
+    resource_inside_response: true
+iam_policy:
+  parent_resource_attribute: 'runtime_template'
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  example_config_body: 'templates/terraform/iam/example_config_body/colab_runtime_template.tf.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates/{{runtime_template}}'
+    - '{{runtime_template}}'
 examples:
   - name: 'colab_runtime_template_basic'
     primary_resource_id: 'runtime-template'
@@ -134,6 +143,7 @@ properties:
         diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
   - name: 'labels'
     type: KeyValueLabels
+    default_from_api: true
     description: 'Labels to identify and group the runtime template.'
   - name: idleShutdownConfig
     type: NestedObject
@@ -146,18 +156,26 @@ properties:
         description: 'The duration after which the runtime is automatically shut down. An input of 0s disables the idle shutdown feature, and a valid range is [10m, 24h].'
   - name: eucConfig
     type: NestedObject
+    default_from_api: true
     description: 'EUC configuration of the NotebookRuntimeTemplate.'
+    diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
     properties:
       - name: 'eucDisabled'
         type: Boolean
+        default_from_api: true
         description: 'Disable end user credential access for the runtime.'
+        diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
   - name: shieldedVmConfig
     type: NestedObject
+    default_from_api: true
     description: 'Runtime Shielded VM spec.'
+    diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
     properties:
       - name: 'enableSecureBoot'
         type: Boolean
+        default_from_api: true
         description: 'Enables secure boot for the runtime.'
+        diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
   - name: 'networkTags'
     type: Array
     item_type:
@@ -170,3 +188,24 @@ properties:
       - name: 'kmsKeyName'
         type: String
         description: 'The Cloud KMS encryption key (customer-managed encryption key) used to protect the runtime.'
+  - name: softwareConfig
+    type: NestedObject
+    default_from_api: true
+    description: 'The notebook software configuration of the notebook runtime.'
+    properties:
+      - name: 'env'
+        type: Array
+        description: 'Environment variables to be passed to the container.'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'name'
+              type: String
+              description: 'Name of the environment variable. Must be a valid C identifier.'
+            - name: 'value'
+              type: String
+              description: 'Variables that reference a $(VAR_NAME) are expanded using the previous defined
+                             environment variables in the container and any service environment variables.
+                            If a variable cannot be resolved, the reference in the input string will be unchanged.
+                            The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped
+                            references will never be expanded, regardless of whether the variable exists or not.'

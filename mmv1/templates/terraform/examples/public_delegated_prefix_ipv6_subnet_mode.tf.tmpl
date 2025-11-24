@@ -1,0 +1,25 @@
+resource "google_compute_public_advertised_prefix" "advertised" {
+  name = "{{index $.Vars "pap_name"}}"
+  description = "{{index $.TestEnvVars "desc"}}"
+  dns_verification_ip = "2001:db8::"
+  ip_cidr_range = "2001:db8::/32"
+  pdp_scope = "REGIONAL"
+}
+
+resource "google_compute_public_delegated_prefix" "prefix" {
+  name = "{{index $.Vars "root_pdp_name"}}"
+  description = "test-delegation-mode-pdp"
+  region = "us-east1"
+  ip_cidr_range = "2001:db8::/40"
+  parent_prefix = google_compute_public_advertised_prefix.advertised.id
+  mode = "DELEGATION"
+}
+
+resource "google_compute_public_delegated_prefix" "subprefix" {
+  name = "{{index $.Vars "sub_pdp_name"}}"
+  description = "test-subnet-mode-pdp"
+  region = "us-east1"
+  ip_cidr_range = "2001:db8::/48"
+  parent_prefix = google_compute_public_delegated_prefix.prefix.id
+  mode = "EXTERNAL_IPV6_SUBNETWORK_CREATION"
+}

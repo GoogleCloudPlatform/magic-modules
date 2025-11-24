@@ -1,0 +1,6 @@
+func chronicleRuleDeploymentNilRunFrequencyDiffSuppressFunc(_, old, new string, _ *schema.ResourceData) bool {
+    if new == "" {
+		return true
+	}
+	return false
+}

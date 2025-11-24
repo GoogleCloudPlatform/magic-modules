@@ -46,9 +46,9 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'tag_value'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
 exclude_tgc: true
+exclude_sweeper: true
 examples:
   - name: 'tag_value_basic'
     primary_resource_id: 'value'

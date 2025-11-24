@@ -16,10 +16,10 @@ name: 'Colab'
 display_name: 'Colab Enterprise'
 versions:
   - name: 'ga'
-    base_url: 'https://{{region}}-aiplatform.googleapis.com/v1/'
+    base_url: 'https://{{location}}-aiplatform.googleapis.com/v1/'
     cai_base_url: 'https://aiplatform.googleapis.com/v1/'
   - name: 'beta'
-    base_url: 'https://{{region}}-aiplatform.googleapis.com/v1beta1/'
+    base_url: 'https://{{location}}-aiplatform.googleapis.com/v1beta1/'
     cai_base_url: 'https://aiplatform.googleapis.com/v1beta1/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'

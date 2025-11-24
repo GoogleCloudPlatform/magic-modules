@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	sweeper.AddTestSweepers("SQLDatabaseInstance", testSweepSQLDatabaseInstance)
+	sweeper.AddTestSweepersLegacy("SQLDatabaseInstance", testSweepSQLDatabaseInstance)
 }
 
 func testSweepSQLDatabaseInstance(region string) error {

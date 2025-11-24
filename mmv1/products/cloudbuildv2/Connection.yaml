@@ -45,10 +45,15 @@ iam_policy:
   method_name_separator: ':'
   allowed_iam_role: 'roles/cloudbuild.connectionViewer'
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
 exclude_tgc: true
 legacy_long_form_project: true
+include_in_tgc_next_DO_NOT_USE: true
+tgc_include_handwritten_tests: true
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-west1"
 examples:
   - name: 'cloudbuildv2_connection'
     primary_resource_id: 'my-connection'
@@ -66,6 +71,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+    custom_tgc_expand: 'templates/tgc_next/custom_expand/cloudbuildv2_repository_name.go.tmpl'
   - name: 'location'
     type: String
     description: The location for the resource

@@ -1,6 +1,6 @@
 ---
-majorVersion: "6.0.0"
-upgradeGuide: "version_6_upgrade.html.markdown"
+majorVersion: "7.0.0"
+upgradeGuide: "version_7_upgrade.html.markdown"
 title: "Make a breaking change"
 summary: "Guidance on making a breaking changes"
 weight: 20
@@ -50,6 +50,8 @@ example:
 * Removing update support from a field if that field is not actually updatable
   in the API.
 * Marking a field required if omitting the field always causes an API error.
+* Changing a List to a Set where the field is unordered and the order
+  returned from the API changes unpredictably.
 
 The following types of changes can be made if the default behavior stays the
 same and new behavior can be enabled with a flag:
@@ -63,7 +65,7 @@ The general process for contributing a breaking change to the
 
 1. Make the `main` branch forwards-compatible with the major release
 2. Add deprecations and warnings to the `main` branch of `magic-modules`
-3. Add upgrade guide entries to the `FEATURE-BRANCH-major-release-6.0.0` branch of `magic-modules`
+3. Add upgrade guide entries to the `FEATURE-BRANCH-major-release-7.0.0` branch of `magic-modules`
 4. Make the breaking change on `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}`
 
 These are covered in more detail in the following sections. The upgrade guide
@@ -87,7 +89,7 @@ provider at runtime as well as in documentation.
 
 #### Field deprecation (due to removal or rename)
 
-{{< tabs "Field deprecations" >}}
+{{% tabs "Field deprecations" %}}
 {{< tab "MMv1" >}}
 Set `deprecation_message` on the field. For example:
 
@@ -122,11 +124,11 @@ The deprecation message will automatically show up in the resource documentation
    * `api_field_name` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Deprecated) FIELD_DESCRIPTION. `api_field_name` is deprecated and will be removed in a future major release. Use `other_field_name` instead.
    ```
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 #### Resource deprecation (due to removal or rename)
 
-{{< tabs "Resource deprecations" >}}
+{{% tabs "Resource deprecations" %}}
 {{< tab "MMv1" >}}
 Set `deprecation_message` on the resource. For example:
 
@@ -163,7 +165,7 @@ The deprecation message will automatically show up in the resource documentation
    major release. Use `google_OTHER_RESOURCE_NAME` instead.
    ```
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 #### Other breaking changes
 
@@ -196,9 +198,9 @@ with the following changes:
    merged into the major release branch every Monday.
 1. Make the breaking change.
 1. Add the upgrade guide entries to
-[{{< param upgradeGuide >}}](https://github.com/GoogleCloudPlatform/magic-modules/blob/FEATURE-BRANCH-major-release-6.0.0/mmv1/third_party/terraform/website/docs/guides/{{< param upgradeGuide >}}). Entries should focus on the changes that users need to make when upgrading
+[{{< param upgradeGuide >}}](https://github.com/GoogleCloudPlatform/magic-modules/blob/FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}/mmv1/third_party/terraform/website/docs/guides/{{< param upgradeGuide >}}). Entries should focus on the changes that users need to make when upgrading
 to `{{% param "majorVersion" %}}`, rather than how to write configurations
-after upgrading. See [Terraform provider for Google Cloud 5.0.0 Upgrade Guide](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_5_upgrade)
+after upgrading. See [Terraform provider for Google Cloud 6.0.0 Upgrade Guide](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_6_upgrade)
 and other upgrade guides for examples.
 1. Remove any deprecation notices and warnings (including in documentation) not already removed by the breaking change.
 1. When you create your pull request,

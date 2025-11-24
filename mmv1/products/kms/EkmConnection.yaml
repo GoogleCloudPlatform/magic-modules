@@ -41,7 +41,6 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   iam_conditions_request_type: 'QUERY_PARAM_NESTED'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/ekmConnections/{{name}}'
 custom_code:

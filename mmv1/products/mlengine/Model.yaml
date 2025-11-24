@@ -22,7 +22,7 @@ references:
   guides:
     'Official Documentation': 'https://cloud.google.com/ai-platform/prediction/docs/deploying-models'
   api: 'https://cloud.google.com/ai-platform/prediction/docs/reference/rest/v1/projects.models'
-docs:
+deprecation_message: 'This resource is deprecated at the API level and will be removed in a future version of Terraform.'
 base_url: 'projects/{{project}}/models'
 self_link: 'projects/{{project}}/models/{{name}}'
 # This resources is not updatable (outside of versions, which is a version-level method)
@@ -44,10 +44,12 @@ schema_version: 1
 state_upgraders: true
 examples:
   - name: 'ml_model_basic'
+    exclude_test: true
     primary_resource_id: 'default'
     vars:
       model_name: 'default'
   - name: 'ml_model_full'
+    exclude_test: true
     primary_resource_id: 'default'
     vars:
       model_name: 'default'

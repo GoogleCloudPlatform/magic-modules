@@ -1,0 +1,67 @@
+package artifactregistry_test
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+)
+
+func TestAccDataSourceArtifactRegistryMavenArtifact_basic(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	// At the moment there are no public Maven artifacts available in Artifact Registry.
+	// This test is skipped to avoid unnecessary failures.
+	// As soon as there are public artifacts available, this test can be enabled by removing the skip and adjusting the configuration accordingly.
+	t.Skip("No public Maven artifacts available in Artifact Registry")
+
+	resourceName := "data.google_artifact_registry_maven_artifact.test"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceArtifactRegistryMavenArtifactConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceName, "project"),
+					resource.TestCheckResourceAttrSet(resourceName, "location"),
+					resource.TestCheckResourceAttrSet(resourceName, "repository_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "artifact_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "name"),
+					validateMavenArtifactTimestamps(resourceName),
+				),
+			},
+		},
+	})
+}
+
+const testAccDataSourceArtifactRegistryMavenArtifactConfig = `
+data "google_artifact_registry_maven_artifact" "test" {
+  project       = "example-project"
+  location      = "us"
+  repository_id = "example-repo"
+  group_id      = "com.example"
+  artifact_id   = "example-artifact"
+}
+`
+
+func validateMavenArtifactTimestamps(dataSourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		res, ok := s.RootModule().Resources[dataSourceName]
+		if !ok {
+			return fmt.Errorf("can't find %s in state", dataSourceName)
+		}
+
+		for _, attr := range []string{"create_time", "update_time"} {
+			if ts, ok := res.Primary.Attributes[attr]; !ok || !isRFC3339(ts) {
+				return fmt.Errorf("%s is not RFC3339: %s", attr, ts)
+			}
+		}
+
+		return nil
+	}
+}
