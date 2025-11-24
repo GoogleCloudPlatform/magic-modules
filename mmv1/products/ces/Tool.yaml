@@ -109,8 +109,7 @@ properties:
               Defines the schema for additional properties allowed in an object.
               The value must be a valid JSON string representing the Schema object.
               (Note: OpenAPI also allows a boolean, this definition expects a Schema JSON).
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-              return s }'
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
             custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
             custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
             validation:
@@ -119,8 +118,7 @@ properties:
             type: String
             description: The instance value should be valid against at least
               one of the schemas in this list.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-              return s }'
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
             custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
             custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
             validation:
@@ -135,8 +133,7 @@ properties:
             type: String
             description: A map of definitions for use by ref. Only allowed at the root
               of the schema.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-              return s }'
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
             custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
             custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
             validation:
@@ -181,8 +178,7 @@ properties:
           - name: prefixItems
             type: String
             description: Schemas of initial elements of Type.ARRAY.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-              return s }'
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
             custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
             custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
             validation:
@@ -190,8 +186,7 @@ properties:
           - name: properties
             type: String
             description: Properties of Type.OBJECT.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-              return s }'
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
             custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
             custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
             validation:
@@ -251,8 +246,7 @@ properties:
               Defines the schema for additional properties allowed in an object.
               The value must be a valid JSON string representing the Schema object.
               (Note: OpenAPI also allows a boolean, this definition expects a Schema JSON).
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-              return s }'
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
             custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
             custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
             validation:
@@ -261,8 +255,7 @@ properties:
             type: String
             description: The instance value should be valid against at least
               one of the schemas in this list.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-              return s }'
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
             custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
             custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
             validation:
@@ -277,8 +270,7 @@ properties:
             type: String
             description: A map of definitions for use by ref. Only allowed at the root
               of the schema.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-              return s }'
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
             custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
             custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
             validation:
@@ -323,8 +315,7 @@ properties:
           - name: prefixItems
             type: String
             description: Schemas of initial elements of Type.ARRAY.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-              return s }'
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
             custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
             custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
             validation:
@@ -332,8 +323,7 @@ properties:
           - name: properties
             type: String
             description: Properties of Type.OBJECT.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-              return s }'
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
             custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
             custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
             validation:
