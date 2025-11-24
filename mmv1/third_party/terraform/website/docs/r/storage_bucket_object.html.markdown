@@ -44,17 +44,16 @@ Example creating an contexts for an object.
 
 ```hcl
 resource "google_storage_bucket_object" "bucket_object" {
-    depends_on=[google_storage_bucket.bucket_acl]
-  bucket  = "image-store"
-  name    = "hello1"
-  content = "hello_hi"
+  bucket  = "test-bucket"
+  name    = "test-object"
+  content = "test-content"
   contexts{
     custom{
       key   ="testKey"
       value ="test"
     }
     custom{
-      key   ="testKey1"
+      key   ="testKeyTwo"
       value ="test"
     }
   }
