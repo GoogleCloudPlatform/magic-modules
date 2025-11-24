@@ -154,6 +154,8 @@ properties:
     type: NestedObject
     description: |
       Settings for sharing the future reservation
+    ignore_read: true
+    default_from_api: true
     properties:
       - name: 'shareType'
         type: Enum
