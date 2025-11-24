@@ -385,7 +385,6 @@ properties:
         type: NestedObject
         description: |
           SSL configuration for the PostgreSQL connection.
-        required: false
         properties:
           - name: 'serverVerification'
             type: NestedObject
@@ -443,7 +442,6 @@ properties:
                 required: true
                 sensitive: true
                 ignore_read: true
-
   - name: 'salesforceProfile'
     min_version: beta
     type: NestedObject
