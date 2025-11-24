@@ -28,7 +28,7 @@ import_format:
   - 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
   - '{{project}}/{{location}}/{{service_id}}'
   - '{{location}}/{{service_id}}'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 examples:
   - name: firebasedataconnect_service_basic
     primary_resource_id: default
