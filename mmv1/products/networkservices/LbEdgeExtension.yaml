@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -40,7 +40,7 @@ async:
 custom_code:
 sweeper:
   url_substitutions:
-    - region: "us-west1"
+    - location: 'global'
 examples:
   - name: 'network_services_lb_edge_extension_basic'
     primary_resource_id: 'default'
@@ -171,7 +171,7 @@ properties:
   - name: 'loadBalancingScheme'
     type: Enum
     description: |
-      All forwarding rules referenced by this extension must share the same load balancing scheme. Supported values: EXTERNAL_MANAGED.
+      All forwarding rules referenced by this extension must share the same load balancing scheme.
     required: true
     immutable: true
     enum_values:
