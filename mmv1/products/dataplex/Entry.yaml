@@ -32,8 +32,9 @@ references:
 
 base_url: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entries/{{entry_id}}'
 self_link: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entries/{{entry_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entries?entryId={{entry_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entries/{{entry_id}}?allow_missing=true'
 update_verb: 'PATCH'
+create_verb: 'PATCH'
 update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entries/{{entry_id}}'
