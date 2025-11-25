@@ -1,3 +1,6 @@
+// If autoscalingConfig is set, ignore  processingUnits and nodeCount.
+// If nodeCount is set, ignore  processingUnits.
+// Those fields conflict with each other.
 if _, ok := res["autoscalingConfig"]; ok {
     res["processingUnits"] = nil
     res["nodeCount"] = nil
