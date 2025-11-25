@@ -40,6 +40,8 @@ func TestAccDiscoveryEngineWidgetConfig_discoveryengineWidgetconfigBasicExample_
 
 func testAccDiscoveryEngineWidgetConfig_discoveryengineWidgetconfigBasicExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {}
+
 resource "google_discovery_engine_data_store" "basic" {
   location                    = "global"
   data_store_id               = "tf-test-data-store-id%{random_suffix}"
@@ -66,7 +68,60 @@ resource "google_discovery_engine_widget_config" "basic" {
   location 					= google_discovery_engine_search_engine.basic.location
   engine_id 				= google_discovery_engine_search_engine.basic.engine_id
   access_settings {
-    enable_web_app 	= true
+    enable_web_app 			= true
+		allow_public_access = false
+		allowlisted_domains = []
+		language_code 			= "en-US"
+  }
+	ui_settings {
+    interaction_type                  = "SEARCH_WITH_ANSWER"
+    enable_autocomplete               = true
+    enable_quality_feedback           = true
+		disable_user_events_collection 		= false
+		enable_create_agent_button				= false
+		enable_people_search							= false
+		enable_safe_search								= false
+		enable_search_as_you_type					= false
+		enable_visual_content_summary			= false
+    generative_answer_config {
+			disable_related_questions 			= false
+			ignore_adversarial_query	 			= false
+			ignore_low_relevant_content 		= false
+			ignore_non_answer_seeking_query = false
+			language_code 									= "en-US"
+			max_rephrase_steps 							= 1
+      result_count                    = 5
+			model_version 									= "stable"
+			model_prompt_preamble 					= "You are a helpful assistant."
+			image_source	 									= "ALL_AVAILABLE_SOURCES"
+    }
+		data_store_ui_configs {
+			name 											= "projects/${data.google_project.project.number}/locations/${google_discovery_engine_data_store.basic.location}/collections/default_collection/dataStores/${google_discovery_engine_data_store.basic.data_store_id}"
+			facet_field {
+				field			 							= "name"
+				display_name 						= "Name"
+			}
+			fields_ui_components_map {
+				ui_component 					= "title"
+				device_visibility 		= ["DESKTOP"]
+				field 								= "name"
+				display_template 			= "Name: {name}"
+			}
+		}
+  }
+	ui_branding {
+	  logo {
+			url = "https://example.com/new-logo.png"
+		}
+	}
+	homepage_setting {
+    shortcuts {
+      destination_uri = "https://example.com/new-destination"
+      icon {
+        url 					= "https://example.com/new-logo.png"
+      }
+      title 					= "Name"
+    }
   }
 }
 `, context)
@@ -74,6 +129,8 @@ resource "google_discovery_engine_widget_config" "basic" {
 
 func testAccDiscoveryEngineWidgetConfig_discoveryengineWidgetconfigBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {}
+
 resource "google_discovery_engine_data_store" "basic" {
   location                    = "global"
   data_store_id               = "tf-test-data-store-id%{random_suffix}"
@@ -102,6 +159,59 @@ resource "google_discovery_engine_widget_config" "basic" {
   access_settings {
     enable_web_app 										= true
     workforce_identity_pool_provider 	= "locations/global/workforcePools/workforce-pool-id/providers/workforce-pool-provider"
+  	allow_public_access 							= false
+		allowlisted_domains 							= []
+		language_code 										= "en-US"
+  }
+	ui_settings {
+    interaction_type                  = "SEARCH_WITH_ANSWER"
+    enable_autocomplete               = true
+    enable_quality_feedback           = true
+		disable_user_events_collection 		= false
+		enable_create_agent_button				= false
+		enable_people_search							= false
+		enable_safe_search								= false
+		enable_search_as_you_type					= false
+		enable_visual_content_summary			= false
+    generative_answer_config {
+			disable_related_questions 			= false
+			ignore_adversarial_query	 			= false
+			ignore_low_relevant_content 		= false
+			ignore_non_answer_seeking_query = false
+			language_code 									= "en-US"
+			max_rephrase_steps 							= 1
+      result_count                    = 5
+			model_version 									= "stable"
+			model_prompt_preamble 					= "You are a helpful assistant."
+			image_source	 									= "ALL_AVAILABLE_SOURCES"
+    }
+		data_store_ui_configs {
+			name 											= "projects/${data.google_project.project.number}/locations/${google_discovery_engine_data_store.basic.location}/collections/default_collection/dataStores/${google_discovery_engine_data_store.basic.data_store_id}"
+			facet_field {
+				field			 							= "name"
+				display_name 						= "Name"
+			}
+			fields_ui_components_map {
+				ui_component 					= "title"
+				device_visibility 		= ["DESKTOP"]
+				field 								= "name"
+				display_template 			= "Name: {name}"
+			}
+		}
+  }
+	ui_branding {
+	  logo {
+			url = "https://example.com/new-logo.png"
+		}
+	}
+	homepage_setting {
+    shortcuts {
+      destination_uri = "https://example.com/new-destination"
+      icon {
+        url 					= "https://example.com/new-logo.png"
+      }
+      title 					= "Name"
+    }
   }
 }
 `, context)
