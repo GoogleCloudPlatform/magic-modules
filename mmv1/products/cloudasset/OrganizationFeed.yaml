@@ -40,7 +40,7 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/cloud_asset_feed.go.tmpl'
   tgc_decoder: 'templates/tgc_next/decoders/cloud_asset_feed.go.tmpl'
 supports_indirect_user_project_override: true
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 tgc_include_handwritten_tests: true
 cai_base_url: 'organizations/{{org_id}}/feeds'
 cai_asset_name_format: 'organizations/{{org_id}}/feeds/{{feed_id}}'
