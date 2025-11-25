@@ -322,15 +322,18 @@ properties:
     type: NestedObject
     description: |
       Scaling settings that apply to the whole service
+    default_from_api: true
     properties:
       - name: 'minInstanceCount'
         type: Integer
         description: |
           Minimum number of instances for the service, to be divided among all revisions receiving traffic.
+        default_from_api: true
       - name: 'maxInstanceCount'
         type: Integer
         description: |
           Combined maximum number of instances for all revisions receiving traffic.
+        default_from_api: true
       - name: 'scalingMode'
         type: Enum
         description: |
@@ -342,6 +345,7 @@ properties:
         type: Integer
         description: |
           Total instance count for the service in manual scaling mode. This number of instances is divided among all revisions with specified traffic based on the percent of traffic they are receiving.
+        default_from_api: true
   - name: 'defaultUriDisabled'
     type: Boolean
     description: |-
