@@ -123,8 +123,17 @@ resource "google_network_security_server_tls_policy" "servertls" {
   description            = "my description"
   location               = "global"
   allow_open             = "false"
+  server_certificate {
+    certificate_provider_instance {
+        plugin_instance = "google_cloud_private_spiffe"
+      }
+  }
   mtls_policy {
-    client_validation_mode = "ALLOW_INVALID_OR_MISSING_CLIENT_CERT"
+    client_validation_ca {
+      grpc_endpoint {
+        target_uri = "unix:mypath"
+      }
+    }
   }
 }
 
@@ -171,8 +180,17 @@ resource "google_network_security_server_tls_policy" "servertls" {
   description            = "my description"
   location               = "global"
   allow_open             = "false"
+  server_certificate {
+    certificate_provider_instance {
+        plugin_instance = "google_cloud_private_spiffe"
+      }
+  }
   mtls_policy {
-    client_validation_mode = "ALLOW_INVALID_OR_MISSING_CLIENT_CERT"
+    client_validation_ca {
+      grpc_endpoint {
+        target_uri = "unix:mypath"
+      }
+    }
   }
 }
 resource "google_network_security_server_tls_policy" "servertls_updated" {
