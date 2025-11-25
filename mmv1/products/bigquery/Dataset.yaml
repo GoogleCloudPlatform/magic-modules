@@ -142,6 +142,8 @@ properties:
         - name: 'groupByEmail'
           type: String
           description: An email address of a Google Group to grant access to.
+          custom_expand: 'templates/terraform/custom_expand/string_to_lower_case.go.tmpl'
+          custom_flatten: 'templates/terraform/custom_flatten/string_to_lower_case.go.tmpl'
         - name: 'role'
           type: String
           description: |
@@ -168,6 +170,8 @@ properties:
           description: |
             An email address of a user to grant access to. For example:
             fred@example.com
+          custom_expand: 'templates/terraform/custom_expand/string_to_lower_case.go.tmpl'
+          custom_flatten: 'templates/terraform/custom_flatten/string_to_lower_case.go.tmpl'
         - name: 'view'
           type: NestedObject
           description: |
