@@ -34,7 +34,7 @@ custom_code:
   pre_update: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
   pre_delete: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
   custom_import: 'templates/terraform/custom_import/dialogflowcx_playbook.go.tmpl'
-  # decoder: 'templates/terraform/decoders/dialogflowcx_playbook.go.tmpl'
+  decoder: 'templates/terraform/decoders/dialogflowcx_playbook.go.tmpl'
 
 examples:
   - name: "dialogflowcx_playbook_basic"
@@ -46,15 +46,13 @@ examples:
     vars:
       agent_name: 'dialogflowcx-agent'
       bucket_name: 'dialogflowcx-bucket'
-    # ignore_read_extra:
-    #   - 'handlers.2.event_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination'
-    #   - 'handlers.2.event_handler.0.fulfillment.0.messages.1.tool_call'
-    #   - 'handlers.3.event_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.message.0.tool_call'
-    #   - 'handlers.6.lifecycle_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination'
-    #   - 'handlers.6.lifecycle_handler.0.fulfillment.0.messages.1.tool_call'
-    #   - 'handlers.7.lifecycle_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.message.0.tool_call'
-    #   - 'input_parameter_definitions.0.type_schema.0.schema_reference.0.tool'
-    #   - 'output_parameter_definitions.0.type_schema.0.schema_reference.0.tool'
+    ignore_read_extra:
+      - 'handlers.2.event_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination'
+      - 'handlers.2.event_handler.0.fulfillment.0.messages.1.tool_call'
+      - 'handlers.3.event_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.message.0.tool_call'
+      - 'handlers.6.lifecycle_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination'
+      - 'handlers.6.lifecycle_handler.0.fulfillment.0.messages.1.tool_call'
+      - 'handlers.7.lifecycle_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.message.0.tool_call'
 
 parameters:
   - name: 'parent'
