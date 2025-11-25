@@ -1,0 +1,317 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: FrameworkDeployment
+description: Framework deployments represent the assignment of a framework to a target resource. Supported target resources are organizations, folders, and projects.
+references:
+  api: https://docs.cloud.google.com/security-command-center/docs/reference/cloudsecuritycompliance/rest/v1/organizations.locations.frameworkDeployments
+base_url: organizations/{{organization}}/locations/{{location}}/frameworkDeployments
+immutable: true
+self_link: organizations/{{organization}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}
+create_url: organizations/{{organization}}/locations/{{location}}/frameworkDeployments?frameworkDeploymentId={{framework_deployment_id}}
+id_format: organizations/{{organization}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}
+import_format:
+  - organizations/{{organization}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}
+examples:
+  - name: "cloudsecuritycompliance_framework_deployment_basic"
+    primary_resource_id: "example"
+    vars:
+      deployment_name: "example-deployment"
+      framework_name: "example-framework"
+    test_env_vars:
+      org_id: "ORG_ID"
+  - name: "cloudsecuritycompliance_framework_deployment_folder_creation"
+    primary_resource_id: "example"
+    vars:
+      deployment_name: "example-deployment-folder"
+      framework_name: "example-framework-folder"
+      folder_display_name: "cm-folder"
+    test_env_vars:
+      org_id: "ORG_ID"
+  - name: "cloudsecuritycompliance_framework_deployment_project_creation"
+    primary_resource_id: "example"
+    vars:
+      deployment_name: "example-deployment-project"
+      framework_name: "example-framework-project"
+      project_display_name: "cm-project"
+    test_env_vars:
+      org_id: "ORG_ID"
+      billing_account: "BILLING_ACCT"
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 20
+      delete_minutes: 20
+    base_url: "{{op_id}}"
+  actions:
+    - create
+    - delete
+  type: OpAsync
+  result:
+    resource_inside_response: true
+  include_project: false
+autogen_status: RnJhbWV3b3JrRGVwbG95bWVudA==
+parameters:
+  - name: organization
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: frameworkDeploymentId
+    type: String
+    description: |-
+      User provided identifier. It should be unique in scope of a parent.
+      This is optional and if not provided, a random UUID will be generated.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: cloudControlDeploymentReferences
+    type: Array
+    description: |-
+      The references to the cloud control deployments. It has all the
+      CloudControlDeployments which are either directly added in the framework or
+      through a CloudControlGroup.
+      Example: If a framework deployment deploys two
+      cloud controls, cc-deployment-1 and cc-deployment-2, then the
+      cloud_control_deployment_references will be:
+      {
+      cloud_control_deployment_reference: {
+      cloud_control_deployment:
+      "organizations/{organization}/locations/{location}/cloudControlDeployments/cc-deployment-1"
+      },
+      cloud_control_deployment_reference: {
+      cloud_control_deployment:
+      "organizations/{organization}/locations/{location}/cloudControlDeployments/cc-deployment-2"
+      }
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: cloudControlDeployment
+          type: String
+          description: |-
+            The name of the CloudControlDeployment. The format is:
+            organizations/{org}/locations/{location}/cloudControlDeployments/{cloud_control_deployment_id}
+          output: true
+  - name: cloudControlMetadata
+    type: Array
+    description: |-
+      Deployment mode and parameters for each of the Cloud Controls in
+      the framework. Every Cloud Control in the framework must have a
+      CloudControlMetadata.
+    required: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: cloudControlDetails
+          type: NestedObject
+          description: CloudControlDetails contains the details of a CloudControl.
+          required: true
+          properties:
+            - name: majorRevisionId
+              type: String
+              description: Major revision of cloudcontrol
+              required: true
+            - name: name
+              type: String
+              description: |-
+                The name of the CloudControl in the format:
+                “organizations/{organization}/locations/{location}/
+                cloudControls/{cloud-control}”
+              required: true
+            - name: parameters
+              type: Array
+              description: |-
+                Parameters is a key-value pair that is required by the CloudControl. The
+                specification of these parameters will be present in cloudcontrol.Eg: {
+                "name": "location","value": "us-west-1"}.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: name
+                    type: String
+                    description: The name of the parameter.
+                    required: true
+                  - name: parameterValue
+                    type: NestedObject
+                    description: Possible parameter value types.
+                    required: true
+                    properties:
+                      - name: boolValue
+                        type: Boolean
+                        description: Represents a boolean value.
+                      - name: numberValue
+                        type: Double
+                        description: Represents a double value.
+                      - name: stringListValue
+                        type: NestedObject
+                        description: A list of strings.
+                        properties:
+                          - name: values
+                            type: Array
+                            description: The strings in the list.
+                            required: true
+                            item_type:
+                              type: String
+                      - name: stringValue
+                        type: String
+                        description: Represents a string value.
+        - name: enforcementMode
+          type: String
+          description: |-
+            Enforcement mode for the framework deployment.
+            Possible values:
+            PREVENTIVE
+            DETECTIVE
+            AUDIT
+          required: true
+  - name: computedTargetResource
+    type: String
+    description: |-
+      The resource on which the Framework is deployed based on the provided
+      TargetResourceConfig in the following format:
+      organizations/{organization}, folders/{folder} or projects/{project}
+    output: true
+  - name: createTime
+    type: String
+    description: The time at which the resource was created.
+    output: true
+  - name: deploymentState
+    type: String
+    description: |-
+      The deployment state of the framework.
+      Possible values:
+      DEPLOYMENT_STATE_VALIDATING
+      DEPLOYMENT_STATE_CREATING
+      DEPLOYMENT_STATE_DELETING
+      DEPLOYMENT_STATE_FAILED
+      DEPLOYMENT_STATE_READY
+      DEPLOYMENT_STATE_PARTIALLY_DEPLOYED
+      DEPLOYMENT_STATE_PARTIALLY_DELETED
+    output: true
+  - name: description
+    type: String
+    description: User provided description of the Framework deployment
+  - name: etag
+    type: String
+    description: |-
+      To prevent concurrent updates from overwriting each other, always provide
+      the `etag` when you update a FrameworkDeployment. You can also
+      provide the `etag` when you delete a FrameworkDeployment, to help
+      ensure that you're deleting the intended version of the
+      FrameworkDeployment.
+    output: true
+  - name: framework
+    type: NestedObject
+    description: FrameworkReference contains the reference of a framework.
+    required: true
+    properties:
+      - name: framework
+        type: String
+        description: |-
+          In the format:
+          organizations/{org}/locations/{location}/frameworks/{framework}
+        required: true
+      - name: majorRevisionId
+        type: String
+        description: |-
+          Major revision id of the framework.
+        required: true
+  - name: name
+    type: String
+    description: |-
+      Identifier. FrameworkDeployment name in the following format:
+      organizations/{organization}/locations/{location}/frameworkDeployments/{framework_deployment_id}
+    output: true
+  - name: targetResourceConfig
+    type: NestedObject
+    description: |-
+      TargetResourceConfig contains either the name of the target_resource or
+      contains the config to create a new target_resource.
+    required: true
+    properties:
+      - name: existingTargetResource
+        type: String
+        description: |-
+          CRM node in format organizations/{organization}, folders/{folder},
+          or projects/{project}
+        exactly_one_of:
+          - "target_resource_config.0.existing_target_resource"
+          - "target_resource_config.0.target_resource_creation_config"
+      - name: targetResourceCreationConfig
+        type: NestedObject
+        description: |-
+          TargetResourceCreationConfig contains the config to create a new resource to
+          be used as the target_resource of a deployment.
+        exactly_one_of:
+          - "target_resource_config.0.existing_target_resource"
+          - "target_resource_config.0.target_resource_creation_config"
+        properties:
+          - name: folderCreationConfig
+            type: NestedObject
+            description: |-
+              FolderCreationConfig contains the config to create a new folder to be used
+              as the target_resource of a deployment.
+            exactly_one_of:
+              - "target_resource_config.0.target_resource_creation_config.0.folder_creation_config"
+              - "target_resource_config.0.target_resource_creation_config.0.project_creation_config"
+            properties:
+              - name: folderDisplayName
+                type: String
+                description: Display name of the folder to be created
+                required: true
+              - name: parent
+                type: String
+                description: |-
+                  The parent of the folder to be created. It can be an organizations/{org} or
+                  folders/{folder}
+                required: true
+          - name: projectCreationConfig
+            type: NestedObject
+            description: |-
+              ProjectCreationConfig contains the config to create a new project to be used
+              as the target_resource of a deployment.
+            exactly_one_of:
+              - "target_resource_config.0.target_resource_creation_config.0.folder_creation_config"
+              - "target_resource_config.0.target_resource_creation_config.0.project_creation_config"
+            properties:
+              - name: billingAccountId
+                type: String
+                description: Billing account id to be used for the project.
+                required: true
+              - name: parent
+                type: String
+                description: organizations/{org} or folders/{folder}
+                required: true
+              - name: projectDisplayName
+                type: String
+                description: Display name of the project to be created.
+                required: true
+  - name: targetResourceDisplayName
+    type: String
+    description: The display name of the target resource.
+    output: true
+  - name: updateTime
+    type: String
+    description: The time at which the resource last updated.
+    output: true
