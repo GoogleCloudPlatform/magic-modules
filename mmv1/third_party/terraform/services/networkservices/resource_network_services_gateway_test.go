@@ -165,7 +165,7 @@ resource "google_network_services_gateway" "foobar" {
   type        = "OPEN_MESH"
   ports       = [443]
   description = "my description"
-  server_tls_policy = "https://networksecurity.googleapis.com/${google_network_security_server_tls_policy.servertls.id}"
+  server_tls_policy = google_network_security_server_tls_policy.servertls.id
 }
 `, serverTlsName, serverTlsUpdatedName, gatewayName)
 }
@@ -221,7 +221,7 @@ resource "google_network_services_gateway" "foobar" {
   type              = "OPEN_MESH"
   ports             = [1000]
   description       = "update description"
-  server_tls_policy = "https://networksecurity.googleapis.com/${google_network_security_server_tls_policy.servertls_updated.id}"
+  server_tls_policy = google_network_security_server_tls_policy.servertls_updated.id
   labels            = {
     foo = "bar"
   }
