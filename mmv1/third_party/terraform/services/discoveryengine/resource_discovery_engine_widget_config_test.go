@@ -65,62 +65,62 @@ resource "google_discovery_engine_search_engine" "basic" {
 }
 
 resource "google_discovery_engine_widget_config" "basic" {
-  location 					= google_discovery_engine_search_engine.basic.location
-  engine_id 				= google_discovery_engine_search_engine.basic.engine_id
+  location          = google_discovery_engine_search_engine.basic.location
+  engine_id         = google_discovery_engine_search_engine.basic.engine_id
   access_settings {
-    enable_web_app 			= true
-		allow_public_access = false
-		allowlisted_domains = []
-		language_code 			= "en-US"
+    enable_web_app      = true
+    allow_public_access = false
+    allowlisted_domains = []
+    language_code       = "en-US"
   }
-	ui_settings {
+  ui_settings {
     interaction_type                  = "SEARCH_WITH_ANSWER"
     enable_autocomplete               = true
     enable_quality_feedback           = true
-		disable_user_events_collection 		= false
-		enable_create_agent_button				= false
-		enable_people_search							= false
-		enable_safe_search								= false
-		enable_search_as_you_type					= false
-		enable_visual_content_summary			= false
+    disable_user_events_collection    = false
+    enable_create_agent_button        = false
+    enable_people_search              = false
+    enable_safe_search                = false
+    enable_search_as_you_type         = false
+    enable_visual_content_summary     = false
     generative_answer_config {
-			disable_related_questions 			= false
-			ignore_adversarial_query	 			= false
-			ignore_low_relevant_content 		= false
-			ignore_non_answer_seeking_query = false
-			language_code 									= "en-US"
-			max_rephrase_steps 							= 1
+      disable_related_questions       = false
+      ignore_adversarial_query        = false
+      ignore_low_relevant_content     = false
+      ignore_non_answer_seeking_query = false
+      language_code                   = "en-US"
+      max_rephrase_steps              = 1
       result_count                    = 5
-			model_version 									= "stable"
-			model_prompt_preamble 					= "You are a helpful assistant."
-			image_source	 									= "ALL_AVAILABLE_SOURCES"
+      model_version                   = "stable"
+      model_prompt_preamble           = "You are a helpful assistant."
+      image_source                    = "ALL_AVAILABLE_SOURCES"
     }
-		data_store_ui_configs {
-			name 											= "projects/${data.google_project.project.number}/locations/${google_discovery_engine_data_store.basic.location}/collections/default_collection/dataStores/${google_discovery_engine_data_store.basic.data_store_id}"
-			facet_field {
-				field			 							= "name"
-				display_name 						= "Name"
-			}
-			fields_ui_components_map {
-				ui_component 					= "title"
-				device_visibility 		= ["DESKTOP"]
-				field 								= "name"
-				display_template 			= "Name: {name}"
-			}
-		}
+    data_store_ui_configs {
+      name                       = "projects/${data.google_project.project.number}/locations/${google_discovery_engine_data_store.basic.location}/collections/default_collection/dataStores/${google_discovery_engine_data_store.basic.data_store_id}"
+      facet_field {
+        field                    = "name"
+        display_name             = "Name"
+      }
+      fields_ui_components_map {
+        ui_component          = "title"
+        device_visibility     = ["DESKTOP"]
+        field                 = "name"
+        display_template      = "Name: {name}"
+      }
+    }
   }
-	ui_branding {
-	  logo {
-			url = "https://example.com/new-logo.png"
-		}
-	}
-	homepage_setting {
+  ui_branding {
+    logo {
+      url = "https://example.com/new-logo.png"
+    }
+  }
+  homepage_setting {
     shortcuts {
       destination_uri = "https://example.com/new-destination"
       icon {
-        url 					= "https://example.com/new-logo.png"
+        url           = "https://example.com/new-logo.png"
       }
-      title 					= "Name"
+      title           = "Name"
     }
   }
 }
@@ -154,63 +154,63 @@ resource "google_discovery_engine_search_engine" "basic" {
 }
 
 resource "google_discovery_engine_widget_config" "basic" {
-  location 														= google_discovery_engine_search_engine.basic.location
-  engine_id 													= google_discovery_engine_search_engine.basic.engine_id
+  location                            = google_discovery_engine_search_engine.basic.location
+  engine_id                           = google_discovery_engine_search_engine.basic.engine_id
   access_settings {
-    enable_web_app 										= true
-    workforce_identity_pool_provider 	= "locations/global/workforcePools/workforce-pool-id/providers/workforce-pool-provider"
-  	allow_public_access 							= false
-		allowlisted_domains 							= []
-		language_code 										= "en-US"
+    enable_web_app                    = true
+    workforce_identity_pool_provider  = "locations/global/workforcePools/workforce-pool-id/providers/workforce-pool-provider"
+    allow_public_access               = false
+    allowlisted_domains               = []
+    language_code                     = "en-US"
   }
-	ui_settings {
+  ui_settings {
     interaction_type                  = "SEARCH_WITH_ANSWER"
     enable_autocomplete               = true
     enable_quality_feedback           = true
-		disable_user_events_collection 		= false
-		enable_create_agent_button				= false
-		enable_people_search							= false
-		enable_safe_search								= false
-		enable_search_as_you_type					= false
-		enable_visual_content_summary			= false
+    disable_user_events_collection    = false
+    enable_create_agent_button        = false
+    enable_people_search              = false
+    enable_safe_search                = false
+    enable_search_as_you_type         = false
+    enable_visual_content_summary     = false
     generative_answer_config {
-			disable_related_questions 			= false
-			ignore_adversarial_query	 			= false
-			ignore_low_relevant_content 		= false
-			ignore_non_answer_seeking_query = false
-			language_code 									= "en-US"
-			max_rephrase_steps 							= 1
+      disable_related_questions       = false
+      ignore_adversarial_query        = false
+      ignore_low_relevant_content     = false
+      ignore_non_answer_seeking_query = false
+      language_code                   = "en-US"
+      max_rephrase_steps              = 1
       result_count                    = 5
-			model_version 									= "stable"
-			model_prompt_preamble 					= "You are a helpful assistant."
-			image_source	 									= "ALL_AVAILABLE_SOURCES"
+      model_version                   = "stable"
+      model_prompt_preamble           = "You are a helpful assistant."
+      image_source                    = "ALL_AVAILABLE_SOURCES"
     }
-		data_store_ui_configs {
-			name 											= "projects/${data.google_project.project.number}/locations/${google_discovery_engine_data_store.basic.location}/collections/default_collection/dataStores/${google_discovery_engine_data_store.basic.data_store_id}"
-			facet_field {
-				field			 							= "name"
-				display_name 						= "Name"
-			}
-			fields_ui_components_map {
-				ui_component 					= "title"
-				device_visibility 		= ["DESKTOP"]
-				field 								= "name"
-				display_template 			= "Name: {name}"
-			}
-		}
+    data_store_ui_configs {
+      name                       = "projects/${data.google_project.project.number}/locations/${google_discovery_engine_data_store.basic.location}/collections/default_collection/dataStores/${google_discovery_engine_data_store.basic.data_store_id}"
+      facet_field {
+        field                    = "name"
+        display_name             = "Name"
+      }
+      fields_ui_components_map {
+        ui_component          = "title"
+        device_visibility     = ["DESKTOP"]
+        field                 = "name"
+        display_template      = "Name: {name}"
+      }
+    }
   }
-	ui_branding {
-	  logo {
-			url = "https://example.com/new-logo.png"
-		}
-	}
-	homepage_setting {
+  ui_branding {
+    logo {
+      url = "https://example.com/new-logo.png"
+    }
+  }
+  homepage_setting {
     shortcuts {
       destination_uri = "https://example.com/new-destination"
       icon {
-        url 					= "https://example.com/new-logo.png"
+        url           = "https://example.com/new-logo.png"
       }
-      title 					= "Name"
+      title           = "Name"
     }
   }
 }
