@@ -16,6 +16,7 @@ package api
 import (
 	"fmt"
 	"log"
+	"sort"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
@@ -876,6 +877,32 @@ func (t Type) WriteOnlyProperties() []*Type {
 	default:
 	}
 	return props
+}
+
+// AllUniqueNestedProperties Returns all unique nested properties (regular and write-only), preserving order and sorted by name.
+func (t Type) AllUniqueNestedProperties() []*Type {
+	seen := make(map[string]bool)
+	var result []*Type
+
+	for _, p := range t.NestedProperties() {
+		key := p.Lineage()
+		if !seen[key] {
+			result = append(result, p)
+			seen[key] = true
+		}
+	}
+	for _, p := range t.WriteOnlyProperties() {
+		key := p.Lineage()
+		if !seen[key] {
+			result = append(result, p)
+			seen[key] = true
+		}
+	}
+
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].Name < result[j].Name
+	})
+	return result
 }
 
 func (t Type) Removed() bool {
