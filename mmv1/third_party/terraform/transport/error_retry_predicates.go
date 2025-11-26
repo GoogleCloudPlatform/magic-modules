@@ -657,7 +657,7 @@ func IsSiteVerificationRetryableError(err error) (bool, string) {
 // Retry 409s when modifying IAM policies due to concurrent changes
 func is409IAMPolicyConcurrentChangesError(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
-		if gerr.Code == 400 && strings.Contains(gerr.Body, "There were concurrent policy changes") {
+		if gerr.Code == 409 && strings.Contains(gerr.Body, "There were concurrent policy changes") {
 			return true, "IAM policy failed due to concurrent changes. Retrying . . ."
 		}
 	}
