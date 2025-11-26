@@ -138,12 +138,12 @@ func testAccDialogflowGenerator_update(context map[string]interface{}) string {
 resource "google_dialogflow_generator" "summarization_generator" {
   location = "global"
   description = "A v3.0 summarization generator with customized section."
-  published_model = "gemini-2.0-flash-001"
+  published_model = "gemini-1.0-pro-002"
   inference_parameter {
-    max_output_tokens = 1024
-    temperature       = 0
-    top_k             = 40
-    top_p             = 0.95
+    max_output_tokens = 2048
+    temperature       = 0.1
+    top_k             = 30
+    top_p             = 0.90
   }
   summarization_context {
     few_shot_examples {
@@ -152,13 +152,13 @@ resource "google_dialogflow_generator" "summarization_generator" {
           create_time   = "2025-12-31T23:58:59Z"
           language_code = "en-us"
           role          = "HUMAN_AGENT"
-          text          = "Hello, what can I help you with?"
+          text          = "Hello, what can I help you with today?"
         }
         message_entries {
           create_time   = "2025-12-31T23:59:59Z"
           language_code = "en-us"
           role          = "END_USER"
-          text          = "I want to cancel my order."
+          text          = "I want to check the status of my order."
         }
       }
       extra_info = {
@@ -168,25 +168,25 @@ resource "google_dialogflow_generator" "summarization_generator" {
         summary_suggestion {
           summary_sections {
             section = "Redaction"
-            summary = "John"
+            summary = "Jeff"
           }
         }
       }
       summarization_section_list {
         summarization_sections {
-          definition = "Always return John as the Customer name."
+          definition = "Always return Jeff as the Customer name."
           key        = "Redaction"
           type       = "CUSTOMER_DEFINED"
         }
       }
     }
     summarization_sections {
-      definition = "Always return John as the Customer name."
+      definition = "Always return Jeff as the Customer name."
       key        = "Redaction"
       type       = "CUSTOMER_DEFINED"
     }
     version = "3.0"
-    output_language_code = "en"
+    output_language_code = "es"
   }
   trigger_event = "MANUAL_CALL"
 }
@@ -196,6 +196,7 @@ resource "google_dialogflow_generator" "summarization_generator" {
 func testAccDialogflowGenerator_regional(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dialogflow_generator" "summarization_generator" {
+  generator_id = "tf-test-generator%{random_suffix}"
   location = "us-central1"
   description = "A v4.0 summarization generator."
   inference_parameter {

@@ -20,6 +20,7 @@ references:
     'Official Documentation': 'https://cloud.google.com/agent-assist/docs'
   api: 'https://cloud.google.com/dialogflow/es/docs/reference/rest/v2beta1/projects.locations.generators'
 base_url: 'projects/{{project}}/locations/{{location}}/generators'
+create_url: 'projects/{{project}}/locations/{{location}}/generators?generatorId={{generator_id}}'
 self_link: '{{name}}'
 update_verb: 'PATCH'
 update_mask: true
@@ -47,7 +48,8 @@ parameters:
       desc
   - name: 'generatorId'
     type: String
-    url_param_only: true
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
     description: |
       Optional. The ID to use for the generator, which will become the final component of the generator's resource name.
 
@@ -140,6 +142,7 @@ properties:
                 Optional. Key is the placeholder field name in input, value is the value of the placeholder. E.g. instruction contains "@price", and ingested data has <"price", "10">
             - name: output
               type: NestedObject
+              required: true
               description: |
                 Required. Example output of the model.
               properties:
@@ -148,20 +151,21 @@ properties:
                   description: |
                     Optional. Suggested summary.
                   properties:
-                    - type: Array
-                      name: summarySections
+                    - name: summarySections
+                      type: Array
+                      required: true
                       description: |
                         Required. All the parts of generated summary.
                       item_type:
                         type: NestedObject
                         properties:
-                          - type: String
-                            name: section
+                          - name: section
+                            type: String
                             required: true
                             description: |
                               Required. Name of the section.
-                          - type: String
-                            name: summary
+                          - name: summary
+                            type: String
                             required: true
                             description: |
                               Required. Summary text for the section.
@@ -170,23 +174,23 @@ properties:
               description: |
                 Summarization sections.
               properties:
-                - type: Array
-                  name: summarizationSections
+                - name: summarizationSections
+                  type: Array
                   description: |
                     Optional. Summarization sections.
                   item_type:
                     type: NestedObject
                     properties:
-                      - type: String
-                        name: key
+                      - name: key
+                        type: String
                         description: |
                           Optional. Name of the section, for example, "situation".
-                      - type: String
-                        name: definition
+                      - name: definition
+                        type: String
                         description: |
                           Optional. Definition of the section, for example, "what the customer needs help with or has question about."
-                      - type: Enum
-                        name: type
+                      - name: type
+                        type: Enum
                         description: |
                           Optional. Type of the summarization section.
                         enum_values:
@@ -201,6 +205,7 @@ properties:
                           - 'ACTION_CONCISE'
       - name: version
         type: String
+        default_from_api: true
         description: |
           Optional. Version of the feature. If not set, default to latest version. Current candidates are ["1.0"].
       - name: outputLanguageCode
@@ -212,20 +217,20 @@ properties:
     description: |
       Optional. Inference parameters for this generator.
     properties:
-      - type: Integer
-        name: maxOutputTokens
+      - name: maxOutputTokens
+        type: Integer
         description: |
           Optional. Maximum number of the output tokens for the generator.
-      - type: Double
-        name: temperature
+      - name: temperature
+        type: Double
         description: |
           Optional. Controls the randomness of LLM predictions. Low temperature = less random. High temperature = more random. If unset (or 0), uses a default value of 0.
-      - type: Integer
-        name: topK
+      - name: topK
+        type: Integer
         description: |
           Optional. Top-k changes how the model selects tokens for output. A top-k of 1 means the selected token is the most probable among all tokens in the model's vocabulary (also called greedy decoding), while a top-k of 3 means that the next token is selected from among the 3 most probable tokens (using temperature). For each token selection step, the top K tokens with the highest probabilities are sampled. Then tokens are further filtered based on topP with the final token selected using temperature sampling. Specify a lower value for less random responses and a higher value for more random responses. Acceptable value is [1, 40], default to 40.
-      - type: Double
-        name: topP
+      - name: topP
+        type: Double
         description: |
           Optional. Top-p changes how the model selects tokens for output. Tokens are selected from most K (see topK parameter) probable to least until the sum of their probabilities equals the top-p value. For example, if tokens A, B, and C have a probability of 0.3, 0.2, and 0.1 and the top-p value is 0.5, then the model will select either A or B as the next token (using temperature) and doesn't consider C. The default top-p value is 0.95. Specify a lower value for less random responses and a higher value for more random responses. Acceptable value is [0.0, 1.0], default to 0.95.
   - name: triggerEvent
