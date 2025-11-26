@@ -123,6 +123,9 @@ service/cloudbuild:
 service/clouddeploy:
   resources:
   - google_clouddeploy_.*
+service/clouddomains:
+  resources:
+  - google_clouddomains_.*
 service/cloudfunctions:
   resources:
   - google_cloudfunctions_.*

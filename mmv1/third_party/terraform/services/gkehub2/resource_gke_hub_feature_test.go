@@ -15,8 +15,6 @@ import (
 )
 
 func TestAccGKEHubFeature_gkehubFeatureFleetObservability(t *testing.T) {
-	// VCR fails to handle batched project services
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -30,7 +28,7 @@ func TestAccGKEHubFeature_gkehubFeatureFleetObservability(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
-			"time":   {},
+			"time": {},
 		},
 		Steps: []resource.TestStep{
 			{
@@ -63,11 +61,6 @@ func TestAccGKEHubFeature_gkehubFeatureFleetObservability(t *testing.T) {
 
 func testAccGKEHubFeature_gkehubFeatureFleetObservability(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
-resource "time_sleep" "wait_for_gkehub_enablement" {
-  create_duration = "150s"
-  depends_on = [google_project_service.gkehub]
-}
-
 resource "google_gke_hub_feature" "feature" {
   name = "fleetobservability"
   location = "global"
@@ -91,11 +84,6 @@ resource "google_gke_hub_feature" "feature" {
 
 func testAccGKEHubFeature_gkehubFeatureFleetObservabilityUpdate1(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
-resource "time_sleep" "wait_for_gkehub_enablement" {
-  create_duration = "150s"
-  depends_on = [google_project_service.gkehub]
-}
-
 resource "google_gke_hub_feature" "feature" {
   name = "fleetobservability"
   location = "global"
@@ -116,11 +104,6 @@ resource "google_gke_hub_feature" "feature" {
 
 func testAccGKEHubFeature_gkehubFeatureFleetObservabilityUpdate2(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
-resource "time_sleep" "wait_for_gkehub_enablement" {
-  create_duration = "150s"
-  depends_on = [google_project_service.gkehub]
-}
-
 resource "google_gke_hub_feature" "feature" {
   name = "fleetobservability"
   location = "global"
@@ -139,66 +122,7 @@ resource "google_gke_hub_feature" "feature" {
 `, context)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
-func gkeHubFeatureProjectSetup(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_project" "project" {
-  name            = "tf-test-gkehub%{random_suffix}"
-  project_id      = "tf-test-gkehub%{random_suffix}"
-  org_id          = "%{org_id}"
-  billing_account = "%{billing_account}"
-  provider        = google-beta
-  deletion_policy = "DELETE"
-}
-
-resource "google_project_service" "mesh" {
-  project = google_project.project.project_id
-  service = "meshconfig.googleapis.com"
-  provider = google-beta
-}
-
-resource "google_project_service" "mci" {
-  project = google_project.project.project_id
-  service = "multiclusteringress.googleapis.com"
-  provider = google-beta
-}
-
-resource "google_project_service" "acm" {
-  project = google_project.project.project_id
-  service = "anthosconfigmanagement.googleapis.com"
-  provider = google-beta
-}
-
-resource "google_project_service" "mcsd" {
-  project = google_project.project.project_id
-  service = "multiclusterservicediscovery.googleapis.com"
-  provider = google-beta
-}
-
-resource "google_project_service" "compute" {
-  project = google_project.project.project_id
-  service = "compute.googleapis.com"
-  provider = google-beta
-}
-
-resource "google_project_service" "container" {
-  project = google_project.project.project_id
-  service = "container.googleapis.com"
-  provider = google-beta
-}
-
-resource "google_project_service" "gkehub" {
-  project = google_project.project.project_id
-  service = "gkehub.googleapis.com"
-  provider = google-beta
-}
-`, context)
-}
-{{- end }}
-
 func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
-	// VCR fails to handle batched project services
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -210,24 +134,27 @@ func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGKEHubFeature_gkehubFeatureMciUpdateStart(context),
 			},
 			{
-				ResourceName:      "google_gke_hub_feature.feature",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_gke_hub_feature.feature",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"update_time"},
 			},
 			{
 				Config: testAccGKEHubFeature_gkehubFeatureMciChangeMembership(context),
 			},
 			{
-				ResourceName:      "google_gke_hub_feature.feature",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_gke_hub_feature.feature",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"update_time", "labels", "terraform_labels"},
 			},
 		},
@@ -243,7 +170,7 @@ resource "google_container_cluster" "primary" {
   initial_node_count = 1
   project = google_project.project.project_id
   deletion_protection = false
-  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
 }
 
 resource "google_container_cluster" "secondary" {
@@ -252,7 +179,7 @@ resource "google_container_cluster" "secondary" {
   initial_node_count = 1
   project = google_project.project.project_id
   deletion_protection = false
-  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
 }
 
 resource "google_gke_hub_membership" "membership" {
@@ -296,7 +223,7 @@ resource "google_container_cluster" "primary" {
   initial_node_count = 1
   project = google_project.project.project_id
   deletion_protection = false
-  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
 }
 
 resource "google_container_cluster" "secondary" {
@@ -305,7 +232,7 @@ resource "google_container_cluster" "secondary" {
   initial_node_count = 1
   project = google_project.project.project_id
   deletion_protection = false
-  depends_on = [google_project_service.mci, google_project_service.container, google_project_service.container, google_project_service.gkehub]
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
 }
 
 resource "google_gke_hub_membership" "membership" {
@@ -345,8 +272,6 @@ resource "google_gke_hub_feature" "feature" {
 }
 
 func TestAccGKEHubFeature_FleetDefaultMemberConfigServiceMesh(t *testing.T) {
-	// VCR fails to handle batched project services
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -358,7 +283,10 @@ func TestAccGKEHubFeature_FleetDefaultMemberConfigServiceMesh(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGKEHubFeature_FleetDefaultMemberConfigServiceMesh(context),
@@ -407,7 +335,7 @@ resource "google_gke_hub_feature" "feature" {
       management = "MANAGEMENT_AUTOMATIC"
     }
   }
-  depends_on = [google_project_service.anthos, google_project_service.gkehub, google_project_service.mesh]
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
   project = google_project.project.project_id
 }
 `, context)
@@ -423,7 +351,7 @@ resource "google_gke_hub_feature" "feature" {
       management = "MANAGEMENT_MANUAL"
     }
   }
-  depends_on = [google_project_service.anthos, google_project_service.gkehub, google_project_service.mesh]
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
   project = google_project.project.project_id
 }
 `, context)
@@ -434,7 +362,7 @@ func testAccGKEHubFeature_FleetDefaultMemberConfigServiceMeshRemovalUpdate(conte
 resource "google_gke_hub_feature" "feature" {
   name = "servicemesh"
   location = "global"
-  depends_on = [google_project_service.anthos, google_project_service.gkehub, google_project_service.mesh]
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
   project = google_project.project.project_id
 }
 `, context)
@@ -450,15 +378,13 @@ resource "google_gke_hub_feature" "feature" {
       management = "MANAGEMENT_MANUAL"
     }
   }
-  depends_on = [google_project_service.anthos, google_project_service.gkehub, google_project_service.mesh]
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
   project = google_project.project.project_id
 }
 `, context)
 }
 
 func TestAccGKEHubFeature_FleetDefaultMemberConfigConfigManagement(t *testing.T) {
-	// VCR fails to handle batched project services
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -470,7 +396,10 @@ func TestAccGKEHubFeature_FleetDefaultMemberConfigConfigManagement(t *testing.T)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGKEHubFeature_FleetDefaultMemberConfigConfigManagement(context),
@@ -489,7 +418,7 @@ func TestAccGKEHubFeature_FleetDefaultMemberConfigConfigManagement(t *testing.T)
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-      {
+			{
 				Config: testAccGKEHubFeature_FleetDefaultMemberConfigConfigManagementRemovalUpdate(context),
 			},
 			{
@@ -522,7 +451,7 @@ resource "google_gke_hub_feature" "feature" {
       }
     }
   }
-  depends_on = [google_project_service.anthos, google_project_service.gkehub, google_project_service.acm]
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
   project = google_project.project.project_id
 }
 `, context)
@@ -552,7 +481,7 @@ resource "google_gke_hub_feature" "feature" {
       }
     }
   }
-  depends_on = [google_project_service.anthos, google_project_service.gkehub, google_project_service.acm]
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
   project = google_project.project.project_id
 }
 `, context)
@@ -563,52 +492,53 @@ func testAccGKEHubFeature_FleetDefaultMemberConfigConfigManagementRemovalUpdate(
 resource "google_gke_hub_feature" "feature" {
   name = "configmanagement"
   location = "global"
-  depends_on = [google_project_service.anthos, google_project_service.gkehub, google_project_service.acm]
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
   project = google_project.project.project_id
 }
 `, context)
 }
 
 func TestAccGKEHubFeature_Clusterupgrade(t *testing.T) {
-  // VCR fails to handle batched project services
-  acctest.SkipIfVcr(t)
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "random_suffix":   acctest.RandString(t, 10),
-    "org_id":          envvar.GetTestOrgFromEnv(t),
-    "billing_account": envvar.GetTestBillingAccountFromEnv(t),
-  }
+	context := map[string]interface{}{
+		"random_suffix":   acctest.RandString(t, 10),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccGKEHubFeature_Clusterupgrade(context),
-      },
-      {
-        ResourceName:            "google_gke_hub_feature.feature",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"project", "update_time"},
-      },
-      {
-        Config: testAccGKEHubFeature_ClusterupgradeUpdate(context),
-      },
-      {
-        ResourceName:      "google_gke_hub_feature.feature",
-        ImportState:       true,
-        ImportStateVerify: true,
-        ImportStateVerifyIgnore: []string{"update_time"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccGKEHubFeature_Clusterupgrade(context),
+			},
+			{
+				ResourceName:            "google_gke_hub_feature.feature",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project", "update_time"},
+			},
+			{
+				Config: testAccGKEHubFeature_ClusterupgradeUpdate(context),
+			},
+			{
+				ResourceName:            "google_gke_hub_feature.feature",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"update_time"},
+			},
+		},
+	})
 }
 
 func testAccGKEHubFeature_Clusterupgrade(context map[string]interface{}) string {
-  return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
+	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   name = "clusterupgrade"
   location = "global"
@@ -620,7 +550,7 @@ resource "google_gke_hub_feature" "feature" {
       }
     }
   }
-  depends_on = [google_project_service.gkehub]
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
   project = google_project.project.project_id
 }
 
@@ -635,14 +565,14 @@ resource "google_gke_hub_feature" "feature_2" {
       }
     }
   }
-  depends_on = [google_project_service.gkehub_2]
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
   project = google_project.project_2.project_id
 }
 `, context)
 }
 
 func testAccGKEHubFeature_ClusterupgradeUpdate(context map[string]interface{}) string {
-  return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
+	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   name = "clusterupgrade"
   location = "global"
@@ -664,6 +594,7 @@ resource "google_gke_hub_feature" "feature" {
     }
   }
   project = google_project.project.project_id
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
 }
 
 resource "google_gke_hub_feature" "feature_2" {
@@ -677,15 +608,13 @@ resource "google_gke_hub_feature" "feature_2" {
       }
     }
   }
-  depends_on = [google_project_service.gkehub_2]
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
   project = google_project.project_2.project_id
 }
 `, context)
 }
 
 func TestAccGKEHubFeature_FleetDefaultMemberConfigPolicyController(t *testing.T) {
-	// VCR fails to handle batched project services
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -697,7 +626,10 @@ func TestAccGKEHubFeature_FleetDefaultMemberConfigPolicyController(t *testing.T)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGKEHubFeature_FleetDefaultMemberConfigPolicyController(context),
@@ -729,7 +661,7 @@ func TestAccGKEHubFeature_FleetDefaultMemberConfigPolicyController(t *testing.T)
 }
 
 func testAccGKEHubFeature_FleetDefaultMemberConfigPolicyController(context map[string]interface{}) string {
-	return gkeHubFeatureProjectSetupForGA(context)  + acctest.Nprintf(`
+	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   name = "policycontroller"
   location = "global"
@@ -749,14 +681,14 @@ resource "google_gke_hub_feature" "feature" {
       }
     }
   }
-  depends_on = [google_project_service.anthos, google_project_service.gkehub, google_project_service.poco]
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
   project = google_project.project.project_id
 }
 `, context)
 }
 
 func testAccGKEHubFeature_FleetDefaultMemberConfigPolicyControllerFull(context map[string]interface{}) string {
-	return gkeHubFeatureProjectSetupForGA(context)  + acctest.Nprintf(`
+	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   name = "policycontroller"
   location = "global"
@@ -813,7 +745,7 @@ resource "google_gke_hub_feature" "feature" {
       }
     }
   }
-  depends_on = [google_project_service.anthos, google_project_service.gkehub, google_project_service.poco]
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
   project = google_project.project.project_id
 }
 `, context)
@@ -840,15 +772,13 @@ resource "google_gke_hub_feature" "feature" {
       }
     }
   }
-  depends_on = [google_project_service.anthos, google_project_service.gkehub, google_project_service.poco]
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
   project = google_project.project.project_id
 }
 `, context)
 }
 
 func TestAccGKEHubFeature_gkehubFeatureMcsd(t *testing.T) {
-	// VCR fails to handle batched project services
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -860,7 +790,10 @@ func TestAccGKEHubFeature_gkehubFeatureMcsd(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGKEHubFeature_gkehubFeatureMcsd(context),
@@ -875,9 +808,9 @@ func TestAccGKEHubFeature_gkehubFeatureMcsd(t *testing.T) {
 				Config: testAccGKEHubFeature_gkehubFeatureMcsdUpdate(context),
 			},
 			{
-				ResourceName:      "google_gke_hub_feature.feature",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_gke_hub_feature.feature",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
@@ -893,7 +826,7 @@ resource "google_gke_hub_feature" "feature" {
   labels = {
     foo = "bar"
   }
-  depends_on = [google_project_service.mcsd]
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
 }
 `, context)
 }
@@ -908,14 +841,12 @@ resource "google_gke_hub_feature" "feature" {
     foo = "quux"
     baz = "qux"
   }
-  depends_on = [google_project_service.mcsd]
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
 }
 `, context)
 }
 
 func TestAccGKEHubFeature_Rbacrolebindingactuation(t *testing.T) {
-	// VCR fails to handle batched project services
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -927,7 +858,10 @@ func TestAccGKEHubFeature_Rbacrolebindingactuation(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckGKEHubFeatureDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGKEHubFeature_Rbacrolebindingactuation(context),
@@ -942,9 +876,9 @@ func TestAccGKEHubFeature_Rbacrolebindingactuation(t *testing.T) {
 				Config: testAccGKEHubFeature_RbacrolebindingactuationUpdate(context),
 			},
 			{
-				ResourceName:      "google_gke_hub_feature.feature",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_gke_hub_feature.feature",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
@@ -952,7 +886,7 @@ func TestAccGKEHubFeature_Rbacrolebindingactuation(t *testing.T) {
 }
 
 func testAccGKEHubFeature_Rbacrolebindingactuation(context map[string]interface{}) string {
-  return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
+	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   name = "rbacrolebindingactuation"
   location = "global"
@@ -961,14 +895,14 @@ resource "google_gke_hub_feature" "feature" {
 	allowed_custom_roles = ["custom-role1","custom-role2","custom-role3"]
     }
   }
-  depends_on = [google_project_service.anthos, google_project_service.gkehub]
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
   project = google_project.project.project_id
 }
 `, context)
 }
 
 func testAccGKEHubFeature_RbacrolebindingactuationUpdate(context map[string]interface{}) string {
-  return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
+	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   name = "rbacrolebindingactuation"
   location = "global"
@@ -977,7 +911,7 @@ resource "google_gke_hub_feature" "feature" {
 	allowed_custom_roles = ["custom-role1","custom-role2","custom-role3","custom-role4"]
     }
   }
-  depends_on = [google_project_service.anthos, google_project_service.gkehub]
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
   project = google_project.project.project_id
 }
 `, context)
@@ -1001,41 +935,49 @@ resource "google_project_service" "mesh" {
 resource "google_project_service" "mci" {
   project = google_project.project.project_id
   service = "multiclusteringress.googleapis.com"
+  depends_on = [google_project_service.mesh]
 }
 
 resource "google_project_service" "acm" {
   project = google_project.project.project_id
   service = "anthosconfigmanagement.googleapis.com"
+  depends_on = [google_project_service.mci]
 }
 
 resource "google_project_service" "poco" {
   project = google_project.project.project_id
   service = "anthospolicycontroller.googleapis.com"
+  depends_on = [google_project_service.acm]
 }
 
 resource "google_project_service" "mcsd" {
   project = google_project.project.project_id
   service = "multiclusterservicediscovery.googleapis.com"
+  depends_on = [google_project_service.poco]
 }
 
 resource "google_project_service" "compute" {
   project = google_project.project.project_id
   service = "compute.googleapis.com"
+  depends_on = [google_project_service.mcsd]
 }
 
 resource "google_project_service" "container" {
   project = google_project.project.project_id
   service = "container.googleapis.com"
+  depends_on = [google_project_service.compute]
 }
 
 resource "google_project_service" "anthos" {
   project = google_project.project.project_id
   service = "anthos.googleapis.com"
+  depends_on = [google_project_service.container]
 }
 
 resource "google_project_service" "gkehub" {
   project = google_project.project.project_id
   service = "gkehub.googleapis.com"
+  depends_on = [google_project_service.anthos]
 }
 
 resource "google_project" "project_2" {
@@ -1054,11 +996,18 @@ resource "google_project_service" "compute_2" {
 resource "google_project_service" "container_2" {
   project = google_project.project_2.project_id
   service = "container.googleapis.com"
+  depends_on = [google_project_service.compute_2]
 }
 
 resource "google_project_service" "gkehub_2" {
   project = google_project.project_2.project_id
   service = "gkehub.googleapis.com"
+  depends_on = [google_project_service.container_2]
+}
+
+resource "time_sleep" "wait_for_gkehub_enablement" {
+  create_duration = "150s"
+  depends_on = [google_project_service.gkehub, google_project_service.gkehub_2]
 }
 `, context)
 }
@@ -1075,7 +1024,7 @@ func testAccCheckGKEHubFeatureDestroyProducer(t *testing.T) func(s *terraform.St
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}GKEHub2BasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/features/{{"{{"}}name{{"}}"}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{GKEHub2BasePath}}projects/{{project}}/locations/{{location}}/features/{{name}}")
 			if err != nil {
 				return err
 			}
@@ -1087,10 +1036,10 @@ func testAccCheckGKEHubFeatureDestroyProducer(t *testing.T) func(s *terraform.St
 			}
 
 			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-				Config: config,
-				Method: "GET",
-				Project: billingProject,
-				RawURL: url,
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
 				UserAgent: config.UserAgent,
 			})
 			if err == nil {
