@@ -1,0 +1,248 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Generator'
+description: |
+  LLM generator.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/agent-assist/docs'
+  api: 'https://cloud.google.com/dialogflow/es/docs/reference/rest/v2beta1/projects.locations.generators'
+base_url: 'projects/{{project}}/locations/{{location}}/generators'
+self_link: '{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/generators?generatorId={{generator_id}}'
+update_verb: 'PATCH'
+update_mask: true
+
+custom_code:
+  pre_create: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
+  pre_read: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
+  pre_update: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
+  pre_delete: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project_and_location.go.tmpl'
+
+examples:
+  - name: 'dialogflow_generator_basic'
+    primary_resource_id: 'summarization_basic_generator'
+    vars:
+      profile_name: 'dialogflow-profile'
+
+parameters:
+  - name: 'location'
+    type: String
+    required: true
+    url_param_only: true
+    description: |
+      desc
+  - name: 'generatorId'
+    type: String
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    description: |
+      Optional. The ID to use for the generator, which will become the final component of the generator's resource name.
+
+properties:
+  - name: name
+    type: String
+    description: |
+      The resource name of the generator.
+    output: true
+  - name: description
+    type: String
+    description: |
+      Optional. Human readable description of the generator.
+  - name: summarizationContext
+    type: NestedObject
+    description: |
+      Input of prebuilt Summarization feature.
+    properties:
+      - name: summarizationSections
+        type: Array
+        description: |
+          Optional. List of sections. Note it contains both predefined section sand customer defined sections.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: key
+              type: String
+              description: |
+                Optional. Name of the section, for example, "situation".
+            - name: definition
+              type: String
+              description: |
+                Optional. Definition of the section, for example, "what the customer needs help with or has question about."
+            - name: type
+              type: Enum
+              description: |
+                Optional. Type of the summarization section.
+              enum_values:
+                - 'SITUATION'
+                - 'ACTION'
+                - 'RESOLUTION'
+                - 'REASON_FOR_CANCELLATION'
+                - 'CUSTOMER_SATISFACTION'
+                - 'ENTITIES'
+                - 'CUSTOMER_DEFINED'
+                - 'SITUATION_CONCISE'
+                - 'ACTION_CONCISE'
+      - name: fewShotExamples
+        type: Array
+        description: |
+          Optional. List of few shot examples.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: conversationContext
+              type: NestedObject
+              description: |
+                Optional. Conversation transcripts.
+              properties:
+                - name: messageEntries
+                  type: Array
+                  description:
+                    Optional. List of message transcripts in the conversation.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: role
+                        type: Enum
+                        description: |
+                          Optional. Participant role of the message.
+                        enum_values:
+                          - 'HUMAN_AGENT'
+                          - 'AUTOMATED_AGENT'
+                          - 'END_USER'
+                      - name: text
+                        type: String
+                        description: |
+                          Optional. Transcript content of the message.
+                      - name: languageCode
+                        type: String
+                        description: |
+                          Optional. The language of the text.
+                      - name: createTime
+                        type: String
+                        description: |
+                          Optional. Create time of the message entry.
+            - name: extraInfo
+              type: KeyValuePairs
+              description: |
+                Optional. Key is the placeholder field name in input, value is the value of the placeholder. E.g. instruction contains "@price", and ingested data has <"price", "10">
+            - name: output
+              type: NestedObject
+              required: true
+              description: |
+                Required. Example output of the model.
+              properties:
+                - name: summarySuggestion
+                  type: NestedObject
+                  description: |
+                    Optional. Suggested summary.
+                  properties:
+                    - name: summarySections
+                      type: Array
+                      required: true
+                      description: |
+                        Required. All the parts of generated summary.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: section
+                            type: String
+                            required: true
+                            description: |
+                              Required. Name of the section.
+                          - name: summary
+                            type: String
+                            required: true
+                            description: |
+                              Required. Summary text for the section.
+            - name: summarizationSectionList
+              type: NestedObject
+              description: |
+                Summarization sections.
+              properties:
+                - name: summarizationSections
+                  type: Array
+                  description: |
+                    Optional. Summarization sections.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: key
+                        type: String
+                        description: |
+                          Optional. Name of the section, for example, "situation".
+                      - name: definition
+                        type: String
+                        description: |
+                          Optional. Definition of the section, for example, "what the customer needs help with or has question about."
+                      - name: type
+                        type: Enum
+                        description: |
+                          Optional. Type of the summarization section.
+                        enum_values:
+                          - 'SITUATION'
+                          - 'ACTION'
+                          - 'RESOLUTION'
+                          - 'REASON_FOR_CANCELLATION'
+                          - 'CUSTOMER_SATISFACTION'
+                          - 'ENTITIES'
+                          - 'CUSTOMER_DEFINED'
+                          - 'SITUATION_CONCISE'
+                          - 'ACTION_CONCISE'
+      - name: version
+        type: String
+        default_from_api: true
+        description: |
+          Optional. Version of the feature. If not set, default to latest version. Current candidates are ["1.0"].
+      - name: outputLanguageCode
+        type: String
+        description: |
+          Optional. The target language of the generated summary. The language code for conversation will be used if this field is empty. Supported 2.0 and later versions.
+  - name: inferenceParameter
+    type: NestedObject
+    description: |
+      Optional. Inference parameters for this generator.
+    properties:
+      - name: maxOutputTokens
+        type: Integer
+        description: |
+          Optional. Maximum number of the output tokens for the generator.
+      - name: temperature
+        type: Double
+        description: |
+          Optional. Controls the randomness of LLM predictions. Low temperature = less random. High temperature = more random. If unset (or 0), uses a default value of 0.
+      - name: topK
+        type: Integer
+        description: |
+          Optional. Top-k changes how the model selects tokens for output. A top-k of 1 means the selected token is the most probable among all tokens in the model's vocabulary (also called greedy decoding), while a top-k of 3 means that the next token is selected from among the 3 most probable tokens (using temperature). For each token selection step, the top K tokens with the highest probabilities are sampled. Then tokens are further filtered based on topP with the final token selected using temperature sampling. Specify a lower value for less random responses and a higher value for more random responses. Acceptable value is [1, 40], default to 40.
+      - name: topP
+        type: Double
+        description: |
+          Optional. Top-p changes how the model selects tokens for output. Tokens are selected from most K (see topK parameter) probable to least until the sum of their probabilities equals the top-p value. For example, if tokens A, B, and C have a probability of 0.3, 0.2, and 0.1 and the top-p value is 0.5, then the model will select either A or B as the next token (using temperature) and doesn't consider C. The default top-p value is 0.95. Specify a lower value for less random responses and a higher value for more random responses. Acceptable value is [0.0, 1.0], default to 0.95.
+  - name: triggerEvent
+    type: Enum
+    description: |
+      Optional. The trigger event of the generator. It defines when the generator is triggered in a conversation.
+    enum_values:
+      - 'END_OF_UTTERANCE'
+      - 'MANUAL_CALL'
+      - 'CUSTOMER_MESSAGE'
+      - 'AGENT_MESSAGE'
+  - name: publishedModel
+    type: String
+    description: |
+      Optional. The published Large Language Model name. * To use the latest model version, specify the model name without version number. Example: text-bison * To use a stable model version, specify the version number as well. Example: text-bison@002.
