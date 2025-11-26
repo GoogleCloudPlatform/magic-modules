@@ -31,13 +31,6 @@ func expandAlloydbInstanceObservabilityConfig(v interface{}, d tpgresource.Terra
 		transformed["trackWaitEvents"] = transformedTrackWaitEvents
 	}
 
-	transformedTrackWaitEventTypes, err := expandAlloydbInstanceObservabilityConfigTrackWaitEventTypes(original["track_wait_event_types"], d, config)
-	if err != nil {
-		return nil, err
-	} else if transformedTrackWaitEventTypes != nil {
-		transformed["trackWaitEventTypes"] = transformedTrackWaitEventTypes
-	}
-
 	transformedMaxQueryStringLength, err := expandAlloydbInstanceObservabilityConfigMaxQueryStringLength(original["max_query_string_length"], d, config)
 	if err != nil {
 		return nil, err
