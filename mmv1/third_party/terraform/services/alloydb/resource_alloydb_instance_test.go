@@ -1574,13 +1574,13 @@ func TestAccAlloydbInstance_ObservabilityConfig_Update(t *testing.T) {
 	random_suffix := acctest.RandString(t, 10)
 	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")
 
-	context1 := map[string]interface{}{
+	// 1. Initial State: Everything Enabled
+	contextEnableAll := map[string]interface{}{
 		"random_suffix":                 random_suffix,
 		"network_name":                  networkName,
 		"enabled":                       true,
 		"preserve_comments":             true,
 		"track_wait_events":             true,
-		"track_wait_event_types":        true,
 		"max_query_string_length":       1024,
 		"record_application_tags":       true,
 		"query_plans_per_minute":        10,
@@ -1588,10 +1588,23 @@ func TestAccAlloydbInstance_ObservabilityConfig_Update(t *testing.T) {
 		"assistive_experiences_enabled": false,
 	}
 
-	context2 := map[string]interface{}{
+	contextDisable := map[string]interface{}{
 		"random_suffix": random_suffix,
 		"network_name":  networkName,
-		"enabled":       false,
+	}
+
+	// 3. Re-Enable Main Toggle, but Disable Sub-features (Test Case 2)
+	contextEnabledButSubFeaturesDisabled := map[string]interface{}{
+		"random_suffix":                 random_suffix,
+		"network_name":                  networkName,
+		"enabled":                       true,
+		"preserve_comments":             false,
+		"track_wait_events":             false,
+		"max_query_string_length":       2048,
+		"record_application_tags":       false,
+		"query_plans_per_minute":        5,
+		"track_active_queries":          false,
+		"assistive_experiences_enabled": false,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1600,29 +1613,36 @@ func TestAccAlloydbInstance_ObservabilityConfig_Update(t *testing.T) {
 		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAlloydbInstance_ObservabilityConfig(context1),
+				Config: testAccAlloydbInstance_ObservabilityConfig(contextEnableAll),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.enabled", "true"),
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.max_query_string_length", "1024"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.track_wait_events", "true"),
 				),
 			},
 			{
-				Config: testAccAlloydbInstance_ObservabilityConfig_False(context2),
+				Config: testAccAlloydbInstance_ObservabilityConfig_Disabled(contextDisable),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.enabled", "false"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.max_query_string_length", "10240"), // Disabled default value
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.query_plans_per_minute", "20"),     // default value
 				),
 			},
+			// Step 3: Mark enabled = true and turn all the other booleans to false
 			{
-				Config: testAccAlloydbInstance_ObservabilityConfig(context1),
+				Config: testAccAlloydbInstance_ObservabilityConfig(contextEnabledButSubFeaturesDisabled),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.preserve_comments", "false"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.track_wait_events", "false"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "observability_config.0.max_query_string_length", "2048"),
 				),
 			},
 		},
 	})
 }
 
-func testAccAlloydbInstance_ObservabilityConfig_False(context map[string]interface{}) string {
+func testAccAlloydbInstance_ObservabilityConfig_Disabled(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_alloydb_instance" "default" {
   cluster       = google_alloydb_cluster.default.name
@@ -1632,8 +1652,8 @@ resource "google_alloydb_instance" "default" {
     cpu_count = 2
   }
   observability_config {
-    enabled                        = false
-}
+    enabled = false
+  }
 }
 resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
@@ -1651,7 +1671,6 @@ data "google_compute_network" "default" {
 }
 `, context)
 }
-
 func testAccAlloydbInstance_ObservabilityConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_alloydb_instance" "default" {
@@ -1665,7 +1684,6 @@ resource "google_alloydb_instance" "default" {
     enabled                        = %{enabled}
     preserve_comments              = %{preserve_comments}
     track_wait_events              = %{track_wait_events}
-    track_wait_event_types         = %{track_wait_event_types}
     max_query_string_length        = %{max_query_string_length}
     record_application_tags        = %{record_application_tags}
     query_plans_per_minute         = %{query_plans_per_minute}
