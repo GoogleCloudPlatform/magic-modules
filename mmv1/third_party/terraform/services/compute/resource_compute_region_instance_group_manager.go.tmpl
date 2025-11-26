@@ -654,6 +654,13 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 				},
 			},
 			{{- if ne $.TargetVersionName "ga" }}
+			"failover_action": {
+				Type:         schema.TypeString,
+				ForceNew:     true,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"NO_FAILOVER"}, false),
+				Description:  `The action to perform in case of zone failure. Only one value is supported, NO_FAILOVER. The default is NO_FAILOVER.`,
+			},
 			"params": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
@@ -715,6 +722,7 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 		DistributionPolicy:          expandDistributionPolicyForCreate(d),
 		StatefulPolicy:              expandStatefulPolicy(d),
 		{{- if ne $.TargetVersionName "ga" }}
+		FailoverAction:              d.Get("failover_action").(string),
 		Params:                      expandInstanceGroupManagerParams(d),
 		{{- end }}
 		// Force send TargetSize to allow size of 0.
@@ -939,6 +947,11 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 	if err = d.Set("stateful_external_ip", flattenStatefulPolicyStatefulExternalIps(d, manager.StatefulPolicy)); err != nil {
 		return fmt.Errorf("Error setting stateful_external_ip in state: %s", err.Error())
 	}
+{{- if ne $.TargetVersionName "ga" }}
+	if err = d.Set("failover_action", manager.FailoverAction); err != nil {
+		return fmt.Errorf("Error setting failover_action in state: %s", err.Error())
+	}
+{{- end }}
 	// If unset in state set to default value
 	if d.Get("wait_for_instances_status").(string) == "" {
 		if err = d.Set("wait_for_instances_status", "STABLE"); err != nil {
