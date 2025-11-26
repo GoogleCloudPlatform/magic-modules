@@ -36,7 +36,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 sweeper:
   dependencies:
     # - "google_network_security_intercept_endpoint_group" (beta only)
@@ -77,6 +77,12 @@ examples:
     test_env_vars:
       project: 'PROJECT_NAME'
   - name: 'network_bgp_best_path_selection_mode_standard_custom_fields'
+    primary_resource_id: 'vpc_network'
+    vars:
+      network_name: 'vpc-network'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'network_bgp_standard_mode_delete_med'
     primary_resource_id: 'vpc_network'
     vars:
       network_name: 'vpc-network'
@@ -200,6 +206,16 @@ properties:
           - 'DEFAULT'
           - 'ADD_COST_TO_MED'
         is_missing_in_cai: true
+      - name: 'delete_bgp_always_compare_med'
+        type: Boolean
+        default_value: false
+        update_verb: 'PATCH'
+        update_url: 'projects/{{project}}/global/networks/{{name}}'
+        custom_flatten: 'templates/terraform/custom_flatten/compute_network_delete_bgp_always_compare_med.go.tmpl'
+        description: |
+          If set to `true`, the `bgp_always_compare_med` field will be cleared.
+          If set to `false` (the default), `bgp_always_compare_med` will be set to the value specified in the configuration.
+        ignore_read: true
   - name: 'mtu'
     type: Integer
     description: |

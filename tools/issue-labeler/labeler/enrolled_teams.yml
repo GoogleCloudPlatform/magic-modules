@@ -123,6 +123,9 @@ service/cloudbuild:
 service/clouddeploy:
   resources:
   - google_clouddeploy_.*
+service/clouddomains:
+  resources:
+  - google_clouddomains_.*
 service/cloudfunctions:
   resources:
   - google_cloudfunctions_.*
@@ -161,7 +164,7 @@ service/cloudscheduler:
   - google_cloud_scheduler_.*
 service/cloudsecuritycompliance:
   resources:
-  - google_cloudsecuritycompliance_.*
+  - google_cloud_security_compliance_.*
 service/cloudtasks:
   resources:
   - google_cloud_tasks_.*
@@ -278,6 +281,7 @@ service/compute-regional-pass-through-lb:
 service/compute-reservation:
   resources:
   - google_compute_reservation.*
+  - google_compute_future_reservation.*
 service/compute-router:
   resources:
   - google_compute_router
@@ -599,8 +603,8 @@ service/networkservices-multicast:
   - google_network_services_multicast_.*
 service/networkservices-service-extensions:
   resources:
-  - google_network_services_lb_route_extension
-  - google_network_services_lb_traffic_extension
+  - google_network_services_lb_.*_extension
+  - google_network_services_wasm_plugin.*
 service/networkservices-traffic-director:
   resources:
   - google_network_services_endpoint_policy
@@ -665,7 +669,7 @@ service/pubsublite:
   - google_pubsub_lite_.*
 service/recaptchaenterprise:
   resources:
-  - google_recaptcha_enterprise_key
+  - google_recaptcha_enterprise_.*
 service/redis-cluster:
   resources:
   - google_redis_cluster.*

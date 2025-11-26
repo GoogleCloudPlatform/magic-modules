@@ -303,7 +303,7 @@ func parseOpenApi(resourcePath, resourceName string, root *openapi3.T) []any {
 		if strings.Contains(strings.ToLower(param.Value.Name), strings.ToLower(resourceName)) {
 			idParam = param.Value.Name
 		}
-		paramObj := writeObject(param.Value.Name, param.Value.Schema, propType(param.Value.Schema), true)
+		paramObj := WriteObject(param.Value.Name, param.Value.Schema, propType(param.Value.Schema), true)
 		description := param.Value.Description
 		if strings.TrimSpace(description) == "" {
 			description = "No description"
@@ -336,7 +336,7 @@ func propType(prop *openapi3.SchemaRef) openapi3.Types {
 	}
 }
 
-func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, urlParam bool) api.Type {
+func WriteObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, urlParam bool) api.Type {
 	var field api.Type
 
 	switch name {
@@ -394,8 +394,17 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		}
 
 		field.Type = "NestedObject"
-
-		field.Properties = buildProperties(obj.Value.Properties, obj.Value.Required)
+		if obj.Value.AdditionalProperties.Schema != nil {
+			field.Type = "Map"
+			field.KeyName = "TODO: CHANGEME"
+			var valueType api.Type
+			valueType.Name = "TODO: CHANGEME"
+			valueType.Type = "NestedObject"
+			valueType.Properties = buildProperties(obj.Value.AdditionalProperties.Schema.Value.Properties, obj.Value.AdditionalProperties.Schema.Value.Required)
+			field.ValueType = &valueType
+		} else {
+			field.Properties = buildProperties(obj.Value.Properties, obj.Value.Required)
+		}
 	case "array":
 		field.Type = "Array"
 		var subField api.Type
@@ -454,7 +463,7 @@ func buildProperties(props openapi3.Schemas, required []string) []*api.Type {
 	properties := []*api.Type{}
 	for _, k := range slices.Sorted(maps.Keys(props)) {
 		prop := props[k]
-		propObj := writeObject(k, prop, propType(prop), false)
+		propObj := WriteObject(k, prop, propType(prop), false)
 		if slices.Contains(required, k) {
 			propObj.Required = true
 		}

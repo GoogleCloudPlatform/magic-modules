@@ -52,7 +52,8 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/alloydb_instance.go.tmpl'
 # Skipping the sweeper because instances will be deleted during cluster sweeps
 exclude_sweeper: true
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 examples:
   - name: 'alloydb_instance_basic'
     primary_resource_id: 'default'

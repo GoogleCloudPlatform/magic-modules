@@ -18,8 +18,8 @@ description: |
   The SCIM tenant configuration allows for the synchronization of user/group identities from external identity provider into Google Cloud using the System for Cross-domain Identity Management (SCIM) protocol.
 references:
   guides:
-    'QUICKSTART_TITLE': 'https://cloud.google.com/iam/docs/workforce-sign-in-microsoft-entra-id-scalable-groups?group_type=extended#extended-attributes'
-  api: 'https://cloud.google.com/sdk/gcloud/reference/iam/workforce-pools/providers/scim-tenants'
+    'Configure a SCIM Tenant': 'https://cloud.google.com/iam/docs/workforce-sign-in-microsoft-entra-id-scalable-groups?group_type=extended#extended-attributes'
+  api: 'https://docs.cloud.google.com/iam/docs/reference/rest/v1/locations.workforcePools.providers.scimTenants'
 base_url: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants'
 self_link: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants/{{scim_tenant_id}}'
 create_url: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/scimTenants?workforcePoolProviderScimTenantId={{scim_tenant_id}}'
@@ -66,7 +66,6 @@ properties:
     output: true
     description: |
       The current state of the scim tenant.
-      * STATE_UNSPECIFIED: State unspecified.
       * ACTIVE: The scim tenant is active and may be used to validate authentication credentials.
       * DELETED: The scim tenant is soft-deleted. Soft-deleted scim tenants are permanently
         deleted after approximately 30 days.
@@ -74,7 +73,7 @@ properties:
       - 'STATE_UNSPECIFIED'
       - 'ACTIVE'
       - 'DELETED'
-  - name: 'baseURI'
+  - name: 'baseUri'
     type: String
     description: |
       Represents the base URI as defined in [RFC 7644, Section
@@ -82,6 +81,19 @@ properties:
       must use this as the root address for managing resources under the tenant.
       Format:
       https://iamscim.googleapis.com/{version}/{tenant_id}/
+    output: true
+  - name: 'claimMapping'
+    type: KeyValuePairs
+    description: Maps BYOID claims to SCIM claims. This is a required field for new SCIM Tenants being created.
+  - name: 'purgeTime'
+    type: Time
+    description: The timestamp that represents the time when the SCIM tenant is purged.
+    output: true
+  - name: 'serviceAgent'
+    type: String
+    description: |
+      Service Agent created by SCIM Tenant API. SCIM tokens created under
+      this tenant will be attached to this service agent.
     output: true
 parameters:
   - name: 'location'
@@ -98,7 +110,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'ProviderId'
+  - name: 'providerId'
     type: String
     description: |
       The ID of the provider.

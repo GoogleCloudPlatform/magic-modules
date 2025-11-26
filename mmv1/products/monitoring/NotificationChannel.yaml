@@ -48,7 +48,7 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/monitoring_notification_channel.go.tmpl'
   encoder: 'templates/terraform/encoders/monitoring_notification_channel.go.tmpl'

@@ -97,7 +97,7 @@ properties:
     type: NestedObject
     description: |
       Settings for Generative Safety.
-      w
+    diff_suppress_func: tpgresource.EmptyOrUnsetBlockDiffSuppress
     properties:
       - name: 'defaultBannedPhraseMatchStrategy'
         type: String

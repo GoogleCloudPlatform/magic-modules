@@ -33,7 +33,8 @@ iam_policy:
   parent_resource_attribute: 'attestor'
 custom_code:
   constants: 'templates/terraform/constants/binaryauthorization_attestor.go.tmpl'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 examples:
   - name: 'binary_authorization_attestor_basic'
     primary_resource_id: 'attestor'

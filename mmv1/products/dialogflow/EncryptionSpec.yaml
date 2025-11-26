@@ -19,7 +19,7 @@ references:
   guides:
     'Official ES Documentation': 'https://cloud.google.com/dialogflow/es/docs'
     'Official CX Documentation': 'https://cloud.google.com/dialogflow/cx/docs'
-  api: 'https://cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.locations.encryptionSpec'
+  api: 'https://docs.cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.locations.encryptionSpec'
 
 base_url: 'projects/{{project}}/locations/{{location}}/encryptionSpec'
 
