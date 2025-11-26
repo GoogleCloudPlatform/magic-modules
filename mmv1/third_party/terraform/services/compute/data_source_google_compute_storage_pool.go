@@ -43,5 +43,10 @@ func dataSourceGoogleComputeStoragePoolRead(d *schema.ResourceData, meta interfa
 	name := d.Get("name").(string)
 
 	d.SetId(fmt.Sprintf("projects/%s/zones/%s/storagePools/%s", project, zone, name))
+
+	if err := d.Set("deletion_protection", false); err != nil {
+		return fmt.Errorf("Error setting deletion_protection: %s", err)
+	}
+
 	return nil
 }
