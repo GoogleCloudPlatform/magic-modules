@@ -55,6 +55,10 @@ var defaultErrorRetryPredicates = []RetryErrorPredicateFunc{
 	// apply a mutex. If we attempt an operation w/ an unready network, retry
 	// it.
 	isNetworkUnreadyError,
+
+	// Editing IAM policies can result in 409 errors due to concurrent changes
+	// where the getIamPolicy etag value is stale by the time we call setIamPolicy.
+	is409IAMPolicyConcurrentChangesError,
 }
 
 /** END GLOBAL ERROR RETRY PREDICATES HERE **/
@@ -646,6 +650,19 @@ func IsSiteVerificationRetryableError(err error) (bool, string) {
 		if gerr.Code == 400 && strings.Contains(strings.ToLower(gerr.Body), "verification token could not be found") {
 			return true, "Waiting for verification token to be visible"
 		}
+	}
+	return false, ""
+}
+
+// Retry 409s when modifying IAM policies due to concurrent changes
+func is409IAMPolicyConcurrentChangesError(err error) (bool, string) {
+	gerr, ok := err.(*googleapi.Error)
+	if !ok {
+		return false, ""
+	}
+
+	if gerr.Code == 409 && strings.Contains(gerr.Body, "There were concurrent policy changes") {
+		return true, "IAM policy failed due to concurrent changes. Retrying . . ."
 	}
 	return false, ""
 }
