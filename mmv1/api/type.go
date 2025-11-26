@@ -16,7 +16,6 @@ package api
 import (
 	"fmt"
 	"log"
-	"sort"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
@@ -899,9 +898,6 @@ func (t Type) AllUniqueNestedProperties() []*Type {
 		}
 	}
 
-	sort.Slice(result, func(i, j int) bool {
-		return result[i].Name < result[j].Name
-	})
 	return result
 }
 
