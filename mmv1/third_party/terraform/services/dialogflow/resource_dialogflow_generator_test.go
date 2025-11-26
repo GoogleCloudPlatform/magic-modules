@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 )
 
-func testAccDialogflowGenerator_update(t *testing.T) {
+func TestAccDialogflowGenerator_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -48,7 +48,7 @@ func testAccDialogflowGenerator_update(t *testing.T) {
 	})
 }
 
-func testAccDialogflowGenerator_regional(t *testing.T) {
+func TestAccDialogflowGenerator_regional(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
