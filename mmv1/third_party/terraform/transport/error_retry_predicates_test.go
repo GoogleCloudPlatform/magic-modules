@@ -214,3 +214,14 @@ func TestExternalIpServiceNotActive(t *testing.T) {
 		t.Errorf("Error not detected as retryable")
 	}
 }
+
+func TestIAMPolicy409_retryConcurrentChanges(t *testing.T) {
+	err := googleapi.Error{
+		Code: 409,
+		Body: "There were concurrent policy changes. Please retry the whole read-modify-write with exponential backoff.",
+	}
+	isRetryable, _ := is409IAMPolicyConcurrentChangesError(&err)
+	if !isRetryable {
+		t.Errorf("Error not detected as retryable")
+	}
+}
