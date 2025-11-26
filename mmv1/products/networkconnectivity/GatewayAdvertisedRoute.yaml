@@ -26,7 +26,6 @@ base_url: 'projects/{{project}}/locations/{{location}}/spokes/{{spoke}}/gatewayA
 self_link: 'projects/{{project}}/locations/{{location}}/spokes/{{spoke}}/gatewayAdvertisedRoutes/{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/spokes/{{spoke}}/gatewayAdvertisedRoutes?gatewayAdvertisedRouteId={{name}}'
 immutable: true
-update_mask: true
 autogen_async: true
 async:
   operation:
