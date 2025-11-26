@@ -18,7 +18,7 @@ description: |
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/agent-assist/docs'
-  api: 'https://cloud.google.com/dialogflow/es/docs/reference/rest/v2beta1/projects.generators'
+  api: 'https://cloud.google.com/dialogflow/es/docs/reference/rest/v2beta1/projects.locations.generators'
 base_url: 'projects/{{project}}/locations/{{location}}/generators'
 self_link: '{{name}}'
 update_verb: 'PATCH'

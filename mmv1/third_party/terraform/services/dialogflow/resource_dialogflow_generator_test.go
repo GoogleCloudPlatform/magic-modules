@@ -1,0 +1,214 @@
+package dialogflow_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+)
+
+func testAccDialogflowGenerator_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDialogflowGeneratorDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDialogflowGenerator_full(context),
+			},
+			{
+				ResourceName:            "google_dialogflow_generator.summarization_generator",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"generator_id", "location"},
+			},
+			{
+				Config: testAccDialogflowGenerator_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_dialogflow_generator.summarization_generator", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_dialogflow_generator.summarization_generator",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"generator_id", "location"},
+			},
+		},
+	})
+}
+
+func testAccDialogflowGenerator_regional(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDialogflowGeneratorDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDialogflowGenerator_regional(context),
+			},
+			{
+				ResourceName:            "google_dialogflow_generator.summarization_generator",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"generator_id", "location"},
+			},
+		},
+	})
+}
+
+func testAccDialogflowGenerator_full(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dialogflow_generator" "summarization_generator" {
+  location = "global"
+  description = "A v4.0 summarization generator with customized section."
+  published_model = "gemini-2.0-flash-001"
+  inference_parameter {
+    max_output_tokens = 1024
+    temperature       = 0
+    top_k             = 40
+    top_p             = 0.95
+  }
+  summarization_context {
+    few_shot_examples {
+      conversation_context {
+        message_entries {
+          create_time   = "2025-12-31T23:58:59Z"
+          language_code = "en-us"
+          role          = "HUMAN_AGENT"
+          text          = "Hello, what can I help you with?"
+        }
+        message_entries {
+          create_time   = "2025-12-31T23:59:59Z"
+          language_code = "en-us"
+          role          = "END_USER"
+          text          = "I want to cancel my order."
+        }
+      }
+      extra_info = {
+        "Customer Name" = "Jack"
+      }
+      output {
+        summary_suggestion {
+          summary_sections {
+            section = "Redaction"
+            summary = "John"
+          }
+        }
+      }
+      summarization_section_list {
+        summarization_sections {
+          definition = "Always return John as the Customer name."
+          key        = "Redaction"
+          type       = "CUSTOMER_DEFINED"
+        }
+      }
+    }
+    summarization_sections {
+      definition = "Always return John as the Customer name."
+      key        = "Redaction"
+      type       = "CUSTOMER_DEFINED"
+    }
+    version = "4.0"
+    output_language_code = "en"
+  }
+  trigger_event = "MANUAL_CALL"
+}
+`, context)
+}
+
+func testAccDialogflowGenerator_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dialogflow_generator" "summarization_generator" {
+  location = "global"
+  description = "A v3.0 summarization generator with customized section."
+  published_model = "gemini-2.0-flash-001"
+  inference_parameter {
+    max_output_tokens = 1024
+    temperature       = 0
+    top_k             = 40
+    top_p             = 0.95
+  }
+  summarization_context {
+    few_shot_examples {
+      conversation_context {
+        message_entries {
+          create_time   = "2025-12-31T23:58:59Z"
+          language_code = "en-us"
+          role          = "HUMAN_AGENT"
+          text          = "Hello, what can I help you with?"
+        }
+        message_entries {
+          create_time   = "2025-12-31T23:59:59Z"
+          language_code = "en-us"
+          role          = "END_USER"
+          text          = "I want to cancel my order."
+        }
+      }
+      extra_info = {
+        "Customer Name" = "Jack"
+      }
+      output {
+        summary_suggestion {
+          summary_sections {
+            section = "Redaction"
+            summary = "John"
+          }
+        }
+      }
+      summarization_section_list {
+        summarization_sections {
+          definition = "Always return John as the Customer name."
+          key        = "Redaction"
+          type       = "CUSTOMER_DEFINED"
+        }
+      }
+    }
+    summarization_sections {
+      definition = "Always return John as the Customer name."
+      key        = "Redaction"
+      type       = "CUSTOMER_DEFINED"
+    }
+    version = "3.0"
+    output_language_code = "en"
+  }
+  trigger_event = "MANUAL_CALL"
+}
+`, context)
+}
+
+func testAccDialogflowGenerator_regional(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dialogflow_generator" "summarization_generator" {
+  location = "us-central1"
+  description = "A v4.0 summarization generator."
+  inference_parameter {
+    max_output_tokens = 1024
+    temperature       = 0
+    top_k             = 40
+    top_p             = 0.95
+  }
+  summarization_context {
+    version = "4.0"
+    output_language_code = "en"
+  }
+  trigger_event = "MANUAL_CALL"
+}
+`, context)
+}
