@@ -87,7 +87,7 @@ resource "google_apigee_api_product" "{{$.PrimaryResourceId}}" {
   quota_time_unit     = "day"
   quota_counter_scope = "PROXY"
 
-  environments = ["dev", "hom"]
+  environments = ["test", "prod"]
   scopes = [
     "read:weather",
     "write:reports"

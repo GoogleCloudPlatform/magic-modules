@@ -132,7 +132,7 @@ resource "google_apigee_api_product" "apigee_api_product" {
   quota_time_unit     = "day"
   quota_counter_scope = "PROXY"
 
-  environments = ["dev", "hom"]
+  environments = ["test", "prod"]
   scopes = [
     "read:weather",
     "write:reports"
@@ -370,7 +370,7 @@ resource "google_apigee_api_product" "apigee_api_product" {
   quota_time_unit     = "day"
   quota_counter_scope = "PROXY"
 
-  environments = ["dev"]
+  environments = ["test"]
   scopes = [
     "read:weather"
   ]
