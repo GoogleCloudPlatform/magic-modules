@@ -31,7 +31,7 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"github.com/otiai10/copy"
+	"google3/third_party/golang/dircopy/copy"
 )
 
 var testRegex = regexp.MustCompile("func (TestAcc[^(]+)")

@@ -23,7 +23,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"github.com/golang/glog"
+	glog "google3/base/go/log"
 )
 
 type TemplateData struct {

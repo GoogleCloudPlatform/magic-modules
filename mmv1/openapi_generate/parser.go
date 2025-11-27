@@ -34,8 +34,8 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	r "github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"github.com/getkin/kin-openapi/openapi3"
-	"gopkg.in/yaml.v3"
+	"google3/third_party/golang/kin_openapi/current/openapi3/openapi3"
+	"google3/third_party/golang/yamlv3/yaml"
 
 	_ "embed"
 )

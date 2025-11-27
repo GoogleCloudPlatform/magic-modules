@@ -4,7 +4,7 @@ import (
 	_ "embed"
 	"testing"
 
-	"github.com/getkin/kin-openapi/openapi3"
+	"google3/third_party/golang/kin_openapi/current/openapi3/openapi3"
 )
 
 //go:embed test_data/test_api.yaml

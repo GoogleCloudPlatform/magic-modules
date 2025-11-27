@@ -24,7 +24,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/golang/glog"
+	glog "google3/base/go/log"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
