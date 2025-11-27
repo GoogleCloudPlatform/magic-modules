@@ -104,7 +104,7 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string, primaryResour
 			// Note maxAttempts-1 is retries, not attempts.
 			backoffPolicy := retry.WithMaxRetries(maxAttempts-1, retry.NewConstant(50*time.Millisecond))
 
-			t.Log("%s: Starting test with retry logic.", tName)
+			t.Logf("%s: Starting test with retry logic.", tName)
 
 			if err := retry.Do(context.Background(), backoffPolicy, flakyAction); err != nil {
 				if strings.Contains(err.Error(), "test data is unavailable") {
