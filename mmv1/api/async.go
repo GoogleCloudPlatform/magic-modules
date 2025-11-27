@@ -19,8 +19,8 @@ import (
 	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
-	"golang.org/x/exp/slices"
-	"gopkg.in/yaml.v3"
+	"slices"
+	"google3/third_party/golang/yamlv3/yaml"
 )
 
 // Base class from which other Async classes can inherit.

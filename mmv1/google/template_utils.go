@@ -22,7 +22,7 @@ import (
 
 	"text/template"
 
-	"github.com/golang/glog"
+	glog "google3/base/go/log"
 )
 
 // Build a map(map[string]interface{}) from a list of paramerter

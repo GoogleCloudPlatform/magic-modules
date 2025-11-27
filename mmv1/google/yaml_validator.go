@@ -17,7 +17,7 @@ import (
 	"bytes"
 	"log"
 
-	"gopkg.in/yaml.v3"
+	"google3/third_party/golang/yamlv3/yaml"
 )
 
 // A helper class to validate contents coming from YAML files.

@@ -22,8 +22,8 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"golang.org/x/exp/slices"
-	"gopkg.in/yaml.v3"
+	"slices"
+	"google3/third_party/golang/yamlv3/yaml"
 )
 
 // Represents a property type
