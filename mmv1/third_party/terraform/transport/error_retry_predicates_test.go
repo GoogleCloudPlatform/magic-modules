@@ -218,7 +218,7 @@ func TestExternalIpServiceNotActive(t *testing.T) {
 func TestIAMPolicy409_retryConcurrentChanges(t *testing.T) {
 	err := googleapi.Error{
 		Code: 409,
-		Body: "There were concurrent policy changes. Please retry the whole read-modify-write with exponential backoff.",
+		Body: "There were concurrent policy changes. Please retry the whole read-modify-write with exponential backoff",
 	}
 	isRetryable, _ := is409IAMPolicyConcurrentChangesError(&err)
 	if !isRetryable {
