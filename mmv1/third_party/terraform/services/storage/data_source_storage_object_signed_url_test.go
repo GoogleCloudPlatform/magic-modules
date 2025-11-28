@@ -1,12 +1,12 @@
 package storage_test
 
 import (
-	"strings"
 	"testing"
 
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -185,7 +185,6 @@ func testGoogleSignedUrlConfig(bucket string) string {
 data "google_storage_object_signed_url" "blerg" {
   bucket      = "%s"
   path        = "%s"
-  credentials = file("/usr/local/google/home/gvoleti/google/terraform-provider-google/key.json")
 }
 `, bucket, objectPath)
 }
