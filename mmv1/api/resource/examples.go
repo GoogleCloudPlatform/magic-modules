@@ -15,10 +15,10 @@ package resource
 
 import (
 	"bytes"
+	"embed"
 	"fmt"
 	"log"
 	"net/url"
-	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -169,9 +169,10 @@ type Examples struct {
 	// your test so avoid if you can.
 	ExternalProviders []string `yaml:"external_providers,omitempty"`
 
-	DocumentationHCLText string `yaml:"-"`
-	TestHCLText          string `yaml:"-"`
-	OicsHCLText          string `yaml:"-"`
+	DocumentationHCLText string    `yaml:"-"`
+	TestHCLText          string    `yaml:"-"`
+	OicsHCLText          string    `yaml:"-"`
+	TemplateFS           *embed.FS `yaml:"-"`
 
 	// ====================
 	// TGC
@@ -230,6 +231,9 @@ func DefaultConfigPath(name string) string {
 func (e *Examples) Validate(rName string) error {
 	if e.Name == "" {
 		return fmt.Errorf("missing `name` for one example in resource %s", rName)
+	}
+	if e.TemplateFS == nil {
+		return fmt.Errorf("example %s has no TemplateFS in resource %s", e.Name, rName)
 	}
 	return e.ValidateExternalProviders()
 }
@@ -345,7 +349,7 @@ func (e *Examples) LoadHCLText(baseDir string) (err error) {
 }
 
 func (e *Examples) ExecuteTemplate(baseDir string) (string, error) {
-	templateContent, err := os.ReadFile(filepath.Join(baseDir, e.ConfigPath))
+	templateContent, err := (*e.TemplateFS).ReadFile(filepath.Join(baseDir, e.ConfigPath))
 	if err != nil {
 		return "", err
 	}
@@ -359,7 +363,7 @@ func (e *Examples) ExecuteTemplate(baseDir string) (string, error) {
 	validateRegexForContents(varRegex, fileContentString, e.ConfigPath, "vars", e.Vars)
 
 	templateFileName := filepath.Base(e.ConfigPath)
-	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).Parse(fileContentString)
+	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions(*e.TemplateFS)).Parse(fileContentString)
 	if err != nil {
 		return "", err
 	}

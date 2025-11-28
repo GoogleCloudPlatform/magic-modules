@@ -15,6 +15,7 @@ package google
 
 import (
 	"bytes"
+	"embed"
 	"errors"
 	"fmt"
 	"path/filepath"
@@ -54,30 +55,37 @@ func plus(a, b int) int {
 	return a + b
 }
 
-var TemplateFunctions = template.FuncMap{
-	"title":         SpaceSeparatedTitle,
-	"replace":       strings.Replace,
-	"replaceAll":    strings.ReplaceAll,
-	"camelize":      Camelize,
-	"underscore":    Underscore,
-	"plural":        Plural,
-	"contains":      strings.Contains,
-	"join":          strings.Join,
-	"lower":         strings.ToLower,
-	"upper":         strings.ToUpper,
-	"hasSuffix":     strings.HasSuffix,
-	"dict":          wrapMultipleParams,
-	"format2regex":  Format2Regex,
-	"hasPrefix":     strings.HasPrefix,
-	"sub":           subtract,
-	"plus":          plus,
-	"firstSentence": FirstSentence,
-	"trimTemplate":  TrimTemplate,
+func TemplateFunctions(templateFs embed.FS) template.FuncMap {
+	t := trimmerData{templateFS: templateFs}
+	return template.FuncMap{
+		"title":         SpaceSeparatedTitle,
+		"replace":       strings.Replace,
+		"replaceAll":    strings.ReplaceAll,
+		"camelize":      Camelize,
+		"underscore":    Underscore,
+		"plural":        Plural,
+		"contains":      strings.Contains,
+		"join":          strings.Join,
+		"lower":         strings.ToLower,
+		"upper":         strings.ToUpper,
+		"hasSuffix":     strings.HasSuffix,
+		"dict":          wrapMultipleParams,
+		"format2regex":  Format2Regex,
+		"hasPrefix":     strings.HasPrefix,
+		"sub":           subtract,
+		"plus":          plus,
+		"firstSentence": FirstSentence,
+		"trimTemplate":  t.TrimTemplate,
+	}
+}
+
+type trimmerData struct {
+	templateFS embed.FS
 }
 
 // Temporary function to simulate how Ruby MMv1's lines() function works
 // for nested documentation. Can replace with normal "template" after switchover
-func TrimTemplate(templatePath string, e any) string {
+func (t *trimmerData) TrimTemplate(templatePath string, e any) string {
 	templates := []string{
 		fmt.Sprintf("templates/terraform/%s", templatePath),
 		"templates/terraform/expand_resource_ref.tmpl",
@@ -86,7 +94,7 @@ func TrimTemplate(templatePath string, e any) string {
 
 	// Need to remake TemplateFunctions, referencing it directly here
 	// causes a declaration loop
-	var templateFunctions = template.FuncMap{
+	templateFunctions := template.FuncMap{
 		"title":         SpaceSeparatedTitle,
 		"replace":       strings.Replace,
 		"replaceAll":    strings.ReplaceAll,
@@ -103,10 +111,10 @@ func TrimTemplate(templatePath string, e any) string {
 		"sub":           subtract,
 		"plus":          plus,
 		"firstSentence": FirstSentence,
-		"trimTemplate":  TrimTemplate,
+		"trimTemplate":  t.TrimTemplate,
 	}
 
-	tmpl, err := template.New(templateFileName).Funcs(templateFunctions).ParseFiles(templates...)
+	tmpl, err := template.New(templateFileName).Funcs(templateFunctions).ParseFS(t.templateFS, templates...)
 	if err != nil {
 		glog.Exit(err)
 	}

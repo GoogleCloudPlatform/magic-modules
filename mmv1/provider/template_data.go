@@ -321,7 +321,7 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 	funcMap := template.FuncMap{
 		"TemplatePath": func() string { return templatePath },
 	}
-	for k, v := range google.TemplateFunctions {
+	for k, v := range google.TemplateFunctions(td.templateFS) {
 		funcMap[k] = v
 	}
 

@@ -1,6 +1,7 @@
 package loader
 
 import (
+	"embed"
 	"errors"
 	"fmt"
 	"log"
@@ -20,12 +21,14 @@ type Loader struct {
 	BaseDirectory     string
 	OverrideDirectory string
 	Version           string
+	TemplateFS        embed.FS
 }
 
 type Config struct {
-	BaseDirectory     string // optional, defaults to current working directory
-	OverrideDirectory string // optional
-	Version           string // required
+	BaseDirectory     string   // optional, defaults to current working directory
+	OverrideDirectory string   // optional
+	Version           string   // required
+	TemplateFS        embed.FS // required
 }
 
 // NewLoader creates a new Loader instance, applying any
@@ -40,6 +43,7 @@ func NewLoader(config Config) *Loader {
 		BaseDirectory:     config.BaseDirectory,
 		OverrideDirectory: config.OverrideDirectory,
 		Version:           config.Version,
+		TemplateFS:        config.TemplateFS,
 	}
 
 	// Normalize override dir to a path that is relative to the magic-modules directory
@@ -278,6 +282,7 @@ func (l *Loader) reconcileOverrideResources(product *api.Product, resources []*a
 // loadResource loads a single resource with optional override
 func (l *Loader) loadResource(product *api.Product, baseResourcePath string, overrideResourcePath string) *api.Resource {
 	resource := &api.Resource{}
+	resource.TemplateFS = l.TemplateFS
 
 	// Check if base resource exists
 	baseResourceExists := Exists(l.BaseDirectory, baseResourcePath)
