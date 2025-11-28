@@ -32,6 +32,8 @@ import (
 const gcsBaseUrl = "https://storage.googleapis.com"
 const googleCredentialsEnvVar = "GOOGLE_APPLICATION_CREDENTIALS"
 
+var gcsHostUrl string
+
 func DataSourceGoogleSignedUrl() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleSignedUrlRead,
@@ -141,7 +143,12 @@ func dataSourceGoogleSignedUrlRead(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
-	urlData.Path = fmt.Sprintf("/%s/%s", d.Get("bucket").(string), d.Get("path").(string))
+	bucketName := d.Get("bucket").(string)
+	objectPath := d.Get("path").(string)
+	getGcsHostUrl(urlData, bucketName, objectPath)
+
+	// sign path should be same in both cases as we are using v2 signature
+	urlData.SignPath = fmt.Sprintf("/%s/%s", d.Get("bucket").(string), d.Get("path").(string))
 
 	// Load JWT Config from Google Credentials
 	jwtConfig, err := loadJwtConfig(d, config)
@@ -208,6 +215,20 @@ func loadJwtConfig(d *schema.ResourceData, meta interface{}) (*jwt.Config, error
 	return nil, errors.New("Credentials not found in datasource, provider configuration or GOOGLE_APPLICATION_CREDENTIALS environment variable.")
 }
 
+func getGcsHostUrl(urlData *UrlData, bucketName, objectPath string) string {
+	if strings.Contains(bucketName, ".") {
+		// if bucket name contains "." use path style URL
+		urlData.Path = fmt.Sprintf("/%s/%s", bucketName, objectPath)
+		gcsHostUrl = gcsBaseUrl
+	} else {
+		// default to always virtual style URL
+		urlData.Path = fmt.Sprintf("/%s", objectPath)
+		url := strings.Split(gcsBaseUrl, "://")
+		gcsHostUrl = fmt.Sprintf("%s://%s.%s", url[0], bucketName, url[1])
+	}
+	return gcsHostUrl
+}
+
 // parsePrivateKey converts the binary contents of a private key file
 // to an *rsa.PrivateKey. It detects whether the private key is in a
 // PEM container or not. If so, it extracts the the private key
@@ -242,6 +263,7 @@ type UrlData struct {
 	Expires     int
 	HttpHeaders map[string]string
 	Path        string
+	SignPath    string
 }
 
 // SigningString creates a string representation of the UrlData in a form ready for signing:
@@ -285,7 +307,7 @@ func (u *UrlData) SigningString() []byte {
 	}
 
 	// Storage Object path (includes bucketname)
-	buf.WriteString(u.Path)
+	buf.WriteString(u.SignPath)
 
 	return buf.Bytes()
 }
@@ -327,7 +349,7 @@ func (u *UrlData) SignedUrl() (string, error) {
 	// build url
 	// https://cloud.google.com/storage/docs/access-control/create-signed-urls-program
 	var urlBuffer bytes.Buffer
-	urlBuffer.WriteString(gcsBaseUrl)
+	urlBuffer.WriteString(gcsHostUrl)
 	urlBuffer.WriteString(u.Path)
 	urlBuffer.WriteString("?GoogleAccessId=")
 	urlBuffer.WriteString(u.JwtConfig.Email)
