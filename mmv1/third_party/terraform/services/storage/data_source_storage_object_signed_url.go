@@ -145,7 +145,7 @@ func dataSourceGoogleSignedUrlRead(d *schema.ResourceData, meta interface{}) err
 
 	bucketName := d.Get("bucket").(string)
 	objectPath := d.Get("path").(string)
-	getGcsHostUrl(*urlData, bucketName, objectPath)
+	getGcsHostUrl(urlData, bucketName, objectPath)
 
 	// sign path should be same in both cases as we are using v2 signature
 	urlData.SignPath = fmt.Sprintf("/%s/%s", d.Get("bucket").(string), d.Get("path").(string))
@@ -215,7 +215,7 @@ func loadJwtConfig(d *schema.ResourceData, meta interface{}) (*jwt.Config, error
 	return nil, errors.New("Credentials not found in datasource, provider configuration or GOOGLE_APPLICATION_CREDENTIALS environment variable.")
 }
 
-func getGcsHostUrl(urlData UrlData, bucketName, objectPath string) string {
+func getGcsHostUrl(urlData *UrlData, bucketName, objectPath string) string {
 	if strings.Contains(bucketName, ".") {
 		// if bucket name contains "." use path style URL
 		urlData.Path = fmt.Sprintf("/%s/%s", bucketName, objectPath)
