@@ -1,5 +1,4 @@
 package compute_test
-{{ if ne $.TargetVersionName `ga` -}}
 import (
 	"testing"
 
@@ -19,7 +18,7 @@ func TestAccComputeCrossSiteNetwork_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeCrossSiteNetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -48,13 +47,11 @@ func TestAccComputeCrossSiteNetwork_update(t *testing.T) {
 func testAccComputeCrossSiteNetwork_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
-  provider = google-beta
 }
 
 resource "google_compute_cross_site_network" "example-cross-site-network" {
   name       = "tf-test-test-cross-site-network%{random_suffix}"
   description         = "Example cross site network%{random_suffix}"
-  provider = google-beta
 }
 `, context)
 }
@@ -62,14 +59,11 @@ resource "google_compute_cross_site_network" "example-cross-site-network" {
 func testAccComputeCrossSiteNetwork_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
-  provider = google-beta
 }
 
 resource "google_compute_cross_site_network" "example-cross-site-network" {
 name       = "tf-test-test-cross-site-network%{random_suffix}"
 description         = "Example cross site network updated%{random_suffix}"
-  provider = google-beta
 }
 `, context)
 }
-{{- end }}
