@@ -15,6 +15,7 @@ package provider
 
 import (
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"time"
@@ -33,14 +34,17 @@ type CaiToTerraformConversion struct {
 	Product *api.Product
 
 	StartTime time.Time
+
+	templateFS fs.FS
 }
 
-func NewCaiToTerraformConversion(product *api.Product, versionName string, startTime time.Time) CaiToTerraformConversion {
+func NewCaiToTerraformConversion(product *api.Product, versionName string, startTime time.Time, templateFS fs.FS) CaiToTerraformConversion {
 	t := CaiToTerraformConversion{
 		Product:           product,
 		TargetVersionName: versionName,
 		Version:           *product.VersionObjOrClosest(versionName),
 		StartTime:         startTime,
+		templateFS:        templateFS,
 	}
 
 	t.Product.SetPropertiesBasedOnVersion(&t.Version)

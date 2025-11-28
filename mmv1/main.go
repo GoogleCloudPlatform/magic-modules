@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"strings"
@@ -12,6 +13,7 @@ import (
 	"golang.org/x/exp/slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/loader"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/openapi_generate"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/provider"
@@ -82,7 +84,12 @@ func GenerateProducts(product, resource, providerName, version, outputPath, base
 	log.Printf("Building %q version", version)
 	log.Printf("Building %q provider", providerName)
 
-	loader := loader.NewLoader(loader.Config{Version: version, BaseDirectory: baseDirectory, OverrideDirectory: overrideDirectory})
+	ofs, err := google.NewOverlayFS(overrideDirectory, baseDirectory)
+	if err != nil {
+		panic(err)
+	}
+
+	loader := loader.NewLoader(loader.Config{Version: version, BaseDirectory: baseDirectory, OverrideDirectory: overrideDirectory, Sysfs: ofs})
 	loadedProducts := loader.LoadProducts()
 
 	var productsToGenerate []string
@@ -97,7 +104,7 @@ func GenerateProducts(product, resource, providerName, version, outputPath, base
 
 	for _, productApi := range loadedProducts {
 		wg.Add(1)
-		go GenerateProduct(version, providerName, productApi, outputPath, startTime, productsToGenerate, resource, generateCode, generateDocs)
+		go GenerateProduct(version, providerName, productApi, outputPath, startTime, ofs, productsToGenerate, resource, generateCode, generateDocs)
 	}
 	wg.Wait()
 
@@ -111,7 +118,7 @@ func GenerateProducts(product, resource, providerName, version, outputPath, base
 
 	// In order to only copy/compile files once per provider this must be called outside
 	// of the products loop. Create an MMv1 provider with an arbitrary product (the first loaded).
-	providerToGenerate := newProvider(providerName, version, productsForVersion[0], startTime)
+	providerToGenerate := newProvider(providerName, version, productsForVersion[0], startTime, ofs)
 	providerToGenerate.CopyCommonFiles(outputPath, generateCode, generateDocs)
 
 	if generateCode {
@@ -122,7 +129,7 @@ func GenerateProducts(product, resource, providerName, version, outputPath, base
 // GenerateProduct generates code and documentation for a product
 // This now uses the CompileProduct method to separate compilation from generation
 func GenerateProduct(version, providerName string, productApi *api.Product, outputPath string,
-	startTime time.Time, productsToGenerate []string, resourceToGenerate string,
+	startTime time.Time, fsys fs.FS, productsToGenerate []string, resourceToGenerate string,
 	generateCode, generateDocs bool) {
 	defer wg.Done()
 
@@ -132,21 +139,21 @@ func GenerateProduct(version, providerName string, productApi *api.Product, outp
 	}
 
 	log.Printf("%s: Generating files", productApi.PackagePath)
-	providerToGenerate := newProvider(providerName, version, productApi, startTime)
+	providerToGenerate := newProvider(providerName, version, productApi, startTime, fsys)
 	providerToGenerate.Generate(outputPath, resourceToGenerate, generateCode, generateDocs)
 }
 
-func newProvider(providerName, version string, productApi *api.Product, startTime time.Time) provider.Provider {
+func newProvider(providerName, version string, productApi *api.Product, startTime time.Time, fsys fs.FS) provider.Provider {
 	switch providerName {
 	case "tgc":
-		return provider.NewTerraformGoogleConversion(productApi, version, startTime)
+		return provider.NewTerraformGoogleConversion(productApi, version, startTime, fsys)
 	case "tgc_cai2hcl":
-		return provider.NewCaiToTerraformConversion(productApi, version, startTime)
+		return provider.NewCaiToTerraformConversion(productApi, version, startTime, fsys)
 	case "tgc_next":
-		return provider.NewTerraformGoogleConversionNext(productApi, version, startTime)
+		return provider.NewTerraformGoogleConversionNext(productApi, version, startTime, fsys)
 	case "oics":
-		return provider.NewTerraformOiCS(productApi, version, startTime)
+		return provider.NewTerraformOiCS(productApi, version, startTime, fsys)
 	default:
-		return provider.NewTerraform(productApi, version, startTime)
+		return provider.NewTerraform(productApi, version, startTime, fsys)
 	}
 }
