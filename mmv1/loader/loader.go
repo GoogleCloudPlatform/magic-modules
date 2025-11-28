@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/golang/glog"
 	"golang.org/x/exp/slices"
 )
@@ -19,12 +20,14 @@ type Loader struct {
 	baseDirectory     string
 	overrideDirectory string
 	version           string
+	sysfs             google.ReadDirReadFileFS
 }
 
 type Config struct {
-	BaseDirectory     string // required
-	OverrideDirectory string // optional
-	Version           string // required
+	BaseDirectory     string                   // required
+	OverrideDirectory string                   // optional
+	Version           string                   // required
+	Sysfs             google.ReadDirReadFileFS // required
 }
 
 // NewLoader creates a new Loader instance, applying any
@@ -37,11 +40,14 @@ func NewLoader(config Config) *Loader {
 	if config.BaseDirectory == "" {
 		panic("a base directory is required")
 	}
-
+	if config.Sysfs == nil {
+		panic("sysfs is required")
+	}
 	l := &Loader{
 		baseDirectory:     config.BaseDirectory,
 		overrideDirectory: config.OverrideDirectory,
 		version:           config.Version,
+		sysfs:             config.Sysfs,
 	}
 
 	// Normalize override dir to a path that is relative to the magic-modules directory
@@ -252,10 +258,7 @@ func (l *Loader) loadResources(product *api.Product) ([]*api.Resource, error) {
 
 // reconcileOverrideResources handles resolution of override resources
 func (l *Loader) reconcileOverrideResources(product *api.Product, resources []*api.Resource) ([]*api.Resource, error) {
-	productOverridePath := filepath.Join(l.overrideDirectory, product.PackagePath, "product.yaml")
-	productOverrideDir := filepath.Dir(productOverridePath)
-
-	overrideFiles, err := filepath.Glob(filepath.Join(productOverrideDir, "*"))
+	overrideFiles, err := filepath.Glob(filepath.Join(l.overrideDirectory, product.PackagePath, "*"))
 	if err != nil {
 		return nil, fmt.Errorf("cannot get override files: %v", err)
 	}
@@ -265,7 +268,7 @@ func (l *Loader) reconcileOverrideResources(product *api.Product, resources []*a
 			continue
 		}
 
-		baseResourcePath := filepath.Join(product.PackagePath, filepath.Base(overrideYamlPath))
+		baseResourcePath := filepath.Join(l.baseDirectory, product.PackagePath, filepath.Base(overrideYamlPath))
 		resource := l.loadResource(product, baseResourcePath, overrideYamlPath)
 		resources = append(resources, resource)
 	}
@@ -274,17 +277,18 @@ func (l *Loader) reconcileOverrideResources(product *api.Product, resources []*a
 }
 
 // loadResource loads a single resource with optional override
+// baseResourcePath and overrideResourcePath are expected to be absolute paths.
 func (l *Loader) loadResource(product *api.Product, baseResourcePath string, overrideResourcePath string) *api.Resource {
 	resource := &api.Resource{}
 
 	// Check if base resource exists
-	baseResourceExists := Exists(l.baseDirectory, baseResourcePath)
+	baseResourceExists := Exists(baseResourcePath)
+	baseRelPath, _ := filepath.Rel(l.baseDirectory, baseResourcePath)
 
 	if baseResourceExists {
-		relPath, _ := filepath.Rel(l.baseDirectory, baseResourcePath)
-		resource.SourceYamlFile = relPath
+		resource.SourceYamlFile = baseRelPath
 	} else {
-		relPath, _ := filepath.Rel(l.baseDirectory, overrideResourcePath)
+		relPath, _ := filepath.Rel(l.overrideDirectory, overrideResourcePath)
 		resource.SourceYamlFile = relPath
 	}
 
@@ -302,7 +306,7 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 	} else {
 		// Base only
 		api.Compile(baseResourcePath, resource, l.overrideDirectory)
-		resource.SourceYamlFile = baseResourcePath
+		resource.SourceYamlFile = baseRelPath
 	}
 
 	// Set resource defaults and validate
@@ -313,10 +317,10 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 	// SetDefault after AddExtraFields to ensure relevant metadata is available for the newly generated fields
 	resource.SetDefault(product)
 	resource.Validate()
-	resource.TestSampleSetUp()
+	resource.TestSampleSetUp(l.sysfs)
 
 	for _, e := range resource.Examples {
-		if err := e.LoadHCLText(l.baseDirectory); err != nil {
+		if err := e.LoadHCLText(l.baseDirectory, l.sysfs); err != nil {
 			glog.Exit(err)
 		}
 	}

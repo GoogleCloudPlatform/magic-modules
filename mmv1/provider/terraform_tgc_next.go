@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"path"
@@ -54,6 +55,8 @@ type TerraformGoogleConversionNext struct {
 	Product *api.Product
 
 	StartTime time.Time
+
+	templateFS fs.FS
 }
 
 type ResourceIdentifier struct {
@@ -65,13 +68,14 @@ type ResourceIdentifier struct {
 	IdentityParam      string
 }
 
-func NewTerraformGoogleConversionNext(product *api.Product, versionName string, startTime time.Time) TerraformGoogleConversionNext {
+func NewTerraformGoogleConversionNext(product *api.Product, versionName string, startTime time.Time, templateFS fs.FS) TerraformGoogleConversionNext {
 	t := TerraformGoogleConversionNext{
 		Product:                    product,
 		TargetVersionName:          versionName,
 		Version:                    *product.VersionObjOrClosest(versionName),
 		StartTime:                  startTime,
 		ResourcesByCaiResourceType: make(map[string][]ResourceIdentifier),
+		templateFS:                 templateFS,
 	}
 
 	t.Product.SetPropertiesBasedOnVersion(&t.Version)
@@ -102,7 +106,7 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 		return
 	}
 
-	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
+	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, tgc.templateFS)
 
 	if !object.IsExcluded() {
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
@@ -176,7 +180,7 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 		"pkg/cai2hcl/converters/convert_resource.go":    "templates/tgc_next/cai2hcl/convert_resource.go.tmpl",
 	}
 
-	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
+	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, tgc.templateFS)
 	tgc.CompileFileList(outputFolder, resourceConverters, *templateData, products)
 }
 
@@ -280,7 +284,7 @@ func (tgc TerraformGoogleConversionNext) CopyFileList(outputFolder string, files
 			log.Fatalf("%s was already modified during this run at %s", targetFile, info.ModTime().String())
 		}
 
-		sourceByte, err := os.ReadFile(source)
+		sourceByte, err := fs.ReadFile(tgc.templateFS, source)
 		if err != nil {
 			log.Fatalf("Cannot read source file %s while copying: %s", source, err)
 		}
@@ -357,7 +361,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 	productName := google.Underscore(product.Name)
 	resourceFullName := fmt.Sprintf("%s_%s", productName, google.Underscore(object.Name))
 	handwrittenTestFilePath := fmt.Sprintf("third_party/terraform/services/%s/resource_%s_test.go", productName, resourceFullName)
-	data, err := os.ReadFile(handwrittenTestFilePath)
+	data, err := fs.ReadFile(tgc.templateFS, handwrittenTestFilePath)
 	for err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			if strings.HasSuffix(handwrittenTestFilePath, ".tmpl") {
@@ -365,7 +369,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 				return nil
 			}
 			handwrittenTestFilePath += ".tmpl"
-			data, err = os.ReadFile(handwrittenTestFilePath)
+			data, err = fs.ReadFile(tgc.templateFS, handwrittenTestFilePath)
 		} else {
 			return fmt.Errorf("error reading handwritten test file %s: %v", handwrittenTestFilePath, err)
 		}

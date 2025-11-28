@@ -16,9 +16,9 @@ package resource
 import (
 	"bytes"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/url"
-	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -257,7 +257,7 @@ func (e *Examples) ValidateExternalProviders() error {
 }
 
 // Executes example templates for documentation and tests
-func (e *Examples) LoadHCLText(baseDir string) (err error) {
+func (e *Examples) LoadHCLText(baseDir string, sysfs fs.FS) (err error) {
 	originalVars := e.Vars
 	originalTestEnvVars := e.TestEnvVars
 	docTestEnvVars := make(map[string]string)
@@ -284,7 +284,7 @@ func (e *Examples) LoadHCLText(baseDir string) (err error) {
 		docTestEnvVars[key] = docs_defaults[e.TestEnvVars[key]]
 	}
 	e.TestEnvVars = docTestEnvVars
-	e.DocumentationHCLText, err = e.ExecuteTemplate(baseDir)
+	e.DocumentationHCLText, err = e.ExecuteTemplate(baseDir, sysfs)
 	if err != nil {
 		return err
 	}
@@ -328,7 +328,7 @@ func (e *Examples) LoadHCLText(baseDir string) (err error) {
 
 	e.Vars = testVars
 	e.TestEnvVars = testTestEnvVars
-	e.TestHCLText, err = e.ExecuteTemplate(baseDir)
+	e.TestHCLText, err = e.ExecuteTemplate(baseDir, sysfs)
 	if err != nil {
 		return err
 	}
@@ -344,8 +344,8 @@ func (e *Examples) LoadHCLText(baseDir string) (err error) {
 	return nil
 }
 
-func (e *Examples) ExecuteTemplate(baseDir string) (string, error) {
-	templateContent, err := os.ReadFile(filepath.Join(baseDir, e.ConfigPath))
+func (e *Examples) ExecuteTemplate(baseDir string, sysfs fs.FS) (string, error) {
+	templateContent, err := fs.ReadFile(sysfs, filepath.Join(baseDir, e.ConfigPath))
 	if err != nil {
 		return "", err
 	}
@@ -359,7 +359,7 @@ func (e *Examples) ExecuteTemplate(baseDir string) (string, error) {
 	validateRegexForContents(varRegex, fileContentString, e.ConfigPath, "vars", e.Vars)
 
 	templateFileName := filepath.Base(e.ConfigPath)
-	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).Parse(fileContentString)
+	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions(sysfs)).Parse(fileContentString)
 	if err != nil {
 		return "", err
 	}
@@ -408,7 +408,7 @@ func (e *Examples) ResourceType(terraformName string) string {
 }
 
 // Executes example templates for documentation and tests
-func (e *Examples) SetOiCSHCLText() {
+func (e *Examples) SetOiCSHCLText(sysfs fs.FS) {
 	var err error
 	originalVars := e.Vars
 	originalTestEnvVars := e.TestEnvVars
@@ -430,7 +430,7 @@ func (e *Examples) SetOiCSHCLText() {
 	e.Vars = testVars
 	// SetOiCSHCLText is generated from the provider, assume base directory is
 	// always relative for this case
-	e.OicsHCLText, err = e.ExecuteTemplate("")
+	e.OicsHCLText, err = e.ExecuteTemplate("", sysfs)
 	if err != nil {
 		log.Fatal(err)
 	}
