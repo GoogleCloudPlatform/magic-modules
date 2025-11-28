@@ -53,6 +53,63 @@ resource "google_cloud_security_compliance_cloud_control" "example" {
 				pattern = "^[a-z]+-[a-z]+[0-9]$"
 			}
 		}
+
+		sub_parameters {
+			name         = "sub-location"
+			display_name = "Sub Location"
+			description  = "A sub-parameter for location"
+			value_type   = "STRING"
+			is_required  = true
+			default_value {
+				string_value = "us-central1-a"
+			}
+		}
+	}
+
+	parameter_spec {
+		name         = "oneof-parameter"
+		display_name = "Oneof Parameter"
+		description  = "A parameter testing oneof_value"
+		value_type   = "ONEOF"
+		is_required  = true
+		
+		default_value {
+			oneof_value {
+				name = "test-oneof"
+				parameter_value {
+					string_value = "test-value"
+				}
+			}
+		}
+		
+		validation {
+			allowed_values {
+				values {
+					oneof_value {
+						name = "test-oneof"
+						parameter_value {
+							string_value = "test-value"
+						}
+					}
+				}
+			}
+		}
+
+		sub_parameters {
+			name         = "sub-oneof"
+			display_name = "Sub Oneof"
+			description  = "A sub-parameter for oneof"
+			value_type   = "ONEOF"
+			is_required  = true
+			default_value {
+				oneof_value {
+					name = "sub-test-oneof"
+					parameter_value {
+						string_value = "sub-test-value"
+					}
+				}
+			}
+		}
 	}
 }
 `, context)
@@ -139,6 +196,63 @@ resource "google_cloud_security_compliance_cloud_control" "example" {
     validation {
       regexp_pattern {
         pattern = "^[a-z]+-[a-z]$"
+      }
+    }
+
+    sub_parameters {
+      name         = "sub-region"
+      display_name = "Sub Region"
+      description  = "A sub-parameter for region"
+      value_type   = "STRING"
+      is_required  = true
+      default_value {
+        string_value = "eu-west"
+      }
+    }
+  }
+
+  parameter_spec {
+    name         = "oneof-parameter"
+    display_name = "Oneof Parameter"
+    description  = "A parameter testing oneof_value"
+    value_type   = "ONEOF"
+    is_required  = true
+    
+    default_value {
+      oneof_value {
+        name = "updated-oneof"
+        parameter_value {
+          string_value = "updated-value"
+        }
+      }
+    }
+    
+    validation {
+      allowed_values {
+        values {
+          oneof_value {
+            name = "updated-oneof"
+            parameter_value {
+              string_value = "updated-value"
+            }
+          }
+        }
+      }
+    }
+
+    sub_parameters {
+      name         = "sub-oneof"
+      display_name = "Sub Oneof"
+      description  = "A sub-parameter for oneof"
+      value_type   = "ONEOF"
+      is_required  = true
+      default_value {
+        oneof_value {
+          name = "sub-updated-oneof"
+          parameter_value {
+            string_value = "sub-updated-value"
+          }
+        }
       }
     }
   }
