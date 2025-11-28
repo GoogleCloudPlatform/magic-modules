@@ -14,6 +14,7 @@
 package api
 
 import (
+	"embed"
 	"fmt"
 	"log"
 	"strings"
@@ -342,6 +343,8 @@ type Type struct {
 	TGCIgnoreTerraformCustomFlatten bool `yaml:"tgc_ignore_terraform_custom_flatten,omitempty"`
 
 	TGCIgnoreRead bool `yaml:"tgc_ignore_read,omitempty"`
+
+	templateFS *embed.FS `yaml:"-"`
 }
 
 const MAX_NAME = 20
@@ -448,6 +451,7 @@ func (t *Type) setShallowDefaults(r *Resource) {
 	if t.ApiName == "" {
 		t.ApiName = t.Name
 	}
+	t.templateFS = &r.TemplateFS
 }
 
 // SetDefault recursively sets default values for this Type and all its children.
@@ -496,6 +500,9 @@ func (t *Type) Validate(rName string) {
 
 	if (t.WriteOnlyLegacy || t.WriteOnly) && t.Sensitive {
 		log.Fatalf("Property %s cannot be write_only and sensitive at the same time in resource %s", t.Name, rName)
+	}
+	if t.templateFS == nil {
+		log.Fatalf("Property %s has no templateFS in resource %s", t.Name, rName)
 	}
 
 	t.validateLabelsField()
@@ -1145,10 +1152,11 @@ func (t *Type) RootProperties() []*Type {
 // While this is technically a map, it's split out because it's a much
 // simpler property to generate and means we can avoid conditional logic
 // in Map.
-func NewProperty(name, apiName string, options []func(*Type)) *Type {
+func NewProperty(name, apiName string, templateFS *embed.FS, options []func(*Type)) *Type {
 	p := &Type{
-		Name:    name,
-		ApiName: apiName,
+		Name:       name,
+		ApiName:    apiName,
+		templateFS: templateFS,
 	}
 
 	for _, option := range options {
@@ -1375,7 +1383,7 @@ func (t Type) NamespaceProperty() string {
 }
 
 func (t Type) CustomTemplate(templatePath string, appendNewline bool) string {
-	return ExecuteTemplate(&t, templatePath, appendNewline)
+	return ExecuteTemplate(&t, *t.templateFS, templatePath, appendNewline)
 }
 
 func (t *Type) GetIdFormat() string {

@@ -16,6 +16,7 @@
 package provider
 
 import (
+	"embed"
 	"fmt"
 	"log"
 	"os"
@@ -34,14 +35,17 @@ type TerraformOiCS struct {
 	Product *api.Product
 
 	StartTime time.Time
+
+	templateFS embed.FS
 }
 
-func NewTerraformOiCS(product *api.Product, versionName string, startTime time.Time) TerraformOiCS {
+func NewTerraformOiCS(product *api.Product, versionName string, startTime time.Time, templateFS embed.FS) TerraformOiCS {
 	toics := TerraformOiCS{
 		Product:           product,
 		TargetVersionName: versionName,
 		Version:           *product.VersionObjOrClosest(versionName),
 		StartTime:         startTime,
+		templateFS:        templateFS,
 	}
 
 	toics.Product.SetPropertiesBasedOnVersion(&toics.Version)
@@ -67,7 +71,7 @@ func (toics TerraformOiCS) GenerateObjects(outputFolder, resourceToGenerate stri
 }
 
 func (toics TerraformOiCS) GenerateObject(object api.Resource, outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
-	templateData := NewTemplateData(outputFolder, toics.TargetVersionName)
+	templateData := NewTemplateData(outputFolder, toics.TargetVersionName, toics.templateFS)
 
 	if !object.IsExcluded() {
 		log.Printf("Generating %s resource", object.Name)

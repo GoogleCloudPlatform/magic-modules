@@ -14,6 +14,7 @@ package api
 
 import (
 	"bytes"
+	"embed"
 	"fmt"
 	"log"
 	"maps"
@@ -364,8 +365,9 @@ type Resource struct {
 	// google_compute_router_nat manages the `nat` field on the `Router` resource.
 	ApiResourceField string `yaml:"api_resource_field,omitempty"`
 
-	ImportPath     string `yaml:"-"`
-	SourceYamlFile string `yaml:"-"`
+	ImportPath     string   `yaml:"-"`
+	SourceYamlFile string   `yaml:"-"`
+	TemplateFS     embed.FS `yaml:"-"`
 
 	constraintGroupRegistry     map[string]*[]string `yaml:"-"`
 	constraintGroupsInitialized bool                 `yaml:"-"`
@@ -503,6 +505,14 @@ func (r *Resource) SetDefault(product *Product) {
 	}
 	for _, vf := range r.VirtualFields {
 		vf.SetDefault(r)
+	}
+	for _, example := range r.Examples {
+		example.TemplateFS = &r.TemplateFS
+	}
+	for _, sample := range r.Samples {
+		for _, step := range sample.Steps {
+			step.TemplateFS = &r.TemplateFS
+		}
 	}
 }
 
@@ -858,7 +868,7 @@ func (r *Resource) attachConstraintGroup(groupType string, source []string) *[]s
 	return &newGroup
 }
 
-func buildWriteOnlyField(name string, versionFieldName string, originalField *Type) *Type {
+func (r *Resource) buildWriteOnlyField(name string, versionFieldName string, originalField *Type) *Type {
 	originalFieldLineage := originalField.TerraformLineage()
 	newFieldLineage := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(name))
 	requiredWith := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(versionFieldName))
@@ -906,10 +916,10 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 		options = append(options, propertyWithAtLeastOneOfPointer(originalField.AtLeastOneOfGroup))
 	}
 
-	return NewProperty(name, originalField.ApiName, options)
+	return NewProperty(name, originalField.ApiName, &r.TemplateFS, options)
 }
 
-func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField *Type) *Type {
+func (r *Resource) buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField *Type) *Type {
 	description := fmt.Sprintf("Triggers update of `%s` write-only. Increment this value when an update to `%s` is needed. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)", google.Underscore(writeOnlyField.Name), google.Underscore(writeOnlyField.Name))
 	requiredWith := strings.ReplaceAll(originalField.TerraformLineage(), google.Underscore(originalField.Name), google.Underscore(writeOnlyField.Name))
 
@@ -921,7 +931,7 @@ func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField
 		propertyWithClientSide(true),
 	}
 
-	return NewProperty(name, name, options)
+	return NewProperty(name, name, &r.TemplateFS, options)
 }
 
 func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type) []*Type {
@@ -932,8 +942,8 @@ func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type)
 	}
 	woFieldName := fmt.Sprintf("%sWo", propWithWoConfigured.Name)
 	woVersionFieldName := fmt.Sprintf("%sVersion", woFieldName)
-	writeOnlyField := buildWriteOnlyField(woFieldName, woVersionFieldName, propWithWoConfigured)
-	writeOnlyVersionField := buildWriteOnlyVersionField(woVersionFieldName, propWithWoConfigured, writeOnlyField)
+	writeOnlyField := r.buildWriteOnlyField(woFieldName, woVersionFieldName, propWithWoConfigured)
+	writeOnlyVersionField := r.buildWriteOnlyVersionField(woVersionFieldName, propWithWoConfigured, writeOnlyField)
 	props = append(props, writeOnlyField, writeOnlyVersionField)
 	return props
 }
@@ -971,8 +981,8 @@ func (r *Resource) addLabelsFields(props []*Type, parent *Type, labels *Type) []
 		r.CustomDiff = append(r.CustomDiff, "tpgresource.SetMetadataLabelsDiff")
 	}
 
-	terraformLabelsField := buildTerraformLabelsField("labels", parent, labels)
-	effectiveLabelsField := buildEffectiveLabelsField("labels", labels)
+	terraformLabelsField := r.buildTerraformLabelsField("labels", parent, labels)
+	effectiveLabelsField := r.buildEffectiveLabelsField("labels", labels)
 	props = append(props, terraformLabelsField, effectiveLabelsField)
 
 	// The effective_labels field is used to write to API, instead of the labels field.
@@ -1008,12 +1018,12 @@ func (r *Resource) addAnnotationsFields(props []*Type, parent *Type, annotations
 		r.CustomDiff = append(r.CustomDiff, "tpgresource.SetMetadataAnnotationsDiff")
 	}
 
-	effectiveAnnotationsField := buildEffectiveLabelsField("annotations", annotations)
+	effectiveAnnotationsField := r.buildEffectiveLabelsField("annotations", annotations)
 	props = append(props, effectiveAnnotationsField)
 	return props
 }
 
-func buildEffectiveLabelsField(name string, labels *Type) *Type {
+func (r *Resource) buildEffectiveLabelsField(name string, labels *Type) *Type {
 	description := fmt.Sprintf("All of %s (key/value pairs) present on the resource in GCP, "+
 		"including the %s configured through Terraform, other clients and services.", name, name)
 
@@ -1030,10 +1040,10 @@ func buildEffectiveLabelsField(name string, labels *Type) *Type {
 		propertyWithUpdateUrl(labels.UpdateUrl),
 		propertyWithImmutable(labels.Immutable),
 	}
-	return NewProperty(n, name, options)
+	return NewProperty(n, name, &r.TemplateFS, options)
 }
 
-func buildTerraformLabelsField(name string, parent *Type, labels *Type) *Type {
+func (r *Resource) buildTerraformLabelsField(name string, parent *Type, labels *Type) *Type {
 	description := fmt.Sprintf("The combination of %s configured directly on the resource\n"+
 		" and default %s configured on the provider.", name, name)
 
@@ -1053,7 +1063,7 @@ func buildTerraformLabelsField(name string, parent *Type, labels *Type) *Type {
 		propertyWithUpdateUrl(labels.UpdateUrl),
 		propertyWithImmutable(immutable),
 	}
-	return NewProperty(n, name, options)
+	return NewProperty(n, name, &r.TemplateFS, options)
 }
 
 // Check if the resource has root "labels" field
@@ -1977,14 +1987,14 @@ func (r Resource) FormatDocDescription(desc string, indent bool) string {
 }
 
 func (r Resource) CustomTemplate(templatePath string, appendNewline bool) string {
-	output := ExecuteTemplate(&r, templatePath, appendNewline)
+	output := ExecuteTemplate(&r, r.TemplateFS, templatePath, appendNewline)
 	if !appendNewline {
 		output = strings.TrimSuffix(output, "\n")
 	}
 	return output
 }
 
-func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
+func ExecuteTemplate(e any, templateFS embed.FS, templatePath string, appendNewline bool) string {
 	templates := []string{
 		templatePath,
 		"templates/terraform/expand_resource_ref.tmpl",
@@ -1997,7 +2007,7 @@ func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
 	}
 	templateFileName := filepath.Base(templatePath)
 
-	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
+	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions(templateFS)).ParseFS(templateFS, templates...)
 	if err != nil {
 		glog.Exit(err)
 	}

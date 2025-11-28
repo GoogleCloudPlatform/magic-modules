@@ -15,10 +15,10 @@ package resource
 
 import (
 	"bytes"
+	"embed"
 	"fmt"
 	"log"
 	"net/url"
-	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -107,10 +107,11 @@ type Step struct {
 	// Whether to skip generating docs for this test step
 	ExcludeDocs bool `yaml:"exclude_docs,omitempty"`
 
-	DocumentationHCLText string `yaml:"-"`
-	TestHCLText          string `yaml:"-"`
-	OicsHCLText          string `yaml:"-"`
-	PrimaryResourceId    string `yaml:"-"`
+	DocumentationHCLText string    `yaml:"-"`
+	TestHCLText          string    `yaml:"-"`
+	OicsHCLText          string    `yaml:"-"`
+	PrimaryResourceId    string    `yaml:"-"`
+	TemplateFS           *embed.FS `yaml:"-"`
 }
 
 func (s *Step) TestStepSlug(productName, resourceName string) string {
@@ -122,6 +123,9 @@ func (s *Step) Validate(rName, sName string) {
 	// TODO: Add check identifier when it's implemented
 	if s.Name == "" {
 		log.Fatalf("Missing `name` for one step in test sample %s in resource %s", sName, rName)
+	}
+	if s.TemplateFS == nil {
+		log.Fatalf("Step %s has no TemplateFS in resource %s", s.Name, rName)
 	}
 
 }
@@ -228,7 +232,7 @@ func (s *Step) SetHCLText() {
 }
 
 func (s *Step) ExecuteTemplate() string {
-	templateContent, err := os.ReadFile(s.ConfigPath)
+	templateContent, err := (*s.TemplateFS).ReadFile(s.ConfigPath)
 	if err != nil {
 		glog.Exit(err)
 	}
@@ -245,7 +249,7 @@ func (s *Step) ExecuteTemplate() string {
 
 	templateFileName := filepath.Base(s.ConfigPath)
 
-	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).Parse(fileContentString)
+	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions(*s.TemplateFS)).Parse(fileContentString)
 	if err != nil {
 		glog.Exit(err)
 	}

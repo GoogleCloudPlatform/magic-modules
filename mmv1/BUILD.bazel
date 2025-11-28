@@ -14,8 +14,20 @@ go_library(
     ],
 )
 
+filegroup(
+    name = "data",
+    srcs = glob([
+        "templates/**",
+        "third_party/**",
+    ]),
+    visibility = ["//visibility:private"],
+)
+
 go_binary(
     name = "mmv1",
     embed = [":mmv1_lib"],
+    embedsrcs = [
+        ":data", # keep
+    ],
     visibility = ["//visibility:public"],
 )
