@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"flag"
 	"fmt"
 	"log"
@@ -39,6 +40,9 @@ var doNotGenerateDocs = flag.Bool("no-docs", false, "do not generate docs")
 var providerFlag = flag.String("provider", "", "optional provider name. If specified, a non-default provider will be used.")
 
 var openapiGenerate = flag.Bool("openapi-generate", false, "Generate MMv1 YAML from openapi directory (Experimental)")
+
+//go:embed all:templates/** all:third_party/**
+var templateFS embed.FS
 
 func main() {
 
@@ -130,14 +134,14 @@ func GenerateProduct(version, providerName string, productApi *api.Product, outp
 func newProvider(providerName, version string, productApi *api.Product, startTime time.Time) provider.Provider {
 	switch providerName {
 	case "tgc":
-		return provider.NewTerraformGoogleConversion(productApi, version, startTime)
+		return provider.NewTerraformGoogleConversion(productApi, version, startTime, templateFS)
 	case "tgc_cai2hcl":
-		return provider.NewCaiToTerraformConversion(productApi, version, startTime)
+		return provider.NewCaiToTerraformConversion(productApi, version, startTime, templateFS)
 	case "tgc_next":
-		return provider.NewTerraformGoogleConversionNext(productApi, version, startTime)
+		return provider.NewTerraformGoogleConversionNext(productApi, version, startTime, templateFS)
 	case "oics":
-		return provider.NewTerraformOiCS(productApi, version, startTime)
+		return provider.NewTerraformOiCS(productApi, version, startTime, templateFS)
 	default:
-		return provider.NewTerraform(productApi, version, startTime)
+		return provider.NewTerraform(productApi, version, startTime, templateFS)
 	}
 }
