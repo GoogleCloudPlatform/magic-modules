@@ -16,6 +16,17 @@ resource "google_cloud_security_compliance_framework" "{{$.PrimaryResourceId}}" 
         string_value = "us-central1"
       }
     }
+    parameters {
+      name = "oneof-parameter"
+      parameter_value {
+        oneof_value {
+          name = "test-oneof"
+          parameter_value {
+            string_value = "test-value"
+          }
+        }
+      }
+    }
   }
 }
 
@@ -61,6 +72,17 @@ resource "google_cloud_security_compliance_framework_deployment" "{{$.PrimaryRes
         name = "location"
         parameter_value {
           string_value = "us-central1"
+        }
+      }
+      parameters {
+        name = "oneof-parameter"
+        parameter_value {
+          oneof_value {
+            name = "test-oneof"
+            parameter_value {
+              string_value = "test-value"
+            }
+          }
         }
       }
     }

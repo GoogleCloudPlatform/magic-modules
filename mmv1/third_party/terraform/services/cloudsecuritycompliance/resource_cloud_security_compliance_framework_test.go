@@ -30,6 +30,17 @@ resource "google_cloud_security_compliance_framework" "example" {
         string_value = "us-central1"
       }
     }
+    parameters {
+      name = "oneof-parameter"
+      parameter_value {
+        oneof_value {
+          name = "test-oneof"
+          parameter_value {
+            string_value = "test-value"
+          }
+        }
+      }
+    }
   }
 }
 `, context)
@@ -92,6 +103,17 @@ resource "google_cloud_security_compliance_framework" "example" {
       name = "region"
       parameter_value {
         string_value = "eu"
+      }
+    }
+    parameters {
+      name = "oneof-parameter"
+      parameter_value {
+        oneof_value {
+          name = "updated-oneof"
+          parameter_value {
+            string_value = "updated-value"
+          }
+        }
       }
     }
   }
