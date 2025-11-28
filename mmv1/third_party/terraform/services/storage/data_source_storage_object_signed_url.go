@@ -144,16 +144,8 @@ func dataSourceGoogleSignedUrlRead(d *schema.ResourceData, meta interface{}) err
 	}
 
 	bucketName := d.Get("bucket").(string)
-	if strings.Contains(bucketName, ".") {
-		// if bucket name contains "." use path style URL
-		urlData.Path = fmt.Sprintf("/%s/%s", d.Get("bucket").(string), d.Get("path").(string))
-		gcsHostUrl = gcsBaseUrl
-	} else {
-		// default to always virtual style URL
-		urlData.Path = fmt.Sprintf("/%s", d.Get("path").(string))
-		url := strings.Split(gcsBaseUrl, "://")
-		gcsHostUrl = fmt.Sprintf("%s://%s.%s", url[0], bucketName, url[1])
-	}
+	objectPath := d.Get("path").(string)
+	getGcsHostUrl(*urlData, bucketName, objectPath)
 
 	// sign path should be same in both cases as we are using v2 signature
 	urlData.SignPath = fmt.Sprintf("/%s/%s", d.Get("bucket").(string), d.Get("path").(string))
@@ -221,6 +213,20 @@ func loadJwtConfig(d *schema.ResourceData, meta interface{}) (*jwt.Config, error
 	}
 
 	return nil, errors.New("Credentials not found in datasource, provider configuration or GOOGLE_APPLICATION_CREDENTIALS environment variable.")
+}
+
+func getGcsHostUrl(urlData UrlData, bucketName, objectPath string) string {
+	if strings.Contains(bucketName, ".") {
+		// if bucket name contains "." use path style URL
+		urlData.Path = fmt.Sprintf("/%s/%s", bucketName, objectPath)
+		gcsHostUrl = gcsBaseUrl
+	} else {
+		// default to always virtual style URL
+		urlData.Path = fmt.Sprintf("/%s", objectPath)
+		url := strings.Split(gcsBaseUrl, "://")
+		gcsHostUrl = fmt.Sprintf("%s://%s.%s", url[0], bucketName, url[1])
+	}
+	return gcsHostUrl
 }
 
 // parsePrivateKey converts the binary contents of a private key file
