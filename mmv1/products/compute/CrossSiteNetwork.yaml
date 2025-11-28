@@ -15,11 +15,10 @@
 name: 'CrossSiteNetwork'
 description: |
   Represents a cross-site-network resource. A CrossSiteNetwork is used to establish L2 connectivity between groups of Interconnects.
-min_version: beta
 references:
   guides:
     'Create a Cross-Site Interconnect': 'https://cloud.google.com/network-connectivity/docs/interconnect/how-to/cross-site/create-network'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/crossSiteNetworks'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/crossSiteNetworks'
 docs:
 base_url: 'projects/{{project}}/global/crossSiteNetworks'
 self_link: 'projects/{{project}}/global/crossSiteNetworks/{{name}}'
@@ -41,7 +40,6 @@ examples:
     vars:
       name: 'test-cross-site-network'
       description: 'Example cross site network'
-    min_version: 'beta'
     test_env_vars:
       project: 'PROJECT_NAME'
 parameters:
