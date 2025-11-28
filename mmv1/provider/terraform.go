@@ -499,7 +499,7 @@ func (t Terraform) getCommonCopyFiles(versionName string, generateCode, generate
 	// Case 3: When copy a single file, save the target as key and source as value to the map singleFiles
 	singleFiles := map[string]string{
 		"go.sum":                           "third_party/terraform/go.sum",
-		"go.mod":                           "third_party/terraform/go.mod",
+		"go.mod":                           "third_party/terraform/go.mod.embed",
 		".go-version":                      "third_party/terraform/.go-version",
 		"terraform-registry-manifest.json": "third_party/terraform/terraform-registry-manifest.json",
 	}
