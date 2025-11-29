@@ -20,43 +20,75 @@
 package {{ lower $.ProductMetadata.Name }}
 
 import (
-
+    "bytes"
+    "context"
+    "encoding/base64"
+    "encoding/json"
     "fmt"
     "log"
     "net/http"
     "reflect"
-{{- if $.SupportsIndirectUserProjectOverride }}
     "regexp"
-{{- end }}
-{{- if or (and (not $.Immutable) ($.UpdateMask)) $.LegacyLongFormProject }}
+    "slices"
+    "sort"
+    "strconv"
     "strings"
-{{- end }}
     "time"
 
-{{/*     # We list all the v2 imports here, because we run 'goimports' to guess the correct */}}
-{{/*     # set of imports, which will never guess the major version correctly. */}}
-    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+    "github.com/hashicorp/errwrap"
+    "github.com/hashicorp/go-cty/cty"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
     "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-    "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
-    "github.com/hashicorp/go-cty/cty"
 
     "{{ $.ImportPath }}/tpgresource"
     transport_tpg "{{ $.ImportPath }}/transport"
     "{{ $.ImportPath }}/verify"
 
-{{ if $.FlattenedProperties }}
     "google.golang.org/api/googleapi"
-{{- end}}
 )
 
 {{if $.CustomCode.Constants -}} 
     {{- $.CustomTemplate $.CustomCode.Constants true -}}
 {{- end}}
+
+var (
+    _ = bytes.Clone
+    _ = context.WithCancel
+    _ = base64.NewDecoder
+    _ = json.Marshal
+    _ = fmt.Sprintf
+    _ = log.Print
+    _ = http.Get
+    _ = reflect.ValueOf
+    _ = regexp.Match
+    _ = slices.Min([]int{1})
+    _ = sort.IntSlice{}
+    _ = strconv.Atoi
+    _ = strings.Trim
+    _ = time.Now
+    _ = errwrap.Wrap
+    _ = cty.BoolVal
+    _ = diag.Diagnostic{}
+    _ = customdiff.All
+    _ = id.UniqueId
+    _ = logging.LogLevel
+    _ = retry.Retry
+    _ = schema.Noop
+    _ = validation.All
+    _ = structure.ExpandJsonFromString
+    _ = terraform.State{}
+    _ = tpgresource.SetLabels
+    _ = transport_tpg.Config{}
+    _ = verify.ValidateEnum
+    _ = googleapi.Error{}
+)
 
 func Resource{{ $.ResourceName -}}() *schema.Resource {
     return &schema.Resource{
@@ -186,19 +218,19 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     obj := make(map[string]interface{})
 
 {{- range $prop := $.SettableProperties }}
-    {{ $prop.ApiName -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}({{ if $prop.FlattenObject }}nil{{ else }}d.Get("{{ underscore $prop.Name }}"){{ end }}, d, config)
+    {{ $prop.CamelizeProperty -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}({{ if $prop.FlattenObject }}nil{{ else if $prop.WriteOnly }}tpgresource.GetRawConfigAttributeAsString(d, "{{ underscore $prop.Name }}"){{ else }}d.Get("{{ underscore $prop.Name }}"){{ end }}, d, config)
     if err != nil {
         return err
-{{- if $prop.SendEmptyValue -}}
-    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop) {
-{{-      else if $prop.FlattenObject -}}
-    } else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiName -}}Prop)) {
-{{-      else -}}
-    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiName -}}Prop)) && (ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop)) {
-{{- end}}
-        obj["{{ $prop.ApiName -}}"] = {{ $prop.ApiName -}}Prop
+    {{- if $prop.SendEmptyValue -}}
+    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); ok || !reflect.DeepEqual(v, {{ $prop.CamelizeProperty -}}Prop) {
+    {{-      else if $prop.FlattenObject -}}
+    } else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.CamelizeProperty -}}Prop)) {
+    {{-      else -}}
+    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.CamelizeProperty -}}Prop)) && (ok || !reflect.DeepEqual(v, {{ $prop.CamelizeProperty -}}Prop)) {
+    {{- end}}
+        obj["{{ $prop.ApiName -}}"] = {{ $prop.CamelizeProperty -}}Prop
     }
-{{- end}}
+    {{- end}}
 
 {{if $.CustomCode.Encoder -}}
     obj, err = resource{{ $.ResourceName -}}Encoder(d, meta, obj)
@@ -723,17 +755,17 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     obj := make(map[string]interface{})
 {{-             range $prop := $.UpdateBodyProperties }}
     {{/* flattened $s won't have something stored in state so instead nil is passed to the next expander. */}}
-    {{- $prop.ApiName -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}({{ if $prop.FlattenObject }}nil{{else}}d.Get("{{underscore $prop.Name}}"){{ end }}, d, config)
+    {{- $prop.CamelizeProperty -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}({{ if $prop.FlattenObject }}nil{{ else if $prop.WriteOnly }}tpgresource.GetRawConfigAttributeAsString(d, "{{ underscore $prop.Name }}"){{else}}d.Get("{{underscore $prop.Name}}"){{ end }}, d, config)
     if err != nil {
         return err
 {{-                 if $prop.SendEmptyValue -}}
-    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop) {
+    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); ok || !reflect.DeepEqual(v, {{ $prop.CamelizeProperty -}}Prop) {
 {{-                 else if $prop.FlattenObject -}}
-    } else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiName -}}Prop)) {
+    } else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.CamelizeProperty -}}Prop)) {
 {{-                 else -}}
-    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop)) {
+    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, {{ $prop.CamelizeProperty -}}Prop)) {
 {{-                 end}}
-        obj["{{ $prop.ApiName -}}"] = {{ $prop.ApiName -}}Prop
+        obj["{{ $prop.ApiName -}}"] = {{ $prop.CamelizeProperty -}}Prop
     }
 {{-             end}}
 

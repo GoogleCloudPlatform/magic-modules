@@ -1,0 +1,116 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'HostGroup'
+description: |
+  Hostgroups define the hosts (aka initiators) that can access the specific Google Cloud Netapp Volumes.
+  Hostgroup is a regional resource and independent of the volumes or any other resource
+references:
+  guides:
+    'Documentation': ''
+  api: ''
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/hostGroups/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/hostGroups'
+self_link: 'projects/{{project}}/locations/{{location}}/hostGroups/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/hostGroups?hostGroupId={{name}}'
+update_url: 'projects/{{project}}/locations/{{location}}/hostGroups/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/locations/{{location}}/hostGroups/{{name}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/hostGroups/{{name}}'
+timeouts:
+  insert_minutes: 10
+  update_minutes: 10
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+custom_code:
+# Skipping the sweeper since we need to sweep multiple regions
+exclude_sweeper: true
+examples:
+  - name: 'netapp_host_group'
+    primary_resource_id: 'test_host_group'
+    vars:
+      host_group_name: 'test-host-group'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      Location (region) of the Host Group.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the Host Group. Needs to be unique per location.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'state'
+    type: String
+    description: |
+      The state of the Host Group.
+    output: true
+  - name: 'createTime'
+    type: String
+    description: |
+      Create time of the host group. A timestamp in RFC3339 UTC "Zulu" format. Examples: "2023-06-22T09:13:01.617Z".
+    output: true
+  - name: 'description'
+    type: String
+    description: |
+      An optional description of this resource.
+    required: false
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Labels as key value pairs. Example: `{ "owner": "Bob", "department": "finance", "purpose": "testing" }`.
+    required: false
+  - name: 'type'
+    type: Enum
+    description: |
+      Type of the host group.
+    required: true
+    immutable: true
+    enum_values:
+      - 'ISCSI_INITIATOR'
+  - name: 'hosts'
+    type: Array
+    description: |
+      The list of hosts associated with the host group
+    required: true
+    item_type:
+      type: String
+  - name: 'osType'
+    type: Enum
+    description: |
+      The OS type of the host group. It indicates the type of operating system
+      used by all of the hosts in the HostGroup. All hosts in a HostGroup must be
+      of the same OS type. This can be set only when creating a HostGroup.
+    immutable: true
+    required: true
+    enum_values:
+      - 'LINUX'
+      - 'WINDOWS'
+      - 'ESXI'

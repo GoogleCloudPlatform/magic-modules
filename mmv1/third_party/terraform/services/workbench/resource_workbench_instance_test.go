@@ -732,6 +732,9 @@ resource "google_workbench_instance" "instance" {
 }
 
 func TestAccWorkbenchInstance_updatelabels(t *testing.T) {
+	// Skip it in VCR test because of the randomness of uuid in "labels" field
+	// which causes the replaying mode after recording mode failing in VCR test
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -741,6 +744,9 @@ func TestAccWorkbenchInstance_updatelabels(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccWorkbenchInstance_label(context),
@@ -787,11 +793,15 @@ func TestAccWorkbenchInstance_updatelabels(t *testing.T) {
 
 func testAccWorkbenchInstance_label(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "random_uuid" "test" {
+}
+
 resource "google_workbench_instance" "instance" {
   name = "tf-test-workbench-instance%{random_suffix}"
   location = "us-central1-a"
   labels = {
     k = "val"
+	computed_label = "${random_uuid.test.result}"
   }
 }
 `, context)

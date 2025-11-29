@@ -55,8 +55,7 @@ iam_policy:
   allowed_iam_role: 'roles/compute.imageUser'
   parent_resource_attribute: 'image'
   iam_conditions_request_type: 'QUERY_PARAM'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 custom_code:
 examples:
   - name: 'image_basic'

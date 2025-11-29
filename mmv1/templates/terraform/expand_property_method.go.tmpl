@@ -31,7 +31,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
     transformed{{$prop.TitlelizeProperty}}, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ underscore $prop.Name }}"], d, config)
     if err != nil {
       return nil, err
-          {{- if or ($prop.SendEmptyValue) (and $prop.IncludeEmptyValueInCai $.ResourceMetadata.IsTgcCompiler) }}
+          {{- if or ($prop.SendEmptyValue) (and $prop.TGCSendEmptyValue $.ResourceMetadata.IsTgcCompiler) }}
     } else {
       transformed["{{$prop.ApiName}}"] = transformed{{$prop.TitlelizeProperty}}
           {{- else }}
@@ -69,7 +69,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
   transformed{{$prop.TitlelizeProperty}}, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}({{ if $prop.FlattenObject }}nil{{ else }}d.Get("{{ underscore $prop.Name }}"), d, config)
   if err != nil {
     return nil, err
-          {{- if or ($prop.SendEmptyValue) (and $prop.IncludeEmptyValueInCai $.ResourceMetadata.IsTgcCompiler) }}
+          {{- if or ($prop.SendEmptyValue) (and $prop.TGCSendEmptyValue $.ResourceMetadata.IsTgcCompiler) }}
   } else {
     transformed["{{$prop.ApiName}}"] = transformed{{$prop.TitlelizeProperty}}
           {{- else }}
@@ -88,6 +88,9 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
   v = v.(*schema.Set).List()
       {{- end }}
       {{- if or $.NestedProperties (and ($.IsA "NestedObject") $.AllowEmptyObject) }}
+  if v == nil {
+    return nil, nil
+  }
   l := v.([]interface{})
         {{- if $.IsA "Array" }}
   req := make([]interface{}, 0, len(l))
@@ -122,7 +125,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
       transformed{{$prop.TitlelizeProperty}}, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ underscore $prop.Name }}"], d, config)
       if err != nil {
         return nil, err
-            {{- if or ($prop.SendEmptyValue) (and $prop.IncludeEmptyValueInCai $.ResourceMetadata.IsTgcCompiler) }}
+            {{- if or ($prop.SendEmptyValue) (and $prop.TGCSendEmptyValue $.ResourceMetadata.IsTgcCompiler) }}
       } else {
         transformed["{{$prop.ApiName}}"] = transformed{{$prop.TitlelizeProperty}}
             {{- else }}

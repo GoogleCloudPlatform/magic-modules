@@ -4,6 +4,14 @@ if  res["patchConfig"] != nil {
 		patchConfig["goo"].(map[string]interface{})["enabled"] = true
 		res["patchConfig"] = patchConfig
 	}
+
+    if patchConfig["yum"] != nil {
+        patchConfigYum := patchConfig["yum"].(map[string]interface{})
+        if _, ok := patchConfigYum["minimal"]; !ok {
+            patchConfigYum["minimal"] = false
+        }
+        patchConfig["yum"] = patchConfigYum
+    }
 }
 
 return res, nil

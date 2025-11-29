@@ -190,6 +190,11 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 		scheduling.GracefulShutdown = transformedGracefulShutdown
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "GracefulShutdown")
 	}
+
+	if v, ok := original["skip_guest_os_shutdown"]; ok {
+		scheduling.SkipGuestOsShutdown = v.(bool)
+		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "SkipGuestOsShutdown")
+	}
 {{- end }}
 	if v, ok := original["local_ssd_recovery_timeout"]; ok {
 		transformedLocalSsdRecoveryTimeout, err := expandComputeLocalSsdRecoveryTimeout(v)
@@ -341,13 +346,13 @@ func expandGracefulShutdownMaxDuration(v interface{}) (*compute.Duration, error)
 
 func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 	schedulingMap := map[string]interface{}{
-		"on_host_maintenance": resp.OnHostMaintenance,
-		"preemptible":         resp.Preemptible,
-		"min_node_cpus":       resp.MinNodeCpus,
-		"provisioning_model":  resp.ProvisioningModel,
+		"on_host_maintenance":         resp.OnHostMaintenance,
+		"preemptible":                 resp.Preemptible,
+		"min_node_cpus":               resp.MinNodeCpus,
+		"provisioning_model":          resp.ProvisioningModel,
 		"instance_termination_action": resp.InstanceTerminationAction,
-		"availability_domain": resp.AvailabilityDomain,
-		"termination_time":    resp.TerminationTime,
+		"availability_domain":         resp.AvailabilityDomain,
+		"termination_time":            resp.TerminationTime,
 	}
 
 	if resp.AutomaticRestart != nil {
@@ -363,6 +368,8 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 	}
 
 {{ if ne $.TargetVersionName `ga` -}}
+	schedulingMap["skip_guest_os_shutdown"] = resp.SkipGuestOsShutdown
+
 	if resp.HostErrorTimeoutSeconds != 0 {
 		schedulingMap["host_error_timeout_seconds"] = resp.HostErrorTimeoutSeconds
 	}
@@ -849,6 +856,10 @@ func schedulingHasChangeWithoutReboot(d *schema.ResourceData) bool {
 	}
 {{- if ne $.TargetVersionName "ga" }}
 	if oScheduling["host_error_timeout_seconds"] != newScheduling["host_error_timeout_seconds"] {
+		return true
+	}
+
+	if oScheduling["skip_guest_os_shutdown"] != newScheduling["skip_guest_os_shutdown"] {
 		return true
 	}
 

@@ -8,7 +8,7 @@ import (
 )
 
 type Provider interface {
-	Generate(string, string, string, bool, bool)
+	Generate(string, string, bool, bool)
 	CopyCommonFiles(outputFolder string, generateCode, generateDocs bool)
 	CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string)
 }
@@ -17,11 +17,9 @@ type Provider interface {
 
 const TERRAFORM_PROVIDER_GA = "github.com/hashicorp/terraform-provider-google"
 const TERRAFORM_PROVIDER_BETA = "github.com/hashicorp/terraform-provider-google-beta"
-const TGC_PROVIDER = "github.com/GoogleCloudPlatform/terraform-google-conversion/v6"
-const TERRAFORM_PROVIDER_PRIVATE = "internal/terraform-next"
+const TGC_PROVIDER = "github.com/GoogleCloudPlatform/terraform-google-conversion/v7"
 const RESOURCE_DIRECTORY_GA = "google"
 const RESOURCE_DIRECTORY_BETA = "google-beta"
-const RESOURCE_DIRECTORY_PRIVATE = "google-private"
 const RESOURCE_DIRECTORY_TGC = "pkg"
 
 // # TODO: Review all object interfaces and move to private methods
@@ -40,8 +38,8 @@ func ImportPathFromVersion(v string) string {
 		tpg = TERRAFORM_PROVIDER_BETA
 		dir = RESOURCE_DIRECTORY_BETA
 	default:
-		tpg = TERRAFORM_PROVIDER_PRIVATE
-		dir = RESOURCE_DIRECTORY_PRIVATE
+		tpg = "github.com/hashicorp/terraform-provider-google-" + v
+		dir = "google-" + v
 	}
 	return fmt.Sprintf("%s/%s", tpg, dir)
 }

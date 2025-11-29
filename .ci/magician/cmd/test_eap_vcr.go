@@ -15,6 +15,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	//go:embed templates/vcr/post_replay_eap.tmpl
+	postReplayEAPTmplText string
+)
+
 var tevRequiredEnvironmentVariables = [...]string{
 	"GEN_PATH",
 	"GOCACHE",
@@ -31,7 +36,6 @@ var tevRequiredEnvironmentVariables = [...]string{
 	"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
 	"KOKORO_ARTIFACTS_DIR",
 	"HOME",
-	"MODIFIED_FILE_PATH",
 	"PATH",
 	"USER",
 }
@@ -125,7 +129,7 @@ The following environment variables are required:
 			return fmt.Errorf("wrong number of arguments %d, expected 1", len(args))
 		}
 
-		return execTestEAPVCR(args[0], env["GEN_PATH"], env["KOKORO_ARTIFACTS_DIR"], env["MODIFIED_FILE_PATH"], rnr, vt)
+		return execTestEAPVCR(args[0], env["GEN_PATH"], env["KOKORO_ARTIFACTS_DIR"], rnr, vt)
 	},
 }
 
@@ -137,7 +141,7 @@ func listTEVEnvironmentVariables() string {
 	return result
 }
 
-func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath string, rnr ExecRunner, vt *vcr.Tester) error {
+func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir string, rnr ExecRunner, vt *vcr.Tester) error {
 	vt.SetRepoPath(provider.Private, genPath)
 	if err := rnr.PushDir(genPath); err != nil {
 		return fmt.Errorf("error changing to gen path: %w", err)
@@ -190,7 +194,7 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath 
 		Version:          provider.Private.String(),
 		Head:             head,
 	}
-	comment, err := formatPostReplay(postReplayData)
+	comment, err := formatPostReplayEAP(postReplayData)
 	if err != nil {
 		return fmt.Errorf("error formatting post replay comment: %w", err)
 	}
@@ -290,4 +294,8 @@ View the [build log](https://storage.cloud.google.com/ci-vcr-logs/%s/refs/heads/
 
 func init() {
 	rootCmd.AddCommand(testEAPVCRCmd)
+}
+
+func formatPostReplayEAP(data postReplay) (string, error) {
+	return formatComment("post_replay_eap.tmpl", postReplayEAPTmplText, data)
 }

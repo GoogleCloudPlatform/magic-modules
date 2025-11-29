@@ -46,8 +46,10 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
+  constants: 'templates/terraform/constants/reservation.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/reservation.go.tmpl'
   pre_update: 'templates/terraform/pre_update/shared_reservation_update.go.tmpl'
+  post_read: templates/terraform/post_read/compute_reservetion.go.tmpl
 sweeper:
   url_substitutions:
     - zone: "us-central1-a"
@@ -82,8 +84,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
-      # Resource creation race
-    skip_vcr: true
+    external_providers: ["time"]
   - name: 'shared_reservation_beta'
     primary_resource_id: 'gce_reservation'
     vars:
@@ -93,9 +94,16 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
-      # Resource creation race
-    skip_vcr: true
     min_version: 'beta'
+    external_providers: ["time"]
+virtual_fields:
+  - name: 'block_names'
+    type: Array
+    description: |
+      List of all reservation block names in the parent reservation.
+    output: true
+    item_type:
+      type: String
 parameters:
   - name: 'zone'
     type: ResourceRef
@@ -208,6 +216,11 @@ properties:
         description: |
           How many instances are in use.
         output: true
+      - name: 'assuredCount'
+        type: Integer
+        description: |
+          Indicates how many instances are actually usable currently.
+        output: true
       - name: 'instanceProperties'
         type: NestedObject
         description: |
@@ -292,6 +305,11 @@ properties:
               - 'RECURRENT'
             min_version: 'beta'
             immutable: true
+          - name: 'locationHint'
+            type: String
+            description: |
+              An opaque location hint used to place the allocation close to other resources. This field is for use by internal tools that use the public API.
+            output: true
       - name: 'sourceInstanceTemplate'
         type: String
         description: |
@@ -352,3 +370,184 @@ properties:
     immutable: true
     ignore_read: true
     min_version: 'beta'
+  - name: 'reservationBlockCount'
+    type: Integer
+    description: |
+      The number of reservation blocks associated with this reservation.
+    output: true
+  - name: 'kind'
+    type: String
+    description: |
+      Type of the resource. Always compute#reservations for reservations.
+    output: true
+  - name: 'id'
+    type: String
+    description: |
+      The unique identifier for the resource. This identifier is defined by the server.
+    output: true
+  - name: 'linkedCommitments'
+    type: Array
+    description: |
+      Full or partial URL to parent commitments. This field displays for reservations that are tied to multiple commitments.
+    output: true
+    item_type:
+      type: String
+  - name: 'satisfiesPzs'
+    type: Boolean
+    description: |
+      Reserved for future use.
+    output: true
+  - name: 'resourceStatus'
+    type: NestedObject
+    description: |
+      Status information for Reservation resource.
+    output: true
+    properties:
+      - name: 'specificSkuAllocation'
+        type: NestedObject
+        description: |
+          Allocation Properties of this reservation.
+        output: true
+        properties:
+          - name: 'sourceInstanceTemplateId'
+            type: String
+            description: |
+              ID of the instance template used to populate reservation properties.
+            output: true
+          - name: 'utilizations'
+            type: KeyValuePairs
+            description: |
+              Per service utilization breakdown. The Key is the Google Cloud managed service name.
+            output: true
+      - name: 'reservationMaintenance'
+        type: NestedObject
+        description: |
+          Maintenance information for this reservation
+        output: true
+        properties:
+          - name: 'upcomingGroupMaintenance'
+            type: NestedObject
+            description: |
+              Maintenance information on this group of VMs.
+            output: true
+            properties:
+              - name: 'type'
+                type: Enum
+                description: |
+                  Defines the type of maintenance.
+                output: true
+                enum_values:
+                  - 'SCHEDULED'
+                  - 'UNSCHEDULED'
+              - name: 'canReschedule'
+                type: Boolean
+                description: |
+                  Indicates if the maintenance can be customer triggered.
+                output: true
+              - name: 'windowStartTime'
+                type: String
+                description: |
+                  The current start time of the maintenance window. This timestamp value is in RFC3339 text format.
+                output: true
+              - name: 'windowEndTime'
+                type: String
+                description: |
+                  The time by which the maintenance disruption will be completed. This timestamp value is in RFC3339 text format.
+                output: true
+              - name: 'latestWindowStartTime'
+                type: String
+                description: |
+                  The latest time for the planned maintenance window to start. This timestamp value is in RFC3339 text format.
+                output: true
+              - name: 'maintenanceStatus'
+                type: Enum
+                description: |
+                  Status of the maintenance.
+                output: true
+                enum_values:
+                  - 'PENDING'
+                  - 'ONGOING'
+                  - 'COMPLETED'
+              - name: 'maintenanceOnShutdown'
+                type: Boolean
+                description: |
+                  Indicates whether the UpcomingMaintenance will be triggered on VM shutdown.
+                output: true
+              - name: 'maintenanceReasons'
+                type: Array
+                description: |
+                  The reasons for the maintenance. Only valid for vms.
+                output: true
+                item_type:
+                  type: Enum
+                  enum_values:
+                    - 'UNKNOWN_REASON'
+                    - 'HOST_MAINTENANCE'
+          - name: 'maintenanceOngoingCount'
+            type: Integer
+            description: |
+              Progress for ongoing maintenance for this group of VMs/hosts. Describes number of hosts in the block that have ongoing maintenance.
+            output: true
+          - name: 'maintenancePendingCount'
+            type: Integer
+            description: |
+              Progress for ongoing maintenance for this group of VMs/hosts. Describes number of hosts in the block that have pending maintenance.
+            output: true
+          - name: 'schedulingType'
+            type: Enum
+            description: |
+              The type of maintenance for the reservation.
+            output: true
+            enum_values:
+              - 'PERIODIC'
+              - 'AS_NEEDED'
+          - name: 'subblockInfraMaintenanceOngoingCount'
+            type: Integer
+            description: |
+              Describes number of subblock Infrastructure that has ongoing maintenance. Here, Subblock Infrastructure Maintenance pertains to upstream hardware contained in the Subblock that is necessary for a VM Family(e.g. NVLink Domains). Not all VM Families will support this field.
+            output: true
+          - name: 'subblockInfraMaintenancePendingCount'
+            type: Integer
+            description: |
+              Describes number of subblock Infrastructure that has pending maintenance. Here, Subblock Infrastructure Maintenance pertains to upstream hardware contained in the Subblock that is necessary for a VM Family (e.g. NVLink Domains). Not all VM Families will support this field.
+            output: true
+          - name: 'instanceMaintenanceOngoingCount'
+            type: Integer
+            description: |
+              Describes number of instances that have ongoing maintenance.
+            output: true
+          - name: 'instanceMaintenancePendingCount'
+            type: Integer
+            description: |
+              Describes number of instances that have pending maintenance.
+            output: true
+      - name: 'reservationBlockCount'
+        type: Integer
+        description: |
+          The number of reservation blocks associated with this reservation.
+        output: true
+      - name: 'healthInfo'
+        type: NestedObject
+        description: |
+          Health information for the reservation.
+        output: true
+        properties:
+          - name: 'healthStatus'
+            type: Enum
+            description: |
+              The health status of the reservation.
+            output: true
+            enum_values:
+              - 'HEALTHY'
+              - 'DEGRADED'
+              - 'UNHEALTHY'
+          - name: 'healthyBlockCount'
+            type: Integer
+            description: |
+              The number of reservation blocks that are healthy.
+            output: true
+          - name: 'degradedBlockCount'
+            type: Integer
+            description: |
+              The number of reservation blocks that are degraded.
+            output: true

@@ -1,0 +1,37 @@
+resource "google_healthcare_fhir_store" "default" {
+  name    = "{{index $.Vars "fhir_store_name"}}"
+  dataset = google_healthcare_dataset.dataset.id
+  version = "R4"
+  complex_data_type_reference_parsing = "DISABLED"
+
+  enable_update_create           = false
+  disable_referential_integrity  = false
+  disable_resource_versioning    = false
+  enable_history_import          = false
+  default_search_handling_strict = false
+
+  notification_configs {
+    pubsub_topic = google_pubsub_topic.topic.id
+  }
+
+  labels = {
+    label1 = "labelvalue1"
+  }
+
+  validation_config {
+    disable_profile_validation = true
+    enabled_implementation_guides = []
+    disable_required_field_validation = true
+    disable_reference_type_validation = true
+    disable_fhirpath_validation = true
+  }
+}
+
+resource "google_pubsub_topic" "topic" {
+  name     = "{{index $.Vars "pubsub_topic"}}"
+}
+
+resource "google_healthcare_dataset" "dataset" {
+  name     = "{{index $.Vars "dataset_name"}}"
+  location = "us-central1"
+}

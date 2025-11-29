@@ -37,7 +37,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 custom_code:
   constants: 'templates/terraform/constants/bigquery_dataset.go.tmpl'
   pre_read: 'templates/terraform/pre_read/bigquery_dataset.go.tmpl'
@@ -129,6 +130,7 @@ properties:
     is_set: true
     default_from_api: true
     is_missing_in_cai: true
+    set_hash_func: 'resourceBigqueryDatasetAccessHash'
     item_type:
       type: NestedObject
       properties:
@@ -140,6 +142,8 @@ properties:
         - name: 'groupByEmail'
           type: String
           description: An email address of a Google Group to grant access to.
+          custom_expand: 'templates/terraform/custom_expand/string_to_lower_case.go.tmpl'
+          custom_flatten: 'templates/terraform/custom_flatten/string_to_lower_case.go.tmpl'
         - name: 'role'
           type: String
           description: |
@@ -166,6 +170,8 @@ properties:
           description: |
             An email address of a user to grant access to. For example:
             fred@example.com
+          custom_expand: 'templates/terraform/custom_expand/string_to_lower_case.go.tmpl'
+          custom_flatten: 'templates/terraform/custom_flatten/string_to_lower_case.go.tmpl'
         - name: 'view'
           type: NestedObject
           description: |
@@ -400,6 +406,11 @@ properties:
       By default, this is FALSE, which means the dataset and its table names are
       case-sensitive. This field does not affect routine references.
     default_from_api: true
+    # This property has default value `true` in the real CAI asset.
+    # The bool property with `default_from_api: true` will have false value in converted CAI asset
+    # by default during tfplan2cai.
+    # Use exclude_false_in_cai: true to override the default behavior during tfplan2cai conversion.
+    exclude_false_in_cai: true
   - name: 'defaultCollation'
     type: String
     description: |

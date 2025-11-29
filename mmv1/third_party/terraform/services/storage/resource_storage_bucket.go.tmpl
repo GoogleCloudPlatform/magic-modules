@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"math"
 	"regexp"
 	"runtime"
 	"strconv"
@@ -46,7 +45,7 @@ func ResourceStorageBucket() *schema.Resource {
 			Read:   schema.DefaultTimeout(4 * time.Minute),
 		},
 
-		SchemaVersion: 3,
+		SchemaVersion: 4,
 		StateUpgraders: []schema.StateUpgrader{
 			{
 				Type:    resourceStorageBucketV0().CoreConfigSchema().ImpliedType(),
@@ -62,6 +61,11 @@ func ResourceStorageBucket() *schema.Resource {
 				Type:    resourceStorageBucketV2().CoreConfigSchema().ImpliedType(),
 				Upgrade: ResourceStorageBucketStateUpgradeV2,
 				Version: 2,
+			},
+			{
+				Type:    resourceStorageBucketV3().CoreConfigSchema().ImpliedType(),
+				Upgrade: ResourceStorageBucketStateUpgradeV3,
+				Version: 3,
 			},
 		},
 
@@ -407,9 +411,8 @@ func ResourceStorageBucket() *schema.Resource {
 							Description: `If set to true, the bucket will be locked and permanently restrict edits to the bucket's retention policy.  Caution: Locking a bucket is an irreversible action.`,
 						},
 						"retention_period": {
-							Type:         schema.TypeInt,
+							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validation.IntBetween(1, math.MaxInt32),
 							Description:  `The period of time, in seconds, that objects in the bucket must be retained and cannot be deleted, overwritten, or archived. The value must be less than 3,155,760,000 seconds.`,
 						},
 					},
@@ -862,7 +865,11 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 			retentionPolicy := retention_policies[0].(map[string]interface{})
 
 			if v, ok := retentionPolicy["retention_period"]; ok {
-				sb.RetentionPolicy.RetentionPeriod = int64(v.(int))
+				value, err := strconv.ParseInt(v.(string), 10, 64)
+				if err != nil {
+					return err
+				}
+				sb.RetentionPolicy.RetentionPeriod = value
 			}
 		}
 	}
@@ -1323,20 +1330,38 @@ func expandCors(configured []interface{}) []*storage.BucketCors {
 	}
 	corsRules := make([]*storage.BucketCors, 0, len(configured))
 	for _, raw := range configured {
+		if raw == nil {
+			corsRule := storage.BucketCors{}
+			corsRules = append(corsRules, &corsRule)
+			continue
+		}
 		data := raw.(map[string]interface{})
-		corsRule := storage.BucketCors{
-			Origin:         tpgresource.ConvertStringArr(data["origin"].([]interface{})),
-			Method:         tpgresource.ConvertStringArr(data["method"].([]interface{})),
-			ResponseHeader: tpgresource.ConvertStringArr(data["response_header"].([]interface{})),
-			MaxAgeSeconds:  int64(data["max_age_seconds"].(int)),
+		corsRule := storage.BucketCors{}
+		if v, ok := data["method"].([]interface{}); ok {
+			corsRule.Method = tpgresource.ConvertStringArr(v)
 		}
 
+		if v, ok := data["origin"].([]interface{}); ok {
+			corsRule.Origin = tpgresource.ConvertStringArr(v)
+		}
+
+		if v, ok := data["response_header"].([]interface{}); ok {
+			corsRule.ResponseHeader = tpgresource.ConvertStringArr(v)
+		}
+
+		if v, ok := data["max_age_seconds"].(int); ok {
+			corsRule.MaxAgeSeconds = int64(v)
+		}
 		corsRules = append(corsRules, &corsRule)
 	}
 	return corsRules
 }
 
-func flattenCors(corsRules []*storage.BucketCors) []map[string]interface{} {
+func flattenCors(d *schema.ResourceData, corsRules []*storage.BucketCors) []map[string]interface{} {
+	cors, _ := d.GetOk("cors")
+	if corsRules == nil && len(cors.([]interface{})) == 0 {
+		return []map[string]interface{}{}
+	}
 	corsRulesSchema := make([]map[string]interface{}, 0, len(corsRules))
 	for _, corsRule := range corsRules {
 		data := map[string]interface{}{
@@ -1345,10 +1370,41 @@ func flattenCors(corsRules []*storage.BucketCors) []map[string]interface{} {
 			"response_header": corsRule.ResponseHeader,
 			"max_age_seconds": corsRule.MaxAgeSeconds,
 		}
-
 		corsRulesSchema = append(corsRulesSchema, data)
 	}
+
+	if len(corsRules) < len(cors.([]interface{})) {
+		emptyCors := map[string]interface{}{
+			"origin":          []string{},
+			"method":          []string{},
+			"response_header": []string{},
+			"max_age_seconds": 0,
+		}
+		for k, v := range cors.([]interface{}) {
+			if isCorsRuleEmpty(v) {
+				corsRulesSchema = append(corsRulesSchema[:k], append([]map[string]interface{}{emptyCors}, corsRulesSchema[k:]...)...)
+			}
+		}
+	}
 	return corsRulesSchema
+}
+
+func isCorsRuleEmpty(rule interface{}) bool {
+	if rule == nil {
+		return true
+	}
+	corsRule, ok := rule.(map[string]interface{})
+	if !ok {
+		return true
+	}
+	method := corsRule["method"] == nil || len(corsRule["method"].([]interface{})) == 0
+	origin := corsRule["origin"] == nil || len(corsRule["origin"].([]interface{})) == 0
+	responseHeader := corsRule["response_header"] == nil || len(corsRule["response_header"].([]interface{})) == 0
+	maxAgeSeconds := corsRule["max_age_seconds"] == 0
+	if method && origin && responseHeader && maxAgeSeconds {
+		return true
+	}
+	return false
 }
 
 func expandBucketEncryption(configured interface{}) *storage.BucketEncryption {
@@ -1470,9 +1526,14 @@ func expandBucketRetentionPolicy(configured interface{}) *storage.BucketRetentio
 	}
 	retentionPolicy := retentionPolicies[0].(map[string]interface{})
 
+	var retentionPeriod int64
+	if v, ok := retentionPolicy["retention_period"]; ok {
+		retentionPeriod, _ = strconv.ParseInt(v.(string), 10, 64)
+	}
+	
 	bucketRetentionPolicy := &storage.BucketRetentionPolicy{
 		IsLocked:        retentionPolicy["is_locked"].(bool),
-		RetentionPeriod: int64(retentionPolicy["retention_period"].(int)),
+		RetentionPeriod: retentionPeriod,
 	}
 
 	return bucketRetentionPolicy
@@ -1487,7 +1548,7 @@ func flattenBucketRetentionPolicy(bucketRetentionPolicy *storage.BucketRetention
 
 	retentionPolicy := map[string]interface{}{
 		"is_locked":        bucketRetentionPolicy.IsLocked,
-		"retention_period": bucketRetentionPolicy.RetentionPeriod,
+		"retention_period": fmt.Sprintf("%d", bucketRetentionPolicy.RetentionPeriod),
 	}
 
 	bucketRetentionPolicies = append(bucketRetentionPolicies, retentionPolicy)
@@ -2206,7 +2267,7 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 	if err := d.Set("location", res.Location); err != nil {
 		return fmt.Errorf("Error setting location: %s", err)
 	}
-	if err := d.Set("cors", flattenCors(res.Cors)); err != nil {
+	if err := d.Set("cors", flattenCors(d, res.Cors)); err != nil {
 		return fmt.Errorf("Error setting cors: %s", err)
 	}
 	if err := d.Set("default_event_based_hold", res.DefaultEventBasedHold); err != nil {

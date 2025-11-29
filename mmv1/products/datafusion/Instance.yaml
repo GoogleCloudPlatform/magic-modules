@@ -38,7 +38,6 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
     - '{{name}}'

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -237,7 +238,6 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	}
 
 	notRunBeta, notRunGa := notRunTests(tpgRepo.UnifiedZeroDiff, tpgbRepo.UnifiedZeroDiff, replayingResult)
-
 	postReplayData := postReplay{
 		RunFullVCR:       runFullVCR,
 		AffectedServices: sort.StringSlice(servicesArr),
@@ -471,9 +471,7 @@ func runReplaying(runFullVCR bool, version provider.Version, services map[string
 				Version:  version,
 				TestDirs: []string{servicePath},
 			})
-			if serviceReplayingErr != nil {
-				replayingErr = serviceReplayingErr
-			}
+			replayingErr = errors.Join(replayingErr, serviceReplayingErr)
 			result.PassedTests = append(result.PassedTests, serviceResult.PassedTests...)
 			result.SkippedTests = append(result.SkippedTests, serviceResult.SkippedTests...)
 			result.FailedTests = append(result.FailedTests, serviceResult.FailedTests...)

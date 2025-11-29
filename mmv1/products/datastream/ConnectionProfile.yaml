@@ -39,9 +39,11 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/datastream_connection_profile.go.tmpl'
   pre_create: 'templates/terraform/pre_create/datastream_connection_profile.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/datastream_connection_profile.go.tmpl'
 examples:
   - name: 'datastream_connection_profile_basic'
     primary_resource_id: 'default'
@@ -108,6 +110,11 @@ examples:
     primary_resource_id: 'default'
     vars:
       source_connection_profile_id: 'source-profile'
+  - name: 'datastream_connection_profile_mongodb'
+    primary_resource_id: 'default'
+    vars:
+      source_connection_profile_id: 'source-profile'
+    exclude_test: true
 parameters:
   - name: 'connectionProfileId'
     type: String
@@ -156,6 +163,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'mongodb_profile'
     properties:
       - name: 'hostname'
         type: String
@@ -202,6 +210,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'mongodb_profile'
     properties:
       - name: 'bucket'
         type: String
@@ -224,6 +233,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'mongodb_profile'
     properties:
       - name: 'hostname'
         type: String
@@ -311,6 +321,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'mongodb_profile'
     properties:
       []
   - name: 'postgresqlProfile'
@@ -325,6 +336,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'mongodb_profile'
     properties:
       - name: 'hostname'
         type: String
@@ -346,6 +358,7 @@ properties:
         description: |
           Password for the PostgreSQL connection.
         sensitive: true
+        is_missing_in_cai: true
         custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_postgresql_profile_password.go.tmpl'
       - name: 'secretManagerStoredPassword'
         type: String
@@ -369,6 +382,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'mongodb_profile'
     properties:
       - name: 'domain'
         type: String
@@ -435,6 +449,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'mongodb_profile'
     properties:
       - name: 'hostname'
         type: String
@@ -466,6 +481,147 @@ properties:
         description: |
           Database for the SQL Server connection.
         required: true
+  - name: 'mongodbProfile'
+    type: NestedObject
+    description: 'Configuration for connecting to a MongoDB database.'
+    exactly_one_of:
+      - 'oracle_profile'
+      - 'gcs_profile'
+      - 'mysql_profile'
+      - 'bigquery_profile'
+      - 'postgresql_profile'
+      - 'sql_server_profile'
+      - 'salesforce_profile'
+      - 'mongodb_profile'
+    properties:
+      - name: 'hostAddresses'
+        type: Array
+        description: 'List of host addresses for a MongoDB cluster.'
+        required: true
+        # This 'properties' block defines the structure of each item in the 'hostAddresses' array
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'hostname'
+              type: String
+              description: |
+                Hostname for the connection.
+              required: true
+            - name: 'port'
+              type: Integer
+              description: |
+                Port for the connection.
+      - name: 'replicaSet'
+        type: String
+        description: |
+          Name of the replica set.
+      - name: 'username'
+        type: String
+        description: |
+          Username for the MongoDB connection.
+        required: true
+      - name: 'password'
+        type: String
+        description: |
+          Password for the MongoDB connection. Mutually exclusive with
+          secretManagerStoredPassword.
+        sensitive: true
+      - name: 'secretManagerStoredPassword'
+        type: String
+        description: |
+          A reference to a Secret Manager resource name storing the MongoDB
+          connection password. Mutually exclusive with password.
+      - name: 'sslConfig'
+        type: NestedObject
+        description: |
+          SSL configuration for the MongoDB connection.
+        properties:
+          - name: 'clientKey'
+            type: String
+            description: |
+              PEM-encoded private key associated with the Client Certificate.
+              If this field is used then the 'client_certificate' and the
+              'ca_certificate' fields are mandatory.
+            required: false
+            exactly_one_of:
+              - 'mongodb_profile.0.ssl_config.0.client_key'
+              - 'mongodb_profile.0.ssl_config.0.secret_manager_stored_client_key'
+            immutable: true
+            sensitive: true
+            ignore_read: true
+          - name: 'clientKeySet'
+            type: Boolean
+            description: |
+              Indicates whether the clientKey field is set.
+            output: true
+          - name: 'clientCertificate'
+            type: String
+            description: |
+              PEM-encoded certificate that will be used by the replica to
+              authenticate against the source database server. If this field
+              is used then the 'clientKey' and the 'caCertificate' fields are
+              mandatory.
+            immutable: true
+            sensitive: true
+            ignore_read: true
+          - name: 'clientCertificateSet'
+            type: Boolean
+            description: |
+              Indicates whether the clientCertificate field is set.
+            output: true
+          - name: 'caCertificate'
+            type: String
+            description: |
+              PEM-encoded certificate of the CA that signed the source database
+              server's certificate.
+            immutable: true
+            sensitive: true
+            ignore_read: true
+          - name: 'caCertificateSet'
+            type: Boolean
+            description: |
+              Indicates whether the clientKey field is set.
+            output: true
+          - name: 'secretManagerStoredClientKey'
+            type: String
+            description: |
+              A reference to a Secret Manager resource name storing the
+              PEM-encoded private key. Mutually exclusive with clientKey.
+            required: false
+            exactly_one_of:
+              - 'mongodb_profile.0.ssl_config.0.client_key'
+              - 'mongodb_profile.0.ssl_config.0.secret_manager_stored_client_key'
+            immutable: true
+            sensitive: true
+            ignore_read: true
+      - name: 'srvConnectionFormat'
+        type: NestedObject
+        description: |
+          Srv connection format. Mutually exclusive with
+          standard_connection_Format.
+        send_empty_value: true
+        allow_empty_object: true
+        at_least_one_of:
+          - 'mongodb_profile.0.srv_connection_format'
+          - 'mongodb_profile.0.standard_connection_format'
+        properties:
+          []
+      - name: 'standardConnectionFormat'
+        type: NestedObject
+        description: |
+          Standard connection format. Mutually exclusive with
+          srv_connection_format.
+        send_empty_value: true
+        allow_empty_object: true
+        at_least_one_of:
+          - 'mongodb_profile.0.srv_connection_format'
+          - 'mongodb_profile.0.standard_connection_format'
+        properties:
+          - name: 'directConnection'
+            type: Boolean
+            description: |
+              Specifies whether the client connects directly to the
+              host[:port] in the connection URI.
   - name: 'forwardSshConnectivity'
     type: NestedObject
     description: |
@@ -497,6 +653,7 @@ properties:
         conflicts:
           - forward_ssh_connectivity.0.private_key
         custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_forward_ssh_connectivity_password.go.tmpl'
+        is_missing_in_cai: true
       - name: 'privateKey'
         type: String
         description: |

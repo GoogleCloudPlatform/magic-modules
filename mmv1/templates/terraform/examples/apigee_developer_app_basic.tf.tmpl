@@ -1,0 +1,55 @@
+resource "google_apigee_developer_app" "{{$.PrimaryResourceId}}" {
+  name            = "{{index $.Vars "developer_app_name"}}"
+  org_id          = google_apigee_organization.apigee_org.id
+  developer_id    = google_apigee_developer.developer.id
+  developer_email = google_apigee_developer.developer.email
+  callback_url    = "https://example-call.url"
+
+  api_products = [
+    google_apigee_api_product.api_product.name
+  ]
+
+  scopes = google_apigee_api_product.api_product.scopes
+}
+
+resource "google_apigee_api_product" "api_product" {
+  org_id        = google_apigee_organization.apigee_org.id
+  name          = "{{index $.Vars "api_product_name"}}"
+  display_name  = "A sample API Product"
+  approval_type = "auto"
+
+  scopes = [
+    "read:weather",
+    "write:reports"
+  ]
+
+  depends_on = [
+    google_apigee_instance.apigee_instance
+  ]
+}
+
+resource "google_apigee_developer" "developer" {
+  email      = "{{index $.Vars "developer_email"}}"
+  first_name = "John"
+  last_name  = "Doe"
+  user_name  = "john.doe"
+  org_id     = google_apigee_organization.apigee_org.id
+
+  depends_on = [
+    google_apigee_instance.apigee_instance
+  ]
+}
+
+resource "google_apigee_instance" "apigee_instance" {
+  name     = "{{index $.Vars "instance_name"}}"
+  location = "us-central1"
+  org_id   = google_apigee_organization.apigee_org.id
+}
+
+resource "google_apigee_organization" "apigee_org" {
+  analytics_region    = "us-central1"
+  project_id          = google_project.project.project_id
+  disable_vpc_peering = true
+}
+
+data "google_project" "project" {}

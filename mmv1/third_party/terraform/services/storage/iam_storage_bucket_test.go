@@ -357,6 +357,9 @@ resource "google_storage_bucket_iam_member" "foo" {
   bucket = google_storage_bucket.default.name
   role = "%{role}"
   member = "user:admin@hashicorptest.com"
+  timeouts {
+    create = "5m"
+  }
 }
 `, context)
 }
@@ -383,6 +386,9 @@ data "google_iam_policy" "foo" {
 resource "google_storage_bucket_iam_policy" "foo" {
   bucket = google_storage_bucket.default.name
   policy_data = data.google_iam_policy.foo.policy_data
+  timeouts {
+    create = "5m"
+  }
 }
 
 data "google_storage_bucket_iam_policy" "foo" {
@@ -424,6 +430,9 @@ resource "google_storage_bucket_iam_binding" "foo" {
   bucket = google_storage_bucket.default.name
   role = "%{role}"
   members = ["user:admin@hashicorptest.com"]
+  timeouts {
+    create = "5m"
+  }
 }
 `, context)
 }

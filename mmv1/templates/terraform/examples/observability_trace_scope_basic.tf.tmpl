@@ -1,0 +1,23 @@
+resource "google_observability_trace_scope" "{{$.PrimaryResourceId}}" {
+    depends_on       = [google_project.project-2]
+    provider         = google-beta
+    trace_scope_id   = "{{index $.Vars "trace_scope_id"}}"
+    location         = "global"
+    resource_names   = [
+        "projects/${data.google_project.project.project_id}",
+        "projects/${google_project.project-2.project_id}",
+    ]
+    description      = "A trace scope configured with Terraform"
+}
+
+data "google_project" "project" {
+    provider         = google-beta
+}
+
+resource "google_project" "project-2" {
+    provider         = google-beta
+    project_id       = "tf-test%{random_suffix}"
+    name             = "tf-test%{random_suffix}"
+    org_id           = "{{index $.TestEnvVars "org_id"}}"
+    deletion_policy  = "DELETE"
+}

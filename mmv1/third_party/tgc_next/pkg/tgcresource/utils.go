@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 )
 
 // Remove the Terraform attribution label "goog-terraform-provisioned" from labels
@@ -60,4 +60,30 @@ func MergeFlattenedProperties(hclData map[string]interface{}, flattenedProp inte
 		hclData[k] = v
 	}
 	return nil
+}
+
+// Checks if all values in the map are nil
+func AllValuesAreNil(m map[string]interface{}) bool {
+	if len(m) == 0 {
+		return true
+	}
+
+	for _, v := range m {
+		if v != nil {
+			return false
+		}
+	}
+
+	return true
+}
+
+// ParseFieldValue extracts named part from resource url.
+func ParseFieldValue(url string, name string) string {
+	fragments := strings.Split(url, "/")
+	for ix, item := range fragments {
+		if item == name && ix+1 < len(fragments) {
+			return fragments[ix+1]
+		}
+	}
+	return ""
 }

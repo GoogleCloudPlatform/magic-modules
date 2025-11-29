@@ -52,6 +52,7 @@ custom_code:
   encoder: 'templates/terraform/encoders/health_check_type.tmpl'
 custom_diff:
   - 'healthCheckCustomizeDiff'
+include_in_tgc_next: true
 sweeper:
   url_substitutions:
     - region: "us-central1"
@@ -114,14 +115,14 @@ examples:
       health_check_name: 'grpc-region-health-check'
   - name: 'region_health_check_grpc_with_tls'
     primary_resource_id: 'grpc-with-tls-region-health-check'
-    min_version: 'beta'
     vars:
       health_check_name: 'grpc-with-tls-region-health-check'
+    tgc_skip_test: 'grpcTlsHealthCheck is not in CAI asset, but is required in this test.'
   - name: 'region_health_check_grpc_with_tls_full'
     primary_resource_id: 'grpc-with-tls-region-health-check'
-    min_version: 'beta'
     vars:
       health_check_name: 'grpc-with-tls-region-health-check'
+    tgc_skip_test: 'grpcTlsHealthCheck is not in CAI asset, but is required in this test.'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -867,7 +868,6 @@ properties:
           - 'grpc_health_check.0.port_specification'
           - 'grpc_health_check.0.grpc_service_name'
   - name: 'grpcTlsHealthCheck'
-    min_version: 'beta'
     type: NestedObject
     exactly_one_of:
       - 'http_health_check'
@@ -878,6 +878,7 @@ properties:
       - 'grpc_health_check'
       - 'grpc_tls_health_check'
     diff_suppress_func: 'portDiffSuppress'
+    is_missing_in_cai: true
     properties:
       - name: 'port'
         type: Integer

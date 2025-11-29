@@ -152,7 +152,10 @@ properties:
               - name: 'service'
                 type: String
                 description: |
-                  The reference to the service that runs the extension. Must be a reference to a backend service
+                  The reference to the service that runs the extension.
+
+                  * To configure a callout extension, service must be a fully-qualified reference to a backend service.
+                  * To configure a plugin extension, service must be a reference to a WasmPlugin resource.
                 required: true
                 diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
               - name: 'timeout'
@@ -201,6 +204,7 @@ properties:
       For more information, refer to [Choosing a load balancer](https://cloud.google.com/load-balancing/docs/backend-service) and
       [Supported application load balancers](https://cloud.google.com/service-extensions/docs/callouts-overview#supported-lbs).
     immutable: true
+    required: true
     enum_values:
       - 'INTERNAL_MANAGED'
       - 'EXTERNAL_MANAGED'

@@ -260,11 +260,6 @@ resource "google_gke_hub_feature_membership" "feature_member_2" {
         secret_type = "none"
       }
     }
-    hierarchy_controller {
-      enable_hierarchical_resource_quota = true
-      enable_pod_tree_labels = false
-      enabled = true
-    }
   }
 }
 
@@ -282,11 +277,6 @@ resource "google_gke_hub_feature_membership" "feature_member_3" {
         sync_repo   = "https://github.com/hashicorp/terraform"
         secret_type = "none"
       }
-    }
-    hierarchy_controller {
-      enable_hierarchical_resource_quota = false
-      enable_pod_tree_labels = true
-      enabled = false
     }
   }
 }
@@ -1308,7 +1298,6 @@ resource "google_project" "project" {
 resource "google_project_service" "anthos" {
   project = google_project.project.project_id
   service = "anthos.googleapis.com"
-  disable_on_destroy = false
 }
 
 resource "google_project_service" "mesh" {
@@ -1339,19 +1328,16 @@ resource "google_project_service" "mcsd" {
 resource "google_project_service" "compute" {
   project = google_project.project.project_id
   service = "compute.googleapis.com"
-  disable_on_destroy = false
 }
 
 resource "google_project_service" "container" {
   project = google_project.project.project_id
   service = "container.googleapis.com"
-  disable_on_destroy = false
 }
 
 resource "google_project_service" "gkehub" {
   project = google_project.project.project_id
   service = "gkehub.googleapis.com"
-  disable_on_destroy = false
 }
 
 // It needs waiting until the API services are really activated.

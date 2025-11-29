@@ -43,7 +43,6 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/locations/{{location}}/workerPools/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/workerPools/{{name}}'
     - '{{name}}'
@@ -52,6 +51,13 @@ custom_code:
 taint_resource_on_failed_create: true
 examples:
   - name: 'cloudrunv2_worker_pool_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-worker-pool%s", context["random_suffix"])'
+    vars:
+      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
+    ignore_read_extra:
+      - 'deletion_protection'
+  - name: 'cloudrunv2_worker_pool_basic_depends_on'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-worker-pool%s", context["random_suffix"])'
     vars:
@@ -114,7 +120,7 @@ examples:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
     ignore_read_extra:
       - 'deletion_protection'
-     # Currently failing
+    # Currently failing
     skip_vcr: true
   - name: 'cloudrunv2_worker_pool_mount_nfs'
     primary_resource_id: 'default'
@@ -130,6 +136,16 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-worker-pool-%s", context["random_suffix"])'
     vars:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
+    ignore_read_extra:
+      - 'deletion_protection'
+  - name: 'cloudrunv2_worker_pool_startup_liveness_probe'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])'
+    vars:
+      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
+      vpc_access_connector_name: 'wp-connector'
+      compute_network_name: 'wp-net'
+      vpc_compute_subnetwork_name: 'wp-subnet'
     ignore_read_extra:
       - 'deletion_protection'
 virtual_fields:
@@ -332,6 +348,10 @@ properties:
         description: |-
           VPC Access configuration to use for this Revision. For more information, visit https://cloud.google.com/run/docs/configuring/connecting-vpc.
         properties:
+          - name: 'connector'
+            type: String
+            description: |-
+              VPC Access connector name. Format: projects/{project}/locations/{location}/connectors/{connector}, where {project} can be project id or number.
           - name: 'egress'
             type: Enum
             description: |-
@@ -400,6 +420,13 @@ properties:
                 Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references are not supported in Cloud Run.
               item_type:
                 type: String
+            - name: 'dependsOn'
+              type: Array
+              description: |-
+                Names of the containers that must start before this container.
+              immutable: true
+              item_type:
+                type: String
             - name: 'env'
               type: Array
               description: |-
@@ -455,7 +482,7 @@ properties:
                 - name: 'limits'
                   type: KeyValuePairs
                   description: |-
-                    Only memory, CPU, and nvidia.com/gpu are supported. Use key `cpu` for CPU limit, `memory` for memory limit, `nvidia.com/gpu` for gpu limit. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
+                    Only memory, CPU, and nvidia.com/gpu are supported. Use key `cpu` for CPU limit, `memory` for memory limit, `nvidia.com/gpu` for gpu limit. Note: The only supported values for CPU are '1', '2', '4', '6', and '8'. Setting 4 CPU requires at least 2Gi of memory, setting 6 or more CPU requires at least 4Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
                   default_from_api: true
             - name: 'volumeMounts'
               type: Array
@@ -474,16 +501,162 @@ properties:
                     description: |-
                       Path within the container at which the volume should be mounted. Must not contain ':'. For Cloud SQL volumes, it can be left empty, or must otherwise be /cloudsql. All instances defined in the Volume will be available as /cloudsql/[instance]. For more information on Cloud SQL volumes, visit https://cloud.google.com/sql/docs/mysql/connect-run
                     required: true
+                  - name: 'subPath'
+                    type: String
+                    description: |-
+                      Path within the volume from which the container's volume should be mounted.
             - name: 'workingDir'
               type: String
               description: |-
                 Container's working directory. If not specified, the container runtime's default will be used, which might be configured in the container image.
-            - name: 'dependsOn'
-              type: Array
+            - name: 'livenessProbe'
+              type: NestedObject
               description: |-
-                Containers which should be started before this container. If specified the container will wait to start until all containers with the listed names are healthy.
-              item_type:
-                type: String
+                Periodic probe of container liveness. Container will be restarted if the probe fails.
+              properties:
+                - name: 'initialDelaySeconds'
+                  default_value: 0
+                  description: |-
+                    Optional. Number of seconds after the container has started before the probe is initiated. Defaults to 0 seconds. Minimum value is 0. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240.
+                  type: Integer
+                - name: 'timeoutSeconds'
+                  default_value: 1
+                  description: |-
+                    Optional. Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Maximum value is 3600. Must be smaller than period_seconds.
+                  type: Integer
+                - name: 'periodSeconds'
+                  default_value: 10
+                  description: |-
+                    Optional. How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240. Must be greater or equal than timeout_seconds.
+                  type: Integer
+                - name: 'failureThreshold'
+                  default_value: 3
+                  description: |-
+                    Optional. Minimum consecutive failures for the probe to be considered failed after having succeeded. Defaults to 3. Minimum value is 1.
+                  type: Integer
+                - name: 'httpGet'
+                  description: |-
+                    Optional. HTTPGet specifies the http request to perform. Exactly one of httpGet, tcpSocket, or grpc must be specified.
+                  type: NestedObject
+                  properties:
+                    - name: 'path'
+                      description: |-
+                        Optional. Path to access on the HTTP server. Defaults to '/'.
+                      type: String
+                    - name: 'port'
+                      description: |-
+                        Optional. Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to the exposed port of the container, which is the value of container.ports[0].containerPort.
+                      type: Integer
+                    - name: 'httpHeaders'
+                      description: |-
+                        Optional. Custom headers to set in the request. HTTP allows repeated headers.
+                      type: NestedObject
+                      properties:
+                        - name: 'port'
+                          required: true
+                          description: |-
+                            Required. The header field name
+                          type: Integer
+                        - name: 'value'
+                          description: |-
+                            Optional. The header field value
+                          type: String
+                - name: 'tcpSocket'
+                  description: |-
+                    Optional. TCPSocket specifies an action involving a TCP port. Exactly one of httpGet, tcpSocket, or grpc must be specified.
+                  type: NestedObject
+                  properties:
+                    - name: 'port'
+                      description: |-
+                        Optional. Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to the exposed port of the container, which is the value of container.ports[0].containerPort.
+                      type: Integer
+                - name: 'grpc'
+                  description: |-
+                    Optional. GRPC specifies an action involving a gRPC port. Exactly one of httpGet, tcpSocket, or grpc must be specified.
+                  type: NestedObject
+                  properties:
+                    - name: 'port'
+                      description: |-
+                        Optional. Port number of the gRPC service. Number must be in the range 1 to 65535. If not specified, defaults to the exposed port of the container, which is the value of container.ports[0].containerPort.
+                      type: Integer
+                    - name: 'service'
+                      description: |-
+                        Optional. Service is the name of the service to place in the gRPC HealthCheckRequest (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md ). If this is not specified, the default behavior is defined by gRPC
+                      type: String
+            - name: 'startupProbe'
+              type: NestedObject
+              description: |-
+                Startup probe of application within the container. All other probes are disabled if a startup probe is provided, until it succeeds. Container will not be added to service endpoints if the probe fails.
+              properties:
+                - name: 'initialDelaySeconds'
+                  default_value: 0
+                  description: |-
+                    Optional. Number of seconds after the container has started before the probe is initiated. Defaults to 0 seconds. Minimum value is 0. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240.
+                  type: Integer
+                - name: 'timeoutSeconds'
+                  default_value: 1
+                  description: |-
+                    Optional. Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Maximum value is 3600. Must be smaller than period_seconds.
+                  type: Integer
+                - name: 'periodSeconds'
+                  default_value: 10
+                  description: |-
+                    Optional. How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1. Maximum value for liveness probe is 3600. Maximum value for startup probe is 240. Must be greater or equal than timeout_seconds.
+                  type: Integer
+                - name: 'failureThreshold'
+                  default_value: 3
+                  description: |-
+                    Optional. Minimum consecutive failures for the probe to be considered failed after having succeeded. Defaults to 3. Minimum value is 1.
+                  type: Integer
+                - name: 'httpGet'
+                  description: |-
+                    Optional. HTTPGet specifies the http request to perform. Exactly one of httpGet, tcpSocket, or grpc must be specified.
+                  type: NestedObject
+                  properties:
+                    - name: 'path'
+                      description: |-
+                        Optional. Path to access on the HTTP server. Defaults to '/'.
+                      type: String
+                    - name: 'port'
+                      description: |-
+                        Optional. Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to the exposed port of the container, which is the value of container.ports[0].containerPort.
+                      type: Integer
+                    - name: 'httpHeaders'
+                      description: |-
+                        Optional. Custom headers to set in the request. HTTP allows repeated headers.
+                      type: NestedObject
+                      properties:
+                        - name: 'port'
+                          required: true
+                          description: |-
+                            Required. The header field name
+                          type: Integer
+                        - name: 'value'
+                          description: |-
+                            Optional. The header field value
+                          type: String
+                - name: 'tcpSocket'
+                  description: |-
+                    Optional. TCPSocket specifies an action involving a TCP port. Exactly one of httpGet, tcpSocket, or grpc must be specified.
+                  type: NestedObject
+                  properties:
+                    - name: 'port'
+                      description: |-
+                        Optional. Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to the exposed port of the container, which is the value of container.ports[0].containerPort.
+                      type: Integer
+                - name: 'grpc'
+                  description: |-
+                    Optional. GRPC specifies an action involving a gRPC port. Exactly one of httpGet, tcpSocket, or grpc must be specified.
+                  type: NestedObject
+                  properties:
+                    - name: 'port'
+                      description: |-
+                        Optional. Port number of the gRPC service. Number must be in the range 1 to 65535. If not specified, defaults to the exposed port of the container, which is the value of container.ports[0].containerPort.
+                      type: Integer
+                    - name: 'service'
+                      description: |-
+                        Optional. Service is the name of the service to place in the gRPC HealthCheckRequest (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md ). If this is not specified, the default behavior is defined by gRPC
+                      type: String
       - name: 'volumes'
         type: Array
         description: |-
@@ -591,7 +764,6 @@ properties:
                   description: If true, mount the GCS bucket as read-only
                   required: false
                 - name: 'mountOptions'
-                  min_version: 'beta'
                   type: Array
                   description: |
                     A list of flags to pass to the gcsfuse command for configuring this volume.

@@ -55,7 +55,6 @@ iam_policy:
   parent_resource_attribute: 'runtime_name'
   # Sets the base url for base_url:GetIamPolicy and base_url:SetIamPolicy in function `qualifyRuntimeUrl`
   base_url: 'projects/{{project}}/locations/{{location}}/runtimes/{{runtime_name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/runtimes/{{runtime_name}}'
     - '{{runtime_name}}'

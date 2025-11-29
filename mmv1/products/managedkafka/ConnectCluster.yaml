@@ -14,7 +14,6 @@
 ---
 name: 'ConnectCluster'
 description: A Managed Service for Kafka Connect cluster.
-min_version: 'beta'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/connectClusters/{{connect_cluster_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/connectClusters'
@@ -41,7 +40,6 @@ custom_code:
 examples:
   - name: 'managedkafka_connect_cluster_basic'
     primary_resource_id: 'example'
-    min_version: 'beta'
     vars:
       connect_cluster_id: 'my-connect-cluster'
       cluster_id: 'my-cluster'

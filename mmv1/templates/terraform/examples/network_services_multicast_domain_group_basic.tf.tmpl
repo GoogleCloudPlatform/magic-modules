@@ -1,0 +1,31 @@
+resource "google_network_services_multicast_domain_group" "{{$.PrimaryResourceId}}"{
+  multicast_domain_group_id                    = "{{index $.Vars "domain_group_name"}}"
+  location = "global"
+  description = "my description"
+  labels = {
+    fake_label = "label123"
+  }
+}
+
+resource "google_compute_network" "network" {
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_network_services_multicast_domain" "multicast_domain_a" {
+  multicast_domain_id                    = "{{index $.Vars "domain_a_name"}}"
+  location = "global"
+  admin_network = google_compute_network.network.id
+  connection_config  { connection_type="SAME_VPC"}
+  multicast_domain_group = google_network_services_multicast_domain_group.{{$.PrimaryResourceId}}.id
+  depends_on = [google_compute_network.network]
+}
+
+resource "google_network_services_multicast_domain" "multicast_domain_b" {
+  multicast_domain_id                   = "{{index $.Vars "domain_b_name"}}"
+  location = "global"
+  admin_network = google_compute_network.network.id
+  connection_config  { connection_type="SAME_VPC"}
+  multicast_domain_group = google_network_services_multicast_domain_group.{{$.PrimaryResourceId}}.id
+  depends_on = [google_compute_network.network]
+}
