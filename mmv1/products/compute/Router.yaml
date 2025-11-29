@@ -180,7 +180,7 @@ properties:
           ranges will be advertised in addition to any specified groups.
           Leave this field blank to advertise no custom IP ranges.
         send_empty_value: true
-        is_set: true
+        custom_flatten: 'templates/terraform/custom_flatten/compute_router_range.go.tmpl'
         item_type:
           type: NestedObject
           properties:
