@@ -65,6 +65,7 @@ properties:
       Optional. Human readable description of the generator.
   - name: summarizationContext
     type: NestedObject
+    required: true
     description: |
       Input of prebuilt Summarization feature.
     properties:
