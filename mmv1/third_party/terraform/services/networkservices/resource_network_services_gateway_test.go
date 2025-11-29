@@ -196,7 +196,7 @@ func TestAccNetworkServicesGateway_swpUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckNetworkServicesGatewayDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkServicesGateway_basicSwp(cmName, netName, subnetName, pSubnetName, policyName, ruleName, serverTlsName, gatewayName, gatewayScope),
+				Config: testAccNetworkServicesGateway_basicSwp(cmName, netName, subnetName, pSubnetName, policyName, ruleName, gatewayName, gatewayScope),
 			},
 			{
 				ResourceName:            "google_network_services_gateway.foobar",
@@ -205,7 +205,7 @@ func TestAccNetworkServicesGateway_swpUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"name", "location", "delete_swg_autogen_router_on_destroy"},
 			},
 			{
-				Config: testAccNetworkServicesGateway_updateSwp(cmName, newCmName, netName, subnetName, pSubnetName, policyName, newPolicyName, ruleName, newRuleName, serverTlsName, gatewayName, gatewayScope),
+				Config: testAccNetworkServicesGateway_updateSwp(cmName, newCmName, netName, subnetName, pSubnetName, policyName, newPolicyName, ruleName, newRuleName, gatewayName, gatewayScope),
 			},
 			{
 				ResourceName:            "google_network_services_gateway.foobar",
@@ -217,7 +217,7 @@ func TestAccNetworkServicesGateway_swpUpdate(t *testing.T) {
 	})
 }
 
-func testAccNetworkServicesGateway_basicSwp(cmName, netName, subnetName, pSubnetName, policyName, ruleName, serverTlsName, gatewayName, gatewayScope string) string {
+func testAccNetworkServicesGateway_basicSwp(cmName, netName, subnetName, pSubnetName, policyName, ruleName, gatewayName, gatewayScope string) string {
 	return fmt.Sprintf(`
 resource "google_certificate_manager_certificate" "default" {
   name        = "%s"
@@ -267,19 +267,6 @@ resource "google_network_security_gateway_security_policy_rule" "default" {
   basic_profile           = "ALLOW"
 }
 
-resource "google_network_security_server_tls_policy" "servertls" {
-  name                   = "%s"
-  labels                 = {
-    foo = "bar"
-  }
-  description            = "my description"
-  location               = "us-east1"
-  allow_open             = "false"
-  mtls_policy {
-    client_validation_mode = "ALLOW_INVALID_OR_MISSING_CLIENT_CERT"
-  }
-}
-
 resource "google_network_services_gateway" "foobar" {
   name                                 = "%s"
   location                             = "us-east1"
@@ -295,14 +282,13 @@ resource "google_network_services_gateway" "foobar" {
   delete_swg_autogen_router_on_destroy = true
   envoy_headers                        = "NONE"
   ip_version                           = "IPV4"
-  server_tls_policy                    = google_network_security_server_tls_policy.servertls.id
   depends_on                           = [google_compute_subnetwork.proxyonlysubnet]
 }
 
-`, cmName, netName, subnetName, pSubnetName, policyName, ruleName, serverTlsName, gatewayName, gatewayScope)
+`, cmName, netName, subnetName, pSubnetName, policyName, ruleName, gatewayName, gatewayScope)
 }
 
-func testAccNetworkServicesGateway_updateSwp(cmName, newCmName, netName, subnetName, pSubnetName, policyName, newPolicyName, ruleName, newRuleName, serverTlsName, gatewayName, gatewayScope string) string {
+func testAccNetworkServicesGateway_updateSwp(cmName, newCmName, netName, subnetName, pSubnetName, policyName, newPolicyName, ruleName, newRuleName, gatewayName, gatewayScope string) string {
 	return fmt.Sprintf(`
 resource "google_certificate_manager_certificate" "default" {
   name        = "%s"
@@ -376,19 +362,6 @@ resource "google_network_security_gateway_security_policy_rule" "newrule" {
   basic_profile           = "ALLOW"
 }
 
-resource "google_network_security_server_tls_policy" "servertls" {
-  name                   = "%s"
-  labels                 = {
-    foo = "bar"
-  }
-  description            = "my description"
-  location               = "us-east1"
-  allow_open             = "false"
-  mtls_policy {
-    client_validation_mode = "ALLOW_INVALID_OR_MISSING_CLIENT_CERT"
-  }
-}
-
 resource "google_network_services_gateway" "foobar" {
   name                                 = "%s"
   location                             = "us-east1"
@@ -404,11 +377,10 @@ resource "google_network_services_gateway" "foobar" {
   delete_swg_autogen_router_on_destroy = true
   envoy_headers                        = "NONE"
   ip_version                           = "IPV4"
-  server_tls_policy                    = google_network_security_server_tls_policy.servertls.id
   depends_on                           = [google_compute_subnetwork.proxyonlysubnet]
 }
 
-`, cmName, newCmName, netName, subnetName, pSubnetName, policyName, newPolicyName, ruleName, newRuleName, serverTlsName, gatewayName, gatewayScope)
+`, cmName, newCmName, netName, subnetName, pSubnetName, policyName, newPolicyName, ruleName, newRuleName, gatewayName, gatewayScope)
 }
 
 func TestAccNetworkServicesGateway_multipleSwpGatewaysDifferentSubnetwork(t *testing.T) {
