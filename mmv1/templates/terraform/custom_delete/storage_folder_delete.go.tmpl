@@ -55,7 +55,13 @@ for deleteObjectError == nil {
 }
 
 err = retry.Retry(1*time.Minute, func() *retry.RetryError {
-    err := config.NewStorageClient(userAgent).Folders.Delete(bucket, name).Do()
+    deleteCall := config.NewStorageClient(userAgent).Folders.Delete(bucket, name)
+    if v_headers, ok := d.GetOk("custom_headers"); ok {
+    for k, v := range v_headers.(map[string]interface{}) {
+            deleteCall.Header().Add(k, v.(string))
+        }
+    }
+    err = deleteCall.Do()
     if err == nil {
         return nil
     }
