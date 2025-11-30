@@ -163,7 +163,7 @@ func nodeCountCustomDiff(ctx context.Context, d *schema.ResourceDiff, meta inter
 	// Otherwise when autoscaling is enabled, ignore the node count in config.
 	return d.Clear("node_count")
 }
- 
+
 func diskSizeCutomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	key := "settings.0.disk_size"
 
@@ -227,6 +227,7 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 			}),
 			customdiff.IfValueChange("instance_type", isReplicaPromoteRequested, checkPromoteConfigurationsAndUpdateDiff),
 			privateNetworkCustomizeDiff,
+			enhancedBackupManagerCustomizeDiff,
 			pitrSupportDbCustomizeDiff,
 			nodeCountCustomDiff,
 		),
@@ -471,6 +472,12 @@ API (for read pools, effective_availability_type may differ from availability_ty
 												},
 											},
 										},
+									},
+									"backup_tier": {
+    									Type:         schema.TypeString,
+										Optional:     true,
+										Computed:     true,
+										Description:  `Backup tier that manages the backups for the instance.`,
 									},
 								},
 							},
@@ -1448,6 +1455,37 @@ func stringContainsSlice(arr []string, str string) bool {
 	return false
 }
 
+// enhancedBackupManagerCustomizeDiff suppresses diff changes to settings.backup_configuration
+// when the SQL instance is managed by Google Cloud Backup and Disaster Recovery (DR) Service.
+func enhancedBackupManagerCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	return EnhancedBackupManagerCustomizeDiffFunc(d)
+}
+
+func EnhancedBackupManagerCustomizeDiffFunc(d tpgresource.TerraformResourceDiff) error {
+    backupTierStr, ok := d.Get("settings.0.backup_configuration.0.backup_tier").(string)
+    if !ok || backupTierStr == "" {
+        return nil
+    }
+    if !strings.EqualFold(backupTierStr, "ENHANCED") {
+        return nil
+    }
+	// Clear the diff since ENHANCED backup manager is enabled
+	if d.HasChange("settings.0.backup_configuration") {
+		lifecycleBlock := `lifecycle { ignore_changes = [settings[0].backup_configuration] }`
+	    log.Printf(
+		"[WARN] Instance %s is managed by Google Cloud Backup and Disaster Recovery (BackupDR). "+
+		"Terraform will not manage the 'settings.0.backup_configuration' block. "+
+		"Any changes to this block in your Terraform configuration will be ignored. "+
+		"To suppress this warning permanently, add the following lifecycle block to your Terraform configuration: %s",
+		d.Get("name"), lifecycleBlock,
+		)
+		if err := d.Clear("settings.0.backup_configuration"); err != nil {
+			return err
+		}
+	}
+    return nil
+}
+
 // Point in time recovery for MySQL database instances needs binary_log_enabled set to true and
 // not point_in_time_recovery_enabled, which is confusing to users. This checks for
 // point_in_time_recovery_enabled being set to a non-PostgreSQL and non-SQLServer database instances and suggests
@@ -1983,6 +2021,7 @@ func expandBackupConfiguration(configured []interface{}) *sqladmin.BackupConfigu
 		Location:                    _backupConfiguration["location"].(string),
 		TransactionLogRetentionDays: int64(_backupConfiguration["transaction_log_retention_days"].(int)),
 		PointInTimeRecoveryEnabled:  _backupConfiguration["point_in_time_recovery_enabled"].(bool),
+		BackupTier:                 _backupConfiguration["backup_tier"].(string),
 		ForceSendFields:             []string{"BinaryLogEnabled", "Enabled", "PointInTimeRecoveryEnabled"},
 	}
 }
@@ -2891,6 +2930,7 @@ func flattenBackupConfiguration(backupConfiguration *sqladmin.BackupConfiguratio
 		"point_in_time_recovery_enabled": backupConfiguration.PointInTimeRecoveryEnabled,
 		"backup_retention_settings":      flattenBackupRetentionSettings(backupConfiguration.BackupRetentionSettings),
 		"transaction_log_retention_days": backupConfiguration.TransactionLogRetentionDays,
+		"backup_tier":                    backupConfiguration.BackupTier,
 	}
 
 	return []map[string]interface{}{data}
