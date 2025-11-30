@@ -1,0 +1,8 @@
+resource "google_compute_global_address" "default" {
+  provider      = google-beta
+  name          = "{{index $.Vars "global_address_name"}}"
+  address_type  = "EXTERNAL"
+  ip_version    = "IPV4"
+  ip_collection = "regions/us-central1/publicDelegatedPrefixes/{{index $.Vars "public_delegated_prefix_name"}}"
+}
+
