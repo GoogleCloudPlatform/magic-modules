@@ -1,0 +1,58 @@
+func generateIapWebTypeAppEngineIAMPolicyStateID(iamResourceAddr string) func(*terraform.State) (string, error) {
+	return func(state *terraform.State) (string, error) {
+		var rawState map[string]string
+		for _, m := range state.Modules {
+			if len(m.Resources) > 0 {
+				if v, ok := m.Resources[iamResourceAddr]; ok {
+					rawState = v.Primary.Attributes
+				}
+			}
+		}
+		fmt.Printf("raw state %s\n", rawState)
+		project := tpgresource.GetResourceNameFromSelfLink(rawState["project"])
+		appId := appIdShortName(rawState["app_id"])
+		return fmt.Sprintf("projects/%s/iap_web/appengine-%s", project, appId) + acctest.ConditionTitleIfPresent(rawState), nil
+	}
+}
+
+func generateIapWebTypeAppEngineIAMBindingStateID(iamResourceAddr string) func(*terraform.State) (string, error) {
+	return func(state *terraform.State) (string, error) {
+		var rawState map[string]string
+		for _, m := range state.Modules {
+			if len(m.Resources) > 0 {
+				if v, ok := m.Resources[iamResourceAddr]; ok {
+					rawState = v.Primary.Attributes
+				}
+			}
+		}
+		fmt.Printf("raw state %s\n", rawState)
+		project := tpgresource.GetResourceNameFromSelfLink(rawState["project"])
+		appId := appIdShortName(rawState["app_id"])
+		return fmt.Sprintf("projects/%s/iap_web/appengine-%s %s", project, appId, rawState["role"]) + acctest.ConditionTitleIfPresent(rawState), nil
+	}
+}
+
+func generateIapWebTypeAppEngineIAMMemberStateID(iamResourceAddr string) func(*terraform.State) (string, error) {
+	return func(state *terraform.State) (string, error) {
+		var rawState map[string]string
+		for _, m := range state.Modules {
+			if len(m.Resources) > 0 {
+				if v, ok := m.Resources[iamResourceAddr]; ok {
+					rawState = v.Primary.Attributes
+				}
+			}
+		}
+		fmt.Printf("raw state %s\n", rawState)
+		project := tpgresource.GetResourceNameFromSelfLink(rawState["project"])
+		appId := appIdShortName(rawState["app_id"])
+		return fmt.Sprintf("projects/%s/iap_web/appengine-%s %s %s", project, appId, rawState["role"], rawState["member"]) + acctest.ConditionTitleIfPresent(rawState), nil
+	}
+}
+
+func appIdShortName(appId string) string {
+    appIdParts := strings.SplitN(appId, "appengine-", 2)
+    if len(appIdParts) == 2 {
+        return appIdParts[1]
+    }
+    return appId
+}

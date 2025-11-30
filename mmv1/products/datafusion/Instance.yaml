@@ -39,7 +39,7 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   import_format:
-    - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
+    - 'projects/{{project}}/locations/{{region}}/instances/{{name}}'
     - '{{name}}'
 custom_code:
   constants: 'templates/terraform/constants/data_fusion_instance_option.go.tmpl'
