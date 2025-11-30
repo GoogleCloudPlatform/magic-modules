@@ -12,6 +12,30 @@ Manages a Cloud Dataproc cluster resource within GCP.
 * How-to Guides
     * [Official Documentation](https://cloud.google.com/dataproc/docs)
 
+## Important Considerations for Dataproc APIs
+
+Dataproc, like many Google Cloud managed services, utilizes internal or private
+APIs for its core operational control and orchestration. These APIs are
+essential for the service's functionality but are **not intended for direct
+customer management or enablement via Terraform**.
+
+* **Example:** The `dataproc-control.googleapis.com` API is a private API used
+  by Dataproc internally. You **do not** need to explicitly enable this API
+  using `google_project_service` or attempt to import it into your Terraform
+  state.
+
+* **No Customer Action Required:** Your Dataproc clusters and jobs will function
+  correctly without any explicit Terraform configuration for these internal
+  APIs. Google Cloud automatically handles their necessary interactions.
+
+* **Focus on Public APIs:** When managing Dataproc resources with Terraform,
+  your configurations should focus on the publicly exposed Dataproc APIs (e.g.,
+  those related to `dataproc.googleapis.com`) and the resources documented here.
+
+For a broader understanding of how Terraform interacts with different types of
+Google Cloud APIs (public vs. private), please refer to the [Understanding
+Google Cloud APIs and Terraform
+Guide](../guides/understanding-apis-and-terraform.md).
 
 !> **Warning:** Due to limitations of the API, all arguments except
 `labels`,`cluster_config.worker_config.num_instances` and `cluster_config.preemptible_worker_config.num_instances` are non-updatable. Changing `cluster_config.worker_config.min_num_instances` will be ignored. Changing others will cause recreation of the
