@@ -902,7 +902,6 @@ func TestAccContainerNodePool_withWorkloadIdentityConfig(t *testing.T) {
 	})
 }
 
-{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func TestAccContainerNodePool_withSandboxConfig(t *testing.T) {
 	t.Parallel()
 
@@ -931,7 +930,6 @@ func TestAccContainerNodePool_withSandboxConfig(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 	t.Parallel()
@@ -3825,7 +3823,6 @@ resource "google_container_node_pool" "with_workload_metadata_config" {
 `, projectID, cluster, networkName, subnetworkName, np)
 }
 
-{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func testAccContainerNodePool_withSandboxConfig(cluster, np, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -3867,7 +3864,6 @@ resource "google_container_node_pool" "with_sandbox_config" {
 }
 `, cluster, networkName, subnetworkName, np)
 }
-{{- end }}
 
 func testAccContainerNodePool_withKubeletConfig(cluster, np, policy, memoryManagerPolicy, topologyManagerPolicy, topologyManagerScope, period, networkName, subnetworkName, insecureKubeletReadonlyPortEnabled, containerLogMaxSize, imageMinimumGcAge, imageMaximumGcAge string, quota, singleProcessOomKill bool, podPidsLimit, containerLogMaxFiles, imageGcLowThresholdPercent, imageGcHighThresholdPercent int) string {
 	return fmt.Sprintf(`

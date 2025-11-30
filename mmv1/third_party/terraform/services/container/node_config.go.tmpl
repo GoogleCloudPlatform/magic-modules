@@ -254,9 +254,7 @@ func schemaNodeConfig() *schema.Schema {
 					Computed: true,
 					Elem:     &schema.Schema{Type: schema.TypeString},
 					Description: `The map of Kubernetes labels (key/value pairs) to be applied to each node. These will added in addition to any default label(s) that Kubernetes may apply to the node.`,
-	{{- if not (or (eq $.TargetVersionName "") (eq $.TargetVersionName "ga")) }}
 					DiffSuppressFunc: containerNodePoolLabelsSuppress,
-	{{- end }}
 				},
 
 				"resource_labels": {
@@ -592,7 +590,6 @@ func schemaNodeConfig() *schema.Schema {
 					},
 				},
 
-	{{ if ne $.TargetVersionName `ga` -}}
 				"sandbox_config": {
 					Type:       schema.TypeList,
 					Optional:   true,
@@ -610,7 +607,7 @@ func schemaNodeConfig() *schema.Schema {
 						},
 					},
 				},
-	{{- end }}
+
 				"boot_disk_kms_key": {
 					Type:       schema.TypeString,
 					Optional:   true,
@@ -1501,14 +1498,13 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 		nc.WorkloadMetadataConfig = expandWorkloadMetadataConfig(v)
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := nodeConfig["sandbox_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		nc.SandboxConfig = &container.SandboxConfig{
-			SandboxType: conf["sandbox_type"].(string),
+			Type: conf["sandbox_type"].(string),
 		}
 	}
-{{- end }}
+
 	if v, ok := nodeConfig["boot_disk_kms_key"]; ok {
 		nc.BootDiskKmsKey = v.(string)
 	}
@@ -2198,8 +2194,8 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"taint":                    flattenTaints(c.Taints, oldTaints),
 		"effective_taints":         flattenEffectiveTaints(c.Taints),
 		"workload_metadata_config": flattenWorkloadMetadataConfig(c.WorkloadMetadataConfig),
-{{- if ne $.TargetVersionName "ga" }}
 		"sandbox_config": 			flattenSandboxConfig(c.SandboxConfig),
+{{- if ne $.TargetVersionName "ga" }}
 		"host_maintenance_policy":  flattenHostMaintenancePolicy(c.HostMaintenancePolicy),
 {{- end }}
 		"confidential_nodes":       flattenConfidentialNodes(c.ConfidentialNodes),
@@ -2448,12 +2444,12 @@ func flattenWorkloadMetadataConfig(c *container.WorkloadMetadataConfig) []map[st
 	}
 	return result
 }
-{{- if not (or (eq $.TargetVersionName "") (eq $.TargetVersionName "ga")) }}
+
 func flattenSandboxConfig(c *container.SandboxConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"sandbox_type": c.SandboxType,
+			"sandbox_type": c.Type,
 		})
 	}
 	return result
@@ -2505,7 +2501,6 @@ func containerNodePoolLabelsSuppress(k, old, new string, d *schema.ResourceData)
 
 	return true
 }
-{{- end }}
 
 func containerNodePoolResourceLabelsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// Suppress diffs for server-specified labels prefixed with "goog-gke"
