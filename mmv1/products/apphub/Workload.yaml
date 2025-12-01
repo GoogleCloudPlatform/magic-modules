@@ -174,12 +174,12 @@ properties:
                   output: true
       - name: 'identity'
         type: NestedObject
-        description: "Output only. The identity associated with the workload."
+        description: "The identity associated with the workload."
         output: true
         properties:
           - name: 'principal'
             type: String
-            description: "Output only. The principal of the identity."
+            description: "The principal of the identity."
             output: true
   - name: 'discoveredWorkload'
     type: String
