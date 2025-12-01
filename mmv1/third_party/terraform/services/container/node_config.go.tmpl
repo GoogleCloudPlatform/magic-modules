@@ -254,9 +254,7 @@ func schemaNodeConfig() *schema.Schema {
 					Computed: true,
 					Elem:     &schema.Schema{Type: schema.TypeString},
 					Description: `The map of Kubernetes labels (key/value pairs) to be applied to each node. These will added in addition to any default label(s) that Kubernetes may apply to the node.`,
-	{{- if not (or (eq $.TargetVersionName "") (eq $.TargetVersionName "ga")) }}
 					DiffSuppressFunc: containerNodePoolLabelsSuppress,
-	{{- end }}
 				},
 
 				"resource_labels": {
@@ -587,31 +585,44 @@ func schemaNodeConfig() *schema.Schema {
 								Required:     true,
 								ValidateFunc: validation.StringInSlice([]string{"MODE_UNSPECIFIED", "GCE_METADATA", "GKE_METADATA"}, false),
 								Description:  `Mode is the configuration for how to expose metadata to workloads running on the node.`,
-							},
-						},
-					},
-				},
+			},
+		},
+	},
+},
 
-	{{ if ne $.TargetVersionName `ga` -}}
-				"sandbox_config": {
-					Type:       schema.TypeList,
-					Optional:   true,
-					ForceNew:   true,
-					MaxItems:   1,
-					Description: `Sandbox configuration for this node.`,
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							"sandbox_type": {
-								Type:         schema.TypeString,
-								Required:     true,
-								Description: `Type of the sandbox to use for the node (e.g. 'gvisor')`,
-								ValidateFunc: validation.StringInSlice([]string{"gvisor"}, false),
-							},
+			"sandbox_config": {
+				Type:       schema.TypeList,
+				Optional:   true,
+				ForceNew:   true,
+				MaxItems:   1,
+				Description: `Sandbox configuration for this node.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+{{ if ne $.TargetVersionName `ga` -}}
+						"sandbox_type": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Deprecated:   "sandbox_type is deprecated. Use type instead.",
+							Description:  `Type of the sandbox to use for the node (e.g. 'gvisor'). Deprecated in favor of type.`,
+							ValidateFunc: validation.StringInSlice([]string{"gvisor"}, false),
+							DiffSuppressFunc: sandboxTypeDiffSuppress,
+						},
+{{- end }}
+						"type": {
+							Type:         schema.TypeString,
+{{ if ne $.TargetVersionName `ga` -}}
+							Optional:     true,
+							DiffSuppressFunc: sandboxTypeDiffSuppress,
+{{- else -}}
+							Required:     true,
+{{- end }}
+							Description:  `Type of the sandbox to use for the node.`,
+							ValidateFunc: validation.StringInSlice([]string{"GVISOR"}, false),
 						},
 					},
 				},
-	{{- end }}
-				"boot_disk_kms_key": {
+			},
+			"boot_disk_kms_key": {
 					Type:       schema.TypeString,
 					Optional:   true,
 					ForceNew:   true,
@@ -1535,14 +1546,21 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 		nc.WorkloadMetadataConfig = expandWorkloadMetadataConfig(v)
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := nodeConfig["sandbox_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
-		nc.SandboxConfig = &container.SandboxConfig{
-			SandboxType: conf["sandbox_type"].(string),
+		nc.SandboxConfig = &container.SandboxConfig{}
+{{ if ne $.TargetVersionName `ga` -}}
+		if v, ok := conf["sandbox_type"]; ok {
+			nc.SandboxConfig.SandboxType = v.(string)
+		} else if v, ok := conf["type"]; ok {
+			nc.SandboxConfig.Type = v.(string)
 		}
-	}
+{{- else -}}
+		if v, ok := conf["type"]; ok {
+			nc.SandboxConfig.Type = v.(string)
+		}
 {{- end }}
+	}
 	if v, ok := nodeConfig["boot_disk_kms_key"]; ok {
 		nc.BootDiskKmsKey = v.(string)
 	}
@@ -2258,8 +2276,8 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"taint":                    flattenTaints(c.Taints, oldTaints),
 		"effective_taints":         flattenEffectiveTaints(c.Taints),
 		"workload_metadata_config": flattenWorkloadMetadataConfig(c.WorkloadMetadataConfig),
+		"sandbox_config":           flattenSandboxConfig(c.SandboxConfig),
 {{- if ne $.TargetVersionName "ga" }}
-		"sandbox_config": 			flattenSandboxConfig(c.SandboxConfig),
 		"host_maintenance_policy":  flattenHostMaintenancePolicy(c.HostMaintenancePolicy),
 {{- end }}
 		"confidential_nodes":       flattenConfidentialNodes(c.ConfidentialNodes),
@@ -2508,13 +2526,22 @@ func flattenWorkloadMetadataConfig(c *container.WorkloadMetadataConfig) []map[st
 	}
 	return result
 }
-{{- if not (or (eq $.TargetVersionName "") (eq $.TargetVersionName "ga")) }}
+
 func flattenSandboxConfig(c *container.SandboxConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
-		result = append(result, map[string]interface{}{
-			"sandbox_type": c.SandboxType,
-		})
+		sandboxConfig := map[string]interface{}{}
+{{ if ne $.TargetVersionName `ga` -}}
+		if c.SandboxType != "" {
+			sandboxConfig["sandbox_type"] = c.SandboxType
+		}
+{{- end }}
+		if c.Type != "" {
+			sandboxConfig["type"] = c.Type
+		}
+		if len(sandboxConfig) > 0 {
+			result = append(result, sandboxConfig)
+		}
 	}
 	return result
 }
@@ -2532,14 +2559,24 @@ func containerNodePoolLabelsSuppress(k, old, new string, d *schema.ResourceData)
 	// Right now, GKE only applies its own out-of-band labels when you enable
 	// Sandbox. We only need to perform diff suppression in this case;
 	// otherwise, the default Terraform behavior is fine.
-	o, n := d.GetChange(root + ".sandbox_config.0.sandbox_type")
-	if o == nil || n == nil {
+{{ if ne $.TargetVersionName `ga` -}}
+	sandboxTypeOld, sandboxTypeNew := d.GetChange(root + ".sandbox_config.0.sandbox_type")
+{{- end }}
+	typeOld, typeNew := d.GetChange(root + ".sandbox_config.0.type")
+
+{{ if ne $.TargetVersionName `ga` -}}
+	if (sandboxTypeOld == nil || sandboxTypeNew == nil) && (typeOld == nil || typeNew == nil) {
 		return false
 	}
+{{- else -}}
+	if typeOld == nil || typeNew == nil {
+		return false
+	}
+{{- end }}
 
 	// Pull the entire changeset as a list rather than trying to deal with each
 	// element individually.
-	o, n = d.GetChange(root + ".labels")
+	o, n := d.GetChange(root + ".labels")
 	if o == nil || n == nil {
 		return false
 	}
@@ -2564,6 +2601,43 @@ func containerNodePoolLabelsSuppress(k, old, new string, d *schema.ResourceData)
 	}
 
 	return true
+}
+{{- if not (or (eq $.TargetVersionName "") (eq $.TargetVersionName "ga")) }}
+
+func sandboxTypeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	return SandboxTypeDiffSuppress(k, old, new, d)
+}
+
+func SandboxTypeDiffSuppress(k, old, new string, d tpgresource.TerraformResourceDataChange) bool {
+	isSandboxType := strings.HasSuffix(k, "sandbox_type")
+	isType := strings.HasSuffix(k, "type")
+
+	if !isSandboxType && !isType {
+		return false
+	}
+
+	var root string
+	if isSandboxType {
+		root = strings.TrimSuffix(k, "sandbox_type")
+	} else {
+		root = strings.TrimSuffix(k, "type")
+	}
+	root = strings.TrimSuffix(root, ".")
+
+	var otherFieldKey string
+	if isSandboxType {
+		otherFieldKey = root + ".type"
+	} else {
+		otherFieldKey = root + ".sandbox_type"
+	}
+
+	_, otherNew := d.GetChange(otherFieldKey)
+
+	if otherNew != nil && otherNew != "" {
+		return true
+	}
+
+	return false
 }
 {{- end }}
 
