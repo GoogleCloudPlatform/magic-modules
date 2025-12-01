@@ -85,7 +85,6 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
   service_account = "{{index $.TestEnvVars "service_account"}}"
 
   depends_on = [
-    google_colab_runtime_template.my_runtime_template,
     google_storage_bucket.output_bucket,
   ]
   
