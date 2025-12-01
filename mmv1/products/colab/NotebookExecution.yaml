@@ -53,8 +53,6 @@ examples:
     test_env_vars:
       project_id: 'PROJECT_NAME'
       service_account: 'SERVICE_ACCT'
-    test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "colab-test-default")'
     ignore_read_extra:
       - direct_notebook_source.0.content
   - name: 'colab_notebook_execution_full'
