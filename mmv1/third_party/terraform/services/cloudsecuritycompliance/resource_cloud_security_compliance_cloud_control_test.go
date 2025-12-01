@@ -283,6 +283,93 @@ resource "google_cloud_security_compliance_cloud_control" "example" {
 			}
 		}
 	}
+
+	parameter_spec {
+		name         = "bool-parameter"
+		display_name = "Bool Parameter"
+		description  = "Testing bool fields"
+		value_type   = "ONEOF"
+		is_required  = true
+		default_value {
+			oneof_value {
+				name = "test-bool"
+				parameter_value {
+					bool_value = true
+				}
+			}
+		}
+		validation {
+			allowed_values {
+				values {
+					oneof_value {
+						name = "test-bool"
+						parameter_value {
+							bool_value = true
+						}
+					}
+				}
+			}
+		}
+		sub_parameters {
+			name         = "sub-allowed-values"
+			display_name = "Sub Allowed Values"
+			description  = "Testing sub-parameter allowed values"
+			value_type   = "STRING"
+			is_required  = true
+			default_value {
+				string_value = "allowed"
+			}
+			validation {
+				allowed_values {
+					values {
+						string_value = "allowed"
+					}
+				}
+			}
+		}
+		sub_parameters {
+			name         = "sub-regexp-pattern"
+			display_name = "Sub Regexp Pattern"
+			description  = "Testing sub-parameter regexp pattern"
+			value_type   = "STRING"
+			is_required  = true
+			default_value {
+				string_value = "match"
+			}
+			validation {
+				regexp_pattern {
+					pattern = "^match$"
+				}
+			}
+		}
+	}
+	parameter_spec {
+		name         = "number-parameter"
+		display_name = "Number Parameter"
+		description  = "Testing number fields"
+		value_type   = "ONEOF"
+		is_required  = true
+		default_value {
+			oneof_value {
+				name = "test-number"
+				parameter_value {
+					number_value = 123.45
+				}
+			}
+		}
+		validation {
+			allowed_values {
+				values {
+					oneof_value {
+						name = "test-number"
+						parameter_value {
+							number_value = 123.45
+						}
+					}
+				}
+			}
+		}
+	}
 }
 `, context)
 }
