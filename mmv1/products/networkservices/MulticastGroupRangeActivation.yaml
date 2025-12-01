@@ -1,0 +1,158 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: MulticastGroupRangeActivation
+description: Create a multicast group range activation in the specified location
+  of the current project.
+base_url: projects/{{project}}/locations/{{location}}/multicastGroupRangeActivations
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/multicastGroupRangeActivations/{{multicast_group_range_activation_id}}
+create_url: projects/{{project}}/locations/{{location}}/multicastGroupRangeActivations?multicastGroupRangeActivationId={{multicast_group_range_activation_id}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/multicastGroupRangeActivations/{{multicast_group_range_activation_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/multicastGroupRangeActivations/{{multicast_group_range_activation_id}}
+examples:
+- name: network_services_multicast_group_range_activation_basic
+  primary_resource_id: mgra_test
+  vars:
+    network_name: test-network-mgra
+    domain_name: test-domain-mgra
+    domain_activation_name: test-domain-activation-mgra
+    internal_range_name: test-internal-range-mgra
+    group_range_name: test-group-range-mgra
+    group_range_activation_name: test-mgra-mgra
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+    - update
+  type: OpAsync
+  result:
+    resource_inside_response: true
+  include_project: false
+autogen_status: TXVsdGljYXN0R3JvdXBSYW5nZUFjdGl2YXRpb24=
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: multicastGroupRangeActivationId
+    type: String
+    description: |-
+      A unique name for the multicast group range activation.
+      The name is restricted to letters, numbers, and hyphen, with the first
+      character a letter, and the last a letter or a number. The name must not
+      exceed 48 characters.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: createTime
+    type: String
+    description: |-
+      [Output only] The timestamp when the multicast group range activation was
+      created.
+    output: true
+  - name: description
+    type: String
+    description: An optional text description of the multicast group range activation.
+  - name: ipCidrRange
+    type: String
+    description: '[Output only] The multicast group IP address range.'
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Labels as key-value pairs.
+  - name: logConfig
+    type: NestedObject
+    description: The logging configuration.
+    properties:
+      - name: enabled
+        type: Boolean
+        description: Whether to enable logging or not.
+  - name: multicastDomainActivation
+    type: String
+    description: |-
+      The resource name of a multicast domain activation that is in the
+      same zone as this multicast group.
+      Use the following format:
+      `projects/*/locations/*/multicastDomainActivations/*`
+    immutable: true
+    required: true
+  - name: multicastGroupConsumerActivations
+    type: Array
+    description: |-
+      The resource names of associated multicast group consumer activations.
+      Use the following format:
+      `projects/*/locations/*/multicastGroupConsumerActivations/*`.
+    output: true
+    item_type:
+      type: String
+  - name: multicastGroupRange
+    type: String
+    description: |-
+      The resource name of the global multicast group range for the
+      group. Use the following format:
+      `projects/*/locations/global/multicastGroupRanges/*`
+    immutable: true
+    required: true
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the multicast group range activation.
+      Use the following format:
+      `projects/*/locations/*/multicastGroupRangeActivations/*`.
+    output: true
+  - name: state
+    type: NestedObject
+    description: The multicast resource's state.
+    output: true
+    properties:
+      - name: state
+        type: String
+        description: |-
+          The state of the multicast resource.
+          Possible values:
+          CREATING
+          ACTIVE
+          DELETING
+          DELETE_FAILED
+          UPDATING
+          UPDATE_FAILED
+          INACTIVE
+        output: true
+  - name: uniqueId
+    type: String
+    description: |-
+      [Output only] The Google-generated UUID for the resource. This value is
+      unique across all multicast group resources. If a group is deleted and
+      another with the same name is created, the new group is assigned a
+      different unique_id.
+    output: true
+  - name: updateTime
+    type: String
+    description: |-
+      [Output only] The timestamp when the multicast group range activation was
+      most recently updated.
+    output: true
