@@ -738,7 +738,6 @@ resource "google_developer_connect_connection" "my-connection" {
 `, context)
 }
 
-
 func TestAccDeveloperConnectConnection_developerConnectConnectionHttpBearerConfigUpdate(t *testing.T) {
 	t.Parallel()
 
