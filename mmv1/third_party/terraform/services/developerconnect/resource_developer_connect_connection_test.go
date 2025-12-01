@@ -661,3 +661,152 @@ resource "google_developer_connect_connection" "my-connection" {
 }
 `, context)
 }
+
+func TestAccDeveloperConnectConnection_developerConnectConnectionHttpBasicConfigUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDeveloperConnectConnection_HttpBasicConfig(context),
+			},
+			{
+				ResourceName:            "google_developer_connect_connection.my-connection",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"connection_id", "location", "terraform_labels"},
+			},
+			{
+				Config: testAccDeveloperConnectConnection_HttpBasicConfigUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_developer_connect_connection.my-connection", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_developer_connect_connection.my-connection",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"connection_id", "location", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccDeveloperConnectConnection_HttpBasicConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_developer_connect_connection" "my-connection" {
+  location = "us-central1"
+  connection_id = "tf-test-tf-test-connection%{random_suffix}"
+
+  http_config {
+    host_uri = "https://devconnectprober.atlassian.net"
+    
+    basic_authentication {
+        username = "devconnectprober@gmail.com"
+        password_secret_version = "projects/devconnect-terraform-creds/secrets/http-basic-auth/versions/latest"
+    }
+
+  }
+}
+`, context)
+}
+
+func testAccDeveloperConnectConnection_HttpBasicConfigUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_developer_connect_connection" "my-connection" {
+  location = "us-central1"
+  connection_id = "tf-test-tf-test-connection%{random_suffix}"
+
+  http_config {
+    host_uri = "https://devconnectprober.atlassian.net"
+    
+    basic_authentication {
+        username = "devconnectprober@gmail.com"
+        password_secret_version = "projects/devconnect-terraform-creds/secrets/http-basic-auth-update/versions/latest"
+    }
+
+  }
+}
+`, context)
+}
+
+
+func TestAccDeveloperConnectConnection_developerConnectConnectionHttpBearerConfigUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDeveloperConnectConnection_HttpBearerConfig(context),
+			},
+			{
+				ResourceName:            "google_developer_connect_connection.my-connection",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"connection_id", "location", "terraform_labels"},
+			},
+			{
+				Config: testAccDeveloperConnectConnection_HttpBearerConfigUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_developer_connect_connection.my-connection", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_developer_connect_connection.my-connection",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"connection_id", "location", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccDeveloperConnectConnection_HttpBearerConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_developer_connect_connection" "my-connection" {
+  location = "us-central1"
+  connection_id = "tf-test-tf-test-connection%{random_suffix}"
+
+  http_config {
+    host_uri = "https://devconnectprober.atlassian.net"
+    
+    bearer_token_authentication {
+      token_secret_version = "projects/devconnect-terraform-creds/secrets/http-bearer-token/versions/latest"
+    }
+  }
+}
+`, context)
+}
+
+func testAccDeveloperConnectConnection_HttpBearerConfigUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_developer_connect_connection" "my-connection" {
+  location = "us-central1"
+  connection_id = "tf-test-tf-test-connection%{random_suffix}"
+
+  http_config {
+    host_uri = "https://devconnectprober.atlassian.net"
+    
+    bearer_token_authentication {
+      token_secret_version = "projects/devconnect-terraform-creds/secrets/http-bearer-token-update/versions/latest"
+    }
+  }
+}
+`, context)
+}
