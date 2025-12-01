@@ -10,8 +10,8 @@ func generateSourceRepoRepositoryIAMPolicyStateID(iamResourceAddr string) func(*
 		}
 		fmt.Printf("raw state %s\n", rawState)
 		project := tpgresource.GetResourceNameFromSelfLink(rawState["project"])
-		respository := repositoryShortName(rawState["respository"])
-		return fmt.Sprintf("projects/%s/repos/%s", project, respository) + acctest.ConditionTitleIfPresent(rawState), nil
+		repository := repositoryShortName(rawState["repository"])
+		return fmt.Sprintf("projects/%s/repos/%s", project, repository) + acctest.ConditionTitleIfPresent(rawState), nil
 	}
 }
 
@@ -27,8 +27,8 @@ func generateSourceRepoRepositoryIAMBindingStateID(iamResourceAddr string) func(
 		}
 		fmt.Printf("raw state %s\n", rawState)
 		project := tpgresource.GetResourceNameFromSelfLink(rawState["project"])
-		respository := repositoryShortName(rawState["respository"])
-		return fmt.Sprintf("projects/%s/repos/%s %s", project, respository, rawState["role"]) + acctest.ConditionTitleIfPresent(rawState), nil
+		repository := repositoryShortName(rawState["repository"])
+		return fmt.Sprintf("projects/%s/repos/%s %s", project, repository, rawState["role"]) + acctest.ConditionTitleIfPresent(rawState), nil
 	}
 }
 
@@ -44,15 +44,15 @@ func generateSourceRepoRepositoryIAMMemberStateID(iamResourceAddr string) func(*
 		}
 		fmt.Printf("raw state %s\n", rawState)
 		project := tpgresource.GetResourceNameFromSelfLink(rawState["project"])
-		respository := repositoryShortName(rawState["respository"])
-		return fmt.Sprintf("projects/%s/repos/%s %s %s", project, respository, rawState["role"], rawState["member"]) + acctest.ConditionTitleIfPresent(rawState), nil
+		repository := repositoryShortName(rawState["repository"])
+		return fmt.Sprintf("projects/%s/repos/%s %s %s", project, repository, rawState["role"], rawState["member"]) + acctest.ConditionTitleIfPresent(rawState), nil
 	}
 }
 
-func repositoryShortName(respository string) string {
-	respositoryParts := strings.SplitN(respository, "/repos/", 2)
-	if len(respositoryParts) == 2 {
-		return respositoryParts[1]
+func repositoryShortName(repository string) string {
+	repositoryParts := strings.SplitN(repository, "/repos/", 2)
+	if len(repositoryParts) == 2 {
+		return repositoryParts[1]
 	}
-	return respository
+	return repository
 }
