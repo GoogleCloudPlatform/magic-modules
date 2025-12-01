@@ -68,7 +68,7 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
       accelerator_count = "1"
     }
 
-    data_persistent_disk_spec {
+    persistent_disk_spec {
       disk_type    = "pd-standard"
       disk_size_gb = 200
     }
