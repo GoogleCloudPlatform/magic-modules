@@ -1553,7 +1553,7 @@ func (t Type) TGCSendEmptyValue() bool {
 
 	// Automatically check if false value should be set in CAI assets
 	if t.IsA("Boolean") {
-		return t.Required || (t.DefaultFromApi && !t.IsMissingInCai && !t.ExcludeFalseInCai)
+		return t.Required
 	}
 
 	return false

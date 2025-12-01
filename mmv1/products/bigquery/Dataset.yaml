@@ -410,7 +410,7 @@ properties:
     # The bool property with `default_from_api: true` will have false value in converted CAI asset
     # by default during tfplan2cai.
     # Use exclude_false_in_cai: true to override the default behavior during tfplan2cai conversion.
-    exclude_false_in_cai: true
+    # exclude_false_in_cai: true
   - name: 'defaultCollation'
     type: String
     description: |
