@@ -2040,7 +2040,6 @@ func ResourceContainerCluster() *schema.Resource {
 						"enable_private_nodes": {
 							Type:             schema.TypeBool,
 							Optional:         true,
-							ForceNew:         true,
 							AtLeastOneOf:     privateClusterConfigKeys,
 							DiffSuppressFunc: containerClusterPrivateClusterConfigSuppress,
 							Description:      `Enables the private cluster feature, creating a private endpoint on the cluster. In a private cluster, nodes only have RFC 1918 private addresses and communicate with the master's private endpoint via private networking.`,
@@ -2354,8 +2353,8 @@ func ResourceContainerCluster() *schema.Resource {
 			"enable_l4_ilb_subsetting": {
 			   Type: schema.TypeBool,
 			   Optional: true,
+			   Computed: true,
 			   Description: `Whether L4ILB Subsetting is enabled for this cluster.`,
-			   Default: false,
 			},
 			"disable_l4_lb_firewall_reconciliation": {
 				Type:        schema.TypeBool,

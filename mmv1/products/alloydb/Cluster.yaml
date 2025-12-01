@@ -62,7 +62,7 @@ custom_code:
   tgc_decoder: 'templates/tgc_next/decoders/alloydb_cluster.go.tmpl'
 # Skipping the sweeper because we need to force-delete clusters.
 exclude_sweeper: true
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 tgc_include_handwritten_tests: true
 examples:
   - name: 'alloydb_cluster_basic'
