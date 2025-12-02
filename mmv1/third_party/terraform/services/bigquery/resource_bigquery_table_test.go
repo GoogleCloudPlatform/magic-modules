@@ -2,13 +2,15 @@ package bigquery_test
 
 import (
 	"fmt"
+
+	"regexp"
+	"strings"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"regexp"
-	"strings"
-	"testing"
 )
 
 func TestAccBigQueryTable_Basic(t *testing.T) {
@@ -2111,6 +2113,28 @@ func TestAccBigQueryTable_foreignTypeInfo(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+			},
+		},
+	})
+}
+
+func TestAccBigQueryTable_ResourceIdentity(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_dataset_%s", acctest.RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_table_%s", acctest.RandString(t, 10))
+
+	resource.Test(t, resource.TestCase{
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableBasicSchema(datasetID, tableID),
+			},
+			{
+				ResourceName:       "google_bigquery_table.test",
+				ImportState:        true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},
 		},
 	})
