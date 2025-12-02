@@ -15,6 +15,10 @@
 name: MulticastGroupRangeActivation
 description: Create a multicast group range activation in the specified location
   of the current project.
+references:
+  guides:
+    'Create Multicast Producer Association': 'https://docs.cloud.google.com/vpc/docs/multicast/create-group-ranges#activate_the_group_range'
+  api: 'https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastGroupRangeActivations'
 base_url: projects/{{project}}/locations/{{location}}/multicastGroupRangeActivations
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/multicastGroupRangeActivations/{{multicast_group_range_activation_id}}
@@ -24,15 +28,15 @@ id_format: projects/{{project}}/locations/{{location}}/multicastGroupRangeActiva
 import_format:
   - projects/{{project}}/locations/{{location}}/multicastGroupRangeActivations/{{multicast_group_range_activation_id}}
 examples:
-- name: network_services_multicast_group_range_activation_basic
-  primary_resource_id: mgra_test
-  vars:
-    network_name: test-network-mgra
-    domain_name: test-domain-mgra
-    domain_activation_name: test-domain-activation-mgra
-    internal_range_name: test-internal-range-mgra
-    group_range_name: test-group-range-mgra
-    group_range_activation_name: test-mgra-mgra
+  - name: network_services_multicast_group_range_activation_basic
+    primary_resource_id: mgra_test
+    vars:
+      network_name: test-network-mgra
+      domain_name: test-domain-mgra
+      domain_activation_name: test-domain-activation-mgra
+      internal_range_name: test-internal-range-mgra
+      group_range_name: test-group-range-mgra
+      group_range_activation_name: test-mgra-mgra
 autogen_async: true
 async:
   operation:
