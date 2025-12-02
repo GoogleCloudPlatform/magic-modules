@@ -573,6 +573,7 @@ func TestAccMemorystoreInstance_switchoverAndDetachSecondary(t *testing.T) {
 				ResourceName:      "google_memorystore_instance.test_secondary",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"update_time"},
 			},
 			{
 				// Switchover to secondary instance
@@ -590,6 +591,7 @@ func TestAccMemorystoreInstance_switchoverAndDetachSecondary(t *testing.T) {
 				ResourceName:      "google_memorystore_instance.test_secondary",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"update_time"},
 			},
 			{
 				// Detach secondary instance and delete the instances
