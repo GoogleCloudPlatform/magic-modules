@@ -257,7 +257,7 @@ func (e *Examples) ValidateExternalProviders() error {
 }
 
 // Executes example templates for documentation and tests
-func (e *Examples) LoadHCLText(baseDir string, sysfs fs.FS) (err error) {
+func (e *Examples) LoadHCLText(sysfs fs.FS) (err error) {
 	originalVars := e.Vars
 	originalTestEnvVars := e.TestEnvVars
 	docTestEnvVars := make(map[string]string)
@@ -284,7 +284,7 @@ func (e *Examples) LoadHCLText(baseDir string, sysfs fs.FS) (err error) {
 		docTestEnvVars[key] = docs_defaults[e.TestEnvVars[key]]
 	}
 	e.TestEnvVars = docTestEnvVars
-	e.DocumentationHCLText, err = e.ExecuteTemplate(baseDir, sysfs)
+	e.DocumentationHCLText, err = e.ExecuteTemplate(sysfs)
 	if err != nil {
 		return err
 	}
@@ -328,7 +328,7 @@ func (e *Examples) LoadHCLText(baseDir string, sysfs fs.FS) (err error) {
 
 	e.Vars = testVars
 	e.TestEnvVars = testTestEnvVars
-	e.TestHCLText, err = e.ExecuteTemplate(baseDir, sysfs)
+	e.TestHCLText, err = e.ExecuteTemplate(sysfs)
 	if err != nil {
 		return err
 	}
@@ -344,8 +344,8 @@ func (e *Examples) LoadHCLText(baseDir string, sysfs fs.FS) (err error) {
 	return nil
 }
 
-func (e *Examples) ExecuteTemplate(baseDir string, sysfs fs.FS) (string, error) {
-	templateContent, err := fs.ReadFile(sysfs, filepath.Join(baseDir, e.ConfigPath))
+func (e *Examples) ExecuteTemplate(sysfs fs.FS) (string, error) {
+	templateContent, err := fs.ReadFile(sysfs, e.ConfigPath)
 	if err != nil {
 		return "", err
 	}
@@ -430,7 +430,7 @@ func (e *Examples) SetOiCSHCLText(sysfs fs.FS) {
 	e.Vars = testVars
 	// SetOiCSHCLText is generated from the provider, assume base directory is
 	// always relative for this case
-	e.OicsHCLText, err = e.ExecuteTemplate("", sysfs)
+	e.OicsHCLText, err = e.ExecuteTemplate(sysfs)
 	if err != nil {
 		log.Fatal(err)
 	}
