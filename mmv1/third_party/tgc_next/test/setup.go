@@ -73,13 +73,10 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 		bucketName := "cai_assets_metadata"
 		currentDate := time.Now()
 		ctx := context.Background()
-		client, err := storage.NewClient(ctx)
-		if err != nil {
-			return nil, fmt.Errorf("storage.NewClient: %v", err)
-		}
-		defer client.Close()
 
-		bucket := client.Bucket(bucketName)
+		var client *storage.Client
+		var bucket *storage.BucketHandle
+		var err error
 
 		var allErrs error
 		retries := 0
@@ -93,6 +90,14 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 				}
 			}
 			if metadata == nil {
+				if client == nil {
+					client, err = storage.NewClient(ctx)
+					if err != nil {
+						return nil, fmt.Errorf("storage.NewClient: %v", err)
+					}
+					defer client.Close()
+					bucket = client.Bucket(bucketName)
+				}
 				metadata, err = readTestsDataFromGCSForRun(ctx, currentDate, bucketName, bucket)
 				if os.Getenv("WRITE_FILES") != "" {
 					writeJSONFile(fmt.Sprintf("../../tests_metadata_%s.json", currentDate.Format(ymdFormat)), metadata)
