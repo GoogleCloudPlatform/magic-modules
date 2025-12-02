@@ -16,8 +16,6 @@ name: AuditManager
 display_name: Audit Manager
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
-Version:
-  -base_url: https://auditmanager.googleapis.com/v1/
-   name : ga
-documentation_link: https://cloud.google.com/audit-manager/docs
-
+versions:
+  - base_url: https://auditmanager.googleapis.com/v1/
+    name: ga
