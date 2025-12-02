@@ -87,7 +87,7 @@ resource "google_network_services_multicast_group_range_activation" mgra_test {
   location = "us-central1-b"
   multicast_group_range = google_network_services_multicast_group_range.group_range.id
   multicast_domain_activation = google_network_services_multicast_domain_activation.multicast_domain_activation.id
-	log_config {
+  log_config {
     enabled = true
   }
 }
@@ -135,7 +135,7 @@ resource "google_network_services_multicast_group_range_activation" mgra_test {
   location = "us-central1-b"
   multicast_group_range = google_network_services_multicast_group_range.group_range.id
   multicast_domain_activation = google_network_services_multicast_domain_activation.multicast_domain_activation.id
-	log_config {
+  log_config {
     enabled = false
   }
 }
