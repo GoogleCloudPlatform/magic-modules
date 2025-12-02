@@ -164,13 +164,11 @@ properties:
     properties:
       - name: machineSpec
         type: NestedObject
-        default_from_api: true
         description: |
           'The machine configuration of the runtime.'
         properties:
           - name: 'machineType'
             type: string
-            default_from_api: true
             description: |
                 The Compute Engine machine type selected for the runtime.
           - name: 'acceleratorType'
@@ -185,17 +183,14 @@ properties:
               - 'NVIDIA_L4'
           - name: 'acceleratorCount'
             type: Integer
-            default_from_api: true
             description: 'The number of accelerators used by the runtime.'
       - name: persistentDiskSpec
-        default_from_api: true
         type: NestedObject
         description: 'The configuration for the data disk of the runtime.'
         properties:
           - name: 'diskType'
             type: enum
             description: 'The type of the persistent disk.'
-            default_from_api: true
             enum_values:
               - 'pd-standard'
               - 'pd-ssd'
@@ -203,19 +198,16 @@ properties:
               - 'pd-extreme'
           - name: 'diskSizeGb'
             type: int
-            default_from_api: true
             description: |
                     The disk size of the runtime in GB. If specified, the diskType must also be specified. The minimum size is 10GB and the maximum is 65536GB.
       - name: networkSpec
         type: NestedObject
-        default_from_api: true
         description: 'The network configuration for the runtime.'
         properties:
           - name: 'enableInternetAccess'
             type: Boolean
             description: Enable public internet access for the runtime.
           - name: 'network'
-            default_from_api: true
             type: String
             description: 'The name of the VPC that this runtime is in.'
             diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
