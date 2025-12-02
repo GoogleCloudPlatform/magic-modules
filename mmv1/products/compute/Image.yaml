@@ -58,6 +58,7 @@ iam_policy:
 include_in_tgc_next: true
 tgc_include_handwritten_tests: true
 custom_code:
+  tgc_decoder: 'templates/tgc_next/decoders/compute_image.go.tmpl'
 examples:
   - name: 'image_basic'
     primary_resource_id: 'example'
@@ -249,6 +250,7 @@ properties:
           You must provide either this property or the sourceDisk property
           but not both.
         required: true
+        is_missing_in_cai: true
   - name: 'sourceDisk'
     type: ResourceRef
     description: |
