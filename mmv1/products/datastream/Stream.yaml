@@ -234,6 +234,25 @@ examples:
     skip_vcr: true
     # Involves complex dependency creation, which makes it impractical in this context
     exclude_test: true
+  - name: 'datastream_stream_rule_sets_bigquery'
+    primary_resource_id: 'default'
+    vars:
+      stream_id: 'rules-stream'
+      source_connection_profile_id: 'rules-source-profile'
+      destination_connection_profile_id: 'rules-dest-profile'
+      dataset_id: 'rules-dataset'
+      private_connection_id: 'rules-connection'
+      network_name: 'rules-network'
+      deletion_protection: 'true'
+      database_instance_name: 'rules-instance'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
+    external_providers: ["random", "time"]
+    skip_vcr: true
+    # Involves complex dependency creation, which makes it impractical in this context
+    exclude_test: true
   - name: 'datastream_stream_salesforce'
     primary_resource_id: 'default'
     vars:
@@ -1982,3 +2001,154 @@ properties:
       will be encrypted using an internal Stream-specific encryption key provisioned through KMS.
     immutable: true
     is_missing_in_cai: true
+  - name: 'ruleSets'
+    type: Array
+    description: 'Rule sets to apply to the stream.'
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'customizationRules'
+          type: Array
+          description: 'List of customization rules to apply.'
+          required: true
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'bigqueryPartitioning'
+                type: NestedObject
+                description: 'BigQuery partitioning rule.'
+                properties:
+                  - name: 'integerRangePartition'
+                    type: NestedObject
+                    properties:
+                      - name: 'column'
+                        type: String
+                        description: 'The partitioning column.'
+                        required: true
+                      - name: 'start'
+                        type: Integer
+                        description: 'The starting value for range partitioning (inclusive).'
+                        required: true
+                      - name: 'end'
+                        type: Integer
+                        description: 'The ending value for range partitioning (exclusive).'
+                        required: true
+                      - name: 'interval'
+                        type: Integer
+                        description: 'The interval of each range within the partition.'
+                        required: true
+                  - name: 'timeUnitPartition'
+                    type: NestedObject
+                    properties:
+                      - name: 'column'
+                        type: String
+                        description: 'The partitioning column.'
+                        required: true
+                      - name: 'partitioningTimeGranularity'
+                        type: Enum
+                        description: 'Partition granularity.'
+                        enum_values:
+                          - 'PARTITIONING_TIME_GRANULARITY_UNSPECIFIED'
+                          - 'PARTITIONING_TIME_GRANULARITY_HOUR'
+                          - 'PARTITIONING_TIME_GRANULARITY_DAY'
+                          - 'PARTITIONING_TIME_GRANULARITY_MONTH'
+                          - 'PARTITIONING_TIME_GRANULARITY_YEAR'
+                  - name: 'ingestionTimePartition'
+                    type: NestedObject
+                    allow_empty_object: true
+                    send_empty_value: true
+                    properties:
+                      - name: 'partitioningTimeGranularity'
+                        type: Enum
+                        description: 'Partition granularity.'
+                        enum_values:
+                          - 'PARTITIONING_TIME_GRANULARITY_UNSPECIFIED'
+                          - 'PARTITIONING_TIME_GRANULARITY_HOUR'
+                          - 'PARTITIONING_TIME_GRANULARITY_DAY'
+                          - 'PARTITIONING_TIME_GRANULARITY_MONTH'
+                          - 'PARTITIONING_TIME_GRANULARITY_YEAR'
+                  - name: 'requirePartitionFilter'
+                    type: Boolean
+                    description: 'If true, queries over the table require a partition filter.'
+              - name: 'bigqueryClustering'
+                type: NestedObject
+                description: 'BigQuery clustering rule.'
+                properties:
+                  - name: 'columns'
+                    type: Array
+                    description: 'Column names to set as clustering columns.'
+                    required: true
+                    item_type:
+                      type: String
+        - name: 'objectFilter'
+          type: NestedObject
+          description: 'Object filter to apply the customization rules to.'
+          required: true
+          properties:
+            - name: 'sourceObjectIdentifier'
+              type: NestedObject
+              description: 'Specific source object identifier.'
+              properties:
+                - name: 'oracleIdentifier'
+                  type: NestedObject
+                  properties:
+                    - name: 'schema'
+                      type: String
+                      description: 'The schema name.'
+                      required: true
+                    - name: 'table'
+                      type: String
+                      description: 'The table name.'
+                      required: true
+                - name: 'mysqlIdentifier'
+                  type: NestedObject
+                  properties:
+                    - name: 'database'
+                      type: String
+                      description: 'The database name.'
+                      required: true
+                    - name: 'table'
+                      type: String
+                      description: 'The table name.'
+                      required: true
+                - name: 'postgresqlIdentifier'
+                  type: NestedObject
+                  properties:
+                    - name: 'schema'
+                      type: String
+                      description: 'The schema name.'
+                      required: true
+                    - name: 'table'
+                      type: String
+                      description: 'The table name.'
+                      required: true
+                - name: 'sqlServerIdentifier'
+                  type: NestedObject
+                  properties:
+                    - name: 'schema'
+                      type: String
+                      description: 'The schema name.'
+                      required: true
+                    - name: 'table'
+                      type: String
+                      description: 'The table name.'
+                      required: true
+                - name: 'salesforceIdentifier'
+                  type: NestedObject
+                  properties:
+                    - name: 'objectName'
+                      type: String
+                      description: 'The Salesforce object name.'
+                      required: true
+                - name: 'mongodbIdentifier'
+                  type: NestedObject
+                  properties:
+                    - name: 'database'
+                      type: String
+                      description: 'The MongoDB database name.'
+                      required: true
+                    - name: 'collection'
+                      type: String
+                      description: 'The MongoDB collection name.'
+                      required: true
+
