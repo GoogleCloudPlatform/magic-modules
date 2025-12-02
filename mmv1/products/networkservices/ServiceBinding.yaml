@@ -25,7 +25,7 @@ create_url: 'projects/{{project}}/locations/global/serviceBindings?serviceBindin
 immutable: true
 import_format:
   - 'projects/{{project}}/locations/global/serviceBindings/{{name}}'
-deprecation_message: |
+deprecation_message: >-
   Cloud Service Mesh's integration with Service Directory is going to be deprecated.
   [Learn more](https://docs.cloud.google.com/service-mesh/docs/service-routing/service-directory-integration-setup).
   Creating new service binding resources will be disabled.
