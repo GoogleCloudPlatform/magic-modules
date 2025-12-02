@@ -240,14 +240,9 @@ examples:
       stream_id: 'rules-stream'
       source_connection_profile_id: 'rules-source-profile'
       destination_connection_profile_id: 'rules-dest-profile'
-      dataset_id: 'rules-dataset'
-      private_connection_id: 'rules-connection'
-      network_name: 'rules-network'
+      dataset_id: 'rules-project:rules-dataset'
       deletion_protection: 'true'
-      database_instance_name: 'rules-instance'
     test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
       'deletion_protection': 'false'
     external_providers: ["random", "time"]
     skip_vcr: true
