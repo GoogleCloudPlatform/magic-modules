@@ -50,13 +50,6 @@ func NewLoader(config Config) *Loader {
 		sysfs:             config.Sysfs,
 	}
 
-	// Normalize override dir to a path that is relative to the magic-modules directory
-	// This is needed for templates that concatenate pwd + override dir + path
-	if filepath.IsAbs(l.OverrideDirectory) {
-		l.OverrideDirectory, _ = filepath.Rel(l.BaseDirectory, l.OverrideDirectory)
-		log.Printf("Override directory normalized to relative path %q", l.OverrideDirectory)
-	}
-
 	return l
 }
 
@@ -180,15 +173,15 @@ func (l *Loader) LoadProduct(productName string) (*api.Product, error) {
 	// Compile the product configuration
 	if overrideProductExists {
 		if baseProductExists {
-			api.Compile(baseProductPath, p, l.OverrideDirectory)
+			api.Compile(baseProductPath, p)
 			overrideApiProduct := &api.Product{}
-			api.Compile(productOverridePath, overrideApiProduct, l.OverrideDirectory)
+			api.Compile(productOverridePath, overrideApiProduct)
 			api.Merge(reflect.ValueOf(p).Elem(), reflect.ValueOf(*overrideApiProduct), l.Version)
 		} else {
-			api.Compile(productOverridePath, p, l.OverrideDirectory)
+			api.Compile(productOverridePath, p)
 		}
 	} else {
-		api.Compile(baseProductPath, p, l.OverrideDirectory)
+		api.Compile(baseProductPath, p)
 	}
 
 	// Check if product exists at the requested l.Version
@@ -296,17 +289,17 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 	if overrideResourcePath != "" {
 		if baseResourceExists {
 			// Merge base and override
-			api.Compile(baseResourcePath, resource, l.OverrideDirectory)
+			api.Compile(baseResourcePath, resource)
 			overrideResource := &api.Resource{}
-			api.Compile(overrideResourcePath, overrideResource, l.OverrideDirectory)
+			api.Compile(overrideResourcePath, overrideResource)
 			api.Merge(reflect.ValueOf(resource).Elem(), reflect.ValueOf(*overrideResource), l.Version)
 		} else {
 			// Override only
-			api.Compile(overrideResourcePath, resource, l.OverrideDirectory)
+			api.Compile(overrideResourcePath, resource)
 		}
 	} else {
 		// Base only
-		api.Compile(baseResourcePath, resource, l.OverrideDirectory)
+		api.Compile(baseResourcePath, resource)
 		resource.SourceYamlFile = baseRelPath
 	}
 
@@ -321,7 +314,7 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 	resource.TestSampleSetUp(l.sysfs)
 
 	for _, e := range resource.Examples {
-		if err := e.LoadHCLText(l.BaseDirectory, l.sysfs); err != nil {
+		if err := e.LoadHCLText(l.sysfs); err != nil {
 			glog.Exit(err)
 		}
 	}
