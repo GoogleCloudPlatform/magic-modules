@@ -738,10 +738,19 @@ func TestAccNetappStoragePool_unifiedStoragePoolCreate(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetappStoragePool_unifiedStoragePoolCreate(context),
+			},
+			{
+				ResourceName:            "google_netapp_storage_pool.test_pool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetappStoragePool_unifiedStoragePoolCreate_update(context),
 			},
 			{
 				ResourceName:            "google_netapp_storage_pool.test_pool",
@@ -757,12 +766,10 @@ func testAccNetappStoragePool_unifiedStoragePoolCreate(context map[string]interf
 	return acctest.Nprintf(`
 
 data "google_compute_network" "default" {
-	provider = google-beta
     name = "%{network_name}"
 }
 
 resource "google_netapp_storage_pool" "test_pool" {
-    provider = google-beta
     name = "tf-test-pool%{random_suffix}"
     location = "us-central1-a"
     service_level = "FLEX"
@@ -774,6 +781,30 @@ resource "google_netapp_storage_pool" "test_pool" {
         key = "test"
         value = "pool"
     }
+}
+`, context)
+}
+
+func testAccNetappStoragePool_unifiedStoragePoolCreate_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+
+data "google_compute_network" "default" {
+    name = "%{network_name}"
+}
+
+resource "google_netapp_storage_pool" "test_pool" {
+    name = "tf-test-pool%{random_suffix}"
+    location = "us-central1-a"
+    service_level = "FLEX"
+    type = "UNIFIED"
+    capacity_gib = "2048"
+    network = data.google_compute_network.default.id
+    description           = "this is a test description"
+    labels                = {
+        key = "test"
+        value = "pool"
+    }
+	total_throughput_mibps = "200"
 }
 `, context)
 }

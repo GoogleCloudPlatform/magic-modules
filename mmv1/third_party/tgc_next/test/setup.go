@@ -84,12 +84,26 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 		var allErrs error
 		retries := 0
 		for i := 0; i < len(TestsMetadata); i++ {
-			metadata, err := readTestsDataFromGCSForRun(ctx, currentDate, bucketName, bucket)
-			if err != nil {
-				if allErrs == nil {
-					allErrs = fmt.Errorf("reading tests data from gcs: %v", err)
-				} else {
-					allErrs = fmt.Errorf("%v, %v", allErrs, err)
+			var metadata map[string]map[int]TgcMetadataPayload
+			if os.Getenv("WRITE_FILES") != "" {
+				filename := fmt.Sprintf("../../tests_metadata_%s.json", currentDate.Format(ymdFormat))
+				_, err := os.Stat(filename)
+				if !os.IsNotExist(err) {
+					metadata = readTestsDataFromLocalFile(filename)
+				}
+			}
+			if metadata == nil {
+				metadata, err = readTestsDataFromGCSForRun(ctx, currentDate, bucketName, bucket)
+				if os.Getenv("WRITE_FILES") != "" {
+					writeJSONFile(fmt.Sprintf("../../tests_metadata_%s.json", currentDate.Format(ymdFormat)), metadata)
+				}
+
+				if err != nil {
+					if allErrs == nil {
+						allErrs = fmt.Errorf("reading tests data from gcs: %v", err)
+					} else {
+						allErrs = fmt.Errorf("%v, %v", allErrs, err)
+					}
 				}
 			}
 			if metadata == nil {
@@ -111,10 +125,6 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 
 		if allErrs != nil {
 			return nil, allErrs
-		}
-
-		if os.Getenv("WRITE_FILES") != "" {
-			writeJSONFile("../../tests_metadata.json", TestsMetadata)
 		}
 		setupDone = true
 	}
@@ -148,6 +158,27 @@ func readTestsDataFromGCSForRun(ctx context.Context, currentDate time.Time, buck
 	}
 
 	return metadata, nil
+}
+
+func readTestsDataFromLocalFile(filename string) map[string]map[int]TgcMetadataPayload {
+	metadata := make(map[string]map[int]TgcMetadataPayload, 0)
+	log.Printf("Read the the local file %s", filename)
+
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return nil
+	}
+
+	if err != nil {
+		return nil
+	}
+
+	err = json.Unmarshal(data, &metadata)
+	if err != nil {
+		return nil
+	}
+
+	return metadata
 }
 
 func getStepNumbers(testName string) ([]int, error) {

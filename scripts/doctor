@@ -53,14 +53,6 @@ else
     fi
 fi
 
-count_in_path "goimports"
-if [ $found -eq 0 ]; then
-    exitcode=1
-    warn "yel" "   goimports not found. Run 'go install golang.org/x/tools/cmd/goimports@latest' to install it."
-else
-    warn "grn" "   found!"
-fi
-
 count_in_path "git"
 if [ $found -eq 0 ]; then
     exitcode=1

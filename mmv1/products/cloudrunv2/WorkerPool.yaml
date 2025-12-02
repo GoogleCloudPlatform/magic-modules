@@ -57,6 +57,13 @@ examples:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
     ignore_read_extra:
       - 'deletion_protection'
+  - name: 'cloudrunv2_worker_pool_basic_depends_on'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-worker-pool%s", context["random_suffix"])'
+    vars:
+      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_limits'
     primary_resource_id: 'default'
     vars:
@@ -413,6 +420,13 @@ properties:
                 Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references are not supported in Cloud Run.
               item_type:
                 type: String
+            - name: 'dependsOn'
+              type: Array
+              description: |-
+                Names of the containers that must start before this container.
+              immutable: true
+              item_type:
+                type: String
             - name: 'env'
               type: Array
               description: |-
@@ -468,7 +482,7 @@ properties:
                 - name: 'limits'
                   type: KeyValuePairs
                   description: |-
-                    Only memory, CPU, and nvidia.com/gpu are supported. Use key `cpu` for CPU limit, `memory` for memory limit, `nvidia.com/gpu` for gpu limit. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
+                    Only memory, CPU, and nvidia.com/gpu are supported. Use key `cpu` for CPU limit, `memory` for memory limit, `nvidia.com/gpu` for gpu limit. Note: The only supported values for CPU are '1', '2', '4', '6', and '8'. Setting 4 CPU requires at least 2Gi of memory, setting 6 or more CPU requires at least 4Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
                   default_from_api: true
             - name: 'volumeMounts'
               type: Array

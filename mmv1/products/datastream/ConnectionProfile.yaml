@@ -39,6 +39,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/datastream_connection_profile.go.tmpl'
   pre_create: 'templates/terraform/pre_create/datastream_connection_profile.go.tmpl'
@@ -357,6 +358,7 @@ properties:
         description: |
           Password for the PostgreSQL connection.
         sensitive: true
+        is_missing_in_cai: true
         custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_postgresql_profile_password.go.tmpl'
       - name: 'secretManagerStoredPassword'
         type: String
@@ -651,6 +653,7 @@ properties:
         conflicts:
           - forward_ssh_connectivity.0.private_key
         custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_forward_ssh_connectivity_password.go.tmpl'
+        is_missing_in_cai: true
       - name: 'privateKey'
         type: String
         description: |
