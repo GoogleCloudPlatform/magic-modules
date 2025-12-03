@@ -837,7 +837,7 @@ resource "google_dataplex_entry" "test_entry_full" {
 `, context)
 }
 
-func TestAccDataplexEntry_dataplexEntryUpdate1P(t *testing.T) {
+func TestAccDataplexEntry_dataplexEntryUpdateBigQuery(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -852,7 +852,7 @@ func TestAccDataplexEntry_dataplexEntryUpdate1P(t *testing.T) {
 		CheckDestroy:             testAccCheckDataplexEntryDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataplexEntry_dataplexEntryFullUpdate1PPrepare(context),
+				Config: testAccDataplexEntry_dataplexEntryFullUpdateBigQueryPrepare(context),
 			},
 			{
 				ResourceName:            "google_dataplex_entry.test_entry_full_1p",
@@ -861,7 +861,7 @@ func TestAccDataplexEntry_dataplexEntryUpdate1P(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"aspects", "dataset_id", "table_id", "entry_id", "location"},
 			},
 			{
-				Config: testAccDataplexEntry_dataplexEntry1PUpdate(context),
+				Config: testAccDataplexEntry_dataplexEntryBigQueryUpdate(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_dataplex_entry.test_entry_full_1p", plancheck.ResourceActionUpdate),
@@ -878,7 +878,7 @@ func TestAccDataplexEntry_dataplexEntryUpdate1P(t *testing.T) {
 	})
 }
 
-func testAccDataplexEntry_dataplexEntryFullUpdate1PPrepare(context map[string]interface{}) string {
+func testAccDataplexEntry_dataplexEntryFullUpdateBigQueryPrepare(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dataplex_aspect_type" "aspect-type-full-one" {
   aspect_type_id = "tf-test-aspect-type-full%{random_suffix}-one"
@@ -1016,7 +1016,7 @@ resource "google_dataplex_entry" "test_entry_full_1p" {
 }`, context)
 }
 
-func testAccDataplexEntry_dataplexEntry1PUpdate(context map[string]interface{}) string {
+func testAccDataplexEntry_dataplexEntryBigQueryUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 
 resource "google_dataplex_aspect_type" "aspect-type-full-one" {

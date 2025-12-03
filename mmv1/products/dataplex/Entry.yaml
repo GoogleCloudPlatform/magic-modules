@@ -80,7 +80,7 @@ examples:
       entry_type_name: "entry-type-full"
     test_env_vars:
       project_number: 'PROJECT_NUMBER'
-  - name: 'dataplex_entry_full_1p'
+  - name: 'dataplex_entry_bigquery_table'
     primary_resource_id: 'tf_test_table'
     primary_resource_name: 'fmt.Sprintf("tf_test_table%s", context["random_suffix"])'
     ignore_read_extra:
