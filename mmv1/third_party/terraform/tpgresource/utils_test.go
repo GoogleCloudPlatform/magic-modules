@@ -6,7 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -972,7 +971,7 @@ func TestConflictError(t *testing.T) {
 	if !tpgresource.IsConflictError(confErr) {
 		t.Error("did not find that a 409 was a conflict error.")
 	}
-	if !tpgresource.IsConflictError(errwrap.Wrapf("wrap", confErr)) {
+	if !tpgresource.IsConflictError(fmt.Errorf("wrap: %w", confErr)) {
 		t.Error("did not find that a wrapped 409 was a conflict error.")
 	}
 	confErr = &googleapi.Error{
@@ -981,7 +980,7 @@ func TestConflictError(t *testing.T) {
 	if !tpgresource.IsConflictError(confErr) {
 		t.Error("did not find that a 412 was a conflict error.")
 	}
-	if !tpgresource.IsConflictError(errwrap.Wrapf("wrap", confErr)) {
+	if !tpgresource.IsConflictError(fmt.Errorf("wrap: %w", confErr)) {
 		t.Error("did not find that a wrapped 412 was a conflict error.")
 	}
 	// skipping negative tests as other cases may be added later.
