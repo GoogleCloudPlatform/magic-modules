@@ -855,7 +855,7 @@ func TestAccDataplexEntry_dataplexEntryUpdateBigQuery(t *testing.T) {
 				Config: testAccDataplexEntry_dataplexEntryFullUpdateBigQueryPrepare(context),
 			},
 			{
-				ResourceName:            "google_dataplex_entry.test_entry_full_1p",
+				ResourceName:            "google_dataplex_entry.test_entry_bigquery_table",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"aspects", "dataset_id", "table_id", "entry_id", "location"},
@@ -864,12 +864,12 @@ func TestAccDataplexEntry_dataplexEntryUpdateBigQuery(t *testing.T) {
 				Config: testAccDataplexEntry_dataplexEntryBigQueryUpdate(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_dataplex_entry.test_entry_full_1p", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_dataplex_entry.test_entry_bigquery_table", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
 			{
-				ResourceName:            "google_dataplex_entry.test_entry_full_1p",
+				ResourceName:            "google_dataplex_entry.test_entry_bigquery_table",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"aspects", "dataset_id", "table_id", "entry_id", "location"},
@@ -986,7 +986,7 @@ resource "google_bigquery_table" "example-table" {
   ])
 }
 
-resource "google_dataplex_entry" "test_entry_full_1p" {
+resource "google_dataplex_entry" "test_entry_bigquery_table" {
   entry_group_id = "@bigquery"
   project = "%{project_number}"
   location = "us-central1"
@@ -1125,7 +1125,7 @@ resource "google_bigquery_table" "example-table" {
   ])
 }
 
-resource "google_dataplex_entry" "test_entry_full_1p" {
+resource "google_dataplex_entry" "test_entry_bigquery_table" {
   entry_group_id = "@bigquery"
   project = "%{project_number}"
   location = "us-central1"
