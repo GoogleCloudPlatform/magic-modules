@@ -23,3 +23,4 @@ fields:
   - field: 'sql_server_user_details.disabled'
   - field: 'sql_server_user_details.server_roles'
   - api_field: 'type'
+  - api_field: 'database_roles'
