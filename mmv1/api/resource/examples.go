@@ -25,8 +25,9 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"github.com/golang/glog"
+	"gopkg.in/yaml.v3"
 )
 
 // Generates configs to be shown as examples in docs and outputted as tests
@@ -56,6 +57,51 @@ type Examples struct {
 	// tests. Permissions attached to resources created in a test should instead
 	// be provisioned with standard terraform resources.
 	BootstrapIam []IamMember `yaml:"bootstrap_iam,omitempty"`
+
+	// The version name of of the example's version if it's different than the
+	// resource version, eg. `beta`
+	//
+	// This should be the highest version of all the features used in the
+	// example; if there's a single beta field in an example, the example's
+	// min_version is beta. This is only needed if an example uses features
+	// with a different version than the resource; a beta resource's examples
+	// are all automatically versioned at beta.
+	//
+	// When an example has a version of beta, each resource must use the
+	// `google-beta` provider in the config. If the `google` provider is
+	// implicitly used, the test will fail.
+	//
+	// NOTE: Until Terraform 0.12 is released and is used in the OiCS tests, an
+	// explicit provider block should be defined. While the tests @ 0.12 will
+	// use `google-beta` automatically, past Terraform versions required an
+	// explicit block.
+	MinVersion string `yaml:"min_version,omitempty"`
+
+	// Extra properties to ignore read on during import.
+	// These properties will likely be custom code.
+	IgnoreReadExtra []string `yaml:"ignore_read_extra,omitempty"`
+
+	// Whether to skip generating tests for this resource
+	ExcludeTest bool `yaml:"exclude_test,omitempty"`
+
+	// Whether to skip generating docs for this example
+	ExcludeDocs bool `yaml:"exclude_docs,omitempty"`
+
+	// Whether to skip import tests for this example
+	ExcludeImportTest bool `yaml:"exclude_import_test,omitempty"`
+
+	// The name of the primary resource for use in IAM tests. IAM tests need
+	// a reference to the primary resource to create IAM policies for
+	PrimaryResourceName string `yaml:"primary_resource_name,omitempty"`
+
+	// The name of the location/region override for use in IAM tests. IAM
+	// tests may need this if the location is not inherited on the resource
+	// for one reason or another
+	RegionOverride string `yaml:"region_override,omitempty"`
+
+	// The path to this example's Terraform config.
+	// Defaults to `templates/terraform/examples/{{name}}.tf.erb`
+	ConfigPath string `yaml:"config_path,omitempty"`
 
 	// Vars is a Hash from template variable names to output variable names.
 	// It will use the provided value as a prefix for generated tests, and
@@ -108,51 +154,6 @@ type Examples struct {
 	// See test_vars_overrides for more details
 	OicsVarsOverrides map[string]string `yaml:"oics_vars_overrides,omitempty"`
 
-	// The version name of of the example's version if it's different than the
-	// resource version, eg. `beta`
-	//
-	// This should be the highest version of all the features used in the
-	// example; if there's a single beta field in an example, the example's
-	// min_version is beta. This is only needed if an example uses features
-	// with a different version than the resource; a beta resource's examples
-	// are all automatically versioned at beta.
-	//
-	// When an example has a version of beta, each resource must use the
-	// `google-beta` provider in the config. If the `google` provider is
-	// implicitly used, the test will fail.
-	//
-	// NOTE: Until Terraform 0.12 is released and is used in the OiCS tests, an
-	// explicit provider block should be defined. While the tests @ 0.12 will
-	// use `google-beta` automatically, past Terraform versions required an
-	// explicit block.
-	MinVersion string `yaml:"min_version,omitempty"`
-
-	// Extra properties to ignore read on during import.
-	// These properties will likely be custom code.
-	IgnoreReadExtra []string `yaml:"ignore_read_extra,omitempty"`
-
-	// Whether to skip generating tests for this resource
-	ExcludeTest bool `yaml:"exclude_test,omitempty"`
-
-	// Whether to skip generating docs for this example
-	ExcludeDocs bool `yaml:"exclude_docs,omitempty"`
-
-	// Whether to skip import tests for this example
-	ExcludeImportTest bool `yaml:"exclude_import_test,omitempty"`
-
-	// The name of the primary resource for use in IAM tests. IAM tests need
-	// a reference to the primary resource to create IAM policies for
-	PrimaryResourceName string `yaml:"primary_resource_name,omitempty"`
-
-	// The name of the location/region override for use in IAM tests. IAM
-	// tests may need this if the location is not inherited on the resource
-	// for one reason or another
-	RegionOverride string `yaml:"region_override,omitempty"`
-
-	// The path to this example's Terraform config.
-	// Defaults to `templates/terraform/examples/{{name}}.tf.erb`
-	ConfigPath string `yaml:"config_path,omitempty"`
-
 	// If the example should be skipped during VCR testing.
 	// This is the case when something about the resource or config causes VCR to fail for example
 	// a resource with a unique identifier generated within the resource via id.UniqueId()
@@ -179,31 +180,61 @@ type Examples struct {
 }
 
 // Set default value for fields
-func (e *Examples) UnmarshalYAML(unmarshal func(any) error) error {
+func (e *Examples) UnmarshalYAML(value *yaml.Node) error {
 	type exampleAlias Examples
 	aliasObj := (*exampleAlias)(e)
 
-	err := unmarshal(aliasObj)
+	err := value.Decode(aliasObj)
 	if err != nil {
 		return err
 	}
 
 	if e.ConfigPath == "" {
-		e.ConfigPath = fmt.Sprintf("templates/terraform/examples/%s.tf.tmpl", e.Name)
+		e.ConfigPath = DefaultConfigPath(e.Name)
 	}
-	e.SetHCLText()
 
 	return nil
 }
 
-func (e *Examples) Validate(rName string) {
-	if e.Name == "" {
-		log.Fatalf("Missing `name` for one example in resource %s", rName)
+// MarshalYAML implements a custom marshaller for the Examples struct.
+// It uses a generic helper to omit fields that are set to their default values.
+func (e *Examples) MarshalYAML() (interface{}, error) {
+	// Use a type alias to prevent infinite recursion.
+	type exampleAlias Examples
+
+	// Create a defaults object by unmarshalling an empty node, which populates defaults.
+	// Here, we can create one manually based on the unmarshal logic.
+	defaults := Examples{}
+	if e.Name != "" {
+		defaults.ConfigPath = DefaultConfigPath(e.Name)
 	}
-	e.ValidateExternalProviders()
+
+	// Use the generic helper to create a clone with default values zeroed out.
+	clone, err := utils.OmitDefaultsForMarshaling(*e, defaults)
+	if err != nil {
+		return nil, err
+	}
+
+	return (*exampleAlias)(clone.(*Examples)), nil
 }
 
-func (e *Examples) ValidateExternalProviders() {
+// DefaultConfigPath returns the default path for an example's Terraform config.
+// It returns an empty string if the example's Name is not set.
+func DefaultConfigPath(name string) string {
+	if name == "" {
+		return ""
+	}
+	return fmt.Sprintf("templates/terraform/examples/%s.tf.tmpl", name)
+}
+
+func (e *Examples) Validate(rName string) error {
+	if e.Name == "" {
+		return fmt.Errorf("missing `name` for one example in resource %s", rName)
+	}
+	return e.ValidateExternalProviders()
+}
+
+func (e *Examples) ValidateExternalProviders() error {
 	// Official providers supported by HashiCorp
 	// https://registry.terraform.io/search/providers?namespace=hashicorp&tier=official
 	HASHICORP_PROVIDERS := []string{"aws", "random", "null", "template", "azurerm", "kubernetes", "local",
@@ -219,12 +250,14 @@ func (e *Examples) ValidateExternalProviders() {
 	}
 
 	if len(unallowedProviders) > 0 {
-		log.Fatalf("Providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders)
+		return fmt.Errorf("Providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders)
 	}
+
+	return nil
 }
 
 // Executes example templates for documentation and tests
-func (e *Examples) SetHCLText() {
+func (e *Examples) LoadHCLText(baseDir string) (err error) {
 	originalVars := e.Vars
 	originalTestEnvVars := e.TestEnvVars
 	docTestEnvVars := make(map[string]string)
@@ -251,7 +284,10 @@ func (e *Examples) SetHCLText() {
 		docTestEnvVars[key] = docs_defaults[e.TestEnvVars[key]]
 	}
 	e.TestEnvVars = docTestEnvVars
-	e.DocumentationHCLText = e.ExecuteTemplate()
+	e.DocumentationHCLText, err = e.ExecuteTemplate(baseDir)
+	if err != nil {
+		return err
+	}
 	e.DocumentationHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.DocumentationHCLText, "\n")
 
 	// Remove region tags
@@ -292,7 +328,10 @@ func (e *Examples) SetHCLText() {
 
 	e.Vars = testVars
 	e.TestEnvVars = testTestEnvVars
-	e.TestHCLText = e.ExecuteTemplate()
+	e.TestHCLText, err = e.ExecuteTemplate(baseDir)
+	if err != nil {
+		return err
+	}
 	e.TestHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.TestHCLText, "\n")
 	// Remove region tags
 	e.TestHCLText = re1.ReplaceAllString(e.TestHCLText, "")
@@ -302,12 +341,13 @@ func (e *Examples) SetHCLText() {
 	// Reset the example
 	e.Vars = originalVars
 	e.TestEnvVars = originalTestEnvVars
+	return nil
 }
 
-func (e *Examples) ExecuteTemplate() string {
-	templateContent, err := os.ReadFile(e.ConfigPath)
+func (e *Examples) ExecuteTemplate(baseDir string) (string, error) {
+	templateContent, err := os.ReadFile(filepath.Join(baseDir, e.ConfigPath))
 	if err != nil {
-		glog.Exit(err)
+		return "", err
 	}
 
 	fileContentString := string(templateContent)
@@ -319,15 +359,14 @@ func (e *Examples) ExecuteTemplate() string {
 	validateRegexForContents(varRegex, fileContentString, e.ConfigPath, "vars", e.Vars)
 
 	templateFileName := filepath.Base(e.ConfigPath)
-
 	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).Parse(fileContentString)
 	if err != nil {
-		glog.Exit(err)
+		return "", err
 	}
 
 	contents := bytes.Buffer{}
 	if err = tmpl.ExecuteTemplate(&contents, templateFileName, e); err != nil {
-		glog.Exit(err)
+		return "", err
 	}
 
 	rs := contents.String()
@@ -336,7 +375,7 @@ func (e *Examples) ExecuteTemplate() string {
 		rs = fmt.Sprintf("%s\n", rs)
 	}
 
-	return rs
+	return rs, nil
 }
 
 func (e *Examples) OiCSLink() string {
@@ -370,6 +409,7 @@ func (e *Examples) ResourceType(terraformName string) string {
 
 // Executes example templates for documentation and tests
 func (e *Examples) SetOiCSHCLText() {
+	var err error
 	originalVars := e.Vars
 	originalTestEnvVars := e.TestEnvVars
 
@@ -388,7 +428,12 @@ func (e *Examples) SetOiCSHCLText() {
 	}
 
 	e.Vars = testVars
-	e.OicsHCLText = e.ExecuteTemplate()
+	// SetOiCSHCLText is generated from the provider, assume base directory is
+	// always relative for this case
+	e.OicsHCLText, err = e.ExecuteTemplate("")
+	if err != nil {
+		log.Fatal(err)
+	}
 	e.OicsHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.OicsHCLText, "\n")
 
 	// Remove region tags

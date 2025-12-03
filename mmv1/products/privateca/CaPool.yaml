@@ -105,7 +105,7 @@ properties:
         type: Array
         description: |
           If any AllowedKeyType is specified, then the certificate request's public key must match one of the key types listed here.
-          Otherwise, any key may be used.
+          Otherwise, any key may be used. You can specify only one key type of those listed here.
         item_type:
           type: NestedObject
           properties:
@@ -518,11 +518,9 @@ properties:
       Used when customer would like to encrypt data at rest. The customer-provided key will be used
       to encrypt the Subject, SubjectAltNames and PEM-encoded certificate fields. When unspecified,
       customer data will remain unencrypted.
-    immutable: true
     properties:
       - name: 'cloudKmsKey'
         type: String
         description: |
           The resource name for an existing Cloud KMS key in the format
           `projects/*/locations/*/keyRings/*/cryptoKeys/*`.
-        immutable: true

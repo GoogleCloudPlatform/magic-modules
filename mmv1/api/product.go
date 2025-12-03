@@ -14,20 +14,17 @@
 package api
 
 import (
-	"errors"
 	"fmt"
 	"log"
-	"os"
-	"path/filepath"
 	"reflect"
 	"regexp"
-	"sort"
 	"strings"
 	"unicode"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"golang.org/x/exp/slices"
+	"gopkg.in/yaml.v3"
 )
 
 // Represents a product to be managed
@@ -63,13 +60,13 @@ type Product struct {
 
 	// The validator "relative URI" of a resource, relative to the product
 	// base URL. Specific to defining the resource as a CAI asset.
-	CaiBaseUrl string
+	CaiBaseUrl string `yaml:"caibaseurl,omitempty"`
 
 	// The service name from CAI asset name, e.g. bigtable.googleapis.com.
 	CaiAssetService string `yaml:"cai_asset_service,omitempty"`
 
 	// CaiResourceType of resources that already have an AssetType constant defined in the product.
-	ResourcesWithCaiAssetType map[string]struct{}
+	ResourcesWithCaiAssetType map[string]struct{} `yaml:"resourceswithcaiassettype,omitempty"`
 
 	// A function reference designed for the rare case where you
 	// need to use retries in operation calls. Used for the service api
@@ -87,169 +84,11 @@ type Product struct {
 	Compiler string `yaml:"-"`
 }
 
-// Load compiles a product with all its resources from the given path and optional overrides
-// This loads the product configuration and all its resources into memory without generating any files
-func (p *Product) Load(productName string, version string, overrideDirectory string) error {
-	productYamlPath := filepath.Join(productName, "product.yaml")
-
-	var productOverridePath string
-	if overrideDirectory != "" {
-		productOverridePath = filepath.Join(overrideDirectory, productName, "product.yaml")
-	}
-
-	_, baseProductErr := os.Stat(productYamlPath)
-	baseProductExists := !errors.Is(baseProductErr, os.ErrNotExist)
-
-	_, overrideProductErr := os.Stat(productOverridePath)
-	overrideProductExists := !errors.Is(overrideProductErr, os.ErrNotExist)
-
-	if !(baseProductExists || overrideProductExists) {
-		return fmt.Errorf("%s does not contain a product.yaml file", productName)
-	}
-
-	// Compile the product configuration
-	if overrideProductExists {
-		if baseProductExists {
-			Compile(productYamlPath, p, overrideDirectory)
-			overrideApiProduct := &Product{}
-			Compile(productOverridePath, overrideApiProduct, overrideDirectory)
-			Merge(reflect.ValueOf(p).Elem(), reflect.ValueOf(*overrideApiProduct), version)
-		} else {
-			Compile(productOverridePath, p, overrideDirectory)
-		}
-	} else {
-		Compile(productYamlPath, p, overrideDirectory)
-	}
-
-	// Check if product exists at the requested version
-	if !p.ExistsAtVersionOrLower(version) {
-		return &ErrProductVersionNotFound{ProductName: productName, Version: version}
-	}
-
-	// Compile all resources
-	resources, err := p.loadResources(productName, version, overrideDirectory)
-	if err != nil {
-		return err
-	}
-
-	p.Objects = resources
-	p.PackagePath = productName
-	p.Validate()
-
-	return nil
-}
-
-// loadResources loads all resources for a product
-func (p *Product) loadResources(productName string, version string, overrideDirectory string) ([]*Resource, error) {
-	var resources []*Resource = make([]*Resource, 0)
-
-	// Get base resource files
-	resourceFiles, err := filepath.Glob(fmt.Sprintf("%s/*", productName))
-	if err != nil {
-		return nil, fmt.Errorf("cannot get resource files: %v", err)
-	}
-
-	// Compile base resources (skip those that will be merged with overrides)
-	for _, resourceYamlPath := range resourceFiles {
-		if filepath.Base(resourceYamlPath) == "product.yaml" || filepath.Ext(resourceYamlPath) != ".yaml" {
-			continue
-		}
-
-		// Skip if resource will be merged in the override loop
-		if overrideDirectory != "" {
-			resourceOverridePath := filepath.Join(overrideDirectory, resourceYamlPath)
-			_, overrideResourceErr := os.Stat(resourceOverridePath)
-			if !errors.Is(overrideResourceErr, os.ErrNotExist) {
-				continue
-			}
-		}
-
-		resource := p.loadResource(resourceYamlPath, "", version, overrideDirectory)
-		resources = append(resources, resource)
-	}
-
-	// Compile override resources
-	if overrideDirectory != "" {
-		resources, err = p.reconcileOverrideResources(productName, version, overrideDirectory, resources)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return resources, nil
-}
-
-// reconcileOverrideResources handles resolution of override resources
-func (p *Product) reconcileOverrideResources(productName string, version string, overrideDirectory string, resources []*Resource) ([]*Resource, error) {
-	productOverridePath := filepath.Join(overrideDirectory, productName, "product.yaml")
-	productOverrideDir := filepath.Dir(productOverridePath)
-
-	overrideFiles, err := filepath.Glob(fmt.Sprintf("%s/*", productOverrideDir))
-	if err != nil {
-		return nil, fmt.Errorf("cannot get override files: %v", err)
-	}
-
-	for _, overrideYamlPath := range overrideFiles {
-		if filepath.Base(overrideYamlPath) == "product.yaml" || filepath.Ext(overrideYamlPath) != ".yaml" {
-			continue
-		}
-
-		baseResourcePath := filepath.Join(productName, filepath.Base(overrideYamlPath))
-		resource := p.loadResource(baseResourcePath, overrideYamlPath, version, overrideDirectory)
-		resources = append(resources, resource)
-	}
-
-	// Sort resources by name for consistent output
-	sort.Slice(resources, func(i, j int) bool {
-		return resources[i].Name < resources[j].Name
-	})
-
-	return resources, nil
-}
-
-// loadResource loads a single resource with optional override
-func (p *Product) loadResource(baseResourcePath string, overrideResourcePath string, version string, overrideDirectory string) *Resource {
-	resource := &Resource{}
-
-	// Check if base resource exists
-	_, baseResourceErr := os.Stat(baseResourcePath)
-	baseResourceExists := !errors.Is(baseResourceErr, os.ErrNotExist)
-
-	if overrideResourcePath != "" {
-		if baseResourceExists {
-			// Merge base and override
-			Compile(baseResourcePath, resource, overrideDirectory)
-			overrideResource := &Resource{}
-			Compile(overrideResourcePath, overrideResource, overrideDirectory)
-			Merge(reflect.ValueOf(resource).Elem(), reflect.ValueOf(*overrideResource), version)
-			resource.SourceYamlFile = baseResourcePath
-		} else {
-			// Override only
-			Compile(overrideResourcePath, resource, overrideDirectory)
-		}
-	} else {
-		// Base only
-		Compile(baseResourcePath, resource, overrideDirectory)
-		resource.SourceYamlFile = baseResourcePath
-	}
-
-	// Set resource defaults and validate
-	resource.TargetVersionName = version
-	// SetDefault before AddExtraFields to ensure relevant metadata is available on existing fields
-	resource.SetDefault(p)
-	resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
-	// SetDefault after AddExtraFields to ensure relevant metadata is available for the newly generated fields
-	resource.SetDefault(p)
-	resource.Validate()
-
-	return resource
-}
-
-func (p *Product) UnmarshalYAML(unmarshal func(any) error) error {
+func (p *Product) UnmarshalYAML(value *yaml.Node) error {
 	type productAlias Product
 	aliasObj := (*productAlias)(p)
 
-	if err := unmarshal(aliasObj); err != nil {
+	if err := value.Decode(aliasObj); err != nil {
 		return err
 	}
 
@@ -465,6 +304,11 @@ func Merge(self, otherObj reflect.Value, version string) {
 	}
 
 	for i := 0; i < selfObj.NumField(); i++ {
+
+		// skip unexported fields
+		if !selfObj.Field(i).CanSet() {
+			continue
+		}
 
 		// skip if the override is the "empty" value
 		emptyOverrideValue := reflect.DeepEqual(reflect.Zero(otherObj.Field(i).Type()).Interface(), otherObj.Field(i).Interface())

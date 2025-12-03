@@ -22,6 +22,7 @@ base_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes
 self_link: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}
 create_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes?codeRepositoryIndexId={{code_repository_index_id}}
 delete_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}?force={{force_destroy}}
+collection_url_key: 'codeRepositoryIndexes'
 update_verb: 'PATCH'
 update_mask: true
 id_format: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}

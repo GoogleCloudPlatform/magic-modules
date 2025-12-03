@@ -65,3 +65,8 @@ resource "google_apigee_organization" "{{$.PrimaryResourceId}}" {
     google_project_service.apigee,
   ]
 }
+
+resource "time_sleep" "wait_after_destroy" {
+  destroy_duration = "150s"
+  depends_on = [google_apigee_organization.{{$.PrimaryResourceId}}]
+}

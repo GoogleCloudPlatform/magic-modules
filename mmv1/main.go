@@ -40,8 +40,6 @@ var providerFlag = flag.String("provider", "", "optional provider name. If speci
 
 var openapiGenerate = flag.Bool("openapi-generate", false, "Generate MMv1 YAML from openapi directory (Experimental)")
 
-var showImportDiffsFlag = flag.Bool("show-import-diffs", false, "write go import diffs to stdout")
-
 func main() {
 
 	// Handle all flags in main. Other functions must not access flag values directly.
@@ -58,10 +56,10 @@ func main() {
 		return
 	}
 
-	GenerateProducts(*productFlag, *resourceFlag, *providerFlag, *versionFlag, *outputPathFlag, *overrideDirectoryFlag, !*doNotGenerateCode, !*doNotGenerateDocs, *showImportDiffsFlag)
+	GenerateProducts(*productFlag, *resourceFlag, *providerFlag, *versionFlag, *outputPathFlag, *overrideDirectoryFlag, !*doNotGenerateCode, !*doNotGenerateDocs)
 }
 
-func GenerateProducts(product, resource, providerName, version, outputPath, overrideDirectory string, generateCode, generateDocs, showImportDiffs bool) {
+func GenerateProducts(product, resource, providerName, version, outputPath, overrideDirectory string, generateCode, generateDocs bool) {
 	if version == "" {
 		log.Printf("No version specified, assuming ga")
 		version = "ga"
@@ -75,11 +73,7 @@ func GenerateProducts(product, resource, providerName, version, outputPath, over
 	log.Printf("Building %s version", version)
 	log.Printf("Building %s provider", providerName)
 
-	loader := loader.Loader{
-		OverrideDirectory: overrideDirectory,
-		Version:           version,
-	}
-
+	loader := loader.NewLoader(loader.Config{Version: version, OverrideDirectory: overrideDirectory})
 	loadedProducts := loader.LoadProducts()
 
 	var productsToGenerate []string
@@ -114,8 +108,6 @@ func GenerateProducts(product, resource, providerName, version, outputPath, over
 	if generateCode {
 		providerToGenerate.CompileCommonFiles(outputPath, productsForVersion, "")
 	}
-
-	provider.FixImports(outputPath, showImportDiffs)
 }
 
 // GenerateProduct generates code and documentation for a product

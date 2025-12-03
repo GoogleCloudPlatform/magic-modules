@@ -109,6 +109,10 @@ var (
 					startDate: newDate(2025, 2, 25),
 					endDate:   newDate(2025, 3, 10),
 				},
+				{
+					startDate: newDate(2025, 11, 11),
+					endDate:   newDate(2025, 11, 24),
+				},
 			},
 		},
 		"roaks3": {
@@ -126,16 +130,16 @@ var (
 		"ScottSuarez": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 9, 26),
-					endDate:   newDate(2025, 10, 5),
+					startDate: newDate(2025, 12, 5),
+					endDate:   newDate(2025, 12, 15),
 				},
 			},
 		},
 		"shuyama1": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 5, 23),
-					endDate:   newDate(2025, 5, 30),
+					startDate: newDate(2025, 11, 25),
+					endDate:   newDate(2025, 12, 3),
 				},
 			},
 		},
