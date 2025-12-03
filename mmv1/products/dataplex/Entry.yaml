@@ -86,10 +86,9 @@ examples:
     ignore_read_extra:
       - 'aspects'
     vars:
-      table_id: 'tf_test_table'
-      dataset_id: 'tf_test_dataset'
-      entry_group_name: '@bigquery'
-      aspect_type_name: "aspect-type-full-1p"
+      table_id: 'table'
+      dataset_id: 'dataset'
+      aspect_type_name: "aspect-type"
     test_env_vars:
       project_number: 'PROJECT_NUMBER'
       project_id: 'PROJECT_NAME'
@@ -99,10 +98,8 @@ examples:
     ignore_read_extra:
       - 'aspects'
     vars:
-      glossary_id: 'tf-test-glossary'
-      glossary_term_id: 'tf-test-glossary-term'
-      entry_group_name: '@dataplex'
-      aspect_type_name: "aspect-type-full-1p"
+      glossary_id: 'glossary'
+      glossary_term_id: 'glossary-term'
     test_env_vars:
       project_number: 'PROJECT_NUMBER'
       project_id: 'PROJECT_NAME'
