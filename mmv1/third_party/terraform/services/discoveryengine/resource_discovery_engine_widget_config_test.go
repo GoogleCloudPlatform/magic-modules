@@ -66,8 +66,10 @@ resource "google_discovery_engine_search_engine" "basic" {
 
 resource "google_discovery_engine_widget_config" "basic" {
   location          = google_discovery_engine_search_engine.basic.location
-  engine_id         = google_discovery_engine_search_engine.basic.engine_id
-  access_settings {
+	collection_id     = "default_collection"
+	engine_id         = google_discovery_engine_search_engine.basic.engine_id
+	widget_config_id  = "default_search_widget_config"
+	access_settings {
     enable_web_app      = true
     allow_public_access = false
     allowlisted_domains = []
@@ -83,7 +85,9 @@ resource "google_discovery_engine_widget_config" "basic" {
     enable_safe_search                = false
     enable_search_as_you_type         = false
     enable_visual_content_summary     = false
-    generative_answer_config {
+		default_search_request_order_by   = "relevanceScore"
+		result_description_type           = "SNIPPET"
+		generative_answer_config {
       disable_related_questions       = false
       ignore_adversarial_query        = false
       ignore_low_relevant_content     = false
@@ -155,8 +159,10 @@ resource "google_discovery_engine_search_engine" "basic" {
 
 resource "google_discovery_engine_widget_config" "basic" {
   location                            = google_discovery_engine_search_engine.basic.location
-  engine_id                           = google_discovery_engine_search_engine.basic.engine_id
-  access_settings {
+	collection_id                       = "default_collection"
+	engine_id                           = google_discovery_engine_search_engine.basic.engine_id
+	widget_config_id                    = "default_search_widget_config"
+	access_settings {
     enable_web_app                    = true
     workforce_identity_pool_provider  = "locations/global/workforcePools/workforce-pool-id/providers/workforce-pool-provider"
     allow_public_access               = false
@@ -173,7 +179,9 @@ resource "google_discovery_engine_widget_config" "basic" {
     enable_safe_search                = false
     enable_search_as_you_type         = false
     enable_visual_content_summary     = false
-    generative_answer_config {
+		default_search_request_order_by   = "relevanceScore"
+		result_description_type           = "SNIPPET"
+		generative_answer_config {
       disable_related_questions       = false
       ignore_adversarial_query        = false
       ignore_low_relevant_content     = false
