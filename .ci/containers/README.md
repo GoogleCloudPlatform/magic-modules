@@ -17,7 +17,7 @@ Before you begin, set up Docker (including configuring it to [authenticate with 
 2. Build & push the image with the `testing` tag:
    ```bash
    gcloud builds submit . \
-    --tag us.gcr.io/graphite-docker-images/go-plus:testing \
+    --tag us.gcr.io/graphite-docker-images/<target-image>:testing \
     --project graphite-docker-images
    ```
 3. Update cloudbuild yaml files to reference the image you just pushed by adding the `:testing` suffix
