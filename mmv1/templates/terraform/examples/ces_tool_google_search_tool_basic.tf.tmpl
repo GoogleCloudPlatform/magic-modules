@@ -13,7 +13,9 @@ resource "google_ces_tool" "{{$.PrimaryResourceId}}" {
     execution_type = "SYNCHRONOUS"
     google_search_tool {
         name            = "example-tool"
+        context_urls    = ["example.com", "example2.com"]
         description     = "example-description"
         exclude_domains = ["example.com", "example2.com"]
+        preferred_domains = ["example3.com", "example4.com"]
     }
 }

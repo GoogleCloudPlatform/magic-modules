@@ -387,7 +387,7 @@ type TGCResource struct {
 	ExcludeTgc bool `yaml:"exclude_tgc,omitempty"`
 
 	// If true, include resource in the new package of TGC (terraform-provider-conversion)
-	IncludeInTGCNext bool `yaml:"include_in_tgc_next_DO_NOT_USE,omitempty"`
+	IncludeInTGCNext bool `yaml:"include_in_tgc_next,omitempty"`
 
 	// The resource kind in CAI.
 	// If this is not set, then :name is used instead.
@@ -416,6 +416,11 @@ type TGCResource struct {
 
 	// [Optional] It overrides the default Cai asset name format, which is the resource id format
 	CaiAssetNameFormat string `yaml:"cai_asset_name_format,omitempty"`
+
+	// [Optional] It overrides the Cai asset name format during cai2hcl conversion.
+	// Its usage is strictly limited to scenarios requiring the extraction of parameters
+	// from the Google Cloud Asset Inventory (CAI) asset name format
+	Cai2hclNameFormat string `yaml:"cai2hcl_name_format,omitempty"`
 }
 
 // // MarshalYAML implements a custom marshaller to omit dynamic default values.
@@ -709,6 +714,10 @@ func (r Resource) SettableProperties() []*Type {
 	})
 
 	props = google.Reject(props, func(v *Type) bool {
+		return v.ClientSide
+	})
+
+	props = google.Reject(props, func(v *Type) bool {
 		return v.IsA("KeyValueLabels") || v.IsA("KeyValueAnnotations")
 	})
 
@@ -850,7 +859,6 @@ func (r *Resource) attachConstraintGroup(groupType string, source []string) *[]s
 }
 
 func buildWriteOnlyField(name string, versionFieldName string, originalField *Type) *Type {
-	description := fmt.Sprintf("%s Note: This property is write-only and will not be read from the API. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", originalField.Description)
 	originalFieldLineage := originalField.TerraformLineage()
 	newFieldLineage := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(name))
 	requiredWith := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(versionFieldName))
@@ -863,7 +871,7 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 	options := []func(*Type){
 		propertyWithType("String"),
 		propertyWithRequired(false),
-		propertyWithDescription(description),
+		propertyWithDescription(originalField.Description),
 		propertyWithWriteOnly(true),
 		propertyWithApiName(apiName),
 		propertyWithIgnoreRead(true),
@@ -880,13 +888,17 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 		}
 		options = append(options, propertyWithExactlyOneOfPointer(originalField.ExactlyOneOfGroup))
 	} else {
+		newConflicts := deduplicateSliceOfStrings(append([]string{originalFieldLineage}, originalField.Conflicts...))
+		newConflicts = slices.DeleteFunc(newConflicts, func(s string) bool {
+			return s == newFieldLineage
+		})
+		options = append(options, propertyWithConflicts(newConflicts))
+
 		if originalField.ConflictsGroup != nil {
 			*originalField.ConflictsGroup = deduplicateSliceOfStrings(append(*originalField.ConflictsGroup, newFieldLineage))
 		} else {
 			originalField.Conflicts = deduplicateSliceOfStrings(append(originalField.Conflicts, newFieldLineage))
 		}
-		newConflicts := deduplicateSliceOfStrings(append([]string{originalFieldLineage}, originalField.Conflicts...))
-		options = append(options, propertyWithConflicts(newConflicts))
 	}
 
 	if originalField.AtLeastOneOfGroup != nil {
@@ -898,7 +910,7 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 }
 
 func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField *Type) *Type {
-	description := fmt.Sprintf("Triggers update of %s write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", google.Underscore(writeOnlyField.Name))
+	description := fmt.Sprintf("Triggers update of `%s` write-only. Increment this value when an update to `%s` is needed. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)", google.Underscore(writeOnlyField.Name), google.Underscore(writeOnlyField.Name))
 	requiredWith := strings.ReplaceAll(originalField.TerraformLineage(), google.Underscore(originalField.Name), google.Underscore(writeOnlyField.Name))
 
 	options := []func(*Type){
@@ -2331,6 +2343,15 @@ func (r Resource) GetCaiAssetNameTemplate() string {
 	}
 
 	return fmt.Sprintf("//%s.googleapis.com/%s", r.CaiProductBackendName(r.CaiProductBaseUrl()), r.IdFormat)
+}
+
+// Gets a format string for CAI asset name
+func (r Resource) Cai2hclAssetNameTemplate() string {
+	if r.Cai2hclNameFormat != "" {
+		return fmt.Sprintf("//%s.googleapis.com/%s", r.CaiProductBackendName(r.CaiProductBaseUrl()), r.Cai2hclNameFormat)
+	}
+
+	return r.GetCaiAssetNameTemplate()
 }
 
 // Ignores verifying CAI asset name if it is one computed field

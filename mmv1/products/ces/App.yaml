@@ -157,6 +157,9 @@ properties:
    type: String
    description: Timestamp when the app was created.
    output: true
+ - name: pinned
+   type: Boolean
+   description: Whether the app is pinned in the app list.
  - name: dataStoreSettings
    type: NestedObject
    description: Data store related settings for the app.
@@ -490,6 +493,9 @@ properties:
        description: Represents a select subset of an OpenAPI 3.0 schema object.
        required: true
        properties:
+        - name: title
+          type: String
+          description: The title of the schema.
         - name: description
           type: String
           description: The description of the data.

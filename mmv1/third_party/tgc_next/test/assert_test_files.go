@@ -34,26 +34,26 @@ var (
 	tmpDir     = os.TempDir()
 )
 
-func BidirectionalConversion(t *testing.T, ignoredFields []string) {
+func BidirectionalConversion(t *testing.T, ignoredFields []string, primaryResourceType string) {
 	testName := t.Name()
 	subTestName := GetSubTestName(testName)
 	if subTestName == "" {
-		t.Skipf("The subtest is unavailable")
+		t.Skipf("%s: The subtest is unavailable", testName)
 	}
 
 	stepNumbers, err := getStepNumbers(subTestName)
 	if err != nil {
-		t.Fatalf("error preparing the input data: %v", err)
+		t.Fatalf("%s: error preparing the input data: %v", subTestName, err)
 	}
 
 	if len(stepNumbers) == 0 {
-		t.Skipf("test steps are unavailable")
+		t.Skipf("%s: test steps are unavailable", subTestName)
 	}
 
 	// Create a temporary directory for running terraform.
 	tfDir, err := os.MkdirTemp(tmpDir, "terraform")
 	if err != nil {
-		t.Fatalf("error creating a temporary directory for running terraform: %v", err)
+		t.Fatalf("%s: error creating a temporary directory for running terraform: %v", subTestName, err)
 	}
 	defer os.RemoveAll(tfDir)
 
@@ -63,12 +63,13 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 		stepName := fmt.Sprintf("step%d", stepN)
 		t.Run(stepName, func(t *testing.T) {
 			retries := 0
+			tName := fmt.Sprintf("%s_%s", subTestName, stepName)
 			flakyAction := func(ctx context.Context) error {
 				testData, err := prepareTestData(subTestName, stepN, retries)
 				retries++
-				log.Printf("Starting the attempt %d", retries)
+				log.Printf("%s: Starting the attempt %d", tName, retries)
 				if err != nil {
-					return fmt.Errorf("error preparing the input data: %v", err)
+					return fmt.Errorf("%s: error preparing the input data: %v", tName, err)
 				}
 
 				if testData == nil {
@@ -79,15 +80,17 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 				// Otherwise, test all of the resources in the test.
 				primaryResource := testData.PrimaryResource
 				resourceTestData := testData.ResourceTestData
-				tName := fmt.Sprintf("%s_%s", subTestName, stepName)
 				if primaryResource != "" {
-					t.Logf("Test for the primary resource %s begins.", primaryResource)
+					t.Logf("%s: Test for the primary resource %s begins.", tName, primaryResource)
 					err = testSingleResource(t, tName, resourceTestData[primaryResource], tfDir, ignoredFields, logger, true)
 					if err != nil {
 						return err
 					}
 				} else {
-					for _, testData := range resourceTestData {
+					for address, testData := range resourceTestData {
+						if !strings.HasPrefix(address, primaryResourceType) {
+							continue
+						}
 						err = testSingleResource(t, tName, testData, tfDir, ignoredFields, logger, false)
 						if err != nil {
 							return err
@@ -101,13 +104,13 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 			// Note maxAttempts-1 is retries, not attempts.
 			backoffPolicy := retry.WithMaxRetries(maxAttempts-1, retry.NewConstant(50*time.Millisecond))
 
-			t.Log("Starting test with retry logic.")
+			t.Logf("%s: Starting test with retry logic.", tName)
 
 			if err := retry.Do(context.Background(), backoffPolicy, flakyAction); err != nil {
 				if strings.Contains(err.Error(), "test data is unavailable") {
-					t.Skipf("Test skipped because data was unavailable after all retries: %v", err)
+					t.Skipf("%s: Test skipped because data was unavailable after all retries: %v", tName, err)
 				} else {
-					t.Fatalf("Failed after all attempts %d: %v", maxAttempts, err)
+					t.Fatalf("%s: Failed after all attempts %d: %v", tName, maxAttempts, err)
 				}
 			}
 		})
@@ -119,7 +122,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	resourceType := testData.ResourceType
 	var tfplan2caiSupported, cai2hclSupported bool
 	if _, tfplan2caiSupported = tfplan2caiconverters.ConverterMap[resourceType]; !tfplan2caiSupported {
-		log.Printf("%s is not supported in tfplan2cai conversion.", resourceType)
+		log.Printf("%s: %s is not supported in tfplan2cai conversion.", testName, resourceType)
 	}
 
 	if testData.Cai == nil {
@@ -132,11 +135,11 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		assets = append(assets, assetData.CaiAsset)
 		assetType := assetData.CaiAsset.Type
 		if assetType == "" {
-			log.Printf("cai asset is unavailable for %s", assetName)
+			log.Printf("%s: cai asset is unavailable for %s", testName, assetName)
 			return retry.RetryableError(fmt.Errorf("fail: test data is unavailable"))
 		}
 		if _, cai2hclSupported = cai2hclconverters.ConverterMap[assetType]; !cai2hclSupported {
-			log.Printf("%s is not supported in cai2hcl conversion.", assetType)
+			log.Printf("%s: %s is not supported in cai2hcl conversion.", testName, assetType)
 		}
 	}
 
@@ -206,10 +209,10 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 
 	// Sometimes, the reason for missing fields could be CAI asset data issue.
 	if len(missingKeys) > 0 {
-		log.Printf("missing fields in resource %s after cai2hcl conversion:\n%s", testData.ResourceAddress, missingKeys)
+		log.Printf("%s: missing fields in resource %s after cai2hcl conversion:\n%s", testName, testData.ResourceAddress, missingKeys)
 		return retry.RetryableError(fmt.Errorf("missing fields"))
 	}
-	log.Printf("Step 1 passes for resource %s. All of the fields in raw config are in export config", testData.ResourceAddress)
+	log.Printf("%s: Step 1 passes for resource %s. All of the fields in raw config are in export config", testName, testData.ResourceAddress)
 
 	// Step 2
 	// Run a terraform plan using export_config.
@@ -248,18 +251,18 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		}
 
 		if err = compareCaiAssets(reexportAssets, roundtripAssets, ignoredFieldSet); err != nil {
-			log.Printf("Roundtrip config is different from the export config.\nroundtrip config:\n%s\nexport config:\n%s", string(roundtripConfigData), string(exportConfigData))
+			log.Printf("%s: Roundtrip config is different from the export config.\nroundtrip config:\n%s\nexport config:\n%s", testName, string(roundtripConfigData), string(exportConfigData))
 			return fmt.Errorf("test %s got diff (-want +got): %s", testName, diff)
 		}
 	}
-	log.Printf("Step 2 passes for resource %s. Roundtrip config and export config are identical", testData.ResourceAddress)
+	log.Printf("%s: Step 2 passes for resource %s. Roundtrip config and export config are identical", testName, testData.ResourceAddress)
 
 	// Step 3
 	// Compare most fields between the exported asset and roundtrip asset, except for "data" field for resource
 	if err = compareCaiAssets(assets, roundtripAssets, ignoredFieldSet); err != nil {
 		return err
 	}
-	log.Printf("Step 3 passes for resource %s. Exported asset and roundtrip asset are identical", testData.ResourceAddress)
+	log.Printf("%s: Step 3 passes for resource %s. Exported asset and roundtrip asset are identical", testName, testData.ResourceAddress)
 
 	return nil
 }

@@ -46,7 +46,7 @@ custom_code:
   pre_update: 'templates/terraform/pre_update/datastream_stream.go.tmpl'
   post_update: 'templates/terraform/post_update/datastream_stream.go.tmpl'
   post_import: 'templates/terraform/post_import/datastream_stream.go.tmpl'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 custom_diff:
   - 'resourceDatastreamStreamCustomDiff'
 examples:
