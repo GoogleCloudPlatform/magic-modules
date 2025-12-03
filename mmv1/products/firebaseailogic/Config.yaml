@@ -16,6 +16,10 @@ name: Config
 min_version: beta
 description: Configuration for Firbase AI Logic.
 base_url: projects/{{project}}/locations/{{location}}/config
+references:
+  guides:
+    'Official Documentation': 'https://firebase.google.com/docs/ai-logic'
+  api: 'https://firebase.google.com/docs/reference/ai-logic/rest'
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/config
 id_format: projects/{{project}}/locations/{{location}}/config
