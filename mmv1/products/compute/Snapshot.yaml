@@ -276,3 +276,10 @@ properties:
       Whether to attempt an application consistent snapshot by informing the OS to prepare for the snapshot process.
     ignore_read: true
     min_version: 'beta'
+  - name: 'snapshotType'
+    type: Enum
+    description: |
+      Indicates the type of the snapshot.
+    enum_values:
+      - 'ARCHIVE'
+      - 'STANDARD'
