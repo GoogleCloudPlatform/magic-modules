@@ -1,12 +1,15 @@
 data "google_project" "project" {
+provider = "google-beta"
 }
 
 resource "google_compute_cross_site_network" "example-cross-site-network" {
+  provider = "google-beta"
   name        = "{{index $.Vars "cross_site_network"}}"
   description = "Example cross site network"
 }
 
 resource "google_compute_wire_group" "{{$.PrimaryResourceId}}" {
+  provider = "google-beta"
   name               = "{{index $.Vars "name"}}"
   description        = "{{index $.Vars "description"}}"
   cross_site_network = "{{index $.Vars "cross_site_network"}}"
@@ -17,6 +20,9 @@ resource "google_compute_wire_group" "{{$.PrimaryResourceId}}" {
     bandwidth_unmetered = 10
     fault_response =  "NONE"
     bandwidth_allocation = "ALLOCATE_PER_WIRE"
+  }
+  wire_group_properties {
+    type = "WIRE"
   }
   admin_enabled = true
 }

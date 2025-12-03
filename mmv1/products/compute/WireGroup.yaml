@@ -49,6 +49,15 @@ examples:
       cross_site_network: 'test-cross-site-network'
     test_env_vars:
       project: 'PROJECT_NAME'
+  - name: 'compute_wire_group_basic_beta'
+    primary_resource_id: 'example-test-wire-group-beta'
+    vars:
+      name: 'test-wire-group-beta'
+      description: 'Example Wire Group Beta'
+      cross_site_network: 'test-cross-site-network-beta'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    min_version: 'beta'
 parameters:
   - name: 'crossSiteNetwork'
     type: ResourceRef
@@ -118,6 +127,7 @@ properties:
     type: NestedObject
     description: |
       Properties specific to the wire group.
+    min_version: 'beta'
     properties:
       - name: type
         type: enum
