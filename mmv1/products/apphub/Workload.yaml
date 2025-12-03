@@ -173,6 +173,15 @@ properties:
                   type: String
                   description: "The resource name for the Extended Metadata Schema."
                   output: true
+      - name: 'identity'
+        type: NestedObject
+        description: "The identity associated with the workload."
+        output: true
+        properties:
+          - name: 'principal'
+            type: String
+            description: "The principal of the identity."
+            output: true
   - name: 'discoveredWorkload'
     type: String
     description: 'Immutable. The resource name of the original discovered workload.'
