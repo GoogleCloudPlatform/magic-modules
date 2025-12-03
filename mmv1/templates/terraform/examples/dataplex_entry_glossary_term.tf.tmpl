@@ -70,23 +70,19 @@ resource "google_dataplex_glossary" "example-glossary" {
 }
 
 resource "google_dataplex_glossary_term" "example-glossary-term" {
-  parent = "projects/{{index $.TestEnvVars "project_number"}}/locations/us-central1/glossaries/${google_dataplex_glossary.example-glossary.glossary_id}"
+  parent = "projects/{{index $.TestEnvVars "project_id"}}/locations/us-central1/glossaries/${google_dataplex_glossary.example-glossary.glossary_id}"
   glossary_id = google_dataplex_glossary.example-glossary.glossary_id
   location = "us-central1"
   term_id = "{{index $.Vars "glossary_term_id"}}"
-  labels = { "tag": "test-tf" }
-  display_name = "terraform term"
-  description = "term created by terraform"
 }
 
 resource "google_dataplex_entry" "{{$.PrimaryResourceId}}" {
   entry_group_id = "@dataplex"
   project = "{{index $.TestEnvVars "project_number"}}"
   location = "us-central1"
-  entry_id = "projects/{{index $.TestEnvVars "project_id"}}/glossaries/${google_dataplex_glossary.example-glossary.glossary_id}/terms/${google_dataplex_glossary_term.example-glossary-term.term_id}"
+  entry_id = "projects/{{index $.TestEnvVars "project_number"}}/locations/us-central1/glossaries/${google_dataplex_glossary.example-glossary.glossary_id}/terms/${google_dataplex_glossary_term.example-glossary-term.term_id}"
   entry_type = "projects/655216118709/locations/global/entryTypes/glossary-term"
-  fully_qualified_name = "dataplex:{{index $.TestEnvVars "project_id"}}.${google_dataplex_glossary.example-glossary.glossary_id}.${google_dataplex_glossary_term.example-glossary-term.term_id}"
-  parent_entry = "projects/{{index $.TestEnvVars "project_number"}}/locations/us-central1/entryGroups/@glossary/entries/projects/{{index $.TestEnvVars "project_id"}}/glossaries/${google_dataplex_glossary.example-glossary.glossary_id}"
+  parent_entry = "projects/{{index $.TestEnvVars "project_number"}}/locations/us-central1/entryGroups/@dataplex/entries/projects/{{index $.TestEnvVars "project_number"}}/locations/us-central1/glossaries/${google_dataplex_glossary.example-glossary.glossary_id}"
 
   aspects {
      aspect_key = "655216118709.global.overview"
