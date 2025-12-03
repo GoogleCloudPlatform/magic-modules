@@ -14,16 +14,14 @@ The images are named according to their use. We have a small number of images th
 Before you begin, set up Docker (including configuring it to [authenticate with gcloud](https://cloud.google.com/container-registry/docs/advanced-authentication#gcloud-helper)).
 
 1. Make changes to the Dockerfile
-2. Build the image with the `testing` tag:
+2. Build & push the image with the `testing` tag:
    ```bash
-   sudo docker build . --tag gcr.io/graphite-docker-images/bash-plus:testing
+   gcloud builds submit . \
+    --tag us.gcr.io/graphite-docker-images/go-plus:testing \
+    --project graphite-docker-images
    ```
-3. Push the image:
-   ```bash
-   sudo docker push gcr.io/graphite-docker-images/bash-plus:testing
-   ```
-4. Update cloudbuild yaml files to reference the image you just pushed by adding the `:testing` suffix
-5. Update files that will cause the cloudbuild yaml changes (and therefore your changes) to be exercised
+3. Update cloudbuild yaml files to reference the image you just pushed by adding the `:testing` suffix
+4. Update files that will cause the cloudbuild yaml changes (and therefore your changes) to be exercised
    - Tip: Modifying `mmv1/third_party/terraform/services/compute/metadata.go.tmpl` will trigger builds for TPG, TPGB, and TGC.
-6. Create a PR with these changes.
-7. Verify that the cloudbuild steps that should use your testing image _are_ using your testing image (in the Execution Details tab for the step.)
+5. Create a PR with these changes.
+6. Verify that the cloudbuild steps that should use your testing image _are_ using your testing image (in the Execution Details tab for the step.)
