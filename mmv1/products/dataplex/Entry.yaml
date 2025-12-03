@@ -93,6 +93,20 @@ examples:
     test_env_vars:
       project_number: 'PROJECT_NUMBER'
       project_id: 'PROJECT_NAME'
+  - name: 'dataplex_entry_glossary_term'
+    primary_resource_id: 'tf_test_glossary_term'
+    primary_resource_name: 'fmt.Sprintf("tf_test_glossary_term%s", context["random_suffix"])'
+    ignore_read_extra:
+      - 'aspects'
+    vars:
+      glossary_id: 'tf-test-glossary'
+      glossary_term_id: 'tf-test-glossary-term'
+      entry_group_name: '@dataplex'
+      aspect_type_name: "aspect-type-full-1p"
+    test_env_vars:
+      project_number: 'PROJECT_NUMBER'
+      project_id: 'PROJECT_NAME'
+
 
 parameters:
   - name: 'location'
