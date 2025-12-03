@@ -1,4 +1,5 @@
 # Stage 1: Download go module cache for builds
+FROM golang:1.25-bullseye AS builder
 ENV GOCACHE=/go/cache
 
 RUN apt-get update && apt-get install -y unzip
