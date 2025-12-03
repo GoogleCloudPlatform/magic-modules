@@ -74,9 +74,6 @@ resource "google_compute_wire_group" "example-test-wire-group" {
     bandwidth_unmetered = 1000
 	bandwidth_allocation = "ALLOCATE_PER_WIRE"
   }
-  wire_group_properties {
-    type = "WIRE"
-  }
   admin_enabled = true
 }
 `, context)
@@ -103,9 +100,6 @@ resource "google_compute_wire_group" "example-test-wire-group" {
     bandwidth_unmetered = 1000
 	bandwidth_allocation = "ALLOCATE_PER_WIRE"
   }
-  wire_group_properties {
-    type = "WIRE"
-  }	
   admin_enabled = true
 }
 `, context)
