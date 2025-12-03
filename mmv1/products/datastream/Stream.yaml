@@ -497,6 +497,7 @@ properties:
               function: 'validation.IntAtLeast(0)'
           - name: 'binaryLogPosition'
             type: NestedObject
+            default_from_api: true
             allow_empty_object: true
             send_empty_value: true
             conflicts:
