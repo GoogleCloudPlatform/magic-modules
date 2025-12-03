@@ -1005,7 +1005,7 @@ resource "google_dataplex_entry" "test_entry_bigquery_table" {
   }
 
   aspects {
-    aspect_key = "%{project_number}.us-central1.${google_dataplex_aspect_type.aspect-type-full-two.aspect_type_id}"
+    aspect_key = "%{project_number}.us-central1.${google_dataplex_aspect_type.aspect-type-full-two.aspect_type_id}@Schema.event_type"
     aspect {
       data = <<EOF
           {"story": "SEQUENCE"    }

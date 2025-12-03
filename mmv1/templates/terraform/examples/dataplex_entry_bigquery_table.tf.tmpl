@@ -115,7 +115,7 @@ resource "google_dataplex_entry" "{{$.PrimaryResourceId}}" {
   }
 
   aspects {
-    aspect_key = "{{index $.TestEnvVars "project_number"}}.us-central1.{{index $.Vars "aspect_type_name"}}-two"
+    aspect_key = "{{index $.TestEnvVars "project_number"}}.us-central1.{{index $.Vars "aspect_type_name"}}-two@Schema.event_type"
     aspect {
       data = <<EOF
           {"story": "SEQUENCE"    }
