@@ -226,7 +226,7 @@ resource "google_project" "project" {
 
 resource "google_service_account" "test-account" {
   account_id   = "tf-test-account%{random_suffix}"
-  display_name = "Test Service Account"
+  display_name = "Test Service Account123"
   project      = google_project.project.project_id
 }
 
