@@ -9,7 +9,7 @@ import (
 
 func TestAccAuditManagerFrameworkAuditScopeReport_basic(t *testing.T) {
 	t.Parallel()
-s
+	s
 	context := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
