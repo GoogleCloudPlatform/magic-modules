@@ -1,0 +1,106 @@
+resource "google_ces_app" "my-app" {
+    location     = "us"
+    display_name = "{{index $.Vars "app_display_name"}}"
+    app_id       = "{{index $.Vars "app_id"}}"
+    time_zone_settings {   
+        time_zone = "America/Los_Angeles"
+    }
+}
+resource "google_ces_tool" "{{$.PrimaryResourceId}}" {
+    location     = "us"
+    app          = google_ces_app.my-app.name
+    tool_id      = "{{index $.Vars "tool_id"}}"
+    execution_type = "SYNCHRONOUS"
+    client_function {
+        name = "{{index $.Vars "tool_display_name"}}"
+        description = "example-description"
+        parameters {
+            additional_properties = jsonencode(
+                {
+                type        = "BOOLEAN"
+                })
+            any_of = jsonencode([
+                {
+                type        = "STRING"
+                description = "any_of option 1: string"
+                },])
+            default = jsonencode(
+                false)
+            defs = jsonencode({
+                SimpleString = {
+                type        = "STRING"
+                description = "A simple string definition"
+            }})
+            description = "schema description"
+            enum = ["VALUE_A", "VALUE_B"]
+            items = jsonencode({
+                type        = "ARRAY"
+                description = "An array"
+            })
+            max_items   = 32
+            maximum     = 64
+            min_items   = 1
+            minimum     = 2
+            nullable    = true
+            prefix_items = jsonencode([
+                {
+                type        = "ARRAY"
+                description = "prefix item 1"
+                },])
+            properties = jsonencode({
+                name = {
+                type        = "STRING"
+                description = "A name"
+            }})
+            ref = "#/defs/MyDefinition"
+            required = ["some_property"]
+            title        = "Title"
+            type         = "ARRAY"
+            unique_items = true
+        }
+        response {
+            additional_properties = jsonencode(
+                {
+                type        = "BOOLEAN"
+                })
+            any_of = jsonencode([
+                {
+                type        = "STRING"
+                description = "any_of option 1: string"
+                },])
+            default = jsonencode(
+                false)
+            defs = jsonencode({
+                SimpleString = {
+                type        = "STRING"
+                description = "A simple string definition"
+            }})
+            description = "schema description"
+            enum = ["VALUE_A", "VALUE_B"]
+            items = jsonencode({
+                type        = "ARRAY"
+                description = "An array"
+            })
+            max_items   = 32
+            maximum     = 64
+            min_items   = 1
+            minimum     = 2
+            nullable    = true
+            prefix_items = jsonencode([
+                {
+                type        = "ARRAY"
+                description = "prefix item 1"
+                },])
+            properties = jsonencode({
+                name = {
+                type        = "STRING"
+                description = "A name"
+            }})
+            ref = "#/defs/MyDefinition"
+            required = ["some_property"]
+            title        = "Title"
+            type         = "ARRAY"
+            unique_items = true
+        }
+    }
+}

@@ -173,10 +173,21 @@ properties:
             type: String
             description: Required. The region the Cloud Run service is deployed in.
             default_from_api: true
+        exactly_one_of:
+          - destination.0.cloudRunService
+          - destination.0.cloudFunction
+          - destination.0.gke
+          - destination.0.workflow
+          - destination.0.httpEndpoint
       - name: cloudFunction
         type: String
         description: 'The Cloud Function resource name. Only Cloud Functions V2 is supported. Format projects/{project}/locations/{location}/functions/{function} This is a read-only field. [WARNING] Creating Cloud Functions V2 triggers is only supported via the Cloud Functions product. An error will be returned if the user sets this value.'
-        output: true
+        exactly_one_of:
+          - destination.0.cloudRunService
+          - destination.0.cloudFunction
+          - destination.0.gke
+          - destination.0.workflow
+          - destination.0.httpEndpoint
       - name: gke
         type: NestedObject
         description: A GKE service capable of receiving events. The service should be running in the same project as the trigger.
@@ -201,11 +212,23 @@ properties:
           - name: path
             type: String
             description: 'Optional. The relative path on the GKE service the events should be sent to. The value must conform to the definition of a URI path segment (section 3.3 of RFC2396). Examples: "/route", "route", "route/subroute".'
+        exactly_one_of:
+          - destination.0.cloudRunService
+          - destination.0.cloudFunction
+          - destination.0.gke
+          - destination.0.workflow
+          - destination.0.httpEndpoint
       - name: workflow
         type: String
         diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
         custom_expand: templates/terraform/custom_expand/eventarc_trigger_destination_workflow.go.tmpl
         description: 'The resource name of the Workflow whose Executions are triggered by the events. The Workflow resource should be deployed in the same project as the trigger. Format: `projects/{project}/locations/{location}/workflows/{workflow}`'
+        exactly_one_of:
+          - destination.0.cloudRunService
+          - destination.0.cloudFunction
+          - destination.0.gke
+          - destination.0.workflow
+          - destination.0.httpEndpoint
       - name: httpEndpoint
         type: NestedObject
         description: An HTTP endpoint destination described by an URI.
@@ -214,6 +237,12 @@ properties:
             type: String
             description: 'Required. The URI of the HTTP enpdoint. The value must be a RFC2396 URI string. Examples: `http://10.10.10.8:80/route`, `http://svc.us-central1.p.local:8080/`. Only HTTP and HTTPS protocols are supported. The host can be either a static IP addressable from the VPC specified by the network config, or an internal DNS hostname of the service resolvable via Cloud DNS.'
             required: true
+        exactly_one_of:
+          - destination.0.cloudRunService
+          - destination.0.cloudFunction
+          - destination.0.gke
+          - destination.0.workflow
+          - destination.0.httpEndpoint
       - name: networkConfig
         type: NestedObject
         description: Optional. Network config is used to configure how Eventarc resolves and connect to a destination. This should only be used with HttpEndpoint destination type.

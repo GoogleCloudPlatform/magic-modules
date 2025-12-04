@@ -37,17 +37,19 @@ func TestAccEventarcChannel_cryptoKeyUpdate(t *testing.T) {
 				Config: testAccEventarcChannel_setCryptoKey(context),
 			},
 			{
-				ResourceName:      "google_eventarc_channel.primary",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_eventarc_channel.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
 				Config: testAccEventarcChannel_cryptoKeyUpdate(context),
 			},
 			{
-				ResourceName:      "google_eventarc_channel.primary",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_eventarc_channel.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
 	})
@@ -60,6 +62,10 @@ resource "google_eventarc_channel" "primary" {
   name                 = "tf-test-name%{random_suffix}"
   crypto_key_name      = "%{key1}"
   third_party_provider = "projects/%{project_name}/locations/%{region}/providers/datadog"
+
+  labels = {
+    "foo" = "bar"
+  }
 }
 `, context)
 }
@@ -71,6 +77,7 @@ resource "google_eventarc_channel" "primary" {
   name                 = "tf-test-name%{random_suffix}"
   crypto_key_name      = "%{key2}"
   third_party_provider = "projects/%{project_name}/locations/%{region}/providers/datadog"
+
 }
 `, context)
 }

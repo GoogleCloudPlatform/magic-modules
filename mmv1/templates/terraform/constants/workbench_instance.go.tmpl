@@ -150,7 +150,7 @@ func WorkbenchInstanceAcceleratorDiffSuppress(_, _, _ string, d *schema.Resource
 	return false
   }
 
-{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
+{{- if not (contains $.Compiler "terraformgoogleconversion") }}
 // waitForWorkbenchInstanceActive waits for an workbench instance to become "ACTIVE"
 func waitForWorkbenchInstanceActive(d *schema.ResourceData, config *transport_tpg.Config, timeout time.Duration) error {
 	return retry.Retry(timeout, func() *retry.RetryError {
@@ -197,7 +197,7 @@ func WorkbenchInstanceKmsDiffSuppress(_, old, new string, _ *schema.ResourceData
 	return false
 }
 
-{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
+{{- if not (contains $.Compiler "terraformgoogleconversion") }}
 func waitForWorkbenchOperation(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string, response map[string]interface{}) error {
 	var opRes map[string]interface{}
 	err := WorkbenchOperationWaitTimeWithResponse(
@@ -237,6 +237,7 @@ func resizeWorkbenchInstanceDisk(config *transport_tpg.Config, d *schema.Resourc
 	  UserAgent: userAgent,
 	  Body: diskObj,
 	  Timeout: d.Timeout(schema.TimeoutUpdate),
+	  ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsWorkbenchQueueError},
 	})
   
 	if err != nil {

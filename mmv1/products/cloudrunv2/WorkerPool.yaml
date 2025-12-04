@@ -57,6 +57,13 @@ examples:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
     ignore_read_extra:
       - 'deletion_protection'
+  - name: 'cloudrunv2_worker_pool_basic_depends_on'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-worker-pool%s", context["random_suffix"])'
+    vars:
+      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_limits'
     primary_resource_id: 'default'
     vars:
@@ -411,6 +418,13 @@ properties:
               type: Array
               description: |-
                 Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references are not supported in Cloud Run.
+              item_type:
+                type: String
+            - name: 'dependsOn'
+              type: Array
+              description: |-
+                Names of the containers that must start before this container.
+              immutable: true
               item_type:
                 type: String
             - name: 'env'

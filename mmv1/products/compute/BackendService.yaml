@@ -43,7 +43,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 iam_policy:
   allowed_iam_role: 'roles/compute.admin'
   parent_resource_attribute: 'name'
@@ -103,8 +103,6 @@ examples:
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
-    tgc_test_ignore_extra:
-      - outlier_detection.enforcing_consecutive_gateway_failure # Ignore the 0 value in config
   - name: 'backend_service_stateful_session_affinity'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -155,8 +153,6 @@ examples:
     min_version: 'beta'
     vars:
       backend_service_name: 'backend-service'
-    tgc_test_ignore_in_asset:
-      - 'RESOURCE.enableCDN' # It has false value in CAI asset
 parameters:
 properties:
   - name: 'affinityCookieTtlSec'
