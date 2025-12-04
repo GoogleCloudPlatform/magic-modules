@@ -154,6 +154,7 @@ properties:
                  If enabled, the root user (UID = 0) of the specified clients doesn't get mapped to nobody (UID = 65534). This is also known as no_root_squash.
                  It's overwritten by the squash_mode parameter. Use either squash_mode or has_root_access.
               default_from_api: true
+              diff_suppress_func: 'suppressHasRootAccessDiff'
             - name: 'accessType'
               type: Enum
               description: |
