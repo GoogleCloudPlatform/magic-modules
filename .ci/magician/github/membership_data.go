@@ -72,12 +72,8 @@ var (
 		"c2thorn": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 4, 9),
-					endDate:   newDate(2025, 4, 15),
-				},
-				{
-					startDate: newDate(2025, 9, 26),
-					endDate:   newDate(2025, 10, 4),
+					startDate: newDate(2025, 12, 3),
+					endDate:   newDate(2025, 12, 15),
 				},
 			},
 		},
