@@ -53,14 +53,17 @@ properties:
     type: String
     description: 'The compliance framework used for the audit.'
     required: true
+    immutable: true
   - name: scope
     type: String
     description: 'The scope of the audit.'
     required: true
+    immutable: true
   - name: framework_audit_destination
     type: NestedObject
     description: 'The destination for the audit reports.'
     required: true
+    immutable: true
     properties:
       - name: bucket
         type: NestedObject
