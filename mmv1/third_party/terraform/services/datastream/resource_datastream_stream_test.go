@@ -85,7 +85,7 @@ func TestAccDatastreamStream_update(t *testing.T) {
 }
 
 func testAccDatastreamStream_datastreamStreamBasic(context map[string]interface{}) string {
-    return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_project" "project" {
 }
 
@@ -215,7 +215,6 @@ resource "google_datastream_stream" "default" {
 }
 `, context)
 }
-
 
 func testAccDatastreamStream_datastreamStreamBasicUpdate(context map[string]interface{}, desiredState string, preventDestroy bool) string {
 	context["lifecycle_block"] = ""
