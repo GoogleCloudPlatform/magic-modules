@@ -225,8 +225,10 @@ properties:
     type: Array
     description: |
       An array of subnets that is provided for NAT in this service attachment.
+    is_set: true
     required: true
     send_empty_value: true
+    set_hash_func: 'tpgresource.SelfLinkRelativePathHash'
     custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
     item_type:
       name: 'subnet'
@@ -272,6 +274,7 @@ properties:
     description: |
       An array of projects that are not allowed to connect to this service
       attachment.
+    is_set: true
     send_empty_value: true
     item_type:
       type: String
