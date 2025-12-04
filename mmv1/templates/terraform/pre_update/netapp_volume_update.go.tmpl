@@ -22,74 +22,128 @@ if v, ok := d.GetOk("block_devices"); ok {
     }
 }
 
-// detect export_policy presence in TF config of volume
+// Get the old and new values for the entire export_policy block
+oldPolicyList, newPolicyList := d.GetChange("export_policy")
 
-if v, ok := d.GetOk("export_policy"); ok {
+newExportPolicy := make([]interface{}, 0, 1)
 
-    l := v.([]interface{})
-    newExportPolicy := make([]interface{}, 0, len(l))
+if newPolicyListVal, ok := newPolicyList.([]interface{}); ok && len(newPolicyListVal) > 0 {
 
-    for _, item := range v.([]interface{}) {
-        if item == nil { continue }
-        ruleSet := item.(map[string]interface{})
+    newPolicySet := newPolicyListVal[0].(map[string]interface{})
+    oldPolicySet := map[string]interface{}{} // Default empty map for old state
 
-        if ruleMap, ruleMapExists := ruleSet["rules"]; ruleMapExists {
+    if oldPolicyListVal, ok := oldPolicyList.([]interface{}); ok && len(oldPolicyListVal) > 0 {
+        oldPolicySet = oldPolicyListVal[0].(map[string]interface{})
+    }
+    
+    // Check if the rules block is present in the new config
+    if newRuleMapVal, ruleMapExists := newPolicySet["rules"]; ruleMapExists {
+        
+        newRuleList := newRuleMapVal.([]interface{})
+        newRuleMap := make([]interface{}, 0, len(newRuleList))
+        
+        // Get the old rules list (if it exists)
+        oldRuleList := make([]interface{}, 0)
+        if oldRuleMapVal, oldRuleMapExists := oldPolicySet["rules"]; oldRuleMapExists {
+            oldRuleList = oldRuleMapVal.([]interface{})
+        }
 
-            l := ruleMap.([]interface{})
-            newRuleMap := make([]interface{}, 0, len(l))
-            for _, ruleMapItem := range ruleMap.([]interface{}) {
-                if ruleMapItem == nil {continue}
-                ruleMapItemSet := ruleMapItem.(map[string]interface{})
-                newRuleMapItemSet := make(map[string]interface{})
+        // Iterate through the new rules
+        for i, ruleMapItem := range newRuleList {
+            if ruleMapItem == nil {
+                continue
+            }
+            newRule := ruleMapItem.(map[string]interface{})
+            newRuleMapItemSet := make(map[string]interface{})
 
-                if val, exists := ruleMapItemSet["access_type"]; exists { newRuleMapItemSet["accessType"] = val }
-                if val, exists := ruleMapItemSet["allowed_clients"]; exists { newRuleMapItemSet["allowedClients"] = val }
-                if val, exists := ruleMapItemSet["has_root_access"]; exists { newRuleMapItemSet["hasRootAccess"] = val }
-                if val, exists := ruleMapItemSet["nfsv3"]; exists { newRuleMapItemSet["nfsv3"] = val }
-                if val, exists := ruleMapItemSet["nfsv4"]; exists { newRuleMapItemSet["nfsv4"] = val }
-                if val, exists := ruleMapItemSet["kerberos5_read_only"]; exists { newRuleMapItemSet["kerberos5ReadOnly"] = val }
-                if val, exists := ruleMapItemSet["kerberos5_read_write"]; exists { newRuleMapItemSet["kerberos5ReadWrite"] = val }
-                if val, exists := ruleMapItemSet["kerberos5i_read_only"]; exists { newRuleMapItemSet["kerberos5iReadOnly"] = val }
-                if val, exists := ruleMapItemSet["kerberos5i_read_write"]; exists { newRuleMapItemSet["kerberos5iReadWrite"] = val }
-                if val, exists := ruleMapItemSet["kerberos5p_read_only"]; exists { newRuleMapItemSet["kerberos5pReadOnly"] = val }
-                if val, exists := ruleMapItemSet["kerberos5p_read_write"]; exists { newRuleMapItemSet["kerberos5pReadWrite"] = val }
+            // Attempt to get the corresponding old rule based on index 'i'.
+            oldRule := map[string]interface{}{}
+            if i < len(oldRuleList) && oldRuleList[i] != nil {
+                oldRule = oldRuleList[i].(map[string]interface{})
+            }
 
-                // Handle "squash_mode":
-                squashModeVal, squashModeExists := ruleMapItemSet["squash_mode"]
+            newHasRootAccessVal, newHasRootAccessExists := newRule["has_root_access"]
+            newSquashModeVal, newSquashModeExists := newRule["squash_mode"]
+            newAnonUidVal, newAnonUidExists := newRule["anon_uid"]
 
-                // Only send if the user explicitly added it.
-                // If not added, send as null.
-                if squashModeExists && squashModeVal == "ALL_SQUASH" {
-                    // User provided the field, send their value
-                    newRuleMapItemSet["squashMode"] = squashModeVal
+            oldHasRootAccessVal := oldRule["has_root_access"]
+            oldSquashModeVal := oldRule["squash_mode"]
+            oldAnonUidVal := oldRule["anon_uid"] // This will be an interface{}, value is typically int64 or nil
+
+            // Simple check for change: if the new value (or absence) is different from the old state value.
+            // Note: This relies on Go's deep equality for interface{} holding primitive types.
+
+            isHasRootAccessChanging := newHasRootAccessVal != "" && newHasRootAccessVal != oldHasRootAccessVal
+            isSquashModeChanging := newSquashModeVal != "" && newSquashModeVal != "SQUASH_MODE_UNSPECIFIED" && newSquashModeVal != oldSquashModeVal
+            isAnonUidChanging := newAnonUidVal != 0 && newAnonUidVal != oldAnonUidVal
+            /*
+                // Mutually Exclusive Field Validation (has_root_access/squash_mode)
+                if isHasRootAccessChanging && isSquashModeChanging {
+                    return fmt.Errorf("Invalid export policy rule specified. 'has_root_access' is not supported when 'squash_mode' is specified on volume %s.", d.Get("name").(string))
+                }
+                
+                // Check if anonUid is changing AND the new squash mode is NOT ALL_SQUASH
+                isNewSquashModeAllSquash := newSquashModeExists && newSquashModeVal == "ALL_SQUASH"
+                
+                if isAnonUidChanging && !isNewSquashModeAllSquash {
+                    return fmt.Errorf("Invalid export policy rule specified, anon_uid is not supported for ROOT_SQUASH/NO_ROOT_SQUASH/SQUASH_MODE_UNSPECIFIED squash mode on volume %s.", d.Get("name").(string))
+                }
+            */
+
+            newRuleMapItemSet["hasRootAccess"] = nil
+            newRuleMapItemSet["squashMode"] = nil
+            // Logic for has_root_access and squash_mode
+            if isHasRootAccessChanging {
+                newRuleMapItemSet["hasRootAccess"] = newHasRootAccessVal
+            } 
+            if isSquashModeChanging {
+                newRuleMapItemSet["squashMode"] = newSquashModeVal
+            } 
+            if !isHasRootAccessChanging && !isSquashModeChanging {
+                // Not changing, so pass through the new config values (one will be set, the other nil, or both nil)
+                if newAnonUidExists && newAnonUidVal == 0 && oldAnonUidVal != 0 {
+                    // this is an udpate from "ALL_SQUASH" to "ROOT_SQUASH" (has_root_access: false)
+                    newRuleMapItemSet["hasRootAccess"] = newHasRootAccessVal
+                    newRuleMapItemSet["squashMode"] = nil
+                } else if newSquashModeExists && newSquashModeVal != "" && newSquashModeVal != "SQUASH_MODE_UNSPECIFIED" {
+                    newRuleMapItemSet["squashMode"] = newSquashModeVal
+                    newRuleMapItemSet["hasRootAccess"] = nil
+                } else if newHasRootAccessExists {
+                    newRuleMapItemSet["hasRootAccess"] = newHasRootAccessVal
+                    newRuleMapItemSet["squashMode"] = nil
                 } else {
-                    // User did NOT provide the field, or provided an empty value.
-                    // Explicitly send null to the API.
+                    newRuleMapItemSet["hasRootAccess"] = nil
                     newRuleMapItemSet["squashMode"] = nil
                 }
-
-                // Handle "anon_uid"
-                anonUidVal, anonUidExists := ruleMapItemSet["anon_uid"]
-
-                // Only send if the user explicitly added it.
-                // If not added, send as null.
-                if anonUidExists && anonUidVal != nil && anonUidVal != 0 {
-                    // User provided the field, send their value
-                    newRuleMapItemSet["anonUid"] = anonUidVal
-                } else {
-                    // User did NOT provide the field, or provided an empty value.
-                    // Explicitly send null to the API.
-                    newRuleMapItemSet["anonUid"] = nil
-                }
-
-                newRuleMap = append(newRuleMap, newRuleMapItemSet)
-                
             }
-            ruleSet["rules"] = newRuleMap
-            newExportPolicy = append(newExportPolicy, ruleSet)
+
+            // If anonUid is present in the new config and is not 0
+            if isAnonUidChanging || (newAnonUidExists && newAnonUidVal != 0) {
+                newRuleMapItemSet["anonUid"] = newAnonUidVal
+            } else {
+                newRuleMapItemSet["anonUid"] = nil
+            }
+
+            if val, exists := newRule["access_type"]; exists { newRuleMapItemSet["accessType"] = val }
+            if val, exists := newRule["allowed_clients"]; exists { newRuleMapItemSet["allowedClients"] = val }
+            if val, exists := newRule["nfsv3"]; exists { newRuleMapItemSet["nfsv3"] = val }
+            if val, exists := newRule["nfsv4"]; exists { newRuleMapItemSet["nfsv4"] = val }
+            if val, exists := newRule["kerberos5_read_only"]; exists { newRuleMapItemSet["kerberos5ReadOnly"] = val }
+            if val, exists := newRule["kerberos5_read_write"]; exists { newRuleMapItemSet["kerberos5ReadWrite"] = val }
+            if val, exists := newRule["kerberos5i_read_only"]; exists { newRuleMapItemSet["kerberos5iReadOnly"] = val }
+            if val, exists := newRule["kerberos5i_read_write"]; exists { newRuleMapItemSet["kerberos5iReadWrite"] = val }
+            if val, exists := newRule["kerberos5p_read_only"]; exists { newRuleMapItemSet["kerberos5pReadOnly"] = val }
+            if val, exists := newRule["kerberos5p_read_write"]; exists { newRuleMapItemSet["kerberos5pReadWrite"] = val }
+            
+            newRuleMap = append(newRuleMap, newRuleMapItemSet)
         }
+        
+        // Final construction of the payload for the API
+        newPolicySet["rules"] = newRuleMap
+        newExportPolicy = append(newExportPolicy, newPolicySet)
     }
-    if len(newExportPolicy) > 0 {
-        obj["exportPolicy"] = newExportPolicy[0]
-    }
+}
+// Set the final object
+if len(newExportPolicy) > 0 {
+    obj["exportPolicy"] = newExportPolicy[0]
 }
