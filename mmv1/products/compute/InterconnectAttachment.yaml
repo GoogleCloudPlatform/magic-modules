@@ -63,6 +63,12 @@ examples:
       address_name: 'test-address'
       router_name: 'test-router'
       network_name: 'test-network'
+  - name: 'compute_interconnect_attachment_tags'
+    primary_resource_id: 'interconnect-attachment-with-tags'
+    vars:
+      interconnect_attachment_name: 'interconnect-attachment-with-tags'
+      router_name: 'router-1'
+      network_name: 'network-1'
   - name: 'compute_interconnect_attachment_custom_ranges'
     primary_resource_id: 'custom-ranges-interconnect-attachment'
     vars:
@@ -160,6 +166,21 @@ properties:
       identifier of an PARTNER attachment used to initiate provisioning with
       a selected partner. Of the form "XXXXX/region/domain"
     output: true
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the interconnect attachment. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        api_name: resourceManagerTags
+        ignore_read: true
   - name: 'partnerAsn'
     type: String
     description: |
