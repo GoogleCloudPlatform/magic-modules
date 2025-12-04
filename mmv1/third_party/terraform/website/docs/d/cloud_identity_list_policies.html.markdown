@@ -4,7 +4,7 @@ layout: "google"
 page_title: "Google: google_cloud_identity_list_policies"
 sidebar_current: "docs-google-data-cloud-identity-list-policies"
 description: |-
-Use this data source to list Cloud Identity policies.
+  Use this data source to list Cloud Identity policies.
 ---
 
 # google_cloud_identity_list_policies
