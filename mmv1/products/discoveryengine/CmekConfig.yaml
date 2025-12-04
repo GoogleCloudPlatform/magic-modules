@@ -75,6 +75,7 @@ parameters:
     description: |
       The unique id of the cmek config.
     url_param_only: true
+    required: true
     immutable: true
   - name: 'setDefault'
     type: Boolean
