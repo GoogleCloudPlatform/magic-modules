@@ -1249,9 +1249,6 @@ func TestAccNetappVolume_NetappVolumeNfsv4Example_update(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetappVolumeDestroyProducer(t),
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"time": {},
-		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetappVolume_volumeNfsv4BasicExample_basic(context),
