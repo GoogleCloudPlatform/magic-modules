@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -26,7 +27,9 @@ var outputPathFlag = flag.String("output", "", "path to output generated files t
 // Example usage: --version beta
 var versionFlag = flag.String("version", "", "optional version name. If specified, this version is preferred for resource generation when applicable")
 
-var overrideDirectoryFlag = flag.String("overrides", "", "directory containing yaml overrides")
+var baseDirectoryFlag = flag.String("base", "", "optional directory containing mmv1 third_party/ and templates/ directories. Empty value defaults to GetCwd().")
+
+var overrideDirectoryFlag = flag.String("overrides", "", "optional directory containing yaml overrides")
 
 var productFlag = flag.String("product", "", "optional product name. If specified, the resources under the specific product will be generated. Otherwise, resources under all products will be generated.")
 
@@ -56,24 +59,30 @@ func main() {
 		return
 	}
 
-	GenerateProducts(*productFlag, *resourceFlag, *providerFlag, *versionFlag, *outputPathFlag, *overrideDirectoryFlag, !*doNotGenerateCode, !*doNotGenerateDocs)
+	GenerateProducts(*productFlag, *resourceFlag, *providerFlag, *versionFlag, *outputPathFlag, *baseDirectoryFlag, *overrideDirectoryFlag, !*doNotGenerateCode, !*doNotGenerateDocs)
 }
 
-func GenerateProducts(product, resource, providerName, version, outputPath, overrideDirectory string, generateCode, generateDocs bool) {
+func GenerateProducts(product, resource, providerName, version, outputPath, baseDirectory, overrideDirectory string, generateCode, generateDocs bool) {
 	if version == "" {
 		log.Printf("No version specified, assuming ga")
 		version = "ga"
+	}
+	if baseDirectory == "" {
+		var err error
+		if baseDirectory, err = os.Getwd(); err != nil {
+			panic(err)
+		}
 	}
 
 	startTime := time.Now()
 	if providerName == "" {
 		providerName = "default (terraform)"
 	}
-	log.Printf("Generating MM output to '%s'", outputPath)
-	log.Printf("Building %s version", version)
-	log.Printf("Building %s provider", providerName)
+	log.Printf("Generating MM output to %q", outputPath)
+	log.Printf("Building %q version", version)
+	log.Printf("Building %q provider", providerName)
 
-	loader := loader.NewLoader(loader.Config{Version: version, OverrideDirectory: overrideDirectory})
+	loader := loader.NewLoader(loader.Config{Version: version, BaseDirectory: baseDirectory, OverrideDirectory: overrideDirectory})
 	loadedProducts := loader.LoadProducts()
 
 	var productsToGenerate []string

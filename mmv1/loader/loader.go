@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -23,7 +22,7 @@ type Loader struct {
 }
 
 type Config struct {
-	BaseDirectory     string // optional, defaults to current working directory
+	BaseDirectory     string // required
 	OverrideDirectory string // optional
 	Version           string // required
 }
@@ -35,6 +34,9 @@ func NewLoader(config Config) *Loader {
 	if config.Version == "" {
 		panic("version is required")
 	}
+	if config.BaseDirectory == "" {
+		panic("a base directory is required")
+	}
 
 	l := &Loader{
 		BaseDirectory:     config.BaseDirectory,
@@ -45,16 +47,8 @@ func NewLoader(config Config) *Loader {
 	// Normalize override dir to a path that is relative to the magic-modules directory
 	// This is needed for templates that concatenate pwd + override dir + path
 	if filepath.IsAbs(l.OverrideDirectory) {
-		mmv1Dir := l.BaseDirectory
-		if mmv1Dir == "" {
-			wd, err := os.Getwd()
-			if err != nil {
-				panic(err)
-			}
-			mmv1Dir = wd
-		}
-		l.OverrideDirectory, _ = filepath.Rel(mmv1Dir, l.OverrideDirectory)
-		log.Printf("Override directory normalized to relative path %s", l.OverrideDirectory)
+		l.OverrideDirectory, _ = filepath.Rel(l.BaseDirectory, l.OverrideDirectory)
+		log.Printf("Override directory normalized to relative path %q", l.OverrideDirectory)
 	}
 
 	return l
@@ -77,8 +71,9 @@ func (l *Loader) LoadProducts() map[string]*api.Product {
 		allProductFiles = append(allProductFiles, fmt.Sprintf("products/%s", filepath.Base(dir)))
 	}
 
+	log.Printf("Using base directory %q", l.BaseDirectory)
 	if l.OverrideDirectory != "" {
-		log.Printf("Using override directory %s", l.OverrideDirectory)
+		log.Printf("Using override directory %q", l.OverrideDirectory)
 		overrideFiles, err := filepath.Glob(filepath.Join(l.OverrideDirectory, "products/**/product.yaml"))
 		if err != nil {
 			panic(err)
@@ -223,10 +218,14 @@ func (l *Loader) loadResources(product *api.Product) ([]*api.Resource, error) {
 		if filepath.Base(resourceYamlPath) == "product.yaml" || filepath.Ext(resourceYamlPath) != ".yaml" {
 			continue
 		}
+		relPath, err := filepath.Rel(l.BaseDirectory, resourceYamlPath)
+		if err != nil {
+			return nil, fmt.Errorf("returned %q is not relative to %q", resourceYamlPath, l.BaseDirectory)
+		}
 
 		// Skip if resource will be merged in the override loop
 		if l.OverrideDirectory != "" {
-			overrideResourceExists := Exists(l.OverrideDirectory, resourceYamlPath)
+			overrideResourceExists := Exists(l.OverrideDirectory, relPath)
 			if overrideResourceExists {
 				continue
 			}
