@@ -2758,9 +2758,9 @@ resource "google_dataproc_cluster" "with_lifecycle_config" {
  region = "us-central1"
 
  cluster_config {
-  //gce_cluster_config {
-  //   subnetwork = "%s"
-  // }
+  gce_cluster_config {
+     subnetwork = "%s"
+   }
 
    lifecycle_config {
      auto_stop_time = "%s"
