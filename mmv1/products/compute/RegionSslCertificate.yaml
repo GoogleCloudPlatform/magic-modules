@@ -96,6 +96,7 @@ properties:
       The chain must include at least one intermediate cert.
     required: true
     sensitive: true
+    write_only: true
   - name: 'creationTimestamp'
     type: Time
     description: 'Creation timestamp in RFC3339 text format.'
