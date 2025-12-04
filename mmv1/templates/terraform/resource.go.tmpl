@@ -37,6 +37,9 @@ import (
 
     "github.com/hashicorp/errwrap"
     {{ if $.GenerateListResource -}}
+    "github.com/hashicorp/terraform-plugin-framework/list"
+	listschema "github.com/hashicorp/terraform-plugin-framework/list/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
     {{ end -}}
     "github.com/hashicorp/go-cty/cty"
     "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -101,6 +104,10 @@ func init() {
         Schema: Resource{{ $.ResourceName -}}(),
     }.Register()
 }
+
+{{- if $.GenerateListResource }}
+    {{- $.CustomTemplate "templates/terraform/list_resource.go.tmpl" false -}}
+{{- end }}
 
 func Resource{{ $.ResourceName -}}() *schema.Resource {
     return &schema.Resource{

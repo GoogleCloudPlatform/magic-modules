@@ -32,7 +32,12 @@ import_format:
   - 'locations/{{location}}/namespaces/{{project}}/services/{{name}}'
 datasource_experimental:
   generate: true
+  # plural:
+  #   generate: true
+  #   list_function: 'templates/terraform/list_functions/cloud_run_service.go.tmpl'
   exclude_test: true
+
+generate_list_resource: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
