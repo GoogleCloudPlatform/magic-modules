@@ -7,7 +7,6 @@ import (
 	"testing"
 )
 
-
 func TestAccNetworkServicesMulticastGroupProducerActivation_networkServicesMulticastGroupProducerActivationUpdateExample(t *testing.T) {
 	t.Parallel()
 
@@ -29,12 +28,13 @@ func TestAccNetworkServicesMulticastGroupProducerActivation_networkServicesMulti
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "multicast_group_producer_activation_id", "terraform_labels"},
 			},
-      {
+			{
 				Config: testAccNetworkServicesMulticastGroupProducerActivation_networkServicesMulticastGroupProducerActivationUpdateExample_diff(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_network_services_multicast_group_producer_activation.mgpa_test", plancheck.ResourceActionUpdate),
 					},
+				},
 			},
 			{
 				ResourceName:            "google_network_services_multicast_group_producer_activation.mgpa_test",
