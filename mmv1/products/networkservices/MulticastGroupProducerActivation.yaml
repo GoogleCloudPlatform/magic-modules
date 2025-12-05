@@ -132,7 +132,7 @@ properties:
   - name: uniqueId
     type: String
     description: |-
-      [Output only] The Google-generated UUID for the resource. This value is
+      The Google-generated UUID for the resource. This value is
       unique across all multicast group producer activation resources. If a group
       producer activation is deleted and another with the same name is created,
       the new group producer activation is assigned a different unique_id.
