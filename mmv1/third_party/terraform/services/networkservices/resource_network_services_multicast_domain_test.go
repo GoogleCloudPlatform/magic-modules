@@ -1,0 +1,92 @@
+package networkservices_test
+
+import (
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"testing"
+)
+
+func TestAccNetworkServicesMulticastDomain_networkServicesMulticastDomainUpdateExample(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetworkServicesMulticastDomainDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkServicesMulticastDomain_networkServicesMulticastDomainUpdateExample_full(context),
+			},
+			{
+				ResourceName:            "google_network_services_multicast_domain.md_test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "multicast_domain_id", "terraform_labels"},
+			},
+      {
+				Config: testAccNetworkServicesMulticastDomain_networkServicesMulticastDomainUpdateExample_diff(context),
+        ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_network_services_multicast_domain.md_test", plancheck.ResourceActionUpdate),
+					},
+			},
+			{
+				ResourceName:            "google_network_services_multicast_domain.md_test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "multicast_domain_id", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccNetworkServicesMulticastDomain_networkServicesMulticastDomainUpdateExample_full(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_network" "network" {
+  name                    = "tf-test-test-md-network%{random_suffix}"
+  auto_create_subnetworks = false
+}
+
+resource "google_network_services_multicast_domain" md_test {
+  multicast_domain_id = "tf-test-test-md-domain%{random_suffix}"
+  location = "global"
+  admin_network = google_compute_network.network.id
+  connection_config  {
+    connection_type="SAME_VPC"
+    ncc_hub = ""
+  }
+  multicast_domain_group  = ""
+  depends_on = [google_compute_network.network]
+}
+`, context)
+}
+
+func testAccNetworkServicesMulticastDomain_networkServicesMulticastDomainUpdateExample_diff(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_network" "network" {
+  name                    = "tf-test-test-md-network%{random_suffix}"
+  auto_create_subnetworks = false
+}
+
+resource "google_network_services_multicast_domain" md_test {
+  multicast_domain_id = "tf-test-test-md-domain%{random_suffix}"
+  location = "global"
+  description = "A sample domain"
+  labels = {
+    label-one = "value-one"
+  }
+  admin_network = google_compute_network.network.id
+  connection_config  {
+    connection_type="SAME_VPC"
+    ncc_hub = ""
+  }
+  multicast_domain_group  = ""
+  depends_on = [google_compute_network.network]
+}
+`, context)
+}
