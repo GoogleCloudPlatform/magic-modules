@@ -44,7 +44,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'batches'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 tgc_ignore_terraform_decoder: true
 custom_code:
   constants: 'templates/terraform/constants/cloud_dataproc_batch.go.tmpl'

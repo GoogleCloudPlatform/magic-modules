@@ -48,7 +48,7 @@ custom_diff:
   - 'customdiff.ForceNewIfChange("redis_version", isRedisVersionDecreasing)'
   - 'tpgresource.DefaultProviderProject'
 exclude_default_cdiff: true
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 examples:
   - name: 'redis_instance_basic'
     primary_resource_id: 'cache'

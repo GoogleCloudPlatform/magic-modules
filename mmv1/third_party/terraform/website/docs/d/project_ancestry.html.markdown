@@ -13,7 +13,7 @@ See the [REST API](https://cloud.google.com/resource-manager/reference/rest/v1/p
 
 ```hcl
 data "google_project_ancestry" "example" {
-  project_id = "example-project"
+  project = "example-project"
 }
 ```
 
@@ -36,6 +36,6 @@ The following attributes are exported:
 
 ---
 
-* `org_id` - The optional user-assigned display name of the project.
+* `org_id` - The organization id.
 * `parent_id` - The parent's id.
 * `parent_type` - One of `"folder"` or `"organization"`.

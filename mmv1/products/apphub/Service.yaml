@@ -40,7 +40,7 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 tgc_include_handwritten_tests: true
 examples:
   - name: 'apphub_service_basic'
@@ -190,6 +190,15 @@ properties:
                   type: String
                   description: "The resource name for the Extended Metadata Schema."
                   output: true
+      - name: 'identity'
+        type: NestedObject
+        description: "The identity associated with the service."
+        output: true
+        properties:
+          - name: 'principal'
+            type: String
+            description: "The principal of the identity."
+            output: true
   - name: 'attributes'
     type: NestedObject
     description: 'Consumer provided attributes.'

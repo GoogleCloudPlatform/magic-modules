@@ -32,7 +32,7 @@ mutex: 'customMetric/{{project}}'
 import_format:
   - '{{name}}'
   - '{{project}} {{name}}'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 tgc_include_handwritten_tests: true
 timeouts:
   insert_minutes: 20

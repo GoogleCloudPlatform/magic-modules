@@ -18,8 +18,8 @@ description: |
   Hostgroup is a regional resource and independent of the volumes or any other resource
 references:
   guides:
-    'Documentation': ''
-  api: ''
+    'Documentation': 'https://docs.cloud.google.com/netapp/volumes/docs/configure-and-use/host-groups/overview'
+  api: 'https://docs.cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.hostGroups'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/hostGroups/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/hostGroups'

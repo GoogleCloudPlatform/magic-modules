@@ -25,7 +25,7 @@ create_url: 'projects/{{project}}/locations/{{location}}/networkPolicies?network
 update_verb: 'PATCH'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/networkPolicies/{{name}}'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 tgc_include_handwritten_tests: true
 timeouts:
   insert_minutes: 60

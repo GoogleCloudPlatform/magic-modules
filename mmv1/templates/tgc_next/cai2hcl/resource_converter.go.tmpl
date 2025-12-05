@@ -18,6 +18,7 @@ package {{ lower $.ProductMetadata.Name }}
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 	"regexp"
 	"strings"
@@ -56,6 +57,7 @@ var (
     _ = customdiff.All
     _ = id.UniqueId
     _ = logging.LogLevel
+	_ = log.Printf
     _ = retry.Retry
     _ = schema.Noop
     _ = structure.ExpandJsonFromString

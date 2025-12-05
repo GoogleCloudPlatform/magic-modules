@@ -392,7 +392,7 @@ type TGCResource struct {
 	ExcludeTgc bool `yaml:"exclude_tgc,omitempty"`
 
 	// If true, include resource in the new package of TGC (terraform-provider-conversion)
-	IncludeInTGCNext bool `yaml:"include_in_tgc_next_DO_NOT_USE,omitempty"`
+	IncludeInTGCNext bool `yaml:"include_in_tgc_next,omitempty"`
 
 	// The resource kind in CAI.
 	// If this is not set, then :name is used instead.
