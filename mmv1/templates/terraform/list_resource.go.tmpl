@@ -1,0 +1,111 @@
+{{/*# The license inside this block applies to this file.
+  # Copyright 2024 Google Inc.
+  # Licensed under the Apache License, Version 2.0 (the "License");
+  # you may not use this file except in compliance with the License.
+  # You may obtain a copy of the License at
+  #
+  #     http://www.apache.org/licenses/LICENSE-2.0
+  #
+  # Unless required by applicable law or agreed to in writing, software
+  # distributed under the License is distributed on an "AS IS" BASIS,
+  # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  # See the License for the specific language governing permissions and
+  # limitations under the License.
+*/}}
+var _ tpgresource.ListResourceWithRawV5Schemas = &{{ $.ResourceName -}}ListResource{}
+
+type {{ $.ResourceName -}}ListResource struct {
+	tpgresource.ListResourceMetadata
+}
+
+func New{{ $.ResourceName -}}ListResource() list.ListResource {
+	return &{{ $.ResourceName -}}ListResource{}
+}
+
+func (r *{{ $.ResourceName -}}ListResource) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = "google_{{ $.ProductMetadata.TerraformName -}}_{{ $.Name -}}"
+}
+
+func (r *{{ $.ResourceName -}}ListResource) RawV5Schemas(ctx context.Context, _ list.RawV5SchemaRequest, resp *list.RawV5SchemaResponse) {
+	{{ $.ResourceName -}} := Resource{{ $.ResourceName -}}()
+	resp.ProtoV5Schema = {{ $.ResourceName -}}.ProtoSchema(ctx)()
+	resp.ProtoV5IdentitySchema = {{ $.ResourceName -}}.ProtoIdentitySchema(ctx)()
+}
+
+func (r *{{ $.ResourceName -}}ListResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	r.Defaults(req, resp)
+}
+
+func (r *{{ $.ResourceName -}}ListResource) ListResourceConfigSchema(ctx context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
+	resp.Schema = listschema.Schema{
+		Attributes: map[string]listschema.Attribute{
+            {{- range $identity := $.IdentityProperties }}
+			"{{ $identity.Name }}": listschema.StringAttribute{
+				Optional: true,
+			},
+            {{- end }}
+		},
+	}
+}
+
+type {{ $.ResourceName -}}ListModel struct {
+    {{- range $identity := $.IdentityProperties }}
+	{{ $identity.Name }} string `tfsdk:"{{ $identity.Name }}"`
+    {{- end }}
+}
+
+func (r *{{ $.ResourceName -}}ListResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
+	var data {{ $.ResourceName -}}ListModel
+	diags := req.Config.Get(ctx, &data)
+	if diags.HasError() {
+		stream.Results = list.ListResultsStreamDiagnostics(diags)
+		return
+	}
+
+    /* INSERT IDENTITY SETTING GENERATION CODE HERE */
+
+
+	stream.Results = func(push func(list.ListResult) bool) {
+		client := r.Client.New{{ $.ResourceName -}}sClient(r.Client.UserAgent)
+
+		listReq := client.{{ $.ResourceName -}}.List{{ $.Name -}}s(project, zone)
+
+		if err := listReq.Pages(ctx, func(page *{{ lower $.ProductMetadata.Name }}.{{ $.ResourceName -}}List) error {
+			log.Printf("[DEBUG] {{ $.ResourceName -}} list: %v", page.Items)
+			for _, {{ $.ResourceName -}} := range page.Items {
+				result := req.NewListResult(ctx)
+				result.DisplayName = {{ $.ResourceName -}}.Name
+
+				{{ $.ResourceName -}}Resource := Resource{{ $.ResourceName -}}()
+				rd := {{ $.ResourceName -}}Resource.Data(&terraform.InstanceState{})
+				rd.SetId({{ $.ResourceName -}}.Name)
+
+                /* INSERT IDENTITY SETTING GENERATION CODE HERE */
+
+				tfTypeIdentity, err := rd.TfTypeIdentityState()
+				if err != nil {
+					return err
+				}
+				if err := result.Identity.Set(ctx, *tfTypeIdentity); err != nil {
+					return errors.New("error setting identity")
+				}
+
+				tfTypeResource, err := rd.TfTypeResourceState()
+				if err != nil {
+					return err
+				}
+				if err := result.Resource.Set(ctx, *tfTypeResource); err != nil {
+					return errors.New("error setting resource")
+				}
+
+				if !push(result) {
+					return errors.New("stream closed")
+				}
+			}
+			return nil
+		}); err != nil {
+			diags.AddError("API Error", err.Error())
+		}
+		stream.Results = list.ListResultsStreamDiagnostics(diags)
+	}
+}
