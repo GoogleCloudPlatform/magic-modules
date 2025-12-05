@@ -7,7 +7,6 @@ import (
 	"testing"
 )
 
-
 func TestAccNetworkServicesMulticastGroupConsumerActivation_networkServicesMulticastGroupConsumerActivationUpdateExample(t *testing.T) {
 	t.Parallel()
 
