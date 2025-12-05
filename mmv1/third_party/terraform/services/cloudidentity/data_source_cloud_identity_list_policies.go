@@ -9,9 +9,9 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func DataSourceGoogleCloudIdentityListPolicies() *schema.Resource {
+func DataSourceGoogleCloudIdentityPolicies() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceGoogleCloudIdentityListPolicies,
+		Read: dataSourceGoogleCloudIdentityPoliciesRead,
 		Schema: map[string]*schema.Schema{
 			"filter": {
 				Type:        schema.TypeString,
@@ -80,7 +80,7 @@ func DataSourceGoogleCloudIdentityListPolicies() *schema.Resource {
 	}
 }
 
-func dataSourceGoogleCloudIdentityListPolicies(d *schema.ResourceData, meta interface{}) error {
+func dataSourceGoogleCloudIdentityPoliciesRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

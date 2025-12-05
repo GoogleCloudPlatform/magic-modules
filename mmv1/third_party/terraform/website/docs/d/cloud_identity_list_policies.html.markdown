@@ -1,20 +1,20 @@
 ---
 subcategory: "Cloud Identity"
 layout: "google"
-page_title: "Google: google_cloud_identity_list_policies"
+page_title: "Google: google_cloud_identity_policies"
 sidebar_current: "docs-google-data-cloud-identity-list-policies"
 description: |-
   Use this data source to list Cloud Identity policies.
 ---
 
-# google_cloud_identity_list_policies
+# google_cloud_identity_policies
 
 Use this data source to list Cloud Identity policies.
 
 ## Example Usage
 
 ```hcl
-data "google_cloud_identity_list_policies" "all" {
+data "google_cloud_identity_policies" "all" {
     # Example filter (optional)"
     # filter = "customer == \"customers/my_customer\" &&
     # setting.type.matches('^settings/gmail\\..*$')"
@@ -22,43 +22,43 @@ data "google_cloud_identity_list_policies" "all" {
 
 // The name of the first policy in the list of policies
 output "first_policy_name" {
-  value = data.google_cloud_identity_list_policies.all.policies[0].name
+  value = data.google_cloud_identity_policies.all.policies[0].name
 }
 
 // The customer to whom the first policy belongs to. This will always be the
 // same across multiple policies as well.
 output "first_policy_customer" {
-  value = data.google_cloud_identity_list_policies.all.policies[0].customer
+  value = data.google_cloud_identity_policies.all.policies[0].customer
 }
 
 // The CEL query of the first policy
 output "policy_query_query" {
-  value = data.google_cloud_identity_list_policies.all.policies[0].policy_query[0].query
+  value = data.google_cloud_identity_policies.all.policies[0].policy_query[0].query
 }
 
 // The org unit the first policy applies to
 output "policy_query_org_unit" {
-  value = data.google_cloud_identity_list_policies.all.policies[0].policy_query[0].org_unit
+  value = data.google_cloud_identity_policies.all.policies[0].policy_query[0].org_unit
 }
 
 // The group the first policy applies to
 output "policy_query_group" {
-  value = data.google_cloud_identity_list_policies.all.policies[0].policy_query[0].group
+  value = data.google_cloud_identity_policies.all.policies[0].policy_query[0].group
 }
 
 // The sort order of the first policy
 output "policy_query_sort_order" {
-  value = data.google_cloud_identity_list_policies.all.policies[0].policy_query[0].sort_order
+  value = data.google_cloud_identity_policies.all.policies[0].policy_query[0].sort_order
 }
 
 // The setting of the first policy as a JSON string
 output "policy_setting" {
-  value = data.google_cloud_identity_list_policies.all.policies[0].setting
+  value = data.google_cloud_identity_policies.all.policies[0].setting
 }
 
 // The type of policy - ADMIN/SYSTEM
 output "policy_type" {
-  value = data.google_cloud_identity_list_policies.all.policies[0].type
+  value = data.google_cloud_identity_policies.all.policies[0].type
 }
 ```
 

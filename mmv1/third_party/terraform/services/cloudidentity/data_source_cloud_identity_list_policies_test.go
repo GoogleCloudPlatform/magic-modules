@@ -35,16 +35,16 @@ func TestAccDataSourceGoogleCloudIdentityPolicies(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: `
-				data "google_cloud_identity_list_policies" "test" {
+				data "google_cloud_identity_policies" "test" {
 				}
 				`,
 				Check: resource.ComposeTestCheckFunc(
 					// We know at least one policy exists from the precheck, so we can
 					// assert that at least the first element in the list is populated.
-					resource.TestCheckResourceAttrSet("data.google_cloud_identity_list_policies.test", "policies.#"),
-					resource.TestCheckResourceAttrSet("data.google_cloud_identity_list_policies.test", "policies.0.name"),
-					resource.TestCheckResourceAttrSet("data.google_cloud_identity_list_policies.test", "policies.0.customer"),
-					resource.TestCheckResourceAttrSet("data.google_cloud_identity_list_policies.test", "policies.0.type"),
+					resource.TestCheckResourceAttrSet("data.google_cloud_identity_policies.test", "policies.#"),
+					resource.TestCheckResourceAttrSet("data.google_cloud_identity_policies.test", "policies.0.name"),
+					resource.TestCheckResourceAttrSet("data.google_cloud_identity_policies.test", "policies.0.customer"),
+					resource.TestCheckResourceAttrSet("data.google_cloud_identity_policies.test", "policies.0.type"),
 				),
 			},
 		},
