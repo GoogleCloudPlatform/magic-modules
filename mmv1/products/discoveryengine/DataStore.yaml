@@ -187,7 +187,7 @@ properties:
     type: NestedObject
     description: |
       Configuration data for advance site search.
-    required: false
+    default_from_api: true
     immutable: true
     properties:
       - name: 'disableInitialIndex'
