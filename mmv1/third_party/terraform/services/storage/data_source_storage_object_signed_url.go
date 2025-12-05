@@ -32,8 +32,6 @@ import (
 const gcsBaseUrl = "https://storage.googleapis.com"
 const googleCredentialsEnvVar = "GOOGLE_APPLICATION_CREDENTIALS"
 
-var gcsHostUrl string
-
 func DataSourceGoogleSignedUrl() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleSignedUrlRead,
@@ -145,10 +143,10 @@ func dataSourceGoogleSignedUrlRead(d *schema.ResourceData, meta interface{}) err
 
 	bucketName := d.Get("bucket").(string)
 	objectPath := d.Get("path").(string)
-	getGcsHostUrl(urlData, bucketName, objectPath)
+	baseUrl := getGcsHostUrl(urlData, bucketName, objectPath)
 
 	// sign path should be same in both cases as we are using v2 signature
-	urlData.SignPath = fmt.Sprintf("/%s/%s", d.Get("bucket").(string), d.Get("path").(string))
+	urlData.SignPath = fmt.Sprintf("/%s/%s", bucketName, objectPath)
 
 	// Load JWT Config from Google Credentials
 	jwtConfig, err := loadJwtConfig(d, config)
@@ -158,7 +156,7 @@ func dataSourceGoogleSignedUrlRead(d *schema.ResourceData, meta interface{}) err
 	urlData.JwtConfig = jwtConfig
 
 	// Construct URL
-	signedUrl, err := urlData.SignedUrl()
+	signedUrl, err := urlData.SignedUrl(baseUrl)
 	if err != nil {
 		return err
 	}
@@ -216,17 +214,20 @@ func loadJwtConfig(d *schema.ResourceData, meta interface{}) (*jwt.Config, error
 }
 
 func getGcsHostUrl(urlData *UrlData, bucketName, objectPath string) string {
+	var baseUrl string
 	if strings.Contains(bucketName, ".") {
-		// if bucket name contains "." use path style URL
+		// Use path-style URL as "." in the bucket name create invalid virtual hostnames
+		// Signed URL format https://storage.googleapis.com/tf-test-bucket-6159205297736845881/path/to/object
 		urlData.Path = fmt.Sprintf("/%s/%s", bucketName, objectPath)
-		gcsHostUrl = gcsBaseUrl
+		baseUrl = gcsBaseUrl
 	} else {
 		// default to always virtual style URL
+		// URL format https://tf-test-bucket-6159205297736845881.storage.googleapis.com//path/to/object
 		urlData.Path = fmt.Sprintf("/%s", objectPath)
-		url := strings.Split(gcsBaseUrl, "://")
-		gcsHostUrl = fmt.Sprintf("%s://%s.%s", url[0], bucketName, url[1])
+		gcsUrl := strings.Split(gcsBaseUrl, "://")
+		baseUrl = fmt.Sprintf("%s://%s.%s", gcsUrl[0], bucketName, gcsUrl[1])
 	}
-	return gcsHostUrl
+	return baseUrl
 }
 
 // parsePrivateKey converts the binary contents of a private key file
@@ -339,7 +340,7 @@ func (u *UrlData) EncodedSignature() (string, error) {
 }
 
 // SignedUrl constructs the final signed URL a client can use to retrieve storage object
-func (u *UrlData) SignedUrl() (string, error) {
+func (u *UrlData) SignedUrl(baseUrl string) (string, error) {
 
 	encodedSig, err := u.EncodedSignature()
 	if err != nil {
@@ -349,7 +350,7 @@ func (u *UrlData) SignedUrl() (string, error) {
 	// build url
 	// https://cloud.google.com/storage/docs/access-control/create-signed-urls-program
 	var urlBuffer bytes.Buffer
-	urlBuffer.WriteString(gcsHostUrl)
+	urlBuffer.WriteString(baseUrl)
 	urlBuffer.WriteString(u.Path)
 	urlBuffer.WriteString("?GoogleAccessId=")
 	urlBuffer.WriteString(u.JwtConfig.Email)

@@ -88,8 +88,8 @@ func TestUrlData_SignedUrl(t *testing.T) {
 		JwtConfig:  cfg,
 		SignPath:   testSignUrlPath,
 	}
-	getGcsHostUrl(urlData, testBucketName, testUrlPath)
-	result, err := urlData.SignedUrl()
+	baseUrl := getGcsHostUrl(urlData, testBucketName, testUrlPath)
+	result, err := urlData.SignedUrl(baseUrl)
 	if err != nil {
 		t.Errorf("Could not generated signed url: %+v", err)
 	}
