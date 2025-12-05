@@ -36,14 +36,10 @@ fields:
     field: 'enable_ipv4'
   - api_field: 'bgpPeers.enableIpv6'
     field: 'enable_ipv6'
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'bgpPeers.exportPolicies'
     field: 'export_policies'
-{{- end }}
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'bgpPeers.importPolicies'
     field: 'import_policies'
-{{- end }}
   - api_field: 'bgpPeers.interfaceName'
     field: 'interface'
   - api_field: 'bgpPeers.ipAddress'
@@ -57,7 +53,7 @@ fields:
   - field: 'is_custom_learned_priority_set'
     provider_only: true
   - api_field: 'bgpPeers.managementType'
-    field: 'management_type'q
+    field: 'management_type'
   - api_field: 'md5AuthenticationKeys.key'
     field: 'md5_authentication_key.key'
   - api_field: 'bgpPeers.md5AuthenticationKeyName'

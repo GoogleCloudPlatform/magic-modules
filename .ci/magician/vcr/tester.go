@@ -104,6 +104,7 @@ var safeToLog = map[string]bool{
 	"PATH":                                       true,
 	"SA_KEY":                                     false,
 	"TF_ACC":                                     true,
+	"TF_ACC_REFRESH_AFTER_APPLY":                 true,
 	"TF_LOG":                                     true,
 	"TF_LOG_CORE":                                true,
 	"TF_LOG_PATH_MASK":                           true,
@@ -253,17 +254,18 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 		"-vet=off",
 	)
 	env := map[string]string{
-		"VCR_PATH":                 cassettePath,
-		"VCR_MODE":                 opt.Mode.Upper(),
-		"ACCTEST_PARALLELISM":      strconv.Itoa(accTestParallelism),
-		"GOOGLE_CREDENTIALS":       vt.env["SA_KEY"],
-		"GOOGLE_TEST_DIRECTORY":    strings.Join(opt.TestDirs, " "),
-		"TF_LOG":                   "DEBUG",
-		"TF_LOG_CORE":              "WARN",
-		"TF_LOG_SDK_FRAMEWORK":     "INFO",
-		"TF_LOG_PATH_MASK":         filepath.Join(logPath, "%s.log"),
-		"TF_ACC":                   "1",
-		"TF_SCHEMA_PANIC_ON_ERROR": "1",
+		"VCR_PATH":                   cassettePath,
+		"VCR_MODE":                   opt.Mode.Upper(),
+		"ACCTEST_PARALLELISM":        strconv.Itoa(accTestParallelism),
+		"GOOGLE_CREDENTIALS":         vt.env["SA_KEY"],
+		"GOOGLE_TEST_DIRECTORY":      strings.Join(opt.TestDirs, " "),
+		"TF_LOG":                     "DEBUG",
+		"TF_LOG_CORE":                "WARN",
+		"TF_LOG_SDK_FRAMEWORK":       "INFO",
+		"TF_LOG_PATH_MASK":           filepath.Join(logPath, "%s.log"),
+		"TF_ACC":                     "1",
+		"TF_ACC_REFRESH_AFTER_APPLY": "1",
+		"TF_SCHEMA_PANIC_ON_ERROR":   "1",
 	}
 	if vt.saKeyPath != "" {
 		env["GOOGLE_APPLICATION_CREDENTIALS"] = filepath.Join(vt.baseDir, vt.saKeyPath)
@@ -401,17 +403,18 @@ func (vt *Tester) runInParallel(mode Mode, version provider.Version, testDir, te
 		"-vet=off",
 	}
 	env := map[string]string{
-		"VCR_PATH":                 cassettePath,
-		"VCR_MODE":                 mode.Upper(),
-		"ACCTEST_PARALLELISM":      "1",
-		"GOOGLE_CREDENTIALS":       vt.env["SA_KEY"],
-		"GOOGLE_TEST_DIRECTORY":    testDir,
-		"TF_LOG":                   "DEBUG",
-		"TF_LOG_CORE":              "WARN",
-		"TF_LOG_SDK_FRAMEWORK":     "INFO",
-		"TF_LOG_PATH_MASK":         filepath.Join(logPath, "%s.log"),
-		"TF_ACC":                   "1",
-		"TF_SCHEMA_PANIC_ON_ERROR": "1",
+		"VCR_PATH":                   cassettePath,
+		"VCR_MODE":                   mode.Upper(),
+		"ACCTEST_PARALLELISM":        "1",
+		"GOOGLE_CREDENTIALS":         vt.env["SA_KEY"],
+		"GOOGLE_TEST_DIRECTORY":      testDir,
+		"TF_LOG":                     "DEBUG",
+		"TF_LOG_CORE":                "WARN",
+		"TF_LOG_SDK_FRAMEWORK":       "INFO",
+		"TF_LOG_PATH_MASK":           filepath.Join(logPath, "%s.log"),
+		"TF_ACC":                     "1",
+		"TF_ACC_REFRESH_AFTER_APPLY": "1",
+		"TF_SCHEMA_PANIC_ON_ERROR":   "1",
 	}
 	if vt.saKeyPath != "" {
 		env["GOOGLE_APPLICATION_CREDENTIALS"] = filepath.Join(vt.baseDir, vt.saKeyPath)

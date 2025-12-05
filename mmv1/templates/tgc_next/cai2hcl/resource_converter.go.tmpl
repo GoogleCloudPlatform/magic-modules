@@ -17,11 +17,17 @@
 package {{ lower $.ProductMetadata.Name }}
 
 import (
+	"fmt"
+	"log"
+	"reflect"
+	"regexp"
+	"strings"
+	"crypto/sha256"
+	"encoding/hex"
+
 {{/* We list all the v2 imports here and unstable imports, because we run 'goimports' to guess the correct
      set of imports, which will never guess the major version correctly. */ -}}
-	"github.com/apparentlymart/go-cidr/cidr"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
@@ -30,8 +36,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"google.golang.org/api/bigtableadmin/v2"
-	"google.golang.org/api/googleapi"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/converters/utils"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/models"
@@ -41,10 +45,30 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
+
+	"google.golang.org/api/googleapi"
 )
 
-{{- $caiProductBaseUrl := $.CaiProductBaseUrl }}
-{{- $productBackendName := $.CaiProductBackendName $caiProductBaseUrl }}
+var (
+    _ = fmt.Sprintf
+    _ = reflect.ValueOf
+    _ = strings.Trim
+    _ = diag.Diagnostic{}
+    _ = customdiff.All
+    _ = id.UniqueId
+    _ = logging.LogLevel
+	_ = log.Printf
+    _ = retry.Retry
+    _ = schema.Noop
+    _ = structure.ExpandJsonFromString
+    _ = validation.All
+    _ = terraform.State{}
+    _ = tgcresource.RemoveTerraformAttributionLabel
+    _ = tpgresource.GetRegion
+    _ = transport_tpg.Config{}
+    _ = verify.ProjectRegex
+    _ = googleapi.Error{}
+)
 
 type {{ $.ResourceName -}}Cai2hclConverter struct {
 	name   string
@@ -87,14 +111,17 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 	}
 	d := fakeResource.TestResourceData()
 
-{{	if $.TgcHclBlockName -}}
-	hclBlockName := res["{{ $.TgcHclBlockName -}}"].(string)
-
-	{{- else -}}
 	assetNameParts := strings.Split(asset.Name, "/")
-	hclBlockName := assetNameParts[len(assetNameParts)-1]
-{{ end}}
 
+	hclBlockName := assetNameParts[len(assetNameParts)-1]
+	digitRegex := regexp.MustCompile(`^\d+$`)
+	nameValidator := regexp.MustCompile("^[a-zA-Z_][a-zA-Z0-9_-]*$")
+	if digitRegex.MatchString(hclBlockName) || !nameValidator.MatchString(hclBlockName) {
+		hasher := sha256.New()
+		hasher.Write([]byte(hclBlockName))
+		fullHash := hex.EncodeToString(hasher.Sum(nil))
+		hclBlockName = fmt.Sprintf("resource%s", fullHash[:8])
+	}
 	hclData := make(map[string]interface{})
 
 {{ if $.CustomCode.TgcDecoder -}}
@@ -118,7 +145,7 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 
 {{/* Attempt to parse all self-link parameters from asset name. */}}
 	outputFields := {{ $.OutputFieldSetStr }}
-	utils.ParseUrlParamValuesFromAssetName(asset.Name, "{{ $.CaiAssetNameTemplate $productBackendName }}", outputFields, hclData)
+	utils.ParseUrlParamValuesFromAssetName(asset.Name, "{{ $.Cai2hclAssetNameTemplate }}", outputFields, hclData)
 {{ range $prop := $.ReadPropertiesForTgc }}
 	{{ if $prop.FlattenObject -}}
 	if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config); flattenedProp != nil {
@@ -147,12 +174,12 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 
 {{- if $.CustomCode.TgcDecoder }}
 func resource{{ $.ResourceName -}}TgcDecoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}, hclData map[string]interface{}) (map[string]interface{}, map[string]interface{}, error) {
-	{{ $.CustomTemplate $.CustomCode.TgcDecoder false -}}
+	{{ customTemplate $ $.CustomCode.TgcDecoder false -}}
 }
 {{- end }}
 
 {{- if and $.CustomCode.Decoder (not $.TGCIgnoreTerraformDecoder) }}
 func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
-	{{ $.CustomTemplate $.CustomCode.Decoder false -}}
+	{{ customTemplate $ $.CustomCode.Decoder false -}}
 }
 {{- end }}
