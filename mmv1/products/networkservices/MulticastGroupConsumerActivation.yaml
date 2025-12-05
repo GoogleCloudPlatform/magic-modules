@@ -102,15 +102,6 @@ properties:
       `projects/*/locations/*/multicastConsumerAssociations/*`.
     immutable: true
     required: true
-  - name: multicastGroup
-    type: String
-    description: |-
-      The resource name of the multicast group created by the admin in the
-      same zone as this multicast group consumer activation.
-      Use the following format:
-      // `projects/*/locations/*/multicastGroups/*`.
-    immutable: true
-    required: true
   - name: multicastGroupRangeActivation
     type: String
     description: |-
