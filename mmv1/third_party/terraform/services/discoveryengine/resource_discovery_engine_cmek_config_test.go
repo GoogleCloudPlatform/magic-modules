@@ -8,6 +8,9 @@ import (
 )
 
 func TestAccDiscoveryEngineCmekConfig_discoveryengineCmekconfigDefaultExample_update(t *testing.T) {
+	// Skipping test because cmek configs are expensive to provision and teardown.
+	t.Skip()
+
 	t.Parallel()
 
 	context := map[string]interface{}{
