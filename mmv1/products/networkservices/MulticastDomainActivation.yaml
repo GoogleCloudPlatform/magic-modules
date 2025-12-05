@@ -76,12 +76,12 @@ parameters:
 properties:
   - name: adminNetwork
     type: String
-    description: '[Output only] The URL of the admin network.'
+    description: 'The URL of the admin network.'
     output: true
   - name: createTime
     type: String
     description: |-
-      [Output only] The timestamp when the multicast domain activation was
+      The timestamp when the multicast domain activation was
       created.
     output: true
   - name: description
@@ -162,7 +162,7 @@ properties:
   - name: uniqueId
     type: String
     description: |-
-      [Output only] The Google-generated UUID for the resource. This value is
+      The Google-generated UUID for the resource. This value is
       unique across all multicast domain activation resources. If a domain
       activation is deleted and another with the same name is created, the new
       domain activation is assigned a different unique_id.
@@ -170,6 +170,6 @@ properties:
   - name: updateTime
     type: String
     description: |-
-      [Output only] The timestamp when the multicast domain activation was most
+      The timestamp when the multicast domain activation was most
       recently updated.
     output: true
