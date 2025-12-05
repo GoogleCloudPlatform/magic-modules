@@ -1,5 +1,0 @@
-resource "google_compute_organization_security_policy" "{{$.PrimaryResourceId}}" {
-  short_name = "{{index $.Vars "short_name"}}"
-  parent     = "organizations/{{index $.TestEnvVars "org_id"}}"
-  type       = "CLOUD_ARMOR"
-}

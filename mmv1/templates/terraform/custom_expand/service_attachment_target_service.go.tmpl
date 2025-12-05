@@ -1,8 +1,0 @@
-func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	resource := strings.Split(v.(string), "/")
-	if len(resource) < 4 {
-		return nil, fmt.Errorf("invalid value for target_service")
-	}
-
-	return v, nil
-}

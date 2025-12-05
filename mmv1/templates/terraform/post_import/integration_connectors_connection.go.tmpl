@@ -1,3 +1,0 @@
-if err := waitforConnectionReady(d, config, d.Timeout(schema.TimeoutCreate) - time.Minute); err != nil {
-  return nil, fmt.Errorf("Error waiting for Connection %q to be in a stable state: %q", d.Get("name").(string), err)
-}

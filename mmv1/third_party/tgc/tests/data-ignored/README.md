@@ -1,1 +1,0 @@
-This directory contains broken tests that have been set aside.

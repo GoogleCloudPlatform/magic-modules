@@ -1,9 +1,0 @@
-load("@rules_go//go:def.bzl", "go_library")
-
-go_library(
-    name = "product",
-    srcs = ["version.go"],
-    importpath = "github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product",
-    visibility = ["//visibility:public"],
-    deps = ["@org_golang_x_exp//slices"],
-)

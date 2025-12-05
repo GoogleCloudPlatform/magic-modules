@@ -1,5 +1,0 @@
-if raw, ok := res["name"]; ok {
-    res["name"] = tpgresource.GetResourceNameFromSelfLink(raw.(string))
-}
-
-return res, hclData, nil

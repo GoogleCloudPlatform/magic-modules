@@ -1,3 +1,0 @@
-if err := waitforConnectionReady(d, config, d.Timeout(schema.TimeoutCreate) - time.Minute); err != nil {
-  return fmt.Errorf("Error waiting for Connection %q to finish being in UPDATING state during updation: %q", d.Get("name").(string), err)
-}

@@ -1,5 +1,0 @@
-resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
-  name          = "{{index $.Vars "name"}}"
-  location      = "US"
-  storage_class = "ARCHIVE"
-}

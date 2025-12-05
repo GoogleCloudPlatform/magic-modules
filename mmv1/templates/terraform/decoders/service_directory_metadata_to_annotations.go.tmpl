@@ -1,5 +1,0 @@
-if _, ok := res["annotations"]; ok {
-    res["metadata"] = res["annotations"].(map[string]interface{})
-    delete(res, "annotations")
-}
-return res, nil

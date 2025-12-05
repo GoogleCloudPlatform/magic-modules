@@ -1,8 +1,0 @@
-resource "google_org_policy_policy" "primary" {
-  name   = "organizations/123456789/policies/gcp.detailedAuditLoggingMode"
-  parent = "organizations/123456789"
-
-  spec {
-    reset = true
-  }
-}

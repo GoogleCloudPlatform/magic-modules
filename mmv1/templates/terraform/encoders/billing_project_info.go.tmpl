@@ -1,8 +1,0 @@
-ba := d.Get("billing_account").(string)
-if ba == "" {
-	obj["billingAccountName"] = ""
-} else {
-	obj["billingAccountName"] = "billingAccounts/" + ba
-}
-delete(obj, "billing_account")
-return obj, nil

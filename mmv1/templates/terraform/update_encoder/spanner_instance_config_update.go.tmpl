@@ -1,8 +1,0 @@
-project, err := tpgresource.GetProject(d, meta.(*transport_tpg.Config))
-if err != nil {
-return nil, err
-}
-obj["name"] = fmt.Sprintf("projects/%s/instanceConfigs/%s", project, obj["name"])
-newObj := make(map[string]interface{})
-newObj["instanceConfig"] = obj
-return newObj, nil

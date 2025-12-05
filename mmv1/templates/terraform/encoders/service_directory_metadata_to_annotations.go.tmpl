@@ -1,7 +1,0 @@
-if obj["metadata"] == nil {
-	return nil, nil
-}
-
-obj["annotations"] = obj["metadata"].(map[string]string)
-delete(obj, "metadata")
-return obj, nil

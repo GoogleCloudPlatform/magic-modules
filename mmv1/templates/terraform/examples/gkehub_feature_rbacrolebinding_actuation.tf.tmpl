@@ -1,9 +1,0 @@
-resource "google_gke_hub_feature" "feature" {
-  name = "rbacrolebindingactuation"
-  location = "global"
-  spec {
-    rbacrolebindingactuation {
-      allowed_custom_roles = ["custom-role1","custom-role2","custom-role3"]
-    }
-  }
-}

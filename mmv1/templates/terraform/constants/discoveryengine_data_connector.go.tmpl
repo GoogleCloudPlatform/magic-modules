@@ -1,3 +1,0 @@
-func DataConnectorEntitiesFieldsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-    return (old == "" && new == "{}") || (old == "{}" && new == "")
-}

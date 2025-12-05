@@ -1,7 +1,0 @@
-if d.Get("wait_for_mirror").(bool) == true {
-	// Wait for mirrorState=MIRRORED before treating the resource as created
-	err = NetappVolumeReplicationWaitForMirror(d, meta, "MIRRORED")
-	if err != nil {
-		return fmt.Errorf("Error waiting for volume replication to reach mirror_state==MIRRORED: %s", err)
-	}
-}
