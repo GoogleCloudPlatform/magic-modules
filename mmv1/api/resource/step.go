@@ -16,9 +16,9 @@ package resource
 import (
 	"bytes"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/url"
-	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -123,7 +123,6 @@ func (s *Step) Validate(rName, sName string) {
 	if s.Name == "" {
 		log.Fatalf("Missing `name` for one step in test sample %s in resource %s", sName, rName)
 	}
-
 }
 
 func validateRegexForContents(r *regexp.Regexp, contents string, configPath string, objName string, vars map[string]string) {
@@ -143,7 +142,7 @@ func validateRegexForContents(r *regexp.Regexp, contents string, configPath stri
 }
 
 // Executes step configuration templates for documentation and tests
-func (s *Step) SetHCLText() {
+func (s *Step) SetHCLText(sysfs fs.FS) {
 	originalPrefixedVars := s.PrefixedVars
 	// originalVars := s.Vars
 	originalTestEnvVars := s.TestEnvVars
@@ -171,7 +170,7 @@ func (s *Step) SetHCLText() {
 		docTestEnvVars[key] = docs_defaults[s.TestEnvVars[key]]
 	}
 	s.TestEnvVars = docTestEnvVars
-	s.DocumentationHCLText = s.ExecuteTemplate()
+	s.DocumentationHCLText = s.ExecuteTemplate(sysfs)
 	s.DocumentationHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(s.DocumentationHCLText, "\n")
 
 	// Remove region tags
@@ -215,7 +214,7 @@ func (s *Step) SetHCLText() {
 
 	s.PrefixedVars = testPrefixedVars
 	s.TestEnvVars = testTestEnvVars
-	s.TestHCLText = s.ExecuteTemplate()
+	s.TestHCLText = s.ExecuteTemplate(sysfs)
 	s.TestHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(s.TestHCLText, "\n")
 	// Remove region tags
 	s.TestHCLText = re1.ReplaceAllString(s.TestHCLText, "")
@@ -227,8 +226,8 @@ func (s *Step) SetHCLText() {
 	s.TestEnvVars = originalTestEnvVars
 }
 
-func (s *Step) ExecuteTemplate() string {
-	templateContent, err := os.ReadFile(s.ConfigPath)
+func (s *Step) ExecuteTemplate(sysfs fs.FS) string {
+	templateContent, err := fs.ReadFile(sysfs, s.ConfigPath)
 	if err != nil {
 		glog.Exit(err)
 	}
@@ -245,7 +244,7 @@ func (s *Step) ExecuteTemplate() string {
 
 	templateFileName := filepath.Base(s.ConfigPath)
 
-	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).Parse(fileContentString)
+	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions(sysfs)).Parse(fileContentString)
 	if err != nil {
 		glog.Exit(err)
 	}
@@ -300,7 +299,7 @@ func SubstituteTestPaths(config string) string {
 }
 
 // Executes step configuration templates for documentation and tests
-func (s *Step) SetOiCSHCLText() {
+func (s *Step) SetOiCSHCLText(sysfs fs.FS) {
 	originalPrefixedVars := s.PrefixedVars
 
 	// // Remove region tags
@@ -318,7 +317,7 @@ func (s *Step) SetOiCSHCLText() {
 	}
 
 	s.PrefixedVars = testPrefixedVars
-	s.OicsHCLText = s.ExecuteTemplate()
+	s.OicsHCLText = s.ExecuteTemplate(sysfs)
 	s.OicsHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(s.OicsHCLText, "\n")
 
 	// Remove region tags
