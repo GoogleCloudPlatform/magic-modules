@@ -15,13 +15,14 @@
 name: FrameworkAudit
 base_url: "{{parent}}/frameworkAudits"
 description: Represents a framework audit.
-create_verb: :POST
+immutable: true
+create_verb: POST
 create_url: "{{parent}}/frameworkAudits?frameworkAuditId={{framework_audit_id}}"
-delete_verb: :DELETE
+delete_verb: DELETE
 delete_url: "{{name}}"
-async: !ruby/object:Api::Async
+async:
   actions: ['create', 'delete']
-  operation: !ruby/object:Api::Async::Operation
+  operation:
     path: 'name'
     base_url: '{{op_id}}'
     wait_ms: 1000
@@ -53,17 +54,14 @@ properties:
     type: String
     description: 'The compliance framework used for the audit.'
     required: true
-    immutable: true
   - name: scope
     type: String
     description: 'The scope of the audit.'
     required: true
-    immutable: true
   - name: framework_audit_destination
     type: NestedObject
     description: 'The destination for the audit reports.'
     required: true
-    immutable: true
     properties:
       - name: bucket
         type: NestedObject
@@ -85,3 +83,7 @@ properties:
     type: String
     description: 'The state of the framework audit.'
     output: true
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/audit-manager/docs'
+  api: 'https://cloud.google.com/audit-manager/docs/reference/rest/v1/organizations.locations.frameworkAudits'
