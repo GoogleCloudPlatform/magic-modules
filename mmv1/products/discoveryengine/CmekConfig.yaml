@@ -61,6 +61,8 @@ examples:
       kms_key_name: 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tftest-shared-key-5").CryptoKey.Name'
     ignore_read_extra:
       - 'project'
+    # Skipping test because cmek configs are expensive to provision and teardown.
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String
