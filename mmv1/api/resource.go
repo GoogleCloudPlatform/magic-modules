@@ -13,7 +13,6 @@
 package api
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"maps"
@@ -22,9 +21,6 @@ import (
 	"slices"
 	"sort"
 	"strings"
-	"text/template"
-
-	"github.com/golang/glog"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
@@ -986,7 +982,7 @@ func (r *Resource) addLabelsFields(props []*Type, parent *Type, labels *Type) []
 	return props
 }
 
-func (r *Resource) HasLabelsField() bool {
+func (r Resource) HasLabelsField() bool {
 	for _, p := range r.Properties {
 		if p.Name == "labels" {
 			return true
@@ -1974,46 +1970,6 @@ func (r Resource) FormatDocDescription(desc string, indent bool) string {
 		return fmt.Sprintf("\n  %s", strings.TrimSuffix(returnString, "\n  "))
 	}
 	return strings.TrimSuffix(returnString, "\n")
-}
-
-func (r Resource) CustomTemplate(templatePath string, appendNewline bool) string {
-	output := ExecuteTemplate(&r, templatePath, appendNewline)
-	if !appendNewline {
-		output = strings.TrimSuffix(output, "\n")
-	}
-	return output
-}
-
-func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
-	templates := []string{
-		templatePath,
-		"templates/terraform/expand_resource_ref.tmpl",
-		"templates/terraform/custom_flatten/bigquery_table_ref.go.tmpl",
-		"templates/terraform/flatten_property_method.go.tmpl",
-		"templates/terraform/expand_property_method.go.tmpl",
-		"templates/terraform/update_mask.go.tmpl",
-		"templates/terraform/nested_query.go.tmpl",
-		"templates/terraform/unordered_list_customize_diff.go.tmpl",
-	}
-	templateFileName := filepath.Base(templatePath)
-
-	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
-	if err != nil {
-		glog.Exit(err)
-	}
-
-	contents := bytes.Buffer{}
-	if err = tmpl.ExecuteTemplate(&contents, templateFileName, e); err != nil {
-		glog.Exit(err)
-	}
-
-	rs := contents.String()
-
-	if !strings.HasSuffix(rs, "\n") && appendNewline {
-		rs = fmt.Sprintf("%s\n", rs)
-	}
-
-	return rs
 }
 
 // Returns the key of the list of resources in the List API response

@@ -65,7 +65,7 @@ var {{ $.ResourceName }}IamSchema = map[string]*schema.Schema{
 }
 
 {{- if and $.IamPolicy $.IamPolicy.CustomDiffSuppress }}
-  {{ $.CustomTemplate $.IamPolicy.CustomDiffSuppress true }}
+  {{ customTemplate $ $.IamPolicy.CustomDiffSuppress true }}
 {{- end }}
 
 type {{ $.ResourceName }}IamUpdater struct {
