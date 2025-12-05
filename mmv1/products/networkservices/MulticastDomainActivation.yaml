@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,6 +15,10 @@
 name: MulticastDomainActivation
 description: Create a multicast domain activation in the specified location of
   the current project.
+references:
+  guides:
+    'Create Multicast Domain Activation': 'https://docs.cloud.google.com/vpc/docs/multicast/create-domains#activate-domain'
+  api: 'https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastDomainActivations'
 base_url: projects/{{project}}/locations/{{location}}/multicastDomainActivations
 update_mask: true
 self_link:
@@ -83,6 +87,12 @@ properties:
   - name: description
     type: String
     description: An optional text description of the multicast domain activation.
+  - name: disablePlacementPolicy
+    type: Boolean
+    description: |-
+      Option to allow disabling placement policy for multicast infrastructure.
+      Only applicable if the activation is for a domain associating with a
+      multicast domain group.
   - name: labels
     type: KeyValueLabels
     description: Labels as key-value pairs
@@ -100,6 +110,24 @@ properties:
       Use the following format:
       `projects/*/locations/*/multicastDomainActivations/*`.
     output: true
+  - name: state
+    type: NestedObject
+    description: The multicast resource's state.
+    output: true
+    properties:
+      - name: state
+        type: String
+        description: |-
+          The state of the multicast resource.
+          Possible values:
+          CREATING
+          ACTIVE
+          DELETING
+          DELETE_FAILED
+          UPDATING
+          UPDATE_FAILED
+          INACTIVE
+        output: true
   - name: trafficSpec
     type: NestedObject
     description: |-
