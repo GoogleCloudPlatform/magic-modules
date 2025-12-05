@@ -161,13 +161,13 @@ properties:
   - name: accessRulesOptions
     type: NestedObject
     description: |-
-      Access control rules for the Lustre instance. Configures default root 
+      Access control rules for the Lustre instance. Configures default root
       squashing behavior and specific access rules based on IP addresses.
     properties:
       - name: defaultSquashMode
         type: Enum
         description: |-
-          Set to "ROOT_SQUASH" to enable root squashing by default. 
+          Set to "ROOT_SQUASH" to enable root squashing by default.
           Other values include "NO_SQUASH".
         enum_values:
           - 'ROOT_SQUASH'
@@ -175,17 +175,17 @@ properties:
       - name: defaultSquashUid
         type: Integer
         description: |-
-          The UID to map the root user to when root squashing is enabled 
+          The UID to map the root user to when root squashing is enabled
           (e.g., 65534 for nobody).
       - name: defaultSquashGid
         type: Integer
         description: |-
-          The GID to map the root user to when root squashing is enabled 
+          The GID to map the root user to when root squashing is enabled
           (e.g., 65534 for nobody).
       - name: accessRules
         type: Array
         description: |-
-          An array of access rule exceptions. Each rule defines IP address ranges 
+          An array of access rule exceptions. Each rule defines IP address ranges
           that should have different squash behavior than the default.
         item_type:
           type: NestedObject
@@ -203,7 +203,7 @@ properties:
             - name: squashMode
               type: Enum
               description: |-
-                The squash mode for this specific rule. Currently, only "NO_SQUASH" 
+                The squash mode for this specific rule. Currently, only "NO_SQUASH"
                 is supported for exceptions.
               enum_values:
                 - 'NO_SQUASH'
