@@ -469,7 +469,7 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -491,7 +491,39 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 				ResourceName:            "google_filestore_instance.replica_instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone", "initial_replication"},
+				ImportStateVerifyIgnore: []string{"zone", "initial_replication", "replica_action"},
+			},
+			{
+				Config: testAccFilestoreInstance_replication_pause(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_filestore_instance.replica_instance",
+						"effective_replication.0.replicas.0.peer_instance",
+						"projects/"+context["project"].(string)+"/locations/us-east1/instances/tf-test-source-instance-"+context["random_suffix"].(string),
+					),
+				),
+			},
+			{
+				ResourceName:            "google_filestore_instance.replica_instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone", "initial_replication", "replica_action"},
+			},
+			{
+				Config: testAccFilestoreInstance_replication_resume(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_filestore_instance.replica_instance",
+						"effective_replication.0.replicas.0.peer_instance",
+						"projects/"+context["project"].(string)+"/locations/us-east1/instances/tf-test-source-instance-"+context["random_suffix"].(string),
+					),
+				),
+			},
+			{
+				ResourceName:            "google_filestore_instance.replica_instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone", "initial_replication", "replica_action"},
 			},
 		},
 	})
@@ -500,6 +532,7 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 func testAccFilestoreInstance_replication(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_filestore_instance" "source_instance" {
+  provider         = google-beta
   name             = "tf-test-source-instance-%{random_suffix}"
   location         = "%{location_1}"
   tier             = "%{tier}"
@@ -517,10 +550,105 @@ resource "google_filestore_instance" "source_instance" {
 }
 
 resource "google_filestore_instance" "replica_instance" {
+  provider        	= google-beta
   name          	= "tf-test-replica-instance-%{random_suffix}"
   location      	= "%{location_2}"
   tier          	= "%{tier}"
   description   	= "An replica instance created during testing."
+
+  file_shares {	
+    capacity_gb 	= 1024
+    name            = "share"
+  }
+
+  networks {
+    network         = "default"
+    modes           = ["MODE_IPV4"]
+  }
+
+  initial_replication {
+    replicas {
+      peer_instance = google_filestore_instance.source_instance.id
+    }
+  }
+}
+`, context)
+}
+
+func testAccFilestoreInstance_replication_pause(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_filestore_instance" "source_instance" {
+  provider         = google-beta
+  name             = "tf-test-source-instance-%{random_suffix}"
+  location         = "%{location_1}"
+  tier             = "%{tier}"
+  description      = "An source instance created during testing."
+
+  file_shares {
+    capacity_gb    = 1024
+    name           = "share"
+  }
+
+  networks {
+    network        = "default"
+    modes          = ["MODE_IPV4"]
+  }
+}
+
+resource "google_filestore_instance" "replica_instance" {
+  provider        	= google-beta
+  name          	= "tf-test-replica-instance-%{random_suffix}"
+  location      	= "%{location_2}"
+  tier          	= "%{tier}"
+  description   	= "An replica instance created during testing."
+  replica_action    = "PAUSE"
+
+  file_shares {	
+    capacity_gb 	= 1024
+    name            = "share"
+  }
+
+  networks {
+    network         = "default"
+    modes           = ["MODE_IPV4"]
+  }
+
+  initial_replication {
+    replicas {
+      peer_instance = google_filestore_instance.source_instance.id
+    }
+  }
+}
+`, context)
+}
+
+func testAccFilestoreInstance_replication_resume(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_filestore_instance" "source_instance" {
+  provider         = google-beta
+  name             = "tf-test-source-instance-%{random_suffix}"
+  location         = "%{location_1}"
+  tier             = "%{tier}"
+  description      = "An source instance created during testing."
+
+  file_shares {
+    capacity_gb    = 1024
+    name           = "share"
+  }
+
+  networks {
+    network        = "default"
+    modes          = ["MODE_IPV4"]
+  }
+}
+
+resource "google_filestore_instance" "replica_instance" {
+  provider        	= google-beta
+  name          	= "tf-test-replica-instance-%{random_suffix}"
+  location      	= "%{location_2}"
+  tier          	= "%{tier}"
+  description   	= "An replica instance created during testing."
+  replica_action    = "RESUME"
 
   file_shares {	
     capacity_gb 	= 1024
