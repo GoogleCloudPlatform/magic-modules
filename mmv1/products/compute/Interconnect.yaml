@@ -433,7 +433,6 @@ properties:
         - 'MACSEC'
   - name: 'wireGroups'
     type: Array
-    min_version: beta
     description: |
       A list of the URLs of all CrossSiteNetwork WireGroups configured to use this Interconnect. The Interconnect cannot be deleted if this list is non-empty.
     output: true
