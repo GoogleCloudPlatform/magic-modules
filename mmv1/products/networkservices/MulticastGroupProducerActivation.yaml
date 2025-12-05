@@ -77,8 +77,7 @@ properties:
   - name: createTime
     type: String
     description: |-
-      [Output only] The timestamp when the multicast group producer activation
-      was created.
+      The timestamp when the multicast group producer activation was created.
     output: true
   - name: description
     type: String
@@ -140,6 +139,6 @@ properties:
   - name: updateTime
     type: String
     description: |-
-      [Output only] The timestamp when the multicast group producer activation
+      The timestamp when the multicast group producer activation
       was most recently updated.
     output: true
