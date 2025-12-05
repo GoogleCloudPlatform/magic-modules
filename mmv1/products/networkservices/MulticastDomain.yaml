@@ -29,7 +29,6 @@ examples:
       network_name: test-md-network
       domain_name: test-md-domain
 autogen_async: true
-immutable: true
 async:
   operation:
     timeouts:
