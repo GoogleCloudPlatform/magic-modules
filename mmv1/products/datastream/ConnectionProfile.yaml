@@ -122,6 +122,10 @@ examples:
     primary_resource_id: 'default'
     vars:
       source_connection_profile_id: 'source-profile'
+    ignore_read_extra:
+      - 'postgresql_profile.0.ssl_config.0.server_and_client_verification.0.ca_certificate'
+      - 'postgresql_profile.0.ssl_config.0.server_and_client_verification.0.client_certificate'
+      - 'postgresql_profile.0.ssl_config.0.server_and_client_verification.0.client_key'
   - name: 'datastream_connection_profile_mongodb'
     primary_resource_id: 'default'
     vars:
