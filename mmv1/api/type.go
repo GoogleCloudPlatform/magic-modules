@@ -1374,10 +1374,6 @@ func (t Type) NamespaceProperty() string {
 	return fmt.Sprintf("%s%s%s", google.Camelize(t.ResourceMetadata.ProductMetadata.ApiName, "lower"), t.ResourceMetadata.Name, name)
 }
 
-func (t Type) CustomTemplate(templatePath string, appendNewline bool) string {
-	return ExecuteTemplate(&t, templatePath, appendNewline)
-}
-
 func (t *Type) GetIdFormat() string {
 	return t.ResourceMetadata.GetIdFormat()
 }
