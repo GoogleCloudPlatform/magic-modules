@@ -136,6 +136,7 @@ properties:
   - name: state
     type: NestedObject
     description: The multicast resource's state.
+    output: true
     properties:
       - name: state
         type: String
