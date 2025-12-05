@@ -28,12 +28,13 @@ func TestAccNetworkServicesMulticastDomain_networkServicesMulticastDomainUpdateE
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "multicast_domain_id", "terraform_labels"},
 			},
-      {
+			{
 				Config: testAccNetworkServicesMulticastDomain_networkServicesMulticastDomainUpdateExample_diff(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_network_services_multicast_domain.md_test", plancheck.ResourceActionUpdate),
 					},
+				},
 			},
 			{
 				ResourceName:            "google_network_services_multicast_domain.md_test",
