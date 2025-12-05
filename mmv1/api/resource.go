@@ -2538,6 +2538,7 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 		"for_each",
 		"provider",
 		"lifecycle",
+		"timeouts",
 	}
 	for _, tp := range r.VirtualFields {
 		props = append(props, tp.MetadataLineage())

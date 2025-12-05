@@ -37,6 +37,10 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 include_in_tgc_next: true
+tgc_include_handwritten_tests: true
+tgc_tests:
+  - name: 'TestAccComputeUrlMap_trafficDirectorRemoveRouteRule'
+    skip: 'Test data has mismatched steps'
 custom_code:
 examples:
   - name: 'url_map_bucket_and_service'
