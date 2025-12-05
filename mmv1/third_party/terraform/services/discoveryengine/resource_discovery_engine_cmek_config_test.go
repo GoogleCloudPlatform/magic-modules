@@ -8,16 +8,13 @@ import (
 )
 
 func TestAccDiscoveryEngineCmekConfig_discoveryengineCmekconfigDefaultExample_update(t *testing.T) {
-	// Skipping test because cmek configs are expensive to provision and teardown.
-	t.Skip()
-
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"kms_key_name":                acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tftest-shared-key-6").CryptoKey.Name,
-		"single_region_kms_key_name1": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tftest-shared-key-us-east1").CryptoKey.Name,
-		"single_region_kms_key_name2": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tftest-shared-key-us-central1").CryptoKey.Name,
-		"single_region_kms_key_name3": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-west1", "tftest-shared-key-us-west1").CryptoKey.Name,
+		"kms_key_name":                acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tftest-shared-key-"+acctest.RandString(t, 10)).CryptoKey.Name,
+		"single_region_kms_key_name1": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tftest-shared-key-us-east1-"+acctest.RandString(t, 10)).CryptoKey.Name,
+		"single_region_kms_key_name2": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tftest-shared-key-us-central1-"+acctest.RandString(t, 10)).CryptoKey.Name,
+		"single_region_kms_key_name3": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-west1", "tftest-shared-key-us-west1-"+acctest.RandString(t, 10)).CryptoKey.Name,
 		"random_suffix":               acctest.RandString(t, 10),
 	}
 
