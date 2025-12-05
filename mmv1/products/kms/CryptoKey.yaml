@@ -40,6 +40,9 @@ import_format:
   - '{{key_ring}}/cryptoKeys/{{name}}'
 include_in_tgc_next: true
 tgc_include_handwritten_tests: true
+tgc_tests:
+  - name: 'TestAccKmsCryptoKey_rotation'
+    skip: 'Test data has mismatched steps'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
