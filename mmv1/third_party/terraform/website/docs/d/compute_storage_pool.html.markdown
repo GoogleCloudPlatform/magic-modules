@@ -34,6 +34,9 @@ The following arguments are supported:
 * `zone` (Required) - The zone where the Storage Pool resides.
 * `project` (Optional) - The project in which the Storage Pool exists. If it is not provided, the provider project is used.
 
+## Note
+* `deletion_protection` is always set to false on the data source and will not be represetative of the actual value on `google_compute_storage_pool` reaosure being read 
+
 ## Attributes Reference
 
 See [google_compute_storage_pool](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_storage_pool) resource for details of the available attributes.
