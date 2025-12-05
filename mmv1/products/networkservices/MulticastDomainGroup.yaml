@@ -76,7 +76,7 @@ parameters:
 properties:
   - name: createTime
     type: String
-    description: '[Output only] The timestamp when the multicast domain group was created.'
+    description: 'The timestamp when the multicast domain group was created.'
     output: true
   - name: description
     type: String
@@ -87,7 +87,7 @@ properties:
   - name: multicastDomains
     type: Array
     description: |-
-      [Output only] Multicast domains associated with the group.
+      Multicast domains associated with the group.
       There can be at most 2 multicast domains in a group.
     output: true
     item_type:
@@ -120,7 +120,7 @@ properties:
   - name: uniqueId
     type: String
     description: |-
-      [Output only] The Google-generated UUID for the resource. This value is
+      The Google-generated UUID for the resource. This value is
       unique across all multicast domain group resources. If a domain is deleted
       and another with the same name is created, the new domain is assigned a
       different unique_id.
@@ -128,6 +128,6 @@ properties:
   - name: updateTime
     type: String
     description: |-
-      [Output only] The timestamp when the multicast domain group was most
+      The timestamp when the multicast domain group was most
       recently updated.
     output: true
