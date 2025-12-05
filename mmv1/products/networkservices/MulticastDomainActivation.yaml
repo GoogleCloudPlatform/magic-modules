@@ -93,6 +93,7 @@ properties:
       Option to allow disabling placement policy for multicast infrastructure.
       Only applicable if the activation is for a domain associating with a
       multicast domain group.
+    immutable: true
   - name: labels
     type: KeyValueLabels
     description: Labels as key-value pairs
