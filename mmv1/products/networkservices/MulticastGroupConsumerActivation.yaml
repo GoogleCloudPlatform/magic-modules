@@ -139,7 +139,7 @@ properties:
   - name: uniqueId
     type: String
     description: |-
-      [Output only] The Google-generated UUID for the resource. This value is
+      The Google-generated UUID for the resource. This value is
       unique across all multicast group consumer activation resources. If a group
       consumer activation is deleted and another with the same name is created,
       the new group consumer activation is assigned a different unique_id.
