@@ -1,0 +1,87 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: FrameworkAudit
+base_url: "{{parent}}/frameworkAudits"
+description: Represents a framework audit.
+create_verb: :POST
+create_url: "{{parent}}/frameworkAudits?frameworkAuditId={{framework_audit_id}}"
+delete_verb: :DELETE
+delete_url: "{{name}}"
+async: !ruby/object:Api::Async
+  actions: ['create', 'delete']
+  operation: !ruby/object:Api::Async::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result:
+    path: 'response'
+  status:
+    path: 'done'
+    complete: true
+    error:
+      path: 'error'
+      message: 'message'
+parameters:
+  - name: parent
+    type: String
+    description: 'The parent resource where this framework audit is created.'
+    required: true
+    url_param_only: true
+  - name: framework_audit_id
+    type: String
+    description: 'The ID to use for the framework audit.'
+    required: true
+    url_param_only: true
+properties:
+  - name: name
+    type: String
+    description: 'The name of the framework audit.'
+    output: true
+  - name: compliance_framework
+    type: String
+    description: 'The compliance framework used for the audit.'
+    required: true
+    immutable: true
+  - name: scope
+    type: String
+    description: 'The scope of the audit.'
+    required: true
+    immutable: true
+  - name: framework_audit_destination
+    type: NestedObject
+    description: 'The destination for the audit reports.'
+    required: true
+    immutable: true
+    properties:
+      - name: bucket
+        type: NestedObject
+        description: 'The Cloud Storage bucket destination.'
+        properties:
+          - name: bucket_uri
+            type: String
+            description: 'The URI of the Cloud Storage bucket.'
+            required: true
+  - name: start_time
+    type: String
+    description: 'The time that the audit started.'
+    output: true
+  - name: finish_time
+    type: String
+    description: 'The time that the audit finished.'
+    output: true
+  - name: state
+    type: String
+    description: 'The state of the framework audit.'
+    output: true
