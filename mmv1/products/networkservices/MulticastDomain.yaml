@@ -29,7 +29,6 @@ examples:
       network_name: test-md-network
       domain_name: test-md-domain
 autogen_async: true
-immutable: true
 async:
   operation:
     timeouts:
@@ -130,6 +129,23 @@ properties:
       another with the same name is created, the new domain is assigned a
       different unique_id.
     output: true
+  - name: state
+    type: NestedObject
+    description: The multicast resource's state.
+    properties:
+      - name: state
+        type: String
+        description: |-
+          The state of the multicast resource.
+          Possible values:
+          CREATING
+          ACTIVE
+          DELETING
+          DELETE_FAILED
+          UPDATING
+          UPDATE_FAILED
+          INACTIVE
+        output: true
   - name: updateTime
     type: String
     description: |-
