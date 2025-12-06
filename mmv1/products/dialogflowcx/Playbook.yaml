@@ -149,7 +149,6 @@ properties:
                   type: Enum
                   description: Data type of the schema.
                   enum_values:
-                    - 'DATA_TYPE_UNSPECIFIED'
                     - 'STRING'
                     - 'NUMBER'
                     - 'BOOLEAN'
@@ -205,7 +204,6 @@ properties:
                   type: Enum
                   description: Data type of the schema.
                   enum_values:
-                    - 'DATA_TYPE_UNSPECIFIED'
                     - 'STRING'
                     - 'NUMBER'
                     - 'BOOLEAN'
