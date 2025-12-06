@@ -21,7 +21,7 @@ func TestAccComputeInstanceGroupMembership_instanceGroupMembershipBasic(t *testi
       "zone": envvar.GetTestZoneFromEnv(),
     }
 
-    igId := fmt.Sprintf("projects/%s/zones/%s/instanceGroups/instance-group-%s",
+    igId := fmt.Sprintf("projects/%s/zones/%s/instanceGroups/tf-test-instance-group-%s",
       envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), context["random_suffix"])
 
     acctest.VcrTest(t, resource.TestCase{
