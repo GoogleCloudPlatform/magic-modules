@@ -337,10 +337,11 @@ properties:
       - name: 'scalingMode'
         type: Enum
         description: |
-          The [scaling mode](https://cloud.google.com/run/docs/reference/rest/v2/projects.locations.services#scalingmode) for the service.
+          The [scaling mode](https://cloud.google.com/run/docs/reference/rest/v2/projects.locations.services#scalingmode) for the service. Defaults to 'AUTOMATIC'.
         enum_values:
           - 'AUTOMATIC'
           - 'MANUAL'
+        default_value: 'AUTOMATIC'
       - name: 'manualInstanceCount'
         type: Integer
         description: |
