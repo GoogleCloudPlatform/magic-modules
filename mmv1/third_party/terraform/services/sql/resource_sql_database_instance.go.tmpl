@@ -504,6 +504,12 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Optional:    true,
 							Description: `Enables Vertex AI Integration.`,
 						},
+						"auto_upgrade_enabled": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     true,
+							Description: `Enables Automatic Version Upgrade feature. Can be used with MySQL only.`,
+						},
 						"enable_dataplex_integration": {
 							Type:             schema.TypeBool,
 							Optional:         true,
@@ -1722,7 +1728,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		Tier:                          _settings["tier"].(string),
 		Edition:                       _settings["edition"].(string),
 		AdvancedMachineFeatures:       expandSqlServerAdvancedMachineFeatures(_settings["advanced_machine_features"].([]interface{})),
-		ForceSendFields:               []string{"StorageAutoResize", "EnableGoogleMlIntegration", "EnableDataplexIntegration", "RetainBackupsOnDelete"},
+		ForceSendFields:               []string{"AutoUpgradeEnabled", "StorageAutoResize", "EnableGoogleMlIntegration", "EnableDataplexIntegration", "RetainBackupsOnDelete"},
 		ActivationPolicy:              _settings["activation_policy"].(string),
 		ActiveDirectoryConfig:         expandActiveDirectoryConfig(_settings["active_directory_config"].([]interface{})),
 		DenyMaintenancePeriods:        expandDenyMaintenancePeriod(_settings["deny_maintenance_period"].([]interface{})),
@@ -1740,6 +1746,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		PricingPlan:                   _settings["pricing_plan"].(string),
 		DeletionProtectionEnabled:     _settings["deletion_protection_enabled"].(bool),
 		EnableGoogleMlIntegration:     _settings["enable_google_ml_integration"].(bool),
+		AutoUpgradeEnabled:            _settings["auto_upgrade_enabled"].(bool),
 		EnableDataplexIntegration:     _settings["enable_dataplex_integration"].(bool),
 		RetainBackupsOnDelete:         _settings["retain_backups_on_delete"].(bool),
 		FinalBackupConfig:			   expandFinalBackupConfig(_settings["final_backup_config"].([]interface{})),
@@ -2571,9 +2578,9 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		instance.NodeCount = int64(d.Get("node_count").(int))
 	}
 
-	// Database Version is required for all calls with Google ML integration enabled or it will be rejected by the API.
-	if d.Get("settings.0.enable_google_ml_integration").(bool) || len(_settings["connection_pool_config"].(*schema.Set).List()) > 0 {
-			instance.DatabaseVersion = databaseVersion
+	// Database Version is required for all calls with Google ML Integration, Auto Upgrade, or Connection Pool enabled, or it will be rejected by the API.
+	if d.Get("settings.0.enable_google_ml_integration").(bool) || d.Get("settings.0.auto_upgrade_enabled").(bool) || len(_settings["connection_pool_config"].(*schema.Set).List()) > 0 {
+		instance.DatabaseVersion = databaseVersion
 	}
 
 	failoverDrReplicaName := d.Get("replication_cluster.0.failover_dr_replica_name").(string)
@@ -2839,6 +2846,7 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 	data["disk_autoresize"] = settings.StorageAutoResize
 	data["disk_autoresize_limit"] = settings.StorageAutoResizeLimit
 
+	data["auto_upgrade_enabled"] = settings.AutoUpgradeEnabled
 	data["enable_google_ml_integration"] = settings.EnableGoogleMlIntegration
 	data["enable_dataplex_integration"] = settings.EnableDataplexIntegration
 

@@ -367,6 +367,11 @@ The `settings` block supports:
 
 * `user_labels` - (Optional) A set of key/value user label pairs to assign to the instance.
 
+* `auto_upgrade_enabled` - Enables Automatic Version Upgrade feature. When this
+    field is set to `true`, Automatic Upgrade is enabled for `MYSQL_8_0` based
+    minor versions. The `database_version` must be `MYSQL_8_0_35` or higher.
+    Can be used with MySQL only.
+
 * `activation_policy` - (Optional) This specifies when the instance should be
     active. Can be either `ALWAYS`, `NEVER` or `ON_DEMAND`.
 
