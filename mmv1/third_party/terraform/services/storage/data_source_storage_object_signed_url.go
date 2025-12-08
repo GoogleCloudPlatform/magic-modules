@@ -218,11 +218,13 @@ func getGcsHostUrl(urlData *UrlData, bucketName, objectPath string) string {
 	if strings.Contains(bucketName, ".") {
 		// Use path-style URL as "." in the bucket name create invalid virtual hostnames
 		// Signed URL format https://storage.googleapis.com/tf-test-bucket-6159205297736845881/path/to/object
+		// Path format is bucket_name/object_path
 		urlData.Path = fmt.Sprintf("/%s/%s", bucketName, objectPath)
 		baseUrl = gcsBaseUrl
 	} else {
 		// default to always virtual style URL
 		// URL format https://tf-test-bucket-6159205297736845881.storage.googleapis.com//path/to/object
+		// Path format is object_path
 		urlData.Path = fmt.Sprintf("/%s", objectPath)
 		gcsUrl := strings.Split(gcsBaseUrl, "://")
 		baseUrl = fmt.Sprintf("%s://%s.%s", gcsUrl[0], bucketName, gcsUrl[1])
@@ -263,8 +265,9 @@ type UrlData struct {
 	HttpMethod  string
 	Expires     int
 	HttpHeaders map[string]string
-	Path        string
 	SignPath    string
+	// Internally used field derived for virtual-host or path-style.
+	Path string
 }
 
 // SigningString creates a string representation of the UrlData in a form ready for signing:
