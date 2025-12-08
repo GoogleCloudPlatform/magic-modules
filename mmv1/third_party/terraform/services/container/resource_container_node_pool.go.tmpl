@@ -206,6 +206,7 @@ func ResourceContainerNodePool() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
 			resourceNodeConfigEmptyGuestAccelerator,
+			nodePoolAcceleratorNetworkProfileCustomizeDiff,
 		),
 
 		UseJSONNumber: true,
@@ -1933,4 +1934,39 @@ func retryWhileIncompatibleOperation(timeout time.Duration, lockKey string, f fu
 		}
 		return nil
 	})
+}
+
+func nodePoolAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta any) error {
+	// 1. Get ANP State
+	oldProfile, newProfile := diff.GetChange("network_config.0.accelerator_network_profile")
+	newProfileStr := newProfile.(string)
+	oldProfileStr := oldProfile.(string)
+	
+	anpIsActive := newProfileStr != ""
+	anpIsChanging := oldProfileStr != newProfileStr
+
+	// 2. Check strict Raw Config (Did the user type the additional block?)
+	rawConfig := diff.GetRawConfig()
+	userConfig := rawConfig.GetAttr("network_config").GetAttr("additional_node_network_configs")
+	userHasConfig := !userConfig.IsNull() && userConfig.LengthInt() > 0
+
+	// Logic: If the user did NOT provide a config, we might need to intervene.
+	if !userHasConfig {
+		
+		// Case 1: User is enabling ANP (Manual -> Auto).
+		// We MUST force empty to avoid API conflict ("Cannot have both ANP and Additional").
+		// We only do this if ANP is *changing* to avoid permadiffs on future runs.
+		if anpIsActive && anpIsChanging {
+			diff.SetNew("network_config.0.additional_node_network_configs", []interface{}{})
+		}
+
+		// Case 2: User is NOT using ANP (Manual -> None).
+		// We MUST force empty to fix the "Sticky" Optional+Computed bug.
+		// Since ANP is off, there are no API defaults to protect, so this is safe.
+		if !anpIsActive {
+			diff.SetNew("network_config.0.additional_node_network_configs", []interface{}{})
+		}
+	}
+
+	return nil
 }
