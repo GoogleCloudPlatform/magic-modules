@@ -13,7 +13,6 @@ import (
 	"golang.org/x/exp/slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/loader"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/openapi_generate"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/provider"
@@ -84,12 +83,7 @@ func GenerateProducts(product, resource, providerName, version, outputPath, base
 	log.Printf("Building %q version", version)
 	log.Printf("Building %q provider", providerName)
 
-	ofs, err := google.NewOverlayFS(overrideDirectory, baseDirectory)
-	if err != nil {
-		panic(err)
-	}
-
-	loader := loader.NewLoader(loader.Config{Version: version, BaseDirectory: baseDirectory, OverrideDirectory: overrideDirectory, Sysfs: ofs})
+	loader := loader.NewLoader(loader.Config{Version: version, BaseDirectory: baseDirectory, OverrideDirectory: overrideDirectory})
 	loadedProducts := loader.LoadProducts()
 
 	var productsToGenerate []string
@@ -104,7 +98,7 @@ func GenerateProducts(product, resource, providerName, version, outputPath, base
 
 	for _, productApi := range loadedProducts {
 		wg.Add(1)
-		go GenerateProduct(version, providerName, productApi, outputPath, startTime, ofs, productsToGenerate, resource, generateCode, generateDocs)
+		go GenerateProduct(version, providerName, productApi, outputPath, startTime, loader.OverlayFS, productsToGenerate, resource, generateCode, generateDocs)
 	}
 	wg.Wait()
 
@@ -118,7 +112,7 @@ func GenerateProducts(product, resource, providerName, version, outputPath, base
 
 	// In order to only copy/compile files once per provider this must be called outside
 	// of the products loop. Create an MMv1 provider with an arbitrary product (the first loaded).
-	providerToGenerate := newProvider(providerName, version, productsForVersion[0], startTime, ofs)
+	providerToGenerate := newProvider(providerName, version, productsForVersion[0], startTime, loader.OverlayFS)
 	providerToGenerate.CopyCommonFiles(outputPath, generateCode, generateDocs)
 
 	if generateCode {

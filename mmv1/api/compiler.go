@@ -27,11 +27,14 @@ func Compile(yamlPath string, obj interface{}) {
 	if err != nil {
 		log.Fatalf("Cannot open the file: %s", yamlPath)
 	}
+	CompileContents(objYaml, obj, yamlPath)
+}
 
+func CompileContents(contents []byte, obj interface{}, yamlPath string) {
 	// TODO: retire {{override_path}} from private overrides repositories,
 	// and remove this later.
-	objYaml = bytes.ReplaceAll(objYaml, []byte("{{override_path}}/"), []byte(""))
+	contents = bytes.ReplaceAll(contents, []byte("{{override_path}}/"), []byte(""))
 
 	yamlValidator := google.YamlValidator{}
-	yamlValidator.Parse(objYaml, obj, yamlPath)
+	yamlValidator.Parse(contents, obj, yamlPath)
 }
