@@ -36,7 +36,7 @@ create_url: '{{key_ring}}/importJobs?importJobId={{import_job_id}}'
 immutable: true
 import_format:
   - '{{name}}'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 tgc_include_handwritten_tests: true
 cai_asset_name_format: '{{key_ring}}/importJobs/{{import_job_id}}'
 timeouts:

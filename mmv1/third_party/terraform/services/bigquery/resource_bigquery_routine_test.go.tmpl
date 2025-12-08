@@ -5,6 +5,9 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+  {{- if ne $.TargetVersionName "ga" }}
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+  {{- end }}
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -343,3 +346,128 @@ resource "google_bigquery_routine" "remote_function_routine" {
 }
 `, context)
 }
+
+{{if ne $.TargetVersionName "ga" }}
+func TestAccBigQueryRoutine_bigqueryRoutinePythonFunction_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckBigQueryRoutineDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryRoutine_bigqueryRoutinePythonFunction_basic(context),
+			},
+			{
+				ResourceName:      "google_bigquery_routine.python_function",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBigQueryRoutine_bigqueryRoutinePythonFunction_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_bigquery_routine.python_function", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_bigquery_routine.python_function",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccBigQueryRoutine_bigqueryRoutinePythonFunction_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_bigquery_dataset" "test" {
+  provider = google-beta
+  dataset_id = "tf_test_dataset_id%{random_suffix}"
+}
+
+resource "google_bigquery_routine" "python_function" {
+  provider = google-beta
+  dataset_id = google_bigquery_dataset.test.dataset_id
+  routine_id = "tf_test_routine_id%{random_suffix}"
+  routine_type = "SCALAR_FUNCTION"
+  language = "PYTHON"
+  arguments {
+    name = "x"
+    data_type = "{\"typeKind\" :  \"FLOAT64\"}"
+  }
+  arguments {
+    name = "y"
+    data_type = "{\"typeKind\" :  \"FLOAT64\"}"
+  }
+  definition_body = <<-EOS
+    def multiply(x, y):
+      return x * y
+  EOS
+  return_type = "{\"typeKind\" :  \"FLOAT64\"}"
+  python_options {
+    entry_point = "multiply"
+  }
+  external_runtime_options {
+    runtime_version = "python-3.11"
+  }
+
+}
+`, context)
+}
+
+func testAccBigQueryRoutine_bigqueryRoutinePythonFunction_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_bigquery_dataset" "test" {
+  provider = google-beta
+  dataset_id = "tf_test_dataset_id%{random_suffix}"
+}
+
+resource "google_bigquery_connection" "test" {
+  provider = google-beta
+  connection_id = "tf_test_connection_id%{random_suffix}"
+  location      = "US"
+  cloud_resource {}
+}
+
+resource "google_bigquery_routine" "python_function" {
+  provider = google-beta
+  dataset_id = google_bigquery_dataset.test.dataset_id
+  routine_id = "tf_test_routine_id%{random_suffix}"
+  routine_type = "SCALAR_FUNCTION"
+  language = "PYTHON"
+  arguments {
+    name = "x"
+    data_type = "{\"typeKind\" :  \"FLOAT64\"}"
+  }
+  arguments {
+    name = "y"
+    data_type = "{\"typeKind\" :  \"FLOAT64\"}"
+  }
+  definition_body = <<-EOS
+    def multiply(x, y):
+      return x * y
+  EOS
+  return_type = "{\"typeKind\" :  \"FLOAT64\"}"
+  python_options {
+    entry_point = "multiply"
+    packages = ["requests"]
+  }
+  external_runtime_options {
+    container_memory = "512Mi"
+    container_cpu = 0.5
+    runtime_connection = "${google_bigquery_connection.test.name}"
+    runtime_version = "python-3.11"
+    max_batching_rows = "10"
+  }
+
+}
+`, context)
+}
+{{- end }}
