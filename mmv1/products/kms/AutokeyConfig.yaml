@@ -65,11 +65,13 @@ properties:
       CryptoKey for any new KeyHandle the Developer creates. Should have the form
       `projects/<project_id_or_number>`.
   - !ruby/object:Api::Type::Enum
-    name: 'sameProjectAutokey'
-    api_name: sameProjectAutokey
-    description: 'Whether to allow same-project Autokey functionality.'
+    name: 'keyProjectResolutionMode'
+    api_name: keyProjectResolutionMode
+    description: 'How Autokey determines which project to use when provisioning CMEK keys.'
     enum_values:
-      - :ENABLED
+      - :KEY_PROJECT_RESOLUTION_MODE_UNSPECIFIED
+      - :DEDICATED_KEY_PROJECT
+      - :RESOURCE_PROJECT
       - :DISABLED
   - !ruby/object:Api::Type::String
     name: 'etag'

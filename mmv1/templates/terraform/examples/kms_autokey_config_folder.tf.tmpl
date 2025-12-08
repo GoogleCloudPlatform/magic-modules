@@ -2,7 +2,7 @@ resource "google_kms_autokey_config" "folder_config" {
   provider    = google-beta
   folder      = "folders/${var.folder_id}"
   key_project = "projects/${var.key_project_id}"
-  # same_project_autokey = "DISABLED" # Optional: Add if you want to test setting this
+  # key_project_resolution_mode = "DEDICATED_KEY_PROJECT" # Optional: Add if you want to test setting resolution mode
 }
 
 resource "google_folder" "autokey_folder" {

@@ -8,20 +8,26 @@ if v, ok := d.GetOk("folder"); ok {
     if !strings.HasPrefix(parent, "folders/") {
         parent = "folders/" + parent
     }
-    updateMask = "keyProject,sameProjectAutokey"
+    updateMask = "keyProject,keyProjectResolutionMode"
 } else if v, ok := d.GetOk("project"); ok {
     parent = v.(string)
     if !strings.HasPrefix(parent, "projects/") {
         parent = "projects/" + parent
     }
-    updateMask = "sameProjectAutokey"
+    updateMask = "keyProjectResolutionMode"
 } else {
     return fmt.Errorf("either folder or project must be set")
 }
 
 // Reuse scaffold variables: assign to `url` and `obj` rather than redeclaring locals.
 url = config.KMSBasePath + parent + "/autokeyConfig?update_mask=" + updateMask
-obj = make(map[string]interface{}) // Empty body
+obj = make(map[string]interface{})
+if strings.HasPrefix(parent, "folders/") {
+    obj["keyProject"] = nil
+    obj["keyProjectResolutionMode"] = nil
+} else {
+    obj["keyProjectResolutionMode"] = nil
+}
 
 _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
     Config:    config,

@@ -44,11 +44,13 @@ properties:
     description: 'The key project to use for this folder. This should be in the format `projects/{{project_id}}`.'
     output: true
   - !ruby/object:Api::Type::Enum
-    name: 'sameProjectAutokey'
-    api_name: sameProjectAutokey
-    description: 'Whether to allow same-project Autokey functionality.'
+    name: 'keyProjectResolutionMode'
+    api_name: keyProjectResolutionMode
+    description: 'How to resolve the project used for key provisioning.'
     enum_values:
-      - :ENABLED
+      - :KEY_PROJECT_RESOLUTION_MODE_UNSPECIFIED
+      - :DEDICATED_KEY_PROJECT
+      - :RESOURCE_PROJECT
       - :DISABLED
     output: true
 

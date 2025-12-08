@@ -36,11 +36,11 @@ if err != nil {
 } else if v, ok := d.GetOkExists("key_project"); !tpgresource.IsEmptyValue(reflect.ValueOf(keyProjectProp)) && (ok || !reflect.DeepEqual(v, keyProjectProp)) {
     obj["keyProject"] = keyProjectProp
 }
-sameProjectAutokeyProp, err := expandKMSAutokeyConfigSameProjectAutokey(d.Get("same_project_autokey"), d, config)
+keyProjectResolutionModeProp, err := expandKMSAutokeyConfigKeyProjectResolutionMode(d.Get("key_project_resolution_mode"), d, config)
 if err != nil {
     return err
-} else if v, ok := d.GetOkExists("same_project_autokey"); !tpgresource.IsEmptyValue(reflect.ValueOf(sameProjectAutokeyProp)) && (ok || !reflect.DeepEqual(v, sameProjectAutokeyProp)) {
-    obj["sameProjectAutokey"] = sameProjectAutokeyProp
+} else if v, ok := d.GetOkExists("key_project_resolution_mode"); !tpgresource.IsEmptyValue(reflect.ValueOf(keyProjectResolutionModeProp)) && (ok || !reflect.DeepEqual(v, keyProjectResolutionModeProp)) {
+    obj["keyProjectResolutionMode"] = keyProjectResolutionModeProp
 }
 
 // Some KMS APIs accept PATCH to create/update singleton configs (projects/{id}/autokeyConfig)
@@ -50,8 +50,8 @@ var updateMask []string
 if !tpgresource.IsEmptyValue(reflect.ValueOf(keyProjectProp)) {
     updateMask = append(updateMask, "keyProject")
 }
-if !tpgresource.IsEmptyValue(reflect.ValueOf(sameProjectAutokeyProp)) {
-    updateMask = append(updateMask, "sameProjectAutokey")
+if !tpgresource.IsEmptyValue(reflect.ValueOf(keyProjectResolutionModeProp)) {
+    updateMask = append(updateMask, "keyProjectResolutionMode")
 }
 var res map[string]interface{}
 if len(updateMask) == 0 {

@@ -21,12 +21,12 @@ if d.HasChange("key_project") {
     }
 }
 
-if d.HasChange("same_project_autokey") {
-    sameProjectAutokeyProp, _ := expandKMSAutokeyConfigSameProjectAutokey(d.Get("same_project_autokey"), d, config)
-    if v, ok := d.GetOkExists("same_project_autokey"); !tpgresource.IsEmptyValue(reflect.ValueOf(sameProjectAutokeyProp)) && (ok || !reflect.DeepEqual(v, sameProjectAutokeyProp)) {
-        body["sameProjectAutokey"] = sameProjectAutokeyProp
+if d.HasChange("key_project_resolution_mode") {
+    keyProjectResolutionModeProp, _ := expandKMSAutokeyConfigKeyProjectResolutionMode(d.Get("key_project_resolution_mode"), d, config)
+    if v, ok := d.GetOkExists("key_project_resolution_mode"); !tpgresource.IsEmptyValue(reflect.ValueOf(keyProjectResolutionModeProp)) && (ok || !reflect.DeepEqual(v, keyProjectResolutionModeProp)) {
+        body["keyProjectResolutionMode"] = keyProjectResolutionModeProp
     } else {
-        body["sameProjectAutokey"] = nil
+        body["keyProjectResolutionMode"] = nil
     }
 }
 

@@ -17,10 +17,10 @@ if v, ok := res["keyProject"].(string); ok {
     d.Set("key_project", nil)
 }
 
-if v, ok := res["sameProjectAutokey"].(string); ok {
-    d.Set("same_project_autokey", v)
+if v, ok := res["keyProjectResolutionMode"].(string); ok {
+    d.Set("key_project_resolution_mode", v)
 } else {
-    d.Set("same_project_autokey", nil)
+    d.Set("key_project_resolution_mode", nil)
 }
 
 return res, nil
