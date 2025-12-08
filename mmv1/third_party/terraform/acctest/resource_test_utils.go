@@ -112,11 +112,18 @@ func TestCheckAttributeValuesEqual(i *string, j *string) resource.TestCheckFunc 
 }
 
 // ConditionTitleIfPresent returns empty string if condition is not preset and " {condition.0.title}" if it is.
-func ConditionTitleIfPresent(state map[string]string) string {
-	if conditionTitle, ok := state["condition.0.title"]; ok {
-		return " " + conditionTitle
-	}
-	return ""
+func BuildIAMImportId(name, role, member, condition string) string {
+    ret := name
+    if role != "" {
+        ret += " " + role
+    }
+    if member != "" {
+        ret += " " + member
+    }
+    if condition != "" {
+        ret += " " + condition
+    }
+    return ret
 }
 
 // testStringValue returns string values from string pointers, handling nil pointers.
