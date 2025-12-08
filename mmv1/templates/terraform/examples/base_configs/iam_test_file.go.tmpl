@@ -670,7 +670,7 @@ func generate{{ $.ResourceName }}IAMPolicyStateID(iamResourceAddr string) func (
 		{{ $p }} := tpgresource.GetResourceNameFromSelfLink(rawState["{{ underscore $p }}"])
 			{{- end }}
 		{{- end }}
-		return fmt.Sprintf("{{ $.IamImportFormat }}", {{ join $.IamImportParams ", " }}) + acctest.ConditionTitleIfPresent(rawState), nil
+		return acctest.BuildIAMImportId(fmt.Sprintf("{{ $.IamImportFormat }}", {{ join $.IamImportParams ", " }}), "", "", rawState["condition.0.title"], nil
 	}
 }
 
@@ -692,7 +692,7 @@ func generate{{ $.ResourceName }}IAMBindingStateID(iamResourceAddr string) func 
 		{{ $p }} := tpgresource.GetResourceNameFromSelfLink(rawState["{{ underscore $p }}"])
 			{{- end }}
 		{{- end }}
-		return fmt.Sprintf("{{ $.IamImportFormat }} %s", {{ join $.IamImportParams ", " }}, rawState["role"]) + acctest.ConditionTitleIfPresent(rawState), nil
+		return acctest.BuildIAMImportId(fmt.Sprintf("{{ $.IamImportFormat }}", {{ join $.IamImportParams ", " }}), rawState["role"], "", rawState["condition.0.title"], nil
 	}
 }
 
@@ -714,7 +714,7 @@ func generate{{ $.ResourceName }}IAMMemberStateID(iamResourceAddr string) func (
 		{{ $p }} := tpgresource.GetResourceNameFromSelfLink(rawState["{{ underscore $p }}"])
 			{{- end }}
 		{{- end }}
-		return fmt.Sprintf("{{ $.IamImportFormat }} %s %s", {{ join $.IamImportParams ", " }}, rawState["role"], rawState["member"]) + acctest.ConditionTitleIfPresent(rawState), nil
+		return acctest.BuildIAMImportId(fmt.Sprintf("{{ $.IamImportFormat }}", {{ join $.IamImportParams ", " }}), rawState["role"], rawState["member"], rawState["condition.0.title"], nil
 	}
 }
 {{- end }}
