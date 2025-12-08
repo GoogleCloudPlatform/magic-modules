@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"reflect"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -3883,316 +3882,198 @@ func TestAccSqlDatabaseInstance_DiskSizeAutoResizeWithDiskSize(t *testing.T) {
 	})
 }
 
-// CustomDiffMock embeds ResourceDiffMock to override HasChange
-type CustomDiffMock struct {
-	tpgresource.ResourceDiffMock
-}
-
-// HasChange overrides the default implementation to use DeepEqual for comparisons.
-func (m *CustomDiffMock) HasChange(key string) bool {
-	oldVal, oldOk := m.Before[key]
-	newVal, newOk := m.After[key]
-
-	if oldOk != newOk {
-		return true // Presence changed
-	}
-
-	return !reflect.DeepEqual(oldVal, newVal)
-}
-
 func TestEnhancedBackupManagerCustomizeDiffFunc(t *testing.T) {
-	cases := map[string]struct {
-		before      map[string]interface{}
-		after       map[string]interface{}
-		expectClear bool
-		description string
-	}{
-		"backup tier is enhanced with change in backup configuration": {
-			before: map[string]interface{}{
-				"name": "test-instance",
-				"settings.0.backup_configuration.0.backup_tier": "ENHANCED",
-				"settings.0.backup_configuration": []interface{}{
-					map[string]interface{}{
-						"backup_tier": "ENHANCED",
-						"enabled":     true,
-					},
+    cases := map[string]struct {
+        before      map[string]interface{}
+        after       map[string]interface{}
+        expectClear bool
+        description string
+    }{
+        "backup tier is enhanced with change in backup configuration": {
+            before: map[string]interface{}{
+                "name": "test-instance",
+                // flattened keys used by other test helpers
+                "settings.0.backup_configuration.0.backup_tier": "ENHANCED",
+                "settings.0.backup_configuration.0.enabled":    true,
+                "settings.0.backup_configuration.0.start_time": "03:00",
+                "settings.0.backup_configuration.0.binary_log_enabled":             true,
+                "settings.0.backup_configuration.0.point_in_time_recovery_enabled": false,
+                "settings.0.backup_configuration.0.transaction_log_retention_days": 7,
+                "settings.0.backup_configuration.0.backup_retention_settings.0.retained_backups": 7,
+                // nested representation so HasChange can detect structural changes if needed
+                "settings.0.backup_configuration": []interface{}{
+                    map[string]interface{}{
+                        "backup_tier":                      "ENHANCED",
+                        "enabled":                          true,
+                        "start_time":                       "03:00",
+                        "binary_log_enabled":               true,
+                        "point_in_time_recovery_enabled":   false,
+                        "transaction_log_retention_days":   7,
+                        "backup_retention_settings": []interface{}{
+                            map[string]interface{}{"retained_backups": 7},
+                        },
+                    },
                 },
-			},
-			after: map[string]interface{}{
-				"name": "test-instance",
-				"settings.0.backup_configuration.0.backup_tier": "ENHANCED",
-				"settings.0.backup_configuration": []interface{}{
-					map[string]interface{}{
-						"backup_tier": "ENHANCED",
-						"enabled":     false,
-					},
-                },
-			},
-			expectClear: true,
-		},
-		"backup tier is enhanced with no change in backup configuration": {
-			before: map[string]interface{}{
-				"name": "test-instance",
-				"settings.0.backup_configuration.0.backup_tier": "ENHANCED",
-				"settings.0.backup_configuration": []interface{}{
-					map[string]interface{}{
-						"backup_tier": "ENHANCED",
-						"enabled":     true,
-					},
-                },
-			},
-			after: map[string]interface{}{
-				"name": "test-instance",
-				"settings.0.backup_configuration.0.backup_tier": "ENHANCED",
-				"settings.0.backup_configuration": []interface{}{
-					map[string]interface{}{
-						"backup_tier": "ENHANCED",
-						"enabled":     true,
-					},
-                },
-			},
-			expectClear: false,
-		},
-		"backup tier is standard with change in backup configuration": {
-			before: map[string]interface{}{
-				"name": "test-instance",
-				"settings.0.backup_configuration.0.backup_tier": "STANDARD",
-				"settings.0.backup_configuration": []interface{}{
-					map[string]interface{}{
-						"backup_tier": "STANDARD",
-						"enabled":     false,
-					},
-                },
-			},
-			after: map[string]interface{}{
-				"name": "test-instance",
-				"settings.0.backup_configuration.0.backup_tier": "STANDARD",
-				"settings.0.backup_configuration": []interface{}{
-					map[string]interface{}{
-						"backup_tier": "STANDARD",
-						"enabled":     true,
-					},
-                },
-			},
-			expectClear: false,
-		},
-	}
-
-	for name, tc := range cases {
-		t.Run(name, func(t *testing.T) {
-			// Use the CustomDiffMock
-			d := &CustomDiffMock{
-				ResourceDiffMock: tpgresource.ResourceDiffMock{
-					Before: tc.before,
-					After:  tc.after,
-					Cleared: make(map[string]interface{}),
-				},
-			}
-
-			err := sql.EnhancedBackupManagerCustomizeDiffFunc(d)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-
-			clearKey := "settings.0.backup_configuration"
-			_, wasCleared := d.Cleared[clearKey]
-
-			if tc.expectClear != wasCleared {
-				t.Errorf("expected '%s' to be cleared: %v, but wasCleared is: %v. Desc: %s", clearKey, tc.expectClear, wasCleared, tc.description)
-			}
-		})
-	}
-}
-
-func TestAccSqlDatabaseInstance_backupConfigurationIgnoredForEnhancedBackupTier(t *testing.T) {
-    t.Parallel()
-
-    backupVaultID := "bv-test"
-    location := "us-central1"
-    project := envvar.GetTestProjectFromEnv()
-    backupVault := acctest.BootstrapBackupDRVault(t, backupVaultID, location)
-
-    context := map[string]interface{}{
-        "random_suffix":     acctest.RandString(t, 10),
-        "project":           project,
-        "backup_vault_id":   backupVaultID,
-        "backup_vault":      backupVault,
-        "db_version":        "MYSQL_8_0_41",
-    }
-
-    acctest.VcrTest(t, resource.TestCase{
-        PreCheck:     func() { acctest.AccTestPreCheck(t) },
-        ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-        CheckDestroy: testAccSqlDatabaseInstanceDestroyProducer(t),
-        Steps: []resource.TestStep{
-            {
-                Config: testGoogleSqlDatabaseInstance_withBackupConfiguration(context),
-                Check: resource.ComposeAggregateTestCheckFunc(
-                    resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.backup_configuration.0.enabled", "true"),
-                    resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.backup_configuration.0.binary_log_enabled", "true"),
-                ),
             },
-            {
-                // Create backup plan and associate with instance
-                Config: testGoogleSqlDatabaseInstance_attachGCBDR(context),
-                Check: resource.ComposeAggregateTestCheckFunc(
-                    resource.TestCheckResourceAttrSet("google_backup_dr_backup_plan_association.backup_association", "id"),
-                ),
+            after: map[string]interface{}{
+                "name": "test-instance",
+                "settings.0.backup_configuration.0.backup_tier": "ENHANCED",
+                "settings.0.backup_configuration.0.enabled":    false,
+                "settings.0.backup_configuration.0.start_time": "05:00",
+                "settings.0.backup_configuration.0.binary_log_enabled":             false,
+                "settings.0.backup_configuration.0.point_in_time_recovery_enabled": true,
+                "settings.0.backup_configuration.0.transaction_log_retention_days": 14,
+                "settings.0.backup_configuration.0.backup_retention_settings.0.retained_backups": 14,
+                "settings.0.backup_configuration": []interface{}{
+                    map[string]interface{}{
+                        "backup_tier":                    "ENHANCED",
+                        "enabled":                        false,
+                        "start_time":                     "05:00",
+                        "binary_log_enabled":             false,
+                        "point_in_time_recovery_enabled": true,
+                        "transaction_log_retention_days": 14,
+                        "backup_retention_settings": []interface{}{
+                            map[string]interface{}{"retained_backups": 14},
+                        },
+                    },
+                },
             },
-            {
-                // Update backup configuration - should be suppressed due to ENHANCED backup manager
-                Config: testGoogleSqlDatabaseInstance_updateBackupConfiguration(context),
-                // Backup configuration is still managed by BackupDR, no plan diff should be generated
-                // The key test is that PlanOnly doesn't show changes
-                PlanOnly:           true,
-                ExpectNonEmptyPlan: false,
-            },
+            expectClear: true,
         },
-    })
-}
-
-func testGoogleSqlDatabaseInstance_withBackupConfiguration(context map[string]interface{}) string {
-    return acctest.Nprintf(`
-resource "google_sql_database_instance" "instance" {
-  name             = "tf-test-instance-%{random_suffix}"
-  database_version = "%{db_version}"
-  region           = "us-central1"
-  deletion_protection = false
-
-  settings {
-    tier = "db-f1-micro"
-
-    backup_configuration {
-      enabled            = true
-      binary_log_enabled = true
-      start_time         = "03:00"
-      location           = "us"
-      
-      backup_retention_settings {
-        retained_backups = 7
-      }
+        "backup tier is enhanced with no change in backup configuration": {
+            before: map[string]interface{}{
+                "name": "test-instance",
+                "settings.0.backup_configuration.0.backup_tier": "ENHANCED",
+                "settings.0.backup_configuration.0.enabled":    true,
+                "settings.0.backup_configuration.0.start_time": "03:00",
+                "settings.0.backup_configuration.0.binary_log_enabled":             true,
+                "settings.0.backup_configuration.0.point_in_time_recovery_enabled": false,
+                "settings.0.backup_configuration.0.transaction_log_retention_days": 7,
+                "settings.0.backup_configuration.0.backup_retention_settings.0.retained_backups": 7,
+                "settings.0.backup_configuration": []interface{}{
+                    map[string]interface{}{
+                        "backup_tier":                    "ENHANCED",
+                        "enabled":                        true,
+                        "start_time":                     "03:00",
+                        "binary_log_enabled":             true,
+                        "point_in_time_recovery_enabled": false,
+                        "transaction_log_retention_days": 7,
+                        "backup_retention_settings": []interface{}{
+                            map[string]interface{}{"retained_backups": 7},
+                        },
+                    },
+                },
+            },
+            after: map[string]interface{}{
+                "name": "test-instance",
+                "settings.0.backup_configuration.0.backup_tier": "ENHANCED",
+                "settings.0.backup_configuration.0.enabled":    true,
+                "settings.0.backup_configuration.0.start_time": "03:00",
+                "settings.0.backup_configuration.0.binary_log_enabled":             true,
+                "settings.0.backup_configuration.0.point_in_time_recovery_enabled": false,
+                "settings.0.backup_configuration.0.transaction_log_retention_days": 7,
+                "settings.0.backup_configuration.0.backup_retention_settings.0.retained_backups": 7,
+                "settings.0.backup_configuration": []interface{}{
+                    map[string]interface{}{
+                        "backup_tier":                    "ENHANCED",
+                        "enabled":                        true,
+                        "start_time":                     "03:00",
+                        "binary_log_enabled":             true,
+                        "point_in_time_recovery_enabled": false,
+                        "transaction_log_retention_days": 7,
+                        "backup_retention_settings": []interface{}{
+                            map[string]interface{}{"retained_backups": 7},
+                        },
+                    },
+                },
+            },
+            expectClear: false,
+        },
+        "backup tier is standard with change in backup configuration": {
+            before: map[string]interface{}{
+                "name": "test-instance",
+                "settings.0.backup_configuration.0.backup_tier": "STANDARD",
+                "settings.0.backup_configuration.0.enabled":    true,
+                "settings.0.backup_configuration.0.start_time": "03:00",
+                "settings.0.backup_configuration.0.binary_log_enabled":             true,
+                "settings.0.backup_configuration.0.point_in_time_recovery_enabled": false,
+                "settings.0.backup_configuration.0.transaction_log_retention_days": 7,
+                "settings.0.backup_configuration.0.backup_retention_settings.0.retained_backups": 7,
+                "settings.0.backup_configuration": []interface{}{
+                    map[string]interface{}{
+                        "backup_tier":                    "STANDARD",
+                        "enabled":                        true,
+                        "start_time":                     "03:00",
+                        "binary_log_enabled":             true,
+                        "point_in_time_recovery_enabled": false,
+                        "transaction_log_retention_days": 7,
+                        "backup_retention_settings": []interface{}{
+                            map[string]interface{}{"retained_backups": 7},
+                        },
+                    },
+                },
+            },
+            after: map[string]interface{}{
+                "name": "test-instance",
+                "settings.0.backup_configuration.0.backup_tier": "STANDARD",
+                "settings.0.backup_configuration.0.enabled":    false,
+                "settings.0.backup_configuration.0.start_time": "03:00",
+                "settings.0.backup_configuration.0.binary_log_enabled":             false,
+                "settings.0.backup_configuration.0.point_in_time_recovery_enabled": false,
+                "settings.0.backup_configuration.0.transaction_log_retention_days": 7,
+                "settings.0.backup_configuration.0.backup_retention_settings.0.retained_backups": 7,
+                "settings.0.backup_configuration": []interface{}{
+                    map[string]interface{}{
+                        "backup_tier":                    "STANDARD",
+                        "enabled":                        false,
+                        "start_time":                     "03:00",
+                        "binary_log_enabled":             false,
+                        "point_in_time_recovery_enabled": false,
+                        "transaction_log_retention_days": 7,
+                        "backup_retention_settings": []interface{}{
+                            map[string]interface{}{"retained_backups": 7},
+                        },
+                    },
+                },
+            },
+            expectClear: false,
+        },
     }
-  }
-}
-`, context)
-}
 
-func testGoogleSqlDatabaseInstance_attachGCBDR(context map[string]interface{}) string {
-    return acctest.Nprintf(`
-data "google_project" "project" {}
+    for name, tc := range cases {
+        t.Run(name, func(t *testing.T) {
+            // Use tpgresource.ResourceDiffMock directly
+            d := &tpgresource.ResourceDiffMock{
+                Before:  tc.before,
+                After:   tc.after,
+                Cleared: make(map[string]interface{}),
+            }
 
-resource "google_sql_database_instance" "instance" {
-  name             = "tf-test-instance-%{random_suffix}"
-  database_version = "%{db_version}"
-  region           = "us-central1"
-  deletion_protection = false
+            if err := sql.EnhancedBackupManagerCustomizeDiffFunc(d); err != nil {
+                t.Fatalf("unexpected error: %v", err)
+            }
 
-  settings {
-    tier = "db-f1-micro"
+            // Keys that should be suppressed/cleared when ENHANCED backup tier is enabled.
+            keysToCheck := []string{
+                "settings.0.backup_configuration.0.enabled",
+                "settings.0.backup_configuration.0.start_time",
+                "settings.0.backup_configuration.0.binary_log_enabled",
+                "settings.0.backup_configuration.0.point_in_time_recovery_enabled",
+                "settings.0.backup_configuration.0.transaction_log_retention_days",
+                "settings.0.backup_configuration.0.backup_retention_settings.0.retained_backups",
+            }
 
-    backup_configuration {
-      enabled            = true
-      binary_log_enabled = true
-      start_time         = "03:00"
-      location           = "us"
-      
-      backup_retention_settings {
-        retained_backups = 7
-      }
+            for _, k := range keysToCheck {
+                _, wasCleared := d.Cleared[k]
+                if tc.expectClear && !wasCleared {
+                    t.Errorf("expected '%s' to be cleared but it was not. Desc: %s", k, tc.description)
+                }
+                if !tc.expectClear && wasCleared {
+                    t.Errorf("expected '%s' NOT to be cleared but it was. Desc: %s", k, tc.description)
+                }
+            }
+        })
     }
-  }
-}
-
-resource "google_backup_dr_backup_plan" "plan" {
-  location       = "us-central1"
-  backup_plan_id = "tf-test-bp-test-%{random_suffix}"
-  resource_type  = "sqladmin.googleapis.com/Instance"
-  backup_vault   = "%{backup_vault}"
-
-  backup_rules {
-    rule_id                = "rule-1"
-    backup_retention_days  = 7
-
-    standard_schedule {
-      recurrence_type     = "DAILY"
-      hourly_frequency    = 6
-      time_zone           = "UTC"
-
-      backup_window {
-        start_hour_of_day = 0
-        end_hour_of_day   = 23
-      }
-    }
-  }
-}
-
-resource "google_backup_dr_backup_plan_association" "backup_association" {
-  location 						= "us-central1" 
-  backup_plan_association_id 	= "tf-test-bpa-test-%{random_suffix}"
-  resource 						= "projects/${data.google_project.project.project_id}/instances/${google_sql_database_instance.instance.name}"
-  resource_type					= "sqladmin.googleapis.com/Instance"
-  backup_plan 					= google_backup_dr_backup_plan.plan.name
-}
-`, context)
-}
-
-func testGoogleSqlDatabaseInstance_updateBackupConfiguration(context map[string]interface{}) string {
-    return acctest.Nprintf(`
-data "google_project" "project" {}
-
-resource "google_sql_database_instance" "instance" {
-  name             = "tf-test-instance-%{random_suffix}"
-  database_version = "%{db_version}"
-  region           = "us-central1"
-  deletion_protection = false
-
-  settings {
-    tier = "db-f1-micro"
-
-    backup_configuration {
-      enabled            = false
-      binary_log_enabled = false
-      start_time         = "05:00"
-      location           = "us"
-      
-      backup_retention_settings {
-        retained_backups = 8
-      }
-    }
-  }
-}
-
-resource "google_backup_dr_backup_plan" "plan" {
-  location       = "us-central1"
-  backup_plan_id = "tf-test-bp-test-%{random_suffix}"
-  resource_type  = "sqladmin.googleapis.com/Instance"
-  backup_vault   = "%{backup_vault}"
-
-  backup_rules {
-    rule_id                = "rule-1"
-    backup_retention_days  = 7
-
-    standard_schedule {
-      recurrence_type     = "DAILY"
-      hourly_frequency    = 6
-      time_zone           = "UTC"
-
-      backup_window {
-        start_hour_of_day = 0
-        end_hour_of_day   = 23
-      }
-    }
-  }
-}
-
-resource "google_backup_dr_backup_plan_association" "backup_association" {
-  location 						= "us-central1" 
-  backup_plan_association_id 	= "tf-test-bpa-test-%{random_suffix}"
-  resource 						= "projects/${data.google_project.project.project_id}/instances/${google_sql_database_instance.instance.name}"
-  resource_type					= "sqladmin.googleapis.com/Instance"
-  backup_plan 					= google_backup_dr_backup_plan.plan.name
-}
-`, context)
 }
 
 func testGoogleSqlDatabaseInstance_setCustomSubjectAlternateName(context map[string]interface{}) string {

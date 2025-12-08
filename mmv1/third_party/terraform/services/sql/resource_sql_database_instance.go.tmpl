@@ -70,6 +70,7 @@ var (
 		"settings.0.backup_configuration.0.point_in_time_recovery_enabled",
 		"settings.0.backup_configuration.0.backup_retention_settings",
 		"settings.0.backup_configuration.0.transaction_log_retention_days",
+		"settings.0.backup_configuration.0.backup_tier",
 	}
 
 	connectionPoolConfigKeys = []string{
@@ -415,12 +416,14 @@ API (for read pools, effective_availability_type may differ from availability_ty
 									"binary_log_enabled": {
 										Type:         schema.TypeBool,
 										Optional:     true,
+										Computed:     true,
 										AtLeastOneOf: backupConfigurationKeys,
 										Description:  `True if binary logging is enabled. If settings.backup_configuration.enabled is false, this must be as well. Can only be used with MySQL.`,
 									},
 									"enabled": {
 										Type:         schema.TypeBool,
 										Optional:     true,
+										Computed: 	  true,
 										AtLeastOneOf: backupConfigurationKeys,
 										Description:  `True if backup configuration is enabled.`,
 									},
@@ -435,12 +438,14 @@ API (for read pools, effective_availability_type may differ from availability_ty
 									"location": {
 										Type:         schema.TypeString,
 										Optional:     true,
+										Computed: 	  true,
 										AtLeastOneOf: backupConfigurationKeys,
 										Description:  `Location of the backup configuration.`,
 									},
 									"point_in_time_recovery_enabled": {
 										Type:         schema.TypeBool,
 										Optional:     true,
+										Computed:	  true,
 										AtLeastOneOf: backupConfigurationKeys,
 										Description:  `True if Point-in-time recovery is enabled.`,
 									},
@@ -461,7 +466,8 @@ API (for read pools, effective_availability_type may differ from availability_ty
 											Schema: map[string]*schema.Schema{
 												"retained_backups": {
 													Type:        schema.TypeInt,
-													Required:    true,
+													Optional:    true,
+													Computed:    true,
 													Description: `Number of backups to retain.`,
 												},
 												"retention_unit": {
@@ -1455,18 +1461,25 @@ func EnhancedBackupManagerCustomizeDiffFunc(d tpgresource.TerraformResourceDiff)
     if !strings.EqualFold(backupTierStr, "ENHANCED") {
         return nil
     }
-	// Clear the diff since ENHANCED backup manager is enabled
-	if d.HasChange("settings.0.backup_configuration") {
-		lifecycleBlock := `lifecycle { ignore_changes = [settings[0].backup_configuration] }`
-	    log.Printf(
-		"[WARN] Instance %s is managed by Google Cloud Backup and Disaster Recovery (BackupDR). "+
-		"Terraform will not manage the 'settings.0.backup_configuration' block. "+
-		"Any changes to this block in your Terraform configuration will be ignored. "+
-		"To suppress this warning permanently, add the following lifecycle block to your Terraform configuration: %s",
-		d.Get("name"), lifecycleBlock,
-		)
-		if err := d.Clear("settings.0.backup_configuration"); err != nil {
-			return err
+	// list of fields that must be ignored when ENHANCED backup manager is enabled
+	fieldsToIgnore := []string{
+		"settings.0.backup_configuration.0.enabled",
+		"settings.0.backup_configuration.0.start_time",
+		"settings.0.backup_configuration.0.binary_log_enabled",
+		"settings.0.backup_configuration.0.point_in_time_recovery_enabled",
+		"settings.0.backup_configuration.0.transaction_log_retention_days",
+		"settings.0.backup_configuration.0.backup_retention_settings.0.retained_backups",
+	}
+	for _, field := range fieldsToIgnore {
+		if d.HasChange(field) {
+			log.Printf(
+				"[INFO] Instance %s is managed by Google Cloud Backup and Disaster Recovery (BackupDR). "+
+					"Terraform will not manage the '%s' field. "+
+					"Any changes to this field in your Terraform configuration will be ignored.", d.Get("name"), field,
+			)
+			if err := d.Clear(field); err != nil {
+				return err
+			}
 		}
 	}
     return nil
