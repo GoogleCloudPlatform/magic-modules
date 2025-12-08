@@ -21,11 +21,11 @@ COPY --from=builder /go/pkg/mod /go/pkg/mod
 COPY --from=builder /go/cache /go/cache
 
 RUN apt-get update && \
-    apt-get install -y git jq unzip zip parallel curl && \
-    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
-    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg  add - && \
+    apt-get install -y git jq unzip zip parallel apt-transport-https ca-certificates gnupg curl && \
+    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
     apt-get update -y && \
-    apt-get install google-cloud-sdk -y && \
+    apt-get install google-cloud-cli -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

@@ -86,7 +86,7 @@ func (w *{{ $.ProductMetadata.Name }}OperationWaiter) QueryOp() (interface{}, er
 
 {{ if $.ProductMetadata.OperationRetry }}
 func (w *{{ $.ProductMetadata.Name }}OperationWaiter) IsRetryable(err error) bool {
-  {{ $.CustomTemplate $.ProductMetadata.OperationRetry false }}
+  {{ customTemplate $ $.ProductMetadata.OperationRetry false }}
 }
 {{- end }}
 

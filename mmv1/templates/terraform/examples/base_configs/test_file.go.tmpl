@@ -140,7 +140,7 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 				continue
 			}
 	{{ if $.Res.CustomCode.TestCheckDestroy }}
-	{{ $.Res.CustomTemplate $.Res.CustomCode.TestCheckDestroy false -}}
+	{{ customTemplate $.Res $.Res.CustomCode.TestCheckDestroy false -}}
 	{{- else }}
 
 		config := acctest.GoogleProviderConfig(t)

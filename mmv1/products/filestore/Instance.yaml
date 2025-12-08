@@ -42,8 +42,11 @@ async:
 custom_code:
   pre_create: 'templates/terraform/pre_create/filestore_instance.go.tmpl'
 include_in_tgc_next: true
+tgc_include_handwritten_tests: true
+tgc_tests:
+  - name: 'TestAccFilestoreInstance_directoryServices'
+    skip: 'Test data has mismatched steps'
 error_abort_predicates:
-
   - 'transport_tpg.Is429QuotaError'
 schema_version: 1
 state_upgraders: true
@@ -260,6 +263,7 @@ properties:
           # won't match the sent value as the returned value is an IP range
           # from the provided named range.
           custom_flatten: 'templates/terraform/custom_flatten/filestore_instance_networks_reserved_ip_range.go.tmpl'
+          tgc_ignore_terraform_custom_flatten: true
         - name: 'ipAddresses'
           type: Array
           description: |
