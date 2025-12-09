@@ -68,44 +68,58 @@ func (r *{{ $.ResourceName -}}ListResource) List(ctx context.Context, req list.L
 	stream.Results = func(push func(list.ListResult) bool) {
 		client := r.Client.New{{ $.ResourceName -}}sClient(r.Client.UserAgent)
 
-		listReq := client.{{ $.ResourceName -}}.List{{ $.Name -}}s(project, zone)
+		listReq := {{lower $.ProductMetadata.Name }}.List{{ $.Name -}}sRequest{		
+			{{- range $identity := $.IdentityProperties }}
+			{{ $identity.Name }},
+			{{- end }}
+		}
 
-		if err := listReq.Pages(ctx, func(page *{{ lower $.ProductMetadata.Name }}.{{ $.ResourceName -}}List) error {
-			log.Printf("[DEBUG] {{ $.ResourceName -}} list: %v", page.Items)
-			for _, {{ $.ResourceName -}} := range page.Items {
-				result := req.NewListResult(ctx)
-				result.DisplayName = {{ $.ResourceName -}}.Name
+		it := client.List{{ $.Name -}}s(ctx, &listReq)
 
-				{{ $.ResourceName -}}Resource := Resource{{ $.ResourceName -}}()
-				rd := {{ $.ResourceName -}}Resource.Data(&terraform.InstanceState{})
-				rd.SetId({{ $.ResourceName -}}.Name)
 
-                /* INSERT IDENTITY SETTING GENERATION CODE HERE */
+		for {
+			resp, err := it.Next()
+			if err == iterator.Done {
+				break
+			} else if err != nil {
+				diags.AddError("API Error", err.Error())
+				break
+			}
+
+			result := req.NewListResult(ctx)
+			result.DisplayName = resp.Name
+
+			{{ $.ResourceName -}}Resource := Resource{{ $.ResourceName -}}()
+			rd := {{ $.ResourceName -}}Resource.Data(&terraform.InstanceState{})
+			rd.SetId(resp.Name)
+
+            /* INSERT IDENTITY SETTING GENERATION CODE HERE */
 
 				tfTypeIdentity, err := rd.TfTypeIdentityState()
 				if err != nil {
-					return err
+					diags.AddError("error getting identity state", err.Error())
+					break
 				}
 				if err := result.Identity.Set(ctx, *tfTypeIdentity); err != nil {
-					return errors.New("error setting identity")
+					diags = err
+					break
 				}
 
 				tfTypeResource, err := rd.TfTypeResourceState()
 				if err != nil {
-					return err
+					diags.AddError("error getting resource state", err.Error())
+					break
 				}
 				if err := result.Resource.Set(ctx, *tfTypeResource); err != nil {
-					return errors.New("error setting resource")
+					diags = err
+					break
 				}
 
 				if !push(result) {
-					return errors.New("stream closed")
+					diags.AddError("stream closed", "stream closed")
+					break
 				}
 			}
-			return nil
-		}); err != nil {
-			diags.AddError("API Error", err.Error())
-		}
 		stream.Results = list.ListResultsStreamDiagnostics(diags)
 	}
 }

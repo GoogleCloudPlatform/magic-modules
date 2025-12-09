@@ -155,6 +155,10 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 			targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s.go", t.ResourceGoFilename(object)))
 			templateData.GenerateResourceFile(targetFilePath, object)
 		}
+		if object.GenerateListResource {
+			targetFilePath := path.Join(targetFolder, fmt.Sprintf("list_resource_%s.go", t.ResourceGoFilename(object)))
+			templateData.GenerateFile(targetFilePath, "templates/terraform/list_resource.go.tmpl", object, true, "templates/terraform/list_resource.go.tmpl")
+		}
 	}
 
 	if generateDocs {
