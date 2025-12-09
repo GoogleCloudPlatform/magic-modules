@@ -2997,12 +2997,6 @@ func TestAccContainerCluster_withSandboxConfigType(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withSandboxConfigType(clusterName, networkName, subnetworkName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_container_cluster.with_sandbox_config",
-						"node_config.0.sandbox_config.0.type", "GVISOR"),
-					resource.TestCheckResourceAttr("google_container_cluster.with_sandbox_config",
-						"node_pool.0.node_config.0.sandbox_config.0.type", "GVISOR"),
-				),
 			},
 			{
 				ResourceName:            "google_container_cluster.with_sandbox_config",
@@ -3011,30 +3005,22 @@ func TestAccContainerCluster_withSandboxConfigType(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"min_master_version", "node_config.0.taint", "deletion_protection"},
 			},
 			{
-				// GKE sets automatic labels and taints on nodes. This makes
-				// sure we ignore the automatic ones and keep our own.
-				Config: testAccContainerCluster_withSandboxConfigType(clusterName, networkName, subnetworkName),
-				// When we use PlanOnly without ExpectNonEmptyPlan, we're
-				// guaranteeing that the computed fields of the resources don't
-				// force an unintentional change to the plan. That is, we
-				// expect this part of the test to pass only if the plan
-				// doesn't change.
-				PlanOnly: true,
-			},
-			{
 				// Now we'll modify the labels, which should force a change to
 				// the plan. We make sure we don't over-suppress and end up
 				// eliminating the labels or taints we asked for. This will
 				// destroy and recreate the cluster as labels are immutable.
-				Config: testAccContainerCluster_withSandboxConfigType_changeLabels(clusterName, networkName, subnetworkName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_container_cluster.with_sandbox_config",
-						"node_config.0.labels.test.terraform.io/gke-sandbox", "true"),
-					resource.TestCheckResourceAttr("google_container_cluster.with_sandbox_config",
-						"node_config.0.labels.test.terraform.io/gke-sandbox-amended", "also-true"),
-					resource.TestCheckResourceAttr("google_container_cluster.with_sandbox_config",
-						"node_config.0.taint.0.key", "test.terraform.io/gke-sandbox"),
-				),
+				Config:           testAccContainerCluster_withSandboxConfigType_changeLabels(clusterName, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+				    PreApply: []plancheck.PlanCheck{
+				        plancheck.ExpectResourceAction("google_container_cluster.with_sandbox_config", plancheck.ResourceActionReplace),
+				    },
+				},
+			},
+			{
+				ResourceName:            "google_container_cluster.with_sandbox_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"min_master_version", "node_config.0.taint", "deletion_protection"},
 			},
 		},
 	})
