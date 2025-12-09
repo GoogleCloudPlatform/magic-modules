@@ -113,31 +113,70 @@ func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta inte
 		project = bp
 	}
 
-	createCall := config.NewServiceNetworkingClient(userAgent).Services.Connections.Create(parentService, connection)
-	if config.UserProjectOverride {
-		createCall.Header().Add("X-Goog-User-Project", project)
-	}
-	op, err := createCall.Do()
-	if err != nil {
-		return err
-	}
+	// createCall := config.NewServiceNetworkingClient(userAgent).Services.Connections.Create(parentService, connection)
+	// if config.UserProjectOverride {
+	// 	createCall.Header().Add("X-Goog-User-Project", project)
+	// }
+	// op, err := createCall.Do()
+	// if err != nil {
+	// 	return err
+	// }
 
-	if err := ServiceNetworkingOperationWaitTimeHW(config, op, "Create Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutCreate)); err != nil {
-		if strings.Contains(err.Error(), "Cannot modify allocated ranges in CreateConnection.") && d.Get("update_on_creation_fail").(bool) {
-			patchCall := config.NewServiceNetworkingClient(userAgent).Services.Connections.Patch(parentService+"/connections/-", connection).UpdateMask("reservedPeeringRanges").Force(true)
+	// if err := ServiceNetworkingOperationWaitTimeHW(config, op, "Create Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutCreate)); err != nil {
+	// 	if strings.Contains(err.Error(), "Cannot modify allocated ranges in CreateConnection.") && d.Get("update_on_creation_fail").(bool) {
+	// 		patchCall := config.NewServiceNetworkingClient(userAgent).Services.Connections.Patch(parentService+"/connections/-", connection).UpdateMask("reservedPeeringRanges").Force(true)
+	// 		if config.UserProjectOverride {
+	// 			patchCall.Header().Add("X-Goog-User-Project", project)
+	// 		}
+	// 		op, err := patchCall.Do()
+	// 		if err != nil {
+	// 			return err
+	// 		}
+	// 		if err := ServiceNetworkingOperationWaitTimeHW(config, op, "Update Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutUpdate)); err != nil {
+	// 			return err
+	// 		}
+	// 	} else {
+	// 		return err
+	// 	}
+	// }
+
+	// connectionId := &connectionId{
+	// 	Network: network,
+	// 	Service: d.Get("service").(string),
+	// }
+
+	rerr := transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() error {
+			createCall := config.NewServiceNetworkingClient(userAgent).Services.Connections.Create(parentService, connection)
 			if config.UserProjectOverride {
-				patchCall.Header().Add("X-Goog-User-Project", project)
+				createCall.Header().Add("X-Goog-User-Project", project)
 			}
-			op, err := patchCall.Do()
+			op, err := createCall.Do()
 			if err != nil {
 				return err
 			}
-			if err := ServiceNetworkingOperationWaitTimeHW(config, op, "Update Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutUpdate)); err != nil {
+			if err := ServiceNetworkingOperationWaitTimeHW(config, op, "Create Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutCreate)); err != nil {
+				if strings.Contains(err.Error(), "Cannot modify allocated ranges in CreateConnection.") && d.Get("update_on_creation_fail").(bool) {
+					patchCall := config.NewServiceNetworkingClient(userAgent).Services.Connections.Patch(parentService+"/connections/-", connection).UpdateMask("reservedPeeringRanges").Force(true)
+					if config.UserProjectOverride {
+						patchCall.Header().Add("X-Goog-User-Project", project)
+					}
+					op, err = patchCall.Do()
+					if err != nil {
+						return err
+					}
+				}
+			} else {
 				return err
 			}
-		} else {
-			return err
-		}
+			return ServiceNetworkingOperationWaitTimeHW(config, op, "Update Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutUpdate))
+		},
+		Timeout:              d.Timeout(schema.TimeoutCreate),
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsServiceNetworkingConnectionRetryableError},
+	})
+
+	if rerr != nil {
+		return rerr
 	}
 
 	connectionId := &connectionId{
