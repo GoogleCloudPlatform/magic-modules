@@ -367,6 +367,19 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     }
     d.SetId(id)
 
+    identity, err := d.Identity()
+    if err == nil && identity != nil {
+    {{- range $p := $.IdentityProperties }}
+        if {{ $p.CamelizeProperty }}Value := d.GetRawConfig().GetAttr("{{ underscore $p.Name}}"); !{{ $p.CamelizeProperty }}Value.IsNull() && {{ $p.CamelizeProperty }}Value.AsString() != "" {
+            if err = identity.Set("{{ underscore $p.Name}}", {{ $p.CamelizeProperty }}Value.AsString()); err != nil {
+                return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+            }
+        }
+    {{- end }}
+    } else {
+        log.Printf("[DEBUG] identity not set: %s", err)
+    }
+
 {{if and $.GetAsync ($.GetAsync.Allow "Create") -}}
 {{  if ($.GetAsync.IsA "OpAsync") -}}
 {{    if and $.GetAsync.Result.ResourceInsideResponse $.HasPostCreateComputedFields -}}
@@ -747,7 +760,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 {{- end}}
 
 	identity, err := d.Identity()
-    if err != nil && identity != nil {
+    if err == nil && identity != nil {
     {{- range $p := $.IdentityProperties }}
     if v, ok := identity.GetOk("{{ underscore $p.Name}}"); ok && v != "" {
         err = identity.Set("{{ underscore $p.Name}}", d.Get("{{ underscore $p.Name}}").(string))
