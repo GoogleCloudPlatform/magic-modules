@@ -17,14 +17,39 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strings"
 
 	"text/template"
 
 	"github.com/golang/glog"
 )
+
+const (
+	noSubstitionBegin = `// begin:no_variable_substitution`
+	noSubstitionEnd   = `// end:no_variable_substitution`
+)
+
+// Finds all blocks surrounded by `noSubstitionBegin` and `noSubstitionEnd`
+// and replaces `{{` with `{{ "{{" }}` and `}}` with `{{ "}}" }}`
+func ProcessNoSubstitution(content string) string {
+	// Find all blocks with no substitution
+	r := regexp.MustCompile(fmt.Sprintf(`(?s)%s(.*?)%s`, noSubstitionBegin, noSubstitionEnd))
+	return r.ReplaceAllStringFunc(content, func(rawBlock string) string {
+		// Remove comments from block
+		cleanBlock := strings.Replace(rawBlock, noSubstitionBegin, "", 1)
+		cleanBlock = strings.Replace(cleanBlock, noSubstitionEnd, "", 1)
+
+		// Escape templating
+		cleanBlock = strings.ReplaceAll(cleanBlock, "{{", `{{ "{{" }}`)
+		cleanBlock = strings.ReplaceAll(cleanBlock, "}}", `{{ "}}" }}`)
+
+		return cleanBlock
+	})
+}
 
 // Build a map(map[string]interface{}) from a list of paramerter
 // The format of passed in parmeters are key1, value1, key2, value2 ...
@@ -104,13 +129,30 @@ func TrimTemplate(templatePath string, e any) string {
 
 	// Need to remake TemplateFunctions, referencing it directly here
 	// causes a declaration loop
-	tmpl, err := template.New(templateFileName).Funcs(templateFunctions()).ParseFiles(templates...)
-	if err != nil {
-		glog.Exit(err)
+	tmpl := template.New(templateFileName).Funcs(templateFunctions())
+	for _, tplFile := range templates {
+		content, err := os.ReadFile(tplFile)
+		if err != nil {
+			glog.Exit(err)
+		}
+
+		// Create a new template with the name of the file and associate it.
+		name := filepath.Base(tplFile)
+		var tpl *template.Template
+		if name == tmpl.Name() {
+			tpl = tmpl
+		} else {
+			tpl = tmpl.New(name)
+		}
+
+		_, err = tpl.Parse(ProcessNoSubstitution(string(content)))
+		if err != nil {
+			glog.Exit(err)
+		}
 	}
 
 	contents := bytes.Buffer{}
-	if err = tmpl.ExecuteTemplate(&contents, templateFileName, structToPtr(e)); err != nil {
+	if err := tmpl.ExecuteTemplate(&contents, templateFileName, structToPtr(e)); err != nil {
 		glog.Exit(err)
 	}
 
@@ -139,13 +181,31 @@ func executeCustomTemplate(e any, templatePath string, appendNewline bool) strin
 	}
 	templateFileName := filepath.Base(templatePath)
 
-	tmpl, err := template.New(templateFileName).Funcs(templateFunctions()).ParseFiles(templates...)
-	if err != nil {
-		glog.Exit(err)
+	tmpl := template.New(templateFileName).Funcs(templateFunctions())
+
+	for _, tplFile := range templates {
+		content, err := os.ReadFile(tplFile)
+		if err != nil {
+			glog.Exit(err)
+		}
+
+		// Create a new template with the name of the file and associate it.
+		name := filepath.Base(tplFile)
+		var tpl *template.Template
+		if name == tmpl.Name() {
+			tpl = tmpl
+		} else {
+			tpl = tmpl.New(name)
+		}
+
+		_, err = tpl.Parse(ProcessNoSubstitution(string(content)))
+		if err != nil {
+			glog.Exit(err)
+		}
 	}
 
 	contents := bytes.Buffer{}
-	if err = tmpl.ExecuteTemplate(&contents, templateFileName, structToPtr(e)); err != nil {
+	if err := tmpl.ExecuteTemplate(&contents, templateFileName, structToPtr(e)); err != nil {
 		glog.Exit(err)
 	}
 
