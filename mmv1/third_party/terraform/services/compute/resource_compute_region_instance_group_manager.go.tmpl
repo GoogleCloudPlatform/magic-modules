@@ -1190,7 +1190,7 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 	if err := d.Set("target_stopped_size", manager.TargetStoppedSize); err != nil {
 		return fmt.Errorf("Error setting target_stopped_size: %s", err)
 	}
-	if err := d.Set("instance_flexibility_policy", flattenInstanceFlexibilityPolicy(manager.InstanceFlexibilityPolicy)); err != nil {
+	if err := d.Set("instance_flexibility_policy", flattenInstanceFlexibilityPolicy(manager.InstanceFlexibilityPolicy, d)); err != nil {
 		return err
 	}
 	if err := d.Set("update_policy", flattenRegionUpdatePolicy(manager.UpdatePolicy)); err != nil {
@@ -1524,7 +1524,11 @@ func flattenRegionUpdatePolicy(updatePolicy *compute.InstanceGroupManagerUpdateP
 func expandInstanceFlexibilityPolicy(d *schema.ResourceData) (*compute.InstanceGroupManagerInstanceFlexibilityPolicy, error) {
 	instanceFlexibilityPolicy := &compute.InstanceGroupManagerInstanceFlexibilityPolicy{}
 	oldFlexibilityPolicy, newFlexibilityPolicy := d.GetChange("instance_flexibility_policy")
+
 	for _, flexibilityPolicy := range newFlexibilityPolicy.([]any) {
+		if flexibilityPolicy == nil {
+			continue
+		}
 		flexibilityPolicyData := flexibilityPolicy.(map[string]any)
 		instanceSelections, err := expandInstanceSelections(flexibilityPolicyData["instance_selections"].(*schema.Set).List())
 		if err != nil {
@@ -1782,12 +1786,17 @@ func expandDistributionPolicyForCreate(d *schema.ResourceData) *compute.Distribu
   return distributionPolicy
 }
 
-func flattenInstanceFlexibilityPolicy(instanceFlexibilityPolicy *compute.InstanceGroupManagerInstanceFlexibilityPolicy) []map[string]any {
-	flattenedInstanceFlexibilityPolicy := []map[string]any{}
+func flattenInstanceFlexibilityPolicy(instanceFlexibilityPolicy *compute.InstanceGroupManagerInstanceFlexibilityPolicy, d *schema.ResourceData) []any {
+	flattenedInstanceFlexibilityPolicy := []any{}
 	if instanceFlexibilityPolicy != nil {
 		instanceSelectionsMap := map[string]any{}
 		instanceSelectionsMap["instance_selections"] = flattenInstanceSelections(instanceFlexibilityPolicy.InstanceSelections)
 		flattenedInstanceFlexibilityPolicy = append(flattenedInstanceFlexibilityPolicy, instanceSelectionsMap)
+	} else {
+		_, exists := d.GetOk("instance_flexibility_policy")
+		if exists { // Api returns nil, but schema has instance_flexibility_policy block sets to it.
+			return []any{nil}
+		}
 	}
 	return flattenedInstanceFlexibilityPolicy
 }
