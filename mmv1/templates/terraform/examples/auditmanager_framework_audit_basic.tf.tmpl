@@ -1,0 +1,26 @@
+resource "google_audit_manager_framework_audit" "primary" {
+  provider = google-beta
+
+  parent               = "organizations/{{org_id}}"
+  framework_audit_id   = "my-framework-audit"
+  compliance_framework = "my-compliance-framework"
+  scope                = "my-scope"
+
+  framework_audit_destination {
+    bucket {
+      bucket_uri = "gs://my-bucket"
+    }
+  }
+}
+
+data "google_audit_manager_framework_audit_scope_report" "report" {
+  provider = google-beta
+
+  scope                = "organizations/{{org_id}}"
+  report_format        = "ODF"
+  compliance_framework = "my-compliance-framework"
+}
+
+output "report_contents" {
+  value = data.google_audit_manager_framework_audit_scope_report.report.scope_report_contents
+}
