@@ -56,6 +56,7 @@ parameters:
     description: |
       Resource ID of the security feedback.
     required: true
+    immutable: true
     url_param_only: true
 properties:
   - name: 'name'
@@ -64,14 +65,13 @@ properties:
       Name of the security feedback resource,
       in the format `organizations/{{org_name}}/securityFeedback/{{feedback_id}}`.
     output: true
-  - name: 'display_name'
+  - name: 'displayName'
     type: String
     description: The display name of the feedback.
-  - name: 'feedback_contexts'
+  - name: 'feedbackContexts'
     type: Array
     description: |
       One or more attribute/value pairs for constraining the feedback.
-    is_set: true
     required: true
     item_type:
       type: NestedObject
@@ -91,21 +91,21 @@ properties:
           required: true
           item_type:
             type: String
-  - name: feedback_type
+  - name: 'feedbackType'
     type: Enum
     description: The type of feedback being submitted.
     required: true
     enum_values:
       - 'EXCLUDED_DETECTION'
-  - name: create_time
+  - name: 'createTime'
     type: String
     description: The time when this specific feedback id was created.
     output: true
-  - name: update_time
+  - name: 'updateTime'
     type: String
     description: The time when this specific feedback id was updated.
     output: true
-  - name: reason
+  - name: 'reason'
     type: Enum
     description: The reason for the feedback.
     enum_values:
@@ -114,6 +114,6 @@ properties:
       - 'NAT'
       - 'PENETRATION_TEST'
       - 'OTHER'
-  - name: comment
+  - name: 'comment'
     type: String
     description: Optional text the user can provide for additional, unstructured context.
