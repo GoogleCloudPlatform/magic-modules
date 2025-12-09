@@ -905,6 +905,19 @@ if len(updateMask) > 0 {
         log.Printf("[DEBUG] Finished updating {{ $.Name }} %q: %#v", d.Id(), res)
     }
 
+    identity, err := d.Identity()
+    if err == nil && identity != nil {
+    {{- range $p := $.IdentityProperties }}
+        if {{ $p.CamelizeProperty }}Value := d.GetRawConfig().GetAttr("{{ underscore $p.Name}}"); !{{ $p.CamelizeProperty }}Value.IsNull() && {{ $p.CamelizeProperty }}Value.AsString() != "" {
+            if err = identity.Set("{{ underscore $p.Name}}", {{ $p.CamelizeProperty }}Value.AsString()); err != nil {
+                return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+            }
+        }
+    {{- end }}
+    } else {
+        log.Printf("[DEBUG] identity not set: %s", err)
+    }
+
 {{              if and ($.GetAsync) ($.GetAsync.Allow "update") -}}
 {{                  if $.GetAsync.IsA "OpAsync" -}}
     err = {{ $.ClientNamePascal -}}OperationWaitTime(
