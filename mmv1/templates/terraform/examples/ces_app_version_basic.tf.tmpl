@@ -1,0 +1,15 @@
+resource "google_ces_app" "my-app" {
+    location     = "us"
+    display_name = "{{index $.Vars "app_display_name"}}"
+    app_id       = "{{index $.Vars "app_id"}}"
+    time_zone_settings {   
+        time_zone = "America/Los_Angeles"
+    }
+}
+resource "google_ces_app_version" "{{$.PrimaryResourceId}}" {
+    location       = "us"
+    display_name   = "{{index $.Vars "app_version_display_name"}}"
+    app            = google_ces_app.my-app.name
+    app_version_id = "{{index $.Vars "app_version_id"}}"
+    description    = "example-app-version"
+}
