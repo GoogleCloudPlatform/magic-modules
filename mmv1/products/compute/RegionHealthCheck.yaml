@@ -58,9 +58,9 @@ tgc_tests:
   - name: 'TestAccComputeRegionHealthCheck_typeTransition'
     skip: 'Test data has mismatched steps'
   - name: 'TestAccComputeRegionHealthCheck_grpcWithTls_create'
-    skip: 'Test data has mismatched steps'
+    skip: 'grpcTlsHealthCheck is not in CAI asset, but is required in this test.'
   - name: 'TestAccComputeRegionHealthCheck_grpcWithTls_update'
-    skip: 'Test data has mismatched steps'
+    skip: 'grpcTlsHealthCheck is not in CAI asset, but is required in this test.'
 sweeper:
   url_substitutions:
     - region: "us-central1"
