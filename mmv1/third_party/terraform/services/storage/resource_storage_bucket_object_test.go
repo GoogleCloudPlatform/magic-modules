@@ -13,6 +13,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"google.golang.org/api/storage/v1"
@@ -636,6 +638,68 @@ func TestAccStorageObject_addUpdateObjectContexts(t *testing.T) {
 
 func testAccCheckGoogleStorageObjectCrc32cHash(t *testing.T, bucket, object, crc32 string) resource.TestCheckFunc {
 	return testAccCheckGoogleStorageObjectCrc32cWithEncryption(t, bucket, object, crc32, "")
+}
+
+func TestAccStorageObject_ResourceIdentity(t *testing.T) {
+	t.Parallel()
+
+	bucketName := acctest.TestBucketName(t)
+	data := []byte("data data data")
+
+	testFile := getNewTmpTestFile(t, "tf-test")
+	if err := ioutil.WriteFile(testFile.Name(), data, 0644); err != nil {
+		t.Errorf("error writing file: %v", err)
+	}
+	resource.Test(t, resource.TestCase{
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleStorageBucketsObjectBasic(bucketName, testFile.Name()),
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectIdentity(
+						"google_storage_bucket_object.object",
+						map[string]knownvalue.Check{
+							"bucket": knownvalue.StringExact(bucketName),
+							"name":   knownvalue.StringExact(objectName),
+						},
+					),
+				},
+			},
+		},
+	})
+}
+
+func testAccCheckGoogleStorageObjectWithEncryption(t *testing.T, bucket, object, md5 string, customerEncryptionKey string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+
+		objectsService := storage.NewObjectsService(config.NewStorageClient(config.UserAgent))
+
+		getCall := objectsService.Get(bucket, object)
+		if customerEncryptionKey != "" {
+			decodedKey, _ := base64.StdEncoding.DecodeString(customerEncryptionKey)
+			keyHash := sha256.Sum256(decodedKey)
+			headers := getCall.Header()
+			headers.Set("x-goog-encryption-algorithm", "AES256")
+			headers.Set("x-goog-encryption-key", customerEncryptionKey)
+			headers.Set("x-goog-encryption-key-sha256", base64.StdEncoding.EncodeToString(keyHash[:]))
+		}
+		res, err := getCall.Do()
+
+		if err != nil {
+			return fmt.Errorf("Error retrieving contents of object %s: %s", object, err)
+		}
+
+		if md5 != res.Md5Hash {
+			return fmt.Errorf("Error contents of %s garbled, md5 hashes don't match (%s, %s)", object, md5, res.Md5Hash)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckGoogleStorageObject(t *testing.T, bucket, object, md5 string) resource.TestCheckFunc {
+	return testAccCheckGoogleStorageObjectWithEncryption(t, bucket, object, md5, "")
 }
 
 func testAccCheckGoogleStorageObjectCrc32cWithEncryption(t *testing.T, bucket, object, crc32 string, customerEncryptionKey string) resource.TestCheckFunc {

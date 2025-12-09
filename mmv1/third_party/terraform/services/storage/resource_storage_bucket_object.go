@@ -44,6 +44,24 @@ func ResourceStorageBucketObject() *schema.Resource {
 			Delete: schema.DefaultTimeout(4 * time.Minute),
 		},
 
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"bucket": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+						Description:       `The name of the bucket.`,
+					},
+					"name": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+						Description:       `The name of the object.`,
+					},
+				}
+			},
+		},
+
 		Schema: map[string]*schema.Schema{
 			"bucket": {
 				Type:        schema.TypeString,
@@ -623,6 +641,19 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 	}
 
 	d.SetId(objectGetID(res))
+
+	identity, err := d.Identity()
+	if err != nil {
+		return fmt.Errorf("Error getting identity: %s", err)
+	}
+	err = identity.Set("bucket", bucket)
+	if err != nil {
+		return fmt.Errorf("Error setting bucket: %s", err)
+	}
+	err = identity.Set("name", name)
+	if err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
 
 	return nil
 }
