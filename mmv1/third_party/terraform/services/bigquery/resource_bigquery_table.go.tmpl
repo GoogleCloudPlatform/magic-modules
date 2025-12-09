@@ -521,6 +521,29 @@ func ResourceBigQueryTable() *schema.Resource {
 			resourceBigQueryTableSchemaCustomizeDiff,
 			tpgresource.SetLabelsDiff,
 		),
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"project": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+						Description:       `The project that the service account belongs to.`,
+					},
+					"dataset_id": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+						Description:       `The dataset ID to create the table in. Changing this forces a new resource to be created.`,
+					},
+					"table_id": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+						Description:       `A unique ID for the resource. Changing this forces a new resource to be created.`,
+					},
+				}
+			},
+		},
+
 		Schema: map[string]*schema.Schema{
 			// TableId: [Required] The ID of the table. The ID must contain only
 			// letters (a-z, A-Z), numbers (0-9), or underscores (_). The maximum
@@ -2208,6 +2231,30 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
+	identity, err := d.Identity()
+	if err != nil && identity != nil {
+		if v, ok := identity.GetOk("project"); ok && v != "" {
+			err = identity.Set("project", project)
+			if err != nil {
+				return fmt.Errorf("Error setting project: %s", err)
+			}
+		}
+		if v, ok := identity.GetOk("dataset_id"); ok && v != "" {
+			err = identity.Set("dataset_id", datasetID)
+			if err != nil {
+				return fmt.Errorf("Error setting dataset_id: %s", err)
+			}
+		}
+		if v, ok := identity.GetOk("table_id"); ok && v != "" {
+			err = identity.Set("table_id", tableID)
+			if err != nil {
+				return fmt.Errorf("Error setting table_id: %s", err)
+			}
+		}
+	} else {
+		log.Printf("[DEBUG] identity not set: %s", err)
+	}
+	
 	return nil
 }
 
