@@ -86,8 +86,8 @@ var (
 		"melinath": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 9, 17),
-					endDate:   newDate(2025, 9, 22),
+					startDate: newDate(2025, 12, 18),
+					endDate:   newDate(2026, 1, 6),
 				},
 			},
 		},

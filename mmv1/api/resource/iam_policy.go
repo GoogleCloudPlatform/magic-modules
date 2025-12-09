@@ -84,6 +84,9 @@ type IamPolicy struct {
 	// CompareSelfLinkOrResourceName
 	CustomDiffSuppress *string `yaml:"custom_diff_suppress,omitempty"`
 
+	// StateIDFuncs may use a custom template if default funcs don't work.
+	CustomImportStateIDFuncs string `yaml:"custom_state_id_funcs"`
+
 	// Some resources (IAP) use fields named differently from the parent resource.
 	// We need to use the parent's attributes to create an IAM policy, but they may not be
 	// named as the IAM resource expects.
