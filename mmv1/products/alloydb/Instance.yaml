@@ -285,7 +285,8 @@ properties:
       - name: 'trackWaitEventTypes'
         type: Boolean
         description: 'Record wait event types during query execution for an instance.'
-        output: true
+        send_empty_value: true
+        default_from_api: true
       - name: 'maxQueryStringLength'
         type: Integer
         description: 'Query string length. The default value is 10240. Any integer between 1024 and 100000 is considered valid.'
