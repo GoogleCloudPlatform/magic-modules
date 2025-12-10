@@ -1,5 +1,5 @@
 package compute_test
-{{ if ne $.TargetVersionName `ga` -}}
+
 import (
 	"testing"
 
@@ -20,7 +20,7 @@ func TestAccComputeWireGroup_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeWireGroupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -56,29 +56,23 @@ func TestAccComputeWireGroup_update(t *testing.T) {
 func testAccComputeWireGroup_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
-provider = google-beta
 }
 
 resource "google_compute_cross_site_network" "example-cross-site-network" {
   name        = "tf-test-cross-site-network%{random_suffix}"
   description = "Example cross site network"
-  provider    = google-beta
 }
 
 resource "google_compute_wire_group" "example-test-wire-group" {
   name               = "tf-test-test-wire-group%{random_suffix}"
   description        = "Example Wire Group%{random_suffix}"
   cross_site_network = google_compute_cross_site_network.example-cross-site-network.name
-  provider           = google-beta
   depends_on = [
     google_compute_cross_site_network.example-cross-site-network
   ]
   wire_properties {
     bandwidth_unmetered = 1000
 	bandwidth_allocation = "ALLOCATE_PER_WIRE"
-  }
-  wire_group_properties {
-    type = "REDUNDANT"
   }
   admin_enabled = true
 }
@@ -87,21 +81,18 @@ resource "google_compute_wire_group" "example-test-wire-group" {
 
 func testAccComputeWireGroup_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {
-provider = google-beta
+data "google_project" "project" {	
 }
 
 resource "google_compute_cross_site_network" "example-cross-site-network" {
   name        = "tf-test-cross-site-network%{random_suffix}"
   description = "Example cross site network"
-  provider    = google-beta
 }
 
 resource "google_compute_wire_group" "example-test-wire-group" {
   name               = "tf-test-test-wire-group%{random_suffix}"
   description        = "Example Wire Group Updated%{random_suffix}"
   cross_site_network = google_compute_cross_site_network.example-cross-site-network.name
-  provider           = google-beta
   depends_on = [
     google_compute_cross_site_network.example-cross-site-network
   ]
@@ -109,11 +100,7 @@ resource "google_compute_wire_group" "example-test-wire-group" {
     bandwidth_unmetered = 1000
 	bandwidth_allocation = "ALLOCATE_PER_WIRE"
   }
-  wire_group_properties {
-    type = "REDUNDANT"
-  }	
   admin_enabled = true
 }
 `, context)
 }
-{{- end }}
