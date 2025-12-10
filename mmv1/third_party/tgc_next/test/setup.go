@@ -39,6 +39,7 @@ type TgcMetadataPayload struct {
 	RawConfig        string                       `json:"raw_config"`
 	ResourceMetadata map[string]*ResourceMetadata `json:"resource_metadata"`
 	PrimaryResource  string                       `json:"primary_resource"`
+	CaiReadTime      time.Time                    `json:"cai_read_time"`
 }
 
 type ResourceTestData struct {
@@ -73,23 +74,42 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 		bucketName := "cai_assets_metadata"
 		currentDate := time.Now()
 		ctx := context.Background()
-		client, err := storage.NewClient(ctx)
-		if err != nil {
-			return nil, fmt.Errorf("storage.NewClient: %v", err)
-		}
-		defer client.Close()
 
-		bucket := client.Bucket(bucketName)
+		var client *storage.Client
+		var bucket *storage.BucketHandle
+		var err error
 
 		var allErrs error
 		retries := 0
 		for i := 0; i < len(TestsMetadata); i++ {
-			metadata, err := readTestsDataFromGCSForRun(ctx, currentDate, bucketName, bucket)
-			if err != nil {
-				if allErrs == nil {
-					allErrs = fmt.Errorf("reading tests data from gcs: %v", err)
-				} else {
-					allErrs = fmt.Errorf("%v, %v", allErrs, err)
+			var metadata map[string]map[int]TgcMetadataPayload
+			if os.Getenv("WRITE_FILES") != "" {
+				filename := fmt.Sprintf("../../tests_metadata_%s.json", currentDate.Format(ymdFormat))
+				_, err := os.Stat(filename)
+				if !os.IsNotExist(err) {
+					metadata = readTestsDataFromLocalFile(filename)
+				}
+			}
+			if metadata == nil {
+				if client == nil {
+					client, err = storage.NewClient(ctx)
+					if err != nil {
+						return nil, fmt.Errorf("storage.NewClient: %v", err)
+					}
+					defer client.Close()
+					bucket = client.Bucket(bucketName)
+				}
+				metadata, err = readTestsDataFromGCSForRun(ctx, currentDate, bucketName, bucket)
+				if os.Getenv("WRITE_FILES") != "" {
+					writeJSONFile(fmt.Sprintf("../../tests_metadata_%s.json", currentDate.Format(ymdFormat)), metadata)
+				}
+
+				if err != nil {
+					if allErrs == nil {
+						allErrs = fmt.Errorf("reading tests data from gcs: %v", err)
+					} else {
+						allErrs = fmt.Errorf("%v, %v", allErrs, err)
+					}
 				}
 			}
 			if metadata == nil {
@@ -105,9 +125,6 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 					MetadataByTestAndStep: metadata,
 					Date:                  currentDate,
 				}
-			}
-			if os.Getenv("WRITE_FILES") != "" {
-				writeJSONFile(fmt.Sprintf("../../tests_metadata_%s.json", currentDate.Format(ymdFormat)), metadata)
 			}
 			currentDate = currentDate.AddDate(0, 0, -1)
 		}
@@ -147,6 +164,27 @@ func readTestsDataFromGCSForRun(ctx context.Context, currentDate time.Time, buck
 	}
 
 	return metadata, nil
+}
+
+func readTestsDataFromLocalFile(filename string) map[string]map[int]TgcMetadataPayload {
+	metadata := make(map[string]map[int]TgcMetadataPayload, 0)
+	log.Printf("Read the the local file %s", filename)
+
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return nil
+	}
+
+	if err != nil {
+		return nil
+	}
+
+	err = json.Unmarshal(data, &metadata)
+	if err != nil {
+		return nil
+	}
+
+	return metadata
 }
 
 func getStepNumbers(testName string) ([]int, error) {

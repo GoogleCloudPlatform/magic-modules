@@ -13,7 +13,6 @@
 package api
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"maps"
@@ -22,9 +21,6 @@ import (
 	"slices"
 	"sort"
 	"strings"
-	"text/template"
-
-	"github.com/golang/glog"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
@@ -387,7 +383,7 @@ type TGCResource struct {
 	ExcludeTgc bool `yaml:"exclude_tgc,omitempty"`
 
 	// If true, include resource in the new package of TGC (terraform-provider-conversion)
-	IncludeInTGCNext bool `yaml:"include_in_tgc_next_DO_NOT_USE,omitempty"`
+	IncludeInTGCNext bool `yaml:"include_in_tgc_next,omitempty"`
 
 	// The resource kind in CAI.
 	// If this is not set, then :name is used instead.
@@ -1976,46 +1972,6 @@ func (r Resource) FormatDocDescription(desc string, indent bool) string {
 	return strings.TrimSuffix(returnString, "\n")
 }
 
-func (r Resource) CustomTemplate(templatePath string, appendNewline bool) string {
-	output := ExecuteTemplate(&r, templatePath, appendNewline)
-	if !appendNewline {
-		output = strings.TrimSuffix(output, "\n")
-	}
-	return output
-}
-
-func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
-	templates := []string{
-		templatePath,
-		"templates/terraform/expand_resource_ref.tmpl",
-		"templates/terraform/custom_flatten/bigquery_table_ref.go.tmpl",
-		"templates/terraform/flatten_property_method.go.tmpl",
-		"templates/terraform/expand_property_method.go.tmpl",
-		"templates/terraform/update_mask.go.tmpl",
-		"templates/terraform/nested_query.go.tmpl",
-		"templates/terraform/unordered_list_customize_diff.go.tmpl",
-	}
-	templateFileName := filepath.Base(templatePath)
-
-	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
-	if err != nil {
-		glog.Exit(err)
-	}
-
-	contents := bytes.Buffer{}
-	if err = tmpl.ExecuteTemplate(&contents, templateFileName, e); err != nil {
-		glog.Exit(err)
-	}
-
-	rs := contents.String()
-
-	if !strings.HasSuffix(rs, "\n") && appendNewline {
-		rs = fmt.Sprintf("%s\n", rs)
-	}
-
-	return rs
-}
-
 // Returns the key of the list of resources in the List API response
 // Used to get the list of resources to sweep
 func (r Resource) ResourceListKey() string {
@@ -2582,6 +2538,7 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 		"for_each",
 		"provider",
 		"lifecycle",
+		"timeouts",
 	}
 	for _, tp := range r.VirtualFields {
 		props = append(props, tp.MetadataLineage())

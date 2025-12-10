@@ -263,3 +263,10 @@ properties:
     update_url: 'projects/{{project}}/global/snapshots/{{name}}/setLabels'
     update_verb: 'POST'
     key_expander: ''
+  - name: 'snapshotType'
+    type: Enum
+    description: |
+      Indicates the type of the snapshot.
+    enum_values:
+      - 'ARCHIVE'
+      - 'STANDARD'

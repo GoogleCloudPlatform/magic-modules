@@ -52,7 +52,15 @@ custom_code:
   encoder: 'templates/terraform/encoders/health_check_type.tmpl'
 custom_diff:
   - 'healthCheckCustomizeDiff'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
+tgc_tests:
+  - name: 'TestAccComputeRegionHealthCheck_typeTransition'
+    skip: 'Test data has mismatched steps'
+  - name: 'TestAccComputeRegionHealthCheck_grpcWithTls_create'
+    skip: 'grpcTlsHealthCheck is not in CAI asset, but is required in this test.'
+  - name: 'TestAccComputeRegionHealthCheck_grpcWithTls_update'
+    skip: 'grpcTlsHealthCheck is not in CAI asset, but is required in this test.'
 sweeper:
   url_substitutions:
     - region: "us-central1"
