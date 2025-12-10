@@ -5802,7 +5802,7 @@ func verifyPscOperation(resourceName string, isPscConfigExpected bool, expectedP
 			}
 
 			pscServiceAttachmentLink, ok := resourceAttributes["psc_service_attachment_link"]
-			if err != nil || pscServiceAttachmentLink == "" {
+			if !ok || pscServiceAttachmentLink == "" {
 				return fmt.Errorf("psc_service_attachment_link property value is empty")
 			}
 		}
