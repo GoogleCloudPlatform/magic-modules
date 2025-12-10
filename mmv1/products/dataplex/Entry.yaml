@@ -86,8 +86,8 @@ examples:
     ignore_read_extra:
       - 'aspects'
     vars:
-      table_id: 'table'
-      dataset_id: 'dataset'
+      table_id: 'table-basic'
+      dataset_id: 'dataset-basic'
       aspect_type_name: "aspect-type"
     test_env_vars:
       project_number: 'PROJECT_NUMBER'
@@ -98,7 +98,7 @@ examples:
     ignore_read_extra:
       - 'aspects'
     vars:
-      glossary_id: 'glossary'
+      glossary_id: 'glossary-basic'
       glossary_term_id: 'glossary-term'
     test_env_vars:
       project_number: 'PROJECT_NUMBER'
