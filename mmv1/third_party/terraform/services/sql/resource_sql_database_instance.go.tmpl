@@ -2575,7 +2575,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 
 	if _, ok := d.GetOk("psc_service_attachment_link"); ok {
 		instance.PscServiceAttachmentLink = d.Get("psc_service_attachment_link").(string)
-        }
+	}
 
 	// Database Version is required for all calls with Google ML integration enabled or it will be rejected by the API.
 	if d.Get("settings.0.enable_google_ml_integration").(bool) || len(_settings["connection_pool_config"].(*schema.Set).List()) > 0 {
