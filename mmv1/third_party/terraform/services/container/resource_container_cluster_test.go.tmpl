@@ -15537,7 +15537,7 @@ func TestAccContainerCluster_additional_ip_ranges_config_on_create(t *testing.T)
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_additional_ip_ranges_config(clusterName, network, sri),
+				Config: testAccContainerCluster_additional_ip_ranges_config(clusterName, network, sri, false),
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
