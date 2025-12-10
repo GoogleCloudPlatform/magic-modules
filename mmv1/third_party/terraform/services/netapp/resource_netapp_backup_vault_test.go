@@ -67,7 +67,6 @@ resource "google_netapp_backup_vault" "test_backup_vault" {
 `, context)
 }
 
-// TestAccNetappBackupVault_Kms: Tests Backup Vault creation with KMS configuration.
 func TestAccNetappBackupVault_Kms(t *testing.T) {
 	location := "us-east4"
 	context := map[string]interface{}{
@@ -97,7 +96,6 @@ func testAccNetappBackupVault_withKms(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_kmsconfig" "test_kms_config" {
   name            = "tf-test-kms-config-%{random_suffix}"
-  provider        = google-beta
   location        = "%{location}"
   crypto_key_name = "%{kms_key_name}"
   description     = "Test KMS config for Backup Vault"
@@ -105,7 +103,6 @@ resource "google_netapp_kmsconfig" "test_kms_config" {
 
 resource "google_netapp_backup_vault" "test_backup_vault_kms" {
   name        = "tf-test-bv-kms-%{random_suffix}"
-  provider    = google-beta
   location    = "%{location}"
   kms_config  = google_netapp_kmsconfig.test_kms_config.id
   description = "Vault with KMS"
