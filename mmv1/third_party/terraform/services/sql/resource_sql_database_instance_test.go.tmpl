@@ -4023,7 +4023,7 @@ func TestAccSqlDatabaseInstance_updateInstanceTierForEnhancedBackupTierInstance(
                 // Update instance backup tier to ENHANCED, which should ignore backup_configuration settings
 				Config: testGoogleSqlDatabaseInstance_updateTierForGcbdrManagedInstance(context),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.backup_tier", "db-g1-small"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.tier", "db-g1-small"),
 				),
             },
         },
