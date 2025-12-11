@@ -50,6 +50,7 @@ custom_code:
   decoder: 'templates/terraform/decoders/kms.go.tmpl'
   tgc_decoder: 'templates/tgc_next/decoders/kms.go.tmpl'
 include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 examples:
   - name: 'kms_key_handle_basic'
     primary_resource_id: 'example-keyhandle'
