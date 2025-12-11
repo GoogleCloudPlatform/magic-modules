@@ -24,6 +24,7 @@ self_link:
   projects/{{project}}/locations/{{location}}/multicastDomains/{{multicast_domain_id}}
 create_url:
   projects/{{project}}/locations/{{location}}/multicastDomains?multicastDomainId={{multicast_domain_id}}
+update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/multicastDomains/{{multicast_domain_id}}
 examples:
