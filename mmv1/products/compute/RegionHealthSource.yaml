@@ -22,7 +22,7 @@ description: |
 references:
   guides:
     'Health checks overview': 'https://cloud.google.com/load-balancing/docs/health-check-concepts'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionHealthSources'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionHealthSources'
 min_version: beta
 
 # URL for the resource's standard List method. https://google.aip.dev/132
