@@ -32,8 +32,9 @@ references:
 
 base_url: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entries/{{entry_id}}'
 self_link: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entries/{{entry_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entries?entryId={{entry_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entries/{{entry_id}}'
 update_verb: 'PATCH'
+create_verb: 'PATCH'
 update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entries/{{entry_id}}'
@@ -45,6 +46,11 @@ custom_code:
   custom_import: templates/terraform/custom_import/dataplex_entry.go.tmpl
   pre_read: templates/terraform/pre_read/dataplex_entry.go.tmpl
   pre_update: templates/terraform/pre_update/dataplex_entry.go.tmpl
+  pre_create: templates/terraform/pre_create/dataplex_entry.go.tmpl
+  pre_delete: templates/terraform/pre_delete/dataplex_entry.go.tmpl
+
+error_retry_predicates:
+  - 'transport_tpg.IsDataplex1PEntryIngestedError'
 
 timeouts:
   insert_minutes: 5
@@ -74,6 +80,30 @@ examples:
       entry_type_name: "entry-type-full"
     test_env_vars:
       project_number: 'PROJECT_NUMBER'
+  - name: 'dataplex_entry_bigquery_table'
+    primary_resource_id: 'tf_test_table'
+    primary_resource_name: 'fmt.Sprintf("tf_test_table%s", context["random_suffix"])'
+    ignore_read_extra:
+      - 'aspects'
+    vars:
+      table_id: 'table-basic'
+      dataset_id: 'dataset-basic'
+      aspect_type_name: "aspect-type"
+    test_env_vars:
+      project_number: 'PROJECT_NUMBER'
+      project_id: 'PROJECT_NAME'
+  - name: 'dataplex_entry_glossary_term'
+    primary_resource_id: 'tf_test_glossary_term'
+    primary_resource_name: 'fmt.Sprintf("tf_test_glossary_term%s", context["random_suffix"])'
+    ignore_read_extra:
+      - 'aspects'
+    vars:
+      glossary_id: 'glossary-basic'
+      glossary_term_id: 'glossary-term'
+    test_env_vars:
+      project_number: 'PROJECT_NUMBER'
+      project_id: 'PROJECT_NAME'
+
 
 parameters:
   - name: 'location'
