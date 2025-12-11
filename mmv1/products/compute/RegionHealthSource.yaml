@@ -62,6 +62,16 @@ async:
   operation:
     base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
 
+examples:
+  - name: "compute_region_health_source_basic"
+    primary_resource_id: "example_test_health_source"
+    vars:
+      name: "test-health-source"
+      description: "Example health source basic"
+    min_version: 'beta'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+
 parameters:
   - name: 'region'
     type: String
@@ -145,13 +155,3 @@ properties:
       Fingerprint of this resource. A hash of the contents stored in this object.
       This field is used in optimistic locking.
     output: true
-
-examples:
-  - name: "compute_region_health_source_basic"
-    primary_resource_id: "example_test_health_source"
-    vars:
-      name: "test-health-source"
-      description: "Example health source basic"
-    min_version: 'beta'
-    test_env_vars:
-      project: 'PROJECT_NAME'
