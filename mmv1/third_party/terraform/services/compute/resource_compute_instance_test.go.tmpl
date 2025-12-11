@@ -5153,10 +5153,22 @@ func TestAccComputeInstance_NicStackTypeUpdate(t *testing.T) {
 
 func TestAccComputeInstance_IgmpQuery_v2(t *testing.T) {
 	t.Parallel()
+
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	suffix := acctest.RandString(t, 10)
+	envRegion := envvar.GetTestRegionFromEnv()
 	context := map[string]interface{}{
-		"instance_name": fmt.Sprintf("tf-test-compute-instance-%s", acctest.RandString(t, 10)),
-		"suffix":        acctest.RandString(t, 10),
-		"env_region":    envvar.GetTestRegionFromEnv(),
+		"instance_name": fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+		"igmp_query": "IGMP_QUERY_V2",
+		"suffix": suffix,
+		"env_region": envRegion,
+	}
+	context_update := map[string]interface{}{
+		"instance_name": instanceName,
+		"igmp_query": "IGMP_QUERY_DISABLED",
+		"suffix": suffix,
+		"env_region": envRegion,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -5166,6 +5178,27 @@ func TestAccComputeInstance_IgmpQuery_v2(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_igmpQuery_v2(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.0.igmp_query", "IGMP_QUERY_V2"),
+				),
+			},
+			{
+				Config: testAccComputeInstance_igmpQuery_v2(context_update),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.0.igmp_query", "IGMP_QUERY_DISABLED"),
+				),
+			},
+			{
+				Config: testAccComputeInstance_igmpQuery_v2(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.0.igmp_query", "IGMP_QUERY_V2"),
+				),
 			},
 		},
 	})
@@ -12675,7 +12708,7 @@ resource "google_compute_instance" "foobar" {
 	network_interface {
 		network = google_compute_network.inst-test-network.id
 		subnetwork = google_compute_subnetwork.inst-test-subnetwork.id
-		igmp_query = "IGMP_QUERY_V2"
+		igmp_query = "%{igmp_query}"
 	}
 }
 `, context)
