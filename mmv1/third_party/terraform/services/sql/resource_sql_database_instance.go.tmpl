@@ -469,14 +469,12 @@ API (for read pools, effective_availability_type may differ from availability_ty
 												"retained_backups": {
 													Type:        schema.TypeInt,
 													Required:    true,
-													DiffSuppressFunc: EnhancedBackupManagerDiffSuppressFunc,
 													Description: `Number of backups to retain.`,
 												},
 												"retention_unit": {
 													Type:        schema.TypeString,
 													Optional:    true,
 													Default:     "COUNT",
-													DiffSuppressFunc: EnhancedBackupManagerDiffSuppressFunc,
 													Description: `The unit that 'retainedBackups' represents. Defaults to COUNT`,
 												},
 											},
