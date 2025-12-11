@@ -21,6 +21,8 @@ references:
     'Configure a Looker (Google Cloud core) instance': 'https://cloud.google.com/looker/docs/looker-core-instance-setup'
   api: 'https://cloud.google.com/looker/docs/reference/rest/v1/projects.locations.instances'
 docs:
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 base_url: 'projects/{{project}}/locations/{{region}}/instances'
 create_url: 'projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}'
 update_verb: 'PATCH'
@@ -414,6 +416,7 @@ properties:
       Looker Instance OAuth login settings.
     ignore_read: true
     required: true
+    custom_tgc_flatten: templates/tgc_next/custom_flatten/looker_instance_oauth_config.go.tmpl
     properties:
       - name: 'clientId'
         type: String
