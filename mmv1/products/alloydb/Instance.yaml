@@ -52,7 +52,8 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/alloydb_instance.go.tmpl'
 # Skipping the sweeper because instances will be deleted during cluster sweeps
 exclude_sweeper: true
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 examples:
   - name: 'alloydb_instance_basic'
     primary_resource_id: 'default'
@@ -473,3 +474,31 @@ properties:
     output: true
     item_type:
       type: String
+  - name: 'connectionPoolConfig'
+    type: NestedObject
+    description: |
+      Configuration for Managed Connection Pool.
+    custom_flatten: 'templates/terraform/custom_flatten/alloydb_instance_connectionpoolconfig_flatten.go.tmpl'
+    properties:
+      - name: 'enabled'
+        type: Boolean
+        description: |
+          Whether to enabled Managed Connection Pool.
+        required: true
+      - name: 'poolerCount'
+        type: Integer
+        output: true
+        description: |
+          The number of running poolers per instance.
+      - name: 'flags'
+        type: KeyValuePairs
+        description: |
+          Flags for configuring managed connection pooling when it is enabled.
+          These flags will only be set if `connection_pool_config.enabled` is
+          true.
+          Please see
+          https://cloud.google.com/alloydb/docs/configure-managed-connection-pooling#configuration-options
+          for a comprehensive list of flags that can be set. To specify the flags
+          in Terraform, please remove the "connection-pooling-" prefix and use
+          underscores instead of dashes in the name. For example,
+          "connection-pooling-pool-mode" would be "pool_mode".

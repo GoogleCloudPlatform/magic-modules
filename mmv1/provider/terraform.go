@@ -326,7 +326,10 @@ func (t *Terraform) GenerateOperation(outputFolder string) {
 
 // Generate the IAM policy for this object. This is used to query and test
 // IAM policies separately from the resource itself
-func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
+func (t *Terraform) GenerateIamPolicyLegacy(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
+	if object.IamPolicy.ExampleConfigBody == "" {
+		object.IamPolicy.ExampleConfigBody = "templates/terraform/iam/iam_attributes_legacy.go.tmpl"
+	}
 	if generateCode && object.IamPolicy != nil && (object.IamPolicy.MinVersion == "" || slices.Index(product.ORDER, object.IamPolicy.MinVersion) <= slices.Index(product.ORDER, t.TargetVersionName)) {
 		productName := t.Product.ApiName
 		targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
@@ -341,6 +344,42 @@ func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData Template
 			return e.ExcludeTest
 		})
 		if len(examples) != 0 {
+			targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s_generated_test.go", t.ResourceGoFilename(object)))
+			templateData.GenerateIamPolicyTestFileLegacy(targetFilePath, object)
+		}
+	}
+	if generateDocs {
+		t.GenerateIamDocumentation(object, templateData, outputFolder, generateCode, generateDocs)
+	}
+}
+
+func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
+	if object.Samples != nil && object.Examples != nil {
+		log.Fatalf("Both Samples and Examples block exist in %v", object.Name)
+	}
+	if object.Examples != nil {
+		t.GenerateIamPolicyLegacy(object, templateData, outputFolder, generateCode, generateDocs)
+		return
+	}
+
+	if object.IamPolicy.SampleConfigBody == "" {
+		object.IamPolicy.SampleConfigBody = "templates/terraform/iam/iam_attributes.go.tmpl"
+	}
+
+	if generateCode && object.IamPolicy != nil && (object.IamPolicy.MinVersion == "" || slices.Index(product.ORDER, object.IamPolicy.MinVersion) <= slices.Index(product.ORDER, t.TargetVersionName)) {
+		productName := t.Product.ApiName
+		targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
+		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+			log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+		}
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s.go", t.ResourceGoFilename(object)))
+		templateData.GenerateIamPolicyFile(targetFilePath, object)
+
+		// Only generate test if testable example configs exist.
+		samples := google.Reject(object.Samples, func(s *resource.Sample) bool {
+			return s.ExcludeTest
+		})
+		if len(samples) != 0 {
 			targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s_generated_test.go", t.ResourceGoFilename(object)))
 			templateData.GenerateIamPolicyTestFile(targetFilePath, object)
 		}
