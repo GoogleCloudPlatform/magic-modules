@@ -228,7 +228,6 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 			}),
 			customdiff.IfValueChange("instance_type", isReplicaPromoteRequested, checkPromoteConfigurationsAndUpdateDiff),
 			privateNetworkCustomizeDiff,
-			enhancedBackupManagerCustomizeDiff,
 			pitrSupportDbCustomizeDiff,
 			nodeCountCustomDiff,
 		),
@@ -416,15 +415,15 @@ API (for read pools, effective_availability_type may differ from availability_ty
 									"binary_log_enabled": {
 										Type:         schema.TypeBool,
 										Optional:     true,
-										Computed:     true,
 										AtLeastOneOf: backupConfigurationKeys,
+										DiffSuppressFunc: EnhancedBackupManagerDiffSuppressFunc,
 										Description:  `True if binary logging is enabled. If settings.backup_configuration.enabled is false, this must be as well. Can only be used with MySQL.`,
 									},
 									"enabled": {
 										Type:         schema.TypeBool,
 										Optional:     true,
-										Computed: 	  true,
 										AtLeastOneOf: backupConfigurationKeys,
+										DiffSuppressFunc: EnhancedBackupManagerDiffSuppressFunc,
 										Description:  `True if backup configuration is enabled.`,
 									},
 									"start_time": {
@@ -433,20 +432,20 @@ API (for read pools, effective_availability_type may differ from availability_ty
 										// start_time is randomly assigned if not set
 										Computed:     true,
 										AtLeastOneOf: backupConfigurationKeys,
+										DiffSuppressFunc: EnhancedBackupManagerDiffSuppressFunc,
 										Description:  `HH:MM format time indicating when backup configuration starts.`,
 									},
 									"location": {
 										Type:         schema.TypeString,
 										Optional:     true,
-										Computed: 	  true,
 										AtLeastOneOf: backupConfigurationKeys,
 										Description:  `Location of the backup configuration.`,
 									},
 									"point_in_time_recovery_enabled": {
 										Type:         schema.TypeBool,
 										Optional:     true,
-										Computed:	  true,
 										AtLeastOneOf: backupConfigurationKeys,
+										DiffSuppressFunc: EnhancedBackupManagerDiffSuppressFunc,
 										Description:  `True if Point-in-time recovery is enabled.`,
 									},
 									"transaction_log_retention_days": {
@@ -454,6 +453,7 @@ API (for read pools, effective_availability_type may differ from availability_ty
 										Computed:     true,
 										Optional:     true,
 										AtLeastOneOf: backupConfigurationKeys,
+										DiffSuppressFunc: EnhancedBackupManagerDiffSuppressFunc,
 										Description:  `The number of days of transaction logs we retain for point in time restore, from 1-7. (For PostgreSQL Enterprise Plus instances, from 1 to 35.)`,
 									},
 									"backup_retention_settings": {
@@ -466,8 +466,8 @@ API (for read pools, effective_availability_type may differ from availability_ty
 											Schema: map[string]*schema.Schema{
 												"retained_backups": {
 													Type:        schema.TypeInt,
-													Optional:    true,
-													Computed:    true,
+													Required:    true,
+													DiffSuppressFunc: EnhancedBackupManagerDiffSuppressFunc,
 													Description: `Number of backups to retain.`,
 												},
 												"retention_unit": {
@@ -1444,44 +1444,6 @@ func stringContainsSlice(arr []string, str string) bool {
 		}
 	}
 	return false
-}
-
-// enhancedBackupManagerCustomizeDiff suppresses diff changes to settings.backup_configuration
-// when the SQL instance is managed by Google Cloud Backup and Disaster Recovery (DR) Service.
-func enhancedBackupManagerCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	return EnhancedBackupManagerCustomizeDiffFunc(d)
-}
-
-func EnhancedBackupManagerCustomizeDiffFunc(d tpgresource.TerraformResourceDiff) error {
-    backupTierStr, ok := d.Get("settings.0.backup_configuration.0.backup_tier").(string)
-    if !ok || backupTierStr == "" {
-        return nil
-    }
-    if !strings.EqualFold(backupTierStr, "ENHANCED") {
-        return nil
-    }
-	// list of fields that must be ignored when ENHANCED backup manager is enabled
-	fieldsToIgnore := []string{
-		"settings.0.backup_configuration.0.enabled",
-		"settings.0.backup_configuration.0.start_time",
-		"settings.0.backup_configuration.0.binary_log_enabled",
-		"settings.0.backup_configuration.0.point_in_time_recovery_enabled",
-		"settings.0.backup_configuration.0.transaction_log_retention_days",
-		"settings.0.backup_configuration.0.backup_retention_settings.0.retained_backups",
-	}
-	for _, field := range fieldsToIgnore {
-		if d.HasChange(field) {
-			log.Printf(
-				"[INFO] Instance %s is managed by Google Cloud Backup and Disaster Recovery (BackupDR). "+
-					"Terraform will not manage the '%s' field. "+
-					"Any changes to this field in your Terraform configuration will be ignored.", d.Get("name"), field,
-			)
-			if err := d.Clear(field); err != nil {
-				return err
-			}
-		}
-	}
-    return nil
 }
 
 // Point in time recovery for MySQL database instances needs binary_log_enabled set to true and
@@ -2680,6 +2642,25 @@ func maintenanceVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) 
 	} else {
 		return false
 	}
+}
+
+// enhancedBackupManagerDiffSuppressFunc suppresses diff changes to settings.backup_configuration
+// when the SQL instance is managed by Google Cloud Backup and Disaster Recovery (DR) Service.
+func EnhancedBackupManagerDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+    // If the API marks this instance as ENHANCED-managed, suppress diffs for backup config fields.
+    tier, _ := d.Get("settings.0.backup_configuration.0.backup_tier").(string)
+    if tier == "" {
+        return false
+    }
+    if strings.EqualFold(tier, "ENHANCED") {
+	    log.Printf(
+				"[INFO] Instance %s is managed by Google Cloud Backup and Disaster Recovery (BackupDR). "+
+					"Terraform will not manage the '%s' field. "+
+					"Any changes to this field in your Terraform configuration will be ignored.", d.Get("name"), k,
+		)
+        return true
+    }
+    return false
 }
 
 func databaseVersionDiffSuppress(_, oldVersion, newVersion string, _ *schema.ResourceData) bool {
