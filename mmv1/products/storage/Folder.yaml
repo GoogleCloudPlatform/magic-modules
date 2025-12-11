@@ -47,12 +47,18 @@ custom_code:
   custom_import: templates/terraform/custom_import/storage_folder.go.tmpl
   custom_update: templates/terraform/custom_update/storage_folder_update.go.tmpl
   custom_delete: templates/terraform/custom_delete/storage_folder_delete.go.tmpl
+  pre_create: templates/terraform/pre_create/custom_headers.go.tmpl
+  pre_read: templates/terraform/pre_create/custom_headers.go.tmpl
 virtual_fields:
   - name: 'force_destroy'
     description:
       If set to true, items within folder if any will be force destroyed.
     type: Boolean
     default_value: false
+  - name: 'custom_headers'
+    type: KeyValuePairs
+    description:
+      Users can set custom headers send to API operations
 parameters:
   - name: 'bucket'
     resource: 'Bucket'
