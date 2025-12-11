@@ -32,9 +32,11 @@ func TestAccComputeRegionHealthSource_update(t *testing.T) {
 			},
 			{
 				Config: testAccComputeRegionHealthSource_update(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_compute_region_health_source.example_test_health_source", "description", "Updated description"),
-				),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_region_health_source.example_test_health_source", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_compute_region_health_source.example_test_health_source",
