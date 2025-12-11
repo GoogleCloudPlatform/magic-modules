@@ -462,6 +462,7 @@ API (for read pools, effective_availability_type may differ from availability_ty
 										AtLeastOneOf: backupConfigurationKeys,
 										Computed:     true,
 										MaxItems:     1,
+										DiffSuppressFunc: EnhancedBackupManagerDiffSuppressFunc,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"retained_backups": {
