@@ -43,6 +43,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+  tgc_decoder: 'templates/tgc_next/decoders/netapp_active_directory.go.tmpl'
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
 examples:
@@ -119,7 +120,6 @@ properties:
       Username for the Active Directory account with permissions to create the compute account within the specified organizational unit.
     required: true
     is_missing_in_cai: true
-    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/netapp_active_directory_dummy.go.tmpl'
   - name: 'password'
     type: String
     description: |
@@ -128,7 +128,6 @@ properties:
     ignore_read: true
     is_missing_in_cai: true
     sensitive: true
-    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/netapp_active_directory_dummy.go.tmpl'
   - name: 'backupOperators'
     type: Array
     description: |
