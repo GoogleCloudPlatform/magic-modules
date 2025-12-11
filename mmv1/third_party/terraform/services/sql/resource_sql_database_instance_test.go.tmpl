@@ -4097,6 +4097,7 @@ resource "google_sql_database_instance" "instance" {
       
       backup_retention_settings {
         retained_backups = 8
+		retention_unit   = "COUNT"
       }
     }
   }
