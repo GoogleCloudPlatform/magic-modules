@@ -183,6 +183,7 @@ properties:
       - 'NO_CONTENT'
       - 'CONTENT_REQUIRED'
       - 'PUBLIC_WEBSITE'
+      - 'GOOGLE_WORKSPACE'
   - name: 'advancedSiteSearchConfig'
     type: NestedObject
     description: |
