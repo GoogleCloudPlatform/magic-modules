@@ -46,6 +46,7 @@ func generateSourceRepoRepositoryIAMMemberStateID(iamResourceAddr string) func(*
 		project := tpgresource.GetResourceNameFromSelfLink(rawState["project"])
 		repository := repositoryShortName(rawState["repository"])
 		return acctest.BuildIAMImportId(fmt.Sprintf("projects/%s/repos/%s", project, repository), rawState["role"], rawState["member"], rawState["condition.0.title"]), nil
+	}
 }
 
 func repositoryShortName(repository string) string {
