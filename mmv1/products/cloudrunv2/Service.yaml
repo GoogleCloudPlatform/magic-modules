@@ -323,6 +323,7 @@ properties:
     description: |
       Scaling settings that apply to the whole service
     default_from_api: true
+    diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
     properties:
       - name: 'minInstanceCount'
         type: Integer
@@ -337,11 +338,10 @@ properties:
       - name: 'scalingMode'
         type: Enum
         description: |
-          The [scaling mode](https://cloud.google.com/run/docs/reference/rest/v2/projects.locations.services#scalingmode) for the service. Defaults to 'AUTOMATIC'.
+          The [scaling mode](https://cloud.google.com/run/docs/reference/rest/v2/projects.locations.services#scalingmode) for the service.
         enum_values:
           - 'AUTOMATIC'
           - 'MANUAL'
-        default_value: 'AUTOMATIC'
       - name: 'manualInstanceCount'
         type: Integer
         description: |
