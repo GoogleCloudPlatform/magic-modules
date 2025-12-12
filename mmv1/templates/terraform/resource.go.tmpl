@@ -762,7 +762,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 	identity, err := d.Identity()
     if err == nil && identity != nil {
     {{- range $p := $.IdentityProperties }}
-    if v, ok := identity.GetOk("{{ underscore $p.Name}}"); ok && v != "" {
+    if v, ok := identity.GetOk("{{ underscore $p.Name}}");!ok && v == "" {
         err = identity.Set("{{ underscore $p.Name}}", d.Get("{{ underscore $p.Name}}").(string))
             if err != nil {
                 return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
@@ -903,19 +903,6 @@ if len(updateMask) > 0 {
         return fmt.Errorf("Error updating {{ $.Name }} %q: %s", d.Id(), err)
     } else {
         log.Printf("[DEBUG] Finished updating {{ $.Name }} %q: %#v", d.Id(), res)
-    }
-
-    identity, err := d.Identity()
-    if err == nil && identity != nil {
-    {{- range $p := $.IdentityProperties }}
-        if {{ $p.CamelizeProperty }}Value := d.GetRawConfig().GetAttr("{{ underscore $p.Name}}"); !{{ $p.CamelizeProperty }}Value.IsNull() && {{ $p.CamelizeProperty }}Value.AsString() != "" {
-            if err = identity.Set("{{ underscore $p.Name}}", {{ $p.CamelizeProperty }}Value.AsString()); err != nil {
-                return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
-            }
-        }
-    {{- end }}
-    } else {
-        log.Printf("[DEBUG] (Update) identity not set: %s", err)
     }
 
 {{              if and ($.GetAsync) ($.GetAsync.Allow "update") -}}
@@ -1101,6 +1088,19 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 {{ "" }}
   d.Partial(false)
 {{-         end  }}{{/*if FieldSpecificUpdateMethods*/}}
+
+    identity, err := d.Identity()
+    if err == nil && identity != nil {
+    {{- range $p := $.IdentityProperties }}
+        if {{ $p.CamelizeProperty }}Value := d.GetRawConfig().GetAttr("{{ underscore $p.Name}}"); !{{ $p.CamelizeProperty }}Value.IsNull() && {{ $p.CamelizeProperty }}Value.AsString() != "" {
+            if err = identity.Set("{{ underscore $p.Name}}", {{ $p.CamelizeProperty }}Value.AsString()); err != nil {
+                return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+            }
+        }
+    {{- end }}
+    } else {
+        log.Printf("[DEBUG] (Update) identity not set: %s", err)
+    }
 
 {{          if $.CustomCode.PostUpdate -}}
     {{ customTemplate $ $.CustomCode.PostUpdate false -}}
