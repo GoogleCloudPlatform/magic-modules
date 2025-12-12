@@ -111,19 +111,6 @@ type Step struct {
 	TestHCLText          string `yaml:"-"`
 	OicsHCLText          string `yaml:"-"`
 	PrimaryResourceId    string `yaml:"-"`
-	ProductName          string `yaml:"-"`
-}
-
-func (s *Step) UnmarshalYAML(unmarshal func(any) error) error {
-	type stepAlias Step
-	aliasObj := (*stepAlias)(s)
-
-	err := unmarshal(aliasObj)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (s *Step) TestStepSlug(productName, resourceName string) string {

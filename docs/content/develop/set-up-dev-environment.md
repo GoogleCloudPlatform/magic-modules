@@ -34,10 +34,6 @@ development environment.
    # Add Go binaries to PATH
    export PATH=$PATH:$(go env GOPATH)/bin
    ```
-1. Install goimports
-   ```bash
-   go install golang.org/x/tools/cmd/goimports@latest
-   ```
 1. [Install terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
 1. Clone the `magic-modules` repository
    ```bash
@@ -56,8 +52,6 @@ development environment.
  
    ```
    Check for go in path...
-      found!
-   Check for goimports in path...
       found!
    Check for git in path...
       found!

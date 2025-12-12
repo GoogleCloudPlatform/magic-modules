@@ -42,7 +42,7 @@ Each of these is discussed in more detail below.
 Magic Modules uses a shared code base to generate terraform-google-conversion and the [google](https://github.com/hashicorp/terraform-provider-google) and [google-beta](https://github.com/hashicorp/terraform-provider-google-beta) Terraform providers.
 Most Terraform resources are represented as [yaml files which are grouped by product](https://github.com/GoogleCloudPlatform/magic-modules/tree/master/mmv1/products).
 Each product has a `product.yaml` file (which defines the basic product information) and  Resource.yaml files (which defines any resource-specific information).
-A Resource.yaml file can specify `include_in_tgc_next_DO_NOT_USE: true` to enable converters autogeneration, or `exclude_resource: true` to skip autogeneration for both converters and the providers.
+A Resource.yaml file can specify `include_in_tgc_next: true` to enable converters autogeneration, or `exclude_resource: true` to skip autogeneration for both converters and the providers.
 
 Auto-generating converters code based on yaml files is strongly preferred.
 
@@ -232,7 +232,7 @@ export WRITE_FILES=true
 To run the unit tests locally, run the following from the root of the `terraform-google-conversion` repository:
 
 ```
-make test
+make test-local
 ```
 
 #### Run integration tests
@@ -246,7 +246,7 @@ make test-integration-local TESTPATH=./test/services/alloydb  TESTARGS='-run=Tes
 
 To run one integration test for the added resource locally, run the following from the root of the `terraform-google-conversion` repository:
 ```
-make test-integration-local TESTPATH=./test/services/alloydb  TESTARGS='-run=TestAccAlloydbBackup_alloydbBackupBasicTestExample' > alloydbBackup.log
+make test-integration-local TESTPATH=./test/services/alloydb  TESTARGS='-run=TestAccAlloydbBackup/TestAccAlloydbBackup_alloydbBackupBasicTestExample' > alloydbBackup.log
 ```
 
 The core integration tests in `terraform-google-conversion` mirror the naming of the corresponding acceptance tests in the Terraform provider. This testing process uses a crucial round-trip validation method:
@@ -267,7 +267,7 @@ The core integration tests in `terraform-google-conversion` mirror the naming of
 
  | File                    | Content                                                       | Conversion Step      |
  | :---------------------- | :------------------------------------------------------------ | :------------------- |
- | File 1 (.tf)            | Original Terraform configuration (raw_config)                 | Start                |
+ | File 1 (.tf)            | Original Terraform configuration (raw_config)                 |                      |
  | File 2 (.json)          | CAI Assets exported from the resource (export_assets)         | Input for CAI to HCL |
  | File 3 (export.tf)      | Converted Terraform configuration (export_config) from File 2 | cai2hcl              |
  | File 4 (roundtrip.json) | CAI Assets (roundtrip_assets) converted from File 3           | tfplan2cai           |

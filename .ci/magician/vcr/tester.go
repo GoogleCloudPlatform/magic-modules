@@ -104,6 +104,7 @@ var safeToLog = map[string]bool{
 	"PATH":                                       true,
 	"SA_KEY":                                     false,
 	"TF_ACC":                                     true,
+	"TF_ACC_REFRESH_AFTER_APPLY":                 true,
 	"TF_LOG":                                     true,
 	"TF_LOG_CORE":                                true,
 	"TF_LOG_PATH_MASK":                           true,
@@ -193,12 +194,10 @@ func (vt *Tester) LogPath(mode Mode, version provider.Version) string {
 }
 
 type RunOptions struct {
-	Mode               Mode
-	Version            provider.Version
-	TestDirs           []string
-	Tests              []string
-	EnableTestCoverage bool
-	TestCovDir         string
+	Mode     Mode
+	Version  provider.Version
+	TestDirs []string
+	Tests    []string
 }
 
 // Run the vcr tests in the given mode and provider version and return the result.
@@ -254,25 +253,19 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 		"-ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc",
 		"-vet=off",
 	)
-	if opt.Mode == Replaying && opt.EnableTestCoverage {
-		args = append(args, []string{
-			"-cover",
-			"-args",
-			"-test.gocoverdir=" + opt.TestCovDir,
-		}...)
-	}
 	env := map[string]string{
-		"VCR_PATH":                 cassettePath,
-		"VCR_MODE":                 opt.Mode.Upper(),
-		"ACCTEST_PARALLELISM":      strconv.Itoa(accTestParallelism),
-		"GOOGLE_CREDENTIALS":       vt.env["SA_KEY"],
-		"GOOGLE_TEST_DIRECTORY":    strings.Join(opt.TestDirs, " "),
-		"TF_LOG":                   "DEBUG",
-		"TF_LOG_CORE":              "WARN",
-		"TF_LOG_SDK_FRAMEWORK":     "INFO",
-		"TF_LOG_PATH_MASK":         filepath.Join(logPath, "%s.log"),
-		"TF_ACC":                   "1",
-		"TF_SCHEMA_PANIC_ON_ERROR": "1",
+		"VCR_PATH":                   cassettePath,
+		"VCR_MODE":                   opt.Mode.Upper(),
+		"ACCTEST_PARALLELISM":        strconv.Itoa(accTestParallelism),
+		"GOOGLE_CREDENTIALS":         vt.env["SA_KEY"],
+		"GOOGLE_TEST_DIRECTORY":      strings.Join(opt.TestDirs, " "),
+		"TF_LOG":                     "DEBUG",
+		"TF_LOG_CORE":                "WARN",
+		"TF_LOG_SDK_FRAMEWORK":       "INFO",
+		"TF_LOG_PATH_MASK":           filepath.Join(logPath, "%s.log"),
+		"TF_ACC":                     "1",
+		"TF_ACC_REFRESH_AFTER_APPLY": "1",
+		"TF_SCHEMA_PANIC_ON_ERROR":   "1",
 	}
 	if vt.saKeyPath != "" {
 		env["GOOGLE_APPLICATION_CREDENTIALS"] = filepath.Join(vt.baseDir, vt.saKeyPath)
@@ -365,7 +358,7 @@ func (vt *Tester) RunParallel(opt RunOptions) (Result, error) {
 	for _, testDir := range opt.TestDirs {
 		for _, test := range opt.Tests {
 			running <- struct{}{}
-			go vt.runInParallel(opt, testDir, test, logPath, cassettePath, running, wg, outputs, errs)
+			go vt.runInParallel(opt.Mode, opt.Version, testDir, test, logPath, cassettePath, running, wg, outputs, errs)
 		}
 	}
 
@@ -396,7 +389,7 @@ func (vt *Tester) RunParallel(opt RunOptions) (Result, error) {
 	return collectResult(output), testErr
 }
 
-func (vt *Tester) runInParallel(opt RunOptions, testDir, test, logPath, cassettePath string, running <-chan struct{}, wg *sync.WaitGroup, outputs chan<- string, errs chan<- error) {
+func (vt *Tester) runInParallel(mode Mode, version provider.Version, testDir, test, logPath, cassettePath string, running <-chan struct{}, wg *sync.WaitGroup, outputs chan<- string, errs chan<- error) {
 	args := []string{
 		"test",
 		testDir,
@@ -409,26 +402,19 @@ func (vt *Tester) runInParallel(opt RunOptions, testDir, test, logPath, cassette
 		"-ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc",
 		"-vet=off",
 	}
-	mode := opt.Mode
-	if mode == Replaying && opt.EnableTestCoverage {
-		args = append(args, []string{
-			"-cover",
-			"-args",
-			"-test.gocoverdir=" + opt.TestCovDir,
-		}...)
-	}
 	env := map[string]string{
-		"VCR_PATH":                 cassettePath,
-		"VCR_MODE":                 mode.Upper(),
-		"ACCTEST_PARALLELISM":      "1",
-		"GOOGLE_CREDENTIALS":       vt.env["SA_KEY"],
-		"GOOGLE_TEST_DIRECTORY":    testDir,
-		"TF_LOG":                   "DEBUG",
-		"TF_LOG_CORE":              "WARN",
-		"TF_LOG_SDK_FRAMEWORK":     "INFO",
-		"TF_LOG_PATH_MASK":         filepath.Join(logPath, "%s.log"),
-		"TF_ACC":                   "1",
-		"TF_SCHEMA_PANIC_ON_ERROR": "1",
+		"VCR_PATH":                   cassettePath,
+		"VCR_MODE":                   mode.Upper(),
+		"ACCTEST_PARALLELISM":        "1",
+		"GOOGLE_CREDENTIALS":         vt.env["SA_KEY"],
+		"GOOGLE_TEST_DIRECTORY":      testDir,
+		"TF_LOG":                     "DEBUG",
+		"TF_LOG_CORE":                "WARN",
+		"TF_LOG_SDK_FRAMEWORK":       "INFO",
+		"TF_LOG_PATH_MASK":           filepath.Join(logPath, "%s.log"),
+		"TF_ACC":                     "1",
+		"TF_ACC_REFRESH_AFTER_APPLY": "1",
+		"TF_SCHEMA_PANIC_ON_ERROR":   "1",
 	}
 	if vt.saKeyPath != "" {
 		env["GOOGLE_APPLICATION_CREDENTIALS"] = filepath.Join(vt.baseDir, vt.saKeyPath)

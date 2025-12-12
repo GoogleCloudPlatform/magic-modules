@@ -45,6 +45,16 @@ examples:
       service_account: 'SERVICE_ACCT'
     ignore_read_extra:
       - direct_notebook_source.0.content
+  - name: 'colab_notebook_execution_custom_env'
+    primary_resource_id: 'notebook-execution'
+    vars:
+      network_name: 'colab-test-default'
+      bucket: 'my_bucket'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+      service_account: 'SERVICE_ACCT'
+    ignore_read_extra:
+      - direct_notebook_source.0.content
   - name: 'colab_notebook_execution_full'
     min_version: beta
     primary_resource_id: 'notebook-execution'
@@ -144,6 +154,67 @@ properties:
     description: 'The NotebookRuntimeTemplate to source compute configuration from.'
     exactly_one_of:
       - notebook_runtime_template_resource_name
+      - custom_environment_spec
+  - name: customEnvironmentSpec
+    type: NestedObject
+    description: Compute configuration to use for an execution job
+    exactly_one_of:
+      - notebook_runtime_template_resource_name
+      - custom_environment_spec
+    properties:
+      - name: machineSpec
+        type: NestedObject
+        description: |
+          'The machine configuration of the runtime.'
+        properties:
+          - name: 'machineType'
+            type: string
+            description: |
+                The Compute Engine machine type selected for the runtime.
+          - name: 'acceleratorType'
+            type: enum
+            description: |
+                The type of hardware accelerator used by the runtime. If specified, acceleratorCount must also be specified.
+            enum_values:
+              - 'NVIDIA_TESLA_V100'
+              - 'NVIDIA_TESLA_T4'
+              - 'NVIDIA_TESLA_A100'
+              - 'NVIDIA_A100_80GB'
+              - 'NVIDIA_L4'
+          - name: 'acceleratorCount'
+            type: Integer
+            description: 'The number of accelerators used by the runtime.'
+      - name: persistentDiskSpec
+        type: NestedObject
+        description: 'The configuration for the data disk of the runtime.'
+        properties:
+          - name: 'diskType'
+            type: enum
+            description: 'The type of the persistent disk.'
+            enum_values:
+              - 'pd-standard'
+              - 'pd-ssd'
+              - 'pd-balanced'
+              - 'pd-extreme'
+          - name: 'diskSizeGb'
+            type: int
+            description: |
+                    The disk size of the runtime in GB. If specified, the diskType must also be specified. The minimum size is 10GB and the maximum is 65536GB.
+      - name: networkSpec
+        type: NestedObject
+        description: 'The network configuration for the runtime.'
+        properties:
+          - name: 'enableInternetAccess'
+            type: Boolean
+            description: Enable public internet access for the runtime.
+          - name: 'network'
+            type: String
+            description: 'The name of the VPC that this runtime is in.'
+            diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+          - name: 'subnetwork'
+            type: String
+            description: 'The name of the subnetwork that this runtime is in.'
+            diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
   - name: 'gcsOutputUri'
     required: true
     type: String

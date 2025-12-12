@@ -16,6 +16,9 @@ package resource
 import (
 	"log"
 	"slices"
+
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
+	"gopkg.in/yaml.v3"
 )
 
 // Information about the IAM policy for this resource
@@ -24,122 +27,153 @@ import (
 // See: https://cloud.google.com/iam/docs/overview
 type IamPolicy struct {
 	// boolean of if this binding should be generated
-	Exclude bool
+	Exclude bool `yaml:"exclude,omitempty"`
 
 	// boolean of if this binding should be generated
-	ExcludeTgc bool `yaml:"exclude_tgc"`
+	ExcludeTgc bool `yaml:"exclude_tgc,omitempty"`
 
 	// Boolean of if tests for IAM resources should exclude import test steps
 	// Used to handle situations where typical generated IAM tests cannot import
 	// due to the parent resource having an API-generated id
-	ExcludeImportTest bool `yaml:"exclude_import_test"`
+	ExcludeImportTest bool `yaml:"exclude_import_test,omitempty"`
 
 	// Character that separates resource identifier from method call in URL
 	// For example, PubSub subscription uses {resource}:getIamPolicy
 	// While Compute subnetwork uses {resource}/getIamPolicy
-	MethodNameSeparator string `yaml:"method_name_separator"`
+	MethodNameSeparator string `yaml:"method_name_separator,omitempty"`
 
 	// The terraform type (e.g. 'google_endpoints_service') of the parent resource
 	// if it is not the same as the IAM resource. The IAP product needs these
 	// as its IAM policies refer to compute resources.
-	ParentResourceType string `yaml:"parent_resource_type"`
+	ParentResourceType string `yaml:"parent_resource_type,omitempty"`
 
 	// Some resources allow retrieving the IAM policy with GET requests,
 	// others expect POST requests
-	FetchIamPolicyVerb string `yaml:"fetch_iam_policy_verb"`
+	FetchIamPolicyVerb string `yaml:"fetch_iam_policy_verb,omitempty"`
 
 	// Last part of URL for fetching IAM policy.
-	FetchIamPolicyMethod string `yaml:"fetch_iam_policy_method"`
+	FetchIamPolicyMethod string `yaml:"fetch_iam_policy_method,omitempty"`
 
 	// Some resources allow setting the IAM policy with POST requests,
 	// others expect PUT requests
-	SetIamPolicyVerb string `yaml:"set_iam_policy_verb"`
+	SetIamPolicyVerb string `yaml:"set_iam_policy_verb,omitempty"`
 
 	// Last part of URL for setting IAM policy.
-	SetIamPolicyMethod string `yaml:"set_iam_policy_method"`
+	SetIamPolicyMethod string `yaml:"set_iam_policy_method,omitempty"`
 
 	// Whether the policy JSON is contained inside of a 'policy' object.
-	WrappedPolicyObj bool `yaml:"wrapped_policy_obj"`
+	WrappedPolicyObj bool `yaml:"wrapped_policy_obj,omitempty"`
 
 	// Certain resources allow different sets of roles to be set with IAM policies
 	// This is a role that is acceptable for the given IAM policy resource for use in tests
-	AllowedIamRole string `yaml:"allowed_iam_role"`
+	AllowedIamRole string `yaml:"allowed_iam_role,omitempty"`
 
 	// This is a role that grants create/read/delete for the parent resource for use in tests.
 	// If set, the test runner will receive a binding to this role in _policy tests in order to
 	// avoid getting locked out of the resource.
-	AdminIamRole string `yaml:"admin_iam_role"`
+	AdminIamRole string `yaml:"admin_iam_role,omitempty"`
 
 	// Certain resources need an attribute other than "id" from their parent resource
 	// Especially when a parent is not the same type as the IAM resource
-	ParentResourceAttribute string `yaml:"parent_resource_attribute"`
+	ParentResourceAttribute string `yaml:"parent_resource_attribute,omitempty"`
 
 	// If the IAM resource test needs a new project to be created, this is the name of the project
-	TestProjectName string `yaml:"test_project_name"`
+	TestProjectName string `yaml:"test_project_name,omitempty"`
 
 	// Resource name may need a custom diff suppress function. Default is to use
 	// CompareSelfLinkOrResourceName
-	CustomDiffSuppress *string `yaml:"custom_diff_suppress"`
+	CustomDiffSuppress *string `yaml:"custom_diff_suppress,omitempty"`
+
+	// StateIDFuncs may use a custom template if default funcs don't work.
+	CustomImportStateIDFuncs string `yaml:"custom_state_id_funcs"`
 
 	// Some resources (IAP) use fields named differently from the parent resource.
 	// We need to use the parent's attributes to create an IAM policy, but they may not be
 	// named as the IAM resource expects.
 	// This allows us to specify a file (relative to MM root) containing a partial terraform
 	// config with the test/example attributes of the IAM resource.
-	ExampleConfigBody string `yaml:"example_config_body"`
+	ExampleConfigBody string `yaml:"example_config_body,omitempty"`
+
+	SampleConfigBody string `yaml:"sample_config_body,omitempty"`
 
 	// How the API supports IAM conditions
-	IamConditionsRequestType string `yaml:"iam_conditions_request_type"`
+	IamConditionsRequestType string `yaml:"iam_conditions_request_type,omitempty"`
 
 	// Allows us to override the base_url of the resource. This is required for Cloud Run as the
 	// IAM resources use an entirely different base URL from the actual resource
-	BaseUrl string `yaml:"base_url"`
+	BaseUrl string `yaml:"base_url,omitempty"`
 
 	// Allows us to override the import format of the resource. Useful for Cloud Run where we need
 	// variables that are outside of the base_url qualifiers.
-	ImportFormat []string `yaml:"import_format"`
+	ImportFormat []string `yaml:"import_format,omitempty"`
 
 	// Allows us to override the self_link of the resource. This is required for Artifact Registry
 	// to prevent breaking changes
-	SelfLink string `yaml:"self_link"`
+	SelfLink string `yaml:"self_link,omitempty"`
 
 	// [Optional] Version number in the request payload.
 	// if set, it overrides the default IamPolicyVersion
-	IamPolicyVersion string `yaml:"iam_policy_version"`
+	IamPolicyVersion string `yaml:"iam_policy_version,omitempty"`
 
 	// [Optional] Min version to make IAM resources available at
 	// If unset, defaults to 'ga'
-	MinVersion string `yaml:"min_version"`
+	MinVersion string `yaml:"min_version,omitempty"`
 
 	// [Optional] Check to see if zone value should be replaced with GOOGLE_ZONE in iam tests
 	// Defaults to true
-	SubstituteZoneValue bool `yaml:"substitute_zone_value"`
+	SubstituteZoneValue bool `yaml:"substitute_zone_value,omitempty"`
 
 	// Add a deprecation message for a resource that's been deprecated in the API.
 	DeprecationMessage string `yaml:"deprecation_message,omitempty"`
 }
 
-func (p *IamPolicy) UnmarshalYAML(unmarshal func(any) error) error {
-	p.MethodNameSeparator = "/"
-	p.FetchIamPolicyVerb = "GET"
-	p.FetchIamPolicyMethod = "getIamPolicy"
-	p.SetIamPolicyVerb = "POST"
-	p.SetIamPolicyMethod = "setIamPolicy"
-	p.WrappedPolicyObj = true
-	p.AllowedIamRole = "roles/viewer"
-	p.ParentResourceAttribute = "id"
-	p.ExampleConfigBody = "templates/terraform/iam/iam_attributes.go.tmpl"
-	p.SubstituteZoneValue = true
+// newIamPolicyWithDefaults returns an IamPolicy object with default values set.
+func newIamPolicyWithDefaults() IamPolicy {
+	return IamPolicy{
+		MethodNameSeparator:     "/",
+		FetchIamPolicyVerb:      "GET",
+		FetchIamPolicyMethod:    "getIamPolicy",
+		SetIamPolicyVerb:        "POST",
+		SetIamPolicyMethod:      "setIamPolicy",
+		WrappedPolicyObj:        true,
+		AllowedIamRole:          "roles/viewer",
+		ParentResourceAttribute: "id",
+		SubstituteZoneValue:     true,
+	}
+}
 
+// UnmarshalYAML implements a custom unmarshaler for the IamPolicy struct.
+// It sets default values and then decodes the YAML over them.
+func (p *IamPolicy) UnmarshalYAML(value *yaml.Node) error {
+	// Start with a struct containing all the default values.
+	*p = newIamPolicyWithDefaults()
+
+	// Use a type alias to prevent recursion when decoding.
 	type iamPolicyAlias IamPolicy
 	aliasObj := (*iamPolicyAlias)(p)
 
-	err := unmarshal(aliasObj)
+	// Decode the provided YAML, which will overwrite any default values that are specified.
+	return value.Decode(aliasObj)
+}
+
+// MarshalYAML implements a custom marshaller for the IamPolicy struct.
+// It uses a generic helper to omit fields that are set to their default values.
+func (p *IamPolicy) MarshalYAML() (interface{}, error) {
+	// Use a type alias to prevent infinite recursion during marshaling.
+	type iamPolicyAlias IamPolicy
+
+	// Create a defaults object and then use the generic helper to create a
+	// clone with default values zeroed out for marshaling.
+	defaults := newIamPolicyWithDefaults()
+	clone, err := utils.OmitDefaultsForMarshaling(*p, defaults)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	// The helper returns an interface{} containing a pointer to the clone.
+	// We cast it to the alias type to ensure the marshaller uses the default
+	// behavior for the struct, but without this custom MarshalYAML method.
+	return (*iamPolicyAlias)(clone.(*IamPolicy)), nil
 }
 
 func (p *IamPolicy) Validate(rName string) {

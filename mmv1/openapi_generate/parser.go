@@ -16,6 +16,7 @@
 package openapi_generate
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
@@ -34,8 +35,13 @@ import (
 	r "github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/getkin/kin-openapi/openapi3"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
+
+	_ "embed"
 )
+
+//go:embed header.txt
+var header []byte
 
 type Parser struct {
 	Folder string
@@ -86,25 +92,22 @@ func (parser Parser) WriteYaml(filePath string) {
 	doc, _ := loader.LoadFromFile(filePath)
 	_ = doc.Validate(ctx)
 
-	header, err := os.ReadFile("openapi_generate/header.txt")
-	if err != nil {
-		log.Fatalf("error reading header %v", err)
-	}
-
 	resourcePaths := findResources(doc)
 	productPath := buildProduct(filePath, parser.Output, doc, header)
 
-	// Disables line wrap for long strings
-	yaml.FutureLineWrap()
 	log.Printf("Generated product %+v/product.yaml", productPath)
 	for _, pathArray := range resourcePaths {
 		resource := buildResource(filePath, pathArray[0], pathArray[1], doc)
 
 		// marshal method
+		var yamlContent bytes.Buffer
 		resourceOutPathMarshal := filepath.Join(productPath, fmt.Sprintf("%s.yaml", resource.Name))
-		bytes, err := yaml.Marshal(resource)
+		encoder := yaml.NewEncoder(&yamlContent)
+		encoder.SetIndent(2)
+
+		err := encoder.Encode(&resource)
 		if err != nil {
-			log.Fatalf("error marshalling yaml %v: %v", resourceOutPathMarshal, err)
+			log.Fatalf("Failed to encode: %v", err)
 		}
 
 		f, err := os.Create(resourceOutPathMarshal)
@@ -115,7 +118,7 @@ func (parser Parser) WriteYaml(filePath string) {
 		if err != nil {
 			log.Fatalf("error writing resource file header %v", err)
 		}
-		_, err = f.Write(bytes)
+		_, err = f.Write(yamlContent.Bytes())
 		if err != nil {
 			log.Fatalf("error writing resource file %v", err)
 		}
@@ -300,7 +303,7 @@ func parseOpenApi(resourcePath, resourceName string, root *openapi3.T) []any {
 		if strings.Contains(strings.ToLower(param.Value.Name), strings.ToLower(resourceName)) {
 			idParam = param.Value.Name
 		}
-		paramObj := writeObject(param.Value.Name, param.Value.Schema, propType(param.Value.Schema), true)
+		paramObj := WriteObject(param.Value.Name, param.Value.Schema, propType(param.Value.Schema), true)
 		description := param.Value.Description
 		if strings.TrimSpace(description) == "" {
 			description = "No description"
@@ -333,7 +336,7 @@ func propType(prop *openapi3.SchemaRef) openapi3.Types {
 	}
 }
 
-func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, urlParam bool) api.Type {
+func WriteObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, urlParam bool) api.Type {
 	var field api.Type
 
 	switch name {
@@ -391,8 +394,17 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		}
 
 		field.Type = "NestedObject"
-
-		field.Properties = buildProperties(obj.Value.Properties, obj.Value.Required)
+		if obj.Value.AdditionalProperties.Schema != nil {
+			field.Type = "Map"
+			field.KeyName = "TODO: CHANGEME"
+			var valueType api.Type
+			valueType.Name = "TODO: CHANGEME"
+			valueType.Type = "NestedObject"
+			valueType.Properties = buildProperties(obj.Value.AdditionalProperties.Schema.Value.Properties, obj.Value.AdditionalProperties.Schema.Value.Required)
+			field.ValueType = &valueType
+		} else {
+			field.Properties = buildProperties(obj.Value.Properties, obj.Value.Required)
+		}
 	case "array":
 		field.Type = "Array"
 		var subField api.Type
@@ -451,7 +463,7 @@ func buildProperties(props openapi3.Schemas, required []string) []*api.Type {
 	properties := []*api.Type{}
 	for _, k := range slices.Sorted(maps.Keys(props)) {
 		prop := props[k]
-		propObj := writeObject(k, prop, propType(prop), false)
+		propObj := WriteObject(k, prop, propType(prop), false)
 		if slices.Contains(required, k) {
 			propObj.Required = true
 		}

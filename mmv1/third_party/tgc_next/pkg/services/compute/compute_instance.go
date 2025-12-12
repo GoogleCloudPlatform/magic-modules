@@ -3,7 +3,7 @@ package compute
 import (
 	"strings"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/converters/utils"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tgcresource"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -1492,7 +1492,7 @@ func flattenNetworkInterfacesTgc(networkInterfaces []*compute.NetworkInterface, 
 			"internal_ipv6_prefix_length": iface.InternalIpv6PrefixLength,
 		}
 
-		subnetProject := utils.ParseFieldValue(iface.Subnetwork, "projects")
+		subnetProject := tgcresource.ParseFieldValue(iface.Subnetwork, "projects")
 		if subnetProject != project {
 			flattened[i]["subnetwork_project"] = subnetProject
 		}

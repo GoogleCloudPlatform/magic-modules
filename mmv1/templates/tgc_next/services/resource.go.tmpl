@@ -29,6 +29,8 @@ import (
 
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+
 
   "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tgcresource"
   "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
@@ -37,7 +39,7 @@ import (
 )
 
 {{if $.CustomCode.Constants -}} 
-    {{- $.CustomTemplate $.CustomCode.Constants true -}}
+    {{- customTemplate $ $.CustomCode.Constants true -}}
 {{- end}}
 
 var (
@@ -51,6 +53,7 @@ var (
     _ = strconv.Atoi
     _ = strings.Trim
     _ = schema.Noop
+    _ = structure.NormalizeJsonString
     _ = validation.All
     _ = tgcresource.RemoveTerraformAttributionLabel
     _ = tpgresource.GetRegion
@@ -74,7 +77,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{template "SchemaFields" $prop -}}
             {{- end }}
 {{- if $.CustomCode.ExtraSchemaEntry }} 
-    {{ $.CustomTemplate $.CustomCode.ExtraSchemaEntry false -}}
+    {{ customTemplate $ $.CustomCode.ExtraSchemaEntry false -}}
 {{- end}}
 {{ if $.HasProject -}}
             "project": {

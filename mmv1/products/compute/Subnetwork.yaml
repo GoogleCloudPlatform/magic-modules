@@ -45,7 +45,8 @@ references:
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/subnetworks'
 has_self_link: true
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 immutable: true
 timeouts:
   insert_minutes: 20
@@ -117,6 +118,12 @@ examples:
     vars:
       subnetwork_name: 'subnet-purpose-test-subnetwork'
       network_name: 'subnet-purpose-test-network'
+  - name: 'subnetwork_resolve_subnet_mask'
+    primary_resource_id: 'subnetwork-resolve-subnet-mask'
+    min_version: 'beta'
+    vars:
+      subnetwork_name: 'subnet-resolve-subnet-mask-test-subnetwork'
+      network_name: 'subnet-resolve-subnet-mask-test-network'
   - name: 'subnetwork_cidr_overlap'
     primary_resource_id: 'subnetwork-cidr-overlap'
     min_version: 'beta'
@@ -152,6 +159,26 @@ examples:
       ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
     test_vars_overrides:
       ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
+  - name: 'subnetwork_with_internal_subnet_mode_pdp'
+    primary_resource_id: 'subnetwork-with-internal-subnet-mode-pdp'
+    exclude_docs: true
+    vars:
+      subnetwork_name: 'internal-subnet-mode-pdp-subnet'
+      network_name: 'network-byoipv6-internal'
+      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp"'
+    test_vars_overrides:
+      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp"'
+  - name: 'subnetwork_with_internal_subnet_mode_pdp_explicit_ip_prefix'
+    primary_resource_id: 'subnetwork-with-internal-subnet-mode-pdp-explicit-ip-prefix'
+    exclude_docs: true
+    vars:
+      subnetwork_name: 'subnet-mode-pdp-subnet-internal-prefix'
+      network_name: 'network-byoipv6-internal-prefix'
+      internal_ipv6_prefix: '"2001:db8:1::/64"'
+      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp-explicit-prefix"'
+    test_vars_overrides:
+      internal_ipv6_prefix: 'fmt.Sprintf("2001:db8:1:%d::/64", acctest.RandIntRange(t, 0, 9999))'
+      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp-explicit-prefix"'
   - name: 'subnetwork_ipv6_only_external'
     primary_resource_id: 'subnetwork-ipv6-only'
     exclude_docs: true
@@ -461,9 +488,12 @@ properties:
     output: true
   - name: 'internalIpv6Prefix'
     type: String
+    diff_suppress_func: 'IpDiffSuppress'
     description: |
       The internal IPv6 address range that is assigned to this subnetwork.
-    output: true
+    default_from_api: true
+    validation:
+      function: 'verify.ValidateIpCidrRange'
   - name: 'externalIpv6Prefix'
     type: String
     description: |
@@ -475,9 +505,9 @@ properties:
     is_missing_in_cai: true
     description: |
       Resource reference of a PublicDelegatedPrefix. The PDP must be a sub-PDP
-      in EXTERNAL_IPV6_SUBNETWORK_CREATION mode.
-      Use one of the following formats to specify a sub-PDP when creating an
-      IPv6 NetLB forwarding rule using BYOIP:
+      in EXTERNAL_IPV6_SUBNETWORK_CREATION or INTERNAL_IPV6_SUBNETWORK_CREATION
+      mode. Use one of the following formats to specify a sub-PDP when creating
+      a dual stack or IPv6-only subnetwork using BYOIP:
       Full resource URL, as in:
         * `https://www.googleapis.com/compute/v1/projects/{{projectId}}/regions/{{region}}/publicDelegatedPrefixes/{{sub-pdp-name}}`
       Partial URL, as in:
@@ -535,3 +565,12 @@ properties:
           To apply tags to an existing resource, see the google_tags_tag_binding resource.
         ignore_read: true
         immutable: true
+  - name: 'resolveSubnetMask'
+    type: Enum
+    description: |
+      'Configures subnet mask resolution for this subnetwork.'
+    enum_values:
+      - 'ARP_ALL_RANGES'
+      - 'ARP_PRIMARY_RANGE'
+    min_version: beta
+    immutable: true
