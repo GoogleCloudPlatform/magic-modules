@@ -72,7 +72,7 @@ examples:
     skip_vcr: true
 virtual_fields:
   - name: 'force_destroy'
-    description: 
+    description:
       If set to true, any FeatureViews and Features for this FeatureOnlineStore will also be deleted.
     type: Boolean
     default_value: false
@@ -86,8 +86,7 @@ parameters:
 properties:
   - name: 'name'
     type: String
-    description:
-      The resource name of the Feature Online Store. This value may be up to 60 characters, and
+    description: The resource name of the Feature Online Store. This value may be up to 60 characters, and
       valid characters are [a-z0-9_]. The first character cannot be a number.
     url_param_only: true
     required: true
@@ -160,7 +159,7 @@ properties:
       - 'bigtable'
       - 'optimized'
     properties:
-    # Meant to be an empty object with no properties - see here : https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featureOnlineStores#Optimized
+  # Meant to be an empty object with no properties - see here : https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featureOnlineStores#Optimized
       []
   - name: 'dedicatedServingEndpoint'
     type: NestedObject
