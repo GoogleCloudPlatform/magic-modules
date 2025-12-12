@@ -164,7 +164,7 @@ properties:
   - name: 'dedicatedServingEndpoint'
     type: NestedObject
     description: |
-      The dedicated serving endpoint for this FeatureOnlineStore, which is different from common vertex service endpoint. Only need to be set when you choose Optimized storage type or enable EmbeddingManagement. Will use public endpoint by default.
+       The dedicated serving endpoint for this FeatureOnlineStore, which is different from common vertex service endpoint. Only need to be set when you choose Optimized storage type or enable EmbeddingManagement. Will use public endpoint by default.
     default_from_api: true
     properties:
       - name: 'publicEndpointDomainName'
