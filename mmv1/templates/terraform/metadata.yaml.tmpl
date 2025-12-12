@@ -1,16 +1,16 @@
-resource: '{{ $.TerraformName }}'
-generation_type: 'mmv1'
-source_file: '{{ $.SourceYamlFile }}'
-api_service_name: '{{ $.ProductMetadata.ServiceName }}'
-api_version: '{{ or $.ProductMetadata.ServiceVersion $.ServiceVersion }}'
-api_resource_type_kind: '{{ or $.ApiResourceTypeKind $.Name }}'
+resource: {{ $.TerraformName }}
+generation_type: mmv1
+source_file: {{ $.SourceYamlFile }}
+api_service_name: {{ $.ProductMetadata.ServiceName }}
+api_version: {{ or $.ProductMetadata.ServiceVersion $.ServiceVersion }}
+api_resource_type_kind: {{ or $.ApiResourceTypeKind $.Name }}
 {{- if $.CAIFormatOverride }}
-cai_asset_name_format: '{{ $.CAIFormatOverride }}'
+cai_asset_name_format: {{ $.CAIFormatOverride }}
 {{- end }}
 {{- if gt (len $.ApiVariantPatterns) 0 }}
 api_variant_patterns:
   {{- range $v := $.ApiVariantPatterns }}
-  - '{{ $v }}'
+    - {{ $v }}
   {{- end }}
 {{- end }}
 {{- if $.AutogenStatus }}
@@ -19,18 +19,18 @@ autogen_status: true
 fields:
 {{- range $p := $.LeafProperties }}
   {{- if $p.ProviderOnly }}
-  - field: '{{ $p.MetadataLineage }}'
-    provider_only: true
+    - field: {{ $p.MetadataLineage }}
+      provider_only: true
   {{- else}}
-  - api_field: '{{ $p.MetadataApiLineage }}'
-    {{- if ne $p.MetadataLineage $p.MetadataDefaultLineage }}
-    field: '{{ $p.MetadataLineage }}'
-    {{- end}}
-    {{- if $p.IsJsonField }}
-    json: true
-    {{- end }}
+    - api_field: {{ $p.MetadataApiLineage }}
+      {{- if ne $p.MetadataLineage $p.MetadataDefaultLineage }}
+      field: {{ $p.MetadataLineage }}
+      {{- end}}
+      {{- if $p.IsJsonField }}
+      json: true
+      {{- end }}
   {{- end}}
 {{- end }}
 {{- if $.HasSelfLink }}
-  - api_field: 'selfLink'
+    - api_field: selfLink
 {{- end }}
