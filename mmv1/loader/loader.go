@@ -3,27 +3,29 @@ package loader
 import (
 	"errors"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
 	"reflect"
-	"sort"
+	"slices"
+	"strings"
 	"sync"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/golang/glog"
-	"golang.org/x/exp/slices"
 )
 
 type Loader struct {
-	// BaseDirectory points to mmv1 root, if cwd can be empty as relative paths are used
-	BaseDirectory     string
-	OverrideDirectory string
-	Version           string
+	baseFS     fs.FS
+	overrideFS fs.FS
+	version    string
+	OverlayFS  google.ReadDirReadFileFS
 }
 
 type Config struct {
-	BaseDirectory     string // optional, defaults to current working directory
+	BaseDirectory     string // required
 	OverrideDirectory string // optional
 	Version           string // required
 }
@@ -35,61 +37,51 @@ func NewLoader(config Config) *Loader {
 	if config.Version == "" {
 		panic("version is required")
 	}
-
+	if config.BaseDirectory == "" {
+		panic("a base directory is required")
+	}
 	l := &Loader{
-		BaseDirectory:     config.BaseDirectory,
-		OverrideDirectory: config.OverrideDirectory,
-		Version:           config.Version,
+		baseFS:  os.DirFS(config.BaseDirectory),
+		version: config.Version,
 	}
-
-	// Normalize override dir to a path that is relative to the magic-modules directory
-	// This is needed for templates that concatenate pwd + override dir + path
-	if filepath.IsAbs(l.OverrideDirectory) {
-		mmv1Dir := l.BaseDirectory
-		if mmv1Dir == "" {
-			wd, err := os.Getwd()
-			if err != nil {
-				panic(err)
-			}
-			mmv1Dir = wd
-		}
-		l.OverrideDirectory, _ = filepath.Rel(mmv1Dir, l.OverrideDirectory)
-		log.Printf("Override directory normalized to relative path %s", l.OverrideDirectory)
+	log.Printf("Using base directory %q", config.BaseDirectory)
+	if config.OverrideDirectory != "" {
+		log.Printf("Using override directory %q", config.OverrideDirectory)
+		l.overrideFS = os.DirFS(config.OverrideDirectory)
 	}
-
+	var err error
+	l.OverlayFS, err = google.NewOverlayFS(l.overrideFS, l.baseFS)
+	if err != nil {
+		panic(err)
+	}
 	return l
 }
 
 func (l *Loader) LoadProducts() map[string]*api.Product {
-	if l.Version == "" {
+	if l.version == "" {
 		log.Printf("No version specified, assuming ga")
-		l.Version = "ga"
+		l.version = "ga"
 	}
 
 	var allProductFiles []string = make([]string, 0)
 
-	files, err := filepath.Glob(filepath.Join(l.BaseDirectory, "products/**/product.yaml"))
+	files, err := fs.Glob(l.baseFS, "products/**/product.yaml")
 	if err != nil {
 		panic(err)
 	}
 	for _, filePath := range files {
-		dir := filepath.Dir(filePath)
-		allProductFiles = append(allProductFiles, fmt.Sprintf("products/%s", filepath.Base(dir)))
+		product := filepath.Base(filepath.Dir(filePath))
+		allProductFiles = append(allProductFiles, fmt.Sprintf("products/%s", product))
 	}
 
-	if l.OverrideDirectory != "" {
-		log.Printf("Using override directory %s", l.OverrideDirectory)
-		overrideFiles, err := filepath.Glob(filepath.Join(l.OverrideDirectory, "products/**/product.yaml"))
+	if l.overrideFS != nil {
+		overrideFiles, err := fs.Glob(l.overrideFS, "products/**/product.yaml")
 		if err != nil {
 			panic(err)
 		}
 		for _, filePath := range overrideFiles {
-			product, err := filepath.Rel(l.OverrideDirectory, filePath)
-			if err != nil {
-				panic(err)
-			}
-			dir := filepath.Dir(product)
-			productFile := fmt.Sprintf("products/%s", filepath.Base(dir))
+			product := filepath.Base(filepath.Dir(filePath))
+			productFile := fmt.Sprintf("products/%s", product)
 			if !slices.Contains(allProductFiles, productFile) {
 				allProductFiles = append(allProductFiles, productFile)
 			}
@@ -158,41 +150,37 @@ func (l *Loader) batchLoadProducts(productNames []string) map[string]*api.Produc
 
 // Load compiles a product with all its resources from the given path and optional overrides
 // This loads the product configuration and all its resources into memory without generating any files
+// productName looks like `products/foo`
 func (l *Loader) LoadProduct(productName string) (*api.Product, error) {
-	p := &api.Product{}
 	productYamlPath := filepath.Join(productName, "product.yaml")
 
-	var productOverridePath string
-	if l.OverrideDirectory != "" {
-		productOverridePath = filepath.Join(l.OverrideDirectory, productYamlPath)
+	var baseContents, overrideContents []byte
+	baseContents, _ = fs.ReadFile(l.baseFS, productYamlPath)
+	if l.overrideFS != nil {
+		overrideContents, _ = fs.ReadFile(l.overrideFS, productYamlPath)
 	}
-
-	baseProductPath := filepath.Join(l.BaseDirectory, productYamlPath)
-
-	baseProductExists := Exists(baseProductPath)
-	overrideProductExists := Exists(productOverridePath)
-
-	if !(baseProductExists || overrideProductExists) {
+	if baseContents == nil && overrideContents == nil {
 		return nil, fmt.Errorf("%s does not contain a product.yaml file", productName)
 	}
 
-	// Compile the product configuration
-	if overrideProductExists {
-		if baseProductExists {
-			api.Compile(baseProductPath, p, l.OverrideDirectory)
-			overrideApiProduct := &api.Product{}
-			api.Compile(productOverridePath, overrideApiProduct, l.OverrideDirectory)
-			api.Merge(reflect.ValueOf(p).Elem(), reflect.ValueOf(*overrideApiProduct), l.Version)
-		} else {
-			api.Compile(productOverridePath, p, l.OverrideDirectory)
+	var p, overrideProduct *api.Product
+	if overrideContents != nil {
+		overrideProduct = &api.Product{}
+		api.CompileContents(overrideContents, overrideProduct, fmt.Sprintf("${OVERRIDE}/%s", productYamlPath))
+	}
+	if baseContents != nil {
+		p = &api.Product{}
+		api.CompileContents(baseContents, p, fmt.Sprintf("${BASE}/%s", productYamlPath))
+		if overrideProduct != nil {
+			api.Merge(reflect.ValueOf(p).Elem(), reflect.ValueOf(*overrideProduct), l.version)
 		}
 	} else {
-		api.Compile(baseProductPath, p, l.OverrideDirectory)
+		p = overrideProduct
 	}
 
 	// Check if product exists at the requested l.Version
-	if !p.ExistsAtVersionOrLower(l.Version) {
-		return nil, &ErrProductVersionNotFound{ProductName: productName, Version: l.Version}
+	if !p.ExistsAtVersionOrLower(l.version) {
+		return nil, &ErrProductVersionNotFound{ProductName: productName, Version: l.version}
 	}
 
 	// Compile all resources
@@ -208,117 +196,100 @@ func (l *Loader) LoadProduct(productName string) (*api.Product, error) {
 	return p, nil
 }
 
+type contents struct {
+	base, override []byte
+}
+
 // loadResources loads all resources for a product
 func (l *Loader) loadResources(product *api.Product) ([]*api.Resource, error) {
 	var resources []*api.Resource = make([]*api.Resource, 0)
 
-	// Get base resource files
-	resourceFiles, err := filepath.Glob(filepath.Join(l.BaseDirectory, product.PackagePath, "*"))
-	if err != nil {
-		return nil, fmt.Errorf("cannot get resource files: %v", err)
-	}
-
-	// Compile base resources (skip those that will be merged with overrides)
-	for _, resourceYamlPath := range resourceFiles {
-		if filepath.Base(resourceYamlPath) == "product.yaml" || filepath.Ext(resourceYamlPath) != ".yaml" {
-			continue
+	resourceContents := make(map[string]*contents)
+	if l.overrideFS != nil {
+		overrideFiles, err := fs.Glob(l.overrideFS, filepath.Join(product.PackagePath, "*"))
+		if err != nil {
+			return nil, fmt.Errorf("cannot get override files: %v", err)
 		}
 
-		// Skip if resource will be merged in the override loop
-		if l.OverrideDirectory != "" {
-			overrideResourceExists := Exists(l.OverrideDirectory, resourceYamlPath)
-			if overrideResourceExists {
+		for _, overrideYamlPath := range overrideFiles {
+			base := filepath.Base(overrideYamlPath)
+			if base == "product.yaml" || filepath.Ext(overrideYamlPath) != ".yaml" {
 				continue
 			}
-		}
-
-		resource := l.loadResource(product, resourceYamlPath, "")
-		resources = append(resources, resource)
-	}
-
-	// Compile override resources
-	if l.OverrideDirectory != "" {
-		resources, err = l.reconcileOverrideResources(product, resources)
-		if err != nil {
-			return nil, err
+			full := filepath.Join(product.PackagePath, base)
+			c, err := fs.ReadFile(l.overrideFS, full)
+			if err != nil {
+				return nil, fmt.Errorf("cannot read override file %q: %v", full, err)
+			}
+			resourceContents[base] = &contents{override: c}
 		}
 	}
-
-	return resources, nil
-}
-
-// reconcileOverrideResources handles resolution of override resources
-func (l *Loader) reconcileOverrideResources(product *api.Product, resources []*api.Resource) ([]*api.Resource, error) {
-	productOverridePath := filepath.Join(l.OverrideDirectory, product.PackagePath, "product.yaml")
-	productOverrideDir := filepath.Dir(productOverridePath)
-
-	overrideFiles, err := filepath.Glob(filepath.Join(productOverrideDir, "*"))
+	// Get base resource files
+	resourceFiles, err := fs.Glob(l.baseFS, filepath.Join(product.PackagePath, "*"))
 	if err != nil {
-		return nil, fmt.Errorf("cannot get override files: %v", err)
+		return nil, fmt.Errorf("cannot get base resource files: %v", err)
 	}
-
-	for _, overrideYamlPath := range overrideFiles {
-		if filepath.Base(overrideYamlPath) == "product.yaml" || filepath.Ext(overrideYamlPath) != ".yaml" {
+	for _, resourceYamlPath := range resourceFiles {
+		base := filepath.Base(resourceYamlPath)
+		if base == "product.yaml" || filepath.Ext(resourceYamlPath) != ".yaml" {
 			continue
 		}
-
-		baseResourcePath := filepath.Join(product.PackagePath, filepath.Base(overrideYamlPath))
-		resource := l.loadResource(product, baseResourcePath, overrideYamlPath)
-		resources = append(resources, resource)
+		full := filepath.Join(product.PackagePath, base)
+		c, err := fs.ReadFile(l.baseFS, full)
+		if err != nil {
+			return nil, fmt.Errorf("cannot read base file %q: %v", full, err)
+		}
+		p, ok := resourceContents[base]
+		if !ok {
+			resourceContents[base] = &contents{base: c}
+		} else {
+			p.base = c
+		}
 	}
-
+	for name, c := range resourceContents {
+		resources = append(resources, l.loadResource(product, name, c))
+	}
 	// Sort resources by name for consistent output
-	sort.Slice(resources, func(i, j int) bool {
-		return resources[i].Name < resources[j].Name
+	slices.SortFunc(resources, func(a, b *api.Resource) int {
+		return strings.Compare(a.Name, b.Name)
 	})
 
 	return resources, nil
 }
 
 // loadResource loads a single resource with optional override
-func (l *Loader) loadResource(product *api.Product, baseResourcePath string, overrideResourcePath string) *api.Resource {
+func (l *Loader) loadResource(product *api.Product, name string, c *contents) *api.Resource {
 	resource := &api.Resource{}
+	resource.SourceYamlFile = filepath.Join(product.PackagePath, name)
 
-	// Check if base resource exists
-	baseResourceExists := Exists(l.BaseDirectory, baseResourcePath)
-
-	if baseResourceExists {
-		relPath, _ := filepath.Rel(l.BaseDirectory, baseResourcePath)
-		resource.SourceYamlFile = relPath
-	} else {
-		relPath, _ := filepath.Rel(l.BaseDirectory, overrideResourcePath)
-		resource.SourceYamlFile = relPath
-	}
-
-	if overrideResourcePath != "" {
-		if baseResourceExists {
+	if c.override != nil {
+		if c.base != nil {
 			// Merge base and override
-			api.Compile(baseResourcePath, resource, l.OverrideDirectory)
+			api.CompileContents(c.base, resource, fmt.Sprintf("${BASE}/%s", resource.SourceYamlFile))
 			overrideResource := &api.Resource{}
-			api.Compile(overrideResourcePath, overrideResource, l.OverrideDirectory)
-			api.Merge(reflect.ValueOf(resource).Elem(), reflect.ValueOf(*overrideResource), l.Version)
+			api.CompileContents(c.override, overrideResource, fmt.Sprintf("${OVERRIDE}/%s", resource.SourceYamlFile))
+			api.Merge(reflect.ValueOf(resource).Elem(), reflect.ValueOf(*overrideResource), l.version)
 		} else {
 			// Override only
-			api.Compile(overrideResourcePath, resource, l.OverrideDirectory)
+			api.CompileContents(c.override, resource, fmt.Sprintf("${OVERRIDE}/%s", resource.SourceYamlFile))
 		}
 	} else {
 		// Base only
-		api.Compile(baseResourcePath, resource, l.OverrideDirectory)
-		resource.SourceYamlFile = baseResourcePath
+		api.CompileContents(c.base, resource, fmt.Sprintf("${BASE}/%s", resource.SourceYamlFile))
 	}
 
 	// Set resource defaults and validate
-	resource.TargetVersionName = l.Version
+	resource.TargetVersionName = l.version
 	// SetDefault before AddExtraFields to ensure relevant metadata is available on existing fields
 	resource.SetDefault(product)
 	resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
 	// SetDefault after AddExtraFields to ensure relevant metadata is available for the newly generated fields
 	resource.SetDefault(product)
 	resource.Validate()
-	resource.TestSampleSetUp()
+	resource.TestSampleSetUp(l.OverlayFS)
 
 	for _, e := range resource.Examples {
-		if err := e.LoadHCLText(l.BaseDirectory); err != nil {
+		if err := e.LoadHCLText(l.OverlayFS); err != nil {
 			glog.Exit(err)
 		}
 	}
