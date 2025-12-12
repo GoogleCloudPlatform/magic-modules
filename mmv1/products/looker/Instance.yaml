@@ -120,6 +120,7 @@ virtual_fields:
       nested resources will return an error. Possible values: DEFAULT, FORCE
 custom_code:
   pre_delete: templates/terraform/pre_delete/looker_instance.go.tmpl
+  tgc_decoder: templates/tgc_next/decoders/looker_instance.go.tmpl
 parameters:
   - name: 'region'
     type: String
@@ -416,7 +417,6 @@ properties:
       Looker Instance OAuth login settings.
     ignore_read: true
     required: true
-    custom_tgc_flatten: templates/tgc_next/custom_flatten/looker_instance_oauth_config.go.tmpl
     properties:
       - name: 'clientId'
         type: String
