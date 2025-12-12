@@ -166,6 +166,7 @@ properties:
     properties:
       - name: defaultSquashMode
         type: Enum
+        required: true
         description: |-
           Set to "ROOT_SQUASH" to enable root squashing by default.
           Other values include "NO_SQUASH".
@@ -194,10 +195,12 @@ properties:
               type: String
               description: |-
                 A unique identifier for the access rule.
+              required: true
             - name: ipAddressRanges
               type: Array
               description: |-
                 An array of IP address strings or CIDR ranges that this rule applies to.
+              required: true
               item_type:
                 type: String
             - name: squashMode
@@ -205,5 +208,6 @@ properties:
               description: |-
                 The squash mode for this specific rule. Currently, only "NO_SQUASH"
                 is supported for exceptions.
+              required: true
               enum_values:
                 - 'NO_SQUASH'

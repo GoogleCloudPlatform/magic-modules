@@ -134,30 +134,23 @@ resource "google_lustre_instance" "instance" {
   per_unit_storage_throughput = 1000
   
   access_rules_options {
-    default_squash_mode = "ROOT_SQUASH"
-    default_squash_uid  = 65534
-    default_squash_gid  = 65534
+    default_squash_mode 	  = "ROOT_SQUASH"
     
     access_rules {
-      name = "admin_hosts"
-      ip_address_ranges = [
-        "192.168.0.0/24",
-        "10.0.1.10/32"
-      ]
-      squash_mode = "NO_SQUASH"
+      name 					  = "admin_hosts"
+      ip_address_ranges       = ["192.168.0.0/24","10.0.1.10/32"]
+      squash_mode 			  = "NO_SQUASH"
     }
     
     access_rules {
-      name = "another_admin"
-      ip_address_ranges = [
-        "172.16.5.0/24"
-      ]
-      squash_mode = "NO_SQUASH"
+      name 					  = "another_admin"
+      ip_address_ranges 	  = ["172.16.5.0/24"]
+      squash_mode 			  = "NO_SQUASH"
     }
   }
   
   timeouts {
-    create = "120m"
+    create 					  = "120m"
   }
 }
 
@@ -179,21 +172,19 @@ resource "google_lustre_instance" "instance" {
   per_unit_storage_throughput = 1000
   
   access_rules_options {
-    default_squash_mode = "NO_SQUASH"
-    default_squash_uid  = 0
-    default_squash_gid  = 0
+    default_squash_mode       = "NO_SQUASH"
+    default_squash_uid        = 0
+    default_squash_gid        = 0
     
     access_rules {
-      name = "updated_admin"
-      ip_address_ranges = [
-        "10.0.0.0/8"
-      ]
-      squash_mode = "NO_SQUASH"
+      name                    = "updated_admin"
+      ip_address_ranges       = ["10.0.0.0/8"]
+      squash_mode             = "NO_SQUASH"
     }
   }
   
   timeouts {
-    create = "120m"
+    create 					  = "120m"
   }
 }
 
