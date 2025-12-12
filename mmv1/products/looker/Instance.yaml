@@ -21,6 +21,8 @@ references:
     'Configure a Looker (Google Cloud core) instance': 'https://cloud.google.com/looker/docs/looker-core-instance-setup'
   api: 'https://cloud.google.com/looker/docs/reference/rest/v1/projects.locations.instances'
 docs:
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 base_url: 'projects/{{project}}/locations/{{region}}/instances'
 create_url: 'projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}'
 update_verb: 'PATCH'
@@ -118,6 +120,7 @@ virtual_fields:
       nested resources will return an error. Possible values: DEFAULT, FORCE
 custom_code:
   pre_delete: templates/terraform/pre_delete/looker_instance.go.tmpl
+  tgc_decoder: templates/tgc_next/decoders/looker_instance.go.tmpl
 parameters:
   - name: 'region'
     type: String
