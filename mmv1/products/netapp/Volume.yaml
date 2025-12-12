@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -554,8 +554,10 @@ properties:
           Only applicable to Flex service level.
   - name: 'hybridReplicationParameters'
     type: NestedObject
-    description: |-
-      The Hybrid Replication parameters for the volume.
+    description: |
+      [Volume migration](https://docs.cloud.google.com/netapp/volumes/docs/migrate/ontap/overview) and
+      [external replication](https://docs.cloud.google.com/netapp/volumes/docs/protect-data/replicate-ontap/overview)
+      are two types of Hybrid Replication. This parameter block specifies the parameters for a hybrid replication.
     properties:
       - name: 'replication'
         type: String
@@ -564,25 +566,26 @@ properties:
       - name: 'peerVolumeName'
         type: String
         description: |
-          Required. Name of the user's local source volume to be peered with the destination volume.
+          Required. Name of the ONTAP source volume to be replicated to NetApp Volumes destination volume.
       - name: 'peerClusterName'
         type: String
         description: |
-          Required. Name of the user's local source cluster to be peered with the destination cluster.
+          Required. Name of the ONTAP source cluster to be peered with NetApp Volumes.
       - name: 'peerSvmName'
         type: String
         description: |
-          Required. Name of the user's local source vserver svm to be peered with the destination vserver svm.
+          Required. Name of the ONTAP source vserver SVM to be peered with NetApp Volumes.
       - name: 'peerIpAddresses'
         type: Array
         description: |
-          Required. List of node ip addresses to be peered with.
+          Required. List of all intercluster LIF IP addresses of the ONTAP source cluster.
         item_type:
           type: String
       - name: 'clusterLocation'
         type: String
         description: |
-          Optional. Name of source cluster location associated with the Hybrid replication. This is a free-form field for the display purpose only.
+          Optional. Name of source cluster location associated with the replication. This is a free-form field
+          for display purposes only.
       - name: 'description'
         type: String
         description: |
@@ -603,7 +606,10 @@ properties:
       - name: 'hybridReplicationType'
         type: Enum
         description: |
-          Optional. Type of the volume's hybrid replication.
+          Optional. Type of the hybrid replication. Use `MIGRATION` to create a volume migration
+          and `ONPREM_REPLICATION` to create an external replication.
+          Other values are read-only. `REVERSE_ONPREM_REPLICATION` is used to represent an external
+          replication which got reversed. Default is `MIGRATION`.
         enum_values:
           - 'MIGRATION'
           - 'CONTINUOUS_REPLICATION'
@@ -612,7 +618,7 @@ properties:
       - name: 'largeVolumeConstituentCount'
         type: Integer
         description: |
-          Optional. Constituent volume count for large volume.
+          Optional. If the source is a FlexGroup volume, this field needs to match the number of constituents in the FlexGroup.
   - name: 'throughputMibps'
     type: Double
     description: |
