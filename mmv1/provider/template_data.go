@@ -329,14 +329,31 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 		funcMap[k] = v
 	}
 
-	tmpl, err := template.New(templateFileName).Funcs(funcMap).ParseFiles(templates...)
-	if err != nil {
-		glog.Exit(fmt.Sprintf("error parsing %s for filepath %s ", templateFileName, filePath), err)
+	tmpl := template.New(templateFileName).Funcs(funcMap)
+	var err error // Declare err here
+	for _, tplFile := range templates {
+		content, err_read := os.ReadFile(tplFile) // Use err_read for new var
+		if err_read != nil {
+			glog.Exit(fmt.Sprintf("error reading %s for filepath %s: %v", tplFile, filePath, err_read))
+		}
+
+		name := filepath.Base(tplFile)
+		var tpl *template.Template
+		if name == tmpl.Name() {
+			tpl = tmpl
+		} else {
+			tpl = tmpl.New(name)
+		}
+
+		_, err = tpl.Parse(google.ProcessNoSubstitution(string(content))) // Assign to declared err
+		if err != nil {
+			glog.Exit(fmt.Sprintf("error parsing %s for filepath %s: %v", tplFile, filePath, err))
+		}
 	}
 
 	contents := bytes.Buffer{}
-	if err = tmpl.ExecuteTemplate(&contents, templateFileName, input); err != nil {
-		glog.Exit(fmt.Sprintf("error executing %s for filepath %s ", templateFileName, filePath), err)
+	if err = tmpl.ExecuteTemplate(&contents, templateFileName, input); err != nil { // Assign to declared err
+		glog.Exit(fmt.Sprintf("error executing %s for filepath %s: %v", templateFileName, filePath, err))
 	}
 
 	sourceByte := contents.Bytes()
@@ -345,7 +362,8 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 	}
 
 	if goFormat {
-		formattedByte, err := format.Source(sourceByte)
+		var formattedByte []byte
+		formattedByte, err = format.Source(sourceByte) // Assign to declared err
 		if err != nil {
 			glog.Error(fmt.Errorf("error formatting %s: %s", filePath, err))
 		} else {
@@ -353,7 +371,7 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 		}
 	}
 
-	err = os.WriteFile(filePath, sourceByte, 0644)
+	err = os.WriteFile(filePath, sourceByte, 0644) // Assign to declared err
 	if err != nil {
 		glog.Exit(err)
 	}

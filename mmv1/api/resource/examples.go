@@ -351,15 +351,16 @@ func (e *Examples) ExecuteTemplate(baseDir string) (string, error) {
 	}
 
 	fileContentString := string(templateContent)
+	processedContent := google.ProcessNoSubstitution(fileContentString)
 
 	// Check that any variables in Vars or TestEnvVars used in the example are defined via YAML
 	envVarRegex := regexp.MustCompile(`{{index \$\.TestEnvVars "([a-zA-Z_]*)"}}`)
-	validateRegexForContents(envVarRegex, fileContentString, e.ConfigPath, "test_env_vars", e.TestEnvVars)
+	validateRegexForContents(envVarRegex, processedContent, e.ConfigPath, "test_env_vars", e.TestEnvVars)
 	varRegex := regexp.MustCompile(`{{index \$\.Vars "([a-zA-Z_]*)"}}`)
-	validateRegexForContents(varRegex, fileContentString, e.ConfigPath, "vars", e.Vars)
+	validateRegexForContents(varRegex, processedContent, e.ConfigPath, "vars", e.Vars)
 
 	templateFileName := filepath.Base(e.ConfigPath)
-	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).Parse(fileContentString)
+	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).Parse(processedContent)
 	if err != nil {
 		return "", err
 	}

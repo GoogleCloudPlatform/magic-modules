@@ -25,10 +25,12 @@ userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 		obj["firewallPolicy"] = firewallPolicyProp
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}locations/global/firewallPolicies/{{"{{"}}firewall_policy{{"}}"}}/addAssociation?replaceExistingAssociation=true")
+  // begin:no_variable_substitution
+	url, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}/locations/global/firewallPolicies/{{firewall_policy}}/addAssociation?replaceExistingAssociation=true")
 	if err != nil {
 		return err
 	}
+  // end:no_variable_substitution
 
 	log.Printf("[DEBUG] Updating FirewallPolicyAssociation %q: %#v", d.Id(), obj)
 	headers := make(http.Header)

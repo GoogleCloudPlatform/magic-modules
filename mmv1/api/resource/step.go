@@ -234,18 +234,19 @@ func (s *Step) ExecuteTemplate() string {
 	}
 
 	fileContentString := string(templateContent)
+	processedContent := google.ProcessNoSubstitution(fileContentString)
 
 	// Check that any variables in PrefixedVars, Vars or TestEnvVars used in the step are defined via YAML
 	envVarRegex := regexp.MustCompile(`{{index \$\.TestEnvVars "([a-zA-Z_]*)"}}`)
-	validateRegexForContents(envVarRegex, fileContentString, s.ConfigPath, "test_env_vars", s.TestEnvVars)
+	validateRegexForContents(envVarRegex, processedContent, s.ConfigPath, "test_env_vars", s.TestEnvVars)
 	varRegex := regexp.MustCompile(`{{index \$\.Vars "([a-zA-Z_]*)"}}`)
-	validateRegexForContents(varRegex, fileContentString, s.ConfigPath, "vars", s.Vars)
+	validateRegexForContents(varRegex, processedContent, s.ConfigPath, "vars", s.Vars)
 	prefixedVarRegex := regexp.MustCompile(`{{index \$\.PrefixedVars "([a-zA-Z_]*)"}}`)
-	validateRegexForContents(prefixedVarRegex, fileContentString, s.ConfigPath, "prefixed_vars", s.PrefixedVars)
+	validateRegexForContents(prefixedVarRegex, processedContent, s.ConfigPath, "prefixed_vars", s.PrefixedVars)
 
 	templateFileName := filepath.Base(s.ConfigPath)
 
-	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).Parse(fileContentString)
+	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).Parse(processedContent)
 	if err != nil {
 		glog.Exit(err)
 	}
