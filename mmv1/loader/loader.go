@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"sort"
+	"strings"
 	"sync"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
@@ -243,6 +243,10 @@ func (l *Loader) loadResources(product *api.Product) ([]*api.Resource, error) {
 			return nil, err
 		}
 	}
+	// Sort resources by name for consistent output
+	slices.SortFunc(resources, func(a, b *api.Resource) int {
+		return strings.Compare(a.Name, b.Name)
+	})
 
 	return resources, nil
 }
@@ -266,11 +270,6 @@ func (l *Loader) reconcileOverrideResources(product *api.Product, resources []*a
 		resource := l.loadResource(product, baseResourcePath, overrideYamlPath)
 		resources = append(resources, resource)
 	}
-
-	// Sort resources by name for consistent output
-	sort.Slice(resources, func(i, j int) bool {
-		return resources[i].Name < resources[j].Name
-	})
 
 	return resources, nil
 }
