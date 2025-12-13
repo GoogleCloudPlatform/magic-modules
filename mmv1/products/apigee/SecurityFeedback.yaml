@@ -40,7 +40,6 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
-    skip_vcr: true
     external_providers: ["time"]
 parameters:
   - name: 'orgId'
