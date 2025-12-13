@@ -323,6 +323,7 @@ properties:
     description: |
       Scaling settings that apply to the whole service
     default_from_api: true
+    diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
     properties:
       - name: 'minInstanceCount'
         type: Integer
