@@ -53,14 +53,14 @@ to time, you may end up with stale files or changes in your downstream that caus
 &lt;p&gt;This page documents all properties for metadata. Metadata does not impact the provider itself, but is used by Google internally for coverage metrics.&lt;/p&gt;
 &lt;h2 id="required"&gt;Required&lt;a class="anchor" href="#required"&gt;#&lt;/a&gt;&lt;/h2&gt;
 &lt;h3 id="resource"&gt;&lt;code&gt;resource&lt;/code&gt;&lt;a class="anchor" href="#resource"&gt;#&lt;/a&gt;&lt;/h3&gt;
-&lt;p&gt;The name of the Terraform resource e.g., &amp;ldquo;google_cloudfunctions2_function&amp;rdquo;.&lt;/p&gt;
+&lt;p&gt;The name of the Terraform resource. For example, &amp;ldquo;google_cloudfunctions2_function&amp;rdquo;.&lt;/p&gt;
 &lt;h3 id="generation_type"&gt;&lt;code&gt;generation_type&lt;/code&gt;&lt;a class="anchor" href="#generation_type"&gt;#&lt;/a&gt;&lt;/h3&gt;
-&lt;p&gt;The generation method used to create the Terraform resource e.g., &amp;ldquo;mmv1&amp;rdquo;, &amp;ldquo;dcl&amp;rdquo;, &amp;ldquo;handwritten&amp;rdquo;.&lt;/p&gt;
+&lt;p&gt;The generation method used to create the Terraform resource. For example, &amp;ldquo;mmv1&amp;rdquo;, &amp;ldquo;dcl&amp;rdquo;, &amp;ldquo;handwritten&amp;rdquo;.&lt;/p&gt;
 &lt;h2 id="optional"&gt;Optional&lt;a class="anchor" href="#optional"&gt;#&lt;/a&gt;&lt;/h2&gt;
 &lt;h3 id="api_service_name"&gt;&lt;code&gt;api_service_name&lt;/code&gt;&lt;a class="anchor" href="#api_service_name"&gt;#&lt;/a&gt;&lt;/h3&gt;
-&lt;p&gt;The base name of the API used for this resource e.g., &amp;ldquo;cloudfunctions.googleapis.com&amp;rdquo;.&lt;/p&gt;
+&lt;p&gt;The base name of the API used for this resource. For example, &amp;ldquo;cloudfunctions.googleapis.com&amp;rdquo;.&lt;/p&gt;
 &lt;h3 id="api_version"&gt;&lt;code&gt;api_version&lt;/code&gt;&lt;a class="anchor" href="#api_version"&gt;#&lt;/a&gt;&lt;/h3&gt;
-&lt;p&gt;The version of the API used for this resource e.g., &amp;ldquo;v2&amp;rdquo;.&lt;/p&gt;</description></item><item><title>Ruby to Go Migration</title><link>https://googlecloudplatform.github.io/magic-modules/reference/ruby-go-changes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/ruby-go-changes/</guid><description>&lt;h1 id="what-has-changed-in-the-mmv1-go-migration"&gt;What has changed in the MMv1 Go migration&lt;a class="anchor" href="#what-has-changed-in-the-mmv1-go-migration"&gt;#&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;The version of the API used for this resource. For example, &amp;ldquo;v2&amp;rdquo;.&lt;/p&gt;</description></item><item><title>Ruby to Go Migration</title><link>https://googlecloudplatform.github.io/magic-modules/reference/ruby-go-changes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/ruby-go-changes/</guid><description>&lt;h1 id="what-has-changed-in-the-mmv1-go-migration"&gt;What has changed in the MMv1 Go migration&lt;a class="anchor" href="#what-has-changed-in-the-mmv1-go-migration"&gt;#&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;The Magic Modules code generator has been rewritten from Ruby to Go. For experienced contributors, this reference document lists what the expected changes are to the previous development workflow in Ruby.&lt;/p&gt;
 &lt;h2 id="yaml-changes"&gt;YAML changes&lt;a class="anchor" href="#yaml-changes"&gt;#&lt;/a&gt;&lt;/h2&gt;
 &lt;p&gt;&lt;code&gt;.yaml&lt;/code&gt; files within &lt;code&gt;mmv1/products&lt;/code&gt; have had adjustments to the attribute typing. The initial Ruby lines &lt;code&gt;!ruby/object:Api::Type::&amp;lt;TYPE&amp;gt;&lt;/code&gt; have been removed and replaced with a simpler &lt;code&gt;type: &amp;lt;TYPE&amp;gt;&lt;/code&gt; line.&lt;/p&gt;

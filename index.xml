@@ -330,14 +330,14 @@ Presubmit VCR tests do not run in GA. Manual testing is required for promoted GA
 &lt;p&gt;This page documents all properties for metadata. Metadata does not impact the provider itself, but is used by Google internally for coverage metrics.&lt;/p&gt;
 &lt;h2 id="required"&gt;Required&lt;a class="anchor" href="#required"&gt;#&lt;/a&gt;&lt;/h2&gt;
 &lt;h3 id="resource"&gt;&lt;code&gt;resource&lt;/code&gt;&lt;a class="anchor" href="#resource"&gt;#&lt;/a&gt;&lt;/h3&gt;
-&lt;p&gt;The name of the Terraform resource e.g., &amp;ldquo;google_cloudfunctions2_function&amp;rdquo;.&lt;/p&gt;
+&lt;p&gt;The name of the Terraform resource. For example, &amp;ldquo;google_cloudfunctions2_function&amp;rdquo;.&lt;/p&gt;
 &lt;h3 id="generation_type"&gt;&lt;code&gt;generation_type&lt;/code&gt;&lt;a class="anchor" href="#generation_type"&gt;#&lt;/a&gt;&lt;/h3&gt;
-&lt;p&gt;The generation method used to create the Terraform resource e.g., &amp;ldquo;mmv1&amp;rdquo;, &amp;ldquo;dcl&amp;rdquo;, &amp;ldquo;handwritten&amp;rdquo;.&lt;/p&gt;
+&lt;p&gt;The generation method used to create the Terraform resource. For example, &amp;ldquo;mmv1&amp;rdquo;, &amp;ldquo;dcl&amp;rdquo;, &amp;ldquo;handwritten&amp;rdquo;.&lt;/p&gt;
 &lt;h2 id="optional"&gt;Optional&lt;a class="anchor" href="#optional"&gt;#&lt;/a&gt;&lt;/h2&gt;
 &lt;h3 id="api_service_name"&gt;&lt;code&gt;api_service_name&lt;/code&gt;&lt;a class="anchor" href="#api_service_name"&gt;#&lt;/a&gt;&lt;/h3&gt;
-&lt;p&gt;The base name of the API used for this resource e.g., &amp;ldquo;cloudfunctions.googleapis.com&amp;rdquo;.&lt;/p&gt;
+&lt;p&gt;The base name of the API used for this resource. For example, &amp;ldquo;cloudfunctions.googleapis.com&amp;rdquo;.&lt;/p&gt;
 &lt;h3 id="api_version"&gt;&lt;code&gt;api_version&lt;/code&gt;&lt;a class="anchor" href="#api_version"&gt;#&lt;/a&gt;&lt;/h3&gt;
-&lt;p&gt;The version of the API used for this resource e.g., &amp;ldquo;v2&amp;rdquo;.&lt;/p&gt;</description></item><item><title>Add IAM support</title><link>https://googlecloudplatform.github.io/magic-modules/develop/add-iam-support/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/add-iam-support/</guid><description>&lt;h1 id="add-iam-support"&gt;Add IAM support&lt;a class="anchor" href="#add-iam-support"&gt;#&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;The version of the API used for this resource. For example, &amp;ldquo;v2&amp;rdquo;.&lt;/p&gt;</description></item><item><title>Add IAM support</title><link>https://googlecloudplatform.github.io/magic-modules/develop/add-iam-support/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/add-iam-support/</guid><description>&lt;h1 id="add-iam-support"&gt;Add IAM support&lt;a class="anchor" href="#add-iam-support"&gt;#&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;This page covers how to add IAM resources in Terraform if they are supported by a particular API resource (indicated by
 &lt;code&gt;setIamPolicy&lt;/code&gt; and &lt;code&gt;getIamPolicy&lt;/code&gt; methods in the API documentation for the resource).&lt;/p&gt;
 &lt;p&gt;For more information about types of resources and the generation process overall, see &lt;a href="https://googlecloudplatform.github.io/magic-modules/"&gt;How Magic Modules works&lt;/a&gt;.&lt;/p&gt;
