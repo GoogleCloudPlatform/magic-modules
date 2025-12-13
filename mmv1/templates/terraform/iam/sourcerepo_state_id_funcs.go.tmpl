@@ -11,7 +11,7 @@ func generateSourceRepoRepositoryIAMPolicyStateID(iamResourceAddr string) func(*
 		fmt.Printf("raw state %s\n", rawState)
 		project := tpgresource.GetResourceNameFromSelfLink(rawState["project"])
 		repository := repositoryShortName(rawState["repository"])
-		return fmt.Sprintf("projects/%s/repos/%s", project, repository) + acctest.ConditionTitleIfPresent(rawState), nil
+		return acctest.BuildIAMImportId(fmt.Sprintf("projects/%s/repos/%s", project, repository), "", "", rawState["condition.0.title"]), nil
 	}
 }
 
@@ -28,7 +28,7 @@ func generateSourceRepoRepositoryIAMBindingStateID(iamResourceAddr string) func(
 		fmt.Printf("raw state %s\n", rawState)
 		project := tpgresource.GetResourceNameFromSelfLink(rawState["project"])
 		repository := repositoryShortName(rawState["repository"])
-		return fmt.Sprintf("projects/%s/repos/%s %s", project, repository, rawState["role"]) + acctest.ConditionTitleIfPresent(rawState), nil
+		return acctest.BuildIAMImportId(fmt.Sprintf("projects/%s/repos/%s", project, repository), rawState["role"], "", rawState["condition.0.title"]), nil
 	}
 }
 
@@ -45,7 +45,7 @@ func generateSourceRepoRepositoryIAMMemberStateID(iamResourceAddr string) func(*
 		fmt.Printf("raw state %s\n", rawState)
 		project := tpgresource.GetResourceNameFromSelfLink(rawState["project"])
 		repository := repositoryShortName(rawState["repository"])
-		return fmt.Sprintf("projects/%s/repos/%s %s %s", project, repository, rawState["role"], rawState["member"]) + acctest.ConditionTitleIfPresent(rawState), nil
+		return acctest.BuildIAMImportId(fmt.Sprintf("projects/%s/repos/%s", project, repository), rawState["role"], rawState["member"], rawState["condition.0.title"]), nil
 	}
 }
 
