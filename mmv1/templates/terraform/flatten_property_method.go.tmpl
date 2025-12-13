@@ -19,7 +19,7 @@
 {{- else -}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
   {{- if or (and $.IgnoreRead (not $.ResourceMetadata.IsTgcCompiler)) $.ClientSide }}
-  return d.Get("{{ $.TerraformLineage }}")
+  return d.Get("{{ join $.Lineage ".0." }}")
   {{- else if $.IsA "NestedObject" }}
   if v == nil {
     return nil
@@ -109,7 +109,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
   }
 
   transformed := make(map[string]interface{})
-  if l, ok := d.GetOkExists("{{ $.TerraformLineage }}"); ok {
+  if l, ok := d.GetOkExists("{{ join $.Lineage ".0." }}"); ok {
     for k := range l.(map[string]interface{}) {
       transformed[k] = v.(map[string]interface{})[k]
     }

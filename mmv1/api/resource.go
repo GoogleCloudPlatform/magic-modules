@@ -765,7 +765,7 @@ func (r Resource) LeafProperties() []*Type {
 
 	// Sort types by lineage
 	slices.SortFunc(types, func(a, b *Type) int {
-		if a.MetadataLineage() < b.MetadataLineage() {
+		if strings.Join(a.Lineage(), ".") < strings.Join(b.Lineage(), ".") {
 			return -1
 		}
 		return 1
@@ -855,7 +855,7 @@ func (r *Resource) attachConstraintGroup(groupType string, source []string) *[]s
 }
 
 func buildWriteOnlyField(name string, versionFieldName string, originalField *Type) *Type {
-	originalFieldLineage := originalField.TerraformLineage()
+	originalFieldLineage := strings.Join(originalField.Lineage(), ".0.")
 	newFieldLineage := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(name))
 	requiredWith := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(versionFieldName))
 
@@ -907,7 +907,7 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 
 func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField *Type) *Type {
 	description := fmt.Sprintf("Triggers update of `%s` write-only. Increment this value when an update to `%s` is needed. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)", google.Underscore(writeOnlyField.Name), google.Underscore(writeOnlyField.Name))
-	requiredWith := strings.ReplaceAll(originalField.TerraformLineage(), google.Underscore(originalField.Name), google.Underscore(writeOnlyField.Name))
+	requiredWith := strings.ReplaceAll(strings.Join(originalField.Lineage(), ".0."), google.Underscore(originalField.Name), google.Underscore(writeOnlyField.Name))
 
 	options := []func(*Type){
 		propertyWithType("Int"),
@@ -1069,7 +1069,7 @@ func (r Resource) IgnoreReadLabelsFields(props []*Type) []string {
 		if p.IsA("KeyValueLabels") ||
 			p.IsA("KeyValueTerraformLabels") ||
 			p.IsA("KeyValueAnnotations") {
-			fields = append(fields, p.TerraformLineage())
+			fields = append(fields, strings.Join(p.Lineage(), ".0."))
 		} else if p.IsA("NestedObject") && len(p.AllProperties()) > 0 {
 			fields = google.Concat(fields, r.IgnoreReadLabelsFields(p.AllProperties()))
 		}
@@ -1466,7 +1466,7 @@ func ignoreReadFields(props []*Type) []string {
 	var fields []string
 	for _, tp := range props {
 		if tp.IgnoreRead && !tp.UrlParamOnly && !tp.IsA("ResourceRef") {
-			fields = append(fields, tp.TerraformLineage())
+			fields = append(fields, strings.Join(tp.Lineage(), ".0."))
 		} else if tp.IsA("NestedObject") && tp.AllProperties() != nil {
 			fields = append(fields, ignoreReadFields(tp.AllProperties())...)
 		}
@@ -2546,13 +2546,13 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 		"timeouts",
 	}
 	for _, tp := range r.VirtualFields {
-		props = append(props, tp.MetadataLineage())
+		props = append(props, strings.Join(tp.Lineage(), "."))
 	}
 	for _, tp := range r.AllNestedProperties(r.RootProperties()) {
 		if tp.UrlParamOnly {
 			props = append(props, google.Underscore(tp.Name))
 		} else if tp.IsMissingInCai || tp.IgnoreRead || tp.ClientSide || tp.WriteOnlyLegacy {
-			props = append(props, tp.MetadataLineage())
+			props = append(props, strings.Join(tp.Lineage(), "."))
 		}
 	}
 
