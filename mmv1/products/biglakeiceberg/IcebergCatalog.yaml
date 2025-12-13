@@ -18,18 +18,38 @@ description: |
 references:
   guides:
     'Use the BigLake metastore Iceberg REST catalog': 'https://docs.cloud.google.com/biglake/docs/blms-rest-catalog'
-base_url: 'restcatalog/extensions/projects/{{project}}/catalogs'
-self_link: 'restcatalog/extensions/projects/{{project}}/catalogs/{{name}}'
+docs:
+  warning: |
+    If you are using User ADCs (Application Default Credentials) with this resource's IAM,
+    you must specify a `billing_project` and set `user_project_override` to true
+    in the provider configuration. Otherwise the IAM API will return 403s.
+    Your account must have the `serviceusage.services.use` permission on the
+    `billing_project` you defined.
+supports_indirect_user_project_override: true
+base_url: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs'
+self_link: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs/{{name}}'
 immutable: false
-create_url: 'restcatalog/extensions/projects/{{project}}/catalogs?iceberg-catalog-id={{name}}'
+create_url: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs?iceberg-catalog-id={{name}}'
 custom_code:
   custom_update:
     templates/terraform/custom_update/biglake_iceberg_catalog_update.go.tmpl
+iam_policy:
+  base_url: 'v1/projects/{{project}}/catalogs/{{name}}'
+  parent_resource_attribute: 'name'
+  method_name_separator: ":"
+  fetch_iam_policy_verb: 'GET'
+  import_format:
+    - 'projects/{{project}}/catalogs/{{name}}'
+    - '{{name}}'
+  allowed_iam_role: 'roles/biglake.editor'
 examples:
   - name: 'biglake_iceberg_catalog'
     primary_resource_id: 'my_iceberg_catalog'
     vars:
       name: 'my_iceberg_catalog'
+    test_env_vars:
+      GOOGLE_BILLING_PROJECT: 'PROJECT'
+      USER_PROJECT_OVERRIDE: 'true'
 parameters:
   - name: 'name'
     type: String
