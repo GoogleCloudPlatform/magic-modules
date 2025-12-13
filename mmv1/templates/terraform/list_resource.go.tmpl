@@ -12,6 +12,22 @@
   # See the License for the specific language governing permissions and
   # limitations under the License.
 */}}
+
+package {{ lower $.ProductMetadata.Name }}
+
+import (
+	"context"
+
+	cloudrun "cloud.google.com/go/run/apiv2/runpb" // This shouldn't be from the cloud pkg but instead an internal package within magicmodules (e.g tpgresource/...)
+	"github.com/hashicorp/terraform-plugin-framework/list"
+	listschema "github.com/hashicorp/terraform-plugin-framework/list/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"google.golang.org/api/iterator"
+
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+)
+
 var _ tpgresource.ListResourceWithRawV5Schemas = &{{ $.ResourceName -}}ListResource{}
 
 type {{ $.ResourceName -}}ListResource struct {
@@ -43,7 +59,13 @@ func (r *{{ $.ResourceName -}}ListResource) ListResourceConfigSchema(ctx context
 			"{{ $identity.Name }}": listschema.StringAttribute{
 				Optional: true,
 			},
-            {{- end }}
+            {{- end }},
+			~> we need logic to determine whether we can add filter support here or not
+			<!-- {{ if or (not $.ExcludeFilter) ($.CustomFilter) -}} -->
+			"filter": listschema.StringAttribute{
+				Optional: true,
+			},
+			<!-- {{ end }} -->
 		},
 	}
 }
@@ -53,6 +75,40 @@ type {{ $.ResourceName -}}ListModel struct {
 	{{ $identity.Name }} string `tfsdk:"{{ $identity.Name }}"`
     {{- end }}
 }
+
+{{ if $.CustomListMethod }}
+	{{ $.CustomTemplate $.CustomListMethod false -}}
+{{ else }}
+	func List{{ $.ResourceName -}}s(ctx context.Context, req list.ListRequest) {
+		client := r.Client.New{{ $.ResourceName -}}sClient(r.Client.UserAgent)
+
+		listReq := {{lower $.ProductMetadata.Name }}.List{{ $.Name -}}sRequest{
+			{{if $.NonParent }}
+			Parent: {{ $.ParentResourceName}},
+			{{else}}
+			{{- range $identity := $.IdentityProperties }}
+			{{ $identity.Name }}: data.{{ $identity.Name }},
+			{{- end }}
+			{{ if not (or $.ExcludeFilter $.CustomFilter) -}}
+			Filter: data.Filter
+			{{ end }}
+			{{ end }}
+		}
+
+		it := client.List{{ $.Name -}}s(ctx, &listReq)
+
+		for {
+			resp, err := it.Next()
+			if err == iterator.Done {
+				break
+			} else if err != nil {
+				diags.AddError("API Error", err.Error())
+				break
+			}
+
+		}
+	}
+{{ end }}
 
 func (r *{{ $.ResourceName -}}ListResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
 	var data {{ $.ResourceName -}}ListModel
@@ -66,25 +122,8 @@ func (r *{{ $.ResourceName -}}ListResource) List(ctx context.Context, req list.L
 
 
 	stream.Results = func(push func(list.ListResult) bool) {
-		client := r.Client.New{{ $.ResourceName -}}sClient(r.Client.UserAgent)
 
-		listReq := {{lower $.ProductMetadata.Name }}.List{{ $.Name -}}sRequest{		
-			{{- range $identity := $.IdentityProperties }}
-			{{ $identity.Name }},
-			{{- end }}
-		}
-
-		it := client.List{{ $.Name -}}s(ctx, &listReq)
-
-
-		for {
-			resp, err := it.Next()
-			if err == iterator.Done {
-				break
-			} else if err != nil {
-				diags.AddError("API Error", err.Error())
-				break
-			}
+		LIST METHOD (func(){
 
 			result := req.NewListResult(ctx)
 			result.DisplayName = resp.Name
@@ -120,6 +159,8 @@ func (r *{{ $.ResourceName -}}ListResource) List(ctx context.Context, req list.L
 					break
 				}
 			}
+			
+		)}
+
 		stream.Results = list.ListResultsStreamDiagnostics(diags)
 	}
-}
