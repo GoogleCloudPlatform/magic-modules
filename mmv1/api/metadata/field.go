@@ -1,7 +1,10 @@
 package metadata
 
 import (
+	"strings"
+
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
 
 func FromProperties(props []*api.Type) []Field {
@@ -11,11 +14,13 @@ func FromProperties(props []*api.Type) []Field {
 			Json:         p.IsJsonField(),
 			ProviderOnly: p.ProviderOnly(),
 		}
+		lineage := p.Lineage()
+		apiLineage := p.ApiLineage()
 		if !p.ProviderOnly() {
-			f.ApiField = p.MetadataApiLineage()
+			f.ApiField = strings.Join(apiLineage, ".")
 		}
-		if p.ProviderOnly() || p.MetadataLineage() != p.MetadataDefaultLineage() {
-			f.Field = p.MetadataLineage()
+		if p.ProviderOnly() || !IsDefaultLineage(lineage, apiLineage) {
+			f.Field = strings.Join(lineage, ".")
 		}
 		fields = append(fields, f)
 	}
@@ -35,4 +40,19 @@ type Field struct {
 	// If true, this is a JSON field which "covers" all child API fields. As a special case, JSON fields which cover an entire resource can
 	// have `api_field` set to `*`.
 	Json bool `yaml:"json,omitempty"`
+}
+
+// Returns true if the lineage is the default we'd expect for a field, and false otherwise.
+// If any ancestor has a non-default lineage, this will return false.
+func IsDefaultLineage(lineage, apiLineage []string) bool {
+	if len(lineage) != len(apiLineage) {
+		return false
+	}
+	for i, part := range lineage {
+		apiPart := apiLineage[i]
+		if part != google.Underscore(apiPart) {
+			return false
+		}
+	}
+	return true
 }

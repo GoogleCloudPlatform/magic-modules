@@ -81,3 +81,70 @@ func TestFromProperties(t *testing.T) {
 		})
 	}
 }
+
+func TestIsDefaultLineage(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		name       string
+		lineage    []string
+		apiLineage []string
+		want       bool
+	}{
+		{
+			name:       "empty",
+			lineage:    []string{},
+			apiLineage: []string{},
+			want:       true,
+		},
+		{
+			name:       "single field",
+			lineage:    []string{"foo_bar"},
+			apiLineage: []string{"fooBar"},
+			want:       true,
+		},
+		{
+			name:       "multiple fields",
+			lineage:    []string{"foo_bar", "baz_moo"},
+			apiLineage: []string{"fooBar", "bazMoo"},
+			want:       true,
+		},
+		{
+			name:       "longer lineage",
+			lineage:    []string{"foo_bar", "baz_moo"},
+			apiLineage: []string{"fooBar"},
+			want:       false,
+		},
+		{
+			name:       "longer apiLineage",
+			lineage:    []string{"foo_bar"},
+			apiLineage: []string{"fooBar", "bazMoo"},
+			want:       false,
+		},
+		{
+			name:       "parent override",
+			lineage:    []string{"foo_bar", "baz_moo"},
+			apiLineage: []string{"otherName", "bazMoo"},
+			want:       false,
+		},
+		{
+			name:       "child override",
+			lineage:    []string{"foo_bar", "baz_moo"},
+			apiLineage: []string{"fooBar", "otherName"},
+			want:       false,
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := IsDefaultLineage(tc.lineage, tc.apiLineage)
+			if got != tc.want {
+				t.Errorf("IsDefaultLineage(%s) failed; want %t, got %t", tc.name, tc.want, got)
+			}
+		})
+	}
+}
