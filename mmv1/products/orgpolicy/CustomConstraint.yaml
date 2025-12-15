@@ -39,7 +39,7 @@ examples:
     vars:
       policy_name: 'custom.disableGkeAutoUpgrade'
     test_env_vars:
-      org_id: 'ORG_ID'
+      org_id: 'ORG_TARGET'
     test_vars_overrides:
       'policy_name': '"custom.tfTestDisableGkeAutoUpgrade" + acctest.RandString(t, 10)'
   - name: 'org_policy_custom_constraint_full'

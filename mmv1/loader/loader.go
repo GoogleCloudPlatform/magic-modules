@@ -282,6 +282,14 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 	// Check if base resource exists
 	baseResourceExists := Exists(l.BaseDirectory, baseResourcePath)
 
+	if baseResourceExists {
+		relPath, _ := filepath.Rel(l.BaseDirectory, baseResourcePath)
+		resource.SourceYamlFile = relPath
+	} else {
+		relPath, _ := filepath.Rel(l.BaseDirectory, overrideResourcePath)
+		resource.SourceYamlFile = relPath
+	}
+
 	if overrideResourcePath != "" {
 		if baseResourceExists {
 			// Merge base and override
@@ -289,7 +297,6 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 			overrideResource := &api.Resource{}
 			api.Compile(overrideResourcePath, overrideResource, l.OverrideDirectory)
 			api.Merge(reflect.ValueOf(resource).Elem(), reflect.ValueOf(*overrideResource), l.Version)
-			resource.SourceYamlFile = baseResourcePath
 		} else {
 			// Override only
 			api.Compile(overrideResourcePath, resource, l.OverrideDirectory)

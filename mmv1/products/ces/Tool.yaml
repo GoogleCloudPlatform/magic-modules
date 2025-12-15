@@ -103,6 +103,41 @@ properties:
         type: NestedObject
         description: Represents a select subset of an OpenAPI 3.0 schema object.
         properties:
+          - name: additionalProperties
+            type: String
+            description: |-
+              Defines the schema for additional properties allowed in an object.
+              The value must be a valid JSON string representing the Schema object.
+              (Note: OpenAPI also allows a boolean, this definition expects a Schema JSON).
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: anyOf
+            type: String
+            description: The instance value should be valid against at least
+              one of the schemas in this list.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: default
+            description: |-
+              Default value of the data. Represents a dynamically typed value
+              which can be either null, a number, a string, a boolean, a struct,
+              or a list of values. The provided default value must be compatible
+              with the defined 'type' and other schema constraints.
+          - name: defs
+            type: String
+            description: A map of definitions for use by ref. Only allowed at the root
+              of the schema.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
           - name: description
             type: String
             description: The description of the data.
@@ -117,9 +152,45 @@ properties:
               {type:INTEGER, format:enum, enum:["101", "201", "301"]}
             item_type:
               type: String
+          - name: items
+            type: String
+            description: Schema of the elements of Type.ARRAY.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: maxItems
+            type: Integer
+            description: Maximum number of the elements for Type.ARRAY. (int64 format)
+          - name: maximum
+            type: Double
+            description: Maximum value for Type.INTEGER and Type.NUMBER.
+          - name: minItems
+            type: Integer
+            description: Minimum number of the elements for Type.ARRAY. (int64 format)
+          - name: minimum
+            type: Double
+            description: Minimum value for Type.INTEGER and Type.NUMBER.
           - name: nullable
             type: Boolean
             description: Indicates if the value may be null.
+          - name: prefixItems
+            type: String
+            description: Schemas of initial elements of Type.ARRAY.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: properties
+            type: String
+            description: Properties of Type.OBJECT.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
           - name: ref
             type: String
             description: |-
@@ -146,6 +217,9 @@ properties:
             description: Required properties of Type.OBJECT.
             item_type:
               type: String
+          - name: title
+            type: String
+            description: The title of the schema.
           - name: type
             type: String
             description: |-
@@ -162,79 +236,45 @@ properties:
             type: Boolean
             description: Indicate the items in the array must be unique. Only applies
               to TYPE.ARRAY.
-          - name: defs
-            type: String
-            description: A map of definitions for use by ref. Only allowed at the root
-              of the schema.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-              return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-            validation:
-              function: 'validation.StringIsJSON'
-          - name: default
-            description: |-
-              Optional. Default value of the data. Represents a dynamically typed value
-              which can be either null, a number, a string, a boolean, a struct,
-              or a list of values. The provided default value must be compatible
-              with the defined 'type' and other schema constraints.
-            required: false
-          - name: additionalProperties
-            type: String
-            description: |-
-              Optional. Defines the schema for additional properties allowed in an object.
-              The value must be a valid JSON string representing the Schema object.
-              (Note: OpenAPI also allows a boolean, this definition expects a Schema JSON).
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-              return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-            validation:
-              function: 'validation.StringIsJSON'
-            required: false
-          - name: anyOf
-            type: String
-            description: Optional. The instance value should be valid against at least
-              one of the schemas in this list.
-            required: false
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-              return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-            validation:
-              function: 'validation.StringIsJSON'
-          - name: prefixItems
-            type: String
-            description: Optional. Schemas of initial elements of Type.ARRAY.
-            required: false
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-              return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-            validation:
-              function: 'validation.StringIsJSON'
-          - name: properties
-            type: String
-            description: Properties of Type.OBJECT.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-              return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-            validation:
-              function: 'validation.StringIsJSON'
-          - name: items
-            type: String
-            description: Schema of the elements of Type.ARRAY.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-              return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-            validation:
-              function: 'validation.StringIsJSON'
       - name: response
         type: NestedObject
         description: Represents a select subset of an OpenAPI 3.0 schema object.
         properties:
+          - name: additionalProperties
+            type: String
+            description: |-
+              Defines the schema for additional properties allowed in an object.
+              The value must be a valid JSON string representing the Schema object.
+              (Note: OpenAPI also allows a boolean, this definition expects a Schema JSON).
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: anyOf
+            type: String
+            description: The instance value should be valid against at least
+              one of the schemas in this list.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: default
+            description: |-
+              Default value of the data. Represents a dynamically typed value
+              which can be either null, a number, a string, a boolean, a struct,
+              or a list of values. The provided default value must be compatible
+              with the defined 'type' and other schema constraints.
+          - name: defs
+            type: String
+            description: A map of definitions for use by ref. Only allowed at the root
+              of the schema.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
           - name: description
             type: String
             description: The description of the data.
@@ -249,9 +289,45 @@ properties:
               {type:INTEGER, format:enum, enum:["101", "201", "301"]}
             item_type:
               type: String
+          - name: items
+            type: String
+            description: Schema of the elements of Type.ARRAY.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: maxItems
+            type: Integer
+            description: Maximum number of the elements for Type.ARRAY. (int64 format)
+          - name: maximum
+            type: Double
+            description: Maximum value for Type.INTEGER and Type.NUMBER.
+          - name: minItems
+            type: Integer
+            description: Minimum number of the elements for Type.ARRAY. (int64 format)
+          - name: minimum
+            type: Double
+            description: Minimum value for Type.INTEGER and Type.NUMBER.
           - name: nullable
             type: Boolean
             description: Indicates if the value may be null.
+          - name: prefixItems
+            type: String
+            description: Schemas of initial elements of Type.ARRAY.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
+          - name: properties
+            type: String
+            description: Properties of Type.OBJECT.
+            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+            validation:
+              function: 'validation.StringIsJSON'
           - name: ref
             type: String
             description: |-
@@ -278,6 +354,9 @@ properties:
             description: Required properties of Type.OBJECT.
             item_type:
               type: String
+          - name: title
+            type: String
+            description: The title of the schema.
           - name: type
             type: String
             description: |-
@@ -294,75 +373,6 @@ properties:
             type: Boolean
             description: Indicate the items in the array must be unique. Only applies
               to TYPE.ARRAY.
-          - name: defs
-            type: String
-            description: A map of definitions for use by ref. Only allowed at the root
-              of the schema.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-              return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-            validation:
-              function: 'validation.StringIsJSON'
-          - name: default
-            description: |-
-              Optional. Default value of the data. Represents a dynamically typed value
-              which can be either null, a number, a string, a boolean, a struct,
-              or a list of values. The provided default value must be compatible
-              with the defined 'type' and other schema constraints.
-            required: false
-          - name: additionalProperties
-            type: String
-            description: |-
-              Optional. Defines the schema for additional properties allowed in an object.
-              The value must be a valid JSON string representing the Schema object.
-              (Note: OpenAPI also allows a boolean, this definition expects a Schema JSON).
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-              return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-            validation:
-              function: 'validation.StringIsJSON'
-            required: false
-          - name: anyOf
-            type: String
-            description: Optional. The instance value should be valid against at least
-              one of the schemas in this list.
-            required: false
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-              return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-            validation:
-              function: 'validation.StringIsJSON'
-          - name: prefixItems
-            type: String
-            description: Optional. Schemas of initial elements of Type.ARRAY.
-            required: false
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-              return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-            validation:
-              function: 'validation.StringIsJSON'
-          - name: properties
-            type: String
-            description: Properties of Type.OBJECT.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-              return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-            validation:
-              function: 'validation.StringIsJSON'
-          - name: items
-            type: String
-            description: Schema of the elements of Type.ARRAY.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-              return s }'
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-            custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-            validation:
-              function: 'validation.StringIsJSON'
   - name: createTime
     type: String
     description: Timestamp when the tool was created.
@@ -705,6 +715,14 @@ properties:
       See
       https://cloud.google.com/vertex-ai/generative-ai/docs/grounding/grounding-with-google-search.
     properties:
+      - name: contextUrls
+        type: Array
+        description: |-
+          Content will be fetched directly from these URLs for context and grounding.
+          More details: https://cloud.google.com/vertex-ai/generative-ai/docs/url-context.
+          Example: "https://example.com/path.html". A maximum of 20 URLs are allowed.
+        item_type:
+          type: String
       - name: description
         type: String
         description: Description of the tool's purpose.
@@ -720,6 +738,18 @@ properties:
         type: String
         description: The name of the tool.
         required: true
+      - name: preferredDomains
+        type: Array
+        description: |-
+          Specifies domain names to guide the search.
+          The model will be instructed to prioritize these domains
+          when formulating queries for google search.
+          This is a best-effort hint and these domains may or may
+          not be exclusively reflected in the final search results.
+          Example: "example.com", "another.site".
+          A maximum of 20 domains can be specified.
+        item_type:
+          type: String
   - name: name
     type: String
     description: |-
@@ -765,6 +795,15 @@ properties:
                   Possible values:
                   HEADER
                   QUERY_STRING
+                output: true
+          - name: bearerTokenConfig
+            type: NestedObject
+            description: Configurations for authentication with a bearer token.
+            output: true
+            properties:
+              - name: token
+                type: String
+                description: The bearer token. Must be in the format $context.variables.<name_of_variable>.
                 output: true
           - name: oauthConfig
             type: NestedObject
@@ -877,7 +916,7 @@ properties:
             description: |-
               Specifies a list of allowed custom CA certificates for HTTPS
               verification.
-            required: true
+            output: true
             item_type:
               type: NestedObject
               properties:
