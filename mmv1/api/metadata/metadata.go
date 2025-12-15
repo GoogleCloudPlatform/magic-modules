@@ -2,6 +2,7 @@ package metadata
 
 import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
 
 // FromResource returns a Metadata object based on a Resource.
@@ -16,7 +17,7 @@ func FromResource(r api.Resource) Metadata {
 		CaiAssetNameFormat:  r.CAIFormatOverride(),
 		ApiVariantPatterns:  r.ApiVariantPatterns,
 		AutogenStatus:       r.AutogenStatus != "",
-		Fields:              FromProperties(r.LeafProperties()),
+		Fields:              FromProperties(r.AllNestedProperties(google.Concat(r.RootProperties(), r.UserVirtualFields()))),
 	}
 
 	if m.ApiVersion == "" {
