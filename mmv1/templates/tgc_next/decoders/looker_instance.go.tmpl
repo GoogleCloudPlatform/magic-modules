@@ -12,11 +12,13 @@
 */ -}}
 // oauthConfig is required in Terraform but ignore_read (missing in CAI or input-only).
 // We inject dummy values so conversion doesn't fail on "missing required argument".
-if _, ok := res["oauthConfig"]; !ok {
-	res["oauthConfig"] = map[string]interface{}{
-		"clientId":     "hidden",
-		"clientSecret": "hidden",
-	}
+if v, ok := res["oauthConfig"].(map[string]interface{}); ok {
+    if len(v) == 0 {
+        res["oauthConfig"] = map[string]interface{}{
+            "clientId":     "hidden",
+            "clientSecret": "hidden",
+        }
+    }
 }
 
 return res, hclData, nil
