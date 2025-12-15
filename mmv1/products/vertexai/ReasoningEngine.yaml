@@ -28,7 +28,7 @@ update_mask: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
-  delete_minutes: 20
+  delete_minutes: 60
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -38,6 +38,11 @@ async:
     resource_inside_response: true
 examples:
   - name: 'vertex_ai_reasoning_engine_basic'
+    primary_resource_id: 'reasoning_engine'
+    exclude_docs: true
+    vars:
+      name: 'reasoning-engine'
+  - name: 'vertex_ai_reasoning_engine_source_based_deployment'
     primary_resource_id: 'reasoning_engine'
     exclude_docs: true
     vars:
@@ -67,7 +72,7 @@ properties:
     type: String
     description: |-
       The generated name of the ReasoningEngine, in the format
-      'projects/{project}/locations/{location}/reasoningEngines/{reasoningEngine}'
+      projects/{project}/locations/{location}/reasoningEngines/{reasoningEngine}
     output: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'displayName'
@@ -86,22 +91,25 @@ properties:
   - name: 'updateTime'
     type: String
     description: |-
-      The timestamp of when the Index was last updated in RFC3339 UTC "Zulu" format,
-      with nanosecond resolution and up to nine fractional digits.
+      The timestamp of when the Index was last updated in RFC3339 UTC "Zulu"
+      format, with nanosecond resolution and up to nine fractional digits.
     output: true
   - name: 'encryptionSpec'
     type: NestedObject
     description: |-
       Optional. Customer-managed encryption key spec for a ReasoningEngine.
-      If set, this ReasoningEngine and all sub-resources of this ReasoningEngine will be secured by this key.
+      If set, this ReasoningEngine and all sub-resources of this ReasoningEngine
+      will be secured by this key.
     immutable: true
     properties:
       - name: 'kmsKeyName'
         type: String
         description: |-
-          Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
-          Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key.
-          The key needs to be in the same region as where the compute resource is created.
+          Required. The Cloud KMS resource identifier of the customer managed
+          encryption key used to protect a resource. Has the form:
+          projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key.
+          The key needs to be in the same region as where the compute resource
+          is created.
         required: true
   - name: 'spec'
     type: NestedObject
@@ -110,10 +118,13 @@ properties:
     properties:
       - name: 'agentFramework'
         type: String
-        description: Optional. The OSS agent framework used to develop the agent.
+        description: |
+          Optional. The OSS agent framework used to develop the agent.
       - name: 'classMethods'
         type: String
-        description: Optional. Declarations for object class methods in OpenAPI specification format.
+        description: |
+          Optional. Declarations for object class methods in OpenAPI
+          specification format.
         state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
         custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
         custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
@@ -127,7 +138,8 @@ properties:
           - name: 'env'
             type: Array
             description: |-
-              Optional. Environment variables to be set with the Reasoning Engine deployment.
+              Optional. Environment variables to be set with the Reasoning
+              Engine deployment.
             is_set: true
             item_type:
               type: NestedObject
@@ -135,17 +147,28 @@ properties:
                 - name: 'name'
                   type: String
                   description: |-
-                    The name of the environment variable. Must be a valid C identifier.
+                    The name of the environment variable. Must be a valid
+                    C identifier.
                   required: true
                 - name: 'value'
                   type: String
                   description: |-
-                    Variables that reference a $(VAR_NAME) are expanded using the previous defined environment variables in the container and any service environment variables. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not.
+                    Variables that reference a $(VAR_NAME) are expanded using
+                    the previous defined environment variables in the container
+                    and any service environment variables. If a variable cannot
+                    be resolved, the reference in the input string will be
+                    unchanged. The $(VAR_NAME) syntax can be escaped with a
+                    double $$, ie: $$(VAR_NAME). Escaped references will never
+                    be expanded, regardless of whether the variable exists
+                    or not.
                   required: true
           - name: 'secretEnv'
             type: Array
             description: |-
-              Optional. Environment variables where the value is a secret in Cloud Secret Manager. To use this feature, add 'Secret Manager Secret Accessor' role (roles/secretmanager.secretAccessor) to AI Platform Reasoning Engine service Agent.
+              Optional. Environment variables where the value is a secret in
+              Cloud Secret Manager. To use this feature, add 'Secret Manager
+              Secret Accessor' role (roles/secretmanager.secretAccessor) to AI
+              Platform Reasoning Engine service Agent.
             is_set: true
             item_type:
               type: NestedObject
@@ -153,23 +176,64 @@ properties:
                 - name: 'name'
                   type: String
                   description: |-
-                    The name of the environment variable. Must be a valid C identifier.
+                    The name of the environment variable. Must be a valid C
+                    identifier.
                   required: true
                 - name: 'secretRef'
                   type: NestedObject
                   description: |-
-                    Reference to a secret stored in the Cloud Secret Manager that will provide the value for this environment variable.
+                    Reference to a secret stored in the Cloud Secret Manager
+                    that will provide the value for this environment variable.
                   required: true
                   properties:
                     - name: 'secret'
                       type: String
                       description: |-
-                        The name of the secret in Cloud Secret Manager. Format: {secret_name}.
+                        The name of the secret in Cloud Secret Manager.
+                        Format: {secret_name}.
                       required: true
                     - name: 'version'
                       type: String
                       description: |-
-                        The Cloud Secret Manager secret version. Can be 'latest' for the latest version, an integer for a specific version, or a version alias.
+                        The Cloud Secret Manager secret version. Can be 'latest'
+                        for the latest version, an integer for a specific
+                        version, or a version alias.
+          - name: 'resourceLimits'
+            type: KeyValuePairs
+            default_from_api: true
+            description: |-
+              Optional. Resource limits for each container.
+              Only 'cpu' and 'memory' keys are supported.
+
+              Defaults to {"cpu": "4", "memory": "4Gi"}.
+
+              The only supported values for CPU are '1', '2', '4', '6' and '8'.
+              For more information, go to
+              https://cloud.google.com/run/docs/configuring/cpu.
+
+              The only supported values for memory are '1Gi', '2Gi', ... '32 Gi'.
+              For more information, go to
+              https://cloud.google.com/run/docs/configuring/memory-limits.
+          - name: 'minInstances'
+            type: 'Integer'
+            description: |
+              Optional. The maximum number of application instances that can be
+              launched to handle increased traffic. Defaults to 100.
+              Range: [1, 1000]. If VPC-SC or PSC-I is enabled, the acceptable
+              range is [1, 100].
+            default_from_api: true
+          - name: 'maxInstances'
+            type: 'Integer'
+            description: |
+              Optional. The minimum number of application instances that will be
+              kept running at all times. Defaults to 1. Range: [0, 10].
+            default_from_api: true
+          - name: 'containerConcurrency'
+            type: 'Integer'
+            description: |
+              Optional. Concurrency for each container and agent server.
+              Recommended value: 2 * cpu + 1. Defaults to 9.
+            default_from_api: true
       - name: 'packageSpec'
         type: NestedObject
         description: |-
@@ -180,20 +244,74 @@ properties:
         properties:
           - name: 'dependencyFilesGcsUri'
             type: String
-            description: Optional. The Cloud Storage URI of the dependency files in tar.gz format.
+            description: |
+              Optional. The Cloud Storage URI of the dependency files in tar.gz
+              format.
           - name: 'pickleObjectGcsUri'
             type: String
-            description: Optional. The Cloud Storage URI of the pickled python object.
+            description: |
+              Optional. The Cloud Storage URI of the pickled python object.
           - name: 'pythonVersion'
             type: String
-            description: Optional. The Python version.
+            description: |
+              Optional. The Python version. Currently support 3.8, 3.9, 3.10,
+              3.11, 3.12, 3.13. If not specified, default value is 3.10.
           - name: 'requirementsGcsUri'
             type: String
-            description: Optional. The Cloud Storage URI of the requirements.txt file
+            description: |
+              Optional. The Cloud Storage URI of the requirements.txtfile
+      - name: 'sourceCodeSpec'
+        type: NestedObject
+        description: |-
+          Specification for deploying from source code.
+        properties:
+          - name: 'inlineSource'
+            type: NestedObject
+            description: Source code is provided directly in the request.
+            ignore_read: true
+            properties:
+              - name: 'sourceArchive'
+                type: String
+                description: |
+                  Required. Input only.
+                  The application source code archive, provided as a compressed
+                  tarball (.tar.gz) file. A base64-encoded string.
+                ignore_read: true
+          - name: 'pythonSpec'
+            type: NestedObject
+            description: |-
+              Specification for running a Python application from source.
+            properties:
+              - name: 'entrypointModule'
+                type: String
+                description: |
+                  Optional. The Python module to load as the entrypoint,
+                  specified as a fully qualified module name. For example:
+                  path.to.agent. If not specified, defaults to "agent".
+                  The project root will be added to Python sys.path, allowing
+                  imports to be specified relative to the root.
+              - name: 'entrypointObject'
+                type: String
+                description: |
+                  Optional. The name of the callable object within the
+                  entrypointModule to use as the application If not specified,
+                  defaults to "root_agent".
+              - name: 'requirementsFile'
+                type: String
+                description: |
+                  Optional. The path to the requirements file, relative to the
+                  source root. If not specified, defaults to "requirements.txt".
+              - name: 'version'
+                type: String
+                description: |
+                  Optional. The version of Python to use. Support version
+                  includes 3.9, 3.10, 3.11, 3.12, 3.13. If not specified,
+                  default value is 3.10.
       - name: 'serviceAccount'
         type: String
         description: |-
-          Optional. The service account that the Reasoning Engine artifact runs as.
-          It should have "roles/storage.objectViewer" for reading the user project's
-          Cloud Storage and "roles/aiplatform.user" for using Vertex extensions.
-          If not specified, the Vertex AI Reasoning Engine service Agent in the project will be used.
+          Optional. The service account that the Reasoning Engine artifact runs
+          as. It should have "roles/storage.objectViewer" for reading the user
+          project's Cloud Storage and "roles/aiplatform.user" for using Vertex
+          extensions. If not specified, the Vertex AI Reasoning Engine service
+          Agent in the project will be used.

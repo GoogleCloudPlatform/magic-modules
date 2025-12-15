@@ -518,11 +518,9 @@ properties:
       Used when customer would like to encrypt data at rest. The customer-provided key will be used
       to encrypt the Subject, SubjectAltNames and PEM-encoded certificate fields. When unspecified,
       customer data will remain unencrypted.
-    immutable: true
     properties:
       - name: 'cloudKmsKey'
         type: String
         description: |
           The resource name for an existing Cloud KMS key in the format
           `projects/*/locations/*/keyRings/*/cryptoKeys/*`.
-        immutable: true
