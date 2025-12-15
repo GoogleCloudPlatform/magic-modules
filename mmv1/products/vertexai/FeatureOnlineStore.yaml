@@ -145,7 +145,6 @@ properties:
           - name: 'zone'
             type: String
             description: The zone where the Bigtable instance will be created.
-            required: true
   - name: 'optimized'
     type: NestedObject
     description:
