@@ -251,6 +251,7 @@ properties:
               - 'password'
               - 'password_wo'
             sensitive: true
+            is_missing_in_cai: true
             custom_flatten: 'templates/terraform/custom_flatten/uptime_check_http_password.tmpl'
           - name: 'passwordWo'
             type: String

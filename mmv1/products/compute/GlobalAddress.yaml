@@ -104,6 +104,7 @@ properties:
     description: |
       The IP Version that will be used by this address. The default value is `IPV4`.
     diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("IPV4")'
+    is_missing_in_cai: true
     enum_values:
       - 'IPV4'
       - 'IPV6'

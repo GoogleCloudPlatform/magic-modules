@@ -199,6 +199,7 @@ properties:
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         sensitive: true
+        is_missing_in_cai: true
       - name: 'rsaEncryptedKey'
         type: String
         description: |
@@ -206,6 +207,7 @@ properties:
           customer-supplied encryption key to either encrypt or decrypt
           this resource. You can provide either the rawKey or the rsaEncryptedKey.
         sensitive: true
+        is_missing_in_cai: true
       - name: 'sha256'
         type: String
         description: |

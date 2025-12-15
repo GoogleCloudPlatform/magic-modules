@@ -199,6 +199,7 @@ properties:
         description: |
           When true, write the subscription name, messageId, publishTime, attributes, and orderingKey to additional columns in the table.
           The subscription name, messageId, and publishTime fields are put in their own columns while all other message properties (other than data) are written to a JSON object in the attributes column.
+        is_missing_in_cai: true
       - name: 'dropUnknownFields'
         type: Boolean
         description: |
