@@ -373,6 +373,7 @@ properties:
               Pub/Sub message attributes to `<KEY>:<VAL>` headers of the HTTP request.
             required: true
             send_empty_value: true
+            is_missing_in_cai: true
   - name: 'ackDeadlineSeconds'
     type: Integer
     description: |
