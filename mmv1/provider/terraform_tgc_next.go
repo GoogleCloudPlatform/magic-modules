@@ -353,9 +353,8 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 	if object.ProductMetadata == nil {
 		return nil
 	}
-	product := object.ProductMetadata
-	productName := google.Underscore(product.Name)
-	resourceFullName := fmt.Sprintf("%s_%s", productName, google.Underscore(object.Name))
+	productName := strings.ToLower(tgc.Product.Name)
+	resourceFullName := tgc.ResourceGoFilename(*object)
 	handwrittenTestFilePath := fmt.Sprintf("third_party/terraform/services/%s/resource_%s_test.go", productName, resourceFullName)
 	data, err := os.ReadFile(handwrittenTestFilePath)
 	for err != nil {
@@ -395,6 +394,42 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 	object.TGCTests = append(object.TGCTests, tests...)
 
 	return nil
+}
+
+// Similar to FullResourceName, but override-aware to prevent things like ending in _test.
+// Non-Go files should just use FullResourceName.
+func (tgc *TerraformGoogleConversionNext) ResourceGoFilename(object api.Resource) string {
+	// early exit if no override is set
+	if object.FilenameOverride == "" {
+		return tgc.FullResourceName(object)
+	}
+
+	resName := object.FilenameOverride
+
+	var productName string
+	if tgc.Product.LegacyName != "" {
+		productName = tgc.Product.LegacyName
+	} else {
+		productName = google.Underscore(tgc.Product.Name)
+	}
+
+	return fmt.Sprintf("%s_%s", productName, resName)
+}
+
+func (tgc *TerraformGoogleConversionNext) FullResourceName(object api.Resource) string {
+	// early exit- resource-level legacy names override the product too
+	if object.LegacyName != "" {
+		return strings.Replace(object.LegacyName, "google_", "", 1)
+	}
+
+	var productName string
+	if tgc.Product.LegacyName != "" {
+		productName = tgc.Product.LegacyName
+	} else {
+		productName = google.Underscore(tgc.Product.Name)
+	}
+
+	return fmt.Sprintf("%s_%s", productName, google.Underscore(object.Name))
 }
 
 // Generates the list of resources, and gets the count of resources.
