@@ -22,7 +22,10 @@ resource "google_project_service" "servicenetworking" {
   service = "servicenetworking.googleapis.com"
   depends_on = [google_project_service.apigee]
 }
-
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_project_service.servicenetworking]
+}
 resource "google_project_service" "compute" {
   project = google_project.project.project_id
   service = "compute.googleapis.com"
