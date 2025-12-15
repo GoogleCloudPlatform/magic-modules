@@ -63,7 +63,7 @@ func TestAccVertexAIIndexEndpoint_psc_automation_config(t *testing.T) {
 				ResourceName:            "google_vertex_ai_index_endpoint.index_endpoint",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "region", "labels", "terraform_labels", "private_service_connect_config.0.psc_automation_configs",},
+				ImportStateVerifyIgnore: []string{"etag", "region", "labels", "terraform_labels", "private_service_connect_config.0.psc_automation_configs"},
 			},
 		},
 	})
