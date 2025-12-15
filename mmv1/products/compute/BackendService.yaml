@@ -363,6 +363,7 @@ properties:
                   field can only be used for a global or regional backend service with the
                   loadBalancingScheme set to <code>EXTERNAL_MANAGED</code>,
                   <code>INTERNAL_MANAGED</code> <code>INTERNAL_SELF_MANAGED</code>.
+                is_missing_in_cai: true
               - name: 'dryRun'
                 type: Boolean
                 required: true
@@ -569,6 +570,7 @@ properties:
     type: NestedObject
     description: 'Cloud CDN configuration for this BackendService.'
     default_from_api: true
+    is_missing_in_cai: true
     properties:
       - name: 'requestCoalescing'
         type: Boolean
