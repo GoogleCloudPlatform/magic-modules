@@ -678,7 +678,7 @@ func (r Resource) SensitivePropsToString() string {
 	var props []string
 
 	for _, prop := range r.SensitiveProps() {
-		props = append(props, fmt.Sprintf("`%s`", prop.Lineage()))
+		props = append(props, fmt.Sprintf("`%s`", strings.Join(prop.Lineage(), ".")))
 	}
 
 	return strings.Join(props, ", ")
@@ -688,7 +688,7 @@ func (r Resource) WriteOnlyPropsToString() string {
 	var props []string
 
 	for _, prop := range r.WriteOnlyProps() {
-		props = append(props, fmt.Sprintf("`%s`", prop.Lineage()))
+		props = append(props, fmt.Sprintf("`%s`", strings.Join(prop.Lineage(), ".")))
 	}
 
 	return strings.Join(props, ", ")
