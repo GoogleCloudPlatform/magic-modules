@@ -1937,34 +1937,93 @@ func retryWhileIncompatibleOperation(timeout time.Duration, lockKey string, f fu
 }
 
 func nodePoolAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta any) error {
-	// 1. Get ANP State
-	oldProfile, newProfile := diff.GetChange("network_config.0.accelerator_network_profile")
-	newProfileStr := newProfile.(string)
-	oldProfileStr := oldProfile.(string)
-	
-	anpIsActive := newProfileStr != ""
-	anpIsChanging := oldProfileStr != newProfileStr
+	log.Printf("[DEBUG] ANP CustomizeDiff: Running...")
 
-	// 2. Check strict Raw Config (Did the user type the additional block?)
+	// 1. SKIP ON CREATE
+	if diff.Id() == "" {
+		log.Printf("[DEBUG] ANP CustomizeDiff: SKIP - Resource is being created (no ID).")
+		return nil
+	}
+
+	// 2. DETECT USER CONFIG
+	userHasAdditionalConfigs := false
 	rawConfig := diff.GetRawConfig()
-	userConfig := rawConfig.GetAttr("network_config").GetAttr("additional_node_network_configs")
-	userHasConfig := !userConfig.IsNull() && userConfig.LengthInt() > 0
+	rawNetworkConfig := rawConfig.GetAttr("network_config")
 
-	// Logic: If the user did NOT provide a config, we might need to intervene.
-	if !userHasConfig {
-		
-		// Case 1: User is enabling ANP (Manual -> Auto).
-		// We MUST force empty to avoid API conflict ("Cannot have both ANP and Additional").
-		// We only do this if ANP is *changing* to avoid permadiffs on future runs.
+	if !rawNetworkConfig.IsNull() {
+		if rawNetworkConfig.Type().IsCollectionType() {
+			it := rawNetworkConfig.ElementIterator()
+			for it.Next() {
+				_, val := it.Element()
+				userConfig := val.GetAttr("additional_node_network_configs")
+				if !userConfig.IsNull() && userConfig.LengthInt() > 0 {
+					userHasAdditionalConfigs = true
+					break
+				}
+			}
+		}
+	}
+
+	// 3. LOGIC CHECK
+	shouldClear := false
+
+	oldProfile, newProfile := diff.GetChange("network_config.0.accelerator_network_profile")
+	anpIsActive := newProfile.(string) != ""
+	anpIsChanging := oldProfile.(string) != newProfile.(string)
+
+	if !userHasAdditionalConfigs {
 		if anpIsActive && anpIsChanging {
-			diff.SetNew("network_config.0.additional_node_network_configs", []interface{}{})
+			shouldClear = true
+		}
+		if !anpIsActive {
+			shouldClear = true
+		}
+	}
+
+	// Check the OLD state to avoid "Plan Not Empty" on defaults
+	currentCount := 0
+	if c, ok := diff.Get("network_config.0.additional_node_network_configs.#").(int); ok {
+		currentCount = c
+	}
+
+	log.Printf("[DEBUG] ANP CustomizeDiff: ANALYSIS: ID=%s, UserHasConfig=%v, ANP=%v, CurrentCount=%d",
+		diff.Id(), userHasAdditionalConfigs, anpIsActive, currentCount)
+
+	if shouldClear {
+		if currentCount == 0 {
+			log.Printf("[DEBUG] ANP CustomizeDiff: ACTION SKIPPED - Config is already empty (Count is 0). Avoiding drift.")
+			shouldClear = false
+		} else {
+			log.Printf("[DEBUG] ANP CustomizeDiff: ACTION REQUIRED - Sticky value detected (Count is %d). Clearing it.", currentCount)
+		}
+	} else {
+		log.Printf("[DEBUG] ANP CustomizeDiff: NO ACTION - Conditions not met.")
+	}
+
+	// 4. EXECUTE THE FIX
+	if shouldClear {
+		log.Printf("[DEBUG] ANP CustomizeDiff: EXECUTING FIX - Rewriting network_config block...")
+		var newConfigMap map[string]interface{}
+		existingConfigs := diff.Get("network_config").([]interface{})
+
+		if len(existingConfigs) > 0 && existingConfigs[0] != nil {
+			currentMap := existingConfigs[0].(map[string]interface{})
+			newConfigMap = make(map[string]interface{})
+			for k, v := range currentMap {
+				newConfigMap[k] = v
+			}
+		} else {
+			newConfigMap = make(map[string]interface{})
 		}
 
-		// Case 2: User is NOT using ANP (Manual -> None).
-		// We MUST force empty to fix the "Sticky" Optional+Computed bug.
-		// Since ANP is off, there are no API defaults to protect, so this is safe.
+		newConfigMap["additional_node_network_configs"] = []interface{}{}
 		if !anpIsActive {
-			diff.SetNew("network_config.0.additional_node_network_configs", []interface{}{})
+			newConfigMap["accelerator_network_profile"] = ""
+		}
+
+		err := diff.SetNew("network_config", []interface{}{newConfigMap})
+		if err != nil {
+			return fmt.Errorf("Error updating network_config: %s", err)
 		}
 	}
 

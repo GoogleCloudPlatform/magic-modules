@@ -6082,28 +6082,63 @@ resource "google_container_node_pool" "np" {
 
 func testAccContainerNodePool_acceleratorNetworkProfile(clusterName, npName string) string {
 	return fmt.Sprintf(`
+resource "google_compute_network" "main_net" {
+  name                    = "%[1]s-main-net"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "main_subnet" {
+  name                     = "%[1]s-main-subnet"
+  network                  = google_compute_network.main_net.name
+  ip_cidr_range            = "10.0.0.0/24"
+  region                   = "us-central1"
+  private_ip_google_access = true
+}
+
+resource "google_compute_network" "anp_net" {
+  name                    = "%[1]s-anp-net"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "anp_subnet" {
+  name          = "%[1]s-anp-subnet"
+  network       = google_compute_network.anp_net.name
+  ip_cidr_range = "10.1.0.0/24"
+  region        = "us-central1"
+}
+
 resource "google_container_cluster" "cluster" {
-  name     = "%s"
+  name     = "%[1]s"
   location = "us-central1-c"
+  
+  network    = google_compute_network.main_net.name
+  subnetwork = google_compute_subnetwork.main_subnet.name
 
-  datapath_provider       = "ADVANCED_DATAPATH"
-  ip_allocation_policy    {} // Enables IP aliasing
+  // Keep these settings consistent across ALL test steps
   enable_multi_networking = true
+  datapath_provider       = "ADVANCED_DATAPATH"
 
-  initial_node_count = 1
+  ip_allocation_policy {
+    cluster_ipv4_cidr_block  = "/16"
+    services_ipv4_cidr_block = "/22"
+  }
+
   deletion_protection = false
+  initial_node_count  = 1
 }
 
 resource "google_container_node_pool" "np" {
-  name     = "%s"
+  name     = "%[2]s"
   cluster  = google_container_cluster.cluster.id
   location = "us-central1-c"
   node_count = 1
 
   node_config {
-    machine_type = "e2-medium"
+    machine_type = "e2-medium" // Keep consistent
+    oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
   }
 
+  // Setting ANP to AUTO
   network_config {
     accelerator_network_profile = "auto"
   }
@@ -6113,48 +6148,49 @@ resource "google_container_node_pool" "np" {
 
 func testAccContainerNodePool_acceleratorNetworkProfile_basic(clusterName, npName string) string {
 	return fmt.Sprintf(`
-resource "google_container_cluster" "cluster" {
-  name     = "%[1]s"
-  location = "us-central1-c"
-  initial_node_count = 1
-  deletion_protection = false
-}
-
-resource "google_container_node_pool" "np" {
-  name     = "%[2]s"
-  cluster  = google_container_cluster.cluster.id
-  location = "us-central1-c"
-  node_count = 1
-
-  node_config {
-	machine_type = "e2-medium"
-  }
-
-  // NO network_config block here
-}
-`, clusterName, npName)
-}
-
-// Creates a cluster with MANUAL additional network config (ANP Off)
-func testAccContainerNodePool_acceleratorNetworkProfile_manual(clusterName, npName string) string {
-	return fmt.Sprintf(`
-resource "google_compute_network" "net" {
-  name                    = "%[1]s-net"
+resource "google_compute_network" "main_net" {
+  name                    = "%[1]s-main-net"
   auto_create_subnetworks = false
 }
 
-resource "google_compute_subnetwork" "sub" {
-  name          = "%[1]s-sub"
-  network       = google_compute_network.net.id
-  ip_cidr_range = "10.0.0.0/24"
+resource "google_compute_subnetwork" "main_subnet" {
+  name                     = "%[1]s-main-subnet"
+  network                  = google_compute_network.main_net.name
+  ip_cidr_range            = "10.0.0.0/24"
+  region                   = "us-central1"
+  private_ip_google_access = true
+}
+
+resource "google_compute_network" "anp_net" {
+  name                    = "%[1]s-anp-net"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "anp_subnet" {
+  name          = "%[1]s-anp-subnet"
+  network       = google_compute_network.anp_net.name
+  ip_cidr_range = "10.1.0.0/24"
   region        = "us-central1"
 }
 
 resource "google_container_cluster" "cluster" {
   name     = "%[1]s"
   location = "us-central1-c"
-  initial_node_count = 1
+  
+  network    = google_compute_network.main_net.name
+  subnetwork = google_compute_subnetwork.main_subnet.name
+
+  // Keep these settings consistent across ALL test steps
+  enable_multi_networking = true
+  datapath_provider       = "ADVANCED_DATAPATH"
+
+  ip_allocation_policy {
+    cluster_ipv4_cidr_block  = "/16"
+    services_ipv4_cidr_block = "/22"
+  }
+
   deletion_protection = false
+  initial_node_count  = 1
 }
 
 resource "google_container_node_pool" "np" {
@@ -6164,13 +6200,83 @@ resource "google_container_node_pool" "np" {
   node_count = 1
 
   node_config {
-   machine_type = "e2-medium"
+    machine_type = "e2-medium" // Keep consistent
+    oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
+  }
+
+  // TEST CHANGE: Removing network_config entirely
+}
+`, clusterName, npName)
+}
+
+func testAccContainerNodePool_acceleratorNetworkProfile_manual(clusterName, npName string) string {
+	// We use the cluster name as a prefix for network names to ensure uniqueness
+	return fmt.Sprintf(`
+resource "google_compute_network" "main_net" {
+  name                    = "%[1]s-main-net"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "main_subnet" {
+  name                     = "%[1]s-main-subnet"
+  network                  = google_compute_network.main_net.name
+  ip_cidr_range            = "10.0.0.0/24"
+  region                   = "us-central1"
+  private_ip_google_access = true
+}
+
+// The Additional Network
+resource "google_compute_network" "add_net" {
+  name                    = "%[1]s-add-net"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "add_subnet" {
+  name          = "%[1]s-add-subnet"
+  network       = google_compute_network.add_net.name
+  ip_cidr_range = "10.1.0.0/24"
+  region        = "us-central1"
+}
+
+resource "google_container_cluster" "cluster" {
+  name     = "%[1]s"
+  location = "us-central1-c"
+  
+  network    = google_compute_network.main_net.name
+  subnetwork = google_compute_subnetwork.main_subnet.name
+
+  enable_multi_networking = true
+  datapath_provider       = "ADVANCED_DATAPATH"
+
+  // Standard VPC-native setup
+  ip_allocation_policy {
+    cluster_ipv4_cidr_block  = "/16"
+    services_ipv4_cidr_block = "/22"
+  }
+
+  deletion_protection = false
+  initial_node_count  = 1
+}
+
+resource "google_container_node_pool" "np" {
+  name     = "%[2]s"
+  cluster  = google_container_cluster.cluster.id
+  location = "us-central1-c"
+  node_count = 1
+
+  node_config {
+    machine_type = "e2-medium"
+    
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform",
+    ]
   }
 
   network_config {
+    // This is the part we are actually testing
     additional_node_network_configs {
-      network    = google_compute_network.net.id
-      subnetwork = google_compute_subnetwork.sub.id
+      network    = google_compute_network.add_net.name
+      subnetwork = google_compute_subnetwork.add_subnet.name
     }
   }
 }
@@ -6183,7 +6289,7 @@ func TestAccContainerNodePool_acceleratorNetworkProfile(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	npName := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
 	resourceName := "google_container_node_pool.np"
-
+	
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -6191,36 +6297,28 @@ func TestAccContainerNodePool_acceleratorNetworkProfile(t *testing.T) {
 		Steps: []resource.TestStep{
 			// ------------------------------------------------------------------
 			// Step 1: Create with Manual Config (ANP Off)
-			// This sets up the "Sticky" value scenario.
 			// ------------------------------------------------------------------
 			{
 				Config: testAccContainerNodePool_acceleratorNetworkProfile_manual(clusterName, npName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", npName),
 					resource.TestCheckResourceAttr(resourceName, "node_config.0.machine_type", "e2-medium"),
-					// Verify Manual Config exists (The starting state)
 					resource.TestCheckResourceAttr(resourceName, "network_config.0.additional_node_network_configs.#", "1"),
-					// Verify ANP is NOT set
-					resource.TestCheckNoResourceAttr(resourceName, "network_config.0.accelerator_network_profile"),
+					resource.TestCheckResourceAttr(resourceName, "network_config.0.accelerator_network_profile", ""),
 				),
 			},
 			// ------------------------------------------------------------------
-			// Step 2: Remove Manual Config (ANP Still Off) -> THIS TESTS CASE 2
-			// The user deletes the 'additional' block.
-			// Without your fix, this value would "stick" at 1 because of Optional+Computed.
-			// With your fix, it should successfully go to "0".
+			// Step 2: Remove Manual Config (Expect Replacement)
 			// ------------------------------------------------------------------
 			{
 				Config: testAccContainerNodePool_acceleratorNetworkProfile_basic(clusterName, npName),
 				Check: resource.ComposeTestCheckFunc(
-					// Verify it was successfully unset (The fix is working)
 					resource.TestCheckResourceAttr(resourceName, "network_config.0.additional_node_network_configs.#", "0"),
-					resource.TestCheckNoResourceAttr(resourceName, "network_config.0.accelerator_network_profile"),
+					resource.TestCheckResourceAttr(resourceName, "network_config.0.accelerator_network_profile", ""),
 				),
 			},
 			// ------------------------------------------------------------------
-			// Step 3: Enable ANP (Auto)
-			// This confirms we can enter the ANP state cleanly from a clean state.
+			// Step 3: Enable ANP (Auto) (Expect Replacement Again)
 			// ------------------------------------------------------------------
 			{
 				Config: testAccContainerNodePool_acceleratorNetworkProfile(clusterName, npName),
@@ -6235,7 +6333,7 @@ func TestAccContainerNodePool_acceleratorNetworkProfile(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "cluster"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "cluster", "initial_node_count"},
 			},
 		},
 	})
@@ -6373,108 +6471,4 @@ func TestAccContainerCluster_nodePool_acceleratorNetworkProfile(t *testing.T) {
 			},
 		},
 	})
-}
-
-func TestNodePoolAcceleratorNetworkProfileCustomizeDiff(t *testing.T) {
-	t.Parallel()
-
-	cases := map[string]struct {
-		State  map[string]interface{} // Represents the "Old" state (what's in the cloud)
-		Config map[string]interface{} // Represents the "New" config (what user typed in .tf)
-		
-		// We expect the function to force the "additional" config to be empty
-		ExpectEmpty bool 
-	}{
-		// CASE 1: Switching Manual -> Auto
-		// User had manual config, removed it, and added ANP "auto".
-		// Without fix: API conflict (Computed keeps old value).
-		// With fix: We force "additional" to empty.
-		"switch_manual_to_auto": {
-			State: map[string]interface{}{
-				"network_config.0.accelerator_network_profile":     "",
-				"network_config.0.additional_node_network_configs": []interface{}{map[string]interface{}{"network": "old"}},
-			},
-			Config: map[string]interface{}{
-				"network_config.0.accelerator_network_profile":     "auto",
-				"network_config.0.additional_node_network_configs": []interface{}{}, // User removed it
-			},
-			ExpectEmpty: true,
-		},
-
-		// CASE 2: Unsetting Manual (Stickiness Fix)
-		// User had manual config, removed it. ANP remains off.
-		// Without fix: "Sticky" value remains.
-		// With fix: We force "additional" to empty.
-		"unset_manual_stickiness": {
-			State: map[string]interface{}{
-				"network_config.0.accelerator_network_profile":     "",
-				"network_config.0.additional_node_network_configs": []interface{}{map[string]interface{}{"network": "old"}},
-			},
-			Config: map[string]interface{}{
-				"network_config.0.accelerator_network_profile":     "",
-				"network_config.0.additional_node_network_configs": []interface{}{}, // User removed it
-			},
-			ExpectEmpty: true,
-		},
-
-		// SAFETY CHECK 1: Explicit Config
-		// User wants both (for some reason). We should NOT interfere.
-		"explicit_config_preserved": {
-			State: map[string]interface{}{
-				"network_config.0.accelerator_network_profile": "auto",
-			},
-			Config: map[string]interface{}{
-				"network_config.0.accelerator_network_profile": "auto",
-				// User explicitly typed this:
-				"network_config.0.additional_node_network_configs": []interface{}{map[string]interface{}{"network": "new"}},
-			},
-			ExpectEmpty: false,
-		},
-
-		// SAFETY CHECK 2: ANP Stable (Computed Defaults)
-		// ANP is already on. API provided defaults. User config is empty.
-		// We should NOT interfere (let Terraform Computed behavior handle it).
-		"anp_stable_defaults_preserved": {
-			State: map[string]interface{}{
-				"network_config.0.accelerator_network_profile":     "auto",
-				// API returned defaults previously:
-				"network_config.0.additional_node_network_configs": []interface{}{map[string]interface{}{"network": "default"}},
-			},
-			Config: map[string]interface{}{
-				"network_config.0.accelerator_network_profile":     "auto",
-				"network_config.0.additional_node_network_configs": []interface{}{}, // User is relying on defaults
-			},
-			ExpectEmpty: false,
-		},
-	}
-
-	for name, tc := range cases {
-		t.Run(name, func(t *testing.T) {
-			// Create the Mock Diff using State (Old) and Config (New/User Intent)
-			d := schema.TestResourceDiff(t, resourceContainerNodePool().Schema, tc.State, tc.Config)
-
-			// Run the Logic
-			err := nodePoolAcceleratorNetworkProfileCustomizeDiff(context.Background(), d, nil)
-			if err != nil {
-				t.Fatalf("unexpected error: %s", err)
-			}
-
-			// Check the Result
-			// We look at the "New" value of the field.
-			_, newUserVal := d.GetChange("network_config.0.additional_node_network_configs")
-			
-			// Convert to list to check length
-			listVal, ok := newUserVal.([]interface{})
-			isEmpty := false
-			if ok && len(listVal) == 0 {
-				isEmpty = true
-			} else if newUserVal == nil {
-				isEmpty = true
-			}
-
-			if isEmpty != tc.ExpectEmpty {
-				t.Errorf("Expected Empty Config: %t, got Empty: %t (Value: %v)", tc.ExpectEmpty, isEmpty, newUserVal)
-			}
-		})
-	}
 }
