@@ -97,19 +97,6 @@ type Sample struct {
 	TGCSkipTest string `yaml:"tgc_skip_test,omitempty"`
 }
 
-// Set default value for fields
-func (s *Sample) UnmarshalYAML(unmarshal func(any) error) error {
-	type sampleAlias Sample
-	aliasObj := (*sampleAlias)(s)
-
-	err := unmarshal(aliasObj)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (s *Sample) TestSampleSlug(productName, resourceName string) string {
 	ret := fmt.Sprintf("%s%s_%sExample", productName, resourceName, google.Camelize(s.Name, "lower"))
 	return ret
