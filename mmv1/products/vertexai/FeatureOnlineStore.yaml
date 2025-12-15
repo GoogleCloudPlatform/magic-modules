@@ -121,7 +121,7 @@ properties:
     properties:
       - name: 'enableDirectBigtableAccess'
         type: Boolean
-        description: 'Optional. It true, enable direct access to the Bigtable instance.'
+        description: 'Optional. If true, enable direct access to the Bigtable instance.'
       - name: 'autoScaling'
         type: NestedObject
         description: Autoscaling config applied to Bigtable Instance.
