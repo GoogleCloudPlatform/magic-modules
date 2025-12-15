@@ -59,14 +59,13 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+properties:
   - name: 'name'
     type: String
     description: |
       The resource name of the Host Group. Needs to be unique per location.
-    url_param_only: true
     required: true
     immutable: true
-properties:
   - name: 'state'
     type: String
     description: |
