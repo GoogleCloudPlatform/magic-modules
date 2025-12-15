@@ -135,6 +135,7 @@ properties:
                     network endpoints in either the primary or additional subnets."
                   item_type:
                     type: String
+                  deprecation_message: '`additionalSubnets` is deprecated and will be removed in a future major release. Managed Kafka Connect clusters can now reach any endpoint accessible from the primary subnet without the need to define additional subnets. Please see https://cloud.google.com/managed-service-for-apache-kafka/docs/connect-cluster/create-connect-cluster#worker-subnet for more information.'
                 - name: 'dnsDomainNames'
                   type: Array
                   description: "Additional DNS domain names from the subnet's network to be made visible to the Connect Cluster. When using

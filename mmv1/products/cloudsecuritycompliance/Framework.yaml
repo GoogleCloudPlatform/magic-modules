@@ -118,6 +118,36 @@ properties:
                   - name: stringValue
                     type: String
                     description: Represents a string value.
+                  - name: oneofValue
+                    type: NestedObject
+                    description: Sub-parameter values.
+                    properties:
+                      - name: name
+                        type: String
+                        description: The name of the parameter.
+                      - name: parameterValue
+                        type: NestedObject
+                        description: The value of the parameter.
+                        properties:
+                          - name: boolValue
+                            type: Boolean
+                            description: Represents a boolean value.
+                          - name: numberValue
+                            type: Double
+                            description: Represents a double value.
+                          - name: stringListValue
+                            type: NestedObject
+                            description: A list of strings.
+                            properties:
+                              - name: values
+                                type: Array
+                                description: The strings in the list.
+                                required: true
+                                item_type:
+                                  type: String
+                          - name: stringValue
+                            type: String
+                            description: Represents a string value.
   - name: description
     type: String
     description: The description of the framework. The maximum length is 2000 characters.
