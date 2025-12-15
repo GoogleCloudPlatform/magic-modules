@@ -65,4 +65,5 @@ tpgtools/serialization.go
 /.ijwb/
 MODULE.bazel.lock
 go.work
-go.work.sumterraform-provider-google/
+go.work.sum
+terraform-provider-google/

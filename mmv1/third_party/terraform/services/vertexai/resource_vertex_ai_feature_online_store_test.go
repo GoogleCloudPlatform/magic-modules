@@ -87,8 +87,11 @@ resource google_vertex_ai_feature_online_store "feature_online_store" {
 func TestAccVertexAIFeatureOnlineStore_bigtable_full(t *testing.T) {
 	t.Parallel()
 
+	kms := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
+
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
+		"kms_key_name":  kms.CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -122,6 +125,9 @@ resource google_vertex_ai_feature_online_store "feature_online_store" {
         }
         enable_direct_bigtable_access = true
         zone = "us-central1-a"
+    }
+    encryption_spec {
+        kms_key_name = "%{kms_key_name}"
     }
     force_destroy = true
 }
