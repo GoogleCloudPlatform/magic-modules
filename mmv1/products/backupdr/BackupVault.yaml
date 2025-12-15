@@ -39,14 +39,27 @@ async:
     resource_inside_response: true
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/backup_dr_backup_vault.go.tmpl'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 examples:
-  - name: 'backup_dr_backup_vault_full'
+  - name: 'backup_dr_backup_vault_simple'
     primary_resource_id: 'backup-vault-test'
     vars:
       backup_vault_id: 'backup-vault-test'
     test_env_vars:
       project: 'PROJECT_NAME'
+  - name: 'backup_dr_backup_vault_cmek'
+    primary_resource_id: 'backup-vault-cmek'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-backupdr.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+    vars:
+      backup_vault_id: 'backup-vault-cmek'
+      kms_key_name: 'bkpvault-key'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    test_vars_overrides:
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 parameters:
   - name: 'location'
     type: String
@@ -192,3 +205,11 @@ properties:
       - 'BACKUP_RETENTION_INHERITANCE_UNSPECIFIED'
       - 'INHERIT_VAULT_RETENTION'
       - 'MATCH_BACKUP_EXPIRE_TIME'
+  - name: 'encryptionConfig'
+    type: NestedObject
+    description: 'Encryption configuration for the backup vault.'
+    properties:
+      - name: 'kmsKeyName'
+        type: String
+        description: 'The Resource name of the Cloud KMS key to be used to encrypt new backups. The key must be in the same location as the backup vault. The key must be a Cloud KMS CryptoKey.'
+        is_missing_in_cai: true

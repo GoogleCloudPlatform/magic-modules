@@ -37,6 +37,7 @@ iam_policy:
   test_project_name: 'tf-test'
   iam_conditions_request_type: 'REQUEST_BODY'
   custom_diff_suppress: 'templates/terraform/iam/iap_web_appengine_diff_suppress.go.tmpl'
+  custom_import_state_id_funcs: 'templates/terraform/iam/iap_web_appengine_state_id_funcs.go.tmpl'
 custom_code:
 exclude_tgc: true
 examples:

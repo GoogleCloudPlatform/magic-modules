@@ -97,7 +97,7 @@ examples:
     min_version: 'beta'
     external_providers: ["time"]
 virtual_fields:
-  - name: 'blockNames'
+  - name: 'block_names'
     type: Array
     description: |
       List of all reservation block names in the parent reservation.

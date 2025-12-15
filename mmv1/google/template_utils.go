@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"text/template"
@@ -54,25 +55,42 @@ func plus(a, b int) int {
 	return a + b
 }
 
-var TemplateFunctions = template.FuncMap{
-	"title":         SpaceSeparatedTitle,
-	"replace":       strings.Replace,
-	"replaceAll":    strings.ReplaceAll,
-	"camelize":      Camelize,
-	"underscore":    Underscore,
-	"plural":        Plural,
-	"contains":      strings.Contains,
-	"join":          strings.Join,
-	"lower":         strings.ToLower,
-	"upper":         strings.ToUpper,
-	"hasSuffix":     strings.HasSuffix,
-	"dict":          wrapMultipleParams,
-	"format2regex":  Format2Regex,
-	"hasPrefix":     strings.HasPrefix,
-	"sub":           subtract,
-	"plus":          plus,
-	"firstSentence": FirstSentence,
-	"trimTemplate":  TrimTemplate,
+var TemplateFunctions = templateFunctions()
+
+func templateFunctions() template.FuncMap {
+	return template.FuncMap{
+		"title":          SpaceSeparatedTitle,
+		"replace":        strings.Replace,
+		"replaceAll":     strings.ReplaceAll,
+		"camelize":       Camelize,
+		"underscore":     Underscore,
+		"plural":         Plural,
+		"contains":       strings.Contains,
+		"join":           strings.Join,
+		"lower":          strings.ToLower,
+		"upper":          strings.ToUpper,
+		"hasSuffix":      strings.HasSuffix,
+		"dict":           wrapMultipleParams,
+		"format2regex":   Format2Regex,
+		"hasPrefix":      strings.HasPrefix,
+		"sub":            subtract,
+		"plus":           plus,
+		"firstSentence":  FirstSentence,
+		"trimTemplate":   TrimTemplate,
+		"customTemplate": executeCustomTemplate,
+	}
+}
+
+func structToPtr(e any) reflect.Value {
+	val := reflect.ValueOf(e)
+	if val.Kind() == reflect.Struct {
+		// If 'e' is a struct (value), create a new pointer to a copy of it.
+		// This allows the template engine to call methods defined on *Type.
+		ptr := reflect.New(val.Type())
+		ptr.Elem().Set(val)
+		return ptr
+	}
+	return val
 }
 
 // Temporary function to simulate how Ruby MMv1's lines() function works
@@ -86,33 +104,13 @@ func TrimTemplate(templatePath string, e any) string {
 
 	// Need to remake TemplateFunctions, referencing it directly here
 	// causes a declaration loop
-	var templateFunctions = template.FuncMap{
-		"title":         SpaceSeparatedTitle,
-		"replace":       strings.Replace,
-		"replaceAll":    strings.ReplaceAll,
-		"camelize":      Camelize,
-		"underscore":    Underscore,
-		"plural":        Plural,
-		"contains":      strings.Contains,
-		"join":          strings.Join,
-		"lower":         strings.ToLower,
-		"upper":         strings.ToUpper,
-		"dict":          wrapMultipleParams,
-		"format2regex":  Format2Regex,
-		"hasPrefix":     strings.HasPrefix,
-		"sub":           subtract,
-		"plus":          plus,
-		"firstSentence": FirstSentence,
-		"trimTemplate":  TrimTemplate,
-	}
-
-	tmpl, err := template.New(templateFileName).Funcs(templateFunctions).ParseFiles(templates...)
+	tmpl, err := template.New(templateFileName).Funcs(templateFunctions()).ParseFiles(templates...)
 	if err != nil {
 		glog.Exit(err)
 	}
 
 	contents := bytes.Buffer{}
-	if err = tmpl.ExecuteTemplate(&contents, templateFileName, e); err != nil {
+	if err = tmpl.ExecuteTemplate(&contents, templateFileName, structToPtr(e)); err != nil {
 		glog.Exit(err)
 	}
 
@@ -126,4 +124,38 @@ func TrimTemplate(templatePath string, e any) string {
 		rs = strings.TrimSuffix(rs, "\n")
 	}
 	return fmt.Sprintf("%s\n", rs)
+}
+
+func executeCustomTemplate(e any, templatePath string, appendNewline bool) string {
+	templates := []string{
+		templatePath,
+		"templates/terraform/expand_resource_ref.tmpl",
+		"templates/terraform/custom_flatten/bigquery_table_ref.go.tmpl",
+		"templates/terraform/flatten_property_method.go.tmpl",
+		"templates/terraform/expand_property_method.go.tmpl",
+		"templates/terraform/update_mask.go.tmpl",
+		"templates/terraform/nested_query.go.tmpl",
+		"templates/terraform/unordered_list_customize_diff.go.tmpl",
+	}
+	templateFileName := filepath.Base(templatePath)
+
+	tmpl, err := template.New(templateFileName).Funcs(templateFunctions()).ParseFiles(templates...)
+	if err != nil {
+		glog.Exit(err)
+	}
+
+	contents := bytes.Buffer{}
+	if err = tmpl.ExecuteTemplate(&contents, templateFileName, structToPtr(e)); err != nil {
+		glog.Exit(err)
+	}
+
+	rs := contents.String()
+
+	if !strings.HasSuffix(rs, "\n") && appendNewline {
+		rs = fmt.Sprintf("%s\n", rs)
+	}
+	if !appendNewline {
+		rs = strings.TrimSuffix(rs, "\n")
+	}
+	return rs
 }

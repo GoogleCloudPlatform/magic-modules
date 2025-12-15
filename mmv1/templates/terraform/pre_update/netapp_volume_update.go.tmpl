@@ -46,6 +46,7 @@ if v, ok := d.GetOk("export_policy"); ok {
                 if val, exists := ruleMapItemSet["allowed_clients"]; exists { newRuleMapItemSet["allowedClients"] = val }
                 if val, exists := ruleMapItemSet["has_root_access"]; exists { newRuleMapItemSet["hasRootAccess"] = val }
                 if val, exists := ruleMapItemSet["nfsv3"]; exists { newRuleMapItemSet["nfsv3"] = val }
+                if val, exists := ruleMapItemSet["nfsv4"]; exists { newRuleMapItemSet["nfsv4"] = val }
                 if val, exists := ruleMapItemSet["kerberos5_read_only"]; exists { newRuleMapItemSet["kerberos5ReadOnly"] = val }
                 if val, exists := ruleMapItemSet["kerberos5_read_write"]; exists { newRuleMapItemSet["kerberos5ReadWrite"] = val }
                 if val, exists := ruleMapItemSet["kerberos5i_read_only"]; exists { newRuleMapItemSet["kerberos5iReadOnly"] = val }
