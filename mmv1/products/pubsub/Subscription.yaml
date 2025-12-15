@@ -278,6 +278,7 @@ properties:
             send_empty_value: true
             description: |
               When true, write the subscription name, messageId, publishTime, attributes, and orderingKey as additional fields in the output.
+            is_missing_in_cai: true
           - name: 'useTopicSchema'
             type: Boolean
             send_empty_value: true
