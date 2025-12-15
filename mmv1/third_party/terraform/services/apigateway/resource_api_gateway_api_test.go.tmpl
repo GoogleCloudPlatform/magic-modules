@@ -2,10 +2,17 @@ package apigateway_test
 {{- if ne $.TargetVersionName "ga" }}
 
 import (
+	"fmt"
 	"testing"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"net/url"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccApiGatewayApi_apigatewayApiBasicExampleUpdated(t *testing.T) {
