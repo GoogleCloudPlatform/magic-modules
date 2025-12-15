@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -500,14 +501,22 @@ func TestAccSpannerInstance_spannerInstanceWithAutoscaling(t *testing.T) {
 }
 
 func TestAccSpannerInstance_freeInstanceBasicUpdate(t *testing.T) {
-	displayName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	context := map[string]interface{}{
+		"random_suffix":  acctest.RandString(t, 10),
+		"org":            envvar.GetTestOrgFromEnv(t),
+		"billingAccount": envvar.GetTestBillingAccountFromEnv(t),
+	}
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckSpannerInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSpannerInstance_freeInstanceBasic(displayName),
+				Config: testAccSpannerInstance_freeInstanceBasic(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_spanner_instance.main", "state"),
 				),
@@ -519,13 +528,52 @@ func TestAccSpannerInstance_freeInstanceBasicUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
-				Config: testAccSpannerInstance_freeInstanceBasicUpdate(displayName),
+				Config: testAccSpannerInstance_freeInstanceBasicUpdate(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_spanner_instance.main", "state"),
 				),
 			},
 			{
 				ResourceName:            "google_spanner_instance.main",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func TestAccSpannerInstance_autoscalingWithTotalCPUUtilizationPercent(t *testing.T) {
+	t.Parallel()
+
+	displayName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSpannerInstance_autoscalingWithTotalCPUUtilizationPercent(displayName, 2000, 4000, 65, 85, 95),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_instance.test", "state"),
+					resource.TestCheckResourceAttr("google_spanner_instance.test", "autoscaling_config.0.autoscaling_targets.0.total_cpu_utilization_percent", "85"),
+				),
+			},
+			{
+				ResourceName:            "google_spanner_instance.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccSpannerInstance_autoscalingWithTotalCPUUtilizationPercent(displayName, 3000, 5000, 75, 90, 95),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_instance.test", "state"),
+					resource.TestCheckResourceAttr("google_spanner_instance.test", "autoscaling_config.0.autoscaling_targets.0.total_cpu_utilization_percent", "90"),
+				),
+			},
+			{
+				ResourceName:            "google_spanner_instance.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
@@ -692,6 +740,7 @@ resource "google_spanner_instance" "basic" {
     }
     autoscaling_targets {
       high_priority_cpu_utilization_percent = %v
+      total_cpu_utilization_percent         = 85
       storage_utilization_percent           = %v
     }
   }
@@ -831,26 +880,90 @@ resource "google_spanner_instance" "example" {
 `, context)
 }
 
-func testAccSpannerInstance_freeInstanceBasic(name string) string {
-	return fmt.Sprintf(`
-resource "google_spanner_instance" "main" {
-  name          = "%s"
-  config        = "regional-europe-west1"
-  display_name  = "%s"
-  instance_type = "FREE_INSTANCE"
-}
-`, name, name)
+func testAccSpannerInstance_freeInstanceBasic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_project" "acceptance" {
+  project_id      = "tf-test-%{random_suffix}"
+  name            = "tf-test-%{random_suffix}"
+  org_id          = "%{org}"
+  billing_account = "%{billingAccount}"
+  deletion_policy = "DELETE"
 }
 
-func testAccSpannerInstance_freeInstanceBasicUpdate(name string) string {
-	return fmt.Sprintf(`
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on      = [google_project.acceptance]
+}
+
+resource "google_project_service" "spanner" {
+  project    = google_project.acceptance.project_id
+  service    = "spanner.googleapis.com"
+  depends_on = [time_sleep.wait_60_seconds]
+}
+
 resource "google_spanner_instance" "main" {
-  name          = "%s"
+  project       = google_project.acceptance.project_id
+  name          = "tf-test-%{random_suffix}"
+  config        = "regional-europe-west1"
+  display_name  = "tf-test-%{random_suffix}"
+  instance_type = "FREE_INSTANCE"
+  depends_on    = [google_project_service.spanner]
+}
+`, context)
+}
+
+func testAccSpannerInstance_freeInstanceBasicUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_project" "acceptance" {
+  project_id      = "tf-test-%{random_suffix}"
+  name            = "tf-test-%{random_suffix}"
+  org_id          = "%{org}"
+  billing_account = "%{billingAccount}"
+  deletion_policy = "DELETE"
+}
+
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on       = [google_project.acceptance]
+}
+
+resource "google_project_service" "spanner" {
+  project    = google_project.acceptance.project_id
+  service    = "spanner.googleapis.com"
+  depends_on = [time_sleep.wait_60_seconds]
+}
+
+resource "google_spanner_instance" "main" {
+  project       = google_project.acceptance.project_id
+  name          = "tf-test-%{random_suffix}"
   config        = "nam-eur-asia3"
-  display_name  = "%s"
+  display_name  = "tf-test-%{random_suffix}"
   edition       = "ENTERPRISE_PLUS"
   instance_type = "PROVISIONED"
   num_nodes     = 1
+  depends_on    = [google_project_service.spanner]
 }
-`, name, name)
+`, context)
+}
+
+func testAccSpannerInstance_autoscalingWithTotalCPUUtilizationPercent(name string, minProcessingUnits, maxProcessingUnits, highPriorityCPU, totalCPU, storageUtilization int) string {
+	return fmt.Sprintf(`
+resource "google_spanner_instance" "test" {
+  name         = "%s"
+  config       = "regional-us-central1"
+  display_name = "%s"
+  autoscaling_config {
+    autoscaling_limits {
+      max_processing_units = %d
+      min_processing_units = %d
+    }
+    autoscaling_targets {
+      high_priority_cpu_utilization_percent = %d
+      total_cpu_utilization_percent         = %d
+      storage_utilization_percent           = %d
+    }
+  }
+  edition = "ENTERPRISE"
+}
+`, name, name, maxProcessingUnits, minProcessingUnits, highPriorityCPU, totalCPU, storageUtilization)
 }

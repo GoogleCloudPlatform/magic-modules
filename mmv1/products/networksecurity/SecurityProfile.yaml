@@ -40,7 +40,7 @@ async:
     resource_inside_response: false
   include_project: true
 custom_code:
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 sweeper:
   url_substitutions:
     - parent: "organizations/${ORG_ID}"
@@ -86,6 +86,16 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
     tgc_skip_test: The ENUM value URL_FILTERING in type field is transformed to UNKNOWN_ENUM_VALUE_ProfileType_5 in CAI asset. The reason could be that URL_FILTERING is not supported in CAI yet. Will check if the value in CAI assets will be correct later.
+  - name: network_security_security_profile_broker
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-security-profile'
+      network_name: 'my-network'
+      deployment_group_id: 'my-dg'
+      endpoint_group_id: 'my-eg'
+    test_env_vars:
+      org_id: 'ORG_ID'
 parameters:
   - name: 'name'
     type: String
@@ -285,9 +295,30 @@ properties:
       - name: mirroringEndpointGroup
         type: String
         description: |
-          The Mirroring Endpoint Group to which matching traffic should be mirrored.
+          The target Mirroring Endpoint Group.
+          When a mirroring rule with this security profile attached matches a packet,
+          a replica will be mirrored to the location-local target in this group.
           Format: projects/{project_id}/locations/global/mirroringEndpointGroups/{endpoint_group_id}
         required: true
+      - name: mirroringDeploymentGroups
+        type: Array
+        item_type:
+          type: String
+        description: |
+          The target downstream Mirroring Deployment Groups.
+          This field is used for Packet Broker mirroring endpoint groups to specify
+          the deployment groups that the packet should be mirrored to by the broker.
+          Format: projects/{project_id}/locations/global/mirroringDeploymentGroups/{deployment_group_id}
+        min_version: 'beta'
+      - name: 'mirroringEndpointGroupType'
+        type: String
+        description: |-
+          The type of the mirroring endpoint group this profile is attached to.
+          Possible values:
+          DIRECT
+          BROKER
+        output: true
+        min_version: 'beta'
     conflicts:
       - 'threatPreventionProfile'
       - 'urlFilteringProfile'

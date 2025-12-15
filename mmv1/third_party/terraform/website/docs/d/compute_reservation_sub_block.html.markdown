@@ -1,7 +1,7 @@
 ---
 subcategory: "Compute Engine"
 description: |-
-  Get information about a Google Compute Engine Reservation Sub-Block.
+  Get information about a Google Compute Engine Reservation Sub-Block. Currnelty only relevent for GB200/A4X + reservetions
 ---
 
 # google_compute_reservation_sub_block
@@ -40,12 +40,12 @@ The following arguments are supported:
 
 * `reservation` - (Required) The name of the parent reservation.
 
-* `zone` - (Required) The zone where the reservation sub-block resides.
-
 - - -
+* `zone` - (Optional) The zone where the reservation sub-block resides.
 
 * `project` - (Optional) The project in which the resource belongs. If it
     is not provided, the provider project is used.
+
 
 ## Attributes Reference
 
