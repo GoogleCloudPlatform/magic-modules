@@ -50,6 +50,11 @@ func TestExtractAffectedResources(t *testing.T) {
 			body:              "\n#### New or Affected Resource(s):\r\ngoogle_scc_mute_config",
 			expectedResources: []string{"google_scc_mute_config"},
 		},
+		{
+			name:              "question",
+			body:              "\n## Related Resource(s):\r\ngoogle_scc_mute_config",
+			expectedResources: []string{"google_scc_mute_config"},
+		},
 	}
 
 	for _, tc := range cases {

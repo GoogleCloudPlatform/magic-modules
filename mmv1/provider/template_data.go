@@ -22,8 +22,10 @@ import (
 	"text/template"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/metadata"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/golang/glog"
+	"gopkg.in/yaml.v3"
 )
 
 type TemplateData struct {
@@ -73,11 +75,15 @@ func (td *TemplateData) GenerateFWResourceFile(filePath string, resource api.Res
 }
 
 func (td *TemplateData) GenerateMetadataFile(filePath string, resource api.Resource) {
-	templatePath := "templates/terraform/metadata.yaml.tmpl"
-	templates := []string{
-		templatePath,
+	metadata := metadata.FromResource(resource)
+	bytes, err := yaml.Marshal(metadata)
+	if err != nil {
+		glog.Exit("error marshalling yaml %v: %v", filePath)
 	}
-	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+	err = os.WriteFile(filePath, bytes, 0644)
+	if err != nil {
+		glog.Exit(err)
+	}
 }
 
 func (td *TemplateData) GenerateDataSourceFile(filePath string, resource api.Resource) {
@@ -254,8 +260,18 @@ func (td *TemplateData) GenerateIamDatasourceDocumentationFile(filePath string, 
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
-func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.Resource) {
+func (td *TemplateData) GenerateIamPolicyTestFileLegacy(filePath string, resource api.Resource) {
 	templatePath := "templates/terraform/examples/base_configs/iam_test_file.go.tmpl"
+	templates := []string{
+		templatePath,
+		"templates/terraform/env_var_context.go.tmpl",
+		"templates/terraform/iam/iam_test_setup_legacy.go.tmpl",
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
+func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/samples/base_configs/iam_test_file.go.tmpl"
 	templates := []string{
 		templatePath,
 		"templates/terraform/env_var_context.go.tmpl",
