@@ -135,6 +135,7 @@ resource "google_lustre_instance" "instance" {
   
   access_rules_options {
     default_squash_mode 	  = "ROOT_SQUASH"
+	default_squash_uid        = 65534
     
     access_rules {
       name 					  = "admin_hosts"
