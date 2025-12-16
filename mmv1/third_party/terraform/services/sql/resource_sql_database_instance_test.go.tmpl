@@ -3107,7 +3107,7 @@ func TestAccSqlDatabaseInstance_PostgresEplusWithFailoverReplicaSetupWithPrivate
 	t.Parallel()
 
 	primaryName := "tf-test-postgres-primary-" + acctest.RandString(t, 10)
-	replicaName := "tf-postgres-replica-" + acctest.RandString(t, 10)
+	replicaName := "tf-test-postgres-replica-" + acctest.RandString(t, 10)
 	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "endpoint")
 	projectId := envvar.GetTestProjectFromEnv()
 
