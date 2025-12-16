@@ -71,7 +71,8 @@ var (
 
 func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 	if !setupDone {
-		bucketName := "cai_assets_metadata"
+		bucketName := "cai_assets"
+		// bucketName := "cai_assets_metadata"
 		currentDate := time.Now()
 		ctx := context.Background()
 
