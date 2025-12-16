@@ -1,0 +1,34 @@
+resource "google_project" "project" {
+  project_id      = "{{index $.Vars "project_id"}}"
+  name            = "{{index $.Vars "project_id"}}"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_acct"}}"
+  deletion_policy = "DELETE"
+}
+resource "google_project_service" "dialogflow" {
+  project  = google_project.project.project_id
+  service  = "dialogflow.googleapis.com"
+}
+resource "time_sleep" "wait_enable_service_api" {
+  depends_on = [
+    google_project_service.dialogflow
+  ]
+  create_duration = "30s"
+}
+resource "google_project_service_identity" "gcp_sa" {
+  service    = "dialogflow.googleapis.com"
+  project    = google_project.project.project_id
+  depends_on = [time_sleep.wait_enable_service_api]
+}
+resource "google_dialogflow_agent" "basic_agent" {
+  display_name = "example_agent"
+  default_language_code = "en-us"
+  time_zone = "America/New_York"
+  project    = google_project.project.project_id
+  depends_on = [time_sleep.wait_enable_service_api]
+}
+resource "google_dialogflow_environment" "basic_environment" {
+  environmentid = "basic-environment"
+  description = "basic environment
+  depends_on = [google_dialogflow_agent.basic_agent]
+}
