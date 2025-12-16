@@ -1674,12 +1674,12 @@ registry_hosts {
         "HEADER_VALUE_2",
       ]
     }
-    ca [
+    ca = [
       {
         gcp_secret_manager_secret_uri = "projects/PROJECT_ID_OR_NUMBER/secrets/CA_SECRET/versions/VERSION"
       }
     ]
-    client [
+    client = [
       {
         cert {
           gcp_secret_manager_secret_uri = "projects/PROJECT_ID_OR_NUMBER/secrets/CLIENT_CERT_SECRET/versions/VERSION"

@@ -752,28 +752,6 @@ func (r Resource) RootProperties() []*Type {
 	return props
 }
 
-// Returns a sorted list of all "leaf" properties, meaning properties that have
-// no children.
-func (r Resource) LeafProperties() []*Type {
-	types := r.AllNestedProperties(google.Concat(r.RootProperties(), r.UserVirtualFields()))
-
-	// Remove types that have children, because we only want "leaf" fields
-	types = slices.DeleteFunc(types, func(t *Type) bool {
-		nestedProperties := t.NestedProperties()
-		return len(nestedProperties) > 0
-	})
-
-	// Sort types by lineage
-	slices.SortFunc(types, func(a, b *Type) int {
-		if strings.Join(a.Lineage(), ".") < strings.Join(b.Lineage(), ".") {
-			return -1
-		}
-		return 1
-	})
-
-	return types
-}
-
 // Return the product-level async object, or the resource-specific one
 // if one exists.
 func (r Resource) GetAsync() *Async {
