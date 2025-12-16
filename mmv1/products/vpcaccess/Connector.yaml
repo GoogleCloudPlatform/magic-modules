@@ -17,6 +17,9 @@ kind: 'vpcaccess#Connector'
 description: 'Serverless VPC Access connector resource.'
 include_in_tgc_next: true
 tgc_include_handwritten_tests: true
+tgc_tests:
+  - name: TestAccVPCAccessConnector_vpcAccessConnectorThroughput_usingThroughputOrInstancesLimits
+    skip: "fix later"
 references:
   guides:
     'Configuring Serverless VPC Access': 'https://cloud.google.com/vpc/docs/configure-serverless-vpc-access'

@@ -1,0 +1,5 @@
+if _, ok := res["billingAccountName"]; !ok {
+    res["billingAccountName"] = ""
+}
+
+return res, hclData, nil

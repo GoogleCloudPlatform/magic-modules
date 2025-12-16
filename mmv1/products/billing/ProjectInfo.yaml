@@ -14,6 +14,8 @@
 ---
 name: 'ProjectInfo'
 api_resource_type_kind: ProjectBillingInfo
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description: |
   Billing information for a project.
 references:
@@ -37,6 +39,7 @@ custom_code:
   encoder: 'templates/terraform/encoders/billing_project_info.go.tmpl'
   decoder: 'templates/terraform/decoders/billing_project_info.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/billing_project_info.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/billing_project_info.go.tmpl'
 examples:
   - name: 'billing_project_info_basic'
     primary_resource_id: 'default'

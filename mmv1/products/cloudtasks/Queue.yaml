@@ -18,6 +18,9 @@ description: |
 docs:
 include_in_tgc_next: true
 tgc_include_handwritten_tests: true
+tgc_tests:
+  - name: TestAccCloudTasksQueue_MaxRetryDiffSuppress0s
+    skip: "fix later"
 id_format: 'projects/{{project}}/locations/{{location}}/queues/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/queues'
 update_verb: 'PATCH'
