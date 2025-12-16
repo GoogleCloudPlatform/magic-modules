@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,17 +27,13 @@ import_format:
  - "projects/{{project}}/locations/{{location}}/boundary"
 
 parameters:
-  - name: 'location'
-    type: String
-    description: 'The location for the Boundary resource. Example: us-central1.'
-    required: true
-    url_param_only: true
+ - name: 'location'
+   type: String
+   description: 'The location for the Boundary resource. Example: us-central1.'
+   required: true
+   url_param_only: true
+   immutable: true
 properties:
-  - name: 'location'
-    type: String
-    description: 'The location for the Boundary resource.'
-    required: true
-    url_param_only: true
   - name: name
     type: String
     description: |-
@@ -50,8 +46,7 @@ properties:
       Optional. The resource name of the CRM node being attached to the
       boundary.
       Format: `projects/{project-number}`
-    optional: true
-    api_field_name: crm_node
+    api_field: crm_node
   - name: createTime
     type: Time
     description: 'Create time.'
@@ -64,16 +59,15 @@ properties:
     type: Enum
     description: 'Boundary type.'
     output: true
-    enum:
-      - TYPE_UNSPECIFIED
-      - AUTOMATIC
-      - MANUAL
-      - MANAGED_AUTOMATIC
+    enum_values:
+     - AUTOMATIC
+     - MANUAL
+     - MANAGED_AUTOMATIC
 
 examples:
   - name: 'apphub_boundary_basic'
     primary_resource_id: 'example'
     vars:
-      project_id: "my-project-id"
-      location: "us-central1"
-      crm_node_project_number: "370517660364"
+     project_id: "my-project-id"
+     location: "us-central1"
+     crm_node_project_number: "370517660364"
