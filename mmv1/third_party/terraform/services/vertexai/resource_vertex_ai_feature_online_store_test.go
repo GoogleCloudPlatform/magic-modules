@@ -169,8 +169,8 @@ resource google_vertex_ai_feature_online_store "feature_online_store" {
             min_node_count = 1
             max_node_count = 2
             cpu_utilization_target = 60
-            zone = "us-central1-a"
         }
+        zone = "us-central1-a"
     }
   force_destroy = true
 }
