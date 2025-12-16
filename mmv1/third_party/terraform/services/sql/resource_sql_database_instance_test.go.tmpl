@@ -3068,7 +3068,7 @@ func TestAccSqlDatabaseInstance_MysqlEplusWithFailoverReplicaSetupWithPrivateNet
 	t.Parallel()
 
 	primaryName := "tf-test-mysql-primary-" + acctest.RandString(t, 10)
-	replicaName := "tf-mysql-replica-" + acctest.RandString(t, 10)
+	replicaName := "tf-test-mysql-replica-" + acctest.RandString(t, 10)
 	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "endpoint")
 	projectId := envvar.GetTestProjectFromEnv()
 
