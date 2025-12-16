@@ -1,0 +1,10 @@
+resource "google_discovery_engine_data_store" "google_workspace" {
+  location                     = "global"
+  data_store_id                = "{{index $.Vars "data_store_id"}}"
+  display_name                 = "tf-test-google-workspace-datastore"
+  industry_vertical            = "GENERIC"
+  content_config               = "GOOGLE_WORKSPACE"
+  solution_types               = ["SOLUTION_TYPE_SEARCH"]
+  create_advanced_site_search  = false
+  skip_default_schema_creation = false
+}
