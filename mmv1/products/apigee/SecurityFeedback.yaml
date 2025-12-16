@@ -18,7 +18,7 @@ description: |
   Manages customer feedback about ML models.
 references:
   guides:
-    'Create a SecurityFeedback': ''
+    'Create a SecurityFeedback': 'https://docs.cloud.google.com/apigee/docs/api-security/abuse-detection#exclude-traffic-from-abuse-detection'
   api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.securityFeedback/create'
 base_url: '{{org_id}}/securityFeedback'
 self_link: '{{org_id}}/securityFeedback/{{feedback_id}}'
