@@ -94,11 +94,15 @@ properties:
     type: KeyValuePairs
     update_mask_fields:
       - 'annotations'
+      - 'metadata'
     description: |
-      Metadata for the endpoint. This data can be consumed
+      [Beta] Metadata for the endpoint. This data can be consumed
       by service clients. The entire metadata dictionary may contain
       up to 512 characters, spread across all key-value pairs.
       Metadata that goes beyond any these limits will be rejected.
+      [GA] Annotations is a key value map stored with a resource that
+      may be set by external tools to store and retrieve arbitrary metadata.
+      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
   - name: 'network'
     type: String
     description: |
