@@ -3067,7 +3067,7 @@ func TestAccSqlDatabaseInstance_SwitchoverSuccess(t *testing.T) {
 func TestAccSqlDatabaseInstance_MysqlEplusWithFailoverReplicaSetupWithPrivateNetwork(t *testing.T) {
 	t.Parallel()
 
-	primaryName := "tf-mysql-primary-" + acctest.RandString(t, 10)
+	primaryName := "tf-test-mysql-primary-" + acctest.RandString(t, 10)
 	replicaName := "tf-mysql-replica-" + acctest.RandString(t, 10)
 	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "endpoint")
 	projectId := envvar.GetTestProjectFromEnv()
