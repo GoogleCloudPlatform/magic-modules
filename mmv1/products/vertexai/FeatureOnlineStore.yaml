@@ -119,6 +119,9 @@ properties:
       - 'bigtable'
       - 'optimized'
     properties:
+      - name: 'enableDirectBigtableAccess'
+        type: Boolean
+        description: 'Optional. If true, enable direct access to the Bigtable instance.'
       - name: 'autoScaling'
         type: NestedObject
         description: Autoscaling config applied to Bigtable Instance.
@@ -139,6 +142,9 @@ properties:
               When a cluster's CPU utilization exceeds the target that you have set,
               Bigtable immediately adds nodes to the cluster. When CPU utilization is substantially lower than the target, Bigtable removes nodes. If not set will default to 50%.
             default_from_api: true
+          - name: 'zone'
+            type: String
+            description: The zone where the Bigtable instance will be created.
   - name: 'optimized'
     type: NestedObject
     description:
@@ -152,7 +158,7 @@ properties:
       - 'bigtable'
       - 'optimized'
     properties:
- # Meant to be an empty object with no properties - see here : https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featureOnlineStores#Optimized
+  # Meant to be an empty object with no properties - see here : https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featureOnlineStores#Optimized
       []
   - name: 'dedicatedServingEndpoint'
     type: NestedObject
@@ -201,3 +207,13 @@ properties:
         description: |
           Enable embedding management.
         immutable: true
+  - name: 'encryptionSpec'
+    type: NestedObject
+    description: |
+      If set, both of the online and offline data storage will be secured by this key.
+    properties:
+      - name: 'kmsKeyName'
+        type: String
+        description: |
+          The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource. Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the compute resource is created.
+        required: true
