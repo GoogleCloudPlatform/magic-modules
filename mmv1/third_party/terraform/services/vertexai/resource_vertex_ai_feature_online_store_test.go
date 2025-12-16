@@ -112,7 +112,6 @@ func TestAccVertexAIFeatureOnlineStore_bigtable_full(t *testing.T) {
 	})
 }
 
-
 func testAccVertexAIFeatureOnlineStore_bigtable_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource google_vertex_ai_feature_online_store "feature_online_store" {
