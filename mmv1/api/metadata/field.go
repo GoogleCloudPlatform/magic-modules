@@ -1,6 +1,7 @@
 package metadata
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
@@ -8,8 +9,20 @@ import (
 )
 
 func FromProperties(props []*api.Type) []Field {
+	// Sort props by lineage
+	slices.SortFunc(props, func(a, b *api.Type) int {
+		if strings.Join(a.Lineage(), ".") < strings.Join(b.Lineage(), ".") {
+			return -1
+		}
+		return 1
+	})
+
 	var fields []Field
 	for _, p := range props {
+		// Skip non-maps with nested fields
+		if !p.IsA("Map") && len(p.NestedProperties()) > 0 {
+			continue
+		}
 		f := Field{
 			Json:         p.IsJsonField(),
 			ProviderOnly: p.ProviderOnly(),
@@ -22,6 +35,13 @@ func FromProperties(props []*api.Type) []Field {
 		if p.ProviderOnly() || !IsDefaultLineage(lineage, apiLineage) {
 			f.Field = strings.Join(lineage, ".")
 		}
+		// For maps (which all have nested children), modify the entry slightly; the map field itself is skipped,
+		// but we need a `key` API field that corresponds to the key_name of the map field.
+		if p.IsA("Map") {
+			f.ApiField += ".key"
+			f.Field = strings.Join(append(lineage, p.KeyName), ".")
+		}
+
 		fields = append(fields, f)
 	}
 	return fields

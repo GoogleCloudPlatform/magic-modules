@@ -531,8 +531,8 @@ func (t Type) Lineage() []string {
 		return []string{google.Underscore(t.Name)}
 	}
 
-	// Skip arrays because otherwise the array will be included twice
-	if t.ParentMetadata.IsA("Array") {
+	// Skip arrays & maps because otherwise the parent field name will be duplicated
+	if t.ParentMetadata.IsA("Array") || t.ParentMetadata.IsA("Map") {
 		return t.ParentMetadata.Lineage()
 	}
 
@@ -553,6 +553,12 @@ func (t Type) ApiLineage() []string {
 	// Skip arrays because otherwise the array will be included twice
 	if t.ParentMetadata.IsA("Array") {
 		return t.ParentMetadata.ApiLineage()
+	}
+
+	// Insert `value` for children of Map fields, and exclude this type because
+	// it will have the same Name as the parent field.
+	if t.ParentMetadata.IsA("Map") {
+		return append(t.ParentMetadata.ApiLineage(), "value")
 	}
 
 	return append(t.ParentMetadata.ApiLineage(), t.ApiName)
