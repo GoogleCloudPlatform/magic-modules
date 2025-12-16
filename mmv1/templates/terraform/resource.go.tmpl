@@ -37,10 +37,6 @@ import (
 
     "github.com/hashicorp/errwrap"
     {{ if $.GenerateListResource -}}
-    "github.com/hashicorp/terraform-plugin-framework/list"
-	listschema "github.com/hashicorp/terraform-plugin-framework/list/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
-    {{ lower $.ProductMetadata.Name }} "cloud.google.com/go/run/apiv2/pb"
     {{ end -}}
     "github.com/hashicorp/go-cty/cty"
     "github.com/hashicorp/terraform-plugin-sdk/v2/diag"

@@ -18,7 +18,7 @@ package {{ lower $.ProductMetadata.Name }}
 import (
 	"context"
 
-	cloudrun "cloud.google.com/go/run/apiv2/runpb" // This shouldn't be from the cloud pkg but instead an internal package within magicmodules (e.g tpgresource/...)
+	// This shouldn't be from the cloud pkg but instead an internal package within magicmodules (e.g tpgresource/...)
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	listschema "github.com/hashicorp/terraform-plugin-framework/list/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -55,7 +55,7 @@ func (r *{{ $.ResourceName -}}ListResource) Configure(_ context.Context, req res
 func (r *{{ $.ResourceName -}}ListResource) ListResourceConfigSchema(ctx context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
 	resp.Schema = listschema.Schema{
 		Attributes: map[string]listschema.Attribute{
-            {{- range $identity := $.IdentityProperties }}
+            {{- range $identity := $.IdentityProperties }} // we can't rely on this because of some resources not containing all the possible parent combinations for list, we should rely more on `base_url`
 			"{{ $identity.Name }}": listschema.StringAttribute{
 				Optional: true,
 			},
