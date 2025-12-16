@@ -3106,7 +3106,7 @@ func TestAccSqlDatabaseInstance_MysqlEplusWithFailoverReplicaSetupWithPrivateNet
 func TestAccSqlDatabaseInstance_PostgresEplusWithFailoverReplicaSetupWithPrivateNetwork(t *testing.T) {
 	t.Parallel()
 
-	primaryName := "tf-postgres-primary-" + acctest.RandString(t, 10)
+	primaryName := "tf-test-postgres-primary-" + acctest.RandString(t, 10)
 	replicaName := "tf-postgres-replica-" + acctest.RandString(t, 10)
 	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "endpoint")
 	projectId := envvar.GetTestProjectFromEnv()
