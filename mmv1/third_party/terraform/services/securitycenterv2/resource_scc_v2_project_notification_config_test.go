@@ -1,7 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-// Modified 2025 by Deutsche Telekom AG
-
 package securitycenterv2_test
 
 import (
