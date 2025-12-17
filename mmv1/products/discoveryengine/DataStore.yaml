@@ -62,6 +62,8 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
     vars:
       data_store_id: 'data-store-id'
+    # Requires Google Workspace integration which cannot be bootstrapped in test environment
+    exclude_test: true
   - name: 'discoveryengine_datastore_kms_key_name'
     primary_resource_id: 'kms_key_name'
     vars:
