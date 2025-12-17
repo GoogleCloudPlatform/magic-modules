@@ -1,0 +1,133 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'MulticloudDataTransferConfig'
+description: |
+  'Manage Multicloud Data Transfer Configs'
+references:
+  guides:
+    'QUICKSTART_TITLE': 'https://docs.cloud.google.com/data-transfer-essentials/docs/create-resources'
+  api: 'https://docs.cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.multicloudDataTransferConfigs'
+
+base_url: 'projects/{{project}}/locations/{{location}}/multicloudDataTransferConfigs'
+self_link: 'projects/{{project}}/locations/{{location}}/multicloudDataTransferConfigs/{{name}}'
+
+immutable: false
+
+create_url: 'projects/{{project}}/locations/{{location}}/multicloudDataTransferConfigs?multicloudDataTransferConfigId={{name}}'
+
+update_verb: 'PATCH'
+update_mask: true
+
+autogen_async: true
+async:
+  operation:
+    base_url: '{{op_id}}'
+
+parameters:
+  - name: 'location'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The location of the multicloud data transfer config.
+  - name: 'name'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The name of the MulticloudDataTransferConfig resource.
+
+properties:
+  - name: 'createTime'
+    type: Time
+    output: true
+    description: |
+      Time when the MulticloudDataTransferConfig resource was created.
+  - name: 'updateTime'
+    type: Time
+    output: true
+    description: |
+      Time when the MulticloudDataTransferConfig resource was updated.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      User-defined labels.
+  - name: 'etag'
+    type: Fingerprint
+    description: |
+      The etag is computed by the server, and might be sent with update and
+      delete requests so that the client has an up-to-date value before
+      proceeding.
+  - name: 'description'
+    type: String
+    description: |
+      A description of this resource.
+  - name: 'destinationsCount'
+    type: Integer
+    output: true
+    description: |
+      The number of Destination resources configured for the
+      MulticloudDataTransferConfig resource.
+  - name: 'destinationsActiveCount'
+    type: Integer
+    output: true
+    description: |
+      The number of Destination resources in use with the
+      MulticloudDataTransferConfig resource.
+  - name: 'services'
+    type: Array
+    description: |
+      Maps services to their current or planned states. Service names are keys,
+      and the associated values describe the state of the service.
+    custom_flatten: 'templates/terraform/custom_flatten/network_connectivity_mcdt_services_state_timeline_flatten.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/network_connectivity_mcdt_services_state_timeline_expand.go.tmpl'
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'service_name'
+          type: String
+          description: 'The name of the service, like "big-query" or "cloud-storage". This corresponds to the map key in the API.'
+          required: true
+        - name: 'states'
+          type: Array
+          description: 'The state and activation time details for the service.'
+          output: true
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'state'
+                type: String
+                description: 'The state of the resource.'
+                output: true
+              - name: 'effective_time'
+                type: String
+                description: 'The time when the state becomes effective, in RFC3339 UTC "Zulu" format.'
+                output: true
+  - name: 'uid'
+    type: String
+    output: true
+    description: |
+      The Google-generated unique ID for the MulticloudDataTransferConfig
+      resource. This value is unique across all MulticloudDataTransferConfig
+      resources. If a resource is deleted and another with the same name is
+      created, the new resource is assigned a different and unique ID.
+
+examples:
+  - name: "network_connectivity_multicloud_data_transfer_config_basic"
+    primary_resource_id: "example"
+    vars:
+      config_name: "basic_config"
