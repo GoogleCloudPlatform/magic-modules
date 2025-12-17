@@ -4414,7 +4414,7 @@ resource "google_sql_database_instance" "instance" {
   region           = "us-central1"
 
   settings {
-    tier = "db-f1-micro"
+    tier = "db-perf-optimized-N-2"
 	edition = "ENTERPRISE_PLUS"
 
     backup_configuration {
