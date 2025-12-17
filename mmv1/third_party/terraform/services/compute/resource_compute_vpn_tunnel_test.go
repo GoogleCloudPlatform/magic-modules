@@ -134,8 +134,7 @@ func TestAccComputeVpnTunnel_cipherSuite(t *testing.T) {
 	t.Parallel()
 
 	// A unique name for the test resources
-	resourceName := "google_compute_vpn_tunnel.test_tunnel"
-	vpnTunnelName := fmt.Sprintf("tf-test-tunnel-%s", randString(10))
+	suffix := acctest.RandString(t, 10)
 	// Other necessary resources like network, gateway, etc. would be defined here.
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -145,19 +144,19 @@ func TestAccComputeVpnTunnel_cipherSuite(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test case 1: Basic cipher suite configuration
-				Config: testAccComputeVpnTunnel_basicCipherSuite(vpnTunnelName),
+				Config: testAccComputeVpnTunnel_basicCipherSuite(suffix),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "cipher_suite.0.phase1.encryption.0", "AES-GCM-16-128"),
-					resource.TestCheckResourceAttr(resourceName, "cipher_suite.0.phase1.encryption.1", "AES-GCM-16-192"),
-					resource.TestCheckResourceAttr(resourceName, "cipher_suite.0.phase2.integrity.0", "HMAC-SHA2-256-128"),
-					resource.TestCheckResourceAttr(resourceName, "cipher_suite.0.phase2.integrity.1", "HMAC-SHA1-96"),
+					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase1.encryption.0", "AES-GCM-16-128"),
+					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase1.encryption.1", "AES-GCM-16-192"),
+					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase2.integrity.0", "HMAC-SHA2-256-128"),
+					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase2.integrity.1", "HMAC-SHA1-96"),
 				),
 			},
 		},
 	})
 }
 
-func testAccComputeVpnTunnel_basicCipherSuite(tunnelName string) string {
+func testAccComputeVpnTunnel_basicCipherSuite(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
   name                    = "tf-test-network-%[1]s"
@@ -203,14 +202,17 @@ resource "google_compute_router" "foobar" {
 
 resource "google_compute_vpn_tunnel" "test_tunnel" {
   name          = "tf-test-ha-vpn-tunnel-%[1]s"
-  project       = "my-gcp-project"
   region        = "us-central1"
-  vpn_gateway   = google_compute_vpn_gateway.target.id
-  shared_secret = "a-secret-string"
+  vpn_gateway = google_compute_ha_vpn_gateway.foobar.id
+  peer_external_gateway           = google_compute_external_vpn_gateway.external_gateway.id
+  peer_external_gateway_interface = 0  
+  shared_secret      = "unguessable"
+  router             = google_compute_router.foobar.self_link
+  vpn_gateway_interface           = 0 
 
   cipher_suite {
     phase1 {
-      encryption = ["AES-GCM-16-128", "AES-GCM-16-192"]
+      encryption = ["AES-GCM-16-128", "AES-CBC-128"]
       integrity  = ["AES-XCBC-96"]
     }
     phase2 {
@@ -219,7 +221,7 @@ resource "google_compute_vpn_tunnel" "test_tunnel" {
     }
   }
 }
-`, tunnelName)
+`, suffix)
 }
 
 func testAccComputeVpnTunnel_regionFromGateway(suffix, region string) string {
