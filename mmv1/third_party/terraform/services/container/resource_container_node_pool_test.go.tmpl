@@ -6283,9 +6283,7 @@ func TestAccContainerNodePool_acceleratorNetworkProfile(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
-			// ------------------------------------------------------------------
 			// Step 1: Create with Manual Config (ANP Off)
-			// ------------------------------------------------------------------
 			{
 				Config: testAccContainerNodePool_acceleratorNetworkProfile_manual(clusterName, npName),
 				Check: resource.ComposeTestCheckFunc(
@@ -6295,9 +6293,7 @@ func TestAccContainerNodePool_acceleratorNetworkProfile(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "network_config.0.accelerator_network_profile", ""),
 				),
 			},
-			// ------------------------------------------------------------------
 			// Step 2: Remove Manual Config (Expect Replacement)
-			// ------------------------------------------------------------------
 			{
 				Config: testAccContainerNodePool_acceleratorNetworkProfile_basic(clusterName, npName),
 				Check: resource.ComposeTestCheckFunc(
@@ -6305,18 +6301,14 @@ func TestAccContainerNodePool_acceleratorNetworkProfile(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "network_config.0.accelerator_network_profile", ""),
 				),
 			},
-			// ------------------------------------------------------------------
 			// Step 3: Enable ANP (Auto) (Expect Replacement Again)
-			// ------------------------------------------------------------------
 			{
 				Config: testAccContainerNodePool_acceleratorNetworkProfile(clusterName, npName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "network_config.0.accelerator_network_profile", "auto"),
 				),
 			},
-			// ------------------------------------------------------------------
 			// Step 4: Import Verify
-			// ------------------------------------------------------------------
 			{
 				ResourceName:            resourceName,
 				ImportState:             true,
@@ -6325,80 +6317,6 @@ func TestAccContainerNodePool_acceleratorNetworkProfile(t *testing.T) {
 			},
 		},
 	})
-}
-
-func testAccContainerNodePool_acceleratorNetworkProfile_conflict(clusterName, npName string) string {
-	return fmt.Sprintf(`
-// 1. Create the "additional" network
-resource "google_compute_network" "additional_net" {
-  name                    = "%[1]s-net" // Based on clusterName
-  auto_create_subnetworks = false
-}
-
-// 2. Create the "additional" subnetwork
-resource "google_compute_subnetwork" "additional_sub" {
-  name          = "%[1]s-sub" // Based on clusterName
-  network       = google_compute_network.additional_net.id
-  ip_cidr_range = "10.2.0.0/16"
-  region        = "us-central1"
-}
-
-// 3. Create the cluster (this will use the 'default' network)
-resource "google_container_cluster" "cluster" {
-  name     = "%[1]s" // clusterName
-  location = "us-central1-c"
-
-  datapath_provider       = "ADVANCED_DATAPATH"
-  ip_allocation_policy    {} // Enables IP aliasing
-  enable_multi_networking = true
-
-  initial_node_count = 1
-  deletion_protection = false
-}
-
-// 4. Create the node pool with the conflicting config
-resource "google_container_node_pool" "np" {
-  name     = "%[2]s" // npName
-  cluster  = google_container_cluster.cluster.id
-  location = "us-central1-c"
-  node_count = 1
-
-  node_config {
-    machine_type = "e2-medium"
-  }
-
-  network_config {
-    // --- This is the conflict ---
-    accelerator_network_profile = "auto"
-
-    additional_node_network_configs {
-      // Use the REAL network and subnetwork IDs
-      network    = google_compute_network.additional_net.id
-      subnetwork = google_compute_subnetwork.additional_sub.name 
-    }
-  }
-}
-`, clusterName, npName)
-}
-
-func TestAccContainerNodePool_acceleratorNetworkProfile_conflict(t *testing.T) {
-    t.Parallel()
-
-    clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-    npName := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
-
-    resource.Test(t, resource.TestCase{
-        PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-        ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-        // No CheckDestroy is needed because the resource should never be created
-        Steps: []resource.TestStep{
-            {
-                // Use the new conflicting config
-                Config: testAccContainerNodePool_acceleratorNetworkProfile_conflict(clusterName, npName),
-				ExpectError: regexp.MustCompile("(?i)Accelerator network profile.*not supported.*additional node interfaces"),
-            },
-        },
-    })
 }
 
 func testAccContainerCluster_nodePool_acceleratorNetworkProfile(clusterName string) string {

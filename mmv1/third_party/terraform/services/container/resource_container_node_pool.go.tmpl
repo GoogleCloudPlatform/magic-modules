@@ -206,7 +206,9 @@ func ResourceContainerNodePool() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
 			resourceNodeConfigEmptyGuestAccelerator,
+			{{ if ne $.TargetVersionName `ga` }}
 			nodePoolAcceleratorNetworkProfileCustomizeDiff,
+			{{- end }}
 		),
 
 		UseJSONNumber: true,
@@ -1941,7 +1943,6 @@ func nodePoolAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sch
 
 	// 1. SKIP ON CREATE
 	if diff.Id() == "" {
-		log.Printf("[DEBUG] ANP CustomizeDiff: SKIP - Resource is being created (no ID).")
 		return nil
 	}
 
@@ -1986,23 +1987,12 @@ func nodePoolAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sch
 		currentCount = c
 	}
 
-	log.Printf("[DEBUG] ANP CustomizeDiff: ANALYSIS: ID=%s, UserHasConfig=%v, ANP=%v, CurrentCount=%d",
-		diff.Id(), userHasAdditionalConfigs, anpIsActive, currentCount)
-
-	if shouldClear {
-		if currentCount == 0 {
-			log.Printf("[DEBUG] ANP CustomizeDiff: ACTION SKIPPED - Config is already empty (Count is 0). Avoiding drift.")
-			shouldClear = false
-		} else {
-			log.Printf("[DEBUG] ANP CustomizeDiff: ACTION REQUIRED - Sticky value detected (Count is %d). Clearing it.", currentCount)
-		}
-	} else {
-		log.Printf("[DEBUG] ANP CustomizeDiff: NO ACTION - Conditions not met.")
+	if shouldClear && currentCount == 0{
+		shouldClear = false
 	}
 
 	// 4. EXECUTE THE FIX
 	if shouldClear {
-		log.Printf("[DEBUG] ANP CustomizeDiff: EXECUTING FIX - Rewriting network_config block...")
 		var newConfigMap map[string]interface{}
 		existingConfigs := diff.Get("network_config").([]interface{})
 
