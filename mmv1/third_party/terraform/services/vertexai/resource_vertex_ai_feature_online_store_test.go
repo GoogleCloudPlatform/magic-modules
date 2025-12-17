@@ -124,6 +124,7 @@ resource google_vertex_ai_feature_online_store "feature_online_store" {
             max_node_count = 2
         }
         enable_direct_bigtable_access = true
+        zone = "us-central1-a"
     }
     encryption_spec {
         kms_key_name = "%{kms_key_name}"
