@@ -1938,6 +1938,7 @@ func retryWhileIncompatibleOperation(timeout time.Duration, lockKey string, f fu
 	})
 }
 
+{{ if ne $.TargetVersionName `ga` }}
 func nodePoolAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta any) error {
 	log.Printf("[DEBUG] ANP CustomizeDiff: Running...")
 
@@ -2019,3 +2020,4 @@ func nodePoolAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sch
 
 	return nil
 }
+{{- end }}
