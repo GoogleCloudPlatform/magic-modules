@@ -146,10 +146,10 @@ func TestAccComputeVpnTunnel_cipherSuite(t *testing.T) {
 				// Test case 1: Basic cipher suite configuration
 				Config: testAccComputeVpnTunnel_basicCipherSuite(suffix),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase1.encryption.0", "AES-GCM-16-128"),
-					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase1.encryption.1", "AES-GCM-16-192"),
-					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase2.integrity.0", "HMAC-SHA2-256-128"),
-					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase2.integrity.1", "HMAC-SHA1-96"),
+					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase1.0.encryption.0", "AES-GCM-16-128"),
+					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase1.0.integrity.0", "AES-XCBC-96"),
+					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase2.0.encryption.0", "AES-CBC-128"),
+					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase2.0.integrity.0", "HMAC-SHA2-256-128"),
 				),
 			},
 		},
@@ -212,12 +212,12 @@ resource "google_compute_vpn_tunnel" "test_tunnel" {
 
   cipher_suite {
     phase1 {
-      encryption = ["AES-GCM-16-128", "AES-CBC-128"]
+      encryption = ["AES-GCM-16-128"]
       integrity  = ["AES-XCBC-96"]
     }
     phase2 {
       encryption = ["AES-CBC-128"]
-      integrity  = ["HMAC-SHA2-256-128", "HMAC-SHA1-96"]
+      integrity  = ["HMAC-SHA2-256-128"]
     }
   }
 }
