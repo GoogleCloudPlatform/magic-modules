@@ -138,11 +138,13 @@ func TestAccServiceDirectoryServiceBeta_serviceDirectoryServiceUpdateExample(t *
 func testAccServiceDirectoryServiceBeta_basic(location, testId string) string {
 	return fmt.Sprintf(`
 resource "google_service_directory_namespace" "example" {
+  provider = google-beta
   namespace_id = "%s"
   location     = "%s"
 }
 
 resource "google_service_directory_service" "example" {
+  provider = google-beta
   service_id = "%s"
   namespace  = google_service_directory_namespace.example.id
 }
@@ -152,11 +154,13 @@ resource "google_service_directory_service" "example" {
 func testAccServiceDirectoryServiceBeta_update(location, testId string) string {
 	return fmt.Sprintf(`
 resource "google_service_directory_namespace" "example" {
+  provider = google-beta
   namespace_id = "%s"
   location     = "%s"
 }
 
 resource "google_service_directory_service" "example" {
+  provider = google-beta
   service_id = "%s"
   namespace  = google_service_directory_namespace.example.id
 
