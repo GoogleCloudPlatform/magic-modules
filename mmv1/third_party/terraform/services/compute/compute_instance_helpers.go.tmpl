@@ -521,6 +521,7 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 			"queue_count":         iface.QueueCount,
 			"internal_ipv6_prefix_length": iface.InternalIpv6PrefixLength,
 			{{- if ne $.TargetVersionName "ga" }}
+			"parent_nic_name":             iface.ParentNicName,
 			"vlan":                        iface.Vlan,
 			{{- end }}
 		}

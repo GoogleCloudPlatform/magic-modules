@@ -574,6 +574,8 @@ The following arguments are supported:
     to. The subnetwork must exist in the same `region` this instance will be
     created in. Either `network` or `subnetwork` must be provided.
 
+* `vlan` - [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The VLAN ID of the network interface. This changes a NIC to become a Dynamic Nic. The VLAN cannot be set on the primary network interface.
+
 * `network_attachment` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.
 
 * `subnetwork_project` - (Optional) The ID of the project in which the subnetwork belongs.

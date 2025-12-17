@@ -650,6 +650,12 @@ func ResourceComputeInstance() *schema.Resource {
 							Description:      `The name or self_link of the subnetwork attached to this interface.`,
 						},
 						{{ if ne $.TargetVersionName `ga` }}
+						"parent_nic_name": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: `The name of the parent NIC for this Network Interface. Supported for Dynamic Nics only.`,
+						},
 						"vlan": {
 							Type:        schema.TypeInt,
 							Optional:    true,
