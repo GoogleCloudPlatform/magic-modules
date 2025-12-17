@@ -13,7 +13,7 @@
   See the License for the specific language governing permissions and
   limitations under the License. */ -}}
 {{- define "expandPropertyMethod" }}
-  {{- if and $.CustomExpand (not $.ShouldIgnoreCustomExpand) }}
+  {{- if $.CustomExpand }}
     {{ customTemplate $ $.CustomExpand true -}}
   {{- else }}{{/* if $.CustomExpand */}}
     {{- if $.IsA "Map" }}

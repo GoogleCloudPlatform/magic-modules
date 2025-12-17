@@ -340,7 +340,6 @@ type Type struct {
 
 	// If true, the custom flatten function is not applied during cai2hcl
 	TGCIgnoreTerraformCustomFlatten bool `yaml:"tgc_ignore_terraform_custom_flatten,omitempty"`
-	TGCIgnoreTerraformCustomExpand  bool `yaml:"tgc_ignore_terraform_custom_expand,omitempty"`
 
 	TGCIgnoreRead bool `yaml:"tgc_ignore_read,omitempty"`
 }
@@ -1520,8 +1519,4 @@ func (t Type) TGCSendEmptyValue() bool {
 
 func (t Type) ShouldIgnoreCustomFlatten() bool {
 	return t.ResourceMetadata.IsTgcCompiler() && (t.IgnoreRead || t.TGCIgnoreTerraformCustomFlatten)
-}
-
-func (t Type) ShouldIgnoreCustomExpand() bool {
-	return t.ResourceMetadata.IsTgcCompiler() && t.TGCIgnoreTerraformCustomExpand
 }
