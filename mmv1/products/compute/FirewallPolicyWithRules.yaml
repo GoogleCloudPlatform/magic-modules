@@ -353,6 +353,7 @@ properties:
             not exist. If this is unspecified, the firewall policy rule will be
             enabled.
   - name: 'predefinedRules'
+    api_name: rules
     type: Array
     description: A list of pre-define firewall policy rules.
     output: true
