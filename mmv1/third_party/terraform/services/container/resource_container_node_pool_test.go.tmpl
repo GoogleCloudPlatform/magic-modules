@@ -6218,19 +6218,17 @@ resource "google_container_node_pool" "np" {
             key = "header_key"
             value = ["header_value_1","header_value_2"]
           }
-          ca = [{
+          ca {
             gcp_secret_manager_secret_uri = google_secret_manager_secret_version.secret-version-basic.name
-          }]
-          client = [
-		    {
-              cert {
-                gcp_secret_manager_secret_uri = google_secret_manager_secret_version.secret-version-basic.name
-              }
-              key {
-                gcp_secret_manager_secret_uri = google_secret_manager_secret_version.secret-version-basic.name
-              }
+          }
+          client {
+            cert {
+              gcp_secret_manager_secret_uri = google_secret_manager_secret_version.secret-version-basic.name
             }
-		  ]
+            key {
+              gcp_secret_manager_secret_uri = google_secret_manager_secret_version.secret-version-basic.name
+            }
+          }
         }
       }
     }

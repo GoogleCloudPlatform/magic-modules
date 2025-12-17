@@ -1674,21 +1674,17 @@ registry_hosts {
         "HEADER_VALUE_2",
       ]
     }
-    ca = [
-      {
-        gcp_secret_manager_secret_uri = "projects/PROJECT_ID_OR_NUMBER/secrets/CA_SECRET/versions/VERSION"
+    ca {
+      gcp_secret_manager_secret_uri = "projects/PROJECT_ID_OR_NUMBER/secrets/CA_SECRET/versions/VERSION"
+    }
+    client {
+      cert {
+        gcp_secret_manager_secret_uri = "projects/PROJECT_ID_OR_NUMBER/secrets/CLIENT_CERT_SECRET/versions/VERSION"
       }
-    ]
-    client = [
-      {
-        cert {
-          gcp_secret_manager_secret_uri = "projects/PROJECT_ID_OR_NUMBER/secrets/CLIENT_CERT_SECRET/versions/VERSION"
-        }
-        key {
-          gcp_secret_manager_secret_uri = "projects/PROJECT_ID_OR_NUMBER/secrets/CLIENT_KEY_SECRET/versions/VERSION"
-        }
+      key {
+        gcp_secret_manager_secret_uri = "projects/PROJECT_ID_OR_NUMBER/secrets/CLIENT_KEY_SECRET/versions/VERSION"
       }
-    ]
+    }
   }
 }
   ```

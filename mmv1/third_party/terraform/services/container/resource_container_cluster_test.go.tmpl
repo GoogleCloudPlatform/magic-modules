@@ -14508,9 +14508,9 @@ resource "google_container_cluster" "primary" {
               key = "header_key"
               value = ["header_value_1","header_value_2"]
             }
-            ca = [{
+            ca {
               gcp_secret_manager_secret_uri = google_secret_manager_secret_version.secret_version_basic.name
-            }]
+            }
           }
         }
       }
@@ -14573,17 +14573,17 @@ resource "google_container_cluster" "primary" {
               key = "header_key"
               value = ["header_value_1","header_value_2"]
             }
-            ca = [{
+            ca {
               gcp_secret_manager_secret_uri = google_secret_manager_secret_version.secret_version_basic.name
-            }]
-            client = [{
+            }
+            client {
               cert {
                 gcp_secret_manager_secret_uri = google_secret_manager_secret_version.secret_version_basic.name
               }
               key {
                 gcp_secret_manager_secret_uri = google_secret_manager_secret_version.secret_version_basic.name
               }
-            }]
+            }
           }
         }
       }
@@ -14648,17 +14648,17 @@ resource "google_container_cluster" "primary" {
             key = "header_key"
             value = ["header_value_1","header_value_2"]
           }
-          ca = [{
+          ca {
             gcp_secret_manager_secret_uri = google_secret_manager_secret_version.secret_version_basic.name
-          }]
-          client = [{
+          }
+          client {
             cert {
               gcp_secret_manager_secret_uri = google_secret_manager_secret_version.secret_version_basic.name
             }
             key {
               gcp_secret_manager_secret_uri = google_secret_manager_secret_version.secret_version_basic.name
             }
-          }]
+          }
         }
       }
     }
