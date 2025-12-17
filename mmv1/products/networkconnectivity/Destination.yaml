@@ -83,6 +83,7 @@ properties:
       User-defined labels.
   - name: 'etag'
     type: Fingerprint
+    output: true
     description: |
       The etag is computed by the server, and might be sent with update and
       delete requests so that the client has an up-to-date value before
