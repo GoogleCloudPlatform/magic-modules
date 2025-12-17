@@ -14,6 +14,10 @@
 ---
 name: MulticastDomainGroup
 description: Create a multicast domain group in the current project.
+references:
+  guides:
+    'Create Multicast Domain Group': 'https://docs.cloud.google.com/vpc/docs/multicast/create-domains#create-domain-group'
+  api: 'https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastDomainGroups'
 base_url: projects/{{project}}/locations/{{location}}/multicastDomainGroups
 update_mask: true
 self_link:
@@ -72,7 +76,7 @@ parameters:
 properties:
   - name: createTime
     type: String
-    description: '[Output only] The timestamp when the multicast domain group was created.'
+    description: 'The timestamp when the multicast domain group was created.'
     output: true
   - name: description
     type: String
@@ -83,7 +87,7 @@ properties:
   - name: multicastDomains
     type: Array
     description: |-
-      [Output only] Multicast domains associated with the group.
+      Multicast domains associated with the group.
       There can be at most 2 multicast domains in a group.
     output: true
     item_type:
@@ -112,10 +116,11 @@ properties:
           UPDATING
           UPDATE_FAILED
           INACTIVE
+        output: true
   - name: uniqueId
     type: String
     description: |-
-      [Output only] The Google-generated UUID for the resource. This value is
+      The Google-generated UUID for the resource. This value is
       unique across all multicast domain group resources. If a domain is deleted
       and another with the same name is created, the new domain is assigned a
       different unique_id.
@@ -123,6 +128,6 @@ properties:
   - name: updateTime
     type: String
     description: |-
-      [Output only] The timestamp when the multicast domain group was most
+      The timestamp when the multicast domain group was most
       recently updated.
     output: true

@@ -116,14 +116,7 @@ properties:
     type: String
     description: |-
       The state of the instance.
-      Possible values:
-      STATE_UNSPECIFIED
-      ACTIVE
-      CREATING
-      DELETING
-      UPGRADING
-      REPAIRING
-      STOPPED
+      Please see https://cloud.google.com/managed-lustre/docs/reference/rest/v1/projects.locations.instances#state for values
     output: true
   - name: mountPoint
     type: String
@@ -155,3 +148,13 @@ properties:
     description: |-
         The placement policy name for the instance in the format of
         projects/{project}/locations/{location}/resourcePolicies/{resource_policy}
+  - name: kmsKey
+    type: String
+    description: |-
+      The KMS key id to use for encryption of the Lustre instance.
+    immutable: true
+  - name: stateReason
+    type: String
+    description: |-
+        The reason why the instance is in a certain state.
+    output: true

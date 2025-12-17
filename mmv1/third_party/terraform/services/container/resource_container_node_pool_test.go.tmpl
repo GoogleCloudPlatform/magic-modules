@@ -1190,6 +1190,40 @@ func TestAccContainerNodePool_withHugepageConfig(t *testing.T) {
 	})
 }
 
+func TestAccContainerNodePool_withNodeKernelModuleLoading(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withNodeKernelModuleLoading(cluster, np, "CGROUP_MODE_V2", "ENFORCE_SIGNED_MODULES", networkName, subnetworkName),
+			},
+			{
+				ResourceName:      "google_container_node_pool.np",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Perform an update.
+			{
+				Config: testAccContainerNodePool_withNodeKernelModuleLoading(cluster, np, "CGROUP_MODE_UNSPECIFIED", "POLICY_UNSPECIFIED", networkName, subnetworkName),
+			},
+			{
+				ResourceName:      "google_container_node_pool.np",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccContainerNodePool_withNetworkConfig(t *testing.T) {
 	t.Parallel()
 
@@ -1419,7 +1453,7 @@ func TestAccContainerNodePool_withUpgradeSettings(t *testing.T) {
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerNodePool_withUpgradeSettings(cluster, np, networkName, subnetworkName, 2, 3, "SURGE", "", 0, 0.0, ""),
+				Config: testAccContainerNodePool_withUpgradeSettings(cluster, np, networkName, subnetworkName, 2, 3, "SURGE", "", "", 0, 0.0, "", ""),
 			},
 			{
 				ResourceName:      "google_container_node_pool.with_upgrade_settings",
@@ -1427,7 +1461,7 @@ func TestAccContainerNodePool_withUpgradeSettings(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccContainerNodePool_withUpgradeSettings(cluster, np, networkName, subnetworkName, 2, 1, "SURGE", "", 0, 0.0, ""),
+				Config: testAccContainerNodePool_withUpgradeSettings(cluster, np, networkName, subnetworkName, 2, 1, "SURGE", "", "", 0, 0.0, "", ""),
 			},
 			{
 				ResourceName:      "google_container_node_pool.with_upgrade_settings",
@@ -1435,7 +1469,7 @@ func TestAccContainerNodePool_withUpgradeSettings(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccContainerNodePool_withUpgradeSettings(cluster, np, networkName, subnetworkName, 1, 1, "SURGE", "", 0, 0.0, ""),
+				Config: testAccContainerNodePool_withUpgradeSettings(cluster, np, networkName, subnetworkName, 1, 1, "SURGE", "", "", 0, 0.0, "", ""),
 			},
 			{
 				ResourceName:      "google_container_node_pool.with_upgrade_settings",
@@ -1443,7 +1477,7 @@ func TestAccContainerNodePool_withUpgradeSettings(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccContainerNodePool_withUpgradeSettings(cluster, np, networkName, subnetworkName, 0, 0, "BLUE_GREEN", "100s", 1, 0.0, "0s"),
+				Config: testAccContainerNodePool_withUpgradeSettings(cluster, np, networkName, subnetworkName, 0, 0, "BLUE_GREEN", "STANDARD", "100s", 1, 0.0, "0s", ""),
 			},
 			{
 				ResourceName:      "google_container_node_pool.with_upgrade_settings",
@@ -1451,13 +1485,31 @@ func TestAccContainerNodePool_withUpgradeSettings(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccContainerNodePool_withUpgradeSettings(cluster, np, networkName, subnetworkName, 0, 0, "BLUE_GREEN", "100s", 0, 0.5, "1s"),
+				Config: testAccContainerNodePool_withUpgradeSettings(cluster, np, networkName, subnetworkName, 0, 0, "BLUE_GREEN", "STANDARD", "100s", 0, 0.5, "1s", ""),
 			},
 			{
 				ResourceName:      "google_container_node_pool.with_upgrade_settings",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+{{ if ne $.TargetVersionName `ga` -}}
+			{
+				Config: testAccContainerNodePool_withUpgradeSettings(cluster, np, networkName, subnetworkName, 0, 0, "BLUE_GREEN", "AUTOSCALED", "0s", 0, 0.0, "", ""),
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_upgrade_settings",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerNodePool_withUpgradeSettings(cluster, np, networkName, subnetworkName, 0, 0, "BLUE_GREEN", "AUTOSCALED", "0s", 0, 0.0, "", "100s"),
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_upgrade_settings",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+{{- end }}
 		},
 	})
 }
@@ -4254,6 +4306,48 @@ resource "google_container_node_pool" "np" {
 `, cluster, networkName, subnetworkName, np, hugepage, hugepage)
 }
 
+func testAccContainerNodePool_withNodeKernelModuleLoading(cluster, np, mode, policy, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+
+resource "google_container_cluster" "cluster" {
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 1
+	min_master_version = data.google_container_engine_versions.central1a.release_channel_latest_version["RAPID"]
+  deletion_protection = false
+  network             = "%s"
+  subnetwork          = "%s"
+
+	release_channel {
+    channel = "RAPID"
+  }
+}
+
+resource "google_container_node_pool" "np" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+  node_config {
+    image_type = "COS_CONTAINERD"
+    linux_node_config {
+      cgroup_mode = "%s"
+			node_kernel_module_loading {
+			  policy = "%s"
+			}
+    }
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+    ]
+  }
+}
+`, cluster, networkName, subnetworkName, np, mode, policy)
+}
+
 func testAccContainerNodePool_withMultiNicNetworkConfig(cluster, np, network string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
@@ -4507,32 +4601,46 @@ resource "google_container_node_pool" "with_boot_disk_kms_key" {
 }
 {{- end }}
 
-func makeUpgradeSettings(maxSurge int, maxUnavailable int, strategy string, nodePoolSoakDuration string, batchNodeCount int, batchPercentage float64, batchSoakDuration string) string {
+func makeUpgradeSettings(maxSurge int, maxUnavailable int, strategy, policy string, nodePoolSoakDuration string, batchNodeCount int, batchPercentage float64, batchSoakDuration string, waitForDrainDuration string) string {
 	if strategy == "BLUE_GREEN" {
+		policyBlock := ""
+		if policy == "STANDARD" {
+			policyBlock = fmt.Sprintf(`
+			standard_rollout_policy {
+				batch_node_count = %d
+				batch_percentage = %f
+				batch_soak_duration = "%s"
+			}
+			node_pool_soak_duration = "%s"
+			`, batchNodeCount, batchPercentage, batchSoakDuration, nodePoolSoakDuration)
+		} else if policy == "AUTOSCALED" {
+			policyBlock = fmt.Sprintf(`
+			autoscaled_rollout_policy {
+				wait_for_drain_duration = "%s"
+			}
+			node_pool_soak_duration = "%s"
+			`, waitForDrainDuration, nodePoolSoakDuration)
+		}
 		return fmt.Sprintf(`
-upgrade_settings {
-	strategy = "%s"
-	blue_green_settings {
-		node_pool_soak_duration = "%s"
-		standard_rollout_policy {
-			batch_node_count = %d
-			batch_percentage = %f
-			batch_soak_duration = "%s"
+	upgrade_settings {
+		strategy = "%s"
+		blue_green_settings {
+			%s
 		}
 	}
-}
-`, strategy, nodePoolSoakDuration, batchNodeCount, batchPercentage, batchSoakDuration)
+	`, strategy, policyBlock)
 	}
 	return fmt.Sprintf(`
-upgrade_settings {
-	max_surge = %d
-	max_unavailable = %d
-	strategy = "%s"
-}
-`, maxSurge, maxUnavailable, strategy)
+	upgrade_settings {
+		max_surge       = %d
+		max_unavailable = %d
+		strategy        = "%s"
+	}
+	`, maxSurge, maxUnavailable, strategy)
 }
 
-func testAccContainerNodePool_withUpgradeSettings(clusterName, nodePoolName, networkName, subnetworkName string, maxSurge int, maxUnavailable int, strategy string, nodePoolSoakDuration string, batchNodeCount int, batchPercentage float64, batchSoakDuration string) string {
+func testAccContainerNodePool_withUpgradeSettings(clusterName, nodePoolName, networkName, subnetworkName string, maxSurge int, maxUnavailable int, strategy, policy string, nodePoolSoakDuration string, batchNodeCount int, batchPercentage float64, batchSoakDuration, waitForDrainDuration string) string {
+	upgradeSettings := makeUpgradeSettings(maxSurge, maxUnavailable, strategy, policy, nodePoolSoakDuration, batchNodeCount, batchPercentage, batchSoakDuration, waitForDrainDuration)
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1" {
   location = "us-central1"
@@ -4553,9 +4661,13 @@ resource "google_container_node_pool" "with_upgrade_settings" {
   location = "us-central1"
   cluster = google_container_cluster.cluster.name
   initial_node_count = 1
+  autoscaling {
+	  min_node_count = 1
+	  max_node_count = 3
+  }
   %s
 }
-`, clusterName, networkName, subnetworkName, nodePoolName, makeUpgradeSettings(maxSurge, maxUnavailable, strategy, nodePoolSoakDuration, batchNodeCount, batchPercentage, batchSoakDuration))
+`, clusterName, networkName, subnetworkName, nodePoolName, upgradeSettings)
 }
 
 func testAccContainerNodePool_withGPU(cluster, np, networkName, subnetworkName string) string {

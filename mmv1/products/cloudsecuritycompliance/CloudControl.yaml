@@ -111,6 +111,36 @@ properties:
             - name: numberValue
               type: Double
               description: Represents a double value.
+            - name: oneofValue
+              type: NestedObject
+              description: Sub-parameter values.
+              properties:
+                - name: name
+                  type: String
+                  description: The name of the parameter.
+                - name: parameterValue
+                  type: NestedObject
+                  description: The value of the parameter.
+                  properties:
+                    - name: boolValue
+                      type: Boolean
+                      description: Represents a boolean value.
+                    - name: numberValue
+                      type: Double
+                      description: Represents a double value.
+                    - name: stringListValue
+                      type: NestedObject
+                      description: A list of strings.
+                      properties:
+                        - name: values
+                          type: Array
+                          description: The strings in the list.
+                          required: true
+                          item_type:
+                            type: String
+                    - name: stringValue
+                      type: String
+                      description: Represents a string value.
             - name: stringListValue
               type: NestedObject
               description: A list of strings.
@@ -160,6 +190,196 @@ properties:
                   - name: attribute
                     type: String
                     description: Fully qualified proto attribute path (e.g., dot notation)
+        - name: subParameters
+          type: Array
+          description: The parameter spec of the cloud control.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: defaultValue
+                type: NestedObject
+                description: Possible parameter value types.
+                properties:
+                  - name: boolValue
+                    type: Boolean
+                    description: Represents a boolean value.
+                  - name: numberValue
+                    type: Double
+                    description: Represents a double value.
+                  - name: oneofValue
+                    type: NestedObject
+                    description: Sub-parameter values.
+                    properties:
+                      - name: name
+                        type: String
+                        description: The name of the parameter.
+                      - name: parameterValue
+                        type: NestedObject
+                        description: The value of the parameter.
+                        properties:
+                          - name: boolValue
+                            type: Boolean
+                            description: Represents a boolean value.
+                          - name: numberValue
+                            type: Double
+                            description: Represents a double value.
+                          - name: stringListValue
+                            type: NestedObject
+                            description: A list of strings.
+                            properties:
+                              - name: values
+                                type: Array
+                                description: The strings in the list.
+                                required: true
+                                item_type:
+                                  type: String
+                          - name: stringValue
+                            type: String
+                            description: Represents a string value.
+                  - name: stringListValue
+                    type: NestedObject
+                    description: A list of strings.
+                    properties:
+                      - name: values
+                        type: Array
+                        description: The strings in the list.
+                        required: true
+                        item_type:
+                          type: String
+                  - name: stringValue
+                    type: String
+                    description: Represents a string value.
+              - name: description
+                type: String
+                description: The description of the parameter. The maximum length is 2000 characters.
+              - name: displayName
+                type: String
+                description: The display name of the parameter. The maximum length is 200 characters.
+              - name: isRequired
+                type: Boolean
+                description: if the parameter is required
+                required: true
+              - name: name
+                type: String
+                description: The name of the parameter.
+                required: true
+              - name: substitutionRules
+                type: Array
+                description: List of parameter substitutions.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: attributeSubstitutionRule
+                      type: NestedObject
+                      description: Attribute at the given path is substituted entirely.
+                      properties:
+                        - name: attribute
+                          type: String
+                          description: |-
+                            Fully qualified proto attribute path (in dot notation).
+                            Example: rules[0].cel_expression.resource_types_values
+                    - name: placeholderSubstitutionRule
+                      type: NestedObject
+                      description: Placeholder is substituted in the rendered string.
+                      properties:
+                        - name: attribute
+                          type: String
+                          description: Fully qualified proto attribute path (e.g., dot notation)
+              - name: validation
+                type: NestedObject
+                description: Validation of the parameter.
+                properties:
+                  - name: allowedValues
+                    type: NestedObject
+                    description: Allowed set of values for the parameter.
+                    properties:
+                      - name: values
+                        type: Array
+                        description: List of allowed values for the parameter.
+                        required: true
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: boolValue
+                              type: Boolean
+                              description: Represents a boolean value.
+                            - name: numberValue
+                              type: Double
+                              description: Represents a double value.
+                            - name: oneofValue
+                              type: NestedObject
+                              description: Sub-parameter values.
+                              properties:
+                                - name: name
+                                  type: String
+                                  description: The name of the parameter.
+                                - name: parameterValue
+                                  type: NestedObject
+                                  description: The value of the parameter.
+                                  properties:
+                                    - name: boolValue
+                                      type: Boolean
+                                      description: Represents a boolean value.
+                                    - name: numberValue
+                                      type: Double
+                                      description: Represents a double value.
+                                    - name: stringListValue
+                                      type: NestedObject
+                                      description: A list of strings.
+                                      properties:
+                                        - name: values
+                                          type: Array
+                                          description: The strings in the list.
+                                          required: true
+                                          item_type:
+                                            type: String
+                                    - name: stringValue
+                                      type: String
+                                      description: Represents a string value.
+                            - name: stringListValue
+                              type: NestedObject
+                              description: A list of strings.
+                              properties:
+                                - name: values
+                                  type: Array
+                                  description: The strings in the list.
+                                  required: true
+                                  item_type:
+                                    type: String
+                            - name: stringValue
+                              type: String
+                              description: Represents a string value.
+                  - name: intRange
+                    type: NestedObject
+                    description: Number range for number parameters.
+                    properties:
+                      - name: max
+                        type: String
+                        description: Maximum allowed value for the numeric parameter (inclusive).
+                        required: true
+                      - name: min
+                        type: String
+                        description: Minimum allowed value for the numeric parameter (inclusive).
+                        required: true
+                  - name: regexpPattern
+                    type: NestedObject
+                    description: Regular Expression Validator for parameter values.
+                    properties:
+                      - name: pattern
+                        type: String
+                        description: Regex Pattern to match the value(s) of parameter.
+                        required: true
+              - name: valueType
+                type: String
+                description: |-
+                  Parameter value type.
+                  Possible values:
+                  STRING
+                  BOOLEAN
+                  STRINGLIST
+                  NUMBER
+                  ONEOF
+                required: true
         - name: validation
           type: NestedObject
           description: Validation of the parameter.
@@ -181,6 +401,36 @@ properties:
                       - name: numberValue
                         type: Double
                         description: Represents a double value.
+                      - name: oneofValue
+                        type: NestedObject
+                        description: Sub-parameter values.
+                        properties:
+                          - name: name
+                            type: String
+                            description: The name of the parameter.
+                          - name: parameterValue
+                            type: NestedObject
+                            description: The value of the parameter.
+                            properties:
+                              - name: boolValue
+                                type: Boolean
+                                description: Represents a boolean value.
+                              - name: numberValue
+                                type: Double
+                                description: Represents a double value.
+                              - name: stringListValue
+                                type: NestedObject
+                                description: A list of strings.
+                                properties:
+                                  - name: values
+                                    type: Array
+                                    description: The strings in the list.
+                                    required: true
+                                    item_type:
+                                      type: String
+                              - name: stringValue
+                                type: String
+                                description: Represents a string value.
                       - name: stringListValue
                         type: NestedObject
                         description: A list of strings.
