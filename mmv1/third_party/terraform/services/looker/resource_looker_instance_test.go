@@ -136,6 +136,19 @@ func TestAccLookerInstance_updatePeriodicExport(t *testing.T) {
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	    {
+	        // For writing/managing the export files in GCS
+	        Member: "serviceAccount:service-{project_number}@gcp-sa-looker.iam.gserviceaccount.com",
+	        Role:   "roles/storage.objectAdmin",
+	    },
+	    {
+	        // For using the KMS key to encrypt the export (Required for periodic_export_config)
+	        Member: "serviceAccount:service-{project_number}@gcp-sa-looker.iam.gserviceaccount.com",
+	        Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+	    },
+	})
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
