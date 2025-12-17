@@ -18,7 +18,7 @@ test-integration:
 	go version
 	terraform --version
 	./config-tf-dev-override.sh
-	TF_CLI_CONFIG_FILE="$${PWD}/${TF_CONFIG_FILE}" GO111MODULE=on go test -run=TestAcc $(TESTPATH) $(TESTARGS) -parallel 8 -timeout 30m -v ./...
+	TF_CLI_CONFIG_FILE="$${PWD}/${TF_CONFIG_FILE}" GO111MODULE=on go test -run=TestAcc $(TESTPATH) $(TESTARGS) -parallel 2 -timeout 30m -v ./...
 
 mod-clean:
 	git restore go.mod
