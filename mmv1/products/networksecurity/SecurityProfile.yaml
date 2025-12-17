@@ -309,7 +309,6 @@ properties:
           This field is used for Packet Broker mirroring endpoint groups to specify
           the deployment groups that the packet should be mirrored to by the broker.
           Format: projects/{project_id}/locations/global/mirroringDeploymentGroups/{deployment_group_id}
-        immutable: true
         min_version: 'beta'
       - name: 'mirroringEndpointGroupType'
         type: String

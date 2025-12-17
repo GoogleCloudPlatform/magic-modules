@@ -39,6 +39,7 @@ type TgcMetadataPayload struct {
 	RawConfig        string                       `json:"raw_config"`
 	ResourceMetadata map[string]*ResourceMetadata `json:"resource_metadata"`
 	PrimaryResource  string                       `json:"primary_resource"`
+	CaiReadTime      time.Time                    `json:"cai_read_time"`
 }
 
 type ResourceTestData struct {
