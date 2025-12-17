@@ -1,0 +1,30 @@
+resource "google_compute_interconnect_attachment" "{{$.PrimaryResourceId}}" {
+  name                     = "{{index $.Vars "interconnect_attachment_name"}}"
+  edge_availability_domain = "AVAILABILITY_DOMAIN_1"
+  type                     = "L2_DEDICATED"
+  router                   = google_compute_router.foobar.id
+  mtu                      = 1500
+  labels                   = { mykey = "myvalue" }
+
+  l2_forwarding {
+    network = google_compute_network.foobar.self_link
+    geneve_header {
+      vni = 1001
+    }
+    default_appliance_ip_address = "192.168.0.1"
+    tunnel_endpoint_ip_address   = "192.168.0.2"
+  }
+}
+
+resource "google_compute_router" "foobar" {
+  name    = "{{index $.Vars "router_name"}}"
+  network = google_compute_network.foobar.name
+  bgp {
+    asn = 16550
+  }
+}
+
+resource "google_compute_network" "foobar" {
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}

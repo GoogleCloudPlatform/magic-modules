@@ -48,6 +48,14 @@ examples:
       interconnect_attachment_name: 'on-prem-attachment'
       router_name: 'router-1'
       network_name: 'network-1'
+
+  - name: 'interconnect_attachment_l2'
+    primary_resource_id: 'on_prem'
+    vars:
+      interconnect_attachment_name: 'on-prem-attachment'
+      router_name: 'router-1'
+      network_name: 'network-1'
+    exclude_docs: true
   - name: 'interconnect_attachment_dedicated'
     primary_resource_id: 'on_prem'
     vars:
@@ -81,6 +89,40 @@ parameters:
     resource: 'Region'
     imports: 'selfLink'
 properties:
+  - name: 'l2Forwarding'
+    type: NestedObject
+    description: |
+      L2 Interconnect Attachment related config. This field is required if the type is L2_DEDICATED.
+      The configuration specifies how VLAN tags (like dot1q, qinq, or dot1ad) within L2 packets are mapped
+      to the destination appliances IP addresses.
+      The packet is then encapsulated with the appliance IP address and sent to the edge appliance.
+    properties:
+      - name: 'network'
+        type: String
+        description: |
+          Resource URL of the network to which this attachment belongs.
+      - name: 'geneveHeader'
+        type: NestedObject
+        description: |
+          It represents the structure of a Geneve (Generic Network Virtualization Encapsulation) header,
+          as defined in RFC8926. It encapsulates packets from various protocols (e.g., Ethernet, IPv4, IPv6)
+          for use in network virtualization environments.
+        properties:
+          - name: 'vni'
+            type: Integer
+            description: |
+              VNI is a 24-bit unique virtual network identifier, from 0 to 16,777,215.
+      - name: 'defaultApplianceIpAddress'
+        type: String
+        description: |
+          A single IPv4 or IPv6 address used as the default destination IP when there is no VLAN mapping result found.
+          Unset field (null-value) indicates the unmatched packet should be dropped.
+      - name: 'tunnelEndpointIpAddress'
+        type: String
+        description: |
+          A single IPv4 or IPv6 address. This address will be used as the source IP address for
+          packets sent to the appliances, and must be used as the destination IP address for packets that
+          should be sent out through this attachment.
   - name: 'adminEnabled'
     type: Boolean
     description: |
@@ -191,6 +233,7 @@ properties:
       - 'DEDICATED'
       - 'PARTNER'
       - 'PARTNER_PROVIDER'
+      - 'L2_DEDICATED'
   - name: 'state'
     type: Enum
     description: |
