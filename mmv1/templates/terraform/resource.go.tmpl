@@ -370,8 +370,8 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     identity, err := d.Identity()
     if err == nil && identity != nil {
     {{- range $p := $.IdentityProperties }}
-        if {{ $p.CamelizeProperty }}Value := res["{{ underscore $p.Name}}"]; !{{ $p.CamelizeProperty }}Value.IsNull() && {{ $p.CamelizeProperty }}Value.AsString() != "" {
-            if err = identity.Set("{{ underscore $p.Name}}", {{ $p.CamelizeProperty }}Value.AsString()); err != nil {
+        if {{ $p.CamelizeProperty }}Value := res["{{ underscore $p.Name}}"].(string); {{ $p.CamelizeProperty }}Value != "" {
+            if err = identity.Set("{{ underscore $p.Name}}", {{ $p.CamelizeProperty }}Value); err != nil {
                 return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
             }
         }
@@ -1092,8 +1092,8 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
     identity, err := d.Identity()
     if err == nil && identity != nil {
     {{- range $p := $.IdentityProperties }}
-        if {{ $p.CamelizeProperty }}Value := res["{{ underscore $p.Name}}"]; !{{ $p.CamelizeProperty }}Value.IsNull() && {{ $p.CamelizeProperty }}Value.AsString() != "" {
-            if err = identity.Set("{{ underscore $p.Name}}", {{ $p.CamelizeProperty }}Value.AsString()); err != nil {
+        if {{ $p.CamelizeProperty }}Value := res["{{ underscore $p.Name}}"].(string); {{ $p.CamelizeProperty }}Value != "" {
+            if err = identity.Set("{{ underscore $p.Name}}", {{ $p.CamelizeProperty }}Value); err != nil {
                 return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
             }
         }
