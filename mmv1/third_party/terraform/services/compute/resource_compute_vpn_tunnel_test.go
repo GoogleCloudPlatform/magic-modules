@@ -147,7 +147,9 @@ func TestAccComputeVpnTunnel_cipherSuite(t *testing.T) {
 				Config: testAccComputeVpnTunnel_basicCipherSuite(suffix),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase1.0.encryption.0", "AES-GCM-16-128"),
+					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase1.0.encryption.1", "AES-GCM-16-192"),
 					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase2.0.integrity.0", "HMAC-SHA2-256-128"),
+					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase2.0.integrity.1", "HMAC-SHA1-96"),
 				),
 			},
 		},
@@ -187,7 +189,7 @@ resource "google_compute_external_vpn_gateway" "external_gateway" {
     id         = 0
     ip_address = "8.8.8.8"
   }
-}`
+}
 
 resource "google_compute_router" "foobar" {
   name    = "tf-test-router-%[1]s"
