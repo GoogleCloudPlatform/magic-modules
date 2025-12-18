@@ -1267,7 +1267,7 @@ func TestAccComputeInstanceFromMachineImage_IgmpQuery_v2(t *testing.T) {
 				Config: testAccComputeInstanceFromMachineImage_igmpQuery_v2(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
-						t, "google_compute_instance.foobar", &instance),
+						t, "google_compute_instance_from_machine_image.foobar", &instance),
 					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar", "network_interface.0.igmp_query", "IGMP_QUERY_V2"),
 				),
 			},
@@ -1275,7 +1275,7 @@ func TestAccComputeInstanceFromMachineImage_IgmpQuery_v2(t *testing.T) {
 				Config: testAccComputeInstanceFromMachineImage_igmpQuery_v2(contextUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
-						t, "google_compute_instance.foobar", &instance),
+						t, "google_compute_instance_from_machine_image.foobar", &instance),
 					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar", "network_interface.0.igmp_query", "IGMP_QUERY_DISABLED"),
 				),
 			},
@@ -1283,7 +1283,7 @@ func TestAccComputeInstanceFromMachineImage_IgmpQuery_v2(t *testing.T) {
 				Config: testAccComputeInstanceFromMachineImage_igmpQuery_v2(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
-						t, "google_compute_instance.foobar", &instance),
+						t, "google_compute_instance_from_machine_image.foobar", &instance),
 					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar", "network_interface.0.igmp_query", "IGMP_QUERY_V2"),
 				),
 			},
