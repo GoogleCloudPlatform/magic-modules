@@ -34,7 +34,7 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/service_directory_endpoint.go.tmpl'
   encoder: 'templates/terraform/encoders/service_directory_metadata_to_annotations.go.tmpl'
   decoder: 'templates/terraform/decoders/service_directory_metadata_to_annotations.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/service_directory.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/service_directory_endpoint.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'service_directory_endpoint_basic'
