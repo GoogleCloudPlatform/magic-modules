@@ -139,6 +139,8 @@ func valueIsInArray(value interface{}, array []interface{}) bool {
 	return false
 }
 
+// This function merges the live dataPolicies with the ones defined in tf config
+// This will be called only when "ignore_schema_changes" with "dataPolicies" is defined
 func mergeDataPolicies(configFields []*bigquery.TableFieldSchema, liveFields []*bigquery.TableFieldSchema, rawSchema []interface{}) {
 	liveMap := make(map[string]*bigquery.TableFieldSchema)
 	if liveFields != nil {
@@ -2461,16 +2463,8 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	if slices.Contains(ignoreSchemaChanges, "dataPolicies") {
-		// Even though we used Patch here originally, merging is safer to ensure
-		// the resulting schema is exactly what we calculated.
-		if _, err = config.NewBigQueryClient(userAgent).Tables.Patch(project, datasetID, tableID, table).Do(); err != nil {
-			return err
-		}
-	} else {
-		if _, err = config.NewBigQueryClient(userAgent).Tables.Update(project, datasetID, tableID, table).Do(); err != nil {
-			return err
-		}
+	if _, err = config.NewBigQueryClient(userAgent).Tables.Update(project, datasetID, tableID, table).Do(); err != nil {
+		return err
 	}
 
 	return resourceBigQueryTableRead(d, meta)
