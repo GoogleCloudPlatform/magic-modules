@@ -23,6 +23,8 @@ references:
   guides:
     'Official Documentation': 'https://cloud.google.com/load-balancing/docs/ssl-certificates'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionSslCertificates'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 docs:
   optional_properties: |
     * `name_prefix` - (Optional) Creates a unique name beginning with the
@@ -49,6 +51,7 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
+  tgc_decoder: 'templates/tgc_next/custom_expand/region_ssl_certificate_decoder.go.tmpl'
   extra_schema_entry: 'templates/terraform/extra_schema_entry/ssl_certificate.tmpl'
   constants: 'templates/terraform/constants/compute_certificate.go.tmpl'
 examples:
@@ -96,6 +99,7 @@ properties:
       The chain must include at least one intermediate cert.
     required: true
     sensitive: true
+    is_missing_in_cai: true
   - name: 'creationTimestamp'
     type: Time
     description: 'Creation timestamp in RFC3339 text format.'
@@ -137,3 +141,4 @@ properties:
     sensitive: true
     diff_suppress_func: 'sha256DiffSuppress'
     custom_flatten: 'templates/terraform/custom_flatten/sha256.tmpl'
+    is_missing_in_cai: true
