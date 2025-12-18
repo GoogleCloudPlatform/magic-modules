@@ -120,6 +120,7 @@ tgc_include_handwritten_tests: true
 custom_code:
   encoder: 'templates/terraform/encoders/redis_cluster.go.tmpl'
   decoder: 'templates/terraform/decoders/redis_cluster.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/redis_cluster.go.tmpl'
 sweeper:
   ensure_value:
     field: deletionProtectionEnabled
