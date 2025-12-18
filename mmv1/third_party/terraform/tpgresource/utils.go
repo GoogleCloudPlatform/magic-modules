@@ -196,6 +196,14 @@ func IsConflictError(err error) bool {
 			return true
 		}
 	}
+	// For cases where the error is not wrapped by errwrap such in 409 IAM concurrency errors.
+	var gErr *googleapi.Error
+	if errors.As(err, &gErr) {
+		if gErr.Code == 409 || gErr.Code == 412 {
+			return true
+		}
+	}
+
 	return false
 }
 
