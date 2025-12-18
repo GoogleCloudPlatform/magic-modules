@@ -69,7 +69,6 @@ examples:
       interconnect_attachment_name: 'test-custom-ranges-interconnect-attachment'
       router_name: 'test-router'
       network_name: 'test-network'
-    min_version: beta
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -367,28 +366,24 @@ properties:
       Single IPv4 address + prefix length to be configured on the cloud router interface for this
       interconnect attachment. Example: 203.0.113.1/29
     immutable: true
-    min_version: beta
   - name: 'candidateCustomerRouterIpAddress'
     type: String
     description: |
       Single IPv4 address + prefix length to be configured on the customer router interface for this
       interconnect attachment. Example: 203.0.113.2/29
     immutable: true
-    min_version: beta
   - name: 'candidateCloudRouterIpv6Address'
     type: String
     description: |
       Single IPv6 address + prefix length to be configured on the cloud router interface for this
       interconnect attachment. Example: 2001:db8::1/125
     immutable: true
-    min_version: beta
   - name: 'candidateCustomerRouterIpv6Address'
     type: String
     description: |
       Single IPv6 address + prefix length to be configured on the customer router interface for this
       interconnect attachment. Example: 2001:db8::2/125
     immutable: true
-    min_version: beta
   - name: 'attachmentGroup'
     type: String
     description: |
