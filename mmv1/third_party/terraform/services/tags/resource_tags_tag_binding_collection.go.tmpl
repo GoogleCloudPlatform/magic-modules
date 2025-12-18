@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -68,6 +69,10 @@ This field is non-authoritative. Terraform will only manage the tags present in 
 locations/{location}/tagBindingCollections/{encoded_full_resource_name}`,
 			},
 		},
+
+		CustomizeDiff: customdiff.All(
+			resourceTagsTagBindingCollectionCustomizeDiff,
+		),
 		UseJSONNumber: true,
 	}
 }
@@ -149,12 +154,15 @@ func resourceTagsTagBindingCollectionUpsert(ctx context.Context, d *schema.Resou
 		return diags
 	}
 
+	log.Printf("[DEBUG] Current Tags %#v", currentTags)
+	log.Printf("[DEBUG] Configured Tags %#v", configuredTags)
+
 	mergedTags := make(map[string]interface{})
 	for k, v := range currentTags {
 		mergedTags[k] = v
 	}
 	for k, v := range configuredTags {
-		// This will also overwrite the current bindings with the bindings in terraform config, nullifying any updates done outside of terraform config
+		// This will also overwrite the a key with value as configured in terraform, nullifying any updates to the same binding outside of terraform
 		mergedTags[k] = v
 	}
 
@@ -165,12 +173,14 @@ func resourceTagsTagBindingCollectionUpsert(ctx context.Context, d *schema.Resou
 		if diags != nil {
 			return diags
 		}
+		log.Printf("[DEBUG] Old Tags %#v", oldTags)
 		for k := range oldTags {
 			if _, existsInNewConfig := configuredTags[k]; !existsInNewConfig {
 				delete(mergedTags, k)
 			}
 		}
 	}
+	log.Printf("[DEBUG] Merged Tags %#v", mergedTags)
 	obj["tags"] = mergedTags
 
 	// Step 3: Write
