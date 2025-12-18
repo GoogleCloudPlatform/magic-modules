@@ -1,190 +1,205 @@
 ---
-name: 'Environment'
-description: |
-  Represents an environment for an agent. You can create multiple versions of your agent and publish them to separate environments.
+name: Environment
+description: >
+  Represents an environment for an agent. You can create multiple
+  versions of your agent and publish them to separate environments.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/dialogflow/docs/'
-  api: 'https://cloud.google.com/dialogflow/docs/reference/rest/v2/projects/environment'
-docs:
-id_format: 'projects/{{project}}/locations/{{location}}/agent/environments/{{environmentid}}'
-base_url: 'projects/{{project}}/locations/{{location}}/agent/environments/{{environmentid}}'
-create_url: 'projects/{{project}}/locations/{{location}}/agent/environments/?environmentId={{environmentid}}'
-self_link: 'projects/{{project}}/locations/{{location}}/agent/environments/{{environmentid}}'
-update_verb: 'PATCH'
+    Official Documentation: https://cloud.google.com/dialogflow/docs/
+  api: https://cloud.google.com/dialogflow/docs/reference/rest/v2/projects/environment
+docs: null
+id_format: projects/{{project}}/locations/{{location}}/agent/environments/{{environmentid}}
+base_url: projects/{{project}}/locations/{{location}}/agent/environments/{{environmentid}}
+create_url: projects/{{project}}/locations/{{location}}/agent/environments/?environmentId={{environmentid}}
+self_link: projects/{{project}}/locations/{{location}}/agent/environments/{{environmentid}}
+update_verb: PATCH
 update_mask: true
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/agent/environments/{{environmentid}}'
+  - projects/{{project}}/locations/{{location}}/agent/environments/{{environmentid}}
 timeouts:
   insert_minutes: 40
   update_minutes: 40
   delete_minutes: 20
 exclude_sweeper: true
 examples:
-  - name: 'dialogflow_environment_basic'
-    primary_resource_id: 'basic_environment'
+  - name: dialogflow_environment_basic
+    primary_resource_id: basic_environment
     vars:
-      project_id: 'my-proj'
+      project_id: my-proj
     test_env_vars:
-      org_id: 'ORG_ID'
-      billing_acct: 'BILLING_ACCT'
+      org_id: ORG_ID
+      billing_acct: BILLING_ACCT
     external_providers:
-      - "time"
+      - time
 parameters:
-  - name: 'environmentid'
+  - name: environmentid
     type: String
     url_param_only: true
     required: true
-  - name: 'location'
+  - name: location
     type: String
     url_param_only: true
-    default_value: 'global'
+    default_value: global
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The unique identifier of this agent environment.
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       The developer-provided description for this environment.
-  - name: 'agentVersion'
+  - name: agentVersion
     type: String
-    description: |
+    description: >
       The agent version loaded into this environment. Supported formats:
+
       - projects/<Project ID>/agent/versions/<Version ID>
+
       - projects/<Project ID>/locations/<Location ID>/agent/versions/<Version ID> 
-  - name: 'state'
+  - name: state
     type: Enum
     description: |
       The state of this environment.
     output: true
     enum_values:
-    - 'STOPPED'
-    - 'LOADING'
-    - 'RUNNING'
-  - name: 'textToSpeechSettings'
+      - STOPPED
+      - LOADING
+      - RUNNING
+  - name: textToSpeechSettings
     type: NestedObject
     description: |
       Text to speech settings for this environment.
     properties:
-      - name: 'enableTextToSpeech'
+      - name: enableTextToSpeech
         type: Boolean
-        description: |
-          Indicates whether text to speech is enabled. Even when this field is false, other settings in this proto are still retained.
-      - name: 'outputAudioEncoding'
+        description: >
+          Indicates whether text to speech is enabled. Even when this field
+          is false, other settings in this proto are still retained.
+      - name: outputAudioEncoding
         type: Enum
         description: |
           Audio encoding of the synthesized audio content.
         enum_values:
-        - 'OUTPUT_AUDIO_ENCODING_UNSPECIFIED'
-        - 'OUTPUT_AUDIO_ENCODING_LINEAR_16'
-        - 'OUTPUT_AUDIO_ENCODING_MP3'
-        - 'OUTPUT_AUDIO_ENCODING_MP3_64_KBPS'
-        - 'OUTPUT_AUDIO_ENCODING_OGG_OPUS'
-        - 'OUTPUT_AUDIO_ENCODING_MULAW'
-        - 'OUTPUT_AUDIO_ENCODING_ALAW'
-      - name: 'sampleRateHertz'
+          - OUTPUT_AUDIO_ENCODING_UNSPECIFIED
+          - OUTPUT_AUDIO_ENCODING_LINEAR_16
+          - OUTPUT_AUDIO_ENCODING_MP3
+          - OUTPUT_AUDIO_ENCODING_MP3_64_KBPS
+          - OUTPUT_AUDIO_ENCODING_OGG_OPUS
+          - OUTPUT_AUDIO_ENCODING_MULAW
+          - OUTPUT_AUDIO_ENCODING_ALAW
+      - name: sampleRateHertz
         type: Integer
         description: |
           The synthesis sample rate (in hertz) for this audio.
-      - name: 'synthesizeSpeechConfigs'
-        type: 'Map'
-        description: |
-          Configuration of how speech should be synthesized, mapping from language to SynthesizeSpeechConfig.
-        key_name: 'language'
+      - name: synthesizeSpeechConfigs
+        type: Map
+        description: >
+          Configuration of how speech should be synthesized, mapping from
+          language to SynthesizeSpeechConfig.
+        key_name: language
         key_description: |
           The language.
         value_type:
           name: synthesizeSpeechConfig
           type: NestedObject
           properties:
-          - type: Double
-            name: 'speakingRate'
-            description: |
-             Speaking rate/speed, in the range [0.25, 4.0].
-          - type: Double
-            name: 'pitch'
-            description: |
-              Speaking pitch, in the range [-20.0, 20.0]. 20 means increase 20 semitones from the original pitch. -20 means decrease 20 semitones from the original pitch.
-          - type: Double
-            name: 'volumeGainDb'
-            description: |
-              Volume gain (in dB) of the normal native volume supported by the specific voice.
-          - type: Array
-            name: 'effectsProfileId'
-            description: |
-              An identifier which selects 'audio effects' profiles that are applied on (post synthesized) text to speech. Effects are applied on top of each other in the order they are given.
-            item_type:
-              type: String
-          - type: NestedObject
-            name: voice
-            description: |
-              The desired voice of the synthesized audio.
-            properties:
-              - type: String
-                name: 'name'
-                description: |
-                  The name of the voice.
-              - type: Enum
-                name: 'ssmlGender'
-                description: |
-                  The preferred gender of the voice.
-                enum_values:
-                  - SSML_VOICE_GENDER_UNSPECIFIED
-                  - SSML_VOICE_GENDER_MALE
-                  - SSML_VOICE_GENDER_FEMALE
-                  - SSML_VOICE_GENDER_NEUTRAL
-  - name: 'fulfillment'
+            - type: Double
+              name: speakingRate
+              description: |
+                Speaking rate/speed, in the range [0.25, 4.0].
+            - type: Double
+              name: pitch
+              description: >
+                Speaking pitch, in the range [-20.0, 20.0]. 20 means increase 20
+                semitones from the original pitch. -20 means decrease 20
+                semitones from the original pitch.
+            - type: Double
+              name: volumeGainDb
+              description: >
+                Volume gain (in dB) of the normal native volume supported by the
+                specific voice.
+            - type: Array
+              name: effectsProfileId
+              description: >
+                An identifier which selects 'audio effects' profiles that are
+                applied on (post synthesized) text to speech. Effects are
+                applied on top of each other in the order they are given.
+              item_type:
+                type: String
+            - type: NestedObject
+              name: voice
+              description: |
+                The desired voice of the synthesized audio.
+              properties:
+                - type: String
+                  name: name
+                  description: |
+                    The name of the voice.
+                - type: Enum
+                  name: ssmlGender
+                  description: |
+                    The preferred gender of the voice.
+                  enum_values:
+                    - SSML_VOICE_GENDER_UNSPECIFIED
+                    - SSML_VOICE_GENDER_MALE
+                    - SSML_VOICE_GENDER_FEMALE
+                    - SSML_VOICE_GENDER_NEUTRAL
+  - name: fulfillment
     type: NestedObject
     description: |
       desc
     properties:
-      - name: 'name'
+      - name: name
         type: String
-        description: |
-          The unique identifier of the fulfillment. Supports the following formats:
+        description: >
+          The unique identifier of the fulfillment. Supports the following
+          formats:
+
           - projects/<Project ID>/agent/fulfillment
+
           - projects/<Project ID>/locations/<Location ID>/agent/fulfillment
-      - name: 'displayName'
+      - name: displayName
         type: String
         description: |
           The human-readable name of the fulfillment, unique within the agent.
-      - name: 'features'
+      - name: features
         type: Array
-        description: |
-          The field defines whether the fulfillment is enabled for certain features.
-        item_type: 
+        description: >
+          The field defines whether the fulfillment is enabled for certain
+          features.
+        item_type:
           type: NestedObject
           properties:
-            - name: 'type'
+            - name: type
               type: Enum
               description: |
                 The type of the feature that enabled for fulfillment.
               required: true
               enum_values:
-                - 'TYPE_UNSPECIFIED'
-                - 'SMALLTALK'
-      - name: 'genericWebService'
+                - TYPE_UNSPECIFIED
+                - SMALLTALK
+      - name: genericWebService
         type: NestedObject
         description: |
           Represents configuration for a generic web service.
         properties:
-          - name: 'uri'
+          - name: uri
             type: String
-            description: |
-              The fulfillment URI for receiving POST requests. It must use https protocol.
+            description: >
+              The fulfillment URI for receiving POST requests. It must use https
+              protocol.
             required: true
-          - name: 'username'
+          - name: username
             type: String
             description: |
               The user name for HTTP Basic authentication.
-          - name: 'password'
+          - name: password
             type: String
             description: |
               The password for HTTP Basic authentication.
-          - name: 'requestHeaders'
+          - name: requestHeaders
             type: KeyValuePairs
-            description: |
+            description: >
               The HTTP request headers to send together with fulfillment requests
