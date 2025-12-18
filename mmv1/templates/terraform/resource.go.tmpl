@@ -790,6 +790,19 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
         return err
     }
 
+    identity, err := d.Identity()
+    if err == nil && identity != nil {
+    {{- range $p := $.IdentityProperties }}
+        if {{ $p.CamelizeProperty }}Value, ok := d.GetOk("{{ underscore $p.Name}}"); ok && {{ $p.CamelizeProperty }}Value.(string)!= "" {
+            if err = identity.Set("{{ underscore $p.Name}}", {{ $p.CamelizeProperty }}Value.(string)); err != nil {
+                return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+            }
+        }
+    {{- end }}
+    } else {
+        log.Printf("[DEBUG] (Update) identity not set: %s", err)
+    }
+
     billingProject := ""
 
 {{          if $.HasProject -}}
@@ -1088,19 +1101,6 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 {{ "" }}
   d.Partial(false)
 {{-         end  }}{{/*if FieldSpecificUpdateMethods*/}}
-
-    identity, err := d.Identity()
-    if err == nil && identity != nil {
-    {{- range $p := $.IdentityProperties }}
-        if {{ $p.CamelizeProperty }}Value, ok := d.GetOk("{{ underscore $p.Name}}"); ok && {{ $p.CamelizeProperty }}Value.(string)!= "" {
-            if err = identity.Set("{{ underscore $p.Name}}", {{ $p.CamelizeProperty }}Value.(string)); err != nil {
-                return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
-            }
-        }
-    {{- end }}
-    } else {
-        log.Printf("[DEBUG] (Update) identity not set: %s", err)
-    }
 
 {{          if $.CustomCode.PostUpdate -}}
     {{ customTemplate $ $.CustomCode.PostUpdate false -}}
