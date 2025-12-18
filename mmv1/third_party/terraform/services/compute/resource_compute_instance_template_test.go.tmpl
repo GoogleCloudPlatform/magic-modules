@@ -1577,6 +1577,114 @@ func TestAccComputeInstanceTemplate_partnerMetadata(t *testing.T) {
 }
 {{- end }}
 
+func TestAccComputeInstance_IPv6ExternalRecreate(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceIPv6External(acctest.RandString(t, 10), false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.test", &instance),
+				),
+			},
+			{
+				// troca de IPv6 → recreate obrigatório
+				Config: testAccComputeInstanceIPv6External(acctest.RandString(t, 10), true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.test", &instance),
+				),
+			},
+			{
+				ResourceName:      "google_compute_instance.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeInstanceIPv6External(suffix string, useNewIPv6 bool) string {
+	ipv6Ref := "google_compute_address.old_static_external_ipv6.address"
+	if useNewIPv6 {
+		ipv6Ref = "google_compute_address.new_static_external_ipv6.address"
+	}
+
+	return fmt.Sprintf(`
+data "google_compute_image" "debian" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_network" "test_vpc" {
+  name                     = "tf-test-vpc-dual-stack-%s"
+  auto_create_subnetworks  = false
+  enable_ula_internal_ipv6 = true
+}
+
+resource "google_compute_subnetwork" "dual_stack" {
+  name          = "tf-test-subnet-dual-stack-%s"
+  region        = "us-central1"
+
+  ip_cidr_range = "10.0.0.0/22"
+
+  stack_type       = "IPV4_IPV6"
+  ipv6_access_type = "EXTERNAL"
+
+  network = google_compute_network.test_vpc.id
+}
+
+resource "google_compute_address" "old_static_external_ipv6" {
+  name               = "tf-test-ipv6-old-%s"
+  region             = "us-central1"
+  subnetwork         = google_compute_subnetwork.dual_stack.id
+  ip_version         = "IPV6"
+  ipv6_endpoint_type = "VM"
+}
+
+resource "google_compute_address" "new_static_external_ipv6" {
+  name               = "tf-test-ipv6-new-%s"
+  region             = "us-central1"
+  subnetwork         = google_compute_subnetwork.dual_stack.id
+  ip_version         = "IPV6"
+  ipv6_endpoint_type = "VM"
+}
+
+resource "google_compute_instance" "test" {
+  name         = "tf-test-vm-ipv6-%s"
+  machine_type = "n1-standard-1"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.debian.self_link
+      size  = 200
+    }
+  }
+
+  network_interface {
+    network    = google_compute_network.test_vpc.id
+    subnetwork = google_compute_subnetwork.dual_stack.id
+    stack_type = "IPV4_IPV6"
+
+    ipv6_access_config {
+      external_ipv6               = %s
+      external_ipv6_prefix_length = 96
+      name                         = "test-vm-ipv6-name"
+      network_tier                 = "PREMIUM"
+    }
+  }
+}
+`, suffix, suffix, suffix, suffix, suffix, ipv6Ref)
+}
+
 func TestAccComputeInstanceTemplate_sourceSnapshotEncryptionKey(t *testing.T) {
 	t.Parallel()
 
