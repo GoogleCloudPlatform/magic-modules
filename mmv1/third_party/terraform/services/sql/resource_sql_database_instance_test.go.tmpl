@@ -4201,6 +4201,8 @@ func TestAccSqlDatabaseInstance_editionUpdateForEnhancedBackupTierInstance(t *te
         "backup_vault_id":   backupVaultID,
         "backup_vault":      backupVault,
         "db_version":        "MYSQL_8_0_41",
+		"edition":           "ENTERPRISE",
+		"tier":              "db-f1-micro",
     }
 
     acctest.VcrTest(t, resource.TestCase{
@@ -4401,6 +4403,13 @@ resource "google_backup_dr_backup_plan_association" "backup_association" {
 }
 
 func testGoogleSqlDatabaseInstance_editionUpdateForGcbdrManagedInstance(context map[string]interface{}, edition string, tier string) string {
+ // Create a copy of the context map to avoid modifying the map from the caller
+    localContext := make(map[string]interface{})
+	for k, v := range context {
+        localContext[k] = v
+    }
+    localContext["edition"] = edition
+    localContext["tier"] = tier
     return acctest.Nprintf(`
 data "google_project" "project" {}
 
@@ -4411,7 +4420,7 @@ resource "google_sql_database_instance" "instance" {
 
   settings {
     tier = "%{tier}"
-	edition = "%{edition}"
+    edition = "%{edition}"
 
     backup_configuration {
       enabled            = false
@@ -4457,7 +4466,7 @@ resource "google_backup_dr_backup_plan_association" "backup_association" {
   resource_type                 = "sqladmin.googleapis.com/Instance"
   backup_plan                   = google_backup_dr_backup_plan.plan.name
 }
-`, context)
+`, localContext)
 }
 
 func testGoogleSqlDatabaseInstance_setCustomSubjectAlternateName(context map[string]interface{}) string {
