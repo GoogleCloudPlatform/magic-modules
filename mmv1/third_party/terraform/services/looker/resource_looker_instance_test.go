@@ -131,7 +131,6 @@ resource "google_looker_instance" "test" {
 func TestAccLookerInstance_updatePeriodicExport(t *testing.T) {
 	t.Parallel()
 
-	// Step 1: Create instance WITHOUT periodic export
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 	}
