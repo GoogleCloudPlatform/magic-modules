@@ -57,7 +57,7 @@ properties:
 
       - projects/<Project ID>/agent/versions/<Version ID>
 
-      - projects/<Project ID>/locations/<Location ID>/agent/versions/<Version ID> 
+      - projects/<Project ID>/locations/<Location ID>/agent/versions/<Version ID>
   - name: state
     type: Enum
     description: |
