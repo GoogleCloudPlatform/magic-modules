@@ -4156,13 +4156,11 @@ func TestAccSqlDatabaseInstance_majorVersionUpgradeForEnhancedBackupTierInstance
     t.Parallel()
 
     backupVaultID := "bv-test"
-    location := "us-central1"
-    project := envvar.GetTestProjectFromEnv()
-    backupVault := acctest.BootstrapBackupDRVault(t, backupVaultID, location)
+    backupVault := acctest.BootstrapBackupDRVault(t, backupVaultID, "us-central1")
 
     context := map[string]interface{}{
         "random_suffix":     acctest.RandString(t, 10),
-        "project":           project,
+        "project":           envvar.GetTestProjectFromEnv(),
         "backup_vault_id":   backupVaultID,
         "backup_vault":      backupVault,
         "db_version":        "MYSQL_8_0_41",
@@ -4195,13 +4193,11 @@ func TestAccSqlDatabaseInstance_editionUpdateForEnhancedBackupTierInstance(t *te
     t.Parallel()
 
     backupVaultID := "bv-test"
-    location := "us-central1"
-    project := envvar.GetTestProjectFromEnv()
-    backupVault := acctest.BootstrapBackupDRVault(t, backupVaultID, location)
+    backupVault := acctest.BootstrapBackupDRVault(t, backupVaultID, "us-central1")
 
     context := map[string]interface{}{
         "random_suffix":     acctest.RandString(t, 10),
-        "project":           project,
+        "project":           envvar.GetTestProjectFromEnv(),
         "backup_vault_id":   backupVaultID,
         "backup_vault":      backupVault,
         "db_version":        "MYSQL_8_0_41",
