@@ -2541,6 +2541,12 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 		}
 	}
 
+	for _, e := range r.Examples {
+		for _, p := range e.IgnoreReadExtra {
+			props = append(props, p)
+		}
+	}
+
 	if r.IgnoreCaiAssetName() {
 		props = append(props, "ASSETNAME")
 	}
