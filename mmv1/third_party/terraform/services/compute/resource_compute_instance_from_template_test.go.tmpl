@@ -2066,24 +2066,24 @@ func TestAccComputeInstanceFromTemplate_IgmpQuery_v2(t *testing.T) {
 				Config: testAccComputeInstanceFromTemplate_igmpQuery_v2(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
-						t, "google_compute_instance.foobar", &instance),
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.0.igmp_query", "IGMP_QUERY_V2"),
+						t, "google_compute_instance_from_template.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance_from_template.foobar", "network_interface.0.igmp_query", "IGMP_QUERY_V2"),
 				),
 			},
 			{
 				Config: testAccComputeInstanceFromTemplate_igmpQuery_v2(contextUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
-						t, "google_compute_instance.foobar", &instance),
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.0.igmp_query", "IGMP_QUERY_DISABLED"),
+						t, "google_compute_instance_from_template.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance_from_template.foobar", "network_interface.0.igmp_query", "IGMP_QUERY_DISABLED"),
 				),
 			},
 			{
 				Config: testAccComputeInstanceFromTemplate_igmpQuery_v2(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
-						t, "google_compute_instance.foobar", &instance),
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.0.igmp_query", "IGMP_QUERY_V2"),
+						t, "google_compute_instance_from_template.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance_from_template.foobar", "network_interface.0.igmp_query", "IGMP_QUERY_V2"),
 				),
 			},
 		},

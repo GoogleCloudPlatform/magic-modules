@@ -1268,7 +1268,7 @@ func TestAccComputeInstanceFromMachineImage_IgmpQuery_v2(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.0.igmp_query", "IGMP_QUERY_V2"),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar", "network_interface.0.igmp_query", "IGMP_QUERY_V2"),
 				),
 			},
 			{
@@ -1276,7 +1276,7 @@ func TestAccComputeInstanceFromMachineImage_IgmpQuery_v2(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.0.igmp_query", "IGMP_QUERY_DISABLED"),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar", "network_interface.0.igmp_query", "IGMP_QUERY_DISABLED"),
 				),
 			},
 			{
@@ -1284,7 +1284,7 @@ func TestAccComputeInstanceFromMachineImage_IgmpQuery_v2(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.0.igmp_query", "IGMP_QUERY_V2"),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar", "network_interface.0.igmp_query", "IGMP_QUERY_V2"),
 				),
 			},
 		},
@@ -1311,11 +1311,15 @@ resource "google_compute_subnetwork" "inst-test-subnetwork" {
 }
 
 resource "google_compute_instance" "vm" {
-  provider     = google-beta
   boot_disk {
     initialize_params {
       image = "debian-cloud/debian-12"
     }
+  }
+
+  network_interface {
+        network = google_compute_network.inst-test-network.id
+        subnetwork = google_compute_subnetwork.inst-test-subnetwork.id
   }
 
   name         = "base-vm-%{suffix}"
@@ -1324,7 +1328,6 @@ resource "google_compute_instance" "vm" {
 
 
 resource "google_compute_machine_image" "foobar" {
-  provider        = google-beta
   name            = "image-%{suffix}"
   source_instance = google_compute_instance.vm.self_link
 }
@@ -1335,9 +1338,6 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 	zone         = "%{env_region}-a"
 
 	source_machine_image = google_compute_machine_image.foobar.self_link
-
-
-	provider = google-beta
 
 	network_interface {
 		network = google_compute_network.inst-test-network.id
