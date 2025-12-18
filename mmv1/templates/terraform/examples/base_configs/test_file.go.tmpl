@@ -59,7 +59,9 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 	{{- if $e.SkipVcr }}
 	acctest.SkipIfVcr(t)
 	{{- end }}
+	{{- if not $e.RunInSerial}}
 	t.Parallel()
+	{{- end }}
 
 	{{- if $e.BootstrapIam }}
 	acctest.BootstrapIamMembers(t, []acctest.IamMember{

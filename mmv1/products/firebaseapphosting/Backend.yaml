@@ -37,6 +37,7 @@ examples:
     test_vars_overrides:
       # prevent tests from colliding with each other
       service_act_id: '"tf-test-fah-minimal"'
+    run_in_serial: true
   - name: firebase_app_hosting_backend_full
     primary_resource_id: example
     vars:
@@ -47,6 +48,7 @@ examples:
     test_vars_overrides:
       # prevent tests from colliding with each other
       service_act_id: '"tf-test-fah-full"'
+    run_in_serial: true
   - name: firebase_app_hosting_backend_github
     primary_resource_id: example
     vars:
