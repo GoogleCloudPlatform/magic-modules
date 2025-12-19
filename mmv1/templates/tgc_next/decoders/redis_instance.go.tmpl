@@ -1,6 +1,0 @@
-// These fields are missing in CAI assets, but requried in Terraform
-if _, ok := res["project"].(string); !ok {
-    res["project"] = "unknown"
-}
-
-return res, hclData, nil
