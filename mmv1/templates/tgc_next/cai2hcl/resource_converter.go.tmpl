@@ -143,6 +143,9 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 	}
 {{ end}}
 
+{{/* Attempt to parse all self-link parameters from asset name. */}}
+	outputFields := {{ $.OutputFieldSetStr }}
+	utils.ParseUrlParamValuesFromAssetName(asset.Name, "{{ $.Cai2hclAssetNameTemplate }}", outputFields, hclData)
 {{ range $prop := $.ReadPropertiesForTgc }}
 	{{ if $prop.FlattenObject -}}
 	if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config); flattenedProp != nil {
@@ -151,21 +154,9 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 		}
 	}
 	{{- else -}}
-    if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
-        return nil, fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
-    }
+	hclData["{{ underscore $prop.Name -}}"] = flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config)
 	{{- end}}
 {{- end}}
-
-	for key, sch := range c.schema {
-		if val, ok := d.GetOk(key); ok || sch.Required {
-			hclData[key] = val
-		}
-	}
-
-{{/* Attempt to parse all self-link parameters from asset name. */}}
-	outputFields := {{ $.OutputFieldSetStr }}
-	utils.ParseUrlParamValuesFromAssetName(asset.Name, "{{ $.Cai2hclAssetNameTemplate }}", outputFields, hclData)
 
 	ctyVal, err := utils.MapToCtyValWithSchema(hclData, c.schema)
 	if err != nil {
