@@ -367,6 +367,19 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     }
     d.SetId(id)
 
+    identity, err := d.Identity()
+    if err == nil && identity != nil {
+    {{- range $p := $.IdentityProperties }}
+        if {{ $p.CamelizeProperty }}Value, ok := d.GetOk("{{ underscore $p.Name}}"); ok && {{ $p.CamelizeProperty }}Value.(string)!= "" {
+            if err = identity.Set("{{ underscore $p.Name}}", {{ $p.CamelizeProperty }}Value.(string)); err != nil {
+                return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+            }
+        }
+    {{- end }}
+    } else {
+        log.Printf("[DEBUG] (Create) identity not set: %s", err)
+    }
+
 {{if and $.GetAsync ($.GetAsync.Allow "Create") -}}
 {{  if ($.GetAsync.IsA "OpAsync") -}}
 {{    if and $.GetAsync.Result.ResourceInsideResponse $.HasPostCreateComputedFields -}}
@@ -747,9 +760,9 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 {{- end}}
 
 	identity, err := d.Identity()
-    if err != nil && identity != nil {
+    if err == nil && identity != nil {
     {{- range $p := $.IdentityProperties }}
-    if v, ok := identity.GetOk("{{ underscore $p.Name}}"); ok && v != "" {
+    if v, ok := identity.GetOk("{{ underscore $p.Name}}");!ok && v == "" {
         err = identity.Set("{{ underscore $p.Name}}", d.Get("{{ underscore $p.Name}}").(string))
             if err != nil {
                 return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
@@ -757,7 +770,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     }
     {{- end }}
     } else {
-        log.Printf("[DEBUG] identity not set: %s", err)
+        log.Printf("[DEBUG] (Read) identity not set: %s", err)
     }
 {{- end }}
     return nil
@@ -775,6 +788,19 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
         return err
+    }
+
+    identity, err := d.Identity()
+    if err == nil && identity != nil {
+    {{- range $p := $.IdentityProperties }}
+        if {{ $p.CamelizeProperty }}Value, ok := d.GetOk("{{ underscore $p.Name}}"); ok && {{ $p.CamelizeProperty }}Value.(string)!= "" {
+            if err = identity.Set("{{ underscore $p.Name}}", {{ $p.CamelizeProperty }}Value.(string)); err != nil {
+                return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+            }
+        }
+    {{- end }}
+    } else {
+        log.Printf("[DEBUG] (Update) identity not set: %s", err)
     }
 
     billingProject := ""
