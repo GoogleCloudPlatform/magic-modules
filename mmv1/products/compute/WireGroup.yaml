@@ -112,7 +112,7 @@ properties:
             properties:
               - name: interconnect
                 type: string
-              - name: vlan_tags
+              - name: vlanTags
                 type: Array
                 description: |
                   VLAN tags for the interconnect.
