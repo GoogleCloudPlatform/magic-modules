@@ -106,6 +106,7 @@ resource "google_cloud_run_v2_service" "default" {
         cloud_storage_source {
           bucket = google_storage_bucket.sourcebucket.name
           object = google_storage_bucket_object.source_tar.name
+		  generation = google_storage_bucket_object.source_tar.generation
         }
       }
     }
@@ -150,6 +151,7 @@ resource "google_cloud_run_v2_service" "default" {
         cloud_storage_source {
           bucket = google_storage_bucket.sourcebucket.name
           object = google_storage_bucket_object.source_tar.name
+		  generation = google_storage_bucket_object.source_tar.generation
         }
       }
     }
