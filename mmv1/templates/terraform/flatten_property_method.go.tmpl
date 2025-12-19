@@ -167,11 +167,11 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 	return v
   {{- else if and ($.ResourceMetadata.IsTgcCompiler) ($.IsA "String") ($.Required) }}
 	if v == nil {
-		return "hidden"
+		return "unknown"
 	}
 	transformed := v.(string)
 	if transformed == "" {
-		return "hidden"
+		return "unknown"
 	}
 	return v
   {{- else }}
