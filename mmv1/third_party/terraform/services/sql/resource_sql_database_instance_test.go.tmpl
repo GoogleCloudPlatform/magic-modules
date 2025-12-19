@@ -4155,13 +4155,11 @@ func TestAccSqlDatabaseInstance_updateInstanceTierForEnhancedBackupTierInstance(
 func TestAccSqlDatabaseInstance_majorVersionUpgradeForEnhancedBackupTierInstance(t *testing.T) {
     t.Parallel()
 
-    backupVaultID := "bv-test"
-    backupVault := acctest.BootstrapBackupDRVault(t, backupVaultID, "us-central1")
+    backupVault := acctest.BootstrapBackupDRVault(t, "bv-test", "us-central1")
 
     context := map[string]interface{}{
         "random_suffix":     acctest.RandString(t, 10),
         "project":           envvar.GetTestProjectFromEnv(),
-        "backup_vault_id":   backupVaultID,
         "backup_vault":      backupVault,
         "db_version":        "MYSQL_8_0_41",
     }
@@ -4192,13 +4190,11 @@ func TestAccSqlDatabaseInstance_majorVersionUpgradeForEnhancedBackupTierInstance
 func TestAccSqlDatabaseInstance_editionUpdateForEnhancedBackupTierInstance(t *testing.T) {
     t.Parallel()
 
-    backupVaultID := "bv-test"
-    backupVault := acctest.BootstrapBackupDRVault(t, backupVaultID, "us-central1")
+    backupVault := acctest.BootstrapBackupDRVault(t, "bv-test", "us-central1")
 
     context := map[string]interface{}{
         "random_suffix":     acctest.RandString(t, 10),
         "project":           envvar.GetTestProjectFromEnv(),
-        "backup_vault_id":   backupVaultID,
         "backup_vault":      backupVault,
         "db_version":        "MYSQL_8_0_41",
 		"edition":           "ENTERPRISE",
@@ -4219,7 +4215,7 @@ func TestAccSqlDatabaseInstance_editionUpdateForEnhancedBackupTierInstance(t *te
             },
             {
                 // Edition upgrade, which should ignore backup_configuration settings
-				Config: testGoogleSqlDatabaseInstance_editionUpdateForGcbdrManagedInstance(context, "ENTERPRISE_PLUS", "db-n1-standard-4"),
+				Config: testGoogleSqlDatabaseInstance_editionUpdateForGcbdrManagedInstance(context, "ENTERPRISE_PLUS", "db-perf-optimized-N-4"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE_PLUS"),
 				),
