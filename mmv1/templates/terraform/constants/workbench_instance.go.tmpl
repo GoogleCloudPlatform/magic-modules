@@ -293,7 +293,12 @@ func workbenchMetadataCustomizeDiff(_ context.Context, diff *schema.ResourceDiff
 		oldMetadata := o.(map[string]interface{})
 		newMetadata := n.(map[string]interface{})
 
-		for _, key := range WorkbenchInstanceSettableUnmodifiableDefaultMetadata {
+		unmodifiableKeys := WorkbenchInstanceSettableUnmodifiableDefaultMetadata
+        if v, ok := diff.GetOk("enable_managed_euc"); ok && v.(bool) {
+            unmodifiableKeys = append(unmodifiableKeys, WorkbenchInstanceEUCSettableUnmodifiableDefaultMetadata...)
+        }
+
+		for _, key := range unmodifiableKeys {
 			oldValue, oldOk := oldMetadata[key]
 			newValue, newOk := newMetadata[key]
 
