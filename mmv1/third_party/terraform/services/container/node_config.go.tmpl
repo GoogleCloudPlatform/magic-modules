@@ -3030,13 +3030,17 @@ func flattenHostInRegistryHosts(hosts []*container.HostConfig) []map[string]inte
 			for i, val := range h.Client {
 			    currentClient := map[string]interface{}{}
 				if val != nil && val.Cert != nil && val.Cert.GcpSecretManagerSecretUri != "" {
-				    currentClient["cert"] = map[string]interface{}{
-						"gcp_secret_manager_secret_uri": val.Cert.GcpSecretManagerSecretUri,
+					currentClient["cert"] = []interface{}{
+						map[string]interface{}{
+							"gcp_secret_manager_secret_uri": val.Cert.GcpSecretManagerSecretUri,
+						},
 					}
 				}
 				if val != nil && val.Key != nil && val.Key.GcpSecretManagerSecretUri != "" {
-				    currentClient["key"] = map[string]interface{}{
-						"gcp_secret_manager_secret_uri": val.Key.GcpSecretManagerSecretUri,
+					currentClient["key"] = []interface{}{
+						map[string]interface{}{
+							"gcp_secret_manager_secret_uri": val.Key.GcpSecretManagerSecretUri,
+						},
 					}
 				}
 				tmp[i] = currentClient
