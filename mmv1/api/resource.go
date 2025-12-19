@@ -14,6 +14,7 @@ package api
 
 import (
 	"fmt"
+	"io/fs"
 	"log"
 	"maps"
 	"path/filepath"
@@ -2090,7 +2091,7 @@ func (r Resource) TestSamples() []*resource.Sample {
 	})
 }
 
-func (r Resource) TestSampleSetUp() {
+func (r Resource) TestSampleSetUp(sysfs fs.FS) {
 	res := make(map[string]string)
 	for _, sample := range r.Samples {
 		sample.TargetVersionName = r.TargetVersionName
@@ -2106,7 +2107,7 @@ func (r Resource) TestSampleSetUp() {
 			if step.ConfigPath == "" {
 				step.ConfigPath = fmt.Sprintf("templates/terraform/samples/services/%s/%s.tf.tmpl", packageName, step.Name)
 			}
-			step.SetHCLText()
+			step.SetHCLText(sysfs)
 			configName := step.Name
 			if _, ok := res[step.Name]; !ok {
 				res[configName] = sample.Name

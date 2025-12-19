@@ -49,9 +49,11 @@ type Terraform struct {
 	Product *api.Product
 
 	StartTime time.Time
+
+	templateFS fs.FS
 }
 
-func NewTerraform(product *api.Product, versionName string, startTime time.Time) Terraform {
+func NewTerraform(product *api.Product, versionName string, startTime time.Time, templateFS fs.FS) Terraform {
 	t := Terraform{
 		ResourceCount:     0,
 		IAMResourceCount:  0,
@@ -59,6 +61,7 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time)
 		TargetVersionName: versionName,
 		Version:           *product.VersionObjOrClosest(versionName),
 		StartTime:         startTime,
+		templateFS:        templateFS,
 	}
 
 	t.Product.SetPropertiesBasedOnVersion(&t.Version)
@@ -98,7 +101,7 @@ func (t *Terraform) GenerateObjects(outputFolder, resourceToGenerate string, gen
 }
 
 func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPath string, generateCode, generateDocs bool) {
-	templateData := NewTemplateData(outputFolder, t.TargetVersionName)
+	templateData := NewTemplateData(outputFolder, t.TargetVersionName, t.templateFS)
 
 	if !object.IsExcluded() {
 		log.Printf("Generating %s resource", object.Name)
@@ -302,7 +305,7 @@ func (t *Terraform) GenerateProduct(outputFolder string) {
 	}
 
 	targetFilePath := path.Join(targetFolder, "product.go")
-	templateData := NewTemplateData(outputFolder, t.TargetVersionName)
+	templateData := NewTemplateData(outputFolder, t.TargetVersionName, t.templateFS)
 	templateData.GenerateProductFile(targetFilePath, *t.Product)
 }
 
@@ -320,7 +323,7 @@ func (t *Terraform) GenerateOperation(outputFolder string) {
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_operation.go", google.Underscore(t.Product.Name)))
-	templateData := NewTemplateData(outputFolder, t.TargetVersionName)
+	templateData := NewTemplateData(outputFolder, t.TargetVersionName, t.templateFS)
 	templateData.GenerateOperationFile(targetFilePath, *asyncObjects[0])
 }
 
@@ -510,7 +513,10 @@ func (t Terraform) getCommonCopyFiles(versionName string, generateCode, generate
 
 func (t Terraform) getCopyFilesInFolder(folderPath, targetDir string) map[string]string {
 	m := make(map[string]string, 0)
-	filepath.WalkDir(folderPath, func(path string, di fs.DirEntry, err error) error {
+	fs.WalkDir(t.templateFS, folderPath, func(path string, di fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
 		if !di.IsDir() && !strings.HasSuffix(di.Name(), ".tmpl") && !strings.HasSuffix(di.Name(), ".erb") { // Exception files
 			if di.Name() == "gha-branch-renaming.png" || di.Name() == "clock-timings-of-branch-making-and-usage.png" {
 				return nil
@@ -543,7 +549,7 @@ func (t Terraform) CopyFileList(outputFolder string, files map[string]string, ge
 			log.Fatalf("%s was already modified during this run at %s", targetFile, info.ModTime().String())
 		}
 
-		sourceByte, err := os.ReadFile(source)
+		sourceByte, err := fs.ReadFile(t.templateFS, source)
 		if err != nil {
 			log.Fatalf("Cannot read source file %s while copying: %s", source, err)
 		}
@@ -577,7 +583,7 @@ func (t Terraform) CopyFileList(outputFolder string, files map[string]string, ge
 func (t Terraform) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
 	t.generateResourcesForVersion(products)
 	files := t.getCommonCompileFiles(t.TargetVersionName)
-	templateData := NewTemplateData(outputFolder, t.TargetVersionName)
+	templateData := NewTemplateData(outputFolder, t.TargetVersionName, t.templateFS)
 	t.CompileFileList(outputFolder, files, *templateData, products)
 }
 
@@ -621,7 +627,10 @@ func (t Terraform) getCommonCompileFiles(versionName string) map[string]string {
 
 func (t Terraform) getCompileFilesInFolder(folderPath, targetDir string) map[string]string {
 	m := make(map[string]string, 0)
-	filepath.WalkDir(folderPath, func(path string, di fs.DirEntry, err error) error {
+	fs.WalkDir(t.templateFS, folderPath, func(path string, di fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
 		if !di.IsDir() && strings.HasSuffix(di.Name(), ".tmpl") {
 			fname := strings.TrimPrefix(path, "third_party/terraform/")
 			fname = strings.TrimSuffix(fname, ".tmpl")
