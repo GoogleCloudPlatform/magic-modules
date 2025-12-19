@@ -62,6 +62,7 @@ resource "google_network_services_multicast_domain" "multicast_domain" {
 resource "google_network_services_multicast_domain_activation" "multicast_domain_activation" {
   multicast_domain_activation_id                    = "tf-test-test-domain-activation-mpa%{random_suffix}"
   location = "us-central1-b"
+  disable_placement_policy = true
   multicast_domain = google_network_services_multicast_domain.multicast_domain.id
 }
 resource "google_network_services_multicast_producer_association" mpa_test  {
@@ -90,6 +91,7 @@ resource "google_network_services_multicast_domain" "multicast_domain" {
 resource "google_network_services_multicast_domain_activation" "multicast_domain_activation" {
   multicast_domain_activation_id                    = "tf-test-test-domain-activation-mpa%{random_suffix}"
   location = "us-central1-b"
+  disable_placement_policy = true
   multicast_domain = google_network_services_multicast_domain.multicast_domain.id
 }
 resource "google_network_services_multicast_producer_association" mpa_test  {
