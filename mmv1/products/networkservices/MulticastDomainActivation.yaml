@@ -94,6 +94,7 @@ properties:
       Only applicable if the activation is for a domain associating with a
       multicast domain group.
     immutable: true
+    default_from_api: true
   - name: labels
     type: KeyValueLabels
     description: Labels as key-value pairs
@@ -104,6 +105,7 @@ properties:
       Use the following format:
       `projects/*/locations/global/multicastDomains/*`.
     immutable: true
+    required: true
   - name: name
     type: String
     description: |-
@@ -140,25 +142,30 @@ properties:
         description: |-
           Aggregated egress Packet-Per-Second for all multicast groups in the domain
           in this zone.
+        default_from_api: true
       - name: aggrIngressPps
         type: String
         description: |-
           Aggregated ingress Packet-Per-Second for all multicast groups in the domain
           in this zone. Default to (aggregated_egress_pps /
           max_per_group_subscribers) * 2.
+        default_from_api: true
       - name: avgPacketSize
-        type: Integer
+        type: String
         description: Average packet size (Default to 512 bytes).
+        default_from_api: true
       - name: maxPerGroupIngressPps
         type: String
         description: |-
           Maximum ingress Packet-Per-Second for a single multicast group in this
           zone. Default to aggregated_ingress_pps / 2.
+        default_from_api: true
       - name: maxPerGroupSubscribers
         type: String
         description: |-
           Maximum number of subscribers for a single multicast group in this zone.
           Default to max(50, aggregated_egress_pps / aggregated_ingress_pps).
+        default_from_api: true
   - name: uniqueId
     type: String
     description: |-
