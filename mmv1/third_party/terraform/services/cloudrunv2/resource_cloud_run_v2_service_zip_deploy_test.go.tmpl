@@ -113,6 +113,7 @@ resource "google_cloud_run_v2_service" "default" {
 }
 
 data "google_project" "project" {
+  provider = google-beta
 }
 `, context)
 }
@@ -156,6 +157,7 @@ resource "google_cloud_run_v2_service" "default" {
 }
 
 data "google_project" "project" {
+  provider = google-beta
 }
 `, context)
 }

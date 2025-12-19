@@ -35,4 +35,5 @@ resource "google_cloud_run_v2_service" "{{$.PrimaryResourceId}}" {
 }
 
 data "google_project" "project" {
+  provider = google-beta
 }
