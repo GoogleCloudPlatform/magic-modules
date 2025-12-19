@@ -81,6 +81,7 @@ properties:
   - name: displayName
     type: String
     description: Optional. Mutable human-readable name. 63 character limit.
+    is_missing_in_cai: true
   - name: annotations
     type: KeyValueAnnotations
     description: Optional. Stores small amounts of arbitrary data.
