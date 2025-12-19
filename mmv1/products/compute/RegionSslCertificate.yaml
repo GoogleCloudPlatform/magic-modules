@@ -51,7 +51,6 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
-  tgc_decoder: 'templates/tgc_next/custom_expand/region_ssl_certificate_decoder.go.tmpl'
   extra_schema_entry: 'templates/terraform/extra_schema_entry/ssl_certificate.tmpl'
   constants: 'templates/terraform/constants/compute_certificate.go.tmpl'
 examples:
