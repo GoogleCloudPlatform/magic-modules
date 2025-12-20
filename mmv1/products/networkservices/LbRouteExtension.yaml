@@ -189,7 +189,7 @@ properties:
                 description: |
                   A set of events during request or response processing for which this extension is called.
                   This field is optional for the LbRouteExtension resource. If unspecified, `REQUEST_HEADERS` event is assumed as supported.
-                  Possible values: `EVENT_TYPE_UNSPECIFIED`, `REQUEST_HEADERS`, `REQUEST_BODY`, `RESPONSE_HEADERS`, `RESPONSE_BODY`, `REQUEST_TRAILERS`, `RESPONSE_TRAILERS`.
+                  Possible values: `EVENT_TYPE_UNSPECIFIED`, `REQUEST_HEADERS`, `REQUEST_BODY`, `REQUEST_TRAILERS`.
                 item_type:
                   type: String
               - name: 'metadata'
