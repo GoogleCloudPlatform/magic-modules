@@ -66,6 +66,30 @@ examples:
     ignore_read_extra:
       - 'port_range'
       - 'target'
+  - name: 'network_services_lb_route_extension_observability'
+    primary_resource_id: 'default'
+    vars:
+      ilb_network_name: 'l7-ilb-network'
+      proxy_subnet_name: 'l7-ilb-proxy-subnet'
+      backend_subnet_name: 'l7-ilb-subnet'
+      forwarding_rule_name: 'l7-ilb-forwarding-rule'
+      target_http_proxy_name: 'l7-ilb-target-http-proxy'
+      regional_url_map_name: 'l7-ilb-regional-url-map'
+      backend_service_name: 'l7-ilb-backend-subnet'
+      mig_template_name: 'l7-ilb-mig-template'
+      hc_name: 'l7-ilb-hc'
+      mig_name: 'l7-ilb-mig1'
+      fw_allow_iap_hc_name: 'l7-ilb-fw-allow-iap-hc'
+      fw_allow_ilb_to_backends_name: 'l7-ilb-fw-allow-ilb-to-backends'
+      vm_test_name: 'l7-ilb-test-vm'
+      lb_route_extension_name: 'l7-ilb-route-ext'
+      callouts_instance_name: 'l7-ilb-callouts-ins'
+      callouts_instance_group: 'l7-ilb-callouts-ins-group'
+      callouts_hc_name: 'l7-ilb-callouts-hc'
+      callouts_backend_name: 'l7-ilb-callouts-backend'
+    ignore_read_extra:
+      - 'port_range'
+      - 'target'
 parameters:
   - name: 'location'
     type: String
@@ -213,19 +237,7 @@ properties:
                   - 'BODY_SEND_MODE_UNSPECIFIED'
                   - 'BODY_SEND_MODE_STREAMED'
                   - 'BODY_SEND_MODE_FULL_DUPLEX_STREAMED'
-              - name: 'responseBodySendMode'
-                type: Enum
-                description: |
-                  Configures the send mode for response processing.
-                  If unspecified, the default value `STREAMED` is used.
-                  The field can only be set if `supported_events` includes `RESPONSE_BODY`.
-                  If `supported_events` includes `RESPONSE_BODY`, but `response_body_send_mode` is unset, the default value `STREAMED` is used.
-                  When this field is set to `FULL_DUPLEX_STREAMED`, `supported_events` must include both `RESPONSE_BODY` and `RESPONSE_TRAILERS`.
-                  This field can be set only for `LbTrafficExtension` resources, and only when the `service` field of the extension points to a `BackendService`.
-                enum_values:
-                  - 'BODY_SEND_MODE_UNSPECIFIED'
-                  - 'BODY_SEND_MODE_STREAMED'
-                  - 'BODY_SEND_MODE_FULL_DUPLEX_STREAMED'
+
               - name: 'observabilityMode'
                 type: Boolean
                 description: |
