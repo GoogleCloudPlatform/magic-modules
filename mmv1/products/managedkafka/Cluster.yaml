@@ -154,9 +154,9 @@ properties:
     description: "Capacity configuration at a per-broker level within the Kafka cluster. The config will be appled to each broker in the cluster."
     ignore_read: true
     properties:
-      - name: 'diskSizeGb'
+      - name: 'diskSizeGib'
         type: String
-        description: "The disk to provision for each broker in Gigabytes. Minimum: 100 GB."
+        description: "The disk to provision for each broker in Gibibytes. Minimum: 100 GiB."
   - name: 'rebalanceConfig'
     type: NestedObject
     description: "Defines rebalancing behavior of a Kafka cluster."
