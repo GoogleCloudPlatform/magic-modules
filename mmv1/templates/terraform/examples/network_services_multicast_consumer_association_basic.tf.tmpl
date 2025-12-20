@@ -14,7 +14,6 @@ resource "google_network_services_multicast_domain" "multicast_domain" {
 resource "google_network_services_multicast_domain_activation" "multicast_domain_activation" {
   multicast_domain_activation_id                    = "{{index $.Vars "domain_activation_name"}}"
   location = "us-central1-b"
-  disable_placement_policy = true
   multicast_domain = google_network_services_multicast_domain.multicast_domain.id
 }
 
