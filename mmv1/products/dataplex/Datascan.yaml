@@ -698,5 +698,15 @@ properties:
       - 'data_profile_spec'
       - 'data_discovery_spec'
       - 'data_documentation_spec'
-    properties:
-      []
+    properties
+     - name: generation_scopes:
+       type: Array
+       description: Determines the scope of created data documentation scan.
+       item_type: 
+        type: Enum
+        description: Determines the created data documentation scan should create everything, description or queries.
+        enum_values:
+         - GENERATION_SCOPE_UNSPECIFIED
+         - ALL
+         - TABLE_AND_COLUMN_DESCRIPTIONS
+         - SQL_QUERIES
