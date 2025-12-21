@@ -1608,7 +1608,7 @@ func TestAccContainerNodePool_withNodeDrainConfig(t *testing.T) {
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerNodePool_withNodeDrainConfig(cluster, np, networkName, subnetworkName),
+				Config: testAccContainerNodePool_withNodeDrainConfig(cluster, nodePool, networkName, subnetworkName),
 			},
 			{
 				ResourceName:      "google_container_node_pool.np_with_node_drain_config",

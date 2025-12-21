@@ -676,7 +676,7 @@ var schemaNodePool = map[string]*schema.Schema{
 				},
 			},
 		},
-	}
+	},
 
 }
 
@@ -1391,7 +1391,7 @@ func flattenNodePoolUpgradeSettings(us *container.UpgradeSettings) []map[string]
 }
 
 func flattenNodePoolNodeDrainConfig(ndc *container.NodeDrainConfig) []map[string]interface{} {
-	if nds == nil {
+	if ndc == nil {
 		return nil
 	}
 
@@ -1971,6 +1971,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			nodeDrain := v.([]interface{})[0].(map[string]interface{})
 			if v, ok := nodeDrain["respect_pdb_during_node_pool_deletion"]; ok {
 				nodeDrainConfig.RespectPdbDuringNodePoolDeletion = v.(bool)
+			}
 		}
 		req := &container.UpdateNodePoolRequest{
 			NodeDrainConfig: nodeDrainConfig,
