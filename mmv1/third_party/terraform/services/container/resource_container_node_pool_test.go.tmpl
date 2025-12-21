@@ -1609,6 +1609,9 @@ func TestAccContainerNodePool_withNodeDrainConfig(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerNodePool_withNodeDrainConfig(cluster, nodePool, networkName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.np_with_node_drain_config", "node_drain_config.0.respect_pdb_during_node_pool_deletion", "true"),
+        ),
 			},
 			{
 				ResourceName:      "google_container_node_pool.np_with_node_drain_config",
@@ -4779,10 +4782,15 @@ resource "google_container_node_pool" "np_with_node_config_scope_alias" {
 
 func testAccContainerNodePool_withNodeDrainConfig(cluster, np, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+
 resource "google_container_cluster" "cluster" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
   deletion_protection = false
   network    = "%s"
   subnetwork    = "%s"

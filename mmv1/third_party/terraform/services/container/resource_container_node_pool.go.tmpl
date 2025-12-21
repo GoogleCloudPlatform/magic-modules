@@ -1325,7 +1325,7 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 		np.NodeDrainConfig = &container.NodeDrainConfig{}
 
 		if v, ok := nodeDrainConfig["respect_pdb_during_node_pool_deletion"]; ok {
-			np.Management.AutoRepair = v.(bool)
+			np.NodeDrainConfig.RespectPdbDuringNodePoolDeletion = v.(bool)
 		}
 	}
 
