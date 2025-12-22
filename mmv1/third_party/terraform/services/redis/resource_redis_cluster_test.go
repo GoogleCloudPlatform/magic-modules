@@ -1432,7 +1432,7 @@ func TestAccRedisCluster_redisClusterHaWithLabelsUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRedisCluster_redisClusterHaWithLabelsExample(context),
+				Config: testAccRedisCluster_redisClusterHaWithLabelsUpdate(context),
 			},
 			{
 				ResourceName:            "google_redis_cluster.cluster-ha-with-labels",
