@@ -381,6 +381,7 @@ properties:
     type: NestedObject
     description: |
       Configuration related to multi-tenant functionality.
+    default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/identity_platform_config_multi_tenant.go.tmpl'
     properties:
       - name: 'allowTenants'
