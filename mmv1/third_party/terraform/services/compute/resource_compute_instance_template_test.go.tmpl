@@ -1595,7 +1595,6 @@ func TestAccComputeInstance_IPv6ExternalRecreate(t *testing.T) {
 				),
 			},
 			{
-				// troca de IPv6 → recreate obrigatório
 				Config: testAccComputeInstanceIPv6External(acctest.RandString(t, 10), true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
