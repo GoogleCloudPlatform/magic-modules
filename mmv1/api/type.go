@@ -846,14 +846,14 @@ func (t Type) AllUniqueNestedProperties() []*Type {
 	var result []*Type
 
 	for _, p := range t.NestedProperties() {
-		key := p.Lineage()
+		key := strings.Join(p.Lineage(), "|")
 		if !seen[key] {
 			result = append(result, p)
 			seen[key] = true
 		}
 	}
 	for _, p := range t.WriteOnlyProperties() {
-		key := p.Lineage()
+		key := strings.Join(p.Lineage(), "|")
 		if !seen[key] {
 			result = append(result, p)
 			seen[key] = true
