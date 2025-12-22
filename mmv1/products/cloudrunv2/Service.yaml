@@ -159,18 +159,6 @@ examples:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
       - 'deletion_protection'
-  - name: 'cloudrunv2_service_function'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-      bucket_name: 'gcf-source'
-      zip_path: 'function_source.zip'
-      sa_name: 'build-sa'
-    test_vars_overrides:
-      'zip_path': '"./test-fixtures/function-source.zip"'
-    ignore_read_extra:
-      - 'deletion_protection'
   - name: 'cloudrunv2_service_iap'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-iap-service%s", context["random_suffix"])'
@@ -334,15 +322,19 @@ properties:
     type: NestedObject
     description: |
       Scaling settings that apply to the whole service
+    default_from_api: true
+    diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
     properties:
       - name: 'minInstanceCount'
         type: Integer
         description: |
           Minimum number of instances for the service, to be divided among all revisions receiving traffic.
+        default_from_api: true
       - name: 'maxInstanceCount'
         type: Integer
         description: |
           Combined maximum number of instances for all revisions receiving traffic.
+        default_from_api: true
       - name: 'scalingMode'
         type: Enum
         description: |
@@ -354,6 +346,7 @@ properties:
         type: Integer
         description: |
           Total instance count for the service in manual scaling mode. This number of instances is divided among all revisions with specified traffic based on the percent of traffic they are receiving.
+        default_from_api: true
   - name: 'defaultUriDisabled'
     type: Boolean
     description: |-

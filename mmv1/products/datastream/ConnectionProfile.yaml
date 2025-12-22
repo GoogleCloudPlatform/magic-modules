@@ -39,7 +39,8 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 custom_code:
   constants: 'templates/terraform/constants/datastream_connection_profile.go.tmpl'
   pre_create: 'templates/terraform/pre_create/datastream_connection_profile.go.tmpl'
@@ -256,6 +257,7 @@ properties:
           Password for the MySQL connection.
         sensitive: true
         custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_mysql_profile_password.go.tmpl'
+        is_missing_in_cai: true
       - name: 'secretManagerStoredPassword'
         type: String
         description: |
@@ -526,6 +528,7 @@ properties:
           Password for the MongoDB connection. Mutually exclusive with
           secretManagerStoredPassword.
         sensitive: true
+        is_missing_in_cai: true
       - name: 'secretManagerStoredPassword'
         type: String
         description: |
@@ -623,6 +626,7 @@ properties:
               Specifies whether the client connects directly to the
               host[:port] in the connection URI.
   - name: 'forwardSshConnectivity'
+    is_missing_in_cai: true
     type: NestedObject
     description: |
       Forward SSH tunnel connectivity.
@@ -662,6 +666,7 @@ properties:
         conflicts:
           - forward_ssh_connectivity.0.password
         custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_forward_ssh_connectivity_private_key.go.tmpl'
+        is_missing_in_cai: true
   - name: 'privateConnectivity'
     type: NestedObject
     description: |

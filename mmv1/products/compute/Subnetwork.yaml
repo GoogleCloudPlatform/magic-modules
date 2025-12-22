@@ -45,7 +45,8 @@ references:
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/subnetworks'
 has_self_link: true
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 immutable: true
 timeouts:
   insert_minutes: 20
@@ -111,13 +112,18 @@ examples:
     vars:
       subnetwork_name: 'internal-ipv6-test-subnetwork'
       network_name: 'internal-ipv6-test-network'
-    tgc_skip_test: 'internalIpv6Prefix is changed to C + O, but TGC uses latest provider version to run tests and does not have this change.'
   - name: 'subnetwork_purpose_private_nat'
     primary_resource_id: 'subnetwork-purpose-private-nat'
     min_version: 'beta'
     vars:
       subnetwork_name: 'subnet-purpose-test-subnetwork'
       network_name: 'subnet-purpose-test-network'
+  - name: 'subnetwork_resolve_subnet_mask'
+    primary_resource_id: 'subnetwork-resolve-subnet-mask'
+    min_version: 'beta'
+    vars:
+      subnetwork_name: 'subnet-resolve-subnet-mask-test-subnetwork'
+      network_name: 'subnet-resolve-subnet-mask-test-network'
   - name: 'subnetwork_cidr_overlap'
     primary_resource_id: 'subnetwork-cidr-overlap'
     min_version: 'beta'
@@ -144,7 +150,6 @@ examples:
     vars:
       subnetwork_name: 'subnet-ipv6-only'
       network_name: 'network-ipv6-only'
-    tgc_skip_test: 'internalIpv6Prefix is changed to C + O, but TGC uses latest provider version to run tests and does not have this change.'
   - name: 'subnetwork_with_subnet_mode_pdp'
     primary_resource_id: 'subnetwork-with-subnet-mode-pdp'
     exclude_docs: true
@@ -163,7 +168,6 @@ examples:
       ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp"'
     test_vars_overrides:
       ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp"'
-    tgc_skip_test: 'internalIpv6Prefix is changed to C + O, but TGC uses latest provider version to run tests and does not have this change.'
   - name: 'subnetwork_with_internal_subnet_mode_pdp_explicit_ip_prefix'
     primary_resource_id: 'subnetwork-with-internal-subnet-mode-pdp-explicit-ip-prefix'
     exclude_docs: true
@@ -175,7 +179,6 @@ examples:
     test_vars_overrides:
       internal_ipv6_prefix: 'fmt.Sprintf("2001:db8:1:%d::/64", acctest.RandIntRange(t, 0, 9999))'
       ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp-explicit-prefix"'
-    tgc_skip_test: 'internalIpv6Prefix is changed to C + O, but TGC uses latest provider version to run tests and does not have this change.'
   - name: 'subnetwork_ipv6_only_external'
     primary_resource_id: 'subnetwork-ipv6-only'
     exclude_docs: true
@@ -562,3 +565,12 @@ properties:
           To apply tags to an existing resource, see the google_tags_tag_binding resource.
         ignore_read: true
         immutable: true
+  - name: 'resolveSubnetMask'
+    type: Enum
+    description: |
+      'Configures subnet mask resolution for this subnetwork.'
+    enum_values:
+      - 'ARP_ALL_RANGES'
+      - 'ARP_PRIMARY_RANGE'
+    min_version: beta
+    immutable: true

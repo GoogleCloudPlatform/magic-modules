@@ -56,6 +56,7 @@ resource "google_compute_organization_security_policy" "policy" {
   parent       = google_folder.security_policy_target.name
   type         = "FIREWALL"
 }
+
 resource "google_compute_organization_security_policy_rule" "policy" {
   policy_id = google_compute_organization_security_policy.policy.id
   action = "allow"

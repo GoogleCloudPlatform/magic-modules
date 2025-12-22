@@ -16,15 +16,16 @@ package resource
 import (
 	"bytes"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/url"
-	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
 	"strings"
 	"text/template"
 
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"gopkg.in/yaml.v3"
 )
@@ -196,30 +197,25 @@ func (e *Examples) UnmarshalYAML(value *yaml.Node) error {
 }
 
 // MarshalYAML implements a custom marshaller for the Examples struct.
-// It omits the ConfigPath field if it's equal to its default generated value.
+// It uses a generic helper to omit fields that are set to their default values.
 func (e *Examples) MarshalYAML() (interface{}, error) {
-	// 1. Calculate the default value for ConfigPath based on the Name field.
-	//    This logic must mirror the one in UnmarshalYAML.
-	defaultPath := ""
-	if e.Name != "" {
-		defaultPath = DefaultConfigPath(e.Name)
-	}
-
-	// 2. Create a shallow copy to avoid modifying the original struct.
-	//    This prevents the marshaling operation from having side effects.
-	clone := *e
-
-	// 3. If the current ConfigPath matches the default, clear it.
-	//    The `omitempty` tag will then cause the YAML marshaler to skip it.
-	if clone.ConfigPath == defaultPath {
-		clone.ConfigPath = ""
-	}
-
-	// 4. Use a type alias to prevent infinite recursion.
-	//    The alias `exampleAlias` does not have this MarshalYAML method,
-	//    so calling the marshaler on it will use the default struct marshaler.
+	// Use a type alias to prevent infinite recursion.
 	type exampleAlias Examples
-	return (*exampleAlias)(&clone), nil
+
+	// Create a defaults object by unmarshalling an empty node, which populates defaults.
+	// Here, we can create one manually based on the unmarshal logic.
+	defaults := Examples{}
+	if e.Name != "" {
+		defaults.ConfigPath = DefaultConfigPath(e.Name)
+	}
+
+	// Use the generic helper to create a clone with default values zeroed out.
+	clone, err := utils.OmitDefaultsForMarshaling(*e, defaults)
+	if err != nil {
+		return nil, err
+	}
+
+	return (*exampleAlias)(clone.(*Examples)), nil
 }
 
 // DefaultConfigPath returns the default path for an example's Terraform config.
@@ -261,7 +257,7 @@ func (e *Examples) ValidateExternalProviders() error {
 }
 
 // Executes example templates for documentation and tests
-func (e *Examples) LoadHCLText(baseDir string) (err error) {
+func (e *Examples) LoadHCLText(sysfs fs.FS) (err error) {
 	originalVars := e.Vars
 	originalTestEnvVars := e.TestEnvVars
 	docTestEnvVars := make(map[string]string)
@@ -288,7 +284,7 @@ func (e *Examples) LoadHCLText(baseDir string) (err error) {
 		docTestEnvVars[key] = docs_defaults[e.TestEnvVars[key]]
 	}
 	e.TestEnvVars = docTestEnvVars
-	e.DocumentationHCLText, err = e.ExecuteTemplate(baseDir)
+	e.DocumentationHCLText, err = e.ExecuteTemplate(sysfs)
 	if err != nil {
 		return err
 	}
@@ -332,7 +328,7 @@ func (e *Examples) LoadHCLText(baseDir string) (err error) {
 
 	e.Vars = testVars
 	e.TestEnvVars = testTestEnvVars
-	e.TestHCLText, err = e.ExecuteTemplate(baseDir)
+	e.TestHCLText, err = e.ExecuteTemplate(sysfs)
 	if err != nil {
 		return err
 	}
@@ -348,8 +344,8 @@ func (e *Examples) LoadHCLText(baseDir string) (err error) {
 	return nil
 }
 
-func (e *Examples) ExecuteTemplate(baseDir string) (string, error) {
-	templateContent, err := os.ReadFile(filepath.Join(baseDir, e.ConfigPath))
+func (e *Examples) ExecuteTemplate(sysfs fs.FS) (string, error) {
+	templateContent, err := fs.ReadFile(sysfs, e.ConfigPath)
 	if err != nil {
 		return "", err
 	}
@@ -363,7 +359,7 @@ func (e *Examples) ExecuteTemplate(baseDir string) (string, error) {
 	validateRegexForContents(varRegex, fileContentString, e.ConfigPath, "vars", e.Vars)
 
 	templateFileName := filepath.Base(e.ConfigPath)
-	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).Parse(fileContentString)
+	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions(sysfs)).Parse(fileContentString)
 	if err != nil {
 		return "", err
 	}
@@ -412,7 +408,7 @@ func (e *Examples) ResourceType(terraformName string) string {
 }
 
 // Executes example templates for documentation and tests
-func (e *Examples) SetOiCSHCLText() {
+func (e *Examples) SetOiCSHCLText(sysfs fs.FS) {
 	var err error
 	originalVars := e.Vars
 	originalTestEnvVars := e.TestEnvVars
@@ -434,7 +430,7 @@ func (e *Examples) SetOiCSHCLText() {
 	e.Vars = testVars
 	// SetOiCSHCLText is generated from the provider, assume base directory is
 	// always relative for this case
-	e.OicsHCLText, err = e.ExecuteTemplate("")
+	e.OicsHCLText, err = e.ExecuteTemplate(sysfs)
 	if err != nil {
 		log.Fatal(err)
 	}

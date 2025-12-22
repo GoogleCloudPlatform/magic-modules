@@ -18,8 +18,8 @@ description: |
   Hostgroup is a regional resource and independent of the volumes or any other resource
 references:
   guides:
-    'Documentation': ''
-  api: ''
+    'Documentation': 'https://docs.cloud.google.com/netapp/volumes/docs/configure-and-use/host-groups/overview'
+  api: 'https://docs.cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.hostGroups'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/hostGroups/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/hostGroups'
@@ -59,14 +59,14 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+properties:
   - name: 'name'
     type: String
     description: |
       The resource name of the Host Group. Needs to be unique per location.
-    url_param_only: true
     required: true
     immutable: true
-properties:
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'state'
     type: String
     description: |
