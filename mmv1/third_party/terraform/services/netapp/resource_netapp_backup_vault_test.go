@@ -114,6 +114,7 @@ resource "google_netapp_backup_vault" "test_backup_vault_kms" {
   description = "Vault with KMS"
 }
 depends_on = [google_kms_crypto_key_iam_member.kmsconfig_role]
+}
 	`, context)
 }
 
