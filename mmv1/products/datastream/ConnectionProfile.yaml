@@ -626,6 +626,7 @@ properties:
               Specifies whether the client connects directly to the
               host[:port] in the connection URI.
   - name: 'forwardSshConnectivity'
+    is_missing_in_cai: true
     type: NestedObject
     description: |
       Forward SSH tunnel connectivity.

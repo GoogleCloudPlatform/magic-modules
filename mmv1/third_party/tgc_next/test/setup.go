@@ -61,7 +61,7 @@ type Resource struct {
 
 const (
 	ymdFormat   = "2006-01-02"
-	maxAttempts = 3
+	maxAttempts = 5
 )
 
 var (

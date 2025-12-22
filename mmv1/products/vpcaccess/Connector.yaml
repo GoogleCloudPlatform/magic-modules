@@ -65,6 +65,9 @@ examples:
       network_name: 'default'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-access-connector")'
+tgc_tests:
+  - name: TestAccVPCAccessConnector_vpcAccessConnectorThroughput_usingThroughputOrInstancesLimits
+    skip: 'For instances vs throughput, prefer instances during cai2hcl conversion as throughput is discouraged.'
 parameters:
   - name: 'region'
     type: String
