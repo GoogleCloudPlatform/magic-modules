@@ -97,7 +97,7 @@ resource "google_network_services_multicast_domain_activation" mda_test {
   traffic_spec {
 		aggr_egress_pps = "1000"
 		aggr_ingress_pps = "500"
-		avg_packet_size = "100"
+		avg_packet_size = 100
 		max_per_group_ingress_pps = "100"
 		max_per_group_subscribers = "1"
 	}
