@@ -406,8 +406,10 @@ properties:
       interconnects.list of features requested for this Interconnect connection. Options: IF_MACSEC (
       If specified then the connection is created on MACsec capable hardware ports. If not
       specified, the default value is false, which allocates non-MACsec capable ports first if
-      available). Note that MACSEC is still technically allowed for compatibility reasons, but it
-      does not work with the API, and will be removed in an upcoming major version.
+      available). IF_L2_FORWARDING ( If specified then the connection is created for L2 traffic forwarding. 
+      If not specified, the default value is false for regular L3 traffic forwarding) .Note that MACSEC 
+      is still technically allowed for compatibility reasons, but it does not work with the API, and 
+      will be removed in an upcoming major version.
     immutable: true
     item_type:
       type: Enum
@@ -417,13 +419,16 @@ properties:
         - 'MACSEC'
         - 'CROSS_SITE_NETWORK'
         - 'IF_MACSEC'
+        - 'IF_L2_FORWARDING'
   - name: 'availableFeatures'
     type: Array
     description: |
       interconnects.list of features available for this Interconnect connection. Can take the value:
-      MACSEC. If present then the Interconnect connection is provisioned on MACsec capable hardware
+      MACSEC, If present then the Interconnect connection is provisioned on MACsec capable hardware
       ports. If not present then the Interconnect connection is provisioned on non-MACsec capable
-      ports and MACsec isn't supported and enabling MACsec fails).
+      ports and MACsec isn't supported and enabling MACsec fails). IF_L2_FORWARDING, If present then 
+      the Interconnect connection can be used for L2 traffic forwarding. If not present then then 
+      Interconnect connection cannot be used with L2 forwarding attachments.
     output: true
     item_type:
       type: Enum
@@ -431,6 +436,7 @@ properties:
         - 'IF_CROSS_SITE_NETWORK'
         - 'IF_MACSEC'
         - 'MACSEC'
+        - 'IF_L2_FORWARDING'
   - name: 'wireGroups'
     type: Array
     description: |
