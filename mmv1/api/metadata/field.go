@@ -1,22 +1,47 @@
 package metadata
 
 import (
+	"slices"
+	"strings"
+
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
 
 func FromProperties(props []*api.Type) []Field {
+	// Sort props by lineage
+	slices.SortFunc(props, func(a, b *api.Type) int {
+		if strings.Join(a.Lineage(), ".") < strings.Join(b.Lineage(), ".") {
+			return -1
+		}
+		return 1
+	})
+
 	var fields []Field
 	for _, p := range props {
+		// Skip non-maps with nested fields
+		if !p.IsA("Map") && len(p.NestedProperties()) > 0 {
+			continue
+		}
 		f := Field{
 			Json:         p.IsJsonField(),
 			ProviderOnly: p.ProviderOnly(),
 		}
+		lineage := p.Lineage()
+		apiLineage := p.ApiLineage()
 		if !p.ProviderOnly() {
-			f.ApiField = p.MetadataApiLineage()
+			f.ApiField = strings.Join(apiLineage, ".")
 		}
-		if p.ProviderOnly() || p.MetadataLineage() != p.MetadataDefaultLineage() {
-			f.Field = p.MetadataLineage()
+		if p.ProviderOnly() || !IsDefaultLineage(lineage, apiLineage) {
+			f.Field = strings.Join(lineage, ".")
 		}
+		// For maps (which all have nested children), modify the entry slightly; the map field itself is skipped,
+		// but we need a `key` API field that corresponds to the key_name of the map field.
+		if p.IsA("Map") {
+			f.ApiField += ".key"
+			f.Field = strings.Join(append(lineage, p.KeyName), ".")
+		}
+
 		fields = append(fields, f)
 	}
 	return fields
@@ -35,4 +60,19 @@ type Field struct {
 	// If true, this is a JSON field which "covers" all child API fields. As a special case, JSON fields which cover an entire resource can
 	// have `api_field` set to `*`.
 	Json bool `yaml:"json,omitempty"`
+}
+
+// Returns true if the lineage is the default we'd expect for a field, and false otherwise.
+// If any ancestor has a non-default lineage, this will return false.
+func IsDefaultLineage(lineage, apiLineage []string) bool {
+	if len(lineage) != len(apiLineage) {
+		return false
+	}
+	for i, part := range lineage {
+		apiPart := apiLineage[i]
+		if part != google.Underscore(apiPart) {
+			return false
+		}
+	}
+	return true
 }

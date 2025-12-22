@@ -37,6 +37,16 @@ timeouts:
 custom_code:
   constants: 'templates/terraform/constants/monitoring_alert_policy.go.tmpl'
   custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project.go.tmpl'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
+tgc_tests:
+  - name: 'TestAccMonitoringAlertPolicy/basic'
+  - name: 'TestAccMonitoringAlertPolicy/forecast'
+  - name: 'TestAccMonitoringAlertPolicy/full'
+  - name: 'TestAccMonitoringAlertPolicy/log'
+  - name: 'TestAccMonitoringAlertPolicy/mql'
+  - name: 'TestAccMonitoringAlertPolicy/promql'
+  - name: 'TestAccMonitoringAlertPolicy/update'
 error_retry_predicates:
 
   - 'transport_tpg.IsMonitoringConcurrentEditError'
@@ -245,6 +255,7 @@ properties:
                       otherwise an error is returned.
                   - name: 'crossSeriesReducer'
                     type: Enum
+                    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/monitoring_alert_policy_cross_series_reducer.go.tmpl'
                     description: |
                       The approach to be used to combine
                       time series. Not all reducer
@@ -538,6 +549,7 @@ properties:
                       otherwise an error is returned.
                   - name: 'crossSeriesReducer'
                     type: Enum
+                    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/monitoring_alert_policy_cross_series_reducer.go.tmpl'
                     description: |
                       The approach to be used to combine
                       time series. Not all reducer
@@ -762,6 +774,7 @@ properties:
                       otherwise an error is returned.
                   - name: 'crossSeriesReducer'
                     type: Enum
+                    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/monitoring_alert_policy_cross_series_reducer.go.tmpl'
                     description: |
                       The approach to be used to combine
                       time series. Not all reducer
