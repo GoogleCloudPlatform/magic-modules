@@ -59,7 +59,7 @@ resource "google_compute_interconnect_attachment" "attachment" {
   name           = "tf-test-attachment-%{random_suffix}"
   interconnect   = google_compute_interconnect.interconnect.id
   type           = "L2_DEDICATED"
-  bandwidth      = "BPS_100G"
+  bandwidth      = "BPS_1G"
   l2_forwarding {
     appliance_mappings {
       	vlan_id = "100"
