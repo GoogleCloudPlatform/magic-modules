@@ -144,7 +144,7 @@ properties:
           in this zone.
         default_from_api: true
       - name: aggrIngressPps
-        type: String
+        type: Integer
         description: |-
           Aggregated ingress Packet-Per-Second for all multicast groups in the domain
           in this zone. Default to (aggregated_egress_pps /
