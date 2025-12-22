@@ -44,7 +44,6 @@ examples:
       name: 'reasoning-engine'
   - name: 'vertex_ai_reasoning_engine_source_based_deployment'
     primary_resource_id: 'reasoning_engine'
-    exclude_docs: true
     vars:
       name: 'reasoning-engine'
   - name: 'vertex_ai_reasoning_engine_full'
