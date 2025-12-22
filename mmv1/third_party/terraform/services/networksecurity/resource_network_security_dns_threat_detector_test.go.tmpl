@@ -1,5 +1,4 @@
 package networksecurity_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -117,4 +116,3 @@ func testAccCheckNetworkSecurityDnsThreatDetectorDestroyProducer(t *testing.T) f
 		return nil
 	}
 }
-{{- end }}
