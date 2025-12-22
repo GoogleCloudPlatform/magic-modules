@@ -104,7 +104,7 @@ resource "google_netapp_kmsconfig" "test_kms_config" {
 resource "google_kms_crypto_key_iam_member" "kmsconfig_role" {
   crypto_key_id = "%{kms_key_name}"
   role          = "projects/ci-test-project-188019/roles/cmekNetAppVolumesRole"
-  member        = "serviceAccount:${google_netapp_kmsconfig.test_kms_config.service_account"
+  member        = "serviceAccount:${google_netapp_kmsconfig.test_kms_config.service_account}"
 }
 
 resource "google_netapp_backup_vault" "test_backup_vault_kms" {
@@ -112,8 +112,7 @@ resource "google_netapp_backup_vault" "test_backup_vault_kms" {
   location    = "%{location}"
   kms_config  = google_netapp_kmsconfig.test_kms_config.id
   description = "Vault with KMS"
-}
-depends_on = [google_kms_crypto_key_iam_member.kmsconfig_role]
+  depends_on = [google_kms_crypto_key_iam_member.kmsconfig_role]
 }
 	`, context)
 }
