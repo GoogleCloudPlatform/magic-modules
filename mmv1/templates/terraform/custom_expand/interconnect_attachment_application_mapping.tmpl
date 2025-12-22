@@ -21,31 +21,10 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
             transformed["applianceIpAddress"] = v
         }
         if v, ok := original["inner_vlan_to_appliance_mappings"]; ok {
-            transformed["innerVlanToApplianceMappings"] = expandInterconnectAttachmentInnerVlanToApplianceMappings(v.([]interface{}))
+            transformed["innerVlanToApplianceMappings"] = v
         }
 
         m[vlanID] = transformed
     }
     return m, nil
-}
-
-// Helper to expand the nested inner mappings
-func expandInterconnectAttachmentInnerVlanToApplianceMappings(l []interface{}) []interface{} {
-    req := make([]interface{}, 0, len(l))
-    for _, raw := range l {
-        if raw == nil {
-            continue
-        }
-        original := raw.(map[string]interface{})
-        transformed := make(map[string]interface{})
-
-        if v, ok := original["inner_vlan_tags"]; ok && v != nil {
-            transformed["innerVlanTags"] = tpgresource.ConvertStringListOfInterface(v.([]interface{}))
-        }
-        if v, ok := original["inner_appliance_ip_address"]; ok {
-            transformed["innerApplianceIpAddress"] = v
-        }
-        req = append(req, transformed)
-    }
-    return req
 }

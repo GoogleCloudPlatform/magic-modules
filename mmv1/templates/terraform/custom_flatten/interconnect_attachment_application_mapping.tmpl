@@ -30,31 +30,10 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
             transformed["appliance_ip_address"] = v
         }
         if v, ok := original["innerVlanToApplianceMappings"]; ok {
-            transformed["inner_vlan_to_appliance_mappings"] = flattenInterconnectAttachmentInnerVlanToApplianceMappings(v.([]interface{}))
+            transformed["inner_vlan_to_appliance_mappings"] = v
         }
 
         l = append(l, transformed)
     }
     return l
-}
-
-// Helper to flatten the nested inner mappings
-func flattenInterconnectAttachmentInnerVlanToApplianceMappings(l []interface{}) []interface{} {
-    transformedList := make([]interface{}, 0, len(l))
-    for _, raw := range l {
-        if raw == nil {
-            continue
-        }
-        original := raw.(map[string]interface{})
-        transformed := make(map[string]interface{})
-
-        if v, ok := original["innerVlanTags"]; ok {
-            transformed["inner_vlan_tags"] = v
-        }
-        if v, ok := original["innerApplianceIpAddress"]; ok {
-            transformed["inner_appliance_ip_address"] = v
-        }
-        transformedList = append(transformedList, transformed)
-    }
-    return transformedList
 }

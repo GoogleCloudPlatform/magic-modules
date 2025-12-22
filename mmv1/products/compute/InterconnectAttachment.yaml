@@ -216,7 +216,6 @@ properties:
       the same region as this InterconnectAttachment. The InterconnectAttachment will
       automatically connect the Interconnect to the network & region within which the
       Cloud Router is configured.
-    required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
@@ -304,8 +303,6 @@ properties:
       such a VLAN attachment. To use HA VPN over Cloud Interconnect, the VLAN
       attachment must be created with this option.
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
-    default_value: "NONE"
     enum_values:
       - 'NONE'
       - 'IPSEC'
@@ -397,7 +394,6 @@ properties:
       - name: 'network'
         type: ResourceRef
         description: 'URL of the network to which this attachment belongs.'
-        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
         custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
         resource: 'Network'
         imports: 'selfLink'
