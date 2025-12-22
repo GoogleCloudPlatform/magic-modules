@@ -100,7 +100,6 @@ parameters:
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Disk'
     imports: 'name'
-    ignore_read: true
     exactly_one_of:
       - 'source_disk'
       - 'source_instant_snapshot'
