@@ -285,7 +285,6 @@ resource "google_sql_database_instance" "instance" {
     }
   }
   backupdr_backup = "backupdr_backup_full_path"
-  }
 }
 ```
 
