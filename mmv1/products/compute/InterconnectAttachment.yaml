@@ -420,7 +420,7 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            - name: 'vlanId' # Represents the map key (VLAN tag)
+            - name: 'vlanId'  # Represents the map key (VLAN tag)
               type: String
               description: 'The VLAN tag.'
             - name: 'name'
