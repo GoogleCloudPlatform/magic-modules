@@ -53,6 +53,7 @@ resource "google_compute_interconnect" "interconnect" {
   description          = "example description"
   macsec_enabled       = false
   noc_contact_email    = "user@example.com"
+  requested_features   = ["IF_L2_FORWARDING"]
 }
 
 resource "google_compute_interconnect_attachment" "attachment" {
