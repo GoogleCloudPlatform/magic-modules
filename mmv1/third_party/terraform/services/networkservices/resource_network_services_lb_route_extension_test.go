@@ -1140,7 +1140,7 @@ func TestAccNetworkServicesLbRouteExtension_validation(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkServicesLbRouteExtension_validation_invalid(context),
+				Config:      testAccNetworkServicesLbRouteExtension_validation_invalid(context),
 				ExpectError: regexp.MustCompile("the valid values are: REQUEST_HEADERS, REQUEST_BODY, REQUEST_TRAILERS"),
 			},
 		},
