@@ -1432,6 +1432,15 @@ func TestAccRedisCluster_redisClusterHaWithLabelsUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
+				Config: testAccRedisCluster_redisClusterHaWithLabelsExample(context),
+			},
+			{
+				ResourceName:            "google_redis_cluster.cluster-ha-with-labels",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"gcs_source", "labels", "managed_backup_source", "name", "psc_configs", "region", "terraform_labels"},
+			},
+			{
 				Config: testAccRedisCluster_redisClusterHaWithLabelsUpdate(context),
 			},
 			{

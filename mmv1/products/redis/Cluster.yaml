@@ -136,6 +136,10 @@ examples:
       subnet_name: 'my-subnet'
       network_name: 'my-network'
       deletion_protection_enabled: 'true'
+    test_vars_overrides:
+      'deletion_protection_enabled': 'false'
+    oics_vars_overrides:
+      'deletion_protection_enabled': 'false'
   - name: 'redis_cluster_ha'
     primary_resource_id: 'cluster-ha'
     vars:
