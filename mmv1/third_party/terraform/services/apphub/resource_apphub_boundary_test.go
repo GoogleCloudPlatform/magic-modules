@@ -67,6 +67,15 @@ func TestAccApphubBoundary_apphubBoundary_update(t *testing.T) {
 	})
 }
 
+func testAccApphubBoundary_apphubBoundaryBasicExample(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_apphub_boundary" "example" {
+  location = "global"
+  crm_node = "projects/%{crm_node_project_number}"
+}
+`, context)
+}
+
 func testAccApphubBoundary_apphubBoundaryNoCrmNode(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_apphub_boundary" "example" {
