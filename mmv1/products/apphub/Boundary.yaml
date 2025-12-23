@@ -14,6 +14,11 @@
 ---
 name: 'Boundary'
 description: 'Application management boundary.'
+references:
+  guides:
+    'AppHub': 'https://docs.cloud.google.com/app-hub/docs/'
+  api: 'https://docs.cloud.google.com/app-hub/docs/reference/rest/v1/Boundary'
+
 docs:
 self_link: 'projects/{{project}}/locations/{{location}}/boundary'
 # Singleton resource, point create_url to update_url.
@@ -29,8 +34,7 @@ import_format:
 parameters:
  - name: 'location'
    type: String
-   description: 'The location for the Boundary resource. Example: us-central1.'
-   required: true
+   description: 'Optional. The location for the Boundary resource. Must be global.'
    url_param_only: true
    immutable: true
 properties:
@@ -46,7 +50,6 @@ properties:
       Optional. The resource name of the CRM node being attached to the
       boundary.
       Format: `projects/{project-number}`
-    api_field: crm_node
   - name: createTime
     type: Time
     description: 'Create time.'
@@ -67,7 +70,5 @@ properties:
 examples:
   - name: 'apphub_boundary_basic'
     primary_resource_id: 'example'
-    vars:
-     project_id: "my-project-id"
-     location: "us-central1"
-     crm_node_project_number: "370517660364"
+    test_env_vars:
+     crm_node_project_number: 'PROJECT_NUMBER'

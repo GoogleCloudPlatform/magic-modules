@@ -1,5 +1,4 @@
 resource "google_apphub_boundary" "{{$.PrimaryResourceId}}" {
-  project  = "{{index $.Vars "project_id"}}"
-  location = "{{index $.Vars "location"}}"
-  crm_node = "projects/{{index $.Vars "crm_node_project_number"}}"
+  location = "global"
+  crm_node = "projects/{{index $.TestEnvVars "crm_node_project_number"}}"
 }
