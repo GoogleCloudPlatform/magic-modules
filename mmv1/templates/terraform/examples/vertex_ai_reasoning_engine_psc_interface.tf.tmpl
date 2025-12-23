@@ -1,3 +1,7 @@
+# When PSC-I is configured, Agent deletion will fail,
+# although the agent will be deleted.
+# Bug at https://github.com/hashicorp/terraform-provider-google/issues/25637
+
 resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
   display_name = "{{index $.Vars "name"}}"
   description  = "A basic reasoning engine"

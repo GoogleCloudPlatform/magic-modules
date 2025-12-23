@@ -63,6 +63,7 @@ examples:
         role: "roles/dns.peer"
       - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
         role: "roles/viewer"
+    exclude_test: true
   - name: 'vertex_ai_reasoning_engine_full'
     primary_resource_id: 'reasoning_engine'
     vars:
