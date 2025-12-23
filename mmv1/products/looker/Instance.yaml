@@ -120,7 +120,6 @@ virtual_fields:
       nested resources will return an error. Possible values: DEFAULT, FORCE
 custom_code:
   pre_delete: templates/terraform/pre_delete/looker_instance.go.tmpl
-  tgc_decoder: templates/tgc_next/decoders/looker_instance.go.tmpl
 parameters:
   - name: 'region'
     type: String
