@@ -183,7 +183,11 @@ resource "google_dataplex_datascan" "full_quality" {
 
   execution_spec {
     trigger {
+<<<<<<< HEAD
       onDemand {}
+=======
+      on_demand {}
+>>>>>>> 90af6dd88 (feat: Implement OneTime trigger for Dataplex Datascan)
     }
   }
 
