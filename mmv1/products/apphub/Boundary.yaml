@@ -29,14 +29,14 @@ update_verb: 'PATCH'
 exclude_delete: true
 id_format: 'projects/{{project}}/locations/{{location}}/boundary'
 import_format:
- - "projects/{{project}}/locations/{{location}}/boundary"
+  - "projects/{{project}}/locations/{{location}}/boundary"
 
 parameters:
- - name: 'location'
-   type: String
-   description: 'Optional. The location for the Boundary resource. Must be global.'
-   url_param_only: true
-   immutable: true
+  - name: 'location'
+    type: String
+    description: 'Optional. The location for the Boundary resource. Must be global.'
+    url_param_only: true
+    immutable: true
 properties:
   - name: name
     type: String
@@ -63,12 +63,12 @@ properties:
     description: 'Boundary type.'
     output: true
     enum_values:
-     - AUTOMATIC
-     - MANUAL
-     - MANAGED_AUTOMATIC
+      - AUTOMATIC
+      - MANUAL
+      - MANAGED_AUTOMATIC
 
 examples:
   - name: 'apphub_boundary_basic'
     primary_resource_id: 'example'
     test_env_vars:
-     crm_node_project_number: 'PROJECT_NUMBER'
+      crm_node_project_number: 'PROJECT_NUMBER'
