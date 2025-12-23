@@ -39,7 +39,7 @@ resource "google_apigee_environment" "env_dev" {
 
 resource "google_apigee_api" "test_apigee_api" {
   name          = "hello-world"
-  org_id        = google_apigee_organization.apigee_org.id
+  org_id        = google_apigee_organization.apigee_org.name
   config_bundle = "apigee_api_bundle.zip"
 }
 
