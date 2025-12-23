@@ -1424,7 +1424,7 @@ func TestAccRedisCluster_redisClusterHaWithLabelsUpdate(t *testing.T) {
 
 	context := map[string]interface{}{
 		"deletion_protection_enabled": false,
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix":               acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
