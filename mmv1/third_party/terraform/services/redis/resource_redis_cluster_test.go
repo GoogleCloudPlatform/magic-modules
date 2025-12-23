@@ -1423,6 +1423,7 @@ func TestAccRedisCluster_redisClusterHaWithLabelsUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"deletion_protection_enabled": false,
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
