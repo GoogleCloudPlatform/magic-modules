@@ -46,8 +46,8 @@ resource "google_apigee_api_product" "full_api_product" {
     value = "private"
   }
 
-  environments = ["dev", "hom"]
-  proxies      = ["hello-world"]
+  environments = ["test", "prod"]
+  proxies      = ["default"]
   api_resources = [
     "/",
     "/weather/**"

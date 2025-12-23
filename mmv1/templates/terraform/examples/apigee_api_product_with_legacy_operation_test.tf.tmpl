@@ -87,8 +87,8 @@ resource "google_apigee_api_product" "{{$.PrimaryResourceId}}" {
     value = "private"
   }
 
-  environments = ["dev", "hom"]
-  proxies      = ["hello-world"]
+  environments = ["test", "prod"]
+  proxies      = ["default"]
   api_resources = [
     "/",
     "/weather/**"
