@@ -30,7 +30,14 @@ exclude_delete: true
 id_format: 'projects/{{project}}/locations/{{location}}/boundary'
 import_format:
   - "projects/{{project}}/locations/{{location}}/boundary"
-
+autogen_async: true
+async:
+  actions: ['create', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
 parameters:
   - name: 'location'
     type: String
