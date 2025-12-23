@@ -14,13 +14,12 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     if v == nil {
         return v
     }
-	m := v.(map[string]interface{})
+    m := v.(map[string]interface{})
     l := make([]interface{}, 0, len(m))
     for key, raw := range m {
         original := raw.(map[string]interface{})
         transformed := make(map[string]interface{})
 
-        // Promote the map key to the 'vlan_id' field
         transformed["vlan_id"] = key
 
         if v, ok := original["name"]; ok {
@@ -29,10 +28,23 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
         if v, ok := original["applianceIpAddress"]; ok {
             transformed["appliance_ip_address"] = v
         }
-        if v, ok := original["innerVlanToApplianceMappings"]; ok {
-            transformed["inner_vlan_to_appliance_mappings"] = v
-        }
 
+        if v, ok := original["innerVlanToApplianceMappings"]; ok {
+            innerList := v.([]interface{})
+            transformedInnerList := make([]interface{}, 0, len(innerList))
+            for _, itemRaw := range innerList {
+                item := itemRaw.(map[string]interface{})
+                transformedItem := make(map[string]interface{})
+                if ip, ok := item["innerApplianceIpAddress"]; ok {
+                    transformedItem["inner_appliance_ip_address"] = ip
+                }
+                if tags, ok := item["innerVlanTags"]; ok {
+                    transformedItem["inner_vlan_tags"] = tags
+                }
+                transformedInnerList = append(transformedInnerList, transformedItem)
+            }
+            transformed["inner_vlan_to_appliance_mappings"] = transformedInnerList
+        }
         l = append(l, transformed)
     }
     return l

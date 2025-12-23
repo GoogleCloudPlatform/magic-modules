@@ -61,6 +61,8 @@ resource "google_compute_interconnect_attachment" "attachment" {
   interconnect   = google_compute_interconnect.interconnect.id
   type           = "L2_DEDICATED"
   bandwidth      = "BPS_50M"
+  vlan_tag8021q  =  1000
+  region         = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.name}/regions/us-east4"
   l2_forwarding {
     appliance_mappings {
       	vlan_id = "100"
@@ -81,6 +83,11 @@ resource "google_compute_interconnect_attachment" "attachment" {
     }
     default_appliance_ip_address = "10.0.0.4"
     tunnel_endpoint_ip_address   = "172.16.0.1"
+  }
+  lifecycle {
+    ignore_changes = [
+      vlan_tag8021q
+    ]
   }
 }
 `, context)

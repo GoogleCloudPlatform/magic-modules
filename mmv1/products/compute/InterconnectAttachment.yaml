@@ -304,6 +304,7 @@ properties:
       attachment must be created with this option.
     immutable: true
     custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/interconnect_attachment_encryption_mapping.tmpl'
     default_value: "NONE"
     enum_values:
       - 'NONE'
