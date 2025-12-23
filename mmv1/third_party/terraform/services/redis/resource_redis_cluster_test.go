@@ -1474,7 +1474,7 @@ resource "google_redis_cluster" "cluster-ha-with-labels" {
   redis_configs = {
     maxmemory-policy	= "volatile-ttl"
   }
-  deletion_protection_enabled = true
+  deletion_protection_enabled = false
 
   zone_distribution_config {
     mode = "MULTI_ZONE"
