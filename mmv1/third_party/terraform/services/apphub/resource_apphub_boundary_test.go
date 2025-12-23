@@ -62,7 +62,7 @@ func TestAccApphubBoundary_apphubBoundary_update(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location"},
-			},			
+			},
 		},
 	})
 }
