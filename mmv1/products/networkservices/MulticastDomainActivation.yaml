@@ -144,14 +144,14 @@ properties:
           in this zone.
         default_from_api: true
       - name: aggrIngressPps
-        type: Integer
+        type: String
         description: |-
           Aggregated ingress Packet-Per-Second for all multicast groups in the domain
           in this zone. Default to (aggregated_egress_pps /
           max_per_group_subscribers) * 2.
         default_from_api: true
       - name: avgPacketSize
-        type: String
+        type: Integer
         description: Average packet size (Default to 512 bytes).
         default_from_api: true
       - name: maxPerGroupIngressPps
