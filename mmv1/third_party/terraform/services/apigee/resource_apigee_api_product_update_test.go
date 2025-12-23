@@ -365,6 +365,10 @@ resource "google_apigee_environment" "env_dev" {
   name   = "dev"
   org_id = google_apigee_organization.apigee_org.id
 }
+resource "google_apigee_environment" "env_hom" {
+  name   = "hom"
+  org_id = google_apigee_organization.apigee_org.id
+}
 resource "google_apigee_api_product" "apigee_api_product" {
   org_id        = google_apigee_organization.apigee_org.id
   name              = "tf-test%{random_suffix}"
@@ -379,7 +383,7 @@ resource "google_apigee_api_product" "apigee_api_product" {
   quota_time_unit     = "day"
   quota_counter_scope = "PROXY"
 
-  environments = ["dev"]
+  environments = ["dev", "hom"]
   scopes = [
     "read:weather"
   ]
@@ -521,7 +525,8 @@ resource "google_apigee_api_product" "apigee_api_product" {
 
   depends_on = [
     google_apigee_instance.apigee_instance,
-	google_apigee_environment.env_dev
+	google_apigee_environment.env_dev,
+	google_apigee_environment.env_hom
   ]
 }
 `, context)
