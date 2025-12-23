@@ -2,10 +2,6 @@
 
 policyUrl := fmt.Sprintf("{{"{{"}}ComputeBasePath{{"}}"}}%s", d.Get("policy_id"))
 url, err = tpgresource.ReplaceVars(d, config, policyUrl)
-{{- if eq $.TargetVersionName "ga" }}
-// TODO remove workaround as soon parent field is promoted to GA
-url = strings.Replace(url, "v1", "beta", 1)
-{{- end }}
 if err != nil {
 	return err
 }
@@ -20,14 +16,10 @@ if err != nil {
 	return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComputeOrganizationSecurityPolicy %q", d.Get("policy_id")))
 }
 
-parentRaw := policyRes["parent"]
-parent := ""
-if parentRaw != nil {
-   parent = parentRaw.(string)
-}
+parent := flattenComputeOrganizationSecurityPolicyParent(policyRes["parent"], d, config)
 var opRes map[string]interface{}
 err = ComputeOrgOperationWaitTimeWithResponse(
-config, res, &opRes, parent, "Creating OrganizationSecurityPolicyAssociation", userAgent,
+	config, res, &opRes, parent.(string), "Creating OrganizationSecurityPolicyAssociation", userAgent,
 	d.Timeout(schema.TimeoutCreate))
 
 if err != nil {
