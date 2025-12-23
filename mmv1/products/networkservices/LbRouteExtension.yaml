@@ -38,6 +38,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+  constants: 'templates/terraform/constants/network_services_lb_route_extension.go.tmpl'
 sweeper:
   url_substitutions:
     - region: "us-west1"
@@ -213,9 +214,11 @@ properties:
                 description: |
                   A set of events during request or response processing for which this extension is called.
                   This field is optional for the LbRouteExtension resource. If unspecified, `REQUEST_HEADERS` event is assumed as supported.
-                  Possible values: `EVENT_TYPE_UNSPECIFIED`, `REQUEST_HEADERS`, `REQUEST_BODY`, `REQUEST_TRAILERS`.
+                  Possible values: `REQUEST_HEADERS`, `REQUEST_BODY`, `REQUEST_TRAILERS`.
                 item_type:
                   type: String
+                  validation:
+                    function: 'ValidateSupportedEvent'
               - name: 'metadata'
                 type: KeyValuePairs
                 description: |
@@ -237,7 +240,6 @@ properties:
                   - 'BODY_SEND_MODE_UNSPECIFIED'
                   - 'BODY_SEND_MODE_STREAMED'
                   - 'BODY_SEND_MODE_FULL_DUPLEX_STREAMED'
-
               - name: 'observabilityMode'
                 type: Boolean
                 description: |
