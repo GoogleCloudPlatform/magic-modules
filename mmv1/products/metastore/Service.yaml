@@ -20,6 +20,8 @@ references:
     'Official Documentation': 'https://cloud.google.com/dataproc-metastore/docs/overview'
   api: 'https://cloud.google.com/dataproc-metastore/docs/reference/rest/v1/projects.locations.services'
 docs:
+  note: |
+    The Dataproc Metastore service, as a fully managed Google Cloud service, relies on internal or private APIs for its operational functionalities. These APIs are essential for the service's underlying mechanisms but are not intended for direct customer interaction, enablement, or management via Terraform. You do not need to explicitly manage or import any such internal APIs when using this resource; their functionality is handled automatically by Google Cloud. For a comprehensive explanation of how Terraform interacts with different types of Google Cloud APIs (public vs. private), please refer to the [Understanding Google Cloud APIs and Terraform Guide](../guides/understanding-apis-and-terraform.md).
 base_url: 'projects/{{project}}/locations/{{location}}/services'
 self_link: 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/services?serviceId={{service_id}}'
