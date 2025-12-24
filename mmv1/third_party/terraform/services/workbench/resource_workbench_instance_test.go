@@ -877,3 +877,56 @@ resource "google_workbench_instance" "instance" {
 }
 `, context)
 }
+
+func TestAccWorkbenchInstance_metadataEUCForceNew(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckWorkbenchInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccWorkbenchInstance_metadataEUC(context, "old-script.sh"),
+			},
+			{
+				Config: testAccWorkbenchInstance_metadataEUC(context, "new-script.sh"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_workbench_instance.instance", plancheck.ResourceActionReplace),
+					},
+				},
+			},
+		},
+	})
+}
+
+func testAccWorkbenchInstance_metadataEUC(context map[string]interface{}, scriptName string) string {
+	context["script_name"] = scriptName
+	return acctest.Nprintf(`
+resource "google_workbench_instance" "instance" {
+  name     = "tf-test-workbench-%{random_suffix}"
+  location = "us-central1-a"
+
+  gce_setup {
+    machine_type = "n1-standard-1"
+    vm_image {
+      project = "cloud-notebooks-managed"
+      family  = "workbench-instances"
+    }
+
+    metadata = {
+      post-startup-script          = "%{script_name}"
+      post-startup-script-behavior = "run_once"
+    }
+  }
+  
+  # Crucial for triggering the EUC-specific logic we added
+  enable_managed_euc = true
+}
+`, context)
+}
