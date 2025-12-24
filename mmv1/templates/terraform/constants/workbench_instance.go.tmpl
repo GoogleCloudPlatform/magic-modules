@@ -2,6 +2,7 @@ var WorkbenchInstanceSettableUnmodifiableDefaultMetadata = []string{
 	"install-monitoring-agent",
 	"serial-port-logging-enable",
 	"report-notebook-metrics",
+	"enable-jupyterlab4",
 }
 
 var WorkbenchInstanceEUCProvidedAdditionalMetadata = []string{
@@ -75,7 +76,6 @@ var WorkbenchInstanceProvidedMetadata = []string{
     "enable-guest-attributes",
     "enable-oslogin",
     "proxy-registration-url",
-    "enable-jupyterlab4",
 }
 
 func WorkbenchInstanceMetadataDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
