@@ -1,0 +1,11 @@
+func ValidateSupportedEvent(i interface{}, k string) (warnings []string, errors []error) {
+	str, ok := i.(string)
+	if !ok {
+		errors = append(errors, fmt.Errorf("expected type of %s to be string", k))
+		return
+	}
+	if !strings.HasPrefix(str, "REQUEST_") {
+		errors = append(errors, fmt.Errorf("value %s in %s is invalid, only REQUEST_* events are allowed", str, k))
+	}
+	return
+}
