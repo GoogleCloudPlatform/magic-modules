@@ -899,7 +899,7 @@ func TestAccStorageBucket_forceDestroyWithVersioning(t *testing.T) {
 			{
 				Config: testAccStorageBucket_forceDestroyWithVersioning(bucketName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckStorageBucketPutItem(t, bucketName),
+					testAccCheckStorageBucketPutObjects(t, bucketName),
 				),
 			},
 		},
@@ -1833,6 +1833,26 @@ func testAccCheckStorageBucketPutItem(t *testing.T, bucketName string) resource.
 			return fmt.Errorf("Objects.Insert failed: %v", err)
 		}
 
+		return nil
+	}
+}
+
+func testAccCheckStorageBucketPutObjects(t *testing.T, bucketName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+
+		// create multiple versions of same file
+		for i := 0; i < 25; i++ {
+			data := bytes.NewBufferString("test")
+			dataReader := bytes.NewReader(data.Bytes())
+			object := &storage.Object{Name: "bucketDestroyTestFile"}
+
+			if res, err := config.NewStorageClient(config.UserAgent).Objects.Insert(bucketName, object).Media(dataReader).Do(); err == nil {
+				log.Printf("[INFO] Created object %v at location %v\n\n", res.Name, res.SelfLink)
+			} else {
+				return fmt.Errorf("Objects.Insert failed: %v", err)
+			}
+		}
 		return nil
 	}
 }

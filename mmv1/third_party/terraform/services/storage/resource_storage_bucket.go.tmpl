@@ -1208,20 +1208,6 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 			break // 0 items and no caches, bucket empty
 		}
 
-		if d.Get("retention_policy.0.is_locked").(bool) {
-			for _, item := range res.Items {
-				expiration, err := time.Parse(time.RFC3339, item.RetentionExpirationTime)
-				if err != nil {
-					return err
-				}
-				if expiration.After(time.Now()) {
-					deleteErr := errors.New("Bucket '" + d.Get("name").(string) + "' contains objects that have not met the retention period yet and cannot be deleted.")
-					log.Printf("Error! %s : %s\n\n", bucket, deleteErr)
-					return deleteErr
-				}
-			}
-		}
-
 		if !d.Get("force_destroy").(bool) {
 			deleteErr := fmt.Errorf("Error trying to delete bucket %s without `force_destroy` set to true", bucket)
 			log.Printf("Error! %s : %s\n\n", bucket, deleteErr)
@@ -1251,19 +1237,56 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 			}
 		})
 
-		for _, object := range res.Items {
-			log.Printf("[DEBUG] Found %s", object.Name)
-			object := object
+		var pageToken string
+		for {
+			var res *storage.Objects
+			var err error
+			var client = config.NewStorageClient(userAgent).Objects.List(bucket).Versions(true)
 
-			wp.Submit(func() {
-				log.Printf("[TRACE] Attempting to delete %s", object.Name)
-				if err := config.NewStorageClient(userAgent).Objects.Delete(bucket, object.Name).Generation(object.Generation).Do(); err != nil {
-					deleteObjectError = err
-					log.Printf("[ERR] Failed to delete storage object %s: %s", object.Name, err)
-				} else {
-					log.Printf("[TRACE] Successfully deleted %s", object.Name)
+			if pageToken != "" {
+				res, err = client.PageToken(pageToken).Do()
+			} else {
+				res, err = client.Do()
+			}
+
+			if err != nil {
+				log.Printf("Error listing contents of bucket %s: %v", bucket, err)
+				listError = err
+				break
+			}
+			for _, object := range res.Items {
+				log.Printf("[DEBUG] Found %s", object.Name)
+				object := object
+
+				if d.Get("retention_policy.0.is_locked").(bool) {
+					expiration, err := time.Parse(time.RFC3339, object.RetentionExpirationTime)
+					if err != nil {
+						return err
+					}
+					if expiration.After(time.Now()) {
+						deleteErr := errors.New("Bucket '" + d.Get("name").(string) + "' contains objects that have not met the retention period yet and cannot be deleted.")
+						log.Printf("Error! %s : %s\n\n", bucket, deleteErr)
+						return deleteErr
+					}
 				}
-			})
+
+				wp.Submit(func() {
+					log.Printf("[TRACE] Attempting to delete %s", object.Name)
+					if err := config.NewStorageClient(userAgent).Objects.Delete(bucket, object.Name).Generation(object.Generation).Do(); err != nil {
+						deleteObjectError = err
+						log.Printf("[ERR] Failed to delete storage object %s: %s", object.Name, err)
+					} else {
+						log.Printf("[TRACE] Successfully deleted %s", object.Name)
+					}
+				})
+			}
+			pageToken = res.NextPageToken
+			if pageToken == "" {
+				break
+			}
+		}
+		if listError != nil {
+			break
 		}
 
 		// Wait for everything to finish.
