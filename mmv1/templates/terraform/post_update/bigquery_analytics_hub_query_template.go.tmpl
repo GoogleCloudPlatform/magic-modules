@@ -1,0 +1,45 @@
+// After successful creation, check and perform submit if requested
+if d.Get("submit").(bool) {
+	// Read the current state of the resource after creation
+	if err := resourceBigqueryAnalyticsHubQueryTemplateRead(d, meta); err != nil {
+		return fmt.Errorf("Error reading QueryTemplate %q after creation for submit check: %s", d.Id(), err)
+	}
+
+	currentState := d.Get("state").(string)
+
+	// Only submit if the current state is DRAFTED
+	if currentState == "DRAFTED"  { 
+		log.Printf("[DEBUG] Attempting to submit BigQuery Analytics Hub QueryTemplate %q (ID: %s)", d.Get("name").(string), d.Id())
+
+		submitUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BigqueryAnalyticsHubBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/dataExchanges/{{"{{"}}data_exchange_id{{"}}"}}/queryTemplates/{{"{{"}}query_template_id{{"}}"}}:submit")
+		if err != nil {
+			return fmt.Errorf("Error constructing submit URL for QueryTemplate %q: %s", d.Id(), err)
+		}
+
+		submitBodyMap := map[string]interface{}{} //checkonce 
+		submitHeaders := make(http.Header)
+		submitHeaders.Set("Content-Type", "application/json")
+
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   billingProject,
+			RawURL:    submitUrl,
+			UserAgent: userAgent,
+			Headers:   submitHeaders,
+			Body:      submitBodyMap,
+		})
+
+		if err != nil {
+			return fmt.Errorf("Error submitting QueryTemplate %q: %s", d.Id(), err)
+		}
+		log.Printf("[DEBUG] Successfully submitted QueryTemplate %q", d.Id())
+
+		// After submit, re-read to update state (e.g., from DRAFTED to PENDING/APPROVED)
+		if err := resourceBigqueryAnalyticsHubQueryTemplateRead(d, meta); err != nil {
+			return fmt.Errorf("Error reading QueryTemplate %q after submission: %s", d.Id(), err)
+		}
+	} else {
+		log.Printf("[DEBUG] Skipping submission for QueryTemplate %q as its current state is %q, not DRAFTED", d.Id(), currentState)
+	}
+}
