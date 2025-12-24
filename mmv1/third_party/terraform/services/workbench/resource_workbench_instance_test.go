@@ -2,6 +2,7 @@ package workbench_test
 
 import (
 	"testing"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
@@ -392,7 +393,6 @@ resource "google_workbench_instance" "instance" {
   gce_setup {
     metadata = {
       terraform = "true"
-      "resource-url" = "new-fake-value",
       "serial-port-logging-enable" = "true",
     }
   }
@@ -415,7 +415,6 @@ resource "google_workbench_instance" "instance" {
     metadata = {
       terraform = "true",
       "idle-timeout-seconds" = "10800",
-      "image-url" = "fake-value",
       "container-custom-params" = "test-params",
     }
   }
@@ -874,6 +873,50 @@ resource "google_workbench_instance" "instance" {
       tag = "20241117-2200-rc0"
     }
   }
+}
+`, context)
+}
+
+// TestAccWorkbenchInstance_metadataValidation ensures protected metadata keys cannot be set.
+func TestAccWorkbenchInstance_metadataValidation(t *testing.T) {
+	acctest.SkipIfVcr(t) // Test doesn't interact with API
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				// Invalid metadata keys should trigger an error
+				Config:      testAccWorkbenchInstance_invalidMetadata(context),
+				ExpectError: regexp.MustCompile(`the following metadata keys are protected and cannot be set: \[gce-software-declaration image-url proxy-url\]`),
+			},
+		},
+	})
+}
+
+// Invalid metadata configuration (should fail)
+func testAccWorkbenchInstance_invalidMetadata(context map[string]interface{}) string {
+   return acctest.Nprintf(`
+resource "google_workbench_instance" "instance" {
+  name     = "tf-test-workbench-instance%{random_suffix}"
+  location = "us-central1-a"
+  gce_setup {
+	metadata = {
+        "proxy-url"  = "https://custom.proxy"
+        "image-url"  = "https://custom.image"
+        "custom-key" = "custom-value"
+		"gce-software-declaration" = "custom-value"
+	}
+  }
+  
+  instance_owners  = ["example@example.com"]
+  
+  enable_managed_euc = true
 }
 `, context)
 }
