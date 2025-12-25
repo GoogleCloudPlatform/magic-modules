@@ -635,6 +635,10 @@ func (vt *Tester) uploadOneCassetteFile(head string, version provider.Version, f
 }
 
 func (vt *Tester) UploadCassettes(head string, version provider.Version) error {
+	if vt.enableAsyncUploadCassettes {
+		fmt.Println("Skipping since cassettes are uploaded in an async thread.")
+		return nil
+	}
 	cassettePath, ok := vt.cassettePaths[version]
 	if !ok {
 		return fmt.Errorf("no cassettes found for version %s", version)
