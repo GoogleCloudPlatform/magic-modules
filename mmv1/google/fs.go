@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"os"
 )
 
 // internal interface supporting ReadDirFS and ReadFileFS
@@ -41,29 +40,28 @@ type overlayFS struct {
 	overlay, base ReadDirReadFileFS
 }
 
-func dirAsReadDirReadFileFS(path string) (ReadDirReadFileFS, error) {
-	fsys, ok := os.DirFS(path).(ReadDirReadFileFS)
+func dirAsReadDirReadFileFS(f fs.FS) (ReadDirReadFileFS, error) {
+	fsys, ok := f.(ReadDirReadFileFS)
 	if !ok {
 		return nil, fmt.Errorf("Golang documentations claim that DirFS implements ReadDirFS and ReadFileFS")
 	}
 	return fsys, nil
 }
 
-// NewOverlayFS create an overlay FS from two directories.
-// overlayDirectory may be empty to
-func NewOverlayFS(overlayDirectory, baseDirectory string) (ReadDirReadFileFS, error) {
-	base, err := dirAsReadDirReadFileFS(baseDirectory)
+// NewOverlayFS create an overlay FS from two FS.
+func NewOverlayFS(override, base fs.FS) (ReadDirReadFileFS, error) {
+	b, err := dirAsReadDirReadFileFS(base)
 	if err != nil {
 		return nil, err
 	}
-	if overlayDirectory == "" {
-		return base, nil
+	if override == nil {
+		return b, nil
 	}
-	o, err := dirAsReadDirReadFileFS(overlayDirectory)
+	o, err := dirAsReadDirReadFileFS(override)
 	if err != nil {
 		return nil, err
 	}
-	return overlayFS{overlay: o, base: base}, nil
+	return overlayFS{overlay: o, base: b}, nil
 }
 
 // Open implements the main FS interface.
