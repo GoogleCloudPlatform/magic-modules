@@ -43,78 +43,120 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/bigquery_analytics_hub_listing.go.tmpl'
 # Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
-examples:
+samples:
   - name: 'bigquery_analyticshub_listing_basic'
     primary_resource_id: 'listing'
     primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
     region_override: 'US'
-    vars:
-      data_exchange_id: 'my_data_exchange'
-      listing_id: 'my_listing'
-      desc: 'example data exchange'
+    steps:
+      - name: 'basic'
+        config_path: 'templates/terraform/examples/bigquery_analyticshub_listing_basic.tf.tmpl'
+        test_env_vars:
+          project_name: 'PROJECT_NAME'
+        vars:
+          data_exchange_id: 'my_data_exchange'
+          listing_id: 'my_listing'
+          desc: 'example data exchange'
   - name: 'bigquery_analyticshub_listing_restricted'
     primary_resource_id: 'listing'
     primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
     region_override: 'US'
-    vars:
-      data_exchange_id: 'my_data_exchange'
-      listing_id: 'my_listing'
-      desc: 'example data exchange'
+    steps:
+      - name: 'basic'
+        config_path: 'templates/terraform/examples/bigquery_analyticshub_listing_restricted.tf.tmpl'
+        test_env_vars:
+          project_name: 'PROJECT_NAME'
+        vars:
+          data_exchange_id: 'my_data_exchange'
+          listing_id: 'my_listing'
+          desc: 'example data exchange'
   - name: 'bigquery_analyticshub_listing_dcr'
     primary_resource_id: 'listing'
     primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
     region_override: 'US'
-    vars:
-      data_exchange_id: 'dcr_data_exchange'
-      listing_id: 'dcr_listing'
-      desc: 'example dcr data exchange'
+    steps:
+      - name: 'basic'
+        config_path: 'templates/terraform/examples/bigquery_analyticshub_listing_dcr.tf.tmpl'
+        test_env_vars:
+          project_name: 'PROJECT_NAME'
+        vars:
+          data_exchange_id: 'dcr_data_exchange'
+          listing_id: 'dcr_listing'
+          desc: 'example dcr data exchange'
   - name: 'bigquery_analyticshub_listing_log_linked_dataset_query_user'
     primary_resource_id: 'listing'
     primary_resource_name: 'fmt.Sprintf("tf_test_log_email_de%s", context["random_suffix"]),fmt.Sprintf("tf_test_log_email_listing%s", context["random_suffix"])'
     region_override: 'US'
-    vars:
-      data_exchange_id: 'tf_test_log_email_de'
-      listing_id: 'tf_test_log_email_listing'
-      dataset_id: 'tf_test_log_email_ds'
-      description: 'Example for log email test'
+    steps:
+      - name: 'basic'
+        config_path: 'templates/terraform/examples/bigquery_analyticshub_listing_log_linked_dataset_query_user.tf.tmpl'
+        test_env_vars:
+          project_name: 'PROJECT_NAME'
+        vars:
+          data_exchange_id: 'tf_test_log_email_de'
+          listing_id: 'tf_test_log_email_listing'
+          dataset_id: 'tf_test_log_email_ds'
+          description: 'Example for log email test'
   - name: 'bigquery_analyticshub_listing_pubsub'
     primary_resource_id: 'listing'
     primary_resource_name: 'fmt.Sprintf("tf_test_pubsub_de%s", context["random_suffix"]),fmt.Sprintf("tf_test_listing%s", context["random_suffix"])'
     region_override: 'US'
-    vars:
-      data_exchange_id: 'tf_test_pubsub_data_exchange'
-      listing_id: 'tf_test_pubsub_listing'
-      pubsub_topic_name: 'test_pubsub'
-      description: 'Example for pubsub topic source'
+    steps:
+      - name: 'basic'
+        config_path: 'templates/terraform/examples/bigquery_analyticshub_listing_pubsub.tf.tmpl'
+        test_env_vars:
+          project_name: 'PROJECT_NAME'
+        vars:
+          data_exchange_id: 'tf_test_pubsub_data_exchange'
+          listing_id: 'tf_test_pubsub_listing'
+          pubsub_topic_name: 'test_pubsub'
+          description: 'Example for pubsub topic source'
   - name: 'bigquery_analyticshub_listing_dcr_routine'
     primary_resource_id: 'listing'
     primary_resource_name: 'fmt.Sprintf("tf_test_pubsub_de%s", context["random_suffix"]),fmt.Sprintf("tf_test_listing%s", context["random_suffix"])'
     region_override: 'US'
     min_version: beta
-    vars:
-      data_exchange_id: 'tf_test_data_exchange'
-      listing_id: 'tf_test_listing_routine'
-      dataset_id: 'tf_test_dataset'
-      routine_id: 'tf_test_routine'
-      desc: 'Example for listing with routine'
-  - name: 'bigquery_analyticshub_public_listing'
+    steps:
+      - name: 'basic'
+        config_path: 'templates/terraform/examples/bigquery_analyticshub_listing_dcr_routine.tf.tmpl'
+        test_env_vars:
+          project_name: 'PROJECT_NAME'
+        vars:
+          data_exchange_id: 'tf_test_data_exchange'
+          listing_id: 'tf_test_listing_routine'
+          dataset_id: 'tf_test_dataset'
+          routine_id: 'tf_test_routine'
+          desc: 'Example for listing with routine'
+  - name: 'bigquery_analyticshub_listing_multiregion'
     primary_resource_id: 'listing'
+    min_version: beta
     primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
     region_override: 'US'
-    vars:
-      data_exchange_id: 'my_data_exchange'
-      listing_id: 'my_listing'
-      desc: 'example public listing'
+    steps:
+      - name: 'multiregion'
+        config_path: 'templates/terraform/samples/services/bigqueryanalyticshub/multiregion.tf.tmpl'
+        test_env_vars:
+          project_name: 'PROJECT_NAME'
+        vars:
+          data_exchange_id: 'my_data_exchange'
+          listing_id: 'my_listing'
+          description: 'example listing for multiregion'
+    exclude_test: true
   - name: 'bigquery_analyticshub_listing_marketplace'
     primary_resource_id: 'listing'
     primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
     region_override: 'us'
-    vars:
-      data_exchange_id: 'my_data_exchange'
-      listing_id: 'my_listing'
-      desc: 'example data exchange'
-    ignore_read_extra:
-      - 'delete_commercial'
+    steps:
+      - name: 'basic'
+        config_path: 'templates/terraform/examples/bigquery_analyticshub_listing_marketplace.tf.tmpl'
+        test_env_vars:
+          project_name: 'PROJECT_NAME'
+        vars:
+          data_exchange_id: 'my_data_exchange'
+          listing_id: 'my_listing'
+          desc: 'example data exchange'
+        ignore_read_extra:
+          - 'delete_commercial'
 virtual_fields:
   - name: 'delete_commercial'
     type: Boolean
@@ -148,6 +190,7 @@ properties:
     url_param_only: true
     required: true
     immutable: true
+    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
   - name: 'displayName'
     type: String
     description: |-
@@ -206,7 +249,6 @@ properties:
   - name: 'bigqueryDataset'
     type: NestedObject
     description: Shared dataset i.e. BigQuery dataset source.
-    immutable: true
     exactly_one_of:
       - 'pubsubTopic'
       - 'bigqueryDataset'
@@ -245,6 +287,43 @@ properties:
               exactly_one_of:
                 - 'table'
                 - 'routine'
+      - name: 'replicaLocations'
+        type: Array
+        is_set: true
+        min_version: 'beta'
+        set_hash_func: 'tpgresource.CaseInsensitiveHash'
+        description: |
+          A list of regions where the publisher has created shared dataset replicas.
+        item_type:
+          type: String
+          diff_suppress_func: 'tpgresource.CaseDiffSuppress'
+      - name: 'effectiveReplicas'
+        type: Array
+        description: |
+          Server owned effective state of replicas. Contains both primary and secondary replicas.
+          Each replica includes a system-computed (output-only) state and primary designation.
+        output: true
+        min_version: 'beta'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'location'
+              type: String
+              description: |
+                The geographic location where the replica resides.
+              output: true
+            - name: 'replicaState'
+              type: String
+              description: |
+                Output-only. Assigned by Analytics Hub based on real BigQuery replication state.
+                Possible values: REPLICA_STATE_UNSPECIFIED, READY_TO_USE, UNAVAILABLE
+              output: true
+            - name: 'primaryState'
+              type: String
+              description: |
+                Output-only. Indicates that this replica is the primary replica.
+                Possible values: PRIMARY_STATE_UNSPECIFIED, PRIMARY_REPLICA
+              output: true
   - name: 'pubsubTopic'
     type: NestedObject
     description: Pub/Sub topic source.
@@ -286,7 +365,7 @@ properties:
           If true, restrict export of query result derived from restricted linked dataset table.
   - name: 'logLinkedDatasetQueryUserEmail'
     type: Boolean
-    description:
+    description: |
       If true, subscriber email logging is enabled and all queries on the linked dataset will log the email address of the querying user. Once enabled, this setting cannot be turned off.
   - name: 'state'
     type: String
