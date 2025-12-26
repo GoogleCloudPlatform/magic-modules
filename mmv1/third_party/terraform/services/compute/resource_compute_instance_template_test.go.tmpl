@@ -13,6 +13,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -1600,6 +1601,11 @@ func TestAccComputeInstance_IPv6ExternalRecreate(t *testing.T) {
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.test", &instance),
 				),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_instance.test", plancheck.ResourceActionReplace),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_compute_instance.test",
