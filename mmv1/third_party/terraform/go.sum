@@ -21,6 +21,8 @@ cloud.google.com/go/monitoring v1.24.2 h1:5OTsoJ1dXYIiMiuL+sYscLc9BumrL3CarVLL7d
 cloud.google.com/go/monitoring v1.24.2/go.mod h1:x7yzPWcgDRnPEv3sI+jJGBkwl5qINf+6qY4eq0I9B4U=
 dario.cat/mergo v1.0.0 h1:AGCNq9Evsj31mOgNPcLyXc+4PNABt905YmuqPYYpBWk=
 dario.cat/mergo v1.0.0/go.mod h1:uNxQE+84aUszobStD9th8a29P2fMDhsBdgRYvZOxGmk=
+cloud.google.com/go/memcache v1.11.6 h1:33IVqQEmFiITsBXwGHeTkUhWz0kLNKr90nV3e22uLPs=
+cloud.google.com/go/memcache v1.11.6/go.mod h1:ZM6xr1mw3F8TWO+In7eq9rKlJc3jlX2MDt4+4H+/+cc=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/GoogleCloudPlatform/declarative-resource-client-library v1.83.0 h1:pvSYcI7HKOtqHTr4E9cRqVbgnh0+qnJZCrnmozltFVg=
 github.com/GoogleCloudPlatform/declarative-resource-client-library v1.83.0/go.mod h1:pL2Qt5HT+x6xrTd806oMiM3awW6kNIXB/iiuClz6m6k=
