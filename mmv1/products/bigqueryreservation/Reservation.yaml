@@ -253,3 +253,8 @@ properties:
       - 'scalingMode'
     conflicts:
       - 'autoscale'
+  - name: 'reservation_group'
+    type: String
+    description: |
+      The reservation group that this reservation belongs to.
+      Not all reservations belong to a group.
