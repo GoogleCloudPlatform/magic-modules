@@ -113,6 +113,8 @@ examples:
       'deletion_protection': 'false'
     external_providers: ["random"]
     skip_vcr: true
+    ignore_read_extra:
+      - 'postgresql_profile.0.password'
   - name: 'datastream_connection_profile_salesforce'
     primary_resource_id: 'default'
     vars:
