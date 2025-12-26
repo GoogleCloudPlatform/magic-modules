@@ -173,6 +173,7 @@ properties:
     enum_values:
       - 'PREMIUM'
       - 'STANDARD'
+      - 'FOOBAR'
   - name: 'subnetwork'
     type: ResourceRef
     description: |
