@@ -157,3 +157,9 @@ func Base64DiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	normalizedNew := r.Replace(new)
 	return normalizedOld == normalizedNew
 }
+
+// CaseInsensitiveHash produces the same hash for strings that differ only in case.
+// This is used for Set fields where case should not trigger a diff.
+func CaseInsensitiveHash(v interface{}) int {
+	return Hashcode(strings.ToLower(v.(string)))
+}
