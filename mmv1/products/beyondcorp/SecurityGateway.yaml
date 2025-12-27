@@ -221,6 +221,8 @@ properties:
         description: Client IP configuration. The client IP address is included if true.
   - name: serviceDiscovery
     type: NestedObject
+    send_empty_value: true
+    allow_empty_object: true
     description: Settings related to the Service Discovery.
     properties:
       - name: apiGateway
