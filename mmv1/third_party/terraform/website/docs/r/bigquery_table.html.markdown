@@ -144,8 +144,8 @@ The following arguments are supported:
     with `external_data_configuration.schema`. Otherwise, schemas must be
     specified with this top-level field.
 
-* `ignore_schema_changes` - (Optional)  A list of fields which should be ignored for each column in schema.
-    **NOTE:** Right now only `dataPolicies` field is supported. We might support others in the future.
+* `ignore_schema_changes` - (Optional)  A list of fields which would act non-authoritative for each column in schema.
+    **NOTE:** Right now only `dataPolicies` field is supported(we might support others in the future). It means that any `dataPolicies` updated outside terraform will be ignored if this option is used.
 
 * `ignore_auto_generated_schema` - (Optional)  If true, Terraform will prevent columns added by the server(e.g. hive partitioned columns) in schema from showing diff.
 
