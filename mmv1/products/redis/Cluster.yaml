@@ -370,6 +370,7 @@ properties:
       If not provided, REDIS_HIGHMEM_MEDIUM will be used as default
     required: false
     default_from_api: true
+    is_missing_in_cai: true
     enum_values:
       - 'REDIS_SHARED_CORE_NANO'
       - 'REDIS_HIGHMEM_MEDIUM'
@@ -523,6 +524,7 @@ properties:
     type: NestedObject
     description: Persistence config (RDB, AOF) for the cluster.
     default_from_api: true
+    is_missing_in_cai: true
     properties:
       - name: 'mode'
         type: Enum
