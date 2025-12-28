@@ -84,6 +84,32 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])'
     vars:
       disk_name: 'test-disk-features'
+  - name: 'disk_user_licenses'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])'
+    vars:
+      disk_name: 'test-disk-user-licenses'
+  - name: 'disk_erase_windows_vss'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])'
+    vars:
+      disk_name: 'test-disk-vss'
+      source_disk_name: 'test-disk-vss-source'
+      snapshot_name: 'test-snapshot-vss'
+  - name: 'disk_source_snapshot_encryption'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])'
+    vars:
+      disk_name: 'test-disk-from-enc-snap'
+      source_disk_name: 'test-disk-enc-source'
+      snapshot_name: 'test-encrypted-snapshot'
+  - name: 'disk_source_image_encryption'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])'
+    vars:
+      disk_name: 'test-disk-from-enc-img'
+      source_disk_name: 'test-disk-img-source'
+      image_name: 'test-encrypted-image'
 parameters:
   - name: 'zone'
     type: ResourceRef
@@ -123,6 +149,12 @@ properties:
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
+      - name: 'rsaEncryptedKey'
+        type: String
+        description: |
+          Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit
+          customer-supplied encryption key to either encrypt or decrypt
+          this resource. You can provide either the rawKey or the rsaEncryptedKey.
       - name: 'sha256'
         type: String
         description: |
@@ -239,6 +271,12 @@ properties:
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
+      - name: 'rsaEncryptedKey'
+        type: String
+        description: |
+          Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit
+          customer-supplied encryption key to either encrypt or decrypt
+          this resource. You can provide either the rawKey or the rsaEncryptedKey.
         # TODO Change to ResourceRef once KMS is in Magic Modules
       - name: 'kmsKeySelfLink'
         type: String
@@ -399,6 +437,12 @@ properties:
       be used to determine whether the image was taken from the current
       or a previous instance of a given disk name.
     output: true
+  - name: 'eraseWindowsVssSignature'
+    type: Boolean
+    description: |
+      Specifies whether the disk restored from a source snapshot should erase
+      Windows specific VSS signature.
+    immutable: true
   - name: 'DiskId'
     type: String
     description: |
@@ -539,6 +583,15 @@ properties:
       description: 'An applicable license URI'
       resource: 'License'
       imports: 'selfLink'
+  - name: 'userLicenses'
+    type: Array
+    description: |
+      A list of publicly visible user-licenses. Unlike regular licenses, user
+      provided licenses can be modified after the disk is created. This includes
+      a list of URLs to the license resource. For example, to provide a debian license:
+      https://www.googleapis.com/compute/v1/projects/debian-cloud/global/licenses/debian-9-stretch
+    item_type:
+      type: String
   - name: 'storagePool'
     type: String
     description: |
