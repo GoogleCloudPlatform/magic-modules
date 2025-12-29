@@ -1,8 +1,0 @@
-// These fields are missing in CAI assets, but requried in Terraform
-if expirationPolicy, ok := res["expirationPolicy"].(map[string]interface{}); ok {
-    if _, ok := expirationPolicy["ttl"].(string); !ok {
-        expirationPolicy["ttl"] = "unknown"
-    }
-}
-
-return res, hclData, nil
