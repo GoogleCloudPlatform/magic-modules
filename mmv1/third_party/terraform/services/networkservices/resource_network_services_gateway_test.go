@@ -1301,7 +1301,7 @@ func TestAccNetworkServicesGateway_swpListenAllPorts(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"region":        "us-east1",
+		"region":        "us-east4",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1313,24 +1313,24 @@ func TestAccNetworkServicesGateway_swpListenAllPorts(t *testing.T) {
 				Config: testAccNetworkServicesGateway_swpAllPortsBasic(context),
 			},
 			{
-				ResourceName:            "google_network_services_gateway.foobar",
+				ResourceName:            "google_network_services_gateway.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"name", "location", "delete_swg_autogen_router_on_destroy"},
 			},
 			{
 				Config: testAccNetworkServicesGateway_swpAllPortsUpdate(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_network_services_gateway.foobar", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_network_services_gateway.default", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
 			{
-				ResourceName:            "google_network_services_gateway.foobar",
+				ResourceName:            "google_network_services_gateway.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"name", "location", "delete_swg_autogen_router_on_destroy"},
 			},
 		},
 	})
@@ -1685,7 +1685,7 @@ resource "google_network_security_gateway_security_policy" "newpolicy" {
 resource "google_network_security_gateway_security_policy_rule" "newrule" {
   name                    = "tf-test-gateway-sec-policy-rule-new-%{random_suffix}"
   location                = "%{region}"
-  gateway_security_policy = google_network_security_gateway_security_policy.default.name
+  gateway_security_policy = google_network_security_gateway_security_policy.newpolicy.name
   enabled                 = true
   description             = "my description"
   priority                = 0
