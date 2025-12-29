@@ -18,7 +18,7 @@ var vcrMergeEapCmd = &cobra.Command{
 	1. CL number
 
 	It then performs the following operations:
-	1. Run gsutil to list, copy, and remove the vcr cassettes fixtures.
+	1. Run gcloud storage to list, copy, and remove the vcr cassettes fixtures.
 	`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
