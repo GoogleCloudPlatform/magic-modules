@@ -2,7 +2,16 @@
 
 // The is logic is inside the encoder since the access_policy_id field is part of
 // the mutex lock and encoders run before the lock is set.
-parts := strings.Split(d.Get("perimeter_name").(string), "/")
-d.Set("access_policy_id", fmt.Sprintf("accessPolicies/%s", parts[1]))
+
+perimeterName := d.Get("perimeter_name").(string)
+
+parts := strings.Split(perimeterName, "/")
+if len(parts) < 2 {
+	retirn nil, fmt.Errorf("invalid perimeter_name format: %s. Expected format: accessPolicies/{access_policy}/servicePerimeters/{servicePerimeter}", perimeterName)
+}
+
+if err := d.Set("access_policy_id", fmt.Sprintf("accessPolicies/%s", parts[1])); err != nil {
+	return nil, fmt.Errorf("error setting access_policy_id: %s", err)
+}
 
 return obj, nil

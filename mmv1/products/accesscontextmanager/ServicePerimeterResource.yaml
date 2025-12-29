@@ -87,6 +87,7 @@ parameters:
     type: ResourceRef
     description: |
       The name of the Service Perimeter to add this resource to.
+      Format: accessPolicies/{access_policy}/servicePerimeters/{servicePerimeter}
     url_param_only: true
     required: true
     immutable: true
