@@ -632,7 +632,6 @@ properties:
       Forward SSH tunnel connectivity.
     conflicts:
       - private_connectivity
-    is_missing_in_cai: true
     properties:
       - name: 'hostname'
         type: String
