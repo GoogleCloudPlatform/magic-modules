@@ -159,15 +159,25 @@ properties:
     default_from_api: true
     item_type:
       type: String
+  - name: 'allPorts'
+    description: |
+      Configures this gateway to ​listen on all ports.
+      By enabling the wildcard ports feature on​ ​your Secure Web Proxy Gateway,
+      it will accept traffic destined for any port (1-65535) on its​ assigned IP address.​
+      This field is configurable only for gateways of type SECURE_WEB_GATEWAY.
+    type: Boolean
+    conflicts:
+      - ports
   - name: 'ports'
     type: Array
     description: |
       One or more port numbers (1-65535), on which the Gateway will receive traffic.
       The proxy binds to the specified ports. Gateways of type 'SECURE_WEB_GATEWAY' are limited to 1 port.
        Gateways of type 'OPEN_MESH' listen on 0.0.0.0 for IPv4 and :: for IPv6 and support multiple ports.
-    required: true
     item_type:
       type: Integer
+    conflicts:
+      - allPorts
   - name: 'scope'
     type: String
     description: |
