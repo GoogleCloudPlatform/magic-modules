@@ -16,7 +16,7 @@ func TestAccIAMWorkforcePoolWorkforcePoolProviderScimToken_update(t *testing.T) 
 	context := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
-    "hard_delete":   true,
+		"hard_delete":   true,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
