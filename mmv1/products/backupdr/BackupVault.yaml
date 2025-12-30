@@ -207,6 +207,7 @@ properties:
   - name: 'encryptionConfig'
     type: NestedObject
     description: 'Encryption configuration for the backup vault.'
+    diff_suppress_func: 'tpgresource.SuppressDiffOnUpdate'
     properties:
       - name: 'kmsKeyName'
         type: String
