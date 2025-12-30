@@ -1695,6 +1695,7 @@ func TestAccSqlDatabaseInstance_pointInTimeRestore(t *testing.T) {
 }
 
 func TestAccSqlDatabaseInstance_pointInTimeRestoreInMultiRegion(t *testing.T) {
+	// Skipped due to randomness
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
@@ -1708,7 +1709,6 @@ func TestAccSqlDatabaseInstance_pointInTimeRestoreInMultiRegion(t *testing.T) {
         "project": 			project,
         "backup_vault_id": 	backupVaultID,
         "backup_vault": 	backupVault,
-		"db_version": 		"MYSQL_8_0_41",
     }
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -8116,11 +8116,6 @@ data "google_sql_backup_run" "backup" {
 
 func testAccSqlDatabaseInstance_pointInTimeRestoreContextMultiRegion(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-// Create service account
-resource "google_service_account" "bkdr_sa" {
-    account_id   = "tf-test-bkdr-sa-%{random_suffix}"
-    display_name = "Backup DR Service Account"
-}
 
 // Create a backup plan
 resource "google_backup_dr_backup_plan" "plan" {
