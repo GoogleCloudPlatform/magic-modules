@@ -59,7 +59,7 @@ parameters:
   - name: 'map'
     type: ResourceRef
     description: |
-      A map entry that is inputted into the cetrificate map
+      A map entry that is inputted into the certificate map
     url_param_only: true
     required: true
     immutable: true

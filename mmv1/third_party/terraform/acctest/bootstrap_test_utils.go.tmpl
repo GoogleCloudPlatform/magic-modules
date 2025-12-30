@@ -11,12 +11,9 @@ import (
 	"time"
 	"net/http"
 
-{{ if ne $.TargetVersionName `ga` -}}
-	// For beta tests only
 	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
 	tpgservicusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
-{{- end }}
 
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/tags"
@@ -37,18 +34,14 @@ import (
 	"google.golang.org/api/servicenetworking/v1"
 	"google.golang.org/api/serviceusage/v1"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
+	backupdr "google.golang.org/api/backupdr/v1"
 )
 
 var SharedKeyRing = "tftest-shared-keyring-1"
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 var DefaultKeyHandleName = "eed58b7b-20ad-4da8-ad85-ba78a0d5ab87"
 var DefaultKeyHandleResourceType = "compute.googleapis.com/Disk"
 var CloudKmsSrviceName = "cloudkms.googleapis.com"
-
-{{- end }}
-
 
 var SharedCryptoKey = map[string]string{
 	"ENCRYPT_DECRYPT":    "tftest-shared-key-1",
@@ -90,8 +83,6 @@ func BootstrapKMSKeyWithPurpose(t *testing.T, purpose string) BootstrappedKMS {
 func BootstrapKMSKeyWithPurposeInLocation(t *testing.T, purpose, locationID string) BootstrappedKMS {
 	return BootstrapKMSKeyWithPurposeInLocationAndName(t, purpose, locationID, SharedCryptoKey[purpose])
 }
-
-{{ if ne $.TargetVersionName `ga` -}}
 
 type BootstrappedKMSAutokey struct {
     *cloudkms.AutokeyConfig
@@ -327,8 +318,6 @@ func setPolicy(crmService *resourceManagerV3.Service, resourceType string, resou
 	return nil
 }
 
-{{- end }}
-
 func BootstrapKMSKeyWithPurposeInLocationAndName(t *testing.T, purpose, locationID, keyShortName string) BootstrappedKMS {
 	config := BootstrapConfig(t)
 	if config == nil {
@@ -397,7 +386,7 @@ func BootstrapKMSKeyWithPurposeInLocationAndName(t *testing.T, purpose, location
 		t.Fatalf("Unable to bootstrap KMS key. CryptoKey is nil!")
 	}
 
-	// TODO(b/372305432): Use the pagination properly.
+	// TODO: b/372305432 Use the pagination properly.
 	ckvResp, err := kmsClient.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.List(keyName).Do()
 	if err != nil {
 		t.Fatalf("Unable to list cryptoKeyVersions: %v", err)
@@ -883,8 +872,6 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 	return projects
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 // BootstrapFolder creates or get a folder having a input folderDisplayName within a TestOrgEnv
 func BootstrapFolder(t *testing.T, folderDisplayName string) *resourceManagerV3.Folder {
 	config := BootstrapConfig(t)
@@ -933,8 +920,6 @@ func BootstrapFolder(t *testing.T, folderDisplayName string) *resourceManagerV3.
 	}
 	return folder
 }
-
-{{- end }}
 
 // BootstrapProject will create or get a project named
 // "<projectIDPrefix><projectIDSuffix>" that will persist across test runs,
@@ -1114,7 +1099,7 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 			PointInTimeRecoveryEnabled: true,
 		}
 		settings := &sqladmin.Settings{
-			Tier:                "db-f1-micro",
+			Tier:                "db-custom-2-3840",
 			BackupConfiguration: backupConfig,
 		}
 		bootstrapInstance = &sqladmin.DatabaseInstance{
@@ -1173,6 +1158,93 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 	}
 
 	return bootstrapInstance.Name
+}
+
+// waitForBackupdrOperation polls the operation until it is done or times out.
+func waitForBackupdrOperation(ctx context.Context, t *testing.T, backupdrService *backupdr.Service, op *backupdr.Operation) (*backupdr.Operation, error) {
+	t.Helper()
+	opService := backupdr.NewProjectsLocationsOperationsService(backupdrService)
+	ticker := time.NewTicker(5 * time.Second) // Poll every 5 seconds
+	defer ticker.Stop()
+
+	const timeout = 5 * time.Minute // Maximum time to wait
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil, fmt.Errorf("timed out waiting for operation %s to complete", op.Name)
+		case <-ticker.C:
+			latestOp, err := opService.Get(op.Name).Context(ctx).Do()
+			if err != nil {
+				// Retry on transient errors if necessary, fail on others.
+				return nil, fmt.Errorf("error getting operation %s: %w", op.Name, err)
+			}
+			op = latestOp
+			t.Logf("Operation %s status: Done=%v", op.Name, op.Done)
+
+			if op.Done {
+				if op.Error != nil {
+					return op, fmt.Errorf("operation %s failed: %v (code %d)", op.Name, op.Error.Message, op.Error.Code)
+				}
+				t.Logf("Operation %s completed successfully.", op.Name)
+				return op, nil
+			}
+		}
+	}
+}
+
+// BootstrapBackupDRVault creates or gets a BackupDR backup vault for testing.
+func BootstrapBackupDRVault(t *testing.T, vaultID, location string) string {
+	ctx := context.Background()
+    project := envvar.GetTestProjectFromEnv()
+    config := BootstrapConfig(t)
+    if config == nil {
+        t.Fatal("Could not bootstrap config.")
+    }
+
+   // Create a backupdr client and check if the vault exists, if not create a vault
+   // backupdrClient := config.NewBackupDRClient(config.UserAgent)
+	vaultName := fmt.Sprintf("projects/%s/locations/%s/backupVaults/%s", project, location, vaultID)
+	projectAndLocation := fmt.Sprintf("projects/%s/locations/%s", project, location)
+
+	log.Printf("[DEBUG] Getting BackupDR vault %q", vaultName)
+	backupdrService := config.NewBackupDRClient(config.UserAgent)
+	_, err := backupdrService.Projects.Locations.BackupVaults.Get(vaultName).Do()
+	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		log.Printf("[DEBUG] BackupDR vault %q not found, bootstrapping", vaultName)
+		// Prepare the request body for BackupVault creation
+		enforcedRetentionDays := 1
+		effectiveDays := 1
+
+		retentionDuration := time.Duration(enforcedRetentionDays) * 24 * time.Hour
+		effectiveTime := time.Now().Add(time.Duration(effectiveDays) * 24 * time.Hour)
+
+		backupVault := &backupdr.BackupVault{
+			BackupMinimumEnforcedRetentionDuration: fmt.Sprintf("%ds", int(retentionDuration.Seconds())),
+			EffectiveTime:                          effectiveTime.Format(time.RFC3339),
+			Description:                            "Created by BootstrapBackupDRVault function",
+		}
+		{{/* _, err = config.NewBackupDRClient(config.UserAgent).Projects.Locations.BackupVaults.Create(projectAndLocation, backupVault).Do() */}}
+		createCall := backupdrService.Projects.Locations.BackupVaults.Create(projectAndLocation, backupVault)
+		createCall.BackupVaultId(vaultID) // *** This is REQUIRED for the query parameter ***
+		// createCall.ValidateOnly(false) // Optional: explicit validate only flag
+		op, err := createCall.Do()	
+		if err != nil {
+			t.Fatalf("Error calling Create BackupDR vault %q: %s", vaultName, err)
+		}
+		fmt.Printf("Successfully initiated creation of BackupDR vault %q (Operation: %s)\n", vaultName, op.Name)
+
+		// *** WAIT FOR COMPLETION ***
+		if _, err := waitForBackupdrOperation(ctx, t, backupdrService, op); err != nil {
+			t.Fatalf("Create operation for %s failed: %v", vaultName, err)
+		}
+		fmt.Printf("Successfully created BackupDR vault %q\n", vaultName)
+
+	}
+
+	return vaultName
 }
 
 func BootstrapSharedCaPoolInLocation(t *testing.T, location string) string {
@@ -2063,16 +2135,16 @@ const sharedTagKeyParentErr = "Parent %q is not valid. Should be in format: 'org
 
 func BootstrapSharedTestProjectTagKey(t *testing.T, testId string, obj map[string]interface{}) string {
 	pid := envvar.GetTestProjectFromEnv()
-	return bootstrapSharedTestTagKey(t, testId, "projects/"+pid, obj)
+	return BootstrapSharedTestTagKeyDetails(t, testId, "projects/"+pid, obj)["shared_tag_key"]
 }
 
 func BootstrapSharedTestOrganizationTagKey(t *testing.T, testId string, obj map[string]interface{}) string {
 	org := envvar.GetTestOrgFromEnv(t)
-	return bootstrapSharedTestTagKey(t, testId, "organizations/"+org, obj)
+	return BootstrapSharedTestTagKeyDetails(t, testId, "organizations/"+org, obj)["shared_tag_key"]
 }
 
 // parent should be in format: {"organization" OR "projects"}/{id}
-func bootstrapSharedTestTagKey(t *testing.T, testId, parent string, obj map[string]interface{}) string {
+func BootstrapSharedTestTagKeyDetails(t *testing.T, testId string, parent string, obj map[string]interface{}) map[string]string {
 	sharedTagKey := fmt.Sprintf("%s-%s", sharedTagKeyPrefix, testId)
 
 	parentSplit := strings.Split(parent, "/")
@@ -2086,7 +2158,7 @@ func bootstrapSharedTestTagKey(t *testing.T, testId, parent string, obj map[stri
 
 	config := BootstrapConfig(t)
 	if config == nil {
-		return ""
+		return make(map[string]string)
 	}
 
 	log.Printf("[DEBUG] Getting shared test tag key %q", sharedTagKey)
@@ -2135,7 +2207,7 @@ func bootstrapSharedTestTagKey(t *testing.T, testId, parent string, obj map[stri
 		}
 	}
 
-	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	getTagKeyResponse, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
 		Project:   config.Project,
@@ -2148,29 +2220,32 @@ func bootstrapSharedTestTagKey(t *testing.T, testId, parent string, obj map[stri
 		t.Fatalf("Error getting shared tag key %q: %s", sharedTagKey, err)
 	}
 
-	return sharedTagKey
+	return map[string]string{
+		"name": getTagKeyResponse["name"].(string),
+		"shared_tag_key":    sharedTagKey,
+	}
 }
 
 const sharedTagValuePrefix = "tf-bootstrap-tagvalue"
 
 func BootstrapSharedTestProjectTagValue(t *testing.T, testId string, tagKey string) string {
 	pid := envvar.GetTestProjectFromEnv()
-	return BootstrapSharedTestTagValue(t, testId, tagKey, pid)
+	return BootstrapSharedTestTagValueDetails(t, testId, tagKey, pid)["shared_tag_value"]
 }
 
 func BootstrapSharedTestOrganizationTagValue(t *testing.T, testId string, tagKey string) string {
 	org := envvar.GetTestOrgFromEnv(t)
-	return BootstrapSharedTestTagValue(t, testId, tagKey, org)
+	return BootstrapSharedTestTagValueDetails(t, testId, tagKey, org)["shared_tag_value"]
 }
 
-func BootstrapSharedTestTagValue(t *testing.T, testId string, tagKey, parentId string) string {
+func BootstrapSharedTestTagValueDetails(t *testing.T, testId string, tagKey, parentId string) map[string]string {
 	sharedTagValue := fmt.Sprintf("%s-%s", sharedTagValuePrefix, testId)
 	tagKeyName := fmt.Sprintf("%s/%s", parentId, tagKey)
 	tagValueName := fmt.Sprintf("%s/%s", tagKeyName, sharedTagValue)
 
 	config := BootstrapConfig(t)
 	if config == nil {
-		return ""
+		return make(map[string]string)
 	}
 
 	log.Printf("[DEBUG] Getting shared test tag value %q", sharedTagValue)
@@ -2229,8 +2304,7 @@ func BootstrapSharedTestTagValue(t *testing.T, testId string, tagKey, parentId s
 			t.Fatalf("Error waiting to create TagValue: %s", err)
 		}
 	}
-
-	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	getTagValueResponse, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
 		Project:   config.Project,
@@ -2243,7 +2317,10 @@ func BootstrapSharedTestTagValue(t *testing.T, testId string, tagKey, parentId s
 		t.Fatalf("Error getting shared tag value %q: %s", sharedTagValue, err)
 	}
 
-	return sharedTagValue
+    return map[string]string{
+		"name": getTagValueResponse["name"].(string),
+		"shared_tag_value":    sharedTagValue,
+	}
 }
 
 type BootstrapClient struct {

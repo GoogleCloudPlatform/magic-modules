@@ -28,18 +28,36 @@
 package converters
 
 import (
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/models"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters/services/compute"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters/services/resourcemanager"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/models"
+	{{- range $caiResourceType, $resources := $.ResourcesByCaiResourceType}}
+		{{- range $object := $resources }}
+	  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/{{ $object.ServiceName }}"
+		{{- end }}
+	{{- end }}
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/resourcemanager"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	tpg_provider "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/provider"
+	tpg_provider "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/provider"
 )
 
 var provider *schema.Provider = tpg_provider.Provider()
 
 // ConverterMap is a collection of converters instances, indexed by cai asset type.
-var ConverterMap = map[string]models.Converter{
-	resourcemanager.ProjectAssetType: resourcemanager.NewProjectConverter(provider),
-	compute.ComputeInstanceAssetType: compute.NewComputeInstanceConverter(provider),
+var ConverterMap = map[string]map[string]models.Cai2hclConverter{
+	// ####### START handwritten resources ###########
+	"cloudresourcemanager.googleapis.com/Project": {
+		"Default": resourcemanager.NewProjectCai2hclConverter(provider),
+	},
+	"compute.googleapis.com/Instance": {
+		"Default": compute.NewComputeInstanceCai2hclConverter(provider),
+	},
+	// ####### END handwritten resources ###########
+
+	{{- range $caiResourceType, $resources := $.ResourcesByCaiResourceType}}
+	"{{ $caiResourceType }}": {
+	{{- range $object := $resources }}
+		"{{ $object.AliasName }}": {{ $object.ServiceName }}.New{{ $object.ResourceName -}}Cai2hclConverter(provider),
+	{{- end }}
+	},
+	{{- end }}
 }

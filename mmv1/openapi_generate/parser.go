@@ -16,9 +16,11 @@
 package openapi_generate
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
+	"maps"
 	"os"
 	"path"
 	"path/filepath"
@@ -33,8 +35,13 @@ import (
 	r "github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/getkin/kin-openapi/openapi3"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
+
+	_ "embed"
 )
+
+//go:embed header.txt
+var header []byte
 
 type Parser struct {
 	Folder string
@@ -44,7 +51,7 @@ type Parser struct {
 func NewOpenapiParser(folder, output string) Parser {
 	wd, err := os.Getwd()
 	if err != nil {
-		log.Fatalf(err.Error())
+		log.Fatalf("%v", err)
 	}
 
 	parser := Parser{
@@ -58,13 +65,13 @@ func NewOpenapiParser(folder, output string) Parser {
 func (parser Parser) Run() {
 	f, err := os.Open(parser.Folder)
 	if err != nil {
-		log.Fatalf(err.Error())
+		log.Fatalf("%v", err)
 		return
 	}
 	defer f.Close()
 	files, err := f.Readdirnames(0)
 	if err != nil {
-		log.Fatalf(err.Error())
+		log.Fatalf("%v", err)
 	}
 
 	// check if folder is empty
@@ -85,25 +92,22 @@ func (parser Parser) WriteYaml(filePath string) {
 	doc, _ := loader.LoadFromFile(filePath)
 	_ = doc.Validate(ctx)
 
-	header, err := os.ReadFile("openapi_generate/header.txt")
-	if err != nil {
-		log.Fatalf("error reading header %v", err)
-	}
-
 	resourcePaths := findResources(doc)
 	productPath := buildProduct(filePath, parser.Output, doc, header)
 
-	// Disables line wrap for long strings
-	yaml.FutureLineWrap()
 	log.Printf("Generated product %+v/product.yaml", productPath)
 	for _, pathArray := range resourcePaths {
 		resource := buildResource(filePath, pathArray[0], pathArray[1], doc)
 
 		// marshal method
+		var yamlContent bytes.Buffer
 		resourceOutPathMarshal := filepath.Join(productPath, fmt.Sprintf("%s.yaml", resource.Name))
-		bytes, err := yaml.Marshal(resource)
+		encoder := yaml.NewEncoder(&yamlContent)
+		encoder.SetIndent(2)
+
+		err := encoder.Encode(&resource)
 		if err != nil {
-			log.Fatalf("error marshalling yaml %v: %v", resourceOutPathMarshal, err)
+			log.Fatalf("Failed to encode: %v", err)
 		}
 
 		f, err := os.Create(resourceOutPathMarshal)
@@ -114,7 +118,7 @@ func (parser Parser) WriteYaml(filePath string) {
 		if err != nil {
 			log.Fatalf("error writing resource file header %v", err)
 		}
-		_, err = f.Write(bytes)
+		_, err = f.Write(yamlContent.Bytes())
 		if err != nil {
 			log.Fatalf("error writing resource file %v", err)
 		}
@@ -162,7 +166,7 @@ func buildProduct(filePath, output string, root *openapi3.T, header []byte) stri
 	apiVersion := &product.Version{}
 
 	apiVersion.BaseUrl = fmt.Sprintf("%s/%s/", server, version)
-	// TODO(slevenick) figure out how to tell the API version
+	// TODO figure out how to tell the API version
 	apiVersion.Name = "ga"
 	apiProduct.Versions = []*product.Version{apiVersion}
 
@@ -265,7 +269,7 @@ func buildResource(filePath, resourcePath, resourceName string, root *openapi3.T
 	example.PrimaryResourceId = "example"
 	example.Vars = map[string]string{"resource_name": "test-resource"}
 
-	resource.Examples = []r.Examples{example}
+	resource.Examples = []*r.Examples{&example}
 
 	resourceNameBytes := []byte(resourceName)
 	// Write the status as an encoded string to flag when a YAML file has been
@@ -299,7 +303,7 @@ func parseOpenApi(resourcePath, resourceName string, root *openapi3.T) []any {
 		if strings.Contains(strings.ToLower(param.Value.Name), strings.ToLower(resourceName)) {
 			idParam = param.Value.Name
 		}
-		paramObj := writeObject(param.Value.Name, param.Value.Schema, propType(param.Value.Schema), true)
+		paramObj := WriteObject(param.Value.Name, param.Value.Schema, propType(param.Value.Schema), true)
 		description := param.Value.Description
 		if strings.TrimSpace(description) == "" {
 			description = "No description"
@@ -332,7 +336,7 @@ func propType(prop *openapi3.SchemaRef) openapi3.Types {
 	}
 }
 
-func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, urlParam bool) api.Type {
+func WriteObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, urlParam bool) api.Type {
 	var field api.Type
 
 	switch name {
@@ -357,6 +361,9 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		if len(obj.Value.Enum) > 0 {
 			var enums []string
 			for _, enum := range obj.Value.Enum {
+				if strings.HasSuffix(fmt.Sprintf("%v", enum), "_UNSPECIFIED") {
+					continue
+				}
 				enums = append(enums, fmt.Sprintf("%v", enum))
 			}
 			additionalDescription = fmt.Sprintf("\n Possible values:\n %s", strings.Join(enums, "\n"))
@@ -374,6 +381,12 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 			break
 		}
 
+		if field.Name == "annotations" {
+			// Standard annotations implementation
+			field.Type = "KeyValueAnnotations"
+			break
+		}
+
 		if obj.Value.AdditionalProperties.Schema != nil && obj.Value.AdditionalProperties.Schema.Value.Type.Is("string") {
 			// AdditionalProperties with type string is a string -> string map
 			field.Type = "KeyValuePairs"
@@ -381,8 +394,17 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		}
 
 		field.Type = "NestedObject"
-
-		field.Properties = buildProperties(obj.Value.Properties, obj.Value.Required)
+		if obj.Value.AdditionalProperties.Schema != nil {
+			field.Type = "Map"
+			field.KeyName = "TODO: CHANGEME"
+			var valueType api.Type
+			valueType.Name = "TODO: CHANGEME"
+			valueType.Type = "NestedObject"
+			valueType.Properties = buildProperties(obj.Value.AdditionalProperties.Schema.Value.Properties, obj.Value.AdditionalProperties.Schema.Value.Required)
+			field.ValueType = &valueType
+		} else {
+			field.Properties = buildProperties(obj.Value.Properties, obj.Value.Required)
+		}
 	case "array":
 		field.Type = "Array"
 		var subField api.Type
@@ -439,8 +461,9 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 
 func buildProperties(props openapi3.Schemas, required []string) []*api.Type {
 	properties := []*api.Type{}
-	for k, prop := range props {
-		propObj := writeObject(k, prop, propType(prop), false)
+	for _, k := range slices.Sorted(maps.Keys(props)) {
+		prop := props[k]
+		propObj := WriteObject(k, prop, propType(prop), false)
 		if slices.Contains(required, k) {
 			propObj.Required = true
 		}

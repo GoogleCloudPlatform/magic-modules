@@ -1,9 +1,11 @@
 package compute_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -29,7 +31,7 @@ func TestAccComputeServiceAttachment_serviceAttachmentBasicExampleUpdate(t *test
 				ImportStateVerifyIgnore: []string{"target_service", "region"},
 			},
 			{
-				Config: testAccComputeServiceAttachment_serviceAttachmentBasicExampleUpdate(context, true),
+				Config: testAccComputeServiceAttachment_serviceAttachmentBasicExampleUpdate(context, true, -1),
 			},
 			{
 				ResourceName:            "google_compute_service_attachment.psc_ilb_service_attachment",
@@ -38,13 +40,21 @@ func TestAccComputeServiceAttachment_serviceAttachmentBasicExampleUpdate(t *test
 				ImportStateVerifyIgnore: []string{"target_service", "region"},
 			},
 			{
-				Config: testAccComputeServiceAttachment_serviceAttachmentBasicExampleUpdate(context, false),
+				Config: testAccComputeServiceAttachment_serviceAttachmentBasicExampleUpdate(context, false, -1),
 			},
 			{
 				ResourceName:            "google_compute_service_attachment.psc_ilb_service_attachment",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"target_service", "region"},
+			},
+			{
+				Config: testAccComputeServiceAttachment_serviceAttachmentBasicExampleUpdate(context, false, 0),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectNonEmptyPlan(),
+					},
+				},
 			},
 		},
 	})
@@ -179,13 +189,25 @@ resource "google_compute_subnetwork" "psc_ilb_nat" {
 `, context)
 }
 
-func testAccComputeServiceAttachment_serviceAttachmentBasicExampleUpdate(context map[string]interface{}, preventDestroy bool) string {
+func testAccComputeServiceAttachment_serviceAttachmentBasicExampleUpdate(context map[string]interface{}, preventDestroy bool, propagatedConnectionLimit int) string {
 	context["lifecycle_block"] = ""
 	if preventDestroy {
 		context["lifecycle_block"] = `
 		lifecycle {
 			prevent_destroy = true
 		}`
+	}
+
+	switch {
+	case propagatedConnectionLimit == 0:
+		context["propagated_connection_limit"] = `
+		propagated_connection_limit = 0
+		send_propagated_connection_limit_if_zero = true
+		`
+	case propagatedConnectionLimit > 0:
+		context["propagated_connection_limit"] = fmt.Sprintf("propagated_connection_limit = %d", propagatedConnectionLimit)
+	default:
+		context["propagated_connection_limit"] = ""
 	}
 
 	return acctest.Nprintf(`
@@ -206,6 +228,7 @@ resource "google_compute_service_attachment" "psc_ilb_service_attachment" {
   }
   reconcile_connections = false
   %{lifecycle_block}
+  %{propagated_connection_limit}
 }
 
 resource "google_compute_address" "psc_ilb_consumer_address" {
@@ -487,6 +510,137 @@ resource "google_network_services_gateway" "default" {
   subnetwork                           = google_compute_subnetwork.default.id
   delete_swg_autogen_router_on_destroy = true
   depends_on                           = [google_compute_subnetwork.proxyonly]
+}
+`, context)
+}
+
+func TestAccComputeServiceAttachment_withNatIps(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeServiceAttachmentDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+
+				Config: testAccComputeServiceAttachment_withNatIps(context, false),
+			},
+			{
+				Config: testAccComputeServiceAttachment_withNatIps(context, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(
+						"google_compute_service_attachment.psc_ilb_service_attachment", "connected_endpoints.0.nat_ips.0"),
+				),
+			},
+			{
+				ResourceName:            "google_compute_service_attachment.psc_ilb_service_attachment",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"target_service", "region", "show_nat_ips", "connected_endpoints.0.nat_ips"},
+			},
+			{
+				Config: testAccComputeServiceAttachment_withNatIps(context, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_service_attachment.psc_ilb_service_attachment", "show_nat_ips", "false"),
+					resource.TestCheckResourceAttr("google_compute_service_attachment.psc_ilb_service_attachment", "connected_endpoints.0.nat_ips.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func testAccComputeServiceAttachment_withNatIps(context map[string]interface{}, showNatIps bool) string {
+	context["show_nat_ips"] = showNatIps
+	return acctest.Nprintf(`
+resource "google_compute_service_attachment" "psc_ilb_service_attachment" {
+  name                  = "tf-test-my-psc-ilb%{random_suffix}"
+  region                = "us-west2"
+  description           = "A service attachment configured with Terraform"
+  enable_proxy_protocol = false
+  connection_preference = "ACCEPT_AUTOMATIC"
+  show_nat_ips          = %{show_nat_ips}
+  nat_subnets           = [google_compute_subnetwork.psc_ilb_nat.id]
+  target_service        = google_compute_forwarding_rule.psc_ilb_target_service.id
+}
+
+resource "google_compute_address" "psc_ilb_consumer_address" {
+  name         = "tf-test-psc-ilb-consumer-address%{random_suffix}"
+  region       = "us-west2"
+  subnetwork   = google_compute_subnetwork.psc_ilb_consumer_subnetwork.id
+  address_type = "INTERNAL"
+}
+
+resource "google_compute_forwarding_rule" "psc_ilb_consumer" {
+  name                  = "tf-test-psc-ilb-consumer-forwarding-rule%{random_suffix}"
+  region                = "us-west2"
+  target                = google_compute_service_attachment.psc_ilb_service_attachment.id
+  load_balancing_scheme = ""
+  network               = google_compute_network.consumer_network.name
+  ip_address            = google_compute_address.psc_ilb_consumer_address.id
+}
+
+resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
+  name                  = "tf-test-producer-forwarding-rule%{random_suffix}"
+  region                = "us-west2"
+  load_balancing_scheme = "INTERNAL"
+  backend_service       = google_compute_region_backend_service.producer_service_backend.id
+  all_ports             = true
+  network               = google_compute_network.producer_network.name
+  subnetwork            = google_compute_subnetwork.psc_ilb_producer_subnetwork.name
+}
+
+resource "google_compute_region_backend_service" "producer_service_backend" {
+  name          = "tf-test-producer-service%{random_suffix}"
+  region        = "us-west2"
+  health_checks = [google_compute_health_check.producer_service_health_check.id]
+}
+
+resource "google_compute_health_check" "producer_service_health_check" {
+  name               = "tf-test-producer-service-health-check%{random_suffix}"
+  check_interval_sec = 1
+  timeout_sec        = 1
+  tcp_health_check {
+    port = "80"
+  }
+}
+
+resource "google_compute_network" "producer_network" {
+  name                    = "tf-test-psc-ilb-producer-network%{random_suffix}"
+  auto_create_subnetworks = false
+  delete_default_routes_on_create = true
+}
+
+resource "google_compute_network" "consumer_network" {
+  name                    = "tf-test-psc-ilb-consumer-network%{random_suffix}"
+  auto_create_subnetworks = false
+  delete_default_routes_on_create = true
+}
+
+resource "google_compute_subnetwork" "psc_ilb_producer_subnetwork" {
+  name          = "tf-test-psc-ilb-producer-subnetwork%{random_suffix}"
+  region        = "us-west2"
+  network       = google_compute_network.producer_network.id
+  ip_cidr_range = "10.0.0.0/16"
+}
+
+resource "google_compute_subnetwork" "psc_ilb_consumer_subnetwork" {
+  name          = "tf-test-psc-ilb-consumer-subnetwork%{random_suffix}"
+  region        = "us-west2"
+  network       = google_compute_network.consumer_network.id
+  ip_cidr_range = "10.2.0.0/16"
+}
+
+resource "google_compute_subnetwork" "psc_ilb_nat" {
+  name          = "tf-test-psc-ilb-nat%{random_suffix}"
+  region        = "us-west2"
+  network       = google_compute_network.producer_network.id
+  purpose       = "PRIVATE_SERVICE_CONNECT"
+  ip_cidr_range = "10.1.0.0/16"
 }
 `, context)
 }

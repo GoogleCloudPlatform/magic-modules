@@ -44,8 +44,7 @@ aliases:
 
 ## Run automated tests
 
-{{< tabs "version" >}}
-
+{{% tabs "version" %}}
 {{< tab "GA Provider" >}}
 
 1. Run unit tests and linters
@@ -85,7 +84,6 @@ aliases:
     ```
 
 {{< /tab >}}
-
 {{< tab "Beta Provider" >}}
 
 1. Run unit tests and linters
@@ -99,7 +97,7 @@ aliases:
 1. Run acceptance tests for only modified resources. (Full test runs can take over 9 hours.) See [Go's documentation](https://pkg.go.dev/cmd/go#hdr-Testing_flags) for more information about `-run` and other flags.
 
     ```bash
-    make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool'
+    make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool_basic$$'
     ```
 
     To run all tests matching, e.g., `TestAccContainerNodePool*`, omit the trailing `$$`:
@@ -124,8 +122,7 @@ aliases:
     ```
 
 {{< /tab >}}
-
-{{< /tabs >}}
+{{% /tabs %}}
 
 ## Troubleshooting acceptance tests {#troubleshooting}
 
@@ -209,8 +206,7 @@ For manual testing, you can build the provider from source and run `terraform ap
 
 Configure Terraform to use locally-built binaries for `google` and `google-beta` instead of downloading the latest versions.
 
-{{< tabs "built-provider" >}}
-
+{{% tabs "built-provider" %}}
 {{< tab "Developer overrides (Mac / Linux)" >}}
 
 1. Find the location where built provider binaries are created. To do this, run this command and make a note of the path value:
@@ -258,7 +254,6 @@ Configure Terraform to use locally-built binaries for `google` and `google-beta`
 1. Save the file.
 
 {{< /tab >}}
-
 {{< tab "Developer overrides (Windows)" >}}
 
 1. Find the location where built provider binaries are created. To do this, run this command and make a note of the path value:
@@ -303,8 +298,7 @@ Configure Terraform to use locally-built binaries for `google` and `google-beta`
 1. Save the file.
 
 {{< /tab >}}
-
-{{< /tabs >}}
+{{% /tabs %}}
 
 ### Run manual tests
 

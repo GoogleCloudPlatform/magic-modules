@@ -38,23 +38,31 @@ func NetworkEndpointsNetworkEndpointConvertToAny(endpoint NetworkEndpointsNetwor
 	return m
 }
 
-// Continues to read network endpoints as long as there are unread pages remaining
-func networkEndpointsPaginatedRead(d *schema.ResourceData, config *transport_tpg.Config, userAgent, url, project, billingProject, pt string) ([]interface{}, error) {
+// Read network endpoints as long as there are unread pages remaining
+func networkEndpointsPaginatedRead(d *schema.ResourceData, config *transport_tpg.Config, userAgent, url, project, billingProject string, res map[string]interface{}) ([]interface{}, error) {
 	var allEndpoints []interface{}
-	for len(pt) > 0 {
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:	config,
-			Method:	"POST",
+	var err error
+
+	for {
+		if items, ok := res["items"].([]interface{}); ok {
+			allEndpoints = append(allEndpoints, items...)
+		}
+
+		pt, ok := res["nextPageToken"].(string)
+		if !ok || pt == "" {
+			break
+		}
+
+		res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
 			Project:   billingProject,
-			RawURL:	fmt.Sprintf("%s?pageToken=%s", url, pt),
+			RawURL:    fmt.Sprintf("%s?pageToken=%s", url, pt),
 			UserAgent: userAgent,
 		})
 		if err != nil {
 			return nil, transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComputeNetworkEndpoints %q", d.Id()))
 		}
-		resEndpoints := res["items"].([]interface{})
-		allEndpoints = append(allEndpoints, resEndpoints...)
-		pt, _ = res["nextPageToken"].(string)
 	}
 	return allEndpoints, nil
 }

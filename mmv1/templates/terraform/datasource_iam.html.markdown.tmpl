@@ -43,6 +43,9 @@ description: |-
 
 
 # {{ $.IamTerraformName }}_policy
+{{- if $.IamPolicy.DeprecationMessage }}
+~> **Warning:** {{$.IamPolicy.DeprecationMessage}}
+{{- end }}
 
 Retrieves the current IAM policy data for {{ lower $.Name }}
 {{- if or (eq $.MinVersionObj.Name "beta") (eq $.IamPolicy.MinVersion "beta") }}
@@ -59,7 +62,13 @@ data "{{ $.IamTerraformName }}_policy" "policy" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{- end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{- if $.IamPolicy.ExampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.ExampleConfigBody false }}
+{{- end }}
+
+{{- if $.IamPolicy.SampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{- end }}
 }
 ```
 

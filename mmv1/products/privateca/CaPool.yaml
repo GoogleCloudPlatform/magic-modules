@@ -58,6 +58,11 @@ examples:
     primary_resource_id: 'default'
     vars:
       name: 'my-pool'
+      cloud_kms_key: 'projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key'
+    test_vars_overrides:
+      'cloud_kms_key': 'acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "us-central1").CryptoKey.Name'
+    # Test requires a beta-only resource
+    min_version: beta
   - name: 'privateca_quickstart'
     primary_resource_id: 'default'
     vars:
@@ -100,7 +105,7 @@ properties:
         type: Array
         description: |
           If any AllowedKeyType is specified, then the certificate request's public key must match one of the key types listed here.
-          Otherwise, any key may be used.
+          Otherwise, any key may be used. You can specify only one key type of those listed here.
         item_type:
           type: NestedObject
           properties:
@@ -507,3 +512,15 @@ properties:
 
       An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass":
       "1.3kg", "count": "3" }.
+  - name: 'encryptionSpec'
+    type: NestedObject
+    description: |
+      Used when customer would like to encrypt data at rest. The customer-provided key will be used
+      to encrypt the Subject, SubjectAltNames and PEM-encoded certificate fields. When unspecified,
+      customer data will remain unencrypted.
+    properties:
+      - name: 'cloudKmsKey'
+        type: String
+        description: |
+          The resource name for an existing Cloud KMS key in the format
+          `projects/*/locations/*/keyRings/*/cryptoKeys/*`.

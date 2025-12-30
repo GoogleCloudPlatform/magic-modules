@@ -1,0 +1,185 @@
+{{/* The license inside this block applies to this file
+  Copyright 2025 Google LLC. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. */ -}}
+{{$.CodeHeader TemplatePath}}
+
+package {{ lower $.ProductMetadata.Name }}
+
+import (
+	"fmt"
+	"log"
+	"reflect"
+	"regexp"
+	"strings"
+	"crypto/sha256"
+	"encoding/hex"
+
+{{/* We list all the v2 imports here and unstable imports, because we run 'goimports' to guess the correct
+     set of imports, which will never guess the major version correctly. */ -}}
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/converters/utils"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/models"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tgcresource"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
+
+	"google.golang.org/api/googleapi"
+)
+
+var (
+    _ = fmt.Sprintf
+    _ = reflect.ValueOf
+    _ = strings.Trim
+    _ = diag.Diagnostic{}
+    _ = customdiff.All
+    _ = id.UniqueId
+    _ = logging.LogLevel
+	_ = log.Printf
+    _ = retry.Retry
+    _ = schema.Noop
+    _ = structure.ExpandJsonFromString
+    _ = validation.All
+    _ = terraform.State{}
+    _ = tgcresource.RemoveTerraformAttributionLabel
+    _ = tpgresource.GetRegion
+    _ = transport_tpg.Config{}
+    _ = verify.ProjectRegex
+    _ = googleapi.Error{}
+)
+
+type {{ $.ResourceName -}}Cai2hclConverter struct {
+	name   string
+	schema map[string]*schema.Schema
+}
+
+func New{{ $.ResourceName -}}Cai2hclConverter(provider *schema.Provider) models.Cai2hclConverter {
+	schema := provider.ResourcesMap[{{ $.ResourceName -}}SchemaName].Schema
+
+	return &{{ $.ResourceName -}}Cai2hclConverter{
+		name:   {{ $.ResourceName -}}SchemaName,
+		schema: schema,
+	}
+}
+
+// Convert converts asset to HCL resource blocks.
+func (c *{{ $.ResourceName -}}Cai2hclConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
+	var blocks []*models.TerraformResourceBlock
+	block, err := c.convertResourceData(asset)
+	if err != nil {
+		return nil, err
+	}
+	blocks = append(blocks, block)
+	return blocks, nil
+}
+
+func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
+	if asset.Resource == nil || asset.Resource.Data == nil {
+		return nil, fmt.Errorf("asset resource data is nil")
+	}
+
+	var err error
+	res := asset.Resource.Data
+	config := transport.NewConfig()
+
+	// This is a fake resource used to get fake d
+	// d.Get will return empty map, instead of nil
+	fakeResource := &schema.Resource{
+		Schema: c.schema,
+	}
+	d := fakeResource.TestResourceData()
+
+	assetNameParts := strings.Split(asset.Name, "/")
+
+	hclBlockName := assetNameParts[len(assetNameParts)-1]
+	digitRegex := regexp.MustCompile(`^\d+$`)
+	nameValidator := regexp.MustCompile("^[a-zA-Z_][a-zA-Z0-9_-]*$")
+	if digitRegex.MatchString(hclBlockName) || !nameValidator.MatchString(hclBlockName) {
+		hasher := sha256.New()
+		hasher.Write([]byte(hclBlockName))
+		fullHash := hex.EncodeToString(hasher.Sum(nil))
+		hclBlockName = fmt.Sprintf("resource%s", fullHash[:8])
+	}
+	hclData := make(map[string]interface{})
+
+{{ if $.CustomCode.TgcDecoder -}}
+	res, hclData, err = resource{{ $.ResourceName -}}TgcDecoder(d, config, res, hclData)
+	if err != nil {
+		return nil, err
+	}
+{{ end}}
+
+{{ if and $.CustomCode.Decoder (not $.TGCIgnoreTerraformDecoder) -}}
+	res, err = resource{{ $.ResourceName -}}Decoder(d, config, res)
+	if err != nil {
+		return nil, err
+	}
+
+	if res == nil {
+		// Decoding the object has resulted in it being gone. It may be marked deleted.
+		return nil, nil
+	}
+{{ end}}
+
+{{/* Attempt to parse all self-link parameters from asset name. */}}
+	outputFields := {{ $.OutputFieldSetStr }}
+	utils.ParseUrlParamValuesFromAssetName(asset.Name, "{{ $.Cai2hclAssetNameTemplate }}", outputFields, hclData)
+{{ range $prop := $.ReadPropertiesForTgc }}
+	{{ if $prop.FlattenObject -}}
+	if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config); flattenedProp != nil {
+		if err := tgcresource.MergeFlattenedProperties(hclData, flattenedProp); err != nil {
+			return nil, fmt.Errorf("error merging flattened properties from {{ $prop.Name }}: %s", err)
+		}
+	}
+	{{- else -}}
+	hclData["{{ underscore $prop.Name -}}"] = flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config)
+	{{- end}}
+{{- end}}
+
+	ctyVal, err := utils.MapToCtyValWithSchema(hclData, c.schema)
+	if err != nil {
+		return nil, err
+	}
+	return &models.TerraformResourceBlock{
+		Labels: []string{c.name, hclBlockName},
+		Value:  ctyVal,
+	}, nil
+}
+
+{{ range $prop := $.ReadPropertiesForTgc }}
+{{- template "flattenTgcPropertyMethod" $prop -}}
+{{- end }}
+
+{{- if $.CustomCode.TgcDecoder }}
+func resource{{ $.ResourceName -}}TgcDecoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}, hclData map[string]interface{}) (map[string]interface{}, map[string]interface{}, error) {
+	{{ customTemplate $ $.CustomCode.TgcDecoder false -}}
+}
+{{- end }}
+
+{{- if and $.CustomCode.Decoder (not $.TGCIgnoreTerraformDecoder) }}
+func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
+	{{ customTemplate $ $.CustomCode.Decoder false -}}
+}
+{{- end }}

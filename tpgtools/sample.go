@@ -337,7 +337,7 @@ func (s *Sample) EnumerateWithUpdateSamples() []Sample {
 	for i, update := range s.Updates {
 		newSample := *s
 		primaryResource := update.Resource
-		// TODO(magic-modules-eng): Consume new dependency list.
+		// TODO: Consume new dependency list.
 		newSample.PrimaryResource = &primaryResource
 		if !newSample.isNativeHCL() {
 			var newDeps []Dependency

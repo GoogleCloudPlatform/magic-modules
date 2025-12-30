@@ -20,4 +20,10 @@ resource "google_iam_workload_identity_pool_managed_identity" "{{$.PrimaryResour
   workload_identity_pool_managed_identity_id = "{{index $.Vars "workload_identity_pool_managed_identity_id"}}"
   description                                = "Example Managed Identity in a Workload Identity Pool Namespace"
   disabled                                   = true
+  attestation_rules {
+    google_cloud_resource = "//compute.googleapis.com/projects/{{index $.TestEnvVars "project"}}/uid/zones/us-central1-a/instances/12345678"
+  }
+  attestation_rules {
+    google_cloud_resource = "//run.googleapis.com/projects/{{index $.TestEnvVars "project"}}/name/locations/us-east1/services/my-service"
+  }
 }

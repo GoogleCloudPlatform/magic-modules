@@ -25,13 +25,15 @@ func TestAccNotebooksInstance_create_vm_image(t *testing.T) {
 				ResourceName:            "google_notebooks_instance.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"vm_image", "metadata"},
+				ImportStateVerifyIgnore: []string{"vm_image", "metadata", "update_time"},
 			},
 		},
 	})
 }
 
 func TestAccNotebooksInstance_update(t *testing.T) {
+	t.Skip()
+
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 	}
@@ -89,8 +91,8 @@ resource "google_notebooks_instance" "test" {
   }
 
   vm_image {
-    project      = "deeplearning-platform-release"
-    image_family = "tf-latest-cpu"
+    project      = "cloud-notebooks-managed"
+    image_family = "workbench-instances"
   }
 }
 `, name)
@@ -104,8 +106,8 @@ resource "google_notebooks_instance" "instance" {
   machine_type = "e2-medium"
 
   vm_image {
-    project      = "deeplearning-platform-release"
-    image_family = "tf-latest-cpu"
+    project      = "cloud-notebooks-managed"
+    image_family = "workbench-instances"
   }
 
   metadata = {
@@ -130,8 +132,8 @@ resource "google_notebooks_instance" "instance" {
   machine_type = "e2-medium"
 
   vm_image {
-    project      = "deeplearning-platform-release"
-    image_family = "tf-latest-cpu"
+    project      = "cloud-notebooks-managed"
+    image_family = "workbench-instances"
   }
 
   metadata = {

@@ -133,15 +133,21 @@ The following arguments are supported:
     ~>**NOTE:** Because this field expects a JSON string, any changes to the
     string will create a diff, even if the JSON itself hasn't changed.
     If the API returns a different value for the same schema, e.g. it
-    switched the order of values or replaced `STRUCT` field type with `RECORD`
-    field type, we currently cannot suppress the recurring diff this causes.
-    As a workaround, we recommend using the schema as returned by the API.
+    switched the order of values or replaced a field data type (`STRUCT` with
+    `RECORD`, `DECIMAL` with `NUMERIC`, etc.), we currently cannot suppress
+    the recurring diff this causes. As a workaround, we recommend using the
+    schema as returned by the API.
 
     ~>**NOTE:**  If you use `external_data_configuration`
     [documented below](#nested_external_data_configuration) and do **not** set
     `external_data_configuration.connection_id`, schemas must be specified
     with `external_data_configuration.schema`. Otherwise, schemas must be
     specified with this top-level field.
+
+* `ignore_schema_changes` - (Optional)  A list of fields which should be ignored for each column in schema.
+    **NOTE:** Right now only `dataPolicies` field is supported. We might support others in the future.
+
+* `ignore_auto_generated_schema` - (Optional)  If true, Terraform will prevent columns added by the server(e.g. hive partitioned columns) in schema from showing diff.
 
 * `schema_foreign_type_info` - (Optional) Specifies metadata of the foreign data
     type definition in field schema. Structure is [documented below](#nested_schema_foreign_type_info).
@@ -275,6 +281,20 @@ The following arguments are supported:
 * `metadata_cache_mode` - (Optional) Metadata Cache Mode for the table. Set this to enable caching of metadata from external data source. Valid values are `AUTOMATIC` and `MANUAL`.
 
 * `object_metadata` - (Optional) Object Metadata is used to create Object Tables. Object Tables contain a listing of objects (with their metadata) found at the sourceUris. If `object_metadata` is set, `source_format` should be omitted.
+
+* `decimal_target_types` - (Optional) Defines the list of possible SQL data types to which the source decimal values are converted. This list and the precision and the scale parameters of the decimal field determine the target type. In the order of NUMERIC, BIGNUMERIC, and STRING, a type is picked if it is in the specified list and if it supports the precision and the scale. STRING supports all precision and scale values. If none of the listed types supports the precision and the scale, the type supporting the widest range in the specified list is picked, and if a value exceeds the supported range when reading the data, an error will be thrown.
+
+    Example: Suppose the value of this field is ["NUMERIC", "BIGNUMERIC"]. If (precision,scale) is:
+
+    (38,9) -> NUMERIC;
+    (39,9) -> BIGNUMERIC (NUMERIC cannot hold 30 integer digits);
+    (38,10) -> BIGNUMERIC (NUMERIC cannot hold 10 fractional digits);
+    (76,38) -> BIGNUMERIC;
+    (77,38) -> BIGNUMERIC (error if value exceeds supported range).
+
+    This field cannot contain duplicate types. The order of the types in this field is ignored. For example, ["BIGNUMERIC", "NUMERIC"] is the same as ["NUMERIC", "BIGNUMERIC"] and NUMERIC always takes precedence over BIGNUMERIC.
+
+    Defaults to ["NUMERIC", "STRING"] for ORC and ["NUMERIC"] for the other file formats.
 
 <a name="nested_csv_options"></a>The `csv_options` block supports:
 
@@ -419,7 +439,12 @@ The following arguments are supported:
 * `query` - (Required) A query that BigQuery executes when the view is referenced.
 
 * `use_legacy_sql` - (Optional) Specifies whether to use BigQuery's legacy SQL for this view.
-    The default value is true. If set to false, the view will use BigQuery's standard SQL.
+    If set to `false`, the view will use BigQuery's standard SQL. If set to
+    `true`, the view will use BigQuery's legacy SQL. If unset, the API will
+    interpret it as a `true` and assumes the legacy SQL dialect for its query
+    according to the [API documentation](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#ViewDefinition).
+    -> **Note**: Starting in provider version `7.0.0`, no default value is
+    provided for this field unless explicitly set in the configuration.
 
 <a name="nested_materialized_view"></a>The `materialized_view` block supports:
 

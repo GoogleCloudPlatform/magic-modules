@@ -35,7 +35,7 @@ func TestAccVmwareengineExternalAddress_vmwareEngineExternalAddressUpdate(t *tes
 			{
 				Config: testVmwareengineExternalAddressCreateConfig(context),
 				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores("data.google_vmwareengine_external_address.ds-primary", "google_vmwareengine_external_address.vmw-engine-external-address-primary", map[string]struct{}{}),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_vmwareengine_external_address.ds-primary", "google_vmwareengine_external_address.vmw-engine-external-address-primary"),
 				),
 			},
 			{
@@ -56,7 +56,7 @@ func TestAccVmwareengineExternalAddress_vmwareEngineExternalAddressUpdate(t *tes
 			{
 				Config: testVmwareengineExternalAccessRuleCreateConfig(context),
 				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores("data.google_vmwareengine_external_access_rule.ds", "google_vmwareengine_external_access_rule.vmw-engine-external-access-rule", map[string]struct{}{}),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_vmwareengine_external_access_rule.ds", "google_vmwareengine_external_access_rule.vmw-engine-external-access-rule"),
 				),
 			},
 			{

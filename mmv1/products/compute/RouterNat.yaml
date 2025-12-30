@@ -14,6 +14,7 @@
 ---
 name: 'RouterNat'
 api_resource_type_kind: Router
+api_resource_field: 'nats'
 description: |
   A NAT service created in a router.
 
@@ -490,7 +491,7 @@ properties:
     type: Boolean
     description: |
       Enable endpoint independent mapping.
-      For more information see the [official documentation](https://cloud.google.com/nat/docs/overview#specs-rfcs).
+      For more information see the [official documentation](https://docs.cloud.google.com/nat/docs/public-nat#specs-rfcs).
     default_from_api: true
     send_empty_value: true
   - name: 'type'
@@ -512,6 +513,7 @@ properties:
       Must be one of: PREMIUM, STANDARD. If not specified, then the current
       project-level default tier is used.
     default_from_api: true
+    ignore_read: true
     enum_values:
       - 'PREMIUM'
       - 'STANDARD'

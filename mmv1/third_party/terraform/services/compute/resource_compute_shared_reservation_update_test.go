@@ -68,7 +68,6 @@ resource "google_project" "owner_project" {
 resource "google_project_service" "compute" {
   project = google_project.owner_project.project_id
   service = "compute.googleapis.com"
-  disable_on_destroy = false
 }
 
 resource "google_project" "guest_project" {
@@ -95,12 +94,13 @@ resource "google_project" "guest_project_third" {
   deletion_policy = "DELETE"
 }
 
-resource "google_organization_policy" "shared_reservation_org_policy" {
-  org_id     = "%{org_id}"
-  constraint = "constraints/compute.sharedReservationsOwnerProjects"
-  list_policy {
-    allow {
-      values = ["projects/${google_project.owner_project.number}"]
+resource "google_org_policy_policy" "shared_reservation_org_policy" {
+  name   = "projects/${google_project.owner_project.project_id}/policies/compute.sharedReservationsOwnerProjects"
+  parent = "projects/${google_project.owner_project.project_id}"
+
+  spec {
+    rules {
+      allow_all = "TRUE"
     }
   }
 }
@@ -108,19 +108,16 @@ resource "google_organization_policy" "shared_reservation_org_policy" {
 resource "google_project_service" "compute_second_project" {
   project = google_project.guest_project.project_id
   service = "compute.googleapis.com"
-  disable_on_destroy = false
 }
 
 resource "google_project_service" "compute_third_project" {
   project = google_project.guest_project_second.project_id
   service = "compute.googleapis.com"
-  disable_on_destroy = false
 }
 
 resource "google_project_service" "compute_fourth_project" {
   project = google_project.guest_project_third.project_id
   service = "compute.googleapis.com"
-  disable_on_destroy = false
 }
 
 resource "google_compute_reservation" "gce_reservation" {
@@ -142,7 +139,7 @@ resource "google_compute_reservation" "gce_reservation" {
       project_id = google_project.guest_project.project_id
     }
   }
-  depends_on = [google_organization_policy.shared_reservation_org_policy,google_project_service.compute,google_project_service.compute_second_project,google_project_service.compute_third_project]
+  depends_on = [google_org_policy_policy.shared_reservation_org_policy,google_project_service.compute,google_project_service.compute_second_project,google_project_service.compute_third_project]
 }
 `, context)
 }
@@ -160,7 +157,6 @@ resource "google_project" "owner_project" {
 resource "google_project_service" "compute" {
   project = google_project.owner_project.project_id
   service = "compute.googleapis.com"
-  disable_on_destroy = false
 }
 
 resource "google_project" "guest_project" {
@@ -187,12 +183,13 @@ resource "google_project" "guest_project_third" {
   deletion_policy = "DELETE"
 }
 
-resource "google_organization_policy" "shared_reservation_org_policy" {
-  org_id     = "%{org_id}"
-  constraint = "constraints/compute.sharedReservationsOwnerProjects"
-  list_policy {
-    allow {
-      values = ["projects/${google_project.owner_project.number}"]
+resource "google_org_policy_policy" "shared_reservation_org_policy" {
+  name   = "projects/${google_project.owner_project.project_id}/policies/compute.sharedReservationsOwnerProjects"
+  parent = "projects/${google_project.owner_project.project_id}"
+
+  spec {
+    rules {
+      allow_all = "TRUE"
     }
   }
 }
@@ -200,19 +197,16 @@ resource "google_organization_policy" "shared_reservation_org_policy" {
 resource "google_project_service" "compute_second_project" {
   project = google_project.guest_project.project_id
   service = "compute.googleapis.com"
-  disable_on_destroy = false
 }
 
 resource "google_project_service" "compute_third_project" {
   project = google_project.guest_project_second.project_id
   service = "compute.googleapis.com"
-  disable_on_destroy = false
 }
 
 resource "google_project_service" "compute_fourth_project" {
   project = google_project.guest_project_third.project_id
   service = "compute.googleapis.com"
-  disable_on_destroy = false
 }
 
 resource "google_compute_reservation" "gce_reservation" {
@@ -242,7 +236,7 @@ resource "google_compute_reservation" "gce_reservation" {
       project_id = google_project.guest_project_third.project_id
     }
   }
-  depends_on = [google_organization_policy.shared_reservation_org_policy,google_project_service.compute,google_project_service.compute_second_project,google_project_service.compute_third_project]
+  depends_on = [google_org_policy_policy.shared_reservation_org_policy,google_project_service.compute,google_project_service.compute_second_project,google_project_service.compute_third_project]
 }
 `, context)
 }

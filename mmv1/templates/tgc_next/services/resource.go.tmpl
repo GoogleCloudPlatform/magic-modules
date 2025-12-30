@@ -1,0 +1,103 @@
+{{/* The license inside this block applies to this file
+  Copyright 2025 Google LLC. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. */ -}}
+{{$.CodeHeader TemplatePath}}
+
+package {{ lower $.ProductMetadata.Name }}
+
+import (
+  "bytes"
+  "context"
+  "fmt"
+  "log"
+  "reflect"
+  "regexp"
+  "sort"
+  "strconv"
+  "strings"
+
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+
+
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tgcresource"
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
+  transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
+)
+
+{{if $.CustomCode.Constants -}} 
+    {{- customTemplate $ $.CustomCode.Constants true -}}
+{{- end}}
+
+var (
+    _ = bytes.Clone
+    _ = context.WithCancel
+    _ = fmt.Sprintf
+    _ = log.Print
+    _ = reflect.ValueOf
+    _ = regexp.Match
+    _ = sort.IntSlice{}
+    _ = strconv.Atoi
+    _ = strings.Trim
+    _ = schema.Noop
+    _ = structure.NormalizeJsonString
+    _ = validation.All
+    _ = tgcresource.RemoveTerraformAttributionLabel
+    _ = tpgresource.GetRegion
+    _ = transport_tpg.Config{}
+    _ = verify.ProjectRegex
+)
+
+{{ if $.DefineAssetTypeForResourceInProduct -}}
+const {{ $.CaiResourceType -}}AssetType string = "{{ $.CaiAssetType }}"
+{{- end }}
+
+const {{ $.ResourceName -}}SchemaName string = "{{ $.TerraformName }}"
+
+func Resource{{ $.ResourceName -}}() *schema.Resource {
+    return &schema.Resource{
+        Schema: map[string]*schema.Schema{
+			{{- range $prop := $.OrderProperties $.AllUserProperties }}
+{{template "SchemaFields" $prop -}}
+			{{- end }}
+            {{- range $prop := $.VirtualFields }}
+{{template "SchemaFields" $prop -}}
+            {{- end }}
+{{- if $.CustomCode.ExtraSchemaEntry }} 
+    {{ customTemplate $ $.CustomCode.ExtraSchemaEntry false -}}
+{{- end}}
+{{ if $.HasProject -}}
+            "project": {
+                Type:     schema.TypeString,
+                Optional: true,
+                Computed: true,
+                ForceNew: true,
+            },
+{{- end}}
+{{- if $.HasSelfLink }}
+            "self_link": {
+                Type:     schema.TypeString,
+                Computed: true,
+            },
+{{- end}}
+        },
+        UseJSONNumber: true,
+    }
+}
+
+{{- range $prop := $.AllUserProperties }}
+{{template "SchemaSubResource" $prop}}
+{{- end}}

@@ -58,6 +58,22 @@ examples:
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com"
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  - name: 'regional_parameter_version_with_json_format_with_file'
+    primary_resource_id: 'regional-parameter-version-with-json-format-with-file'
+    vars:
+      parameter_id: 'regional_parameter'
+      parameter_version_id: 'regional_parameter_version'
+      data: regional-parameter-json-data.json
+    test_vars_overrides:
+      'data': '"./test-fixtures/regional_parameter_data_json_format.json"'
+  - name: 'regional_parameter_version_with_yaml_format_with_file'
+    primary_resource_id: 'regional-parameter-version-with-yaml-format-with-file'
+    vars:
+      parameter_id: 'regional_parameter'
+      parameter_version_id: 'regional_parameter_version'
+      data: regional-parameter-yaml-data.yaml
+    test_vars_overrides:
+      'data': '"./test-fixtures/regional_parameter_data_yaml_format.yaml"'
 custom_code:
   pre_create: 'templates/terraform/pre_create/parameter_manager_regional_parameter_version.go.tmpl'
   custom_import: 'templates/terraform/custom_import/parameter_manager_regional_parameter_version.go.tmpl'

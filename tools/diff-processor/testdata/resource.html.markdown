@@ -275,6 +275,34 @@ exported:
   (Optional)
   Human-friendly description of the error.
 
+## Ephemeral Attributes Reference
+
+The following write-only attributes are supported:
+
+* `shared_secret_wo` -
+  (Optional)
+  Shared secret used to set the secure session between the Cloud VPN
+  gateway and the peer VPN gateway.
+  Note: This property is write-only and will not be read from the API. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
+  **Note**: This property is write-only and will not be read from the API.
+
+* `sensitive_params` -
+  (Optional)
+  Different parameters are configured primarily using the the `params` field on this
+  resource. This block contains the parameters which contain secrets or passwords so that they can be marked
+  sensitive and hidden from plan output. The name of the field, eg: secret_access_key, will be the key
+  in the `params` map in the api request.
+  Credentials may not be specified in both locations and will cause an error. Changing from one location
+  to a different credential configuration in the config will require an apply to update state.
+  Structure is [documented below](#nested_sensitive_params).
+
+<a name="nested_sensitive_params"></a>The `sensitive_params` block supports:
+
+* `secret_access_key_wo` -
+  (Optional)
+  The Secret Access Key of the AWS account transferring data from.
+  **Note**: This property is write-only and will not be read from the API.
+
 ## Timeouts
 
 Lorem ipsum

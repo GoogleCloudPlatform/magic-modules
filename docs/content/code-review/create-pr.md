@@ -24,14 +24,13 @@ aliases:
    - VCR tests will first attempt to play back recorded HTTP requests (REPLAYING mode). If any tests fail, they will run in RECORDING mode to generate a new cassette; then, the same tests will run again in REPLAYING mode to detect any nondeterministic behavior in the test (which can cause flaky tests.)
 1. If your assigned reviewer does not respond to changes on a pull request within two US business days, ping them on the pull request.
 
-{{< hint info >}}
-**TIP:** Speeding up review:
-1. [Test your changes locally before pushing]({{< ref "/test/run-tests" >}}) to iterate faster.
-   - You can push them and test in parallel as well. New CI runs will preempt old ones where possible.
-1. Resolve failed [status checks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/about-status-checks) quickly
-   - Directly ask your reviewer for help if you don't know how to proceed. If there are failed checks they may only check in if there's no progress after a couple days.
-1. [Self-review your PR]({{< ref "/code-review/review-pr" >}}) or ask someone else familiar with Terraform to review
-{{< /hint >}}
+> [!NOTE]
+> **TIP:** Speeding up review:
+> 1. [Test your changes locally before pushing]({{< ref "/test/run-tests" >}}) to iterate faster.
+>    - You can push them and test in parallel as well. New CI runs will preempt old ones where possible.
+> 1. Resolve failed [status checks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/about-status-checks) quickly
+>    - Directly ask your reviewer for help if you don't know how to proceed. If there are failed checks they may only check in if there's no progress after a couple days.
+> 1. [Self-review your PR]({{< ref "/code-review/review-pr" >}}) or ask someone else familiar with Terraform to review
 
 
 ## Troubleshoot status check failures
@@ -42,7 +41,7 @@ VCR test failures that do not immediately seem related to your PR are most likel
 
 1. Review the "diff generation" report to make sure the generated code looks as expected.
 1. Check out the generated code for your PR to [run tests]({{< ref "/test/run-tests" >}}) and iterate locally. For handwritten code or [custom code]({{< ref "/develop/custom-code" >}}), you can iterate directly in the provider and then copy the changes to your `magic-modules` branch once you have resolved the issue.
-   {{< tabs "checkout-auto-pr" >}}
+   {{% tabs "checkout-auto-pr" %}}
    {{< tab "terraform-provider-google" >}}
    ```bash
    cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
@@ -69,4 +68,4 @@ VCR test failures that do not immediately seem related to your PR are most likel
    ```
    Replace PR_NUMBER with your PR's ID.
    {{< /tab >}}
-   {{< /tabs >}}
+   {{% /tabs %}}

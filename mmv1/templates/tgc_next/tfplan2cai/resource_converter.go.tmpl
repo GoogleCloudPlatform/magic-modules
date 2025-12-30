@@ -17,133 +17,147 @@
 package {{ lower $.ProductMetadata.Name }}
 
 import (
-{{/* We list all the v2 imports here and unstable imports, because we run 'goimports' to guess the correct
-     set of imports, which will never guess the major version correctly. */ -}}
-  "github.com/apparentlymart/go-cidr/cidr"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
-  "google.golang.org/api/bigtableadmin/v2"
-  "google.golang.org/api/googleapi"
+  "encoding/base64"
+  "fmt"
+  "log"
+  "reflect"
+  "regexp"
+  "strconv"
+  "strings"
+  "time"
 
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters/cai"
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tpgresource"
-  transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/verify"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/converters/cai"
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tgcresource"
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
+  transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
+
+  "google.golang.org/api/googleapi"
+)
+
+var (
+    _ = base64.StdEncoding
+    _ = fmt.Sprintf
+    _ = log.Print
+    _ = reflect.ValueOf
+    _ = regexp.Match
+    _ = strconv.Atoi
+    _ = strings.Trim
+    _ = diag.Diagnostic{}
+    _ = customdiff.All
+    _ = id.UniqueId
+    _ = logging.LogLevel
+    _ = retry.Retry
+    _ = schema.Noop
+    _ = structure.ExpandJsonFromString
+    _ = time.Now
+    _ = validation.All
+    _ = terraform.State{}
+    _ = tgcresource.RemoveTerraformAttributionLabel
+    _ = tpgresource.GetRegion
+    _ = transport_tpg.Config{}
+    _ = verify.ProjectRegex
+    _ = googleapi.Error{}
 )
 
 {{- $caiProductBaseUrl := $.CaiProductBaseUrl }}
 {{- $productBackendName := $.CaiProductBackendName $caiProductBaseUrl }}
 {{- $apiVersion := $.CaiApiVersion $productBackendName $caiProductBaseUrl}}
 
-{{if $.CustomCode.Constants -}} 
-    {{- $.CustomTemplate $.CustomCode.Constants true -}}
-{{- end}}
-
-const {{ $.ResourceName -}}AssetType string = "{{ $productBackendName }}.googleapis.com/{{ $.Name -}}"
-
-func Resource{{ $.ResourceName -}}() *schema.Resource {
-    return &schema.Resource{
-        Schema: map[string]*schema.Schema{
-			{{- range $prop := $.OrderProperties $.AllUserProperties }}
-{{template "SchemaFields" $prop -}}
-			{{- end }}
-            {{- range $prop := $.VirtualFields }}
-{{template "SchemaFields" $prop -}}
-            {{- end }}
-{{- if $.CustomCode.ExtraSchemaEntry }} 
-    {{ $.CustomTemplate $.CustomCode.ExtraSchemaEntry false -}}
-{{- end}}
-{{ if $.HasProject -}}
-            "project": {
-                Type:     schema.TypeString,
-                Optional: true,
-                Computed: true,
-                ForceNew: true,
-            },
-{{- end}}
-{{- if $.HasSelfLink }}
-            "self_link": {
-                Type:     schema.TypeString,
-                Computed: true,
-            },
-{{- end}}
-        },
-        UseJSONNumber: true,
+func {{ $.ResourceName -}}Tfplan2caiConverter() cai.Tfplan2caiConverter {
+    return cai.Tfplan2caiConverter{
+        Convert: Get{{ $.ResourceName -}}CaiAssets,
     }
 }
 
-{{- range $prop := $.AllUserProperties }}
-{{template "SchemaSubResource" $prop}}
-{{- end}}
-
-func ResourceConverter{{ $.ResourceName -}}() cai.ResourceConverter {
-    return cai.ResourceConverter{
-        Convert: Get{{ $.ResourceName -}}CaiObject,
-    }
-}
-
-func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]caiasset.Asset, error) {
-    name, err := cai.AssetName(d, config, "{{ $.CaiAssetNameTemplate $productBackendName }}")
+func Get{{ $.ResourceName -}}CaiAssets(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]caiasset.Asset, error) {
+    name, err := cai.AssetName(d, config, "{{ $.GetCaiAssetNameTemplate }}")
     if err != nil {
         return []caiasset.Asset{}, err
     }
-    if obj, err := Get{{ $.ResourceName -}}ApiObject(d, config); err == nil {
-        return []caiasset.Asset{{"{{"}}
-            Name: name,
-            Type: {{ $.ResourceName -}}AssetType,
-            Resource: &caiasset.AssetResource{
-                Version: "{{ $apiVersion }}",
-                DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/{{ $productBackendName }}/{{ $apiVersion }}/rest",
-                DiscoveryName: "{{ $.Name }}",
-                Data: obj,
+    if obj, err := Get{{ $.ResourceName -}}CaiObject(d, config); err == nil {
+        location, _ := tpgresource.GetLocation(d, config)
+        if location == "" {
+            location = "global"
+        }
+        return []caiasset.Asset{
+            {
+                Name: name,
+                Type: {{ $.CaiResourceType -}}AssetType,
+                Resource: &caiasset.AssetResource{
+                    Version: "{{ $apiVersion }}",
+                    DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/{{ $productBackendName }}/{{ $apiVersion }}/rest",
+                    DiscoveryName: "{{ or $.ApiResourceTypeKind $.Name }}",
+                    Data: obj,
+                    Location:             location,
+                },
             },
-        {{"}}"}}, nil
+        }, nil
     } else {
         return []caiasset.Asset{}, err
     }
 }
 
-func Get{{ $.ResourceName -}}ApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
     obj := make(map[string]interface{})
 {{- range $prop := $.SettableProperties }}
 {{- if $prop.FlattenObject }}
-    {{ $prop.ApiName -}}Prop, err := expand{{ $.ResourceName -}}{{$prop.TitlelizeProperty}}(nil, d, config)
+    {{ $prop.CamelizeProperty -}}Prop, err := expand{{ $.ResourceName -}}{{$prop.TitlelizeProperty}}(nil, d, config)
 {{- else }}
-    {{ $prop.ApiName -}}Prop, err := expand{{ $.ResourceName -}}{{$prop.TitlelizeProperty}}(d.Get("{{underscore $prop.Name}}"), d, config)
+    {{ $prop.CamelizeProperty -}}Prop, err := expand{{ $.ResourceName -}}{{$prop.TitlelizeProperty}}(d.Get("{{underscore $prop.Name}}"), d, config)
 {{- end}}
     if err != nil {
         return nil, err
-{{- if not $prop.SendEmptyValue }}
-    } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiName -}}Prop)) && (ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop)) {
+{{- if and (not $prop.SendEmptyValue) (not $prop.TGCSendEmptyValue) }}
+    } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.CamelizeProperty -}}Prop)) && (ok || !reflect.DeepEqual(v, {{ $prop.CamelizeProperty -}}Prop)) {
 {{- else }}
-    } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop) {
+    } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); ok || !reflect.DeepEqual(v, {{ $prop.CamelizeProperty -}}Prop) {
 {{- end }}
-        obj["{{ $prop.ApiName -}}"] = {{ $prop.ApiName -}}Prop
+        obj["{{ $prop.ApiName -}}"] = {{ $prop.CamelizeProperty -}}Prop
     }
 {{- end}}
 
-{{ if $.CustomCode.Encoder -}}
-    return resource{{ $.ResourceName -}}Encoder(d, config, obj)
+{{ if and $.CustomCode.Encoder (not $.TGCIgnoreTerraformEncoder) -}}
+    obj, err = resource{{ $.ResourceName -}}Encoder(d, config, obj)
+    if err != nil {
+        return nil, err
+    }
+    if obj == nil {
+        obj = make(map[string]interface{})
+    }
+{{- end }}
+
+{{- if $.CustomCode.TgcEncoder }}
+    return resource{{ $.ResourceName -}}TgcEncoder(d, config, obj)
 {{- else }}
     return obj, nil
 {{- end}}
 }
 
-{{if $.CustomCode.Encoder -}}
+{{if and $.CustomCode.Encoder (not $.TGCIgnoreTerraformEncoder) -}}
 func resource{{ $.ResourceName -}}Encoder(d tpgresource.TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-{{ $.CustomTemplate $.CustomCode.Encoder false -}}
+{{ customTemplate $ $.CustomCode.Encoder false -}}
+}
+{{- end}}
+
+{{if $.CustomCode.TgcEncoder -}}
+func resource{{ $.ResourceName -}}TgcEncoder(d tpgresource.TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+{{ customTemplate $ $.CustomCode.TgcEncoder false -}}
 }
 {{- end}}
 
 {{ range $prop := $.SettableProperties }}
-    {{- template "expandPropertyMethod" $prop -}}
+    {{- template "expandTgcPropertyMethod" $prop -}}
 {{- end}}

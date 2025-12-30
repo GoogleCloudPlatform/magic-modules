@@ -1,0 +1,552 @@
+package dialogflowcx_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccDialogflowCXTool_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDialogflowCXTool_basic(context),
+			},
+			{
+				ResourceName:      "google_dialogflow_cx_tool.my_tool",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccDialogflowCXTool_full_api_key(context),
+			},
+			{
+				ResourceName:            "google_dialogflow_cx_tool.my_tool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"open_api_spec.0.authentication.0.api_key_config.0.api_key"},
+			},
+			{
+				Config: testAccDialogflowCXTool_full_service_agent_auth(context),
+			},
+			{
+				ResourceName:      "google_dialogflow_cx_tool.my_tool",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccDialogflowCXTool_full_bearer_token(context),
+			},
+			{
+				ResourceName:            "google_dialogflow_cx_tool.my_tool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"open_api_spec.0.authentication.0.bearer_token_config.0.token"},
+			},
+		},
+	})
+}
+
+func testAccDialogflowCXTool_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+	resource "google_dialogflow_cx_agent" "agent_tool" {
+		display_name             = "tf-test-%{random_suffix}"
+		location                 = "global"
+		default_language_code    = "en"
+		time_zone                = "America/New_York"
+		description              = "ageng for tool test"
+	}
+
+	resource "google_dialogflow_cx_tool" "my_tool" {
+		parent       = google_dialogflow_cx_agent.agent_tool.id
+		display_name = "Example"
+		description  = "Example Description"
+	}
+	`, context)
+}
+
+func testAccDialogflowCXTool_full_api_key(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+	resource "google_dialogflow_cx_agent" "agent_tool" {
+		display_name             = "tf-test-%{random_suffix}"
+		location                 = "global"
+		default_language_code    = "en"
+		time_zone                = "America/New_York"
+		description              = "ageng for tool test"
+	}
+
+	resource "google_dialogflow_cx_tool" "my_tool" {
+		parent       = google_dialogflow_cx_agent.agent_tool.id
+		display_name = "Example Open API Tool with api_key_config"
+		description  = "Example Description"
+		open_api_spec {
+			authentication {
+				api_key_config {
+					key_name = "example key name"
+					api_key = "example key"
+					secret_version_for_api_key = "projects/-/secrets/-/versions/-"
+					request_location = "HEADER"
+				}
+			}
+			tls_config {
+				ca_certs {
+					display_name = "example ca cert name"
+					cert = base64encode("example cert")
+				}
+			}
+			service_directory_config {
+				service = "projects/-/locations/-/namespaces/-/services/-"
+			}
+			text_schema = <<EOF
+			{
+				"openapi": "3.0.0",
+				"info": {
+					"title": "Time API",
+					"version": "1.0.0",
+					"description": "A simple API to get the current time."
+				},
+				"servers": [
+					{
+						"url": "https://example-api-endpoint.com"
+					}
+				],
+				"paths": {
+					"/time": {
+						"get": {
+							"operationId": "getCurrentTime",
+							"summary": "Gets the current server time.",
+							"responses": {
+								"200": {
+									"description": "Successful response with the current time.",
+									"content": {
+										"application/json": {
+											"schema": {
+												"type": "object",
+												"properties": {
+													"currentTime": {
+														"type": "string",
+														"format": "date-time",
+														"description": "The current time in ISO 8601 format."
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			EOF
+		}
+	}
+	`, context)
+}
+
+func testAccDialogflowCXTool_full_service_agent_auth(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+	resource "google_dialogflow_cx_agent" "agent_tool" {
+		display_name             = "tf-test-%{random_suffix}"
+		location                 = "global"
+		default_language_code    = "en"
+		time_zone                = "America/New_York"
+		description              = "ageng for tool test"
+	}
+
+	resource "google_dialogflow_cx_tool" "my_tool" {
+		parent       = google_dialogflow_cx_agent.agent_tool.id
+		display_name = "Example Open API Tool with service_agent_auth_config"
+		description  = "Example Description"
+		open_api_spec {
+			authentication {
+				service_agent_auth_config {
+					service_agent_auth = "ID_TOKEN"
+				}
+			}
+			tls_config {
+				ca_certs {
+					display_name = "example ca cert name"
+					cert = base64encode("example cert")
+				}
+			}
+			service_directory_config {
+				service = "projects/-/locations/-/namespaces/-/services/-"
+			}
+			text_schema = <<EOF
+			{
+				"openapi": "3.0.0",
+				"info": {
+					"title": "Time API",
+					"version": "1.0.0",
+					"description": "A simple API to get the current time."
+				},
+				"servers": [
+					{
+						"url": "https://example-api-endpoint.com"
+					}
+				],
+				"paths": {
+					"/time": {
+						"get": {
+							"operationId": "getCurrentTime",
+							"summary": "Gets the current server time.",
+							"responses": {
+								"200": {
+									"description": "Successful response with the current time.",
+									"content": {
+										"application/json": {
+											"schema": {
+												"type": "object",
+												"properties": {
+													"currentTime": {
+														"type": "string",
+														"format": "date-time",
+														"description": "The current time in ISO 8601 format."
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			EOF
+		}
+	}
+	`, context)
+}
+
+func testAccDialogflowCXTool_full_bearer_token(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+	resource "google_dialogflow_cx_agent" "agent_tool" {
+		display_name             = "tf-test-%{random_suffix}"
+		location                 = "global"
+		default_language_code    = "en"
+		time_zone                = "America/New_York"
+		description              = "ageng for tool test"
+	}
+
+	resource "google_dialogflow_cx_tool" "my_tool" {
+		parent       = google_dialogflow_cx_agent.agent_tool.id
+		display_name = "Example Open API Tool with bearer_token_config"
+		description  = "Example Description"
+		open_api_spec {
+			authentication {
+				bearer_token_config {
+					token = "example token"
+					secret_version_for_token = "projects/-/secrets/-/versions/-"
+				}
+			}
+			tls_config {
+				ca_certs {
+					display_name = "example ca cert name"
+					cert = base64encode("example cert")
+				}
+			}
+			service_directory_config {
+				service = "projects/-/locations/-/namespaces/-/services/-"
+			}
+			text_schema = <<EOF
+			{
+				"openapi": "3.0.0",
+				"info": {
+					"title": "Time API",
+					"version": "1.0.0",
+					"description": "A simple API to get the current time."
+				},
+				"servers": [
+					{
+						"url": "https://example-api-endpoint.com"
+					}
+				],
+				"paths": {
+					"/time": {
+						"get": {
+							"operationId": "getCurrentTime",
+							"summary": "Gets the current server time.",
+							"responses": {
+								"200": {
+									"description": "Successful response with the current time.",
+									"content": {
+										"application/json": {
+											"schema": {
+												"type": "object",
+												"properties": {
+													"currentTime": {
+														"type": "string",
+														"format": "date-time",
+														"description": "The current time in ISO 8601 format."
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			EOF
+		}
+  }
+	`, context)
+}
+
+func TestAccDialogflowCXTool_dialogflowcxToolConnectorExample_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckDialogflowCXToolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDialogflowCXTool_dialogflowcxToolConnectorExample_full(context),
+			},
+			{
+				Config:                  testAccDialogflowCXTool_dialogflowcxToolConnectorExample_full(context),
+				ResourceName:            "google_dialogflow_cx_tool.connector_tool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"open_api_spec.0.authentication.0.api_key_config.0.api_key", "open_api_spec.0.authentication.0.bearer_token_config.0.token", "open_api_spec.0.authentication.0.oauth_config.0.client_secret", "parent"},
+			},
+			{
+				Config: testAccDialogflowCXTool_dialogflowcxToolConnectorExample_update(context),
+			},
+			{
+				Config:                  testAccDialogflowCXTool_dialogflowcxToolConnectorExample_update(context),
+				ResourceName:            "google_dialogflow_cx_tool.connector_tool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"open_api_spec.0.authentication.0.api_key_config.0.api_key", "open_api_spec.0.authentication.0.bearer_token_config.0.token", "open_api_spec.0.authentication.0.oauth_config.0.client_secret", "parent"},
+			},
+		},
+	})
+}
+
+func testAccDialogflowCXTool_dialogflowcxToolConnectorExample_full(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+provider "google-beta" {
+}
+resource "google_dialogflow_cx_agent" "agent" {
+  provider = google-beta
+  display_name = "tf-test-dialogflowcx-agent-connector%{random_suffix}"
+  location = "us-central1"
+  default_language_code = "en"
+  time_zone = "America/New_York"
+  description = "Example description."
+  delete_chat_engine_on_destroy = true
+}
+
+resource "google_integration_connectors_connection" "integration_connector" {
+  provider = google-beta
+  name     = "terraform-df-cx-test-connection-update%{random_suffix}"
+  location = "us-central1"
+  connector_version = "projects/${google_dialogflow_cx_agent.agent.project}/locations/global/providers/gcp/connectors/bigquery/versions/1"
+  description = "tf created description"
+  config_variable {
+      key = "dataset_id"
+      string_value = google_bigquery_dataset.bq_dataset.dataset_id
+  }
+    config_variable {
+      key = "project_id"
+      string_value = google_dialogflow_cx_agent.agent.project
+  }
+  config_variable {
+    key = "support_native_data_type"
+    boolean_value = false
+  }
+  config_variable {
+    key = "proxy_enabled"
+    boolean_value = false
+  }
+
+  service_account = "${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"
+
+  auth_config {
+    auth_type = "AUTH_TYPE_UNSPECIFIED"
+  }
+  lifecycle {
+    ignore_changes = [
+      auth_config,
+    ]
+  }
+}
+
+resource "google_bigquery_dataset" "bq_dataset" {
+  provider = google-beta
+  dataset_id    = "terraformdatasetdfcxtoolupdate%{random_suffix}"
+  friendly_name = "test"
+  description   = "This is a test description"
+  location      = "us-central1"
+  delete_contents_on_destroy = true
+}
+
+resource "google_bigquery_table" "bq_table" {
+  provider = google-beta
+  deletion_protection = false
+  dataset_id = google_bigquery_dataset.bq_dataset.dataset_id
+  table_id   = "terraformdatasetdfcxtooltable"
+}
+
+
+resource "google_bigquery_dataset_iam_member" "connector_sa_dataset_perms" {
+  provider   = google-beta
+  project    = data.google_project.test_project.project_id
+  dataset_id = google_bigquery_dataset.bq_dataset.dataset_id
+  role       = "roles/bigquery.dataEditor"
+  member     = "serviceAccount:${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"
+}
+
+resource "google_dialogflow_cx_tool" "connector_tool" {
+  provider = google-beta
+  parent       = google_dialogflow_cx_agent.agent.id
+  display_name = "Example Connector Tool"
+  description  = "Example Description"
+
+
+  connector_spec {
+    name = "projects/${google_dialogflow_cx_agent.agent.project}/locations/us-central1/connections/${google_integration_connectors_connection.integration_connector.name}"
+    actions {
+      connection_action_id = "ExecuteCustomQuery"
+      input_fields = ["test1"]
+      output_fields = ["test1"]
+    }
+    actions {
+      entity_operation {
+        entity_id = google_bigquery_table.bq_table.table_id
+        operation = "LIST"
+      }
+    }
+  }
+}
+
+data "google_project" "test_project" {
+  provider = google-beta
+}
+`, context)
+}
+
+func testAccDialogflowCXTool_dialogflowcxToolConnectorExample_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+provider "google-beta" {
+}
+resource "google_dialogflow_cx_agent" "agent" {
+  provider = google-beta
+  display_name = "tf-test-dialogflowcx-agent-connector%{random_suffix}"
+  location = "us-central1"
+  default_language_code = "en"
+  time_zone = "America/New_York"
+  description = "Example description."
+  delete_chat_engine_on_destroy = true
+}
+
+resource "google_integration_connectors_connection" "integration_connector" {
+  provider = google-beta
+  name     = "terraform-df-cx-test-connection-update%{random_suffix}"
+  location = "us-central1"
+  connector_version = "projects/${google_dialogflow_cx_agent.agent.project}/locations/global/providers/gcp/connectors/bigquery/versions/1"
+  description = "tf created description"
+  config_variable {
+      key = "dataset_id"
+      string_value = google_bigquery_dataset.bq_dataset.dataset_id
+  }
+    config_variable {
+      key = "project_id"
+      string_value = google_dialogflow_cx_agent.agent.project
+  }
+  config_variable {
+    key = "support_native_data_type"
+    boolean_value = false
+  }
+  config_variable {
+    key = "proxy_enabled"
+    boolean_value = false
+  }
+
+  service_account = "${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"
+
+  auth_config {
+    auth_type = "AUTH_TYPE_UNSPECIFIED"
+  }
+  lifecycle {
+    ignore_changes = [
+      auth_config,
+    ]
+  }
+}
+
+resource "google_bigquery_dataset" "bq_dataset" {
+  provider = google-beta
+  dataset_id    = "terraformdatasetdfcxtoolupdate%{random_suffix}"
+  friendly_name = "test"
+  description   = "This is a test description"
+  location      = "us-central1"
+  delete_contents_on_destroy = true
+}
+
+resource "google_bigquery_table" "bq_table" {
+  provider = google-beta
+  deletion_protection = false
+  dataset_id = google_bigquery_dataset.bq_dataset.dataset_id
+  table_id   = "terraformdatasetdfcxtooltable"
+}
+
+
+resource "google_bigquery_dataset_iam_member" "connector_sa_dataset_perms" {
+  provider   = google-beta
+  project    = data.google_project.test_project.project_id
+  dataset_id = google_bigquery_dataset.bq_dataset.dataset_id
+  role       = "roles/bigquery.dataEditor"
+  member     = "serviceAccount:${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"
+}
+
+resource "google_dialogflow_cx_tool" "connector_tool" {
+  provider = google-beta
+  parent       = google_dialogflow_cx_agent.agent.id
+  display_name = "Example Connector Tool"
+  description  = "Example Description"
+
+
+  connector_spec {
+    name = "projects/${google_dialogflow_cx_agent.agent.project}/locations/us-central1/connections/${google_integration_connectors_connection.integration_connector.name}"
+    actions {
+      connection_action_id = "ExecuteCustomQuery"
+      input_fields = ["test1","test2"]
+      output_fields = ["test1","test2"]
+    }
+    actions {
+      entity_operation {
+        entity_id = google_bigquery_table.bq_table.table_id
+        operation = "UPDATE"
+      }
+    }
+  }
+}
+
+data "google_project" "test_project" {
+  provider = google-beta
+}
+`, context)
+}

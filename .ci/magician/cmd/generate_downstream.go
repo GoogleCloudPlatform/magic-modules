@@ -383,6 +383,12 @@ func addChangelogEntry(downstreamRepo *source.Repo, pullRequest *github.PullRequ
 			return err
 		}
 	}
+	// If changelog entry is missing, add an entry "unknown: <PR title>".
+	if matches == nil {
+		if err := rnr.WriteFile(filepath.Join(".changelog", fmt.Sprintf("%d.txt", pullRequest.Number)), "unknown: "+pullRequest.Title); err != nil {
+			return err
+		}
+	}
 	return rnr.PopDir()
 }
 

@@ -45,6 +45,8 @@ resource "google_dataproc_cluster" "mycluster" {
   cluster_config {
     staging_bucket = "dataproc-staging-bucket"
 
+    cluster_tier = "CLUSTER_TIER_STANDARD"
+
     master_config {
       num_instances = 1
       machine_type  = "e2-medium"
@@ -341,6 +343,8 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
    and jobs data, such as Spark and MapReduce history files.
    Note: If you don't explicitly specify a `temp_bucket` then GCP will auto create / assign one for you.
 
+* `cluster_tier` - (Optional) The tier of the cluster.
+
 * `gce_cluster_config` (Optional) Common config settings for resources of Google Compute Engine cluster
    instances, applicable to all instances in the cluster. Structure [defined below](#nested_gce_cluster_config).
 
@@ -439,6 +443,10 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 
 * `metadata` - (Optional) A map of the Compute Engine metadata entries to add to all instances
    (see [Project and instance metadata](https://cloud.google.com/compute/docs/storing-retrieving-metadata#project_and_instance_metadata)).
+
+* `resource_manager_tags` - (Optional) A map of resource manager tags to add to all instances.
+   Keys must be in the format `tagKeys/{tag_key_id}` and values in the format `tagValues/{tag_value_id}`
+   (see [Secure tags](https://cloud.google.com/dataproc/docs/guides/use-secure-tags)).
 
 * `reservation_affinity` - (Optional) Reservation Affinity for consuming zonal reservation.
     * `consume_reservation_type` - (Optional) Corresponds to the type of reservation consumption.
@@ -716,11 +724,17 @@ cluster_config {
       kms_key_uri = "projects/projectId/locations/locationId/keyRings/keyRingId/cryptoKeys/keyId"
       root_principal_password_uri = "bucketId/o/objectId"
     }
+    identity_config {
+      user_service_account_mapping = {
+        "user@company.com" = "service-account@iam.gserviceaccounts.com"
+      }
+    }
   }
 }
 ```
 
-* `kerberos_config` (Required) Kerberos Configuration
+* `kerberos_config` (Optional) Kerberos Configuration. At least one of `identity_config`
+       or `kerberos_config` is required.
 
     * `cross_realm_trust_admin_server` - (Optional) The admin server (IP or hostname) for the
        remote trusted realm in a cross realm trust relationship.
@@ -767,6 +781,12 @@ cluster_config {
 
     * `truststore_uri` - (Optional) The Cloud Storage URI of the truststore file used for
        SSL encryption. If not provided, Dataproc will provide a self-signed certificate.
+
+* `identity_config` (Optional) Identity Configuration. At least one of `identity_config`
+       or `kerberos_config` is required.
+
+    * `user_service_account_mapping` - (Required) The end user to service account mappings
+       in a service account based multi-tenant cluster
 
 - - -
 

@@ -13,12 +13,12 @@
   See the License for the specific language governing permissions and
   limitations under the License. */ -}}
 {{- define "flattenPropertyMethod" }}
-{{- if $.WriteOnly }}
-{{- else if $.CustomFlatten }}
-    {{- $.CustomTemplate $.CustomFlatten false -}}
+{{- if or $.WriteOnlyLegacy $.WriteOnly }}
+{{- else if and $.CustomFlatten (not $.ShouldIgnoreCustomFlatten) }}
+    {{- customTemplate $ $.CustomFlatten false -}}
 {{- else -}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-  {{- if $.IgnoreRead }}
+  {{- if or (and $.IgnoreRead (not $.ResourceMetadata.IsTgcCompiler)) $.ClientSide }}
   return d.Get("{{ $.TerraformLineage }}")
   {{- else if $.IsA "NestedObject" }}
   if v == nil {
@@ -34,7 +34,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     {{- end }}
   transformed := make(map[string]interface{})
     {{- range $prop := $.UserProperties }}
-      {{- if $prop.WriteOnly }}
+      {{- if or $prop.WriteOnlyLegacy $prop.WriteOnly }}
       {{- else if $prop.FlattenObject }}
     if {{ $prop.ApiName }} := flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config); {{ $prop.ApiName }} != nil {
       obj := {{ $prop.ApiName }}.([]interface{})[0]
@@ -46,6 +46,11 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     transformed["{{ underscore $prop.Name }}"] =
     flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config)
       {{- end }}
+    {{- end }}
+    {{- if and $.ResourceMetadata.IsTgcCompiler (not $.AllowEmptyObject) }}
+    if tgcresource.AllValuesAreNil(transformed) {
+      return nil
+    }
     {{- end }}
   return []interface{}{transformed}
   {{- else if and ($.IsA "Array") ($.ItemType.IsA "NestedObject") }}
@@ -75,7 +80,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
   {{- end }}
 
   {{- range $prop := $.ItemType.UserProperties }}
-    {{- if not (or $prop.IgnoreRead $prop.WriteOnly) }}
+    {{- if not (or $prop.IgnoreRead $prop.WriteOnlyLegacy $prop.WriteOnly) }}
       "{{ underscore $prop.Name }}": flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config),
     {{- end }}
   {{- end }}
@@ -125,6 +130,12 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 		return intVal
 	}
 
+ {{- if and $.ResourceMetadata.IsTgcCompiler $.Required }}
+	if v == nil {
+		return 0
+	}
+ {{- end }}
+
 	return v // let terraform core handle it otherwise
   {{- else if and ($.IsA "Array") ($.ItemType.IsA "ResourceRef")}}
   if v == nil {
@@ -132,10 +143,14 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
   }
   return tpgresource.ConvertAndMapStringArr(v.([]interface{}), tpgresource.ConvertSelfLinkToV1)
   {{- else if $.IsA "ResourceRef" }}
+    {{- if $.ResourceMetadata.IsTgcCompiler }}
+  {{- template "fullToRelativePath" $ -}}
+    {{- else }}
   if v == nil {
     return v
   }
   return tpgresource.ConvertSelfLinkToV1(v.(string))
+    {{- end }}
   {{- else if $.IsSet }}
   if v == nil {
     return v
@@ -145,13 +160,22 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     {{- else if or ($.ItemType.IsA "String") ($.ItemType.IsA "Enum") }}
   return schema.NewSet(schema.HashString, v.([]interface{}))
     {{- end }}
+  {{- else if and ($.ResourceMetadata.IsTgcCompiler) ($.IsA "Boolean") ($.Required) }}
+	if v == nil {
+		return false
+	}
+	return v
   {{- else }}
   return v
 {{- end }}
 }
 {{- if $.NestedProperties }}
     {{- range $prop := $.NestedProperties }}
+      {{- if $.ResourceMetadata.IsTgcCompiler }}
+      {{ template "flattenTgcPropertyMethod" $prop -}}
+      {{- else }}
       {{ template "flattenPropertyMethod" $prop -}}
+      {{- end }}
     {{- end }}
   {{- end }}
 {{- end }}

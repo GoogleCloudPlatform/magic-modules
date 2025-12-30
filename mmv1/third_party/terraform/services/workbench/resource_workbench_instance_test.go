@@ -87,7 +87,8 @@ resource "google_workbench_instance" "instance" {
 	  }
 
     metadata = {
-      terraform = "true"
+      terraform = "true",
+	  "serial-port-logging-enable" = "false",
     }
 
   }
@@ -353,6 +354,19 @@ func TestAccWorkbenchInstance_updateMetadataKey(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
 			},
 			{
+				Config: testAccWorkbenchInstance_update(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
+			},
+			{
+				ResourceName:            "google_workbench_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
+			},
+			{
 				Config: testAccWorkbenchInstance_updateMetadata(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -379,6 +393,7 @@ resource "google_workbench_instance" "instance" {
     metadata = {
       terraform = "true"
       "resource-url" = "new-fake-value",
+      "serial-port-logging-enable" = "true",
     }
   }
 
@@ -401,7 +416,7 @@ resource "google_workbench_instance" "instance" {
       terraform = "true",
       "idle-timeout-seconds" = "10800",
       "image-url" = "fake-value",
-	  "container-custom-params" = "test-params",
+      "container-custom-params" = "test-params",
     }
   }
 
@@ -651,7 +666,7 @@ func TestAccWorkbenchInstance_updateBothDisks(t *testing.T) {
 				ResourceName:            "google_workbench_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
+				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state", "gce_setup.0.metadata"},
 			},
 			{
 				Config: testAccWorkbenchInstance_updateBothDisks(context),
@@ -664,7 +679,7 @@ func TestAccWorkbenchInstance_updateBothDisks(t *testing.T) {
 				ResourceName:            "google_workbench_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
+				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state", "gce_setup.0.metadata"},
 			},
 		},
 	})
@@ -717,6 +732,9 @@ resource "google_workbench_instance" "instance" {
 }
 
 func TestAccWorkbenchInstance_updatelabels(t *testing.T) {
+	// Skip it in VCR test because of the randomness of uuid in "labels" field
+	// which causes the replaying mode after recording mode failing in VCR test
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -726,6 +744,9 @@ func TestAccWorkbenchInstance_updatelabels(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccWorkbenchInstance_label(context),
@@ -772,11 +793,15 @@ func TestAccWorkbenchInstance_updatelabels(t *testing.T) {
 
 func testAccWorkbenchInstance_label(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "random_uuid" "test" {
+}
+
 resource "google_workbench_instance" "instance" {
   name = "tf-test-workbench-instance%{random_suffix}"
   location = "us-central1-a"
   labels = {
     k = "val"
+	computed_label = "${random_uuid.test.result}"
   }
 }
 `, context)

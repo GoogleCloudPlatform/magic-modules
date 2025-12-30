@@ -111,6 +111,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Bigquerydatapolicy",
         "path" to "./google-beta/services/bigquerydatapolicy"
     ),
+    "bigquerydatapolicyv2" to mapOf(
+        "name" to "bigquerydatapolicyv2",
+        "displayName" to "Bigquerydatapolicyv2",
+        "path" to "./google-beta/services/bigquerydatapolicyv2"
+    ),
     "bigquerydatatransfer" to mapOf(
         "name" to "bigquerydatatransfer",
         "displayName" to "Bigquerydatatransfer",
@@ -145,6 +150,11 @@ var ServicesListBeta = mapOf(
         "name" to "certificatemanager",
         "displayName" to "Certificatemanager",
         "path" to "./google-beta/services/certificatemanager"
+    ),
+    "ces" to mapOf(
+        "name" to "ces",
+        "displayName" to "Customerengagementsuite",
+        "path" to "./google-beta/services/ces"
     ),
     "chronicle" to mapOf(
         "name" to "chronicle",
@@ -216,6 +226,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Cloudscheduler",
         "path" to "./google-beta/services/cloudscheduler"
     ),
+    "cloudsecuritycompliance" to mapOf(
+        "name" to "cloudsecuritycompliance",
+        "displayName" to "Cloud Security Compliance",
+        "path" to "./google-beta/services/cloudsecuritycompliance"
+    ),
     "cloudtasks" to mapOf(
         "name" to "cloudtasks",
         "displayName" to "Cloudtasks",
@@ -235,6 +250,11 @@ var ServicesListBeta = mapOf(
         "name" to "compute",
         "displayName" to "Compute",
         "path" to "./google-beta/services/compute"
+    ),
+    "contactcenterinsights" to mapOf(
+        "name" to "contactcenterinsights",
+        "displayName" to "Contact Center AI Insights",
+        "path" to "./google-beta/services/contactcenterinsights"
     ),
     "container" to mapOf(
         "name" to "container",
@@ -556,6 +576,16 @@ var ServicesListBeta = mapOf(
         "displayName" to "Mlengine",
         "path" to "./google-beta/services/mlengine"
     ),
+    "modelarmor" to mapOf(
+        "name" to "modelarmor",
+        "displayName" to "ModelArmor",
+        "path" to "./google-beta/services/modelarmor"
+    ),
+    "modelarmorglobal" to mapOf(
+        "name" to "modelarmorglobal",
+        "displayName" to "ModelArmorGlobal",
+        "path" to "./google-beta/services/modelarmorglobal"
+    ),
     "monitoring" to mapOf(
         "name" to "monitoring",
         "displayName" to "Monitoring",
@@ -570,6 +600,11 @@ var ServicesListBeta = mapOf(
         "name" to "networkconnectivity",
         "displayName" to "Networkconnectivity",
         "path" to "./google-beta/services/networkconnectivity"
+    ),
+    "networkconnectivityv1" to mapOf(
+        "name" to "networkconnectivityv1",
+        "displayName" to "Networkconnectivityv1",
+        "path" to "./google-beta/services/networkconnectivityv1"
     ),
     "networkmanagement" to mapOf(
         "name" to "networkmanagement",
@@ -590,6 +625,11 @@ var ServicesListBeta = mapOf(
         "name" to "notebooks",
         "displayName" to "Notebooks",
         "path" to "./google-beta/services/notebooks"
+    ),
+    "observability" to mapOf(
+        "name" to "observability",
+        "displayName" to "Observability",
+        "path" to "./google-beta/services/observability"
     ),
     "oracledatabase" to mapOf(
         "name" to "oracledatabase",
@@ -680,6 +720,11 @@ var ServicesListBeta = mapOf(
         "name" to "runtimeconfig",
         "displayName" to "Runtimeconfig",
         "path" to "./google-beta/services/runtimeconfig"
+    ),
+    "saasruntime" to mapOf(
+        "name" to "saasruntime",
+        "displayName" to "SaaS Runtime",
+        "path" to "./google-beta/services/saasruntime"
     ),
     "secretmanager" to mapOf(
         "name" to "secretmanager",
@@ -795,11 +840,6 @@ var ServicesListBeta = mapOf(
         "name" to "tags",
         "displayName" to "Tags",
         "path" to "./google-beta/services/tags"
-    ),
-    "tpu" to mapOf(
-        "name" to "tpu",
-        "displayName" to "Tpu",
-        "path" to "./google-beta/services/tpu"
     ),
     "tpuv2" to mapOf(
         "name" to "tpuv2",

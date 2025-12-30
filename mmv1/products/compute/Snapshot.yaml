@@ -53,7 +53,6 @@ async:
 collection_url_key: 'items'
 iam_policy:
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/global/snapshots/{{name}}'
     - '{{name}}'
@@ -136,7 +135,7 @@ parameters:
           The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
           encryption key that protects this resource.
         output: true
-        # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+        # TODO Change to ResourceRef once KMS is in Magic Modules
       - name: 'kmsKeySelfLink'
         type: String
         description: |
@@ -264,3 +263,10 @@ properties:
     update_url: 'projects/{{project}}/global/snapshots/{{name}}/setLabels'
     update_verb: 'POST'
     key_expander: ''
+  - name: 'snapshotType'
+    type: Enum
+    description: |
+      Indicates the type of the snapshot.
+    enum_values:
+      - 'ARCHIVE'
+      - 'STANDARD'

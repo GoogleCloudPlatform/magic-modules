@@ -15,7 +15,7 @@
 name: 'ServiceDirectory'
 display_name: 'Service Directory'
 versions:
-  - name: 'beta'
-    base_url: 'https://servicedirectory.googleapis.com/v1beta1/'
+  - name: 'ga'
+    base_url: 'https://servicedirectory.googleapis.com/v1/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'

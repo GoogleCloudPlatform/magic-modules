@@ -410,7 +410,7 @@ resource "google_dialogflow_cx_flow" "{{$.PrimaryResourceId}}" {
 
 resource "google_discovery_engine_data_store" "my_datastore" {
   location          = "global"
-  data_store_id     = "datastore-flow-full"
+  data_store_id     = "{{index $.Vars "data-store"}}"
   display_name      = "datastore-flow-full"
   industry_vertical = "GENERIC"
   content_config    = "NO_CONTENT"

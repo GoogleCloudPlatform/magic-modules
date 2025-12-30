@@ -37,6 +37,12 @@ examples:
     region_override: 'global'
     vars:
       security_gateway_name: default
+  - name: beyondcorp_security_gateway_spa
+    primary_resource_id: example-spa
+    primary_resource_name: 'fmt.Sprintf("default-spa%s", context["random_suffix"])'
+    region_override: 'global'
+    vars:
+      security_gateway_name: default-spa
 autogen_async: true
 async:
   operation:
@@ -54,6 +60,8 @@ async:
     resource_inside_response: true
   include_project: false
 autogen_status: U2VjdXJpdHlHYXRld2F5
+custom_code:
+  constants: 'templates/terraform/constants/beyondcorp_security_gateway.go.tmpl'
 parameters:
   - name: location
     type: String
@@ -104,15 +112,17 @@ properties:
       as a key.
     key_name: region
     key_description: The region to deploy the hub in.
+    set_hash_func: 'beyondcorpSecurityGatewayHubsHash'
     value_type:
       name: Hub
       type: NestedObject
       properties:
-        - name: internet_gateway
+        - name: internetGateway
           type: NestedObject
           description: Internet Gateway configuration.
+          default_from_api: true
           properties:
-            - name: assigned_ips
+            - name: assignedIps
               type: Array
               description: Output only. List of IP addresses assigned to the Cloud NAT.
               output: true
@@ -140,3 +150,87 @@ properties:
     description: |-
       Service account used for operations that involve resources in consumer projects.
     output: true
+  - name: proxyProtocolConfig
+    type: NestedObject
+    description: Shared proxy configuration for all apps.
+    properties:
+      - name: allowedClientHeaders
+        type: Array
+        description: The configuration for the proxy.
+        item_type:
+          type: string
+      - name: contextualHeaders
+        type: NestedObject
+        description: Configuration for the contextual headers.
+        properties:
+          - name: userInfo
+            type: NestedObject
+            description: User info configuration.
+            properties:
+              - name: outputType
+                type: Enum
+                description: The output type of the delegated user info.
+                enum_values:
+                  - 'PROTOBUF'
+                  - 'JSON'
+                  - 'NONE'
+          - name: groupInfo
+            type: NestedObject
+            description: Group info configuration.
+            properties:
+              - name: outputType
+                type: Enum
+                description: The output type of the delegated group info.
+                enum_values:
+                  - 'PROTOBUF'
+                  - 'JSON'
+                  - 'NONE'
+          - name: deviceInfo
+            type: NestedObject
+            description: Device info configuration.
+            properties:
+              - name: outputType
+                type: Enum
+                description: The output type of the delegated device info.
+                enum_values:
+                  - 'PROTOBUF'
+                  - 'JSON'
+                  - 'NONE'
+          - name: outputType
+            type: Enum
+            description: Default output type for all enabled headers.
+            enum_values:
+              - 'PROTOBUF'
+              - 'JSON'
+              - 'NONE'
+      - name: metadataHeaders
+        type: KeyValuePairs
+        description: |-
+          Custom resource specific headers along with the values.
+          The names should conform to RFC 9110:
+          > Field names SHOULD constrain themselves to alphanumeric characters, "-",
+            and ".", and SHOULD begin with a letter.
+          > Field values SHOULD contain only ASCII printable characters and tab.
+      - name: gatewayIdentity
+        type: Enum
+        description: Gateway identity configuration.
+        enum_values:
+          - 'RESOURCE_NAME'
+      - name: clientIp
+        type: Boolean
+        description: Client IP configuration. The client IP address is included if true.
+  - name: serviceDiscovery
+    type: NestedObject
+    description: Settings related to the Service Discovery.
+    properties:
+      - name: apiGateway
+        type: NestedObject
+        description: External API configuration.
+        properties:
+          - name: resourceOverride
+            type: NestedObject
+            description: Enables fetching resource model updates to alter service behavior per Chrome profile.
+            properties:
+              - name: path
+                type: String
+                description: Contains uri path fragment where HTTP request is sent.

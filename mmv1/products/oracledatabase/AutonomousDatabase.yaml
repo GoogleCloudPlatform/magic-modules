@@ -73,6 +73,36 @@ examples:
       deletion_protection: 'false'
       database_name: 'fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))'
       endpoint_name: 'fmt.Sprintf("tftestendpoint%s", acctest.RandString(t, 10))'
+  - name: 'oracledatabase_autonomous_database_odbnetwork'
+    primary_resource_id: 'myADB'
+    vars:
+      project: 'my-project'
+      autonomous_database_id: 'my-instance'
+      database_name: 'mydatabase'
+      odb_network: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork'
+      odb_subnet: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet'
+      deletion_protection: 'true'
+    ignore_read_extra:
+      - 'deletion_protection'
+    test_vars_overrides:
+      deletion_protection: 'false'
+      project: '"oci-terraform-testing-prod"'
+      database_name: 'fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))'
+      odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
+      odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+  - name: 'oracledatabase_autonomous_database_publicip'
+    primary_resource_id: 'myADB'
+    vars:
+      project: 'my-project'
+      autonomous_database_id: 'my-instance'
+      database_name: 'mydatabase'
+      deletion_protection: 'true'
+    ignore_read_extra:
+      - 'deletion_protection'
+    test_vars_overrides:
+      deletion_protection: 'false'
+      project: '"oci-terraform-testing-prod"'
+      database_name: 'fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))'
 virtual_fields:
   - name: 'deletion_protection'
     type: Boolean
@@ -136,6 +166,10 @@ properties:
         type: Double
         description: 'The number of compute servers for the Autonomous Database. '
         default_from_api: true
+      - name: 'cpuCoreCount'
+        type: Integer
+        description: 'The number of CPU cores to be made available to the database. '
+        default_from_api: true
       - name: 'dataStorageSizeTb'
         type: Integer
         description: 'The size of the data stored in the database, in terabytes. '
@@ -198,6 +232,12 @@ properties:
               description: "The email address used by Oracle to send notifications
                 regarding databases\nand infrastructure. "
               required: true
+      - name: 'secretId'
+        type: String
+        description: 'The ID of the Oracle Cloud Infrastructure vault secret. '
+      - name: 'vaultId'
+        type: String
+        description: 'The ID of the Oracle Cloud Infrastructure vault. '
       - name: 'maintenanceScheduleType'
         type: String
         description: "The maintenance schedule of the Autonomous Database. \n
@@ -623,11 +663,27 @@ properties:
     type: String
     description: "The name of the VPC network used by the Autonomous Database.\nFormat:
     projects/{project}/global/networks/{network} "
-    required: true
+    required: false
   - name: 'cidr'
     type: String
     description: 'The subnet CIDR range for the Autonmous Database. '
-    required: true
+    required: false
+  - name: odbNetwork
+    type: String
+    description: |-
+      The name of the OdbNetwork associated with the Autonomous Database.
+      Format:
+      projects/{project}/locations/{location}/odbNetworks/{odb_network}
+      It is optional but if specified, this should match the parent ODBNetwork of
+      the odb_subnet and backup_odb_subnet.
+    default_from_api: true
+  - name: odbSubnet
+    type: String
+    description: |-
+      The name of the OdbSubnet associated with the Autonomous Database for
+      IP allocation. Format:
+      projects/{project}/locations/{location}/odbNetworks/{odb_network}/odbSubnets/{odb_subnet}
+    default_from_api: true
   - name: 'createTime'
     type: String
     description: 'The date and time that the Autonomous Database was created. '
