@@ -88,7 +88,7 @@ parameters:
        If set, the following restrictions against deletion of the backup vault instance can be overridden:
           * deletion of a backup vault instance containing no backups, but still containing empty datasources.
           * deletion of a backup vault instance that is being referenced by an active backup plan.
-    url_param_only: true
+    url_param_onlyq: true
     default_value: false
     deprecation_message: '`force_delete` is deprecated and will be removed in a future major release. Use `ignore_inactive_datasources` instead.'
     conflicts:
@@ -207,6 +207,7 @@ properties:
       - 'MATCH_BACKUP_EXPIRE_TIME'
   - name: 'encryptionConfig'
     type: NestedObject
+    diff_suppress_func: 'tpgresource.SuppressDiffOnUpdate'
     description: 'Encryption configuration for the backup vault.'
     properties:
       - name: 'kmsKeyName'

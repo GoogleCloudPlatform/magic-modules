@@ -252,3 +252,46 @@ func TestBase64DiffSuppress(t *testing.T) {
 		}
 	}
 }
+
+func TestSuppressDiffOnUpdate(t *testing.T) {
+	cases := map[string]struct {
+		ResourceID         string
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"new resource": {
+			ResourceID:         "", // ID is empty for new resources
+			Old:                "",
+			New:                "some_value",
+			ExpectDiffSuppress: false, // Should NOT suppress diff during creation
+		},
+		"existing resource with diff": {
+			ResourceID:         "some-resource-id", // ID is set for existing resources
+			Old:                "old_value",
+			New:                "new_value",
+			ExpectDiffSuppress: true, // Should suppress diff during update
+		},
+		"existing resource no diff": {
+			ResourceID:         "some-resource-id",
+			Old:                "same_value",
+			New:                "same_value",
+			ExpectDiffSuppress: true, // Should still suppress (though no diff exists)
+		},
+		"existing resource new value empty": {
+			ResourceID:         "some-resource-id",
+			Old:                "old_value",
+			New:                "",
+			ExpectDiffSuppress: true, // Should suppress diff during update
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			mockData := &MockResourceData{id: tc.ResourceID}
+			got := SuppressDiffOnUpdate("some_key", tc.Old, tc.New, mockData)
+			if got != tc.ExpectDiffSuppress {
+				t.Errorf("'%s' => '%s' with ID '%s': expected %t, got %t", tc.Old, tc.New, tc.ResourceID, tc.ExpectDiffSuppress, got)
+			}
+		})
+	}
+}
