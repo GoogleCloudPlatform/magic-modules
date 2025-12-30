@@ -43,7 +43,6 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-  tgc_decoder: 'templates/tgc_next/decoders/netapp_active_directory.go.tmpl'
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
 examples:
