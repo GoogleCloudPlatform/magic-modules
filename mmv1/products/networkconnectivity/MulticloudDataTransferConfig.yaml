@@ -23,8 +23,6 @@ references:
 base_url: 'projects/{{project}}/locations/{{location}}/multicloudDataTransferConfigs'
 self_link: 'projects/{{project}}/locations/{{location}}/multicloudDataTransferConfigs/{{name}}'
 
-immutable: false
-
 create_url: 'projects/{{project}}/locations/{{location}}/multicloudDataTransferConfigs?multicloudDataTransferConfigId={{name}}'
 
 update_verb: 'PATCH'
