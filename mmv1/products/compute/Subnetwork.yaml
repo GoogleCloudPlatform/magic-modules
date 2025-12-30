@@ -478,6 +478,7 @@ properties:
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
     update_verb: 'PATCH'
     fingerprint_name: 'fingerprint'
+    is_missing_in_cai: true
     enum_values:
       - 'EXTERNAL'
       - 'INTERNAL'
