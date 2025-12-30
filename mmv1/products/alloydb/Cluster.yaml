@@ -346,11 +346,12 @@ properties:
   - name: 'restoreBackupSource'
     type: NestedObject
     description: |
-      The source when restoring from a backup. Conflicts with 'restore_continuous_backup_source', both can't be set together.
+      The source when restoring from a backup. Conflicts with 'restore_continuous_backup_source' or 'restore_backupdr_backup_source', both can't be set together.
     immutable: true
     ignore_read: true
     conflicts:
       - restore_continuous_backup_source
+      - restore_backupdr_backup_source
     properties:
       - name: 'backupName'
         type: String
@@ -361,11 +362,12 @@ properties:
   - name: 'restoreContinuousBackupSource'
     type: NestedObject
     description: |
-      The source when restoring via point in time recovery (PITR). Conflicts with 'restore_backup_source', both can't be set together.
+      The source when restoring via point in time recovery (PITR). Conflicts with 'restore_backup_source' or 'restore_backupdr_backup_source', both can't be set together.
     immutable: true
     ignore_read: true
     conflicts:
       - restore_backup_source
+      - restore_backupdr_backup_source
     properties:
       - name: 'cluster'
         type: String
@@ -377,6 +379,22 @@ properties:
         type: String
         description: |
           The point in time that this cluster is restored to, in RFC 3339 format.
+        required: true
+        immutable: true
+  - name: 'restoreBackupdrBackupSource'
+    type: NestedObject
+    description: |
+      The source when restoring from a backup. Conflicts with 'restore_continuous_backup_source' or 'restore_backup_source', both can't be set together.
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - restore_continuous_backup_source
+      - restore_backup_source
+    properties:
+      - name: 'backup'
+        type: String
+        description: |
+          The name of the BackupDR backup that this cluster is restored from.
         required: true
         immutable: true
   - name: 'continuousBackupConfig'
@@ -543,6 +561,14 @@ properties:
       - name: 'sourceType'
         type: String
         description: 'Type of migration source.'
+  - name: 'backupdrBackupSource'
+    type: NestedObject
+    description: 'Cluster created from a BackupDR backup.'
+    output: true
+    properties:
+      - name: 'backup'
+        type: String
+        description: 'The name of the BackupDR backup resource.'
   - name: 'clusterType'
     type: Enum
     description: |

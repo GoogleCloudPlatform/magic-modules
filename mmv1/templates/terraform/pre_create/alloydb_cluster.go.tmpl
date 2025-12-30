@@ -1,6 +1,7 @@
 // Read the restore variables from obj and remove them, since they do not map to anything in the cluster
 var backupSource interface{}
 var continuousBackupSource interface{}
+var backupDrBackupSource interface{}
 if val, ok := obj["restoreBackupSource"]; ok {
 	backupSource = val
 	delete(obj, "restoreBackupSource")
@@ -8,6 +9,10 @@ if val, ok := obj["restoreBackupSource"]; ok {
 if val, ok := obj["restoreContinuousBackupSource"]; ok {
 	continuousBackupSource = val
 	delete(obj, "restoreContinuousBackupSource")
+}
+if val, ok := obj["restoreBackupdrBackupSource"]; ok {
+	backupDrBackupSource = val
+	delete(obj, "restoreBackupdrBackupSource")
 }
 
 restoreClusterRequestBody := make(map[string]interface{})
@@ -17,9 +22,12 @@ if backupSource != nil {
 } else if continuousBackupSource != nil {
 	// Otherwise if restoring via PITR, set the continuousBackupSource
 	restoreClusterRequestBody["continuous_backup_source"] = continuousBackupSource
+} else if backupDrBackupSource != nil {
+	// If restore from a BackupDR backup, set the backupDrBackupSource
+	restoreClusterRequestBody["backupdr_backup_source"] = backupDrBackupSource
 }
 
-if backupSource != nil || continuousBackupSource != nil {
+if backupSource != nil || continuousBackupSource != nil || backupDrBackupSource != nil {
 	// Use restore API if this is a restore instead of a create cluster call
 	url = strings.Replace(url, "clusters?clusterId", "clusters:restore?clusterId", 1)
 
