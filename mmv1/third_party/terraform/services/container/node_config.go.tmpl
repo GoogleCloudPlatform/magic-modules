@@ -602,7 +602,7 @@ func schemaNodeConfig() *schema.Schema {
 						"sandbox_type": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							Deprecated:   "sandbox_config.sandbox_type is deprecated. Use sandbox_config.type instead.",
+							Deprecated:   "`sandbox_config.sandbox_type` is deprecated and will be removed in a future major release. Use `sandbox_config.type` instead.",
 							Description:  `Type of the sandbox to use for the node (e.g. 'gvisor'). Deprecated in favor of type.`,
 							ValidateFunc: validation.StringInSlice([]string{"gvisor"}, false),
 							DiffSuppressFunc: sandboxTypeDiffSuppress,

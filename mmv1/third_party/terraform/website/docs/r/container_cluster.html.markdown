@@ -1416,7 +1416,7 @@ not.
 
     * `"GVISOR"`: Pods run within a gVisor sandbox.
 
-* `sandbox_type` (DEPRECATED) Which sandbox to use for pods in the node pool. Deprecated in favor of `type`.
+* `sandbox_type` (Beta, Deprecated) Which sandbox to use for pods in the node pool. `sandbox_config.sandbox_type` is deprecated and will be removed in a future major release. Use `sandbox_config.type` instead.
     Accepted values are:
 
     * `"gvisor"`: Pods run within a gVisor sandbox.
