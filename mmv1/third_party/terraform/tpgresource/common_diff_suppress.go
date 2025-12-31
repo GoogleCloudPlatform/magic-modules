@@ -157,15 +157,3 @@ func Base64DiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	normalizedNew := r.Replace(new)
 	return normalizedOld == normalizedNew
 }
-
-// SuppressDiffOnUpdate suppresses diffs on the field this function is attached to,
-// but only if the resource has already been created (i.e., it has an ID).
-// This makes the field effectively immutable after initial creation.
-func SuppressDiffOnUpdate(k, old, new string, d *schema.ResourceData) bool {
-	// If d.Id() is empty, the resource is being created, so do not suppress the diff.
-	if d.Id() == "" {
-		return false
-	}
-	// The resource already exists, suppress any changes to this field.
-	return true
-}
