@@ -952,7 +952,9 @@ func ResourceDataprocCluster() *schema.Resource {
 										Description: `Instance flexibility Policy allowing a mixture of VM shapes`,
 										AtLeastOneOf: []string{
 											"cluster_config.0.master_config.0.num_instances",
-											"cluster_config.0.master_config.0.disk_config",
+											"cluster_config.0.master_config.0.image_uri",
+											"cluster_config.0.master_config.0.machine_type",
+											"cluster_config.0.master_config.0.accelerators",
 											"cluster_config.0.master_config.0.instance_flexibility_policy",
 										},
 										MaxItems: 1,
@@ -1182,7 +1184,10 @@ func ResourceDataprocCluster() *schema.Resource {
 										Description: `Instance flexibility Policy allowing a mixture of VM shapes`,
 										AtLeastOneOf: []string{
 											"cluster_config.0.worker_config.0.num_instances",
-											"cluster_config.0.worker_config.0.disk_config",
+											"cluster_config.0.worker_config.0.image_uri",
+											"cluster_config.0.worker_config.0.machine_type",
+											"cluster_config.0.worker_config.0.accelerators",
+											"cluster_config.0.worker_config.0.min_num_instances",
 											"cluster_config.0.worker_config.0.instance_flexibility_policy",
 										},
 										MaxItems: 1,

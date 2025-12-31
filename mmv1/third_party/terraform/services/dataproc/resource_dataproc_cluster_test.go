@@ -658,7 +658,7 @@ func TestAccDataprocCluster_allInstanceFlexibilityPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n2d-standard-2"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n2d-standard-2"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.master_config.0.instance_flexibility_policy.0.instance_selection_list.0.rank", "1"),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.rank", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.rank", "2"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.rank", "1"),
 					resource.TestCheckResourceAttrWith("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.master_config.0.instance_flexibility_policy.0.instance_selection_results.0.machine_type", validateMachineTypeExpected(expectedMasterMachines)),
 					resource.TestCheckResourceAttrWith("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_results.0.machine_type", validateMachineTypeExpected(expectedWorkerMachines)),
@@ -2490,11 +2490,11 @@ resource "google_dataproc_cluster" "all_instance_flexibility_policy" {
       instance_flexibility_policy {
 				instance_selection_list {
 					machine_types = ["n2d-standard-2"]
-					rank          = 1
+					rank          = 2
 				}
 				instance_selection_list {
 					machine_types = ["e2-standard-2"]
-					rank          = 2
+					rank          = 1
 				}
 			}
     }
@@ -2547,7 +2547,7 @@ resource "google_dataproc_cluster" "worker_instance_flexibility_policy" {
 				}
 				instance_selection_list {
 					machine_types = ["e2-standard-2"]
-					rank          = 2
+					rank          = 3
 				}
 			}
     }
