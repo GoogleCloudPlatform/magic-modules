@@ -3,10 +3,9 @@
 package tpgresource
 
 import (
-	"testing"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"testing"
 )
-
 
 func TestCaseDiffSuppress(t *testing.T) {
 	cases := map[string]struct {
