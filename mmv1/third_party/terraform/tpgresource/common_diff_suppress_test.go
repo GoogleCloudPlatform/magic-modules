@@ -2,7 +2,11 @@
 
 package tpgresource
 
-import "testing"
+import (
+	"testing"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
+
 
 func TestCaseDiffSuppress(t *testing.T) {
 	cases := map[string]struct {
@@ -253,6 +257,17 @@ func TestBase64DiffSuppress(t *testing.T) {
 	}
 }
 
+// Helper function to create a schema.ResourceData with a specific ID for testing.
+func testResourceData(t *testing.T, id string) *schema.ResourceData {
+	// Create a real schema.ResourceData object.
+	// We need to provide a schema map, even if it's empty for this test.
+	d := schema.TestResourceDataRaw(t, map[string]*schema.Schema{}, nil)
+	if id != "" {
+		d.SetId(id)
+	}
+	return d
+}
+
 func TestSuppressDiffOnUpdate(t *testing.T) {
 	cases := map[string]struct {
 		ResourceID         string
@@ -287,7 +302,8 @@ func TestSuppressDiffOnUpdate(t *testing.T) {
 
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
-			mockData := &MockResourceData{id: tc.ResourceID}
+			// Use the helper to get a *schema.ResourceData with the desired ID
+			mockData := testResourceData(t, tc.ResourceID)
 			got := SuppressDiffOnUpdate("some_key", tc.Old, tc.New, mockData)
 			if got != tc.ExpectDiffSuppress {
 				t.Errorf("'%s' => '%s' with ID '%s': expected %t, got %t", tc.Old, tc.New, tc.ResourceID, tc.ExpectDiffSuppress, got)
