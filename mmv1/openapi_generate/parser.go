@@ -103,35 +103,46 @@ func (parser Parser) WriteYaml(filePath string) {
 		}
 		resource := buildResource(filePath, name, resource, doc)
 
-		// marshal method
-		var yamlContent bytes.Buffer
-		resourceOutPathMarshal := filepath.Join(productPath, fmt.Sprintf("%s.yaml", resource.Name))
-		encoder := yaml.NewEncoder(&yamlContent)
-		encoder.SetIndent(2)
-
-		err := encoder.Encode(&resource)
-		if err != nil {
-			log.Fatalf("Failed to encode: %v", err)
-		}
-
-		f, err := os.Create(resourceOutPathMarshal)
-		if err != nil {
-			log.Fatalf("error creating resource file %v", err)
-		}
-		_, err = f.Write(header)
-		if err != nil {
-			log.Fatalf("error writing resource file header %v", err)
-		}
-		_, err = f.Write(yamlContent.Bytes())
-		if err != nil {
-			log.Fatalf("error writing resource file %v", err)
-		}
-		err = f.Close()
-		if err != nil {
-			log.Fatalf("error closing resource file %v", err)
-		}
-		log.Printf("Generated resource %s", resourceOutPathMarshal)
+		parser.writeResource(resource, productPath)
 	}
+
+	singletonPaths := findSingletons(doc)
+	for _, pathArray := range singletonPaths {
+		resource := buildResource(filePath, pathArray[0], pathArray[1], doc)
+
+		parser.writeResource(resource, productPath)
+	}
+}
+
+func (parser Parser) writeResource(resource api.Resource, productPath string) {
+	// marshal method
+	var yamlContent bytes.Buffer
+	resourceOutPathMarshal := filepath.Join(productPath, fmt.Sprintf("%s.yaml", resource.Name))
+	encoder := yaml.NewEncoder(&yamlContent)
+	encoder.SetIndent(2)
+
+	err := encoder.Encode(&resource)
+	if err != nil {
+		log.Fatalf("Failed to encode: %v", err)
+	}
+
+	f, err := os.Create(resourceOutPathMarshal)
+	if err != nil {
+		log.Fatalf("error creating resource file %v", err)
+	}
+	_, err = f.Write(header)
+	if err != nil {
+		log.Fatalf("error writing resource file header %v", err)
+	}
+	_, err = f.Write(yamlContent.Bytes())
+	if err != nil {
+		log.Fatalf("error writing resource file %v", err)
+	}
+	err = f.Close()
+	if err != nil {
+		log.Fatalf("error closing resource file %v", err)
+	}
+	log.Printf("Generated resource %s", resourceOutPathMarshal)
 }
 
 type resourceOp struct {
@@ -197,6 +208,26 @@ func findResources(doc *openapi3.T) map[string]*resource {
 	}
 
 	return resources
+}
+
+func findSingletons(doc *openapi3.T) [][]string {
+	var resourcePaths [][]string
+
+	pathMap := doc.Paths.Map()
+	for key, pathValue := range pathMap {
+		if pathValue.Patch == nil {
+			continue
+		}
+
+		// Check for Update methods without Create & Delete
+		if strings.HasPrefix(pathValue.Post.OperationID, "Update") &&  {
+			resourcePath := key
+			resourceName := strings.Replace(pathValue.Post.OperationID, "Create", "", 1)
+			resourcePaths = append(resourcePaths, []string{resourcePath, resourceName})
+		}
+	}
+
+	return resourcePaths
 }
 
 func buildProduct(filePath, output string, root *openapi3.T, header []byte) string {
