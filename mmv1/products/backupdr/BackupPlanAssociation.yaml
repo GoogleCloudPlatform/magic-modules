@@ -131,7 +131,7 @@ properties:
               type: String
               description: A developer-facing error message, which should be in English.
               output: true
-  - name: 'lastSuccessfulBackupConsistencyTime'
-    type: String
-    description: The point in time when the last successful backup was captured from the source
-    output: true
+        - name: 'lastSuccessfulBackupConsistencyTime'
+          type: String
+          description: The point in time when the last successful backup was captured from the source
+          output: true
