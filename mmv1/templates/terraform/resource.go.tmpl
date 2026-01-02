@@ -191,14 +191,14 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
             "deletion_policy": {
                 Type:     schema.TypeString,
                 Optional: true,
-                Description: `Whether Terraform will be prevented from destroying the instance. Defaults to {{$.DeletionPolicyDefault}}.
+                Description: `Whether Terraform will be prevented from destroying the instance. Defaults to "{{$.DeletionPolicyDefault}}".
 When a 'terraform destroy' or 'terraform apply' would delete the instance,
 the command will fail if this field is set to "PREVENT" in Terraform state.
 When set to "ABANDON", the command will remove the resource from Terraform
 management without updating or deleting the resource in the API.
 When set to "DELETE", deleting the resource is allowed.
 `,
-                Default: {{$.DeletionPolicyDefault}},
+                Default: "{{$.DeletionPolicyDefault}}",
             },
 {{- end}}
         },
@@ -1141,10 +1141,10 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     {{- end }}
     {{- if $.DeletionPolicy }}
     if d.Get("deletion_policy").(string) == "PREVENT" {
-        return fmt.Errorf("cannot destroy {{$.ResourceName}} without setting deletion_policy="DELETE" and running `terraform apply`")
+        return fmt.Errorf("cannot destroy {{$.ResourceName}} without setting deletion_policy=\"DELETE\" and running `terraform apply`")
     }
     if d.Get("deletion_policy").(string) == "ABANDON" {
-        log.Printf("[DEBUG] deletion_policy set to "ABANDON", removing {{ $.Name }} %q from Terraform state without deletion", d.Id())
+        log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing {{ $.Name }} %q from Terraform state without deletion", d.Id())
         return nil
     }
     {{- end }}
