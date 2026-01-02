@@ -276,9 +276,9 @@ type Resource struct {
 	// public ca external account keys
 	ExcludeRead bool `yaml:"exclude_read,omitempty"`
 
-	// Set to true for resources that are to generate deletion policy fields by default
-	// TODO: this will be inverted to an opt-out flag very soon
-	DeletionPolicy bool `yaml:"deletion_policy,omitempty"`
+	// Set to true for resources that are to exclude the default generated deletion policy field
+	// Primarily for resources that had deletion policy implementations before the universal generation.
+	DeletionPolicyExclude bool `yaml:"deletion_policy,omitempty"`
 
 	// Set to the default deletion policy value for the resource.
 	// By default this will be "DELETE".
@@ -491,7 +491,7 @@ func (r *Resource) setShallowDefaults() {
 	if r.Timeouts == nil {
 		r.Timeouts = NewTimeouts() // This only sets defaults if Timeouts is nil
 	}
-	if r.DeletionPolicy {
+	if !r.DeletionPolicyExclude {
 		if r.DeletionPolicyDefault == "" {
 			r.DeletionPolicyDefault = "DELETE"
 		}
