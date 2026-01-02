@@ -40,10 +40,6 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-identity:
-  - name
-  - keyId
-  - b64MacKey
 custom_code:
   custom_create: templates/terraform/custom_create/public_ca_external_account_key.go.tmpl
 exclude_tgc: true
