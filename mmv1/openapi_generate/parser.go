@@ -99,18 +99,17 @@ func (parser Parser) WriteYaml(filePath string) {
 	log.Printf("Generated product %+v/product.yaml", productPath)
 	for name, resource := range resources {
 		if resource.create == nil {
-			continue
+			if resource.update == nil {
+				continue
+			}
+			singleton := buildSingleton(name, resource, doc)
+
+			parser.writeResource(singleton, productPath)
+		} else {
+			resource := buildResource(name, resource, doc)
+
+			parser.writeResource(resource, productPath)
 		}
-		resource := buildResource(filePath, name, resource, doc)
-
-		parser.writeResource(resource, productPath)
-	}
-
-	singletonPaths := findSingletons(doc)
-	for _, pathArray := range singletonPaths {
-		resource := buildResource(filePath, pathArray[0], pathArray[1], doc)
-
-		parser.writeResource(resource, productPath)
 	}
 }
 
@@ -210,26 +209,6 @@ func findResources(doc *openapi3.T) map[string]*resource {
 	return resources
 }
 
-func findSingletons(doc *openapi3.T) [][]string {
-	var resourcePaths [][]string
-
-	pathMap := doc.Paths.Map()
-	for key, pathValue := range pathMap {
-		if pathValue.Patch == nil {
-			continue
-		}
-
-		// Check for Update methods without Create & Delete
-		if strings.HasPrefix(pathValue.Post.OperationID, "Update") &&  {
-			resourcePath := key
-			resourceName := strings.Replace(pathValue.Post.OperationID, "Create", "", 1)
-			resourcePaths = append(resourcePaths, []string{resourcePath, resourceName})
-		}
-	}
-
-	return resourcePaths
-}
-
 func buildProduct(filePath, output string, root *openapi3.T, header []byte) string {
 
 	version := root.Info.Version
@@ -309,11 +288,69 @@ func stripVersion(path string) string {
 	return re.ReplaceAllString(path, "")
 }
 
-func buildResource(filePath, resourceName string, in *resource, root *openapi3.T) api.Resource {
+func buildSingleton(resourceName string, in *resource, root *openapi3.T) api.Resource {
+	resource := api.Resource{}
+	resourcePath := in.update.path
+
+	op := root.Paths.Find(resourcePath).Patch
+	parsedObjects := parseOpenApi(resourcePath, resourceName, op)
+
+	parameters := parsedObjects[0].([]*api.Type)
+	properties := parsedObjects[1].([]*api.Type)
+
+	baseUrl := baseUrl(resourcePath)
+	selfLink := baseUrl
+
+	resource.Name = resourceName
+	resource.BaseUrl = baseUrl
+	resource.Parameters = parameters
+	resource.Properties = properties
+	resource.SelfLink = selfLink
+	resource.IdFormat = selfLink
+	resource.ImportFormat = []string{selfLink}
+	resource.CreateUrl = fmt.Sprintf("%s=?updateMask=*", baseUrl)
+	resource.Description = "Description"
+
+
+
+	resource.CreateVerb = "PATCH"
+
+	resource.UpdateVerb = "PATCH"
+	resource.UpdateMask = true
+	if in.update.async {
+		resource.AutogenAsync = true
+		async := api.NewAsync()
+		async.Operation.BaseUrl = "{{op_id}}"
+		async.Result.ResourceInsideResponse = true
+		// Clear the default, we will attach the right values below
+		async.Actions = nil
+		resource.Async = async
+		resource.Async.Actions = append(resource.Async.Actions, "update")
+	}
+
+	example := r.Examples{}
+	example.Name = "name_of_example_file"
+	example.PrimaryResourceId = "example"
+	example.Vars = map[string]string{"resource_name": "test-resource"}
+
+	resource.Examples = []*r.Examples{&example}
+
+	resourceNameBytes := []byte(resourceName)
+
+	resource.ExcludeDelete = true
+	// Write the status as an encoded string to flag when a YAML file has been
+	// copy and pasted without actually using this tool
+	resource.AutogenStatus = base64.StdEncoding.EncodeToString(resourceNameBytes)
+
+	return resource
+}
+
+func buildResource(resourceName string, in *resource, root *openapi3.T) api.Resource {
 	resource := api.Resource{}
 	resourcePath := in.create.path
 
-	parsedObjects := parseOpenApi(resourcePath, resourceName, root)
+	op := root.Paths.Find(resourcePath).Post
+	parsedObjects := parseOpenApi(resourcePath, resourceName, op)
 
 	parameters := parsedObjects[0].([]*api.Type)
 	properties := parsedObjects[1].([]*api.Type)
@@ -371,13 +408,15 @@ func buildResource(filePath, resourceName string, in *resource, root *openapi3.T
 	return resource
 }
 
-func parseOpenApi(resourcePath, resourceName string, root *openapi3.T) []any {
+func parseOpenApi(resourcePath, resourceName string, op *openapi3.Operation) []any {
+	if op == nil {
+		log.Fatalf("error parsing nil OpenAPI operation for resource: %v", resourceName)
+	}
 	returnArray := []any{}
-	path := root.Paths.Find(resourcePath)
 
 	parameters := []*api.Type{}
 	var idParam string
-	for _, param := range path.Post.Parameters {
+	for _, param := range op.Parameters {
 		if strings.Contains(strings.ToLower(param.Value.Name), strings.ToLower(resourceName)) {
 			idParam = param.Value.Name
 		}
@@ -388,7 +427,7 @@ func parseOpenApi(resourcePath, resourceName string, root *openapi3.T) []any {
 		}
 		paramObj.Description = trimDescription(description)
 
-		if param.Value.Name == "requestId" || param.Value.Name == "validateOnly" || paramObj.Name == "" {
+		if param.Value.Name == "requestId" || param.Value.Name == "validateOnly" || paramObj.Name == "" || paramObj.Name == "updateMask" {
 			continue
 		}
 
@@ -397,7 +436,7 @@ func parseOpenApi(resourcePath, resourceName string, root *openapi3.T) []any {
 		parameters = append(parameters, &paramObj)
 	}
 
-	properties := buildProperties(path.Post.RequestBody.Value.Content["application/json"].Schema.Value.Properties, path.Post.RequestBody.Value.Content["application/json"].Schema.Value.Required)
+	properties := buildProperties(op.RequestBody.Value.Content["application/json"].Schema.Value.Properties, op.RequestBody.Value.Content["application/json"].Schema.Value.Required)
 
 	returnArray = append(returnArray, parameters)
 	returnArray = append(returnArray, properties)
