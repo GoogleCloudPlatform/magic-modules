@@ -163,6 +163,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
         DeprecationMessage: "{{ $.DeprecationMessage -}}",
 {{- end}}
 
+{{ if not $.ExcludeRead }}
         Identity: &schema.ResourceIdentity{
           Version: {{ $.GetIdentitySchemaVersion }},
           SchemaFunc: func() map[string]*schema.Schema {
@@ -191,6 +192,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
           },
 {{- end }}
         },
+{{- end }}
         Schema: map[string]*schema.Schema{
 			{{- range $prop := $.OrderProperties $.AllUserProperties }}
 {{template "SchemaFields" $prop -}}
@@ -745,7 +747,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
     }
 {{- end}}
-
+{{ if not $.ExcludeRead }}
 	identity, err := d.Identity()
     if err != nil && identity != nil {
     {{- range $p := $.IdentityProperties }}
@@ -759,6 +761,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     } else {
         log.Printf("[DEBUG] identity not set: %s", err)
     }
+{{ end }}
 {{- end }}
     return nil
 }
@@ -1296,8 +1299,7 @@ func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta
     {{ customTemplate $ $.StateMigrationFile false -}}
 {{- end }}
 
-{{- if and $.IdentitySchemaVersion $.IdentityUpgraders }}
-
+{{- if and (and $.IdentitySchemaVersion $.IdentityUpgraders) (not $.ExcludeRead) }}
     {{ $.CustomTemplate $.IdentityUpgraderFile false -}}
 {{- end }}
 
