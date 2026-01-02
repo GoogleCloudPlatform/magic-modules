@@ -306,12 +306,7 @@ func buildSingleton(resourceName string, in *resource, root *openapi3.T) api.Res
 	resource.Parameters = parameters
 	resource.Properties = properties
 	resource.SelfLink = selfLink
-	resource.IdFormat = selfLink
-	resource.ImportFormat = []string{selfLink}
 	resource.CreateUrl = fmt.Sprintf("%s=?updateMask=*", baseUrl)
-	resource.Description = "Description"
-
-
 
 	resource.CreateVerb = "PATCH"
 
@@ -328,19 +323,9 @@ func buildSingleton(resourceName string, in *resource, root *openapi3.T) api.Res
 		resource.Async.Actions = append(resource.Async.Actions, "update")
 	}
 
-	example := r.Examples{}
-	example.Name = "name_of_example_file"
-	example.PrimaryResourceId = "example"
-	example.Vars = map[string]string{"resource_name": "test-resource"}
-
-	resource.Examples = []*r.Examples{&example}
-
-	resourceNameBytes := []byte(resourceName)
-
 	resource.ExcludeDelete = true
-	// Write the status as an encoded string to flag when a YAML file has been
-	// copy and pasted without actually using this tool
-	resource.AutogenStatus = base64.StdEncoding.EncodeToString(resourceNameBytes)
+
+	resource = attachStandardFunctionality(resource)
 
 	return resource
 }
@@ -364,10 +349,7 @@ func buildResource(resourceName string, in *resource, root *openapi3.T) api.Reso
 	resource.Parameters = parameters
 	resource.Properties = properties
 	resource.SelfLink = selfLink
-	resource.IdFormat = selfLink
-	resource.ImportFormat = []string{selfLink}
 	resource.CreateUrl = fmt.Sprintf("%s?%s={{%s}}", baseUrl, queryParam, google.Underscore(queryParam))
-	resource.Description = "Description"
 
 	resource.AutogenAsync = true
 	async := api.NewAsync()
@@ -393,6 +375,18 @@ func buildResource(resourceName string, in *resource, root *openapi3.T) api.Reso
 		resource.Async.Actions = append(resource.Async.Actions, "delete")
 	}
 
+	resource = attachStandardFunctionality(resource)
+
+	return resource
+}
+
+// Standard functionality between regular and singleton resources
+func attachStandardFunctionality(resource api.Resource) api.Resource {
+	resource.Description = "Description"
+
+	resource.IdFormat = resource.SelfLink
+	resource.ImportFormat = []string{resource.SelfLink}
+
 	example := r.Examples{}
 	example.Name = "name_of_example_file"
 	example.PrimaryResourceId = "example"
@@ -400,7 +394,7 @@ func buildResource(resourceName string, in *resource, root *openapi3.T) api.Reso
 
 	resource.Examples = []*r.Examples{&example}
 
-	resourceNameBytes := []byte(resourceName)
+	resourceNameBytes := []byte(resource.Name)
 	// Write the status as an encoded string to flag when a YAML file has been
 	// copy and pasted without actually using this tool
 	resource.AutogenStatus = base64.StdEncoding.EncodeToString(resourceNameBytes)
