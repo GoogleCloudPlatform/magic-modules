@@ -498,7 +498,7 @@ func (r *Resource) setShallowDefaults() {
 	}
 	if r.DeletionPolicy {
 		if r.DeletionPolicyDefault == "" {
-			r.DeletionPolicyDefault == "DELETE"
+			r.DeletionPolicyDefault = "DELETE"
 		}
 	}
 }
