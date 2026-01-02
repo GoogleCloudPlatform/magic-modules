@@ -6,6 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 )
 
 func TestAccWorkbenchInstance_update(t *testing.T) {
@@ -925,7 +927,6 @@ resource "google_workbench_instance" "instance" {
     }
   }
   
-  # Crucial for triggering the EUC-specific logic we added
   enable_managed_euc = true
 }
 `, context)
