@@ -9,6 +9,9 @@ import (
 )
 
 func TestAccBackupDRBackupVault_fullUpdate(t *testing.T) {
+	// Uses time.Now
+	acctest.SkipIfVcr(t)
+
 	t.Parallel()
 
 	timeNow := time.Now().UTC()
