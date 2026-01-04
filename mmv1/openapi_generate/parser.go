@@ -26,6 +26,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"slices"
+	"strconv"
 	"strings"
 
 	"log"
@@ -92,12 +93,15 @@ func (parser Parser) WriteYaml(filePath string) {
 	doc, _ := loader.LoadFromFile(filePath)
 	_ = doc.Validate(ctx)
 
-	resourcePaths := findResources(doc)
+	resources := findResources(doc)
 	productPath := buildProduct(filePath, parser.Output, doc, header)
 
 	log.Printf("Generated product %+v/product.yaml", productPath)
-	for _, pathArray := range resourcePaths {
-		resource := buildResource(filePath, pathArray[0], pathArray[1], doc)
+	for name, resource := range resources {
+		if resource.create == nil {
+			continue
+		}
+		resource := buildResource(filePath, name, resource, doc)
 
 		// marshal method
 		var yamlContent bytes.Buffer
@@ -130,24 +134,69 @@ func (parser Parser) WriteYaml(filePath string) {
 	}
 }
 
-func findResources(doc *openapi3.T) [][]string {
-	var resourcePaths [][]string
+type resourceOp struct {
+	path  string
+	async bool
+}
 
-	pathMap := doc.Paths.Map()
-	for key, pathValue := range pathMap {
-		if pathValue.Post == nil {
-			continue
+type resource struct {
+	// nil if not defined
+	create, update, delete *resourceOp
+}
+
+func anyToBool(a any) bool {
+	switch v := a.(type) {
+	case bool:
+		return v
+	case string:
+		if b, err := strconv.ParseBool(v); err == nil {
+			return b
 		}
+		panic(fmt.Sprintf("cannot parse expected boolean value, found string: %q", v))
+	default:
+		panic(fmt.Sprintf("unexpected type: %T", v))
+	}
+}
 
-		// Not very clever way of identifying create resource methods
-		if strings.HasPrefix(pathValue.Post.OperationID, "Create") {
-			resourcePath := key
-			resourceName := strings.Replace(pathValue.Post.OperationID, "Create", "", 1)
-			resourcePaths = append(resourcePaths, []string{resourcePath, resourceName})
+func buildOperation(resourcePath string, op *openapi3.Operation, prefix string) (string, *resourceOp) {
+	if op == nil {
+		return "", nil
+	}
+	if strings.HasPrefix(op.OperationID, prefix) {
+		resourceName := strings.Replace(op.OperationID, prefix, "", 1)
+		async := false
+		if a, ok := op.Extensions["x-google-lro"]; ok {
+			async = anyToBool(a)
+		}
+		return resourceName, &resourceOp{path: resourcePath, async: async}
+	}
+	return "", nil
+}
+
+func findResources(doc *openapi3.T) map[string]*resource {
+	resources := make(map[string]*resource)
+	getDefault := func(n string) *resource {
+		r, ok := resources[n]
+		if !ok {
+			r = &resource{}
+			resources[n] = r
+		}
+		return r
+	}
+
+	for key, pathValue := range doc.Paths.Map() {
+		if name, op := buildOperation(key, pathValue.Post, "Create"); op != nil {
+			getDefault(name).create = op
+		}
+		if name, op := buildOperation(key, pathValue.Delete, "Delete"); op != nil {
+			getDefault(name).delete = op
+		}
+		if name, op := buildOperation(key, pathValue.Patch, "Update"); op != nil {
+			getDefault(name).update = op
 		}
 	}
 
-	return resourcePaths
+	return resources
 }
 
 func buildProduct(filePath, output string, root *openapi3.T, header []byte) string {
@@ -229,8 +278,9 @@ func stripVersion(path string) string {
 	return re.ReplaceAllString(path, "")
 }
 
-func buildResource(filePath, resourcePath, resourceName string, root *openapi3.T) api.Resource {
+func buildResource(filePath, resourceName string, in *resource, root *openapi3.T) api.Resource {
 	resource := api.Resource{}
+	resourcePath := in.create.path
 
 	parsedObjects := parseOpenApi(resourcePath, resourceName, root)
 
@@ -255,13 +305,24 @@ func buildResource(filePath, resourcePath, resourceName string, root *openapi3.T
 	async := api.NewAsync()
 	async.Operation.BaseUrl = "{{op_id}}"
 	async.Result.ResourceInsideResponse = true
+	// Clear the default, we will attach the right values below
+	async.Actions = nil
 	resource.Async = async
+	if in.create.async {
+		resource.Async.Actions = append(resource.Async.Actions, "create")
+	}
 
-	if hasUpdate(resourceName, root) {
+	if in.update != nil {
 		resource.UpdateVerb = "PATCH"
 		resource.UpdateMask = true
+		if in.update.async {
+			resource.Async.Actions = append(resource.Async.Actions, "update")
+		}
 	} else {
 		resource.Immutable = true
+	}
+	if in.delete != nil && in.delete.async {
+		resource.Async.Actions = append(resource.Async.Actions, "delete")
 	}
 
 	example := r.Examples{}
@@ -277,20 +338,6 @@ func buildResource(filePath, resourcePath, resourceName string, root *openapi3.T
 	resource.AutogenStatus = base64.StdEncoding.EncodeToString(resourceNameBytes)
 
 	return resource
-}
-
-func hasUpdate(resourceName string, root *openapi3.T) bool {
-	// Create and Update have different paths in the OpenAPI spec, so look
-	// through all paths to find one that matches the expected operation name
-	for _, pathValue := range root.Paths.Map() {
-		if pathValue.Patch == nil {
-			continue
-		}
-		if pathValue.Patch.OperationID == fmt.Sprintf("Update%s", resourceName) {
-			return true
-		}
-	}
-	return false
 }
 
 func parseOpenApi(resourcePath, resourceName string, root *openapi3.T) []any {
