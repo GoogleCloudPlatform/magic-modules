@@ -14,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	compute "google.golang.org/api/compute/v1"
 
 	"github.com/hashicorp/terraform-provider-google/google/fwvalidators"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -137,7 +136,7 @@ func (a *computeInstancePowerAction) Invoke(ctx context.Context, req action.Invo
 		"operation": operation, "instance": name, "status": instance.Status,
 	})
 
-	var op *compute.Operation
+	var op interface{}
 	switch operation {
 	case "start":
 		if instance.Status == "RUNNING" {
@@ -163,7 +162,8 @@ func (a *computeInstancePowerAction) Invoke(ctx context.Context, req action.Invo
 		return
 	}
 
-	if err := waitForComputeZoneOp(ctx, resp, a.config, op, project, fmt.Sprintf("%s Instance", operation), a.config.UserAgent, timeout); err != nil {
+	if err := ComputeOperationWaitTime(a.config, op, project, fmt.Sprintf("%s Instance", operation), a.config.UserAgent, timeout); err != nil {
+		resp.Diagnostics.AddError("Error Waiting for Operation", fmt.Sprintf("Failed while waiting for %s operation: %v", operation, err))
 		return
 	}
 
@@ -220,32 +220,4 @@ func resolveInstanceProjectZoneName(
 	}
 
 	return project, zone, name
-}
-
-func waitForComputeZoneOp(
-	ctx context.Context,
-	resp *action.InvokeResponse,
-	config *transport_tpg.Config,
-	op *compute.Operation,
-	project string,
-	activity string,
-	userAgent string,
-	timeout time.Duration,
-) error {
-	resp.SendProgress(action.InvokeProgressEvent{
-		Message: fmt.Sprintf("%s: waiting for operation %q to complete...", activity, op.Name),
-	})
-
-	if err := ComputeOperationWaitTime(config, op, project, activity, userAgent, timeout); err != nil {
-		resp.Diagnostics.AddError(
-			fmt.Sprintf("Error %s", activity),
-			fmt.Sprintf("Error while waiting for operation %q: %s", op.Name, err),
-		)
-		return err
-	}
-
-	resp.SendProgress(action.InvokeProgressEvent{
-		Message: fmt.Sprintf("%s: operation %q completed successfully", activity, op.Name),
-	})
-	return nil
 }
