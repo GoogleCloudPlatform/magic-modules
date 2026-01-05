@@ -913,6 +913,7 @@ func testAccWorkbenchInstance_metadataEUC(context map[string]interface{}, script
 resource "google_workbench_instance" "instance" {
   name     = "tf-test-workbench-%{random_suffix}"
   location = "us-central1-a"
+  instance_owners = ["workbenche2etestota@gmail.com"]
 
   gce_setup {
     machine_type = "n1-standard-1"
