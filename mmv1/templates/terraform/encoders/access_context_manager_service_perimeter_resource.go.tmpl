@@ -7,7 +7,7 @@ perimeterName := d.Get("perimeter_name").(string)
 
 parts := strings.Split(perimeterName, "/")
 if len(parts) < 2 {
-	return nil, fmt.Errorf("invalid perimeter_name format: %s. Expected format: accessPolicies/{access_policy}/servicePerimeters/{servicePerimeter}", perimeterName)
+	return nil, fmt.Errorf("invalid perimeter_name format: %s. Expected format: accessPolicies/{accessPolicy}/servicePerimeters/{servicePerimeter}", perimeterName)
 }
 
 if err := d.Set("access_policy_id", fmt.Sprintf("accessPolicies/%s", parts[1])); err != nil {
