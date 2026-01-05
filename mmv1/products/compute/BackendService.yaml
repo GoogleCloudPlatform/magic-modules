@@ -43,7 +43,8 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 iam_policy:
   allowed_iam_role: 'roles/compute.admin'
   parent_resource_attribute: 'name'
@@ -97,18 +98,12 @@ examples:
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
-    tgc_test_ignore_in_asset:
-      - 'RESOURCE.enableCDN' # It has false value in CAI asset
   - name: 'backend_service_traffic_director_ring_hash'
     primary_resource_id: 'default'
     min_version: 'beta'
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
-    tgc_test_ignore_extra:
-      - outlier_detection.enforcing_consecutive_gateway_failure # Ignore the 0 value in config
-    tgc_test_ignore_in_asset:
-      - 'RESOURCE.enableCDN' # It has false value in CAI asset
   - name: 'backend_service_stateful_session_affinity'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -121,6 +116,12 @@ examples:
     vars:
       backend_service_name: 'backend-service'
       neg_name: 'network-endpoint'
+  - name: 'backend_service_in_flight'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
   - name: 'backend_service_external_managed'
     primary_resource_id: 'default'
     vars:
@@ -153,8 +154,6 @@ examples:
     min_version: 'beta'
     vars:
       backend_service_name: 'backend-service'
-    tgc_test_ignore_in_asset:
-      - 'RESOURCE.enableCDN' # It has false value in CAI asset
 parameters:
 properties:
   - name: 'affinityCookieTtlSec'
@@ -194,6 +193,7 @@ properties:
             - 'RATE'
             - 'CONNECTION'
             - 'CUSTOM_METRICS'
+            - 'IN_FLIGHT'
         - name: 'capacityScaler'
           type: Double
           description: |
@@ -363,6 +363,7 @@ properties:
                   field can only be used for a global or regional backend service with the
                   loadBalancingScheme set to <code>EXTERNAL_MANAGED</code>,
                   <code>INTERNAL_MANAGED</code> <code>INTERNAL_SELF_MANAGED</code>.
+                is_missing_in_cai: true
               - name: 'dryRun'
                 type: Boolean
                 required: true
@@ -569,6 +570,7 @@ properties:
     type: NestedObject
     description: 'Cloud CDN configuration for this BackendService.'
     default_from_api: true
+    is_missing_in_cai: true
     properties:
       - name: 'requestCoalescing'
         type: Boolean

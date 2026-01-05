@@ -18,7 +18,7 @@ description: |
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/dialogflow/es/docs/fulfillment-overview'
-  api: 'https://cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.agent/getFulfillment'
+  api: 'https://docs.cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.agent/getFulfillment'
 docs:
 id_format: '{{name}}'
 base_url: 'projects/{{project}}/agent/fulfillment/'

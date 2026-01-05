@@ -70,6 +70,16 @@ examples:
     # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
     # resource_compute_public_advertised_prefix_test.go
     exclude_test: true
+  - name: 'public_delegated_prefix_internal_ipv6_subnet_mode'
+    vars:
+      pap_name: "ipv6-pap"
+      root_pdp_name: "ipv6-root-pdp"
+      sub_pdp_name: "ipv6-sub-pdp"
+    test_env_vars:
+      desc: 'PAP_DESCRIPTION'
+    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
+    # resource_compute_public_advertised_prefix_test.go
+    exclude_test: true
 parameters:
 properties:
   - name: 'region'
@@ -103,12 +113,16 @@ properties:
   - name: 'mode'
     type: Enum
     description: |
-      Specifies the mode of this IPv6 PDP. MODE must be one of: DELEGATION,
-      EXTERNAL_IPV6_FORWARDING_RULE_CREATION and EXTERNAL_IPV6_SUBNETWORK_CREATION.
+      Specifies the mode of this IPv6 PDP. MODE must be one of:
+        * DELEGATION
+        * EXTERNAL_IPV6_FORWARDING_RULE_CREATION
+        * EXTERNAL_IPV6_SUBNETWORK_CREATION
+        * INTERNAL_IPV6_SUBNETWORK_CREATION
     enum_values:
       - 'DELEGATION'
       - 'EXTERNAL_IPV6_FORWARDING_RULE_CREATION'
       - 'EXTERNAL_IPV6_SUBNETWORK_CREATION'
+      - 'INTERNAL_IPV6_SUBNETWORK_CREATION'
   - name: 'allocatablePrefixLength'
     type: Integer
     default_from_api: true
@@ -122,6 +136,20 @@ properties:
       The IP address range, in CIDR format, represented by this public
       delegated prefix.
     required: true
+  - name: 'ipv6AccessType'
+    type: Enum
+    description: |
+      The internet access type for IPv6 Public Delegated Prefixes. Inherited
+      from parent prefix and can be one of following:
+        * EXTERNAL: The prefix will be announced to the internet. All children
+        PDPs will have access type as EXTERNAL.
+        * INTERNAL: The prefix won’t be announced to the internet. Prefix will
+        be used privately within Google Cloud. All children PDPs will have
+        access type as INTERNAL.
+    output: true
+    enum_values:
+      - 'EXTERNAL'
+      - 'INTERNAL'
   - name: 'publicDelegatedSubPrefixs'
     type: Array
     output: true
@@ -169,11 +197,26 @@ properties:
             - 'DELEGATION'
             - 'EXTERNAL_IPV6_FORWARDING_RULE_CREATION'
             - 'EXTERNAL_IPV6_SUBNETWORK_CREATION'
+            - 'INTERNAL_IPV6_SUBNETWORK_CREATION'
         - name: 'allocatablePrefixLength'
           type: Integer
           description: |
             The allocatable prefix length supported by this PublicDelegatedSubPrefix.
-        - name: 'delegatee_project'
+        - name: 'ipv6AccessType'
+          type: Enum
+          description: |
+            The internet access type for IPv6 Public Delegated Prefixes. Inherited
+            from parent prefix and can be one of following:
+              * EXTERNAL: The prefix will be announced to the internet. All children
+              PDPs will have access type as EXTERNAL.
+              * INTERNAL: The prefix won’t be announced to the internet. Prefix will
+              be used privately within Google Cloud. All children PDPs will have
+              access type as INTERNAL.
+          output: true
+          enum_values:
+            - 'EXTERNAL'
+            - 'INTERNAL'
+        - name: 'delegateeProject'
           type: String
           description: |
             Name of the project scoping this PublicDelegatedSubPrefix.
