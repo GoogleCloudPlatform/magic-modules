@@ -1,0 +1,6 @@
+resource "google_compute_address" "{{$.PrimaryResourceId}}" {
+  name             = "{{index $.Vars "address_name"}}"
+  region           = "us-central1"
+  ip_collection    = "{{index $.Vars "ip_collection_url"}}"
+}
+
