@@ -96,9 +96,12 @@ examples:
     primary_resource_id: 'default'
     vars:
       address_name: 'test-address'
-      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-enhanced-pdp-136-124-3-120-29"'
+      sub_pdp_name: 'test-sub-pdp'
+      sub_pdp_ip_cidr: '"136.124.3.120/32"'
+      root_pdp_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-enhanced-pdp-136-124-3-120-29"'
     test_vars_overrides:
-      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-enhanced-pdp-136-124-3-120-29"'
+      sub_pdp_ip_cidr: 'fmt.Sprintf("136.124.3.%d/32", 120 + acctest.RandIntRange(t, 0, 7))'
+      root_pdp_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-enhanced-pdp-136-124-3-120-29"'
 parameters:
   - name: 'region'
     type: ResourceRef
