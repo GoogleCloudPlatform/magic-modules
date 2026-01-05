@@ -91,6 +91,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Biglake",
         "path" to "./google/services/biglake"
     ),
+    "biglakeiceberg" to mapOf(
+        "name" to "biglakeiceberg",
+        "displayName" to "BiglakeIceberg",
+        "path" to "./google/services/biglakeiceberg"
+    ),
     "bigquery" to mapOf(
         "name" to "bigquery",
         "displayName" to "Bigquery",
@@ -150,6 +155,11 @@ var ServicesListGa = mapOf(
         "name" to "certificatemanager",
         "displayName" to "Certificatemanager",
         "path" to "./google/services/certificatemanager"
+    ),
+    "ces" to mapOf(
+        "name" to "ces",
+        "displayName" to "Customerengagementsuite",
+        "path" to "./google/services/ces"
     ),
     "chronicle" to mapOf(
         "name" to "chronicle",
@@ -220,6 +230,11 @@ var ServicesListGa = mapOf(
         "name" to "cloudscheduler",
         "displayName" to "Cloudscheduler",
         "path" to "./google/services/cloudscheduler"
+    ),
+     "cloudsecuritycompliance" to mapOf(
+        "name" to "cloudsecuritycompliance",
+        "displayName" to "Cloud Security Compliance",
+        "path" to "./google/services/cloudsecuritycompliance"
     ),
     "cloudtasks" to mapOf(
         "name" to "cloudtasks",
@@ -585,6 +600,11 @@ var ServicesListGa = mapOf(
         "name" to "networkconnectivity",
         "displayName" to "Networkconnectivity",
         "path" to "./google/services/networkconnectivity"
+    ),
+    "networkconnectivityv1" to mapOf(
+        "name" to "networkconnectivityv1",
+        "displayName" to "Networkconnectivityv1",
+        "path" to "./google/services/networkconnectivityv1"
     ),
     "networkmanagement" to mapOf(
         "name" to "networkmanagement",

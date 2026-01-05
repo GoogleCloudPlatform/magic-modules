@@ -115,6 +115,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+include_in_tgc_next: true
 custom_code:
   encoder: 'templates/terraform/encoders/redis_cluster.go.tmpl'
   decoder: 'templates/terraform/decoders/redis_cluster.go.tmpl'
@@ -127,6 +128,18 @@ sweeper:
     - region: "us-east1"
     - region: "europe-west1"
 examples:
+  - name: 'redis_cluster_ha_with_labels'
+    primary_resource_id: 'cluster-ha-with-labels'
+    vars:
+      cluster_name: 'ha-cluster'
+      policy_name: 'my-policy'
+      subnet_name: 'my-subnet'
+      network_name: 'my-network'
+      deletion_protection_enabled: 'true'
+    test_vars_overrides:
+      'deletion_protection_enabled': 'false'
+    oics_vars_overrides:
+      'deletion_protection_enabled': 'false'
   - name: 'redis_cluster_ha'
     primary_resource_id: 'cluster-ha'
     vars:
@@ -231,6 +244,9 @@ parameters:
     ignore_read: true
     default_from_api: true
 properties:
+  - name: 'labels'
+    type: KeyValueLabels
+    description: Resource labels to represent user provided metadata.
   - name: 'createTime'
     type: Time
     description: |
@@ -354,6 +370,7 @@ properties:
       If not provided, REDIS_HIGHMEM_MEDIUM will be used as default
     required: false
     default_from_api: true
+    is_missing_in_cai: true
     enum_values:
       - 'REDIS_SHARED_CORE_NANO'
       - 'REDIS_HIGHMEM_MEDIUM'
@@ -385,6 +402,7 @@ properties:
       network addresses will be designated to the cluster for client access.
       Currently, only one PscConfig is supported.
     ignore_read: true
+    is_missing_in_cai: true
     item_type:
       type: NestedObject
       properties:
@@ -506,6 +524,7 @@ properties:
     type: NestedObject
     description: Persistence config (RDB, AOF) for the cluster.
     default_from_api: true
+    is_missing_in_cai: true
     properties:
       - name: 'mode'
         type: Enum
@@ -689,6 +708,23 @@ properties:
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
         output: true
+  - name: 'maintenanceVersion'
+    type: String
+    description: |
+      This field can be used to trigger self service update to indicate the desired maintenance version. The input to this field can be determined by the available_maintenance_versions field.
+      *Note*: This field can only be specified when updating an existing cluster to a newer version. Downgrades are currently not supported!
+  - name: 'effectiveMaintenanceVersion'
+    type: String
+    description: |
+      This field represents the actual maintenance version of the cluster.
+    output: true
+  - name: 'availableMaintenanceVersions'
+    type: Array
+    description: |
+     This field is used to determine the available maintenance versions for the self service update.
+    item_type:
+      type: String
+    output: true
   - name: 'crossClusterReplicationConfig'
     type: NestedObject
     description: Cross cluster replication config

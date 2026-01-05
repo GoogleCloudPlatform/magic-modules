@@ -27,6 +27,8 @@ update_verb: 'PATCH'
 update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 timeouts:
   insert_minutes: 40
   update_minutes: 20
@@ -64,12 +66,16 @@ examples:
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
+    ignore_read_extra:
+      - 'update_time'
   - name: 'workbench_instance_basic_container'
     primary_resource_id: 'instance'
     primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
+    ignore_read_extra:
+      - 'update_time'
   - name: 'workbench_instance_basic_gpu'
     primary_resource_id: 'instance'
     primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
@@ -79,6 +85,7 @@ examples:
       reservation_name: 'wbi-reservation'
     ignore_read_extra:
       - 'gce_setup.0.vm_image'
+      - 'update_time'
   - name: 'workbench_instance_labels_stopped'
     primary_resource_id: 'instance'
     primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
@@ -90,6 +97,7 @@ examples:
       service_account: 'SERVICE_ACCT'
     ignore_read_extra:
       - 'desired_state'
+      - 'update_time'
   - name: 'workbench_instance_full'
     primary_resource_id: 'instance'
     primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
@@ -108,8 +116,6 @@ examples:
       - 'gce_setup.0.vm_image'
       - 'gce_setup.0.boot_disk.0.disk_type'
       - 'gce_setup.0.data_disks.0.disk_type'
-      - 'gce_setup.0.metadata.version'
-      - 'gce_setup.0.metadata.%'
       - 'update_time'
   - name: 'workbench_instance_confidential_compute'
     primary_resource_id: 'instance'
@@ -117,6 +123,8 @@ examples:
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
+    ignore_read_extra:
+      - 'update_time'
   - name: 'workbench_instance_euc'
     primary_resource_id: 'instance'
     primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
@@ -126,6 +134,8 @@ examples:
     test_env_vars:
       project_id: 'PROJECT_NAME'
       project_number: 'PROJECT_NUMBER'
+    ignore_read_extra:
+      - 'update_time'
 virtual_fields:
   - name: 'desired_state'
     description: |
@@ -258,6 +268,7 @@ properties:
         default_from_api: true
         conflicts:
           - gce_setup.0.container_image
+        is_missing_in_cai: true
         custom_flatten: 'templates/terraform/custom_flatten/workbench_instance_vm_image_flatten.go.tmpl'
         properties:
           - name: 'project'
@@ -312,6 +323,7 @@ properties:
             description: |
               Optional. Indicates the type of the disk.
             immutable: true
+            is_missing_in_cai: true
             default_from_api: true
             custom_flatten: 'templates/terraform/custom_flatten/workbench_instance_boot_disk_type_flatten.go.tmpl'
             enum_values:
@@ -357,6 +369,7 @@ properties:
               description: |
                 Optional. Input only. Indicates the type of the disk.
               immutable: true
+              is_missing_in_cai: true
               custom_flatten: 'templates/terraform/custom_flatten/workbench_instance_data_disk_type_flatten.go.tmpl'
               enum_values:
                 - 'PD_STANDARD'
@@ -423,6 +436,7 @@ properties:
                 external IP address.
               immutable: true
               default_from_api: true
+              custom_tgc_flatten: 'templates/tgc_next/custom_flatten/workbench_instance_access_configs.go.tmpl'
               item_type:
                 type: NestedObject
                 properties:

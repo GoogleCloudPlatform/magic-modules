@@ -67,6 +67,12 @@ iam_policy:
 error_retry_predicates:
   - 'transport_tpg.IsCodeRepositoryIndexUnreadyError'
   - 'transport_tpg.IsRepositoryGroupQueueError'
+sweeper:
+  parent:
+    resource_type: 'google_gemini_code_repository_index'
+    child_field: 'code_repository_index'
+    parent_field: 'name'
+    parent_field_extract_name: true
 parameters:
   - name: location
     type: String

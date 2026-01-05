@@ -1,6 +1,4 @@
 resource "google_compute_region_health_check" "grpc-with-tls-region-health-check" {
-  provider = google-beta
-  
   name = "{{index $.Vars "health_check_name"}}"
   description = "regional health check via GRPC with TLS"
 
