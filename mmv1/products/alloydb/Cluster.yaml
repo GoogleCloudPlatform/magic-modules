@@ -60,6 +60,7 @@ custom_code:
   pre_update: 'templates/terraform/pre_update/alloydb_cluster.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/alloydb_cluster.go.tmpl'
 # Skipping the sweeper because we need to force-delete clusters.
+deletion_policy_exclude: true
 exclude_sweeper: true
 include_in_tgc_next: true
 tgc_include_handwritten_tests: true

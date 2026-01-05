@@ -39,6 +39,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+deletion_policy_exclude: true
 exclude_sweeper: true
 error_abort_predicates:
 
