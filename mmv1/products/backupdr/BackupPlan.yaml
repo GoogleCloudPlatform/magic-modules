@@ -118,6 +118,10 @@ properties:
     description: |
       When the `BackupPlan` was last updated.
     output: true
+  - name: 'maxCustomOnDemandRetentionDays'
+    type: Integer
+    description: |
+      The maximum number of days for which an on-demand backup taken with custom retention can be retained.
   - name: 'backupRules'
     type: Array
     description: |
