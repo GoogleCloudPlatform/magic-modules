@@ -100,7 +100,7 @@ func WorkbenchInstanceMetadataDiffSuppress(k, old, new string, d *schema.Resourc
 		}
 
 		for _, metadata := range WorkbenchInstanceEUCSettableUnmodifiableDefaultMetadata {
-			if strings.Contains(k, metadata) && new == "" {
+			if key == metadata && new == "" {
 				return true
 			}
 		}
