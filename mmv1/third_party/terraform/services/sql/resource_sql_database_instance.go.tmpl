@@ -700,7 +700,7 @@ API (for read pools, effective_availability_type may differ from availability_ty
 									"server_certificate_rotation_mode": {
 										Type:         schema.TypeString,
 										Optional:     true,
-										ValidateFunc: validation.StringInSlice([]string{"SERVER_CERTIFICATE_ROTATION_MODE_UNSPECIFIED", "NO_AUTOMATIC_ROTATION", "AUTOMATIC_ROTATION_DURING_MAINTENANCE"}, false),
+										ValidateFunc: validation.StringInSlice([]string{"NO_AUTOMATIC_ROTATION", "AUTOMATIC_ROTATION_DURING_MAINTENANCE"}, false),
 										Description:  `Settings for how the server certificate gets rotated.`,
 										AtLeastOneOf: ipConfigurationKeys,
 									},
@@ -3105,7 +3105,6 @@ func flattenIpConfiguration(ipConfiguration *sqladmin.IpConfiguration, d *schema
 		"ssl_mode":                                      ipConfiguration.SslMode,
 		"server_ca_mode":                                ipConfiguration.ServerCaMode,
 		"server_ca_pool":                                ipConfiguration.ServerCaPool,
-		"server_certificate_rotation_mode":              ipConfiguration.ServerCertificateRotationMode,
 		"custom_subject_alternative_names":		 ipConfiguration.CustomSubjectAlternativeNames,
 	}
 
@@ -3115,6 +3114,10 @@ func flattenIpConfiguration(ipConfiguration *sqladmin.IpConfiguration, d *schema
 
 	if ipConfiguration.PscConfig != nil {
 		data["psc_config"] = flattenPscConfigs(ipConfiguration.PscConfig)
+	}
+
+	if ipConfiguration.ServerCertificateRotationMode != "SERVER_CERTIFICATE_ROTATION_MODE_UNSPECIFIED" {
+		data["server_certificate_rotation_mode"] = ipConfiguration.ServerCertificateRotationMode
 	}
 
 	return []map[string]interface{}{data}

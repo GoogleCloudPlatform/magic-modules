@@ -4548,7 +4548,7 @@ resource "google_sql_database_instance" "instance" {
 		ipv4_enabled    = "true"
 		server_ca_mode  = "CUSTOMER_MANAGED_CAS_CA"
 		server_ca_pool  = google_privateca_ca_pool.customer_ca_pool.id
-		server_certificate_rotation_mode = "SERVER_CERTIFICATE_ROTATION_MODE_UNSPECIFIED"
+		server_certificate_rotation_mode = "AUTOMATIC_ROTATION_DURING_MAINTENANCE"
 		custom_subject_alternative_names = ["%{customSan}"]
 	}
   }
