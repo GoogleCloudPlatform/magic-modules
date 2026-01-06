@@ -112,6 +112,7 @@ properties:
     enum_values:
       - 'MESH'
       - 'STAR'
+      - 'HYBRID_INSPECTION'
     default_from_api: true
   - name: 'policyMode'
     type: Enum

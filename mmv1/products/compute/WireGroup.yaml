@@ -20,8 +20,7 @@ description: |
 references:
   guides:
     'Create a WireGroup': 'https://cloud.google.com/network-connectivity/docs/interconnect/how-to/cross-site/modify-network#add-wire-group'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/wireGroups'
-min_version: beta
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/wireGroups'
 docs:
 id_format: 'projects/{{project}}/global/crossSiteNetworks/{{cross_site_network}}/wireGroups/{{name}}'
 base_url: 'projects/{{project}}/global/crossSiteNetworks/{{cross_site_network}}/wireGroups'
@@ -48,9 +47,17 @@ examples:
       name: 'test-wire-group'
       description: 'Example Wire Group'
       cross_site_network: 'test-cross-site-network'
-    min_version: 'beta'
     test_env_vars:
       project: 'PROJECT_NAME'
+  - name: 'compute_wire_group_basic_beta'
+    primary_resource_id: 'example-test-wire-group-beta'
+    vars:
+      name: 'test-wire-group-beta'
+      description: 'Example Wire Group Beta'
+      cross_site_network: 'test-cross-site-network-beta'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    min_version: 'beta'
 parameters:
   - name: 'crossSiteNetwork'
     type: ResourceRef
@@ -62,7 +69,6 @@ parameters:
     imports: 'name'
     diff_suppress_func: 'tpgresource.CompareResourceNames'
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    min_version: beta
 properties:
   - name: 'description'
     type: String
@@ -106,7 +112,7 @@ properties:
             properties:
               - name: interconnect
                 type: string
-              - name: vlan_tags
+              - name: vlanTags
                 type: Array
                 description: |
                   VLAN tags for the interconnect.
@@ -121,6 +127,7 @@ properties:
     type: NestedObject
     description: |
       Properties specific to the wire group.
+    min_version: 'beta'
     properties:
       - name: type
         type: enum

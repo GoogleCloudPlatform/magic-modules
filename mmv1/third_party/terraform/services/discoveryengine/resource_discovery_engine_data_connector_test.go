@@ -126,7 +126,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
     params                     = jsonencode({
       "inclusion_filters": {
         "knowledgeBaseSysId": [
-          "123"
+          "456"
         ]
       }
     })
@@ -136,7 +136,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
     params                     = jsonencode({
       "inclusion_filters": {
         "knowledgeBaseSysId": [
-          "123"
+          "456"
         ]
       }
     })
@@ -146,7 +146,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
     params                     = jsonencode({
       "inclusion_filters": {
         "knowledgeBaseSysId": [
-          "123"
+          "456"
         ]
       }
     })
@@ -184,7 +184,7 @@ func TestAccDiscoveryEngineDataConnector_DataConnectorEntitiesParamsDiffSuppress
 	}
 
 	for tn, tc := range cases {
-		if discoveryengine.DataConnectorEntitiesParamsDiffSuppress("entities_params_diff_supress", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if discoveryengine.DataConnectorEntitiesFieldsDiffSuppress("entities_params_diff_supress", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Errorf("bad: %s, %q => %q expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}

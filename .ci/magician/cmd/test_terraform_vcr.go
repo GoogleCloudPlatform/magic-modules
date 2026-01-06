@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -92,7 +93,8 @@ It expects the following arguments:
 	3. Build ID
 	4. Project ID where Cloud Builds are located
 	5. Build step number
-	
+	6. Enable async upload cassettes
+
 The following environment variables are required:
 ` + listTTVRequiredEnvironmentVariables(),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -133,13 +135,17 @@ The following environment variables are required:
 		}
 		ctlr := source.NewController(env["GOPATH"], "modular-magician", env["GITHUB_TOKEN_DOWNSTREAMS"], rnr)
 
-		vt, err := vcr.NewTester(env, "ci-vcr-cassettes", "ci-vcr-logs", rnr)
-		if err != nil {
-			return fmt.Errorf("error creating VCR tester: %w", err)
+		if len(args) < 5 {
+			return fmt.Errorf("wrong number of arguments %d, expected >=5", len(args))
+		}
+		enableAsyncUploadCassettes := false
+		if len(args) > 5 {
+			enableAsyncUploadCassettes = strings.ToLower(args[5]) == "true"
 		}
 
-		if len(args) != 5 {
-			return fmt.Errorf("wrong number of arguments %d, expected 5", len(args))
+		vt, err := vcr.NewTester(env, "ci-vcr-cassettes", "ci-vcr-logs", rnr, enableAsyncUploadCassettes)
+		if err != nil {
+			return fmt.Errorf("error creating VCR tester: %w", err)
 		}
 
 		return execTestTerraformVCR(args[0], args[1], args[2], args[3], args[4], baseBranch, gh, rnr, ctlr, vt)
@@ -259,10 +265,11 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	}
 	if len(replayingResult.FailedTests) > 0 {
 		recordingResult, recordingErr := vt.RunParallel(vcr.RunOptions{
-			Mode:     vcr.Recording,
-			Version:  provider.Beta,
-			TestDirs: testDirs,
-			Tests:    replayingResult.FailedTests,
+			Mode:             vcr.Recording,
+			Version:          provider.Beta,
+			TestDirs:         testDirs,
+			Tests:            replayingResult.FailedTests,
+			UploadBranchName: newBranch,
 		})
 		if recordingErr != nil {
 			testState = "failure"
@@ -470,9 +477,7 @@ func runReplaying(runFullVCR bool, version provider.Version, services map[string
 				Version:  version,
 				TestDirs: []string{servicePath},
 			})
-			if serviceReplayingErr != nil {
-				replayingErr = serviceReplayingErr
-			}
+			replayingErr = errors.Join(replayingErr, serviceReplayingErr)
 			result.PassedTests = append(result.PassedTests, serviceResult.PassedTests...)
 			result.SkippedTests = append(result.SkippedTests, serviceResult.SkippedTests...)
 			result.FailedTests = append(result.FailedTests, serviceResult.FailedTests...)

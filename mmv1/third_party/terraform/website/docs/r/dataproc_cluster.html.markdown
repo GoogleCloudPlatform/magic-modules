@@ -444,6 +444,10 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 * `metadata` - (Optional) A map of the Compute Engine metadata entries to add to all instances
    (see [Project and instance metadata](https://cloud.google.com/compute/docs/storing-retrieving-metadata#project_and_instance_metadata)).
 
+* `resource_manager_tags` - (Optional) A map of resource manager tags to add to all instances.
+   Keys must be in the format `tagKeys/{tag_key_id}` and values in the format `tagValues/{tag_value_id}`
+   (see [Secure tags](https://cloud.google.com/dataproc/docs/guides/use-secure-tags)).
+
 * `reservation_affinity` - (Optional) Reservation Affinity for consuming zonal reservation.
     * `consume_reservation_type` - (Optional) Corresponds to the type of reservation consumption.
     * `key` - (Optional) Corresponds to the label key of reservation resource.
@@ -940,6 +944,8 @@ cluster_config {
   lifecycle_config {
     idle_delete_ttl = "10m"
     auto_delete_time = "2120-01-01T12:00:00.01Z"
+    idle_stop_ttl = "10m"
+    auto_stop_time = "2120-01-01T12:00:00.01Z"
   }
 }
 ```
@@ -948,6 +954,13 @@ cluster_config {
   (no jobs running). After this TTL, the cluster will be deleted. Valid range: [10m, 14d].
 
 * `auto_delete_time` - (Optional) The time when cluster will be auto-deleted.
+  A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds.
+  Example: "2014-10-02T15:01:23.045123456Z".
+
+* `idle_stop_ttl` - (Optional) The duration to keep the cluster alive while idling
+  (no jobs running). After this TTL, the cluster will be stopped. Valid range: [10m, 14d].
+
+* `auto_stop_time` - (Optional) The time when cluster will be auto-stopped.
   A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds.
   Example: "2014-10-02T15:01:23.045123456Z".
 
