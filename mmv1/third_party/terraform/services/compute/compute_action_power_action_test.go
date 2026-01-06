@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/go-version"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
@@ -31,7 +33,7 @@ func TestAccComputeInstancePowerAction_basic(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version0_14_0),
+			tfversion.SkipBelow(version.Must(version.NewVersion("1.14.0"))),
 		},
 		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
