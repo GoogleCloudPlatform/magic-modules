@@ -150,10 +150,21 @@ properties:
   - name: 'wireFormat'
     type: Enum
     description: |
-      The format of communication supported by the callout extension.
-      Will be set to EXT_PROC_GRPC by the backend if no value is set.
-      The extension service uses ext_proc gRPC API over a gRPC stream. This is the default value if the wire format is not specified. The backend service for the extension must use HTTP2 or H2C as the protocol. All `supported_events` for a client request are sent as part of the same gRPC stream.
-      The extension service uses Envoy's `ext_authz` gRPC API. The backend service for the extension must use HTTP2 or H2C as the protocol. `EXT_AUTHZ_GRPC` is only supported for regional `AuthzExtension` resources.
+      Specifies the communication protocol used by the callout extension
+      to communicate with its backend service.
+      Supported values:
+      - WIRE_FORMAT_UNSPECIFIED:
+          No wire format is explicitly specified. The backend automatically
+          defaults this value to EXT_PROC_GRPC.
+      - EXT_PROC_GRPC:
+          Uses Envoy's External Processing (ext_proc) gRPC API over a single
+          gRPC stream. The backend service must support HTTP/2 or H2C.
+          All supported events for a client request are sent over the same
+          gRPC stream. This is the default wire format.
+      - EXT_AUTHZ_GRPC:
+          Uses Envoy's external authorization (ext_authz) gRPC API.
+          The backend service must support HTTP/2 or H2C.
+          This option is only supported for regional AuthzExtension resources.
     default_from_api: true
     enum_values:
       - 'WIRE_FORMAT_UNSPECIFIED'
