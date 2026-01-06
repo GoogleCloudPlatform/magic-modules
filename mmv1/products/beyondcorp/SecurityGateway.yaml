@@ -111,10 +111,8 @@ properties:
       Optional. Map of Hubs that represents regional data path deployment with GCP region
       as a key.
     key_name: region
-    key_description: The region to deploy the hub in.
     set_hash_func: 'beyondcorpSecurityGatewayHubsHash'
     value_type:
-      name: Hub
       type: NestedObject
       properties:
         - name: internetGateway
@@ -221,6 +219,8 @@ properties:
         description: Client IP configuration. The client IP address is included if true.
   - name: serviceDiscovery
     type: NestedObject
+    send_empty_value: true
+    allow_empty_object: true
     description: Settings related to the Service Discovery.
     properties:
       - name: apiGateway

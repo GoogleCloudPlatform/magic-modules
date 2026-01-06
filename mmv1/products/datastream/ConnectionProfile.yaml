@@ -102,7 +102,28 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
     exclude_test: true
+  - name: 'datastream_stream_postgresql_sslconfig_server_and_client_verification'
+    primary_resource_id: 'default'
+    vars:
+      connection_profile_id: 'profile-id'
+      deletion_protection: 'true'
+      database_instance_name: 'my-instance'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
+    external_providers: ["random"]
+    skip_vcr: true
+    ignore_read_extra:
+      - 'postgresql_profile.0.password'
+    # TODO: include the new added field by using the latest commit of GA provider in tgc tests
+    tgc_skip_test: fix it after ssl_config is released in v7.16.0
   - name: 'datastream_connection_profile_salesforce'
+    primary_resource_id: 'default'
+    vars:
+      source_connection_profile_id: 'source-profile'
+    exclude_test: true
+  - name: 'datastream_connection_profile_spanner'
     primary_resource_id: 'default'
     vars:
       source_connection_profile_id: 'source-profile'
@@ -164,6 +185,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'spanner_profile'
       - 'mongodb_profile'
     properties:
       - name: 'hostname'
@@ -211,6 +233,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'spanner_profile'
       - 'mongodb_profile'
     properties:
       - name: 'bucket'
@@ -234,6 +257,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'spanner_profile'
       - 'mongodb_profile'
     properties:
       - name: 'hostname'
@@ -323,6 +347,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'spanner_profile'
       - 'mongodb_profile'
     properties:
       []
@@ -338,6 +363,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'spanner_profile'
       - 'mongodb_profile'
     properties:
       - name: 'hostname'
@@ -371,6 +397,68 @@ properties:
         description: |
           Database for the PostgreSQL connection.
         required: true
+      - name: 'sslConfig'
+        type: NestedObject
+        description: |
+          SSL configuration for the PostgreSQL connection.
+        properties:
+          - name: 'serverVerification'
+            type: NestedObject
+            description: |
+              If this field is set, the communication will be encrypted with TLS encryption
+              and the server identity will be authenticated.
+            exactly_one_of:
+              - 'ssl_config.0.server_verification'
+              - 'ssl_config.0.server_and_client_verification'
+            properties:
+              - name: 'caCertificate'
+                type: String
+                description: PEM-encoded server root CA certificate.
+                required: true
+                immutable: true
+                sensitive: true
+                ignore_read: true
+          - name: 'serverAndClientVerification'
+            type: NestedObject
+            description: |
+              If this field is set, the communication will be encrypted with TLS encryption
+              and both the server identity and the client identity will be authenticated.
+            exactly_one_of:
+              - 'ssl_config.0.server_verification'
+              - 'ssl_config.0.server_and_client_verification'
+            ignore_read: true
+            properties:
+              - name: 'clientCertificate'
+                type: String
+                description: |
+                  PEM-encoded certificate used by the source database to authenticate the
+                  client identity (i.e., the Datastream's identity). This certificate is
+                  signed by either a root certificate trusted by the server or one or more
+                  intermediate certificates (which is stored with the leaf certificate) to
+                  link to this certificate to the trusted root certificate.
+                immutable: true
+                required: true
+                sensitive: true
+                ignore_read: true
+              - name: 'clientKey'
+                type: String
+                description: |
+                  PEM-encoded private key associated with the client certificate.
+                  This value will be used during the SSL/TLS handshake, allowing
+                  the PostgreSQL server to authenticate the client's identity,
+                  i.e. identity of the stream.
+                immutable: true
+                required: true
+                sensitive: true
+                ignore_read: true
+              - name: 'caCertificate'
+                type: String
+                description: |
+                  PEM-encoded server root CA certificate.
+                immutable: true
+                required: true
+                sensitive: true
+                ignore_read: true
   - name: 'salesforceProfile'
     min_version: beta
     type: NestedObject
@@ -384,6 +472,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'spanner_profile'
       - 'mongodb_profile'
     properties:
       - name: 'domain'
@@ -439,6 +528,33 @@ properties:
             type: String
             description: |
               A reference to a Secret Manager resource name storing the client secret.
+  - name: 'spannerProfile'
+    min_version: beta
+    type: NestedObject
+    description: |
+      Spanner profile.
+    exactly_one_of:
+      - 'oracle_profile'
+      - 'gcs_profile'
+      - 'mysql_profile'
+      - 'bigquery_profile'
+      - 'postgresql_profile'
+      - 'sql_server_profile'
+      - 'salesforce_profile'
+      - 'spanner_profile'
+      - 'mongodb_profile'
+    properties:
+      - name: 'database'
+        type: String
+        description: |
+          The full project and resource path for Spanner database. Format:
+          projects/{project}/instances/{instance}/databases/{database}.
+        required: true
+      - name: 'host'
+        type: String
+        description: |
+          The regional Spanner endpoint. Format:
+          https://spanner.{region}.rep.googleapis.com.
   - name: 'sqlServerProfile'
     type: NestedObject
     description: |
@@ -451,6 +567,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'spanner_profile'
       - 'mongodb_profile'
     properties:
       - name: 'hostname'
@@ -494,6 +611,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'spanner_profile'
       - 'mongodb_profile'
     properties:
       - name: 'hostAddresses'
