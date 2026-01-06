@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
+	"strings"
 	"testing"
 	"time"
 
@@ -17,6 +19,18 @@ import (
 )
 
 func TestAccComputeInstancePowerAction_basic(t *testing.T) {
+	versionOutput, err := exec.Command("terraform", "version").Output()
+	currentVersion := "unknown"
+	if err == nil {
+		fields := strings.Fields(string(versionOutput))
+		if len(fields) > 1 {
+			currentVersion = fields[1]
+		}
+	}
+	t.Logf("Terraform version detected: %s", currentVersion)
+
+	acctest.SkipIfVcr(t)
+
 	t.Parallel()
 	ctx := context.Background()
 
