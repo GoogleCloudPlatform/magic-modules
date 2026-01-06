@@ -1,4 +1,4 @@
-{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
+{{- if not (contains $.Compiler "terraformgoogleconversion") }}
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 {{ end }}
@@ -22,10 +22,26 @@ import (
   "encoding/json"
   "errors"
   "fmt"
+  "log"
+  "strings"
   "time"
 
   "{{ $.ImportPath }}/tpgresource"
   transport_tpg "{{ $.ImportPath }}/transport"
+
+  "google.golang.org/api/googleapi"
+)
+
+var (
+  _ = json.Marshal
+  _ = errors.New
+  _ = fmt.Sprintf
+  _ = log.Print
+  _ = strings.Trim
+  _ = time.Now
+  _ = tpgresource.SetLabels
+  _ = transport_tpg.Config{}
+  _ = googleapi.Error{}
 )
 
 type {{ $.ProductMetadata.Name }}OperationWaiter struct {
@@ -70,7 +86,7 @@ func (w *{{ $.ProductMetadata.Name }}OperationWaiter) QueryOp() (interface{}, er
 
 {{ if $.ProductMetadata.OperationRetry }}
 func (w *{{ $.ProductMetadata.Name }}OperationWaiter) IsRetryable(err error) bool {
-  {{ $.CustomTemplate $.ProductMetadata.OperationRetry false }}
+  {{ customTemplate $ $.ProductMetadata.OperationRetry false }}
 }
 {{- end }}
 

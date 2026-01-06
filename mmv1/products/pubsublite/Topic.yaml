@@ -25,6 +25,7 @@ create_url: 'projects/{{project}}/locations/{{zone}}/topics?topicId={{name}}'
 update_url: 'projects/{{project}}/locations/{{zone}}/topics/{{name}}'
 update_verb: 'PATCH'
 update_mask: true
+deprecation_message: '[Pubsub Lite is deprecated and will be turned down effective March 18, 2026](https://cloud.google.com/pubsub/lite/docs/release-notes#June_17_2024). The resource will be removed in a future major release, please use `google_pubsub_topic` instead.'
 timeouts:
   insert_minutes: 20
   update_minutes: 20

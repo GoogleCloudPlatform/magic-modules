@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -15,6 +16,7 @@ func TestAccIAMWorkforcePoolWorkforcePoolProviderScimTenant_update(t *testing.T)
 	context := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
+		"hard_delete":   true,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -29,16 +31,21 @@ func TestAccIAMWorkforcePoolWorkforcePoolProviderScimTenant_update(t *testing.T)
 				ResourceName:            "google_iam_workforce_pool_provider_scim_tenant.scim_tenant",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"state"},
+				ImportStateVerifyIgnore: []string{"state", "hard_delete"},
 			},
 			{
 				Config: testAccIAMWorkforcePoolWorkforcePoolProviderScimTenant_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_iam_workforce_pool_provider_scim_tenant.scim_tenant", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_iam_workforce_pool_provider_scim_tenant.scim_tenant",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"state"},
+				ImportStateVerifyIgnore: []string{"state", "hard_delete"},
 			},
 		},
 	})
@@ -86,7 +93,12 @@ resource "google_iam_workforce_pool_provider_scim_tenant" "scim_tenant" {
   scim_tenant_id    = "example-scim-tenant"
   display_name      = "Example SCIM Tenant"
   description       = "A basic SCIM tenant for IAM Workforce Pool Provider"
-  # state is output only, not settable
+  claim_mapping       = {
+    "google.subject"  = "user.externalId",
+    "google.group"    = "group.externalId"
+  }
+  hard_delete = "%{hard_delete}"
+  # state, base_uri, purge_time and service_agent are output only, not settable
 }
 
 `, context)
@@ -134,7 +146,12 @@ resource "google_iam_workforce_pool_provider_scim_tenant" "scim_tenant" {
   scim_tenant_id    = "example-scim-tenant"
   display_name      = "Example SCIM Tenant - Updated"
   description       = "A basic SCIM tenant for IAM Workforce Pool Provider - Updated"
-  # state is output only, not settable
+  claim_mapping       = {
+    "google.subject"  = "user.externalId",
+    "google.group"    = "group.externalId"
+  }
+  hard_delete = "%{hard_delete}"
+  # state, base_uri, purge_time and service_agent are output only, not settable
 }
 `, context)
 }
