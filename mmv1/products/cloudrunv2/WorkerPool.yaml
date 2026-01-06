@@ -131,13 +131,6 @@ examples:
       - 'deletion_protection'
     # Currently failing
     skip_vcr: true
-  - name: 'cloudrunv2_worker_pool_custom_audiences'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-worker-pool-%s", context["random_suffix"])'
-    vars:
-      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
-    ignore_read_extra:
-      - 'deletion_protection'
   - name: 'cloudrunv2_worker_pool_startup_liveness_probe'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])'
@@ -288,6 +281,7 @@ properties:
     description: |
       One or more custom audiences that you want this worker pool to support. Specify each custom audience as the full URL in a string. The custom audiences are encoded in the token and used to authenticate requests.
       For more information, see https://cloud.google.com/run/docs/configuring/custom-audiences.
+    deprecation_message: '`custom_audiences` is deprecated since it is not applicable to WorkerPool resource and will be removed in a future major release.'
     item_type:
       type: String
   - name: 'scaling'

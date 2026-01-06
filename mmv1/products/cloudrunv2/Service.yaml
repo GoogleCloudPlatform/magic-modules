@@ -167,6 +167,15 @@ examples:
       cloud_run_service_name: 'cloudrun-iap-service'
     ignore_read_extra:
       - 'deletion_protection'
+  - name: 'cloudrunv2_service_zip_deploy'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service%s", context["random_suffix"])'
+    min_version: 'beta'
+    vars:
+      cloud_run_service_name: 'cloudrun-zip-service'
+      targz_path: './test-fixtures/function-source.tar.gz'
+    ignore_read_extra:
+      - 'deletion_protection'
 virtual_fields:
   - name: 'deletion_protection'
     description: |
@@ -813,6 +822,33 @@ properties:
                   description: |-
                     Source code location of the image.
                   output: true
+            - name: 'sourceCode'
+              type: NestedObject
+              description: |-
+                Location of the source.
+              min_version: 'beta'
+              properties:
+                - name: 'cloudStorageSource'
+                  type: NestedObject
+                  description: |-
+                    Cloud Storage source.
+                  exactly_one_of:
+                    - 'cloud_storage_source'
+                  properties:
+                    - name: 'bucket'
+                      type: String
+                      description: |-
+                        The Cloud Storage bucket name.
+                      required: true
+                    - name: 'object'
+                      type: String
+                      description: |-
+                        The Cloud Storage object name.
+                      required: true
+                    - name: 'generation'
+                      type: String
+                      description: |-
+                        The Cloud Storage object generation. The is an int64 value. As with most Google APIs, its JSON representation will be a string instead of an integer.
       - name: 'volumes'
         type: Array
         description: |-

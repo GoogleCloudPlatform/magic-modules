@@ -40,6 +40,7 @@ async:
     resource_inside_response: true
 custom_code:
 include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 error_abort_predicates:
 
   - 'transport_tpg.Is429QuotaError'

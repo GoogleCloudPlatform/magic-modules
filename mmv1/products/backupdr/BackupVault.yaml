@@ -207,6 +207,7 @@ properties:
       - 'MATCH_BACKUP_EXPIRE_TIME'
   - name: 'encryptionConfig'
     type: NestedObject
+    ignore_read: true
     description: 'Encryption configuration for the backup vault.'
     properties:
       - name: 'kmsKeyName'

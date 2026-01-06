@@ -1,8 +1,0 @@
-// Inject dummy values for required fields missing in CAI
-if _, ok := res["privateKey"]; !ok {
-    res["privateKey"] = "mc_is_missing_in_cai"
-}
-if _, ok := res["certificate"]; !ok {
-    res["certificate"] = "mc_is_missing_in_cai"
-}
-return res, hclData, nil

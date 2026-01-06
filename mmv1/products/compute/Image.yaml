@@ -58,7 +58,6 @@ iam_policy:
 include_in_tgc_next: true
 tgc_include_handwritten_tests: true
 custom_code:
-  tgc_decoder: 'templates/tgc_next/decoders/compute_image.go.tmpl'
 examples:
   - name: 'image_basic'
     primary_resource_id: 'example'

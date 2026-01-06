@@ -17,7 +17,7 @@ legacy_name: 'biglake'
 display_name: 'Biglake'
 versions:
   - name: 'ga'
-    base_url: 'https://biglake.googleapis.com/iceberg/v1/'
+    base_url: 'https://biglake.googleapis.com/'
 scopes:
   - 'https://www.googleapis.com/auth/bigquery'
   - 'https://www.googleapis.com/auth/cloud-platform'
