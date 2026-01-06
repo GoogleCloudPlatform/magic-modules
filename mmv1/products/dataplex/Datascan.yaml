@@ -277,6 +277,7 @@ properties:
               The scan runs once upon DataScan creation.
             send_empty_value: true
             allow_empty_object: true
+            immutable: true
             exactly_one_of:
               - 'execution_spec.0.trigger.0.on_demand'
               - 'execution_spec.0.trigger.0.schedule'
