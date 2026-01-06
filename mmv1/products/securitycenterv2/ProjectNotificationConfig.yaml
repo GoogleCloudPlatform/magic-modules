@@ -39,8 +39,6 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "global"
-    - region: "us"
-    - region: "eu"
 examples:
   - name: 'scc_v2_project_notification_config_basic'
     primary_resource_id: 'custom_notification_config'
@@ -62,8 +60,7 @@ parameters:
   - name: 'location'
     type: String
     description: |
-      Location ID for the parent project. Only `global`, `us`, and `eu` are supported.
-      Defaults to `global` if location is not provided.
+      Location ID for the parent project. Defaults to `global` if location is not provided.
     url_param_only: true
     required: false
     immutable: true

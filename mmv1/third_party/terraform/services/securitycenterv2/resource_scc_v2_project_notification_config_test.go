@@ -1,3 +1,7 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+// Modified 2025 by Deutsche Telekom AG
+
 package securitycenterv2_test
 
 import (
@@ -116,6 +120,7 @@ resource "google_scc_v2_project_notification_config" "custom_notification_config
 }
 
 func TestAccSecurityCenterV2ProjectNotificationConfig_locationEu(t *testing.T) {
+	t.Skip("Skipping: CI project does not support data residency for other locations. This has to be setup during SCC Initalization")
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -160,6 +165,7 @@ func TestAccSecurityCenterV2ProjectNotificationConfig_locationEu(t *testing.T) {
 }
 
 func TestAccSecurityCenterV2ProjectNotificationConfig_locationUs(t *testing.T) {
+	t.Skip("Skipping: CI project does not support data residency for other locations. This has to be setup during SCC Initalization")
 	t.Parallel()
 
 	context := map[string]interface{}{
