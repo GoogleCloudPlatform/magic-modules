@@ -116,6 +116,8 @@ examples:
     skip_vcr: true
     ignore_read_extra:
       - 'postgresql_profile.0.password'
+    # TODO: include the new added field by using the latest commit of GA provider in tgc tests
+    tgc_skip_test: fix it after ssl_config is released in v7.16.0
   - name: 'datastream_connection_profile_salesforce'
     primary_resource_id: 'default'
     vars:
