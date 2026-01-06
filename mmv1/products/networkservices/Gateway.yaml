@@ -166,6 +166,7 @@ properties:
       it will accept traffic destined for any port (1-65535) on its​ assigned IP address.​
       This field is configurable only for gateways of type SECURE_WEB_GATEWAY.
     type: Boolean
+    immutable: true
     conflicts:
       - ports
   - name: 'ports'
