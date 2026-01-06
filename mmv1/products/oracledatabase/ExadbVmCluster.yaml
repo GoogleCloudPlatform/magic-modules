@@ -201,12 +201,15 @@ properties:
           - name: isDiagnosticsEventsEnabled
             type: Boolean
             description: Indicates whether to enable data collection for diagnostics.
+            default_from_api: true
           - name: isHealthMonitoringEnabled
             type: Boolean
             description: Indicates whether to enable health monitoring.
+            default_from_api: true
           - name: isIncidentLogsEnabled
             type: Boolean
             description: Indicates whether to enable incident logs and trace collection.
+            default_from_api: true
       - name: enabledEcpuCountPerNode
         type: Integer
         description: |-
