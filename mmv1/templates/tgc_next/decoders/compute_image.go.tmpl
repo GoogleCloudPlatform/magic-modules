@@ -1,6 +1,0 @@
-// These fields are missing in CAI assets, but requried in Terraform
-if rawDisk, ok := res["rawDisk"].(map[string]interface{}); ok {
-	rawDisk["source"] = "unknown"
-}
-
-return res, hclData, nil

@@ -40,7 +40,11 @@ examples:
   - name: 'dialogflow_agent_full'
     primary_resource_id: 'full_agent'
     vars:
+      project_id: 'my-project'
+      account_id: 'my-account'
       agent_name: 'dialogflow-agent'
+    test_env_vars:
+      org_id: 'ORG_ID'
 parameters:
 properties:
   - name: 'displayName'

@@ -389,7 +389,7 @@ resource "{{ $.IamTerraformName }}_member" "foo" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
   role = "%{role}"
   member = "user:admin@hashicorptest.com"
 }
@@ -419,7 +419,7 @@ resource "{{ $.IamTerraformName }}_policy" "foo" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
   policy_data = data.google_iam_policy.foo.policy_data
 }
 
@@ -427,7 +427,7 @@ data "{{ $.IamTerraformName }}_policy" "foo" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
   depends_on = [
     {{ $.IamTerraformName }}_policy.foo
   ]
@@ -448,7 +448,7 @@ resource "{{ $.IamTerraformName }}_policy" "foo" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
   policy_data = data.google_iam_policy.foo.policy_data
 }
 `, context)
@@ -461,7 +461,7 @@ resource "{{ $.IamTerraformName }}_binding" "foo" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
   role = "%{role}"
   members = ["user:admin@hashicorptest.com"]
 }
@@ -475,7 +475,7 @@ resource "{{ $.IamTerraformName }}_binding" "foo" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
   role = "%{role}"
   members = ["user:admin@hashicorptest.com", "user:gterraformtest1@gmail.com"]
 }
@@ -489,7 +489,7 @@ resource "{{ $.IamTerraformName }}_binding" "foo" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
   role = "%{role}"
   members = ["user:admin@hashicorptest.com"]
   condition {
@@ -508,7 +508,7 @@ resource "{{ $.IamTerraformName }}_binding" "foo" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
   role = "%{role}"
   members = ["user:admin@hashicorptest.com"]
 }
@@ -517,7 +517,7 @@ resource "{{ $.IamTerraformName }}_binding" "foo2" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
   role = "%{role}"
   members = ["user:admin@hashicorptest.com"]
   condition {
@@ -531,7 +531,7 @@ resource "{{ $.IamTerraformName }}_binding" "foo3" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
   role = "%{role}"
   members = ["user:admin@hashicorptest.com"]
   condition {
@@ -551,7 +551,7 @@ resource "{{ $.IamTerraformName }}_member" "foo" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
   role = "%{role}"
   member = "user:admin@hashicorptest.com"
   condition {
@@ -570,7 +570,7 @@ resource "{{ $.IamTerraformName }}_member" "foo" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
   role = "%{role}"
   member = "user:admin@hashicorptest.com"
 }
@@ -579,7 +579,7 @@ resource "{{ $.IamTerraformName }}_member" "foo2" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
   role = "%{role}"
   member = "user:admin@hashicorptest.com"
   condition {
@@ -593,7 +593,7 @@ resource "{{ $.IamTerraformName }}_member" "foo3" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
   role = "%{role}"
   member = "user:admin@hashicorptest.com"
   condition {
@@ -644,7 +644,7 @@ resource "{{ $.IamTerraformName }}_policy" "foo" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
   policy_data = data.google_iam_policy.foo.policy_data
 }
 `, context)

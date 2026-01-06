@@ -1,0 +1,18 @@
+resource "google_logging_saved_query" "{{.PrimaryResourceId}}" {
+  name         = "{{index $.Vars "logging_saved_query_name"}}"
+  display_name = "My Saved Query"
+  parent       = "projects/{{index $.TestEnvVars "project"}}"
+  location     = "global"
+  description  = "A saved query"
+  logging_query {
+    filter = "resource.type=gce_instance"
+    summary_fields {
+      field = "jsonPayload.paymentId"
+    }
+    summary_fields {
+      field = "jsonPayload.errorMessage"
+    }
+    summary_field_start = 100 # truncates after the first 100 characters
+  }
+  visibility = "SHARED"
+}

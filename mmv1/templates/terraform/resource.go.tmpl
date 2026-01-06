@@ -388,7 +388,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     {{- $renderedIdFromName := "false" }}
     {{- range $prop := $.GettableProperties }}
     {{- /* Check if prop is potentially computed */}}
-    {{-   if and ($.InPostCreateComputed $prop) (and (or $prop.Output $prop.DefaultFromApi) (not $prop.IgnoreRead)) }}
+    {{-   if and ($.InPostCreateComputed $prop) (or $prop.Output $prop.DefaultFromApi) }}
     {{-     if and (eq $prop.CustomFlatten "templates/terraform/custom_flatten/id_from_name.tmpl") (eq $renderedIdFromName "false") }}
     // Setting `name` field so that `id_from_name` flattener will work properly.
     if err := d.Set("name", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}Name(opRes["name"], d, config)); err != nil {
@@ -396,11 +396,11 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     }
     {{-       $renderedIdFromName = "true" }}
     {{-     end }}
-    {{-     if and $prop.Output (not $prop.IgnoreRead) }}
+    {{-     if $prop.Output }}
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(opRes["{{ $prop.ApiName -}}"], d, config)); err != nil {
         return err
     }
-    {{-     else if and $prop.DefaultFromApi (not $prop.IgnoreRead) }}
+    {{-     else if $prop.DefaultFromApi }}
     // {{ underscore $prop.Name }} is set by API when unset
     if tpgresource.IsEmptyValue(reflect.ValueOf(d.Get("{{ underscore $prop.Name }}"))) {
         if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(opRes["{{ $prop.ApiName -}}"], d, config)); err != nil {
@@ -689,7 +689,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
     }
 {{- end}}
-{{ range $prop := $.ReadProperties }}
+{{ range $prop := $.GettableProperties }}
 {{if $prop.FlattenObject -}}
 // Terraform must set the top level schema field, but since this object contains collapsed properties
 // it's difficult to know what the top level should be. Instead we just loop over the map returned from flatten.
@@ -1216,9 +1216,7 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
 }
 {{ end }}
 {{- range $prop := $.GettableProperties }}
-    {{- if not $prop.IgnoreRead }}
-        {{ template "flattenPropertyMethod" $prop -}}
-    {{- end }}
+    {{ template "flattenPropertyMethod" $prop -}}
 {{- end }}
 {{- range $prop := $.SettableProperties }}
     {{- template "expandPropertyMethod" $prop -}}
@@ -1284,7 +1282,7 @@ func resource{{ $.ResourceName -}}PostCreateSetComputedFields(d *schema.Resource
     {{- $renderedIdFromName := "false" }}
     {{- range $prop := $.GettableProperties }}
     {{- /* Check if prop is potentially computed */}}
-    {{-   if and ($.InPostCreateComputed $prop) (and (or $prop.Output $prop.DefaultFromApi) (not $prop.IgnoreRead)) }}
+    {{-   if and ($.InPostCreateComputed $prop) (or $prop.Output $prop.DefaultFromApi) }}
     {{-     if and (eq $prop.CustomFlatten "templates/terraform/custom_flatten/id_from_name.tmpl") (eq $renderedIdFromName "false") }}
     // Setting `name` field so that `id_from_name` flattener will work properly.
     if err := d.Set("name", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}Name(res["name"], d, config)); err != nil {
@@ -1292,11 +1290,11 @@ func resource{{ $.ResourceName -}}PostCreateSetComputedFields(d *schema.Resource
     }
     {{-       $renderedIdFromName = "true" }}
     {{-     end }}
-    {{-     if and $prop.Output (not $prop.IgnoreRead) }}
+    {{-     if $prop.Output }}
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
         return fmt.Errorf(`Error setting computed identity field "{{ underscore $prop.Name }}": %s`, err)
     }
-    {{-     else if and $prop.DefaultFromApi (not $prop.IgnoreRead) }}
+    {{-     else if $prop.DefaultFromApi }}
     // {{ underscore $prop.Name }} is set by API when unset
     if tpgresource.IsEmptyValue(reflect.ValueOf(d.Get("{{ underscore $prop.Name }}"))) {
         if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {

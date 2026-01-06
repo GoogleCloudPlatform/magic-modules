@@ -74,13 +74,13 @@ type Tester struct {
 const accTestParallelism = 32
 const parallelJobs = 16
 
-const replayingTimeout = "240m"
+const replayingTimeout = "360m"
 
 var testResultsExpression = regexp.MustCompile(`(?m:^--- (PASS|FAIL|SKIP): (TestAcc\w+))`)
 
 var subtestResultsExpression = regexp.MustCompile(`(?m:^    --- (PASS|FAIL|SKIP): (TestAcc\w+)/(\w+))`)
 
-var testPanicExpression = regexp.MustCompile(`^panic: .*`)
+var testPanicExpression = regexp.MustCompile(`(?m:^panic: .*)`)
 
 var safeToLog = map[string]bool{
 	"ACCTEST_PARALLELISM":                        true,

@@ -46,8 +46,8 @@ async:
 collection_url_key: 'batches'
 include_in_tgc_next: true
 tgc_include_handwritten_tests: true
-tgc_ignore_terraform_decoder: true
 custom_code:
+  tgc_ignore_terraform_decoder: true
   constants: 'templates/terraform/constants/cloud_dataproc_batch.go.tmpl'
   decoder: 'templates/terraform/decoders/cloud_dataproc_batch.go.tmpl'
 examples:

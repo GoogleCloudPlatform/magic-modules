@@ -51,6 +51,7 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/firewall.tmpl'
   constants: 'templates/terraform/constants/firewall.tmpl'
@@ -260,6 +261,7 @@ properties:
       `source_ranges`, `source_tags` or `source_service_accounts` is required.
     is_set: true
     diff_suppress_func: 'diffSuppressSourceRanges'
+    set_hash_func: tpgresource.IpAddrSetHashFunc
     item_type:
       type: String
   - name: 'sourceServiceAccounts'

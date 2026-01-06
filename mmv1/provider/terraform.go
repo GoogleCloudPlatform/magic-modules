@@ -64,7 +64,6 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time,
 		templateFS:        templateFS,
 	}
 
-	t.Product.SetPropertiesBasedOnVersion(&t.Version)
 	t.Product.SetCompiler(ProviderName(t))
 	for _, r := range t.Product.Objects {
 		r.SetCompiler(ProviderName(t))
@@ -89,7 +88,7 @@ func (t Terraform) Generate(outputFolder, resourceToGenerate string, generateCod
 
 func (t *Terraform) GenerateObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 	for _, object := range t.Product.Objects {
-		object.ExcludeIfNotInVersion(&t.Version)
+		object.ExcludeIfNotInVersion(t.Product.Version)
 
 		if resourceToGenerate != "" && object.Name != resourceToGenerate {
 			log.Printf("Excluding %s per user request", object.Name)
@@ -179,7 +178,7 @@ func (t *Terraform) GenerateResourceTestsLegacy(object api.Resource, templateDat
 	eligibleExample := false
 	for _, example := range object.Examples {
 		if !example.ExcludeTest {
-			if object.ProductMetadata.VersionObjOrClosest(t.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
+			if object.ProductMetadata.VersionObjOrClosest(t.Product.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
 				eligibleExample = true
 				break
 			}
@@ -210,7 +209,7 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 	eligibleSample := false
 	for _, sample := range object.Samples {
 		if !sample.ExcludeTest {
-			if object.ProductMetadata.VersionObjOrClosest(t.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
+			if object.ProductMetadata.VersionObjOrClosest(t.Product.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
 				eligibleSample = true
 				break
 			}

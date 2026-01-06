@@ -134,7 +134,6 @@ properties:
       key_name: 'language_code'
       required: false
       value_type:
-       name: SynthesizeSpeechConfig
        type: NestedObject
        description: Configuration for speech synthesis for a specific language.
        properties:

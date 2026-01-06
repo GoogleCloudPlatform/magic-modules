@@ -376,11 +376,8 @@ properties:
       Map keys are policy IDs supplied by users during policy creation. They must
       unique within a repository and be under 128 characters in length.
     key_name: 'id'
-    key_description: |-
-      The policy ID. Must be unique within a repository.
     set_hash_func: 'mapHashID'
     value_type:
-      name: cleanupPolicies
       type: NestedObject
       properties:
         - name: 'action'

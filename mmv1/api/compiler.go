@@ -14,7 +14,6 @@
 package api
 
 import (
-	"bytes"
 	"log"
 	"os"
 
@@ -27,10 +26,6 @@ func Compile(yamlPath string, obj interface{}) {
 	if err != nil {
 		log.Fatalf("Cannot open the file: %s", yamlPath)
 	}
-
-	// TODO: retire {{override_path}} from private overrides repositories,
-	// and remove this later.
-	objYaml = bytes.ReplaceAll(objYaml, []byte("{{override_path}}/"), []byte(""))
 
 	yamlValidator := google.YamlValidator{}
 	yamlValidator.Parse(objYaml, obj, yamlPath)

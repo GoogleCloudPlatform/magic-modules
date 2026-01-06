@@ -87,7 +87,7 @@ examples:
       - 'aspects'
     vars:
       table_id: 'table-basic'
-      dataset_id: 'dataset-basic'
+      dataset_id: 'dataset_basic'
       aspect_type_name: "aspect-type"
     test_env_vars:
       project_number: 'PROJECT_NUMBER'

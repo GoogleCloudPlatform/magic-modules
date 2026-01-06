@@ -191,10 +191,7 @@ properties:
         description: |
           A map of project id and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
         key_name: 'id'
-        key_description: |
-          The project ID.
         value_type:
-          name: projectConfig
           type: NestedObject
           properties:
             - name: 'projectId'

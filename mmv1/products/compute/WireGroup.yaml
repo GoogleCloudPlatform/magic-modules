@@ -95,16 +95,12 @@ properties:
     description: |
       Endpoints grouped by location, each mapping to interconnect configurations.
     key_name: 'endpoint'
-    key_description: |
-      The name of the endpoint, which is a city name.
     value_type:
       type: NestedObject
       properties:
         - name: interconnects
           type: Map
           key_name: interconnect_name
-          key_description: |
-            The name of the interconnect.
           value_type:
             type: NestedObject
             description: |

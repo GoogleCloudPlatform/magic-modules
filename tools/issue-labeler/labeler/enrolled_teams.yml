@@ -323,6 +323,10 @@ service/container:
 service/containeranalysis:
   resources:
   - google_container_analysis_.*
+service/data-transfer-essentials:
+  resources:
+  - google_network_connectivity_multicloud_data_transfer_config
+  - google_network_connectivity_destination
 service/datacatalog:
   resources:
   - google_data_catalog_.*
@@ -374,6 +378,7 @@ service/dialogflow-cx:
   - google_dialogflow_entity_type
   - google_dialogflow_fulfillment
   - google_dialogflow_intent
+  - google_dialogflow_version
 service/discoveryengine:
   resources:
   - google_discovery_engine_.*
@@ -418,6 +423,10 @@ service/firebase:
   - google_firebase_storage.*
   - google_firebase_web.*
   - google_firebaserules_.*
+service/firebaseailogic:
+  team: firebase-terraform
+  resources:
+  - google_firebase_ai_logic.*
 service/firebaseapphosting:
   resources:
   - google_firebase_app_hosting.*
@@ -559,6 +568,9 @@ service/network-connectivity-center:
   resources:
   - google_network_connectivity_hub
   - google_network_connectivity_spoke
+  - google_network_connectivity_gateway_advertised_route
+  - google_network_security_sac_realm
+  - google_network_security_sac_attachment
 service/network-security:
   resources:
   - google_network_security_authorization_policy

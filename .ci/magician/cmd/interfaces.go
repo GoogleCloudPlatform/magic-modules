@@ -50,7 +50,7 @@ type CloudstorageClient interface {
 }
 
 type TeamcityClient interface {
-	GetBuilds(project, finishCut, startCut string) (teamcity.Builds, error)
+	GetBuilds(state, project, finishCut, startCut string) (teamcity.Builds, error)
 	GetTestResults(build teamcity.Build) (teamcity.TestResults, error)
 }
 

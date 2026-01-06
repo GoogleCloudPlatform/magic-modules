@@ -76,6 +76,13 @@ examples:
     vars:
       snapshot_name: 'my-snapshot'
       disk_name: 'debian-disk'
+  - name: 'snapshot_basic_source_instant_snapshot'
+    primary_resource_id: 'snapshot'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-snapshot%s", context["random_suffix"])'
+    vars:
+      snapshot_name: 'my-snapshot'
+      disk_name: 'debian-disk'
+      instant_snapshot_name: 'my-instant-snapshot'
   - name: 'snapshot_chainname'
     primary_resource_id: 'snapshot'
     primary_resource_name: 'fmt.Sprintf("tf-test-snapshot-chainname%s", context["random_suffix"])'
@@ -84,16 +91,6 @@ examples:
       disk_name: 'debian-disk'
       chain_name: 'snapshot-chain'
 parameters:
-  - name: 'sourceDisk'
-    type: ResourceRef
-    description: 'A reference to the disk used to create this snapshot.'
-    required: true
-    immutable: true
-    # ignore_read in providers - this is only used in Create
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Disk'
-    imports: 'name'
   - name: 'zone'
     type: ResourceRef
     description: 'A reference to the zone where the disk is hosted.'
@@ -186,6 +183,31 @@ parameters:
           The service account used for the encryption request for the given KMS key.
           If absent, the Compute Engine Service Agent service account is used.
 properties:
+  - name: 'sourceDisk'
+    type: ResourceRef
+    description: 'A reference to the disk used to create this snapshot.'
+    immutable: true
+    # ignore_read in providers - this is only used in Create
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Disk'
+    imports: 'name'
+    default_from_api: true
+    exactly_one_of:
+      - 'source_disk'
+      - 'source_instant_snapshot'
+  - name: 'sourceInstantSnapshot'
+    type: ResourceRef
+    description: 'A reference to the instant snapshot used to create this snapshot.'
+    immutable: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'InstantSnapshot'
+    imports: 'name'
+    ignore_read: true
+    exactly_one_of:
+      - 'source_instant_snapshot'
+      - 'source_disk'
   - name: 'creationTimestamp'
     type: Time
     description: 'Creation timestamp in RFC3339 text format.'

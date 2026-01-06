@@ -16,6 +16,10 @@ name: 'Certificate'
 description: |
   Certificate represents a HTTP-reachable backend for a Certificate.
 docs:
+references:
+  guides:
+    'Official Documentation': 'https://docs.cloud.google.com/certificate-manager/docs/certificates'
+  api: 'https://docs.cloud.google.com/certificate-manager/docs/reference/certificate-manager/rest/v1/projects.locations.certificates'
 id_format: 'projects/{{project}}/locations/{{location}}/certificates/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/certificates'
 self_link: 'projects/{{project}}/locations/{{location}}/certificates/{{name}}'

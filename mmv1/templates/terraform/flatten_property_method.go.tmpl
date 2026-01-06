@@ -24,7 +24,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
   if v == nil {
     return nil
   }
-    {{- if not $.AllowEmptyObject }}
+    {{- if and (not $.AllowEmptyObject) (not $.ResourceMetadata.IsTgcCompiler) }}
   original := v.(map[string]interface{})
   if len(original) == 0 {
     return nil
@@ -163,6 +163,15 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
   {{- else if and ($.ResourceMetadata.IsTgcCompiler) ($.IsA "Boolean") ($.Required) }}
 	if v == nil {
 		return false
+	}
+	return v
+  {{- else if and ($.ResourceMetadata.IsTgcCompiler) ($.IsA "String") ($.Required) }}
+	if v == nil {
+		return "unknown"
+	}
+	transformed := v.(string)
+	if transformed == "" {
+		return "unknown"
 	}
 	return v
   {{- else }}

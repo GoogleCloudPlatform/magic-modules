@@ -1,0 +1,94 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: PromptTemplate
+description: The PromptTemplate resource for Firebase AI Logic.
+base_url: projects/{{project}}/locations/{{location}}/templates
+references:
+  guides:
+    'Official Documentation': 'https://firebase.google.com/docs/ai-logic'
+  api: 'https://firebase.google.com/docs/reference/ai-logic/rest/v1beta/projects.locations.templates'
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
+create_url: projects/{{project}}/locations/{{location}}/templates?promptTemplateId={{template_id}}
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/templates/{{template_id}}
+delete_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
+autogen_async: false
+autogen_status: UHJvbXB0VGVtcGxhdGU=
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: templateId
+    type: String
+    required: true
+    immutable: true
+    description: |-
+      The unique ID of the PromptTemplate, which is the final component of the
+      PromptTemplate's resource name.
+  - name: createTime
+    type: String
+    description: Timestamp when the PromptTemplate was created.
+    output: true
+  - name: displayName
+    type: String
+    description: The display name of the PromptTemplate.
+  - name: locked
+    type: Boolean
+    description: |-
+      Indicates if the PromptTemplate has been locked for mutations.  It is
+      strongly recommended that PromptTemplates used in production Apps be
+      locked to avoid accidental distruption to live apps.
+
+      To modify a PromptTemplate that has been locked, a call to ModifyLock with
+      lock=false is required first.
+    output: true
+  - name: model
+    type: String
+    description: The model name parsed from the template_string.
+    output: true
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the PromptTemplate.
+      Format:
+      projects/{project}/locations/{location}/templates/{prompt_template}
+    output: true
+  - name: stateChangeTime
+    type: String
+    description: Timestamp when the PromptTemplate state was last changed.
+    output: true
+  - name: templateString
+    type: String
+    required: true
+    description: The DotPrompt raw template string.
+  - name: updateTime
+    type: String
+    description: Timestamp when the PromptTemplate was last updated.
+    output: true
+min_version: beta
+examples:
+  - name: firebaseailogic_prompt_template_basic
+    min_version: beta
+    primary_resource_id: basic
+    vars:
+      template_id: 'basic-template'
+    # Need the time_sleep resource
+    external_providers: ["time"]
