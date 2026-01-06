@@ -11,7 +11,7 @@
 * `{{ underscore $.KeyName }}` - (Required) The identifier for this object. Format specified above.
 {{ "" }}
   {{- end -}}
-  {{- range $np := $.AllUniqueNestedProperties }}
+  {{- range $np := $.AllUniqueNestedProperties -}}
 {{- trimTemplate "property_documentation.html.markdown.tmpl" $np -}}
   {{- end -}}
 {{ "" }}
@@ -30,4 +30,3 @@
       {{- end -}}
     {{- end -}}
 {{- end -}}
-{{ "" }}
