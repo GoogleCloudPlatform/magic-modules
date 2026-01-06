@@ -169,7 +169,9 @@ fields:
     field: 'numeric_id'
 {{- if ne $.TargetVersionName "ga" }}
   - field: 'partner_metadata'
-    api_field: 'properties.partnerMetadata'
+    api_field: 'properties.partnerMetadata.key'
+  - field: 'partner_metadata'
+    api_field: 'properties.partnerMetadata.value.entries'
 {{- end }}
   - field: 'project'
   - api_field: 'region'
