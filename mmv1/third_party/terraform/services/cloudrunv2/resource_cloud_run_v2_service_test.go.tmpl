@@ -1143,9 +1143,6 @@ resource "google_cloud_run_v2_service" "default" {
 `, context)
 }
 
-
-{{ if ne $.TargetVersionName `ga` -}}
-
 func TestAccCloudRunV2Service_cloudrunv2ServiceWithDefaultUriDisabled(t *testing.T) {
   t.Parallel()
   context := map[string]interface{} {
@@ -1163,7 +1160,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceWithDefaultUriDisabled(t *testing
         ResourceName: "google_cloud_run_v2_service.default",
         ImportState: true,
         ImportStateVerify: true,
-        ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "launch_stage", "deletion_protection"},
+        ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "deletion_protection"},
       },
       {
         Config: testAccCloudRunV2Service_cloudrunv2ServiceWithNoMinInstances(context),
@@ -1172,7 +1169,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceWithDefaultUriDisabled(t *testing
         ResourceName: "google_cloud_run_v2_service.default",
         ImportState: true,
         ImportStateVerify: true,
-        ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "launch_stage", "deletion_protection"},
+        ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "deletion_protection"},
       },
 
     }, 
@@ -1186,7 +1183,6 @@ resource "google_cloud_run_v2_service" "default" {
   description = "description creating"
   location = "us-central1"
   deletion_protection = false
-  launch_stage = "BETA"
   annotations = {
     generated-by = "magic-modules"
   }
@@ -1201,22 +1197,16 @@ resource "google_cloud_run_v2_service" "default" {
   }
   default_uri_disabled = true
   template {
+    health_check_disabled = true
     containers {
       name = "container-1"
       image = "us-docker.pkg.dev/cloudrun/container/hello"
     }
   }
-  lifecycle {
-    ignore_changes = [
-      launch_stage,
-    ]
-  }
 }
 
 `, context)
 }
-
-{{ end }}
 
 {{ if ne $.TargetVersionName `ga` -}}
 func TestAccCloudRunV2Service_cloudrunv2ServiceMeshUpdate(t *testing.T) {
@@ -1766,7 +1756,6 @@ resource "google_cloud_run_v2_service" "default" {
     generated-by = "magic-modules"
   }
   ingress = "INGRESS_TRAFFIC_ALL"
-  launch_stage = "BETA"
   scaling {
     scaling_mode = "MANUAL"
     manual_instance_count = 2
@@ -1791,7 +1780,6 @@ resource "google_cloud_run_v2_service" "default" {
     generated-by = "magic-modules"
   }
   ingress = "INGRESS_TRAFFIC_ALL"
-  launch_stage = "BETA"
   scaling {
     scaling_mode = "MANUAL"
     manual_instance_count = 10

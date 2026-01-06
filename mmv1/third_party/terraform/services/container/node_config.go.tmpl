@@ -1,10 +1,13 @@
 package container
 
 import (
+	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -74,6 +77,21 @@ func schemaContainerdConfig() *schema.Schema {
 						}},
 					},
 				}},
+			},
+			"writable_cgroups": {
+				Type:        schema.TypeList,
+				Description: `Parameters for writable cgroups configuration.`,
+				Optional:    true,
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:        schema.TypeBool,
+							Required:    true,
+							Description: `Whether writable cgroups are enabled.`,
+						},
+					},
+				},
 			},
 		}},
 	}
@@ -659,6 +677,7 @@ func schemaNodeConfig() *schema.Schema {
 							},
 							"cpu_cfs_quota": {
 								Type:     schema.TypeBool,
+								Computed: true,
 								Optional: true,
 								Description: `Enable CPU CFS quota enforcement for containers that specify CPU limits.`,
 							},
@@ -869,6 +888,23 @@ func schemaNodeConfig() *schema.Schema {
 								ValidateFunc:     validation.StringInSlice([]string{"CGROUP_MODE_UNSPECIFIED", "CGROUP_MODE_V1", "CGROUP_MODE_V2"}, false),
 								Description:      `cgroupMode specifies the cgroup mode to be used on the node.`,
 								DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("CGROUP_MODE_UNSPECIFIED"),
+							},
+							"node_kernel_module_loading": {
+								Type:     schema.TypeList,
+								Optional: true,
+								MaxItems: 1,
+								Description: `The settings for kernel module loading.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"policy": {
+											Type:        schema.TypeString,
+											Optional:    true,
+											ValidateFunc: validation.StringInSlice([]string{"POLICY_UNSPECIFIED", "ENFORCE_SIGNED_MODULES", "DO_NOT_ENFORCE_SIGNED_MODULES"}, false),
+											Description: `The policy for kernel module loading.`,
+											DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("POLICY_UNSPECIFIED"),
+										},
+									},
+								},
 							},
 							"transparent_hugepage_enabled": {
 								Type:             schema.TypeString,
@@ -1157,8 +1193,8 @@ func schemaNodePoolAutoConfigNodeKubeletConfig() *schema.Schema {
 	}
 }
 
-// Separate since this currently only supports a single value -- a subset of
-// the overall LinuxNodeConfig
+// Separate since this currently only supports a subset of the overall
+// LinuxNodeConfig
 func schemaNodePoolAutoConfigLinuxNodeConfig() *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeList,
@@ -1174,6 +1210,23 @@ func schemaNodePoolAutoConfigLinuxNodeConfig() *schema.Schema {
 					ValidateFunc:     validation.StringInSlice([]string{"CGROUP_MODE_UNSPECIFIED", "CGROUP_MODE_V1", "CGROUP_MODE_V2"}, false),
 					Description:      `cgroupMode specifies the cgroup mode to be used on the node.`,
 					DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("CGROUP_MODE_UNSPECIFIED"),
+				},
+				"node_kernel_module_loading": {
+					Type:     schema.TypeList,
+					Optional: true,
+					MaxItems: 1,
+					Description: `The settings for kernel module loading.`,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"policy": {
+								Type:        schema.TypeString,
+								Optional:    true,
+								ValidateFunc: validation.StringInSlice([]string{"POLICY_UNSPECIFIED", "ENFORCE_SIGNED_MODULES", "DO_NOT_ENFORCE_SIGNED_MODULES"}, false),
+								Description: `The policy for kernel module loading.`,
+								DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("POLICY_UNSPECIFIED"),
+							},
+						},
+					},
 				},
 			},
 		},
@@ -1213,7 +1266,7 @@ func expandNodeConfigDefaults(configured interface{}) *container.NodeConfigDefau
 	return nodeConfigDefaults
 }
 
-func expandNodeConfig(v interface{}) *container.NodeConfig {
+func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *container.NodeConfig {
 	nodeConfigs := v.([]interface{})
 	nc := &container.NodeConfig{
 		// Defaults can't be set on a list/set in the schema, so set the default on create here.
@@ -1496,6 +1549,34 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 
 	if v, ok := nodeConfig["kubelet_config"]; ok {
 		nc.KubeletConfig = expandKubeletConfig(v)
+
+		// start cpu_cfs_quota fix https://github.com/hashicorp/terraform-provider-google/issues/15767
+		// this makes the field conditional on appearance in configuration. This allows the API `true` default
+		// to override null, where currently we force-send null as false, which is wrong.
+		rawConfigNPRoot := d.GetRawConfig()
+		// if we have a prefix, we're in `node_pool.N.` in GKE Cluster. Traverse the RawConfig object to reach that
+		// root, at which point local references work going forwards.
+		if prefix != "" {
+			parts := strings.Split(prefix, ".") // "node_pool.N." -> ["node_pool" "N", ""]
+			npIndex, err := strconv.Atoi(parts[1])
+			if err != nil { // no error return from expander
+			    panic(fmt.Errorf("unexpected format for node pool path prefix: %w. value: %v", err, prefix))
+			}
+
+			rawConfigNPRoot = rawConfigNPRoot.GetAttr("node_pool").Index(cty.NumberIntVal(int64(npIndex)))
+		}
+
+		if vNC := rawConfigNPRoot.GetAttr("node_config"); vNC.LengthInt() > 0 {
+			if vKC := vNC.Index(cty.NumberIntVal(0)).GetAttr("kubelet_config"); vKC.LengthInt() > 0 {
+				v := vKC.Index(cty.NumberIntVal(0)).GetAttr("cpu_cfs_quota");
+				if v == cty.NullVal(cty.Bool) {
+				    nc.KubeletConfig.CpuCfsQuota = true
+				} else if v.False() { // force-send explicit false to API
+					nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "CpuCfsQuota")
+				}
+			}
+		}
+		// end cpu_cfs_quota fix
 	}
 
 	if v, ok := nodeConfig["linux_node_config"]; ok {
@@ -1640,7 +1721,6 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 	}
 	if cpuCfsQuota, ok := cfg["cpu_cfs_quota"]; ok {
 		kConfig.CpuCfsQuota = cpuCfsQuota.(bool)
-		kConfig.ForceSendFields = append(kConfig.ForceSendFields, "CpuCfsQuota")
 	}
 	if cpuCfsQuotaPeriod, ok := cfg["cpu_cfs_quota_period"]; ok {
 		kConfig.CpuCfsQuotaPeriod = cpuCfsQuotaPeriod.(string)
@@ -1847,6 +1927,10 @@ func expandLinuxNodeConfig(v interface{}) *container.LinuxNodeConfig {
 	if v, ok := cfg["hugepages_config"]; ok {
 		linuxNodeConfig.Hugepages = expandHugepagesConfig(v)
 	}
+	
+	if v, ok := cfg["node_kernel_module_loading"]; ok {
+		linuxNodeConfig.NodeKernelModuleLoading = expandNodeKernelModuleLoading(v)
+	}
 
 	return linuxNodeConfig
 }
@@ -1916,6 +2000,28 @@ func expandHugepagesConfig(v interface{}) *container.HugepagesConfig {
 	return hugepagesConfig
 }
 
+func expandNodeKernelModuleLoading(v interface{}) *container.NodeKernelModuleLoading {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.NodeKernelModuleLoading{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	NodeKernelModuleLoading := &container.NodeKernelModuleLoading{}
+
+	if v, ok := cfg["policy"]; ok {
+		NodeKernelModuleLoading.Policy = v.(string)
+	}
+
+	return NodeKernelModuleLoading
+}
+
 func expandContainerdConfig(v interface{}) *container.ContainerdConfig {
 	if v == nil {
 		return nil
@@ -1931,6 +2037,7 @@ func expandContainerdConfig(v interface{}) *container.ContainerdConfig {
 
 	cc := &container.ContainerdConfig{}
 	cc.PrivateRegistryAccessConfig = expandPrivateRegistryAccessConfig(cfg["private_registry_access_config"])
+	cc.WritableCgroups = expandWritableCgroups(cfg["writable_cgroups"])
 	return cc
 }
 
@@ -2000,6 +2107,26 @@ func expandGCPSecretManagerCertificateConfig(v interface{}) *container.GCPSecret
 		gcpSMConfig.SecretUri = v.(string)
 	}
 	return gcpSMConfig
+}
+
+func expandWritableCgroups(v interface{}) *container.WritableCgroups {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.WritableCgroups{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	wcg := &container.WritableCgroups{}
+	if enabled, ok := cfg["enabled"]; ok {
+		wcg.Enabled = enabled.(bool)
+	}
+	return wcg
 }
 
 func expandSoleTenantConfig(v interface{}) *container.SoleTenantConfig {
@@ -2570,6 +2697,7 @@ func flattenLinuxNodeConfig(c *container.LinuxNodeConfig) []map[string]interface
 			"hugepages_config":             flattenHugepagesConfig(c.Hugepages),
 			"transparent_hugepage_enabled": c.TransparentHugepageEnabled,
 			"transparent_hugepage_defrag":  c.TransparentHugepageDefrag,
+			"node_kernel_module_loading":   flattenNodeKernelModuleLoading(c.NodeKernelModuleLoading),
 		})
 	}
 	return result
@@ -2596,6 +2724,16 @@ func flattenHugepagesConfig(c *container.HugepagesConfig) []map[string]interface
 	return result
 }
 
+func flattenNodeKernelModuleLoading(c *container.NodeKernelModuleLoading) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"policy": c.Policy,
+		})
+	}
+	return result
+}
+
 func flattenContainerdConfig(c *container.ContainerdConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c == nil {
@@ -2604,6 +2742,9 @@ func flattenContainerdConfig(c *container.ContainerdConfig) []map[string]interfa
 	r := map[string]interface{}{}
 	if c.PrivateRegistryAccessConfig != nil {
 		r["private_registry_access_config"] = flattenPrivateRegistryAccessConfig(c.PrivateRegistryAccessConfig)
+	}
+	if c.WritableCgroups != nil {
+		r["writable_cgroups"] = flattenWritableCgroups(c.WritableCgroups)
 	}
 	return append(result, r)
 }
@@ -2660,6 +2801,17 @@ func flattenGCPSecretManagerCertificateConfig(c *container.GCPSecretManagerCerti
 	}
 	r := map[string]interface{}{
 		"secret_uri": c.SecretUri,
+	}
+	return append(result, r)
+}
+
+func flattenWritableCgroups(c *container.WritableCgroups) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c == nil {
+		return result
+	}
+	r := map[string]interface{}{
+		"enabled": c.Enabled,
 	}
 	return append(result, r)
 }

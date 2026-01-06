@@ -33,6 +33,8 @@ update_mask: true
 exclude_delete: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/ekmConnections/{{name}}'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -41,7 +43,6 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   iam_conditions_request_type: 'QUERY_PARAM_NESTED'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/ekmConnections/{{name}}'
 custom_code:

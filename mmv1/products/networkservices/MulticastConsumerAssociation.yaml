@@ -1,0 +1,149 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: MulticastConsumerAssociation
+description: Create a multicast consumer association in the specified location
+  of the current project.
+references:
+  guides:
+    'Create Multicast Consumer Association': 'https://docs.cloud.google.com/vpc/docs/multicast/enable-consumer-network#add-consumer'
+  api: 'https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastConsumerAssociations'
+base_url: projects/{{project}}/locations/{{location}}/multicastConsumerAssociations
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/multicastConsumerAssociations/{{multicast_consumer_association_id}}
+create_url: projects/{{project}}/locations/{{location}}/multicastConsumerAssociations?multicastConsumerAssociationId={{multicast_consumer_association_id}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/multicastConsumerAssociations/{{multicast_consumer_association_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/multicastConsumerAssociations/{{multicast_consumer_association_id}}
+examples:
+  - name: network_services_multicast_consumer_association_basic
+    primary_resource_id: mca_test
+    vars:
+      network_name: test-network-mca
+      domain_name: test-domain-mca
+      domain_activation_name: test-domain-activation-mca
+      consumer_association_name: test-consumer-association-mca
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+    - update
+  type: OpAsync
+  result:
+    resource_inside_response: true
+  include_project: false
+autogen_status: TXVsdGljYXN0Q29uc3VtZXJBc3NvY2lhdGlvbg==
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: multicastConsumerAssociationId
+    type: String
+    description: |-
+      A unique name for the multicast consumer association.
+      The name is restricted to letters, numbers, and hyphen, with the first
+      character a letter, and the last a letter or a number. The name must not
+      exceed 48 characters.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: createTime
+    type: String
+    description: |-
+      [Output only] The timestamp when the multicast consumer association was
+      created.
+    output: true
+  - name: description
+    type: String
+    description: An optional text description of the multicast consumer association.
+  - name: labels
+    type: KeyValueLabels
+    description: Labels as key-value pairs
+  - name: multicastDomainActivation
+    type: String
+    description: |-
+      The resource name of the multicast domain activation that is in the
+      same zone as this multicast consumer association.
+      Use the following format:
+      // `projects/*/locations/*/multicastDomainActivations/*`.
+    immutable: true
+    required: true
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the multicast consumer association.
+      Use the following format:
+      `projects/*/locations/*/multicastConsumerAssociations/*`.
+    output: true
+  - name: network
+    type: String
+    description: |-
+      The resource name of the multicast consumer VPC network.
+      Use following format:
+      `projects/{project}/locations/global/networks/{network}`.
+    immutable: true
+    required: true
+  - name: placementPolicy
+    type: String
+    description: |-
+      [Output only] A Compute Engine (placement
+      policy)[https://cloud.google.com/compute/docs/instances/placement-policies-overview]
+      that can be used to place virtual machine (VM) instances as multicast
+      consumers close to the multicast infrastructure created for this domain,
+      on a best effort basis.
+    output: true
+  - name: state
+    type: NestedObject
+    description: The multicast resource's state.
+    output: true
+    properties:
+      - name: state
+        type: String
+        description: |-
+          The state of the multicast resource.
+          Possible values:
+          CREATING
+          ACTIVE
+          DELETING
+          DELETE_FAILED
+          UPDATING
+          UPDATE_FAILED
+          INACTIVE
+        output: true
+  - name: uniqueId
+    type: String
+    description: |-
+      [Output only] The Google-generated UUID for the resource. This value is
+      unique across all multicast consumer association resources. If a consumer
+      association is deleted and another with the same name is created, the new
+      consumer association is assigned a different unique_id.
+    output: true
+  - name: updateTime
+    type: String
+    description: |-
+      [Output only] The timestamp when the Multicast Consumer Association was
+      most recently updated.
+    output: true

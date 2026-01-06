@@ -52,6 +52,14 @@ examples:
       network_name: 'example-network'
       deployment_group_id: 'example-dg'
       endpoint_group_id: 'example-eg'
+  - name: 'network_security_mirroring_endpoint_group_broker_basic'
+    config_path: 'templates/terraform/examples/network_security_mirroring_endpoint_group_broker_basic.tf.tmpl'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      network_name: 'example-network'
+      deployment_group_id: 'example-dg'
+      endpoint_group_id: 'example-eg'
 parameters:
   - name: 'location'
     type: String
@@ -99,8 +107,24 @@ properties:
       The deployment group that this DIRECT endpoint group is connected to, for example:
       `projects/123456789/locations/global/mirroringDeploymentGroups/my-dg`.
       See https://google.aip.dev/124.
-    required: true
     immutable: true
+    exactly_one_of:
+      - mirroring_deployment_group
+      - mirroring_deployment_groups
+  - name: 'mirroringDeploymentGroups'
+    type: Array
+    description: |-
+      A list of the deployment groups that this BROKER endpoint group is
+      connected to, for example:
+      `projects/123456789/locations/global/mirroringDeploymentGroups/my-dg`.
+      See https://google.aip.dev/124.
+    min_version: 'beta'
+    immutable: true
+    item_type:
+      type: String
+    exactly_one_of:
+      - mirroring_deployment_group
+      - mirroring_deployment_groups
   - name: 'state'
     type: String
     description: |-
@@ -123,6 +147,17 @@ properties:
       operation (e.g. adding a new association to the group).
       See https://google.aip.dev/128.
     output: true
+  - name: 'type'
+    type: String
+    description: |-
+      The type of the endpoint group.
+      If left unspecified, defaults to DIRECT.
+      Possible values:
+      DIRECT
+      BROKER
+    min_version: 'beta'
+    default_value: 'DIRECT'
+    immutable: true
   - name: description
     type: String
     description: |-

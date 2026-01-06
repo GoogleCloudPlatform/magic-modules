@@ -9,5 +9,6 @@ resource "google_beyondcorp_security_gateway_application" "{{$.PrimaryResourceId
   application_id = "{{index $.Vars "application_name"}}"
   endpoint_matchers {
     hostname = "google.com"
+    ports = [80, 443]
   }
 }

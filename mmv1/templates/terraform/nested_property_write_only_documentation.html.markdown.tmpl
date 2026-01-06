@@ -1,9 +1,9 @@
 {{- if $.WriteOnlyProperties }}
-<a name="nested_{{ underscore $.Name }}"></a>The `{{ underscore $.Name }}` block {{ if $.Output }}contains{{ else }}supports{{ end }}:
+<a name="nested_{{ join $.Lineage "_" }}"></a>The `{{ underscore $.Name }}` block {{ if $.Output }}contains{{ else }}supports{{ end }}:
 {{ "" }}
   {{- if $.NestedProperties }}
     {{- range $np := $.NestedProperties }}
-      {{- if $np.WriteOnlyLegacy }}
+      {{- if or $np.WriteOnlyLegacy $np.WriteOnly }}
 {{- trimTemplate "property_documentation.html.markdown.tmpl" $np -}}
       {{- end -}}
     {{- end -}}

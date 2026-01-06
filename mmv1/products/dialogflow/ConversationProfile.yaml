@@ -18,7 +18,7 @@ description: |
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/dialogflow/docs/'
-  api: 'https://cloud.google.com/dialogflow/docs/reference/rest/v2beta1/projects/conversationProfiles'
+  api: 'https://docs.cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.conversationProfiles'
 docs:
 id_format: '{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/conversationProfiles'
@@ -44,6 +44,11 @@ examples:
     primary_resource_id: 'basic_profile'
     vars:
       profile_name: 'dialogflow-profile'
+  - name: 'dialogflow_conversation_profile_recognition_result_notification'
+    primary_resource_id: 'recognition_result_notification_profile'
+    vars:
+      profile_name: 'dialogflow-profile'
+      topic_name: 'recognition-result-notification'
 parameters:
   - name: 'location'
     type: String
@@ -536,7 +541,7 @@ properties:
         description: |
           Whether to log conversation events
   - type: NestedObject
-    name: newMessageEventNotificationConfig
+    name: 'newMessageEventNotificationConfig'
     description: |
       Pub/Sub topic on which to publish new agent assistant events.
       Expects the format "projects/<Project ID>/locations/<Location ID>/topics/<Topic ID>"
@@ -656,3 +661,23 @@ properties:
               - SSML_VOICE_GENDER_MALE
               - SSML_VOICE_GENDER_FEMALE
               - SSML_VOICE_GENDER_NEUTRAL
+  - type: NestedObject
+    name: 'newRecognitionResultNotificationConfig'
+    description: |
+      Optional. Configuration for publishing transcription intermediate results. Event will be sent in format of ConversationEvent. If configured, the following information will be populated as ConversationEvent Pub/Sub message attributes: - "participant_id" - "participantRole" - "message_id"
+    properties:
+      - type: string
+        name: 'topic'
+        description: |
+          Name of the Pub/Sub topic to publish conversation events like CONVERSATION_STARTED as serialized ConversationEvent protos.
+          For telephony integration to receive notification, make sure either this topic is in the same project as the conversation or you grant service-<Conversation Project Number>@gcp-sa-dialogflow.iam.gserviceaccount.com the Dialogflow Service Agent role in the topic project.
+          For chat integration to receive notification, make sure API caller has been granted the Dialogflow Service Agent role for the topic.
+          Format: projects/<Project ID>/locations/<Location ID>/topics/<Topic ID>.
+      - name: 'messageFormat'
+        type: Enum
+        description: |
+          Format of message.
+        enum_values:
+          - 'MESSAGE_FORMAT_UNSPECIFIED'
+          - 'PROTO'
+          - 'JSON'

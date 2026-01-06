@@ -47,14 +47,14 @@ examples:
       wasm_plugin_name: 'my-wasm-plugin'
       plugin_package_name: 'my-wasm-plugin-data'
       repository_name: 'my-artifact-registry-docker-repository'
-    skip_vcr: true
+    exclude_test: true
   - name: 'wasm_plugin_basic_generic_repository'
     primary_resource_id: 'wasm_plugin'
     vars:
       wasm_plugin_name: 'my-wasm-plugin'
       plugin_package_name: 'my-wasm-plugin-data'
       repository_name: 'my-artifact-registry-generic-repository'
-    skip_vcr: true
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String

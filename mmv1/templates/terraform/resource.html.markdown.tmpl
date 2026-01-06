@@ -41,7 +41,7 @@ To get more information about {{$.Name}}, see:
     * [{{$title}}]({{$link}})
 		{{- end }}
 	{{- end }}
-	{{- if gt (len $.Examples) 0}}
+	{{- if or (gt (len $.Examples) 0) (gt (len $.Samples) 0) }}
 {{ "" }}
 	{{- end }}
 {{- else }}
@@ -60,7 +60,7 @@ values will be stored in the raw state as plain text: {{ $.SensitivePropsToStrin
 {{ end }}
 {{- if $.WriteOnlyProps }}
 ~> **Note:**  All arguments marked as write-only values will not be stored in the state: {{ $.WriteOnlyPropsToString }}.
-[Read more about Write-only Attributes](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments).
+[Read more about Write-only Arguments](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments).
 {{ end }}
 {{- if $.Examples }}
 	{{- range $e := $.Examples }}
@@ -82,19 +82,41 @@ values will be stored in the raw state as plain text: {{ $.SensitivePropsToStrin
 	{{- end }}
 {{- end }}
 
+{{- if $.Samples }}
+	{{- range $sample := $.Samples }}
+		{{- range $step := $sample.Steps }}
+			{{- if not $step.ExcludeDocs }}
+				{{- if not (or $sample.ExcludeTest $step.TestEnvVars) }}
+<div class = "oics-button" style="float: right; margin: 0 0 -15px">
+  <a href="{{ $step.OiCSLink }}" target="_blank">
+    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
+  </a>
+</div>
+				{{- end }}
+## Example Usage - {{ title (camelize $step.Name "upper" )}}
+
+
+```hcl
+{{ $step.DocumentationHCLText -}}
+	```
+			{{- end }}
+		{{- end }}
+	{{- end }}
+{{- end }}
+
 ## Argument Reference
 
 The following arguments are supported:
 {{ "" }}
 {{ "" }}
 {{- range $p := $.RootProperties }}
-	{{- if and $p.Required (not $p.WriteOnlyLegacy) }}
+	{{- if $p.Required }}
 {{- trimTemplate "property_documentation.html.markdown.tmpl" $p -}}
 	{{- end }}
 {{- end }}
 {{ "" }}
 {{- range $p := $.RootProperties }}
-	{{- if and (not $p.Required) (not $p.Output) (not $p.WriteOnlyLegacy) }}
+	{{- if and (not $p.Required) (not $p.Output) }}
 {{- trimTemplate "property_documentation.html.markdown.tmpl" $p -}}
 	{{- end }}
 {{- end }}
@@ -124,19 +146,6 @@ The following arguments are supported:
 	{{- end}}
 {{- end }}
 {{- "" }}
-{{- if $.WriteOnlyProps }}
-## Ephemeral Attributes Reference
-
-The following write-only attributes are supported:
-{{ range $p := $.RootProperties }}
-    {{- if $p.WriteOnlyLegacy }}
-{{- trimTemplate "property_documentation.html.markdown.tmpl" $p }}
-    {{- end}}
-{{- end }}
-{{ range $p := $.AllUserProperties }}
-{{- trimTemplate "nested_property_write_only_documentation.html.markdown.tmpl" $p }}
-{{- end }}
-{{- end }}
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:

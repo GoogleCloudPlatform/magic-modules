@@ -1,0 +1,25 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "openapi_generate",
+    srcs = ["parser.go"],
+    embedsrcs = ["header.txt"],
+    importpath = "github.com/GoogleCloudPlatform/magic-modules/mmv1/openapi_generate",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//mmv1/api",
+        "//mmv1/api/product",
+        "//mmv1/api/resource",
+        "//mmv1/google",
+        "@com_github_getkin_kin_openapi//openapi3",
+        "@in_gopkg_yaml_v3//:yaml_v3",
+    ],
+)
+
+go_test(
+    name = "openapi_generate_test",
+    srcs = ["parser_test.go"],
+    embed = [":openapi_generate"],
+    embedsrcs = ["test_data/test_api.yaml"],
+    deps = ["@com_github_getkin_kin_openapi//openapi3"],
+)

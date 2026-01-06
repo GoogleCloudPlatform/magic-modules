@@ -1,31 +1,27 @@
 ---
 subcategory: "Backup and DR Service"
 description: |-
-  Get information about a list of Backup and DR BackupPlanAssociations for a specific resource type .
+  Get information about a list of Backup and DR BackupPlanAssociations.
 ---
 
 # google_backup_dr_backup_plan_associations
 
-Provides a list of Backup and DR BackupPlanAssociations for a specific resource type.
-
-~> **Warning:** This datasource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta datasources.
+Provides a list of Backup and DR BackupPlanAssociations.
 
 ## Example Usage
 
 ```hcl
-data "google_backup_dr_backup_plan_associations" "compute_instance_associations" {
+data "google_backup_dr_backup_plan_associations" "all_associations" {
   location      = "us-central1"
-  resource_type = "compute.googleapis.com/Instance"
 }
+```
 
 ## Argument Reference
 
 The following arguments are supported:
 
 * `location` - (Required)The location where the Backup Plan Association resources reside.
-* `resource_type` - (Required) The resource type of the workload. For example, sqladmin.googleapis.com/Instance or compute.googleapis.com/Instance.
-
+* `resource_type` - (Optional, Deprecated) The resource type of the workload. For example, sqladmin.googleapis.com/Instance or compute.googleapis.com/Instance. `resource_type` is deprecated and will be removed in a future major release.
 - - -
 
 * `project` - (Optional) The project in which the resource belongs. If it
@@ -43,6 +39,13 @@ Each entry in the `associations` list contains the following fields:
 *   `name` - The full name of the backup plan association resource.
 *   `resource` - The resource to which the backup plan is applied.
 *   `backup_plan` - The backup plan to which the resource is attached.
-*   `create_time` - The time when the association was created.
+*   `data_source` - The resource name of data source which will be used as storage location for backups taken.
+*   `rules_config_info` - A list containing information about the backup rules. Each object in the list contains:
+    *   `rule_id` - Backup Rule id fetched from backup plan.
+    *   `last_backup_state` - State of last backup taken.
+    *   `last_successful_backup_consistency_time` - The point in time when the last successful backup was captured from the source.
+    *   `last_backup_error` - A block containing details of the last backup error, if any.
+        *   `code` - The status code, which should be an enum value of [google.rpc.Code].
+        *   `message` - A developer-facing error message.
 
 See [google_backup_dr_backup_plan_associations](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/backup_dr_backup_plan_associations) resource for details of the available attributes.

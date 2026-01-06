@@ -17,29 +17,59 @@
 package {{ lower $.ProductMetadata.Name }}
 
 import (
-{{/* We list all the v2 imports here and unstable imports, because we run 'goimports' to guess the correct
-     set of imports, which will never guess the major version correctly. */ -}}
-  "github.com/apparentlymart/go-cidr/cidr"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
-  "google.golang.org/api/bigtableadmin/v2"
-  "google.golang.org/api/googleapi"
+  "encoding/base64"
+  "fmt"
+  "log"
+  "reflect"
+  "regexp"
+  "strconv"
+  "strings"
+  "time"
 
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters/cai"
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tgcresource"
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tpgresource"
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
-  transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/verify"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/converters/cai"
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tgcresource"
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
+  transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
+
+  "google.golang.org/api/googleapi"
+)
+
+var (
+    _ = base64.StdEncoding
+    _ = fmt.Sprintf
+    _ = log.Print
+    _ = reflect.ValueOf
+    _ = regexp.Match
+    _ = strconv.Atoi
+    _ = strings.Trim
+    _ = diag.Diagnostic{}
+    _ = customdiff.All
+    _ = id.UniqueId
+    _ = logging.LogLevel
+    _ = retry.Retry
+    _ = schema.Noop
+    _ = structure.ExpandJsonFromString
+    _ = time.Now
+    _ = validation.All
+    _ = terraform.State{}
+    _ = tgcresource.RemoveTerraformAttributionLabel
+    _ = tpgresource.GetRegion
+    _ = transport_tpg.Config{}
+    _ = verify.ProjectRegex
+    _ = googleapi.Error{}
 )
 
 {{- $caiProductBaseUrl := $.CaiProductBaseUrl }}
@@ -53,7 +83,7 @@ func {{ $.ResourceName -}}Tfplan2caiConverter() cai.Tfplan2caiConverter {
 }
 
 func Get{{ $.ResourceName -}}CaiAssets(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]caiasset.Asset, error) {
-    name, err := cai.AssetName(d, config, "{{ $.CaiAssetNameTemplate $productBackendName }}")
+    name, err := cai.AssetName(d, config, "{{ $.GetCaiAssetNameTemplate }}")
     if err != nil {
         return []caiasset.Asset{}, err
     }
@@ -104,6 +134,9 @@ func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, conf
     if err != nil {
         return nil, err
     }
+    if obj == nil {
+        obj = make(map[string]interface{})
+    }
 {{- end }}
 
 {{- if $.CustomCode.TgcEncoder }}
@@ -115,13 +148,13 @@ func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, conf
 
 {{if and $.CustomCode.Encoder (not $.TGCIgnoreTerraformEncoder) -}}
 func resource{{ $.ResourceName -}}Encoder(d tpgresource.TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-{{ $.CustomTemplate $.CustomCode.Encoder false -}}
+{{ customTemplate $ $.CustomCode.Encoder false -}}
 }
 {{- end}}
 
 {{if $.CustomCode.TgcEncoder -}}
 func resource{{ $.ResourceName -}}TgcEncoder(d tpgresource.TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-{{ $.CustomTemplate $.CustomCode.TgcEncoder false -}}
+{{ customTemplate $ $.CustomCode.TgcEncoder false -}}
 }
 {{- end}}
 

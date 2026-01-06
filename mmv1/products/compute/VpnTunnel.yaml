@@ -177,7 +177,7 @@ properties:
       gateway and the peer VPN gateway.
     required: true
     ignore_read: true
-    sensitive: true
+    write_only: true
   - name: 'sharedSecretHash'
     type: String
     description: |
@@ -242,25 +242,21 @@ properties:
           - name: 'encryption'
             type: Array
             description: 'Encryption algorithms.'
-            is_set: true
             item_type:
               type: String
           - name: 'integrity'
             type: Array
             description: 'Integrity algorithms.'
-            is_set: true
             item_type:
               type: String
           - name: 'prf'
             type: Array
             description: 'Pseudo-random functions.'
-            is_set: true
             item_type:
               type: String
           - name: 'dh'
             type: Array
             description: 'Diffie-Hellman groups.'
-            is_set: true
             item_type:
               type: String
       - name: 'phase2'
@@ -270,18 +266,15 @@ properties:
           - name: 'encryption'
             type: Array
             description: 'Encryption algorithms.'
-            is_set: true
             item_type:
               type: String
           - name: 'integrity'
             type: Array
             description: 'Integrity algorithms.'
-            is_set: true
             item_type:
               type: String
           - name: 'pfs'
             type: Array
             description: 'Perfect forward secrecy groups.'
-            is_set: true
             item_type:
               type: String

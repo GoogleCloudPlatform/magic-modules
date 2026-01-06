@@ -26,6 +26,10 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
+timeouts:
+  insert_minutes: 120
+  update_minutes: 60
+  delete_minutes: 60
 sweeper:
   url_substitutions:
     - location: "us-central1-a"
@@ -45,8 +49,8 @@ async:
   operation:
     timeouts:
       insert_minutes: 120
-      update_minutes: 20
-      delete_minutes: 20
+      update_minutes: 60
+      delete_minutes: 60
     base_url: '{{op_id}}'
   actions:
     - create
@@ -112,14 +116,7 @@ properties:
     type: String
     description: |-
       The state of the instance.
-      Possible values:
-      STATE_UNSPECIFIED
-      ACTIVE
-      CREATING
-      DELETING
-      UPGRADING
-      REPAIRING
-      STOPPED
+      Please see https://cloud.google.com/managed-lustre/docs/reference/rest/v1/projects.locations.instances#state for values
     output: true
   - name: mountPoint
     type: String
@@ -146,3 +143,71 @@ properties:
     type: String
     description: Identifier. The name of the instance.
     output: true
+  - name: placementPolicy
+    type: String
+    description: |-
+        The placement policy name for the instance in the format of
+        projects/{project}/locations/{location}/resourcePolicies/{resource_policy}
+  - name: kmsKey
+    type: String
+    description: |-
+      The KMS key id to use for encryption of the Lustre instance.
+    immutable: true
+  - name: stateReason
+    type: String
+    description: |-
+        The reason why the instance is in a certain state.
+    output: true
+  - name: accessRulesOptions
+    type: NestedObject
+    description: |-
+      Access control rules for the Lustre instance. Configures default root
+      squashing behavior and specific access rules based on IP addresses.
+    properties:
+      - name: defaultSquashMode
+        type: Enum
+        required: true
+        description: |-
+          Set to "ROOT_SQUASH" to enable root squashing by default.
+          Other values include "NO_SQUASH".
+        enum_values:
+          - 'ROOT_SQUASH'
+          - 'NO_SQUASH'
+      - name: defaultSquashUid
+        type: Integer
+        description: |-
+          The UID to map the root user to when root squashing is enabled
+          (e.g., 65534 for nobody).
+      - name: defaultSquashGid
+        type: Integer
+        description: |-
+          The GID to map the root user to when root squashing is enabled
+          (e.g., 65534 for nobody).
+      - name: accessRules
+        type: Array
+        description: |-
+          An array of access rule exceptions. Each rule defines IP address ranges
+          that should have different squash behavior than the default.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: name
+              type: String
+              description: |-
+                A unique identifier for the access rule.
+              required: true
+            - name: ipAddressRanges
+              type: Array
+              description: |-
+                An array of IP address strings or CIDR ranges that this rule applies to.
+              required: true
+              item_type:
+                type: String
+            - name: squashMode
+              type: Enum
+              description: |-
+                The squash mode for this specific rule. Currently, only "NO_SQUASH"
+                is supported for exceptions.
+              required: true
+              enum_values:
+                - 'NO_SQUASH'

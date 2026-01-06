@@ -13,7 +13,6 @@
 
 ---
 name: 'Instance'
-# plugin_framework: true
 description: |
   Represents a Data Fusion instance.
 references:
@@ -39,9 +38,8 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
-    - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
+    - 'projects/{{project}}/locations/{{region}}/instances/{{name}}'
     - '{{name}}'
 custom_code:
   constants: 'templates/terraform/constants/data_fusion_instance_option.go.tmpl'

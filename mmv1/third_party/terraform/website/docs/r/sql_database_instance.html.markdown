@@ -270,6 +270,46 @@ resource "google_sql_database_instance" "main" {
 }
 ```
 
+### Cloud SQL Instance created with backupdr_backup
+~> **NOTE:** For restoring from a backupdr_backup, note that the backup must be in active state. List down the backups using `google_backup_dr_backup`. Replace `backupdr_backup_full_path` with the backup name.
+
+```hcl
+resource "google_sql_database_instance" "instance" {
+  name             = "main-instance"
+  database_version = "MYSQL_8_0"
+  settings {
+    tier    = "db-f1-micro"
+    backup_configuration {
+      enabled = true
+      binary_log_enabled = true
+    }
+    backupdr_backup = "backupdr_backup_full_path"
+  }
+}
+```
+
+### Cloud SQL Instance created using point_in_time_restore
+~> **NOTE:** Replace `backupdr_datasource` with the full datasource path, `time_stamp` should be in the format of `YYYY-MM-DDTHH:MM:SSZ`.
+
+```hcl
+resource "google_sql_database_instance" "instance" {
+  name             = "main-instance"
+  database_version = "MYSQL_8_0"
+  settings {
+    tier    = "db-f1-micro"
+    backup_configuration {
+      enabled = true
+      binary_log_enabled = true
+    }
+  }
+  point_in_time_restore_context {
+   datasource      = "backupdr_datasource"
+   target_instance = "target_instance_name"
+   point_in_time   = "time_stamp"
+ }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -313,6 +353,12 @@ includes an up-to-date reference of supported versions.
 
 * `root_password` - (Optional) Initial root password. Can be updated. Required for MS SQL Server.
 
+* `root_password_wo` - (Optional) Initial root password. Can be updated. Required for MS SQL Server. **Note**: This property is write-only and will not be read from the API.
+
+  ~> **Note:** One of `root_password` or `root_password_wo` can only be set.
+
+* `root_password_wo_version` - Triggers update of `root_password_wo` write-only. Increment this value when an update to `root_password_wo` is needed. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)
+
 * `encryption_key_name` - (Optional)
     The full path to the encryption key used for the CMEK disk encryption.  Setting
     up disk encryption currently requires manual steps outside of Terraform.
@@ -328,9 +374,9 @@ includes an up-to-date reference of supported versions.
     or `terraform destroy` that would delete the instance will fail.
     When the field is set to false, deleting the instance is allowed.
 
-* `final_backup_description` - (Optional) The description of final backup. Only set this field when `final_backup_config.enabled` is true.
-
   ~> **NOTE:** This flag only protects instances from deletion within Terraform. To protect your instances from accidental deletion across all surfaces (API, gcloud, Cloud Console and Terraform), use the API flag `settings.deletion_protection_enabled`.
+
+* `final_backup_description` - (Optional) The description of final backup. Only set this field when `final_backup_config.enabled` is true.
 
 * `restore_backup_context` - (optional) The context needed to restore the database to a backup run. This field will
     cause Terraform to trigger the database to restore from the backup run indicated. The configuration is detailed below.
@@ -345,6 +391,11 @@ includes an up-to-date reference of supported versions.
 * `clone` - (Optional) The context needed to create this instance as a clone of another instance. When this field is set during
     resource creation, Terraform will attempt to clone another instance as indicated in the context. The
     configuration is detailed below.
+
+* `point_in_time_restore_context` - (Optional) The point_in_time_restore_context needed for performing a point-in-time recovery of an instance managed by Google Cloud Backup and Disaster Recovery. This field will
+    cause Terraform to trigger the database to restore to a point in time indicated. The configuration is detailed below.
+    **NOTE:** Restoring from a backup is an imperative action and not recommended via Terraform. Adding or modifying this
+    block during resource creation/update will trigger the restore action after the resource is created/updated.
 
 The `settings` block supports:
 
@@ -390,7 +441,7 @@ The `settings` block supports:
 
 * `data_disk_provisioned_throughput` - (Optional, Beta) Provisioned throughput measured in MiB per second for the data disk. This field is only used for `HYPERDISK_BALANCED` disk types.
 
-* `node_count` - For a read pool instance, the number of nodes in the read pool.
+* `node_count` - For a read pool instance, the number of nodes in the read pool. For read pools with auto scaling enabled, this field is read only.
 
 * `pricing_plan` - (Optional) Pricing plan for this instance, can only be `PER_USE`.
 
@@ -445,6 +496,8 @@ The optional `settings.backup_configuration` subblock supports:
     Can only be used with MySQL.
 
 * `enabled` - (Optional) True if backup configuration is enabled.
+
+* `backup_tier` - (Computed) The backup tier that manages the backups for the instance.
 
 * `start_time` - (Optional) `HH:MM` format time indicating when backup
     configuration starts.
@@ -511,6 +564,28 @@ The optional `settings.ip_configuration.psc_config` sublist supports:
 * `network_attachment_uri` - (Optional) Network Attachment URI in the format `projects/project1/regions/region1/networkAttachments/networkAttachment1` to enable outbound connectivity on PSC instance.
 
 * `consumer_service_project_id` - (Optional) The project ID of consumer service project of this consumer endpoint.
+
+The optional `settings.read_pool_auto_scale_config` subblock supports:
+
+* `enabled` - True if Read Pool Auto Scale is enabled.
+
+* `max_node_count` - Maximum number of nodes in the read pool. If set to lower than current node count, node count will be updated.
+
+* `min_node_count` - Minimum number of nodes in the read pool. If set to higher than current node count, node count will be updated.
+
+
+
+* `disable_scale_in` - True if auto scale in is disabled.
+
+* `scale_in_cooldown_seconds` - The cooldown period for scale in operations.
+
+* `scale_out_cooldown_seconds` - The cooldown period for scale out operations.
+
+* `target_metrics` - Target metrics for Read Pool Auto Scale. Must specify `target_metrics.metric` and `target_metrics.target_value` in subblock.
+
+* `metric` - Metric name for Read Pool Auto Scale.
+
+* `target_value` - Target value for Read Pool Auto Scale.
 
 The optional `settings.location_preference` subblock supports:
 
@@ -604,6 +679,28 @@ is present when the master instance is a source representation instance, `dump_f
 * `verify_server_certificate` - (Optional) True if the master's common name
     value is checked during the SSL handshake.
 
+The optional `point_in_time_restore_context` block supports:
+
+* `datasource` - The Google Cloud Backup and Disaster Recovery Datasource URI.
+
+* `point_in_time` -  The timestamp of the point in time that should be restored.
+
+    A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+
+* `target_instance` - The name of the target instance.
+
+* `private_network` - (Optional) The resource link for the VPC network from which the Cloud SQL instance is accessible for private IP. For example, "/projects/myProject/global/networks/default".
+
+* `preferred_zone` - (Optional) Point-in-time recovery of an instance to the specified zone. If no zone is specified, then clone to the same primary zone as the source instance.
+
+* `allocated_ip_range` -  (Optional) The name of the allocated ip range for the private ip CloudSQL instance. For example: "google-managed-services-default". If set, the cloned instance ip will be created in the allocated range. The range name must comply with [RFC 1035](https://tools.ietf.org/html/rfc1035). Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.
+
+* `source_instance_deletion_time` -  (Optional) The timestamp of when the source instance was deleted for a clone from a deleted instance.
+
+    A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+
+* `database_names` - (Optional) (SQL Server only, use with `point_in_time`) Clone only the specified databases from the source instance. Clone all databases if empty.
+
 The optional `clone` block supports:
 
 * `source_instance_name` - (Required) Name of the source instance which will be cloned.
@@ -618,6 +715,10 @@ The optional `clone` block supports:
 
 * `allocated_ip_range` -  (Optional) The name of the allocated ip range for the private ip CloudSQL instance. For example: "google-managed-services-default". If set, the cloned instance ip will be created in the allocated range. The range name must comply with [RFC 1035](https://tools.ietf.org/html/rfc1035). Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.
 
+* `source_instance_deletion_time` -  (Optional) The timestamp of when the source instance was deleted for a clone from a deleted instance.
+
+    A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+
 The optional `restore_backup_context` block supports:
 **NOTE:** Restoring from a backup is an imperative action and not recommended via Terraform. Adding or modifying this
 block during resource creation/update will trigger the restore action after the resource is created/updated.
@@ -629,7 +730,7 @@ block during resource creation/update will trigger the restore action after the 
 
 * `project` - (Optional) The full project ID of the source instance.`
 
-The optional, computed `replication_cluster` block represents a primary instance and disaster recovery replica pair. Applicable to MySQL and PostgreSQL. This field can be set only after both the primary and replica are created. This block supports:
+The optional, computed `replication_cluster` block represents a primary instance and disaster recovery replica pair. Applicable to MySQL and PostgreSQL. This field can be set if the primary has psa_write_endpoint set or both the primary and replica are created. This block supports:
 
 * `psa_write_endpoint`: Read-only field which if set, indicates this instance has a private service access (PSA) DNS endpoint that is pointing to the primary instance of the cluster. If this instance is the primary, then the DNS endpoint points to this instance. After a switchover or replica failover operation, this DNS endpoint points to the promoted instance. This is a read-only field, returned to the user as information. This field can exist even if a standalone instance doesn't have a DR replica yet or the DR replica is deleted.
 
