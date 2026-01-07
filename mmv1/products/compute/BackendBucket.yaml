@@ -255,6 +255,7 @@ properties:
     description: |
       The security policy associated with this backend bucket.
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    is_missing_in_cai: true
   - name: 'customResponseHeaders'
     type: Array
     description: |
