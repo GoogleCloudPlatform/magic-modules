@@ -55,8 +55,8 @@ examples:
     vars:
       agent_name: 'dialogflowcx-agent-connector'
       connection_name: 'example-connection'
-      dataset_id: 'example-dataset'
-      table_id: 'example-table'
+      dataset_id: 'example_dataset'
+      table_id: 'example_table'
       tool_name: 'connector-tool'
     min_version: beta
 parameters:
