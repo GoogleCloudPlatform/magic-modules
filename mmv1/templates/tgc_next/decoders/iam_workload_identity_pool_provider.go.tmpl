@@ -1,11 +1,8 @@
 // These fields are missing in CAI assets, but requried in Terraform
-if saml, ok := res["saml"].(map[string]interface{}); ok {
-	saml["idpMetadataXml"] = "unknown"
-}
-
 if x509, ok := res["x509"].(map[string]interface{}); ok {
 	if trustStore, ok := x509["trustStore"].(map[string]interface{}); ok {
 		if trustAnchors, ok := trustStore["trustAnchors"].([]interface{}); ok {
+			// trust_anchors is missing in CAI assets, but requried in Terraform
 			for _, trustAnchorRaw := range trustAnchors {
 				if trustAnchor, ok := trustAnchorRaw.(map[string]interface{}); ok {
 					trustAnchor["pemCertificate"] = "hidden"

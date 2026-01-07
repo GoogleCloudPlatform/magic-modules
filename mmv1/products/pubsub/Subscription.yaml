@@ -30,6 +30,7 @@ update_url: 'projects/{{project}}/subscriptions/{{name}}'
 update_verb: 'PATCH'
 update_mask: true
 include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -198,6 +199,7 @@ properties:
         description: |
           When true, write the subscription name, messageId, publishTime, attributes, and orderingKey to additional columns in the table.
           The subscription name, messageId, and publishTime fields are put in their own columns while all other message properties (other than data) are written to a JSON object in the attributes column.
+        is_missing_in_cai: true
       - name: 'dropUnknownFields'
         type: Boolean
         description: |
@@ -276,6 +278,7 @@ properties:
             send_empty_value: true
             description: |
               When true, write the subscription name, messageId, publishTime, attributes, and orderingKey as additional fields in the output.
+            is_missing_in_cai: true
           - name: 'useTopicSchema'
             type: Boolean
             send_empty_value: true
@@ -370,6 +373,7 @@ properties:
               Pub/Sub message attributes to `<KEY>:<VAL>` headers of the HTTP request.
             required: true
             send_empty_value: true
+            is_missing_in_cai: true
   - name: 'ackDeadlineSeconds'
     type: Integer
     description: |
@@ -436,6 +440,7 @@ properties:
           Example - "3.5s".
         required: true
         diff_suppress_func: 'comparePubsubSubscriptionExpirationPolicy'
+        is_missing_in_cai: true
   - name: 'filter'
     type: String
     description: |

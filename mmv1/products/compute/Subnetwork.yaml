@@ -47,9 +47,6 @@ base_url: 'projects/{{project}}/regions/{{region}}/subnetworks'
 has_self_link: true
 include_in_tgc_next: true
 tgc_include_handwritten_tests: true
-tgc_tests:
-  - name: 'TestAccComputeSubnetwork_secondaryIpRanges'
-    skip: 'Test data has mismatched steps'
 immutable: true
 timeouts:
   insert_minutes: 20
@@ -481,6 +478,7 @@ properties:
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
     update_verb: 'PATCH'
     fingerprint_name: 'fingerprint'
+    is_missing_in_cai: true
     enum_values:
       - 'EXTERNAL'
       - 'INTERNAL'

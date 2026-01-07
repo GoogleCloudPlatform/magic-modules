@@ -14,6 +14,10 @@
 ---
 name: MulticastGroupRange
 description: Create a multicast group range in the current project.
+references:
+  guides:
+    'Create Multicast Group Range': 'https://docs.cloud.google.com/vpc/docs/multicast/create-group-ranges#create_a_group_range'
+  api: 'https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastGroupRanges'
 base_url: projects/{{project}}/locations/{{location}}/multicastGroupRanges
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/multicastGroupRanges/{{multicast_group_range_id}}
