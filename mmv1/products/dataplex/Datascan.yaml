@@ -79,6 +79,13 @@ examples:
     test_env_vars:
       project_name: 'PROJECT_NAME'
     exclude_docs: true
+  - name: 'dataplex_datascan_onetime_profile'
+    primary_resource_id: 'onetime_profile'
+    primary_resource_name: 'fmt.Sprintf("tf-test-dataprofile-onetime%s", context["random_suffix"])'
+    vars:
+      datascan_name: 'dataprofile-onetime'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
   - name: 'dataplex_datascan_basic_quality'
     primary_resource_id: 'basic_quality'
     vars:
@@ -99,6 +106,13 @@ examples:
     test_env_vars:
       project_name: 'PROJECT_NAME'
     exclude_docs: true
+  - name: 'dataplex_datascan_onetime_quality'
+    primary_resource_id: 'onetime_quality'
+    vars:
+      datascan_name: 'dataquality-onetime'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+    exclude_test: true
   - name: 'dataplex_datascan_basic_discovery'
     primary_resource_id: 'basic_discovery'
     vars:
@@ -113,10 +127,25 @@ examples:
     test_env_vars:
       project_name: 'PROJECT_NAME'
       location: 'REGION'
+  - name: 'dataplex_datascan_onetime_discovery'
+    primary_resource_id: 'onetime_discovery'
+    vars:
+      datascan_name: 'datadiscovery-onetime'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+      location: 'REGION'
+    exclude_test: true
   - name: 'dataplex_datascan_documentation'
     primary_resource_id: 'documentation'
     vars:
       datascan_name: 'datadocumentation'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+      location: 'REGION'
+  - name: 'dataplex_datascan_onetime_documentation'
+    primary_resource_id: 'onetime_documentation'
+    vars:
+      datascan_name: 'datadocumentation-onetime'
     test_env_vars:
       project_name: 'PROJECT_NAME'
       location: 'REGION'
@@ -224,6 +253,7 @@ properties:
             exactly_one_of:
               - 'execution_spec.0.trigger.0.on_demand'
               - 'execution_spec.0.trigger.0.schedule'
+              - 'execution_spec.0.trigger.0.one_time'
             properties:
               []
           - name: 'schedule'
@@ -233,6 +263,7 @@ properties:
             exactly_one_of:
               - 'execution_spec.0.trigger.0.on_demand'
               - 'execution_spec.0.trigger.0.schedule'
+              - 'execution_spec.0.trigger.0.one_time'
             properties:
               - name: 'cron'
                 type: String
@@ -240,6 +271,22 @@ properties:
                   Cron schedule for running scans periodically. This field is
                   required for Schedule scans.
                 required: true
+          - name: oneTime
+            type: NestedObject
+            description: |
+              The scan runs once upon DataScan creation.
+            send_empty_value: true
+            allow_empty_object: true
+            immutable: true
+            exactly_one_of:
+              - 'execution_spec.0.trigger.0.on_demand'
+              - 'execution_spec.0.trigger.0.schedule'
+              - 'execution_spec.0.trigger.0.one_time'
+            properties:
+              - name: ttlAfterScanCompletion
+                type: DURATION
+                description: |
+                  Time to live for the DataScan and its results after the one-time run completes. Accepts a string with a unit suffix 's' (e.g., '7200s'). Default is 24 hours. Ranges between 0 and 31536000 seconds (1 year).
       - name: 'field'
         type: String
         description: |
