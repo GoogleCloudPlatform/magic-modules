@@ -246,7 +246,7 @@ func TestFormatDiffComment(t *testing.T) {
 		},
 		"multiple resources are displayed": {
 			data: diffCommentData{
-				AddedResources: []string{"google_redis_instance", "google_alloydb_cluster"},
+				MultipleResources: []string{"google_redis_instance", "google_alloydb_cluster"},
 			},
 			expectedStrings: []string{
 				"## Diff report",
@@ -348,6 +348,72 @@ func TestFormatDiffComment(t *testing.T) {
 			for _, s := range tc.notExpectedStrings {
 				assert.NotContains(t, comment, s)
 			}
+		})
+	}
+}
+
+func TestMultipleResources(t *testing.T) {
+	cases := []struct {
+		name      string
+		resources []string
+		want      []string
+	}{
+		{
+			name: "no resources",
+		},
+		{
+			name:      "single non-iam",
+			resources: []string{"google_redis_instance"},
+			want:      []string{"google_redis_instance"},
+		},
+		{
+			name:      "multiple non-iam",
+			resources: []string{"google_redis_instance", "google_alloydb_cluster"},
+			want:      []string{"google_alloydb_cluster", "google_redis_instance"},
+		},
+		{
+			name:      "single iam only",
+			resources: []string{"google_redis_instance_iam_member", "google_redis_instance_iam_policy", "google_redis_instance_iam_binding"},
+			want:      []string{"google_redis_instance_iam_*"},
+		},
+		{
+			name:      "single iam with parent",
+			resources: []string{"google_redis_instance_iam_member", "google_redis_instance_iam_policy", "google_redis_instance_iam_binding", "google_redis_instance"},
+			want:      []string{"google_redis_instance"},
+		},
+		{
+			name: "multiple iam",
+			resources: []string{
+				"google_redis_instance_iam_member",
+				"google_redis_instance_iam_policy",
+				"google_redis_instance_iam_binding",
+				"google_alloydb_cluster_iam_member",
+				"google_alloydb_cluster_iam_policy",
+				"google_alloydb_cluster_iam_binding",
+			},
+			want: []string{"google_alloydb_cluster_iam_*", "google_redis_instance_iam_*"},
+		},
+		{
+			name: "multiple iam with parent",
+			resources: []string{
+				"google_redis_instance_iam_member",
+				"google_redis_instance_iam_policy",
+				"google_redis_instance_iam_binding",
+				"google_alloydb_cluster_iam_member",
+				"google_alloydb_cluster_iam_policy",
+				"google_alloydb_cluster_iam_binding",
+				"google_redis_instance",
+			},
+			want: []string{"google_alloydb_cluster_iam_*", "google_redis_instance"},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := multipleResources(tc.resources)
+			assert.Equal(t, tc.want, got)
 		})
 	}
 }

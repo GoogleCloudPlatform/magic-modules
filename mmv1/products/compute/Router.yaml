@@ -44,6 +44,8 @@ custom_code:
   constants: 'templates/terraform/constants/router.go.tmpl'
 custom_diff:
   - 'resourceComputeRouterCustomDiff'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 sweeper:
   prefixes:
     - "swg-autogen-router" # Secure Web Proxy(SWP) auto-generated router prefix.

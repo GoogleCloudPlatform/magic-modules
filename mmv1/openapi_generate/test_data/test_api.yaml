@@ -41,18 +41,18 @@ paths:
                 $ref: "#/components/schemas/Error"
     post:
       summary: Create a pet
-      operationId: createPets
+      operationId: CreatePet
       tags:
         - pets
       parameters:
-        - name: pet
-          in: body
-          required: true
-          description: The pet to create
-          schema:
-            type: object
-            additionalProperties:
-              $ref: "#/components/schemas/Pet"
+      requestBody:
+        description: "Required. The pets being created"
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                $ref: "#/components/schemas/Pet"
       responses:
         201:
           description: Null response
@@ -88,9 +88,87 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /foods:
+    get:
+      summary: List all foods
+      operationId: listFoods
+      tags:
+        - foods
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: An paged array of foods
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/Foods"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      summary: Create a food
+      operationId: CreateFood
+      tags:
+        - foods
+      x-google-lro: true
+      requestBody:
+        description: "Required. The food being created"
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Food"
+      responses:
+        default:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateFoodOperation"
+  /foods/{foodId}:
+    get:
+      summary: Info for a specific food
+      operationId: showFoodById
+      tags:
+        - foods
+      parameters:
+        - name: foodId
+          in: path
+          required: true
+          description: The id of the food to retrieve
+          schema:
+            type: string
+      responses:
+        200:
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Foods"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 components:
   schemas:
     Pet:
+      type: object
       required:
         - id
         - name
@@ -112,10 +190,19 @@ components:
       properties:
         name:
           type: string
+    Foods:
+      type: array
+      items:
+        $ref: "#/components/schemas/Food"
     Pets:
       type: array
       items:
         $ref: "#/components/schemas/Pet"
+    CreateFoodOperation:
+      type: object
+      properties:
+        name:
+          type: string
     Error:
       required:
         - code
