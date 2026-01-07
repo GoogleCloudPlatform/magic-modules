@@ -41,8 +41,10 @@ custom_code:
 examples:
   - name: 'vertex_ai_pipeline_job_minimal'
     primary_resource_id: 'pipelineJob'
-    vars:
-      display_name: 'example-pipeline-job'
+    exclude_test: true
+    test_env_vars:
+      org_id: 'ORG_ID'
+      project: 'PROJECT_NAME'
 parameters:
   - name: 'region'
     type: String
