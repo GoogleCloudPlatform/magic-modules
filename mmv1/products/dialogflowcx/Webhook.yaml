@@ -54,6 +54,15 @@ examples:
     primary_resource_id: 'flexible_webhook'
     vars:
       agent_name: 'dialogflowcx-agent'
+  - name: 'dialogflowcx_webhook_service_account_auth'
+    primary_resource_id: 'webhook_use_service_account'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+    test_env_vars:
+      service_account: 'SERVICE_ACCT'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-dialogflow.iam.gserviceaccount.com"
+        role: "roles/iam.serviceAccountTokenCreator"
 parameters:
   - name: 'parent'
     type: String
