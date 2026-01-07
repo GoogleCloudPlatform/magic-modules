@@ -75,6 +75,9 @@ examples:
       project: 'PROJECT_NAME'
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
+    # Skip in VCR until the test issue is resolved
+    # https://github.com/hashicorp/terraform-provider-google/issues/25087
+    skip_vcr: true
   - name: 'shared_future_reservation'
     primary_resource_id: 'gce_future_reservation'
     vars:
@@ -89,6 +92,9 @@ examples:
       org_id: 'ORG_TARGET'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
+    # Skip in VCR until the test issue is resolved
+    # https://github.com/hashicorp/terraform-provider-google/issues/25063
+    skip_vcr: true
 parameters:
   - name: 'name'
     type: String
