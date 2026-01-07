@@ -11,10 +11,10 @@ import (
 
 func TestAccDialogflowCXTestCase_update(t *testing.T) {
 	t.Parallel()
-  
-  // Skip in VCR until the test issue is resolved
-  // https://github.com/hashicorp/terraform-provider-google/issues/25227
-  acctest.SkipIfVcr(t)
+
+	// Skip in VCR until the test issue is resolved
+	// https://github.com/hashicorp/terraform-provider-google/issues/25227
+	acctest.SkipIfVcr(t)
 
 	context := map[string]interface{}{
 		"org_id":          envvar.GetTestOrgFromEnv(t),
