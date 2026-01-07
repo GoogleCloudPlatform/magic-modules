@@ -12,7 +12,7 @@ resource "google_dialogflow_cx_agent" "agent" {
 
 resource "google_dialogflow_cx_tool" "tool" {
   parent       = google_dialogflow_cx_agent.agent.id
-  display_name = "Example Data Store Tool"
+  display_name = "{{index $.Vars "tool_name"}}"
   description  = "Example Description"
   data_store_spec {
     data_store_connections {
@@ -41,7 +41,7 @@ resource "google_dialogflow_cx_tool_version" "{{$.PrimaryResourceId}}" {
   parent       = google_dialogflow_cx_tool.tool.id
   display_name = "Example Data Store Tool Version"
   tool {
-    display_name = "Example Data Store Tool"
+    display_name = "{{index $.Vars "tool_name"}}"
     description  = "Example Description"
     data_store_spec {
       data_store_connections {

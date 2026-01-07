@@ -8,7 +8,7 @@ resource "google_dialogflow_cx_agent" "agent" {
 
 resource "google_dialogflow_cx_tool" "tool" {
   parent       = google_dialogflow_cx_agent.agent.id
-  display_name = "Example Function Tool"
+  display_name = "{{index $.Vars "tool_name"}}"
   description  = "Example Description"
   function_spec {
     input_schema  = <<EOF
@@ -43,7 +43,7 @@ resource "google_dialogflow_cx_tool_version" "{{$.PrimaryResourceId}}" {
   parent       = google_dialogflow_cx_tool.tool.id
   display_name = "Example Function Tool Version"
   tool {
-    display_name = "Example Function Tool"
+    display_name = "{{index $.Vars "tool_name"}}"
     description  = "Example Description"
     function_spec {
       input_schema  = <<EOF

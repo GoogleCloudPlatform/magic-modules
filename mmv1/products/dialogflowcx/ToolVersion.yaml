@@ -38,19 +38,26 @@ examples:
     primary_resource_id: 'open_api_tool_version'
     vars:
       agent_name: 'dialogflowcx-agent-open-api'
+      tool_name: 'open-api-tool'
   - name: 'dialogflowcx_tool_version_data_store'
     primary_resource_id: 'data_store_tool_version'
     vars:
       agent_name: 'dialogflowcx-agent-data-store'
       data_store: 'datastore-tool-version'
+      tool_name: 'datastore-tool'
   - name: 'dialogflowcx_tool_version_function'
     primary_resource_id: 'function_tool_version'
     vars:
       agent_name: 'dialogflowcx-agent-fucntion'
+      tool_name: 'function-tool'
   - name: 'dialogflowcx_tool_version_connector'
     primary_resource_id: 'connector_tool_version'
     vars:
       agent_name: 'dialogflowcx-agent-connector'
+      connection_name: 'example-connection'
+      dataset_id: 'example-dataset'
+      table_id: 'example-table'
+      tool_name: 'connector-tool'
     min_version: beta
 parameters:
   - name: 'parent'

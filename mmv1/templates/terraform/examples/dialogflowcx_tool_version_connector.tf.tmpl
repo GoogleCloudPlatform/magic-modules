@@ -10,7 +10,7 @@ resource "google_dialogflow_cx_agent" "agent" {
 
 resource "google_integration_connectors_connection" "integration_connector" {
   provider = google-beta
-  name     = "terraform-df-cx-tool-connection"
+  name     = "{{index $.Vars "connection_name"}}"
   location = "us-central1"
   connector_version = "projects/${google_dialogflow_cx_agent.agent.project}/locations/global/providers/gcp/connectors/bigquery/versions/1"
   description = "tf created description"
@@ -45,7 +45,7 @@ resource "google_integration_connectors_connection" "integration_connector" {
 
 resource "google_bigquery_dataset" "bq_dataset" {
   provider = google-beta
-  dataset_id    = "terraformdatasetdfcxtool"
+  dataset_id    = "{{index $.Vars "dataset_id"}}"
   friendly_name = "test"
   description   = "This is a test description"
   location      = "us-central1"
@@ -56,7 +56,7 @@ resource "google_bigquery_table" "bq_table" {
   provider = google-beta
   deletion_protection = false
   dataset_id = google_bigquery_dataset.bq_dataset.dataset_id
-  table_id   = "terraformdatasetdfcxtooltable"
+  table_id   = "{{index $.Vars "table_id"}}"
 }
 
 
@@ -71,7 +71,7 @@ resource "google_bigquery_dataset_iam_member" "connector_sa_dataset_perms" {
 resource "google_dialogflow_cx_tool" "tool" {
   provider = google-beta
   parent       = google_dialogflow_cx_agent.agent.id
-  display_name = "Example Connector Tool"
+  display_name = "{{index $.Vars "tool_name"}}"
   description  = "Example Description"
 
   connector_spec {
@@ -95,7 +95,7 @@ resource "google_dialogflow_cx_tool_version" "{{$.PrimaryResourceId}}" {
   provider = google-beta
   display_name = "Example Connector Tool Version"
   tool {
-    display_name = "Example Connector Tool"
+    display_name = "{{index $.Vars "tool_name"}}"
     description  = "Example Description"
 
     connector_spec {

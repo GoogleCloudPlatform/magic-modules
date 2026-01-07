@@ -8,7 +8,7 @@ resource "google_dialogflow_cx_agent" "agent" {
 
 resource "google_dialogflow_cx_tool" "tool" {
   parent       = google_dialogflow_cx_agent.agent.id
-  display_name = "Example Open API Tool"
+  display_name = "{{index $.Vars "tool_name"}}"
   description  = "Example Description"
   open_api_spec {
     authentication {
@@ -81,7 +81,7 @@ resource "google_dialogflow_cx_tool_version" "{{$.PrimaryResourceId}}" {
   parent       = google_dialogflow_cx_tool.tool.id
   display_name = "Example Open API Tool Version"
   tool {
-    display_name = "Example Open API Tool"
+    display_name = "{{index $.Vars "tool_name"}}"
     description  = "Example Description"
     open_api_spec {
       authentication {
