@@ -209,13 +209,8 @@ resource "google_network_services_lb_route_extension" "{{$.PrimaryResourceId}}" 
         timeout   = "0.1s"
         fail_open = false
 
-        forward_headers  = ["custom-header"]
-
-        supported_events = ["REQUEST_HEADERS", "REQUEST_BODY", "REQUEST_TRAILERS"]
-        request_body_send_mode = "BODY_SEND_MODE_FULL_DUPLEX_STREAMED"
-        metadata = {
-            "key" = "value"
-        }
+        supported_events = ["REQUEST_HEADERS"]
+        observability_mode = true
     }
   }
 
