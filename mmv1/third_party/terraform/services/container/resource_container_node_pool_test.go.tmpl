@@ -6130,13 +6130,16 @@ resource "google_container_node_pool" "np" {
   name     = "%[2]s"
   cluster  = google_container_cluster.cluster.id
   location = "us-central1-c"
-  node_count = 1
+  initial_node_count = 1
   
   // Enabling Flex Start
   queued_provisioning {
 	enabled = true
   }
-
+  autoscaling {
+    min_node_count = 1
+    max_node_count = 1
+  }
   node_config {
     machine_type = "a3-highgpu-8g"
     oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
@@ -6200,13 +6203,16 @@ resource "google_container_node_pool" "np" {
   name     = "%[2]s"
   cluster  = google_container_cluster.cluster.id
   location = "us-central1-c"
-  node_count = 1
+  initial_node_count = 1
 
   // Enabling Flex Start
   queued_provisioning {
 	enabled = true
   }
-
+  autoscaling {
+    min_node_count = 1
+    max_node_count = 1
+  }
   node_config {
     machine_type = "a3-highgpu-8g"
     oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
@@ -6281,13 +6287,16 @@ resource "google_container_node_pool" "np" {
   name     = "%[2]s"
   cluster  = google_container_cluster.cluster.id
   location = "us-central1-c"
-  node_count = 1
+  initial_node_count = 1
 
   // Enabling Flex Start
   queued_provisioning {
 	enabled = true
   }
-
+  autoscaling {
+    min_node_count = 1
+    max_node_count = 1
+  }
   node_config {
     machine_type = "a3-highgpu-8g"
     oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
@@ -6377,11 +6386,15 @@ resource "google_container_cluster" "primary" {
   // Inline node pool definition as requested
   node_pool {
     name       = "anp-pool"
-    node_count = 1
+    initial_node_count = 1
 
 	// Flex start
     queued_provisioning {
       enabled = true
+    }
+	autoscaling {
+      min_node_count = 1
+      max_node_count = 1
     }
     node_config {
       machine_type = "a3-highgpu-8g"
