@@ -381,6 +381,7 @@ properties:
               - name: 'auditIntervalSeconds'
                 type: Integer
                 description: 'Interval for Policy Controller Audit scans (in seconds). When set to 0, this disables audit functionality altogether.'
+                default_from_api: true
               - name: 'exemptableNamespaces'
                 type: Array
                 description: 'The set of namespaces that are excluded from Policy Controller checks. Namespaces do not need to currently exist on the cluster.'

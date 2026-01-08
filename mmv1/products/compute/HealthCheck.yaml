@@ -52,6 +52,7 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 custom_code:
   constants: 'templates/terraform/constants/health_check.tmpl'
   encoder: 'templates/terraform/encoders/health_check_type.tmpl'
@@ -60,6 +61,11 @@ custom_diff:
 sweeper:
   dependencies:
     - "google_compute_subnetwork"
+tgc_tests:
+  - name: 'TestAccComputeHealthCheck_grpcWithTls_create'
+    skip: 'grpcTlsHealthCheck is not in CAI asset, but is required in this test.'
+  - name: 'TestAccComputeHealthCheck_grpcWithTls_update'
+    skip: 'grpcTlsHealthCheck is not in CAI asset, but is required in this test.'
 examples:
   - name: 'health_check_tcp'
     primary_resource_id: 'tcp-health-check'

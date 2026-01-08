@@ -1,0 +1,14 @@
+resource "google_storage_bucket" "bucket_for_{{$.PrimaryResourceId}}" {
+  name          = "{{index $.Vars "name"}}"
+  location      = "us-central1"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_biglake_iceberg_catalog" "{{$.PrimaryResourceId}}" {
+    name = "{{index $.Vars "name"}}"
+    catalog_type = "CATALOG_TYPE_GCS_BUCKET"
+    depends_on = [
+      google_storage_bucket.bucket_for_{{$.PrimaryResourceId}}
+    ]
+}

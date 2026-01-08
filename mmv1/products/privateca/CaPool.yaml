@@ -48,6 +48,7 @@ iam_policy:
   iam_conditions_request_type: 'QUERY_PARAM_NESTED'
   example_config_body: 'templates/terraform/iam/example_config_body/privateca_ca_pool.tf.tmpl'
 custom_code:
+  tgc_decoder: 'templates/tgc_next/decoders/privateca_capool.go.tmpl'
 examples:
   - name: 'privateca_capool_basic'
     primary_resource_id: 'default'
@@ -70,6 +71,8 @@ examples:
       my_certificate: 'my-certificate'
     exclude_test: true
     exclude_docs: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 parameters:
   - name: 'location'
     type: String

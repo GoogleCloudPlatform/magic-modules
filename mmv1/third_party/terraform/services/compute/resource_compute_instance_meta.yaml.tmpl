@@ -199,7 +199,10 @@ fields:
   - api_field: 'networkPerformanceConfig.totalEgressBandwidthTier'
   - api_field: 'params.resourceManagerTags'
 {{- if ne $.TargetVersionName "ga" }}
-  - api_field: 'partnerMetadata'
+  - api_field: 'partnerMetadata.key'
+    field: 'partner_metadata'
+  - api_field: 'partnerMetadata.value.entries'
+    field: 'partner_metadata'
 {{- end }}
   - field: 'project'
   - api_field: 'reservationAffinity.key'
