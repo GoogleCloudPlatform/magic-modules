@@ -6114,7 +6114,6 @@ resource "google_container_cluster" "cluster" {
   network    = google_compute_network.main_net.name
   subnetwork = google_compute_subnetwork.main_subnet.name
 
-  // Keep these settings consistent across ALL test steps
   enable_multi_networking = true
   datapath_provider       = "ADVANCED_DATAPATH"
 
@@ -6132,10 +6131,27 @@ resource "google_container_node_pool" "np" {
   cluster  = google_container_cluster.cluster.id
   location = "us-central1-c"
   node_count = 1
+  
+  // Enabling Flex Start
+  queued_provisioning {
+	enabled = true
+  }
 
   node_config {
-    machine_type = "e2-medium" // Keep consistent
+    machine_type = "a3-highgpu-8g"
     oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
+	enable_gvnic = true
+	guest_accelerator {
+		type = "nvidia-h100-80gb"
+		count = 8
+		gpu_driver_installation_config {
+			gpu_driver_version = "LATEST"
+		}
+	}
+	// Flex Start requirement
+	reservation_affinity {
+      consume_reservation_type = "NO_RESERVATION"
+    }
   }
 
   // Setting ANP to AUTO
@@ -6187,9 +6203,26 @@ resource "google_container_node_pool" "np" {
   location = "us-central1-c"
   node_count = 1
 
+  // Enabling Flex Start
+  queued_provisioning {
+	enabled = true
+  }
+
   node_config {
-    machine_type = "e2-medium" // Keep consistent
+    machine_type = "a3-highgpu-8g"
     oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
+	enable_gvnic = true
+	guest_accelerator {
+		type = "nvidia-h100-80gb"
+		count = 8
+		gpu_driver_installation_config {
+			gpu_driver_version = "LATEST"
+		}
+	}
+	// Flex Start requirement
+	reservation_affinity {
+      consume_reservation_type = "NO_RESERVATION"
+    }
   }
 
   // TEST CHANGE: Removing network_config entirely
@@ -6252,12 +6285,26 @@ resource "google_container_node_pool" "np" {
   location = "us-central1-c"
   node_count = 1
 
+  // Enabling Flex Start
+  queued_provisioning {
+	enabled = true
+  }
+
   node_config {
-    machine_type = "e2-medium"
-    
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/cloud-platform",
-    ]
+    machine_type = "a3-highgpu-8g"
+    oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
+	enable_gvnic = true
+	guest_accelerator {
+		type = "nvidia-h100-80gb"
+		count = 8
+		gpu_driver_installation_config {
+			gpu_driver_version = "LATEST"
+		}
+	}
+	// Flex Start requirement
+	reservation_affinity {
+      consume_reservation_type = "NO_RESERVATION"
+    }
   }
 
   network_config {
@@ -6288,7 +6335,7 @@ func TestAccContainerNodePool_acceleratorNetworkProfile(t *testing.T) {
 				Config: testAccContainerNodePool_acceleratorNetworkProfile_manual(clusterName, npName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", npName),
-					resource.TestCheckResourceAttr(resourceName, "node_config.0.machine_type", "e2-medium"),
+					resource.TestCheckResourceAttr(resourceName, "node_config.0.machine_type", "a3-highgpu-8g"),
 					resource.TestCheckResourceAttr(resourceName, "network_config.0.additional_node_network_configs.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "network_config.0.accelerator_network_profile", ""),
 				),
@@ -6335,8 +6382,29 @@ resource "google_container_cluster" "primary" {
     name       = "anp-pool"
     node_count = 1
 
+	// Flex start
+    queued_provisioning {
+      enabled = true
+    }
     node_config {
-      machine_type = "e2-medium"
+      machine_type = "a3-highgpu-8g"
+
+      enable_gvnic = true
+
+      guest_accelerator {
+        type  = "nvidia-h100-80gb"
+        count = 8
+        gpu_driver_installation_config {
+          gpu_driver_version = "LATEST"
+        }
+      }
+
+      // Disable Reservations for Flex Start
+      reservation_affinity {
+        consume_reservation_type = "NO_RESERVATION"
+      }
+      
+      oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
     }
 
     network_config {
