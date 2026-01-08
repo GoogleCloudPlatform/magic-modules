@@ -279,6 +279,43 @@ func mergeMaps(oldMap, newMap map[string]interface{}) map[string]string {
 
 
 func workbenchMetadataCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	// Get the new metadata from the diff.
+	metadata, ok := diff.Get("gce_setup.0.metadata").(map[string]interface{})
+	if !ok {
+		// No metadata set, so no validation needed.
+		return nil
+	}
+
+	var invalidKeys []string
+
+	// Create a set to hold all protected keys for efficient lookup.
+	protectedKeys := make(map[string]struct{})
+
+	// Add the default protected keys to the set.
+	for _, key := range WorkbenchInstanceProvidedMetadata {
+		protectedKeys[key] = struct{}{}
+	}
+
+	// If EUC is enabled, add the additional protected keys.
+	if eucEnabled, ok := diff.Get("enable_managed_euc").(bool); ok && eucEnabled {
+		for _, key := range WorkbenchInstanceEUCProvidedAdditionalMetadata {
+			protectedKeys[key] = struct{}{}
+		}
+	}
+
+	// Iterate through the metadata keys and check against the protected set.
+	for key := range metadata {
+		if _, isProtected := protectedKeys[key]; isProtected {
+			invalidKeys = append(invalidKeys, key)
+		}
+	}
+
+	if len(invalidKeys) > 0 {
+		// Sort the keys for a deterministic error message
+		sort.Strings(invalidKeys)
+		return fmt.Errorf("the following metadata keys are protected and cannot be set: %v", invalidKeys)
+	}
+
 	if diff.HasChange("gce_setup.0.metadata") {
 		o, n := diff.GetChange("gce_setup.0.metadata")
 		oldMetadata := o.(map[string]interface{})
