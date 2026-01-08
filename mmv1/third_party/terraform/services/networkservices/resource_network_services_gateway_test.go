@@ -1362,6 +1362,13 @@ resource "google_compute_subnetwork" "default" {
   role          = "ACTIVE"
 }
 
+resource "google_compute_address" "swp_ip" {
+  name         = "tf-test-gateway-swp-%{random_suffix}"
+  subnetwork   = google_compute_subnetwork.default.id
+  address_type = "INTERNAL"
+  region       = "%{region}"
+}
+
 resource "google_privateca_ca_pool" "default" {
   name     = "tf-test-gateway-ca-pool-%{random_suffix}"
   location = "%{region}"
@@ -1474,7 +1481,7 @@ resource "google_network_security_gateway_security_policy_rule" "default" {
 resource "google_network_services_gateway" "default" {
   name                                 = "tf-test-gateway-swp-%{random_suffix}"
   location                             = "%{region}"
-  addresses                            = ["10.128.0.99"]
+  addresses                            = [google_compute_address.swp_ip.address]
   type                                 = "SECURE_WEB_GATEWAY"
   routing_mode                         = "NEXT_HOP_ROUTING_MODE"
   all_ports                            = true
@@ -1550,6 +1557,13 @@ resource "google_compute_subnetwork" "default" {
   region        = "%{region}"
   network       = google_compute_network.default.id
   role          = "ACTIVE"
+}
+
+resource "google_compute_address" "swp_ip" {
+  name         = "tf-test-gateway-swp-%{random_suffix}"
+  subnetwork   = google_compute_subnetwork.default.id
+  address_type = "INTERNAL"
+  region       = "%{region}"
 }
 
 resource "google_privateca_ca_pool" "default" {
@@ -1698,7 +1712,7 @@ resource "google_network_security_gateway_security_policy_rule" "newrule" {
 resource "google_network_services_gateway" "default" {
   name                                 = "tf-test-gateway-swp-%{random_suffix}"
   location                             = "%{region}"
-  addresses                            = ["10.128.0.99"]
+  addresses                            = [google_compute_address.swp_ip.address]
   type                                 = "SECURE_WEB_GATEWAY"
   routing_mode                         = "NEXT_HOP_ROUTING_MODE"
   all_ports                             = true
@@ -1830,6 +1844,13 @@ resource "google_compute_subnetwork" "default" {
   role          = "ACTIVE"
 }
 
+resource "google_compute_address" "swp_ip" {
+  name         = "tf-test-gateway-swp-%{random_suffix}"
+  subnetwork   = google_compute_subnetwork.default.id
+  address_type = "INTERNAL"
+  region       = "%{region}"
+}
+
 resource "google_privateca_ca_pool" "default" {
   name     = "tf-test-gateway-ca-pool-%{random_suffix}"
   location = "%{region}"
@@ -1942,7 +1963,7 @@ resource "google_network_security_gateway_security_policy_rule" "default" {
 resource "google_network_services_gateway" "default" {
   name                                 = "tf-test-gateway-swp-%{random_suffix}"
   location                             = "%{region}"
-  addresses                            = ["10.128.0.99"]
+  addresses                            = [google_compute_address.swp_ip.address]
   type                                 = "SECURE_WEB_GATEWAY"
   routing_mode                         = "NEXT_HOP_ROUTING_MODE"
   ports                                = [443]
