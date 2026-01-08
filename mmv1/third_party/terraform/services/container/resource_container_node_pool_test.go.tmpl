@@ -6130,7 +6130,7 @@ resource "google_container_node_pool" "np" {
   name     = "%[2]s"
   cluster  = google_container_cluster.cluster.id
   location = "us-central1-c"
-  initial_node_count = 1
+  initial_node_count = 0
   
   // Enabling Flex Start
   queued_provisioning {
@@ -6203,7 +6203,7 @@ resource "google_container_node_pool" "np" {
   name     = "%[2]s"
   cluster  = google_container_cluster.cluster.id
   location = "us-central1-c"
-  initial_node_count = 1
+  initial_node_count = 0
 
   // Enabling Flex Start
   queued_provisioning {
@@ -6287,7 +6287,7 @@ resource "google_container_node_pool" "np" {
   name     = "%[2]s"
   cluster  = google_container_cluster.cluster.id
   location = "us-central1-c"
-  initial_node_count = 1
+  initial_node_count = 0
 
   // Enabling Flex Start
   queued_provisioning {
@@ -6386,7 +6386,7 @@ resource "google_container_cluster" "primary" {
   // Inline node pool definition as requested
   node_pool {
     name       = "anp-pool"
-    initial_node_count = 1
+    initial_node_count = 0
 
 	// Flex start
     queued_provisioning {
