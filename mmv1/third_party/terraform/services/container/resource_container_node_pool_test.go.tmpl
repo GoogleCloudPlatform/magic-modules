@@ -6140,7 +6140,6 @@ resource "google_container_node_pool" "np" {
   node_config {
     machine_type = "a3-highgpu-8g"
     oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
-	enable_gvnic = true
 	guest_accelerator {
 		type = "nvidia-h100-80gb"
 		count = 8
@@ -6211,7 +6210,6 @@ resource "google_container_node_pool" "np" {
   node_config {
     machine_type = "a3-highgpu-8g"
     oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
-	enable_gvnic = true
 	guest_accelerator {
 		type = "nvidia-h100-80gb"
 		count = 8
@@ -6293,7 +6291,6 @@ resource "google_container_node_pool" "np" {
   node_config {
     machine_type = "a3-highgpu-8g"
     oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
-	enable_gvnic = true
 	guest_accelerator {
 		type = "nvidia-h100-80gb"
 		count = 8
@@ -6388,9 +6385,6 @@ resource "google_container_cluster" "primary" {
     }
     node_config {
       machine_type = "a3-highgpu-8g"
-
-      enable_gvnic = true
-
       guest_accelerator {
         type  = "nvidia-h100-80gb"
         count = 8
