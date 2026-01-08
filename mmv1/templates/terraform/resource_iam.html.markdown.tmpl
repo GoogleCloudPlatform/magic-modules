@@ -86,7 +86,13 @@ resource "{{ $.IamTerraformName }}_policy" "policy" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{- end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{- if $.IamPolicy.ExampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.ExampleConfigBody false }}
+{{- end }}
+
+{{- if $.IamPolicy.SampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{- end }}
   policy_data = data.google_iam_policy.admin.policy_data
 }
 ```
@@ -116,7 +122,13 @@ resource "{{ $.IamTerraformName }}_policy" "policy" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{- end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{- if $.IamPolicy.ExampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.ExampleConfigBody false }}
+{{- end }}
+
+{{- if $.IamPolicy.SampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{- end }}
   policy_data = data.google_iam_policy.admin.policy_data
 }
 ```
@@ -128,7 +140,13 @@ resource "{{ $.IamTerraformName }}_binding" "binding" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{- end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{- if $.IamPolicy.ExampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.ExampleConfigBody false }}
+{{- end }}
+
+{{- if $.IamPolicy.SampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{- end }}
   role = "{{if $.IamPolicy.AdminIamRole}}{{$.IamPolicy.AdminIamRole }}{{else}}{{$.IamPolicy.AllowedIamRole}}{{end}}"
   members = [
     "user:jane@example.com",
@@ -143,7 +161,13 @@ resource "{{ $.IamTerraformName }}_binding" "binding" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{- end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{- if $.IamPolicy.ExampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.ExampleConfigBody false }}
+{{- end }}
+
+{{- if $.IamPolicy.SampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{- end }}
   role = "{{if $.IamPolicy.AdminIamRole}}{{$.IamPolicy.AdminIamRole }}{{else}}{{$.IamPolicy.AllowedIamRole}}{{end}}"
   members = [
     "user:jane@example.com",
@@ -164,7 +188,13 @@ resource "{{ $.IamTerraformName }}_member" "member" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{- end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{- if $.IamPolicy.ExampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.ExampleConfigBody false }}
+{{- end }}
+
+{{- if $.IamPolicy.SampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{- end }}
   role = "{{if $.IamPolicy.AdminIamRole}}{{$.IamPolicy.AdminIamRole }}{{else}}{{$.IamPolicy.AllowedIamRole}}{{end}}"
   member = "user:jane@example.com"
 }
@@ -177,7 +207,13 @@ resource "{{ $.IamTerraformName }}_member" "member" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{- end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{- if $.IamPolicy.ExampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.ExampleConfigBody false }}
+{{- end }}
+
+{{- if $.IamPolicy.SampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{- end }}
   role = "{{if $.IamPolicy.AdminIamRole}}{{$.IamPolicy.AdminIamRole}}{{else}}{{$.IamPolicy.AllowedIamRole}}{{end}}"
   member = "user:jane@example.com"
 
@@ -230,6 +266,7 @@ The following arguments are supported:
   * **projectOwner:projectid**: Owners of the given project. For example, "projectOwner:my-example-project"
   * **projectEditor:projectid**: Editors of the given project. For example, "projectEditor:my-example-project"
   * **projectViewer:projectid**: Viewers of the given project. For example, "projectViewer:my-example-project"
+  * **Federated identities**: One or more federated identities in a workload or workforce identity pool, workload running on GKE, etc. Refer to the [Principal identifiers documentation](https://cloud.google.com/iam/docs/principal-identifiers#allow) for examples of targets and valid configuration. For example, "principal://iam.googleapis.com/locations/global/workforcePools/example-contractors/subject/joe@example.com"
 
 * `role` - (Required) The role that should be applied. Only one
     `{{ $.IamTerraformName }}_binding` can be used per role. Note that custom roles must be of the format

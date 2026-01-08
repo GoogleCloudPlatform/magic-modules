@@ -380,6 +380,7 @@ func testAccCloudRunV2Job_cloudrunv2JobWithGcsVolume(context map[string]interfac
           volume_mounts {
             name = "gcs"
             mount_path = "/mnt/gcs"
+            sub_path = "/LM01"
           }
         }
         volumes {
@@ -387,9 +388,7 @@ func testAccCloudRunV2Job_cloudrunv2JobWithGcsVolume(context map[string]interfac
           gcs {
             bucket = "gcp-public-data-landsat"
             read_only = true
-{{ if ne $.TargetVersionName `ga` -}}
-	mount_options = ["log-severity=info"]
-{{ end }}
+            mount_options = ["log-severity=info"]
           }
         }
       }
@@ -1042,7 +1041,6 @@ func testAccCloudRunV2Job_cloudrunv2JobWithGpu(context map[string]interface{}) s
   resource "google_cloud_run_v2_job" "default" {
     name     = "%{job_name}"
     location = "us-central1"
-    launch_stage = "BETA"
     deletion_protection = false
     template {
       template {

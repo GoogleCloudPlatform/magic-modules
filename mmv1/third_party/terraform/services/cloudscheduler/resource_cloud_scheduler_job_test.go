@@ -86,6 +86,7 @@ resource "google_cloud_scheduler_job" "job" {
   schedule         = "*/8 * * * *"
   time_zone        = "America/New_York"
   attempt_deadline = "320s"
+  region           = "us-west2"
 
   retry_config {
     retry_count = 1
@@ -109,6 +110,7 @@ resource "google_cloud_scheduler_job" "job" {
   schedule         = "*/8 * * * *"
   time_zone        = "America/New_York"
   attempt_deadline = "320s"
+  region           = "us-west2"
 
   retry_config {
     retry_count = 1

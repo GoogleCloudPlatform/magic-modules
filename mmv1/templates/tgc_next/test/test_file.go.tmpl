@@ -15,30 +15,46 @@
 package {{$.PackageName}}_test
 
 import (
+	"os"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/test"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/test"
 )
 
-{{ range $e := $.TestExamples }}
-func TestAcc{{ $e.TestSlug $.ProductMetadata.Name $.Name }}(t *testing.T) {
-	{{- if $e.TGCSkipTest }}
-	t.Skip("{{$e.TGCSkipTest}}")
-	{{- end }}
-	t.Parallel()
+func TestAcc{{$.ResourceName}}(t *testing.T) {
+	if os.Getenv("WRITE_FILES") != "" {
+		t.Parallel()
+	}
+	tests := []test.TestCase{
+{{- range $t := $.TGCTests }}
+		{
+			Name:  "{{ $t.Name }}",
+		{{- if $t.Skip }}
+			Skip:  "{{ $t.Skip }}",
+		{{- end }}
+		},
+{{- end }}
+	}
 
-	test.BidirectionalConversion(
-		t,
-		[]string{
-{{- range $field := $.TGCTestIgnorePropertiesToStrings $e }}
-	"{{ $field }}",
-{{- end }}
-		},
-		[]string{
-{{- range $field := $e.TGCTestIgnoreInAsset }}
-	"{{ $field }}",
-{{- end }}
-		},
-	)
+	for _, tt := range tests {
+		tt := tt
+
+		t.Run(tt.Name, func(t *testing.T) {
+			t.Parallel()
+
+			if tt.Skip != "" {
+				t.Skipf("Skipping %s test case: This case is currently disabled due to Issue.", tt.Name)
+			}
+
+			test.BidirectionalConversion(
+				t,
+				[]string{
+		{{- range $field := $.TGCTestIgnorePropertiesToStrings }}
+			"{{ $field }}",
+		{{- end }}
+				},
+				"{{$.TerraformName}}",
+			)
+		})
+	}
 }
-{{- end }}

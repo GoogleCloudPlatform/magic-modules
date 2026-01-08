@@ -60,7 +60,7 @@ Every resource or datasource documentation page must include the following secti
 
    For beta-only resources or data sources, add the following snippet at the end of this section: 
 
-   {{< tabs "resource-beta-warning" >}}
+   {{% tabs "resource-beta-warning" %}}
    {{< tab "Resource" >}}
    ```markdown
    ~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
@@ -73,7 +73,7 @@ Every resource or datasource documentation page must include the following secti
    See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
    ```
    {{< /tab >}}
-   {{< /tabs >}}
+   {{% /tabs %}}
 2. **Example Usage.** Include a minimal set of examples showing how to use the resource or data source.
 3. **Argument Reference.** List settable fields on the datasource. For example:
    ```markdown
@@ -104,15 +104,13 @@ Every resource or datasource documentation page must include the following secti
    * `create_time` - (Output) The time when the repository was created.
    ```
 
-   {{< hint "info" >}}
-   **Note:** If a data source is a read-only version of a resource, instead provide a link to the resource documentation to avoid duplicating information:
-
-   ```markdown
-   ## Attribute Reference
-
-   See [google_FOOBAR](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/FOOBAR#argument-reference) for details of the available attributes.
-   ```
-   {{< /hint >}}
+   > [!NOTE]
+   > **Note:** If a data source is a read-only version of a resource, instead provide a link to the resource documentation to avoid duplicating information:
+   >
+   > ```markdown
+   > ## Attribute Reference
+   > See [google_FOOBAR](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/FOOBAR#argument-reference) for details of the available attributes.
+   > ```
 
 
 If relevant, also include the following sections:

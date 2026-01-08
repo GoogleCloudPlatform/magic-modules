@@ -29,6 +29,10 @@ timeouts:
   insert_minutes: 60
   update_minutes: 60
   delete_minutes: 60
+custom_code:
+  tgc_decoder: 'templates/tgc_next/decoders/backup_dr_backup_plan.go.tmpl'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 examples:
   - name: 'backup_dr_backup_plan_simple'
     primary_resource_id: 'my-backup-plan-1'
@@ -95,7 +99,6 @@ properties:
     type: Array
     description: |
       The list of all resource types to which the `BackupPlan` can be applied.
-    min_version: beta
     item_type:
       type: String
     output: true
@@ -115,6 +118,10 @@ properties:
     description: |
       When the `BackupPlan` was last updated.
     output: true
+  - name: 'maxCustomOnDemandRetentionDays'
+    type: Integer
+    description: |
+      The maximum number of days for which an on-demand backup taken with custom retention can be retained.
   - name: 'backupRules'
     type: Array
     description: |

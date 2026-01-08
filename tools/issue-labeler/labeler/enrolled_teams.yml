@@ -7,6 +7,9 @@ service/accessapproval:
 service/accesscontextmanager:
   resources:
   - google_access_context_manager_.*
+service/aiplatform-agent-engine:
+  resources:
+  - google_vertex_ai_reasoning_engine
 service/aiplatform-colab-enterprise:
   resources:
   - google_colab_.*
@@ -26,6 +29,7 @@ service/aiplatform-metadata:
   - google_vertex_ai_metadata_store
 service/aiplatform-prediction:
   resources:
+  - google_vertex_ai_cache_config
   - google_vertex_ai_endpoint
   - google_vertex_ai_deployment_resource_pool
   - google_ml_engine_model
@@ -94,6 +98,9 @@ service/certificatemanager:
   - google_compute_managed_ssl_certificate
   - google_compute_region_ssl_certificate
   - google_compute_ssl_certificate
+service/ces:
+  resources:
+  - google_ces_.*
 service/chronicle:
   team: chronicle-terraform
   resources:
@@ -116,6 +123,9 @@ service/cloudbuild:
 service/clouddeploy:
   resources:
   - google_clouddeploy_.*
+service/clouddomains:
+  resources:
+  - google_clouddomains_.*
 service/cloudfunctions:
   resources:
   - google_cloudfunctions_.*
@@ -152,6 +162,9 @@ service/cloudresourcemanager-tags:
 service/cloudscheduler:
   resources:
   - google_cloud_scheduler_.*
+service/cloudsecuritycompliance:
+  resources:
+  - google_cloud_security_compliance_.*
 service/cloudtasks:
   resources:
   - google_cloud_tasks_.*
@@ -173,7 +186,10 @@ service/compute-health:
   - google_compute_health_check
   - google_compute_http_health_check
   - google_compute_https_health_check
+  - google_compute_region_composite_health_check
+  - google_compute_region_health_aggregation_policy
   - google_compute_region_health_check
+  - google_compute_region_health_source
   - google_network_services_service_lb_policies
 service/compute-instances:
   resources:
@@ -265,6 +281,7 @@ service/compute-regional-pass-through-lb:
 service/compute-reservation:
   resources:
   - google_compute_reservation.*
+  - google_compute_future_reservation.*
 service/compute-router:
   resources:
   - google_compute_router
@@ -306,6 +323,10 @@ service/container:
 service/containeranalysis:
   resources:
   - google_container_analysis_.*
+service/data-transfer-essentials:
+  resources:
+  - google_network_connectivity_multicloud_data_transfer_config
+  - google_network_connectivity_destination
 service/datacatalog:
   resources:
   - google_data_catalog_.*
@@ -348,7 +369,16 @@ service/developerconnect:
   - google_developer_connect_.*
 service/dialogflow:
   resources:
-  - google_dialogflow_.*
+  - google_dialogflow_conversation_profile
+service/dialogflow-cx:
+  resources:
+  - google_dialogflow_cx_.*
+  - google_dialogflow_agent
+  - google_dialogflow_encryption_spec
+  - google_dialogflow_entity_type
+  - google_dialogflow_fulfillment
+  - google_dialogflow_intent
+  - google_dialogflow_version
 service/discoveryengine:
   resources:
   - google_discovery_engine_.*
@@ -393,6 +423,10 @@ service/firebase:
   - google_firebase_storage.*
   - google_firebase_web.*
   - google_firebaserules_.*
+service/firebaseailogic:
+  team: firebase-terraform
+  resources:
+  - google_firebase_ai_logic.*
 service/firebaseapphosting:
   resources:
   - google_firebase_app_hosting.*
@@ -403,6 +437,7 @@ service/firestore-controlplane:
   resources:
   - google_firestore_backup_schedule
   - google_firestore_database
+  - google_firestore_user_creds
 service/firestore-dataplane:
   resources:
   - google_datastore_index
@@ -410,6 +445,9 @@ service/firestore-dataplane:
   - google_firestore_field
   - google_firestore_index
   - google_firestore_ttl
+service/gce-preview-feature:
+  resources:
+  - google_compute_preview_feature
 service/gemini:
   resources:
   - google_gemini_.*
@@ -472,6 +510,7 @@ service/integrations:
 service/logging:
   resources:
   - google_logging_.*
+  - google_observability_.*
 service/looker-core:
   resources:
   - google_looker_instance
@@ -529,6 +568,9 @@ service/network-connectivity-center:
   resources:
   - google_network_connectivity_hub
   - google_network_connectivity_spoke
+  - google_network_connectivity_gateway_advertised_route
+  - google_network_security_sac_realm
+  - google_network_security_sac_attachment
 service/network-security:
   resources:
   - google_network_security_authorization_policy
@@ -568,10 +610,13 @@ service/networksecurityintegrations:
 service/networkservices-media-cdn:
   resources:
   - google_network_services_edge_cache_.*
+service/networkservices-multicast:
+  resources:
+  - google_network_services_multicast_.*
 service/networkservices-service-extensions:
   resources:
-  - google_network_services_lb_route_extension
-  - google_network_services_lb_traffic_extension
+  - google_network_services_lb_.*_extension
+  - google_network_services_wasm_plugin.*
 service/networkservices-traffic-director:
   resources:
   - google_network_services_endpoint_policy
@@ -626,6 +671,7 @@ service/publicca:
   resources:
   - google_public_ca_external_account_key
 service/pubsub:
+  team: api-pubsub
   resources:
   - google_pubsub_schema
   - google_pubsub_subscription.*
@@ -635,7 +681,7 @@ service/pubsublite:
   - google_pubsub_lite_.*
 service/recaptchaenterprise:
   resources:
-  - google_recaptcha_enterprise_key
+  - google_recaptcha_enterprise_.*
 service/redis-cluster:
   resources:
   - google_redis_cluster.*

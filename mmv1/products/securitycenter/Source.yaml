@@ -39,7 +39,6 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'source'
   base_url: 'organizations/{{organization}}/sources/{{source}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'organizations/{{organization}}/sources/{{source}}'
     - '{{source}}'

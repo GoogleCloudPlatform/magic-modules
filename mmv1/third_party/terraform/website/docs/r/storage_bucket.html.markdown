@@ -38,6 +38,12 @@ resource "google_storage_bucket" "static-site" {
     response_header = ["*"]
     max_age_seconds = 3600
   }
+  cors {
+    origin            = ["http://image-store.com"]
+    method            = ["GET", "HEAD", "PUT", "POST", "DELETE"]
+    response_header   = ["*"]
+    max_age_seconds   = 0
+  }
 }
 ```
 
@@ -117,6 +123,40 @@ resource "google_storage_bucket" "hns-enabled" {
 }
 ```
 
+## Example Usage - IP filter mode enabled
+
+```hcl
+resource "google_storage_bucket" "hns-enabled" {
+  name          = "hns-enabled-bucket"
+  location      = "US"
+  force_destroy = true
+
+  ip_filter  {
+    mode = "Enabled"
+    public_network_source {
+      allowed_ip_cidr_ranges = ["0.0.0.0/0", "::/0"]
+    }
+  }
+}
+```
+
+## Example Usage - IP filter mode disabled
+
+```hcl
+resource "google_storage_bucket" "hns-enabled" {
+  name          = "hns-enabled-bucket"
+  location      = "US"
+  force_destroy = true
+
+  ip_filter  {
+    mode = "Disabled"
+    public_network_source {
+      allowed_ip_cidr_ranges = ["0.0.0.0/0", "::/0"]
+    }
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -127,9 +167,7 @@ The following arguments are supported:
 
 - - -
 
-* `force_destroy` - (Optional, Default: false) When deleting a bucket, this
-    boolean option will delete all contained objects. If you try to delete a
-    bucket that contains objects, Terraform will fail that run.
+* `force_destroy` - (Optional, Default: false) When true, before deleting a bucket, delete all objects within the bucket, or Anywhere Caches caching data for that bucket. Otherwise, buckets with objects/caches will fail. Anywhere Cache requires additional permissions to interact with and will be assumed not present when Terraform is not permissioned, attempting to delete the bucket anyways. This may result in the objects in the bucket getting destroyed but not the bucket itself if there is a cache in use with the bucket. Force deletion may take a long time to delete buckets with lots of objects or with any Anywhere Caches (80m+).
 
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
@@ -255,7 +293,7 @@ The following arguments are supported:
 
 * `is_locked` - (Optional) If set to `true`, the bucket will be [locked](https://cloud.google.com/storage/docs/using-bucket-lock#lock-bucket) and permanently restrict edits to the bucket's retention policy.  Caution: Locking a bucket is an irreversible action.
 
-* `retention_period` - (Required) The period of time, in seconds, that objects in the bucket must be retained and cannot be deleted, overwritten, or archived. The value must be less than 2,147,483,647 seconds.
+* `retention_period` - (Required) The period of time, in seconds, that objects in the bucket must be retained and cannot be deleted, overwritten, or archived. The value must be less than 3,155,760,000 seconds.
 
 <a name="nested_logging"></a>The `logging` block supports:
 
@@ -297,7 +335,11 @@ The following arguments are supported:
 
 <a name="nested_ip_filter"></a>The `ip_filter` block supports:
 
-* `mode` - (Required) The state of the IP filter configuration. Valid values are `Enabled` and `Disabled`. When set to `Enabled`, IP filtering rules are applied to a bucket and all incoming requests to the bucket are evaluated against these rules. When set to `Disabled`, IP filtering rules are not applied to a bucket. **Note**: `allow_all_service_agent_access` must be supplied when `mode` is set to `Enabled`, it can be ommited for other values.
+* `mode` - (Required) The state of the IP filter configuration. Valid values are `Enabled` and `Disabled`. When set to `Enabled`, IP filtering rules are applied to a bucket and all incoming requests to the bucket are evaluated against these rules. When set to `Disabled`, IP filtering rules are not applied to a bucket.
+
+**Note**: Once ip_filter is setup, it can either be `Enabled` or `Disabled` and cannot be removed from config.
+
+**Note**: `allow_all_service_agent_access` must be supplied when `mode` is set to `Enabled`, it can be ommited for other values.
 
 * `allow_cross_org_vpcs` - (Optional) While set `true`, allows cross-org VPCs in the bucket's IP filter configuration.
 

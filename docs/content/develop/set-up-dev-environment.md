@@ -13,14 +13,13 @@ development environment.
 1. [Install the gcloud CLI.](https://cloud.google.com/sdk/docs/install)
 1. In the Google Cloud console, on the project selector page, select or
    [create a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects).
-   {{< hint info >}}
 
-   **Note:** If you don't already have a project to use for testing changes to
-   the Terraform providers, create a project instead of selecting an existing
-   poject. After you finish these steps, you can delete the project, removing
-   all resources associated with the project.
+   > [!NOTE]
+   > **Note:** If you don't already have a project to use for testing changes to
+   > the Terraform providers, create a project instead of selecting an existing
+   > poject. After you finish these steps, you can delete the project, removing
+   > all resources associated with the project.
 
-   {{< /hint >}}
    {{< button href="https://console.cloud.google.com/projectselector2/home/dashboard" >}}Go to project selector{{< /button >}}
 1. Make sure that billing is enabled for your Google Cloud project. Learn how to
    [check if billing is enabled on a project](https://cloud.google.com/billing/docs/how-to/verify-billing-enabled).
@@ -34,10 +33,6 @@ development environment.
    export GOPATH=$(go env GOPATH)
    # Add Go binaries to PATH
    export PATH=$PATH:$(go env GOPATH)/bin
-   ```
-1. Install goimports
-   ```bash
-   go install golang.org/x/tools/cmd/goimports@latest
    ```
 1. [Install terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
 1. Clone the `magic-modules` repository
@@ -57,8 +52,6 @@ development environment.
  
    ```
    Check for go in path...
-      found!
-   Check for goimports in path...
       found!
    Check for git in path...
       found!

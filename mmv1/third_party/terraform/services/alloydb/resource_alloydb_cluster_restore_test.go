@@ -34,7 +34,7 @@ func TestAccAlloydbCluster_restore(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.source",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
 			},
 			{
 				// Invalid input check - cannot pass in both sources
@@ -54,7 +54,7 @@ func TestAccAlloydbCluster_restore(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.restored_from_backup",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "restore_backup_source"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location", "restore_backup_source"},
 			},
 			{
 				// Validate PITR succeeds
@@ -64,7 +64,7 @@ func TestAccAlloydbCluster_restore(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.restored_from_point_in_time",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "restore_continuous_backup_source"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location", "restore_continuous_backup_source"},
 			},
 			{
 				// Make sure updates work without recreating the clusters
@@ -89,6 +89,12 @@ resource "google_alloydb_cluster" "source" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "source" {
@@ -122,6 +128,12 @@ resource "google_alloydb_cluster" "source" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "source" {
@@ -144,6 +156,9 @@ resource "google_alloydb_cluster" "restored" {
   network_config {
     network = data.google_compute_network.default.id
   }
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
   restore_backup_source {
     backup_name = google_alloydb_backup.default.name
   }
@@ -155,6 +170,8 @@ resource "google_alloydb_cluster" "restored" {
   lifecycle {
     prevent_destroy = true
   }
+
+  deletion_protection = false
 }
 
 data "google_project" "project" {}
@@ -174,6 +191,12 @@ resource "google_alloydb_cluster" "source" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "source" {
@@ -197,9 +220,15 @@ resource "google_alloydb_cluster" "restored" {
     network = data.google_compute_network.default.id
   }
 
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+
   restore_continuous_backup_source {
     cluster = google_alloydb_cluster.source.name
   }
+
+  deletion_protection = false
 
   lifecycle {
     prevent_destroy = true
@@ -222,6 +251,12 @@ resource "google_alloydb_cluster" "source" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "source" {
@@ -244,9 +279,14 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   network_config {
     network = data.google_compute_network.default.id
   }
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
   restore_backup_source {
     backup_name = google_alloydb_backup.default.name
   }
+
+  deletion_protection = false
 
   lifecycle {
     prevent_destroy = true
@@ -271,6 +311,12 @@ resource "google_alloydb_cluster" "source" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "source" {
@@ -293,9 +339,14 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   network_config {
     network = data.google_compute_network.default.id
   }
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
   restore_backup_source {
     backup_name = google_alloydb_backup.default.name
   }
+
+  deletion_protection = false
 
   lifecycle {
     prevent_destroy = true
@@ -308,10 +359,15 @@ resource "google_alloydb_cluster" "restored_from_point_in_time" {
   network_config {
     network = data.google_compute_network.default.id
   }
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
   restore_continuous_backup_source {
     cluster = google_alloydb_cluster.source.name
     point_in_time = google_alloydb_backup.default.update_time
   }
+
+  deletion_protection = false
 
   lifecycle {
     prevent_destroy = true
@@ -336,6 +392,12 @@ resource "google_alloydb_cluster" "source" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "source" {
@@ -358,6 +420,9 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   network_config {
     network = data.google_compute_network.default.id
   }
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
   restore_backup_source {
     backup_name = google_alloydb_backup.default.name
   }
@@ -366,6 +431,8 @@ resource "google_alloydb_cluster" "restored_from_backup" {
     enabled              = true
     recovery_window_days = 20
   }
+
+  deletion_protection = false
 
   lifecycle {
     prevent_destroy = true
@@ -378,6 +445,9 @@ resource "google_alloydb_cluster" "restored_from_point_in_time" {
   network_config {
     network = data.google_compute_network.default.id
   }
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
   restore_continuous_backup_source {
     cluster = google_alloydb_cluster.source.name
     point_in_time = google_alloydb_backup.default.update_time
@@ -387,6 +457,8 @@ resource "google_alloydb_cluster" "restored_from_point_in_time" {
     enabled              = true
     recovery_window_days = 20
   }
+
+  deletion_protection = false
 
   lifecycle {
     prevent_destroy = true
@@ -411,6 +483,11 @@ resource "google_alloydb_cluster" "source" {
   network_config {
     network = data.google_compute_network.default.id
   }
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "source" {
@@ -441,6 +518,9 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   network_config {
     network = data.google_compute_network.default.id
   }
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
   restore_backup_source {
     backup_name = google_alloydb_backup.default2.name
   }
@@ -449,6 +529,8 @@ resource "google_alloydb_cluster" "restored_from_backup" {
     enabled              = true
     recovery_window_days = 20
   }
+
+  deletion_protection = false
 
   lifecycle {
     prevent_destroy = true
@@ -463,6 +545,9 @@ resource "google_alloydb_cluster" "restored_from_point_in_time" {
   network_config {
     network = data.google_compute_network.default.id
   }
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
   restore_continuous_backup_source {
     cluster = google_alloydb_cluster.restored_from_backup.name
     point_in_time = google_alloydb_backup.default.update_time
@@ -472,6 +557,8 @@ resource "google_alloydb_cluster" "restored_from_point_in_time" {
     enabled              = true
     recovery_window_days = 20
   }
+
+  deletion_protection = false
 
   lifecycle {
     prevent_destroy = true
@@ -496,6 +583,11 @@ resource "google_alloydb_cluster" "source" {
   network_config {
     network = data.google_compute_network.default.id
   }
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "source" {
@@ -518,9 +610,14 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   network_config {
     network = data.google_compute_network.default.id
   }
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
   restore_backup_source {
     backup_name = google_alloydb_backup.default.name
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_cluster" "restored_from_point_in_time" {
@@ -529,10 +626,15 @@ resource "google_alloydb_cluster" "restored_from_point_in_time" {
   network_config {
     network = data.google_compute_network.default.id
   }
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
   restore_continuous_backup_source {
     cluster = google_alloydb_cluster.source.name
     point_in_time = google_alloydb_backup.default.update_time
   }
+
+  deletion_protection = false
 }
 
 data "google_project" "project" {}

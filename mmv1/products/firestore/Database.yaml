@@ -236,7 +236,7 @@ properties:
     enum_values:
       - 'POINT_IN_TIME_RECOVERY_ENABLED'
       - 'POINT_IN_TIME_RECOVERY_DISABLED'
-  - name: 'key_prefix'
+  - name: 'keyPrefix'
     type: String
     description: |
       Output only. The keyPrefix for this database.
@@ -263,12 +263,12 @@ properties:
       and may be sent on update and delete requests to ensure the client has an
       up-to-date value before proceeding.
     output: true
-  - name: 'create_time'
+  - name: 'createTime'
     type: String
     description: |
       Output only. The timestamp at which this database was created.
     output: true
-  - name: 'update_time'
+  - name: 'updateTime'
     type: String
     description: |
       Output only. The timestamp at which this database was most recently updated.

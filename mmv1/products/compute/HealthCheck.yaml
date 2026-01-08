@@ -51,7 +51,8 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 custom_code:
   constants: 'templates/terraform/constants/health_check.tmpl'
   encoder: 'templates/terraform/encoders/health_check_type.tmpl'
@@ -60,6 +61,11 @@ custom_diff:
 sweeper:
   dependencies:
     - "google_compute_subnetwork"
+tgc_tests:
+  - name: 'TestAccComputeHealthCheck_grpcWithTls_create'
+    skip: 'grpcTlsHealthCheck is not in CAI asset, but is required in this test.'
+  - name: 'TestAccComputeHealthCheck_grpcWithTls_update'
+    skip: 'grpcTlsHealthCheck is not in CAI asset, but is required in this test.'
 examples:
   - name: 'health_check_tcp'
     primary_resource_id: 'tcp-health-check'
@@ -111,13 +117,11 @@ examples:
       health_check_name: 'grpc-health-check'
   - name: 'health_check_grpc_with_tls'
     primary_resource_id: 'grpc-with-tls-health-check'
-    min_version: 'beta'
     vars:
       health_check_name: 'grpc-with-tls-health-check'
     tgc_skip_test: 'grpcTlsHealthCheck is not in CAI asset, but is required in this test.'
   - name: 'health_check_grpc_with_tls_full'
     primary_resource_id: 'grpc-with-tls-health-check'
-    min_version: 'beta'
     vars:
       health_check_name: 'grpc-with-tls-health-check'
     tgc_skip_test: 'grpcTlsHealthCheck is not in CAI asset, but is required in this test.'
@@ -888,7 +892,6 @@ properties:
           - 'grpc_health_check.0.port_specification'
           - 'grpc_health_check.0.grpc_service_name'
   - name: 'grpcTlsHealthCheck'
-    min_version: beta
     type: NestedObject
     exactly_one_of:
       - 'http_health_check'

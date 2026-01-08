@@ -13,8 +13,8 @@
 package api
 
 import (
-	"bytes"
 	"fmt"
+	"io/fs"
 	"log"
 	"maps"
 	"path/filepath"
@@ -22,9 +22,6 @@ import (
 	"slices"
 	"sort"
 	"strings"
-	"text/template"
-
-	"github.com/golang/glog"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
@@ -55,6 +52,7 @@ type Resource struct {
 	//		api: 'rest_api_reference_url/version'
 	//
 	References resource.ReferenceLinks `yaml:"references,omitempty"`
+	Docs       resource.Docs           `yaml:"docs,omitempty"`
 
 	// [Required] The GCP "relative URI" of a resource, relative to the product
 	// base URL. It can often be inferred from the `create` path.
@@ -205,8 +203,6 @@ type Resource struct {
 
 	CustomCode resource.CustomCode `yaml:"custom_code,omitempty"`
 
-	Docs resource.Docs `yaml:"docs,omitempty"`
-
 	// This block inserts entries into the customdiff.All() block in the
 	// resource schema -- the code for these custom diff functions must
 	// be included in the resource constants or come from tpgresource
@@ -218,7 +214,10 @@ type Resource struct {
 
 	// Examples in documentation. Backed by generated tests, and have
 	// corresponding OiCS walkthroughs.
-	Examples []resource.Examples
+	Examples []*resource.Examples `yaml:"examples,omitempty"`
+
+	// Samples for generating tests and documentation
+	Samples []*resource.Sample `yaml:"samples,omitempty"`
 
 	// If true, generates product operation handling logic.
 	AutogenAsync bool `yaml:"autogen_async,omitempty"`
@@ -236,6 +235,8 @@ type Resource struct {
 	Sweeper resource.Sweeper `yaml:"sweeper,omitempty"`
 
 	Timeouts *Timeouts `yaml:"timeouts,omitempty"`
+
+	Async *Async `yaml:"async,omitempty"`
 
 	// An array of function names that determine whether an error is retryable.
 	ErrorRetryPredicates []string `yaml:"error_retry_predicates,omitempty"`
@@ -302,11 +303,13 @@ type Resource struct {
 	// Add a deprecation message for a resource that's been deprecated in the API.
 	DeprecationMessage string `yaml:"deprecation_message,omitempty"`
 
-	Async *Async
-
 	// Tag autogen resources so that we can track them. In the future this will
 	// control if a resource is continuously generated from public OpenAPI docs
 	AutogenStatus string `yaml:"autogen_status"`
+
+	// WARNING: this is an incomplete feature and may have several build errors.
+	// If true, this resource generates with the new plugin framework resource template
+	FrameworkResource bool `yaml:"plugin_framework,omitempty"`
 
 	// The three groups of []*Type fields are expected to be strictly ordered within a yaml file
 	// in the sequence of Virtual Fields -> Parameters -> Properties
@@ -353,13 +356,26 @@ type Resource struct {
 	// organization variant, however most resources do not need it.
 	ApiVariantPatterns []string `yaml:"api_variant_patterns,omitempty"`
 
+	// ApiResourceField indicates what field on the API resource is managed by a resource.
+	// This is generally relevant for fine-grained resources. For example,
+	// google_compute_router_nat manages the `nat` field on the `Router` resource.
+	ApiResourceField string `yaml:"api_resource_field,omitempty"`
+
 	ImportPath     string `yaml:"-"`
 	SourceYamlFile string `yaml:"-"`
+
+	constraintGroupRegistry     map[string]*[]string `yaml:"-"`
+	constraintGroupsInitialized bool                 `yaml:"-"`
 
 	// ====================
 	// TGC
 	// ====================
 	TGCResource `yaml:",inline"`
+}
+
+type TestConfig struct {
+	Sample *resource.Sample
+	Step   *resource.Step
 }
 
 type TGCResource struct {
@@ -368,10 +384,7 @@ type TGCResource struct {
 	ExcludeTgc bool `yaml:"exclude_tgc,omitempty"`
 
 	// If true, include resource in the new package of TGC (terraform-provider-conversion)
-	IncludeInTGCNext bool `yaml:"include_in_tgc_next_DO_NOT_USE,omitempty"`
-
-	// Name of the hcl resource block used in TGC
-	TgcHclBlockName string `yaml:"tgc_hcl_block_name,omitempty"`
+	IncludeInTGCNext bool `yaml:"include_in_tgc_next,omitempty"`
 
 	// The resource kind in CAI.
 	// If this is not set, then :name is used instead.
@@ -379,21 +392,63 @@ type TGCResource struct {
 	// and compute.googleapis.com/GlobalAddress has GlobalAddress for CaiResourceKind.
 	// But they have the same api resource type: address
 	CaiResourceKind string `yaml:"cai_resource_kind,omitempty"`
+
+	// If true, the Terraform custom encoder is not applied during tfplan2cai
+	TGCIgnoreTerraformEncoder bool `yaml:"tgc_ignore_terraform_encoder,omitempty"`
+
+	// If true, the Terraform custom decoder is not applied during cai2hcl
+	TGCIgnoreTerraformDecoder bool `yaml:"tgc_ignore_terraform_decoder,omitempty"`
+
+	// [Optional] The parameter that uniquely identifies the resource.
+	// Generally, it shouldn't be set when the identity can be decided.
+	// Otherswise, it should be set.
+	CaiIdentity string `yaml:"cai_identity,omitempty"`
+
+	// If true, create TGC tests automatically for all handwritten provider tests.
+	TGCIncludeHandwrittenTests bool `yaml:"tgc_include_handwritten_tests,omitempty"`
+
+	// Tests for TGC, will automatically be filled with resource's examples
+	// and handwritten tests. Can be specified in order to skip specific tests.
+	TGCTests []resource.TGCTest `yaml:"tgc_tests,omitempty"`
+
+	// [Optional] It overrides the default Cai asset name format, which is the resource id format
+	CaiAssetNameFormat string `yaml:"cai_asset_name_format,omitempty"`
+
+	// [Optional] It overrides the Cai asset name format during cai2hcl conversion.
+	// Its usage is strictly limited to scenarios requiring the extraction of parameters
+	// from the Google Cloud Asset Inventory (CAI) asset name format
+	Cai2hclNameFormat string `yaml:"cai2hcl_name_format,omitempty"`
 }
 
-func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
+// // MarshalYAML implements a custom marshaller to omit dynamic default values.
+func (r *Resource) MarshalYAML() (interface{}, error) {
 	type resourceAlias Resource
-	aliasObj := (*resourceAlias)(r)
 
-	err := unmarshal(aliasObj)
+	defaults := Resource{}
+
+	// Pre-populate fields needed for shallow default calculation.
+	defaults.Name = r.Name
+	defaults.ApiResourceTypeKind = r.ApiResourceTypeKind
+	defaults.SelfLink = r.SelfLink
+	defaults.MinVersion = r.MinVersion
+	// Calculate shallow defaults.
+	defaults.setShallowDefaults()
+	defaults.Name = ""
+	defaults.ApiResourceTypeKind = ""
+	defaults.SelfLink = ""
+	defaults.MinVersion = ""
+
+	clone, err := utils.OmitDefaultsForMarshaling(*r, defaults)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return (*resourceAlias)(clone.(*Resource)), nil
 }
 
-func (r *Resource) SetDefault(product *Product) {
+// SetShallowDefaults calculates and sets default values for the immediate fields
+// of this Resource, without recursing into its children (Properties, etc.).
+func (r *Resource) setShallowDefaults() {
 	if r.CreateVerb == "" {
 		r.CreateVerb = "POST"
 	}
@@ -427,6 +482,18 @@ func (r *Resource) SetDefault(product *Product) {
 		}
 	}
 
+	if r.IamPolicy != nil && r.IamPolicy.MinVersion == "" {
+		r.IamPolicy.MinVersion = r.MinVersion
+	}
+	if r.Timeouts == nil {
+		r.Timeouts = NewTimeouts() // This only sets defaults if Timeouts is nil
+	}
+}
+
+// SetDefault sets default values for this Resource and all its properties.
+func (r *Resource) SetDefault(product *Product) {
+	r.setShallowDefaults() // Set defaults for the current level.
+
 	r.ProductMetadata = product
 	for _, property := range r.AllProperties() {
 		property.SetDefault(r)
@@ -434,13 +501,6 @@ func (r *Resource) SetDefault(product *Product) {
 	for _, vf := range r.VirtualFields {
 		vf.SetDefault(r)
 	}
-	if r.IamPolicy != nil && r.IamPolicy.MinVersion == "" {
-		r.IamPolicy.MinVersion = r.MinVersion
-	}
-	if r.Timeouts == nil {
-		r.Timeouts = NewTimeouts()
-	}
-
 }
 
 func (r *Resource) Validate() {
@@ -505,7 +565,13 @@ func (r *Resource) Validate() {
 	}
 
 	for _, example := range r.Examples {
-		example.Validate(r.Name)
+		if err := example.Validate(r.Name); err != nil {
+			log.Fatalln(err)
+		}
+	}
+
+	for _, sample := range r.Samples {
+		sample.Validate(r.Name)
 	}
 
 	if r.Async != nil {
@@ -605,7 +671,7 @@ func (r Resource) SensitiveProps() []*Type {
 func (r Resource) WriteOnlyProps() []*Type {
 	props := r.AllNestedProperties(r.RootProperties())
 	return google.Select(props, func(p *Type) bool {
-		return p.WriteOnly
+		return p.WriteOnlyLegacy || p.WriteOnly
 	})
 }
 
@@ -613,7 +679,7 @@ func (r Resource) SensitivePropsToString() string {
 	var props []string
 
 	for _, prop := range r.SensitiveProps() {
-		props = append(props, fmt.Sprintf("`%s`", prop.Lineage()))
+		props = append(props, fmt.Sprintf("`%s`", strings.Join(prop.Lineage(), ".")))
 	}
 
 	return strings.Join(props, ", ")
@@ -623,7 +689,7 @@ func (r Resource) WriteOnlyPropsToString() string {
 	var props []string
 
 	for _, prop := range r.WriteOnlyProps() {
-		props = append(props, fmt.Sprintf("`%s`", prop.Lineage()))
+		props = append(props, fmt.Sprintf("`%s`", strings.Join(prop.Lineage(), ".")))
 	}
 
 	return strings.Join(props, ", ")
@@ -642,6 +708,10 @@ func (r Resource) SettableProperties() []*Type {
 
 	props = google.Reject(props, func(v *Type) bool {
 		return v.UrlParamOnly
+	})
+
+	props = google.Reject(props, func(v *Type) bool {
+		return v.ClientSide
 	})
 
 	props = google.Reject(props, func(v *Type) bool {
@@ -683,28 +753,6 @@ func (r Resource) RootProperties() []*Type {
 	return props
 }
 
-// Returns a sorted list of all "leaf" properties, meaning properties that have
-// no children.
-func (r Resource) LeafProperties() []*Type {
-	types := r.AllNestedProperties(google.Concat(r.RootProperties(), r.UserVirtualFields()))
-
-	// Remove types that have children, because we only want "leaf" fields
-	types = slices.DeleteFunc(types, func(t *Type) bool {
-		nestedProperties := t.NestedProperties()
-		return len(nestedProperties) > 0
-	})
-
-	// Sort types by lineage
-	slices.SortFunc(types, func(a, b *Type) int {
-		if a.MetadataLineage() < b.MetadataLineage() {
-			return -1
-		}
-		return 1
-	})
-
-	return types
-}
-
 // Return the product-level async object, or the resource-specific one
 // if one exists.
 func (r Resource) GetAsync() *Async {
@@ -737,10 +785,57 @@ func (r Resource) GetIdentity() []*Type {
 	})
 }
 
-func buildWriteOnlyField(name string, versionFieldName string, originalField *Type, originalFieldLineage string) *Type {
-	description := fmt.Sprintf("%s Note: This property is write-only and will not be read from the API. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", originalField.Description)
-	fieldPathOriginalField := originalFieldLineage
-	fieldPathCurrentField := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(name))
+func deduplicateSliceOfStrings(slice []string) []string {
+	seen := make(map[string]bool, len(slice))
+	result := make([]string, 0, len(slice))
+
+	for _, str := range slice {
+		if !seen[str] {
+			seen[str] = true
+			result = append(result, str)
+		}
+	}
+
+	return result
+}
+
+func (r *Resource) initializeConstraintGroups() {
+	if r.constraintGroupsInitialized {
+		return
+	}
+	r.constraintGroupRegistry = make(map[string]*[]string)
+
+	props := r.AllNestedProperties(google.Concat(r.RootProperties(), r.UserVirtualFields()))
+	for _, prop := range props {
+		prop.ConflictsGroup = r.attachConstraintGroup("conflicts", prop.Conflicts)
+		prop.AtLeastOneOfGroup = r.attachConstraintGroup("at_least_one_of", prop.AtLeastOneOf)
+		prop.ExactlyOneOfGroup = r.attachConstraintGroup("exactly_one_of", prop.ExactlyOneOf)
+		prop.RequiredWithGroup = r.attachConstraintGroup("required_with", prop.RequiredWith)
+	}
+	r.constraintGroupsInitialized = true
+}
+
+func (r *Resource) attachConstraintGroup(groupType string, source []string) *[]string {
+	if len(source) == 0 {
+		return nil
+	}
+
+	sorted := slices.Clone(source)
+	slices.Sort(sorted)
+	key := fmt.Sprintf("%s|%s", groupType, strings.Join(sorted, ","))
+
+	if existing, ok := r.constraintGroupRegistry[key]; ok {
+		return existing
+	}
+
+	newGroup := slices.Clone(sorted)
+	r.constraintGroupRegistry[key] = &newGroup
+	return &newGroup
+}
+
+func buildWriteOnlyField(name string, versionFieldName string, originalField *Type) *Type {
+	originalFieldLineage := strings.Join(originalField.Lineage(), ".0.")
+	newFieldLineage := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(name))
 	requiredWith := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(versionFieldName))
 
 	apiName := originalField.ApiName
@@ -751,36 +846,51 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 	options := []func(*Type){
 		propertyWithType("String"),
 		propertyWithRequired(false),
-		propertyWithDescription(description),
+		propertyWithDescription(originalField.Description),
 		propertyWithWriteOnly(true),
 		propertyWithApiName(apiName),
 		propertyWithIgnoreRead(true),
 		propertyWithRequiredWith([]string{requiredWith}),
 	}
 
-	if originalField.Required {
-		exactlyOneOf := append(originalField.ExactlyOneOf, fieldPathOriginalField, fieldPathCurrentField)
-		options = append(options, propertyWithExactlyOneOf(exactlyOneOf))
+	if originalField.Required || len(originalField.ExactlyOneOf) > 0 {
+		originalField.Required = false
+		if originalField.ExactlyOneOfGroup == nil {
+			base := []string{originalFieldLineage, newFieldLineage}
+			originalField.ExactlyOneOfGroup = &base
+		} else {
+			*originalField.ExactlyOneOfGroup = deduplicateSliceOfStrings(append(*originalField.ExactlyOneOfGroup, originalFieldLineage, newFieldLineage))
+		}
+		options = append(options, propertyWithExactlyOneOfPointer(originalField.ExactlyOneOfGroup))
 	} else {
-		conflicts := append(originalField.Conflicts, fieldPathOriginalField)
-		options = append(options, propertyWithConflicts(conflicts))
+		newConflicts := deduplicateSliceOfStrings(append([]string{originalFieldLineage}, originalField.Conflicts...))
+		newConflicts = slices.DeleteFunc(newConflicts, func(s string) bool {
+			return s == newFieldLineage
+		})
+		options = append(options, propertyWithConflicts(newConflicts))
+
+		if originalField.ConflictsGroup != nil {
+			*originalField.ConflictsGroup = deduplicateSliceOfStrings(append(*originalField.ConflictsGroup, newFieldLineage))
+		} else {
+			originalField.Conflicts = deduplicateSliceOfStrings(append(originalField.Conflicts, newFieldLineage))
+		}
 	}
 
-	if len(originalField.AtLeastOneOf) > 0 {
-		atLeastOneOf := append(originalField.AtLeastOneOf, fieldPathCurrentField)
-		options = append(options, propertyWithAtLeastOneOf(atLeastOneOf))
+	if originalField.AtLeastOneOfGroup != nil {
+		*originalField.AtLeastOneOfGroup = deduplicateSliceOfStrings(append(*originalField.AtLeastOneOfGroup, originalFieldLineage, newFieldLineage))
+		options = append(options, propertyWithAtLeastOneOfPointer(originalField.AtLeastOneOfGroup))
 	}
 
 	return NewProperty(name, originalField.ApiName, options)
 }
 
-func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField *Type, originalFieldLineage string) *Type {
-	description := fmt.Sprintf("Triggers update of %s write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", google.Underscore(writeOnlyField.Name))
-	requiredWith := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(writeOnlyField.Name))
+func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField *Type) *Type {
+	description := fmt.Sprintf("Triggers update of `%s` write-only. Increment this value when an update to `%s` is needed. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)", google.Underscore(writeOnlyField.Name), google.Underscore(writeOnlyField.Name))
+	requiredWith := strings.ReplaceAll(strings.Join(originalField.Lineage(), ".0."), google.Underscore(originalField.Name), google.Underscore(writeOnlyField.Name))
 
 	options := []func(*Type){
-		propertyWithType("String"),
-		propertyWithImmutable(originalField.Immutable),
+		propertyWithType("Int"),
+		propertyWithImmutable(originalField.IsForceNew()),
 		propertyWithDescription(description),
 		propertyWithRequiredWith([]string{requiredWith}),
 		propertyWithClientSide(true),
@@ -789,42 +899,37 @@ func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField
 	return NewProperty(name, name, options)
 }
 
-func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type, propWithWoConfiguredLineagePath string) []*Type {
+func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type) []*Type {
+	propWithWoConfigured.WriteOnly = false
+	propWithWoConfigured.Sensitive = true
 	if len(propWithWoConfigured.RequiredWith) > 0 {
 		log.Fatalf("WriteOnly property '%s' in resource '%s' cannot have RequiredWith set. This combination is not supported.", propWithWoConfigured.Name, r.Name)
 	}
 	woFieldName := fmt.Sprintf("%sWo", propWithWoConfigured.Name)
 	woVersionFieldName := fmt.Sprintf("%sVersion", woFieldName)
-	writeOnlyField := buildWriteOnlyField(woFieldName, woVersionFieldName, propWithWoConfigured, propWithWoConfiguredLineagePath)
-	writeOnlyVersionField := buildWriteOnlyVersionField(woVersionFieldName, propWithWoConfigured, writeOnlyField, propWithWoConfiguredLineagePath)
+	writeOnlyField := buildWriteOnlyField(woFieldName, woVersionFieldName, propWithWoConfigured)
+	writeOnlyVersionField := buildWriteOnlyVersionField(woVersionFieldName, propWithWoConfigured, writeOnlyField)
 	props = append(props, writeOnlyField, writeOnlyVersionField)
 	return props
 }
 
-func (r *Resource) buildCurrentPropLineage(p *Type, lineage string) string {
-	underscoreName := google.Underscore(p.Name)
-	if lineage == "" {
-		return underscoreName
-	}
-	return fmt.Sprintf("%s.0.%s", lineage, underscoreName)
-}
-
 // AddExtraFields processes properties and adds supplementary fields based on property types.
 // It handles write-only properties, labels, and annotations.
-func (r *Resource) AddExtraFields(props []*Type, parent *Type, lineage string) []*Type {
+func (r *Resource) AddExtraFields(props []*Type, parent *Type) []*Type {
+	if !r.constraintGroupsInitialized {
+		r.initializeConstraintGroups()
+	}
+
 	for _, p := range props {
-		currentPropLineage := r.buildCurrentPropLineage(p, lineage)
 		if p.WriteOnly && !strings.HasSuffix(p.Name, "Wo") {
-			props = r.addWriteOnlyFields(props, p, currentPropLineage)
-			p.WriteOnly = false
-			p.Required = false
+			props = r.addWriteOnlyFields(props, p)
 		}
 		if p.IsA("KeyValueLabels") {
 			props = r.addLabelsFields(props, parent, p)
 		} else if p.IsA("KeyValueAnnotations") {
 			props = r.addAnnotationsFields(props, parent, p)
 		} else if p.IsA("NestedObject") && len(p.AllProperties()) > 0 {
-			p.Properties = r.AddExtraFields(p.AllProperties(), p, currentPropLineage)
+			p.Properties = r.AddExtraFields(p.AllProperties(), p)
 		}
 	}
 	return props
@@ -843,7 +948,6 @@ func (r *Resource) addLabelsFields(props []*Type, parent *Type, labels *Type) []
 
 	terraformLabelsField := buildTerraformLabelsField("labels", parent, labels)
 	effectiveLabelsField := buildEffectiveLabelsField("labels", labels)
-
 	props = append(props, terraformLabelsField, effectiveLabelsField)
 
 	// The effective_labels field is used to write to API, instead of the labels field.
@@ -880,7 +984,6 @@ func (r *Resource) addAnnotationsFields(props []*Type, parent *Type, annotations
 	}
 
 	effectiveAnnotationsField := buildEffectiveLabelsField("annotations", annotations)
-
 	props = append(props, effectiveAnnotationsField)
 	return props
 }
@@ -945,7 +1048,7 @@ func (r Resource) IgnoreReadLabelsFields(props []*Type) []string {
 		if p.IsA("KeyValueLabels") ||
 			p.IsA("KeyValueTerraformLabels") ||
 			p.IsA("KeyValueAnnotations") {
-			fields = append(fields, p.TerraformLineage())
+			fields = append(fields, strings.Join(p.Lineage(), ".0."))
 		} else if p.IsA("NestedObject") && len(p.AllProperties()) > 0 {
 			fields = google.Concat(fields, r.IgnoreReadLabelsFields(p.AllProperties()))
 		}
@@ -1273,36 +1376,76 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 	return uniq
 }
 
-func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
+// IgnoreReadPropertiesLegacy is the legacy version of IgnoreReadProperties for Examples
+// IgnoreReadProperties returns a sorted slice of property names (snake_case) that should be ignored when reading.
+// This is useful for downstream code that needs to iterate over these properties.
+func (r Resource) IgnoreReadPropertiesLegacy(e *resource.Examples) []string {
 	var props []string
 	for _, tp := range r.AllUserProperties() {
 		if tp.UrlParamOnly || tp.IsA("ResourceRef") {
-			props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp.Name)))
+			props = append(props, google.Underscore(tp.Name))
 		}
 	}
-	for _, tp := range e.IgnoreReadExtra {
-		props = append(props, fmt.Sprintf("\"%s\"", tp))
-	}
-	for _, tp := range r.IgnoreReadLabelsFields(r.PropertiesWithExcluded()) {
-		props = append(props, fmt.Sprintf("\"%s\"", tp))
-	}
-	for _, tp := range ignoreReadFields(r.AllUserProperties()) {
-		props = append(props, fmt.Sprintf("\"%s\"", tp))
-	}
+	props = append(props, e.IgnoreReadExtra...)
+	props = append(props, r.IgnoreReadLabelsFields(r.PropertiesWithExcluded())...)
+	props = append(props, ignoreReadFields(r.AllUserProperties())...)
 
 	slices.Sort(props)
+	return props
+}
 
+// IgnoreReadPropertiesToStringLegacy is the legacy version of IgnoreReadPropertiesToString for Examples
+// IgnoreReadPropertiesToString returns the ignore read properties as a Go-syntax string slice.
+// This is a wrapper around IgnoreReadProperties for backwards compatibility.
+func (r Resource) IgnoreReadPropertiesToStringLegacy(e *resource.Examples) string {
+	props := r.IgnoreReadPropertiesLegacy(e)
 	if len(props) > 0 {
-		return fmt.Sprintf("[]string{%s}", strings.Join(props, ", "))
+		return fmt.Sprintf("[]string{%s}", strings.Join(quoteStrings(props), ", "))
 	}
 	return ""
+}
+
+// IgnoreReadProperties returns a sorted slice of property names (snake_case) that should be ignored when reading.
+// This is useful for downstream code that needs to iterate over these properties.
+func (r Resource) IgnoreReadProperties(s *resource.Step) []string {
+	var props []string
+	for _, tp := range r.AllUserProperties() {
+		if tp.UrlParamOnly || tp.IsA("ResourceRef") {
+			props = append(props, google.Underscore(tp.Name))
+		}
+	}
+	props = append(props, s.IgnoreReadExtra...)
+	props = append(props, r.IgnoreReadLabelsFields(r.PropertiesWithExcluded())...)
+	props = append(props, ignoreReadFields(r.AllUserProperties())...)
+
+	slices.Sort(props)
+	return props
+}
+
+// IgnoreReadPropertiesToString returns the ignore read properties as a Go-syntax string slice.
+// This is a wrapper around IgnoreReadProperties for backwards compatibility.
+func (r Resource) IgnoreReadPropertiesToString(s *resource.Step) string {
+	props := r.IgnoreReadProperties(s)
+	if len(props) > 0 {
+		return fmt.Sprintf("[]string{%s}", strings.Join(quoteStrings(props), ", "))
+	}
+	return ""
+}
+
+// quoteStrings returns a new slice with each string quoted.
+func quoteStrings(strs []string) []string {
+	quoted := make([]string, len(strs))
+	for i, s := range strs {
+		quoted[i] = fmt.Sprintf("\"%s\"", s)
+	}
+	return quoted
 }
 
 func ignoreReadFields(props []*Type) []string {
 	var fields []string
 	for _, tp := range props {
 		if tp.IgnoreRead && !tp.UrlParamOnly && !tp.IsA("ResourceRef") {
-			fields = append(fields, tp.TerraformLineage())
+			fields = append(fields, strings.Join(tp.Lineage(), ".0."))
 		} else if tp.IsA("NestedObject") && tp.AllProperties() != nil {
 			fields = append(fields, ignoreReadFields(tp.AllProperties())...)
 		}
@@ -1565,31 +1708,65 @@ func (r Resource) IamAttributes() []string {
 
 // Since most resources define a "basic" config as their first example,
 // we can reuse that config to create a resource to test IAM resources with.
-func (r Resource) FirstTestExample() resource.Examples {
-	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
+func (r Resource) FirstTestExample() *resource.Examples {
+	examples := google.Reject(r.Examples, func(e *resource.Examples) bool {
 		return e.ExcludeTest
 	})
-	examples = google.Reject(examples, func(e resource.Examples) bool {
+	examples = google.Reject(examples, func(e *resource.Examples) bool {
 		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
 	})
 
 	return examples[0]
 }
 
+// Use the first valid config to create datasource and IAM resource test
+func (r Resource) FirstTestConfig() TestConfig {
+	for _, sample := range r.Samples {
+		if sample.ExcludeTest || (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0) {
+			continue
+		}
+		for _, step := range sample.Steps {
+			if r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
+				return TestConfig{
+					Sample: sample,
+					Step:   step,
+				}
+			}
+		}
+	}
+	return TestConfig{}
+}
+
 func (r Resource) ExamplePrimaryResourceId() string {
-	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
+	examples := google.Reject(r.Examples, func(e *resource.Examples) bool {
 		return e.ExcludeTest
 	})
-	examples = google.Reject(examples, func(e resource.Examples) bool {
+	examples = google.Reject(examples, func(e *resource.Examples) bool {
 		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
 	})
 
 	if len(examples) == 0 {
-		examples = google.Reject(r.Examples, func(e resource.Examples) bool {
+		examples = google.Reject(r.Examples, func(e *resource.Examples) bool {
 			return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
 		})
 	}
 	return examples[0].PrimaryResourceId
+}
+
+func (r Resource) SamplePrimaryResourceId() string {
+	samples := google.Reject(r.Samples, func(s *resource.Sample) bool {
+		return s.ExcludeTest
+	})
+	samples = google.Reject(samples, func(s *resource.Sample) bool {
+		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(s.MinVersion)) < 0)
+	})
+
+	if len(samples) == 0 {
+		samples = google.Reject(r.Samples, func(s *resource.Sample) bool {
+			return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(s.MinVersion)) < 0)
+		})
+	}
+	return samples[0].PrimaryResourceId
 }
 
 func (r Resource) IamParentSourceType() string {
@@ -1600,22 +1777,73 @@ func (r Resource) IamParentSourceType() string {
 	return t
 }
 
-func (r Resource) IamImportFormat() string {
+func (r Resource) IamImportFormatTemplate() string {
 	var importFormat string
 	if len(r.IamPolicy.ImportFormat) > 0 {
 		importFormat = r.IamPolicy.ImportFormat[0]
 	} else {
 		importFormat = r.IamPolicy.SelfLink
 		if importFormat == "" {
-			importFormat = r.SelfLinkUrl()
+			if len(r.ImportFormat) > 0 {
+				importFormat = r.ImportFormat[0]
+			} else {
+				importFormat = r.SelfLinkUrl()
+			}
 		}
 	}
+	return strings.ReplaceAll(importFormat, "{{name}}", fmt.Sprintf("{{%s}}", r.IamParentResourceName()))
+}
+
+func (r Resource) IamImportFormat() string {
+	importFormat := r.IamImportFormatTemplate()
 
 	importFormat = regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(importFormat, "%s")
 	return strings.ReplaceAll(importFormat, r.ProductMetadata.BaseUrl, "")
 }
 
+func (r Resource) IamImportParams() []string {
+	importFormat := r.IamImportFormatTemplate()
+
+	return r.ExtractIdentifiers(importFormat)
+}
+
 func (r Resource) IamImportQualifiersForTest() string {
+	params := r.IamImportParams()
+	var importQualifiers []string
+	for i, param := range params {
+		if param == "project" {
+			if i != len(params)-1 {
+				// If the last parameter is project then we want to create a new project to use for the test, so don't default from the environment
+				if r.IamPolicy.TestProjectName == "" {
+					importQualifiers = append(importQualifiers, "envvar.GetTestProjectFromEnv()")
+				} else {
+					importQualifiers = append(importQualifiers, `context["project_id"]`)
+				}
+			}
+		} else if param == "zone" && r.IamPolicy.SubstituteZoneValue {
+			importQualifiers = append(importQualifiers, "envvar.GetTestZoneFromEnv()")
+		} else if param == "region" || param == "location" {
+			example := r.FirstTestExample()
+			if example.RegionOverride == "" {
+				importQualifiers = append(importQualifiers, "envvar.GetTestRegionFromEnv()")
+			} else {
+				importQualifiers = append(importQualifiers, fmt.Sprintf("\"%s\"", example.RegionOverride))
+			}
+		} else if param == "universe_domain" {
+			importQualifiers = append(importQualifiers, "envvar.GetTestUniverseDomainFromEnv()")
+		} else {
+			break
+		}
+	}
+
+	if len(importQualifiers) == 0 {
+		return ""
+	}
+
+	return strings.Join(importQualifiers, ", ")
+}
+
+func (r Resource) IamImportQualifiersForTestSample() string {
 	var importFormat string
 	if len(r.IamPolicy.ImportFormat) > 0 {
 		importFormat = r.IamPolicy.ImportFormat[0]
@@ -1641,11 +1869,12 @@ func (r Resource) IamImportQualifiersForTest() string {
 		} else if param == "zone" && r.IamPolicy.SubstituteZoneValue {
 			importQualifiers = append(importQualifiers, "envvar.GetTestZoneFromEnv()")
 		} else if param == "region" || param == "location" {
-			example := r.FirstTestExample()
-			if example.RegionOverride == "" {
+			testConfig := r.FirstTestConfig()
+			sample := testConfig.Sample
+			if sample.RegionOverride == "" {
 				importQualifiers = append(importQualifiers, "envvar.GetTestRegionFromEnv()")
 			} else {
-				importQualifiers = append(importQualifiers, fmt.Sprintf("\"%s\"", example.RegionOverride))
+				importQualifiers = append(importQualifiers, fmt.Sprintf("\"%s\"", sample.RegionOverride))
 			}
 		} else if param == "universe_domain" {
 			importQualifiers = append(importQualifiers, "envvar.GetTestUniverseDomainFromEnv()")
@@ -1725,46 +1954,6 @@ func (r Resource) FormatDocDescription(desc string, indent bool) string {
 		return fmt.Sprintf("\n  %s", strings.TrimSuffix(returnString, "\n  "))
 	}
 	return strings.TrimSuffix(returnString, "\n")
-}
-
-func (r Resource) CustomTemplate(templatePath string, appendNewline bool) string {
-	output := ExecuteTemplate(&r, templatePath, appendNewline)
-	if !appendNewline {
-		output = strings.TrimSuffix(output, "\n")
-	}
-	return output
-}
-
-func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
-	templates := []string{
-		templatePath,
-		"templates/terraform/expand_resource_ref.tmpl",
-		"templates/terraform/custom_flatten/bigquery_table_ref.go.tmpl",
-		"templates/terraform/flatten_property_method.go.tmpl",
-		"templates/terraform/expand_property_method.go.tmpl",
-		"templates/terraform/update_mask.go.tmpl",
-		"templates/terraform/nested_query.go.tmpl",
-		"templates/terraform/unordered_list_customize_diff.go.tmpl",
-	}
-	templateFileName := filepath.Base(templatePath)
-
-	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
-	if err != nil {
-		glog.Exit(err)
-	}
-
-	contents := bytes.Buffer{}
-	if err = tmpl.ExecuteTemplate(&contents, templateFileName, e); err != nil {
-		glog.Exit(err)
-	}
-
-	rs := contents.String()
-
-	if !strings.HasSuffix(rs, "\n") && appendNewline {
-		rs = fmt.Sprintf("%s\n", rs)
-	}
-
-	return rs
 }
 
 // Returns the key of the list of resources in the List API response
@@ -1886,12 +2075,46 @@ func (r Resource) IsExcluded() bool {
 	return r.Exclude || r.ExcludeResource
 }
 
-func (r Resource) TestExamples() []resource.Examples {
-	return google.Reject(google.Reject(r.Examples, func(e resource.Examples) bool {
+func (r Resource) TestExamples() []*resource.Examples {
+	return google.Reject(google.Reject(r.Examples, func(e *resource.Examples) bool {
 		return e.ExcludeTest
-	}), func(e resource.Examples) bool {
+	}), func(e *resource.Examples) bool {
 		return e.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, e.MinVersion)
 	})
+}
+
+func (r Resource) TestSamples() []*resource.Sample {
+	return google.Reject(google.Reject(r.Samples, func(s *resource.Sample) bool {
+		return s.ExcludeTest
+	}), func(s *resource.Sample) bool {
+		return s.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, s.MinVersion)
+	})
+}
+
+func (r Resource) TestSampleSetUp(sysfs fs.FS) {
+	res := make(map[string]string)
+	for _, sample := range r.Samples {
+		sample.TargetVersionName = r.TargetVersionName
+		if sample.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, sample.MinVersion) {
+			continue
+		}
+		for _, step := range sample.Steps {
+			if step.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, step.MinVersion) {
+				continue
+			}
+			step.PrimaryResourceId = sample.PrimaryResourceId
+			packageName := filepath.Base(filepath.Dir(r.SourceYamlFile))
+			if step.ConfigPath == "" {
+				step.ConfigPath = fmt.Sprintf("templates/terraform/samples/services/%s/%s.tf.tmpl", packageName, step.Name)
+			}
+			step.SetHCLText(sysfs)
+			configName := step.Name
+			if _, ok := res[step.Name]; !ok {
+				res[configName] = sample.Name
+				sample.NewConfigFuncs = append(sample.NewConfigFuncs, step)
+			}
+		}
+	}
 }
 
 func (r Resource) VersionedProvider(exampleVersion string) bool {
@@ -1915,12 +2138,7 @@ func (r Resource) StateUpgradersCount() []int {
 }
 
 func (r Resource) CaiProductBaseUrl() string {
-	version := r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName)
-	baseUrl := version.CaiBaseUrl
-	if baseUrl == "" {
-		baseUrl = version.BaseUrl
-	}
-	return baseUrl
+	return r.ProductMetadata.ServiceBaseUrl()
 }
 
 // Gets the CAI product legacy base url.
@@ -1965,32 +2183,137 @@ func (r Resource) DefineAssetTypeForResourceInProduct() bool {
 	return true
 }
 
-// Gets the Cai asset name template, which could include version
-// For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
-func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
+// Gets the Cai asset name format
+func (r Resource) GetCaiAssetNameFormat() string {
 	caiBaseUrl := ""
+	caiId := ""
+	if r.CaiIdentity != "" {
+		caiId = r.CaiIdentity
+	} else {
+		caiId = r.getCaiId()
+	}
+	caiIdTemplate := fmt.Sprintf("{{%s}}", caiId)
 	if r.CaiBaseUrl != "" {
-		caiBaseUrl = fmt.Sprintf("%s/{{name}}", r.CaiBaseUrl)
+		if caiId == "" || strings.Contains(r.CaiBaseUrl, caiIdTemplate) {
+			caiBaseUrl = r.CaiBaseUrl
+		} else {
+			caiBaseUrl = fmt.Sprintf("%s/%s", r.CaiBaseUrl, caiIdTemplate)
+		}
 	}
 	if caiBaseUrl == "" {
 		caiBaseUrl = r.SelfLink
 	}
 	if caiBaseUrl == "" {
-		caiBaseUrl = fmt.Sprintf("%s/{{name}}", r.BaseUrl)
+		if caiId == "" || strings.Contains(r.BaseUrl, caiIdTemplate) {
+			caiBaseUrl = r.BaseUrl
+		} else {
+			caiBaseUrl = fmt.Sprintf("%s/%s", r.BaseUrl, caiIdTemplate)
+		}
 	}
-	return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, caiBaseUrl)
+	return caiBaseUrl
 }
 
-// Gets the Cai asset name template, which doesn't include version
-// For example: //monitoring.googleapis.com/projects/{{project}}/services/{{service_id}}
-func (r Resource) CaiAssetNameTemplate(productBackendName string) string {
-	template := r.rawCaiAssetNameTemplate(productBackendName)
-	versionRegex, err := regexp.Compile(`\/(v\d[^\/]*)\/`)
-	if err != nil {
-		log.Fatalf("Cannot compile the regular expression: %v", err)
+// Gets the Cai asset name template, which could include version
+// For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
+func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
+	return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, r.GetCaiAssetNameFormat())
+}
+
+// Guesses the identifier of the resource, as "name" is not always the identifier
+// For example, the cai identifier is feed_id in google_cloud_asset_folder_feed
+func (r Resource) getCaiId() string {
+	for _, p := range r.AllUserProperties() {
+		if p.Name == "name" && !p.Output {
+			return "name"
+		}
 	}
 
-	return versionRegex.ReplaceAllString(template, "/")
+	// Get the last identifier extracted from selfLink
+	id := r.getCandidateCaiId(r.SelfLink)
+	if id != "" {
+		return id
+	}
+
+	// Get the last identifier extracted from createUrl
+	id = r.getCandidateCaiId(r.CreateUrl)
+	if id != "" {
+		return id
+	}
+
+	return ""
+}
+
+// Extracts the last identifier from the url, if it is not computed,
+// then it is the candidate identifier
+func (r Resource) getCandidateCaiId(url string) string {
+	identifiers := r.ExtractIdentifiers(url)
+	if len(identifiers) > 0 {
+		id := identifiers[len(identifiers)-1]
+		for _, p := range r.AllUserProperties() {
+			if google.Underscore(p.Name) == id && !p.Output {
+				return id
+			}
+		}
+	}
+	return ""
+}
+
+// Gets a format string that is used to override the default format from resource id format
+func (r Resource) CAIFormatOverride() string {
+	caiAssetService := strings.Trim(r.ProductMetadata.CaiAssetService, "/")
+	if r.CaiAssetNameFormat != "" || caiAssetService != "" {
+		if caiAssetService == "" {
+			caiAssetService = r.ProductMetadata.ServiceName()
+		}
+
+		caiAssetName := r.CaiAssetNameFormat
+		if caiAssetName == "" {
+			caiAssetName = r.IdFormat
+		}
+		return fmt.Sprintf("//%s/%s", caiAssetService, caiAssetName)
+	}
+	return ""
+}
+
+// Gets a format string for CAI asset name
+func (r Resource) GetCaiAssetNameTemplate() string {
+	caiAssetNameFormat := r.CAIFormatOverride()
+	if caiAssetNameFormat != "" {
+		return caiAssetNameFormat
+	}
+
+	return fmt.Sprintf("//%s.googleapis.com/%s", r.CaiProductBackendName(r.CaiProductBaseUrl()), r.IdFormat)
+}
+
+// Gets a format string for CAI asset name
+func (r Resource) Cai2hclAssetNameTemplate() string {
+	if r.Cai2hclNameFormat != "" {
+		return fmt.Sprintf("//%s.googleapis.com/%s", r.CaiProductBackendName(r.CaiProductBaseUrl()), r.Cai2hclNameFormat)
+	}
+
+	return r.GetCaiAssetNameTemplate()
+}
+
+// Ignores verifying CAI asset name if it is one computed field
+// For example, the CAI asset name format is //monitoring.googleapis.com/{{name}}
+// for google_monitoring_notification_channel
+func (r Resource) IgnoreCaiAssetName() bool {
+	nameTemplate := r.GetCaiAssetNameTemplate()
+	parts := strings.Split(nameTemplate, "/")
+	if len(parts) > 4 {
+		return false
+	}
+
+	params := r.ExtractIdentifiers(nameTemplate)
+	if len(params) == 1 {
+		param := params[0]
+		for _, p := range r.GettableProperties() {
+			if google.Underscore(p.Name) == param {
+				return p.Output
+			}
+		}
+	}
+	return false
 }
 
 // Gets the Cai API version
@@ -2087,6 +2410,13 @@ func (r *Resource) ShouldGenerateSingularDataSource() bool {
 	return r.Datasource.Generate
 }
 
+func (r *Resource) ShouldGenerateSingularDataSourceTests() bool {
+	if r.Datasource == nil {
+		return false
+	}
+	return !r.Datasource.ExcludeTest
+}
+
 func (r Resource) ShouldDatasourceSetLabels() bool {
 	for _, p := range r.Properties {
 		if p.Name == "labels" && p.Type == "KeyValueLabels" {
@@ -2109,7 +2439,7 @@ func (r Resource) ShouldDatasourceSetAnnotations() bool {
 // that should be marked as "Required".
 func (r Resource) DatasourceRequiredFields() []string {
 	requiredFields := []string{}
-	uriParts := strings.Split(r.SelfLink, "/")
+	uriParts := strings.Split(r.IdFormat, "/")
 
 	for _, part := range uriParts {
 		if strings.HasPrefix(part, "{{") && strings.HasSuffix(part, "}}") {
@@ -2126,7 +2456,7 @@ func (r Resource) DatasourceRequiredFields() []string {
 // that should be marked as "Optional".
 func (r Resource) DatasourceOptionalFields() []string {
 	optionalFields := []string{}
-	uriParts := strings.Split(r.SelfLink, "/")
+	uriParts := strings.Split(r.IdFormat, "/")
 
 	for _, part := range uriParts {
 		if strings.HasPrefix(part, "{{") && strings.HasSuffix(part, "}}") {
@@ -2185,34 +2515,44 @@ func (r Resource) MarkdownHeader(templatePath string) string {
 // TGC Methods
 // ====================
 // Lists fields that test.BidirectionalConversion should ignore
-func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string {
+func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 	props := []string{
 		"depends_on",
 		"count",
 		"for_each",
 		"provider",
 		"lifecycle",
+		"timeouts",
 	}
 	for _, tp := range r.VirtualFields {
-		props = append(props, google.Underscore(tp.Name))
+		props = append(props, strings.Join(tp.Lineage(), "."))
 	}
 	for _, tp := range r.AllNestedProperties(r.RootProperties()) {
 		if tp.UrlParamOnly {
 			props = append(props, google.Underscore(tp.Name))
-		} else if tp.IsMissingInCai {
-			props = append(props, tp.MetadataLineage())
+		} else if tp.IsMissingInCai || tp.IgnoreRead || tp.ClientSide || tp.WriteOnlyLegacy {
+			props = append(props, strings.Join(tp.Lineage(), "."))
 		}
 	}
-	props = append(props, e.TGCTestIgnoreExtra...)
+
+	for _, e := range r.Examples {
+		for _, p := range e.IgnoreReadExtra {
+			props = append(props, p)
+		}
+	}
+
+	if r.IgnoreCaiAssetName() {
+		props = append(props, "ASSETNAME")
+	}
 
 	slices.Sort(props)
-	return props
+	return slices.Compact(props)
 }
 
 // Filters out computed properties during cai2hcl
 func (r Resource) ReadPropertiesForTgc() []*Type {
 	return google.Reject(r.AllUserProperties(), func(v *Type) bool {
-		return v.Output || v.UrlParamOnly
+		return v.Output || v.UrlParamOnly || v.TGCIgnoreRead
 	})
 }
 

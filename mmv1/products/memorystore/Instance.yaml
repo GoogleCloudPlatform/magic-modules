@@ -43,6 +43,7 @@ async:
 custom_code:
   encoder: 'templates/terraform/encoders/memorystore_instance.go.tmpl'
   decoder: 'templates/terraform/decoders/memorystore_instance.go.tmpl'
+  constants: 'templates/terraform/constants/memorystore_instance.go.tmpl'
 examples:
   - name: 'memorystore_instance_basic'
     primary_resource_id: 'instance-basic'
@@ -108,8 +109,8 @@ examples:
       'secondary_instance_prevent_destroy': 'false'
 virtual_fields:
   - name: 'desired_psc_auto_connections'
-    description: "`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead."
-    deprecation_message: '`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead.'
+    description: "`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead `terraform import` will only work with desired_auto_created_endpoints`."
+    deprecation_message: '`desired_psc_auto_connections` is deprecated. Use `desired_auto_created_endpoints` instead. `terraform import` will only work with desired_auto_created_endpoints`.'
     type: Array
     immutable: true
     conflicts:
@@ -134,6 +135,7 @@ virtual_fields:
       endpoints connections. "
     type: Array
     immutable: true
+    diff_suppress_func: 'memorystoreInstancedDesiredAutoConnectionsDiffSuppress'
     conflicts:
       - desiredPscAutoConnections
     item_type:
@@ -480,6 +482,23 @@ properties:
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
         output: true
+  - name: 'maintenanceVersion'
+    type: String
+    description: |
+      This field can be used to trigger self service update to indicate the desired maintenance version. The input to this field can be determined by the available_maintenance_versions field.
+      *Note*: This field can only be specified when updating an existing cluster to a newer version. Downgrades are currently not supported!
+  - name: 'effectiveMaintenanceVersion'
+    type: String
+    description: |
+      This field represents the actual maintenance version of the cluster.
+    output: true
+  - name: 'availableMaintenanceVersions'
+    type: Array
+    description: |
+     This field is used to determine the available maintenance versions for the self service update.
+    item_type:
+      type: String
+    output: true
   - name: 'engineVersion'
     type: String
     description: "Optional. Engine version of the instance."
@@ -517,14 +536,6 @@ properties:
         enum_values:
           - 'MULTI_ZONE'
           - 'SINGLE_ZONE'
-  - name: 'allowFewerZonesDeployment'
-    type: Boolean
-    description: |
-      Allows customers to specify if they are okay with deploying a multi-zone
-      instance in less than 3 zones. Once set, if there is a zonal outage during
-      the instance creation, the instance will only be deployed in 2 zones, and
-      stay within the 2 zones for its lifecycle.
-    immutable: true
   - name: 'deletionProtectionEnabled'
     type: Boolean
     description: "Optional. If set to true deletion of the instance will fail. "

@@ -19,7 +19,7 @@ references:
   guides:
     'Official ES Documentation': 'https://cloud.google.com/dialogflow/es/docs'
     'Official CX Documentation': 'https://cloud.google.com/dialogflow/cx/docs'
-  api: 'https://cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.locations.encryptionSpec'
+  api: 'https://docs.cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.locations.encryptionSpec'
 
 base_url: 'projects/{{project}}/locations/{{location}}/encryptionSpec'
 
@@ -67,6 +67,9 @@ examples:
     primary_resource_id: "my-encryption-spec"
     min_version: "beta"
     exclude_import_test: true
+    # The test resulted in an increasing number of CMEK DBs
+    # which we don't have ways to handle db deletion for deleted cmek projects.
+    exclude_test: true
     vars:
       project_id: 'my-proj'
       kms_keyring: 'my-keyring'

@@ -12,6 +12,8 @@ resource "google_alloydb_cluster" "{{$.PrimaryResourceId}}" {
   network_config {
     network = google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "{{$.PrimaryResourceId}}" {

@@ -171,6 +171,18 @@ resource "google_organization_iam_member" "sa_principal_access_boundary_admin" {
   member = google_service_account.sa.member
 }
 
+resource "google_organization_iam_member" "dlp_admin" {
+  org_id = data.google_organization.org.org_id
+  role   = "roles/dlp.admin"
+  member = google_project_service_identity.dlp_sa.member
+}
+
+resource "google_organization_iam_member" "dlp_org_driver" {
+  org_id = data.google_organization.org.org_id
+  role   = "roles/dlp.orgdriver"
+  member = google_project_service_identity.dlp_sa.member
+}
+
 resource "google_billing_account_iam_member" "sa_master_billing_admin" {
   billing_account_id = data.google_billing_account.master_acct.id
   role               = "roles/billing.admin"
@@ -223,6 +235,7 @@ module "project-services" {
     "binaryauthorization.googleapis.com",
     "blockchainnodeengine.googleapis.com",
     "certificatemanager.googleapis.com",
+    "ces.googleapis.com",
     "chronicle.googleapis.com",
     "cloudaicompanion.googleapis.com",
     "cloudapis.googleapis.com",
@@ -236,6 +249,7 @@ module "project-services" {
     "cloudquotas.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "cloudscheduler.googleapis.com",
+    "cloudsecuritycompliance.googleapis.com",
     "cloudtasks.googleapis.com",
     "cloudtrace.googleapis.com",
     "composer.googleapis.com",
@@ -315,6 +329,7 @@ module "project-services" {
     "networksecurity.googleapis.com",
     "networkservices.googleapis.com",
     "notebooks.googleapis.com",
+    "observability.googleapis.com",
     "orgpolicy.googleapis.com",
     "osconfig.googleapis.com",
     "oslogin.googleapis.com",
@@ -418,6 +433,14 @@ resource "google_project_service_identity" "parametermanager_sa" {
 
   project = google_project.proj.project_id
   service = "parametermanager.googleapis.com"
+}
+
+resource "google_project_service_identity" "dlp_sa" {
+  provider = google-beta
+  depends_on = [module.project-services]
+
+  project = google_project.proj.project_id
+  service = "dlp.googleapis.com"
 }
 
 # TestAccComposerEnvironment_fixPyPiPackages

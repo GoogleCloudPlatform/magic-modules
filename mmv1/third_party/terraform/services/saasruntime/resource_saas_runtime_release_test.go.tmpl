@@ -1,0 +1,160 @@
+package saasruntime_test
+
+{{ if ne $.TargetVersionName `ga` -}}
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccSaasRuntimeRelease_update(t *testing.T) {
+	t.Parallel()
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com",
+			Role:   "roles/saasservicemgmt.serviceAgent",
+		},
+	})
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSaasRuntimeRelease_basic(context),
+			},
+			{
+				ResourceName:            "google_saas_runtime_release.example",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "release_id", "terraform_labels"},
+			},
+			{
+				Config: testAccSaasRuntimeRelease_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_saas_runtime_release.example", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_saas_runtime_release.example",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "release_id", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccSaasRuntimeRelease_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_saas_runtime_saas" "example_saas" {
+  provider = google-beta
+  saas_id  = "tf-test-example-saas%{random_suffix}"
+  location = "global"
+
+  locations {
+    name = "us-central1"
+  }
+}
+
+resource "google_saas_runtime_unit_kind" "example_unitkind" {
+  provider     = google-beta
+  location     = "global"
+  unit_kind_id = "tf-test-example-unitkind%{random_suffix}"
+  saas         = google_saas_runtime_saas.example_saas.id
+}
+
+resource "google_saas_runtime_release" "example_previous" {
+  provider          = google-beta
+  location          = "global"
+  release_id        = "tf-test-previous-release%{random_suffix}"
+  unit_kind         = google_saas_runtime_unit_kind.example_unitkind.id
+  blueprint {
+    package = "us-central1-docker.pkg.dev/ci-test-project-188019/test-repo/tf-test-easysaas-alpha-image@sha256:7992fdbaeaf998ecd31a7f937bb26e38a781ecf49b24857a6176c1e9bfc299ee"
+  }
+}
+
+resource "google_saas_runtime_release" "example" {
+  provider          = google-beta
+  location          = "global"
+  release_id        = "tf-test-example-release%{random_suffix}"
+  unit_kind         = google_saas_runtime_unit_kind.example_unitkind.id
+  blueprint {
+    package = "us-central1-docker.pkg.dev/ci-test-project-188019/test-repo/tf-test-easysaas-beta-image@sha256:7bba0fa85b2956df7768f7b32e715b6fe11f4f4193e2a70a35bf3f286a6cdf9e"
+  }
+  input_variable_defaults {
+    variable = "name"
+    value    = "test"
+    type     = "STRING"
+  }
+}
+`, context)
+}
+
+func testAccSaasRuntimeRelease_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_saas_runtime_saas" "example_saas" {
+  provider = google-beta
+  saas_id  = "tf-test-example-saas%{random_suffix}"
+  location = "global"
+
+  locations {
+    name = "us-central1"
+  }
+}
+
+resource "google_saas_runtime_unit_kind" "example_unitkind" {
+  provider     = google-beta
+  location     = "global"
+  unit_kind_id = "tf-test-example-unitkind%{random_suffix}"
+  saas         = google_saas_runtime_saas.example_saas.id
+}
+
+resource "google_saas_runtime_release" "example_previous" {
+  provider          = google-beta
+  location          = "global"
+  release_id        = "tf-test-previous-release%{random_suffix}"
+  unit_kind         = google_saas_runtime_unit_kind.example_unitkind.id
+  blueprint {
+    package = "us-central1-docker.pkg.dev/ci-test-project-188019/test-repo/tf-test-easysaas-alpha-image@sha256:7992fdbaeaf998ecd31a7f937bb26e38a781ecf49b24857a6176c1e9bfc299ee"
+  }
+}
+
+resource "google_saas_runtime_release" "example" {
+  provider          = google-beta
+  location          = "global"
+  release_id        = "tf-test-example-release%{random_suffix}"
+  unit_kind         = google_saas_runtime_unit_kind.example_unitkind.id
+  blueprint {
+    package = "us-central1-docker.pkg.dev/ci-test-project-188019/test-repo/tf-test-easysaas-beta-image@sha256:7bba0fa85b2956df7768f7b32e715b6fe11f4f4193e2a70a35bf3f286a6cdf9e"
+  }
+  input_variable_defaults {
+    variable = "name"
+    value    = "test"
+    type     = "STRING"
+  }
+  labels = {
+    "key" = "value"
+  }
+  annotations = {
+    "key" = "value"
+  }
+  release_requirements {
+    upgradeable_from_releases = [google_saas_runtime_release.example_previous.id]
+  }
+}
+`, context)
+}
+{{- end }}

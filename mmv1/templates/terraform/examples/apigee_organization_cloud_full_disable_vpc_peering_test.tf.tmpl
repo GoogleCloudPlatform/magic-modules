@@ -37,13 +37,18 @@ resource "google_project_service" "kms" {
   depends_on = [google_project_service.compute]
 }
 
+resource "time_sleep" "wait_for_services" {
+  create_duration = "120s"
+  depends_on = [google_project_service.kms]
+}
+
 resource "google_kms_key_ring" "apigee_keyring" {
   provider = google-beta
 
   name       = "apigee-keyring"
   location   = "us-central1"
   project    = google_project.project.project_id
-  depends_on = [google_project_service.kms]
+  depends_on = [time_sleep.wait_for_services]
 }
 
 resource "google_kms_crypto_key" "apigee_key" {
@@ -69,6 +74,11 @@ resource "google_kms_crypto_key_iam_member" "apigee_sa_keyuser" {
   member = google_project_service_identity.apigee_sa.member
 }
 
+resource "time_sleep" "wait_for_iam" {
+  create_duration = "120s"
+  depends_on = [google_kms_crypto_key_iam_member.apigee_sa_keyuser]
+}
+
 resource "google_apigee_organization" "{{$.PrimaryResourceId}}" {
   provider = google-beta
 
@@ -91,6 +101,11 @@ resource "google_apigee_organization" "{{$.PrimaryResourceId}}" {
   }
 
   depends_on = [
-    google_kms_crypto_key_iam_member.apigee_sa_keyuser,
+    time_sleep.wait_for_iam,
   ]
+}
+
+resource "time_sleep" "wait_after_destroy" {
+  destroy_duration = "150s"
+  depends_on = [google_apigee_organization.{{$.PrimaryResourceId}}]
 }

@@ -19,18 +19,18 @@ For more information about types of resources and the generation process overall
 1. Complete the steps in [Set up your development environment]({{< ref "/develop/set-up-dev-environment" >}}) to set up your environment and your Google Cloud project.
 1. [Ensure the resource to which you want to add the fields exists in the provider]({{< ref "/develop/add-resource" >}}).
 1. Ensure that your `magic-modules`, `terraform-provider-google`, and `terraform-provider-google-beta` repositories are up to date.
-  ```bash
-  cd ~/magic-modules
-  git checkout main && git clean -f . && git checkout -- . && git pull
-  cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-  git checkout main && git clean -f . && git checkout -- . && git pull
-  cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
-  git checkout main && git clean -f . && git checkout -- . && git pull
-  ```
+   ```bash
+   cd ~/magic-modules
+   git checkout main && git clean -f . && git checkout -- . && git pull
+   cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+   git checkout main && git clean -f . && git checkout -- . && git pull
+   cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+   git checkout main && git clean -f . && git checkout -- . && git pull
+   ```
 
 ## Add fields
 
-{{< tabs "fields" >}}
+{{% tabs "fields" %}}
 {{< tab "MMv1" >}}
 1. For each API field, copy the following template into the resource's `properties` attribute. Be sure to indent appropriately.
 
@@ -164,7 +164,7 @@ Replace `String` in the field type with one of the following options:
     type: Map
     description: |
       MULTILINE_FIELD_DESCRIPTION
-    key_name: 'KEY_NAME'
+    key_name: 'key_name'
     key_description: |
       MULTILINE_KEY_FIELD_DESCRIPTION
   # Map of primitive values
@@ -211,7 +211,7 @@ For `key_name` and `key_description`, provide a domain-appropriate name and desc
 4. If any of the added Go code (including any imports) is beta-only, change the file suffix to `.go.tmpl` and wrap the beta-only code in a version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`.
    - Add a new guard rather than adding the field to an existing guard; it is easier to read.
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 ## What's next?
 
