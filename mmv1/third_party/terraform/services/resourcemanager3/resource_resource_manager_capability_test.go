@@ -11,6 +11,8 @@ import (
 )
 
 func TestAccResourceManagerCapability_resourceManagerCapabilityExample_basic(t *testing.T) {
+	// The test fails as the folder with a configured capability fails to be deleted.
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
