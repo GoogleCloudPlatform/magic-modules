@@ -881,6 +881,7 @@ resource "google_workbench_instance" "instance" {
 }
 
 func TestAccWorkbenchInstance_metadataEUCForceNew(t *testing.T) {
+	t.Skip("Skipping until backend rollout completes which throws an error for non-allowlisted users, rather than silently dropping the key.")
 	t.Parallel()
 
 	context := map[string]interface{}{
