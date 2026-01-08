@@ -73,12 +73,15 @@ func TestAccBigQueryTable_IgnoreSchemaDataPoliciesMerge(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns", "ignore_schema_changes"},
 			},
-			// Stage 2: Add policies to col1 and col2 (Standard Authoritative Update)
+			// Stage 2: Add policies to col1, col2 AND nested_col.sub1, nested_col.sub2 (Standard Authoritative Update)
 			// No ignore flag set yet.
 			{
 				Config: testAccBigQueryTableDataPoliciesMergeStage2(datasetID, tableID, taxonomyName, policyID1, policyID2),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBigQueryTableMergedPolicies(t, datasetID, tableID, []string{"col1", "col2"}),
+					testAccCheckBigQueryTableMergedPolicies(t, datasetID, tableID, []string{
+						"col1", "col2",
+						"nested_col.sub1", "nested_col.sub2",
+					}),
 					resource.TestCheckResourceAttr("google_bigquery_table.test", "description", "Stage 2 Table"),
 				),
 			},
@@ -93,14 +96,21 @@ func TestAccBigQueryTable_IgnoreSchemaDataPoliciesMerge(t *testing.T) {
 			// col1: Removed from Config (Should be preserved from backend)
 			// col2: Kept in Config + Description Updated
 			// col3: New Policy added in Config
+			// Same for nested columns
 			{
 				Config: testAccBigQueryTableDataPoliciesMergeStage3(datasetID, tableID, taxonomyName, policyID1, policyID2),
 				Check: resource.ComposeTestCheckFunc(
-					// Verification 1: Column descriptions are updated correctly
+					// Verification 1: Column descriptions are updated correctly (Top level + Nested)
 					testAccCheckBigQueryTableColumnDescription(t, datasetID, tableID, "col2", "new description"),
+					testAccCheckBigQueryTableColumnDescription(t, datasetID, tableID, "nested_col.sub2", "new nested desc"),
+
 					resource.TestCheckResourceAttr("google_bigquery_table.test", "description", "Updated Table"),
-					// Verification 2: All 3 columns now have policies (1 preserved, 1 matched, 1 newly added)
-					testAccCheckBigQueryTableMergedPolicies(t, datasetID, tableID, []string{"col1", "col2", "col3"}),
+
+					// Verification 2: All 6 columns now have policies (Preserved, Matched, Newly Added)
+					testAccCheckBigQueryTableMergedPolicies(t, datasetID, tableID, []string{
+						"col1", "col2", "col3",
+						"nested_col.sub1", "nested_col.sub2", "nested_col.sub3",
+					}),
 				),
 			},
 			{
@@ -2211,6 +2221,7 @@ EOH
 }
 
 // Verification function: Fetches the table from BQ API and checks specific columns for DataPolicies
+// It supports nested columns via dot-notation (e.g. "nested_col.sub1")
 func testAccCheckBigQueryTableMergedPolicies(t *testing.T, datasetID, tableID string, expectedCols []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
@@ -2219,26 +2230,37 @@ func testAccCheckBigQueryTableMergedPolicies(t *testing.T, datasetID, tableID st
 			return err
 		}
 
-		policyCount := 0
+		var foundPolicies []string
+
+		// Level 1: Iterate Top-level fields
 		for _, field := range res.Schema.Fields {
+			// Check Top-level policy
 			if len(field.DataPolicies) > 0 {
-				// Check if this column was in our expected list
-				found := false
-				for _, expected := range expectedCols {
-					if field.Name == expected {
-						found = true
-						break
-					}
+				foundPolicies = append(foundPolicies, field.Name)
+			}
+
+			// Level 2: Iterate Nested fields (if any)
+			for _, subField := range field.Fields {
+				if len(subField.DataPolicies) > 0 {
+					foundPolicies = append(foundPolicies, fmt.Sprintf("%s.%s", field.Name, subField.Name))
 				}
-				if !found && len(expectedCols) > 0 {
-					return fmt.Errorf("column %s has a policy but was not expected to", field.Name)
-				}
-				policyCount++
 			}
 		}
 
-		if policyCount != len(expectedCols) {
-			return fmt.Errorf("expected %d columns with policies, found %d", len(expectedCols), policyCount)
+		// Validation Logic (Same as before)
+		policyMap := make(map[string]bool)
+		for _, p := range foundPolicies {
+			policyMap[p] = true
+		}
+
+		for _, expected := range expectedCols {
+			if !policyMap[expected] {
+				return fmt.Errorf("expected policy on column '%s', but none found. Found policies on: %v", expected, foundPolicies)
+			}
+		}
+
+		if len(foundPolicies) != len(expectedCols) {
+			return fmt.Errorf("expected %d columns with policies, found %d. Expected: %v, Found: %v", len(expectedCols), len(foundPolicies), expectedCols, foundPolicies)
 		}
 
 		return nil
@@ -2246,7 +2268,8 @@ func testAccCheckBigQueryTableMergedPolicies(t *testing.T, datasetID, tableID st
 }
 
 // Verification function: Checks if a column description was correctly updated
-func testAccCheckBigQueryTableColumnDescription(t *testing.T, datasetID, tableID, colName, expectedDesc string) resource.TestCheckFunc {
+// It supports nested columns via dot-notation (e.g. "nested_col.sub2")
+func testAccCheckBigQueryTableColumnDescription(t *testing.T, datasetID, tableID, colPath, expectedDesc string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 		res, err := config.NewBigQueryClient(config.UserAgent).Tables.Get(config.Project, datasetID, tableID).Do()
@@ -2254,15 +2277,47 @@ func testAccCheckBigQueryTableColumnDescription(t *testing.T, datasetID, tableID
 			return err
 		}
 
-		for _, field := range res.Schema.Fields {
-			if field.Name == colName {
-				if field.Description != expectedDesc {
-					return fmt.Errorf("column %s description expected '%s', got '%s'", colName, expectedDesc, field.Description)
+		parts := strings.Split(colPath, ".")
+		targetFields := res.Schema.Fields
+		var targetFieldDesc string
+		found := false
+
+		// Logic for 1 level of nesting
+		if len(parts) == 1 {
+			// Case A: Top-level column "col1"
+			for _, f := range targetFields {
+				if f.Name == parts[0] {
+					targetFieldDesc = f.Description
+					found = true
+					break
 				}
-				return nil
 			}
+		} else if len(parts) == 2 {
+			// Case B: Nested column "parent.child"
+			for _, parent := range targetFields {
+				if parent.Name == parts[0] {
+					// Found parent, now search children
+					for _, child := range parent.Fields {
+						if child.Name == parts[1] {
+							targetFieldDesc = child.Description
+							found = true
+							break
+						}
+					}
+					break // Stop searching parents
+				}
+			}
+		} else {
+			return fmt.Errorf("test helper only supports up to 1 level of nesting, got: %s", colPath)
 		}
-		return fmt.Errorf("column %s not found in schema", colName)
+
+		if !found {
+			return fmt.Errorf("column '%s' not found in schema", colPath)
+		}
+		if targetFieldDesc != expectedDesc {
+			return fmt.Errorf("column '%s' description expected '%s', got '%s'", colPath, expectedDesc, targetFieldDesc)
+		}
+		return nil
 	}
 }
 
@@ -2316,7 +2371,16 @@ resource "google_bigquery_table" "test" {
 [
   { "name": "col1", "type": "STRING" },
   { "name": "col2", "type": "STRING", "description": "old description" },
-  { "name": "col3", "type": "STRING" }
+  { "name": "col3", "type": "STRING" },
+  {
+    "name": "nested_col",
+    "type": "RECORD",
+    "fields": [
+      { "name": "sub1", "type": "STRING" },
+      { "name": "sub2", "type": "STRING", "description": "old nested desc" },
+      { "name": "sub3", "type": "STRING" }
+    ]
+  }
 ]
 EOF
 }
@@ -2347,6 +2411,24 @@ resource "google_bigquery_table" "test" {
   {
     "name": "col3",
     "type": "STRING"
+  },
+  {
+    "name": "nested_col",
+    "type": "RECORD",
+    "fields": [
+      { 
+        "name": "sub1", 
+        "type": "STRING",
+        "dataPolicies": [{ "name": "projects/${data.google_project.project.number}/locations/us-central1/dataPolicies/${google_bigquery_datapolicy_data_policy.p1.data_policy_id}" }]
+      },
+      { 
+        "name": "sub2", 
+        "type": "STRING", 
+        "description": "old nested desc",
+        "dataPolicies": [{ "name": "projects/${data.google_project.project.number}/locations/us-central1/dataPolicies/${google_bigquery_datapolicy_data_policy.p2.data_policy_id}" }]
+      },
+      { "name": "sub3", "type": "STRING" }
+    ]
   }
 ]
 EOF
@@ -2380,6 +2462,27 @@ resource "google_bigquery_table" "test" {
     "name": "col3",
     "type": "STRING",
     "dataPolicies": [{ "name": "projects/${data.google_project.project.number}/locations/us-central1/dataPolicies/${google_bigquery_datapolicy_data_policy.p1.data_policy_id}" }]
+  },
+  {
+    "name": "nested_col",
+    "type": "RECORD",
+    "fields": [
+      { 
+        "name": "sub1", 
+        "type": "STRING"
+      },
+      { 
+        "name": "sub2", 
+        "type": "STRING", 
+        "description": "new nested desc",
+        "dataPolicies": [{ "name": "projects/${data.google_project.project.number}/locations/us-central1/dataPolicies/${google_bigquery_datapolicy_data_policy.p2.data_policy_id}" }]
+      },
+      { 
+        "name": "sub3", 
+        "type": "STRING",
+        "dataPolicies": [{ "name": "projects/${data.google_project.project.number}/locations/us-central1/dataPolicies/${google_bigquery_datapolicy_data_policy.p1.data_policy_id}" }]
+      }
+    ]
   }
 ]
 EOF
