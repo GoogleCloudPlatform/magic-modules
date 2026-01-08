@@ -54,7 +54,7 @@ func NewLoader(config Config) *Loader {
 	return l
 }
 
-func (l *Loader) LoadProducts() {
+func (l *Loader) LoadProducts() *Loader {
 	if l.version == "" {
 		log.Printf("No version specified, assuming ga")
 		l.version = "ga"
@@ -92,6 +92,8 @@ func (l *Loader) LoadProducts() {
 	}
 
 	l.Products = l.batchLoadProducts(allProductFiles)
+
+	return l
 }
 
 func (l *Loader) batchLoadProducts(productNames []string) map[string]*api.Product {
@@ -318,9 +320,9 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 	return resource
 }
 
-func (l *Loader) AddExtraFields() error {
+func (l *Loader) AddExtraFields() *Loader {
 	if l.Products == nil {
-		return errors.New("products have not been loaded into memory")
+		log.Fatalln("products have not been loaded into memory")
 	}
 
 	for _, product := range l.Products {
@@ -328,20 +330,9 @@ func (l *Loader) AddExtraFields() error {
 			resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
 			// SetDefault after AddExtraFields to ensure relevant metadata is available for the newly generated fields
 			resource.SetDefault(product)
-		}
-	}
-
-	return nil
-}
-
-func (l *Loader) Validate() {
-	if l.Products == nil {
-		log.Fatalln("products have not been loaded into memory")
-	}
-
-	for _, product := range l.Products {
-		for _, resource := range product.Objects {
 			resource.Validate()
 		}
 	}
+
+	return l
 }
