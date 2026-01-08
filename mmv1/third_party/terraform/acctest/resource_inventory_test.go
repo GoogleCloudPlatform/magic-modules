@@ -212,7 +212,7 @@ func TestValidateResourceMetadata(t *testing.T) {
 				continue
 			}
 			if _, ok := mFields[f]; !ok {
-				t.Errorf("Field %s.%s present in provider resource but missing in meta.yaml", r.Name, f)
+				t.Errorf("Field in provider resource; missing in meta.yaml: %s.%s", r.Name, f)
 			}
 		}
 		for f, _ := range mFields {
@@ -220,7 +220,7 @@ func TestValidateResourceMetadata(t *testing.T) {
 				continue
 			}
 			if _, ok := r.Fields[f]; !ok {
-				t.Errorf("Field %s.%s present in meta.yaml but isn't in the provider resource", r.Name, f)
+				t.Errorf("Field in meta.yaml; missing in provider resource: %s.%s", r.Name, f)
 			}
 		}
 	}
