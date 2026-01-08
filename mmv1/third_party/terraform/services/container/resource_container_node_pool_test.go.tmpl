@@ -6137,7 +6137,7 @@ resource "google_container_node_pool" "np" {
 	enabled = true
   }
   autoscaling {
-    min_node_count = 1
+    min_node_count = 0
     max_node_count = 1
   }
   node_config {
@@ -6210,7 +6210,7 @@ resource "google_container_node_pool" "np" {
 	enabled = true
   }
   autoscaling {
-    min_node_count = 1
+    min_node_count = 0
     max_node_count = 1
   }
   node_config {
@@ -6294,7 +6294,7 @@ resource "google_container_node_pool" "np" {
 	enabled = true
   }
   autoscaling {
-    min_node_count = 1
+    min_node_count = 0
     max_node_count = 1
   }
   node_config {
@@ -6393,7 +6393,7 @@ resource "google_container_cluster" "primary" {
       enabled = true
     }
 	autoscaling {
-      min_node_count = 1
+      min_node_count = 0
       max_node_count = 1
     }
     node_config {
