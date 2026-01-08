@@ -194,6 +194,9 @@ func mergeDataPolicies(configFields []*bigquery.TableFieldSchema, liveFields []*
 	}
 }
 
+// If the same table column is found in both the TF config and live state,
+// and the column in the live state has data policies when the column in the TF config doesn't,
+// copy the data policies from live state into the TF config.
 func mergeDataPoliciesIntoMap(old, new []interface{}) {
 	oldMap := make(map[string]map[string]interface{})
 	for _, v := range old {
@@ -216,6 +219,7 @@ func mergeDataPoliciesIntoMap(old, new []interface{}) {
 			if _, specified := newField["dataPolicies"]; !specified {
 				if dp, hasDP := oldField["dataPolicies"]; hasDP {
 					newField["dataPolicies"] = dp
+					log.Printf("[DEBUG] Added live data policy to schema: %v", dp)
 				}
 			}
 
@@ -558,7 +562,6 @@ func resourceBigQueryTableSchemaCustomizeDiffFunc(d tpgresource.TerraformResourc
 			log.Printf("[DEBUG] unable to unmarshal json customized diff - %v", err)
 		}
 
-		// --- ADD THIS LOGIC ---
 		var ignoreSchemaChanges []interface{}
 		if val := d.Get("ignore_schema_changes"); val != nil {
 			ignoreSchemaChanges = val.([]interface{})
@@ -583,7 +586,6 @@ func resourceBigQueryTableSchemaCustomizeDiffFunc(d tpgresource.TerraformResourc
 				}
 			}
 		}
-		// --- END OF NEW LOGIC ---
 
 		// no is schema changeable check needed, if new schema is old schema
 		if reflect.DeepEqual(old, new) {

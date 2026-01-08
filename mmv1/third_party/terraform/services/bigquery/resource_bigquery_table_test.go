@@ -67,6 +67,12 @@ func TestAccBigQueryTable_IgnoreSchemaDataPoliciesMerge(t *testing.T) {
 					testAccCheckBigQueryTableMergedPolicies(t, datasetID, tableID, []string{}), // 0 policies
 				),
 			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns", "ignore_schema_changes"},
+			},
 			// Stage 2: Add policies to col1 and col2 (Standard Authoritative Update)
 			// No ignore flag set yet.
 			{
@@ -75,6 +81,12 @@ func TestAccBigQueryTable_IgnoreSchemaDataPoliciesMerge(t *testing.T) {
 					testAccCheckBigQueryTableMergedPolicies(t, datasetID, tableID, []string{"col1", "col2"}),
 					resource.TestCheckResourceAttr("google_bigquery_table.test", "description", "Stage 2 Table"),
 				),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns", "ignore_schema_changes"},
 			},
 			// Stage 3: The "Ignore & Merge" Logic
 			// ignore_schema_changes = ["dataPolicies"]
@@ -90,6 +102,12 @@ func TestAccBigQueryTable_IgnoreSchemaDataPoliciesMerge(t *testing.T) {
 					// Verification 2: All 3 columns now have policies (1 preserved, 1 matched, 1 newly added)
 					testAccCheckBigQueryTableMergedPolicies(t, datasetID, tableID, []string{"col1", "col2", "col3"}),
 				),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns", "ignore_schema_changes"},
 			},
 		},
 	})
