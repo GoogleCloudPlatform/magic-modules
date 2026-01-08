@@ -330,9 +330,20 @@ func (l *Loader) AddExtraFields() *Loader {
 			resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
 			// SetDefault after AddExtraFields to ensure relevant metadata is available for the newly generated fields
 			resource.SetDefault(product)
-			resource.Validate()
 		}
 	}
 
 	return l
+}
+
+func (l *Loader) Validate() {
+	if l.Products == nil {
+		log.Fatalln("products have not been loaded into memory")
+	}
+
+	for _, product := range l.Products {
+		for _, resource := range product.Objects {
+			resource.Validate()
+		}
+	}
 }
