@@ -18,6 +18,6 @@ versions:
   - name: 'ga'
     base_url: 'https://dataplex.googleapis.com/v1/'
   - name: 'beta'
-    base_url: 'https://dataplex.googleapis.com/v1/'  
+    base_url: 'https://dataplex.googleapis.com/v1/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'
