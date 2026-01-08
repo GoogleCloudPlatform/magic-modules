@@ -50,7 +50,7 @@ examples:
   - name: 'resource_manager_capability'
     primary_resource_id: 'capability'
     vars:
-      display_name: 'my-folder-cap'
+      display_name: 'folder-cap'
     test_env_vars:
       org_id: "ORG_ID"
     external_providers: ["time"]
