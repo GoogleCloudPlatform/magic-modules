@@ -52,7 +52,7 @@ func TestAccResourceManagerCapability_resourceManagerCapabilityExample_basic(t *
 func testAccResourceManagerCapability_resourceManagerCapabilityExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_folder" "folder" {
-  display_name     = "my-folder%{random_suffix}"
+  display_name     = "tf-test-my-folder-cap-up-%{random_suffix}"
   parent           = "organizations/%{org_id}"
   deletion_protection = false
 }

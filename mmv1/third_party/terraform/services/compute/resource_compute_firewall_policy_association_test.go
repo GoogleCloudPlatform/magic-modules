@@ -94,7 +94,7 @@ func TestAccComputeFirewallPolicyAssociation_organization(t *testing.T) {
 func testAccComputeFirewallPolicyAssociation_organization(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_folder" "folder" {
-  display_name = "tf-test-my-folder-%{random_suffix}"
+  display_name = "tf-test-my-folder-fpa-up-%{random_suffix}"
   parent       = "%{org_name}"
   deletion_protection = false
 }
