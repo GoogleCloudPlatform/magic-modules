@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -16,6 +17,15 @@ import (
 )
 
 func init() {
+	// SKIP_FOLDER_SWEEPER can be set for a sweeper run to prevent it from
+	// sweeping folders. This can be useful when running sweepers in
+	// organizations where acceptance tests intiated by another folder may
+	// already be in-progress.
+	// Example: SKIP_FOLDER_SWEEPER=1 go test ./google -v -sweep=us-central1 -sweep-run=
+	if os.Getenv("SKIP_FOLDER_SWEEPER") != "" {
+		return
+	}
+
 	sweeper.AddTestSweepersLegacy("GoogleFolder", testSweepFolder)
 }
 
