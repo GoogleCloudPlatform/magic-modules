@@ -37,5 +37,5 @@ resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
   force_destroy               = true
   uniform_bucket_level_access = true
 
-  depends_on = [google_project_service.project]
+  depends_on = [time_sleep.wait_120_seconds]
 }
