@@ -57,7 +57,7 @@ examples:
     # test depends upon google_project_service_identity service which is still in beta, so we need to keep test limited to beta
     min_version: 'beta'
     vars:
-      folder_name: 'my-folder'
+      folder_name: 'folder-kh'
       key_project_name: 'key-proj'
       resource_project_name: 'res-proj'
     test_env_vars:
