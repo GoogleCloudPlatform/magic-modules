@@ -115,6 +115,7 @@ properties:
       INTERNAL_MANAGED and must be regional and in the same region
       as the CompositeHealthCheck (cross-region deployment for
       INTERNAL_MANAGED is not supported). Can be mutated.
+    required: true
   - name: 'id'
     type: String
     description: 'The unique identifier for the resource. This identifier is defined by the server.'

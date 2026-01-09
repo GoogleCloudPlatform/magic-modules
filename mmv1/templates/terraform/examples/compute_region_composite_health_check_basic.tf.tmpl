@@ -1,7 +1,7 @@
 resource "google_compute_region_composite_health_check" "{{$.PrimaryResourceId}}" {
   provider           = google-beta
   name               = "{{index $.Vars "name"}}"
-  description        = "{{index $.Vars "description"}}"
+  description        = "test regional composite health check resource"
   region             = "us-central1"
   health_sources     = [google_compute_region_health_source.default.id]
   health_destination = google_compute_forwarding_rule.default.id
