@@ -32,9 +32,25 @@ func TestAccComputeRegionCompositeHealthCheck_update(t *testing.T) {
 			},
 			{
 				Config: testAccComputeRegionCompositeHealthCheck_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{plancheck.ExpectResourceAction("google_compute_region_composite_health_check.example_test_composite_health_check", plancheck.ResourceActionUpdate),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_region_composite_health_check.example_test_composite_health_check", "description", "Updated description"),
 				),
+			},
+			{
+				ResourceName:      "google_compute_region_composite_health_check.example_test_composite_health_check",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionCompositeHealthCheck_basic(context),			
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{plancheck.ExpectResourceAction("google_compute_region_composite_health_check.example_test_composite_health_check", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_compute_region_composite_health_check.example_test_composite_health_check",
