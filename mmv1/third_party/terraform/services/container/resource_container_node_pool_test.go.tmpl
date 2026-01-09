@@ -6154,6 +6154,9 @@ resource "google_container_node_pool" "np" {
 	reservation_affinity {
       consume_reservation_type = "NO_RESERVATION"
     }
+	ephemeral_storage_local_ssd_config {
+      local_ssd_count = 16
+    }
   }
 
   // Setting ANP to AUTO
@@ -6226,6 +6229,9 @@ resource "google_container_node_pool" "np" {
 	// Flex Start requirement
 	reservation_affinity {
       consume_reservation_type = "NO_RESERVATION"
+    }
+	ephemeral_storage_local_ssd_config {
+      local_ssd_count = 16
     }
   }
 
@@ -6310,6 +6316,9 @@ resource "google_container_node_pool" "np" {
 	// Flex Start requirement
 	reservation_affinity {
       consume_reservation_type = "NO_RESERVATION"
+    }
+	ephemeral_storage_local_ssd_config {
+      local_ssd_count = 16
     }
   }
 
@@ -6410,7 +6419,9 @@ resource "google_container_cluster" "primary" {
       reservation_affinity {
         consume_reservation_type = "NO_RESERVATION"
       }
-      
+      ephemeral_storage_local_ssd_config {
+        local_ssd_count = 16
+      }
       oauth_scopes = [ "https://www.googleapis.com/auth/cloud-platform" ]
     }
 
