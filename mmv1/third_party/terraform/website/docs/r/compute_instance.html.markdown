@@ -446,6 +446,7 @@ is desired, you will need to modify your state file manually using
     network is in auto subnet mode, specifying the subnetwork is optional. If the network is
     in custom subnet mode, specifying the subnetwork is required.
 
+* `vlan` - [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The VLAN ID of the network interface. This changes a NIC to become a Dynamic Nic. The VLAN cannot be set on the primary network interface.
 
 *  `subnetwork_project` - (Optional) The project in which the subnetwork belongs.
    If the `subnetwork` is a self_link, this field is set to the project
@@ -722,6 +723,8 @@ This field is always inherited from its subnetwork.
 * `network_interface.0.network_ip` - The internal ip address of the instance, either manually or dynamically assigned.
 
 * `network_interface.0.access_config.0.nat_ip` - If the instance has an access config, either the given external ip (in the `nat_ip` field) or the ephemeral (generated) ip (if you didn't provide one).
+
+* `network_interface.0.parent_nic_name` - [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The name of the parent NIC for this Network Interface. Supported for Dynamic Nics only.
 
 * `attached_disk.0.disk_encryption_key_sha256` - The [RFC 4648 base64](https://tools.ietf.org/html/rfc4648#section-4)
     encoded SHA-256 hash of the [customer-supplied encryption key]
