@@ -114,6 +114,7 @@ examples:
       bucket_name: 'global-ilb-bucket'
     exclude_docs: true
     skip_vcr: true
+    external_providers: ["time"]
 parameters:
 properties:
   - name: 'bucketName'
