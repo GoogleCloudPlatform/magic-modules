@@ -264,7 +264,7 @@ func testAccCheckGoogleProjectDefaultServiceAccountsRevert(t *testing.T, project
 				}
 			}
 
-			delay = min(delay * 2, maxDelay)
+			delay = min(delay*2, maxDelay)
 			time.Sleep(delay)
 		}
 
