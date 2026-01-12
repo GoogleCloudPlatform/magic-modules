@@ -94,7 +94,6 @@ examples:
       project_name: 'PROJECT_NAME'
   - name: 'dataplex_data_asset_full'
     primary_resource_id: 'example'
-    exclude_test: true
     vars:
       data_product_id: 'data-product'
       data_asset_id: 'data-asset'

@@ -10,7 +10,7 @@ resource "google_dataplex_data_product" "example" {
     group_id     = "analyst"
     display_name = "Data Analyst"
     principal {
-      google_group = "tf-test-analysts-%{random_suffix}@example.com"
+      google_group = "dataproduct-terraform-examples@google.com"
     }
   }
 
@@ -19,7 +19,7 @@ resource "google_dataplex_data_product" "example" {
     group_id     = "scientist"
     display_name = "Data Scientist"
     principal {
-      google_group = "tf-test-scientists-%{random_suffix}@example.com"
+      google_group = "dataproduct-terraform-examples-2@google.com"
     }
   }
 
