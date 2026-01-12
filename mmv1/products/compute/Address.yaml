@@ -51,6 +51,7 @@ async:
 collection_url_key: 'items'
 include_in_tgc_next: true
 custom_code:
+  constants: 'templates/terraform/constants/compute_address.go.tmpl'
   post_create: 'templates/terraform/post_create/labels.tmpl'
 sweeper:
   url_substitutions:
@@ -91,6 +92,16 @@ examples:
     vars:
       address_name: 'test-address'
       network_name: 'test-network'
+  - name: 'compute_address_enhanced_byoip'
+    primary_resource_id: 'default'
+    vars:
+      address_name: 'test-address'
+      sub_pdp_name: 'test-sub-pdp'
+      sub_pdp_ip_cidr: '"136.124.3.120/32"'
+      root_pdp_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-enhanced-pdp-136-124-3-120-29"'
+    test_vars_overrides:
+      sub_pdp_ip_cidr: 'fmt.Sprintf("136.124.3.%d/32", 120 + acctest.RandIntRange(t, 0, 7))'
+      root_pdp_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-enhanced-pdp-136-124-3-120-29"'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -236,3 +247,15 @@ properties:
     enum_values:
       - 'VM'
       - 'NETLB'
+  - name: ipCollection
+    type: String
+    diff_suppress_func: 'AddressIpCollectionDiffSuppress'
+    description: |
+      Reference to the source of external IPv4 addresses, like a PublicDelegatedPrefix(PDP) for BYOIP.
+      The PDP must support enhanced IPv4 allocations.
+      Use one of the following formats to specify a PDP when reserving an external IPv4 address using BYOIP.
+      Full resource URL, as in:
+        * `https://www.googleapis.com/compute/v1/projects/{{projectId}}/regions/{{region}}/publicDelegatedPrefixes/{{pdp-name}}`
+      Partial URL, as in:
+        * `projects/{{projectId}}/regions/region/publicDelegatedPrefixes/{{pdp-name}}`
+        * `regions/{{region}}/publicDelegatedPrefixes/{{pdp-name}}`

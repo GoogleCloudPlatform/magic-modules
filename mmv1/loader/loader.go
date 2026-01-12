@@ -19,6 +19,7 @@ type Loader struct {
 	// baseDirectory points to mmv1 root, if cwd can be empty as relative paths are used
 	baseDirectory     string
 	overrideDirectory string
+	Products          map[string]*api.Product
 	version           string
 	sysfs             google.ReadDirReadFileFS
 }
@@ -53,7 +54,7 @@ func NewLoader(config Config) *Loader {
 	return l
 }
 
-func (l *Loader) LoadProducts() map[string]*api.Product {
+func (l *Loader) LoadProducts() {
 	if l.version == "" {
 		log.Printf("No version specified, assuming ga")
 		l.version = "ga"
@@ -90,7 +91,7 @@ func (l *Loader) LoadProducts() map[string]*api.Product {
 		}
 	}
 
-	return l.batchLoadProducts(allProductFiles)
+	l.Products = l.batchLoadProducts(allProductFiles)
 }
 
 func (l *Loader) batchLoadProducts(productNames []string) map[string]*api.Product {
@@ -306,10 +307,6 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 	resource.TargetVersionName = l.version
 	// SetDefault before AddExtraFields to ensure relevant metadata is available on existing fields
 	resource.SetDefault(product)
-	resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
-	// SetDefault after AddExtraFields to ensure relevant metadata is available for the newly generated fields
-	resource.SetDefault(product)
-	resource.Validate()
 	resource.TestSampleSetUp(l.sysfs)
 
 	for _, e := range resource.Examples {
@@ -319,4 +316,32 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 	}
 
 	return resource
+}
+
+func (l *Loader) AddExtraFields() error {
+	if l.Products == nil {
+		return errors.New("products have not been loaded into memory")
+	}
+
+	for _, product := range l.Products {
+		for _, resource := range product.Objects {
+			resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
+			// SetDefault after AddExtraFields to ensure relevant metadata is available for the newly generated fields
+			resource.SetDefault(product)
+		}
+	}
+
+	return nil
+}
+
+func (l *Loader) Validate() {
+	if l.Products == nil {
+		log.Fatalln("products have not been loaded into memory")
+	}
+
+	for _, product := range l.Products {
+		for _, resource := range product.Objects {
+			resource.Validate()
+		}
+	}
 }
