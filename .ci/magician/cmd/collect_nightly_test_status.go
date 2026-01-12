@@ -43,6 +43,7 @@ type TestInfo struct {
 	Status          string    `json:"status"`
 	Service         string    `json:"service"`
 	Resource        string    `json:"resource"`
+	CommitSha       string    `json:"commit_sha"`
 	ErrorMessage    string    `json:"error_message"`
 	LogLink         string    `json:"log_link"`
 	ProviderVersion string    `json:"provider_version"`
@@ -189,6 +190,7 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 				Status:          testResult.Status,
 				Service:         serviceName,
 				Resource:        convertTestNameToResource(testResult.Name),
+				CommitSha:       build.Number,
 				ErrorMessage:    errorMessage,
 				LogLink:         logLink,
 				ProviderVersion: strings.ToUpper(pVersion.String()),
