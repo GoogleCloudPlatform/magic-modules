@@ -7,6 +7,7 @@ mmv1/templates/terraform/examples/datastream_stream_spanner.tf.tmplresource "goo
         source_connection_profile = "{{index $.Vars "source_connection_profile_id"}}"
         spanner_source_config {
             change_stream_name = "example-change-stream"
+            fgac_role = "example-role"
             spanner_rpc_priority = "MEDIUM"
             max_concurrent_cdc_tasks = 1000
             max_concurrent_backfill_tasks = 10
@@ -48,5 +49,14 @@ mmv1/templates/terraform/examples/datastream_stream_spanner.tf.tmplresource "goo
         }
     }
 
-    backfill_none {}
+    backfill_all {
+        spanner_excluded_objects {
+            schemas {
+                schema = "example-schema"
+                tables {
+                    table = "example-table"
+                }
+            }
+        }
+    }
 }
