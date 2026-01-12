@@ -241,6 +241,7 @@ func testAccCheckGoogleProjectDefaultServiceAccountsRevert(t *testing.T, project
 
 		attempts := 3
 		delay := 5 * time.Second
+		maxDelay := 30 * time.Second
 
 		for i := 0; i < attempts; i++ {
 			response, err := config.NewIamClient(config.UserAgent).Projects.ServiceAccounts.List(resourcemanager.PrefixedProject(project)).Do()
@@ -263,6 +264,7 @@ func testAccCheckGoogleProjectDefaultServiceAccountsRevert(t *testing.T, project
 				}
 			}
 
+			delay = min(delay * 2, maxDelay)
 			time.Sleep(delay)
 		}
 
