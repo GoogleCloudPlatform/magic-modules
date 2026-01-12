@@ -41,7 +41,8 @@ custom_code:
   constants: 'templates/terraform/constants/apphub_application.go.tmpl'
 custom_diff:
   - 'apphubApplicationCustomizeDiff'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 sweeper:
   url_substitutions:
     - region: "us-central1"

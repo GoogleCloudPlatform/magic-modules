@@ -1,0 +1,7 @@
+if obj["metadata"] == nil {
+	return obj, nil
+}
+
+obj["annotations"] = obj["metadata"].(map[string]string)
+delete(obj, "metadata")
+return obj, nil

@@ -1,0 +1,13 @@
+resource "google_compute_address" "{{$.PrimaryResourceId}}" {
+  name             = "{{index $.Vars "address_name"}}"
+  region           = "us-central1"
+  ip_collection    = google_compute_public_delegated_prefix.sub_pdp.self_link
+}
+
+resource "google_compute_public_delegated_prefix" "sub_pdp" {
+  name             = "{{index $.Vars "sub_pdp_name"}}"
+  region           = "us-central1"
+  ip_cidr_range    = "{{index $.Vars "sub_pdp_ip_cidr"}}"
+  parent_prefix    = "{{index $.Vars "root_pdp_url"}}"
+}
+

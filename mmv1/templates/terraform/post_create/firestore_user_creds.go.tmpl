@@ -1,0 +1,8 @@
+securePassword, ok := res["securePassword"]
+if (!ok) {
+  return fmt.Errorf("Create response did not contain secure_password. Create may not have succeeded.")
+}
+if err := d.Set("secure_password", securePassword); err != nil {
+  // securePassword is only returned in the create call.
+  return fmt.Errorf("Error setting secure_password: %s", err)
+}

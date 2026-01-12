@@ -118,18 +118,21 @@ properties:
     description: |
       Username for the Active Directory account with permissions to create the compute account within the specified organizational unit.
     required: true
+    is_missing_in_cai: true
   - name: 'password'
     type: String
     description: |
       Password for specified username. Note - Manual changes done to the password will not be detected. Terraform will not re-apply the password, unless you use a new password in Terraform.
     required: true
     ignore_read: true
+    is_missing_in_cai: true
     sensitive: true
   - name: 'backupOperators'
     type: Array
     description: |
       Domain user/group accounts to be added to the Backup Operators group of the SMB service. The Backup Operators group allows members to backup and restore files regardless of whether they have read or write access to the files. Comma-separated list.
     required: false
+    is_missing_in_cai: true
     item_type:
       type: String
   - name: 'administrators'
@@ -137,6 +140,7 @@ properties:
     description: |
       Domain user accounts to be added to the local Administrators group of the SMB service. Comma-separated list of domain users or groups. The Domain Admin group is automatically added when the service joins your domain as a hidden group.
     required: false
+    is_missing_in_cai: true
     item_type:
       type: String
   - name: 'securityOperators'
@@ -144,6 +148,7 @@ properties:
     description: |
       Domain accounts that require elevated privileges such as `SeSecurityPrivilege` to manage security logs. Comma-separated list.
     required: false
+    is_missing_in_cai: true
     item_type:
       type: String
   - name: 'kdcHostname'
@@ -187,3 +192,5 @@ properties:
     description: |
       The state details of the Active Directory.
     output: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true

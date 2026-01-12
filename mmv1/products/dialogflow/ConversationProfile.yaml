@@ -18,7 +18,7 @@ description: |
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/dialogflow/docs/'
-  api: 'https://cloud.google.com/dialogflow/docs/reference/rest/v2beta1/projects/conversationProfiles'
+  api: 'https://docs.cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.conversationProfiles'
 docs:
 id_format: '{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/conversationProfiles'

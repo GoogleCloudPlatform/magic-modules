@@ -15,6 +15,8 @@
 name: 'Connector'
 kind: 'vpcaccess#Connector'
 description: 'Serverless VPC Access connector resource.'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 references:
   guides:
     'Configuring Serverless VPC Access': 'https://cloud.google.com/vpc/docs/configure-serverless-vpc-access'
@@ -37,9 +39,11 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+tgc_ignore_terraform_decoder: true
 custom_code:
   encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
   decoder: 'templates/terraform/decoders/long_name_to_self_link.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/vpc_access_connector_decoder.go.tmpl'
   post_create: 'templates/terraform/post_create/sleep.go.tmpl'
   constants: 'templates/terraform/constants/vpc_access_connector.go.tmpl'
   pre_update: 'templates/terraform/pre_update/vpc_access_connector_instances.go.tmpl'
@@ -61,6 +65,9 @@ examples:
       network_name: 'default'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-access-connector")'
+tgc_tests:
+  - name: TestAccVPCAccessConnector_vpcAccessConnectorThroughput_usingThroughputOrInstancesLimits
+    skip: 'For instances vs throughput, prefer instances during cai2hcl conversion as throughput is discouraged.'
 parameters:
   - name: 'region'
     type: String
@@ -77,6 +84,7 @@ properties:
     required: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     immutable: true
+    tgc_ignore_read: true
   - name: 'network'
     type: String
     description: |

@@ -570,9 +570,10 @@ func TestAccMemorystoreInstance_switchoverAndDetachSecondary(t *testing.T) {
 				}),
 			},
 			{
-				ResourceName:      "google_memorystore_instance.test_secondary",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_memorystore_instance.test_secondary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"update_time"},
 			},
 			{
 				// Switchover to secondary instance
@@ -587,9 +588,10 @@ func TestAccMemorystoreInstance_switchoverAndDetachSecondary(t *testing.T) {
 				}),
 			},
 			{
-				ResourceName:      "google_memorystore_instance.test_secondary",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_memorystore_instance.test_secondary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"update_time"},
 			},
 			{
 				// Detach secondary instance and delete the instances
@@ -1767,6 +1769,67 @@ resource "google_compute_network" "producer_net" {
 }
 
 data "google_project" "project" {
+}
+`, context)
+}
+
+func TestAccMemorystoreInstance_memorystoreInstanceMaintenanceVersion(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"location":      "us-central1",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMemorystoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMemorystoreInstance_memorystoreInstanceMaintenanceVersionDeploy(context),
+			},
+			{
+				ResourceName:      "google_memorystore_instance.instance-ms",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccMemorystoreInstance_memorystoreInstanceMaintenanceVersionUpdate(context),
+			},
+			{
+				ResourceName:      "google_memorystore_instance.instance-ms",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccMemorystoreInstance_memorystoreInstanceMaintenanceVersionDeploy(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_memorystore_instance" "instance-ms" {
+  instance_id 					= "tf-test-ms-instance%{random_suffix}"
+  shard_count 					= 1
+  location                    	= "%{location}"
+  node_type                     = "SHARED_CORE_NANO"
+  deletion_protection_enabled 	= false
+  transit_encryption_mode 		= "SERVER_AUTHENTICATION"
+}
+
+`, context)
+}
+
+func testAccMemorystoreInstance_memorystoreInstanceMaintenanceVersionUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_memorystore_instance" "instance-ms" {
+  instance_id 					= "tf-test-ms-instance%{random_suffix}"
+  shard_count 					= 1
+  location                   	= "%{location}"
+  node_type                     = "SHARED_CORE_NANO"
+  deletion_protection_enabled 	= false
+  # maintenance_version 			= "MEMORYSTORE_20241206_00_00"
+  transit_encryption_mode 		= "SERVER_AUTHENTICATION"
 }
 `, context)
 }

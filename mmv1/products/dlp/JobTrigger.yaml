@@ -56,6 +56,13 @@ examples:
       trigger: 'trigger'
     test_env_vars:
       project: 'PROJECT_NAME'
+  - name: 'dlp_job_trigger_publish_to_dataplex_catalog'
+    primary_resource_id: 'publish_to_dataplex_catalog'
+    vars:
+      trigger: 'trigger'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    exclude_docs: true
   - name: 'dlp_job_trigger_data_catalog_output'
     primary_resource_id: 'data_catalog_output'
     vars:
@@ -1067,7 +1074,7 @@ properties:
               # exactly_one_of:
               #   - save_findings
               #   - pub_sub
-              #   - publish_findings_to_cloud_data_catalog
+              #   - publish_findings_to_dataplex_catalog
               #   - publish_summary_to_cscc
               #   - job_notification_emails
               #   - deidentify
@@ -1140,7 +1147,7 @@ properties:
               # exactly_one_of:
               #   - save_findings
               #   - pub_sub
-              #   - publish_findings_to_cloud_data_catalog
+              #   - publish_findings_to_dataplex_catalog
               #   - publish_summary_to_cscc
               #   - job_notification_emails
               #   - deidentify
@@ -1162,7 +1169,24 @@ properties:
               # exactly_one_of:
               #   - save_findings
               #   - pub_sub
-              #   - publish_findings_to_cloud_data_catalog
+              #   - publish_findings_to_dataplex_catalog
+              #   - publish_summary_to_cscc
+              #   - job_notification_emails
+              #   - deidentify
+              #   - publish_to_stackdriver
+              allow_empty_object: true
+              properties:
+                []
+            - name: 'publishFindingsToDataplexCatalog'
+              type: NestedObject
+              description: |
+                Publish findings of a DlpJob as an aspect to Dataplex Universal Catalog.
+              send_empty_value: true
+              # TODO: uncomment here once they are supported(github.com/hashicorp/terraform-plugin-sdk/issues/470)
+              # exactly_one_of:
+              #   - save_findings
+              #   - pub_sub
+              #   - publish_findings_to_dataplex_catalog
               #   - publish_summary_to_cscc
               #   - job_notification_emails
               #   - deidentify
@@ -1174,12 +1198,13 @@ properties:
               type: NestedObject
               description: |
                 Publish findings of a DlpJob to Data Catalog.
+              deprecation_message: '`publish_findings_to_cloud_data_catalog` is deprecated and will be removed in a future major release. To publish findings to Dataplex Catalog, use `publish_findings_to_dataplex_catalog` instead.'
               send_empty_value: true
               # TODO: uncomment here once they are supported(github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # exactly_one_of:
               #   - save_findings
               #   - pub_sub
-              #   - publish_findings_to_cloud_data_catalog
+              #   - publish_findings_to_dataplex_catalog
               #   - publish_summary_to_cscc
               #   - job_notification_emails
               #   - deidentify
@@ -1196,7 +1221,7 @@ properties:
               # exactly_one_of:
               #   - save_findings
               #   - pub_sub
-              #   - publish_findings_to_cloud_data_catalog
+              #   - publish_findings_to_dataplex_catalog
               #   - publish_summary_to_cscc
               #   - job_notification_emails
               #   - deidentify
@@ -1210,7 +1235,7 @@ properties:
               # exactly_one_of:
               #   - save_findings
               #   - pub_sub
-              #   - publish_findings_to_cloud_data_catalog
+              #   - publish_findings_to_dataplex_catalog
               #   - publish_summary_to_cscc
               #   - job_notification_emails
               #   - deidentify
@@ -1302,7 +1327,7 @@ properties:
               # exactly_one_of:
               #   - save_findings
               #   - pub_sub
-              #   - publish_findings_to_cloud_data_catalog
+              #   - publish_findings_to_dataplex_catalog
               #   - publish_summary_to_cscc
               #   - job_notification_emails
               #   - deidentify

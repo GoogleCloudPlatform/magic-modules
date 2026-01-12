@@ -39,6 +39,7 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'repository'
   custom_diff_suppress: 'templates/terraform/iam/sourcerepo_diff_suppress.go.tmpl'
+  custom_import_state_id_funcs: 'templates/terraform/iam/sourcerepo_state_id_funcs.go.tmpl'
 custom_code:
   constants: 'templates/terraform/constants/source_repo_repository.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/source_repo_repository.tmpl'

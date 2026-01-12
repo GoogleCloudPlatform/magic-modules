@@ -164,7 +164,7 @@ Replace `String` in the field type with one of the following options:
     type: Map
     description: |
       MULTILINE_FIELD_DESCRIPTION
-    key_name: 'KEY_NAME'
+    key_name: 'key_name'
     key_description: |
       MULTILINE_KEY_FIELD_DESCRIPTION
   # Map of primitive values

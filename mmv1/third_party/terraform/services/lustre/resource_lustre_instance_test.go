@@ -80,6 +80,181 @@ data "google_compute_network" "lustre-network" {
 `, context)
 }
 
+func TestAccLustreInstance_withAccessRulesOptions(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"network_name":  acctest.BootstrapSharedTestNetwork(t, "default-vpc"),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLustreInstance_withAccessRulesOptions(context),
+			},
+			{
+				ResourceName:            "google_lustre_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"instance_id", "labels", "gke_support_enabled", "location", "terraform_labels"},
+			},
+			{
+				Config: testAccLustreInstance_withAccessRulesOptionsUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(
+							"google_lustre_instance.instance",
+							plancheck.ResourceActionUpdate,
+						),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_lustre_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"instance_id", "labels", "gke_support_enabled", "location", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccLustreInstance_withAccessRulesOptions(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_lustre_instance" "instance" {
+  instance_id                 = "tf-test-my-instance%{random_suffix}"
+  location                    = "us-central1-a"
+  filesystem                  = "testfs"
+  network                     = data.google_compute_network.lustre-network.id
+  gke_support_enabled         = false
+  capacity_gib                = 18000
+  per_unit_storage_throughput = 1000
+  
+  access_rules_options {
+    default_squash_mode 	  = "ROOT_SQUASH"
+	default_squash_uid        = 65534
+    
+    access_rules {
+      name 					  = "admin_hosts"
+      ip_address_ranges       = ["192.168.0.0/24","10.0.1.10/32"]
+      squash_mode 			  = "NO_SQUASH"
+    }
+    
+    access_rules {
+      name 					  = "another_admin"
+      ip_address_ranges 	  = ["172.16.5.0/24"]
+      squash_mode 			  = "NO_SQUASH"
+    }
+  }
+  
+  timeouts {
+    create 					  = "120m"
+  }
+}
+
+data "google_compute_network" "lustre-network" {
+  name = "%{network_name}"
+}
+`, context)
+}
+
+func testAccLustreInstance_withAccessRulesOptionsUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_lustre_instance" "instance" {
+  instance_id                 = "tf-test-my-instance%{random_suffix}"
+  location                    = "us-central1-a"
+  filesystem                  = "testfs"
+  network                     = data.google_compute_network.lustre-network.id
+  gke_support_enabled         = false
+  capacity_gib                = 18000
+  per_unit_storage_throughput = 1000
+  
+  access_rules_options {
+    default_squash_mode       = "NO_SQUASH"
+    default_squash_uid        = 0
+    default_squash_gid        = 0
+    
+    access_rules {
+      name                    = "updated_admin"
+      ip_address_ranges       = ["10.0.0.0/8"]
+      squash_mode             = "NO_SQUASH"
+    }
+  }
+  
+  timeouts {
+    create 					  = "120m"
+  }
+}
+
+data "google_compute_network" "lustre-network" {
+  name = "%{network_name}"
+}
+`, context)
+}
+
+func TestAccLustreInstance_withKmsKey(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"network_name":  acctest.BootstrapSharedTestNetwork(t, "default-vpc"),
+		"random_suffix": acctest.RandString(t, 10),
+		"kms":           acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLustreInstance_withKmsKey(context),
+			},
+			{
+				ResourceName:            "google_lustre_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"instance_id", "labels", "gke_support_enabled", "location", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccLustreInstance_withKmsKey(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_lustre_instance" "instance" {
+  instance_id                 = "tf-test-my-instance%{random_suffix}"
+  location                    = "us-central1-a"
+  filesystem                  = "testfs"
+  network                     = data.google_compute_network.lustre-network.id
+  gke_support_enabled         = false
+  capacity_gib                = 18000
+  per_unit_storage_throughput = 1000
+  kms_key                     = "%{kms}"
+  
+  timeouts {
+    create = "120m"
+  }
+  
+  depends_on = [google_kms_crypto_key_iam_member.lustre_sa_encrypter_decrypter]
+}
+
+resource "google_kms_crypto_key_iam_member" "lustre_sa_encrypter_decrypter" {
+  crypto_key_id = "%{kms}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-lustre.iam.gserviceaccount.com"
+}
+
+data "google_compute_network" "lustre-network" {
+  name = "%{network_name}"
+}
+
+data "google_project" "project" {
+}
+`, context)
+}
+
 func testAccLustreInstance_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_lustre_instance" "instance" {
@@ -106,6 +281,69 @@ resource "google_lustre_instance" "instance" {
 // If this network hasn't been created and you are using this example in your
 // config, add an additional network resource or change
 // this from "data"to "resource"
+data "google_compute_network" "lustre-network" {
+  name = "%{network_name}"
+}
+`, context)
+}
+
+func TestAccLustreInstance_withPlacementPolicy(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"network_name":  acctest.BootstrapSharedTestNetwork(t, "default-vpc"),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLustreInstance_withPlacementPolicy(context),
+			},
+			{
+				ResourceName:            "google_lustre_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"instance_id", "labels", "gke_support_enabled", "location", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccLustreInstance_withPlacementPolicy(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_lustre_instance" "instance" {
+  instance_id                 = "tf-test-my-instance%{random_suffix}"
+  location                    = "us-central1-a"
+  filesystem                  = "testfs"
+  network                     = data.google_compute_network.lustre-network.id
+  gke_support_enabled         = false
+  capacity_gib                = 18000
+  per_unit_storage_throughput = 1000
+  
+  placement_policy  = google_compute_resource_policy.lustre_policy.id
+  
+  timeouts {
+	create = "120m"
+  }
+}
+
+resource "google_compute_resource_policy" "lustre_policy" {
+  name   = "gce-policy"
+  region = "us-central1"
+  snapshot_schedule_policy {
+    schedule {
+      daily_schedule {
+        days_in_cycle = 1
+        start_time    = "04:00"
+      }
+    }
+  }
+}
+
+
 data "google_compute_network" "lustre-network" {
   name = "%{network_name}"
 }

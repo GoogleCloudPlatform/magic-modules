@@ -28,7 +28,8 @@ import_format:
   - 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
   - '{{project}}/{{location}}/{{service_id}}'
   - '{{location}}/{{service_id}}'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 examples:
   - name: firebasedataconnect_service_basic
     primary_resource_id: default
@@ -80,6 +81,7 @@ properties:
   - name: displayName
     type: String
     description: Optional. Mutable human-readable name. 63 character limit.
+    is_missing_in_cai: true
   - name: annotations
     type: KeyValueAnnotations
     description: Optional. Stores small amounts of arbitrary data.

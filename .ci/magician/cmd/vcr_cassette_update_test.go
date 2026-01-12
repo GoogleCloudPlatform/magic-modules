@@ -324,6 +324,7 @@ func TestExecVCRCassetteUpdate(t *testing.T) {
 						"GOOGLE_TEST_DIRECTORY":          "",
 						"SA_KEY":                         "sa_key",
 						"TF_ACC":                         "1",
+						"TF_ACC_REFRESH_AFTER_APPLY":     "1",
 						"TF_LOG":                         "DEBUG",
 						"TF_LOG_CORE":                    "WARN",
 						"TF_LOG_PATH_MASK":               "/mock/dir/magic-modules/.ci/magician/testlogs/replaying/beta/%s.log",
@@ -340,8 +341,8 @@ func TestExecVCRCassetteUpdate(t *testing.T) {
 		{
 			name: "replay failed then record",
 			cmdResults: map[string]string{
-				"gopath/src/github.com/hashicorp/terraform-provider-google-beta go [test  -parallel 32 -v -run=TestAcc -timeout 240m -ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc -vet=off] map[ACCTEST_PARALLELISM:32 GOOGLE_APPLICATION_CREDENTIALS:/mock/dir/magic-modules/.ci/magician/sa_key.json GOOGLE_CREDENTIALS:sa_key GOOGLE_TEST_DIRECTORY: SA_KEY:sa_key TF_ACC:1 TF_LOG:DEBUG TF_LOG_CORE:WARN TF_LOG_PATH_MASK:/mock/dir/magic-modules/.ci/magician/testlogs/replaying/beta/%s.log TF_LOG_SDK_FRAMEWORK:INFO TF_SCHEMA_PANIC_ON_ERROR:1 VCR_MODE:REPLAYING VCR_PATH:/mock/dir/magic-modules/.ci/magician/cassettes/beta]":                                           "--- FAIL: TestAccContainerNodePool_defaultDriverInstallation (590.29s)",
-				"gopath/src/github.com/hashicorp/terraform-provider-google-beta go [test  -parallel 1 -v -run=TestAccContainerNodePool_defaultDriverInstallation$ -timeout 240m -ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc -vet=off] map[ACCTEST_PARALLELISM:1 GOOGLE_APPLICATION_CREDENTIALS:/mock/dir/magic-modules/.ci/magician/sa_key.json GOOGLE_CREDENTIALS:sa_key GOOGLE_TEST_DIRECTORY: SA_KEY:sa_key TF_ACC:1 TF_LOG:DEBUG TF_LOG_CORE:WARN TF_LOG_PATH_MASK:/mock/dir/magic-modules/.ci/magician/testlogs/recording/beta/%s.log TF_LOG_SDK_FRAMEWORK:INFO TF_SCHEMA_PANIC_ON_ERROR:1 VCR_MODE:RECORDING VCR_PATH:/mock/dir/magic-modules/.ci/magician/cassettes/beta]": "--- PASS: TestAccContainerNodePool_defaultDriverInstallation (590.29s)",
+				"gopath/src/github.com/hashicorp/terraform-provider-google-beta go [test  -parallel 32 -v -run=TestAcc -timeout 240m -ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc -vet=off] map[ACCTEST_PARALLELISM:32 GOOGLE_APPLICATION_CREDENTIALS:/mock/dir/magic-modules/.ci/magician/sa_key.json GOOGLE_CREDENTIALS:sa_key GOOGLE_TEST_DIRECTORY: SA_KEY:sa_key TF_ACC:1 TF_ACC_REFRESH_AFTER_APPLY:1 TF_LOG:DEBUG TF_LOG_CORE:WARN TF_LOG_PATH_MASK:/mock/dir/magic-modules/.ci/magician/testlogs/replaying/beta/%s.log TF_LOG_SDK_FRAMEWORK:INFO TF_SCHEMA_PANIC_ON_ERROR:1 VCR_MODE:REPLAYING VCR_PATH:/mock/dir/magic-modules/.ci/magician/cassettes/beta]":                                           "--- FAIL: TestAccContainerNodePool_defaultDriverInstallation (590.29s)",
+				"gopath/src/github.com/hashicorp/terraform-provider-google-beta go [test  -parallel 1 -v -run=TestAccContainerNodePool_defaultDriverInstallation$ -timeout 240m -ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc -vet=off] map[ACCTEST_PARALLELISM:1 GOOGLE_APPLICATION_CREDENTIALS:/mock/dir/magic-modules/.ci/magician/sa_key.json GOOGLE_CREDENTIALS:sa_key GOOGLE_TEST_DIRECTORY: SA_KEY:sa_key TF_ACC:1 TF_ACC_REFRESH_AFTER_APPLY:1 TF_LOG:DEBUG TF_LOG_CORE:WARN TF_LOG_PATH_MASK:/mock/dir/magic-modules/.ci/magician/testlogs/recording/beta/%s.log TF_LOG_SDK_FRAMEWORK:INFO TF_SCHEMA_PANIC_ON_ERROR:1 VCR_MODE:RECORDING VCR_PATH:/mock/dir/magic-modules/.ci/magician/cassettes/beta]": "--- PASS: TestAccContainerNodePool_defaultDriverInstallation (590.29s)",
 			},
 			expectedCalls: map[string][]ParameterList{
 				"Run": {
@@ -357,6 +358,7 @@ func TestExecVCRCassetteUpdate(t *testing.T) {
 						"GOOGLE_TEST_DIRECTORY":          "",
 						"SA_KEY":                         "sa_key",
 						"TF_ACC":                         "1",
+						"TF_ACC_REFRESH_AFTER_APPLY":     "1",
 						"TF_LOG":                         "DEBUG",
 						"TF_LOG_CORE":                    "WARN",
 						"TF_LOG_PATH_MASK":               "/mock/dir/magic-modules/.ci/magician/testlogs/replaying/beta/%s.log",
@@ -376,6 +378,7 @@ func TestExecVCRCassetteUpdate(t *testing.T) {
 						"GOOGLE_TEST_DIRECTORY":          "",
 						"SA_KEY":                         "sa_key",
 						"TF_ACC":                         "1",
+						"TF_ACC_REFRESH_AFTER_APPLY":     "1",
 						"TF_LOG":                         "DEBUG",
 						"TF_LOG_CORE":                    "WARN",
 						"TF_LOG_PATH_MASK":               "/mock/dir/magic-modules/.ci/magician/testlogs/recording/beta/%s.log",
@@ -404,7 +407,7 @@ func TestExecVCRCassetteUpdate(t *testing.T) {
 			ctlr := source.NewController("gopath", "hashicorp", "token", rnr)
 			vt, err := vcr.NewTester(map[string]string{
 				"SA_KEY": "sa_key",
-			}, "ci-vcr-cassettes", "", rnr)
+			}, "ci-vcr-cassettes", "", rnr, false)
 			if err != nil {
 				t.Fatalf("Failed to create new tester: %v", err)
 			}

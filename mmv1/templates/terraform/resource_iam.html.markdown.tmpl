@@ -86,7 +86,13 @@ resource "{{ $.IamTerraformName }}_policy" "policy" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{- end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{- if $.IamPolicy.ExampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.ExampleConfigBody false }}
+{{- end }}
+
+{{- if $.IamPolicy.SampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{- end }}
   policy_data = data.google_iam_policy.admin.policy_data
 }
 ```
@@ -116,7 +122,13 @@ resource "{{ $.IamTerraformName }}_policy" "policy" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{- end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{- if $.IamPolicy.ExampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.ExampleConfigBody false }}
+{{- end }}
+
+{{- if $.IamPolicy.SampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{- end }}
   policy_data = data.google_iam_policy.admin.policy_data
 }
 ```
@@ -128,7 +140,13 @@ resource "{{ $.IamTerraformName }}_binding" "binding" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{- end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{- if $.IamPolicy.ExampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.ExampleConfigBody false }}
+{{- end }}
+
+{{- if $.IamPolicy.SampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{- end }}
   role = "{{if $.IamPolicy.AdminIamRole}}{{$.IamPolicy.AdminIamRole }}{{else}}{{$.IamPolicy.AllowedIamRole}}{{end}}"
   members = [
     "user:jane@example.com",
@@ -143,7 +161,13 @@ resource "{{ $.IamTerraformName }}_binding" "binding" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{- end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{- if $.IamPolicy.ExampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.ExampleConfigBody false }}
+{{- end }}
+
+{{- if $.IamPolicy.SampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{- end }}
   role = "{{if $.IamPolicy.AdminIamRole}}{{$.IamPolicy.AdminIamRole }}{{else}}{{$.IamPolicy.AllowedIamRole}}{{end}}"
   members = [
     "user:jane@example.com",
@@ -164,7 +188,13 @@ resource "{{ $.IamTerraformName }}_member" "member" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{- end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{- if $.IamPolicy.ExampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.ExampleConfigBody false }}
+{{- end }}
+
+{{- if $.IamPolicy.SampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{- end }}
   role = "{{if $.IamPolicy.AdminIamRole}}{{$.IamPolicy.AdminIamRole }}{{else}}{{$.IamPolicy.AllowedIamRole}}{{end}}"
   member = "user:jane@example.com"
 }
@@ -177,7 +207,13 @@ resource "{{ $.IamTerraformName }}_member" "member" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{- end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{- if $.IamPolicy.ExampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.ExampleConfigBody false }}
+{{- end }}
+
+{{- if $.IamPolicy.SampleConfigBody}}
+{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{- end }}
   role = "{{if $.IamPolicy.AdminIamRole}}{{$.IamPolicy.AdminIamRole}}{{else}}{{$.IamPolicy.AllowedIamRole}}{{end}}"
   member = "user:jane@example.com"
 

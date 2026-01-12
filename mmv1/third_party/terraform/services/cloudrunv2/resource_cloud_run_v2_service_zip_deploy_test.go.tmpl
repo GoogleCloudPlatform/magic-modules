@@ -1,0 +1,166 @@
+package cloudrunv2_test
+
+{{ if ne $.TargetVersionName "ga" }}
+import (
+	"fmt"
+	"log"
+	"strconv"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
+	"google.golang.org/api/googleapi"
+)
+
+var (
+	_ = fmt.Sprintf
+	_ = log.Print
+	_ = strconv.Atoi
+	_ = strings.Trim
+	_ = time.Now
+	_ = resource.TestMain
+	_ = terraform.NewState
+	_ = envvar.TestEnvVar
+	_ = tpgresource.SetLabels
+	_ = transport_tpg.Config{}
+	_ = googleapi.Error{}
+)
+
+func TestAccCloudRunV2Service_cloudrunv2ServiceZipDeployExample_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckCloudRunV2ServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudRunV2Service_cloudrunv2ServiceZipDeployExample_basic(context),
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"annotations", "deletion_protection", "labels", "location", "name", "terraform_labels"},
+			},
+			{
+				Config: testAccCloudRunV2Service_cloudrunv2ServiceZipDeployExample_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_cloud_run_v2_service.default", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"annotations", "deletion_protection", "labels", "location", "name", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccCloudRunV2Service_cloudrunv2ServiceZipDeployExample_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_storage_bucket" "sourcebucket" {
+  provider = google-beta
+  name     = "${data.google_project.project.project_id}-tf-test-gcf-source%{random_suffix}"  # Every bucket name must be globally unique
+  location = "US"
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "source_tar" {
+  provider = google-beta
+  name   = "function-source.zip"
+  bucket = google_storage_bucket.sourcebucket.name
+  source = "./test-fixtures/cr-zip-nodejs-hello.tar.gz"
+}
+
+resource "google_cloud_run_v2_service" "default" {
+  provider = google-beta
+  name     = "tf-test-cloudrun-zip-service%{random_suffix}"
+  location = "us-central1"
+  deletion_protection = false
+
+  template {
+    containers {
+      image = "scratch"
+      base_image_uri = "us-central1-docker.pkg.dev/serverless-runtimes/google-24-full/runtimes/nodejs24"
+      command = ["node"]
+      args = ["index.js"]
+      source_code {
+        cloud_storage_source {
+          bucket = google_storage_bucket.sourcebucket.name
+          object = google_storage_bucket_object.source_tar.name
+		  generation = google_storage_bucket_object.source_tar.generation
+        }
+      }
+    }
+  }
+}
+
+data "google_project" "project" {
+  provider = google-beta
+}
+`, context)
+}
+
+func testAccCloudRunV2Service_cloudrunv2ServiceZipDeployExample_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_storage_bucket" "sourcebucket" {
+  provider = google-beta
+  name     = "${data.google_project.project.project_id}-tf-test-gcf-source%{random_suffix}"  # Every bucket name must be globally unique
+  location = "US"
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "source_tar" {
+  provider = google-beta
+  name   = "function-source.zip"
+  bucket = google_storage_bucket.sourcebucket.name
+  source = "./test-fixtures/cr-zip-py-hello.tar.gz"
+}
+
+resource "google_cloud_run_v2_service" "default" {
+  provider = google-beta
+  name     = "tf-test-cloudrun-zip-service%{random_suffix}"
+  location = "us-central1"
+  deletion_protection = false
+
+  template {
+    containers {
+      image = "scratch"
+      base_image_uri = "us-central1-docker.pkg.dev/serverless-runtimes/google-22-full/runtimes/python313"
+      command = ["python"]
+      args = ["main.py"]
+      source_code {
+        cloud_storage_source {
+          bucket = google_storage_bucket.sourcebucket.name
+          object = google_storage_bucket_object.source_tar.name
+		  generation = google_storage_bucket_object.source_tar.generation
+        }
+      }
+    }
+  }
+}
+
+data "google_project" "project" {
+  provider = google-beta
+}
+`, context)
+}
+{{ end }}

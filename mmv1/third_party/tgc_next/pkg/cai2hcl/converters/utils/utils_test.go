@@ -248,6 +248,13 @@ func TestParseUrlParamValuesFromAssetName(t *testing.T) {
 			outputFields: make(map[string]struct{}),
 			want:         map[string]any{},
 		},
+		{
+			name:         "PartialTemplate",
+			template:     "//cloudkms.googleapis.com/{{crypto_key}}/cryptoKeyVersions/",
+			assetName:    "//cloudkms.googleapis.com/projects/tf-test-6813515571143553110/locations/us-central1/keyRings/tf-test-f0qeplfob8/cryptoKeys/tf-test-zvizc6wldk/cryptoKeyVersions/1",
+			outputFields: make(map[string]struct{}),
+			want:         map[string]any{"crypto_key": "projects/tf-test-6813515571143553110/locations/us-central1/keyRings/tf-test-f0qeplfob8/cryptoKeys/tf-test-zvizc6wldk"},
+		},
 	}
 
 	for _, tc := range testCases {

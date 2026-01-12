@@ -34,13 +34,14 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 custom_code:
   encoder: 'templates/terraform/encoders/uptime_check_config.go.tmpl'
   constants: 'templates/terraform/constants/monitoring_uptime_check_config.go.tmpl'
   custom_delete: 'templates/terraform/custom_delete/monitoring_uptime_check_config.go.tmpl'
   custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
 error_retry_predicates:
-
   - 'transport_tpg.IsMonitoringConcurrentEditError'
 examples:
   - name: 'uptime_check_config_http'
@@ -250,6 +251,7 @@ properties:
               - 'password'
               - 'password_wo'
             sensitive: true
+            is_missing_in_cai: true
             custom_flatten: 'templates/terraform/custom_flatten/uptime_check_http_password.tmpl'
           - name: 'passwordWo'
             type: String
@@ -377,6 +379,7 @@ properties:
           all bytes fields JSON representations are base64 encoded. e.g.
           `foo=bar` in URL-encoded form is `foo%3Dbar` and in base64 encoding is
           `Zm9vJTI1M0RiYXI=`.
+        is_missing_in_cai: true
       - name: 'acceptedResponseStatusCodes'
         type: Array
         description:

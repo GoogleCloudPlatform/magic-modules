@@ -57,6 +57,10 @@ if err != nil {
     return err
 }
 
+if len(lastPage) == 0 {
+    return resourceComputeNetworkEndpointsRead(d, meta)
+}
+
 obj = map[string]interface{}{
     "networkEndpoints": lastPage,
 }

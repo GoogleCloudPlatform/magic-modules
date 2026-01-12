@@ -49,6 +49,7 @@ custom_code:
   post_create: 'templates/terraform/post_create/private_cloud.go.tmpl'
   post_update: 'templates/terraform/post_update/private_cloud.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/vmwareengine_private_cloud.go.tmpl'
+  post_delete: 'templates/terraform/post_delete/private_cloud.go.tmpl'
 sweeper:
   query_string: "?delay_hours=0"
   url_substitutions:

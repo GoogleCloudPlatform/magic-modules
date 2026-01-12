@@ -269,6 +269,8 @@ properties:
         required: true
         item_type:
           type: String
+        item_validation:
+          regex: '^[A-Z_]+$'
   - name: 'routine'
     type: NestedObject
     description: |

@@ -62,13 +62,11 @@ examples:
       vpc_flow_logs_config_id: 'basic-test-id'
   - name: 'network_management_vpc_flow_logs_config_network_basic'
     primary_resource_id: 'network-test'
-    min_version: 'beta'
     vars:
       network_name: 'basic-network-test-network'
       vpc_flow_logs_config_id: 'basic-network-test-id'
   - name: 'network_management_vpc_flow_logs_config_subnet_basic'
     primary_resource_id: 'subnet-test'
-    min_version: 'beta'
     vars:
       network_name: 'basic-subnet-test-network'
       subnetwork_name: 'basic-subnet-test-subnetwork'
@@ -149,12 +147,10 @@ properties:
     description: |
       Traffic will be logged from the VPN Tunnel. Format: projects/{project_id}/regions/{region}/vpnTunnels/{name}
   - name: 'subnet'
-    min_version: 'beta'
     type: String
     description: |
       Traffic will be logged from VMs within the subnetwork. Format: projects/{project_id}/regions/{region}/subnetworks/{name}
   - name: 'network'
-    min_version: 'beta'
     type: String
     description: |
       Traffic will be logged from VMs, VPN tunnels and Interconnect Attachments within the network. Format: projects/{project_id}/global/networks/{name}

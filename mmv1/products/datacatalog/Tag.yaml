@@ -141,7 +141,7 @@ properties:
       name: field_value
       type: NestedObject
       properties:
-        - name: 'display_name'
+        - name: 'displayName'
           type: String
           description: |
             The display name of this field

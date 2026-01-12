@@ -105,7 +105,6 @@ properties:
     description: |
       Target number of physical links in the link bundle, as requested by the customer.
     required: true
-    immutable: true
   - name: 'interconnectType'
     type: Enum
     description: |
@@ -128,6 +127,21 @@ properties:
       interconnect and no BGP routes are exchanged over it. By default, the status is set to true.
     send_empty_value: true
     default_value: true
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the interconnect. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        api_name: resourceManagerTags
+        ignore_read: true
   - name: 'nocContactEmail'
     type: String
     description: |
@@ -419,7 +433,6 @@ properties:
         - 'MACSEC'
   - name: 'wireGroups'
     type: Array
-    min_version: beta
     description: |
       A list of the URLs of all CrossSiteNetwork WireGroups configured to use this Interconnect. The Interconnect cannot be deleted if this list is non-empty.
     output: true

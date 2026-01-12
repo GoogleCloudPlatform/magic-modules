@@ -3,10 +3,11 @@
 package storage_test
 
 import (
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"testing"
 )
 
 func TestAccStorageAnywhereCache_update(t *testing.T) {
@@ -30,7 +31,7 @@ func TestAccStorageAnywhereCache_update(t *testing.T) {
 				ResourceName:            "google_storage_anywhere_cache.cache",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"bucket"},
+				ImportStateVerifyIgnore: []string{"bucket", "update_time"},
 			},
 			{
 				Config: testAccStorageAnywhereCache_update(context),
@@ -44,7 +45,7 @@ func TestAccStorageAnywhereCache_update(t *testing.T) {
 				ResourceName:            "google_storage_anywhere_cache.cache",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"bucket"},
+				ImportStateVerifyIgnore: []string{"bucket", "update_time"},
 			},
 		},
 	})

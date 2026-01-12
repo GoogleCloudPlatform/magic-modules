@@ -46,6 +46,11 @@ custom_code:
   pre_update: 'templates/terraform/pre_update/datastream_stream.go.tmpl'
   post_update: 'templates/terraform/post_update/datastream_stream.go.tmpl'
   post_import: 'templates/terraform/post_import/datastream_stream.go.tmpl'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
+tgc_tests:
+  - name: 'TestAccDatastreamStream_mongoDb'
+    skip: 'Test data has mismatched steps'
 custom_diff:
   - 'resourceDatastreamStreamCustomDiff'
 examples:
@@ -233,10 +238,30 @@ examples:
     skip_vcr: true
     # Involves complex dependency creation, which makes it impractical in this context
     exclude_test: true
+  - name: 'datastream_stream_rule_sets_bigquery'
+    primary_resource_id: 'default'
+    vars:
+      stream_id: 'rules-stream'
+      source_connection_profile_id: 'rules-source-profile'
+      destination_connection_profile_id: 'rules-dest-profile'
+      dataset_id: 'rules-project:rules-dataset'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    skip_vcr: true
+    # Involves complex dependency creation, which makes it impractical in this context
+    exclude_test: true
   - name: 'datastream_stream_salesforce'
     primary_resource_id: 'default'
     vars:
       stream_id: 'sf-stream'
+      source_connection_profile_id: 'source-profile'
+      destination_connection_profile_id: 'destination-profile'
+    exclude_test: true
+  - name: 'datastream_stream_mongodb'
+    primary_resource_id: 'default'
+    vars:
+      stream_id: 'mongodb-stream'
       source_connection_profile_id: 'source-profile'
       destination_connection_profile_id: 'destination-profile'
     exclude_test: true
@@ -309,6 +334,7 @@ properties:
           - 'source_config.0.postgresql_source_config'
           - 'source_config.0.sql_server_source_config'
           - 'source_config.0.salesforce_source_config'
+          - 'source_config.0.mongodb_source_config'
         properties:
           - name: 'includeObjects'
             type: NestedObject
@@ -375,14 +401,17 @@ properties:
                                   type: Boolean
                                   description: |
                                     Whether or not the column represents a primary key.
+                                  is_missing_in_cai: true
                                 - name: 'nullable'
                                   type: Boolean
                                   description: |
                                     Whether or not the column can accept a null value.
+                                  is_missing_in_cai: true
                                 - name: 'ordinalPosition'
                                   type: Integer
                                   description: |
                                     The ordinal position of the column in the table.
+                                  is_missing_in_cai: true
                             min_size: 1
                       min_size: 1
                 min_size: 1
@@ -451,14 +480,17 @@ properties:
                                   type: Boolean
                                   description: |
                                     Whether or not the column represents a primary key.
+                                  is_missing_in_cai: true
                                 - name: 'nullable'
                                   type: Boolean
                                   description: |
                                     Whether or not the column can accept a null value.
+                                  is_missing_in_cai: true
                                 - name: 'ordinalPosition'
                                   type: Integer
                                   description: |
                                     The ordinal position of the column in the table.
+                                  is_missing_in_cai: true
                             min_size: 1
                       min_size: 1
                 min_size: 1
@@ -510,6 +542,7 @@ properties:
           - 'source_config.0.postgresql_source_config'
           - 'source_config.0.sql_server_source_config'
           - 'source_config.0.salesforce_source_config'
+          - 'source_config.0.mongodb_source_config'
         properties:
           - name: 'includeObjects'
             type: NestedObject
@@ -737,6 +770,7 @@ properties:
           - 'source_config.0.postgresql_source_config'
           - 'source_config.0.sql_server_source_config'
           - 'source_config.0.salesforce_source_config'
+          - 'source_config.0.mongodb_source_config'
         properties:
           - name: 'includeObjects'
             type: NestedObject
@@ -935,6 +969,7 @@ properties:
           - 'source_config.0.postgresql_source_config'
           - 'source_config.0.sql_server_source_config'
           - 'source_config.0.salesforce_source_config'
+          - 'source_config.0.mongodb_source_config'
         properties:
           - name: 'includeObjects'
             type: NestedObject
@@ -1150,6 +1185,7 @@ properties:
           - 'source_config.0.postgresql_source_config'
           - 'source_config.0.sql_server_source_config'
           - 'source_config.0.salesforce_source_config'
+          - 'source_config.0.mongodb_source_config'
         properties:
           - name: 'includeObjects'
             type: NestedObject
@@ -1224,6 +1260,102 @@ properties:
             description: |
               Salesforce objects polling interval. The interval at which new changes will be polled for each object. The duration must be between 5 minutes and 24 hours.
             required: true
+      - name: 'mongodbSourceConfig'
+        description: |
+          MongoDB source configuration.
+        type: NestedObject
+        send_empty_value: true
+        allow_empty_object: true
+        exactly_one_of:
+          - 'source_config.0.mysql_source_config'
+          - 'source_config.0.oracle_source_config'
+          - 'source_config.0.postgresql_source_config'
+          - 'source_config.0.sql_server_source_config'
+          - 'source_config.0.salesforce_source_config'
+          - 'source_config.0.mongodb_source_config'
+        properties:
+          - name: 'includeObjects'
+            type: NestedObject
+            description: |
+              MongoDB collections to include in the stream.
+            properties:
+              - type: Array
+                name: 'databases'
+                description: |
+                  MongoDB databases in the cluster.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - type: String
+                      name: 'database'
+                      description: |
+                        Database name.
+                    - type: Array
+                      name: 'collections'
+                      description: |
+                        Collections in the database.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - type: String
+                            name: 'collection'
+                            description: |
+                              Collection name.
+                          - type: Array
+                            name: 'fields'
+                            description: |
+                              Fields in the collection.
+                            item_type:
+                              type: NestedObject
+                              properties:
+                                - type: 'String'
+                                  name: 'field'
+                                  description: |
+                                    Field name.
+          - name: 'excludeObjects'
+            type: NestedObject
+            description: |
+              MongoDB collections to include in the stream.
+            properties:
+              - type: Array
+                name: 'databases'
+                description: |
+                  MongoDB databases in the cluster.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - type: String
+                      name: 'database'
+                      description: |
+                        Database name.
+                    - type: Array
+                      name: 'collections'
+                      description: |
+                        Collections in the database.
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - type: String
+                            name: 'collection'
+                            description: |
+                              Collection name.
+                          - type: Array
+                            name: 'fields'
+                            description: |
+                              Fields in the collection.
+                            item_type:
+                              type: NestedObject
+                              properties:
+                                - type: 'String'
+                                  name: 'field'
+                                  description: |
+                                    Field name.
+          - name: 'maxConcurrentBackfillTasks'
+            type: Integer
+            description: |
+              Optional. Maximum number of concurrent backfill tasks. The number
+              should be non-negative and less than or equal to 50. If not set
+              (or set to 0), the system''s default value is used
   - name: 'destinationConfig'
     type: NestedObject
     description: |
@@ -1500,14 +1632,17 @@ properties:
                               type: Boolean
                               description: |
                                 Whether or not the column represents a primary key.
+                              is_missing_in_cai: true
                             - name: 'nullable'
                               type: Boolean
                               description: |
                                 Whether or not the column can accept a null value.
+                              is_missing_in_cai: true
                             - name: 'ordinalPosition'
                               type: Integer
                               description: |
                                 The ordinal position of the column in the table.
+                              is_missing_in_cai: true
                         min_size: 1
                   min_size: 1
             min_size: 1
@@ -1802,6 +1937,50 @@ properties:
                         type: String
                         description: |
                           Field name.
+      - name: 'mongodbExcludedObjects'
+        type: NestedObject
+        description: |
+          MongoDB data source objects to avoid backfilling.
+        properties:
+          - type: Array
+            name: 'databases'
+            description: |
+              MongoDB databases in the cluster.
+            required: true
+            min_size: 1
+            item_type:
+              type: NestedObject
+              properties:
+                - type: String
+                  name: 'database'
+                  required: true
+                  description: |
+                    Database name.
+                - type: Array
+                  name: 'collections'
+                  min_size: 1
+                  description: |
+                    Collections in the database.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - type: String
+                        name: 'collection'
+                        required: true
+                        description: |
+                          Collection name.
+                      - type: Array
+                        name: 'fields'
+                        min_size: 1
+                        description: |
+                          Fields in the collection.
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - type: 'String'
+                              name: 'field'
+                              description: |
+                                Field name.
   - name: 'backfillNone'
     type: NestedObject
     description: |
@@ -1819,3 +1998,154 @@ properties:
       A reference to a KMS encryption key. If provided, it will be used to encrypt the data. If left blank, data
       will be encrypted using an internal Stream-specific encryption key provisioned through KMS.
     immutable: true
+    is_missing_in_cai: true
+  - name: 'ruleSets'
+    type: Array
+    description: 'Rule sets to apply to the stream.'
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'customizationRules'
+          type: Array
+          description: 'List of customization rules to apply.'
+          required: true
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'bigqueryPartitioning'
+                type: NestedObject
+                description: 'BigQuery partitioning rule.'
+                properties:
+                  - name: 'integerRangePartition'
+                    type: NestedObject
+                    properties:
+                      - name: 'column'
+                        type: String
+                        description: 'The partitioning column.'
+                        required: true
+                      - name: 'start'
+                        type: Integer
+                        description: 'The starting value for range partitioning (inclusive).'
+                        required: true
+                      - name: 'end'
+                        type: Integer
+                        description: 'The ending value for range partitioning (exclusive).'
+                        required: true
+                      - name: 'interval'
+                        type: Integer
+                        description: 'The interval of each range within the partition.'
+                        required: true
+                  - name: 'timeUnitPartition'
+                    type: NestedObject
+                    properties:
+                      - name: 'column'
+                        type: String
+                        description: 'The partitioning column.'
+                        required: true
+                      - name: 'partitioningTimeGranularity'
+                        type: Enum
+                        description: 'Partition granularity.'
+                        enum_values:
+                          - 'PARTITIONING_TIME_GRANULARITY_UNSPECIFIED'
+                          - 'PARTITIONING_TIME_GRANULARITY_HOUR'
+                          - 'PARTITIONING_TIME_GRANULARITY_DAY'
+                          - 'PARTITIONING_TIME_GRANULARITY_MONTH'
+                          - 'PARTITIONING_TIME_GRANULARITY_YEAR'
+                  - name: 'ingestionTimePartition'
+                    type: NestedObject
+                    allow_empty_object: true
+                    send_empty_value: true
+                    properties:
+                      - name: 'partitioningTimeGranularity'
+                        type: Enum
+                        description: 'Partition granularity.'
+                        enum_values:
+                          - 'PARTITIONING_TIME_GRANULARITY_UNSPECIFIED'
+                          - 'PARTITIONING_TIME_GRANULARITY_HOUR'
+                          - 'PARTITIONING_TIME_GRANULARITY_DAY'
+                          - 'PARTITIONING_TIME_GRANULARITY_MONTH'
+                          - 'PARTITIONING_TIME_GRANULARITY_YEAR'
+                  - name: 'requirePartitionFilter'
+                    type: Boolean
+                    description: 'If true, queries over the table require a partition filter.'
+              - name: 'bigqueryClustering'
+                type: NestedObject
+                description: 'BigQuery clustering rule.'
+                properties:
+                  - name: 'columns'
+                    type: Array
+                    description: 'Column names to set as clustering columns.'
+                    required: true
+                    item_type:
+                      type: String
+        - name: 'objectFilter'
+          type: NestedObject
+          description: 'Object filter to apply the customization rules to.'
+          required: true
+          properties:
+            - name: 'sourceObjectIdentifier'
+              type: NestedObject
+              description: 'Specific source object identifier.'
+              properties:
+                - name: 'oracleIdentifier'
+                  type: NestedObject
+                  properties:
+                    - name: 'schema'
+                      type: String
+                      description: 'The schema name.'
+                      required: true
+                    - name: 'table'
+                      type: String
+                      description: 'The table name.'
+                      required: true
+                - name: 'mysqlIdentifier'
+                  type: NestedObject
+                  properties:
+                    - name: 'database'
+                      type: String
+                      description: 'The database name.'
+                      required: true
+                    - name: 'table'
+                      type: String
+                      description: 'The table name.'
+                      required: true
+                - name: 'postgresqlIdentifier'
+                  type: NestedObject
+                  properties:
+                    - name: 'schema'
+                      type: String
+                      description: 'The schema name.'
+                      required: true
+                    - name: 'table'
+                      type: String
+                      description: 'The table name.'
+                      required: true
+                - name: 'sqlServerIdentifier'
+                  type: NestedObject
+                  properties:
+                    - name: 'schema'
+                      type: String
+                      description: 'The schema name.'
+                      required: true
+                    - name: 'table'
+                      type: String
+                      description: 'The table name.'
+                      required: true
+                - name: 'salesforceIdentifier'
+                  type: NestedObject
+                  properties:
+                    - name: 'objectName'
+                      type: String
+                      description: 'The Salesforce object name.'
+                      required: true
+                - name: 'mongodbIdentifier'
+                  type: NestedObject
+                  properties:
+                    - name: 'database'
+                      type: String
+                      description: 'The MongoDB database name.'
+                      required: true
+                    - name: 'collection'
+                      type: String
+                      description: 'The MongoDB collection name.'
+                      required: true

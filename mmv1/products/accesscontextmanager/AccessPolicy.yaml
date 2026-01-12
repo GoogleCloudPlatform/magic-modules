@@ -33,6 +33,7 @@ docs:
 id_format: '{{name}}'
 base_url: 'accessPolicies'
 self_link: 'accessPolicies/{{name}}'
+cai_asset_name_format: 'accessPolicies/{{name}}'
 update_verb: 'PATCH'
 update_mask: true
 import_format:
