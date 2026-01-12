@@ -4,6 +4,12 @@
     required: false
     optional: true
     computed: true
+- type: CUSTOM_SCHEMA_VALUES
+  field: encryption_config
+  details:
+    required: false
+    optional: true
+    computed: true
 - type: DEPRECATED
   field: version
   details:

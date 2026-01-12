@@ -64,25 +64,112 @@ resource "google_dataproc_workflow_template" "template" {
 }
 ```
 
+## Example Usage - Encryption Config with Spark Jobs
+
+```hcl
+# Grant Dataproc service account KMS permissions at project level
+resource "google_project_iam_member" "dataproc_kms_encrypter_decrypter" {
+  project = data.google_project.project.name
+  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member  = "serviceAccount:service-${data.google_project.project.number}@dataproc-accounts.iam.gserviceaccount.com"
+}
+
+resource "google_dataproc_workflow_template" "example" {
+  name     = var.workflow_template_name
+  location = var.region
+
+  # Ensure IAM permissions are granted before creating the template
+  depends_on = [google_project_iam_member.dataproc_kms_encrypter_decrypter]
+
+  // Encryption config for encrypting workflow template job arguments
+  encryption_config {
+    kms_key = "<<-- uri to desired crypto key for customer management -->>"
+  }
+
+  placement {
+    managed_cluster {
+      cluster_name = var.cluster_name
+      config {
+        gce_cluster_config {
+          zone    = var.zone
+          network = var.network
+        }
+
+        master_config {
+          num_instances = 1
+          machine_type  = var.machine_type
+          disk_config {
+            boot_disk_type    = "pd-standard"
+            boot_disk_size_gb = 100
+          }
+        }
+
+        worker_config {
+          num_instances = 2
+          machine_type  = var.machine_type
+          disk_config {
+            boot_disk_type    = "pd-standard"
+            boot_disk_size_gb = 100
+          }
+        }
+      }
+    }
+  }
+
+  jobs {
+    step_id = "example-job"
+    spark_job {
+      main_class = "org.apache.spark.examples.SparkPi"
+      jar_file_uris = [
+        "file:///usr/lib/spark/examples/jars/spark-examples.jar"
+      ]
+      args = ["1000"]
+    }
+  }
+
+  jobs {
+    step_id = "example-pyspark-job"
+    pyspark_job {
+      main_python_file_uri = "gs://dataproc-examples/pyspark/hello-world/hello-world.py"
+    }
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
 
 * `jobs` -
-  (Required)
-  Required. The Directed Acyclic Graph of Jobs to submit.
+  (Required) The Directed Acyclic Graph of Jobs to submit.
 
 * `location` -
   (Required)
   The location for the resource
 
 * `name` -
-  (Required)
-  Output only. The resource name of the workflow template, as described in https://cloud.google.com/apis/design/resource_names. * For `projects.regions.workflowTemplates`, the resource name of the template has the following format: `projects/{project_id}/regions/{region}/workflowTemplates/{template_id}` * For `projects.locations.workflowTemplates`, the resource name of the template has the following format: `projects/{project_id}/locations/{location}/workflowTemplates/{template_id}`
+  (Required) The resource name of the workflow template, as described in https://cloud.google.com/apis/design/resource_names. * For `projects.regions.workflowTemplates`, the resource name of the template has the following format: `projects/{project_id}/regions/{region}/workflowTemplates/{template_id}` * For `projects.locations.workflowTemplates`, the resource name of the template has the following format: `projects/{project_id}/locations/{location}/workflowTemplates/{template_id}`
 
 * `placement` -
-  (Required)
-  Required. WorkflowTemplate scheduling information.
+  (Required) WorkflowTemplate scheduling information.
+
+* The `encryption_config` - (Optional) Encryption settings for encrypting workflow template job arguments.
+
+The `encryption_config` block supports:
+
+* `kms_key` - (Optional) The Cloud KMS key name to use for encrypting workflow template [job arguments](https://cloud.google.com/dataproc/docs/concepts/workflows/use-workflows?_gl=1*1a0vliy*_ga*MTA5NTk1NjQ5MC4xNzAyMzEzMTA2*_ga_WH2QY8WWF5*czE3NjgyNTk1Mjkkbzk1JGcxJHQxNzY4MjYxNTM0JGo1OSRsMCRoMA..#adding_jobs_to_a_template).
+
+When this this key is provided, the following workflow template job arguments, if present, are [CMEK encrypted](https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/customer-managed-encryption?_gl=1*1n7st1x*_ga*MTA5NTk1NjQ5MC4xNzAyMzEzMTA2*_ga_WH2QY8WWF5*czE3NjgyNTk1Mjkkbzk1JGcxJHQxNzY4MjYxNTM0JGo1OSRsMCRoMA..#use_cmek_with_workflow_template_data):
+
+- [FlinkJob args](https://cloud.google.com/dataproc/docs/reference/rest/v1/FlinkJob?_gl=1*1n7st1x*_ga*MTA5NTk1NjQ5MC4xNzAyMzEzMTA2*_ga_WH2QY8WWF5*czE3NjgyNTk1Mjkkbzk1JGcxJHQxNzY4MjYxNTM0JGo1OSRsMCRoMA..)
+- [HadoopJob args](https://cloud.google.com/dataproc/docs/reference/rest/v1/HadoopJob?_gl=1*1n7st1x*_ga*MTA5NTk1NjQ5MC4xNzAyMzEzMTA2*_ga_WH2QY8WWF5*czE3NjgyNTk1Mjkkbzk1JGcxJHQxNzY4MjYxNTM0JGo1OSRsMCRoMA..)
+- [SparkJob args](https://cloud.google.com/dataproc/docs/reference/rest/v1/SparkJob?_gl=1*1n7st1x*_ga*MTA5NTk1NjQ5MC4xNzAyMzEzMTA2*_ga_WH2QY8WWF5*czE3NjgyNTk1Mjkkbzk1JGcxJHQxNzY4MjYxNTM0JGo1OSRsMCRoMA..)
+- [SparkRJob args](https://cloud.google.com/dataproc/docs/reference/rest/v1/SparkRJob?_gl=1*um6483*_ga*MTA5NTk1NjQ5MC4xNzAyMzEzMTA2*_ga_WH2QY8WWF5*czE3NjgyNTk1Mjkkbzk1JGcxJHQxNzY4MjYxNTM0JGo1OSRsMCRoMA..)
+- [PySparkJob args](https://cloud.google.com/dataproc/docs/reference/rest/v1/PySparkJob?_gl=1*um6483*_ga*MTA5NTk1NjQ5MC4xNzAyMzEzMTA2*_ga_WH2QY8WWF5*czE3NjgyNTk1Mjkkbzk1JGcxJHQxNzY4MjYxNTM0JGo1OSRsMCRoMA..)
+- [SparkSqlJob](https://cloud.google.com/dataproc/docs/reference/rest/v1/SparkSqlJob?_gl=1*um6483*_ga*MTA5NTk1NjQ5MC4xNzAyMzEzMTA2*_ga_WH2QY8WWF5*czE3NjgyNTk1Mjkkbzk1JGcxJHQxNzY4MjYxNTM0JGo1OSRsMCRoMA..) scriptVariables and queryList.queries
+- [HiveJob](https://cloud.google.com/dataproc/docs/reference/rest/v1/HiveJob?_gl=1*um6483*_ga*MTA5NTk1NjQ5MC4xNzAyMzEzMTA2*_ga_WH2QY8WWF5*czE3NjgyNTk1Mjkkbzk1JGcxJHQxNzY4MjYxNTM0JGo1OSRsMCRoMA..) scriptVariables and queryList.queries
+- [PigJob](https://cloud.google.com/dataproc/docs/reference/rest/v1/PigJob?_gl=1*um6483*_ga*MTA5NTk1NjQ5MC4xNzAyMzEzMTA2*_ga_WH2QY8WWF5*czE3NjgyNTk1Mjkkbzk1JGcxJHQxNzY4MjYxNTM0JGo1OSRsMCRoMA..) scriptVariables  and queryList.queries
+- [PrestoJob](https://cloud.google.com/dataproc/docs/reference/rest/v1/PrestoJob?_gl=1*um6483*_ga*MTA5NTk1NjQ5MC4xNzAyMzEzMTA2*_ga_WH2QY8WWF5*czE3NjgyNTk1Mjkkbzk1JGcxJHQxNzY4MjYxNTM0JGo1OSRsMCRoMA..) scriptVariables and queryList.queries
 
 The `jobs` block supports:
 
