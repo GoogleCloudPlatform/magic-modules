@@ -108,6 +108,13 @@ examples:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
       - 'deletion_protection'
+  - name: 'cloudrunv2_service_readiness_probes'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'cloudrunv2_service_secret'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
@@ -783,6 +790,78 @@ properties:
                   #   - template.0.containers.0.startupProbe.0.httpGet
                   #   - template.0.containers.0.startupProbe.0.tcpSocket
                   #   - template.0.containers.0.startupProbe.0.grpc
+                  properties:
+                    - name: 'port'
+                      type: Integer
+                      description: |-
+                        Port number to access on the container. Number must be in the range 1 to 65535.
+                        If not specified, defaults to the same value as container.ports[0].containerPort.
+                      default_from_api: true
+                    - name: 'service'
+                      type: String
+                      description: |-
+                        The name of the service to place in the gRPC HealthCheckRequest
+                        (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+                        If this is not specified, the default behavior is defined by gRPC.
+            - name: 'readinessProbe'
+              type: NestedObject
+              description: |-
+                Periodic probe of container readiness.
+              properties:
+                - name: 'timeoutSeconds'
+                  type: Integer
+                  description: |-
+                    Number of seconds after which the probe times out.
+                    Defaults to 1 second. Must be smaller than period_seconds.
+                  default_from_api: true
+                - name: 'periodSeconds'
+                  type: Integer
+                  description: |-
+                    How often (in seconds) to perform the probe.
+                    Default to 10 seconds.
+                  default_from_api: true
+                - name: 'failureThreshold'
+                  type: Integer
+                  description: |-
+                    Minimum consecutive failures for the probe to be considered failed after
+                    having succeeded. Defaults to 3.
+                  default_from_api: true
+                - name: 'successThreshold'
+                  type: Integer
+                  description: |-
+                    Minimum consecutive successes for the probe to be considered successful after having failed.
+                    Defaults to 2.
+                  default_from_api: true
+                - name: 'httpGet'
+                  type: NestedObject
+                  description: |-
+                    HttpGet specifies the http request to perform.
+                  send_empty_value: true
+                  allow_empty_object: true
+                  # exactly_one_of:
+                  #   - template.0.containers.0.readinessProbe.0.httpGet
+                  #   - template.0.containers.0.readinessProbe.0.grpc
+                  properties:
+                    - name: 'path'
+                      type: String
+                      description: |-
+                        Path to access on the HTTP server. If set, it should not be empty string.
+                      default_from_api: true
+                    - name: 'port'
+                      type: Integer
+                      description: |-
+                        Port number to access on the container. Number must be in the range 1 to 65535.
+                        If not specified, defaults to the same value as container.ports[0].containerPort.
+                      default_from_api: true
+                - name: 'grpc'
+                  type: NestedObject
+                  description: |-
+                    GRPC specifies an action involving a GRPC port.
+                  send_empty_value: true
+                  allow_empty_object: true
+                  # exactly_one_of:
+                  #   - template.0.containers.0.readinessProbe.0.httpGet
+                  #   - template.0.containers.0.readinessProbe.0.grpc
                   properties:
                     - name: 'port'
                       type: Integer
