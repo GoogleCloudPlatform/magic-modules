@@ -17,11 +17,6 @@ var (
 	GlobalMetadataCache = MetadataCache{
 		mutex: &sync.Mutex{},
 	}
-	{{ if eq $.TargetVersionName `ga` -}}
-	providerName = "google"
-	{{- else }}
-	providerName = "google-beta"
-	{{- end }}
 )
 
 // Metadata represents the structure of the metadata files
@@ -157,31 +152,43 @@ func (mc *MetadataCache) Cache() map[string]Metadata {
 // getServicesDir returns the path to the services directory
 // It will attempt to find the project root relative to cwd
 func getServicesDir() (string, error) {
+	var startingDirs []string
 	// Try to find project root
 	root, err := findProjectRoot()
-	if err == nil {
-		servicesDir := filepath.Join(root, providerName, "services")
-		if _, err := os.Stat(servicesDir); err == nil {
-			return servicesDir, nil
-		}
-	}
-
-	// Last resort: try relative to current directory
-	currentDir, err := os.Getwd()
 	if err != nil {
-		return "", fmt.Errorf("failed to determine current directory: %v", err)
+		fmt.Printf("Error finding project root: %v", err)
+		// Fall back to dirs relative the current directory
+		currentDir, err := os.Getwd()
+		if err != nil {
+			return "", fmt.Errorf("failed to determine current directory: %v", err)
+		}
+		startingDirs = []string{
+			filepath.Join(currentDir),
+			filepath.Join(currentDir, ".."),
+			filepath.Join(currentDir, "..", ".."),
+		}
+	} else {
+		startingDirs = append(startingDirs, root)
 	}
 
-	// Try a few common relative paths
-	potentialPaths := []string{
-		filepath.Join(currentDir, providerName, "services"),
-		filepath.Join(currentDir, "..", providerName, "services"),
-		filepath.Join(currentDir, "..", "..", providerName, "services"),
-	}
+	for _, dir := range startingDirs {
+		files, err := os.ReadDir(dir)
+		if err != nil {
+			return "", fmt.Errorf("Failed reading dir %q: %v", dir, err)
+		}
 
-	for _, path := range potentialPaths {
-		if _, err := os.Stat(path); err == nil {
-			return path, nil
+		for _, file := range files {
+			fi, err := file.Info()
+			if err != nil {
+				return "", fmt.Errorf("Failed getting info for file %q: %v", filepath.Join(dir, file.Name()), err)
+			}
+
+			if fi.Mode().IsDir() && strings.HasPrefix(file.Name(), "google") {
+				servicesDir := filepath.Join(dir, file.Name(), "services")
+				if _, err := os.Stat(servicesDir); err == nil {
+					return servicesDir, nil
+				}
+			}
 		}
 	}
 
