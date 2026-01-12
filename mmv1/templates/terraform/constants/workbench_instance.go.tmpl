@@ -1,8 +1,11 @@
+metadataDefaults := map[string]string{
+        "enable-jupyterlab4": "true",
+    }
+
 var WorkbenchInstanceSettableUnmodifiableDefaultMetadata = []string{
 	"install-monitoring-agent",
 	"serial-port-logging-enable",
 	"report-notebook-metrics",
-	"enable-jupyterlab4",
 }
 
 var WorkbenchInstanceEUCProvidedAdditionalMetadata = []string{
@@ -102,6 +105,12 @@ func WorkbenchInstanceMetadataDiffSuppress(k, old, new string, d *schema.Resourc
 			return true
 		}
 	}
+
+	if defaultValue, exists := metadataDefaults[key]; exists {
+        if new == "" && old == defaultValue {
+            return true
+        }
+    }
 
 	// Let diff be determined by metadata
 	if strings.Contains(k, "gce_setup.0.metadata.%") {
