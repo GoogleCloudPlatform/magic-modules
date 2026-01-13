@@ -16503,3 +16503,50 @@ resource "google_container_cluster" "with_kubelet_config" {
 }
 `, clusterName, networkName, subnetworkName, npName, npName)
 }
+
+func TestAccContainerCluster_withSlurmOperatorConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-slurm-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withSlurmOperatorEnabled(clusterName, networkName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.with_slurm_config", "addons_config.0.slurm_operator_config.0.enabled", "true"),
+				),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_slurm_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func testAccContainerCluster_withSlurmOperatorEnabled(clusterName, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_slurm_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  network            = "%s"
+  subnetwork         = "%s"
+  deletion_protection = false
+
+  addons_config {
+    slurm_operator_config {
+      enabled = true
+    }
+  }
+}
+`, clusterName, networkName, subnetworkName)
+}
