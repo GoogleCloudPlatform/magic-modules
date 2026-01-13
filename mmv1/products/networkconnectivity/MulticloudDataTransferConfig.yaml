@@ -95,6 +95,7 @@ properties:
       MulticloudDataTransferConfig resource.
   - name: 'services'
     type: Array
+    is_set: true
     description: |
       Maps services to their current or planned states. Service names are keys,
       and the associated values describe the state of the service.
