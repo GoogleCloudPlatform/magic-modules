@@ -6340,7 +6340,7 @@ func TestAccContainerNodePool_acceleratorNetworkProfile(t *testing.T) {
 	npName := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
 	resourceName := "google_container_node_pool.np"
 
-	resource.Test(t, resource.TestCase{
+	resource.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
@@ -6439,7 +6439,7 @@ func TestAccContainerCluster_nodePool_acceleratorNetworkProfile(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	resourceName := "google_container_cluster.primary"
 
-	resource.Test(t, resource.TestCase{
+	resource.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
