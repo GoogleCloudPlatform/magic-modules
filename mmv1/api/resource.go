@@ -393,17 +393,6 @@ type TGCResource struct {
 	// But they have the same api resource type: address
 	CaiResourceKind string `yaml:"cai_resource_kind,omitempty"`
 
-	// If true, the Terraform custom encoder is not applied during tfplan2cai
-	TGCIgnoreTerraformEncoder bool `yaml:"tgc_ignore_terraform_encoder,omitempty"`
-
-	// If true, the Terraform custom decoder is not applied during cai2hcl
-	TGCIgnoreTerraformDecoder bool `yaml:"tgc_ignore_terraform_decoder,omitempty"`
-
-	// [Optional] The parameter that uniquely identifies the resource.
-	// Generally, it shouldn't be set when the identity can be decided.
-	// Otherswise, it should be set.
-	CaiIdentity string `yaml:"cai_identity,omitempty"`
-
 	// If true, create TGC tests automatically for all handwritten provider tests.
 	TGCIncludeHandwrittenTests bool `yaml:"tgc_include_handwritten_tests,omitempty"`
 
@@ -2183,42 +2172,6 @@ func (r Resource) DefineAssetTypeForResourceInProduct() bool {
 	return true
 }
 
-// Gets the Cai asset name format
-func (r Resource) GetCaiAssetNameFormat() string {
-	caiBaseUrl := ""
-	caiId := ""
-	if r.CaiIdentity != "" {
-		caiId = r.CaiIdentity
-	} else {
-		caiId = r.getCaiId()
-	}
-	caiIdTemplate := fmt.Sprintf("{{%s}}", caiId)
-	if r.CaiBaseUrl != "" {
-		if caiId == "" || strings.Contains(r.CaiBaseUrl, caiIdTemplate) {
-			caiBaseUrl = r.CaiBaseUrl
-		} else {
-			caiBaseUrl = fmt.Sprintf("%s/%s", r.CaiBaseUrl, caiIdTemplate)
-		}
-	}
-	if caiBaseUrl == "" {
-		caiBaseUrl = r.SelfLink
-	}
-	if caiBaseUrl == "" {
-		if caiId == "" || strings.Contains(r.BaseUrl, caiIdTemplate) {
-			caiBaseUrl = r.BaseUrl
-		} else {
-			caiBaseUrl = fmt.Sprintf("%s/%s", r.BaseUrl, caiIdTemplate)
-		}
-	}
-	return caiBaseUrl
-}
-
-// Gets the Cai asset name template, which could include version
-// For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
-func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
-	return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, r.GetCaiAssetNameFormat())
-}
-
 // Guesses the identifier of the resource, as "name" is not always the identifier
 // For example, the cai identifier is feed_id in google_cloud_asset_folder_feed
 func (r Resource) getCaiId() string {
@@ -2318,7 +2271,7 @@ func (r Resource) IgnoreCaiAssetName() bool {
 
 // Gets the Cai API version
 func (r Resource) CaiApiVersion(productBackendName, caiProductBaseUrl string) string {
-	template := r.rawCaiAssetNameTemplate(productBackendName)
+	template := r.GetCaiAssetNameTemplate()
 
 	versionRegex, err := regexp.Compile(`\/(v\d[^\/]*)\/`)
 	if err != nil {
