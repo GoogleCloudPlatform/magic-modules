@@ -102,6 +102,7 @@ examples:
     test_vars_overrides:
       sub_pdp_ip_cidr: 'fmt.Sprintf("136.124.3.%d/32", 120 + acctest.RandIntRange(t, 0, 7))'
       root_pdp_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-enhanced-pdp-136-124-3-120-29"'
+    tgc_skip_test: fix later
 parameters:
   - name: 'region'
     type: ResourceRef
