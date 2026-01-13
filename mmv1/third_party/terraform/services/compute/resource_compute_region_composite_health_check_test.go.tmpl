@@ -24,7 +24,7 @@ func TestAccComputeRegionCompositeHealthCheck_update(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeRegionCompositeHealthCheckDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionCompositeHealthCheck_basic(context),
+				Config: testAccComputeRegionCompositeHealthCheck_basic(context, "[google_compute_region_health_source.default.id]"),
 			},
 			{
 				ResourceName:      "google_compute_region_composite_health_check.example_test_composite_health_check",
@@ -32,7 +32,7 @@ func TestAccComputeRegionCompositeHealthCheck_update(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeRegionCompositeHealthCheck_update(context),
+				Config: testAccComputeRegionCompositeHealthCheck_update(context, "[google_compute_region_health_source.default.id, google_compute_region_health_source.default2.id]"),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{plancheck.ExpectResourceAction("google_compute_region_composite_health_check.example_test_composite_health_check", plancheck.ResourceActionUpdate),
 					},
@@ -47,7 +47,14 @@ func TestAccComputeRegionCompositeHealthCheck_update(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeRegionCompositeHealthCheck_basic(context),			
+				Config: testAccComputeRegionCompositeHealthCheck_update(context, "[google_compute_region_health_source.default.id]"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{plancheck.ExpectResourceAction("google_compute_region_composite_health_check.example_test_composite_health_check", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				Config: testAccComputeRegionCompositeHealthCheck_basic(context, "[google_compute_region_health_source.default.id]"),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{plancheck.ExpectResourceAction("google_compute_region_composite_health_check.example_test_composite_health_check", plancheck.ResourceActionUpdate),
 					},
@@ -62,14 +69,15 @@ func TestAccComputeRegionCompositeHealthCheck_update(t *testing.T) {
 	})
 }
 
-func testAccComputeRegionCompositeHealthCheck_basic(context map[string]interface{}) string {
+func testAccComputeRegionCompositeHealthCheck_basic(context map[string]interface{}, health_sources string) string {
+	context["health_sources"] = health_sources
 	return acctest.Nprintf(`
 resource "google_compute_region_composite_health_check" "example_test_composite_health_check" {
   provider           = google-beta
   name               = "tf-test-composite-health-check-%{random_suffix}"
   description        = "Example composite health check basic"
   region             = "%{region}"
-  health_sources     = [google_compute_region_health_source.default.id]
+  health_sources     = %{health_sources}
   health_destination = google_compute_forwarding_rule.default.id
 }
 
@@ -133,14 +141,19 @@ resource "google_compute_subnetwork" "default" {
 `, context)
 }
 
-func testAccComputeRegionCompositeHealthCheck_update(context map[string]interface{}) string {
+func testAccComputeRegionCompositeHealthCheck_update(context map[string]interface{}, health_sources string) string {
+	newContext := make(map[string]interface{})
+	for k, v := range context {
+		newContext[k] = v
+	}
+	newContext["health_sources"] = health_sources
 	return acctest.Nprintf(`
 resource "google_compute_region_composite_health_check" "example_test_composite_health_check" {
   provider           = google-beta
   name               = "tf-test-composite-health-check-%{random_suffix}"
   description        = "Updated description"
   region             = "%{region}"
-  health_sources     = [google_compute_region_health_source.default.id, google_compute_region_health_source.default2.id]
+  health_sources     = %{health_sources}
   health_destination = google_compute_forwarding_rule.default.id
 }
 
@@ -225,6 +238,6 @@ resource "google_compute_region_backend_service" "default2" {
   health_checks         = [google_compute_health_check.default.id]
   load_balancing_scheme = "INTERNAL"
 }
-`, context)
+`, newContext)
 }
 {{- end }}
