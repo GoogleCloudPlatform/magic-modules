@@ -30,6 +30,7 @@ import_format:
   - '{{name}}'
 cai_asset_name_format: 'projects/{{project}}/instances/{{name}}'
 include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 tgc_ignore_terraform_encoder: true
 tgc_ignore_terraform_decoder: true
 timeouts:
@@ -131,6 +132,7 @@ properties:
       The number of processing units allocated to this instance. Exactly one of either num_nodes,
       processing_units or autoscaling_config must be present in terraform except when instance_type = FREE_INSTANCE.
     default_from_api: true
+    is_missing_in_cai: true
     at_least_one_of:
       - 'num_nodes'
       - 'processing_units'
@@ -179,6 +181,7 @@ properties:
           only scale within that range. Users can either use nodes or processing
           units to specify the limits, but should use the same unit to set both the
           min_limit and max_limit.
+        is_missing_in_cai: true
         properties:
           - name: 'minProcessingUnits'
             type: Integer
@@ -242,7 +245,7 @@ properties:
               This number is on a scale from 0 (no utilization) to 100 (full utilization). The valid range is [10, 90] inclusive.
               If not specified or set to 0, the autoscaler will skip scaling based on total cpu utilization.
               The value should be higher than high_priority_cpu_utilization_percent if present.
-
+            is_missing_in_cai: true
       - name: 'asymmetricAutoscalingOptions'
         type: Array
         description: |
