@@ -1,17 +1,13 @@
 package container
 
 import (
-{{- if ne $.TargetVersionName `ga` }}
 	"context"
 	"os"
-{{- end }}
 	"fmt"
 	"log"
 	"regexp"
 	"strings"
-{{- if ne $.TargetVersionName `ga` }}
 	"sync"
-{{- end }}
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
@@ -24,6 +20,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 {{ if eq $.TargetVersionName `ga` }}
+	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/container/v1"
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
@@ -33,7 +30,6 @@ import (
 
 var clusterIdRegex = regexp.MustCompile("projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/clusters/(?P<name>[^/]+)")
 
-{{ if ne $.TargetVersionName `ga` }}
 type nodePoolWithUpdateTime struct {
 	nodePool   *container.NodePool
 	updateTime time.Time
@@ -180,7 +176,6 @@ var (
 		ttl:                   getCacheTTL(),
 	}
 )
-{{- end }}
 
 func ResourceContainerNodePool() *schema.Resource {
 	return &schema.Resource{
@@ -887,17 +882,6 @@ func resourceContainerNodePoolRead(d *schema.ResourceData, meta interface{}) err
 
 	name := getNodePoolName(d.Id())
 
-{{ if eq $.TargetVersionName `ga` }}
-	clusterNodePoolsGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Get(nodePoolInfo.fullyQualifiedName(name))
-	if config.UserProjectOverride {
-		clusterNodePoolsGetCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-	}
-	nodePool, err := clusterNodePoolsGetCall.Do()
-	if err != nil {
-		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("NodePool %q from cluster %q", name, nodePoolInfo.cluster))
-	}
-
-{{- else }}
 	if err := npCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo, name); err != nil {
 	  return err
 	}
@@ -907,7 +891,6 @@ func resourceContainerNodePoolRead(d *schema.ResourceData, meta interface{}) err
 		d.SetId("")
 		return nil
 	}
-{{- end }}
 
 	npMap, err := flattenNodePool(d, config, nodePool, "")
 	if err != nil {
@@ -964,9 +947,7 @@ func resourceContainerNodePoolUpdate(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-{{ if ne $.TargetVersionName `ga` }}
 	npCache.remove(nodePoolInfo.fullyQualifiedName(name))
-{{- end }}
 
 	return resourceContainerNodePoolRead(d, meta)
 }
@@ -1048,9 +1029,7 @@ func resourceContainerNodePoolDelete(d *schema.ResourceData, meta interface{}) e
 
 	d.SetId("")
 
-{{ if ne $.TargetVersionName `ga` }}
 	npCache.remove(nodePoolInfo.fullyQualifiedName(name))
-{{- end }}
 
 	return nil
 }
@@ -1068,20 +1047,6 @@ func resourceContainerNodePoolExists(d *schema.ResourceData, meta interface{}) (
 	}
 
 	name := getNodePoolName(d.Id())
-{{- if eq $.TargetVersionName `ga` }}
-	clusterNodePoolsGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Get(nodePoolInfo.fullyQualifiedName(name))
-	if config.UserProjectOverride {
-		clusterNodePoolsGetCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-	}
-	_, err = clusterNodePoolsGetCall.Do()
-	if err != nil {
-		if err = transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Container NodePool %s", name)); err == nil {
-			return false, nil
-		}
-		// There was some other error in reading the resource
-		return true, err
-	}
-{{- else }}
 	if err := npCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo, name); err != nil {
         return false, err
 	}
@@ -1091,7 +1056,6 @@ func resourceContainerNodePoolExists(d *schema.ResourceData, meta interface{}) (
 		d.SetId("")
 		return false, nil
 	}
-{{- end }}
 	return true, nil
 }
 
@@ -1383,16 +1347,6 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 		if len(matches) < 4 {
 			return nil, fmt.Errorf("Error reading instance group manage URL '%q'", url)
 		}
-{{- if eq $.TargetVersionName `ga` }}
-		igm, err := config.NewComputeClient(userAgent).InstanceGroupManagers.Get(matches[1], matches[2], matches[3]).Do()
-		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
-			// The IGM URL in is stale; don't include it
-			continue
-		}
-		if err != nil {
-			return nil, fmt.Errorf("Error reading instance group manager returned as an instance group URL: %q", err)
-		}
-{{- else }}
         if strings.HasPrefix("gk3", matches[3]) {
             // IGM is autopilot so we know it will not be found, skip it
             continue
@@ -1405,7 +1359,6 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 		    // The IGM URL is stale; don't include it
 		    continue
 		}
-{{- end }}
 		size += int(igm.TargetSize)
 		igmUrls = append(igmUrls, url)
 		managedIgmUrls = append(managedIgmUrls, igm.InstanceGroup)
