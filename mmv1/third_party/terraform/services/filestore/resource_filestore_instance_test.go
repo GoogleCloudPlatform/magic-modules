@@ -477,13 +477,8 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_filestore_instance.replica_instance",
-						"effective_replication.0.replicas.0.peer_instance",
-						"projects/"+context["project"].(string)+"/locations/us-east1/instances/tf-test-source-instance-"+context["random_suffix"].(string),
-					),
-					resource.TestCheckResourceAttr(
-						"google_filestore_instance.replica_instance",
-						"effective_replication.0.role",
-						"STANDBY",
+						"effective_replication.0.replicas.0.state",
+						"READY",
 					),
 				),
 			},
@@ -498,7 +493,7 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_filestore_instance.replica_instance",
-						"effective_replication.0.role",
+						"effective_replication.0.replicas.0.state",
 						"PAUSED",
 					),
 				),
@@ -511,6 +506,13 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 			},
 			{
 				Config: testAccFilestoreInstance_replication_resume(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_filestore_instance.replica_instance",
+						"effective_replication.0.replicas.0.state",
+						"READY",
+					),
+				),
 			},
 			{
 				ResourceName:            "google_filestore_instance.replica_instance",
