@@ -300,6 +300,10 @@ region are guaranteed to support the same version.
     [SecretManagerConfig](https://cloud.google.com/secret-manager/docs/secret-manager-managed-csi-component) feature.
     Structure is [documented below](#nested_secret_manager_config).
 
+* `secret_sync_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the
+    [SecretSyncConfig](https://cloud.google.com/secret-manager/docs/sync-k8-secrets) feature.
+    Structure is [documented below](#nested_secret_sync_config).
+
 * `authenticator_groups_config` - (Optional) Configuration for the
     [Google Groups for GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control#groups-setup-gsuite) feature.
     Structure is [documented below](#nested_authenticator_groups_config).
@@ -523,6 +527,8 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
    `enable_legacy_lustre_port` which allows the Lustre CSI driver to initialize LNet (the virtual networklayer for Lustre kernel module) using port 6988. 
    This flag is required to workaround a port conflict with the gke-metadata-server on GKE nodes.
    See [Enable Lustre CSI driver](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/lustre-csi-driver-new-volume) for more information.
+
+* `pod_snapshot_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The status of the Pod Snapshot addon. It is disabled by default. Set `enabled = true` to enable.
 
 This example `addons_config` disables two addons:
 
@@ -761,6 +767,7 @@ maintenance_policy {
 
 <a name="nested_exclusion_options"></a>The `exclusion_options` block supports:
 * `scope` - (Required) The scope of automatic upgrades to restrict in the exclusion window. One of: **NO_UPGRADES | NO_MINOR_UPGRADES | NO_MINOR_OR_NODE_UPGRADES**
+* `end_time_behavior` - (Optional) The exclusion window end time behavior. One of: **UNTIL_END_OF_SUPPORT**. One and and one of `end_time_behavior` and `end_time` should be specified.
 
 Specify `start_time` and `end_time` in [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) "Zulu" date format.  The start time's date is
 the initial date that the window starts, and the end time is used for calculating duration.Specify `recurrence` in
@@ -787,9 +794,9 @@ maintenance_policy {
   maintenance_exclusion{
     exclusion_name = "holiday data load"
     start_time = "2019-05-01T00:00:00Z"
-    end_time = "2019-05-02T00:00:00Z"
     exclusion_options {
       scope = "NO_MINOR_UPGRADES"
+      end_time_behavior = "UNTIL_END_OF_SUPPORT"
     }
   }
 }
@@ -1147,7 +1154,7 @@ sole_tenant_config {
 
 * `data_cache_count` (Optional) - Number of raw-block local NVMe SSD disks to be attached to the node utilized for GKE Data Cache. If zero, then GKE Data Cache will not be enabled in the nodes.
 
-<a name="nasted_fast_socket"></a>The `fast_socket` block supports:
+<a name="nested_fast_socket"></a>The `fast_socket` block supports:
 
 * `enabled` (Required) - Whether or not the NCCL Fast Socket is enabled
 
@@ -1223,7 +1230,7 @@ Structure is [documented below](#nested_node_kubelet_config).
 
 * `network_tags` (Optional) - The network tag config for the cluster's automatically provisioned node pools. Structure is [documented below](#nested_network_tags).
 
-* `linux_node_config` (Optional) -  Linux system configuration for the cluster's automatically provisioned node pools. Only `cgroup_mode` field is supported in `node_pool_auto_config`. Structure is [documented below](#nested_linux_node_config).
+* `linux_node_config` (Optional) -  Linux system configuration for the cluster's automatically provisioned node pools. Only `cgroup_mode` and `node_kernel_module_loading` fields are supported in `node_pool_auto_config`. Structure is [documented below](#nested_linux_node_config).
 
 <a name="nested_node_kubelet_config"></a>The `node_kubelet_config` block supports:
 
@@ -1307,6 +1314,16 @@ notification_config {
 
 * `enabled` (Optional) - Enable the roation in Secret Manager add-on for this cluster.
 * `rotation_interval` (Optional) - The interval between two consecutive rotations. Default rotation interval is 2 minutes.
+
+<a name="nested_secret_sync_config"></a>The `secret_sync_config` block supports:
+
+* `enabled` (Required, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - Enable the Sync as K8s secret feature for this cluster.
+* `rotation_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - config for secret sync auto rotation. Structure is [docuemented below](#sync_rotation_config)
+
+<a name="sync_rotation_config"></a>The `rotation_config` block supports:
+
+* `enabled` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - Enable the roation in Sync as K8s secret feature for this cluster.
+* `rotation_interval` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - The interval between two consecutive rotations. Default rotation interval is 2 minutes.
 
 <a name="nested_user_managed_keys_config"></a>The `user_managed_keys_config` block supports:
 
@@ -1593,6 +1610,8 @@ linux_node_config {
 
 * `hugepages_config` - (Optional) Amounts for 2M and 1G hugepages. Structure is [documented below](#nested_hugepages_config).
 
+* `node_kernel_module_loading` - (Optional) Settings for kernel module loading. Structure is [documented below](#nested_node_kernel_module_loading_config).
+
 <a name="nested_hugepages_config"></a>The `hugepages_config` block supports:
 
 * `hugepage_size_2m` - (Optional) Amount of 2M hugepages.
@@ -1615,6 +1634,14 @@ linux_node_config {
     * `TRANSPARENT_HUGEPAGE_DEFRAG_NEVER`: An application will never enter direct reclaim or compaction.
     * `TRANSPARENT_HUGEPAGE_DEFRAG_UNSPECIFIED`: Default value. GKE will not modify the kernel configuration.
 
+<a name="nested_node_kernel_module_loading_config"></a>The `node_kernel_module_loading` block supports:
+
+* `policy` - (Optional) Possible kernel module loading policies.
+    Accepted values are:
+    * `POLICY_UNSPECIFIED`: Default if unset. GKE selects the image based on node type. For CPU and TPU nodes, the image will not allow loading external kernel modules. For GPU nodes, the image will allow loading any module, whether it is signed or not.
+    * `ENFORCE_SIGNED_MODULES`: Enforced signature verification: Node pools will use a Container-Optimized OS image configured to allow loading of *Google-signed* external kernel modules. Loadpin is enabled but configured to exclude modules, and kernel module signature checking is enforced.
+    * `DO_NOT_ENFORCE_SIGNED_MODULES`: Mirrors existing DEFAULT behavior: For CPU and TPU nodes, the image will not allow loading external kernel modules. For GPU nodes, the image will allow loading any module, whether it is signed or not.
+
 <a name="nested_containerd_config"></a>The `containerd_config` block supports:
 
 * `private_registry_access_config` (Optional) - Configuration for private container registries. There are two fields in this config:
@@ -1633,6 +1660,45 @@ linux_node_config {
       secret_uri = "projects/99999/secrets/my-ca-cert/versions/1"
     }
   }
+  ```
+
+* `writable_cgroups` (Optional) - Configuration for writable cgroups. This allows containers to have a writable `/sys/fs/cgroup` directory, which is required for some workloads to create their own sub-cgroups. The `writable_cgroups` block supports:
+
+  * `enabled` (Required) - Whether writable cgroups are enabled.
+
+* `registry_hosts` (Optional) - Defines containerd registry host configuration. Each `registry_hosts` entry represents a `hosts.toml` file. See [customize containerd configuration in GKE nodes](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/customize-containerd-configuration#registryHosts) for more detail. Example:
+  ```hcl
+registry_hosts {
+  server = "REGISTRY_SERVER_FQDN"
+  hosts {
+    host = "MIRROR_FQDN"
+    capabilities = [
+      "HOST_CAPABILITY_PULL",
+      "HOST_CAPABILITY_RESOLVE",
+      "HOST_CAPABILITY_PUSH",
+    ]
+    override_path = false
+    dial_timeout = "30s"
+    header {
+      key = "HEADER_KEY"
+      value = [
+        "HEADER_VALUE_1",
+        "HEADER_VALUE_2",
+      ]
+    }
+    ca {
+      gcp_secret_manager_secret_uri = "projects/PROJECT_ID_OR_NUMBER/secrets/CA_SECRET/versions/VERSION"
+    }
+    client {
+      cert {
+        gcp_secret_manager_secret_uri = "projects/PROJECT_ID_OR_NUMBER/secrets/CLIENT_CERT_SECRET/versions/VERSION"
+      }
+      key {
+        gcp_secret_manager_secret_uri = "projects/PROJECT_ID_OR_NUMBER/secrets/CLIENT_KEY_SECRET/versions/VERSION"
+      }
+    }
+  }
+}
   ```
 
 <a name="nested_vertical_pod_autoscaling"></a>The `vertical_pod_autoscaling` block supports:

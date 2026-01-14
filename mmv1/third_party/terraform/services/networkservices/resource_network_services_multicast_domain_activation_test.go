@@ -1,0 +1,106 @@
+package networkservices_test
+
+import (
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"testing"
+)
+
+func TestAccNetworkServicesMulticastDomainActivation_networkServicesMulticastDomainActivationUpdateExample(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetworkServicesMulticastDomainActivationDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkServicesMulticastDomainActivation_networkServicesMulticastDomainActivationBasicExample_full(context),
+			},
+			{
+				ResourceName:            "google_network_services_multicast_domain_activation.mda_test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "multicast_domain_activation_id", "terraform_labels"},
+			},
+			{
+				Config: testAccNetworkServicesMulticastDomainActivation_networkServicesMulticastDomainActivationBasicExample_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_network_services_multicast_domain_activation.mda_test", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_network_services_multicast_domain_activation.mda_test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "multicast_domain_activation_id", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccNetworkServicesMulticastDomainActivation_networkServicesMulticastDomainActivationBasicExample_full(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_network" "network" {
+  name                    = "tf-test-test-network-mda%{random_suffix}"
+  auto_create_subnetworks = false
+}
+
+resource "google_network_services_multicast_domain" "multicast_domain" {
+  multicast_domain_id                    = "tf-test-test-domain-mda%{random_suffix}"
+  location = "global"
+  admin_network = google_compute_network.network.id
+  connection_config  { connection_type="SAME_VPC"}
+  depends_on = [google_compute_network.network]
+}
+
+resource "google_network_services_multicast_domain_activation" mda_test {
+  multicast_domain_activation_id                    = "tf-test-test-domain-activation-mda%{random_suffix}"
+  location = "us-central1-b"
+  disable_placement_policy = true
+  multicast_domain = google_network_services_multicast_domain.multicast_domain.id
+}
+`, context)
+}
+
+func testAccNetworkServicesMulticastDomainActivation_networkServicesMulticastDomainActivationBasicExample_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_network" "network" {
+  name                    = "tf-test-test-network-mda%{random_suffix}"
+  auto_create_subnetworks = false
+}
+
+resource "google_network_services_multicast_domain" "multicast_domain" {
+  multicast_domain_id                    = "tf-test-test-domain-mda%{random_suffix}"
+  location = "global"
+  admin_network = google_compute_network.network.id
+  connection_config  { connection_type="SAME_VPC"}
+  depends_on = [google_compute_network.network]
+}
+
+resource "google_network_services_multicast_domain_activation" mda_test {
+  multicast_domain_activation_id                    = "tf-test-test-domain-activation-mda%{random_suffix}"
+  location = "us-central1-b"
+  multicast_domain = google_network_services_multicast_domain.multicast_domain.id
+  description = "my description"
+  disable_placement_policy = true
+  labels = {
+    fake_label = "label123"
+  }
+  traffic_spec {
+		aggr_egress_pps = "1000"
+		aggr_ingress_pps = "500"
+		avg_packet_size = 100
+		max_per_group_ingress_pps = "100"
+		max_per_group_subscribers = "1"
+	}
+}
+`, context)
+}

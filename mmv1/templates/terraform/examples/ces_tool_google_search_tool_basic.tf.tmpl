@@ -1,0 +1,21 @@
+resource "google_ces_app" "my-app" {
+    location     = "us"
+    display_name = "{{index $.Vars "app_display_name"}}"
+    app_id       = "{{index $.Vars "app_id"}}"
+    time_zone_settings {   
+        time_zone = "America/Los_Angeles"
+    }
+}
+resource "google_ces_tool" "{{$.PrimaryResourceId}}" {
+    location       = "us"
+    app            = google_ces_app.my-app.name
+    tool_id        = "{{index $.Vars "tool_id"}}"
+    execution_type = "SYNCHRONOUS"
+    google_search_tool {
+        name            = "example-tool"
+        context_urls    = ["example.com", "example2.com"]
+        description     = "example-description"
+        exclude_domains = ["example.com", "example2.com"]
+        preferred_domains = ["example3.com", "example4.com"]
+    }
+}

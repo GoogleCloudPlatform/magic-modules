@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"slices"
 	"strings"
 	"testing"
@@ -203,133 +204,17 @@ func TestResourceServiceVersion(t *testing.T) {
 	}
 }
 
-func TestLeafProperties(t *testing.T) {
-	t.Parallel()
-
-	cases := []struct {
-		description string
-		obj         Resource
-		expected    Type
-	}{
-		{
-			description: "non-nested type",
-			obj: Resource{
-				BaseUrl: "test",
-				Properties: []*Type{
-					{
-						Name: "basic",
-						Type: "String",
-					},
-				},
-			},
-			expected: Type{
-				Name: "basic",
-			},
-		},
-		{
-			description: "nested type",
-			obj: Resource{
-				BaseUrl: "test",
-				Properties: []*Type{
-					{
-						Name: "root",
-						Type: "NestedObject",
-						Properties: []*Type{
-							{
-								Name: "foo",
-								Type: "NestedObject",
-								Properties: []*Type{
-									{
-										Name: "bars",
-										Type: "Array",
-										ItemType: &Type{
-											Type: "NestedObject",
-											Properties: []*Type{
-												{
-													Name: "fooBar",
-													Type: "String",
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			expected: Type{
-				Name: "fooBar",
-			},
-		},
-		{
-			description: "nested virtual",
-			obj: Resource{
-				BaseUrl: "test",
-				VirtualFields: []*Type{
-					{
-						Name: "root",
-						Type: "NestedObject",
-						Properties: []*Type{
-							{
-								Name: "foo",
-								Type: "String",
-							},
-						},
-					},
-				},
-			},
-			expected: Type{
-				Name: "foo",
-			},
-		},
-		{
-			description: "nested param",
-			obj: Resource{
-				BaseUrl: "test",
-				Parameters: []*Type{
-					{
-						Name: "root",
-						Type: "NestedObject",
-						Properties: []*Type{
-							{
-								Name: "foo",
-								Type: "String",
-							},
-						},
-					},
-				},
-			},
-			expected: Type{
-				Name: "foo",
-			},
-		},
-	}
-
-	for _, tc := range cases {
-		tc := tc
-
-		t.Run(tc.description, func(t *testing.T) {
-			t.Parallel()
-
-			tc.obj.SetDefault(nil)
-			if got, want := tc.obj.LeafProperties(), tc.expected; got[0].Name != want.Name {
-				t.Errorf("expected %q to be %q", got[0].Name, want.Name)
-			}
-		})
-	}
-}
-
 // TestMagicianLocation verifies that the current package is being executed from within
 // the RELATIVE_MAGICIAN_LOCATION ("mmv1/") directory structure. This ensures that references
 // to files relative to this location will remain valid even if the repository structure
 // changes or the source is downloaded without git metadata.
 func TestMagicianLocation(t *testing.T) {
-	// Get the current working directory of the test
-	pwd, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("Failed to get working directory: %v", err)
+	// Get the path where this test file is located
+	_, testFilePath, _, ok := runtime.Caller(0)
+	if !ok {
+		t.Fatal("Failed to get current test file path")
 	}
+	pwd := filepath.Dir(testFilePath)
 
 	// Walk up directories until we either:
 	// 1. Find the mmv1 directory
@@ -338,6 +223,11 @@ func TestMagicianLocation(t *testing.T) {
 	for {
 		// Check if we're in the directory containing mmv1
 		if _, err := os.Stat(filepath.Join(dir, "mmv1")); err == nil {
+			break
+		}
+
+		// When running under bazel runtime paths are relative
+		if dir == "." {
 			break
 		}
 
