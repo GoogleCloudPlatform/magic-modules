@@ -226,18 +226,31 @@ func TestValidateResourceMetadata(t *testing.T) {
 	}
 
 	// Validate yaml files
-	for resourceName, m := range metaResources {
-		if m.Resource == "" {
-			t.Errorf("`resource` is missing from %s", m.Path)
+	for resourceName, r := range metaResources {
+		if r.Resource == "" {
+			t.Errorf("`resource` is missing from %s", r.Path)
 		}
-		if m.ServicePackage == "" {
-			t.Errorf("can't detect service package for %s", m.Path)
+		if r.ServicePackage == "" {
+			t.Errorf("%s: can't detect service package", r.Resource)
 		}
 
-		if m.ApiServiceName == "" {
+		if r.ApiServiceName == "" {
 			// Allowlist google_container_registry because it doesn't clearly correspond to a service
 			if resourceName != "google_container_registry" {
-				t.Errorf("`api_service_name` is missing from %s", m.Path)
+				t.Errorf("%s: `api_service_name` is required and not set", r.Resource)
+			}
+		}
+
+		for _, f := range r.Fields {
+			tfField := f.Field
+			if tfField == "" {
+				tfField = underscore(f.ApiField)
+			}
+			if f.ProviderOnly && f.ApiField != "" {
+				t.Errorf("%s.%s: `api_field` can't be set for provider-only fields", r.Resource, tfField)
+			}
+			if f.Field != "" && f.Field == underscore(f.ApiField) {
+				t.Errorf("%s.%s: `field` must be omitted because it can be inferred from `api_field`", r.Resource, tfField)
 			}
 		}
 
