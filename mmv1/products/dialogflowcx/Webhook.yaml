@@ -54,6 +54,18 @@ examples:
     primary_resource_id: 'flexible_webhook'
     vars:
       agent_name: 'dialogflowcx-agent'
+  - name: 'dialogflowcx_webhook_with_service_account_auth'
+    primary_resource_id: 'webhook_use_service_account'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+    test_env_vars:
+      service_account: 'SERVICE_ACCT'
+  - name: 'dialogflowcx_webhook_service_directory_with_service_account_auth'
+    primary_resource_id: 'webhook_use_service_account'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+    test_env_vars:
+      service_account: 'SERVICE_ACCT'
 parameters:
   - name: 'parent'
     type: String
@@ -200,6 +212,21 @@ properties:
           - 'NONE'
           - 'ID_TOKEN'
           - 'ACCESS_TOKEN'
+      - name: serviceAccountAuthConfig
+        type: NestedObject
+        description: Configuration for authentication using a service account.
+        properties:
+          - name: serviceAccount
+            type: String
+            required: true
+            description: |-
+              The email address of the service account used to authenticate the webhook call.
+              Dialogflow uses this service account to exchange an access token and the access
+              token is then sent in the **Authorization** header of the webhook request.
+
+              The service account must have the **roles/iam.serviceAccountTokenCreator** role
+              granted to the
+              [Dialogflow service agent](https://cloud.google.com/iam/docs/service-agents?_gl=1*1jsujvh*_ga*NjYxMzU3OTg2LjE3Njc3MzQ4NjM.*_ga_WH2QY8WWF5*czE3Njc3MzQ2MjgkbzIkZzEkdDE3Njc3MzQ3NzQkajYwJGwwJGgw#dialogflow-service-agent).
       - name: uri
         type: String
         description: The webhook URI for receiving POST requests. It must use https protocol.
@@ -338,6 +365,21 @@ properties:
               - 'NONE'
               - 'ID_TOKEN'
               - 'ACCESS_TOKEN'
+          - name: serviceAccountAuthConfig
+            type: NestedObject
+            description: Configuration for authentication using a service account.
+            properties:
+              - name: serviceAccount
+                type: String
+                required: true
+                description: |-
+                  The email address of the service account used to authenticate the webhook call.
+                  Dialogflow uses this service account to exchange an access token and the access
+                  token is then sent in the **Authorization** header of the webhook request.
+
+                  The service account must have the **roles/iam.serviceAccountTokenCreator** role
+                  granted to the
+                  [Dialogflow service agent](https://cloud.google.com/iam/docs/service-agents?_gl=1*1jsujvh*_ga*NjYxMzU3OTg2LjE3Njc3MzQ4NjM.*_ga_WH2QY8WWF5*czE3Njc3MzQ2MjgkbzIkZzEkdDE3Njc3MzQ3NzQkajYwJGwwJGgw#dialogflow-service-agent).
           - name: uri
             type: String
             description: The webhook URI for receiving POST requests. It must use https protocol.
