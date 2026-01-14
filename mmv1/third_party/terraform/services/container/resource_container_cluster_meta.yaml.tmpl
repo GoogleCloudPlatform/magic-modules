@@ -30,6 +30,7 @@ fields:
 {{- end }}
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'addonsConfig.kalmConfig.enabled'
+  - api_field: 'addonsConfig.podSnapshotConfig.enabled'
 {{- end }}
   - api_field: 'addonsConfig.lustreCsiDriverConfig.enableLegacyLustrePort'
   - api_field: 'addonsConfig.lustreCsiDriverConfig.enabled'
