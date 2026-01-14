@@ -8501,73 +8501,68 @@ func containerClusterNodeVersionCustomizeDiffFunc(diff tpgresource.TerraformReso
 
 {{ if ne $.TargetVersionName `ga` }}
 func clusterAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta any) error {
-    log.Printf("[DEBUG] ANP CustomizeDiff: Running...")
-
-	// 1. Skip on create
+    // 1. SKIP ON CREATE
     if diff.Id() == "" {
         return nil
     }
 
-    // 2. Get raw config
-    // We need the raw config to see what the user actually wrote in their TF file
+    // 2. PREPARE TO UPDATE THE FULL LIST
+    // We must read the entire list, modify items in place, and write the whole list back.
+    oldNodePools := diff.Get("node_pool").([]interface{})
+    newNodePools := make([]interface{}, len(oldNodePools))
+    listChanged := false
+
+    // We also need Raw Config to check what the user actually wrote
     rawConfig := diff.GetRawConfig()
     rawNodePools := rawConfig.GetAttr("node_pool")
+    
+    // 3. ITERATE OVER ALL POOLS
+    for i, np := range oldNodePools {
+        // Deep copy the node pool map so we can modify it safely
+        npMap := np.(map[string]interface{})
+        newNpMap := make(map[string]interface{})
+        for k, v := range npMap {
+            newNpMap[k] = v
+        }
 
-    // If no node pools defined in config, nothing to do
-    if rawNodePools.IsNull() || !rawNodePools.Type().IsCollectionType() {
-        return nil
-    }
+        // A. DETECT USER CONFIG (Raw Config Check)
+        userHasAdditionalConfigs := false
+        if !rawNodePools.IsNull() && rawNodePools.Type().IsCollectionType() {
+            // Find the matching raw element by index
+            it := rawNodePools.ElementIterator()
+            idx := 0
+            for it.Next() {
+                if idx == i {
+                    _, val := it.Element()
+                    rawNc := val.GetAttr("network_config")
+                    if !rawNc.IsNull() && rawNc.Type().IsCollectionType() {
+                        ncIt := rawNc.ElementIterator()
+                        for ncIt.Next() {
+                            _, ncVal := ncIt.Element()
+                            userConfig := ncVal.GetAttr("additional_node_network_configs")
+                            if !userConfig.IsNull() && userConfig.LengthInt() > 0 {
+                                userHasAdditionalConfigs = true
+                            }
+                        }
+                    }
+                    break
+                }
+                idx++
+            }
+        }
 
-    // 3. Iterate over the node pools
-    // We get the list length from the diff wrapper which is easier than counting cty elements
-    count := diff.Get("node_pool.#").(int)
-
-    for i := 0; i < count; i++ {
-        // Prepare paths for this specific node pool index
+        // B. CHECK TRANSITION LOGIC
+        shouldClear := false
         basePath := fmt.Sprintf("node_pool.%d", i)
         networkConfigPath := basePath + ".network_config.0"
         
-        // A. Detect user config for this pool
-        userHasAdditionalConfigs := false
+        // Use GetChange to see the specific ANP change for this pool
+        oldProfile, newProfile := diff.GetChange(networkConfigPath + ".accelerator_network_profile")
         
-        // Iterate raw config to find the matching pool element (cty iteration)
-        // We have to iterate the cty.Value list manually
-        it := rawNodePools.ElementIterator()
-        currentIndex := 0
-        for it.Next() {
-            if currentIndex == i {
-                _, val := it.Element()
-                rawNc := val.GetAttr("network_config")
-                if !rawNc.IsNull() && rawNc.Type().IsCollectionType() {
-                    ncIt := rawNc.ElementIterator()
-                    for ncIt.Next() {
-                        _, ncVal := ncIt.Element()
-                        userConfig := ncVal.GetAttr("additional_node_network_configs")
-                        if !userConfig.IsNull() && userConfig.LengthInt() > 0 {
-                            userHasAdditionalConfigs = true
-                        }
-                    }
-                }
-                break
-            }
-            currentIndex++
-        }
-
-        // B. Check if ANP has changed
-        shouldClear := false
-        anpPath := networkConfigPath + ".accelerator_network_profile"
-        
-        oldProfile, newProfile := diff.GetChange(anpPath)
-        
-        // Handle cases where network_config might not exist yet (nil)
         newProfileStr := ""
-        if newProfile != nil {
-            newProfileStr = newProfile.(string)
-        }
+        if newProfile != nil { newProfileStr = newProfile.(string) }
         oldProfileStr := ""
-        if oldProfile != nil {
-            oldProfileStr = oldProfile.(string)
-        }
+        if oldProfile != nil { oldProfileStr = oldProfile.(string) }
 
         anpIsActive := newProfileStr != ""
         anpIsChanging := oldProfileStr != newProfileStr
@@ -8581,50 +8576,56 @@ func clusterAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *sche
             }
         }
 
-        // Check CURRENT state count to avoid no-op changes
-        addConfigsPath := networkConfigPath + ".additional_node_network_configs.#"
+        // Check if additional configs currently exist to avoid no-op
         currentCount := 0
-        if c, ok := diff.Get(addConfigsPath).(int); ok {
+        if c, ok := diff.Get(networkConfigPath + ".additional_node_network_configs.#").(int); ok {
             currentCount = c
         }
-
         if shouldClear && currentCount == 0 {
             shouldClear = false
         }
 
-        // C. Apply fix
+        // C. APPLY FIX TO THE MAP
         if shouldClear {
             log.Printf("[DEBUG] Cluster ANP CustomizeDiff: Clearing additional configs for pool %d", i)
             
-            // We need to construct the full network_config map
             var newConfigMap map[string]interface{}
             
-            // Get existing config from Diff to preserve other fields
-            existingConfigs := diff.Get(basePath + ".network_config").([]interface{})
-
-            if len(existingConfigs) > 0 && existingConfigs[0] != nil {
-                currentMap := existingConfigs[0].(map[string]interface{})
-                newConfigMap = make(map[string]interface{})
-                for k, v := range currentMap {
-                    newConfigMap[k] = v
+            // Get the existing network_config list from the map
+            // It is usually a []interface{} with 1 element
+            if ncList, ok := newNpMap["network_config"].([]interface{}); ok && len(ncList) > 0 {
+                // Copy the existing network config map
+                if existingMap, ok := ncList[0].(map[string]interface{}); ok {
+                    newConfigMap = make(map[string]interface{})
+                    for k, v := range existingMap {
+                        newConfigMap[k] = v
+                    }
                 }
-            } else {
+            }
+            
+            if newConfigMap == nil {
                 newConfigMap = make(map[string]interface{})
             }
 
-            // The Logic: Empty the list
+            // DO THE CLEARING
             newConfigMap["additional_node_network_configs"] = []interface{}{}
             
             if !anpIsActive {
                 newConfigMap["accelerator_network_profile"] = ""
             }
 
-            // Set the new value back to the diff
-            err := diff.SetNew(basePath + ".network_config", []interface{}{newConfigMap})
-            if err != nil {
-                return fmt.Errorf("Error updating cluster node pool %d network_config: %s", i, err)
-            }
+            // Assign back to the pool map
+            newNpMap["network_config"] = []interface{}{newConfigMap}
+            listChanged = true
         }
+
+        // Store the (potentially modified) map in the new list
+        newNodePools[i] = newNpMap
+    }
+
+    // 4. WRITE THE FULL LIST BACK
+    if listChanged {
+        return diff.SetNew("node_pool", newNodePools)
     }
 
     return nil
