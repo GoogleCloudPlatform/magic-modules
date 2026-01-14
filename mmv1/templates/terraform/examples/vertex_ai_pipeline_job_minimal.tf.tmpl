@@ -42,19 +42,28 @@ resource "google_storage_bucket" "pipeline_output" {
   location = "US"
 }
 
-resource "google_vertex_ai_pipeline_job" "pipelineJob" {
-  provider        = google-beta
-  project         = google_project.project.project_id
-  region          = "us-east1"
-  display_name    = "tf-test-example-pipeline-job%{random_suffix}"
-  service_account = google_service_account.pipeline_sa.email
-
-  template_uri = "gs://cloud-samples-data/ai-platform/pipelines/hello-world-pipeline.json"
-
+resource "google_vertex_ai_pipeline_job" "primary" {
+  provider = google-beta
+  project  = google_project.project.project_id
+  display_name = "tf-test-example-pipeline-job%{random_suffix}"
+  labels = {}
+  network = null
+  original_pipeline_job_id = null
+  pipeline_spec {
+    additional_properties = {}
+  }
+  preflight_validations = null
+  psc_interface_config {
+    raw = null
+  }
+  region = "us-east1"
+  reserved_ip_ranges = null
   runtime_config {
     gcs_output_directory = "gs://${google_storage_bucket.pipeline_output.name}/outputs/"
   }
-
+  satisfies_pzi = null
+  service_account = google_service_account.pipeline_sa.email
+  template_uri = "gs://cloud-samples-data/ai-platform/pipelines/hello-world-pipeline.json"
   depends_on = [
     google_project_iam_member.pipeline_sa_roles,
     google_vertex_ai_metadata_store.default_test
