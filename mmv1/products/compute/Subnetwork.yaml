@@ -360,6 +360,20 @@ properties:
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
     update_verb: 'PATCH'
     fingerprint_name: 'fingerprint'
+  - name: 'enableFlowLogs'
+    type: Boolean
+    description: |
+      Whether to enable flow logging for this subnetwork. If this field is not explicitly
+      set, it will not appear in get listings. If not set the default behavior is
+      determined by the org policy, if there is no org policy specified, then it will
+      default to disabled. This field isn't supported if the subnet purpose field is set
+      to REGIONAL_MANAGED_PROXY.
+    default_from_api: true
+    send_empty_value: true
+    update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
+    update_verb: 'PATCH'
+    update_id: 'enableFlowLogs'
+    fingerprint_name: 'fingerprint'
   - name: 'region'
     type: ResourceRef
     description: |
