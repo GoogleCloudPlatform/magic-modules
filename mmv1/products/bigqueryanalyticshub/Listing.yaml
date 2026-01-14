@@ -312,18 +312,21 @@ properties:
               description: |
                 The geographic location where the replica resides.
               output: true
+              min_version: beta
             - name: 'replicaState'
               type: String
               description: |
                 Output-only. Assigned by Analytics Hub based on real BigQuery replication state.
                 Possible values: REPLICA_STATE_UNSPECIFIED, READY_TO_USE, UNAVAILABLE
               output: true
+              min_version: beta
             - name: 'primaryState'
               type: String
               description: |
                 Output-only. Indicates that this replica is the primary replica.
                 Possible values: PRIMARY_STATE_UNSPECIFIED, PRIMARY_REPLICA
               output: true
+              min_version: beta
   - name: 'pubsubTopic'
     type: NestedObject
     description: Pub/Sub topic source.
