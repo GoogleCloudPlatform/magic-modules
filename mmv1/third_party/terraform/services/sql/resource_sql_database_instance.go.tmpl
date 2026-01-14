@@ -1529,7 +1529,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	cloneContext, cloneSource := expandCloneContext(d.Get("clone").([]interface{}))
-	pointInTimeRestoreContext := expandPointInTimeRestoreContext(d.Get("point_in_time_restore_context").([]interface{}), region)
+	pointInTimeRestoreContext := expandPointInTimeRestoreContext(d.Get("point_in_time_restore_context").([]interface{}))
 
 	s, ok := d.GetOk("settings")
 	desiredSettings := expandSqlDatabaseInstanceSettings(s.([]interface{}), databaseVersion)
@@ -3410,22 +3410,19 @@ func sqlDatabaseInstanceRestoreFromBackup(d *schema.ResourceData, config *transp
 	return nil
 }
 
-func expandPointInTimeRestoreContext(configured []interface{}, region string) *sqladmin.PointInTimeRestoreContext {
+func expandPointInTimeRestoreContext(configured []interface{}) *sqladmin.PointInTimeRestoreContext {
 	if len(configured) == 0 || configured[0] == nil {
 		return nil
 	}
 
 	_pitrc := configured[0].(map[string]interface{})
-	if _pitrc["region"] != "" {
-		region = _pitrc["region"].(string)
-	}
 	return &sqladmin.PointInTimeRestoreContext{
 		PointInTime: _pitrc["point_in_time"].(string),
 		PreferredZone:  _pitrc["preferred_zone"].(string),
 		Datasource:     _pitrc["datasource"].(string),
 		AllocatedIpRange: _pitrc["allocated_ip_range"].(string),
 		TargetInstance: _pitrc["target_instance"].(string),
-		Region: region,
+		Region: _pitrc["region"].(string),
 	}
 }
 
@@ -3433,15 +3430,11 @@ func sqlDatabaseInstancePointInTimeRestore(d *schema.ResourceData, config *trans
 	log.Printf("[DEBUG] Initiating GCBDR managed SQL database instance backup point in time restore")
 	pointInTimeRestoreContext := r.([]interface{})
 	parent := fmt.Sprintf("projects/%s", project)
-	region, err := tpgresource.GetRegion(d, config)
-	if err != nil {
-		return err
-	}
 
 	var op *sqladmin.Operation
-	err = transport_tpg.Retry(transport_tpg.RetryOptions{
+	err := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (operr error) {
-			op, operr = config.NewSqlAdminClient(userAgent).Instances.PointInTimeRestore(parent, expandPointInTimeRestoreContext(pointInTimeRestoreContext, region)).Do()
+			op, operr = config.NewSqlAdminClient(userAgent).Instances.PointInTimeRestore(parent, expandPointInTimeRestoreContext(pointInTimeRestoreContext)).Do()
 			return operr
 		},
 		Timeout:              d.Timeout(schema.TimeoutUpdate),
