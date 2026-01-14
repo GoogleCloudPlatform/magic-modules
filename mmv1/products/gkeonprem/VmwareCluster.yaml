@@ -744,12 +744,11 @@ properties:
     type: Array
     description: "A list of validations to skip during preflight checks."
     url_param_only: true
-    api_methods: [CREATE, UPDATE]
     item_type:
       name: ValidationSkip
       type: Enum
       description: "Specific validation to skip."
-      values:
+      enum_values:
         - VALIDATION_SKIP_UNSPECIFIED
         - ALL
         - WORKSTATION
