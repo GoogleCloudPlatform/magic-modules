@@ -39,7 +39,7 @@ if [ $? != 0 ]; then
 fi
 
 echo "running tests now"
-TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/debug_log/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta/services/container -parallel $ACCTEST_PARALLELISM -v -run=TestAcc -timeout 1200m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > test.log
+TF_LOG=DEBUG TF_LOG_PATH_MASK=$local_path/testlog/debug_log/%s.log TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test ./google-beta/services/sql -parallel $ACCTEST_PARALLELISM -v -run=TestAccSqlDatabaseInstance_MysqlSwitchoverSuccess -timeout 1200m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc" > test.log
 
 # store build log
 gsutil -h "Content-Type:text/plain" -q cp test.log gs://test-nightly/beta/$today/$build_id/logs/build-log/
