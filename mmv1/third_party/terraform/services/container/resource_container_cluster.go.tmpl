@@ -237,6 +237,9 @@ func ResourceContainerCluster() *schema.Resource {
 			containerClusterEnableK8sBetaApisCustomizeDiff,
 			containerClusterNodeVersionCustomizeDiff,
 			tpgresource.SetDiffForLabelsWithCustomizedName("resource_labels"),
+			{{ if ne $.TargetVersionName `ga` }}
+			clusterAcceleratorNetworkProfileCustomizeDiff,
+			{{- end }}
 		),
 
 		Timeouts: &schema.ResourceTimeout{
@@ -8263,3 +8266,135 @@ func containerClusterNodeVersionCustomizeDiffFunc(diff tpgresource.TerraformReso
 
 	return nil
 }
+
+{{ if ne $.TargetVersionName `ga` }}
+func clusterAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta any) error {
+    log.Printf("[DEBUG] ANP CustomizeDiff: Running...")
+
+	// 1. Skip on create
+    if diff.Id() == "" {
+        return nil
+    }
+
+    // 2. Get raw config
+    // We need the raw config to see what the user actually wrote in their TF file
+    rawConfig := diff.GetRawConfig()
+    rawNodePools := rawConfig.GetAttr("node_pool")
+
+    // If no node pools defined in config, nothing to do
+    if rawNodePools.IsNull() || !rawNodePools.Type().IsCollectionType() {
+        return nil
+    }
+
+    // 3. Iterate over the node pools
+    // We get the list length from the diff wrapper which is easier than counting cty elements
+    count := diff.Get("node_pool.#").(int)
+
+    for i := 0; i < count; i++ {
+        // Prepare paths for this specific node pool index
+        basePath := fmt.Sprintf("node_pool.%d", i)
+        networkConfigPath := basePath + ".network_config.0"
+        
+        // A. Detect user config for this pool
+        userHasAdditionalConfigs := false
+        
+        // Iterate raw config to find the matching pool element (cty iteration)
+        // We have to iterate the cty.Value list manually
+        it := rawNodePools.ElementIterator()
+        currentIndex := 0
+        for it.Next() {
+            if currentIndex == i {
+                _, val := it.Element()
+                rawNc := val.GetAttr("network_config")
+                if !rawNc.IsNull() && rawNc.Type().IsCollectionType() {
+                    ncIt := rawNc.ElementIterator()
+                    for ncIt.Next() {
+                        _, ncVal := ncIt.Element()
+                        userConfig := ncVal.GetAttr("additional_node_network_configs")
+                        if !userConfig.IsNull() && userConfig.LengthInt() > 0 {
+                            userHasAdditionalConfigs = true
+                        }
+                    }
+                }
+                break
+            }
+            currentIndex++
+        }
+
+        // B. Check if ANP has changed
+        shouldClear := false
+        anpPath := networkConfigPath + ".accelerator_network_profile"
+        
+        oldProfile, newProfile := diff.GetChange(anpPath)
+        
+        // Handle cases where network_config might not exist yet (nil)
+        newProfileStr := ""
+        if newProfile != nil {
+            newProfileStr = newProfile.(string)
+        }
+        oldProfileStr := ""
+        if oldProfile != nil {
+            oldProfileStr = oldProfile.(string)
+        }
+
+        anpIsActive := newProfileStr != ""
+        anpIsChanging := oldProfileStr != newProfileStr
+
+        if !userHasAdditionalConfigs {
+            if anpIsActive && anpIsChanging {
+                shouldClear = true
+            }
+            if !anpIsActive {
+                shouldClear = true
+            }
+        }
+
+        // Check CURRENT state count to avoid no-op changes
+        addConfigsPath := networkConfigPath + ".additional_node_network_configs.#"
+        currentCount := 0
+        if c, ok := diff.Get(addConfigsPath).(int); ok {
+            currentCount = c
+        }
+
+        if shouldClear && currentCount == 0 {
+            shouldClear = false
+        }
+
+        // C. Apply fix
+        if shouldClear {
+            log.Printf("[DEBUG] Cluster ANP CustomizeDiff: Clearing additional configs for pool %d", i)
+            
+            // We need to construct the full network_config map
+            var newConfigMap map[string]interface{}
+            
+            // Get existing config from Diff to preserve other fields
+            existingConfigs := diff.Get(basePath + ".network_config").([]interface{})
+
+            if len(existingConfigs) > 0 && existingConfigs[0] != nil {
+                currentMap := existingConfigs[0].(map[string]interface{})
+                newConfigMap = make(map[string]interface{})
+                for k, v := range currentMap {
+                    newConfigMap[k] = v
+                }
+            } else {
+                newConfigMap = make(map[string]interface{})
+            }
+
+            // The Logic: Empty the list
+            newConfigMap["additional_node_network_configs"] = []interface{}{}
+            
+            if !anpIsActive {
+                newConfigMap["accelerator_network_profile"] = ""
+            }
+
+            // Set the new value back to the diff
+            err := diff.SetNew(basePath + ".network_config", []interface{}{newConfigMap})
+            if err != nil {
+                return fmt.Errorf("Error updating cluster node pool %d network_config: %s", i, err)
+            }
+        }
+    }
+
+    return nil
+}
+{{- end }}
