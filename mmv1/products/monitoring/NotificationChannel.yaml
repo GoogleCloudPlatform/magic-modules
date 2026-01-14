@@ -102,6 +102,7 @@ properties:
 
       Credentials may not be specified in both locations and will cause an error. Changing from one location
       to a different credential configuration in the config will require an apply to update state.
+    ignore_read: true
     properties:
       - name: 'authToken'
         type: String
