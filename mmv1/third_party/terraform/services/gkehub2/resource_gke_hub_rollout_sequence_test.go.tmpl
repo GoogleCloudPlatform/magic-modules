@@ -1,5 +1,7 @@
 package gkehub2_test
 
+{{- if ne $.TargetVersionName "ga" -}}
+
 import (
 	"fmt"
 	"log"
@@ -112,3 +114,5 @@ resource "google_gke_hub_rollout_sequence" "rollout_sequence" {
 }
 `, context)
 }
+
+{{- end }}
