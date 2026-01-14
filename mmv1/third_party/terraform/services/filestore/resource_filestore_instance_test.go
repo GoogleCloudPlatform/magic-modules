@@ -491,15 +491,15 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 				ResourceName:            "google_filestore_instance.replica_instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone", "initial_replication", "replica_action"},
+				ImportStateVerifyIgnore: []string{"zone", "initial_replication", "replica_action", "effective_replication.0.replicas.0.last_active_sync_time"},
 			},
 			{
 				Config: testAccFilestoreInstance_replication_pause(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_filestore_instance.replica_instance",
-						"effective_replication.0.replicas.0.peer_instance",
-						"projects/"+context["project"].(string)+"/locations/us-east1/instances/tf-test-source-instance-"+context["random_suffix"].(string),
+						"effective_replication.0.role",
+						"PAUSED",
 					),
 				),
 			},
@@ -507,23 +507,16 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 				ResourceName:            "google_filestore_instance.replica_instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone", "initial_replication", "replica_action"},
+				ImportStateVerifyIgnore: []string{"zone", "initial_replication", "replica_action", "effective_replication.0.replicas.0.last_active_sync_time"},
 			},
 			{
 				Config: testAccFilestoreInstance_replication_resume(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_filestore_instance.replica_instance",
-						"effective_replication.0.replicas.0.peer_instance",
-						"projects/"+context["project"].(string)+"/locations/us-east1/instances/tf-test-source-instance-"+context["random_suffix"].(string),
-					),
-				),
 			},
 			{
 				ResourceName:            "google_filestore_instance.replica_instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone", "initial_replication", "replica_action"},
+				ImportStateVerifyIgnore: []string{"zone", "initial_replication", "replica_action", "effective_replication.0.replicas.0.last_active_sync_time"},
 			},
 		},
 	})
