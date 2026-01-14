@@ -36,6 +36,7 @@ func TestAccTags(t *testing.T) {
 		"tagValueIamPolicy":                    testAccTagsTagValueIamPolicy,
 		"tagsLocationTagBindingBasic":          testAccTagsLocationTagBinding_locationTagBindingbasic,
 		"tagsLocationTagBindingZonal":          TestAccTagsLocationTagBinding_locationTagBindingzonal,
+		// "tagsLocationDynamicTagBindingBasic":   testAccTagsLocationTagBinding_locationDynamicTagBindingbasic,
 	}
 
 	for name, tc := range testCases {
@@ -990,6 +991,64 @@ resource "google_tags_location_tag_binding" "binding" {
 `, context)
 }
 
+func TestAccTagsLocationDynamicTagBinding(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+		},
+		CheckDestroy: testAccCheckTagsLocationTagBindingDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTagsLocationTagBinding_locationDynamicTagBindingBasicExample(context),
+			},
+			{
+				ResourceName:      "google_tags_location_tag_binding.binding",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccTagsLocationTagBinding_locationDynamicTagBindingBasicExample(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+}
+
+data "google_tags_tag_key" "test_key" {
+	parent = "projects/tags-blr-test-ap"
+	short_name = "dynamic-tags-test-key-mukul"
+}
+
+resource "google_compute_instance" "default" {
+	name         = "test-%{random_suffix}"
+	machine_type = "e2-medium"
+	zone         = "us-central1-staginga"
+  boot_disk {
+    initialize_params {
+      image = "gce-staging-images/debian-11"
+    }
+  }
+  network_interface {
+    network = "default"
+  }
+}
+resource "google_tags_location_tag_binding" "binding" {
+	parent    = "//compute.googleapis.com/projects/${data.google_project.project.number}/zones/us-central1-staginga/instances/${google_compute_instance.default.instance_id}"
+	tag_value = "${data.google_tags_tag_key.test_key.namespaced_name}/dynamic-test-value"
+	location  = "us-central1-staginga"
+}
+`, context)
+}
+
 func TestAccTagsLocationTagBinding_locationTagBindingBasicWithProjectId(t *testing.T) {
 	t.Parallel()
 
@@ -1143,10 +1202,10 @@ resource "google_tags_tag_value" "value" {
 resource "google_compute_instance" "default" {
 	name         = "test-%{random_suffix}"
 	machine_type = "e2-medium"
-	zone         = "us-central1-a"
+	zone         = "us-central1-staginga"
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-11"
+      image = "gce-staging-images/debian-11"
     }
   }
   network_interface {
@@ -1154,9 +1213,9 @@ resource "google_compute_instance" "default" {
   }
 }
 resource "google_tags_location_tag_binding" "binding" {
-	parent    = "//compute.googleapis.com/projects/${data.google_project.project.number}/zones/us-central1-a/instances/${google_compute_instance.default.instance_id}"
+	parent    = "//compute.googleapis.com/projects/${data.google_project.project.number}/zones/us-central1-staginga/instances/${google_compute_instance.default.instance_id}"
 	tag_value = google_tags_tag_value.value.id
-	location  = "us-central1-a"
+	location  = "us-central1-staginga"
 }
 `, context)
 }

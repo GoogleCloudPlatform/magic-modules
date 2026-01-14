@@ -70,7 +70,7 @@ properties:
   - name: 'name'
     type: String
     description: |
-      The generated id for the TagBinding. This is a string of the form: `tagBindings/{full-resource-name}/{tag-value-name}`
+      The generated id for the TagBinding. This is a string of the form `tagBindings/{full-resource-name}/{tag-value-name}` or `tagBindings/{full-resource-name}/{tag-key-name}`
     output: true
     custom_flatten: 'templates/terraform/custom_flatten/tags_tag_binding_name.tmpl'
   - name: 'parent'
@@ -81,5 +81,5 @@ properties:
   - name: 'tagValue'
     type: String
     description: |
-      The TagValue of the TagBinding. Must be of the form tagValues/456.
+      The TagValue of the TagBinding. Must be either in id format `tagValues/{tag-value-id}`, or namespaced format `{parent-id}/{tag-key-short-name}/{tag-value-short-name}`.
     required: true
