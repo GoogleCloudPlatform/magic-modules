@@ -170,6 +170,9 @@ properties:
       - gateway
     update_mask_fields:
       - 'linkedVpnTunnels.includeImportRanges'
+      - 'linkedVpnTunnels.excludeImportRanges'
+      - 'linkedVpnTunnels.includeExportRanges'
+      - 'linkedVpnTunnels.excludeExportRanges'
     properties:
       - name: 'uris'
         type: Array
@@ -186,8 +189,23 @@ properties:
       - name: 'includeImportRanges'
         type: Array
         description: |
-          IP ranges allowed to be included during import from hub (does not control transit connectivity).
-          The only allowed value for now is "ALL_IPV4_RANGES".
+          Hub routes fully encompassed by include import ranges are included during import from hub.
+          "ALL_IPV4_RANGES" or IPv4 CIDR ranges are allowed.
+        item_type:
+          type: String
+      - name: 'excludeImportRanges'
+        type: Array
+        description: Hub routes overlapped/encompassed by exclude import ranges are excluded during import from hub.
+        item_type:
+          type: String
+      - name: 'includeExportRanges'
+        type: Array
+        description: Dynamic routes fully encompassed by include export ranges are included during export to hub.
+        item_type:
+          type: String
+      - name: 'excludeExportRanges'
+        type: Array
+        description: Dynamic routes overlapped/encompassed by exclude export ranges are excluded during export to hub.
         item_type:
           type: String
   - name: 'linkedInterconnectAttachments'
@@ -201,6 +219,9 @@ properties:
       - gateway
     update_mask_fields:
       - 'linkedInterconnectAttachments.includeImportRanges'
+      - 'linkedInterconnectAttachments.excludeImportRanges'
+      - 'linkedInterconnectAttachments.includeExportRanges'
+      - 'linkedInterconnectAttachments.excludeExportRanges'
     properties:
       - name: 'uris'
         type: Array
@@ -217,8 +238,23 @@ properties:
       - name: 'includeImportRanges'
         type: Array
         description: |
-          IP ranges allowed to be included during import from hub (does not control transit connectivity).
-          The only allowed value for now is "ALL_IPV4_RANGES".
+          Hub routes fully encompassed by include import ranges are included during import from hub.
+          "ALL_IPV4_RANGES" or IPv4 CIDR ranges are allowed.
+        item_type:
+          type: String
+      - name: 'excludeImportRanges'
+        type: Array
+        description: Hub routes overlapped/encompassed by exclude import ranges are excluded during import from hub.
+        item_type:
+          type: String
+      - name: 'includeExportRanges'
+        type: Array
+        description: Dynamic routes fully encompassed by include export ranges are included during export to hub.
+        item_type:
+          type: String
+      - name: 'excludeExportRanges'
+        type: Array
+        description: Dynamic routes overlapped/encompassed by exclude export ranges are excluded during export to hub.
         item_type:
           type: String
   - name: 'linkedRouterApplianceInstances'
@@ -233,6 +269,9 @@ properties:
     update_mask_fields:
       - 'linkedRouterApplianceInstances.instances'
       - 'linkedRouterApplianceInstances.includeImportRanges'
+      - 'linkedRouterApplianceInstances.excludeImportRanges'
+      - 'linkedRouterApplianceInstances.includeExportRanges'
+      - 'linkedRouterApplianceInstances.excludeExportRanges'
     properties:
       - name: 'instances'
         type: Array
@@ -259,8 +298,23 @@ properties:
       - name: 'includeImportRanges'
         type: Array
         description: |
-          IP ranges allowed to be included during import from hub (does not control transit connectivity).
-          The only allowed value for now is "ALL_IPV4_RANGES".
+          Hub routes fully encompassed by include import ranges are included during import from hub.
+          "ALL_IPV4_RANGES" or IPv4 CIDR ranges are allowed.
+        item_type:
+          type: String
+      - name: 'excludeImportRanges'
+        type: Array
+        description: Hub routes overlapped/encompassed by exclude import ranges are excluded during import from hub.
+        item_type:
+          type: String
+      - name: 'includeExportRanges'
+        type: Array
+        description: Dynamic routes fully encompassed by include export ranges are included during export to hub.
+        item_type:
+          type: String
+      - name: 'excludeExportRanges'
+        type: Array
+        description: Dynamic routes overlapped/encompassed by exclude export ranges are excluded during export to hub.
         item_type:
           type: String
   - name: 'linkedVpcNetwork'
