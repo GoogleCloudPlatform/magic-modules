@@ -1573,21 +1573,8 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		ReplicaConfiguration: expandReplicaConfiguration(d.Get("replica_configuration").([]interface{})),
 	}
 
-	cloneContext, cloneSourceInstance := expandCloneContext(d.Get("clone").([]interface{}))
-	
-	{{- if ne $.TargetVersionName "ga" }}
-	cloneSourceProject := expandCloneSourceProject(d.Get("clone").([]interface{}))
-	if cloneSourceProject == "" {
-		cloneSourceProject = project
-	}
-	{{- end }}
+	cloneContext, cloneSource := expandCloneContext(d.Get("clone").([]interface{}))
 	pointInTimeRestoreContext := expandPointInTimeRestoreContext(d.Get("point_in_time_restore_context").([]interface{}))
-
-	if valueI, ok := d.GetOk("settings.0.auto_upgrade_enabled"); ok && !(valueI.(bool)) {
-		if err := d.Set("settings.0.auto_upgrade_enabled", nil); err != nil {
-			return err
-		}
-	}
 
 	s, ok := d.GetOk("settings")
 	desiredSettings := expandSqlDatabaseInstanceSettings(s.([]interface{}), databaseVersion)
