@@ -2183,6 +2183,7 @@ properties:
                               type: String
                               description: |
                                 Column name.
+                              required: true
                             - name: 'dataType'
                               type: String
                               description: |
