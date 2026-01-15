@@ -19,18 +19,18 @@ import (
 
 func TestAccTags(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		"tagKeyBasic":                          testAccTagsTagKey_tagKeyBasic,
-		"tagKeyBasicWithPurposeGceFirewall":    testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewall,
-		"tagKeyBasicWithPurposeDataGovernance": testAccTagsTagKey_tagKeyBasicWithPurposeDataGovernance,
-		"tagKeyBasicWithAllowedValuesRegex":    testAccTagsTagKey_tagKeyBasicWithAllowedValuesRegex,
-		"tagKeyUpdate":                         testAccTagsTagKey_tagKeyUpdate,
-		"tagKeyUpdateAllowedValuesRegex":       testAccTagsTagKey_tagKeyUpdateAllowedValuesRegex,
-		"tagKeyIamBinding":                     testAccTagsTagKeyIamBinding,
-		"tagKeyIamMember":                      testAccTagsTagKeyIamMember,
-		"tagKeyIamPolicy":                      testAccTagsTagKeyIamPolicy,
-		"tagValueBasic":                        testAccTagsTagValue_tagValueBasic,
-		"tagValueUpdate":                       testAccTagsTagValue_tagValueUpdate,
-		"tagBindingBasic":                      testAccTagsTagBinding_tagBindingBasic,
+		"tagKeyBasic":                           testAccTagsTagKey_tagKeyBasic,
+		"tagKeyBasicWithPurposeGceFirewall":     testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewall,
+		"tagKeyBasicWithPurposeDataGovernance":  testAccTagsTagKey_tagKeyBasicWithPurposeDataGovernance,
+		"tagKeyBasicWithAllowedValuesRegex":     testAccTagsTagKey_tagKeyBasicWithAllowedValuesRegex,
+		"tagKeyUpdate":                          testAccTagsTagKey_tagKeyUpdate,
+		"tagKeyUpdateAllowedValuesRegex":        testAccTagsTagKey_tagKeyUpdateAllowedValuesRegex,
+		"tagKeyIamBinding":                      testAccTagsTagKeyIamBinding,
+		"tagKeyIamMember":                       testAccTagsTagKeyIamMember,
+		"tagKeyIamPolicy":                       testAccTagsTagKeyIamPolicy,
+		"tagValueBasic":                         testAccTagsTagValue_tagValueBasic,
+		"tagValueUpdate":                        testAccTagsTagValue_tagValueUpdate,
+		"tagBindingBasic":                       testAccTagsTagBinding_tagBindingBasic,
 		"tagBindingBasicDynamic":				 testAccTagsTagBinding_tagBindingBasicDynamic,
 		"tagBindingNamespaced":					 testAccTagsTagBinding_tagBindingNamespaced,
 		"tagValueIamBinding":                    testAccTagsTagValueIamBinding,
@@ -543,8 +543,8 @@ func testAccTagsTagBinding_tagBindingBasicDynamic(t *testing.T) {
 				Config: testAccTagsTagBinding_tagBindingBasicDynamicExample(context),
 			},
 			{
-				ResourceName:      		 "google_tags_tag_binding.binding",
-				ImportState:       		 true,
+				ResourceName: "google_tags_tag_binding.binding",
+				ImportState:  true,
 			},
 		},
 	})
@@ -592,8 +592,8 @@ func testAccTagsTagBinding_tagBindingNamespaced(t *testing.T) {
 				Config: testAccTagsTagBinding_tagBindingNamespacedExample(context),
 			},
 			{
-				ResourceName:      "google_tags_tag_binding.binding",
-				ImportState:       true,
+				ResourceName: "google_tags_tag_binding.binding",
+				ImportState:  true,
 			},
 		},
 	})
@@ -1376,8 +1376,8 @@ func testAccTagsLocationTagBinding_locationTagBindingZonalNamespaced(t *testing.
 				Config: testAccTagsLocationTagBinding_locationTagBindingZonalNamespacedExample(context),
 			},
 			{
-				ResourceName:      "google_tags_location_tag_binding.binding",
-				ImportState:       true,
+				ResourceName: "google_tags_location_tag_binding.binding",
+				ImportState:  true,
 			},
 		},
 	})
