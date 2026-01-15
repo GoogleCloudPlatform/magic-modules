@@ -518,6 +518,55 @@ resource "google_tags_tag_binding" "binding" {
 `, context)
 }
 
+func TestAccTagsDynamicTagBinding(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"project_id":    "tf-test-" + acctest.RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"random": {},
+		},
+		CheckDestroy: testAccCheckTagsTagBindingDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTagsTagBinding_dynamicTagBindingBasicExample(context),
+			},
+			{
+				ResourceName:      "google_tags_tag_binding.binding",
+				ImportState:       true,
+			},
+		},
+	})
+}
+
+func testAccTagsTagBinding_dynamicTagBindingBasicExample(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_tags_tag_key" "test_key" {
+	parent = "projects/tags-blr-test-ap"
+	short_name = "dynamic-tags-test-key-mukul"
+}
+
+resource "google_project" "project" {
+	project_id = "%{project_id}"
+	name       = "%{project_id}"
+	org_id     = "%{org_id}"
+	deletion_policy = "DELETE"
+}
+
+resource "google_tags_tag_binding" "binding" {
+	parent    = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
+	tag_value = "${data.google_tags_tag_key.test_key.namespaced_name}/dynamic-test-value"
+}
+`, context)
+}
+
 func testAccCheckTagsTagBindingDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {
@@ -1028,19 +1077,25 @@ data "google_tags_tag_key" "test_key" {
 	short_name = "dynamic-tags-test-key-mukul"
 }
 
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "gce-staging-images"
+}
+
 resource "google_compute_instance" "default" {
 	name         = "test-%{random_suffix}"
 	machine_type = "e2-medium"
 	zone         = "us-central1-staginga"
   boot_disk {
     initialize_params {
-      image = "gce-staging-images/debian-11"
+      image = data.google_compute_image.my_image.self_link
     }
   }
   network_interface {
     network = "default"
   }
 }
+
 resource "google_tags_location_tag_binding" "binding" {
 	parent    = "//compute.googleapis.com/projects/${data.google_project.project.number}/zones/us-central1-staginga/instances/${google_compute_instance.default.instance_id}"
 	tag_value = "${data.google_tags_tag_key.test_key.namespaced_name}/dynamic-test-value"

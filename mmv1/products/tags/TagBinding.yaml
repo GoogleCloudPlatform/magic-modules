@@ -44,13 +44,10 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-nested_query:
-  keys:
-    - tagBindings
-  is_list_of_ids: false
-  modify_by_patch: false
 custom_code:
   custom_import: 'templates/terraform/custom_import/tags_tag_binding.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/tags_tag_binding.go.tmpl'
+  post_read: 'templates/terraform/post_read/tags_tag_binding.go.tmpl'
 examples:
   - name: 'tag_binding_basic'
     primary_resource_id: 'binding'
@@ -83,3 +80,4 @@ properties:
     description: |
       The TagValue of the TagBinding. Must be either in id format `tagValues/{tag-value-id}`, or namespaced format `{parent-id}/{tag-key-short-name}/{tag-value-short-name}`.
     required: true
+    ignore_read: true
