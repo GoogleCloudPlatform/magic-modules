@@ -62,6 +62,13 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+  - name: 'folder_id'
+    type: String
+    description: |
+      The ID of the folder where this feed has been created. Both [FOLDER_NUMBER]
+      and folders/[FOLDER_NUMBER] are accepted.
+    output: true
+    url_param_only: true
 properties:
   - name: 'billing_project'
     type: String
@@ -72,12 +79,6 @@ properties:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'folder_id'
-    type: String
-    description: |
-      The ID of the folder where this feed has been created. Both [FOLDER_NUMBER]
-      and folders/[FOLDER_NUMBER] are accepted.
-    output: true
   - name: 'name'
     type: String
     description: |
