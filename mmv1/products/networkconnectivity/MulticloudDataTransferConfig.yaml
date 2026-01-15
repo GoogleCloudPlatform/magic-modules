@@ -104,13 +104,15 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'serviceName'
+        - name: 'service_name'
+          api_name: 'key'
           type: String
           description: |
             The name of the service, like "big-query" or "cloud-storage".
             This corresponds to the map key in the API.
           required: true
         - name: 'states'
+          api_name: 'value.states'
           type: Array
           description: 'The state and activation time details for the service.'
           output: true
