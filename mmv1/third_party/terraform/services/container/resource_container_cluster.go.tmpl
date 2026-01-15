@@ -1251,6 +1251,22 @@ func ResourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
+						"disruption_budget": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems:    1,
+							Description: `Cluster disruption intervals for minor version and patch version upgrade`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"minor_version_disruption_interval": {
+										Type:     schema.TypeString,
+									},
+									"patch_version_disruption_interval": {
+										Type:     schema.TypeString,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -5843,6 +5859,13 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 		}
 	}
 
+	budget := &container.DisruptionBudget{}
+	if disruptionBudget, ok := maintenancePolicy["disruption_budget"]; ok && len(disruptionBudget.([]interface{})) > 0 {
+		db := disruptionBudget.([]interface{})[0].(map[string]interface{})
+		budget.MinorVersionDisruptionInterval = db["minor_version_disruption_interval"].(string)
+		budget.PatchVersionDisruptionInterval = db["patch_version_disruption_interval"].(string)
+	}
+
 	if dailyMaintenanceWindow, ok := maintenancePolicy["daily_maintenance_window"]; ok && len(dailyMaintenanceWindow.([]interface{})) > 0 {
 		dmw := dailyMaintenanceWindow.([]interface{})[0].(map[string]interface{})
 		startTime := dmw["start_time"].(string)
@@ -5853,6 +5876,7 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 					StartTime: startTime,
 				},
 			},
+			DisruptionBudget: budget,
 			ResourceVersion: resourceVersion,
 		}
 	}
@@ -5869,6 +5893,7 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 					Recurrence: rw["recurrence"].(string),
 				},
 			},
+			DisruptionBudget: budget,
 			ResourceVersion: resourceVersion,
 		}
 	}
@@ -7589,6 +7614,13 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 			exclusions = append(exclusions, exclusion)
 		}
 	}
+	var budget map[string]interface{}
+	if mp.DisruptionBudget != nil {
+	    budget = map[string]interface{}{
+			"minor_version_disruption_interval": mp.DisruptionBudget.MinorVersionDisruptionInterval,
+			"patch_version_disruption_interval": mp.DisruptionBudget.PatchVersionDisruptionInterval,
+		}
+	}
 
 	if mp.Window.DailyMaintenanceWindow != nil {
 		return []map[string]interface{}{
@@ -7600,6 +7632,7 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 					},
 				},
 				"maintenance_exclusion": exclusions,
+				"disruption_budget": budget,
 			},
 		}
 	}
@@ -7614,6 +7647,7 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 					},
 				},
 				"maintenance_exclusion": exclusions,
+				"disruption_budget": budget,
 			},
 		}
 	}
