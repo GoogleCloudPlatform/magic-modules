@@ -62,6 +62,17 @@ examples:
       'value_short_name': '"tf-test-value-" + acctest.RandString(t, 10)'
       'project_id': '"tf-test-" + acctest.RandString(t, 10)'
     exclude_test: true
+  - name: 'tag_binding_using_dynamic_tag_key'
+    primary_resource_id: 'binding'
+    vars:
+      key_short_name: 'keyname'
+      project_id: 'project_id'
+    test_env_vars:
+      org_id: 'ORG_ID'
+    test_vars_overrides:
+      'key_short_name': '"tf-test-key-" + acctest.RandString(t, 10)'
+      'project_id': '"tf-test-" + acctest.RandString(t, 10)'
+    exclude_test: true
 parameters:
 properties:
   - name: 'name'

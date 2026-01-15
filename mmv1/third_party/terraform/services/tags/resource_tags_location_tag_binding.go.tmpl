@@ -43,7 +43,6 @@ func ResourceTagsLocationTagBinding() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 				Description: `The TagValue of the TagBinding. Must be either in id format 'tagValues/{tag-value-id}', or namespaced format '{parent-id}/{tag-key-short-name}/{tag-value-short-name}'.`,
-				DiffSuppressFunc: suppressTagValueDiff,
 			},
 			"location": {
 				Type:     schema.TypeString,
@@ -56,17 +55,6 @@ Examples: US, EU, asia-northeast1. The default value is US.`,
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: `The generated id for the TagBinding. This is a string of the form 'tagBindings/{full-resource-name}/{tag-value-name}' or 'tagBindings/{full-resource-name}/{tag-key-name}'`,
-			},
-			// Computed fields to store the tag value id and namespaced names from the API response
-			"tag_value_id": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: `Read-only. The unique ID of the TagValue (e.g., tagValues/123), as returned by the API. This will be empty for Dynamic Tags.`,
-			},
-			"tag_value_namespaced_name": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: `Read-only. The namespaced name of the TagValue (e.g., 12345/env/prod), as returned by the API.`,
 			},
 		},
 		UseJSONNumber: true,
@@ -257,44 +245,31 @@ func resourceTagsLocationTagBindingRead(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	apiTagValueId := ""
-	if tv, ok := res["tagValue"].(string); ok {
-		apiTagValueId = tv
-	}
-	apiTagValueNamespacedName := res["tagValueNamespacedName"].(string)
-	if apiTagValueNamespacedName == "" {
-		return fmt.Errorf("API response for %s is missing 'tagValueNamespacedName'", res["name"])
-	}
-
 	if err := d.Set("name", flattenNestedTagsLocationTagBindingName(res["name"], d, config)); err != nil {
 		return fmt.Errorf("Error reading LocationTagBinding: %s", err)
 	}
 	if err := d.Set("parent", flattenNestedTagsLocationTagBindingParent(res["parent"], d, config)); err != nil {
 		return fmt.Errorf("Error reading LocationTagBinding: %s", err)
 	}
-	// Set the computed fields based on the API response
-	if err := d.Set("tag_value_id", apiTagValueId); err != nil {
-		return fmt.Errorf("Error reading LocationTagBinding: %s", err)
-	}
-	if err := d.Set("tag_value_namespaced_name", apiTagValueNamespacedName); err != nil {
-		return fmt.Errorf("Error reading LocationTagBinding: %s", err)
-	}
 
 	// Initialize tag_value in state ONLY if it's not set (e.g., after import)
 	if _, ok := d.GetOk("tag_value"); !ok {
 		var initialTagValue string
-        if apiTagValueId != "" {
-            initialTagValue = apiTagValueId
-        } else {
-            initialTagValue = apiTagValueNamespacedName
-        }
-        if err := d.Set("tag_value", initialTagValue); err != nil {
-            return fmt.Errorf("Error initializing tag_value: %s", err)
-        }
+		if tv, ok := res["tagValue"].(string); ok {
+			initialTagValue = tv
+		} else if tv, ok := res["tagValueNamespacedName"].(string); ok {
+			initialTagValue = tv
+		} else {
+			return fmt.Errorf("API response for %s is missing 'tagValueNamespacedName'", res["name"])
+		}
+
+		if err := d.Set("tag_value", initialTagValue); err != nil {
+			return fmt.Errorf("Error initializing tag_value: %s", err)
+		}
 		log.Printf("[DEBUG] Read: Initialized tag_value in state to: %s", initialTagValue)
 	} else {
 		// Do not change the existing d.Get("tag_value") format to maintain backward compatibility.
-		log.Printf("[DEBUG] Read: Existing tag_value in state: %s. API tag value id: '%s', API tag value namespaced name: '%s'", d.Get("tag_value").(string), apiTagValueId, apiTagValueNamespacedName)
+		log.Printf("[DEBUG] Read: Existing tag_value in state: %s.", d.Get("tag_value").(string))
 	}
 
 	return nil
