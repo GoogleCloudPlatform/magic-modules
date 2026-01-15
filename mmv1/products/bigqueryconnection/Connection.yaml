@@ -139,6 +139,24 @@ examples:
     ignore_read_extra:
       # password removed
       - 'cloud_sql.0.credential'
+  - name: 'bigquery_connection_sql_with_cmek_password_wo'
+    primary_resource_id: 'bq-connection-cmek'
+    bootstrap_iam:
+      - member: "serviceAccount:bq-{project_number}@bigquery-encryption.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+    vars:
+      database_instance_name: 'my-database-instance'
+      username: 'user'
+      deletion_protection: 'true'
+      kms_key_name: 'projects/project/locations/us-central1/keyRings/us-central1/cryptoKeys/bq-key'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+      'kms_key_name': 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
+    ignore_read_extra:
+      # password removed
+      - 'cloud_sql.0.credential'
 parameters:
 properties:
   - name: 'name'
@@ -218,8 +236,22 @@ properties:
           - name: 'password'
             type: String
             description: Password for database.
-            required: true
+            exactly_one_of:
+              - 'cloud_sql.0.credential.0.passwordWo'
             sensitive: true
+          - name: 'passwordWo'
+            type: String
+            description: Write-Only password for database.
+            exactly_one_of:
+              - 'cloud_sql.0.credential.0.password'
+            write_only: true
+          - name: 'passwordWoVersion'
+            type: String
+            description: Write-Only version of password for database.
+            immutable: true
+            required_with:
+              - 'cloud_sql.0.credential.0.passwordWo'
+
       - name: 'type'
         type: Enum
         description: Type of the Cloud SQL database.
