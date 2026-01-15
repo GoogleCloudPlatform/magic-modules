@@ -173,6 +173,37 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
         DeprecationMessage: "{{ $.DeprecationMessage -}}",
 {{- end}}
 
+{{ if not $.ExcludeRead }}
+        Identity: &schema.ResourceIdentity{
+          Version: {{ $.GetIdentitySchemaVersion }},
+          SchemaFunc: func() map[string]*schema.Schema {
+            return map[string]*schema.Schema{
+              {{- range $p := .IdentityProperties }}
+              "{{ underscore $p.Name}}": {
+                Type:     schema.TypeString,
+                {{- if or $p.Required $p.Output }}
+                RequiredForImport: true,
+                {{- else }}
+                OptionalForImport: true,
+                {{- end }}
+              },
+              {{- end }}
+            }
+          },
+{{- if $.IdentityUpgraders }}
+          IdentityUpgraders: []schema.IdentityUpgrader{
+{{- range $v := $.IdentityUpgradersCount }}
+              {
+                Type: identity{{ $.ResourceName }}ResourceV{{$v}}(),
+                Upgrade: Identity{{ $.ResourceName }}UpgradeV{{$v}},
+                Version: {{$v}},
+              },
+{{- end }}
+          },
+{{- end }}
+        },
+{{- end }}
+
         Schema: map[string]*schema.Schema{
 			{{- range $prop := $.OrderProperties $.AllUserProperties }}
 {{template "SchemaFields" $prop -}}
@@ -348,6 +379,19 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
         return fmt.Errorf("Error constructing id: %s", err)
     }
     d.SetId(id)
+
+    identity, err := d.Identity()
+    if err == nil && identity != nil {
+    {{- range $p := $.IdentityProperties }}
+        if {{ $p.CamelizeProperty }}Value, ok := d.GetOk("{{ underscore $p.Name}}"); ok && {{ $p.CamelizeProperty }}Value.(string)!= "" {
+            if err = identity.Set("{{ underscore $p.Name}}", {{ $p.CamelizeProperty }}Value.(string)); err != nil {
+                return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+            }
+        }
+    {{- end }}
+    } else {
+        log.Printf("[DEBUG] (Create) identity not set: %s", err)
+    }
 
 {{if and $.GetAsync ($.GetAsync.Allow "Create") -}}
 {{  if ($.GetAsync.IsA "OpAsync") -}}
@@ -727,9 +771,23 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
     }
 {{- end}}
-
+{{ if not $.ExcludeRead }}
+    identity, err := d.Identity()
+    if err == nil && identity != nil {
+    {{- range $p := $.IdentityProperties }}
+    if v, ok := identity.GetOk("{{ underscore $p.Name}}");!ok && v == "" {
+        err = identity.Set("{{ underscore $p.Name}}", d.Get("{{ underscore $p.Name}}").(string))
+            if err != nil {
+                return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+            }     
+    }
+    {{- end }}
+    } else {
+        log.Printf("[DEBUG] (Read) identity not set: %s", err)
+    }
+{{ end }}
+{{- end }}
     return nil
-{{  end -}}
 }
 
 {{if $.Updatable -}}
@@ -744,6 +802,19 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
         return err
+    }
+
+    identity, err := d.Identity()
+    if err == nil && identity != nil {
+    {{- range $p := $.IdentityProperties }}
+        if {{ $p.CamelizeProperty }}Value, ok := d.GetOk("{{ underscore $p.Name}}"); ok && {{ $p.CamelizeProperty }}Value.(string)!= "" {
+            if err = identity.Set("{{ underscore $p.Name}}", {{ $p.CamelizeProperty }}Value.(string)); err != nil {
+                return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+            }
+        }
+    {{- end }}
+    } else {
+        log.Printf("[DEBUG] (Update) identity not set: %s", err)
     }
 
     billingProject := ""
@@ -1262,6 +1333,11 @@ func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta
 
     {{ customTemplate $ $.StateMigrationFile false -}}
 {{- end }}
+
+{{- if and (and $.IdentitySchemaVersion $.IdentityUpgraders) (not $.ExcludeRead) }}
+    {{ $.CustomTemplate $.IdentityUpgraderFile false -}}
+{{- end }}
+
 {{- if and $.HasPostCreateComputedFields (or (or (not $.GetAsync) (not ($.GetAsync.Allow "Create"))) (and $.GetAsync (and ($.GetAsync.IsA "PollAsync") ($.GetAsync.Allow "Create"))))}}
 func resource{{ $.ResourceName -}}PostCreateSetComputedFields(d *schema.ResourceData, meta interface{}, res map[string]interface{}) error {
     config := meta.(*transport_tpg.Config)
