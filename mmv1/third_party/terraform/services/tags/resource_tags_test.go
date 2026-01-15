@@ -29,8 +29,8 @@ func TestAccTags(t *testing.T) {
 		"tagValueBasic":                         testAccTagsTagValue_tagValueBasic,
 		"tagValueUpdate":                        testAccTagsTagValue_tagValueUpdate,
 		"tagBindingBasic":                       testAccTagsTagBinding_tagBindingBasic,
-		"tagBindingBasicDynamic":				 testAccTagsTagBinding_tagBindingBasicDynamic,
-		"tagBindingNamespaced":					 testAccTagsTagBinding_tagBindingNamespaced,
+		"tagBindingBasicDynamic":                testAccTagsTagBinding_tagBindingBasicDynamic,
+		"tagBindingNamespaced":                  testAccTagsTagBinding_tagBindingNamespaced,
 		"tagValueIamBinding":                    testAccTagsTagValueIamBinding,
 		"tagValueIamMember":                     testAccTagsTagValueIamMember,
 		"tagValueIamPolicy":                     testAccTagsTagValueIamPolicy,
@@ -456,8 +456,8 @@ func testAccTagsTagBinding_tagBindingBasicDynamic(t *testing.T) {
 				Config: testAccTagsTagBinding_tagBindingBasicDynamicExample(context),
 			},
 			{
-				ResourceName:      		 "google_tags_tag_binding.binding",
-				ImportState:       		 true,
+				ResourceName: "google_tags_tag_binding.binding",
+				ImportState:  true,
 			},
 		},
 	})
@@ -505,8 +505,8 @@ func testAccTagsTagBinding_tagBindingNamespaced(t *testing.T) {
 				Config: testAccTagsTagBinding_tagBindingNamespacedExample(context),
 			},
 			{
-				ResourceName:      "google_tags_tag_binding.binding",
-				ImportState:       true,
+				ResourceName: "google_tags_tag_binding.binding",
+				ImportState:  true,
 			},
 		},
 	})
@@ -1289,8 +1289,8 @@ func testAccTagsLocationTagBinding_locationTagBindingZonalNamespaced(t *testing.
 				Config: testAccTagsLocationTagBinding_locationTagBindingZonalNamespacedExample(context),
 			},
 			{
-				ResourceName:      "google_tags_location_tag_binding.binding",
-				ImportState:       true,
+				ResourceName: "google_tags_location_tag_binding.binding",
+				ImportState:  true,
 			},
 		},
 	})
