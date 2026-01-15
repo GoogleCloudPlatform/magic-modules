@@ -16517,7 +16517,6 @@ resource "google_container_cluster" "primary" {
   location = "us-central1-c"
 
   datapath_provider       = "ADVANCED_DATAPATH"
-  enable_multi_networking = true
   ip_allocation_policy    {}
   deletion_protection = false
   
@@ -16631,7 +16630,6 @@ resource "google_container_cluster" "primary" {
   subnetwork = google_compute_subnetwork.main_subnet.name
 
   datapath_provider       = "ADVANCED_DATAPATH"
-  enable_multi_networking = true
   ip_allocation_policy    {
     cluster_ipv4_cidr_block  = "/16"
     services_ipv4_cidr_block = "/22"
@@ -16705,7 +16703,6 @@ resource "google_container_cluster" "primary" {
   subnetwork = google_compute_subnetwork.main_subnet.name
 
   datapath_provider       = "ADVANCED_DATAPATH"
-  enable_multi_networking = true
   ip_allocation_policy    {
     cluster_ipv4_cidr_block  = "/16"
     services_ipv4_cidr_block = "/22"
@@ -16774,7 +16771,6 @@ resource "google_container_cluster" "primary" {
   subnetwork = google_compute_subnetwork.main_subnet.name
 
   datapath_provider       = "ADVANCED_DATAPATH"
-  enable_multi_networking = true
   ip_allocation_policy    {
     cluster_ipv4_cidr_block  = "/16"
     services_ipv4_cidr_block = "/22"

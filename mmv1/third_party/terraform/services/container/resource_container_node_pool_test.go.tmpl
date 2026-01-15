@@ -6455,7 +6455,6 @@ resource "google_container_cluster" "primary" {
   initial_node_count       = 1
 
   datapath_provider       = "ADVANCED_DATAPATH"
-  enable_multi_networking = true
   ip_allocation_policy    {} 
   deletion_protection     = false
 }
@@ -6572,10 +6571,9 @@ resource "google_container_cluster" "cluster" {
   name     = "%[1]s"
   location = "us-central1-c"
   
-  network    = google_compute_network.main_net.name
-  subnetwork = google_compute_subnetwork.main_subnet.name
+  network    = google_compute_network.main_net.id
+  subnetwork = google_compute_subnetwork.main_subnet.id
 
-  enable_multi_networking = true
   datapath_provider       = "ADVANCED_DATAPATH"
 
   // Standard VPC-native setup
@@ -6650,11 +6648,9 @@ resource "google_container_cluster" "cluster" {
   name     = "%[1]s"
   location = "us-central1-c"
   
-  network    = google_compute_network.main_net.name
-  subnetwork = google_compute_subnetwork.main_subnet.name
+  network    = google_compute_network.main_net.id
+  subnetwork = google_compute_subnetwork.main_subnet.id
 
-  // Keep these settings consistent across ALL test steps
-  enable_multi_networking = true
   datapath_provider       = "ADVANCED_DATAPATH"
 
   ip_allocation_policy {
@@ -6723,10 +6719,9 @@ resource "google_container_cluster" "cluster" {
   name     = "%[1]s"
   location = "us-central1-c"
   
-  network    = google_compute_network.main_net.name
-  subnetwork = google_compute_subnetwork.main_subnet.name
+  network    = google_compute_network.main_net.id
+  subnetwork = google_compute_subnetwork.main_subnet.id
 
-  enable_multi_networking = true
   datapath_provider       = "ADVANCED_DATAPATH"
 
   ip_allocation_policy {
