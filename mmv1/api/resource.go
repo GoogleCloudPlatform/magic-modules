@@ -2172,45 +2172,6 @@ func (r Resource) DefineAssetTypeForResourceInProduct() bool {
 	return true
 }
 
-// Guesses the identifier of the resource, as "name" is not always the identifier
-// For example, the cai identifier is feed_id in google_cloud_asset_folder_feed
-func (r Resource) getCaiId() string {
-	for _, p := range r.AllUserProperties() {
-		if p.Name == "name" && !p.Output {
-			return "name"
-		}
-	}
-
-	// Get the last identifier extracted from selfLink
-	id := r.getCandidateCaiId(r.SelfLink)
-	if id != "" {
-		return id
-	}
-
-	// Get the last identifier extracted from createUrl
-	id = r.getCandidateCaiId(r.CreateUrl)
-	if id != "" {
-		return id
-	}
-
-	return ""
-}
-
-// Extracts the last identifier from the url, if it is not computed,
-// then it is the candidate identifier
-func (r Resource) getCandidateCaiId(url string) string {
-	identifiers := r.ExtractIdentifiers(url)
-	if len(identifiers) > 0 {
-		id := identifiers[len(identifiers)-1]
-		for _, p := range r.AllUserProperties() {
-			if google.Underscore(p.Name) == id && !p.Output {
-				return id
-			}
-		}
-	}
-	return ""
-}
-
 // Gets a format string that is used to override the default format from resource id format
 func (r Resource) CAIFormatOverride() string {
 	caiAssetService := strings.Trim(r.ProductMetadata.CaiAssetService, "/")
@@ -2270,8 +2231,8 @@ func (r Resource) IgnoreCaiAssetName() bool {
 }
 
 // Gets the Cai API version
-func (r Resource) CaiApiVersion(productBackendName, caiProductBaseUrl string) string {
-	template := r.GetCaiAssetNameTemplate()
+func (r Resource) CaiApiVersion(_, caiProductBaseUrl string) string {
+	template := caiProductBaseUrl
 
 	versionRegex, err := regexp.Compile(`\/(v\d[^\/]*)\/`)
 	if err != nil {
