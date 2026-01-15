@@ -13,8 +13,8 @@
 package api
 
 import (
-	"bytes"
 	"fmt"
+	"io/fs"
 	"log"
 	"maps"
 	"path/filepath"
@@ -22,9 +22,6 @@ import (
 	"slices"
 	"sort"
 	"strings"
-	"text/template"
-
-	"github.com/golang/glog"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
@@ -387,7 +384,7 @@ type TGCResource struct {
 	ExcludeTgc bool `yaml:"exclude_tgc,omitempty"`
 
 	// If true, include resource in the new package of TGC (terraform-provider-conversion)
-	IncludeInTGCNext bool `yaml:"include_in_tgc_next_DO_NOT_USE,omitempty"`
+	IncludeInTGCNext bool `yaml:"include_in_tgc_next,omitempty"`
 
 	// The resource kind in CAI.
 	// If this is not set, then :name is used instead.
@@ -682,7 +679,7 @@ func (r Resource) SensitivePropsToString() string {
 	var props []string
 
 	for _, prop := range r.SensitiveProps() {
-		props = append(props, fmt.Sprintf("`%s`", prop.Lineage()))
+		props = append(props, fmt.Sprintf("`%s`", strings.Join(prop.Lineage(), ".")))
 	}
 
 	return strings.Join(props, ", ")
@@ -692,7 +689,7 @@ func (r Resource) WriteOnlyPropsToString() string {
 	var props []string
 
 	for _, prop := range r.WriteOnlyProps() {
-		props = append(props, fmt.Sprintf("`%s`", prop.Lineage()))
+		props = append(props, fmt.Sprintf("`%s`", strings.Join(prop.Lineage(), ".")))
 	}
 
 	return strings.Join(props, ", ")
@@ -711,6 +708,10 @@ func (r Resource) SettableProperties() []*Type {
 
 	props = google.Reject(props, func(v *Type) bool {
 		return v.UrlParamOnly
+	})
+
+	props = google.Reject(props, func(v *Type) bool {
+		return v.ClientSide
 	})
 
 	props = google.Reject(props, func(v *Type) bool {
@@ -750,28 +751,6 @@ func (r Resource) RootProperties() []*Type {
 		}
 	}
 	return props
-}
-
-// Returns a sorted list of all "leaf" properties, meaning properties that have
-// no children.
-func (r Resource) LeafProperties() []*Type {
-	types := r.AllNestedProperties(google.Concat(r.RootProperties(), r.UserVirtualFields()))
-
-	// Remove types that have children, because we only want "leaf" fields
-	types = slices.DeleteFunc(types, func(t *Type) bool {
-		nestedProperties := t.NestedProperties()
-		return len(nestedProperties) > 0
-	})
-
-	// Sort types by lineage
-	slices.SortFunc(types, func(a, b *Type) int {
-		if a.MetadataLineage() < b.MetadataLineage() {
-			return -1
-		}
-		return 1
-	})
-
-	return types
 }
 
 // Return the product-level async object, or the resource-specific one
@@ -855,7 +834,7 @@ func (r *Resource) attachConstraintGroup(groupType string, source []string) *[]s
 }
 
 func buildWriteOnlyField(name string, versionFieldName string, originalField *Type) *Type {
-	originalFieldLineage := originalField.TerraformLineage()
+	originalFieldLineage := strings.Join(originalField.Lineage(), ".0.")
 	newFieldLineage := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(name))
 	requiredWith := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(versionFieldName))
 
@@ -884,13 +863,17 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 		}
 		options = append(options, propertyWithExactlyOneOfPointer(originalField.ExactlyOneOfGroup))
 	} else {
+		newConflicts := deduplicateSliceOfStrings(append([]string{originalFieldLineage}, originalField.Conflicts...))
+		newConflicts = slices.DeleteFunc(newConflicts, func(s string) bool {
+			return s == newFieldLineage
+		})
+		options = append(options, propertyWithConflicts(newConflicts))
+
 		if originalField.ConflictsGroup != nil {
 			*originalField.ConflictsGroup = deduplicateSliceOfStrings(append(*originalField.ConflictsGroup, newFieldLineage))
 		} else {
 			originalField.Conflicts = deduplicateSliceOfStrings(append(originalField.Conflicts, newFieldLineage))
 		}
-		newConflicts := deduplicateSliceOfStrings(append([]string{originalFieldLineage}, originalField.Conflicts...))
-		options = append(options, propertyWithConflicts(newConflicts))
 	}
 
 	if originalField.AtLeastOneOfGroup != nil {
@@ -903,7 +886,7 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 
 func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField *Type) *Type {
 	description := fmt.Sprintf("Triggers update of `%s` write-only. Increment this value when an update to `%s` is needed. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)", google.Underscore(writeOnlyField.Name), google.Underscore(writeOnlyField.Name))
-	requiredWith := strings.ReplaceAll(originalField.TerraformLineage(), google.Underscore(originalField.Name), google.Underscore(writeOnlyField.Name))
+	requiredWith := strings.ReplaceAll(strings.Join(originalField.Lineage(), ".0."), google.Underscore(originalField.Name), google.Underscore(writeOnlyField.Name))
 
 	options := []func(*Type){
 		propertyWithType("Int"),
@@ -1065,7 +1048,7 @@ func (r Resource) IgnoreReadLabelsFields(props []*Type) []string {
 		if p.IsA("KeyValueLabels") ||
 			p.IsA("KeyValueTerraformLabels") ||
 			p.IsA("KeyValueAnnotations") {
-			fields = append(fields, p.TerraformLineage())
+			fields = append(fields, strings.Join(p.Lineage(), ".0."))
 		} else if p.IsA("NestedObject") && len(p.AllProperties()) > 0 {
 			fields = google.Concat(fields, r.IgnoreReadLabelsFields(p.AllProperties()))
 		}
@@ -1462,7 +1445,7 @@ func ignoreReadFields(props []*Type) []string {
 	var fields []string
 	for _, tp := range props {
 		if tp.IgnoreRead && !tp.UrlParamOnly && !tp.IsA("ResourceRef") {
-			fields = append(fields, tp.TerraformLineage())
+			fields = append(fields, strings.Join(tp.Lineage(), ".0."))
 		} else if tp.IsA("NestedObject") && tp.AllProperties() != nil {
 			fields = append(fields, ignoreReadFields(tp.AllProperties())...)
 		}
@@ -1794,33 +1777,38 @@ func (r Resource) IamParentSourceType() string {
 	return t
 }
 
-func (r Resource) IamImportFormat() string {
+func (r Resource) IamImportFormatTemplate() string {
 	var importFormat string
 	if len(r.IamPolicy.ImportFormat) > 0 {
 		importFormat = r.IamPolicy.ImportFormat[0]
 	} else {
 		importFormat = r.IamPolicy.SelfLink
 		if importFormat == "" {
-			importFormat = r.SelfLinkUrl()
+			if len(r.ImportFormat) > 0 {
+				importFormat = r.ImportFormat[0]
+			} else {
+				importFormat = r.SelfLinkUrl()
+			}
 		}
 	}
+	return strings.ReplaceAll(importFormat, "{{name}}", fmt.Sprintf("{{%s}}", r.IamParentResourceName()))
+}
+
+func (r Resource) IamImportFormat() string {
+	importFormat := r.IamImportFormatTemplate()
 
 	importFormat = regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(importFormat, "%s")
 	return strings.ReplaceAll(importFormat, r.ProductMetadata.BaseUrl, "")
 }
 
-func (r Resource) IamImportQualifiersForTest() string {
-	var importFormat string
-	if len(r.IamPolicy.ImportFormat) > 0 {
-		importFormat = r.IamPolicy.ImportFormat[0]
-	} else {
-		importFormat = r.IamPolicy.SelfLink
-		if importFormat == "" {
-			importFormat = r.SelfLinkUrl()
-		}
-	}
+func (r Resource) IamImportParams() []string {
+	importFormat := r.IamImportFormatTemplate()
 
-	params := r.ExtractIdentifiers(importFormat)
+	return r.ExtractIdentifiers(importFormat)
+}
+
+func (r Resource) IamImportQualifiersForTest() string {
+	params := r.IamImportParams()
 	var importQualifiers []string
 	for i, param := range params {
 		if param == "project" {
@@ -1968,46 +1956,6 @@ func (r Resource) FormatDocDescription(desc string, indent bool) string {
 	return strings.TrimSuffix(returnString, "\n")
 }
 
-func (r Resource) CustomTemplate(templatePath string, appendNewline bool) string {
-	output := ExecuteTemplate(&r, templatePath, appendNewline)
-	if !appendNewline {
-		output = strings.TrimSuffix(output, "\n")
-	}
-	return output
-}
-
-func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
-	templates := []string{
-		templatePath,
-		"templates/terraform/expand_resource_ref.tmpl",
-		"templates/terraform/custom_flatten/bigquery_table_ref.go.tmpl",
-		"templates/terraform/flatten_property_method.go.tmpl",
-		"templates/terraform/expand_property_method.go.tmpl",
-		"templates/terraform/update_mask.go.tmpl",
-		"templates/terraform/nested_query.go.tmpl",
-		"templates/terraform/unordered_list_customize_diff.go.tmpl",
-	}
-	templateFileName := filepath.Base(templatePath)
-
-	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
-	if err != nil {
-		glog.Exit(err)
-	}
-
-	contents := bytes.Buffer{}
-	if err = tmpl.ExecuteTemplate(&contents, templateFileName, e); err != nil {
-		glog.Exit(err)
-	}
-
-	rs := contents.String()
-
-	if !strings.HasSuffix(rs, "\n") && appendNewline {
-		rs = fmt.Sprintf("%s\n", rs)
-	}
-
-	return rs
-}
-
 // Returns the key of the list of resources in the List API response
 // Used to get the list of resources to sweep
 func (r Resource) ResourceListKey() string {
@@ -2143,7 +2091,7 @@ func (r Resource) TestSamples() []*resource.Sample {
 	})
 }
 
-func (r Resource) TestSampleSetUp() {
+func (r Resource) TestSampleSetUp(sysfs fs.FS) {
 	res := make(map[string]string)
 	for _, sample := range r.Samples {
 		sample.TargetVersionName = r.TargetVersionName
@@ -2159,7 +2107,7 @@ func (r Resource) TestSampleSetUp() {
 			if step.ConfigPath == "" {
 				step.ConfigPath = fmt.Sprintf("templates/terraform/samples/services/%s/%s.tf.tmpl", packageName, step.Name)
 			}
-			step.SetHCLText()
+			step.SetHCLText(sysfs)
 			configName := step.Name
 			if _, ok := res[step.Name]; !ok {
 				res[configName] = sample.Name
@@ -2574,15 +2522,22 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 		"for_each",
 		"provider",
 		"lifecycle",
+		"timeouts",
 	}
 	for _, tp := range r.VirtualFields {
-		props = append(props, tp.MetadataLineage())
+		props = append(props, strings.Join(tp.Lineage(), "."))
 	}
 	for _, tp := range r.AllNestedProperties(r.RootProperties()) {
 		if tp.UrlParamOnly {
 			props = append(props, google.Underscore(tp.Name))
 		} else if tp.IsMissingInCai || tp.IgnoreRead || tp.ClientSide || tp.WriteOnlyLegacy {
-			props = append(props, tp.MetadataLineage())
+			props = append(props, strings.Join(tp.Lineage(), "."))
+		}
+	}
+
+	for _, e := range r.Examples {
+		for _, p := range e.IgnoreReadExtra {
+			props = append(props, p)
 		}
 	}
 
@@ -2591,7 +2546,7 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 	}
 
 	slices.Sort(props)
-	return props
+	return slices.Compact(props)
 }
 
 // Filters out computed properties during cai2hcl

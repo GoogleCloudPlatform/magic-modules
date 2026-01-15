@@ -131,6 +131,7 @@ properties:
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
   - name: 'createTime'
     type: String
     description: Output only. The time the spoke was created.

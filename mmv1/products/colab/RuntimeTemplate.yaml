@@ -220,3 +220,20 @@ properties:
             type: String
             description: 'A human-readable description of the specified colab image release, populated by the system. Example: "Python 3.10", "Latest - current Python 3.11"'
             output: true
+      - name: 'postStartupScriptConfig'
+        type: NestedObject
+        description: 'Post startup script config.'
+        properties:
+          - name: 'postStartupScript'
+            type: String
+            description: 'Post startup script to run after runtime is started.'
+          - name: 'postStartupScriptUrl'
+            type: String
+            description: 'Post startup script url to download. Example: https://bucket/script.sh.'
+          - name: 'postStartupScriptBehavior'
+            type: Enum
+            description: 'Post startup script behavior that defines download and execution behavior.'
+            enum_values:
+              - 'RUN_ONCE'
+              - 'RUN_EVERY_START'
+              - 'DOWNLOAD_AND_RUN_EVERY_START'

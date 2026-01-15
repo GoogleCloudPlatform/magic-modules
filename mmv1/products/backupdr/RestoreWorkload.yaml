@@ -1,0 +1,798 @@
+---
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: 'RestoreWorkload'
+description: |
+  An imperative resource that triggers a GCBDR restoration event.
+  Creating this resource will initiate a restore operation from a specified backup.
+  The resource represents the restore operation and its result.
+min_version: beta
+# Immutable ensures any config change triggers a fresh restore rather than an invalid update
+# TODO: Remove this once update operations are supported.
+immutable: true
+# Skip read since this is an imperative action resource, not a persistent resource
+exclude_read: true
+# Enable LRO polling for the background resource creation process
+autogen_async: true
+async:
+  actions: ['create']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+custom_code:
+  custom_create: 'templates/terraform/custom_create/backup_dr_restore_workload.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/backup_dr_restore_workload.go.tmpl'
+examples:
+  - name: 'backup_dr_restore_workload_compute_instance_basic'
+    primary_resource_id: 'restore_compute_basic'
+    skip_test: true
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    vars:
+      backup_vault_id: 'backup-vault'
+      data_source_id: 'data-source'
+      backup_id: 'backup'
+      backup_name: 'projects/my-project/locations/us-central1/backups/my-backup'
+      instance_name: 'restored-instance'
+  - name: 'backup_dr_restore_workload_compute_instance_full'
+    primary_resource_id: 'restore_compute_full'
+    skip_test: true
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    vars:
+      backup_vault_id: 'backup-vault'
+      data_source_id: 'data-source'
+      backup_id: 'backup'
+      backup_name: 'projects/my-project/locations/us-central1/backups/my-backup'
+      instance_name: 'restored-instance-full'
+  - name: 'backup_dr_restore_workload_disk_basic'
+    primary_resource_id: 'restore_disk_basic'
+    skip_test: true
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    vars:
+      backup_vault_id: 'backup-vault'
+      data_source_id: 'data-source'
+      backup_id: 'backup'
+      backup_name: 'projects/my-project/locations/us-central1/backups/my-backup'
+      disk_name: 'restored-disk'
+  - name: 'backup_dr_restore_workload_regional_disk'
+    primary_resource_id: 'restore_regional_disk'
+    skip_test: true
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    vars:
+      backup_vault_id: 'backup-vault'
+      data_source_id: 'data-source'
+      backup_id: 'backup'
+      backup_name: 'projects/my-project/locations/us-central1/backups/my-backup'
+      disk_name: 'restored-regional-disk'
+  - name: 'backup_dr_restore_workload_without_delete'
+    primary_resource_id: 'restore_without_delete'
+    skip_test: true
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    vars:
+      backup_vault_id: 'backup-vault'
+      data_source_id: 'data-source'
+      backup_id: 'backup'
+      backup_name: 'projects/my-project/locations/us-central1/backups/my-backup'
+      disk_name: 'persistent-disk'
+parameters:
+  - name: 'location'
+    type: String
+    required: true
+    url_param_only: true
+    description: 'Required. The location for the backup vault.'
+  - name: 'backup_vault_id'
+    type: String
+    required: true
+    url_param_only: true
+    description: 'Required. The ID of the backup vault.'
+  - name: 'data_source_id'
+    type: String
+    required: true
+    url_param_only: true
+    description: 'Required. The ID of the data source.'
+  - name: 'backup_id'
+    type: String
+    required: true
+    url_param_only: true
+    description: 'Required. The ID of the backup to restore from.'
+properties:
+  - name: 'name'
+    type: String
+    description: 'Required. The resource name of the backup instance.'
+    required: true
+  - name: 'requestId'
+    type: String
+    description: |
+      Optional. An optional request ID to identify requests. Specify a unique request ID
+      so that if you must retry your request, the server will know to ignore
+      the request if it has already been completed.
+  # --- Target Environments (oneof target_environment) ---
+  - name: 'computeInstanceTargetEnvironment'
+    type: NestedObject
+    description: 'Optional. The destination environment for GCE VM restoration.'
+    properties:
+      - name: 'project'
+        type: String
+        required: true
+        description: 'Required. Target project for the Compute Engine instance.'
+      - name: 'zone'
+        type: String
+        required: true
+        description: 'Required. The zone of the Compute Engine instance.'
+  - name: 'diskTargetEnvironment'
+    type: NestedObject
+    description: 'Optional. The destination environment for zonal disk restoration.'
+    properties:
+      - name: 'project'
+        type: String
+        required: true
+        description: 'Required. Target project for the disk.'
+      - name: 'zone'
+        type: String
+        required: true
+        description: 'Required. Target zone for the disk.'
+  - name: 'regionDiskTargetEnvironment'
+    type: NestedObject
+    description: 'Optional. The destination environment for regional disk restoration.'
+    properties:
+      - name: 'project'
+        type: String
+        required: true
+        description: 'Required. Target project for the disk.'
+      - name: 'region'
+        type: String
+        required: true
+        description: 'Required. Target region for the disk.'
+      - name: 'replicaZones'
+        type: Array
+        item_type:
+          type: String
+        required: true
+        description: 'Required. Target URLs of the replica zones for the disk.'
+  # --- Restore Properties (oneof instance_properties) ---
+  - name: 'computeInstanceRestoreProperties'
+    type: NestedObject
+    description: 'Optional. Compute Engine instance properties to be overridden during restore.'
+    properties:
+      - name: 'name'
+        type: String
+        required: true
+        description: 'Required. Name of the compute instance.'
+      - name: 'advancedMachineFeatures'
+        type: NestedObject
+        description: 'Optional. Controls for advanced machine-related behavior features.'
+        properties:
+          - name: 'enableNestedVirtualization'
+            type: Boolean
+            description: 'Optional. Whether to enable nested virtualization or not (default is false).'
+          - name: 'threadsPerCore'
+            type: Integer
+            description: 'Optional. The number of threads per physical core.'
+          - name: 'visibleCoreCount'
+            type: Integer
+            description: 'Optional. The number of physical cores to expose to an instance.'
+          - name: 'enableUefiNetworking'
+            type: Boolean
+            description: 'Optional. Whether to enable UEFI networking for instance creation.'
+      - name: 'canIpForward'
+        type: Boolean
+        description: 'Optional. Allows this instance to send and receive packets with non-matching destination or source IPs.'
+      - name: 'confidentialInstanceConfig'
+        type: NestedObject
+        description: 'Optional. Controls Confidential compute options on the instance.'
+        properties:
+          - name: 'enableConfidentialCompute'
+            type: Boolean
+            description: 'Optional. Defines whether the instance should have confidential compute enabled.'
+      - name: 'deletionProtection'
+        type: Boolean
+        description: 'Optional. Whether the resource should be protected against deletion.'
+      - name: 'description'
+        type: String
+        description: 'Optional. An optional description of this resource.'
+      - name: 'disks'
+        type: Array
+        description: 'Optional. Array of disks associated with this instance.'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'initializeParams'
+              type: NestedObject
+              description: 'Optional. Specifies the parameters to initialize this disk.'
+              properties:
+                - name: 'diskName'
+                  type: String
+                  description: 'Optional. Specifies the disk name.'
+                - name: 'replicaZones'
+                  type: Array
+                  item_type:
+                    type: String
+                  description: 'Optional. URL of the zone where the disk should be created.'
+            - name: 'deviceName'
+              type: String
+              description: 'Optional. This is used as an identifier for the disks.'
+            - name: 'kind'
+              type: String
+              description: 'Optional. Type of the resource.'
+            - name: 'mode'
+              type: Enum
+              description: 'Optional. The mode in which to attach this disk.'
+              enum_values:
+                - 'DISK_MODE_UNSPECIFIED'
+                - 'READ_WRITE'
+                - 'READ_ONLY'
+                - 'LOCKED'
+            - name: 'source'
+              type: String
+              description: 'Optional. Specifies a valid partial or full URL to an existing Persistent Disk resource.'
+            - name: 'index'
+              type: Integer
+              description: 'Optional. A zero-based index to this disk, where 0 is reserved for the boot disk.'
+            - name: 'boot'
+              type: Boolean
+              description: 'Optional. Indicates that this is a boot disk.'
+            - name: 'autoDelete'
+              type: Boolean
+              description: 'Optional. Specifies whether the disk will be auto-deleted when the instance is deleted.'
+            - name: 'license'
+              type: Array
+              item_type:
+                type: String
+              description: 'Optional. Any valid publicly visible licenses.'
+            - name: 'diskInterface'
+              type: Enum
+              description: 'Optional. Specifies the disk interface to use for attaching this disk.'
+              enum_values:
+                - 'DISK_INTERFACE_UNSPECIFIED'
+                - 'SCSI'
+                - 'NVME'
+                - 'NVDIMM'
+                - 'ISCSI'
+            - name: 'guestOsFeature'
+              type: Array
+              description: 'Optional. A list of features to enable on the guest operating system.'
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'type'
+                    type: Enum
+                    description: 'Optional. The ID of a supported feature.'
+                    enum_values:
+                      - 'FEATURE_TYPE_UNSPECIFIED'
+                      - 'VIRTIO_SCSI_MULTIQUEUE'
+                      - 'WINDOWS'
+                      - 'MULTI_IP_SUBNET'
+                      - 'UEFI_COMPATIBLE'
+                      - 'SECURE_BOOT'
+                      - 'GVNIC'
+                      - 'SEV_CAPABLE'
+                      - 'BARE_METAL_LINUX_COMPATIBLE'
+                      - 'SUSPEND_RESUME_COMPATIBLE'
+                      - 'SEV_LIVE_MIGRATABLE'
+                      - 'SEV_SNP_CAPABLE'
+                      - 'TDX_CAPABLE'
+                      - 'IDPF'
+                      - 'SEV_LIVE_MIGRATABLE_V2'
+            - name: 'diskEncryptionKey'
+              type: NestedObject
+              description: 'Optional. Encrypts or decrypts a disk using a customer-supplied encryption key.'
+              properties:
+                - name: 'rawKey'
+                  type: String
+                  description: 'Optional. Specifies a 256-bit customer-supplied encryption key.'
+                - name: 'rsaEncryptedKey'
+                  type: String
+                  description: 'Optional. RSA-wrapped 2048-bit customer-supplied encryption key.'
+                - name: 'kmsKeyName'
+                  type: String
+                  description: 'Optional. The name of the encryption key that is stored in Google Cloud KMS.'
+                - name: 'kmsKeyServiceAccount'
+                  type: String
+                  description: 'Optional. The service account being used for the encryption request.'
+            - name: 'diskSizeGb'
+              type: Integer
+              description: 'Optional. The size of the disk in GB.'
+            - name: 'savedState'
+              type: Enum
+              description: 'Optional. Specifies the saved state of the disk.'
+              enum_values:
+                - 'DISK_SAVED_STATE_UNSPECIFIED'
+                - 'PRESERVED'
+            - name: 'diskType'
+              type: String
+              description: 'Output only. The URI of the disk type resource.'
+            - name: 'type'
+              type: Enum
+              description: 'Optional. Specifies the type of the disk.'
+              enum_values:
+                - 'DISK_TYPE_UNSPECIFIED'
+                - 'SCRATCH'
+                - 'PERSISTENT'
+      - name: 'displayDevice'
+        type: NestedObject
+        description: 'Optional. Enables display device for the instance.'
+        properties:
+          - name: 'enableDisplay'
+            type: Boolean
+            description: 'Optional. Enables display for the Compute Engine VM.'
+      - name: 'guestAccelerators'
+        type: Array
+        description: 'Optional. A list of the type and count of accelerator cards attached to the instance.'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'acceleratorType'
+              type: String
+              description: 'Optional. Full or partial URL of the accelerator type resource.'
+            - name: 'acceleratorCount'
+              type: Integer
+              description: 'Optional. The number of the guest accelerator cards exposed to this instance.'
+      - name: 'hostname'
+        type: String
+        description: 'Optional. Specifies the hostname of the instance.'
+      - name: 'instanceEncryptionKey'
+        type: NestedObject
+        description: 'Optional. Encrypts suspended data for an instance with a customer-managed encryption key.'
+        properties:
+          - name: 'rawKey'
+            type: String
+          - name: 'rsaEncryptedKey'
+            type: String
+          - name: 'kmsKeyName'
+            type: String
+          - name: 'kmsKeyServiceAccount'
+            type: String
+      - name: 'keyRevocationActionType'
+        type: Enum
+        description: 'Optional. KeyRevocationActionType of the instance.'
+        enum_values:
+          - 'KEY_REVOCATION_ACTION_TYPE_UNSPECIFIED'
+          - 'NONE'
+          - 'STOP'
+      - name: 'labels'
+        type: Map
+        key_name: key
+        value_type:
+          name: value
+          type: NestedObject
+          properties:
+            - name: 'value'
+              type: String
+        description: 'Optional. Labels to apply to this instance.'
+      - name: 'machineType'
+        type: String
+        description: 'Optional. Full or partial URL of the machine type resource to use for this instance.'
+      - name: 'metadata'
+        type: NestedObject
+        description: 'Optional. This includes custom metadata and predefined keys.'
+        properties:
+          - name: 'items'
+            type: Array
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'key'
+                  type: String
+                - name: 'value'
+                  type: String
+      - name: 'minCpuPlatform'
+        type: String
+        description: 'Optional. Minimum CPU platform to use for this instance.'
+      - name: 'networkInterfaces'
+        type: Array
+        description: 'Optional. An array of network configurations for this instance.'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'network'
+              type: String
+              description: 'Optional. URL of the VPC network resource for this instance.'
+            - name: 'subnetwork'
+              type: String
+              description: 'Optional. The URL of the Subnetwork resource for this instance.'
+            - name: 'ipAddress'
+              type: String
+              description: 'Optional. An IPv4 internal IP address to assign to the instance.'
+            - name: 'ipv6Address'
+              type: String
+              description: 'Optional. An IPv6 internal network address for this network interface.'
+            - name: 'internalIpv6PrefixLength'
+              type: Integer
+              description: 'Optional. The prefix length of the primary internal IPv6 range.'
+            - name: 'accessConfigs'
+              type: Array
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'type'
+                    type: Enum
+                    description: 'Optional. The type of configuration.'
+                    enum_values:
+                      - 'ACCESS_TYPE_UNSPECIFIED'
+                      - 'ONE_TO_ONE_NAT'
+                      - 'DIRECT_IPV6'
+                  - name: 'name'
+                    type: String
+                    description: 'Optional. The name of this access configuration.'
+                  - name: 'externalIp'
+                    type: String
+                  - name: 'externalIpv6'
+                    type: String
+                  - name: 'externalIpv6PrefixLength'
+                    type: Integer
+                  - name: 'setPublicPtr'
+                    type: Boolean
+                  - name: 'publicPtrDomainName'
+                    type: String
+                  - name: 'networkTier'
+                    type: Enum
+                    enum_values:
+                      - 'NETWORK_TIER_UNSPECIFIED'
+                      - 'PREMIUM'
+                      - 'STANDARD'
+            - name: 'ipv6AccessConfigs'
+              type: Array
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'type'
+                    type: Enum
+                    description: 'Optional. The type of configuration.'
+                    enum_values:
+                      - 'ACCESS_TYPE_UNSPECIFIED'
+                      - 'ONE_TO_ONE_NAT'
+                      - 'DIRECT_IPV6'
+                  - name: 'name'
+                    type: String
+                    description: 'Optional. The name of this access configuration.'
+                  - name: 'externalIp'
+                    type: String
+                  - name: 'externalIpv6'
+                    type: String
+                  - name: 'externalIpv6PrefixLength'
+                    type: Integer
+                  - name: 'setPublicPtr'
+                    type: Boolean
+                  - name: 'publicPtrDomainName'
+                    type: String
+                  - name: 'networkTier'
+                    type: Enum
+                    enum_values:
+                      - 'NETWORK_TIER_UNSPECIFIED'
+                      - 'PREMIUM'
+                      - 'STANDARD'
+            - name: 'aliasIpRanges'
+              type: Array
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'ipCidrRange'
+                    type: String
+                  - name: 'subnetworkRangeName'
+                    type: String
+            - name: 'stackType'
+              type: Enum
+              enum_values:
+                - 'STACK_TYPE_UNSPECIFIED'
+                - 'IPV4_ONLY'
+                - 'IPV4_IPV6'
+            - name: 'ipv6AccessType'
+              type: Enum
+              enum_values:
+                - 'UNSPECIFIED_IPV6_ACCESS_TYPE'
+                - 'INTERNAL'
+                - 'EXTERNAL'
+            - name: 'queueCount'
+              type: Integer
+            - name: 'nicType'
+              type: Enum
+              enum_values:
+                - 'NIC_TYPE_UNSPECIFIED'
+                - 'VIRTIO_NET'
+                - 'GVNIC'
+            - name: 'networkAttachment'
+              type: String
+      - name: 'networkPerformanceConfig'
+        type: NestedObject
+        description: 'Optional. Configure network performance such as egress bandwidth tier.'
+        properties:
+          - name: 'totalEgressBandwidthTier'
+            type: Enum
+            enum_values:
+              - 'TIER_UNSPECIFIED'
+              - 'DEFAULT'
+              - 'TIER_1'
+      - name: 'params'
+        type: NestedObject
+        description: 'Input only. Additional params passed with the request.'
+        properties:
+          - name: 'resourceManagerTags'
+            type: Map
+            key_name: key
+            value_type:
+              name: value
+              type: NestedObject
+              properties:
+                - name: 'value'
+                  type: String
+      - name: 'privateIpv6GoogleAccess'
+        type: Enum
+        description: 'Optional. The private IPv6 google access type for the VM.'
+        enum_values:
+          - 'INSTANCE_PRIVATE_IPV6_GOOGLE_ACCESS_UNSPECIFIED'
+          - 'INHERIT_FROM_SUBNETWORK'
+          - 'ENABLE_OUTBOUND_VM_ACCESS_TO_GOOGLE'
+          - 'ENABLE_BIDIRECTIONAL_ACCESS_TO_GOOGLE'
+      - name: 'allocationAffinity'
+        type: NestedObject
+        description: 'Optional. Specifies the reservations that this instance can consume from.'
+        properties:
+          - name: 'consumeAllocationType'
+            type: Enum
+            enum_values:
+              - 'TYPE_UNSPECIFIED'
+              - 'NO_RESERVATION'
+              - 'ANY_RESERVATION'
+              - 'SPECIFIC_RESERVATION'
+          - name: 'key'
+            type: String
+          - name: 'values'
+            type: Array
+            item_type:
+              type: String
+      - name: 'resourcePolicies'
+        type: Array
+        item_type:
+          type: String
+        description: 'Optional. Resource policies applied to this instance.'
+      - name: 'scheduling'
+        type: NestedObject
+        description: 'Optional. Sets the scheduling options for this instance.'
+        properties:
+          - name: 'onHostMaintenance'
+            type: Enum
+            enum_values:
+              - 'ON_HOST_MAINTENANCE_UNSPECIFIED'
+              - 'TERMINATE'
+              - 'MIGRATE'
+          - name: 'automaticRestart'
+            type: Boolean
+          - name: 'preemptible'
+            type: Boolean
+          - name: 'nodeAffinities'
+            type: Array
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'key'
+                  type: String
+                - name: 'operator'
+                  type: Enum
+                  enum_values:
+                    - 'OPERATOR_UNSPECIFIED'
+                    - 'IN'
+                    - 'NOT_IN'
+                - name: 'values'
+                  type: Array
+                  item_type:
+                    type: String
+          - name: 'minNodeCpus'
+            type: Integer
+          - name: 'provisioningModel'
+            type: Enum
+            enum_values:
+              - 'PROVISIONING_MODEL_UNSPECIFIED'
+              - 'STANDARD'
+              - 'SPOT'
+          - name: 'instanceTerminationAction'
+            type: Enum
+            enum_values:
+              - 'INSTANCE_TERMINATION_ACTION_UNSPECIFIED'
+              - 'DELETE'
+              - 'STOP'
+          - name: 'localSsdRecoveryTimeout'
+            type: NestedObject
+            properties:
+              - name: 'seconds'
+                type: Integer
+              - name: 'nanos'
+                type: Integer
+          - name: 'maxRunDuration'
+            type: NestedObject
+            properties:
+              - name: 'seconds'
+                type: Integer
+              - name: 'nanos'
+                type: Integer
+          - name: 'terminationTime'
+            type: String
+      - name: 'serviceAccounts'
+        type: Array
+        description: 'Optional. A list of service accounts, with their specified scopes, authorized for this instance.'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'email'
+              type: String
+            - name: 'scopes'
+              type: Array
+              item_type:
+                type: String
+      - name: 'shieldedInstanceConfig'
+        type: NestedObject
+        description: 'Optional. Controls Shielded compute options on the instance.'
+        properties:
+          - name: 'enableSecureBoot'
+            type: Boolean
+          - name: 'enableVtpm'
+            type: Boolean
+          - name: 'enableIntegrityMonitoring'
+            type: Boolean
+      - name: 'tags'
+        type: NestedObject
+        description: 'Optional. Tags to apply to this instance.'
+        properties:
+          - name: 'items'
+            type: Array
+            item_type:
+              type: String
+  - name: 'diskRestoreProperties'
+    type: NestedObject
+    description: 'Optional. Disk properties to be overridden during restore.'
+    properties:
+      - name: 'name'
+        type: String
+        required: true
+        description: 'Required. Name of the disk.'
+      - name: 'description'
+        type: String
+        description: 'Optional. An optional description of this resource.'
+      - name: 'sizeGb'
+        type: Integer
+        required: true
+        description: 'Required. The size of the disk in GB.'
+      - name: 'licenses'
+        type: Array
+        item_type:
+          type: String
+        description: 'Optional. A list of publicly available licenses that are applicable to this backup.'
+      - name: 'guestOsFeature'
+        type: Array
+        description: 'Optional. A list of features to enable in the guest operating system.'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'type'
+              type: Enum
+              enum_values:
+                - 'FEATURE_TYPE_UNSPECIFIED'
+                - 'VIRTIO_SCSI_MULTIQUEUE'
+                - 'WINDOWS'
+                - 'MULTI_IP_SUBNET'
+                - 'UEFI_COMPATIBLE'
+                - 'SECURE_BOOT'
+                - 'GVNIC'
+                - 'SEV_CAPABLE'
+                - 'BARE_METAL_LINUX_COMPATIBLE'
+                - 'SUSPEND_RESUME_COMPATIBLE'
+                - 'SEV_LIVE_MIGRATABLE'
+                - 'SEV_SNP_CAPABLE'
+                - 'TDX_CAPABLE'
+                - 'IDPF'
+                - 'SEV_LIVE_MIGRATABLE_V2'
+      - name: 'diskEncryptionKey'
+        type: NestedObject
+        description: 'Optional. Encrypts the disk using a customer-supplied encryption key.'
+        properties:
+          - name: 'rawKey'
+            type: String
+          - name: 'rsaEncryptedKey'
+            type: String
+          - name: 'kmsKeyName'
+            type: String
+          - name: 'kmsKeyServiceAccount'
+            type: String
+      - name: 'physicalBlockSizeBytes'
+        type: Integer
+        description: 'Optional. Physical block size of the persistent disk, in bytes.'
+      - name: 'provisionedIops'
+        type: Integer
+        description: 'Optional. Indicates how many IOPS to provision for the disk.'
+      - name: 'provisionedThroughput'
+        type: Integer
+        description: 'Optional. Indicates how much throughput to provision for the disk.'
+      - name: 'enableConfidentialCompute'
+        type: Boolean
+        description: 'Optional. Indicates whether this disk is using confidential compute mode.'
+      - name: 'storagePool'
+        type: String
+        description: 'Optional. The storage pool in which the new disk is created.'
+      - name: 'accessMode'
+        type: Enum
+        description: 'Optional. The access mode of the disk.'
+        enum_values:
+          - 'READ_WRITE_SINGLE'
+          - 'READ_WRITE_MANY'
+          - 'READ_ONLY_MANY'
+      - name: 'architecture'
+        type: Enum
+        description: 'Optional. The architecture of the source disk.'
+        enum_values:
+          - 'ARCHITECTURE_UNSPECIFIED'
+          - 'X86_64'
+          - 'ARM64'
+      - name: 'resourcePolicy'
+        type: Array
+        item_type:
+          type: String
+        description: 'Optional. Resource policies applied to this disk.'
+      - name: 'type'
+        type: String
+        required: true
+        description: 'Required. URL of the disk type resource describing which disk type to use.'
+      - name: 'labels'
+        type: Map
+        key_name: key
+        value_type:
+          name: value
+          type: NestedObject
+          properties:
+            - name: 'value'
+              type: String
+        description: 'Optional. Labels to apply to this disk.'
+      - name: 'resourceManagerTags'
+        type: Map
+        key_name: key
+        value_type:
+          name: value
+          type: NestedObject
+          properties:
+            - name: 'value'
+              type: String
+        description: 'Optional. Resource manager tags to be bound to the disk.'
+  - name: 'clearOverridesFieldMask'
+    type: String
+    description: 'Optional. A field mask used to clear server-side default values during restore.'
+  # --- Terraform Specific ---
+  - name: 'deleteRestoredInstance'
+    type: Boolean
+    default_value: true
+    description: |
+      Optional. If true (default), running terraform destroy will delete the live resource in GCP.
+      If false, only the restore record is removed from the state, leaving the resource active.
+  # --- Output (RestoreBackupResponse) ---
+  - name: 'targetResource'
+    type: NestedObject
+    output: true
+    description: 'Output only. Details of the target resource created/modified as part of restore.'
+    properties:
+      - name: 'gcpResource'
+        type: NestedObject
+        description: 'Output only. Details of the native Google Cloud resource created as part of restore.'
+        properties:
+          - name: 'gcpResourcename'
+            type: String
+            description: 'Output only. Name of the Google Cloud resource.'
+          - name: 'location'
+            type: String
+            description: 'Output only. Location of the resource.'
+          - name: 'type'
+            type: String
+            description: 'Output only. Type of the resource.'

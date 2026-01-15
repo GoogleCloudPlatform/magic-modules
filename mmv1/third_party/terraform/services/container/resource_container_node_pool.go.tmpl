@@ -1,17 +1,13 @@
 package container
 
 import (
-{{- if ne $.TargetVersionName `ga` }}
 	"context"
 	"os"
-{{- end }}
 	"fmt"
 	"log"
 	"regexp"
 	"strings"
-{{- if ne $.TargetVersionName `ga` }}
 	"sync"
-{{- end }}
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
@@ -24,6 +20,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 {{ if eq $.TargetVersionName `ga` }}
+	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/container/v1"
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
@@ -33,7 +30,6 @@ import (
 
 var clusterIdRegex = regexp.MustCompile("projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/clusters/(?P<name>[^/]+)")
 
-{{ if ne $.TargetVersionName `ga` }}
 type nodePoolWithUpdateTime struct {
 	nodePool   *container.NodePool
 	updateTime time.Time
@@ -180,7 +176,6 @@ var (
 		ttl:                   getCacheTTL(),
 	}
 )
-{{- end }}
 
 func ResourceContainerNodePool() *schema.Resource {
 	return &schema.Resource{
@@ -250,7 +245,11 @@ var schemaBlueGreenSettings = &schema.Schema{
 		Schema: map[string]*schema.Schema{
 			"standard_rollout_policy": {
 				Type:        schema.TypeList,
+				{{ if eq $.TargetVersionName `ga` -}}
 				Required:    true,
+				{{- else }}
+				Optional:    true,
+				{{- end }}
 				MaxItems:    1,
 				Description: `Standard rollout policy is the default policy for blue-green.`,
 				Elem: &schema.Resource{
@@ -258,7 +257,7 @@ var schemaBlueGreenSettings = &schema.Schema{
 						"batch_percentage": {
 							Type:         schema.TypeFloat,
 							Optional:     true,
-							Computed:	  true,
+							Computed:    true,
 							Description:  `Percentage of the blue pool nodes to drain in a batch.`,
 							ValidateFunc: validation.FloatBetween(0.0, 1.0),
 						},
@@ -271,7 +270,7 @@ var schemaBlueGreenSettings = &schema.Schema{
 						"batch_soak_duration": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Computed:	 true,
+							Computed:    true,
 							Description: `Soak time after each batch gets drained.`,
 						},
 					},
@@ -283,6 +282,24 @@ var schemaBlueGreenSettings = &schema.Schema{
 				Computed:    true,
 				Description: `Time needed after draining entire blue pool. After this period, blue pool will be cleaned up.`,
 			},
+			{{ if ne $.TargetVersionName `ga` -}}
+			"autoscaled_rollout_policy": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: `Autoscaled rollout policy for blue-green upgrade.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"wait_for_drain_duration": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+							Description: `Time in seconds to wait after cordoning the blue pool before draining the nodes.`,
+						},
+					},
+				},
+			},
+			{{- end }}
 		},
 	},
 	Description: `Settings for BlueGreen node pool upgrade.`,
@@ -865,17 +882,6 @@ func resourceContainerNodePoolRead(d *schema.ResourceData, meta interface{}) err
 
 	name := getNodePoolName(d.Id())
 
-{{ if eq $.TargetVersionName `ga` }}
-	clusterNodePoolsGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Get(nodePoolInfo.fullyQualifiedName(name))
-	if config.UserProjectOverride {
-		clusterNodePoolsGetCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-	}
-	nodePool, err := clusterNodePoolsGetCall.Do()
-	if err != nil {
-		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("NodePool %q from cluster %q", name, nodePoolInfo.cluster))
-	}
-
-{{- else }}
 	if err := npCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo, name); err != nil {
 	  return err
 	}
@@ -885,7 +891,6 @@ func resourceContainerNodePoolRead(d *schema.ResourceData, meta interface{}) err
 		d.SetId("")
 		return nil
 	}
-{{- end }}
 
 	npMap, err := flattenNodePool(d, config, nodePool, "")
 	if err != nil {
@@ -942,9 +947,7 @@ func resourceContainerNodePoolUpdate(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-{{ if ne $.TargetVersionName `ga` }}
 	npCache.remove(nodePoolInfo.fullyQualifiedName(name))
-{{- end }}
 
 	return resourceContainerNodePoolRead(d, meta)
 }
@@ -1026,9 +1029,7 @@ func resourceContainerNodePoolDelete(d *schema.ResourceData, meta interface{}) e
 
 	d.SetId("")
 
-{{ if ne $.TargetVersionName `ga` }}
 	npCache.remove(nodePoolInfo.fullyQualifiedName(name))
-{{- end }}
 
 	return nil
 }
@@ -1046,20 +1047,6 @@ func resourceContainerNodePoolExists(d *schema.ResourceData, meta interface{}) (
 	}
 
 	name := getNodePoolName(d.Id())
-{{- if eq $.TargetVersionName `ga` }}
-	clusterNodePoolsGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Get(nodePoolInfo.fullyQualifiedName(name))
-	if config.UserProjectOverride {
-		clusterNodePoolsGetCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-	}
-	_, err = clusterNodePoolsGetCall.Do()
-	if err != nil {
-		if err = transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Container NodePool %s", name)); err == nil {
-			return false, nil
-		}
-		// There was some other error in reading the resource
-		return true, err
-	}
-{{- else }}
 	if err := npCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo, name); err != nil {
         return false, err
 	}
@@ -1069,7 +1056,6 @@ func resourceContainerNodePoolExists(d *schema.ResourceData, meta interface{}) (
 		d.SetId("")
 		return false, nil
 	}
-{{- end }}
 	return true, nil
 }
 
@@ -1240,6 +1226,14 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 				return nil, fmt.Errorf("Blue-green upgrade settings may not be changed when blue-green strategy is not enabled")
 			}
 
+			{{ if ne $.TargetVersionName `ga` -}}
+			if _, ok1 := blueGreenSettingsConfig["standard_rollout_policy"]; ok1 {
+				if _, ok2 := blueGreenSettingsConfig["autoscaled_rollout_policy"]; ok2 {
+					return nil, fmt.Errorf("`standard_rollout_policy` and `autoscaled_rollout_policy` cannot be set at the same time")
+				}
+			}
+			{{- end }}
+
 			if v, ok := blueGreenSettingsConfig["node_pool_soak_duration"]; ok {
 				np.UpgradeSettings.BlueGreenSettings.NodePoolSoakDuration = v.(string)
 			}
@@ -1260,6 +1254,17 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 
 				np.UpgradeSettings.BlueGreenSettings.StandardRolloutPolicy = standardRolloutPolicy
 			}
+			{{ if ne $.TargetVersionName `ga` -}}
+			if v, ok := blueGreenSettingsConfig["autoscaled_rollout_policy"]; ok && len(v.([]interface{})) > 0 {
+				autoscaledRolloutPolicyConfig := v.([]interface{})[0].(map[string]interface{})
+				autoscaledRolloutPolicy := &container.AutoscaledRolloutPolicy{}
+
+				if v, ok := autoscaledRolloutPolicyConfig["wait_for_drain_duration"]; ok {
+					autoscaledRolloutPolicy.WaitForDrainDuration = v.(string)
+				}
+				np.UpgradeSettings.BlueGreenSettings.AutoscaledRolloutPolicy = autoscaledRolloutPolicy
+			}
+			{{- end }}
 		}
 	}
 
@@ -1280,6 +1285,20 @@ func flattenNodePoolStandardRolloutPolicy(rp *container.StandardRolloutPolicy) [
 	}
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
+func flattenNodePoolAutoscaledRolloutPolicy(rp *container.AutoscaledRolloutPolicy) []map[string]interface{} {
+  if rp == nil {
+    return nil
+  }
+
+  return []map[string]interface{}{
+    {
+      "wait_for_drain_duration": rp.WaitForDrainDuration,
+    },
+  }
+}
+{{- end }}
+
 func flattenNodePoolBlueGreenSettings(bg *container.BlueGreenSettings) []map[string]interface{} {
 	if bg == nil {
 		return nil
@@ -1288,6 +1307,9 @@ func flattenNodePoolBlueGreenSettings(bg *container.BlueGreenSettings) []map[str
 		{
 			"node_pool_soak_duration": bg.NodePoolSoakDuration,
 			"standard_rollout_policy": flattenNodePoolStandardRolloutPolicy(bg.StandardRolloutPolicy),
+			{{ if ne $.TargetVersionName `ga` -}}
+			"autoscaled_rollout_policy": flattenNodePoolAutoscaledRolloutPolicy(bg.AutoscaledRolloutPolicy),
+			{{- end }}
 		},
 	}
 }
@@ -1325,16 +1347,6 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 		if len(matches) < 4 {
 			return nil, fmt.Errorf("Error reading instance group manage URL '%q'", url)
 		}
-{{- if eq $.TargetVersionName `ga` }}
-		igm, err := config.NewComputeClient(userAgent).InstanceGroupManagers.Get(matches[1], matches[2], matches[3]).Do()
-		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
-			// The IGM URL in is stale; don't include it
-			continue
-		}
-		if err != nil {
-			return nil, fmt.Errorf("Error reading instance group manager returned as an instance group URL: %q", err)
-		}
-{{- else }}
         if strings.HasPrefix("gk3", matches[3]) {
             // IGM is autopilot so we know it will not be found, skip it
             continue
@@ -1347,7 +1359,6 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 		    // The IGM URL is stale; don't include it
 		    continue
 		}
-{{- end }}
 		size += int(igm.TargetSize)
 		igmUrls = append(igmUrls, url)
 		managedIgmUrls = append(managedIgmUrls, igm.InstanceGroup)
@@ -1797,6 +1808,17 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 					}
 					blueGreenSettings.StandardRolloutPolicy = standardRolloutPolicy
 				}
+				{{ if ne $.TargetVersionName `ga` -}}
+				if v, ok := blueGreenSettingsConfig["autoscaled_rollout_policy"]; ok && len(v.([]interface{})) > 0 {
+					autoscaledRolloutPolicy := &container.AutoscaledRolloutPolicy{}
+					if autoscaledRolloutPolicyConfig, ok := v.([]interface{})[0].(map[string]interface{}); ok {
+						if v, ok := autoscaledRolloutPolicyConfig["wait_for_drain_duration"]; ok {
+							autoscaledRolloutPolicy.WaitForDrainDuration = v.(string)
+						}
+					}
+					blueGreenSettings.AutoscaledRolloutPolicy = autoscaledRolloutPolicy
+				}
+				{{- end }}
 				upgradeSettings.BlueGreenSettings = blueGreenSettings
 			}
 		}

@@ -59,13 +59,9 @@ custom_code:
   pre_create: 'templates/terraform/pre_create/alloydb_cluster.go.tmpl'
   pre_update: 'templates/terraform/pre_update/alloydb_cluster.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/alloydb_cluster.go.tmpl'
-  constants: 'templates/terraform/constants/alloydb_cluster.go.tmpl'
-  tgc_decoder: 'templates/tgc_next/decoders/alloydb_cluster.go.tmpl'
-custom_diff:
-  - 'alloydbClusterCustomizeDiff'
 # Skipping the sweeper because we need to force-delete clusters.
 exclude_sweeper: true
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 tgc_include_handwritten_tests: true
 examples:
   - name: 'alloydb_cluster_basic'
@@ -326,7 +322,7 @@ properties:
   - name: 'initialUser'
     type: NestedObject
     description: |
-      Initial user to setup during cluster creation. This must be set for all new Clusters.
+      Initial user to setup during cluster creation. If unset for new Clusters, a postgres role with null password is created. You will need to create additional users or set the password in order to log in.
     ignore_read: true
     custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_input_user_flatten.go.tmpl'
     properties:
@@ -335,13 +331,18 @@ properties:
         description: |
           The database username.
         is_missing_in_cai: true
+        at_least_one_of:
+          - 'initial_user.0.user'
+          - 'initial_user.0.password'
       - name: 'password'
         type: String
         description: |
           The initial password for the user.
-        required: true
         sensitive: true
         is_missing_in_cai: true
+        at_least_one_of:
+          - 'initial_user.0.user'
+          - 'initial_user.0.password'
   - name: 'restoreBackupSource'
     type: NestedObject
     description: |
