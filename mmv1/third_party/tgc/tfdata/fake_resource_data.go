@@ -132,7 +132,7 @@ func (d *FakeResourceData) Set(string, interface{}) error     { return nil }
 func (d *FakeResourceData) SetId(string)                      {}
 func (d *FakeResourceData) GetProviderMeta(interface{}) error { return nil }
 func (d *FakeResourceData) Timeout(key string) time.Duration  { return time.Duration(1) }
-func (d *FakeResourceData) GetRawConfig() cty.Value { return cty.NullVal(cty.String) }
+func (d *FakeResourceData) GetRawConfig() cty.Value           { return cty.NullVal(cty.String) }
 
 func NewFakeResourceData(kind string, resourceSchema map[string]*schema.Schema, values map[string]interface{}) *FakeResourceData {
 	state := map[string]string{}

@@ -18,7 +18,7 @@ type ResourceDataMock struct {
 	FieldsInSchema      map[string]interface{}
 	FieldsWithHasChange []string
 	id                  string
-	identity *schema.IdentityData
+	identity            *schema.IdentityData
 }
 
 func (d *ResourceDataMock) HasChange(key string) bool {
