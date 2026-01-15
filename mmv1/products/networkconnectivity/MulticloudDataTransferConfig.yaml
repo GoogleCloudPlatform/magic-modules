@@ -104,7 +104,7 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: 'service_name'
+        - name: 'serviceName'
           type: String
           description: |
             The name of the service, like "big-query" or "cloud-storage".
@@ -121,7 +121,7 @@ properties:
                 type: String
                 description: 'The state of the resource.'
                 output: true
-              - name: 'effective_time'
+              - name: 'effectiveTime'
                 type: String
                 description: 'The time when the state becomes effective'
                 output: true
