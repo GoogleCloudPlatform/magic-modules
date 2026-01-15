@@ -294,6 +294,7 @@ properties:
         custom_tgc_expand: 'templates/tgc_next/custom_expand/dataproc_batch.go.tmpl'
         custom_tgc_flatten: 'templates/tgc_next/custom_flatten/dataproc_batch.go.tmpl'
       - name: 'effective_properties'
+        api_name: 'properties'
         type: KeyValuePairs
         description: |
           A mapping of property names to values, which are used to configure workload execution.

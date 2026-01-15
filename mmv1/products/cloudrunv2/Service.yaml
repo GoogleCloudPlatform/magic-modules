@@ -817,7 +817,7 @@ properties:
                   description: |-
                     Entry point of the function when the image is a Cloud Run function.
                   output: true
-                - name: 'source_location'
+                - name: 'sourceLocation'
                   type: String
                   description: |-
                     Source code location of the image.

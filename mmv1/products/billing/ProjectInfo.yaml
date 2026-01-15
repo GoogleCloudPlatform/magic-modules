@@ -46,7 +46,7 @@ examples:
     exclude_import_test: true
 parameters:
 properties:
-  - name: 'billing_account'
+  - name: 'billingAccount'
     type: String
     description: |
       The ID of the billing account associated with the project, if
