@@ -692,7 +692,7 @@ properties:
         description: |
           The name of the topic from which this subscription is receiving messages.
         required: true
-      - name: 'service_account_email'
+      - name: 'serviceAccountEmail'
         type: String
         description: |
           Service account that will make the push request.
