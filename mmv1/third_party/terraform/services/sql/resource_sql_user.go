@@ -65,6 +65,34 @@ func ResourceSqlUser() *schema.Resource {
 		SchemaVersion: 1,
 		MigrateState:  resourceSqlUserMigrateState,
 
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"project": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+						Description:       `The project that the service account belongs to.`,
+					},
+					"instance": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+						Description:       `The name of the Cloud SQL instance.`,
+					},
+					"name": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+						Description:       `The name of the user.`,
+					},
+					"host": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+						Description:       `The host the user can connect from. This is only supported for MySQL instances. Don't set this field for PostgreSQL instances. Can be an IP address. Changing this forces a new resource to be created.`,
+					},
+				}
+			},
+		},
+
 		Schema: map[string]*schema.Schema{
 			"host": {
 				Type:        schema.TypeString,
@@ -425,6 +453,28 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", user.Name, user.Host, user.Instance))
+
+	identity, err := d.Identity()
+	if err != nil {
+		return fmt.Errorf("Error getting identity: %s", err)
+	}
+	err = identity.Set("project", project)
+	if err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	err = identity.Set("instance", instance)
+	if err != nil {
+		return fmt.Errorf("Error setting instance: %s", err)
+	}
+	err = identity.Set("name", user.Name)
+	if err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
+	}
+	err = identity.Set("host", user.Host)
+	if err != nil {
+		return fmt.Errorf("Error setting host: %s", err)
+	}
+
 	return nil
 }
 
