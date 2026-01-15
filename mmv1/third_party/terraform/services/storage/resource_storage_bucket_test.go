@@ -1699,6 +1699,26 @@ func TestAccStorageBucket_IPFilter(t *testing.T) {
 	})
 }
 
+func TestAccStorageBucket_ResourceIdentity(t *testing.T) {
+	t.Parallel()
+
+	bucketName := fmt.Sprintf("storage-bucket-test-%s", acctest.RandString(t, 10))
+
+	resource.Test(t, resource.TestCase{
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_basic(bucketName),
+			},
+			{
+				ResourceName:    "google_storage_bucket.bucket",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+			},
+		},
+	})
+}
+
 func testAccCheckStorageBucketPutFolderItem(t *testing.T, bucketName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
