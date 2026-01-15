@@ -29,7 +29,7 @@ func TestAccComputeInstancePowerAction_basic(t *testing.T) {
 
 	rName := fmt.Sprintf("tf-test-power-action%s", acctest.RandString(t, 10))
 
-	resource.Test(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
