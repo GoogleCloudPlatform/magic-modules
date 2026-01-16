@@ -114,6 +114,26 @@ examples:
     ignore_read_extra:
       - 'oidc.0.client_secret.0.value.0.plain_text'
       - 'extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text'
+  - name: 'iam_workforce_pool_provider_extra_attributes_display_name_oauth2_config_client_basic'
+    primary_resource_id: 'example'
+    vars:
+      workforce_pool_id: 'example-pool'
+      provider_id: 'example-prvdr'
+    test_env_vars:
+      org_id: 'ORG_ID'
+    ignore_read_extra:
+      - 'oidc.0.client_secret.0.value.0.plain_text'
+      - 'extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text'
+  - name: 'iam_workforce_pool_provider_extra_attributes_display_name_oauth2_config_client_full'
+    primary_resource_id: 'example'
+    vars:
+      workforce_pool_id: 'example-pool'
+      provider_id: 'example-prvdr'
+    test_env_vars:
+      org_id: 'ORG_ID'
+    ignore_read_extra:
+      - 'oidc.0.client_secret.0.value.0.plain_text'
+      - 'extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text'
   - name: 'iam_workforce_pool_provider_extended_attributes_oauth2_config_client_basic'
     primary_resource_id: 'example'
     vars:
@@ -466,10 +486,19 @@ properties:
           group IDs obtained from Azure AD are present in `assertion.groups` for
           OIDC providers and `assertion.attributes.groups` for SAML providers for
           attribute mapping.
+          * AZURE_AD_GROUPS_DISPLAY_NAME: Used to get the user's group claims from the Azure AD identity provider
+          using configuration provided in ExtraAttributesOAuth2Client and `displayName` property
+          of the `microsoft.graph.group` object is used for claim mapping. See
+          https://learn.microsoft.com/en-us/graph/api/resources/group?view=graph-rest-1.0#properties
+          for more details on `microsoft.graph.group` properties. The
+          group displayNames obtained from Azure AD are present in `assertion.groups` for
+          OIDC providers and `assertion.attributes.groups` for SAML providers for
+          attribute mapping.
         required: true
         enum_values:
           - 'AZURE_AD_GROUPS_MAIL'
           - 'AZURE_AD_GROUPS_ID'
+          - 'AZURE_AD_GROUPS_DISPLAY_NAME'
       - name: 'queryParameters'
         type: NestedObject
         description: |
@@ -478,9 +507,11 @@ properties:
           - name: 'filter'
             type: String
             description: |
-              The filter used to request specific records from IdP. In case of attributes type as AZURE_AD_GROUPS_MAIL and AZURE_AD_GROUPS_ID, it represents the
-              filter used to request specific groups for users from IdP. By default, all of the groups associated with the user are fetched. The
-              groups should be security enabled. See https://learn.microsoft.com/en-us/graph/search-query-parameter for more details.
+              The filter used to request specific records from IdP. In case of attributes type as AZURE_AD_GROUPS_MAIL,
+              AZURE_AD_GROUPS_ID and AZURE_AD_GROUPS_DISPLAY_NAME, it represents the filter used to request specific
+              groups for users from IdP. By default, all of the groups associated with the user are fetched. The groups
+              should be security enabled. See https://learn.microsoft.com/en-us/graph/search-query-parameter for more
+              details.
   - name: 'extendedAttributesOauth2Client'
     type: NestedObject
     description: |
