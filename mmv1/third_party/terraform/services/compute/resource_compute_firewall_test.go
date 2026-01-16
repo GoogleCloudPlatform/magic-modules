@@ -351,6 +351,45 @@ func TestAccComputeFirewall_resourceManagerTags(t *testing.T) {
 	})
 }
 
+func TestAccComputeFirewall_sourceRangesIpv6(t *testing.T) {
+	t.Parallel()
+
+	networkName := fmt.Sprintf("tf-test-firewall-%s", acctest.RandString(t, 10))
+	firewallName := fmt.Sprintf("tf-test-firewall-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeFirewallDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeFirewall_sourceRangesIpv6(networkName, firewallName),
+			},
+			{
+				ResourceName:      "google_compute_firewall.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeFirewall_sourceRangesIpv6(networkName, firewallName),
+			},
+			{
+				ResourceName:      "google_compute_firewall.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeFirewall_sourceRangesIpv6Update(networkName, firewallName),
+			},
+			{
+				ResourceName:      "google_compute_firewall.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccComputeFirewall_resourceManagerTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "foobar" {
@@ -686,3 +725,50 @@ resource "google_compute_firewall" "foobar" {
 }
 `, network, network, network, firewall)
 }
+
+func testAccComputeFirewall_sourceRangesIpv6(network, firewall string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_firewall" "foobar" {
+  name        = "%s"
+  description = "Resource created for Terraform acceptance testing"
+  network     = google_compute_network.foobar.name
+  source_tags = ["foo"]
+
+  source_ranges      = ["0000:00:0000:00::/0"]
+  destination_ranges = ["192.168.1.0/24"]
+
+  allow {
+    protocol = "icmp"
+  }
+}
+`, network, firewall)
+}
+
+func testAccComputeFirewall_sourceRangesIpv6Update(network, firewall string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_firewall" "foobar" {
+  name        = "%s"
+  description = "Resource created for Terraform acceptance testing"
+  network     = google_compute_network.foobar.name
+  source_tags = ["foo"]
+
+  source_ranges      = ["0000:0000::/0"]
+  destination_ranges = ["192.168.1.0/24"]
+
+  allow {
+    protocol = "icmp"
+  }
+}
+`, network, firewall)
+}
+
