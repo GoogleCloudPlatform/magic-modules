@@ -163,7 +163,7 @@ properties:
           item_type:
             type: NestedObject
             properties:
-              - name: detailMessage
+              - name: detail_message
                 type: String
                 description: |-
                   A message with details about the error.
