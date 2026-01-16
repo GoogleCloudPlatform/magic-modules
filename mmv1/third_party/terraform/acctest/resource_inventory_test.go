@@ -225,6 +225,31 @@ func TestValidateResourceMetadata(t *testing.T) {
 		}
 	}
 
+	// Most of the fields in this list probably represent bugs in resource logic
+	// and should be fixed over time.
+	allowedApiNameUnderscores := map[string]struct{}{
+		"google_bigquery_job.user_email":                                                                                               struct{}{},
+		"google_billing_project_info.billing_account":                                                                                  struct{}{},
+		"google_cloud_run_v2_service.template.containers.build_info.source_location":                                                   struct{}{},
+		"google_compute_network.delete_bgp_always_compare_med":                                                                         struct{}{},
+		"google_compute_router_peer.custom_learned_route_priority":                                                                     struct{}{},
+		"google_dataproc_batch.runtime_config.effective_properties":                                                                    struct{}{},
+		"google_dataproc_session_template.runtime_config.effective_properties":                                                         struct{}{},
+		"google_datastream_connection_profile.salesforce_profile.oauth2_client_credentials.client_id":                                  struct{}{},
+		"google_developer_connect_insights_config.errors.details.detail_message":                                                       struct{}{},
+		"google_integrations_auth_config.client_certificate.encrypted_private_key":                                                     struct{}{},
+		"google_integrations_auth_config.client_certificate.passphrase":                                                                struct{}{},
+		"google_integrations_auth_config.client_certificate.ssl_certificate":                                                           struct{}{},
+		"google_network_connectivity_multicloud_data_transfer_config.services.service_name":                                            struct{}{},
+		"google_network_connectivity_multicloud_data_transfer_config.services.states.effective_time":                                   struct{}{},
+		"google_os_config_v2_policy_orchestrator.orchestration_state.current_iteration_state.error.details.type_url":                   struct{}{},
+		"google_os_config_v2_policy_orchestrator.orchestration_state.previous_iteration_state.error.details.type_url":                  struct{}{},
+		"google_os_config_v2_policy_orchestrator_for_folder.orchestration_state.current_iteration_state.error.details.type_url":        struct{}{},
+		"google_os_config_v2_policy_orchestrator_for_folder.orchestration_state.previous_iteration_state.error.details.type_url":       struct{}{},
+		"google_os_config_v2_policy_orchestrator_for_organization.orchestration_state.current_iteration_state.error.details.type_url":  struct{}{},
+		"google_os_config_v2_policy_orchestrator_for_organization.orchestration_state.previous_iteration_state.error.details.type_url": struct{}{},
+	}
+
 	// Validate yaml files
 	for resourceName, r := range metaResources {
 		if r.Resource == "" {
@@ -251,6 +276,12 @@ func TestValidateResourceMetadata(t *testing.T) {
 			}
 			if f.Field != "" && f.Field == underscore(f.ApiField) {
 				t.Errorf("%s.%s: `field` must be omitted because it can be inferred from `api_field`", r.Resource, tfField)
+			}
+			if strings.Contains(f.ApiField, "_") {
+				k := fmt.Sprintf("%s.%s", r.Resource, tfField)
+				if _, ok := allowedApiNameUnderscores[k]; !ok {
+					t.Errorf("%s.%s: `api_field` can't contain `_` characters", r.Resource, tfField)
+				}
 			}
 		}
 
