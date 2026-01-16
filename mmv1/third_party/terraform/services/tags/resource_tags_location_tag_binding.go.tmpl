@@ -462,33 +462,3 @@ func transformTagsLocationTagBindingReadError(err error) error {
 
     return err
 }
-
-func suppressTagValueDiff(k, oldTagValue, newTagValue string, d *schema.ResourceData) bool {
-    if oldTagValue == newTagValue {
-        return true // No change in configuration.
-    }
-
-    // Get the values as reported by the API, from the computed fields in the state.
-    idFromAPI := d.Get("tag_value_id").(string)
-    namespacedNameFromAPI := d.Get("tag_value_namespaced_name").(string)
-
-    // If API data isn't populated yet, don't suppress, let Read populate it.
-    if namespacedNameFromAPI == "" {
-        return false
-    }
-
-    isNewTagValueIdFormat := strings.HasPrefix(newTagValue, "tagValues/")
-    if isNewTagValueIdFormat {
-        if idFromAPI != "" && newTagValue == idFromAPI {
-            log.Printf("[DEBUG] suppressTagValueDiff: Configured tag_value '%s' matches tag_value_id '%s'. Suppressing diff.", newTagValue, idFromAPI)
-            return true
-        }
-    } else {
-        if newTagValue == namespacedNameFromAPI {
-            log.Printf("[DEBUG] suppressTagValueDiff: Configured tag_value '%s' matches tag_value_namespaced_name '%s'. Suppressing diff.", newTagValue, namespacedNameFromAPI)
-            return true
-        }
-    }
-
-    return false
-}
