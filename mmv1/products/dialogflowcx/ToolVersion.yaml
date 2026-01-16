@@ -67,6 +67,7 @@ parameters:
       Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/tools/<Tool ID>.
     url_param_only: true
     immutable: true
+    required: true
 properties:
   - name: 'name'
     type: String
