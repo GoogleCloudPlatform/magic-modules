@@ -35,12 +35,12 @@ import_format:
   - 'projects/{{project}}/locations/{{location}}/keyRings/{{name}}'
 include_in_tgc_next: true
 tgc_include_handwritten_tests: true
-tgc_ignore_terraform_decoder: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+  tgc_ignore_terraform_decoder: true
   encoder: 'templates/terraform/encoders/send_nil_body.go.tmpl'
   decoder: 'templates/terraform/decoders/kms.go.tmpl'
   tgc_decoder: 'templates/tgc_next/decoders/noop.go.tmpl'
