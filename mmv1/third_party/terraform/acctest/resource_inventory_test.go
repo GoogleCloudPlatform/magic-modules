@@ -256,10 +256,20 @@ func TestValidateResourceMetadata(t *testing.T) {
 			t.Errorf("%s: can't detect service package", r.Resource)
 		}
 
-		if r.ApiServiceName == "" {
-			// Allowlist google_container_registry because it doesn't clearly correspond to a service
-			if resourceName != "google_container_registry" {
+		// Allowlist google_container_registry because it doesn't clearly correspond to a service.
+		// We don't currently have a concept of a "provider-only" resource; if more examples show up,
+		// we could consider adding one.
+		if resourceName != "google_container_registry" {
+			if r.ApiServiceName == "" {
 				t.Errorf("%s: `api_service_name` is required and not set", r.Resource)
+			}
+			// Allowlist google_biglake_iceberg_catalog as a pre-existing case. I believe
+			// that's a mistake which should be corrected at some point in the future.
+			if r.ApiVersion == "" && resourceName != "google_biglake_iceberg_catalog" {
+				t.Errorf("%s: `api_version` is required and not set", r.Resource)
+			}
+			if r.ApiResourceTypeKind == "" {
+				t.Errorf("%s: `api_resource_type_kind` is required and not set", r.Resource)
 			}
 		}
 
@@ -281,6 +291,6 @@ func TestValidateResourceMetadata(t *testing.T) {
 				}
 			}
 		}
-
 	}
+	t.Logf("Docs: https://googlecloudplatform.github.io/magic-modules/reference/metadata/")
 }
