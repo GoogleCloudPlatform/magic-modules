@@ -39,7 +39,6 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-tgc_ignore_terraform_decoder: true
 custom_code:
   encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
   decoder: 'templates/terraform/decoders/long_name_to_self_link.go.tmpl'
@@ -47,6 +46,7 @@ custom_code:
   post_create: 'templates/terraform/post_create/sleep.go.tmpl'
   constants: 'templates/terraform/constants/vpc_access_connector.go.tmpl'
   pre_update: 'templates/terraform/pre_update/vpc_access_connector_instances.go.tmpl'
+  tgc_ignore_terraform_decoder: true
 custom_diff:
   - 'customdiff.ForceNewIfChange("min_instances", isInstanceShrinkage)'
   - 'customdiff.ForceNewIfChange("max_instances", isInstanceShrinkage)'

@@ -20,4 +20,3 @@ versions:
   - name: "beta"
     base_url: https://saasservicemgmt.googleapis.com/v1beta1/
 caibaseurl: ""
-resourceswithcaiassettype: {}
