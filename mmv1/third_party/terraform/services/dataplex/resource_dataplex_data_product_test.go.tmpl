@@ -1,5 +1,6 @@
 package dataplex_test
 
+{{- if ne $.TargetVersionName "ga" }}
 import (
 	"testing"
 
@@ -8,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-{{- if ne $.TargetVersionName "ga" }}
 func TestAccDataplexDataProduct_update(t *testing.T) {
 	t.Parallel()
 
@@ -39,7 +39,6 @@ func TestAccDataplexDataProduct_update(t *testing.T) {
 				Config: testAccDataplexDataProduct_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						// Ensures the resource is UPDATED, not destroyed and recreated
 						plancheck.ExpectResourceAction("google_dataplex_data_product.example", plancheck.ResourceActionUpdate),
 					},
 				},
