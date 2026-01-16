@@ -670,6 +670,22 @@ var schemaNodePool = map[string]*schema.Schema{
 			},
 		},
 	},
+
+	"node_drain_config": {
+		Type:        schema.TypeList,
+		Optional:    true,
+		Computed:    true,
+		Description: `Node drain configuration for this NodePool.`,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"respect_pdb_during_node_pool_deletion": {
+					Type:         schema.TypeBool,
+					Optional:     true,
+					Description:  `Whether to respect PodDisruptionBudget policy during node pool deletion.`,
+				},
+			},
+		},
+	},
 }
 
 type NodePoolInformation struct {
