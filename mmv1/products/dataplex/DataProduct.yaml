@@ -1,4 +1,4 @@
-# Copyright 2025 Google Inc.
+# Copyright 2026 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,7 +18,7 @@ description: |
   specific use cases.
 references:
   guides:
-    'Introduction to Data Products': 'https://cloud.google.com/dataplex/docs/data-products-overview'
+   'Introduction to Data Products': 'https://cloud.google.com/dataplex/docs/data-products-overview'
   api: 'https://cloud.google.com/dataplex/docs/reference/rest/v1/projects.locations.dataProducts'
 min_version: beta
 
@@ -42,16 +42,27 @@ async:
   operation:
     base_url: '{{op_id}}'
 
-# iam_policy:
-#   exclude_import_test: true
-#   method_name_separator: ':'
-#   parent_resource_attribute: 'data_product_id'
-#   import_format:
-#     - 'projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}'
-#     - '{{data_product_id}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}'
   - '{{data_product_id}}'
+
+examples:
+  - name: 'dataplex_data_product_basic'
+    primary_resource_id: 'example'
+    vars:
+      data_product_id: 'data-product-basic'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+    test_vars_overrides:
+      data_product_id: 'fmt.Sprintf("tf-test-dp%s", acctest.RandString(t, 10))'
+  - name: 'dataplex_data_product_full'
+    primary_resource_id: 'example'
+    vars:
+      data_product_id: 'data-product-full'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+    test_vars_overrides:
+      data_product_id: 'fmt.Sprintf("tf-test-dp%s", acctest.RandString(t, 10))'
 
 parameters:
   - name: 'location'
@@ -72,11 +83,6 @@ parameters:
       The ID of the data product.
 
 properties:
-  # FIX: Conflicting output-only 'name' property has been REMOVED to resolve Go panics
-  # - name: 'name'
-  #   type: String
-  #   output: true
-  #   description: 'Resource name of the data product.'
   - name: 'uid'
     type: String
     output: true
@@ -142,20 +148,3 @@ properties:
             - name: 'googleGroup'
               type: String
               description: 'Email of the Google Group.'
-examples:
-  - name: 'dataplex_data_product_basic'
-    primary_resource_id: 'example'
-    vars:
-      data_product_id: 'data-product-basic'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-    test_vars_overrides:
-      data_product_id: 'fmt.Sprintf("tf-test-dp%s", acctest.RandString(t, 10))'
-  - name: 'dataplex_data_product_full'
-    primary_resource_id: 'example'
-    vars:
-      data_product_id: 'data-product-full'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-    test_vars_overrides:
-      data_product_id: 'fmt.Sprintf("tf-test-dp%s", acctest.RandString(t, 10))'
