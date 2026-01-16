@@ -110,6 +110,7 @@ properties:
     min_version: 'beta'
     output: true
   - name: 'version_id'
+    api_name: 'name'
     type: String
     description: The ID for the version as in sites/SITE_ID/versions/VERSION_ID
     min_version: 'beta'
