@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/zclconf/go-cty/cty"
 	"google.golang.org/api/iam/v1"
 )
 
@@ -53,8 +54,24 @@ func ResourceGoogleServiceAccountKey() *schema.Resource {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ForceNew:      true,
-				ConflictsWith: []string{"key_algorithm", "private_key_type"},
+				ConflictsWith: []string{"key_algorithm", "private_key_type", "public_key_data_wo"},
 				Description:   `A field that allows clients to upload their own public key. If set, use this public key data to create a service account key for given service account. Please note, the expected format for this field is a base64 encoded X509_PEM.`,
+			},
+			"public_key_data_wo": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				WriteOnly:     true,
+				ConflictsWith: []string{"key_algorithm", "private_key_type", "public_key_data"},
+				RequiredWith:  []string{"public_key_data_wo_version"},
+				Description:   `Write-only version of public_key_data. A field that allows clients to upload their own public key without storing it in Terraform state. If set, use this public key data to create a service account key for given service account. Please note, the expected format for this field is a base64 encoded X509_PEM.`,
+			},
+			"public_key_data_wo_version": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ForceNew:     true,
+				RequiredWith: []string{"public_key_data_wo"},
+				Description:  `Version number for public_key_data_wo. Increment this value to trigger recreation of the service account key with the write-only public key data.`,
 			},
 			"keepers": {
 				Description: "Arbitrary map of values that, when changed, will trigger recreation of resource.",
@@ -110,9 +127,17 @@ func resourceGoogleServiceAccountKeyCreate(d *schema.ResourceData, meta interfac
 
 	var sak *iam.ServiceAccountKey
 
-	if d.Get("public_key_data").(string) != "" {
+	// Check for public key data from either regular or write-only field
+	var publicKeyData string
+	if pkd, ok := d.GetOk("public_key_data"); ok {
+		publicKeyData = pkd.(string)
+	} else if pkdWo, _ := d.GetRawConfigAt(cty.GetAttrPath("public_key_data_wo")); !pkdWo.IsNull() {
+		publicKeyData = pkdWo.AsString()
+	}
+
+	if publicKeyData != "" {
 		ru := &iam.UploadServiceAccountKeyRequest{
-			PublicKeyData: d.Get("public_key_data").(string),
+			PublicKeyData: publicKeyData,
 		}
 		sak, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Keys.Upload(serviceAccountName, ru).Do()
 		if err != nil {
