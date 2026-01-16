@@ -167,6 +167,10 @@ fields:
     field: 'network_interface.ipv6_access_type'
   - api_field: 'networkInterfaces.ipv6Address'
     field: 'network_interface.ipv6_address'
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'networkInterfaces.macAddress'
+    field: 'network_interface.mac_address'
+{{- end }}
   - api_field: 'networkInterfaces.name'
     field: 'network_interface.name'
   - api_field: 'networkInterfaces.network'

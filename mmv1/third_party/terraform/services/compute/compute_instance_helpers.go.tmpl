@@ -529,6 +529,11 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 		if iface.Name != "" {
 			flattened[i]["name"] = iface.Name
 		}
+		{{- if ne $.TargetVersionName "ga" }}
+		if iface.MacAddress != "" {
+			flattened[i]["mac_address"] = iface.MacAddress
+		}
+		{{- end }}
 		if internalIP == "" {
 			internalIP = iface.NetworkIP
 		}
@@ -628,6 +633,13 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 			return nil, fmt.Errorf("cannot determine self_link for subnetwork %q: %s", subnetwork, err)
 		}
 
+		{{- if ne $.TargetVersionName "ga" }}
+		var macAddress = ""
+		if macAddressObj, ok := data["mac_address"]; ok {
+			macAddress = macAddressObj.(string)
+		}
+		{{- end }}
+
 		ifaces[i] = &compute.NetworkInterface{
 			NetworkIP:         data["network_ip"].(string),
 			Network:           nf.RelativeLink(),
@@ -642,6 +654,9 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 			Ipv6Address:       data["ipv6_address"].(string),
 			InternalIpv6PrefixLength: int64(data["internal_ipv6_prefix_length"].(int)),
 			IgmpQuery:         data["igmp_query"].(string),
+			{{- if ne $.TargetVersionName "ga" }}
+			MacAddress: macAddress,
+			{{- end }}
 		}
 	}
 	return ifaces, nil
