@@ -740,10 +740,9 @@ resource "google_compute_firewall" "foobar" {
   source_tags = ["foo"]
 
   source_ranges      = ["0000:00:0000:00::/0"]
-  destination_ranges = ["::/0"]
 
   allow {
-    protocol = "icmp"
+    protocol = "all"
   }
 }
 `, network, firewall)
@@ -763,10 +762,9 @@ resource "google_compute_firewall" "foobar" {
   source_tags = ["foo"]
 
   source_ranges      = ["0000:0000::/0"]
-  destination_ranges = ["::/0"]
 
   allow {
-    protocol = "icmp"
+    protocol = "all"
   }
 }
 `, network, firewall)
