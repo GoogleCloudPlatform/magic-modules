@@ -514,6 +514,26 @@ func TestAccDNSRecordSet_readOutOfBandRrDataChange(t *testing.T) {
 	})
 }
 
+func TestAccDNSRecordSet_ResourceIdentity(t *testing.T) {
+	t.Parallel()
+
+	zoneName := fmt.Sprintf("dnszone-test-%s", acctest.RandString(t, 10))
+
+	resource.Test(t, resource.TestCase{
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDnsRecordSet_basic(zoneName, "127.0.0.10", 300),
+			},
+			{
+				ResourceName:    "google_dns_record_set.foobar",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+			},
+		},
+	})
+}
+
 func testAccCheckDnsRecordSetSetRoutingPolicyOutOfBand(t *testing.T, zoneName, rrsetName string, ttl int, rrdata []string, routingPolicy *dns.RRSetRoutingPolicy) func() {
 	return func() {
 		config := acctest.GoogleProviderConfig(t)
