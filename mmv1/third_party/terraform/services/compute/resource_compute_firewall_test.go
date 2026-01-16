@@ -771,4 +771,3 @@ resource "google_compute_firewall" "foobar" {
 }
 `, network, firewall)
 }
-

@@ -109,5 +109,5 @@ func diffSuppressSourceRanges(k, old, new string, d *schema.ResourceData) bool {
 	}
 
 	// For any other source_ranges value diff, pass comparison to IP comparison diffsuppress
-	return InternalIpDiffSuppress(_, old, new, _)
+	return InternalIpDiffSuppress(k, old, new, d)
 }
