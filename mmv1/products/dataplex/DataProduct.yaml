@@ -18,7 +18,7 @@ description: |
   specific use cases.
 references:
   guides:
-   'Introduction to Data Products': 'https://cloud.google.com/dataplex/docs/data-products-overview'
+    'Introduction to Data Products': 'https://cloud.google.com/dataplex/docs/data-products-overview'
   api: 'https://cloud.google.com/dataplex/docs/reference/rest/v1/projects.locations.dataProducts'
 min_version: beta
 
