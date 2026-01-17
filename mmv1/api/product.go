@@ -66,7 +66,7 @@ type Product struct {
 	CaiAssetService string `yaml:"cai_asset_service,omitempty"`
 
 	// CaiResourceType of resources that already have an AssetType constant defined in the product.
-	ResourcesWithCaiAssetType map[string]struct{} `yaml:"resourceswithcaiassettype,omitempty"`
+	ResourcesWithCaiAssetType map[string]struct{}
 
 	// A function reference designed for the rare case where you
 	// need to use retries in operation calls. Used for the service api

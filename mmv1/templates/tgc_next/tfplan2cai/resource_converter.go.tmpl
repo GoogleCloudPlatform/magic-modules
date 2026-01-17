@@ -129,7 +129,7 @@ func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, conf
     }
 {{- end}}
 
-{{ if and $.CustomCode.Encoder (not $.TGCIgnoreTerraformEncoder) -}}
+{{ if and $.CustomCode.Encoder (not $.CustomCode.TGCIgnoreTerraformEncoder) -}}
     obj, err = resource{{ $.ResourceName -}}Encoder(d, config, obj)
     if err != nil {
         return nil, err
@@ -146,7 +146,7 @@ func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, conf
 {{- end}}
 }
 
-{{if and $.CustomCode.Encoder (not $.TGCIgnoreTerraformEncoder) -}}
+{{if and $.CustomCode.Encoder (not $.CustomCode.TGCIgnoreTerraformEncoder) -}}
 func resource{{ $.ResourceName -}}Encoder(d tpgresource.TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
 {{ customTemplate $ $.CustomCode.Encoder false -}}
 }

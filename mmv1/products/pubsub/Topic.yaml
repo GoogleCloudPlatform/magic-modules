@@ -51,7 +51,7 @@ iam_policy:
 custom_code:
   encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/pubsub_topic.tmpl'
-tgc_ignore_terraform_encoder: true
+  tgc_ignore_terraform_encoder: true
 error_retry_predicates:
   - 'transport_tpg.PubsubTopicProjectNotReady'
 include_in_tgc_next: true
