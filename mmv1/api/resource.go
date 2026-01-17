@@ -275,6 +275,14 @@ type Resource struct {
 	// public ca external account keys
 	ExcludeRead bool `yaml:"exclude_read,omitempty"`
 
+	// Set to true for resources that are to exclude the default generated deletion policy field
+	// Primarily for resources that had deletion policy implementations before the universal generation.
+	DeletionPolicyExclude bool `yaml:"deletion_policy,omitempty"`
+
+	// Set to the default deletion policy value for the resource.
+	// By default this will be "DELETE".
+	DeletionPolicyDefault string `yaml:"deletion_policy_default,omitempty"`
+
 	// Set to true for resources that wish to disable automatic generation of default provider
 	// value customdiff functions
 	// TODO rewrite: 1 instance used
@@ -487,6 +495,11 @@ func (r *Resource) setShallowDefaults() {
 	}
 	if r.Timeouts == nil {
 		r.Timeouts = NewTimeouts() // This only sets defaults if Timeouts is nil
+	}
+	if !r.DeletionPolicyExclude {
+		if r.DeletionPolicyDefault == "" {
+			r.DeletionPolicyDefault = "DELETE"
+		}
 	}
 }
 

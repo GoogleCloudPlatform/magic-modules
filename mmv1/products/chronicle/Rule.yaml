@@ -27,7 +27,7 @@ import_format:
 update_verb: PATCH
 update_mask: true
 autogen_status: UnVsZQ==
-
+deletion_policy_exclude: true
 examples:
   - name: 'chronicle_rule_basic'
     primary_resource_id: example

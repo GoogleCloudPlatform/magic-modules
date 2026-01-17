@@ -47,6 +47,7 @@ custom_code:
   constants: 'templates/terraform/constants/containerattached_cluster_diff.go.tmpl'
   pre_update: 'templates/terraform/pre_update/containerattached_update.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/container_attached_deletion_policy.go.tmpl'
+deletion_policy_exclude: true
 examples:
   - name: 'container_attached_cluster_basic'
     primary_resource_id: 'primary'
