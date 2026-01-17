@@ -105,6 +105,8 @@ func ResourceStorageBucket() *schema.Resource {
 				Description: `When true, before deleting a bucket, delete all objects within the bucket, or Anywhere Caches caching data for that bucket. Otherwise, buckets with objects/caches will fail. Anywhere Cache requires additional permissions to interact with and will be ignored when those are not present, attempting to delete anyways. This may result in the objects in the bucket getting destroyed but not the bucket itself if there is a cache in use with the bucket. Force deletion may take a long time to delete buckets with lots of objects or with any Anywhere Caches (80m+).`,
 			},
 
+			"custom_headers": storageCustomHeaders(),
+
 			"labels": {
 				Type:        schema.TypeMap,
 				ValidateFunc: labelKeyValidator,
@@ -920,6 +922,12 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
 			insertCall := config.NewStorageClient(userAgent).Buckets.Insert(project, sb)
+			if v_headers, ok := d.GetOk("custom_headers"); ok {
+				for k, v := range v_headers.(map[string]interface{}) {
+					insertCall.Header().Add(k, v.(string))
+				}
+			}
+
 			if d.Get("enable_object_retention").(bool) {
 				insertCall.EnableObjectRetention(true)
 			}
@@ -1098,14 +1106,20 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 			sb.SoftDeletePolicy = expandBucketSoftDeletePolicy(v.([]interface{}))
 		}
 	}
-
-	if d.HasChange("ip_filter") {
+  
+  if d.HasChange("ip_filter") {
 		if v, ok := d.GetOk("ip_filter"); ok {
 			sb.IpFilter = expandBucketIpFilter(v.([]interface{}))
 		}
 	}
 
-	res, err := config.NewStorageClient(userAgent).Buckets.Patch(d.Get("name").(string), sb).Do()
+	updateCall := config.NewStorageClient(userAgent).Buckets.Patch(d.Get("name").(string), sb)
+	if v_headers, ok := d.GetOk("custom_headers"); ok {
+		for k, v := range v_headers.(map[string]interface{}) {
+			updateCall.Header().Add(k, v.(string))
+		}
+	}
+	res, err := updateCall.Do()
 	if err != nil {
 		return err
 	}
@@ -1164,9 +1178,13 @@ func resourceStorageBucketRead(d *schema.ResourceData, meta interface{}) error {
 	// Get the bucket and acl
 	bucket := d.Get("name").(string)
 
-	// There seems to be some eventual consistency errors in some cases, so we want to check a few times
-	// to make sure it exists before moving on
-	res, err := config.NewStorageClient(userAgent).Buckets.Get(bucket).Do()
+	getCall := config.NewStorageClient(userAgent).Buckets.Get(bucket)
+	if v_headers, ok := d.GetOk("custom_headers"); ok {
+		for k, v := range v_headers.(map[string]interface{}) {
+			getCall.Header().Add(k, v.(string))
+		}
+	}
+	res, err := getCall.Do()
 
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Storage Bucket %q", d.Get("name").(string)))
@@ -1277,7 +1295,13 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 
 	// destroy bucket
 	err = retry.Retry(1*time.Minute, func() *retry.RetryError {
-		err := config.NewStorageClient(userAgent).Buckets.Delete(bucket).Do()
+		deleteCall := config.NewStorageClient(userAgent).Buckets.Delete(bucket)
+		if v_headers, ok := d.GetOk("custom_headers"); ok {
+			for k, v := range v_headers.(map[string]interface{}) {
+				deleteCall.Header().Add(k, v.(string))
+			}
+		}
+		err := deleteCall.Do()
 		if err == nil {
 			return nil
 		}
