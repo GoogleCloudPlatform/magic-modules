@@ -124,6 +124,9 @@ examples:
       dns_name: 'services.example.com.'
     test_vars_overrides:
       'dns_name': '"services.example.com-" + acctest.RandString(t, 10) + "."'
+  - name: 'dns_managed_zone_custom_name_server_set'
+    primary_resource_id: 'custom-name-server-set-zone'
+    external_providers: ["random", "time"]
 virtual_fields:
   - name: 'force_destroy'
     description: 'Set this true to delete all records in the zone.'
@@ -459,3 +462,10 @@ properties:
           'If set, enable query logging for this ManagedZone. False by default,
           making logging opt-in.'
         required: true
+  - name: 'nameServerSet'
+    type: String
+    description: |
+      Optionally specifies the NameServerSet for this ManagedZone. A NameServerSet is a set of DNS name servers that all host the same ManagedZones. Most users leave this field unset. If you need to use this field, contact your account team.
+    required: false
+    validation:
+      function: 'validation.StringIsNotEmpty'
