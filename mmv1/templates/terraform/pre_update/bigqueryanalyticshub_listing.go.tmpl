@@ -2,19 +2,26 @@ if d.HasChange("pubsub_topic.0.data_affinity_regions"){
     // Split URL into base and query parts
 	parts := strings.SplitN(url, "?", 2)
 	if len(parts) == 2 {
-	base := parts[0]
-	query := parts[1]
+		base := parts[0]
+		query := parts[1]
 
-	query = strings.ReplaceAll(query, "%2C", ",")
-	query = strings.ReplaceAll(query, "%2c", ",")
+		// Replace "pubsubTopic" with "pubsubTopic.dataAffinityRegions"
+		query = strings.ReplaceAll(query, "pubsubTopic", "pubsubTopic.dataAffinityRegions")
 
-	// Replace "pubsubTopic" with "pubsubTopic.dataAffinityRegions"
-	query = strings.ReplaceAll(query, "pubsubTopic", "pubsubTopic.dataAffinityRegions")
-
-	// Re-encode commas back
-	query = strings.ReplaceAll(query, ",", "%2C")
-
-	url = base + "?" + query
+		url = base + "?" + query
 	}
 } 
 
+if d.HasChange("bigquery_dataset.0.replica_locations"){               
+    // Split URL into base and query parts
+	parts := strings.SplitN(url, "?", 2)
+	if len(parts) == 2 {
+		base := parts[0]
+		query := parts[1]
+
+		// Replace "bigqueryDataset" with "bigqueryDataset.replicaLocations"
+		query = strings.ReplaceAll(query, "bigqueryDataset", "bigqueryDataset.replicaLocations")
+
+		url = base + "?" + query
+	}
+} 
