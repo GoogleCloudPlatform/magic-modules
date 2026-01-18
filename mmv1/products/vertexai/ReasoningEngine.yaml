@@ -46,6 +46,23 @@ examples:
     primary_resource_id: 'reasoning_engine'
     vars:
       name: 'reasoning-engine'
+  - name: 'vertex_ai_reasoning_engine_psc_interface'
+    primary_resource_id: 'reasoning_engine'
+    vars:
+      name: 'reasoning-engine'
+      bucket_name: 'reasoning-engine'
+      network_name: 'network'
+      network_attachment_name: 'network-attachment'
+      subnetwork_name: 'subnetwork'
+    external_providers: ["time"]
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/compute.networkAdmin"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/dns.peer"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
+        role: "roles/viewer"
+    exclude_test: true
   - name: 'vertex_ai_reasoning_engine_full'
     primary_resource_id: 'reasoning_engine'
     vars:
@@ -197,6 +214,51 @@ properties:
                         The Cloud Secret Manager secret version. Can be 'latest'
                         for the latest version, an integer for a specific
                         version, or a version alias.
+          - name: 'pscInterfaceConfig'
+            type: NestedObject
+            description: |-
+              Optional. Configuration for PSC-Interface.
+            properties:
+              - name: 'networkAttachment'
+                type: String
+                description: |-
+                  Optional. The name of the Compute Engine network attachment
+                  to attach to the resource within the region and user project.
+                  To specify this field, you must have already created a network attachment.
+                  This field is only used for resources using PSC-Interface.
+              - name: 'dnsPeeringConfigs'
+                type: 'Array'
+                description: |
+                  Optional. DNS peering configurations.
+                  When specified, Vertex AI will attempt to configure DNS
+                  peering zones in the tenant project VPC to resolve the
+                  specified domains using the target network's Cloud DNS.
+                  The user must grant the dns.peer role to the Vertex AI
+                  service Agent on the target project.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: 'domain'
+                      type: String
+                      description: |
+                        Required. The DNS name suffix of the zone being peered
+                        to, e.g., "my-internal-domain.corp.".
+                        Must end with a dot.
+                      required: true
+                    - name: 'targetProject'
+                      type: String
+                      description: |
+                        Required. The project id hosting the Cloud DNS managed
+                        zone that contains the 'domain'.
+                        The Vertex AI service Agent requires the dns.peer role
+                        on this project.
+                      required: true
+                    - name: 'targetNetwork'
+                      type: String
+                      description: |
+                        Required. The VPC network name in the targetProject
+                        where the DNS zone specified by 'domain' is visible.
+                      required: true
           - name: 'resourceLimits'
             type: KeyValuePairs
             default_from_api: true
