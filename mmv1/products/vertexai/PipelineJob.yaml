@@ -1,0 +1,167 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'PipelineJob'
+description: |-
+  Represents a Vertex AI PipelineJob (an instance of a machine learning pipeline).
+  This resource mirrors the v1beta1 PipelineJob schema from the Vertex AI REST API.
+min_version: 'beta'
+references:
+  guides:
+    'Vertex AI Pipelines': 'https://cloud.google.com/vertex-ai/docs/pipelines'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.pipelineJobs'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/pipelineJobs'
+self_link: 'projects/{{project}}/locations/{{region}}/pipelineJobs'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+custom_code:
+examples:
+  - name: 'vertex_ai_pipeline_job_minimal'
+    primary_resource_id: 'pipelineJob'
+    exclude_test: true
+    test_env_vars:
+      org_id: 'ORG_ID'
+      project: 'PROJECT_NAME'
+parameters:
+  - name: 'region'
+    type: String
+    min_version: 'beta'
+    description: The region of the PipelineJob. eg us-central1
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+properties:
+  - name: 'name'
+    min_version: 'beta'
+    type: String
+    description: The resource name of the PipelineJob.
+    output: true
+  - name: 'displayName'
+    min_version: 'beta'
+    type: String
+    description: The display name of the Pipeline.
+    required: true
+  - name: 'createTime'
+    min_version: 'beta'
+    type: String
+    description: Pipeline creation time (RFC3339 UTC format).
+    output: true
+  - name: 'startTime'
+    min_version: 'beta'
+    type: String
+    description: Pipeline start time (RFC3339 UTC format).
+    output: true
+  - name: 'endTime'
+    min_version: 'beta'
+    type: String
+    description: Pipeline end time (RFC3339 UTC format).
+    output: true
+  - name: 'updateTime'
+    min_version: 'beta'
+    type: String
+    description: Timestamp when this PipelineJob was most recently updated.
+    output: true
+  - name: 'runtimeConfig'
+    min_version: 'beta'
+    type: NestedObject
+    description: Optional. Runtime config controlling the runtime behavior of this Extension.
+    properties:
+      - name: 'gcsOutputDirectory'
+        type: String
+  - name: 'pipelineSpec'
+    min_version: 'beta'
+    type: NestedObject
+    description: The spec of the pipeline. Stored as free-form JSON/object.
+    properties:
+      - name: 'additionalProperties'
+        type: Any
+  - name: 'state'
+    min_version: 'beta'
+    type: Enum
+    description: The detailed state of the job.
+    output: true
+    enum_values:
+      - PIPELINE_STATE_UNSPECIFIED
+      - PIPELINE_STATE_QUEUED
+      - PIPELINE_STATE_PENDING
+      - PIPELINE_STATE_RUNNING
+      - PIPELINE_STATE_SUCCEEDED
+      - PIPELINE_STATE_FAILED
+      - PIPELINE_STATE_CANCELLING
+      - PIPELINE_STATE_CANCELLED
+      - PIPELINE_STATE_PAUSED
+  - name: 'labels'
+    min_version: 'beta'
+    type: KeyValueLabels
+    description: The spec of the pipeline. Stored as free-form JSON/object.
+  - name: 'serviceAccount'
+    min_version: 'beta'
+    type: String
+    description: The service account that the pipeline workload runs as.
+  - name: 'network'
+    min_version: 'beta'
+    type: String
+    description: The full name of the Compute Engine network to which the Pipeline Job's workload should be peered.
+  - name: 'templateUri'
+    min_version: 'beta'
+    type: String
+    description: A template uri from where the PipelineJob.pipeline_spec, if empty, will be downloaded. Currently, only uri from Vertex Template Registry & Gallery is supported. Reference to https://cloud.google.com/vertex-ai/docs/pipelines/create-pipeline-template.
+  - name: 'reservedIpRanges'
+    min_version: 'beta'
+    type: Array
+    description: A list of names for reserved IP ranges under the VPC network.
+    item_type:
+      type: String
+  - name: 'pscInterfaceConfig'
+    min_version: 'beta'
+    type: NestedObject
+    description: Optional configuration for PSC-I for PipelineJob.
+    properties:
+      - name: 'raw'
+        type: Any
+  - name: 'scheduleName'
+    min_version: 'beta'
+    type: String
+    description: The schedule resource name if created by Schedule API.
+    output: true
+  - name: 'preflightValidations'
+    min_version: 'beta'
+    type: Boolean
+    description: Whether to do component level validations before job creation.
+  - name: 'satisfiesPzs'
+    min_version: 'beta'
+    type: Boolean
+    description: Reserved for future use.
+    output: true
+  - name: 'satisfiesPzi'
+    min_version: 'beta'
+    type: Boolean
+    description: Reserved for future use.
+    send_empty_value: true
+  - name: 'originalPipelineJobId'
+    min_version: 'beta'
+    type: String
+    description: The original pipeline job id if this job is a rerun of a previous job.
