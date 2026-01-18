@@ -16564,3 +16564,45 @@ resource "google_container_cluster" "with_kubelet_config" {
 }
 `, clusterName, networkName, subnetworkName, npName, npName)
 }
+
+func TestAccContainerCluster_tags(t *testing.T) {
+	t.Parallel()
+        name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+        org := envvar.GetTestOrgFromEnv(t)
+	tagKey := acctest.BootstrapSharedTestTagKey(t, "container-clusters-tagkey")
+	tagValue := acctest.BootstrapSharedTestTagValue(t, "container-clusters-tagvalue", tagKey)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerClustersTags(name, map[string]string{org + "/" + tagKey: tagValue}),
+			},
+			{
+				ResourceName:            "google_container_cluster.cluster",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"tags"},
+			},
+		},
+	})
+}
+
+func testAccContainerClustersTags(name string, tags map[string]string) string {
+	r := fmt.Sprintf(`
+resource "google_container_cluster" "cluster" {
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 1
+tags = {`, name)
+
+	l := ""
+	for key, value := range tags {
+		l += fmt.Sprintf("%q = %q\n", key, value)
+	}
+
+	l += fmt.Sprintf("}\n}")
+	return r + l
+}
