@@ -53,7 +53,7 @@ examples:
   - name: 'bigquery_analyticshub_listing_subscription_multiregion'
     primary_resource_id: 'subscription'
     min_version: beta
-    exclude_test: true # Excluded because handwritten tests handle verification
+    exclude_test: true
     vars:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
