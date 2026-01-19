@@ -1,0 +1,84 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: ServiceAgent
+description: A Service Agent resource within the Workload Identity API.
+base_url: projects/{{project}}/locations/{{location}}/serviceAgents
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/serviceAgents/{{service_agent_id}}
+create_url: projects/{{project}}/locations/{{location}}/serviceAgents?serviceAgentId={{service_agent_id}}
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/serviceAgents/{{service_agent_id}}
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - update
+    - delete
+  result:
+    resource_inside_response: true
+autogen_status: U2VydmljZUFnZW50
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: serviceAgentId
+    type: String
+    required: true
+    description: |-
+      Id of the requesting object
+      If auto-generating Id server-side, remove this field and
+      service_agent_id from the method_signature of Create RPC
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: '[Output only] Create time stamp'
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Labels as key value pairs
+  - name: name
+    type: String
+    description: Identifier. name of resource
+    output: true
+  - name: updateTime
+    type: String
+    description: '[Output only] Update time stamp'
+    output: true
+min_version: beta
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "workload_identity_service_agent_basic"
+    primary_resource_id: "default"
+    version: beta
+    provider: google-beta
+    vars:
+      service_agent_id: "tf-test-agent-%{random_suffix}"
+      label_val: "tf-test"
+    test_env_vars:
+      project: "{{project}}"
+      # region:  Required if location is not hardcoded to "global"
+      # zone:    Required if location is not hardcoded to "global"
