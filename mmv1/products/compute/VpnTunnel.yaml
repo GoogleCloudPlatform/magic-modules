@@ -281,7 +281,7 @@ properties:
   - name: 'capacityTier'
     type: Enum
     description: |
-      The capacity tier for this VPN tunnel. 
+      The capacity tier for this VPN tunnel.
       Possible values:
         - `DEFAULT`: A VPN tunnel which can support up to 3 Gbps.
         - `HIGH`: A VPN tunnel which can support up to 6 Gbps.
