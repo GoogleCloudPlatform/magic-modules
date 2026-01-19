@@ -15,13 +15,17 @@
 name: PromptTemplate
 description: The PromptTemplate resource for Firebase AI Logic.
 base_url: projects/{{project}}/locations/{{location}}/templates
+references:
+  guides:
+    'Official Documentation': 'https://firebase.google.com/docs/ai-logic'
+  api: 'https://firebase.google.com/docs/reference/ai-logic/rest/v1beta/projects.locations.templates'
 update_mask: true
-self_link: projects/{{project}}/locations/{{location}}/templates/{{prompt_template_id}}
-create_url: projects/{{project}}/locations/{{location}}/templates?promptTemplateId={{prompt_template_id}}
+self_link: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
+create_url: projects/{{project}}/locations/{{location}}/templates?promptTemplateId={{template_id}}
 update_verb: PATCH
 import_format:
-  - projects/{{project}}/locations/{{location}}/templates/{{prompt_template_id}}
-delete_url: projects/{{project}}/locations/{{location}}/templates/{{prompt_template_id}}
+  - projects/{{project}}/locations/{{location}}/templates/{{template_id}}
+delete_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
 autogen_async: false
 autogen_status: UHJvbXB0VGVtcGxhdGU=
 parameters:
@@ -31,18 +35,14 @@ parameters:
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-  - name: promptTemplateId
+properties:
+  - name: templateId
     type: String
     required: true
-    description: |-
-      The unique ID to use for the PromptTemplate, which will become the final
-      component of the PromptTemplate's resource name. It can contain only
-      lowercase letters, numbers, and hyphens, with the first character a letter,
-      the last a letter or a number, and a 63-character maximum.
-      If not provided, a system-generated ID will be used.
     immutable: true
-    url_param_only: true
-properties:
+    description: |-
+      The unique ID of the PromptTemplate, which is the final component of the
+      PromptTemplate's resource name.
   - name: createTime
     type: String
     description: Timestamp when the PromptTemplate was created.
@@ -81,13 +81,6 @@ properties:
     type: String
     description: Timestamp when the PromptTemplate state was last changed.
     output: true
-  - name: templateId
-    type: String
-    description: |-
-      The unique ID of the PromptTemplate, which is the final component of the
-      PromptTemplate's resource name.
-    output: true
-    immutable: true
   - name: templateString
     type: String
     required: true

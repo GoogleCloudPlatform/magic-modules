@@ -57,7 +57,7 @@ func TestAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateUpdate(t 
 				ResourceName:            "google_firebase_ai_logic_prompt_template.updating",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "prompt_template_id"},
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 			{
 				Config: testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateUpdateExample(context, "Hello from Updated Version 2"),
@@ -66,7 +66,7 @@ func TestAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateUpdate(t 
 				ResourceName:            "google_firebase_ai_logic_prompt_template.updating",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "prompt_template_id"},
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})
@@ -99,7 +99,7 @@ func TestAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateComplexUp
 				ResourceName:            "google_firebase_ai_logic_prompt_template.complex",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "prompt_template_id"},
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 			{
 				Config: testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateComplexUpdateExample(context, "Updated Name", "gemini-1.5-flash", "Hello V1"),
@@ -125,7 +125,7 @@ resource "google_firebase_ai_logic_prompt_template" "updating" {
   provider = google-beta
   project  = "%{project_id}"
   location = "global"
-  prompt_template_id = "update-test-%{random_suffix}"
+  template_id = "update-test-%{random_suffix}"
   template_string = <<EOF
 ---
 model: googleai/gemini-2.0-flash
@@ -145,7 +145,7 @@ resource "google_firebase_ai_logic_prompt_template" "complex" {
   provider = google-beta
   project  = "%{project_id}"
   location = "global"
-  prompt_template_id = "complex-test-%{random_suffix}"
+  template_id = "complex-test-%{random_suffix}"
   display_name = "%{display_name}"
   template_string = <<EOF
 ---
