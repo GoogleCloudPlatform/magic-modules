@@ -27,6 +27,11 @@ sweeper:
     - region: "us"
     - region: "eu"
 
+examples:
+  - name: 'google_document_ai_schema_version'
+  - name: 'google_document_ai_schema_version_eu'
+    exclude_docs: true
+
 parameters:
   - name: 'location'
     type: String
