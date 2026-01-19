@@ -84,7 +84,7 @@ properties:
     type: String
     description: The time the processor was created.
     output: true
-  - name: defaultProcessorVersion
+  - name: 'defaultProcessorVersion'
     type: String
     description: The default processor version.
   - name: 'processEndpoint'
@@ -99,10 +99,10 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: alias
+        - name: 'alias'
           type: String
           description: The alias in the form of `processor_version` resource name.
-        - name: processorVersion
+        - name: 'processorVersion'
           type: String
           description: The resource name of aliased processor version.
   - name: 'satisfiesPzi'
