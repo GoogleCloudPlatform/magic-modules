@@ -874,7 +874,7 @@ var ServicesListGa = mapOf(
     "workloadidentity" to mapOf(
         "name" to "workloadidentity",
         "displayName" to "Workload Identity",
-        "path" to "./google-beta/services/workloadidentity"
+        "path" to "./google/services/workloadidentity"
     ),
     "workflows" to mapOf(
         "name" to "workflows",
