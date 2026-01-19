@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,64 +12,167 @@
 # limitations under the License.
 
 ---
-name: 'Processor'
-description: |
-  The first-class citizen for Document AI. Each processor defines how to extract structural information from a document.
+name: SchemaVersion
+description: SchemaVersion is a version of the processor's schema which is created as a child resource of Schema.
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/document-ai/docs/overview'
-  api: 'https://cloud.google.com/document-ai/docs/reference/rest/v1/projects.locations.processors'
-docs:
-base_url: 'projects/{{project}}/locations/{{location}}/processors'
-immutable: true
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-custom_code:
+
+base_url: 'projects/{{project}}/locations/{{location}}/schemas/{{schema_id}}/schemaVersions'
+update_verb: PATCH
+update_mask: true
+
 sweeper:
   url_substitutions:
     - region: "us"
     - region: "eu"
-examples:
-  - name: 'documentai_processor'
-    primary_resource_id: 'processor'
-    vars:
-      processor_name: 'test-processor'
-  - name: 'documentai_processor_eu'
-    primary_resource_id: 'processor'
-    vars:
-      processor_name: 'test-processor'
-    exclude_docs: true
+
 parameters:
   - name: 'location'
     type: String
-    description: |
-      The location of the resource.
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
     url_param_only: true
+  - name: 'schema_id'
+    type: String
     required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
+    url_param_only: true
+
 properties:
-  - name: 'name'
+  - name: 'createTime'
     type: String
-    description: |
-      The resource name of the processor.
+    description: The time when the SchemaVersion was created.
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'type'
-    type: String
-    description: |
-      The type of processor. For possible types see the [official list](https://cloud.google.com/document-ai/docs/reference/rest/v1/projects.locations/fetchProcessorTypes#google.cloud.documentai.v1.DocumentProcessorService.FetchProcessorTypes)
-    required: true
-    immutable: true
   - name: 'displayName'
     type: String
-    description: |
-      The display name. Must be unique.
     required: true
-    immutable: true
-  - name: 'kmsKeyName'
+    description: The user-defined name of the SchemaVersion.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: The GCP labels for the SchemaVersion.
+  - name: 'name'
     type: String
-    description: |
-      The KMS key used for encryption/decryption in CMEK scenarios. See https://cloud.google.com/security-key-management.
-    immutable: true
+    description: |-
+      Identifier. The resource name of the SchemaVersion.
+      Format:
+      `projects/{project}/locations/{location}/schemas/{schema}/schemaVersions/{schemaversion}`
+  - name: 'schema'
+    type: NestedObject
+    required: true
+    description: The schema defines the output of the processed document by a processor.
+    properties:
+      - name: 'description'
+        type: String
+        description: Description of the schema.
+      - name: 'displayName'
+        type: String
+        description: Display name to show to users.
+      - name: 'entityTypes'
+        type: Array
+        description: Entity types of the schema.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'baseTypes'
+              type: Array
+              description: |-
+                The entity type that this type is derived from.  For now, one and only
+                one should be set.
+              item_type:
+                type: String
+            - name: 'displayName'
+              type: String
+              description: User defined name for the type.
+            - name: 'enumValues'
+              type: NestedObject
+              description: Defines the a list of enum values.
+              properties:
+                - name: 'values'
+                  type: Array
+                  description: The individual values that this enum values type can include.
+                  item_type:
+                    type: String
+            - name: 'name'
+              type: String
+              description: |-
+                Name of the type. It must be unique within the schema file and
+                cannot be a "Common Type".  The following naming conventions are used:
+
+                - Use `snake_casing`.
+                - Name matching is case-sensitive.
+                - Maximum 64 characters.
+                - Must start with a letter.
+                - Allowed characters: ASCII letters `[a-z0-9_-]`.  (For backward
+                compatibility internal infrastructure and tooling can handle any ascii
+                character.)
+                - The `/` is sometimes used to denote a property of a type.  For example
+                `line_item/amount`.  This convention is deprecated, but will still be
+                honored for backward compatibility.
+            - name: 'properties'
+              type: Array
+              description: Description the nested structure, or composition of an entity.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'displayName'
+                    type: String
+                    description: User defined name for the property.
+                  - name: 'method'
+                    type: Enum
+                    description: Specifies how the entity's value is obtained.
+                    enum_values:
+                      - 'EXTRACT'
+                      - 'DERIVE'
+                  - name: 'name'
+                    type: String
+                    description: |-
+                      The name of the property.  Follows the same guidelines as the
+                      EntityType name.
+                  - name: 'occurrenceType'
+                    type: Enum
+                    description: |-
+                      Occurrence type limits the number of instances an entity type appears
+                      in the document.
+                    enum_values:
+                      - 'OPTIONAL_ONCE'
+                      - 'OPTIONAL_MULTIPLE'
+                      - 'REQUIRED_ONCE'
+                      - 'REQUIRED_MULTIPLE'
+                  - name: 'valueType'
+                    type: String
+                    description: |-
+                      A reference to the value type of the property.  This type is subject
+                      to the same conventions as the `Entity.base_types` field.
+      - name: 'metadata'
+        type: NestedObject
+        description: Metadata for global schema behavior.
+        properties:
+          - name: 'documentAllowMultipleLabels'
+            type: Boolean
+            description: |-
+              If true, on a given page, there can be multiple `document` annotations
+              covering it.
+          - name: 'documentSplitter'
+            type: Boolean
+            description: |-
+              If true, a `document` entity type can be applied to subdocument
+              (splitting). Otherwise, it can only be applied to the entire document
+              (classification).
+          - name: 'prefixedNamingOnProperties'
+            type: Boolean
+            description: If set, all the nested entities must be prefixed with the parents.
+          - name: 'skipNamingValidation'
+            type: Boolean
+            description: |-
+              If set, we will skip the naming format validation in the schema. So the
+              string values in `DocumentSchema.EntityType.name` and
+              `DocumentSchema.EntityType.Property.name` will not be checked.
+      - name: 'documentPrompt'
+        type: string
+        description: |-
+          Document level prompt provided by the user. This custom text is injected
+          into the AI model's prompt to provide extra, document-wide guidance for
+          processing.
