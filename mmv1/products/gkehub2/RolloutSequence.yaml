@@ -114,6 +114,7 @@ properties:
               description: |
                 The label selector must be a valid CEL (Common Expression Language) expression which
                 evaluates resource.labels.
+              required: true
         - name: 'soakDuration'
           type: String
           description: |
