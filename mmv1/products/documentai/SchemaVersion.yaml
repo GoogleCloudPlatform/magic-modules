@@ -41,6 +41,15 @@ parameters:
     immutable: true
     url_param_only: true
 
+examples:
+  - name: 'document_ai_schema_version'
+    vars:
+      schema_id: 'schema_id'
+  - name: 'document_ai_schema_version_eu'
+    vars:
+      schema_id: 'schema_id_eu'
+    exclude_docs: true
+
 properties:
   - name: 'createTime'
     type: String
@@ -176,3 +185,4 @@ properties:
           Document level prompt provided by the user. This custom text is injected
           into the AI model's prompt to provide extra, document-wide guidance for
           processing.
+          
