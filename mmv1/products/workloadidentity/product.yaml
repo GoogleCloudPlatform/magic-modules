@@ -20,5 +20,5 @@ scopes:
 versions:
   - base_url: https://workloadidentity.googleapis.com/v1alpha/
     name: beta
-  - base_url: https://workloadidentity.googleapis.com/v1/  # Add this block
+  - base_url: https://workloadidentity.googleapis.com/v1/
     name: ga

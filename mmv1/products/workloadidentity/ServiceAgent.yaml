@@ -82,3 +82,13 @@ examples:
       project: "{{project}}"
       # region:  Required if location is not hardcoded to "global"
       # zone:    Required if location is not hardcoded to "global"
+    # Add import_id format
+    import_id: "projects/{{project}}/locations/global/serviceAgents/{{vars.service_agent_id}}"
+    # Add steps for testing updates
+    update_test_steps:
+      - !ruby/object:Provider::Terraform::Examples::TestStep
+        name: "update"
+        tf_file_path: "templates/terraform/examples/workload_identity_service_agent_update.tf.tmpl"
+        vars:
+          label_val: "{{updated_label_val}}"
+    check_dangling_resources: true
