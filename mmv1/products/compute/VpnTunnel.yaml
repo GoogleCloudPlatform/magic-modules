@@ -278,3 +278,16 @@ properties:
             description: 'Perfect forward secrecy groups.'
             item_type:
               type: String
+  - name: 'capacityTier'
+    type: Enum
+    description: |
+      The capacity tier for this VPN tunnel. 
+      Possible values:
+        - `DEFAULT`: A VPN tunnel which can support up to 3 Gbps.
+        - `HIGH`: A VPN tunnel which can support up to 6 Gbps.
+    min_version: beta
+    enum_values:
+      - 'DEFAULT'
+      - 'HIGH'
+    immutable: true
+    default_from_api: true
