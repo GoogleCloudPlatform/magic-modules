@@ -125,7 +125,6 @@ properties:
     description: |
       Custom user defined access groups at the data product level.
     value_type:
-      name: 'AccessGroup'
       type: NestedObject
       properties:
         - name: 'group_id'

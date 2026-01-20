@@ -165,9 +165,7 @@ properties:
       Output only. Map of listing resource names to associated linked resource,
       e.g. projects/123/locations/US/dataExchanges/456/listings/789 -> projects/123/datasets/my_dataset
     key_name: resource_name
-    key_description: The associated linked resource
     value_type:
-      name: linked_resource
       type: NestedObject
       properties:
         - name: listing
