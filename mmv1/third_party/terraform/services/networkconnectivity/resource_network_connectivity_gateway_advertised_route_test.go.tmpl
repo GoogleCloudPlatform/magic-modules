@@ -56,7 +56,7 @@ resource "google_compute_network" "network" {
 resource "google_compute_subnetwork" "subnetwork" {
   name          = "tf-test-subnet%{random_suffix}"
   ip_cidr_range = "10.0.0.0/28"
-  region        = "us-central1"
+  region        = "us-east7"
   network       = google_compute_network.network.self_link
 }
 
@@ -71,7 +71,7 @@ resource "google_network_connectivity_hub" "basic_hub" {
 
 resource "google_network_connectivity_spoke" "primary" {
   name = "tf-test-name%{random_suffix}"
-  location = "us-central1"
+  location = "us-east7"
   description = "A sample spoke with a linked routher appliance instance"
   labels = {
     label-one = "value-one"
@@ -88,7 +88,7 @@ resource "google_network_connectivity_spoke" "primary" {
 
 resource "google_network_connectivity_gateway_advertised_route" "gateway-advertised-route" {
   spoke         = google_network_connectivity_spoke.primary.name
-  location      = "us-central1"
+  location      = "us-east7"
   name          = "tf-test-gateway-advertised-route%{random_suffix}"
   labels = {
     label-one = "value-one"
@@ -112,7 +112,7 @@ resource "google_compute_network" "network" {
 resource "google_compute_subnetwork" "subnetwork" {
   name          = "tf-test-subnet%{random_suffix}"
   ip_cidr_range = "10.0.0.0/28"
-  region        = "us-central1"
+  region        = "us-east7"
   network       = google_compute_network.network.self_link
 }
 
@@ -127,7 +127,7 @@ resource "google_network_connectivity_hub" "basic_hub" {
 
 resource "google_network_connectivity_spoke" "primary" {
   name = "tf-test-name%{random_suffix}"
-  location = "us-central1"
+  location = "us-east7"
   description = "A sample spoke with a linked routher appliance instance"
   labels = {
     label-one = "value-one"
@@ -144,7 +144,7 @@ resource "google_network_connectivity_spoke" "primary" {
 
 resource "google_network_connectivity_gateway_advertised_route" "gateway-advertised-route" {
   spoke         = google_network_connectivity_spoke.primary.name
-  location      = "us-central1"
+  location      = "us-east7"
   name          = "tf-test-gateway-advertised-route%{random_suffix}"
   labels = {
     label-one = "value-one"
