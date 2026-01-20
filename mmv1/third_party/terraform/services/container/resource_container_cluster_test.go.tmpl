@@ -16893,6 +16893,8 @@ func TestAccContainerCluster_nodePool_acceleratorNetworkProfile_Lifecycle(t *tes
 					resource.TestCheckResourceAttr(resourceName, "node_pool.0.network_config.0.additional_node_network_configs.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "node_pool.0.network_config.0.accelerator_network_profile", ""),
 				),
+			},
+			{
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -16911,6 +16913,8 @@ func TestAccContainerCluster_nodePool_acceleratorNetworkProfile_Lifecycle(t *tes
 					resource.TestCheckResourceAttr(resourceName, "node_pool.0.network_config.0.additional_node_network_configs.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "node_pool.0.network_config.0.accelerator_network_profile", ""),
 				),
+			},
+			{
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -16928,6 +16932,8 @@ func TestAccContainerCluster_nodePool_acceleratorNetworkProfile_Lifecycle(t *tes
 					// Verify Auto is set
 					resource.TestCheckResourceAttr(resourceName, "node_pool.0.network_config.0.accelerator_network_profile", "auto"),
 				),
+			},
+			{
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,

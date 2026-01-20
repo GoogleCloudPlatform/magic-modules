@@ -6852,6 +6852,8 @@ func TestAccContainerNodePool_acceleratorNetworkProfile_Lifecycle(t *testing.T) 
 					resource.TestCheckResourceAttr(resourceName, "network_config.0.additional_node_network_configs.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "network_config.0.accelerator_network_profile", ""),
 				),
+			},
+			{
                 ResourceName:            resourceName,
                 ImportState:             true,
                 ImportStateVerify:       true,
@@ -6869,6 +6871,8 @@ func TestAccContainerNodePool_acceleratorNetworkProfile_Lifecycle(t *testing.T) 
 					resource.TestCheckResourceAttr(resourceName, "network_config.0.additional_node_network_configs.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "network_config.0.accelerator_network_profile", ""),
 				),
+			},
+			{
                 ResourceName:            resourceName,
                 ImportState:             true,
                 ImportStateVerify:       true,
@@ -6885,6 +6889,8 @@ func TestAccContainerNodePool_acceleratorNetworkProfile_Lifecycle(t *testing.T) 
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "network_config.0.accelerator_network_profile", "auto"),
 				),
+			},
+			{
 				ResourceName:            resourceName,
                 ImportState:             true,
                 ImportStateVerify:       true,
