@@ -1,0 +1,19 @@
+resource "google_dataplex_data_product" "{{$.PrimaryResourceId}}" {
+  project         = "{{index $.TestEnvVars "project_name"}}"
+  location        = "us-central1"
+  data_product_id = "{{index $.Vars "data_product_id"}}"
+  display_name    = "terraform data product"
+  
+  owner_emails = ["terraform-test@google.com"]
+
+  access_groups {
+    id           = "analyst"
+    group_id     = "analyst"
+    display_name = "Data Analyst"
+    principal {
+      google_group = "tf-test-analysts-%{random_suffix}@example.com"
+    }
+  }
+
+  provider = google-beta
+}
