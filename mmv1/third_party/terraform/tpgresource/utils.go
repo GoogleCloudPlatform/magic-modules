@@ -987,7 +987,7 @@ func NormalizeIamPrincipalCasing(principal string) string {
 	return principal
 }
 
-// Hash based on relative url for a nested object containing a URL field.
+// Hash based on a normalized IP address
 func IpAddrSetHashFunc(v interface{}) int {
 	if v == nil {
 		return 0
