@@ -16873,50 +16873,63 @@ resource "google_container_cluster" "primary" {
 }
 
 func TestAccContainerCluster_nodePool_acceleratorNetworkProfile_Lifecycle(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
-    clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-    resourceName := "google_container_cluster.primary"
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	resourceName := "google_container_cluster.primary"
+	importIgnore := []string{"deletion_protection", "terraform_labels", "initial_node_count"}
 
-    acctest.VcrTest(t, resource.TestCase{
-        PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-        ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-        CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
-        Steps: []resource.TestStep{
-            // Step 1: Create with Manual Config (ANP Off)
-            {
-                Config: testAccContainerCluster_nodePool_additionalNodeNetworkConfigs_manual(clusterName),
-                Check: resource.ComposeTestCheckFunc(
-                    resource.TestCheckResourceAttr(resourceName, "name", clusterName),
-                    // Verify manual config exists
-                    resource.TestCheckResourceAttr(resourceName, "node_pool.0.network_config.0.additional_node_network_configs.#", "1"),
-                    resource.TestCheckResourceAttr(resourceName, "node_pool.0.network_config.0.accelerator_network_profile", ""),
-                ),
-            },
-            // Step 2: Remove Manual Config (Expect Replacement)
-            {
-                Config: testAccContainerCluster_nodePool_acceleratorNetworkProfile_basic(clusterName),
-                Check: resource.ComposeTestCheckFunc(
-                    // Verify additional configs are gone
-                    resource.TestCheckResourceAttr(resourceName, "node_pool.0.network_config.0.additional_node_network_configs.#", "0"),
-                    resource.TestCheckResourceAttr(resourceName, "node_pool.0.network_config.0.accelerator_network_profile", ""),
-                ),
-            },
-            // Step 3: Enable ANP (Auto) (Expect Replacement Again)
-            {
-                Config: testAccContainerCluster_nodePool_acceleratorNetworkProfile_auto(clusterName),
-                Check: resource.ComposeTestCheckFunc(
-                    // Verify Auto is set
-                    resource.TestCheckResourceAttr(resourceName, "node_pool.0.network_config.0.accelerator_network_profile", "auto"),
-                ),
-            },
-            // Step 4: Import Verify
-            {
-                ResourceName:            resourceName,
-                ImportState:             true,
-                ImportStateVerify:       true,
-                ImportStateVerifyIgnore: []string{"deletion_protection", "terraform_labels", "initial_node_count"},
-            },
-        },
-    })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// Step 1: Create with Manual Config (ANP Off)
+			{
+				Config: testAccContainerCluster_nodePool_additionalNodeNetworkConfigs_manual(clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
+					// Verify manual config exists
+					resource.TestCheckResourceAttr(resourceName, "node_pool.0.network_config.0.additional_node_network_configs.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "node_pool.0.network_config.0.accelerator_network_profile", ""),
+				),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: importIgnore,
+			},
+			// Step 2: Remove Manual Config (Expect Replacement)
+			{
+				Config: testAccContainerCluster_nodePool_acceleratorNetworkProfile_basic(clusterName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionReplace),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					// Verify additional configs are gone
+					resource.TestCheckResourceAttr(resourceName, "node_pool.0.network_config.0.additional_node_network_configs.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "node_pool.0.network_config.0.accelerator_network_profile", ""),
+				),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: importIgnore,
+			},
+			// Step 3: Enable ANP (Auto) (Expect Replacement Again)
+			{
+				Config: testAccContainerCluster_nodePool_acceleratorNetworkProfile_auto(clusterName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionReplace),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					// Verify Auto is set
+					resource.TestCheckResourceAttr(resourceName, "node_pool.0.network_config.0.accelerator_network_profile", "auto"),
+				),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: importIgnore,
+			},
+		},
+	})
 }

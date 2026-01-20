@@ -6836,6 +6836,7 @@ func TestAccContainerNodePool_acceleratorNetworkProfile_Lifecycle(t *testing.T) 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	npName := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
 	resourceName := "google_container_node_pool.np"
+    importIgnore := []string{"deletion_protection", "cluster", "initial_node_count"}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -6851,28 +6852,40 @@ func TestAccContainerNodePool_acceleratorNetworkProfile_Lifecycle(t *testing.T) 
 					resource.TestCheckResourceAttr(resourceName, "network_config.0.additional_node_network_configs.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "network_config.0.accelerator_network_profile", ""),
 				),
+                ImportState:             true,
+                ImportStateVerify:       true,
+                ImportStateVerifyIgnore: importIgnore,
 			},
 			// Step 2: Remove Manual Config (Expect Replacement)
 			{
 				Config: testAccContainerNodePool_acceleratorNetworkProfile_basic(clusterName, npName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionReplace),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "network_config.0.additional_node_network_configs.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "network_config.0.accelerator_network_profile", ""),
 				),
+                ImportState:             true,
+                ImportStateVerify:       true,
+                ImportStateVerifyIgnore: importIgnore,
 			},
 			// Step 3: Enable ANP (Auto) (Expect Replacement Again)
 			{
 				Config: testAccContainerNodePool_acceleratorNetworkProfile_auto(clusterName, npName),
+                ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionReplace),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "network_config.0.accelerator_network_profile", "auto"),
 				),
-			},
-			// Step 4: Import Verify
-			{
-				ResourceName:            resourceName,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "cluster", "initial_node_count"},
+                ImportState:             true,
+                ImportStateVerify:       true,
+                ImportStateVerifyIgnore: importIgnore,
 			},
 		},
 	})
