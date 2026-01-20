@@ -137,6 +137,9 @@ type Resource struct {
 	// must be set.
 	Identity []string `yaml:"identity,omitempty"`
 
+	// [Optional] If set to true, the identity values will not be included in identity() generation
+	ExcludeIdentityFromIdentityImport bool `yaml:"exclude_identity_from_identity_import,omitempty"`
+
 	// [Optional] (Api::Resource::NestedQuery) This is useful in case you need
 	// to change the query made for GET requests only. In particular, this is
 	// often used to extract an object from a parent object or a collection.
@@ -668,7 +671,11 @@ func (r Resource) AllNestedProperties(props []*Type) []*Type {
 
 func (r Resource) IdentityProperties() []*Type {
 	props := make([]*Type, 0)
-	importFormat := r.ExtractIdentifiers(ImportIdFormats(r.ImportFormat, r.Identity, r.BaseUrl)[0])
+	identities := r.Identity
+	if r.ExcludeIdentityFromIdentityImport {
+		identities = nil
+	}
+	importFormat := r.ExtractIdentifiers(ImportIdFormats(r.ImportFormat, identities, r.BaseUrl)[0])
 	optionalValues := map[string]bool{"project": false, "zone": false, "region": false}
 	for _, p := range r.AllProperties() {
 		if slices.Contains(importFormat, google.Underscore(p.Name)) {
