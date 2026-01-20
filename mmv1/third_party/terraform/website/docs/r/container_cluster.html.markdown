@@ -1301,6 +1301,11 @@ The `node_config_defaults` block supports:
 
 * `gcfs_config` (Optional) The default Google Container Filesystem (GCFS) configuration at the cluster level. e.g. enable [image streaming](https://cloud.google.com/kubernetes-engine/docs/how-to/image-streaming) across all the node pools within the cluster. Structure is [documented below](#nested_gcfs_config).
 
+<a name="nested_best_effort_provisioning"></a>The `best_effort_provisioning` block supports:
+
+* `enabled` - (Optional) If `true`, best-effort provisioning is enabled.
+* `min_provision_nodes` - (Optional) Minimum number of nodes to be provisioned.
+
 <a name="nested_notification_config"></a>The `notification_config` block supports:
 
 * `pubsub` (Required) - The pubsub config for the cluster's upgrade notifications.
