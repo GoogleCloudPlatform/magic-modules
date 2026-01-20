@@ -709,6 +709,10 @@ fields:
     api_field: 'nodePools.placementPolicy.type'
   - field: 'node_pool.queued_provisioning.enabled'
     api_field: 'nodePools.queuedProvisioning.enabled'
+  - field: 'node_pool.best_effort_provisioning.enabled'
+    api_field: 'nodePools.bestEffortProvisioning.enabled'
+  - field: 'node_pool.best_effort_provisioning.min_provision_nodes'
+    api_field: 'nodePools.bestEffortProvisioning.minProvisionNodes'
 {{- if ne $.TargetVersionName "ga" }}
   - field: 'node_pool.upgrade_settings.blue_green_settings.autoscaled_rollout_policy.wait_for_drain_duration'
     api_field: 'nodePools.upgradeSettings.blueGreenSettings.autoscaledRolloutPolicy.waitForDrainDuration'
