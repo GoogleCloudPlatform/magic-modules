@@ -72,7 +72,7 @@ resource "google_tags_location_tag_binding" "binding" {
 }
 ```
 
-## Example Usage - Compute Instance With Dynamic Tag Key
+## Example Usage - Compute Instance With Dynamic Tag Value
 
 ```hcl
 resource "google_project" "project" {
