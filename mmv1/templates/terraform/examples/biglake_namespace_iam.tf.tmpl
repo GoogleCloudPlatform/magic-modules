@@ -1,0 +1,4 @@
+resource "google_biglake_catalog" "catalog" {
+    name = "{{index $.Vars "catalog_id"}}"
+    location = "US"
+}

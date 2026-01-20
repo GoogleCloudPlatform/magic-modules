@@ -1,0 +1,9 @@
+resource "google_biglake_catalog" "catalog" {
+    name = "{{index $.Vars "catalog_id"}}"
+    location = "US"
+}
+
+resource "google_biglake_namespace" "{{$.PrimaryResourceId}}"  {
+    name = "{{index $.Vars "name"}}"
+    catalog = google_biglake_catalog.catalog.id
+}
