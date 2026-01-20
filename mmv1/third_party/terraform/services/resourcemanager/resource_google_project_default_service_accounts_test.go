@@ -239,8 +239,8 @@ func testAccCheckGoogleProjectDefaultServiceAccountsRevert(t *testing.T, project
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
-		attempts := 3
-		delay := 5 * time.Second
+		attempts := 5
+		delay := 1 * time.Second
 		maxDelay := 30 * time.Second
 
 		for i := 0; i < attempts; i++ {
