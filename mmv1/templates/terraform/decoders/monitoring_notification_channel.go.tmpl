@@ -22,17 +22,9 @@ if sensitiveLabelsRaw != nil {
 			sensitiveLabels := make(map[string]interface{})
 
 			for configKey, configVal := range configuredSensitiveLabels {
-				if strings.HasSuffix(configKey, "_wo_version") {
-					// Convert: field_wo_version → fieldWoVersion
-					base := strings.TrimSuffix(configKey, "_wo_version")
-					camelKey := base + "WoVersion"
-					sensitiveLabels[camelKey] = configVal
-					continue
-				}
-
 				apiField := strings.TrimSuffix(configKey, "_wo")
-				sensitiveLabels[configKey] = configVal
 				delete(labels, apiField)
+				sensitiveLabels[configKey] = configVal
 			}
 
 			if len(sensitiveLabels) > 0 {
