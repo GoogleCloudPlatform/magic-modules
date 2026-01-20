@@ -44,6 +44,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+exclude_identity_from_identity_import: true
+ # the identity values aren't used for identity import
 identity:
   - role
   - userByEmail
