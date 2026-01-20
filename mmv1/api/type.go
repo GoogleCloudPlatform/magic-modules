@@ -500,8 +500,8 @@ func (t *Type) Validate(rName string) {
 		log.Fatalf("Property %s cannot be write_only and sensitive at the same time in resource %s", t.Name, rName)
 	}
 
-	if t.KeyDescription {
-		log.Fatalf("Property %s.key_description can't be set; it's deprecated", t.Name, rName)
+	if t.KeyDescription != "" {
+		log.Fatalf("Property %s.key_description can't be set in resource %s; it's deprecated", t.Name, rName)
 	}
 
 	t.validateLabelsField()
