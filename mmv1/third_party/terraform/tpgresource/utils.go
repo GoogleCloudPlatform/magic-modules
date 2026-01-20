@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/url"
 	"reflect"
 	"regexp"
@@ -984,4 +985,17 @@ func NormalizeIamPrincipalCasing(principal string) string {
 		principal = strings.Join(pieces, ":")
 	}
 	return principal
+}
+
+// Hash based on relative url for a nested object containing a URL field.
+func IpAddrSetHashFunc(v interface{}) int {
+	if v == nil {
+		return 0
+	}
+
+	m := v.(string)
+	log.Printf("[DEBUG] hashing %v", m)
+	ip := net.ParseIP(m).String()
+	log.Printf("[DEBUG] computed hash value of %v from %s", Hashcode(ip), ip)
+	return Hashcode(ip)
 }
