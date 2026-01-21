@@ -345,7 +345,6 @@ properties:
             * `docx`: Override parsing config for DOCX files, only digital parsing and or layout parsing are supported.
         key_name: 'file_type'
         value_type:
-          name: parsingConfigOverrides
           type: NestedObject
           properties:
             - name: 'digitalParsingConfig'
