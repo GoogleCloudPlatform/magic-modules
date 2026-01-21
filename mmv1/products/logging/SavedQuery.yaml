@@ -59,7 +59,7 @@ parameters:
   - name: 'location'
     type: String
     description: |
-      The location of the resource see 
+      The location of the resource see
       [supported regions](https://docs.cloud.google.com/logging/docs/region-support#bucket-regions).
     url_param_only: true
     required: true
