@@ -20,4 +20,3 @@ versions:
   - base_url: https://bigquerydatapolicy.googleapis.com/v2/
     name: ga
 caibaseurl: ""
-resourceswithcaiassettype: {}
