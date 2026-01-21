@@ -829,7 +829,6 @@ func ResourceBigQueryTable() *schema.Resource {
 										Default:     0,
 										Description: `The number of rows at the top of a CSV file that BigQuery will skip when reading the data.`,
 									},
-									// SourceColumnMatch: [Optional] Controls the strategy used to match loaded columns to the schema.
 									"source_column_match": {
 										Type:         schema.TypeString,
 										Optional:     true,
