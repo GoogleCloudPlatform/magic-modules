@@ -17,6 +17,7 @@ import (
 	"io/fs"
 	"log"
 	"maps"
+	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -2543,6 +2544,22 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 
 	if r.IgnoreCaiAssetName() {
 		props = append(props, "ASSETNAME")
+	}
+
+	if r.CustomCode.ExtraSchemaEntry != "" {
+		b, err := os.ReadFile(r.CustomCode.ExtraSchemaEntry)
+
+		if err != nil {
+			log.Printf("Warning: failed to read extra_schema_entry file %s: %v", r.CustomCode.ExtraSchemaEntry, err)
+		} else {
+			re := regexp.MustCompile(`"([^"]+)"\s*:`)
+			matches := re.FindAllStringSubmatch(string(b), -1)
+			for _, match := range matches {
+				if len(match) > 1 {
+					props = append(props, match[1])
+				}
+			}
+		}
 	}
 
 	slices.Sort(props)
