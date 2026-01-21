@@ -25,58 +25,63 @@ base_url: 'projects/{{project}}/datasets/{{dataset_id}}/routines'
 self_link: 'projects/{{project}}/datasets/{{dataset_id}}/routines/{{routine_id}}'
 import_format:
   - 'projects/{{project}}/datasets/{{dataset_id}}/routines/{{routine_id}}'
+exclude_identity_generation: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  custom_identity:
-    - 'project'
-    - 'dataset_id'
-    - 'routine_id'
 examples:
   - name: 'bigquery_routine_basic'
+    exclude_identity_import: true
     primary_resource_id: 'sproc'
     primary_resource_name: 'fmt.Sprintf("tf_test_dataset_id%s", context["random_suffix"]), fmt.Sprintf("tf_test_table_id%s", context["random_suffix"])'
     vars:
       dataset_id: 'dataset_id'
       routine_id: 'routine_id'
   - name: 'bigquery_routine_json'
+    exclude_identity_import: true
     primary_resource_id: 'sproc'
     primary_resource_name: 'fmt.Sprintf("tf_test_dataset_id%s", context["random_suffix"]), fmt.Sprintf("tf_test_table_id%s", context["random_suffix"])'
     vars:
       dataset_id: 'dataset_id'
       routine_id: 'routine_id'
   - name: 'bigquery_routine_tvf'
+    exclude_identity_import: true
     primary_resource_id: 'sproc'
     primary_resource_name: 'fmt.Sprintf("tf_test_dataset_id%s", context["random_suffix"]), fmt.Sprintf("tf_test_table_id%s", context["random_suffix"])'
     vars:
       dataset_id: 'dataset_id'
       routine_id: 'routine_id'
   - name: 'bigquery_routine_pyspark'
+    exclude_identity_import: true
     primary_resource_id: 'pyspark'
     vars:
       dataset_id: 'dataset_id'
       connection_id: 'connection_id'
       routine_id: 'routine_id'
   - name: 'bigquery_routine_pyspark_mainfile'
+    exclude_identity_import: true
     primary_resource_id: 'pyspark_mainfile'
     vars:
       dataset_id: 'dataset_id'
       connection_id: 'connection_id'
       routine_id: 'routine_id'
   - name: 'bigquery_routine_spark_jar'
+    exclude_identity_import: true
     primary_resource_id: 'spark_jar'
     vars:
       dataset_id: 'dataset_id'
       connection_id: 'connection_id'
       routine_id: 'routine_id'
   - name: 'bigquery_routine_data_governance_type'
+    exclude_identity_import: true
     primary_resource_id: 'custom_masking_routine'
     vars:
       dataset_id: 'dataset_id'
       routine_id: 'routine_id'
   - name: 'bigquery_routine_remote_function'
+    exclude_identity_import: true
     primary_resource_id: 'remote_function'
     vars:
       dataset_id: 'dataset_id'
@@ -84,6 +89,7 @@ examples:
       routine_id: 'routine_id'
     exclude_test: true
   - name: 'bigquery_routine_python_function'
+    exclude_identity_import: true
     primary_resource_id: 'python_function'
     vars:
       dataset_id: 'dataset_id'
