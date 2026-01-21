@@ -181,10 +181,7 @@ properties:
         description: |
           A map of project id and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
         key_name: 'id'
-        key_description: |
-          The project id/number which is deleting or adding to the project list.
         value_type:
-          name: 'projectConfig'
           type: NestedObject
           properties:
             - name: 'projectId'
@@ -376,12 +373,9 @@ properties:
                   - name: 'projectMap'
                     type: Map
                     key_name: project
-                    key_description: |
-                      The project ID, used as the key in this map.
                     description: |
                       A map of project id and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
                     value_type:
-                      name: 'projectConfig'
                       type: NestedObject
                       properties:
                         - name: 'projectId'

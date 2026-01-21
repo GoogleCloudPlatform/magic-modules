@@ -370,7 +370,6 @@ properties:
         type: Map
         key_name: key
         value_type:
-          name: value
           type: NestedObject
           properties:
             - name: 'value'
@@ -527,7 +526,6 @@ properties:
             type: Map
             key_name: key
             value_type:
-              name: value
               type: NestedObject
               properties:
                 - name: 'value'
@@ -751,7 +749,6 @@ properties:
         type: Map
         key_name: key
         value_type:
-          name: value
           type: NestedObject
           properties:
             - name: 'value'
@@ -761,7 +758,6 @@ properties:
         type: Map
         key_name: key
         value_type:
-          name: value
           type: NestedObject
           properties:
             - name: 'value'
