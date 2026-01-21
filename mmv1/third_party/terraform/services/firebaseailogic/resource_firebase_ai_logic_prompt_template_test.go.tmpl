@@ -109,11 +109,23 @@ func TestAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateComplexUp
 				),
 			},
 			{
+				ResourceName:            "google_firebase_ai_logic_prompt_template.complex",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+			{
 				Config: testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateComplexUpdateExample(context, "Final Name", "gemini-2.0-flash", "Hello V2"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_firebase_ai_logic_prompt_template.complex", "display_name", "Final Name"),
 					resource.TestCheckResourceAttr("google_firebase_ai_logic_prompt_template.complex", "model", "googleai/gemini-2.0-flash"),
 				),
+			},
+			{
+				ResourceName:            "google_firebase_ai_logic_prompt_template.complex",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})
@@ -153,7 +165,7 @@ resource "google_firebase_ai_logic_prompt_template" "updating" {
   provider = google-beta
   project  = "%{project_id}"
   location = "global"
-  template_id = "update-test-%{random_suffix}"
+  template_id = "tf-test-update-%{random_suffix}"
   template_string = <<EOF
 ---
 model: googleai/gemini-2.0-flash
@@ -173,7 +185,7 @@ resource "google_firebase_ai_logic_prompt_template" "complex" {
   provider = google-beta
   project  = "%{project_id}"
   location = "global"
-  template_id = "complex-test-%{random_suffix}"
+  template_id = "tf-test-complex-%{random_suffix}"
   display_name = "%{display_name}"
   template_string = <<EOF
 ---

@@ -50,12 +50,6 @@ properties:
   - name: displayName
     type: String
     description: The display name of the PromptTemplate.
-  - name: etag
-    type: String
-    description: |-
-      The etag of the PromptTemplate. If this is provided with an update request,
-      it must match the server's etag for the operation to succeed.
-    output: true
   - name: locked
     type: Boolean
     description: |-
@@ -95,8 +89,6 @@ examples:
     min_version: beta
     primary_resource_id: basic
     vars:
-      random_suffix: ''
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+      template_id: 'basic-template'
     # Need the time_sleep resource
     external_providers: ["time"]
