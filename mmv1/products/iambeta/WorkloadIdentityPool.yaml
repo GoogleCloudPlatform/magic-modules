@@ -231,11 +231,7 @@ properties:
           `additional_trust_bundles` map, those trust anchors will be *appended to* the Trust Bundle
           automatically derived from your `InlineCertificateIssuanceConfig`'s `ca_pools`.
         key_name: trust_domain
-        key_description: |
-          The trusted trust domains (e.g., "example.com") to be extended trust to additional trust
-          domains to.
         value_type:
-          name: trustStore
           type: NestedObject
           description: |
             Trust store that contains trust anchors and optional intermediate CAs used in PKI to
