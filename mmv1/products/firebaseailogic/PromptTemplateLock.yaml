@@ -52,9 +52,10 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: templateId
+  - name: template_id
     type: String
     description: The ID of the prompt template.
+    api_name: templateId
     url_param_only: true
     required: true
     immutable: true

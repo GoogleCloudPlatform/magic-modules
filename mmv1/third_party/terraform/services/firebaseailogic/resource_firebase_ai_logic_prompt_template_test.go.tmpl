@@ -152,7 +152,7 @@ func TestAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateLockedUpd
 			},
 			{
 				Config:      testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateLockedExample(context, "Hello V2"),
-				ExpectError: regexp.MustCompile("(?s)Error updating PromptTemplate.*is locked and cannot be updated. Code: FAILED_PRECONDITION"),
+				ExpectError: regexp.MustCompile("(?s)Error updating PromptTemplate.*Precondition check failed"),
 			},
 		},
 	})
@@ -204,7 +204,7 @@ resource "google_firebase_ai_logic_prompt_template" "locked" {
   provider = google-beta
   project  = "%{project_id}"
   location = "global"
-  template_id = "locked-test-%{random_suffix}"
+  template_id = "tf-test-locked-%{random_suffix}"
   template_string = <<EOF
 ---
 model: googleai/gemini-2.0-flash
@@ -257,7 +257,7 @@ resource "google_firebase_ai_logic_prompt_template" "regional" {
   provider = google-beta
   project  = "%{project_id}"
   location = "%{location}"
-  template_id = "regional-test-%{random_suffix}"
+  template_id = "tf-test-regional-%{random_suffix}"
   template_string = <<EOF
 ---
 model: googleai/gemini-2.0-flash
