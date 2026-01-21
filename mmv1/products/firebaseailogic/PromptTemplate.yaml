@@ -35,8 +35,6 @@ parameters:
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-custom_code:
-  custom_update: 'templates/terraform/custom_update/firebase_ai_logic_prompt_template.go.tmpl'
 properties:
   - name: templateId
     type: String

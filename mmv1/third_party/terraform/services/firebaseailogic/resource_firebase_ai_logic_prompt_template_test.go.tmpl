@@ -140,7 +140,7 @@ func TestAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateLockedUpd
 			},
 			{
 				Config:      testAccFirebaseAILogicPromptTemplate_firebaseailogicPromptTemplateLockedExample(context, "Hello V2"),
-				ExpectError: regexp.MustCompile("(?s)Error updating PromptTemplate.*If the lock is managed by Terraform"),
+				ExpectError: regexp.MustCompile("(?s)Error updating PromptTemplate.*is locked and cannot be updated. Code: FAILED_PRECONDITION"),
 			},
 		},
 	})
