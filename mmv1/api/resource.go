@@ -235,6 +235,9 @@ type Resource struct {
 	// If true, skip sweeper generation for this resource
 	ExcludeSweeper bool `yaml:"exclude_sweeper,omitempty"`
 
+	// If true, skip identity generation for this resource
+	ExcludeIdentityGeneration bool `yaml:"exclude_identity_generation,omitempty"`
+
 	// Override sweeper settings
 	Sweeper resource.Sweeper `yaml:"sweeper,omitempty"`
 

@@ -41,6 +41,8 @@ custom_code:
   pre_read: 'templates/terraform/pre_read/monitoring_monitored_project.go.tmpl'
   custom_import: 'templates/terraform/custom_import/monitoring_monitored_project.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/monitoring_monitored_project.go.tmpl'
+# exluding resource_identity due to custom_import
+exclude_identity_generation: true
 error_retry_predicates:
   - 'transport_tpg.IsMonitoringPermissionError'
 schema_version: 1
@@ -49,6 +51,7 @@ exclude_sweeper: true
 examples:
   - name: 'monitoring_monitored_project_basic'
     primary_resource_id: 'primary'
+    exclude_identity_import: true
     vars:
       monitored_project: 'm-id'
     test_env_vars:
@@ -62,6 +65,7 @@ examples:
       org_id: 'ORG_ID'
       project_id: 'PROJECT_NAME'
     exclude_docs: true
+    exclude_identity_import: true
 parameters:
   - name: 'metricsScope'
     type: String

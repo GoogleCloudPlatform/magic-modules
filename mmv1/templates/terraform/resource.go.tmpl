@@ -173,7 +173,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
         DeprecationMessage: "{{ $.DeprecationMessage -}}",
 {{- end}}
 
-{{ if not $.ExcludeRead }}
+{{ if and (not $.ExcludeIdentityGeneration) (not $.ExcludeRead) }}
         Identity: &schema.ResourceIdentity{
           Version: {{ $.GetIdentitySchemaVersion }},
           SchemaFunc: func() map[string]*schema.Schema {
@@ -380,6 +380,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     }
     d.SetId(id)
 
+{{ if not $.ExcludeIdentityGeneration -}}
     identity, err := d.Identity()
     if err == nil && identity != nil {
     {{- range $p := $.IdentityProperties }}
@@ -401,7 +402,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     } else {
         log.Printf("[DEBUG] (Create) identity not set: %s", err)
     }
-
+{{ end }}
 {{if and $.GetAsync ($.GetAsync.Allow "Create") -}}
 {{  if ($.GetAsync.IsA "OpAsync") -}}
 {{    if and $.GetAsync.Result.ResourceInsideResponse $.HasPostCreateComputedFields -}}
@@ -780,7 +781,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
     }
 {{- end}}
-{{ if not $.ExcludeRead }}
+{{ if and (not $.ExcludeIdentityGeneration) (not $.ExcludeRead) }}
     identity, err := d.Identity()
     if err == nil && identity != nil {
     {{- range $p := $.IdentityProperties }}
@@ -821,7 +822,7 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     if err != nil {
         return err
     }
-
+{{ if not $.ExcludeIdentityGeneration -}}
     identity, err := d.Identity()
     if err == nil && identity != nil {
     {{- range $p := $.IdentityProperties }}
@@ -843,7 +844,7 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     } else {
         log.Printf("[DEBUG] (Update) identity not set: %s", err)
     }
-
+{{ end }}
     billingProject := ""
 
 {{          if $.HasProject -}}
