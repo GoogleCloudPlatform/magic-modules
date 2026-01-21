@@ -1960,6 +1960,27 @@ func ResourceContainerCluster() *schema.Resource {
 				},
 			},
 
+{{- if ne $.TargetVersionName "ga" }}
+			"managed_opentelemetry_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: "The configuration for the Managed OpenTelemetry pipeline inside the cluster.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"scope": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Description:  "The scope of the Managed OpenTelemetry pipeline. Available options include SCOPE_UNSPECIFIED, NONE, and COLLECTION_AND_INSTRUMENTATION_COMPONENTS.",
+							ValidateFunc: validation.StringInSlice([]string{"SCOPE_UNSPECIFIED", "NONE", "COLLECTION_AND_INSTRUMENTATION_COMPONENTS"}, false),
+							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("SCOPE_UNSPECIFIED"),
+						},
+					},
+				},
+			},
+{{- end }}
+
 			// Defaults to "VPC_NATIVE" during create only
 			"networking_mode": {
 				Type:         schema.TypeString,
@@ -2850,6 +2871,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		MonitoringService:       d.Get("monitoring_service").(string),
 		NetworkPolicy:           expandNetworkPolicy(d.Get("network_policy")),
 		AddonsConfig:            expandClusterAddonsConfig(d.Get("addons_config")),
+{{- if ne $.TargetVersionName "ga" }}
+		ManagedOpentelemetryConfig: expandManagedOpenTelemetryConfig(d.Get("managed_opentelemetry_config")),
+{{- end }}
 		EnableKubernetesAlpha:   d.Get("enable_kubernetes_alpha").(bool),
 		IpAllocationPolicy:      ipAllocationBlock,
 {{- if ne $.TargetVersionName "ga" }}
@@ -3624,6 +3648,12 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("monitoring_config", flattenMonitoringConfig(cluster.MonitoringConfig)); err != nil {
 		return err
 	}
+
+{{ if ne $.TargetVersionName "ga" }}
+	if err := d.Set("managed_opentelemetry_config", flattenManagedOpenTelemetryConfig(cluster.ManagedOpentelemetryConfig)); err != nil {
+		return err
+	}
+{{- end }}
 
 	if err := d.Set("node_pool_auto_config", flattenNodePoolAutoConfig(cluster.NodePoolAutoConfig)); err != nil {
 		return err
@@ -4901,6 +4931,23 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		log.Printf("[INFO] GKE cluster %s monitoring config has been updated", d.Id())
 	}
+
+{{ if ne $.TargetVersionName `ga` -}}
+	if d.HasChange("managed_opentelemetry_config") {
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredManagedOpentelemetryConfig: expandManagedOpenTelemetryConfig(d.Get("managed_opentelemetry_config")),
+			},
+		}
+		updateF := updateFunc(req, "updating GKE cluster managed opentelemetry config")
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s managed opentelemetry config has been updated", d.Id())
+	}
+{{- end }}
 
 	if d.HasChange("effective_labels") {
 		resourceLabels := d.Get("effective_labels").(map[string]interface{})
@@ -6344,6 +6391,30 @@ func expandManCidrBlocks(configured interface{}) []*container.CidrBlock {
 	}
 	return result
 }
+
+{{- if ne $.TargetVersionName "ga" }}
+func expandManagedOpenTelemetryConfig(configured interface{}) *container.ManagedOpenTelemetryConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	config := l[0].(map[string]interface{})
+	return &container.ManagedOpenTelemetryConfig{
+		Scope: config["scope"].(string),
+	}
+}
+
+func flattenManagedOpenTelemetryConfig(c *container.ManagedOpenTelemetryConfig) []map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"scope": c.Scope,
+		},
+	}
+}
+{{- end }}
 
 func expandNetworkPolicy(configured interface{}) *container.NetworkPolicy {
 	result := &container.NetworkPolicy{}

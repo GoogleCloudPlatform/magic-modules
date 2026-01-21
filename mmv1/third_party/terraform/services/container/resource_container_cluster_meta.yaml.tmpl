@@ -209,6 +209,9 @@ fields:
     api_field: 'maintenancePolicy.window.recurringWindow.recurrence'
   - field: 'maintenance_policy.recurring_window.start_time'
     api_field: 'maintenancePolicy.window.recurringWindow.window.startTime'
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'managedOpentelemetryConfig.scope'
+{{- end }}
   - api_field: 'masterAuth.clientCertificate'
   - api_field: 'masterAuth.clientCertificateConfig.issueClientCertificate'
   - api_field: 'masterAuth.clientKey'
