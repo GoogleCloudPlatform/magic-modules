@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,12 +12,10 @@
 # limitations under the License.
 
 ---
-name: 'Dataplex'
-display_name: 'Dataplex'
-versions:
-  - name: 'ga'
-    base_url: 'https://dataplex.googleapis.com/v1/'
-  - name: 'beta'
-    base_url: 'https://dataplex.googleapis.com/v1/'
+name: FirebaseAILogic
+display_name: Firebase AI Logic
 scopes:
-  - 'https://www.googleapis.com/auth/cloud-platform'
+    - https://www.googleapis.com/auth/cloud-platform
+versions:
+    - base_url: https://firebasevertexai.googleapis.com/v1beta/
+      name: beta
