@@ -14,10 +14,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"google.golang.org/api/compute/v1"
 
 	"github.com/hashicorp/terraform-provider-google/google/fwvalidators"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	{{ if eq $.TargetVersionName `ga` }}
+		compute "google.golang.org/api/compute/v1"
+	{{- else }}
+		compute "google.golang.org/api/compute/v0.beta"
+	{{- end }}
 )
 
 const (
