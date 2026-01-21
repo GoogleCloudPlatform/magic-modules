@@ -44,15 +44,13 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{name}}'
     - '{{name}}'
+  example_config_body: 'templates/terraform/iam/biglake_iceberg_namespace_iam.go.tmpl'
 examples:
-  - name: 'biglake_iceberg_namespace_iam'
-    primary_resource_id: 'namespace'
+  - name: 'biglake_iceberg_namespace'
+    primary_resource_id: 'example_namespace'
     vars:
-      name: 'my_namespace'
-      catalog_id: 'my_catalog'
-    test_env_vars:
-      GOOGLE_BILLING_PROJECT: 'PROJECT'
-      USER_PROJECT_OVERRIDE: 'true'
+      name: 'example_namespace'
+      catalog_name: 'example_catalog'
 parameters:
   - name: 'catalog'
     type: String
@@ -61,6 +59,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+properties:
   - name: 'name'
     type: String
     description: |
@@ -68,7 +67,6 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-properties:
   - name: 'create_time'
     api_name: 'create-time'
     type: String
