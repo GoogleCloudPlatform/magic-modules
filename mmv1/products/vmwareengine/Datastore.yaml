@@ -1,0 +1,179 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Datastore
+description: A datastore resource that can be mounted on a privatecloud cluster
+base_url: projects/{{project}}/locations/{{location}}/datastores
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/datastores/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/datastores?datastoreId={{name}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/datastores/{{name}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/datastores/{{name}}
+datasource:
+  generate: true
+  exclude_test: true
+examples:
+  - name: vmware_engine_datastore_thirdparty
+    primary_resource_id: example_thirdparty
+    vars:
+      resource_name: thirdparty-datastore
+    test_env_vars:
+      region: "REGION"
+      project: "PROJECT"
+    # Update tests take care of both create and update - Datastore deletion requires some additional setup
+    exclude_test: true
+  - name: vmware_engine_datastore_filestore
+    primary_resource_id: example_filestore
+    vars:
+      resource_name: filestore-datastore
+      network_name: default
+    test_env_vars:
+      region: "REGION"
+      zone: "ZONE"
+      project: "PROJECT"
+    # Update tests take care of both create and update - Datastore deletion requires some additional setup
+    exclude_test: true
+  - name: vmware_engine_datastore_netapp
+    primary_resource_id: example_netapp
+    vars:
+      resource_name: netapp-datastore
+      network_name: default
+    test_env_vars:
+      region: "REGION"
+      project: "PROJECT"
+    # Update tests take care of both create and update - Datastore deletion requires some additional setup
+    exclude_test: true
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: "{{op_id}}"
+  actions:
+    - create
+    - delete
+    - update
+  type: OpAsync
+  result:
+    resource_inside_response: true
+  include_project: false
+autogen_status: RGF0YXN0b3Jl
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: name
+    type: String
+    description: |-
+      The user-provided identifier of the datastore to be created.
+      This identifier must be unique among each `Datastore` within the parent
+      and becomes the final token in the name URI.
+      The identifier must meet the following requirements:
+
+      * Only contains 1-63 alphanumeric characters and hyphens
+      * Begins with an alphabetical character
+      * Ends with a non-hyphen character
+      * Not formatted as a UUID
+      * Complies with [RFC 1034](https://datatracker.ietf.org/doc/html/rfc1034)
+      (section 3.5)
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: clusters
+    type: Array
+    description: Clusters to which the datastore is attached.
+    output: true
+    item_type:
+      type: String
+  - name: createTime
+    type: String
+    description: Creation time of this resource.
+    output: true
+  - name: description
+    type: String
+    description: User-provided description for this datastore
+  - name: nfsDatastore
+    type: NestedObject
+    description: The NFS datastore configuration.
+    required: true
+    properties:
+      - name: googleFileService
+        type: NestedObject
+        description: Google service file service configuration
+        properties:
+          - name: filestoreInstance
+            type: String
+            description: |-
+              Google filestore instance resource name
+              e.g. projects/my-project/locations/me-west1-b/instances/my-instance
+          - name: netappVolume
+            type: String
+            description: |-
+              Google netapp volume resource name
+              e.g. projects/my-project/locations/me-west1-b/volumes/my-volume
+      - name: thirdPartyFileService
+        type: NestedObject
+        description: Third party file service configuration
+        properties:
+          - name: fileShare
+            type: String
+            description: |-
+              Required
+              Mount Folder name
+            required: true
+          - name: network
+            type: String
+            description: |-
+              Required to identify vpc peering used for NFS access
+              network name of NFS's vpc
+              e.g. projects/project-id/global/networks/my-network_id
+            required: true
+          - name: servers
+            type: Array
+            description: |-
+              Server IP addresses of the NFS file service.
+              NFS v3, provide a single IP address or DNS name.
+              Multiple servers can be supported in future when NFS 4.1 protocol support
+              is enabled.
+            required: true
+            item_type:
+              type: String
+  - name: state
+    type: String
+    description: |-
+      The state of the Datastore.
+      Possible values:
+      CREATING
+      ACTIVE
+      UPDATING
+      DELETING
+      SOFT_DELETING
+      SOFT_DELETED
+    output: true
+  - name: uid
+    type: String
+    description: System-generated unique identifier for the resource.
+    output: true
+  - name: updateTime
+    type: String
+    description: Last update time of this resource.
+    output: true

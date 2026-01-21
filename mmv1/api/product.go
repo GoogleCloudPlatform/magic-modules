@@ -36,7 +36,7 @@ type Product struct {
 	Name string
 
 	// This is the name of the package path relative to mmv1 root repo
-	PackagePath string
+	PackagePath string `yaml:"package_path,omitempty"`
 
 	// original value of :name before the provider override happens
 	// same as :name if not overridden in provider

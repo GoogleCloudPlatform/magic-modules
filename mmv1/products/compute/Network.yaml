@@ -212,11 +212,10 @@ properties:
         default_value: false
         update_verb: 'PATCH'
         update_url: 'projects/{{project}}/global/networks/{{name}}'
-        custom_flatten: 'templates/terraform/custom_flatten/compute_network_delete_bgp_always_compare_med.go.tmpl'
+        client_side: true
         description: |
           If set to `true`, the `bgp_always_compare_med` field will be cleared.
           If set to `false` (the default), `bgp_always_compare_med` will be set to the value specified in the configuration.
-        ignore_read: true
   - name: 'mtu'
     type: Integer
     description: |

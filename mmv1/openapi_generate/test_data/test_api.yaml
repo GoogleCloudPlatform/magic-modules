@@ -165,6 +165,57 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /animals/{animalId}/breeds:
+    get:
+      summary: Info for a specific breed
+      operationId: showBreeds
+      tags:
+        - breed
+      parameters:
+        - name: animalId
+          in: path
+          required: true
+          description: The id of the animal breeds to retrieve
+          schema:
+            type: string
+      responses:
+        200:
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Breeds"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    patch:
+      summary: Update breeds
+      operationId: UpdateBreeds
+      tags:
+        - breeds
+      parameters:
+        - name: animalId
+          in: path
+          required: true
+          description: The id of the animal breeds to update
+          schema:
+            type: string
+      requestBody:
+        description: "Required. The breed being updated"
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Breeds"
+      responses:
+        default:
+          description: Result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Breeds"
 components:
   schemas:
     Pet:
@@ -190,10 +241,20 @@ components:
       properties:
         name:
           type: string
+    Breed:
+      required:
+        - name
+      properties:
+        name:
+          type: string
     Foods:
       type: array
       items:
         $ref: "#/components/schemas/Food"
+    Breeds:
+      type: array
+      items:
+        $ref: "#/components/schemas/Breed"
     Pets:
       type: array
       items:

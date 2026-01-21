@@ -16,7 +16,7 @@ func TestAccModelArmorGlobalFloorsetting_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id": envvar.GetTestProjectFromEnv(),
+		"project_id": acctest.BootstrapProject(t, "tf-boot-modelarmor-", envvar.GetTestBillingAccountFromEnv(t), []string{"modelarmor.googleapis.com"}).ProjectId,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

@@ -25,3 +25,21 @@ func ValidateWorkloadIdentityPoolProviderId(v interface{}, k string) (ws []strin
 
     return
 }
+
+func jwksJsonDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if old == "" || new == "" {
+		return old == new
+	}
+
+	var oldJson, newJson interface{}
+
+	if err := json.Unmarshal([]byte(old), &oldJson); err != nil {
+		return false
+	}
+
+	if err := json.Unmarshal([]byte(new), &newJson); err != nil {
+		return false
+	}
+
+	return reflect.DeepEqual(oldJson, newJson)
+}

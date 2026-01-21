@@ -123,6 +123,11 @@ examples:
     vars:
       source_connection_profile_id: 'source-profile'
     exclude_test: true
+  - name: 'datastream_connection_profile_spanner'
+    primary_resource_id: 'default'
+    vars:
+      source_connection_profile_id: 'source-profile'
+    exclude_test: true
   - name: 'datastream_connection_profile_postgres_secret_manager'
     primary_resource_id: 'default'
     vars:
@@ -180,6 +185,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'spanner_profile'
       - 'mongodb_profile'
     properties:
       - name: 'hostname'
@@ -227,6 +233,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'spanner_profile'
       - 'mongodb_profile'
     properties:
       - name: 'bucket'
@@ -250,6 +257,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'spanner_profile'
       - 'mongodb_profile'
     properties:
       - name: 'hostname'
@@ -339,6 +347,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'spanner_profile'
       - 'mongodb_profile'
     properties:
       []
@@ -354,6 +363,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'spanner_profile'
       - 'mongodb_profile'
     properties:
       - name: 'hostname'
@@ -462,6 +472,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'spanner_profile'
       - 'mongodb_profile'
     properties:
       - name: 'domain'
@@ -517,6 +528,33 @@ properties:
             type: String
             description: |
               A reference to a Secret Manager resource name storing the client secret.
+  - name: 'spannerProfile'
+    min_version: beta
+    type: NestedObject
+    description: |
+      Spanner profile.
+    exactly_one_of:
+      - 'oracle_profile'
+      - 'gcs_profile'
+      - 'mysql_profile'
+      - 'bigquery_profile'
+      - 'postgresql_profile'
+      - 'sql_server_profile'
+      - 'salesforce_profile'
+      - 'spanner_profile'
+      - 'mongodb_profile'
+    properties:
+      - name: 'database'
+        type: String
+        description: |
+          The full project and resource path for Spanner database. Format:
+          projects/{project}/instances/{instance}/databases/{database}.
+        required: true
+      - name: 'host'
+        type: String
+        description: |
+          The regional Spanner endpoint. Format:
+          https://spanner.{region}.rep.googleapis.com.
   - name: 'sqlServerProfile'
     type: NestedObject
     description: |
@@ -529,6 +567,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'spanner_profile'
       - 'mongodb_profile'
     properties:
       - name: 'hostname'
@@ -572,6 +611,7 @@ properties:
       - 'postgresql_profile'
       - 'sql_server_profile'
       - 'salesforce_profile'
+      - 'spanner_profile'
       - 'mongodb_profile'
     properties:
       - name: 'hostAddresses'
