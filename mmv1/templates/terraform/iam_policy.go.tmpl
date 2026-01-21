@@ -22,6 +22,9 @@ package {{ lower $.ProductMetadata.Name }}
 
 import (
 	"fmt"
+{{- if and $.IamPolicy $.IamPolicy.SendsUserProjectHeader }}
+	"net/http"
+{{- end }}
 	"regexp"
 	"strings"
 
@@ -218,6 +221,11 @@ func (u *{{ $.ResourceName }}IamUpdater) GetResourceIamPolicy() (*cloudresourcem
 		return nil, err
 	}
 
+{{- if and $.IamPolicy $.IamPolicy.SendsUserProjectHeader }}
+	headers := make(http.Header)
+	headers.Set("x-goog-user-project", project)
+{{- end }}
+
 	policy, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config: u.Config,
 		Method: "{{ $.IamPolicy.FetchIamPolicyVerb }}",
@@ -227,6 +235,9 @@ func (u *{{ $.ResourceName }}IamUpdater) GetResourceIamPolicy() (*cloudresourcem
 		RawURL: url,
 		UserAgent: userAgent,
 		Body: obj,
+{{- if and $.IamPolicy $.IamPolicy.SendsUserProjectHeader }}
+		Headers: headers,
+{{- end }}
 {{- if $.ErrorRetryPredicates }}
 		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{ join $.ErrorRetryPredicates "," }} },
 {{- end }}
@@ -281,6 +292,11 @@ func (u *{{ $.ResourceName }}IamUpdater) SetResourceIamPolicy(policy *cloudresou
 		return err
 	}
 
+{{- if and $.IamPolicy $.IamPolicy.SendsUserProjectHeader }}
+	headers := make(http.Header)
+	headers.Set("x-goog-user-project", project)
+{{- end }}
+
 	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config: u.Config,
 		Method: "{{ $.IamPolicy.SetIamPolicyVerb }}",
@@ -290,6 +306,9 @@ func (u *{{ $.ResourceName }}IamUpdater) SetResourceIamPolicy(policy *cloudresou
 		RawURL: url,
 		UserAgent: userAgent,
 		Body: obj,
+{{- if and $.IamPolicy $.IamPolicy.SendsUserProjectHeader }}
+		Headers: headers,
+{{- end }}
 		Timeout: u.d.Timeout(schema.TimeoutCreate),
 {{- if $.ErrorRetryPredicates }}
 		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{ join $.ErrorRetryPredicates "," }} },

@@ -45,6 +45,7 @@ iam_policy:
     - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{name}}'
     - '{{name}}'
   example_config_body: 'templates/terraform/iam/biglake_iceberg_namespace_iam.go.tmpl'
+  sends_user_project_header: true
 examples:
   - name: 'biglake_iceberg_namespace'
     primary_resource_id: 'example_namespace'

@@ -125,6 +125,9 @@ type IamPolicy struct {
 
 	// Add a deprecation message for a resource that's been deprecated in the API.
 	DeprecationMessage string `yaml:"deprecation_message,omitempty"`
+
+	// Whether to send the x-goog-user-project header in IAM requests.
+	SendsUserProjectHeader bool `yaml:"sends_user_project_header,omitempty"`
 }
 
 // newIamPolicyWithDefaults returns an IamPolicy object with default values set.
