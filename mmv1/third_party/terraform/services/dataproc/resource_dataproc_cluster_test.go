@@ -2202,7 +2202,7 @@ resource "google_storage_bucket_object" "init_script" {
   content = <<EOL
 #!/bin/bash
 echo "init action success" >> /tmp/%s
-gcloud storage cp /tmp/%s ${google_storage_bucket.init_bucket.url}
+gsutil cp /tmp/%s ${google_storage_bucket.init_bucket.url}
 EOL
 
 }
