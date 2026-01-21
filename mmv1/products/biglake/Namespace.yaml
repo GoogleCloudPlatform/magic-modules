@@ -30,9 +30,6 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 iam_policy:
-  method: 'setIamPolicy'
-  fetch_iam_policy:
-    method: 'getIamPolicy'
   example_config_body: "templates/terraform/iam/example_config_body/biglake_namespace.tf.tmpl"
 examples:
   - name: 'biglake_namespace_iam'
