@@ -739,7 +739,7 @@ resource "google_compute_firewall" "foobar" {
   network     = google_compute_network.foobar.name
   source_tags = ["foo"]
 
-  source_ranges      = ["0000:00:0000:00::/0"]
+  source_ranges      = ["2001:db8:0000:0:00::/32"]
 
   allow {
     protocol = "all"
@@ -761,7 +761,7 @@ resource "google_compute_firewall" "foobar" {
   network     = google_compute_network.foobar.name
   source_tags = ["foo"]
 
-  source_ranges      = ["0000:0000::/0"]
+  source_ranges      = ["2001:db8:0::/32"]
 
   allow {
     protocol = "all"

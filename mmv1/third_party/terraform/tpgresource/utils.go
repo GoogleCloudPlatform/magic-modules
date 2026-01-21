@@ -987,7 +987,7 @@ func NormalizeIamPrincipalCasing(principal string) string {
 	return principal
 }
 
-// Hash based on a normalized IP address
+// hash based normalized IP addresses in CIDR notation
 func IpAddrSetHashFunc(v interface{}) int {
 	if v == nil {
 		return 0
@@ -995,7 +995,11 @@ func IpAddrSetHashFunc(v interface{}) int {
 
 	m := v.(string)
 	log.Printf("[DEBUG] hashing %v", m)
-	ip := net.ParseIP(m).String()
-	log.Printf("[DEBUG] computed hash value of %v from %s", Hashcode(ip), ip)
-	return Hashcode(ip)
+	_, ipnet, err := net.ParseCIDR(m)
+	if err != nil {
+		//if invalid cidr, hash based on the direct value without standardizing.
+		return Hashcode(m)
+	}
+	log.Printf("[DEBUG] computed hash value of %v from %v", Hashcode(ipnet.String()), ipnet.String())
+	return Hashcode(ipnet.String())
 }
