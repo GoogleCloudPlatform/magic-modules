@@ -41,6 +41,8 @@ include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/bigquery_dataset.go.tmpl'
   pre_read: 'templates/terraform/pre_read/bigquery_dataset.go.tmpl'
+# exluding resource_identity due to dataset_id field
+exclude_identity_generation: true
 exclude_sweeper: true
 examples:
   - name: 'bigquery_dataset_basic'
@@ -48,12 +50,14 @@ examples:
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
+    exclude_identity_import: true
   - name: 'bigquery_dataset_with_max_time_travel_hours'
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
     exclude_docs: true
+    exclude_identity_import: true
   - name: 'bigquery_dataset_cmek'
     primary_resource_id: 'dataset'
     vars:
@@ -61,12 +65,14 @@ examples:
       key_name: 'example-key'
       keyring_name: 'example-keyring'
     exclude_test: true
+    exclude_identity_import: true
   - name: 'bigquery_dataset_authorized_dataset'
     primary_resource_id: 'dataset'
     vars:
       private: 'private'
       public: 'public'
       account_name: 'bqowner'
+    exclude_identity_import: true
   - name: 'bigquery_dataset_authorized_routine'
     primary_resource_id: 'private'
     vars:
@@ -75,27 +81,32 @@ examples:
       public_routine: 'public_routine'
     test_env_vars:
       service_account: 'SERVICE_ACCT'
+    exclude_identity_import: true
   - name: 'bigquery_dataset_case_insensitive_names'
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
     exclude_docs: true
+    exclude_identity_import: true
   - name: 'bigquery_dataset_default_collation_set'
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
     exclude_docs: true
+    exclude_identity_import: true
   - name: 'bigquery_dataset_external_reference_aws'
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
     exclude_test: true
+    exclude_identity_import: true
   - name: 'bigquery_dataset_external_catalog_dataset_options'
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
+    exclude_identity_import: true
   - name: 'bigquery_dataset_resource_tags'
     primary_resource_id: 'dataset'
     primary_resource_name: 'fmt.Sprintf("tf_test_dataset%s", context["random_suffix"])'
@@ -106,6 +117,7 @@ examples:
       tag_key2: 'tag_key2'
       tag_value2: 'tag_value2'
     exclude_docs: true
+    exclude_identity_import: true
 virtual_fields:
   - name: 'delete_contents_on_destroy'
     description: |

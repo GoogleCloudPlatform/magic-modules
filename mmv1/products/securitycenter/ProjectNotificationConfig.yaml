@@ -42,6 +42,8 @@ timeouts:
   delete_minutes: 20
 custom_code:
   custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project.go.tmpl'
+# exluding resource_identity due to custom_import
+exclude_identity_generation: true
 examples:
   - name: 'scc_project_notification_config_basic'
     primary_resource_id: 'custom_notification_config'
@@ -52,6 +54,7 @@ examples:
       project: 'PROJECT_NAME'
     ignore_read_extra:
       - 'project'
+    exclude_identity_import: true
 parameters:
   - name: 'configId'
     type: String
