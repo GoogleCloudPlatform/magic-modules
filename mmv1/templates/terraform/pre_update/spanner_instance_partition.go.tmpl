@@ -2,7 +2,7 @@ delete(obj, "instancePartitionId")
 fieldMask := []string{}
 
 if d.HasChange("display_name") {
-    fieldMask = append(fieldMask, "displayName")
+    fieldMask = append(fieldMask, "display_name")
 }
 
 if d.HasChange("config") {
@@ -10,11 +10,11 @@ if d.HasChange("config") {
 }
 
 if d.HasChange("node_count") {
-    fieldMask = append(fieldMask, "nodeCount")
+    fieldMask = append(fieldMask, "node_count")
 }
 
 if d.HasChange("processing_units") {
-    fieldMask = append(fieldMask, "processingUnits")
+    fieldMask = append(fieldMask, "processing_units")
 }
 
 if d.HasChange("autoscaling_config") {
@@ -22,34 +22,34 @@ if d.HasChange("autoscaling_config") {
     oldSlice := old.([]interface{})
     newSlice := new.([]interface{})
     if len(oldSlice) == 0 || len(newSlice) == 0 {
-        fieldMask = append(fieldMask, "autoscalingConfig")
+        fieldMask = append(fieldMask, "autoscaling_config")
         if len(newSlice) == 0 {
-            fieldMask = append(fieldMask, "processingUnits")
+            fieldMask = append(fieldMask, "processing_units")
         }
     } else {
         if d.HasChange("autoscaling_config.0.autoscaling_limits.0.max_processing_units") {
-            fieldMask = append(fieldMask, "autoscalingConfig.autoscalingLimits.maxProcessingUnits")
+            fieldMask = append(fieldMask, "autoscaling_config.autoscaling_limits.max_processing_units")
         }
         if d.HasChange("autoscaling_config.0.autoscaling_limits.0.min_processing_units") {
-            fieldMask = append(fieldMask, "autoscalingConfig.autoscalingLimits.minProcessingUnits")
+            fieldMask = append(fieldMask, "autoscaling_config.autoscaling_limits.min_processing_units")
         }
         if d.HasChange("autoscaling_config.0.autoscaling_limits.0.max_nodes") {
-            fieldMask = append(fieldMask, "autoscalingConfig.autoscalingLimits.maxNodes")
+            fieldMask = append(fieldMask, "autoscaling_config.autoscaling_limits.max_nodes")
         }
         if d.HasChange("autoscaling_config.0.autoscaling_limits.0.min_nodes") {
-            fieldMask = append(fieldMask, "autoscalingConfig.autoscalingLimits.minNodes")
+            fieldMask = append(fieldMask, "autoscaling_config.autoscaling_limits.min_nodes")
         }
         if d.HasChange("autoscaling_config.0.autoscaling_targets.0.high_priority_cpu_utilization_percent") {
-            fieldMask = append(fieldMask, "autoscalingConfig.autoscalingTargets.highPriorityCpuUtilizationPercent")
+            fieldMask = append(fieldMask, "autoscaling_config.autoscaling_targets.high_priority_cpu_utilization_percent")
         }
         if d.HasChange("autoscaling_config.0.autoscaling_targets.0.storage_utilization_percent") {
-            fieldMask = append(fieldMask, "autoscalingConfig.autoscalingTargets.storageUtilizationPercent")
+            fieldMask = append(fieldMask, "autoscaling_config.autoscaling_targets.storage_utilization_percent")
         }
         if d.HasChange("autoscaling_config.0.autoscaling_targets.0.total_cpu_utilization_percent") {
-            fieldMask = append(fieldMask, "autoscalingConfig.autoscalingTargets.totalCpuUtilizationPercent")
+            fieldMask = append(fieldMask, "autoscaling_config.autoscaling_targets.total_cpu_utilization_percent")
         }
         if d.HasChange("autoscaling_config.0.asymmetric_autoscaling_options") {
-            fieldMask = append(fieldMask, "autoscalingConfig.asymmetricAutoscalingOptions")
+            fieldMask = append(fieldMask, "autoscaling_config.asymmetric_autoscaling_options")
         }
     }
 }

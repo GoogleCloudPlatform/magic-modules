@@ -1038,8 +1038,8 @@ resource "google_spanner_instance" "test" {
       }
       overrides {
         autoscaling_limits {
-          min_nodes = 1
-          max_nodes = 5
+          min_processing_units = 1000
+          max_processing_units = 5000
         }
         disable_high_priority_cpu_autoscaling = true
         disable_total_cpu_autoscaling         = false
@@ -1085,8 +1085,8 @@ resource "google_spanner_instance" "test" {
       }
       overrides {
         autoscaling_limits {
-          min_nodes = 2
-          max_nodes = 6
+          min_processing_units = 2000
+          max_processing_units = 6000
         }
         disable_high_priority_cpu_autoscaling = false
         disable_total_cpu_autoscaling         = true
