@@ -189,10 +189,10 @@ func (vt *Tester) FetchCassettes(version provider.Version, baseBranch, head stri
 
 func (vt *Tester) fetchBucketPath(bucketPath, cassettePath string) error {
 	// Fetch the cassettes.
-	args := []string{"storage", "cp", bucketPath, cassettePath}
-	fmt.Println("Fetching cassettes:\n", "gcloud", strings.Join(args, " "))
-	if _, err := vt.rnr.Run("gcloud", args, nil); err != nil {
-		return fmt.Errorf("error running gcloud: %v", err)
+	args := []string{"-m", "-q", "cp", bucketPath, cassettePath}
+	fmt.Println("Fetching cassettes:\n", "gsutil", strings.Join(args, " "))
+	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
+		return fmt.Errorf("error running gsutil: %v", err)
 	}
 	return nil
 }

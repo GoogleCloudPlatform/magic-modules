@@ -47,6 +47,12 @@ fun BuildSteps.checkVcrEnvironmentVariables() {
                 echo "gcloud CLI not found"
                 exit 1
             fi
+
+            if ! command -v gsutil &> /dev/null   
+            then
+                echo "gsutil CLI not found"
+                exit 1
+            fi
         """.trimIndent()
         // ${'$'} is required to allow creating a script in TeamCity that contains
         // parts like ${GIT_HASH_SHORT} without having Kotlin syntax issues. For more info see:
@@ -106,15 +112,15 @@ fun BuildSteps.runVcrTestRecordingSetup() {
 
             # Pull files from GCS
             echo "Listing files present in gs://${'$'}VCR_BUCKET_NAME/beta/fixtures/"
-            gcloud storage ls --project ${'$'}GOOGLE_INFRA_PROJECT gs://${'$'}VCR_BUCKET_NAME/beta/fixtures/
+            gsutil ls -p ${'$'}GOOGLE_INFRA_PROJECT gs://${'$'}VCR_BUCKET_NAME/beta/fixtures/
 
             echo "Copying files present in gs://${'$'}VCR_BUCKET_NAME/beta/fixtures/"
-            gcloud storage cp gs://${'$'}VCR_BUCKET_NAME/beta/fixtures/* ${'$'}VCR_PATH
+            gsutil -m cp gs://${'$'}VCR_BUCKET_NAME/beta/fixtures/* ${'$'}VCR_PATH
 
             # copy branch-specific cassettes over master. This might fail but that's ok if the folder doesnt exist
             export BRANCH_NAME=%teamcity.build.branch%
             echo "Attempting to copy branch-specific files, if they exist: gs://${'$'}VCR_BUCKET_NAME/beta/${'$'}BRANCH_NAME/fixtures/*"
-            gcloud storage cp gs://${'$'}VCR_BUCKET_NAME/beta/${'$'}BRANCH_NAME/fixtures/* ${'$'}VCR_PATH
+            gsutil -m cp gs://${'$'}VCR_BUCKET_NAME/beta/${'$'}BRANCH_NAME/fixtures/* ${'$'}VCR_PATH
 
             echo "Listing files present in ${'$'}VCR_PATH:"
             ls ${'$'}VCR_PATH
@@ -169,14 +175,14 @@ fun BuildSteps.runVcrTestRecordingSaveCassettes() {
                 echo "Using main branch, so copying files to fixures/ in root of Cloud Storage bucket"
 
                 echo "Listing files already present in gs://${'$'}VCR_BUCKET_NAME/beta/fixtures/:"
-                gcloud storage ls --project ${'$'}GOOGLE_INFRA_PROJECT gs://${'$'}VCR_BUCKET_NAME/beta/fixtures/
+                gsutil ls -p ${'$'}GOOGLE_INFRA_PROJECT gs://${'$'}VCR_BUCKET_NAME/beta/fixtures/
 
                 echo "Copying files to Cloud Storage bucket:"
-                gcloud storage cp ${'$'}VCR_PATH/* gs://${'$'}VCR_BUCKET_NAME/beta/fixtures/
+                gsutil -m cp ${'$'}VCR_PATH/* gs://${'$'}VCR_BUCKET_NAME/beta/fixtures/
             else
                 echo "Using ${'$'}BRANCH_NAME branch, so copying files to ${'$'}BRANCH_NAME/fixtures/ folder in Cloud Storage bucket"
 
-                gcloud storage cp ${'$'}VCR_PATH/* gs://${'$'}VCR_BUCKET_NAME/beta/${'$'}BRANCH_NAME/fixtures/
+                gsutil -m cp ${'$'}VCR_PATH/* gs://${'$'}VCR_BUCKET_NAME/beta/${'$'}BRANCH_NAME/fixtures/
             fi
 
             # Cleanup
