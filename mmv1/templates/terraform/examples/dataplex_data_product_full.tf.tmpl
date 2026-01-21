@@ -1,0 +1,36 @@
+resource "google_dataplex_data_product" "{{$.PrimaryResourceId}}" {
+  project         = "{{index $.TestEnvVars "project_name"}}"
+  location        = "us-central1"
+  data_product_id = "{{index $.Vars "data_product_id"}}"
+  display_name    = "DP Full Test: Special Chars !@#$"
+  
+  # UTF-8 verification
+  description     = "Updated with emojis 🚀 and brackets {test}"
+  
+  owner_emails = ["terraform-test@google.com"]
+
+  labels = {
+    env = "manual-test"
+  }
+
+  access_groups {
+    id           = "analyst"
+    group_id     = "analyst"
+    display_name = "Data Analyst - Updated"
+    description  = "In-place update verified"
+    principal {
+      google_group = "tf-test-analysts-%{random_suffix}@example.com"
+    }
+  }
+
+  access_groups {
+    id           = "scientist"
+    group_id     = "scientist"
+    display_name = "Data Scientist"
+    principal {
+      google_group = "tf-test-scientists-%{random_suffix}@example.com"
+    }
+  }
+
+  provider = google-beta
+}

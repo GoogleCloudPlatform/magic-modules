@@ -1,17 +1,13 @@
 package container
 
 import (
-{{- if ne $.TargetVersionName `ga` }}
 	"context"
 	"os"
-{{- end }}
 	"fmt"
 	"log"
 	"regexp"
 	"strings"
-{{- if ne $.TargetVersionName `ga` }}
 	"sync"
-{{- end }}
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
@@ -24,6 +20,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 {{ if eq $.TargetVersionName `ga` }}
+	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/container/v1"
 {{- else }}
 	compute "google.golang.org/api/compute/v0.beta"
@@ -33,7 +30,6 @@ import (
 
 var clusterIdRegex = regexp.MustCompile("projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/clusters/(?P<name>[^/]+)")
 
-{{ if ne $.TargetVersionName `ga` }}
 type nodePoolWithUpdateTime struct {
 	nodePool   *container.NodePool
 	updateTime time.Time
@@ -180,7 +176,6 @@ var (
 		ttl:                   getCacheTTL(),
 	}
 )
-{{- end }}
 
 func ResourceContainerNodePool() *schema.Resource {
 	return &schema.Resource{
@@ -662,6 +657,22 @@ var schemaNodePool = map[string]*schema.Schema{
 		},
 	},
 
+	"node_drain_config": {
+		Type:        schema.TypeList,
+		Optional:    true,
+		Computed:    true,
+		Description: `Node drain configuration for this NodePool.`,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"respect_pdb_during_node_pool_deletion": {
+					Type:         schema.TypeBool,
+					Optional:     true,
+					Description:  `Whether to respect PodDisruptionBudget policy during node pool deletion.`,
+				},
+			},
+		},
+	},
+
 }
 
 type NodePoolInformation struct {
@@ -887,17 +898,6 @@ func resourceContainerNodePoolRead(d *schema.ResourceData, meta interface{}) err
 
 	name := getNodePoolName(d.Id())
 
-{{ if eq $.TargetVersionName `ga` }}
-	clusterNodePoolsGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Get(nodePoolInfo.fullyQualifiedName(name))
-	if config.UserProjectOverride {
-		clusterNodePoolsGetCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-	}
-	nodePool, err := clusterNodePoolsGetCall.Do()
-	if err != nil {
-		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("NodePool %q from cluster %q", name, nodePoolInfo.cluster))
-	}
-
-{{- else }}
 	if err := npCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo, name); err != nil {
 	  return err
 	}
@@ -907,7 +907,6 @@ func resourceContainerNodePoolRead(d *schema.ResourceData, meta interface{}) err
 		d.SetId("")
 		return nil
 	}
-{{- end }}
 
 	npMap, err := flattenNodePool(d, config, nodePool, "")
 	if err != nil {
@@ -964,9 +963,7 @@ func resourceContainerNodePoolUpdate(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-{{ if ne $.TargetVersionName `ga` }}
 	npCache.remove(nodePoolInfo.fullyQualifiedName(name))
-{{- end }}
 
 	return resourceContainerNodePoolRead(d, meta)
 }
@@ -1048,9 +1045,7 @@ func resourceContainerNodePoolDelete(d *schema.ResourceData, meta interface{}) e
 
 	d.SetId("")
 
-{{ if ne $.TargetVersionName `ga` }}
 	npCache.remove(nodePoolInfo.fullyQualifiedName(name))
-{{- end }}
 
 	return nil
 }
@@ -1068,20 +1063,6 @@ func resourceContainerNodePoolExists(d *schema.ResourceData, meta interface{}) (
 	}
 
 	name := getNodePoolName(d.Id())
-{{- if eq $.TargetVersionName `ga` }}
-	clusterNodePoolsGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Get(nodePoolInfo.fullyQualifiedName(name))
-	if config.UserProjectOverride {
-		clusterNodePoolsGetCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-	}
-	_, err = clusterNodePoolsGetCall.Do()
-	if err != nil {
-		if err = transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Container NodePool %s", name)); err == nil {
-			return false, nil
-		}
-		// There was some other error in reading the resource
-		return true, err
-	}
-{{- else }}
 	if err := npCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo, name); err != nil {
         return false, err
 	}
@@ -1091,7 +1072,6 @@ func resourceContainerNodePoolExists(d *schema.ResourceData, meta interface{}) (
 		d.SetId("")
 		return false, nil
 	}
-{{- end }}
 	return true, nil
 }
 
@@ -1304,6 +1284,15 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 		}
 	}
 
+	if v, ok := d.GetOk(prefix + "node_drain_config"); ok {
+		nodeDrainConfig := v.([]interface{})[0].(map[string]interface{})
+		np.NodeDrainConfig = &container.NodeDrainConfig{}
+
+		if v, ok := nodeDrainConfig["respect_pdb_during_node_pool_deletion"]; ok {
+			np.NodeDrainConfig.RespectPdbDuringNodePoolDeletion = v.(bool)
+		}
+	}
+
 	return np, nil
 }
 
@@ -1365,6 +1354,17 @@ func flattenNodePoolUpgradeSettings(us *container.UpgradeSettings) []map[string]
 	return []map[string]interface{}{upgradeSettings}
 }
 
+func flattenNodePoolNodeDrainConfig(ndc *container.NodeDrainConfig) []map[string]interface{} {
+	if ndc == nil {
+		return nil
+	}
+
+	nodeDrainConfig := make(map[string]interface{})
+
+	nodeDrainConfig["respect_pdb_during_node_pool_deletion"] = ndc.RespectPdbDuringNodePoolDeletion
+	return []map[string]interface{}{nodeDrainConfig}
+}
+
 func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *container.NodePool, prefix string) (map[string]interface{}, error) {
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -1383,16 +1383,6 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 		if len(matches) < 4 {
 			return nil, fmt.Errorf("Error reading instance group manage URL '%q'", url)
 		}
-{{- if eq $.TargetVersionName `ga` }}
-		igm, err := config.NewComputeClient(userAgent).InstanceGroupManagers.Get(matches[1], matches[2], matches[3]).Do()
-		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
-			// The IGM URL in is stale; don't include it
-			continue
-		}
-		if err != nil {
-			return nil, fmt.Errorf("Error reading instance group manager returned as an instance group URL: %q", err)
-		}
-{{- else }}
         if strings.HasPrefix("gk3", matches[3]) {
             // IGM is autopilot so we know it will not be found, skip it
             continue
@@ -1405,7 +1395,6 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 		    // The IGM URL is stale; don't include it
 		    continue
 		}
-{{- end }}
 		size += int(igm.TargetSize)
 		igmUrls = append(igmUrls, url)
 		managedIgmUrls = append(managedIgmUrls, igm.InstanceGroup)
@@ -1478,6 +1467,10 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 		nodePool["upgrade_settings"] = flattenNodePoolUpgradeSettings(np.UpgradeSettings)
 	} else {
 		delete(nodePool, "upgrade_settings")
+	}
+
+	if np.NodeDrainConfig != nil {
+		nodePool["node_drain_config"] = flattenNodePoolNodeDrainConfig(np.NodeDrainConfig)
 	}
 
 	return nodePool, nil
@@ -1923,6 +1916,43 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 
 			log.Printf("[INFO] Updated network_config for node pool %s", name)
 		}
+	}
+
+	if d.HasChange(prefix + "node_drain_config") {
+		nodeDrainConfig := &container.NodeDrainConfig{}
+		if v, ok := d.GetOk(prefix + "node_drain_config"); ok {
+			nodeDrain := v.([]interface{})[0].(map[string]interface{})
+			if v, ok := nodeDrain["respect_pdb_during_node_pool_deletion"]; ok {
+				nodeDrainConfig.RespectPdbDuringNodePoolDeletion = v.(bool)
+			}
+		}
+		req := &container.UpdateNodePoolRequest{
+			NodeDrainConfig: nodeDrainConfig,
+		}
+
+		updateF := func() error {
+			clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
+
+			if config.UserProjectOverride {
+				clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
+			}
+			op, err := clusterNodePoolsUpdateCall.Do()
+
+			if err != nil {
+				return err
+			}
+
+			// Wait until it's updated
+			return ContainerOperationWait(config, op,
+				nodePoolInfo.project,
+				nodePoolInfo.location,
+				"updating GKE node pool node_drain_config", userAgent, timeout)
+		}
+
+		if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
+				return err
+		}
+		log.Printf("[INFO] Updated node_drain_config in Node Pool %s", name)
 	}
 
 	return nil

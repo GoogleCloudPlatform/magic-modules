@@ -17,8 +17,6 @@ The name of the Terraform resource. For example, "google_cloudfunctions2_functio
 
 The generation method used to create the Terraform resource. For example, "mmv1", "dcl", "handwritten".
 
-## Optional
-
 ### `api_service_name`
 
 The base name of the API used for this resource. For example, "cloudfunctions.googleapis.com".
@@ -30,6 +28,8 @@ The version of the API used for this resource. For example, "v2".
 ### `api_resource_type_kind`
 
 The API "resource type kind" used for this resource. For example, "Function".
+
+## Optional
 
 ### `cai_asset_name_format`
 
@@ -43,7 +43,7 @@ The API URL patterns used by this resource that represent variants. For example,
 
 The list of fields used by this resource. Each field can contain the following attributes:
 
-- `api_field`: The name of the field in the REST API, including the path. For example, "buildConfig.source.storageSource.bucket".
-- `field`: The name of the field in Terraform, including the path. For example, "build_config.source.storage_source.bucket". Defaults to the value of `api_field` converted to snake_case.
+- `api_field`: Required for fields that aren't provider-only. The name of the field in the REST API, including the path. For example, "buildConfig.source.storageSource.bucket".
+- `field`: The name of the field in Terraform, including the path. For example, "build_config.source.storage_source.bucket". Must be provided if and only if the field is provider-only or the Terraform field name can't be derived from the API name.
 - `provider_only`: If true, the field is only present in the provider. This primarily applies for virtual fields and url-only parameters. When set to true, `field` should be set and `api_field` should be left empty. Default: `false`.
 - `json`: If true, this is a JSON field which "covers" all child API fields. As a special case, JSON fields which cover an entire resource can have `api_field` set to `*`.
