@@ -108,7 +108,7 @@ resource "google_logging_saved_query" "saved_query" {
     }
     summary_field_start = 100 # truncates after the first 100 characters
   }
-  visibility = "SHARED"
+  visibility = "PRIVATE"
 }
 `, context)
 }
