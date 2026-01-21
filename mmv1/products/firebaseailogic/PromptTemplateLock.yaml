@@ -31,7 +31,7 @@ examples:
     primary_resource_id: basic_lock
     vars:
       location: global
-      random_suffix: basic
+      template_id: 'lock-template'
     test_env_vars:
       project_id: PROJECT_NAME
 # Use a custom create to call :modifyLock

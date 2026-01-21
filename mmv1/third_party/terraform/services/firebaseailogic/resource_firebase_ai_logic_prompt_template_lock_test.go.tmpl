@@ -56,7 +56,7 @@ resource "google_firebase_ai_logic_prompt_template" "locked_template" {
   provider = google-beta
   project  = "%{project_id}"
   location = "global"
-  template_id = "lock-test-%{random_suffix}"
+  template_id = "tf-test-lock-%{random_suffix}"
   template_string = <<EOF
 ---
 model: googleai/gemini-1.5-flash
@@ -80,7 +80,7 @@ resource "google_firebase_ai_logic_prompt_template" "locked_template" {
   provider = google-beta
   project  = "%{project_id}"
   location = "global"
-  template_id = "lock-test-%{random_suffix}"
+  template_id = "tf-test-lock-%{random_suffix}"
   template_string = <<EOF
 ---
 model: googleai/gemini-1.5-flash

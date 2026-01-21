@@ -1,14 +1,7 @@
-# This example demonstrates how to lock a PromptTemplate.
-# To update a locked template, you must either:
-# 1. Remove the google_firebase_ai_logic_prompt_template_lock resource from your configuration
-#    and apply the change (atomic unlock+update).
-# 2. Unlock the template externally (e.g. Firebase Console).
-#
 resource "google_firebase_ai_logic_prompt_template" "basic" {
   provider = google-beta
-  project  = "{{index $.TestEnvVars "project_id"}}"
   location = "global"
-  template_id = "lock-example-{{index $.Vars "random_suffix"}}"
+  template_id = "{{index $.Vars "template_id"}}"
   template_string = <<EOF
 ---
 model: googleai/gemini-1.5-flash
@@ -19,7 +12,6 @@ EOF
 
 resource "google_firebase_ai_logic_prompt_template_lock" "basic_lock" {
   provider = google-beta
-  project  = google_firebase_ai_logic_prompt_template.basic.project
   location = google_firebase_ai_logic_prompt_template.basic.location
   template_id = google_firebase_ai_logic_prompt_template.basic.template_id
 }
