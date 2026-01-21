@@ -24,7 +24,6 @@ base_url: '{{name}}'
 self_link: '{{name}}'
 create_url: '{{namespace}}/services?serviceId={{service_id}}'
 update_verb: 'PATCH'
-update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}'
 timeouts:
@@ -40,6 +39,7 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/service_directory_service.go.tmpl'
   encoder: 'templates/terraform/encoders/service_directory_metadata_to_annotations.go.tmpl'
   decoder: 'templates/terraform/decoders/service_directory_metadata_to_annotations.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/service_directory.go.tmpl'
 
 exclude_sweeper: true
 examples:
@@ -75,8 +75,6 @@ properties:
     output: true
   - name: 'metadata'
     type: KeyValuePairs
-    update_mask_fields:
-      - 'annotations'
     description: |
       Metadata for the service. This data can be consumed
       by service clients. The entire metadata dictionary may contain
