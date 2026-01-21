@@ -55,6 +55,7 @@ async:
   actions: ['create']
 identity:
   - name
+exclude_identity_generation: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/iap_brand.go.tmpl'
   custom_identity:
@@ -68,6 +69,7 @@ examples:
       org_id: 'ORG_ID'
       org_domain: 'ORG_DOMAIN'
     exclude_test: true
+    exclude_identity_import: true
 parameters:
   - name: 'name'
     type: String

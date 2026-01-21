@@ -30,6 +30,10 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+  custom_identity:
+    - 'project'
+    - 'dataset_id'
+    - 'routine_id'
 examples:
   - name: 'bigquery_routine_basic'
     primary_resource_id: 'sproc'
