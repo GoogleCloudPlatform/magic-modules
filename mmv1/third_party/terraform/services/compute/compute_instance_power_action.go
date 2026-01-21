@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"google.golang.org/api/compute/v1"
 
 	"github.com/hashicorp/terraform-provider-google/google/fwvalidators"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -34,6 +35,7 @@ func NewComputeInstancePowerAction() action.Action {
 
 type computeInstancePowerAction struct {
 	config *transport_tpg.Config
+	client *compute.Service
 }
 
 type computeInstancePowerActionModel struct {
@@ -98,6 +100,7 @@ func (a *computeInstancePowerAction) Configure(_ context.Context, req action.Con
 		return
 	}
 	a.config = cfg
+	a.client = cfg.NewComputeClient("terraform-provider-google-tf-action")
 }
 
 func (a *computeInstancePowerAction) Invoke(ctx context.Context, req action.InvokeRequest, resp *action.InvokeResponse) {
@@ -123,7 +126,7 @@ func (a *computeInstancePowerAction) Invoke(ctx context.Context, req action.Invo
 	}
 
 	operation := data.Operation.ValueString()
-	client := a.config.NewComputeClient("terraform-provider-google-tf-action")
+	client := a.client
 
 	// Fetch current status
 	instance, err := client.Instances.Get(project, zone, name).Context(ctx).Do()
