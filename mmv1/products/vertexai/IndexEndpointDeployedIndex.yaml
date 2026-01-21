@@ -52,9 +52,12 @@ custom_code:
   decoder: 'templates/terraform/decoders/vertex_ai_index_endpoint_deployed_index.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/vertex_ai_index_endpoint_deployed_index.go.tmpl'
   custom_import: 'templates/terraform/custom_import/vertex_ai_index_endpoint_deployed_index.go.tmpl'
+# exluding resource_identity due to custom_import
+exclude_identity_generation: true
 examples:
   - name: 'vertex_ai_index_endpoint_deployed_index_basic'
     primary_resource_id: 'basic_deployed_index'
+    exclude_identity_import: true
     vars:
       endpoint_name: 'endpoint-name'
       network_name: 'network-name'
@@ -69,6 +72,7 @@ examples:
       'address_name': 'acctest.BootstrapSharedTestGlobalAddress(t, "vpc-network-1", acctest.AddressWithPrefixLength(8))'
   - name: 'vertex_ai_index_endpoint_deployed_index_basic_two'
     primary_resource_id: 'basic_deployed_index'
+    exclude_identity_import: true
     vars:
       endpoint_name: 'endpoint-name'
       network_name: 'network-name'
@@ -83,6 +87,7 @@ examples:
       'address_name': 'acctest.BootstrapSharedTestGlobalAddress(t, "vpc-network-1", acctest.AddressWithPrefixLength(8))'
   - name: 'vertex_ai_index_endpoint_deployed_index_dedicated_resources'
     primary_resource_id: 'dedicated_resources'
+    exclude_identity_import: true
     vars:
       display_name_index: 'test-index'
       bucket_name: 'bucket-name'
@@ -91,6 +96,7 @@ examples:
     exclude_docs: true
   - name: 'vertex_ai_index_endpoint_deployed_index_automatic_resources'
     primary_resource_id: 'automatic_resources'
+    exclude_identity_import: true
     vars:
       display_name_index: 'test-index'
       bucket_name: 'bucket-name'
