@@ -607,6 +607,15 @@ func TestAccBigQueryExternalDataTable_sourceColumnMatch(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"external_data_configuration.0.schema", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
 			},
+			{
+				Config: testAccBigQueryTableSourceColumnMatchRemoved(datasetID, tableID, bucketName),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"external_data_configuration.0.schema", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+			},
 		},
 	})
 }
@@ -5625,6 +5634,50 @@ resource "google_bigquery_table" "test" {
       { name = "product", type = "STRING" },
       { name = "price", type = "INT64" }
     ])
+
+    source_uris = [
+      "gs://${google_storage_bucket.test.name}/${google_storage_bucket_object.test.name}",
+    ]
+  }
+}
+`, datasetID, bucketName, tableID)
+}
+
+func testAccBigQueryTableSourceColumnMatchRemoved(datasetID, tableID, bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_storage_bucket" "test" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_storage_bucket_object" "test" {
+  name    = "test.csv"
+  content = <<EOF
+country,product,price
+US,phone,100
+JP,tablet,300
+UK,laptop,200
+EOF
+
+  bucket = google_storage_bucket.test.name
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+  external_data_configuration {
+    autodetect    = true
+    source_format = "CSV"
+    csv_options {
+      quote               = ""
+      skip_leading_rows   = 1
+    }
 
     source_uris = [
       "gs://${google_storage_bucket.test.name}/${google_storage_bucket_object.test.name}",
