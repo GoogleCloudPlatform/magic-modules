@@ -261,6 +261,7 @@ properties:
       `source_ranges`, `source_tags` or `source_service_accounts` is required.
     is_set: true
     diff_suppress_func: 'diffSuppressSourceRanges'
+    set_hash_func: tpgresource.IpAddrSetHashFunc
     item_type:
       type: String
   - name: 'sourceServiceAccounts'

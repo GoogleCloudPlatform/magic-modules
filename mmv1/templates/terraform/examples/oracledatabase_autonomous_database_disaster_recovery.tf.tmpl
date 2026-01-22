@@ -1,0 +1,10 @@
+resource "google_oracle_database_autonomous_database" "{{$.PrimaryResourceId}}"{
+  autonomous_database_id = "{{index $.Vars "adb_id"}}"
+  location = "{{index $.Vars "location"}}"
+  project = "{{index $.Vars "project"}}"
+  source_config {
+    autonomous_database = "{{index $.Vars "peer_adb_name"}}"
+    automatic_backups_replication_enabled = "{{index $.Vars "enable_backup_replication"}}"
+    }
+  deletion_protection = "{{index $.Vars "deletion_protection"}}"
+}
