@@ -22,9 +22,7 @@ package {{ lower $.ProductMetadata.Name }}
 
 import (
 	"fmt"
-{{- if and $.IamPolicy $.IamPolicy.SendsUserProjectHeader }}
 	"net/http"
-{{- end }}
 	"regexp"
 	"strings"
 
