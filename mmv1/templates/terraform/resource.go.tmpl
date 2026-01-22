@@ -345,9 +345,22 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     // Use the resource in the operation response to populate
     // identity fields and d.Id() before read
     var opRes map[string]interface{}
-    err = {{ $.ClientNamePascal -}}OperationWaitTimeWithResponse(
-    config, res, &opRes, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Creating {{ $.Name -}}", userAgent,
-        d.Timeout(schema.TimeoutCreate))
+{{      if $.GetAsync.AllowSkipWait -}}
+    if d.Get("skip_wait").(bool) {
+{{        if $.CustomCode.SkipWaitDecoder -}}
+        opRes, err =  resource{{ $.ResourceName -}}SkipWaitDecoder(d, meta, res)
+        if err != nil {
+            return fmt.Errorf("Error decoding response from operation: %s", err)
+        }
+{{- end}}
+    } else {
+{{      end -}}
+        err = {{ $.ClientNamePascal -}}OperationWaitTimeWithResponse(
+            config, res, &opRes, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Creating {{ $.Name -}}", userAgent,
+            d.Timeout(schema.TimeoutCreate))
+{{      if $.GetAsync.AllowSkipWait -}}
+    }
+{{      end -}}
     if err != nil {
 {{if $.CustomCode.PostCreateFailure -}}
         resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
@@ -420,6 +433,9 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     d.SetId(id)
 
 {{        else -}}
+{{          if $.GetAsync.AllowSkipWait -}}
+    if !d.Get("skip_wait").(bool) {
+{{          end -}}
     err = {{ $.ClientNamePascal -}}OperationWaitTime(
     config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Creating {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutCreate))
@@ -434,6 +450,9 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- end}}
         return fmt.Errorf("Error waiting to create {{ $.Name -}}: %s", err)
     }
+{{           if $.GetAsync.AllowSkipWait -}}
+    }
+{{           end -}}
 
 {{        end  -}}
 {{      end -}}{{/*if ($.GetAsync.IsA "OpAsync")*/}}
@@ -853,6 +872,9 @@ if len(updateMask) > 0 {
 
 {{              if and ($.GetAsync) ($.GetAsync.Allow "update") -}}
 {{                  if $.GetAsync.IsA "OpAsync" -}}
+{{                      if $.GetAsync.AllowSkipWait -}}
+    if !d.Get("skip_wait").(bool) {
+{{                      end -}}
     err = {{ $.ClientNamePascal -}}OperationWaitTime(
         config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Updating {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutUpdate))
@@ -860,6 +882,9 @@ if len(updateMask) > 0 {
     if err != nil {
         return err
     }
+{{-                      if $.GetAsync.AllowSkipWait -}}
+    }
+{{-                      end -}}
 {{-             if not $.FieldSpecificUpdateMethods }}
 {{""}}
 {{-             end}}
@@ -1012,12 +1037,18 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 
 {{                  if and ($.GetAsync) ($.GetAsync.Allow "update") -}}
 {{                      if $.GetAsync.IsA "OpAsync" -}}
-	    err = {{ $.ClientNamePascal -}}OperationWaitTime(
-	        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Updating {{ $.Name -}}", userAgent,
-	        d.Timeout(schema.TimeoutUpdate))
-	    if err != nil {
-	        return err
-	    }
+{{                          if $.GetAsync.AllowSkipWait -}}
+     if !d.Get("skip_wait").(bool) {
+{{                          end -}}
+        err = {{ $.ClientNamePascal -}}OperationWaitTime(
+            config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Updating {{ $.Name -}}", userAgent,
+            d.Timeout(schema.TimeoutUpdate))
+        if err != nil {
+            return err
+        }
+{{-                          if $.GetAsync.AllowSkipWait -}}
+    }
+{{-                          end -}}
 {{-                      else if $.GetAsync.IsA "PollAsync" -}}
 	    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Updating {{ $.Name -}}", d.Timeout(schema.TimeoutUpdate), {{ $.GetAsync.TargetOccurrences -}})
 	    if err != nil {
@@ -1157,6 +1188,9 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
             {{- end }}
     }
         {{- else }}
+{{          if $.GetAsync.AllowSkipWait -}}
+    if !d.Get("skip_wait").(bool) {
+{{          end -}}
     err = {{ $.ClientNamePascal }}OperationWaitTime(
         config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Deleting {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutDelete))
@@ -1164,6 +1198,9 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     if err != nil {
         return err
     }
+{{-           if $.GetAsync.AllowSkipWait -}}
+    }
+{{-           end -}}
     {{- end }}
 {{- end }}
 {{- if $.CustomCode.PostDelete }}
@@ -1307,5 +1344,10 @@ func resource{{ $.ResourceName -}}PostCreateSetComputedFields(d *schema.Resource
     {{-   end }}{{/* prop is potentially computed */}}
     {{- end }}{{/* range */}}
     return nil
+}
+{{- end }}
+{{- if $.CustomCode.SkipWaitDecoder }}
+func resource{{ $.ResourceName -}}SkipWaitDecoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
+    {{ customTemplate $ $.CustomCode.SkipWaitDecoder false -}}
 }
 {{- end }}

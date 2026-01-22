@@ -47,10 +47,12 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+  allow_skip_wait: true
 custom_code:
   constants: 'templates/terraform/constants/firestore_index.go.tmpl'
   encoder: 'templates/terraform/encoders/index.go.tmpl'
   custom_import: 'templates/terraform/custom_import/index_self_link_as_name_set_project.go.tmpl'
+  skip_wait_decoder: 'templates/terraform/decoders/firestore_index_skip_wait.go.tmpl'
 error_retry_predicates:
 
   - 'transport_tpg.FirestoreIndex409Retry'
@@ -98,6 +100,14 @@ examples:
       database_id: 'database-id-unique'
     test_env_vars:
       project_id: 'PROJECT_NAME'
+  - name: 'firestore_index_skip_wait'
+    primary_resource_id: 'my-index'
+    vars:
+      database_id: 'database-id-skip-wait'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'skip_wait'
 parameters:
 properties:
   - name: 'name'
