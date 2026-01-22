@@ -235,9 +235,7 @@ func (u *{{ $.ResourceName }}IamUpdater) GetResourceIamPolicy() (*cloudresourcem
 		RawURL: url,
 		UserAgent: userAgent,
 		Body: obj,
-{{- if and $.IamPolicy $.IamPolicy.SendsUserProjectHeader }}
 		Headers: headers,
-{{- end }}
 {{- if $.ErrorRetryPredicates }}
 		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{ join $.ErrorRetryPredicates "," }} },
 {{- end }}
