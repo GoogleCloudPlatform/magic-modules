@@ -20,9 +20,9 @@ api_variant_patterns:
 description: "Defines an organization policy which is used to specify constraints for configurations of Google Cloud resources."
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/resource-manager/docs/organization-policy/creating-managing-custom-constraints'
-    'Supported Services': 'https://cloud.google.com/resource-manager/docs/organization-policy/custom-constraint-supported-services'
-  api: 'https://cloud.google.com/resource-manager/docs/reference/orgpolicy/rest/v2/organizations.policies'
+    'Official Documentation': 'https://docs.cloud.google.com/resource-manager/docs/organization-policy/creating-managing-custom-constraints'
+    'Supported Services': 'https://docs.cloud.google.com/resource-manager/docs/organization-policy/custom-constraint-supported-services'
+  api: 'https://docs.cloud.google.com/resource-manager/docs/reference/orgpolicy/rest/v2/organizations.policies'
 docs:
 base_url: '{{parent}}/policies'
 self_link: '{{parent}}/policies/{{name}}'
