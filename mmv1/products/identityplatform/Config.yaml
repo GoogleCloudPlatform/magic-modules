@@ -191,7 +191,6 @@ properties:
         required: true
         key_name: 'event_type'
         value_type:
-          name: triggers
           type: NestedObject
           properties:
             - name: 'functionUri'

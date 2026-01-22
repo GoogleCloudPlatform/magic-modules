@@ -193,7 +193,6 @@ properties:
           `secret_versions_for_request_headers` will be used.
         key_name: 'key'
         value_type:
-          name: 'secretVersionsForRequestHeader'
           type: NestedObject
           properties:
             - name: secretVersion
@@ -346,7 +345,6 @@ properties:
               `secret_versions_for_request_headers` will be used.
             key_name: 'key'
             value_type:
-              name: 'secretVersionsForRequestHeader'
               type: NestedObject
               properties:
                 - name: secretVersion
