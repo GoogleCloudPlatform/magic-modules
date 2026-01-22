@@ -19,8 +19,8 @@ description:
   the TagValue is applied to all the descendants of the cloud resource.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing'
-  api: 'https://cloud.google.com/resource-manager/reference/rest/v3/tagBindings'
+    'Official Documentation': 'https://docs.cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing'
+  api: 'https://docs.cloud.google.com/resource-manager/reference/rest/v3/tagBindings'
 docs:
 id_format: 'tagBindings/{{name}}'
 base_url: 'tagBindings'
