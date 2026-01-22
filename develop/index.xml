@@ -9,7 +9,7 @@ development environment.&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;In the Google Cloud console, on the project selector page, select or
-&lt;a href="https://cloud.google.com/resource-manager/docs/creating-managing-projects"&gt;create a Google Cloud project&lt;/a&gt;.&lt;/p&gt;
+&lt;a href="https://docs.cloud.google.com/resource-manager/docs/creating-managing-projects"&gt;create a Google Cloud project&lt;/a&gt;.&lt;/p&gt;
 &lt;blockquote class='book-hint note'&gt;
 &lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; If you don&amp;rsquo;t already have a project to use for testing changes to
 the Terraform providers, create a project instead of selecting an existing
