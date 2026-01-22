@@ -14,7 +14,7 @@
 ---
 name: Config
 min_version: beta
-description: Configuration for Firbase AI Logic.
+description: Configuration for Firebase AI Logic.
 base_url: projects/{{project}}/locations/{{location}}/config
 references:
   guides:

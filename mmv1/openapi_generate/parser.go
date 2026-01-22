@@ -509,7 +509,6 @@ func WriteObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 			field.Type = "Map"
 			field.KeyName = "TODO: CHANGEME"
 			var valueType api.Type
-			valueType.Name = "TODO: CHANGEME"
 			valueType.Type = "NestedObject"
 			valueType.Properties = buildProperties(obj.Value.AdditionalProperties.Schema.Value.Properties, obj.Value.AdditionalProperties.Schema.Value.Required)
 			field.ValueType = &valueType
