@@ -52,8 +52,6 @@ examples:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
       desc: 'example data exchange'
-    steps:
-      - name: 'basic'
   - name: 'bigquery_analyticshub_listing_restricted'
     primary_resource_id: 'listing'
     primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
@@ -62,8 +60,6 @@ examples:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
       desc: 'example data exchange'
-    steps:
-      - name: 'restricted'
   - name: 'bigquery_analyticshub_listing_dcr'
     primary_resource_id: 'listing'
     primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
@@ -72,8 +68,6 @@ examples:
       data_exchange_id: 'dcr_data_exchange'
       listing_id: 'dcr_listing'
       desc: 'example dcr data exchange'
-    steps:
-      - name: 'dcr'
   - name: 'bigquery_analyticshub_listing_log_linked_dataset_query_user'
     primary_resource_id: 'listing'
     primary_resource_name: 'fmt.Sprintf("tf_test_log_email_de%s", context["random_suffix"]),fmt.Sprintf("tf_test_log_email_listing%s", context["random_suffix"])'
@@ -83,8 +77,6 @@ examples:
       listing_id: 'tf_test_log_email_listing'
       dataset_id: 'tf_test_log_email_ds'
       description: 'Example for log email test'
-    steps:
-      - name: 'log_linked_dataset_query_user'
   - name: 'bigquery_analyticshub_listing_pubsub'
     primary_resource_id: 'listing'
     primary_resource_name: 'fmt.Sprintf("tf_test_pubsub_de%s", context["random_suffix"]),fmt.Sprintf("tf_test_listing%s", context["random_suffix"])'
@@ -94,8 +86,6 @@ examples:
       listing_id: 'tf_test_pubsub_listing'
       pubsub_topic_name: 'test_pubsub'
       description: 'Example for pubsub topic source'
-    steps:
-      - name: 'pubsub'
   - name: 'bigquery_analyticshub_listing_dcr_routine'
     primary_resource_id: 'listing'
     primary_resource_name: 'fmt.Sprintf("tf_test_pubsub_de%s", context["random_suffix"]),fmt.Sprintf("tf_test_listing%s", context["random_suffix"])'
@@ -107,8 +97,6 @@ examples:
       dataset_id: 'tf_test_dataset'
       routine_id: 'tf_test_routine'
       desc: 'Example for listing with routine'
-    steps:
-      - name: 'dcr_routine'
   - name: 'bigquery_analyticshub_public_listing'
     primary_resource_id: 'listing'
     primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
@@ -117,8 +105,6 @@ examples:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
       desc: 'example public listing'
-    steps:
-      - name: 'public_listing'
   - name: 'bigquery_analyticshub_listing_marketplace'
     primary_resource_id: 'listing'
     primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
@@ -129,8 +115,6 @@ examples:
       desc: 'example data exchange'
     ignore_read_extra:
       - 'delete_commercial'
-    steps:
-      - name: 'listing_marketplace'
   - name: 'bigquery_analyticshub_listing_multiregion'
     primary_resource_id: 'listing'
     min_version: beta
@@ -139,8 +123,6 @@ examples:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
       description: 'example listing for multiregion'
-    steps:
-      - name: 'multiregion'
 virtual_fields:
   - name: 'delete_commercial'
     type: Boolean
