@@ -8,5 +8,6 @@ fields:
   - api_field: 'network'
   - api_field: 'peering'
   - api_field: 'reservedPeeringRanges'
+    unordered_list: true
   - api_field: 'service'
   - field: 'update_on_creation_fail'

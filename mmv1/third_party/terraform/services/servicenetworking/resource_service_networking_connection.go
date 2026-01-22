@@ -54,9 +54,10 @@ func ResourceServiceNetworkingConnection() *schema.Resource {
 				Description: `Provider peering service that is managing peering connectivity for a service provider organization. For Google services that support this functionality it is 'servicenetworking.googleapis.com'.`,
 			},
 			"reserved_peering_ranges": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Required:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
+				Set:         schema.HashString,
 				Description: `Named IP address range(s) of PEERING type reserved for this service provider. Note that invoking this method with a different range when connection is already established will not reallocate already provisioned service producer subnetworks.`,
 			},
 			"deletion_policy": {
@@ -94,7 +95,7 @@ func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta inte
 
 	connection := &servicenetworking.Connection{
 		Network:               serviceNetworkingNetworkName,
-		ReservedPeeringRanges: tpgresource.ConvertStringArr(d.Get("reserved_peering_ranges").([]interface{})),
+		ReservedPeeringRanges: tpgresource.ConvertStringArr(d.Get("reserved_peering_ranges").(*schema.Set).List()),
 	}
 
 	networkFieldValue, err := tpgresource.ParseNetworkFieldValue(network, d, config)
@@ -240,7 +241,7 @@ func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta inte
 
 		connection := &servicenetworking.Connection{
 			Network:               serviceNetworkingNetworkName,
-			ReservedPeeringRanges: tpgresource.ConvertStringArr(d.Get("reserved_peering_ranges").([]interface{})),
+			ReservedPeeringRanges: tpgresource.ConvertStringArr(d.Get("reserved_peering_ranges").(*schema.Set).List()),
 		}
 
 		networkFieldValue, err := tpgresource.ParseNetworkFieldValue(network, d, config)
