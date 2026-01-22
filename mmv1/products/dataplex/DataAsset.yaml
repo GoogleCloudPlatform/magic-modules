@@ -75,7 +75,6 @@ properties:
     key_name: 'access_group'
     description: 'Access groups configurations.'
     value_type:
-      name: 'AccessGroupConfig'
       type: NestedObject
       properties:
         - name: 'iamRoles'
