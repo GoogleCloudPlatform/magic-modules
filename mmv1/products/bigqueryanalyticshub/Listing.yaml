@@ -105,6 +105,15 @@ examples:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
       desc: 'example public listing'
+  - name: 'bigquery_analyticshub_restricted_export_policy_listing'
+    primary_resource_id: 'listing'
+    primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
+    region_override: 'US'
+    vars:
+      data_exchange_id: 'my_data_exchange'
+      listing_id: 'my_listing'
+      dataset_id: 'tf_test_dataset'
+      desc: 'example listing with restricted export policy'
   - name: 'bigquery_analyticshub_listing_marketplace'
     primary_resource_id: 'listing'
     primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
@@ -219,6 +228,23 @@ properties:
         required: true
         immutable: true
         diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+      - name: 'restrictedExportPolicy'
+        type: NestedObject
+        description: Restricted export policy used to configure restricted export on linked dataset
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description: If true, enable restricted export.
+            diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+          - name: 'restrictDirectTableAccess'
+            type: Boolean
+            description: If true, restrict direct table access (read api/tabledata.list) on linked table.
+            diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+          - name: 'restrictQueryResult'
+            type: Boolean
+            description: If true, restrict export of query result derived from restricted linked dataset table.
+            diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
       - name: 'selectedResources'
         type: Array
         description: Resource in this dataset that is selectively shared. This field is required for data clean room exchanges.
