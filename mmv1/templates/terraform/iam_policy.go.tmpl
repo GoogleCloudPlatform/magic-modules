@@ -221,8 +221,8 @@ func (u *{{ $.ResourceName }}IamUpdater) GetResourceIamPolicy() (*cloudresourcem
 		return nil, err
 	}
 
-{{- if and $.IamPolicy $.IamPolicy.SendsUserProjectHeader }}
 	headers := make(http.Header)
+{{- if and $.IamPolicy $.IamPolicy.SendsUserProjectHeader }}
 	headers.Set("x-goog-user-project", project)
 {{- end }}
 
