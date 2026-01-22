@@ -31,8 +31,8 @@ func TestAccTags(t *testing.T) {
 		"tagValueBasic":                         testAccTagsTagValue_tagValueBasic,
 		"tagValueUpdate":                        testAccTagsTagValue_tagValueUpdate,
 		"tagBindingBasic":                       testAccTagsTagBinding_tagBindingBasic,
-		"tagBindingBasicDynamic":				 testAccTagsTagBinding_tagBindingBasicDynamic,
-		"tagBindingNamespaced":					 testAccTagsTagBinding_tagBindingNamespaced,
+		"tagBindingBasicDynamic":                testAccTagsTagBinding_tagBindingBasicDynamic,
+		"tagBindingNamespaced":                  testAccTagsTagBinding_tagBindingNamespaced,
 		"tagValueIamBinding":                    testAccTagsTagValueIamBinding,
 		"tagValueIamMember":                     testAccTagsTagValueIamMember,
 		"tagValueIamPolicy":                     testAccTagsTagValueIamPolicy,
@@ -552,11 +552,6 @@ func testAccTagsTagBinding_tagBindingBasicDynamic(t *testing.T) {
 
 func testAccTagsTagBinding_tagBindingBasicDynamicExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_tags_tag_key" "test_key" {
-	parent = "projects/tags-blr-test-ap"
-	short_name = "dynamic-tags-tf-test-key"
-}
-
 resource "google_project" "project" {
 	project_id = "%{project_id}"
 	name       = "%{project_id}"
@@ -564,9 +559,16 @@ resource "google_project" "project" {
 	deletion_policy = "DELETE"
 }
 
+resource "google_tags_tag_key" "key" {
+	parent = "organizations/%{org_id}"
+	short_name = "keyname%{random_suffix}"
+	description = "For a certain set of resources."
+	allowed_values_regex = "test-.*"
+}
+
 resource "google_tags_tag_binding" "binding" {
 	parent    = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
-	tag_value = "${data.google_tags_tag_key.test_key.namespaced_name}/tf-test-value"
+	tag_value = "${google_tags_tag_key.key.namespaced_name}/test-value"
 }
 `, context)
 }
@@ -1133,9 +1135,11 @@ func testAccTagsLocationTagBinding_locationTagBindingBasicDynamicExample(context
 data "google_project" "project" {
 }
 
-data "google_tags_tag_key" "test_key" {
-	parent = "projects/tags-blr-test-ap"
-	short_name = "dynamic-tags-tf-test-key"
+resource "google_tags_tag_key" "key" {
+	parent = "organizations/${data.google_project.project.org_id}"
+	short_name = "keyname%{random_suffix}"
+	description = "For a certain set of resources."
+	allowed_values_regex = "test-.*"
 }
 
 resource "google_cloud_run_service" "default" {
@@ -1158,7 +1162,7 @@ resource "google_cloud_run_service" "default" {
   
 resource "google_tags_location_tag_binding" "binding" {
 	parent    = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${google_cloud_run_service.default.location}/services/${google_cloud_run_service.default.name}"
-	tag_value = "${data.google_tags_tag_key.test_key.namespaced_name}/tf-test-value"
+	tag_value = "${google_tags_tag_key.key.namespaced_name}/test-value"
 	location  = "us-central1"
 }
 `, context)
@@ -1301,6 +1305,7 @@ func testAccTagsLocationTagBinding_locationTagBindingZonalDynamic(t *testing.T) 
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -1334,6 +1339,13 @@ data "google_tags_tag_key" "test_key" {
 	short_name = "dynamic-tags-tf-test-key"
 }
 
+resource "google_tags_tag_key" "key" {
+	parent = "organizations/%{org_id}"
+	short_name = "keyname%{random_suffix}"
+	description = "For a certain set of resources."
+	allowed_values_regex = "test-.*"
+}
+
 resource "google_compute_instance" "default" {
 	name         = "test-%{random_suffix}"
 	machine_type = "e2-medium"
@@ -1350,7 +1362,7 @@ resource "google_compute_instance" "default" {
 
 resource "google_tags_location_tag_binding" "binding" {
 	parent    = "//compute.googleapis.com/projects/${data.google_project.project.number}/zones/us-central1-a/instances/${google_compute_instance.default.instance_id}"
-	tag_value = "${data.google_tags_tag_key.test_key.namespaced_name}/tf-test-value"
+	tag_value = "${google_tags_tag_key.key.namespaced_name}/test-value"
 	location  = "us-central1-a"
 }
 `, context)
