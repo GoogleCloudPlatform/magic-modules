@@ -67,20 +67,17 @@ properties:
       The name of the App Hub Application.
       Format:
       projects/{project}/locations/{location}/applications/{application}
-    optional: true
     conflicts:
     - projects
   - name: projects
     type: NestedObject
     description: The projects to track with the InsightsConfig.
-    optional: true
     conflicts:
       - appHubApplication
     properties:
       - name: projectIds
         type: Array
         description: The project IDs. Format {project}.
-        optional: true
         item_type:
           type: String
   - name: name
