@@ -54,14 +54,6 @@ type Product struct {
 	// The API versions of this product
 	Versions []*product.Version
 
-	// The base URL for the service API endpoint
-	// For example: `https://www.googleapis.com/compute/v1/`
-	BaseUrl string `yaml:"base_url,omitempty"`
-
-	// The validator "relative URI" of a resource, relative to the product
-	// base URL. Specific to defining the resource as a CAI asset.
-	CaiBaseUrl string `yaml:"caibaseurl,omitempty"`
-
 	// The service name from CAI asset name, e.g. bigtable.googleapis.com.
 	CaiAssetService string `yaml:"cai_asset_service,omitempty"`
 
@@ -79,6 +71,9 @@ type Product struct {
 	LegacyName string `yaml:"legacy_name,omitempty"`
 
 	ClientName string `yaml:"client_name,omitempty"`
+
+	// The version of the product which is currently being generated.
+	Version *product.Version `yaml:"-"`
 
 	// The compiler to generate the downstream files, for example "terraformgoogleconversion-codegen".
 	Compiler string `yaml:"-"`
@@ -234,11 +229,6 @@ func (p *Product) ExistsAtVersion(name string) bool {
 	return false
 }
 
-func (p *Product) SetPropertiesBasedOnVersion(version *product.Version) {
-	p.BaseUrl = version.BaseUrl
-	p.CaiBaseUrl = version.CaiBaseUrl
-}
-
 func (p *Product) TerraformName() string {
 	if p.LegacyName != "" {
 		return google.Underscore(p.LegacyName)
@@ -247,10 +237,10 @@ func (p *Product) TerraformName() string {
 }
 
 func (p *Product) ServiceBaseUrl() string {
-	if p.CaiBaseUrl != "" {
-		return p.CaiBaseUrl
+	if p.Version.CaiBaseUrl != "" {
+		return p.Version.CaiBaseUrl
 	}
-	return p.BaseUrl
+	return p.Version.BaseUrl
 }
 
 func (p *Product) ServiceName() string {

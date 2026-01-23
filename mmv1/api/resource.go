@@ -1109,7 +1109,7 @@ func (r *Resource) ExcludeIfNotInVersion(version *product.Version) {
 // In newer resources there is much less standardisation in terms of value.
 // Generally for them though, it's the product.base_url + resource.name
 func (r Resource) SelfLinkUrl() string {
-	s := []string{r.ProductMetadata.BaseUrl, r.SelfLinkUri()}
+	s := []string{r.ProductMetadata.Version.BaseUrl, r.SelfLinkUri()}
 	return strings.Join(s, "")
 }
 
@@ -1127,7 +1127,7 @@ func (r Resource) SelfLinkUri() string {
 }
 
 func (r Resource) CollectionUrl() string {
-	s := []string{r.ProductMetadata.BaseUrl, r.collectionUri()}
+	s := []string{r.ProductMetadata.Version.BaseUrl, r.collectionUri()}
 	return strings.Join(s, "")
 }
 
@@ -1793,7 +1793,7 @@ func (r Resource) IamImportFormat() string {
 	importFormat := r.IamImportFormatTemplate()
 
 	importFormat = regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(importFormat, "%s")
-	return strings.ReplaceAll(importFormat, r.ProductMetadata.BaseUrl, "")
+	return strings.ReplaceAll(importFormat, r.ProductMetadata.Version.BaseUrl, "")
 }
 
 func (r Resource) IamImportParams() []string {
@@ -1971,7 +1971,7 @@ func (r Resource) ListUrlTemplate() string {
 }
 
 func (r Resource) DeleteUrlTemplate() string {
-	return fmt.Sprintf("%s%s", r.ProductMetadata.BaseUrl, r.DeleteUri())
+	return fmt.Sprintf("%s%s", r.ProductMetadata.Version.BaseUrl, r.DeleteUri())
 }
 
 func (r Resource) LastNestedQueryKey() string {
