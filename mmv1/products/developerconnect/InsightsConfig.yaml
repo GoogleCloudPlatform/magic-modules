@@ -68,7 +68,7 @@ properties:
       Format:
       projects/{project}/locations/{location}/applications/{application}
     conflicts:
-    - projects
+      - projects
   - name: projects
     type: NestedObject
     description: The projects to track with the InsightsConfig.
