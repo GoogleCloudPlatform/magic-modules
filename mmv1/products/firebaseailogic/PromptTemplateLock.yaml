@@ -40,6 +40,7 @@ delete_verb: POST
 custom_code:
   # We read the PromptTemplate to verify it is locked
   post_read: 'templates/terraform/post_read/firebase_ai_logic_prompt_template_lock.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/firebase_ai_logic_prompt_template_lock.go.tmpl'
 parameters:
   - name: location
     type: String
