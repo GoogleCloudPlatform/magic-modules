@@ -1,4 +1,4 @@
-# Copyright 2025 Google Inc.
+# Copyright 2026 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,6 +15,10 @@
 name: 'DataAsset'
 description: |
   A data asset resource that can be packaged and shared via a data product.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/dataplex/docs'
+  api: 'https://cloud.google.com/dataplex/docs/reference/rest/v1/projects.locations.dataProducts.dataAssets'
 min_version: beta
 
 base_url: 'projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}/dataAssets'
@@ -24,7 +28,6 @@ create_url: 'projects/{{project}}/locations/{{location}}/dataProducts/{{data_pro
 id_format: 'projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}/dataAssets/{{data_asset_id}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}/dataAssets/{{data_asset_id}}'
-  - '{{data_product_id}}/{{data_asset_id}}'
 
 update_verb: 'PATCH'
 update_mask: true
@@ -53,8 +56,6 @@ parameters:
     required: true
     immutable: true
     url_param_only: true
-    api_name: 'name'
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     description: 'The ID of the data asset.'
 
 properties:
@@ -75,7 +76,6 @@ properties:
     key_name: 'access_group'
     description: 'Access groups configurations.'
     value_type:
-      name: 'AccessGroupConfig'
       type: NestedObject
       properties:
         - name: 'iamRoles'

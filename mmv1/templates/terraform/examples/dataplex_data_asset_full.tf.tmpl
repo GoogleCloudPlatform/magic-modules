@@ -3,7 +3,7 @@ resource "google_dataplex_data_product" "example" {
   location        = "us-central1"
   data_product_id = "tf-test-dp-%{random_suffix}"
   display_name    = "Full Example Parent DP"
-  owner_emails    = ["terraform-test@google.com"]
+  owner_emails    = ["gterraformtestuser@gmail.com"]
 
   access_groups {
     id           = "analyst"
