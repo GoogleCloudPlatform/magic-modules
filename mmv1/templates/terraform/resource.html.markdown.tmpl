@@ -56,7 +56,7 @@ To get more information about {{$.Name}}, see:
 {{- if $.SensitiveProps }}
 ~> **Warning:** All arguments including the following potentially sensitive
 values will be stored in the raw state as plain text: {{ $.SensitivePropsToString }}.
-[Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data).
+[Read more about sensitive data in state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data).
 {{ end }}
 {{- if $.WriteOnlyProps }}
 ~> **Note:**  All arguments marked as write-only values will not be stored in the state: {{ $.WriteOnlyPropsToString }}.
