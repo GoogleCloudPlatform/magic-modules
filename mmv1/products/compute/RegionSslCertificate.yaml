@@ -138,6 +138,7 @@ properties:
     immutable: true
     ignore_read: true
     sensitive: true
+    write_only: true
     diff_suppress_func: 'sha256DiffSuppress'
     custom_flatten: 'templates/terraform/custom_flatten/sha256.tmpl'
     is_missing_in_cai: true
