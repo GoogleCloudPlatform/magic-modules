@@ -1,0 +1,3 @@
+go: cannot find main module, but found .git/config in /usr/local/google/home/kushallunkad/magic-modules-10
+	to create a module there, run:
+	go mod init
