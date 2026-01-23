@@ -501,7 +501,7 @@ func (t *Type) Validate(rName string) {
 	}
 
 	if t.KeyDescription != "" {
-		log.Fatalf("Property %s.key_description can't be set in resource %s; it's deprecated", t.Name, rName)
+		log.Fatalf("Property %s key_description can't be set in resource %s; it's deprecated", t.Name, rName)
 	}
 
 	t.validateLabelsField()
@@ -517,7 +517,7 @@ func (t *Type) Validate(rName string) {
 		t.ValueType.Validate(rName)
 		t.ValueType.Name = oldName
 		if t.ValueType.Name != "" {
-			log.Fatalf("Property %s.name can't be set in resource %s", t.Name, rName)
+			log.Fatalf("Property %s value_type.name can't be set in resource %s", t.Name, rName)
 		}
 	case t.IsA("NestedObject"):
 		for _, p := range t.Properties {
