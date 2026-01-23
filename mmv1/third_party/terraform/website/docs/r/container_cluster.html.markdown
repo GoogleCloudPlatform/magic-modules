@@ -21,7 +21,7 @@ To get more information about GKE clusters, see:
 and run `terraform apply` to write the field to state in order to destroy a cluster.
 
 ~> All arguments and attributes (including certificate outputs) will be stored in the raw state as
-plaintext. [Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data).
+plaintext. [Read more about sensitive data in state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data).
 
 ## Example Usage - with a separately managed node pool (recommended)
 
