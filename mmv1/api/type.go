@@ -881,7 +881,7 @@ func (t *Type) FieldType() []string {
 	}
 
 	if t.MinVersion == "beta" && t.ResourceMetadata.MinVersion != "beta" {
-		ret = append(ret, "[Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)")
+		ret = append(ret, "[Beta](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions)")
 	}
 
 	if t.DeprecationMessage != "" {

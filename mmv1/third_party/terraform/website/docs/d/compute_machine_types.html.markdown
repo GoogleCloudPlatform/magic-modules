@@ -106,7 +106,7 @@ The following attributes are exported:
 
 * `description` - A textual description of the machine type.
 
-* `bundled_local_ssds` - ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The configuration of bundled local SSD for the machine type. Structure is [documented below](#nested_bundled_local_ssds).
+* `bundled_local_ssds` - ([Beta](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions)) The configuration of bundled local SSD for the machine type. Structure is [documented below](#nested_bundled_local_ssds).
 
 * `deprecated` - The deprecation status associated with this machine type. Structure is [documented below](#nested_deprecated).
 
@@ -126,9 +126,9 @@ The following attributes are exported:
 
 <a name="nested_bundled_local_ssds"></a>The `bundled_local_ssds` block supports:
 
-* `default_interface` - ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The default disk interface if the interface is not specified.
+* `default_interface` - ([Beta](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions)) The default disk interface if the interface is not specified.
 
-* `partition_count` - ([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The number of partitions.
+* `partition_count` - ([Beta](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions)) The number of partitions.
 
 <a name="nested_deprecated"></a>The `deprecated` block supports:
 
