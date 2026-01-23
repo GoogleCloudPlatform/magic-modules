@@ -31,6 +31,8 @@ async:
   result:
     resource_inside_response: true
 autogen_async: true
+# excluding identity due to name value inconsistency
+exclude_identity_generation: true
 description: |
  The Eventarc Trigger resource
 sweeper:
@@ -40,12 +42,14 @@ sweeper:
 examples:
   - name: eventarc_trigger_with_cloud_run_destination
     primary_resource_id: primary
+    exclude_identity_import: true
     vars:
       trigger_name: some-trigger
       topic_name: some-topic
       service_name: some-service
   - name: eventarc_trigger_with_http_destination
     primary_resource_id: primary
+    exclude_identity_import: true
     vars:
       trigger_name: some-trigger
       network_attachment_name: network-attachment
@@ -57,6 +61,7 @@ examples:
     exclude_docs: true
   - name: eventarc_trigger_with_channel_cmek
     primary_resource_id: primary
+    exclude_identity_import: true
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
@@ -73,6 +78,7 @@ examples:
     exclude_docs: true
   - name: eventarc_trigger_with_workflow_destination
     primary_resource_id: primary
+    exclude_identity_import: true
     vars:
       trigger_name: some-trigger
       workflow_name: some-workflow
@@ -81,6 +87,7 @@ examples:
     exclude_docs: true
   - name: eventarc_trigger_with_path_pattern_filter
     primary_resource_id: primary
+    exclude_identity_import: true
     vars:
       trigger_name: some-trigger
       service_account_id: trigger-sa
@@ -88,6 +95,7 @@ examples:
     exclude_docs: true
   - name: eventarc_trigger_with_firestore_source
     primary_resource_id: primary
+    exclude_identity_import: true
     vars:
       trigger_name: some-trigger
       service_account_id: trigger-sa

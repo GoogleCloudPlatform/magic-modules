@@ -36,9 +36,12 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
+# excluding identity due to region value inconsistency
+exclude_identity_generation: true
 examples:
   - name: 'network_attachment_basic'
     primary_resource_id: 'default'
+    exclude_identity_import: true
     vars:
       resource_name: 'basic-network-attachment'
       network_name: 'basic-network'
@@ -51,6 +54,7 @@ examples:
   - name: 'network_attachment_instance_usage'
     primary_resource_id: 'default'
     min_version: 'beta'
+    exclude_identity_import: true
     vars:
       resource_name: 'basic-network-attachment'
       network_name: 'basic-network'
