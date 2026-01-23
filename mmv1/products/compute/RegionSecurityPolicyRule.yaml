@@ -47,25 +47,32 @@ async:
 custom_code:
   pre_create: 'templates/terraform/pre_create/region_security_policy_default_rule_update_on_create.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/security_policy_default_rule_delete.go.tmpl'
+# excluding identity due to region value inconsistency
+exclude_identity_generation: true
 examples:
   - name: 'region_security_policy_rule_basic'
     primary_resource_id: 'policy_rule'
+    exclude_identity_import: true
     vars:
       sec_policy_name: 'policyruletest'
   - name: 'region_security_policy_rule_multiple_rules'
     primary_resource_id: 'policy_rule_one'
+    exclude_identity_import: true
     vars:
       sec_policy_name: 'policywithmultiplerules'
   - name: 'region_security_policy_rule_default_rule'
     primary_resource_id: 'policy_rule'
+    exclude_identity_import: true
     vars:
       sec_policy_name: 'policywithdefaultrule'
   - name: 'region_security_policy_rule_with_preconfigured_waf_config'
     primary_resource_id: 'policy_rule'
+    exclude_identity_import: true
     vars:
       sec_policy_name: 'policyruletest'
   - name: 'region_security_policy_rule_with_network_match'
     primary_resource_id: 'policy_rule_network_match'
+    exclude_identity_import: true
     vars:
       sec_policy_name: 'policyfornetworkmatch'
     # it needs to run synchronously because a region can have only one google_compute_network_edge_security_service.
