@@ -14,7 +14,7 @@
 package resource
 
 import (
-	"log"
+	"fmt"
 	"slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
@@ -176,19 +176,21 @@ func (p *IamPolicy) MarshalYAML() (interface{}, error) {
 	return (*iamPolicyAlias)(clone.(*IamPolicy)), nil
 }
 
-func (p *IamPolicy) Validate(rName string) {
+func (p *IamPolicy) Validate(rName string) (es []error) {
 	allowed := []string{"GET", "POST"}
 	if !slices.Contains(allowed, p.FetchIamPolicyVerb) {
-		log.Fatalf("Value on `fetch_iam_policy_verb` should be one of %#v in resource %s", allowed, rName)
+		es = append(es, fmt.Errorf("value on `fetch_iam_policy_verb` should be one of %#v in resource %s", allowed, rName))
 	}
 
 	allowed = []string{"POST", "PUT"}
 	if !slices.Contains(allowed, p.SetIamPolicyVerb) {
-		log.Fatalf("Value on `set_iam_policy_verb` should be one of %#v in resource %s", allowed, rName)
+		es = append(es, fmt.Errorf("value on `set_iam_policy_verb` should be one of %#v in resource %s", allowed, rName))
 	}
 
 	allowed = []string{"REQUEST_BODY", "QUERY_PARAM", "QUERY_PARAM_NESTED"}
 	if p.IamConditionsRequestType != "" && !slices.Contains(allowed, p.IamConditionsRequestType) {
-		log.Fatalf("Value on `iam_conditions_request_type` should be one of %#v in resource %s", allowed, rName)
+		es = append(es, fmt.Errorf("value on `iam_conditions_request_type` should be one of %#v in resource %s", allowed, rName))
 	}
+
+	return es
 }
