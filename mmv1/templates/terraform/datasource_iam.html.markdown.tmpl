@@ -63,11 +63,11 @@ data "{{ $.IamTerraformName }}_policy" "policy" {
   provider = google-beta
 {{- end }}
 {{- if $.IamPolicy.ExampleConfigBody}}
-{{- customTemplate $ $.IamPolicy.ExampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.ExampleConfigBody false }}
 {{- end }}
 
 {{- if $.IamPolicy.SampleConfigBody}}
-{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
 {{- end }}
 }
 ```
