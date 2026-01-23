@@ -218,7 +218,7 @@ func ResourceSqlUser() *schema.Resource {
 				Computed:    true,
 				ForceNew:    true,
 				Description: `The email address for MySQL IAM database users.`,
-                        },
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -286,14 +286,13 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 			databaseRoles = append(databaseRoles, r.(string))
 		}
 	}
-	
 
 	user := &sqladmin.User{
-		Name:     name,
-		Instance: instance,
-		Password: password,
-		Host:     host,
-		Type:     typ,
+		Name:          name,
+		Instance:      instance,
+		Password:      password,
+		Host:          host,
+		Type:          typ,
 		DatabaseRoles: databaseRoles,
 	}
 
@@ -431,7 +430,7 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	if err := d.Set("iam_email", user.IamEmail); err != nil {
 		return fmt.Errorf("Error setting iam_email: %s", err)
-        }
+	}
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
@@ -534,7 +533,7 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 		user := &sqladmin.User{
 			Name:     name,
 			Instance: instance,
-			Type: typ,
+			Type:     typ,
 		}
 
 		if hasPasswordChange {

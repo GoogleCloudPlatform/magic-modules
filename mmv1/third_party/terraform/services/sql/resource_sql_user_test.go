@@ -424,218 +424,218 @@ func TestAccSqlUser_mysql_createUserWithDatabaseRoles(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"password", "database_roles"},
 			},
 			{
-                                Config: testGoogleSqlUser_mysql_userWithDatabaseRoles(instance, "admin@hashicorptest.com", "", "CLOUD_IAM_USER", "", `["cloudsqlsuperuser"]`),
-                                Check: resource.ComposeTestCheckFunc(
-                                        testAccCheckGoogleSqlUserExists(t, "google_sql_user.admin"),
-                                ),
-                        },
-                        {
-                                ResourceName:            "google_sql_user.admin",
-                                ImportStateId:           fmt.Sprintf("%s/%s/%%/admin@hashicorptest.com", envvar.GetTestProjectFromEnv(), instance),
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"password", "database_roles"},
-                        },
+				Config: testGoogleSqlUser_mysql_userWithDatabaseRoles(instance, "admin@hashicorptest.com", "", "CLOUD_IAM_USER", "", `["cloudsqlsuperuser"]`),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.admin"),
+				),
+			},
 			{
-                                Config: testGoogleSqlUser_mysql_userWithDatabaseRoles(instance, "iam-group-auth-test-group@google.com", "", "CLOUD_IAM_GROUP", "", `["cloudsqlsuperuser"]`),
-                                Check: resource.ComposeTestCheckFunc(
-                                        testAccCheckGoogleSqlUserExists(t, "google_sql_user.iam-group-auth-test-group"),
-                                ),
-                        },
-                        {
-                                ResourceName:            "google_sql_user.iam-group-auth-test-group",
-                                ImportStateId:           fmt.Sprintf("%s/%s/%%/iam-group-auth-test-group@google.com", envvar.GetTestProjectFromEnv(), instance),
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"password", "database_roles"},
-                        },
+				ResourceName:            "google_sql_user.admin",
+				ImportStateId:           fmt.Sprintf("%s/%s/%%/admin@hashicorptest.com", envvar.GetTestProjectFromEnv(), instance),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password", "database_roles"},
+			},
+			{
+				Config: testGoogleSqlUser_mysql_userWithDatabaseRoles(instance, "iam-group-auth-test-group@google.com", "", "CLOUD_IAM_GROUP", "", `["cloudsqlsuperuser"]`),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.iam-group-auth-test-group"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_user.iam-group-auth-test-group",
+				ImportStateId:           fmt.Sprintf("%s/%s/%%/iam-group-auth-test-group@google.com", envvar.GetTestProjectFromEnv(), instance),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password", "database_roles"},
+			},
 		},
 	})
 }
 
 func TestAccSqlUser_mysql_updateUserWithDatabaseRoles(t *testing.T) {
-        t.Parallel()
+	t.Parallel()
 
-        instance := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
-        acctest.VcrTest(t, resource.TestCase{
-                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-                ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-                CheckDestroy:             testAccSqlUserDestroyProducer(t),
-                Steps: []resource.TestStep{
-                        {
-                                Config: testGoogleSqlUser_mysql_userWithDatabaseRoles(instance, "testuser", "gmail.com", "BUILT_IN", "password", `[]`),
-                                Check: resource.ComposeTestCheckFunc(
-                                        testAccCheckGoogleSqlUserExists(t, "google_sql_user.testuser"),
-                                ),
-                        },
-                        {
-                                ResourceName:            "google_sql_user.testuser",
-                                ImportStateId:           fmt.Sprintf("%s/%s/gmail.com/testuser", envvar.GetTestProjectFromEnv(), instance),
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"password", "database_roles"},
-                        },
+	instance := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlUserDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlUser_mysql_userWithDatabaseRoles(instance, "testuser", "gmail.com", "BUILT_IN", "password", `[]`),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.testuser"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_user.testuser",
+				ImportStateId:           fmt.Sprintf("%s/%s/gmail.com/testuser", envvar.GetTestProjectFromEnv(), instance),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password", "database_roles"},
+			},
 			{
 				Config: testGoogleSqlUser_mysql_userWithDatabaseRoles(instance, "testuser", "gmail.com", "BUILT_IN", "password", `["cloudsqlsuperuser"]`),
-                                Check: resource.ComposeTestCheckFunc(
-                                        testAccCheckGoogleSqlUserExists(t, "google_sql_user.testuser"),
-                                ),
-                        },
-                        {
-                                ResourceName:            "google_sql_user.testuser",
-                                ImportStateId:           fmt.Sprintf("%s/%s/gmail.com/testuser", envvar.GetTestProjectFromEnv(), instance),
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"password", "database_roles"},
-                        },
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.testuser"),
+				),
+			},
 			{
-                                Config: testGoogleSqlUser_mysql_userWithDatabaseRoles(instance, "admin@hashicorptest.com", "", "CLOUD_IAM_USER", "", `[]`),
-                                Check: resource.ComposeTestCheckFunc(
-                                        testAccCheckGoogleSqlUserExists(t, "google_sql_user.admin"),
-                                ),
-                        },
-                        {
-                                ResourceName:            "google_sql_user.admin",
-                                ImportStateId:           fmt.Sprintf("%s/%s/%%/admin@hashicorptest.com", envvar.GetTestProjectFromEnv(), instance),
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"password", "database_roles"},
-                        },
+				ResourceName:            "google_sql_user.testuser",
+				ImportStateId:           fmt.Sprintf("%s/%s/gmail.com/testuser", envvar.GetTestProjectFromEnv(), instance),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password", "database_roles"},
+			},
 			{
-                                Config: testGoogleSqlUser_mysql_userWithDatabaseRoles(instance, "admin@hashicorptest.com", "", "CLOUD_IAM_USER", "", `["cloudsqlsuperuser"]`),
-                                Check: resource.ComposeTestCheckFunc(
-                                        testAccCheckGoogleSqlUserExists(t, "google_sql_user.admin"),
-                                ),
-                        },
-                        {
-                                ResourceName:            "google_sql_user.admin",
-                                ImportStateId:           fmt.Sprintf("%s/%s/%%/admin@hashicorptest.com", envvar.GetTestProjectFromEnv(), instance),
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"password", "database_roles"},
-                        },
+				Config: testGoogleSqlUser_mysql_userWithDatabaseRoles(instance, "admin@hashicorptest.com", "", "CLOUD_IAM_USER", "", `[]`),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.admin"),
+				),
+			},
 			{
-                                Config: testGoogleSqlUser_mysql_saUserWithDatabaseRoles(instance, "sa_user", `[]`),
-                                Check: resource.ComposeTestCheckFunc(
-                                        testAccCheckGoogleSqlUserExists(t, "google_sql_user.sa_user"),
-                                ),
-                        },
-                        {
-                                ResourceName:            "google_sql_user.sa_user",
-                                ImportStateId:           fmt.Sprintf("%s/%s/%%/%s@%s.iam.gserviceaccount.com", envvar.GetTestProjectFromEnv(), instance, instance, envvar.GetTestProjectFromEnv()),
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"password", "database_roles"},
-                        },
-                        {
-                                Config: testGoogleSqlUser_mysql_saUserWithDatabaseRoles(instance, "sa_user", `["cloudsqlsuperuser"]`),
-                                Check: resource.ComposeTestCheckFunc(
-                                        testAccCheckGoogleSqlUserExists(t, "google_sql_user.sa_user"),
-                                ),
-                        },
-                        {
-                                ResourceName:            "google_sql_user.sa_user",
-                                ImportStateId:           fmt.Sprintf("%s/%s/%%/%s@%s.iam.gserviceaccount.com", envvar.GetTestProjectFromEnv(), instance, instance, envvar.GetTestProjectFromEnv()),
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"password", "database_roles"},
-                        },
-                },
-        })
+				ResourceName:            "google_sql_user.admin",
+				ImportStateId:           fmt.Sprintf("%s/%s/%%/admin@hashicorptest.com", envvar.GetTestProjectFromEnv(), instance),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password", "database_roles"},
+			},
+			{
+				Config: testGoogleSqlUser_mysql_userWithDatabaseRoles(instance, "admin@hashicorptest.com", "", "CLOUD_IAM_USER", "", `["cloudsqlsuperuser"]`),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.admin"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_user.admin",
+				ImportStateId:           fmt.Sprintf("%s/%s/%%/admin@hashicorptest.com", envvar.GetTestProjectFromEnv(), instance),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password", "database_roles"},
+			},
+			{
+				Config: testGoogleSqlUser_mysql_saUserWithDatabaseRoles(instance, "sa_user", `[]`),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.sa_user"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_user.sa_user",
+				ImportStateId:           fmt.Sprintf("%s/%s/%%/%s@%s.iam.gserviceaccount.com", envvar.GetTestProjectFromEnv(), instance, instance, envvar.GetTestProjectFromEnv()),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password", "database_roles"},
+			},
+			{
+				Config: testGoogleSqlUser_mysql_saUserWithDatabaseRoles(instance, "sa_user", `["cloudsqlsuperuser"]`),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.sa_user"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_user.sa_user",
+				ImportStateId:           fmt.Sprintf("%s/%s/%%/%s@%s.iam.gserviceaccount.com", envvar.GetTestProjectFromEnv(), instance, instance, envvar.GetTestProjectFromEnv()),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password", "database_roles"},
+			},
+		},
+	})
 }
 
 func TestAccSqlUser_postgres_updateUserWithDatabaseRoles(t *testing.T) {
-        t.Parallel()
+	t.Parallel()
 
-        instance := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
-        acctest.VcrTest(t, resource.TestCase{
-                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-                ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-                CheckDestroy:             testAccSqlUserDestroyProducer(t),
-                Steps: []resource.TestStep{
+	instance := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlUserDestroyProducer(t),
+		Steps: []resource.TestStep{
 			{
-                                Config: testGoogleSqlUser_postgres_userWithDatabaseRoles(instance, "testuser", "BUILT_IN", "password", `[]`),
-                                Check: resource.ComposeTestCheckFunc(
-                                        testAccCheckGoogleSqlUserExists(t, "google_sql_user.testuser"),
-                                ),
-                        },
+				Config: testGoogleSqlUser_postgres_userWithDatabaseRoles(instance, "testuser", "BUILT_IN", "password", `[]`),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.testuser"),
+				),
+			},
 			{
 				ResourceName:            "google_sql_user.testuser",
-                                ImportStateId:           fmt.Sprintf("%s/%s/testuser", envvar.GetTestProjectFromEnv(), instance),
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"password", "database_roles"},
-                        },
+				ImportStateId:           fmt.Sprintf("%s/%s/testuser", envvar.GetTestProjectFromEnv(), instance),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password", "database_roles"},
+			},
 			{
-                                Config: testGoogleSqlUser_postgres_userWithDatabaseRoles(instance, "testuser", "BUILT_IN", "password", `["cloudsqlsuperuser"]`),
-                                Check: resource.ComposeTestCheckFunc(
-                                        testAccCheckGoogleSqlUserExists(t, "google_sql_user.testuser"),
-                                ),
-                        },
-                        {
-                                ResourceName:            "google_sql_user.testuser",
-                                ImportStateId:           fmt.Sprintf("%s/%s/testuser", envvar.GetTestProjectFromEnv(), instance),
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"password", "database_roles"},
-                        },
-                        {
-                                Config: testGoogleSqlUser_postgres_userWithDatabaseRoles(instance, "admin@hashicorptest.com", "CLOUD_IAM_USER", "", `[]`),
-                                Check: resource.ComposeTestCheckFunc(
-                                        testAccCheckGoogleSqlUserExists(t, "google_sql_user.admin"),
-                                ),
-                        },
-                        {
-                                ResourceName:            "google_sql_user.admin",
-                                ImportStateId:           fmt.Sprintf("%s/%s/admin@hashicorptest.com", envvar.GetTestProjectFromEnv(), instance),
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"password", "database_roles"},
-                        },
-                        {
-                                Config: testGoogleSqlUser_postgres_userWithDatabaseRoles(instance, "admin@hashicorptest.com", "CLOUD_IAM_USER", "", `["cloudsqlsuperuser"]`),
-                                Check: resource.ComposeTestCheckFunc(
-                                        testAccCheckGoogleSqlUserExists(t, "google_sql_user.admin"),
-                                ),
-                        },
-                        {
-                                ResourceName:            "google_sql_user.admin",
-                                ImportStateId:           fmt.Sprintf("%s/%s/admin@hashicorptest.com", envvar.GetTestProjectFromEnv(), instance),
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"password", "database_roles"},
-                        },
+				Config: testGoogleSqlUser_postgres_userWithDatabaseRoles(instance, "testuser", "BUILT_IN", "password", `["cloudsqlsuperuser"]`),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.testuser"),
+				),
+			},
 			{
-                                Config: testGoogleSqlUser_postgres_saUserWithDatabaseRoles(instance, "sa_user", `[]`),
-                                Check: resource.ComposeTestCheckFunc(
-                                        testAccCheckGoogleSqlUserExists(t, "google_sql_user.sa_user"),
-                                ),
-                        },
+				ResourceName:            "google_sql_user.testuser",
+				ImportStateId:           fmt.Sprintf("%s/%s/testuser", envvar.GetTestProjectFromEnv(), instance),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password", "database_roles"},
+			},
 			{
-                                ResourceName:            "google_sql_user.sa_user",
-                                ImportStateId:           fmt.Sprintf("%s/%s//%s@%s.iam", envvar.GetTestProjectFromEnv(), instance, instance, envvar.GetTestProjectFromEnv()),
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"password", "database_roles"},
-                        },
-                        {
-                                Config: testGoogleSqlUser_postgres_saUserWithDatabaseRoles(instance, "sa_user", `["cloudsqlsuperuser"]`),
-                                Check: resource.ComposeTestCheckFunc(
-                                        testAccCheckGoogleSqlUserExists(t, "google_sql_user.sa_user"),
-                                ),
-                        },
-                        {
-                                ResourceName:            "google_sql_user.sa_user",
-                                ImportStateId:           fmt.Sprintf("%s/%s//%s@%s.iam", envvar.GetTestProjectFromEnv(), instance, instance, envvar.GetTestProjectFromEnv()),
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"password", "database_roles"},
-                        },
-                },
-        })
+				Config: testGoogleSqlUser_postgres_userWithDatabaseRoles(instance, "admin@hashicorptest.com", "CLOUD_IAM_USER", "", `[]`),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.admin"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_user.admin",
+				ImportStateId:           fmt.Sprintf("%s/%s/admin@hashicorptest.com", envvar.GetTestProjectFromEnv(), instance),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password", "database_roles"},
+			},
+			{
+				Config: testGoogleSqlUser_postgres_userWithDatabaseRoles(instance, "admin@hashicorptest.com", "CLOUD_IAM_USER", "", `["cloudsqlsuperuser"]`),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.admin"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_user.admin",
+				ImportStateId:           fmt.Sprintf("%s/%s/admin@hashicorptest.com", envvar.GetTestProjectFromEnv(), instance),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password", "database_roles"},
+			},
+			{
+				Config: testGoogleSqlUser_postgres_saUserWithDatabaseRoles(instance, "sa_user", `[]`),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.sa_user"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_user.sa_user",
+				ImportStateId:           fmt.Sprintf("%s/%s//%s@%s.iam", envvar.GetTestProjectFromEnv(), instance, instance, envvar.GetTestProjectFromEnv()),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password", "database_roles"},
+			},
+			{
+				Config: testGoogleSqlUser_postgres_saUserWithDatabaseRoles(instance, "sa_user", `["cloudsqlsuperuser"]`),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.sa_user"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_user.sa_user",
+				ImportStateId:           fmt.Sprintf("%s/%s//%s@%s.iam", envvar.GetTestProjectFromEnv(), instance, instance, envvar.GetTestProjectFromEnv()),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password", "database_roles"},
+			},
+		},
+	})
 }
 
-func testGoogleSqlUser_mysql_userWithDatabaseRoles(instance, username, host,  usertype, password, roles string) string {
+func testGoogleSqlUser_mysql_userWithDatabaseRoles(instance, username, host, usertype, password, roles string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
@@ -663,7 +663,7 @@ resource "google_sql_user" "%s" {
 }
 
 func testGoogleSqlUser_mysql_saUserWithDatabaseRoles(instance, username, roles string) string {
-        return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
   region              = "us-central1"
@@ -697,7 +697,7 @@ resource "google_sql_user" "%s" {
 }
 
 func testGoogleSqlUser_postgres_saUserWithDatabaseRoles(instance, username, roles string) string {
-        return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
   region              = "us-central1"
@@ -731,7 +731,7 @@ resource "google_sql_user" "%s" {
 }
 
 func testGoogleSqlUser_postgres_userWithDatabaseRoles(instance, username, usertype, password, roles string) string {
-        return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
   region              = "us-central1"
