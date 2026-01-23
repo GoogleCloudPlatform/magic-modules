@@ -369,8 +369,7 @@ The following arguments are supported:
 
 * `management` -
   (Optional)
-  Set this field to MANAGEMENT_AUTOMATIC to enable
-  [Config Sync auto-upgrades](http://cloud/kubernetes-engine/enterprise/config-sync/docs/how-to/upgrade-config-sync#auto-upgrade-config),
+  Enables automatic Feature management. Set this field to MANAGEMENT_AUTOMATIC to enable Config Sync auto-upgrades,
   and set this field to MANAGEMENT_MANUAL or MANAGEMENT_UNSPECIFIED to disable Config Sync auto-upgrades.
   This field was introduced in Terraform version [5.41.0](https://github.com/hashicorp/terraform-provider-google/releases/tag/v5.41.0).
 
@@ -418,7 +417,7 @@ The following arguments are supported:
 
 * `stop_syncing` -
   (Optional)
-  Set to `true` to stop syncing configurations for a single cluster. This field is only available on clusters using Config Sync [auto-upgrades](http://cloud/kubernetes-engine/enterprise/config-sync/docs/how-to/upgrade-config-sync#auto-upgrade-config) or on Config Sync version 1.20.0 or later. Defaults: `false`.
+  Set to true to stop syncing configs for a single cluster. Default to false.
 
 * `deployment_overrides` -
   (Optional)
