@@ -7,7 +7,7 @@ description: |-
 # google_project_service_identity
 
 ~> **Warning:** These resources are in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions) for more details on beta resources.
+See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
 
 Generate service identity for a service.
 

@@ -153,7 +153,7 @@ func TestTypeFieldType(t *testing.T) {
 					MinVersion: "ga",
 				},
 			},
-			expected: []string{"Optional", "[Beta](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions)"},
+			expected: []string{"Optional", "[Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)"},
 		},
 		{
 			description: "Beta field in Beta resource",
@@ -191,7 +191,7 @@ func TestTypeFieldType(t *testing.T) {
 				ResourceMetadata:   &Resource{MinVersion: "ga"},
 				DeprecationMessage: "This field is deprecated.",
 			},
-			expected: []string{"Required", "Write-Only", "[Beta](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions)", "Deprecated"},
+			expected: []string{"Required", "Write-Only", "[Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)", "Deprecated"},
 		},
 		{
 			description: "All fields set for an optional property",
@@ -201,7 +201,7 @@ func TestTypeFieldType(t *testing.T) {
 				ResourceMetadata:   &Resource{MinVersion: "ga"},
 				DeprecationMessage: "This field is deprecated.",
 			},
-			expected: []string{"Optional", "Write-Only", "[Beta](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions)", "Deprecated"},
+			expected: []string{"Optional", "Write-Only", "[Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)", "Deprecated"},
 		},
 		{
 			description: "Output and deprecated",

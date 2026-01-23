@@ -56,7 +56,7 @@ destroyed. If `false` or unset, an error will be returned if any enabled
 services depend on this service when attempting to destroy it.
 
 * `check_if_service_has_usage_on_destroy` - (Optional)
-[Beta](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions)
+[Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)
 If `true`, the usage of the service to be disabled will be checked and an error
 will be returned if the service to be disabled has usage in last 30 days.
 

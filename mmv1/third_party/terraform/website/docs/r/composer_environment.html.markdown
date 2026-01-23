@@ -495,7 +495,7 @@ The following arguments are supported:
   dependencies.
 
 * `maintenance_window` -
-  (Optional, [Beta](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions))
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
   The configuration settings for Cloud Composer maintenance windows.
 
 * `master_authorized_networks_config` -
@@ -571,7 +571,7 @@ The following arguments are supported:
   Cannot be updated.
 
 * `max_pods_per_node` -
-  (Optional, [Beta](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_versions),
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html),
   Cloud Composer 1 only)
   The maximum pods per node in the GKE cluster allocated during environment
   creation. Lowering this value reduces IP address consumption by the Cloud
