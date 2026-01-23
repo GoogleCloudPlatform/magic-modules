@@ -137,7 +137,7 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
   project  = "%{project}"
   planning_status = "DRAFT"
   auto_delete_auto_created_reservations = true
-  enable_emergent_maintenance = false
+  enable_emergent_maintenance = true
   protection_tier = "CAPACITY_OPTIMIZED"
   description      = "test future reservation"
   time_window {
