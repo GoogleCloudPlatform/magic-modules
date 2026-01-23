@@ -30,7 +30,6 @@ examples:
     min_version: beta
     primary_resource_id: basic_lock
     vars:
-      location: global
       template_id: 'lock-template'
     test_env_vars:
       project_id: PROJECT_NAME
