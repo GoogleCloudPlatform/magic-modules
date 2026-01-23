@@ -365,6 +365,7 @@ fields:
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'nodeConfig.sandboxConfig.sandboxType'
 {{- end }}
+  - api_field: 'nodeConfig.sandboxConfig.type'
   - api_field: 'nodeConfig.secondaryBootDisks.diskImage'
   - api_field: 'nodeConfig.secondaryBootDisks.mode'
   - api_field: 'nodeConfig.serviceAccount'
@@ -661,6 +662,8 @@ fields:
   - field: 'node_pool.node_config.sandbox_config.sandbox_type'
     api_field: 'nodePools.config.sandboxConfig.sandboxType'
 {{- end }}
+  - field: 'node_pool.node_config.sandbox_config.type'
+    api_field: 'nodePools.config.sandboxConfig.type'
   - field: 'node_pool.node_config.secondary_boot_disks.disk_image'
     api_field: 'nodePools.config.secondaryBootDisks.diskImage'
   - field: 'node_pool.node_config.secondary_boot_disks.mode'
