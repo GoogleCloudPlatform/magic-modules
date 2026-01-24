@@ -138,7 +138,7 @@ resource "google_network_services_multicast_domain" md_test {
   connection_config  {
     connection_type="SAME_VPC"
   }
-  ull_multicast_domain = {
+  ull_multicast_domain_config {
     preconfigured_ull_domain = "e2e-test-internal-feed"
   }
   depends_on = [google_compute_network.network]
@@ -163,7 +163,7 @@ resource "google_network_services_multicast_domain" md_test {
   connection_config  {
     connection_type="SAME_VPC"
   }
-  ull_multicast_domain = {
+  ull_multicast_domain_config {
     preconfigured_ull_domain = "e2e-test-internal-feed"
   }
   depends_on = [google_compute_network.network]
