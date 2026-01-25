@@ -14,25 +14,37 @@
 ---
 name: ServiceAgent
 description: A Service Agent resource within the Workload Identity API.
+
+# Disables in-place updates. Any change to a configurable field
+# will force Terraform to destroy (remove from state) and recreate the resource.
+immutable: true
+
+# Prevents Terraform from calling the DELETE API on destroy.
+# The resource will be removed from Terraform state but not from GCP.
+exclude_delete: true
+
 base_url: projects/{{project}}/locations/{{location}}/serviceAgents
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/serviceAgents/{{service_agent_id}}
 create_url: projects/{{project}}/locations/{{location}}/serviceAgents?serviceAgentId={{service_agent_id}}
-update_verb: PATCH
+
+# Update verb/mask are no longer relevant due to immutable: true
+# update_verb: PATCH
+# update_mask: true
+
+# Import is still possible if needed, but not tested in this version
 import_format:
   - projects/{{project}}/locations/{{location}}/serviceAgents/{{service_agent_id}}
+
 autogen_async: true
 async:
   operation:
     timeouts:
       insert_minutes: 20
-      update_minutes: 20
-      delete_minutes: 20
+      # update_minutes and delete_minutes are not needed
     base_url: '{{op_id}}'
   actions:
     - create
-    - update
-    - delete
+    # 'update' and 'delete' actions are omitted
   result:
     resource_inside_response: true
 autogen_status: U2VydmljZUFnZW50
@@ -57,6 +69,7 @@ properties:
   - name: labels
     type: KeyValueLabels
     description: User-defined labels to organize and categorize Service Agents.
+    # Note: Because the resource is immutable: true, labels can only be set at creation.
   - name: name
     type: String
     description: '[Output only] The full resource name of the Service Agent.'
@@ -77,6 +90,6 @@ examples:
       label_val: "tf-test"
     test_env_vars:
       project: "{{project}}"
-    # REMOVED: import_id: "projects/{{project}}/locations/global/serviceAgents/{{vars.service_agent_id}}"
-    # REMOVED: Entire update_test_steps block
-    check_dangling_resources: true
+    # Since exclude_delete is true, Terraform won't call the delete API.
+    # This flag tells the test runner not to expect the resource to be gone after destroy.
+    check_dangling_resources: false
