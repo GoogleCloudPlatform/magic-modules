@@ -1,0 +1,115 @@
+# Use this network for filestore instance
+data "google_compute_network" "fs_network" {
+  name = "filestore_nw"
+}
+
+# Create a filestore instance with delete protection enabled
+#### Use ip range of private cloud service subnet in the 'nfs_export_options'
+resource "google_filestore_instance" "test_instance" {
+  name                        =  "{{index $.Vars "filestore_instance_id"}}"
+  location                    = "{{index $.TestEnvVars "zone"}}"
+  tier                        = "ZONAL"
+  deletion_protection_enabled = "yes"
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share101"
+    nfs_export_options {
+      ip_ranges = ["{{index $.Vars "svc_ip_cidr"}}"]
+    }
+  }
+  networks {
+    network       = data.google_compute_network.fs_network.id
+    modes         = ["MODE_IPV4"]
+    connect_mode  = "PRIVATE_SERVICE_ACCESS"
+  }
+}
+
+resource "google_vmwareengine_network" "cluster-nw" {
+  name        = "{{index $.Vars "network_id"}}"
+  type        = "STANDARD"
+  location    = "global"
+  description = "PC network description."
+}
+
+
+resource "google_vmwareengine_private_cloud" "cluster-pc" {
+  location    = "{{index $.TestEnvVars "zone"}}"
+  name        = "{{index $.Vars "private_cloud_id"}}"
+  description = "Sample test PC."
+  network_config {
+    management_cidr       = "192.168.30.0/24"
+    vmware_engine_network = google_vmwareengine_network.cluster-nw.id
+  }
+  management_cluster {
+    cluster_id = "{{index $.Vars "management_cluster_id"}}"
+    node_type_configs {
+      node_type_id = "standard-72"
+      node_count   = 3
+      custom_core_count = 32
+    }
+  }
+}
+
+# Update service subnet
+####  Service subnet is used by nfs datastore mounts
+#### ip_cidr_range configured on subnet must also be allowed in filestore instance's 'nfs_export_options'
+resource "google_vmwareengine_subnet" "cluster-pc-subnet" {
+  name = "service-1"
+  parent =  google_vmwareengine_private_cloud.cluster-pc.id
+  ip_cidr_range = "{{index $.Vars "svc_ip_cidr"}}"
+}
+
+# Read network peering
+#### This peering is created by filestore instance
+data "google_compute_network_peering" "sn_peering" {
+  name       = "servicenetworking-googleapis-com"
+  network    = data.google_compute_network.fs_network.id
+}
+
+# Create vmware engine network peering
+#### vmware network peering is required for filestore mount on cluster
+resource "google_vmwareengine_network_peering" "psa_network_peering" {
+  name = "tf-test-psa-network-peering"
+  description = "test description"
+  vmware_engine_network = google_vmwareengine_network.cluster-nw.id
+  peer_network = trimprefix(data.google_compute_network_peering.sn_peering.peer_network, "https://www.googleapis.com/compute/v1")
+  peer_network_type = "PRIVATE_SERVICES_ACCESS"
+}
+
+
+resource "google_vmwareengine_datastore" "test_fs_datastore" {
+  name        = "{{index $.Vars "datastore_id"}}"
+  location    = "{{index $.TestEnvVars "zone"}}"
+  description = "test description"
+
+  nfs_datastore {
+    google_file_service {
+      filestore_instance = google_filestore_instance.test_instance.id
+    }
+  }
+}
+
+resource "google_vmwareengine_cluster" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "name"}}"
+  parent   = google_vmwareengine_private_cloud.cluster-pc.id
+  node_type_configs {
+    node_type_id = "standard-72"
+    node_count   = 3
+  }
+  datastore_mount_config {
+    datastore = google_vmwareengine_datastore.test_fs_datastore.id
+    datastore_network {
+      subnet = google_vmwareengine_subnet.cluster-pc-subnet.id
+      connection_count = 4
+      mtu = 1500
+    }
+    nfs_version = "NFS_V3"
+    access_mode = "READ_WRITE"
+    ignore_colocation = false
+  }
+  depends_on = [google_vmwareengine_network_peering.psa_network_peering]
+}
+
+
+
