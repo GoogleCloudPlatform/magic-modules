@@ -827,13 +827,13 @@ func TestAccFilestoreInstance_psc_ipv6(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_filestore_instance.instance", "networks.0.connect_mode", "PRIVATE_SERVICE_CONNECT"),
 					resource.TestCheckResourceAttr("google_filestore_instance.instance", "networks.0.address_mode", "MODE_IPV6"),
-					resource.TestCheckResourceAttrWith("google_filestore_instance.instance", "networks.0.ip_addresses", func(value []string) error {
-						if len(value) != 1 {
-							return fmt.Errorf("should contain exactly one IP address")
+					resource.TestCheckResourceAttrWith("google_filestore_instance.instance", "networks.0.ip_addresses.0", func(value string) error {
+						if value == "" {
+							return fmt.Errorf("should not be empty")
 						}
 
-						ip, err := netip.ParseAddr(value[0])
-						if err != nil || !ip.IsIPv6() {
+						ip, err := netip.ParseAddr(value)
+						if err != nil || !ip.Is6() {
 							return fmt.Errorf("should contain a valid IPv6 address")
 						}
 
