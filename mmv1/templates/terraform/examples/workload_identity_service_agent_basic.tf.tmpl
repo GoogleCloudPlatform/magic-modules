@@ -1,11 +1,10 @@
 resource "google_workload_identity_service_agent" "default" {
   provider = google-beta
 
-  project  = "<%= ctx[:test_env_vars]['project'] %>"
-  location = "global"  # Assuming 'global' is the only or primary location
-  service_agent_id = "<%= ctx[:vars]['service_agent_id'] %>"
+  location          = "global"
+  service_agent_id  = "tf-test-agent-%{random_suffix}"
 
   labels = {
-    test-label = "<%= ctx[:vars]['label_val'] %>"
+    test-label = "tf-test"
   }
 }
