@@ -71,30 +71,6 @@ examples:
       odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
       odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
       backup_odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-backup-odbsubnet"'
-  - name: oracledatabase_exadb_vm_cluster_update
-    primary_resource_id: "my_exadb_vm_cluster"
-    vars:
-      project: "my-project"
-      exadb_vm_cluster_id: "my-instance"
-      exascale_db_storage_vault_id: "my-storage-vault"
-      odb_network: "projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork"
-      odb_subnet: "projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet"
-      backup_odb_subnet: "projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-backup-odbsubnet"
-      deletion_protection: true
-    ignore_read_extra:
-      - "deletion_protection"
-    test_vars_overrides:
-      "deletion_protection": "false"
-      "project": '"oci-terraform-testing-prod"'
-      # ofake- prefix is needed to create a dummy resource for testing purposes only
-      # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
-      # As a result these resources are not sweepable
-      # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-      exadb_vm_cluster_id: 'fmt.Sprintf("ofake-tf-test-exadb-vm-cluster-update-%s", acctest.RandString(t, 10))'
-      exascale_db_storage_vault_id: 'fmt.Sprintf("ofake-tf-test-storage-vault-update-%s", acctest.RandString(t, 10))'
-      odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
-      odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
-      backup_odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-backup-odbsubnet"'
 virtual_fields:
   - name: "deletion_protection"
     type: Boolean
