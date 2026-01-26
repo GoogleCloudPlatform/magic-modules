@@ -81,7 +81,7 @@ func ResourceIamBinding(parentSpecificSchema map[string]*schema.Schema, newUpdat
 		SchemaVersion:      settings.SchemaVersion,
 		StateUpgraders:     settings.StateUpgraders,
 		Importer: &schema.ResourceImporter{
-			State: iamBindingImport(newUpdaterFunc, resourceIdParser),
+			State: iamBindingImport(newUpdaterFunc, resourceIdParser, settings.EnableResourceIdentity),
 		},
 		UseJSONNumber: true,
 	}
@@ -181,7 +181,7 @@ func resourceIamBindingRead(newUpdaterFunc NewResourceIamUpdaterFunc) schema.Rea
 	}
 }
 
-func iamBindingImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser ResourceIdParserFunc) schema.StateFunc {
+func iamBindingImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser ResourceIdParserFunc, enableResourceIdentity bool) schema.StateFunc {
 	return func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 		if resourceIdParser == nil {
 			return nil, errors.New("Import not supported for this IAM resource.")
@@ -207,7 +207,7 @@ func iamBindingImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser
 		if err := d.Set("role", role); err != nil {
 			return nil, fmt.Errorf("Error setting role: %s", err)
 		}
-		err := resourceIdParser(d, config)
+		err := resourceIdParser(d, config, enableResourceIdentity)
 		if err != nil {
 			return nil, err
 		}

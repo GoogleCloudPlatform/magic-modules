@@ -26,13 +26,13 @@ var IamPolicyBaseSchema = map[string]*schema.Schema{
 	},
 }
 
-func iamPolicyImport(resourceIdParser ResourceIdParserFunc) schema.StateFunc {
+func iamPolicyImport(resourceIdParser ResourceIdParserFunc, enableResourceIdentity bool) schema.StateFunc {
 	return func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 		if resourceIdParser == nil {
 			return nil, errors.New("Import not supported for this IAM resource.")
 		}
 		config := m.(*transport_tpg.Config)
-		err := resourceIdParser(d, config)
+		err := resourceIdParser(d, config, enableResourceIdentity)
 		if err != nil {
 			return nil, err
 		}
@@ -58,7 +58,7 @@ func ResourceIamPolicy(parentSpecificSchema map[string]*schema.Schema, newUpdate
 		SchemaVersion:  settings.SchemaVersion,
 		StateUpgraders: settings.StateUpgraders,
 		Importer: &schema.ResourceImporter{
-			State: iamPolicyImport(resourceIdParser),
+			State: iamPolicyImport(resourceIdParser, settings.EnableResourceIdentity),
 		},
 		UseJSONNumber: true,
 	}
