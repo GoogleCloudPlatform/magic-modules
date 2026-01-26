@@ -1,4 +1,4 @@
-package google
+package oracledatabase_test
 
 import (
 	"fmt"
