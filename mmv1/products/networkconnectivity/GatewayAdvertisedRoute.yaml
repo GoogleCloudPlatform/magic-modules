@@ -80,6 +80,7 @@ properties:
   - name: 'description'
     type: String
     description: An optional description of the gateway advertised route.
+    immutable: true
   - name: 'uniqueId'
     type: String
     description: |
