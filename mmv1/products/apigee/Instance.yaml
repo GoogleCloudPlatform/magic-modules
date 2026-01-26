@@ -29,6 +29,8 @@ mutex: '{{org_id}}/apigeeInstances'
 import_format:
   - '{{org_id}}/instances/{{name}}'
   - '{{org_id}}/{{name}}'
+datasource:
+  generate: true
 timeouts:
   insert_minutes: 60
   update_minutes: 20
