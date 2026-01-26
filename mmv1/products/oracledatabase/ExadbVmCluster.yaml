@@ -222,16 +222,20 @@ properties:
         description: |-
           Data collection options for diagnostics.
           https://docs.oracle.com/en-us/iaas/api/#/en/database/20160918/datatypes/DataCollectionOptions
+        default_from_api: true
         properties:
           - name: isDiagnosticsEventsEnabled
             type: Boolean
             description: Indicates whether to enable data collection for diagnostics.
+            default_from_api: true
           - name: isHealthMonitoringEnabled
             type: Boolean
             description: Indicates whether to enable health monitoring.
+            default_from_api: true
           - name: isIncidentLogsEnabled
             type: Boolean
             description: Indicates whether to enable incident logs and trace collection.
+            default_from_api: true
       - name: enabledEcpuCountPerNode
         type: Integer
         description: |-
@@ -268,7 +272,7 @@ properties:
         description: Prefix for VM cluster host names.
         immutable: true
         required: true
-        default_from_api: true
+        ignore_read: true
       - name: licenseModel
         type: String
         description: |-
