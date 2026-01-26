@@ -4,13 +4,16 @@ import (
 	"testing"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/google/go-cmp/cmp"
 )
 
 func TestFromResource(t *testing.T) {
 	product := &api.Product{
-		Name:    "Product",
-		BaseUrl: "https://compute.googleapis.com/beta",
+		Name: "Product",
+		Version: &product.Version{
+			BaseUrl: "https://compute.googleapis.com/beta",
+		},
 	}
 	cases := []struct {
 		name         string

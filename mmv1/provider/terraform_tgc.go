@@ -31,7 +31,6 @@ import (
 	"golang.org/x/exp/slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
 
@@ -44,8 +43,6 @@ type TerraformGoogleConversion struct {
 
 	TargetVersionName string
 
-	Version product.Version
-
 	Product *api.Product
 
 	StartTime time.Time
@@ -57,12 +54,10 @@ func NewTerraformGoogleConversion(product *api.Product, versionName string, star
 	t := TerraformGoogleConversion{
 		Product:           product,
 		TargetVersionName: versionName,
-		Version:           *product.VersionObjOrClosest(versionName),
 		StartTime:         startTime,
 		templateFS:        templateFS,
 	}
 
-	t.Product.SetPropertiesBasedOnVersion(&t.Version)
 	t.Product.SetCompiler(ProviderName(t))
 	for _, r := range t.Product.Objects {
 		r.SetCompiler(ProviderName(t))
@@ -84,7 +79,7 @@ func (tgc TerraformGoogleConversion) Generate(outputFolder, resourceToGenerate s
 
 func (tgc TerraformGoogleConversion) GenerateObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 	for _, object := range tgc.Product.Objects {
-		object.ExcludeIfNotInVersion(&tgc.Version)
+		object.ExcludeIfNotInVersion(tgc.Product.Version)
 
 		if resourceToGenerate != "" && object.Name != resourceToGenerate {
 			log.Printf("Excluding %s per user request", object.Name)
