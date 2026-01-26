@@ -56,9 +56,9 @@ type (
 	// Parser for Terraform resource identifier (d.Id) for resource whose IAM policy is being changed
 	ResourceIdParserFunc func(d *schema.ResourceData, config *transport_tpg.Config) error
 
-	// ParentResourceIdFromIdentityParserFunc derives the canonical identifier of the IAM resource's
-	// parent (e.g. the project, folder, bucket, or instance the policy is attached to).
-	ParentResourceIdFromIdentityParserFunc func(d *schema.ResourceData, identity *schema.IdentityData, config *transport_tpg.Config) (resourceID string, err error)
+	// ResourceIdentityParserFunc builds the canonical resource identifier (first segment of
+	// google_*_iam_member import id) from Terraform import identity when d.Id() is empty.
+	ResourceIdentityParserFunc func(identity *schema.IdentityData, config *transport_tpg.Config) (resourceID string, err error)
 )
 
 // Locking wrapper around read-only operation with retries.
@@ -432,8 +432,9 @@ type IamSettings struct {
 	StateUpgraders     []schema.StateUpgrader
 	SchemaVersion      int
 	CreateTimeOut      int64
-	// ParentResourceIdentityParser, when non-nil, enables ResourceIdentity for this IAM resource
-	ParentResourceIdentityParser ParentResourceIdFromIdentityParserFunc
+	// ResourceIdentityParser, when non-nil, enables Terraform resource identity for this IAM
+	// member resource (identity schema, create/read identity sync, and import when d.Id() is empty).
+	ResourceIdentityParser ResourceIdentityParserFunc
 }
 
 func NewIamSettings(options ...func(*IamSettings)) *IamSettings {
@@ -450,10 +451,11 @@ func IamWithDeprecationMessage(message string) func(s *IamSettings) {
 	}
 }
 
-// IamWithParentResourceIdentity enables import with resource identity block when parser is non-nil.
-func IamWithParentResourceIdentity(parser ParentResourceIdFromIdentityParserFunc) func(*IamSettings) {
+// IamWithResourceIdentity enables Terraform resource identity for this IAM member and sets the
+// parser that derives the canonical resource id from import identity when d.Id() is empty.
+func IamWithResourceIdentity(parser ResourceIdentityParserFunc) func(*IamSettings) {
 	return func(s *IamSettings) {
-		s.ParentResourceIdentityParser = parser
+		s.ResourceIdentityParser = parser
 	}
 }
 
