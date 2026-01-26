@@ -288,8 +288,8 @@ func (u *{{ $.ResourceName }}IamUpdater) SetResourceIamPolicy(policy *cloudresou
 		return err
 	}
 
-{{- if and $.IamPolicy $.IamPolicy.SendsUserProjectHeader }}
 	headers := make(http.Header)
+{{- if and $.IamPolicy $.IamPolicy.SendsUserProjectHeader }}
 	headers.Set("x-goog-user-project", project)
 {{- end }}
 
@@ -302,9 +302,7 @@ func (u *{{ $.ResourceName }}IamUpdater) SetResourceIamPolicy(policy *cloudresou
 		RawURL: url,
 		UserAgent: userAgent,
 		Body: obj,
-{{- if and $.IamPolicy $.IamPolicy.SendsUserProjectHeader }}
 		Headers: headers,
-{{- end }}
 		Timeout: u.d.Timeout(schema.TimeoutCreate),
 {{- if $.ErrorRetryPredicates }}
 		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{ join $.ErrorRetryPredicates "," }} },
