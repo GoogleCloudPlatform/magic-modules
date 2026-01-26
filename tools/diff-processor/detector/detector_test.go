@@ -59,6 +59,24 @@ func TestGetChangedFieldsFromSchemaDiff(t *testing.T) {
 			schemaDiff: diff.SchemaDiff{
 				"google_resource_iam_member": diff.ResourceDiff{
 					Fields: map[string]diff.FieldDiff{
+						"condition": {
+							New: &schema.Schema{
+								Type: schema.TypeList,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"expression": {
+											Type: schema.TypeString,
+										},
+										"title": {
+											Type: schema.TypeString,
+										},
+										"description": {
+											Type: schema.TypeString,
+										},
+									},
+								},
+							},
+						},
 						"condition.description": {
 							New: &schema.Schema{},
 						},
@@ -72,6 +90,24 @@ func TestGetChangedFieldsFromSchemaDiff(t *testing.T) {
 				},
 				"google_resource_iam_binding": diff.ResourceDiff{
 					Fields: map[string]diff.FieldDiff{
+						"condition": {
+							New: &schema.Schema{
+								Type: schema.TypeList,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"expression": {
+											Type: schema.TypeString,
+										},
+										"title": {
+											Type: schema.TypeString,
+										},
+										"description": {
+											Type: schema.TypeString,
+										},
+									},
+								},
+							},
+						},
 						"condition.description": {
 							New: &schema.Schema{},
 						},
@@ -85,6 +121,24 @@ func TestGetChangedFieldsFromSchemaDiff(t *testing.T) {
 				},
 				"google_resource_iam_policy": diff.ResourceDiff{
 					Fields: map[string]diff.FieldDiff{
+						"condition": {
+							New: &schema.Schema{
+								Type: schema.TypeList,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"expression": {
+											Type: schema.TypeString,
+										},
+										"title": {
+											Type: schema.TypeString,
+										},
+										"description": {
+											Type: schema.TypeString,
+										},
+									},
+								},
+							},
+						},
 						"condition.description": {
 							New: &schema.Schema{},
 						},
