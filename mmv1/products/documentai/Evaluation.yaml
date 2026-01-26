@@ -1,0 +1,271 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Evaluation
+description: An evaluation of a ProcessorVersion's performance.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/document-ai/docs/overview'
+  api: 'https://cloud.google.com/document-ai/docs/reference/rest/v1/projects.locations.processors.processorVersions.evaluations'
+base_url: 'projects/{{project}}/locations/{{location}}/processors/{{processor}}/processorVersions/{{processorVersion}}/evaluations'
+create_url: 'projects/{{project}}/locations/{{location}}/processors/{{processor}}/processorVersions/{{processorVersion}}:evaluateProcessorVersion'
+exclude_delete: true
+immutable: true
+
+sweeper:
+  url_substitutions:
+    - region: "us"
+    - region: "eu"
+
+parameters:
+  - name: 'location'
+    type: String
+    required: true
+    description: The location ID.
+    immutable: true
+    url_param_only: true
+  - name: 'processor'
+    type: String
+    required: true
+    description: The processor ID.
+    immutable: true
+    url_param_only: true
+  - name: 'processorVersion'
+    type: String
+    required: true
+    description: The processor version ID.
+    immutable: true
+    url_param_only: true
+
+properties:
+  - name: 'name'
+    type: String
+    description: |-
+      The resource name of the evaluation.
+      Format: `projects/{project}/locations/{location}/processors/{processor}/processorVersions/{processor_version}/evaluations/{evaluation}`
+    output: true
+    immutable: true
+  - name: 'createTime'
+    type: String
+    description: The time that the evaluation was created.
+    output: true
+  - name: 'documentCounters'
+    type: NestedObject
+    description: Evaluation counters for the documents that were used.
+    properties:
+      - name: 'inputDocumentsCount'
+        type: Integer
+        description: How many documents were sent for evaluation.
+      - name: 'invalidDocumentsCount'
+        type: Integer
+        description: How many documents were not included in the evaluation as they didn't pass validation.
+      - name: 'failedDocumentsCount'
+        type: Integer
+        description: How many documents were not included in the evaluation as Document AI failed to process them.
+      - name: 'evaluatedDocumentsCount'
+        type: Integer
+        description: How many documents were used in the evaluation.
+  - name: 'allEntitiesMetrics'
+    type: NestedObject
+    description: Metrics for all the entities in aggregate.
+    properties:
+      - name: 'confidenceLevelMetrics'
+        type: Array
+        item_type:
+          type: NestedObject
+          description: Evaluations metrics, at a specific confidence level.
+          properties:
+            - name: 'confidenceLevel'
+              type: Float
+            - name: 'metrics'
+              type: NestedObject
+              properties:
+                - name: 'precision'
+                  type: Float
+                  description: The calculated precision.
+                - name: 'recall'
+                  type: Float
+                  description: The calculated recall.
+                - name: 'f1Score'
+                  type: Float
+                  description: The calculated f1 score.
+                - name: 'predictedOccurrencesCount'
+                  type: Integer
+                  description: The amount of occurrences in predicted documents.
+                - name: 'groundTruthCccurrencesCount'
+                  type: Integer
+                  description: The amount of occurrences in ground truth documents.
+                - name: 'predictedDocumentCount'
+                  type: Integer
+                  description: The amount of documents with a predicted occurrence.
+                - name: 'groundTruthDocumentCount'
+                  type: Integer
+                  description: The amount of documents with a ground truth occurrence.
+                - name: 'truePositivesCount'
+                  type: Integer
+                  description: The amount of true positives.
+                - name: 'falsePositivesCount'
+                  type: Integer
+                  description: The amount of false positives.
+                - name: 'falseNegativesCount'
+                  type: Integer
+                  description: The amount of false negatives.
+                - name: 'totalDocumentsCount'
+                  type: Integer
+                  description: The amount of documents that had an occurrence of this label.
+      - name: 'auprc'
+        type: Float
+        description: The AUPRC for metrics with fuzzy matching disabled, i.e., exact matching only
+      - name: 'estimatedCalibrationError'
+        type: Float
+        description: The ECE for the predicted entities with fuzzy matching disabled, i.e., exact matching only
+      - name: 'auprcExact'
+        type: Float
+        description: The AUPRC for metrics with fuzzy matching disabled, i.e., exact matching only.
+      - name: 'estimatedCalibrationErrorExact'
+        type: Float
+        description: The ECE for the predicted entities with fuzzy matching disabled, i.e., exact matching only.
+      - name: 'metricsType'
+        type: Enum
+        description: The metrics type for the label
+        enum_values:
+          - 'METRICS_TYPE_UNSPECIFIED'
+          - 'AGGREGATE'
+  - name: 'entityMetrics'
+    type: Map
+    description: Metrics across confidence levels, for different entities.
+    key_name: 'entity'
+    value_type:
+      name: 'metrics'
+      type: NestedObject
+      properties:
+        - name: 'confidenceLevelMetrics'
+          type: Array
+          item_type:
+            type: NestedObject
+            description: Evaluations metrics, at a specific confidence level.
+            properties:
+              - name: 'confidenceLevel'
+                type: Float
+              - name: 'metrics'
+                type: NestedObject
+                properties:
+                  - name: 'precision'
+                    type: Float
+                    description: The calculated precision.
+                  - name: 'recall'
+                    type: Float
+                    description: The calculated recall.
+                  - name: 'f1Score'
+                    type: Float
+                    description: The calculated f1 score.
+                  - name: 'predictedOccurrencesCount'
+                    type: Integer
+                    description: The amount of occurrences in predicted documents.
+                  - name: 'groundTruthCccurrencesCount'
+                    type: Integer
+                    description: The amount of occurrences in ground truth documents.
+                  - name: 'predictedDocumentCount'
+                    type: Integer
+                    description: The amount of documents with a predicted occurrence.
+                  - name: 'groundTruthDocumentCount'
+                    type: Integer
+                    description: The amount of documents with a ground truth occurrence.
+                  - name: 'truePositivesCount'
+                    type: Integer
+                    description: The amount of true positives.
+                  - name: 'falsePositivesCount'
+                    type: Integer
+                    description: The amount of false positives.
+                  - name: 'falseNegativesCount'
+                    type: Integer
+                    description: The amount of false negatives.
+                  - name: 'totalDocumentsCount'
+                    type: Integer
+                    description: The amount of documents that had an occurrence of this label.
+        - name: 'confidenceLevelMetricsExact'
+          description: Metrics across confidence levels with only exact matching.
+          type: Array
+          item_type:
+            type: NestedObject
+            description: Evaluations metrics, at a specific confidence level.
+            properties:
+              - name: 'confidenceLevel'
+                type: Float
+              - name: 'metrics'
+                type: NestedObject
+                properties:
+                  - name: 'precision'
+                    type: Float
+                    description: The calculated precision.
+                  - name: 'recall'
+                    type: Float
+                    description: The calculated recall.
+                  - name: 'f1Score'
+                    type: Float
+                    description: The calculated f1 score.
+                  - name: 'predictedOccurrencesCount'
+                    type: Integer
+                    description: The amount of occurrences in predicted documents.
+                  - name: 'groundTruthCccurrencesCount'
+                    type: Integer
+                    description: The amount of occurrences in ground truth documents.
+                  - name: 'predictedDocumentCount'
+                    type: Integer
+                    description: The amount of documents with a predicted occurrence.
+                  - name: 'groundTruthDocumentCount'
+                    type: Integer
+                    description: The amount of documents with a ground truth occurrence.
+                  - name: 'truePositivesCount'
+                    type: Integer
+                    description: The amount of true positives.
+                  - name: 'falsePositivesCount'
+                    type: Integer
+                    description: The amount of false positives.
+                  - name: 'falseNegativesCount'
+                    type: Integer
+                    description: The amount of false negatives.
+                  - name: 'totalDocumentsCount'
+                    type: Integer
+                    description: The amount of documents that had an occurrence of this label.
+        - name: 'auprc'
+          type: Float
+          description: The AUPRC for metrics with fuzzy matching disabled, i.e., exact matching only
+        - name: 'estimatedCalibrationError'
+          type: Float
+          description: The ECE for the predicted entities with fuzzy matching disabled, i.e., exact matching only
+        - name: 'auprcExact'
+          type: Float
+          description: The AUPRC for metrics with fuzzy matching disabled, i.e., exact matching only.
+        - name: 'estimatedCalibrationErrorExact'
+          type: Float
+          description: The ECE for the predicted entities with fuzzy matching disabled, i.e., exact matching only.
+        - name: 'metricsType'
+          type: Enum
+          description: The metrics type for the label
+          enum_values:
+            - 'METRICS_TYPE_UNSPECIFIED'
+            - 'AGGREGATE'
+  - name: 'kmsKeyName'
+    type: String
+    description: The KMS key name used for encryption.
+  - name: 'kmsKeyVersionName'
+    type: String
+    description: The KMS key version with which data is encrypted.
+  - name: 'schemaVersion'
+    type: String
+    description: |-
+      SchemaVersion used during evaluation.
+      Format is
+      `projects/{project}/locations/{location}/schemas/{schema}/schemaVersions/{schema_version}`
