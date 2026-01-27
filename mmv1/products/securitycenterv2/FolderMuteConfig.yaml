@@ -13,6 +13,8 @@
 
 ---
 name: 'FolderMuteConfig'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 api_resource_type_kind: MuteConfig
 api_variant_patterns:
   - 'folders/{folder}/locations/{location}/muteConfigs/{muteConfig}'

@@ -13,6 +13,8 @@
 
 ---
 name: 'CertificateTemplate'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description: |
   Certificate Authority Service provides reusable and parameterized templates that you can use for common certificate issuance scenarios. A certificate template represents a relatively static and well-defined certificate issuance schema within an organization. A certificate template can essentially become a full-fledged vertical certificate issuance framework.
 references:

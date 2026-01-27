@@ -13,6 +13,8 @@
 
 ---
 name: 'Agent'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description: |
   A Dialogflow agent is a virtual agent that handles conversations with your end-users. It is a natural language
   understanding module that understands the nuances of human language. Dialogflow translates end-user text or audio

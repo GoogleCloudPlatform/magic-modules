@@ -13,6 +13,8 @@
 
 ---
 name: 'Repository'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description: |-
   A resource represents a Dataform Git repository
 min_version: 'beta'
