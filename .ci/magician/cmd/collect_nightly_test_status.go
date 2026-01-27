@@ -103,7 +103,7 @@ var collectNightlyTestStatusCmd = &cobra.Command{
 		}
 
 		// Set the time to 7pm PT
-		date = time.Date(year, month, day, 19, 0, 0, 0, loc)
+		date := time.Date(year, month, day, 19, 0, 0, 0, loc)
 
 		return execCollectNightlyTestStatus(date, tc, gcs)
 	},
@@ -145,17 +145,17 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 	}
 	if len(queuedBuilds.Builds) > 0 {
 		fmt.Printf("Test unfinished: there are still %d builds queued.\n", len(queuedBuilds.Builds))
-		return
+		return nil
 	}
 
 	// Check Running Builds
-	runningBuilds, err = tc.GetBuilds("running", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
+	runningBuilds, err := tc.GetBuilds("running", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
 	if err != nil {
 		return fmt.Errorf("failed to get running builds: %w", err)
 	}
 	if len(runningBuilds.Builds) > 0 {
 		fmt.Printf("Test unfinished: there are still %d builds queued.\n", len(runningBuilds.Builds))
-		return
+		return nil
 	}
 
 	// Get all service test builds
