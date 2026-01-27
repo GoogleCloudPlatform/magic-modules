@@ -156,6 +156,125 @@ func TestAccComputeVpnTunnel_cipherSuite(t *testing.T) {
 	})
 }
 
+func TestAccComputeVpnTunnel_capacityTierZ2Z(t *testing.T) {
+	t.Parallel()
+
+	suffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeVpnTunnelDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeVpnTunnel_capacityTierZ2Z(suffix, "DEFAULT"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.foobar", "capacity_tier", "DEFAULT"),
+				),
+			},
+		},
+	})
+}
+
+func testAccComputeVpnTunnel_capacityTierZ2Z(suffix, tier string) string {
+	return fmt.Sprintf(`
+provider "google-beta" {
+  region = "us-east4"
+}
+
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_compute_network" "network" {
+  provider                = google-beta
+  name                    = "tf-test-network-%[1]s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_interconnect" "interconnect" {
+  provider             = google-beta
+  name                 = "tf-test-interconnect-%[1]s"
+  customer_name        = "internal_customer"
+  interconnect_type    = "DEDICATED"
+  link_type            = "LINK_TYPE_ETHERNET_100G_LR"
+  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/global/interconnectLocations/z2z-us-east4-zone1-pniada-a"
+  requested_link_count = 1
+  admin_enabled        = true
+}
+
+resource "google_compute_router" "encrypted_router" {
+  provider                      = google-beta
+  name                          = "tf-test-encrypted-router-%[1]s"
+  region                        = "us-east4"
+  network                       = google_compute_network.network.id
+  encrypted_interconnect_router = true
+  bgp {
+    asn = 64514
+  }
+}
+
+resource "google_compute_router" "router" {
+  provider = google-beta
+  name     = "tf-test-router-%[1]s"
+  region   = "us-east4"
+  network  = google_compute_network.network.id
+  bgp {
+    asn = 64515
+  }
+}
+
+resource "google_compute_interconnect_attachment" "attachment" {
+  provider      = google-beta
+  name          = "tf-test-attachment-%[1]s"
+  interconnect  = google_compute_interconnect.interconnect.id
+  type          = "DEDICATED"
+  region        = "us-east4"
+  bandwidth     = "BPS_10G"
+  router        = google_compute_router.encrypted_router.id
+  vlan_tag8021q = 1100
+  encryption    = "IPSEC"
+}
+
+resource "google_compute_ha_vpn_gateway" "ha_gateway" {
+  provider = google-beta
+  name     = "tf-test-ha-gw-%[1]s"
+  network  = google_compute_network.network.id
+  region   = "us-east4"
+
+  vpn_interfaces {
+    id                      = 0
+    interconnect_attachment = google_compute_interconnect_attachment.attachment.self_link
+  }
+}
+
+resource "google_compute_external_vpn_gateway" "external_gateway" {
+  provider        = google-beta
+  name            = "tf-test-ext-gw-%[1]s"
+  redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
+  interface {
+    id         = 0
+    ip_address = "8.8.8.8"
+  }
+}
+
+resource "google_compute_vpn_tunnel" "foobar" {
+  provider                        = google-beta
+  name                            = "tf-test-tunnel-%[1]s"
+  region                          = "us-east4"
+  vpn_gateway                     = google_compute_ha_vpn_gateway.ha_gateway.id
+  vpn_gateway_interface           = 0
+  peer_external_gateway           = google_compute_external_vpn_gateway.external_gateway.id
+  peer_external_gateway_interface = 0
+  shared_secret                   = "unguessable"
+  router                          = google_compute_router.router.id
+
+  # Field under test
+  capacity_tier                   = "%[2]s"
+}
+`, suffix, tier)
+}
+
 func testAccComputeVpnTunnel_basicCipherSuite(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
