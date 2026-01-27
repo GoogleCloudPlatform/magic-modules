@@ -4,6 +4,8 @@ resource "google_compute_subnetwork" "subnet-with-logging" {
   region        = "us-central1"
   network       = google_compute_network.custom-test.id
 
+  enable_flow_logs = true
+
   log_config {
     aggregation_interval = "INTERVAL_10_MIN"
     flow_sampling        = 0.5
