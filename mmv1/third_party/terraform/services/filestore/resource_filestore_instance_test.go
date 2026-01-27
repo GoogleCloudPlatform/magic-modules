@@ -826,7 +826,7 @@ func TestAccFilestoreInstance_psc_ipv6(t *testing.T) {
 				Config: testAccFilestoreInstance_psc(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_filestore_instance.instance", "networks.0.connect_mode", "PRIVATE_SERVICE_CONNECT"),
-					resource.TestCheckResourceAttr("google_filestore_instance.instance", "networks.0.address_mode", "MODE_IPV6"),
+					resource.TestCheckResourceAttr("google_filestore_instance.instance", "networks.0.modes.0", "MODE_IPV6"),
 					resource.TestCheckResourceAttrWith("google_filestore_instance.instance", "networks.0.ip_addresses.0", func(value string) error {
 						if value == "" {
 							return fmt.Errorf("should not be empty")
