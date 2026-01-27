@@ -21,7 +21,7 @@ id_format: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters'
 self_link: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters?vmware_cluster_id={{name}}&skipValidations={{skip_validations}}'
-update_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}?skip_validations={{skipValidations}}'
+update_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}?skipValidations={{skip_validations}}'
 update_verb: 'PATCH'
 update_mask: true
 delete_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}?force=true'
