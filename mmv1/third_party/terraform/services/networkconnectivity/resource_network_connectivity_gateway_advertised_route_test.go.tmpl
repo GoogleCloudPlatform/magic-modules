@@ -146,6 +146,12 @@ resource "google_network_connectivity_gateway_advertised_route" "gateway-adverti
   spoke         = google_network_connectivity_spoke.primary.name
   location      = "us-east1"
   name          = "tf-test-gateway-advertised-route%{random_suffix}"
+  labels = {
+    label-one = "value-one"
+  }
+  description   = "description of the gateway advertised route"
+  ip_range      = "0.0.0.0/24"
+  recipient     = "ADVERTISE_TO_HUB"
   priority      = 100
 }
 `, context)
