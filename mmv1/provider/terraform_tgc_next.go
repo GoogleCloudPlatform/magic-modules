@@ -62,6 +62,7 @@ type ResourceIdentifier struct {
 	ResourceName       string
 	AliasName          string // It can be "Default" or the same with ResourceName
 	CaiAssetNameFormat string
+	ImportFormats      []string
 	IdentityParam      string
 }
 
@@ -461,6 +462,7 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 				ResourceName:       object.ResourceName(),
 				AliasName:          object.ResourceName(),
 				CaiAssetNameFormat: object.GetCaiAssetNameTemplate(),
+				ImportFormats:      object.ImportFormat,
 			}
 			tgc.ResourcesForVersion = append(tgc.ResourcesForVersion, resourceIdentifier)
 
@@ -494,19 +496,7 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 func FindIdentityParams(rids []ResourceIdentifier) []ResourceIdentifier {
 	segmentsList := make([][]string, len(rids))
 	for i, rid := range rids {
-		urlPath := rid.CaiAssetNameFormat
-		urlPath = strings.Trim(urlPath, "/")
-
-		processedURL := regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(urlPath, "")
-		segments := strings.Split(processedURL, "/")
-		var cleanSegments []string
-		for _, seg := range segments {
-			if seg != "" {
-				cleanSegments = append(cleanSegments, seg)
-			}
-		}
-
-		segmentsList[i] = cleanSegments
+		segmentsList[i] = processPathIntoSegments(rid.CaiAssetNameFormat)
 	}
 
 	segmentsList = removeSharedElements(segmentsList)
@@ -516,6 +506,44 @@ func FindIdentityParams(rids []ResourceIdentifier) []ResourceIdentifier {
 			rids[i].IdentityParam = ""
 		} else {
 			rids[i].IdentityParam = segments[0]
+		}
+	}
+
+	// Check if we have multiple resources with the same IdentityParam
+	identityParams := make(map[string]int)
+	for _, rid := range rids {
+		identityParams[rid.IdentityParam]++
+	}
+
+	// If we have collisions or empty params, try using ImportFormats
+	hasCollision := false
+	for _, count := range identityParams {
+		if count > 1 {
+			hasCollision = true
+			break
+		}
+	}
+
+	if hasCollision {
+		// Reset segmentsList using ImportFormats
+		for i, rid := range rids {
+			if len(rid.ImportFormats) > 0 {
+				segmentsList[i] = processPathIntoSegments(rid.ImportFormats[0])
+			} else {
+				// If no import format, fallback to previous empty list or keep as is?
+				// For now let's assume if we are falling back, we want fresh segments.
+				segmentsList[i] = []string{}
+			}
+		}
+
+		segmentsList = removeSharedElements(segmentsList)
+
+		for i, segments := range segmentsList {
+			if len(segments) == 0 {
+				rids[i].IdentityParam = ""
+			} else {
+				rids[i].IdentityParam = segments[0]
+			}
 		}
 	}
 
@@ -533,6 +561,25 @@ func FindIdentityParams(rids []ResourceIdentifier) []ResourceIdentifier {
 	}
 
 	return rids
+}
+
+// processPathIntoSegments processes a URL path or import format string
+// into a list of cleaned segments by removing variables and empty segments.
+// It handles both standard variables {{var}} and import format variables {{%var}}.
+func processPathIntoSegments(path string) []string {
+	// ImportFormat often has {{%variable}}, remove strict format
+	path = strings.ReplaceAll(path, "%", "")
+	path = strings.Trim(path, "/")
+
+	processedURL := regexp.MustCompile(`\{\{[a-zA-Z0-9_]+\}\}`).ReplaceAllString(path, "")
+	segments := strings.Split(processedURL, "/")
+	var cleanSegments []string
+	for _, seg := range segments {
+		if seg != "" {
+			cleanSegments = append(cleanSegments, seg)
+		}
+	}
+	return cleanSegments
 }
 
 // Finds elements common to ALL lists in a list of lists
