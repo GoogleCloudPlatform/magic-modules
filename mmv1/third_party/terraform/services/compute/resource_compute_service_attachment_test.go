@@ -186,7 +186,7 @@ resource "google_compute_subnetwork" "proxy_only_subnet" {
   purpose       = "REGIONAL_MANAGED_PROXY"
   role          = "ACTIVE"
   network       = google_compute_network.psc_ilb_network.id
-  region        = us-west2
+  region        = "us-west2"
 }
 
 resource "google_compute_health_check" "hc" {
@@ -224,13 +224,13 @@ resource "google_compute_region_backend_service" "producer_l7_ilb_backend_servic
 resource "google_compute_region_url_map" "producer_url_map" {
   name            = "producer-l7-ilb-url-map-%{random_suffix}"
   default_service = google_compute_region_backend_service.producer_l7_ilb_backend_service.id
-  region          = us-west2
+  region          = "us-west2"
 }
 
 resource "google_compute_region_target_http_proxy" "producer_proxy" {
   name    = "producer-l7-ilb-proxy-%{random_suffix}"
   url_map = google_compute_region_url_map.producer_url_map.id
-  region  = us-west2
+  region  = "us-west2"
 }
 
 resource "google_compute_forwarding_rule" "producer_l7_ilb_forwarding_rule" {
