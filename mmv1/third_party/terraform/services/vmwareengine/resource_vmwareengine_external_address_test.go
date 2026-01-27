@@ -16,6 +16,7 @@ import (
 
 func TestAccVmwareengineExternalAddress_vmwareEngineExternalAddressUpdate(t *testing.T) {
 	t.Parallel()
+	acctest.SkipIfVcr(t)
 
 	context := map[string]interface{}{
 		"region":               "me-west1", // region with allocated quota
