@@ -31,6 +31,7 @@ import_format:
   - '{{org_id}}/{{name}}'
 datasource:
   generate: true
+  exclude_test: true
 timeouts:
   insert_minutes: 60
   update_minutes: 20
