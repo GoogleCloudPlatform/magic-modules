@@ -728,6 +728,10 @@ func collectResult(output string) Result {
 	}
 	results := make(map[string][]string, 4)
 	results["PANIC"] = testPanicExpression.FindAllString(output, -1)
+	fmt.Println("####################################")
+	fmt.Println("######### Print out crashes ########")
+	fmt.Println(results["PANIC"])
+	fmt.Println("####################################")
 	sort.Strings(results["PANIC"])
 	subtestResults := make(map[string][]string, 3)
 	for _, kind := range []string{"FAIL", "PASS", "SKIP"} {
