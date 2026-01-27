@@ -154,7 +154,7 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 		return fmt.Errorf("failed to get running builds: %w", err)
 	}
 	if len(runningBuilds.Builds) > 0 {
-		fmt.Printf("%s Test unfinished: there are still %d builds queued.\n", strings.ToUpper(pVersion.String()), len(runningBuilds.Builds))
+		fmt.Printf("%s Test unfinished: there are still %d builds running.\n", strings.ToUpper(pVersion.String()), len(runningBuilds.Builds))
 		return nil
 	}
 
