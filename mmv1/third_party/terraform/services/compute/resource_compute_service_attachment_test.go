@@ -238,8 +238,7 @@ resource "google_compute_forwarding_rule" "producer_l7_ilb_forwarding_rule" {
   region                = "us-west2"
   load_balancing_scheme = "INTERNAL_MANAGED"
   port_range            = "8080"
-  backend_service       = google_compute_region_backend_service.producer_l7_ilb_backend_service.id
-  all_ports             = true
+  target                = google_compute_region_target_http_proxy.producer_proxy.id
   network               = google_compute_network.psc_ilb_network.name
   subnetwork            = google_compute_subnetwork.psc_ilb_subnet.name
   depends_on            = [google_compute_subnetwork.proxy_only_subnet]
