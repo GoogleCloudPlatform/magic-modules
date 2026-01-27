@@ -152,7 +152,12 @@ func TestAccComputeServiceAttachment_targetServiceInPlaceUpdate(t *testing.T) {
 }
 
 func testAccComputeServiceAttachment_targetServiceUpdate(context map[string]interface{}, targetKey string) string {
-	context["target_key"] = targetKey
+	var targetService string
+	if targetKey == "l4ilb" {
+		targetService = "google_compute_forwarding_rule.producer_l4_ilb_fr.id"
+	} else {
+		targetService = "google_compute_forwarding_rule.producer_l7_ilb_forwarding_rule.id"
+	}
 	return acctest.Nprintf(`
 resource "google_compute_network" "psc_ilb_network" {
   name                    = "tf-test-producer-net-%{random_suffix}"
@@ -232,7 +237,7 @@ resource "google_compute_forwarding_rule" "producer_l7_ilb_forwarding_rule" {
   region                = "us-west2"
   load_balancing_scheme = "INTERNAL_MANAGED"
   port_range            = "8080"
-  backend_service       = google_compute_region_backend_service.backend_b.id
+  backend_service       = google_compute_region_backend_service.producer_l7_ilb_backend_service.id
   all_ports             = true
   network               = google_compute_network.psc_ilb_network.name
   subnetwork            = google_compute_subnetwork.psc_ilb_subnet.name
@@ -247,7 +252,7 @@ resource "google_compute_service_attachment" "psc_attachment" {
   nat_subnets           = [google_compute_subnetwork.psc_ilb_nat_subnet.id]
 
   # Dynamically switch the target based on the test step
-  target_service = %{target_key == "l4ilb" ? "google_compute_forwarding_rule.producer_l4_ilb_fr.id" : "google_compute_forwarding_rule.producer_l7_ilb_forwarding_rule.id"}
+  target_service = %{target_service}
 }
 `, context)
 }
