@@ -207,6 +207,36 @@ properties:
     enum_values:
       - 'STANDARD'
       - 'ENTERPRISE'
+  - name: 'firestoreDataAccessMode'
+    type: Enum
+    description: |
+      The Firestore API data access mode to use for this database.
+    required: false
+    default_from_api: true
+    immutable: true
+    enum_values:
+      - 'DATA_ACCESS_MODE_ENABLED'
+      - 'DATA_ACCESS_MODE_DISABLED'
+  - name: 'mongodbCompatibleDataAccessMode'
+    type: Enum
+    description: |
+      The MongoDB compatible API data access mode to use for this database.
+    required: false
+    default_from_api: true
+    immutable: true
+    enum_values:
+      - 'DATA_ACCESS_MODE_ENABLED'
+      - 'DATA_ACCESS_MODE_DISABLED'
+  - name: 'realtimeUpdatesMode'
+    type: Enum
+    description: |
+      The Realtime Updates mode to use for this database..
+    required: false
+    default_from_api: true
+    immutable: true
+    enum_values:
+      - 'REALTIME_UPDATES_MODE_ENABLED'
+      - 'REALTIME_UPDATES_MODE_DISABLED'
   - name: 'concurrencyMode'
     type: Enum
     description: |
