@@ -29,7 +29,6 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/otiai10/copy"
@@ -49,8 +48,6 @@ type TerraformGoogleConversionNext struct {
 	ResourcesByCaiResourceType map[string][]ResourceIdentifier
 
 	TargetVersionName string
-
-	Version product.Version
 
 	Product *api.Product
 
@@ -72,13 +69,11 @@ func NewTerraformGoogleConversionNext(product *api.Product, versionName string, 
 	t := TerraformGoogleConversionNext{
 		Product:                    product,
 		TargetVersionName:          versionName,
-		Version:                    *product.VersionObjOrClosest(versionName),
 		StartTime:                  startTime,
 		ResourcesByCaiResourceType: make(map[string][]ResourceIdentifier),
 		templateFS:                 templateFS,
 	}
 
-	t.Product.SetPropertiesBasedOnVersion(&t.Version)
 	t.Product.SetCompiler(ProviderName(t))
 	for _, r := range t.Product.Objects {
 		r.SetCompiler(ProviderName(t))
@@ -90,7 +85,7 @@ func NewTerraformGoogleConversionNext(product *api.Product, versionName string, 
 
 func (tgc TerraformGoogleConversionNext) Generate(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 	for _, object := range tgc.Product.Objects {
-		object.ExcludeIfNotInVersion(&tgc.Version)
+		object.ExcludeIfNotInVersion(tgc.Product.Version)
 
 		if resourceToGenerate != "" && object.Name != resourceToGenerate {
 			log.Printf("Excluding %s per user request", object.Name)
@@ -111,10 +106,8 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 	if !object.IsExcluded() {
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 		tgc.addTestsFromSamples(&object)
-		if object.TGCIncludeHandwrittenTests {
-			if err := tgc.addTestsFromHandwrittenTests(&object); err != nil {
-				log.Printf("Error adding examples from handwritten tests: %v", err)
-			}
+		if err := tgc.addTestsFromHandwrittenTests(&object); err != nil {
+			log.Printf("Error adding examples from handwritten tests: %v", err)
 		}
 		tgc.GenerateResourceTests(object, *templateData, outputFolder)
 	}
@@ -325,7 +318,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromExamples(object *api.Resour
 		if example.ExcludeTest {
 			continue
 		}
-		if object.ProductMetadata.VersionObjOrClosest(tgc.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) < 0 {
+		if object.ProductMetadata.VersionObjOrClosest(tgc.Product.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) < 0 {
 			continue
 		}
 		object.TGCTests = append(object.TGCTests, resource.TGCTest{
@@ -344,7 +337,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromSamples(object *api.Resourc
 		if sample.ExcludeTest {
 			continue
 		}
-		if object.ProductMetadata.VersionObjOrClosest(tgc.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0 {
+		if object.ProductMetadata.VersionObjOrClosest(tgc.Product.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0 {
 			continue
 		}
 		object.TGCTests = append(object.TGCTests, resource.TGCTest{

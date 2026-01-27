@@ -39,7 +39,6 @@ custom_code:
   constants: 'templates/terraform/constants/compute_service_attachment.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/compute_service_attachment.go.tmpl'
   encoder: 'templates/terraform/encoders/compute_service_attachment.go.tmpl'
-  pre_read: 'templates/terraform/pre_read/service_attachment_show_nat_ips.go.tmpl'
 sweeper:
   url_substitutions:
     - region: "us-west2"
@@ -164,7 +163,9 @@ properties:
   - name: 'showNatIps'
     type: Boolean
     description: |
-      If true, show NAT IPs of all connected endpoints.
+      NOTE: This field is temporarily non-functional due to an underlying API issue.
+      Any value provided here will be ignored until the API issue is resolved, expected around 2026-03.
+      [If true, show NAT IPs of all connected endpoints.]
     url_param_only: true
   - name: 'connectionPreference'
     type: String
@@ -209,7 +210,10 @@ properties:
           output: true
         - name: 'natIps'
           type: Array
-          description: 'The nat IPs of the connected endpoint.'
+          description: |
+            NOTE: This field is temporarily non-functional due to an underlying API issue.
+            Any value provided here will be ignored until the API issue is resolved, expected around 2026-03.
+            'The nat IPs of the connected endpoint.'
           output: true
           item_type:
             type: String

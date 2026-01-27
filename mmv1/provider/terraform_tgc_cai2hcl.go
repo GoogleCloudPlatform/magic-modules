@@ -21,15 +21,12 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/otiai10/copy"
 )
 
 // Code generator for a library converting GCP CAI objects to Terraform state.
 type CaiToTerraformConversion struct {
 	TargetVersionName string
-
-	Version product.Version
 
 	Product *api.Product
 
@@ -42,12 +39,10 @@ func NewCaiToTerraformConversion(product *api.Product, versionName string, start
 	t := CaiToTerraformConversion{
 		Product:           product,
 		TargetVersionName: versionName,
-		Version:           *product.VersionObjOrClosest(versionName),
 		StartTime:         startTime,
 		templateFS:        templateFS,
 	}
 
-	t.Product.SetPropertiesBasedOnVersion(&t.Version)
 	t.Product.SetCompiler(ProviderName(t))
 	for _, r := range t.Product.Objects {
 		r.SetCompiler(ProviderName(t))
