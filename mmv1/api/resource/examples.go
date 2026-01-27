@@ -154,6 +154,11 @@ type Examples struct {
 	// See test_vars_overrides for more details
 	OicsVarsOverrides map[string]string `yaml:"oics_vars_overrides,omitempty"`
 
+	//If the generated tests should be ran in serial.
+	//Occasionally tests will fail due to conflicts in permissions if ran in parallel.
+	//Setting this flag will remove the `t.Parallel()` from the start of the generated test.
+	RunInSerial bool `yaml:"run_in_serial,omitempty"`
+
 	// If the example should be skipped during VCR testing.
 	// This is the case when something about the resource or config causes VCR to fail for example
 	// a resource with a unique identifier generated within the resource via id.UniqueId()
