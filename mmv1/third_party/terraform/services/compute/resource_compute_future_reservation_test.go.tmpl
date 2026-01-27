@@ -73,7 +73,7 @@ func TestAccComputeFutureReservation_maintenance_protection(t *testing.T) {
 				ResourceName:            "google_compute_future_reservation.gce_future_reservation",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"auto_delete_auto_created_reservations"},
+				ImportStateVerifyIgnore: []string{"auto_delete_auto_created_reservations", "enable_emergent_maintenance"},
 			},
 		},
 	})

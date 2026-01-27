@@ -442,6 +442,7 @@ properties:
     description: |
       Indicates if this group of VMs have emergent maintenance enabled.
     immutable: true
+    ignore_read: true
   - name: 'reservationName'
     type: String
     description: |
