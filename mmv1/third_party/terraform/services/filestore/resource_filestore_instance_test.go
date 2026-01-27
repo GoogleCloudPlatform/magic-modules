@@ -823,7 +823,7 @@ func TestAccFilestoreInstance_psc_ipv6(t *testing.T) {
 		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFilestoreInstance_psc(context),
+				Config: testAccFilestoreInstance_psc_ipv6(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_filestore_instance.instance", "networks.0.connect_mode", "PRIVATE_SERVICE_CONNECT"),
 					resource.TestCheckResourceAttr("google_filestore_instance.instance", "networks.0.modes.0", "MODE_IPV6"),
