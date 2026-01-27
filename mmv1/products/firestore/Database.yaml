@@ -151,6 +151,16 @@ examples:
       - 'project'
       - 'etag'
       - 'deletion_policy'
+  - name: 'firestore_database_data_access'
+    primary_resource_id: 'enterprise-db'
+    vars:
+      database_id: 'database-id'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'project'
+      - 'etag'
+      - 'deletion_policy'
 virtual_fields:
   - name: 'deletion_policy'
     description: |
