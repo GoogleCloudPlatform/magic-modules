@@ -1,0 +1,71 @@
+resource "google_project" "project" {
+  provider   = google-beta
+  name       = "{{index $.TestEnvVars "project"}}"
+  project_id = "{{index $.TestEnvVars "project"}}"
+  org_id     = "{{index $.TestEnvVars "org_id"}}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_service_account" "pipeline_sa" {
+  provider     = google-beta
+  account_id   = "pipeline-owner-sa"
+  project      = google_project.project.project_id
+  display_name = "Pipeline Owner Service Account"
+}
+
+resource "google_vertex_ai_metadata_store" "default_test" {
+  provider = google-beta
+  name     = "default"
+  project  = google_project.project.project_id
+  region   = "us-east1"
+}
+
+resource "google_project_iam_member" "pipeline_sa_roles" {
+  for_each = toset([
+    "roles/aiplatform.user",
+    "roles/aiplatform.serviceAgent",
+    "roles/storage.admin",
+    "roles/iam.serviceAccountUser",
+    "roles/aiplatform.admin"
+  ])
+
+  provider = google-beta
+  project  = google_project.project.project_id
+  role     = each.key
+  member   = "serviceAccount:${google_service_account.pipeline_sa.email}"
+}
+
+resource "google_storage_bucket" "pipeline_output" {
+  provider = google-beta
+  project  = google_project.project.project_id
+  name     = "tf-test-pipeline-output-%{random_suffix}"
+  location = "US"
+}
+
+resource "google_vertex_ai_pipeline_job" "primary" {
+  provider = google-beta
+  project  = google_project.project.project_id
+  display_name = "tf-test-example-pipeline-job%{random_suffix}"
+  labels = {}
+  network = null
+  original_pipeline_job_id = null
+  pipeline_spec {
+    additional_properties = {}
+  }
+  preflight_validations = null
+  psc_interface_config {
+    raw = null
+  }
+  region = "us-east1"
+  reserved_ip_ranges = null
+  runtime_config {
+    gcs_output_directory = "gs://${google_storage_bucket.pipeline_output.name}/outputs/"
+  }
+  satisfies_pzi = null
+  service_account = google_service_account.pipeline_sa.email
+  template_uri = "gs://cloud-samples-data/ai-platform/pipelines/hello-world-pipeline.json"
+  depends_on = [
+    google_project_iam_member.pipeline_sa_roles,
+    google_vertex_ai_metadata_store.default_test
+  ]
+}
