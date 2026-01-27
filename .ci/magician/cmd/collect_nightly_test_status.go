@@ -159,7 +159,7 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 	}
 
 	// Get all service test builds
-	builds, err = tc.GetBuilds(pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
+	builds, err := tc.GetBuilds("finished", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
 	if err != nil {
 		return fmt.Errorf("failed to get finished builds: %w", err)
 	}
