@@ -31,22 +31,29 @@ examples:
       logging_saved_query_name: 'my-saved-query'
     test_env_vars:
       project: 'PROJECT_NAME'
+  - name: 'logging_saved_query_no_description'
+    primary_resource_id: 'saved_query'
+    vars:
+      logging_saved_query_name: 'my-saved-query-no-description'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    exclude_docs: true
   - name: 'logging_saved_query_private'
     primary_resource_id: 'saved_query'
     vars:
-      logging_saved_query_name: 'my-saved-query'
+      logging_saved_query_name: 'my-saved-query-private'
     test_env_vars:
       project: 'PROJECT_NAME'
   - name: 'logging_saved_query_summary_fields'
     primary_resource_id: 'saved_query'
     vars:
-      logging_saved_query_name: 'my-saved-query'
+      logging_saved_query_name: 'my-saved-query-summary-fields'
     test_env_vars:
       project: 'PROJECT_NAME'
   - name: 'logging_saved_query_sql_basic'
     primary_resource_id: 'saved_query'
     vars:
-      logging_saved_query_name: 'my-saved-query'
+      logging_saved_query_name: 'my-saved-query-sql'
     test_env_vars:
       project: 'PROJECT_NAME'
 parameters:
@@ -118,13 +125,13 @@ properties:
         description: |
           Characters will be counted from the start of the string.
         conflicts:
-          - 'summaryFieldEnd'
+          - 'loggingQuery.0.summaryFieldEnd'
       - name: 'summaryFieldEnd'
         type: Integer
         description: |
           Characters will be counted from the end of the string.
         conflicts:
-          - 'summaryFieldStart'
+          - 'loggingQuery.0.summaryFieldStart'
       - name: 'summaryFields'
         type: Array
         description: |
