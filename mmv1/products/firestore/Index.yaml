@@ -51,8 +51,8 @@ custom_code:
   constants: 'templates/terraform/constants/firestore_index.go.tmpl'
   encoder: 'templates/terraform/encoders/index.go.tmpl'
   custom_import: 'templates/terraform/custom_import/index_self_link_as_name_set_project.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/firestore_index.go.tmpl'
 error_retry_predicates:
-
   - 'transport_tpg.FirestoreIndex409Retry'
 examples:
   - name: 'firestore_index_basic'
@@ -98,6 +98,26 @@ examples:
       database_id: 'database-id-unique'
     test_env_vars:
       project_id: 'PROJECT_NAME'
+  - name: 'firestore_index_delete_protection'
+    primary_resource_id: 'my-index'
+    vars:
+      database_id: 'database-id-delete-protection'
+      delete_protection: true
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    # Example will show delete_protection as true, but in test we will actually set to false
+    # so the test can cleanup after itself.
+    test_vars_overrides:
+      'delete_protection': 'false'
+    ignore_read_extra:
+      - 'delete_protection'
+virtual_fields:
+  - name: 'delete_protection'
+    type: Boolean
+    default_value: false
+    description: |
+      Whether or not to allow Terraform to destroy the index. If this field is true,
+      a terraform destroy or terraform apply that would delete the index will fail.
 parameters:
 properties:
   - name: 'name'
