@@ -12,7 +12,7 @@ timeout: 3600s
 options:
     machineType: 'N1_HIGHCPU_32'
 
-logsBucket: 'gs://cloudbuild-ingest-nightly-test-data-logs'
+logsBucket: 'gs://cloudbuild-ingest-test-data-logs'
 availableSecrets:
   secretManager:
     - versionName: projects/673497134629/secrets/teamcity-token/versions/latest
