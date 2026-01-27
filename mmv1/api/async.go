@@ -14,7 +14,7 @@
 package api
 
 import (
-	"log"
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -162,14 +162,16 @@ func (a *Async) MarshalYAML() (interface{}, error) {
 	return (*asyncAlias)(clonePtr), nil
 }
 
-func (a *Async) Validate() {
+func (a *Async) Validate() (es []error) {
 	if a.Type == "OpAsync" {
 		if a.Operation == nil {
-			log.Fatalf("Missing `Operation` for OpAsync")
+			es = append(es, fmt.Errorf("missing `Operation` for OpAsync"))
 		} else {
 			if a.Operation.BaseUrl != "" && a.Operation.FullUrl != "" {
-				log.Fatalf("`base_url` and `full_url` cannot be set at the same time in OpAsync operation.")
+				es = append(es, fmt.Errorf("`base_url` and `full_url` cannot be set at the same time in OpAsync operation"))
 			}
 		}
 	}
+
+	return es
 }
