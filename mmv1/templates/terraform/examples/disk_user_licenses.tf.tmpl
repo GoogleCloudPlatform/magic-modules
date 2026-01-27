@@ -1,0 +1,13 @@
+resource "google_compute_disk" "default" {
+  name  = "{{index $.Vars "disk_name"}}"
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+  size  = 10
+
+  user_licenses = [
+    "https://www.googleapis.com/compute/v1/projects/debian-cloud/global/licenses/debian-9-stretch"
+  ]
+
+  physical_block_size_bytes = 4096
+}
+
