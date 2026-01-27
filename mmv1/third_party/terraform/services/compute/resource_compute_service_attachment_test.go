@@ -158,6 +158,7 @@ func testAccComputeServiceAttachment_targetServiceUpdate(context map[string]inte
 	} else {
 		targetService = "google_compute_forwarding_rule.producer_l7_ilb_forwarding_rule.id"
 	}
+  context["target_service"] = targetService
 	return acctest.Nprintf(`
 resource "google_compute_network" "psc_ilb_network" {
   name                    = "tf-test-producer-net-%{random_suffix}"
