@@ -98,6 +98,10 @@ examples:
     primary_resource_id: 'zone'
     vars:
       instance_name: 'my-instance'
+  - name: 'data_fusion_instance_patch_revision'
+    primary_resource_id: 'data_fusion_instance_patch_revision'
+    vars:
+      instance_name: 'my-instance'
 parameters:
   - name: 'region'
     type: String
@@ -207,6 +211,11 @@ properties:
     type: String
     description: |
       Current version of the Data Fusion.
+    default_from_api: true
+  - name: 'patchRevision'
+    type: String
+    description: |
+      Current patch revision of the Data Fusion.
     default_from_api: true
   - name: 'serviceAccount'
     type: String
