@@ -54,8 +54,14 @@ type (
 	iamPolicyModifyFunc func(p *cloudresourcemanager.Policy) error
 
 	// Parser for Terraform resource identifier (d.Id) for resource whose IAM policy is being changed
-	ResourceIdParserFunc func(d *schema.ResourceData, config *transport_tpg.Config) error
+	ResourceIdParserFunc func(d *schema.ResourceData, config *transport_tpg.Config, enableResourceIdentity bool) error
 )
+
+func ResourceIdentityUnsupportedInIdParseFunc(fn func(d *schema.ResourceData, config *transport_tpg.Config) error) ResourceIdParserFunc {
+	return func(d *schema.ResourceData, config *transport_tpg.Config, enableResourceIdentity bool) error {
+		return fn(d, config)
+	}
+}
 
 // Locking wrapper around read-only operation with retries.
 func iamPolicyReadWithRetry(updater ResourceIamUpdater) (*cloudresourcemanager.Policy, error) {
@@ -428,6 +434,7 @@ type IamSettings struct {
 	StateUpgraders     []schema.StateUpgrader
 	SchemaVersion      int
 	CreateTimeOut      int64
+	EnableResourceIdentity bool
 }
 
 func NewIamSettings(options ...func(*IamSettings)) *IamSettings {
@@ -442,6 +449,10 @@ func IamWithDeprecationMessage(message string) func(s *IamSettings) {
 	return func(s *IamSettings) {
 		s.DeprecationMessage = message
 	}
+}
+
+func IamWithEnableResourceIdentity(s *IamSettings) {
+	s.EnableResourceIdentity = true
 }
 
 func IamWithGAResourceDeprecation() func (s *IamSettings) {

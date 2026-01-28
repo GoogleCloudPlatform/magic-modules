@@ -159,7 +159,7 @@ func resourceLoggingExclusionDelete(newUpdaterFunc newResourceLoggingExclusionUp
 func resourceLoggingExclusionImportState(resourceIdParser tpgiamresource.ResourceIdParserFunc) schema.StateFunc {
 	return func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 		config := meta.(*transport_tpg.Config)
-		err := resourceIdParser(d, config)
+		err := resourceIdParser(d, config, false)
 		if err != nil {
 			return nil, err
 		}
