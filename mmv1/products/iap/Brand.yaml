@@ -57,6 +57,8 @@ identity:
   - name
 custom_code:
   custom_import: 'templates/terraform/custom_import/iap_brand.go.tmpl'
+  custom_identity:
+    - 'project'
 examples:
   - name: 'iap_brand'
     primary_resource_id: 'project_brand'
