@@ -28,7 +28,7 @@ type registeredProducts struct {
 	m map[string]Product
 }
 
-var products = registeredProducts{
+var products = &registeredProducts{
 	m: make(map[string]Product),
 }
 
@@ -78,7 +78,7 @@ type registeredSchemas struct {
 	d map[string]Schema
 }
 
-var schemas = registeredSchemas{
+var schemas = &registeredSchemas{
 	r: make(map[string]Schema),
 	d: make(map[string]Schema),
 }
