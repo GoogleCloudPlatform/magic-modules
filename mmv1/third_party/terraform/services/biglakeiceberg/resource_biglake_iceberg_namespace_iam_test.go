@@ -63,6 +63,12 @@ func TestAccBiglakeIcebergIcebergNamespaceIamBinding(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				PreConfig: func() {
+					acctest.CleanupBigLakeIcebergNamespace(t, catalogId, namespaceId)
+				},
+				Config: testAccBiglakeIcebergIcebergNamespace_catalogOnly(context),
+			},
 		},
 	})
 
@@ -111,6 +117,12 @@ func TestAccBiglakeIcebergIcebergNamespaceIamMember(t *testing.T) {
 				ImportStateId:     fmt.Sprintf("%s %s user:admin@hashicorptest.com", importId, role),
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				PreConfig: func() {
+					acctest.CleanupBigLakeIcebergNamespace(t, catalogId, namespaceId)
+				},
+				Config: testAccBiglakeIcebergIcebergNamespace_catalogOnly(context),
 			},
 		},
 	})
@@ -166,6 +178,12 @@ func TestAccBiglakeIcebergIcebergNamespaceIamPolicy(t *testing.T) {
 				ImportStateId:     importId,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				PreConfig: func() {
+					acctest.CleanupBigLakeIcebergNamespace(t, catalogId, namespaceId)
+				},
+				Config: testAccBiglakeIcebergIcebergNamespace_catalogOnly(context),
 			},
 		},
 	})
