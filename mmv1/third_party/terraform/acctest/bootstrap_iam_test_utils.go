@@ -17,6 +17,8 @@ type IamMember struct {
 	Member, Role string
 }
 
+// Trigger tests
+
 // BootstrapIamMembers ensures that a given set of member/role pairs exist in the default
 // test project. This should be used to avoid race conditions that can happen on the
 // default project due to parallel tests managing the same member/role pairings. Members
