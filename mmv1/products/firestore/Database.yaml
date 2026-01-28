@@ -155,8 +155,11 @@ examples:
     primary_resource_id: 'enterprise-db'
     vars:
       database_id: 'database-id'
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
     test_env_vars:
       project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
     ignore_read_extra:
       - 'project'
       - 'etag'
