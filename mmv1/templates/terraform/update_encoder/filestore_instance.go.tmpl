@@ -37,8 +37,6 @@ if d.HasChange("replica_action") {
 
 	headers := make(http.Header)
 
-	// err == nil indicates that the billing_project value was found
-
 	emptyReqBody := make(map[string]interface{})
 
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
