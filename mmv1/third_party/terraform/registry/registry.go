@@ -20,6 +20,9 @@ type Product struct {
 func (p Product) Register() {
 	products.Lock()
 	defer products.Unlock()
+	if _, ok := products.m[p.Name]; ok {
+		log.Fatalf("Duplicate registration attempt for product %q", p.Name)
+	}
 	products.m[p.Name] = p
 }
 
@@ -66,8 +69,14 @@ func (s Schema) Register() {
 	products.Lock()
 	defer products.Unlock()
 	if s.Type.IsDataSource() {
+		if _, ok := schemas.d[s.Name]; ok {
+			log.Fatalf("Duplicate registration attempt for data source %q", s.Name)
+		}
 		schemas.d[s.Name] = s
 	} else {
+		if _, ok := schemas.r[s.Name]; ok {
+			log.Fatalf("Duplicate registration attempt for resource %q", s.Name)
+		}
 		schemas.r[s.Name] = s
 	}
 }
