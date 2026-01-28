@@ -51,6 +51,7 @@ custom_code:
   constants: 'templates/terraform/constants/firestore_index.go.tmpl'
   encoder: 'templates/terraform/encoders/index.go.tmpl'
   custom_import: 'templates/terraform/custom_import/index_self_link_as_name_set_project.go.tmpl'
+  custom_create: 'templates/terraform/custom_create/firestore_index.go.tmpl'
 error_retry_predicates:
 
   - 'transport_tpg.FirestoreIndex409Retry'
@@ -98,7 +99,22 @@ examples:
       database_id: 'database-id-unique'
     test_env_vars:
       project_id: 'PROJECT_NAME'
+  - name: 'firestore_index_skip_wait'
+    primary_resource_id: 'my-index'
+    vars:
+      database_id: 'database-id-skip-wait'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'skip_wait'
+virtual_fields:
+  - name: "skip_wait"
+    type: Boolean
+    default_value: false
+    description: "Whether to skip waiting for the index to be created."
+    ignore_read: true
 parameters:
+# Firestore uses a custom create function. Any new fields must be explicitly handled there.
 properties:
   - name: 'name'
     type: String
