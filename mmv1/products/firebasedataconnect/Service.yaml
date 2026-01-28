@@ -62,6 +62,7 @@ async:
     resource_inside_response: true
   include_project: false
 autogen_status: U2VydmljZQ==
+deletion_policy_exclude: true
 parameters:
   - name: location
     type: String

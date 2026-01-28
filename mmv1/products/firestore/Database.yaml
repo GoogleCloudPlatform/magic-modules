@@ -49,6 +49,7 @@ async:
     resource_inside_response: true
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/firestore_database.go.tmpl'
+deletion_policy_exclude: true
 examples:
   - name: 'firestore_default_database'
     primary_resource_id: 'database'
