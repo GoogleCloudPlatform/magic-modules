@@ -37,6 +37,46 @@ func TestAccComputeSslCertificate_no_name(t *testing.T) {
 	})
 }
 
+func TestAccComputeSslCertificate_update_wo(t *testing.T) {
+	// Randomness
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSslCertificateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeSslCertificate_wo(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeSslCertificateExists(
+						t, "google_compute_ssl_certificate.foobar"),
+				),
+			},
+			{
+				ResourceName:            "google_compute_ssl_certificate.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"private_key", "private_key_wo_version", "certificate", "certificate_wo_version"},
+			},
+			{
+				Config: testAccComputeSslCertificate_update_wo(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeSslCertificateExists(
+						t, "google_compute_ssl_certificate.foobar"),
+				),
+			},
+			{
+				ResourceName:            "google_compute_ssl_certificate.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"private_key", "private_key_wo_version", "certificate", "certificate_wo_version"},
+			},
+		},
+	})
+}
+
 func TestUnitComputeManagedSslCertificate_AbsoluteDomainSuppress(t *testing.T) {
 	cases := map[string]struct {
 		Old, New           string
@@ -111,6 +151,30 @@ resource "google_compute_ssl_certificate" "foobar" {
   description = "really descriptive"
   private_key = file("test-fixtures/test.key")
   certificate = file("test-fixtures/test.crt")
+}
+`)
+}
+
+func testAccComputeSslCertificate_wo() string {
+	return fmt.Sprintf(`
+resource "google_compute_ssl_certificate" "foobar" {
+  description = "really descriptive"
+  private_key_wo = file("test-fixtures/test.key")
+  private_key_wo_version = 1	
+  certificate_wo = file("test-fixtures/test.crt")
+  certificate_wo_version = 1
+}
+`)
+}
+
+func testAccComputeSslCertificate_update_wo() string {
+	return fmt.Sprintf(`
+resource "google_compute_ssl_certificate" "foobar" {
+  description = "really descriptive"
+  private_key_wo = file("test-fixtures/test.key")
+  private_key_wo_version = 2	
+  certificate_wo = file("test-fixtures/test.crt")
+  certificate_wo_version = 2
 }
 `)
 }
