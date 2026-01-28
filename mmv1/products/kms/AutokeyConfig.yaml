@@ -61,8 +61,7 @@ examples:
     vars:
       folder_name: 'my-folder'
       key_project_name: 'key-proj'
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
+    external_providers: ["time"]
   - name: 'kms_autokey_config_project' # Example for project
     primary_resource_id: 'example-autokeyconfig-project'
     min_version: 'beta'
@@ -70,9 +69,8 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     vars:
-      project_name: 'my-resource-proj'
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
+      test_project_name: 'my-test-proj'
+    external_providers: ["time"]
 
 parameters:
   - name: 'folder'
