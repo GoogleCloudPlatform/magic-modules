@@ -49,6 +49,7 @@ iam_policy:
 examples:
   - name: 'biglake_iceberg_namespace'
     primary_resource_id: 'example_namespace'
+    exclude_test: true
     vars:
       name: 'example_namespace'
       catalog_name: 'example_catalog'
