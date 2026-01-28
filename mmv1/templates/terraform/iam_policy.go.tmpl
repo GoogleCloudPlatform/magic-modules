@@ -42,6 +42,7 @@ var (
     _ = schema.Noop
 )
 
+{{- if not $.IsTgcCompiler }}
 func init() {
     registry.Schema{
         Name: "{{ $.TerraformName }}_iam_binding",
@@ -68,6 +69,7 @@ func init() {
         Schema: tpgiamresource.DataSourceIamPolicy({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer),
     }.Register()
 }
+{{- end }}
 
 var {{ $.ResourceName }}IamSchema = map[string]*schema.Schema{
 {{- range $i, $param := $.IamResourceParams }}
