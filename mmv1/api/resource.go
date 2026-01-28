@@ -278,7 +278,7 @@ type Resource struct {
 
 	// Set to true for resources that are to exclude the default generated deletion policy field
 	// Primarily for resources that had deletion policy implementations before the universal generation.
-	DeletionPolicyExclude bool `yaml:"deletion_policy,omitempty"`
+	DeletionPolicyExclude bool `yaml:"deletion_policy_exclude,omitempty"`
 
 	// Set to the default deletion policy value for the resource.
 	// By default this will be "DELETE".
