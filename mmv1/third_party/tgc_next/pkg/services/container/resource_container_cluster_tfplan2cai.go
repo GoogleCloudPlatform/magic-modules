@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/converters/cai"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
@@ -11,6 +13,49 @@ import (
 
 	"google.golang.org/api/container/v1"
 )
+
+func ContainerClusterTfplan2CaiConverter() cai.Tfplan2caiConverter {
+	return cai.Tfplan2caiConverter{
+		Convert: GetContainerCluster,
+	}
+}
+
+func GetContainerCluster(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (caiasset.Asset, error) {
+	name, err := cai.AssetName(d, config, "//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{name}}")
+	if err != nil {
+		return caiasset.Asset{}, err
+	}
+	if data, err := GetContainerClusterData(d, config); err == nil {
+		location, _ := tpgresource.GetLocation(d, config)
+		return caiasset.Asset{
+			Name: name,
+			Type: ContainerClusterAssetType,
+			Resource: &caiasset.AssetResource{
+				Version:              "v1",
+				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/container/v1/rest",
+				DiscoveryName:        "Cluster",
+				Data:                 data,
+				Location:             location,
+			},
+		}, nil
+	} else {
+		return caiasset.Asset{}, err
+	}
+}
+
+func GetContainerClusterData(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return nil, err
+	}
+
+	cluster, err := expandContainerCluster(project, d, config)
+	if err != nil {
+		return nil, err
+	}
+
+	return cai.JsonMap(cluster)
+}
 
 func expandContainerCluster(project string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*container.Cluster, error) {
 	clusterName := d.Get("name").(string)
