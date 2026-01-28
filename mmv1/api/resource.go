@@ -726,10 +726,10 @@ func (r Resource) UnorderedListProperties() []*Type {
 	})
 }
 
-// Properties that will be returned in the API body
+// Properties that are read from the API response.
 func (r Resource) GettableProperties() []*Type {
 	return google.Reject(r.AllUserProperties(), func(v *Type) bool {
-		return v.UrlParamOnly
+		return v.UrlParamOnly || v.IgnoreRead
 	})
 }
 
@@ -1490,7 +1490,7 @@ func (r Resource) HasPostCreateComputedFields() bool {
 		if _, ok := fields[google.Underscore(p.Name)]; !ok {
 			continue
 		}
-		if (p.Output || p.DefaultFromApi) && !p.IgnoreRead {
+		if p.Output || p.DefaultFromApi {
 			return true
 		}
 	}
@@ -1501,14 +1501,8 @@ func (r Resource) HasPostCreateComputedFields() bool {
 // Template Methods
 // ====================
 // Functions used to create slices of resource properties that could not otherwise be called from within generating templates.
-func (r Resource) ReadProperties() []*Type {
-	return google.Reject(r.GettableProperties(), func(p *Type) bool {
-		return p.IgnoreRead
-	})
-}
-
 func (r Resource) FlattenedProperties() []*Type {
-	return google.Select(r.ReadProperties(), func(p *Type) bool {
+	return google.Select(r.GettableProperties(), func(p *Type) bool {
 		return p.FlattenObject
 	})
 }
