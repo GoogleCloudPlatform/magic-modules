@@ -291,6 +291,7 @@ properties:
     default_from_api: true
     properties:
       - name: 'scalingMode'
+        ignore_read: true
         type: Enum
         description: |
           The scaling mode for the worker pool. It defaults to MANUAL.
