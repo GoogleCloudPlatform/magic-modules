@@ -12,8 +12,8 @@ import (
 type Product struct {
 	// Name is the product name in lower case, e.g,. "alloydb".
 	Name string
-	// BasePath is the base URL for API requests. It may contain Magic Modules templating directives.
-	BasePath string
+	// BaseUrl is the base URL for API requests. It may contain Magic Modules templating directives.
+	BaseUrl string
 }
 
 // Register adds the product definition to the internal product registry.

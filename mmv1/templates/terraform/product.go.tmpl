@@ -28,6 +28,6 @@ const ProductName = "{{ lower $.Name }}"
 func init() {
     registry.Product{
         Name: "{{ lower $.Name }}",
-	    BasePath: "{{ $.Version.BaseUrl }}",
+	    BaseUrl: "{{ $.Version.BaseUrl }}",
     }.Register()
 }
