@@ -194,6 +194,100 @@ func mergeDataPolicies(configFields []*bigquery.TableFieldSchema, liveFields []*
 	}
 }
 
+// This function merges the live policyTags with the ones defined in tf config
+// This will be called only when "ignore_schema_changes" with "policyTags" is defined
+func mergePolicyTags(configFields []*bigquery.TableFieldSchema, liveFields []*bigquery.TableFieldSchema, rawSchema []interface{}) {
+	liveMap := make(map[string]*bigquery.TableFieldSchema)
+	if liveFields != nil {
+		for _, f := range liveFields {
+			liveMap[f.Name] = f
+		}
+	}
+
+	rawMap := make(map[string]map[string]interface{})
+	for _, item := range rawSchema {
+		if m, ok := item.(map[string]interface{}); ok {
+			if name, ok := m["name"].(string); ok {
+				rawMap[name] = m
+			}
+		}
+	}
+
+	for _, configField := range configFields {
+		rawField, rawExists := rawMap[configField.Name]
+		liveField := liveMap[configField.Name]
+
+		// Recursively handle nested fields (RECORD/STRUCT types)
+		if len(configField.Fields) > 0 {
+			var liveNested []*bigquery.TableFieldSchema
+			if liveField != nil {
+				liveNested = liveField.Fields
+			}
+			var rawNested []interface{}
+			if rawExists {
+				if fields, ok := rawField["fields"].([]interface{}); ok {
+					rawNested = fields
+				}
+			}
+			mergePolicyTags(configField.Fields, liveNested, rawNested)
+		}
+
+		// Handle PolicyTags logic
+		policyTagsSpecified := false
+		if rawExists {
+			// Check if "policyTags" key explicitly exists in the raw config JSON
+			_, policyTagsSpecified = rawField["policyTags"]
+		}
+
+		// If the user did NOT specify policyTags in the config,
+		// and they exist on the server, copy them to the config struct.
+		if !policyTagsSpecified && liveField != nil {
+			if liveField.PolicyTags != nil && len(liveField.PolicyTags.Names) > 0 {
+				configField.PolicyTags = liveField.PolicyTags
+			}
+		}
+	}
+}
+
+// If the same table column is found in both the TF config and live state,
+// and the column in the live state has policy tags when the column in the TF config doesn't,
+// copy the policy tags from live state into the TF config.
+func mergePolicyTagsIntoMap(old, new []interface{}) {
+	oldMap := make(map[string]map[string]interface{})
+	for _, v := range old {
+		if m, ok := v.(map[string]interface{}); ok {
+			if name, ok := m["name"].(string); ok {
+				oldMap[name] = m
+			}
+		}
+	}
+
+	for _, v := range new {
+		newField, ok := v.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		name := newField["name"].(string)
+
+		if oldField, exists := oldMap[name]; exists {
+			// If config doesn't have policyTags, but backend does, copy them over
+			if _, specified := newField["policyTags"]; !specified {
+				if pt, hasPT := oldField["policyTags"]; hasPT {
+					newField["policyTags"] = pt
+					log.Printf("[DEBUG] Added live policy tag to schema: %v", pt)
+				}
+			}
+
+			// Recursively handle nested fields (RECORD types)
+			if oldNested, ok1 := oldField["fields"].([]interface{}); ok1 {
+				if newNested, ok2 := newField["fields"].([]interface{}); ok2 {
+					mergePolicyTagsIntoMap(oldNested, newNested)
+				}
+			}
+		}
+	}
+}
+
 // If the same table column is found in both the TF config and live state,
 // and the column in the live state has data policies when the column in the TF config doesn't,
 // copy the data policies from live state into the TF config.
@@ -255,8 +349,29 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 		eq := valueIsInArray(valA, equivalentSet) && valueIsInArray(valB, equivalentSet)
 		return eq
 	case "policyTags":
-		eq := bigQueryTableNormalizePolicyTags(valA) == nil && bigQueryTableNormalizePolicyTags(valB) == nil
-		return eq
+		// If both are nil/empty, suppress diff
+		if bigQueryTableNormalizePolicyTags(valA) == nil && bigQueryTableNormalizePolicyTags(valB) == nil {
+			return true
+		}
+		if d == nil {
+			return false
+		}
+		// Access the ignore_schema_changes list from the Terraform configuration
+		var ignoreSchemaChanges []interface{}
+		if val := d.Get("ignore_schema_changes"); val != nil {
+			ignoreSchemaChanges = val.([]interface{})
+		}
+
+		// If policyTags is ignored...
+		if slices.Contains(ignoreSchemaChanges, "policyTags") {
+			// If the NEW value (valB) is empty or nil, suppress diff to keep backend values.
+			if bigQueryTableNormalizePolicyTags(valB) == nil {
+				return true
+			}
+			// If the user EXPLICITLY provided policyTags, allow the update.
+			return false
+		}
+		return false
 	case "dataPolicies":
 		if d == nil {
 			return false
@@ -571,12 +686,18 @@ func resourceBigQueryTableSchemaCustomizeDiffFunc(d tpgresource.TerraformResourc
 			ignoreSchemaChanges = val.([]interface{})
 		}
 
-		if slices.Contains(ignoreSchemaChanges, "dataPolicies") {
+		if slices.Contains(ignoreSchemaChanges, "dataPolicies") || slices.Contains(ignoreSchemaChanges, "policyTags") {
 			oldList, okOld := old.([]interface{})
 			newList, okNew := new.([]interface{})
 			if okOld && okNew {
-				// Modify the 'new' object in memory to include hidden backend policies
-				mergeDataPoliciesIntoMap(oldList, newList)
+				if slices.Contains(ignoreSchemaChanges, "dataPolicies") {
+					// Modify the 'new' object in memory to include hidden backend data policies
+					mergeDataPoliciesIntoMap(oldList, newList)
+				}
+				if slices.Contains(ignoreSchemaChanges, "policyTags") {
+					// Modify the 'new' object in memory to include hidden backend policy tags
+					mergePolicyTagsIntoMap(oldList, newList)
+				}
 
 				// Marshal the modified 'new' state back to JSON
 				updatedNewJSON, err := json.Marshal(newList)
@@ -2437,15 +2558,16 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 		tableID:   tableID,
 	}
 
-	// Logic to fetch oldTable if needed for Dropping Columns OR Merging Data Policies
+	// Logic to fetch oldTable if needed for Dropping Columns OR Merging Data/Policy Tags
 	ignoreSchemaChanges := d.Get("ignore_schema_changes").([]interface{})
 	shouldIgnoreDataPolicies := slices.Contains(ignoreSchemaChanges, "dataPolicies")
+	shouldIgnorePolicyTags := slices.Contains(ignoreSchemaChanges, "policyTags")
 	shouldDropColumns := !d.Get("ignore_auto_generated_schema").(bool)
 
 	var oldTable *bigquery.Table
 	var errOldTable error
 
-	if shouldDropColumns || shouldIgnoreDataPolicies {
+	if shouldDropColumns || shouldIgnoreDataPolicies || shouldIgnorePolicyTags {
 		client := config.NewBigQueryClient(userAgent).Tables.Get(project, datasetID, tableID)
 		if len(tableMetadataView) > 0 {
 			client = client.View(tableMetadataView)
@@ -2464,14 +2586,18 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	// 2. Data Policy Merge Logic
-	// If we are ignoring dataPolicies, check if we need to preserve existing ones
-	if shouldIgnoreDataPolicies && table.Schema != nil && oldTable != nil && oldTable.Schema != nil {
+	// 2. Data Policy / Policy Tags Merge Logic
+	// If we are ignoring dataPolicies or policyTags, check if we need to preserve existing ones
+	if (shouldIgnoreDataPolicies || shouldIgnorePolicyTags) && table.Schema != nil && oldTable != nil && oldTable.Schema != nil {
 		rawSchemaStr := d.Get("schema").(string)
 		var rawSchema []interface{}
-		// Unmarshal the RAW input to see if user explicitly defined "dataPolicies" or not
 		if err := json.Unmarshal([]byte(rawSchemaStr), &rawSchema); err == nil {
-			mergeDataPolicies(table.Schema.Fields, oldTable.Schema.Fields, rawSchema)
+			if shouldIgnoreDataPolicies {
+				mergeDataPolicies(table.Schema.Fields, oldTable.Schema.Fields, rawSchema)
+			}
+			if shouldIgnorePolicyTags {
+				mergePolicyTags(table.Schema.Fields, oldTable.Schema.Fields, rawSchema)
+			}
 		}
 	}
 

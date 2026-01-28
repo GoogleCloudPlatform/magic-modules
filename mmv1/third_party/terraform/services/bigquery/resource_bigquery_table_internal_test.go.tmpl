@@ -676,6 +676,13 @@ var testUnitBigQueryDataTableIsChangeableTestCases = []testUnitBigQueryDataTable
 		ignoreSchemaChanges: []interface{}{"dataPolicies"},
 		changeable:          true, // Should not trigger ForceNew
 	},
+	{
+		name:                "ignorePolicyTagRemoval",
+		jsonOld:             "[{\"name\": \"col1\", \"type\" : \"STRING\", \"policyTags\": {\"names\": [\"projects/123/locations/us/taxonomies/456/policyTags/789\"]}}]",
+		jsonNew:             "[{\"name\": \"col1\", \"type\" : \"STRING\"}]",
+		ignoreSchemaChanges: []interface{}{"policyTags"},
+		changeable:          true, // Should not trigger ForceNew
+	},
 	{{- if ne $.TargetVersionName "ga" }}
 	{
 		name:       "foreignTypeDefinition",
@@ -848,5 +855,208 @@ func TestMergeDataPoliciesIntoMap(t *testing.T) {
 	updatedField := new[0].(map[string]interface{})
 	if _, ok := updatedField["dataPolicies"]; !ok {
 		t.Errorf("dataPolicies were not merged into the map")
+	}
+}
+
+func TestBigQueryTableSchemaDiffSuppress_WithIgnorePolicyTags(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		Old                string
+		New                string
+		ExpectDiffSuppress bool
+	}{
+		"ignore top level policy tag removal": {
+			Old:                `[{"name": "col1", "policyTags": {"names": ["projects/123/locations/us/taxonomies/456/policyTags/789"]}}]`,
+			New:                `[{"name": "col1"}]`,
+			ExpectDiffSuppress: true,
+		},
+		"ignore nested policy tag removal": {
+			Old: `[{
+				"name": "parent",
+				"type": "RECORD",
+				"fields": [{
+					"name": "child",
+					"policyTags": {"names": ["projects/123/locations/us/taxonomies/456/policyTags/789"]}
+				}]
+			}]`,
+			New: `[{
+				"name": "parent",
+				"type": "RECORD",
+				"fields": [{
+					"name": "child"
+				}]
+			}]`,
+			ExpectDiffSuppress: true,
+		},
+		"do NOT ignore description change (even if ignore set)": {
+			Old:                `[{"name": "col1", "description": "old desc"}]`,
+			New:                `[{"name": "col1", "description": "new desc"}]`,
+			ExpectDiffSuppress: false,
+		},
+		"do NOT ignore explicit policy tag change (user override)": {
+			Old:                `[{"name": "col1", "policyTags": {"names": ["projects/123/locations/us/taxonomies/456/policyTags/old"]}}]`,
+			New:                `[{"name": "col1", "policyTags": {"names": ["projects/123/locations/us/taxonomies/456/policyTags/new"]}}]`,
+			ExpectDiffSuppress: false,
+		},
+		"suppress if explicit policy tag matches backend": {
+			Old:                `[{"name": "col1", "policyTags": {"names": ["projects/123/locations/us/taxonomies/456/policyTags/same"]}}]`,
+			New:                `[{"name": "col1", "policyTags": {"names": ["projects/123/locations/us/taxonomies/456/policyTags/same"]}}]`,
+			ExpectDiffSuppress: true,
+		},
+		"mixed: ignore policy tag removal but detect description change": {
+			Old:                `[{"name": "col1", "description": "old", "policyTags": {"names": ["projects/123/locations/us/taxonomies/456/policyTags/789"]}}]`,
+			New:                `[{"name": "col1", "description": "new"}]`,
+			ExpectDiffSuppress: false, // Should be false because description changed
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			// Create a real ResourceData object with the ignore flag set.
+			// This simulates `ignore_schema_changes = ["policyTags"]` in HCL.
+			d := schema.TestResourceDataRaw(t, ResourceBigQueryTable().Schema, map[string]interface{}{
+				"ignore_schema_changes": []interface{}{"policyTags"},
+			})
+
+			suppressed := bigQueryTableSchemaDiffSuppress("schema", tc.Old, tc.New, d)
+
+			if suppressed != tc.ExpectDiffSuppress {
+				t.Errorf("Expected DiffSuppress to be %v, got %v", tc.ExpectDiffSuppress, suppressed)
+			}
+		})
+	}
+}
+
+// Test mergePolicyTags using JSON to generate the structs.
+func TestMergePolicyTags(t *testing.T) {
+	t.Parallel()
+
+	// Define the 'Live' schema (from API) as JSON.
+	// Contains the policy tags we want to preserve.
+	liveJSON := `[
+		{
+			"name": "col1",
+			"type": "STRING",
+			"policyTags": {
+				"names": ["projects/123/locations/us/taxonomies/456/policyTags/789"]
+			}
+		},
+		{
+			"name": "nested_col",
+			"type": "RECORD",
+			"fields": [
+				{
+					"name": "subcol",
+					"type": "STRING",
+					"policyTags": {
+						"names": ["projects/123/locations/us/taxonomies/456/policyTags/nested_789"]
+					}
+				}
+			]
+		}
+	]`
+
+	// Define the 'Config' schema (from Terraform) as JSON.
+	// Simulates the user NOT defining policyTags in their config.
+	configJSON := `[
+		{
+			"name": "col1",
+			"type": "STRING"
+		},
+		{
+			"name": "nested_col",
+			"type": "RECORD",
+			"fields": [
+				{
+					"name": "subcol",
+					"type": "STRING"
+				}
+			]
+		}
+	]`
+
+	// Define the Expected Result.
+	// It should look like the Config, but with policy tags merged in from Live.
+	expectedJSON := `[
+		{
+			"name": "col1",
+			"type": "STRING",
+			"policyTags": {
+				"names": ["projects/123/locations/us/taxonomies/456/policyTags/789"]
+			}
+		},
+		{
+			"name": "nested_col",
+			"type": "RECORD",
+			"fields": [
+				{
+					"name": "subcol",
+					"type": "STRING",
+					"policyTags": {
+						"names": ["projects/123/locations/us/taxonomies/456/policyTags/nested_789"]
+					}
+				}
+			]
+		}
+	]`
+
+	// Unmarshal input data into SDK types
+	var liveFields []*bigquery.TableFieldSchema
+	if err := json.Unmarshal([]byte(liveJSON), &liveFields); err != nil {
+		t.Fatalf("Failed to unmarshal live JSON: %v", err)
+	}
+
+	var configFields []*bigquery.TableFieldSchema
+	if err := json.Unmarshal([]byte(configJSON), &configFields); err != nil {
+		t.Fatalf("Failed to unmarshal config JSON: %v", err)
+	}
+
+	// Unmarshal configJSON into []interface{} to create the rawSchema
+	var rawSchema []interface{}
+	if err := json.Unmarshal([]byte(configJSON), &rawSchema); err != nil {
+		t.Fatalf("Failed to unmarshal config JSON to rawSchema: %v", err)
+	}
+
+	// Run the function under test
+	mergePolicyTags(configFields, liveFields, rawSchema)
+
+	// Validate: Marshal the result back to JSON and compare with Expected.
+	resultBytes, err := json.Marshal(configFields)
+	if err != nil {
+		t.Fatalf("Failed to marshal result: %v", err)
+	}
+
+	var resultGeneric, expectedGeneric interface{}
+	if err := json.Unmarshal(resultBytes, &resultGeneric); err != nil {
+		t.Fatalf("Failed to unmarshal result generic: %v", err)
+	}
+	if err := json.Unmarshal([]byte(expectedJSON), &expectedGeneric); err != nil {
+		t.Fatalf("Failed to unmarshal expected generic: %v", err)
+	}
+
+	if !reflect.DeepEqual(resultGeneric, expectedGeneric) {
+		t.Errorf("Result does not match expected.\nGot:\n%s\nExpected:\n%s", string(resultBytes), expectedJSON)
+	}
+}
+
+func TestMergePolicyTagsIntoMap(t *testing.T) {
+	t.Parallel()
+
+	old := []interface{}{
+		map[string]interface{}{
+			"name":       "col1",
+			"policyTags": map[string]interface{}{"names": []interface{}{"projects/123/locations/us/taxonomies/456/policyTags/789"}},
+		},
+	}
+	new := []interface{}{
+		map[string]interface{}{"name": "col1"}, // Policy tag missing here
+	}
+
+	mergePolicyTagsIntoMap(old, new)
+
+	updatedField := new[0].(map[string]interface{})
+	if _, ok := updatedField["policyTags"]; !ok {
+		t.Errorf("policyTags were not merged into the map")
 	}
 }
