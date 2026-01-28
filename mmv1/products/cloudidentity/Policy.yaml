@@ -102,3 +102,16 @@ properties:
         required: true
         custom_expand: 'templates/terraform/custom_expand/cloudidentity_policy_setting_value_json.go.tmpl'
         custom_flatten: 'templates/terraform/custom_flatten/cloudidentity_policy_setting_value_json.go.tmpl'
+
+examples:
+  - name: "cloudidentity_policy_basic"
+    primary_resource_id: "primary"
+    vars:
+      # NOTE: These must be provided by the test environment/ recorded VCR cassette.
+      customer: "customers/C01234567"
+      org_unit: "orgUnits/03abcxyz"
+      group: "groups/0123456789"
+      query: "true"
+      setting_type: "something.googleapis.com/SettingType"
+      value_json: '{"enabled": true}'
+    min_version: beta
