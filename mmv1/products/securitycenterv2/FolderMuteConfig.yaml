@@ -37,6 +37,8 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 examples:
   - name: 'scc_v2_folder_mute_config_basic'
     primary_resource_id: 'default'
