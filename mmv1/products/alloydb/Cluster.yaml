@@ -352,6 +352,7 @@ properties:
     conflicts:
       - restore_continuous_backup_source
       - restore_backupdr_backup_source
+      - restore_backupdr_pitr_source
     properties:
       - name: 'backupName'
         type: String
@@ -368,6 +369,7 @@ properties:
     conflicts:
       - restore_backup_source
       - restore_backupdr_backup_source
+      - restore_backupdr_pitr_source
     properties:
       - name: 'cluster'
         type: String
@@ -390,11 +392,12 @@ properties:
     conflicts:
       - restore_continuous_backup_source
       - restore_backup_source
+      - restore_backupdr_pitr_source
     properties:
       - name: 'backup'
         type: String
         description: |
-          The name of the BackupDR backup that this cluster is restored from.
+          The name of the BackupDR backup that this cluster is restored from. It must be of the format "projects/[PROJECT]/locations/[LOCATION]/backupVaults/[VAULT_ID]/dataSources/[DATASOURCE_ID]/backups/[BACKUP_ID]"
         required: true
         immutable: true
   - name: 'restoreBackupdrPitrSource'
@@ -411,7 +414,7 @@ properties:
       - name: 'dataSource'
         type: String
         description: |
-          The name of the BackupDR data source that this cluster is restore from.
+          The name of the BackupDR data source that this cluster is restore from. It must be of the format "projects/[PROJECT]/locations/[LOCATION]/backupVaults/[VAULT_ID]/dataSources/[DATASOURCE_ID]"
         required: true
         immutable: true
       - name: 'pointInTime'
