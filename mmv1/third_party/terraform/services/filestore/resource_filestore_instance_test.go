@@ -862,11 +862,12 @@ resource "google_compute_network" "psc_network" {
 }
 
 resource "google_compute_subnetwork" "psc_subnet" {
-  name          = "%{name}"
-  ip_cidr_range = "10.2.0.0/16"
-  region        = "%{location}"
-  stack_type    = "IPV4_IPV6"
-  network       = google_compute_network.psc_network.id
+  name             = "%{name}"
+  ip_cidr_range    = "10.2.0.0/16"
+  region           = "%{location}"
+  stack_type       = "IPV4_IPV6"
+  ipv6_access_type = "INTERNAL"
+  network          = google_compute_network.psc_network.id
 }
 
 resource "google_network_connectivity_service_connection_policy" "default" {
