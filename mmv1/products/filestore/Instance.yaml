@@ -81,7 +81,7 @@ virtual_fields:
       - 'PAUSE'
       - 'RESUME'
     description: |
-      Replicate action can perfrom p[ause and resume on replica
+      Replica action can perform pause and resume on replica
 parameters:
   - name: 'zone'
     type: String
