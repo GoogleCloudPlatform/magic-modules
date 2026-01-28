@@ -24,6 +24,7 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"golang.org/x/exp/slices"
+	"gopkg.in/yaml.v3"
 )
 
 // Represents a product to be managed
@@ -33,6 +34,9 @@ type Product struct {
 	// words in the api name - "accesscontextmanager" vs "AccessContextManager"
 	// Example inputs: "Compute", "AccessContextManager"
 	Name string
+
+	// This is the name of the package path relative to mmv1 root repo
+	PackagePath string `yaml:"package_path,omitempty"`
 
 	// original value of :name before the provider override happens
 	// same as :name if not overridden in provider
@@ -50,13 +54,8 @@ type Product struct {
 	// The API versions of this product
 	Versions []*product.Version
 
-	// The base URL for the service API endpoint
-	// For example: `https://www.googleapis.com/compute/v1/`
-	BaseUrl string `yaml:"base_url,omitempty"`
-
-	// The validator "relative URI" of a resource, relative to the product
-	// base URL. Specific to defining the resource as a CAI asset.
-	CaiBaseUrl string
+	// The service name from CAI asset name, e.g. bigtable.googleapis.com.
+	CaiAssetService string `yaml:"cai_asset_service,omitempty"`
 
 	// CaiResourceType of resources that already have an AssetType constant defined in the product.
 	ResourcesWithCaiAssetType map[string]struct{}
@@ -73,15 +72,18 @@ type Product struct {
 
 	ClientName string `yaml:"client_name,omitempty"`
 
+	// The version of the product which is currently being generated.
+	Version *product.Version `yaml:"-"`
+
 	// The compiler to generate the downstream files, for example "terraformgoogleconversion-codegen".
 	Compiler string `yaml:"-"`
 }
 
-func (p *Product) UnmarshalYAML(unmarshal func(any) error) error {
+func (p *Product) UnmarshalYAML(value *yaml.Node) error {
 	type productAlias Product
 	aliasObj := (*productAlias)(p)
 
-	if err := unmarshal(aliasObj); err != nil {
+	if err := value.Decode(aliasObj); err != nil {
 		return err
 	}
 
@@ -227,11 +229,6 @@ func (p *Product) ExistsAtVersion(name string) bool {
 	return false
 }
 
-func (p *Product) SetPropertiesBasedOnVersion(version *product.Version) {
-	p.BaseUrl = version.BaseUrl
-	p.CaiBaseUrl = version.CaiBaseUrl
-}
-
 func (p *Product) TerraformName() string {
 	if p.LegacyName != "" {
 		return google.Underscore(p.LegacyName)
@@ -240,10 +237,10 @@ func (p *Product) TerraformName() string {
 }
 
 func (p *Product) ServiceBaseUrl() string {
-	if p.CaiBaseUrl != "" {
-		return p.CaiBaseUrl
+	if p.Version.CaiBaseUrl != "" {
+		return p.Version.CaiBaseUrl
 	}
-	return p.BaseUrl
+	return p.Version.BaseUrl
 }
 
 func (p *Product) ServiceName() string {
@@ -297,6 +294,11 @@ func Merge(self, otherObj reflect.Value, version string) {
 	}
 
 	for i := 0; i < selfObj.NumField(); i++ {
+
+		// skip unexported fields
+		if !selfObj.Field(i).CanSet() {
+			continue
+		}
 
 		// skip if the override is the "empty" value
 		emptyOverrideValue := reflect.DeepEqual(reflect.Zero(otherObj.Field(i).Type()).Interface(), otherObj.Field(i).Interface())

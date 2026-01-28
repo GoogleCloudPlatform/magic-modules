@@ -207,9 +207,7 @@ properties:
       e.g. projects/123/locations/us/dataExchanges/456/listings/789 -> projects/123/datasets/my_dataset
       For Data Exchange subscriptions, this map may contain multiple entries if the Data Exchange has multiple listings.
     key_name: resource_name
-    key_description: The associated linked resource
     value_type:
-      name: linked_resource
       type: NestedObject
       properties:
         - name: 'listing'

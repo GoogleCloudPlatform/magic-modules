@@ -1,0 +1,180 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: MulticastGroupRange
+description: Create a multicast group range in the current project.
+references:
+  guides:
+    'Create Multicast Group Range': 'https://docs.cloud.google.com/vpc/docs/multicast/create-group-ranges#create_a_group_range'
+  api: 'https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastGroupRanges'
+base_url: projects/{{project}}/locations/{{location}}/multicastGroupRanges
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/multicastGroupRanges/{{multicast_group_range_id}}
+create_url: projects/{{project}}/locations/{{location}}/multicastGroupRanges?multicastGroupRangeId={{multicast_group_range_id}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/multicastGroupRanges/{{multicast_group_range_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/multicastGroupRanges/{{multicast_group_range_id}}
+examples:
+  - name: network_services_multicast_group_range_basic
+    primary_resource_id: mgr_test
+    vars:
+      network_name: test-mgr-network
+      domain_name: test-mgr-domain
+      internal_range_name: test-mgr-internal-range
+      group_range_name: test-mgr-group-range
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+    - update
+  type: OpAsync
+  result:
+    resource_inside_response: true
+  include_project: false
+autogen_status: TXVsdGljYXN0R3JvdXBSYW5nZQ==
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: multicastGroupRangeId
+    type: String
+    description: |-
+      A unique name for the multicast group range.
+      The name is restricted to letters, numbers, and hyphen, with the first
+      character a letter, and the last a letter or a number. The name must not
+      exceed 48 characters.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: consumerAcceptList
+    type: Array
+    description: |-
+      A list of consumer projects that are allowed to subscribe to the multicast
+      IP addresses within the range defined by this MulticastGroupRange. The
+      project can be specified using its project ID or project number. If left
+      empty, then all consumer projects are allowed (unless
+      require_explicit_accept is set to true) once they have VPC networks
+      associated to the multicast domain. The current max length of the accept
+      list is 100.
+    item_type:
+      type: String
+  - name: createTime
+    type: String
+    description: |-
+      [Output only] The timestamp when the multicast group range was
+      created.
+    output: true
+  - name: description
+    type: String
+    description: An optional text description of the multicast group range.
+  - name: distributionScope
+    type: String
+    description: |-
+      Multicast group range's distribution scope. Intra-zone or intra-region
+      cross-zone is supported, with default value being intra-region. Cross
+      region distribution is not supported.
+      Possible values:
+      INTRA_ZONE
+      INTRA_REGION
+    immutable: true
+  - name: ipCidrRange
+    type: String
+    description: '[Output only] The multicast group IP address range.'
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Labels as key-value pairs.
+  - name: logConfig
+    type: NestedObject
+    description: The logging configuration.
+    properties:
+      - name: enabled
+        type: Boolean
+        description: Whether to enable logging or not.
+  - name: multicastDomain
+    type: String
+    description: |-
+      The resource name of the multicast domain in which to create this
+      multicast group range.
+      Use the following format:
+      `projects/*/locations/global/multicastDomains/*`.
+    immutable: true
+    required: true
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the multicast group range.
+      Use the following format:
+      `projects/*/locations/global/multicastGroupRanges/*`.
+    output: true
+  - name: requireExplicitAccept
+    type: Boolean
+    description: Whether an empty consumer_accept_list will deny all consumer projects.
+  - name: reservedInternalRange
+    type: String
+    description: |-
+      The resource name of the internal range reserved for this
+      multicast group range.
+
+      The internal range must be a Class D address (224.0.0.0 to 239.255.255.255)
+      and have a prefix length >= 23.
+
+      Use the following format:
+      `projects/*/locations/global/internalRanges/*`.
+    immutable: true
+    required: true
+  - name: state
+    type: NestedObject
+    description: The multicast resource's state.
+    output: true
+    properties:
+      - name: state
+        type: String
+        description: |-
+          The state of the multicast resource.
+          Possible values:
+          CREATING
+          ACTIVE
+          DELETING
+          DELETE_FAILED
+          UPDATING
+          UPDATE_FAILED
+          INACTIVE
+        output: true
+  - name: uniqueId
+    type: String
+    description: |-
+      [Output only] The Google-generated UUID for the resource. This value is
+      unique across all multicast group range resources. If a group
+      range is deleted and another with the same name is created, the new
+      group range is assigned a different unique_id.
+    output: true
+  - name: updateTime
+    type: String
+    description: |-
+      [Output only] The timestamp when the multicast group range was most
+      recently updated.
+    output: true

@@ -57,7 +57,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     vars:
-      folder_name: 'my-folder'
+      folder_name: 'folder-cfg'
       key_project_name: 'key-proj'
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'

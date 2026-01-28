@@ -44,14 +44,14 @@ examples:
   - name: 'folder_access_approval_full'
     primary_resource_id: 'folder_access_approval'
     vars:
-      folder_name: 'my-folder'
+      folder_name: 'folder-faaf'
     test_env_vars:
       org_id: 'ORG_ID'
     exclude_test: true
   - name: 'folder_access_approval_active_key_version'
     primary_resource_id: 'folder_access_approval'
     vars:
-      folder_name: 'my-folder'
+      folder_name: 'folder-faak'
     test_env_vars:
       org_id: 'ORG_ID'
     exclude_test: true

@@ -43,6 +43,7 @@ async:
 custom_code:
   encoder: 'templates/terraform/encoders/memorystore_instance.go.tmpl'
   decoder: 'templates/terraform/decoders/memorystore_instance.go.tmpl'
+  constants: 'templates/terraform/constants/memorystore_instance.go.tmpl'
 examples:
   - name: 'memorystore_instance_basic'
     primary_resource_id: 'instance-basic'
@@ -54,6 +55,8 @@ examples:
       prevent_destroy: 'true'
     test_vars_overrides:
       'prevent_destroy': 'false'
+    ignore_read_extra:
+      - 'update_time'
   - name: 'memorystore_instance_full'
     primary_resource_id: 'instance-full'
     bootstrap_iam:
@@ -81,6 +84,8 @@ examples:
       prevent_destroy: 'true'
     test_vars_overrides:
       'prevent_destroy': 'false'
+    ignore_read_extra:
+      - 'update_time'
   - name: 'memorystore_instance_secondary_instance'
     primary_resource_id: 'secondary_instance'
     vars:
@@ -106,6 +111,8 @@ examples:
       'secondary_instance_deletion_protection_enabled': 'false'
       'primary_instance_prevent_destroy': 'false'
       'secondary_instance_prevent_destroy': 'false'
+    ignore_read_extra:
+      - 'update_time'
 virtual_fields:
   - name: 'desired_psc_auto_connections'
     description: "`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead `terraform import` will only work with desired_auto_created_endpoints`."
@@ -134,6 +141,7 @@ virtual_fields:
       endpoints connections. "
     type: Array
     immutable: true
+    diff_suppress_func: 'memorystoreInstancedDesiredAutoConnectionsDiffSuppress'
     conflicts:
       - desiredPscAutoConnections
     item_type:
@@ -480,6 +488,23 @@ properties:
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
         output: true
+  - name: 'maintenanceVersion'
+    type: String
+    description: |
+      This field can be used to trigger self service update to indicate the desired maintenance version. The input to this field can be determined by the available_maintenance_versions field.
+      *Note*: This field can only be specified when updating an existing cluster to a newer version. Downgrades are currently not supported!
+  - name: 'effectiveMaintenanceVersion'
+    type: String
+    description: |
+      This field represents the actual maintenance version of the cluster.
+    output: true
+  - name: 'availableMaintenanceVersions'
+    type: Array
+    description: |
+     This field is used to determine the available maintenance versions for the self service update.
+    item_type:
+      type: String
+    output: true
   - name: 'engineVersion'
     type: String
     description: "Optional. Engine version of the instance."

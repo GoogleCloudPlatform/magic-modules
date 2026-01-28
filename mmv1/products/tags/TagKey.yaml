@@ -16,8 +16,8 @@ name: 'TagKey'
 description: A TagKey, used to group a set of TagValues.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing'
-  api: 'https://cloud.google.com/resource-manager/reference/rest/v3/tagKeys'
+    'Official Documentation': 'https://docs.cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing'
+  api: 'https://docs.cloud.google.com/resource-manager/reference/rest/v3/tagKeys'
 docs:
 id_format: 'tagKeys/{{name}}'
 base_url: 'tagKeys'
@@ -125,3 +125,9 @@ properties:
       Purpose data corresponds to the policy system that the tag is intended for. For example, the GCE_FIREWALL purpose expects data in the following format: `network = "<project-name>/<vpc-name>"`.
     immutable: true
     ignore_read: true
+  - name: 'allowedValuesRegex'
+    type: String
+    description: |
+      Regular expression constraint for dynamic tag values, follows RE2 syntax. If present, it implicitly allows dynamic values (constrained by the regex).
+    validation:
+      function: 'verify.ValidateTagKeyAllowedValuesRegex'

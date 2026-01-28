@@ -76,3 +76,14 @@ func AllValuesAreNil(m map[string]interface{}) bool {
 
 	return true
 }
+
+// ParseFieldValue extracts named part from resource url.
+func ParseFieldValue(url string, name string) string {
+	fragments := strings.Split(url, "/")
+	for ix, item := range fragments {
+		if item == name && ix+1 < len(fragments) {
+			return fragments[ix+1]
+		}
+	}
+	return ""
+}

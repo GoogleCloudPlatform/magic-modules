@@ -35,6 +35,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+  constants: 'templates/terraform/constants/bigtable_app_profile_routing.go.tmpl'
   extra_schema_entry: 'templates/terraform/extra_schema_entry/bigtable_app_profile.go.tmpl'
   encoder: 'templates/terraform/encoders/bigtable_app_profile.go.tmpl'
   pre_update: 'templates/terraform/pre_update/bigtable_app_profile.go.tmpl'

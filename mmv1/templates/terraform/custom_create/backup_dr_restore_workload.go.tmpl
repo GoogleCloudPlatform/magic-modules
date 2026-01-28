@@ -1,0 +1,1005 @@
+// Helper functions for repeated patterns
+processEncryptionKey := func(ekList []interface{}) map[string]interface{} {
+    if len(ekList) == 0 || ekList[0] == nil {
+        return nil
+    }
+    ek := ekList[0].(map[string]interface{})
+    ekObj := make(map[string]interface{})
+    if rk, ok := ek["raw_key"]; ok && rk != "" {
+        ekObj["rawKey"] = rk.(string)
+    }
+    if rek, ok := ek["rsa_encrypted_key"]; ok && rek != "" {
+        ekObj["rsaEncryptedKey"] = rek.(string)
+    }
+    if kn, ok := ek["kms_key_name"]; ok && kn != "" {
+        ekObj["kmsKeyName"] = kn.(string)
+    }
+    if ksa, ok := ek["kms_key_service_account"]; ok && ksa != "" {
+        ekObj["kmsKeyServiceAccount"] = ksa.(string)
+    }
+    if len(ekObj) > 0 {
+        return ekObj
+    }
+    return nil
+}
+
+processGuestOsFeatures := func(gofList []interface{}) []map[string]interface{} {
+    if len(gofList) == 0 {
+        return nil
+    }
+    gofArr := []map[string]interface{}{}
+    for _, gof := range gofList {
+        if gof == nil {
+            continue
+        }
+        gofMap := gof.(map[string]interface{})
+        gofObj := make(map[string]interface{})
+        if t, ok := gofMap["type"]; ok && t != "" {
+            gofObj["type"] = t.(string)
+        }
+        if len(gofObj) > 0 {
+            gofArr = append(gofArr, gofObj)
+        }
+    }
+    if len(gofArr) > 0 {
+        return gofArr
+    }
+    return nil
+}
+
+processLabels := func(val interface{}) map[string]string {
+    labels := make(map[string]string)
+    if labelMap, isMap := val.(map[string]interface{}); isMap {
+        for k, v := range labelMap {
+            if vStr, ok := v.(string); ok {
+                labels[k] = vStr
+            }
+        }
+    }
+    if len(labels) > 0 {
+        return labels
+    }
+    return nil
+}
+
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+    return err
+}
+
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+    return fmt.Errorf("Error fetching project for RestoreWorkload: %s", err)
+}
+billingProject := project
+
+obj := make(map[string]interface{})
+
+// ==================== Top-Level Request Fields ====================
+if v, ok := d.GetOk("name"); ok && v.(string) != "" {
+    obj["name"] = v.(string)
+}
+if v, ok := d.GetOk("request_id"); ok && v.(string) != "" {
+    obj["requestId"] = v.(string)
+}
+if v, ok := d.GetOk("clear_overrides_field_mask"); ok && v.(string) != "" {
+    obj["clearOverridesFieldMask"] = v.(string)
+}
+
+// ==================== Target Environments ====================
+if v, ok := d.GetOkExists("compute_instance_target_environment"); ok {
+    list := v.([]interface{})
+    if len(list) > 0 {
+        m := list[0].(map[string]interface{})
+        env := make(map[string]interface{})
+        if val, ok := m["project"]; ok {
+            env["project"] = val.(string)
+        }
+        if val, ok := m["zone"]; ok {
+            env["zone"] = val.(string)
+        }
+        if len(env) > 0 {
+            obj["computeInstanceTargetEnvironment"] = env
+        }
+    }
+}
+
+// Disk target environment block
+if v, ok := d.GetOkExists("disk_target_environment"); ok {
+    list := v.([]interface{})
+    if len(list) > 0 {
+        m := list[0].(map[string]interface{})
+        env := make(map[string]interface{})
+        if val, ok := m["project"]; ok {
+            env["project"] = val.(string)
+        }
+        if val, ok := m["zone"]; ok {
+            env["zone"] = val.(string)
+        }
+        if len(env) > 0 {
+            obj["diskTargetEnvironment"] = env
+        }
+    }
+}
+
+// Region disk target environment block
+if v, ok := d.GetOkExists("region_disk_target_environment"); ok {
+    list := v.([]interface{})
+    if len(list) > 0 {
+        m := list[0].(map[string]interface{})
+        env := make(map[string]interface{})
+        if val, ok := m["project"]; ok {
+            env["project"] = val.(string)
+        }
+        if val, ok := m["region"]; ok {
+            env["region"] = val.(string)
+        }
+        if zones, ok := m["replica_zones"]; ok {
+            env["replicaZones"] = zones
+        }
+        if len(env) > 0 {
+            obj["regionDiskTargetEnvironment"] = env
+        }
+    }
+}
+
+// ==================== Compute Instance Restore Properties ====================
+if v, ok := d.GetOkExists("compute_instance_restore_properties"); ok {
+    list := v.([]interface{})
+    if len(list) > 0 {
+        m := list[0].(map[string]interface{})
+        props := make(map[string]interface{})
+        
+        // --- Basic Properties ---
+        if val, ok := m["name"]; ok && val != "" {
+            props["name"] = val.(string)
+        }
+        if val, ok := m["description"]; ok && val != "" {
+            props["description"] = val.(string)
+        }
+        if val, ok := m["hostname"]; ok && val != "" {
+            props["hostname"] = val.(string)
+        }
+        if val, ok := m["machine_type"]; ok && val != "" {
+            props["machineType"] = val.(string)
+        }
+        if val, ok := m["min_cpu_platform"]; ok && val != "" {
+            props["minCpuPlatform"] = val.(string)
+        }
+        
+        // --- Boolean Flags ---
+        if val, ok := m["can_ip_forward"]; ok {
+            props["canIpForward"] = val.(bool)
+        }
+        if val, ok := m["deletion_protection"]; ok {
+            props["deletionProtection"] = val.(bool)
+        }
+        
+        // --- Enum Properties ---
+        if val, ok := m["private_ipv6_google_access"]; ok && val != "" {
+            props["privateIpv6GoogleAccess"] = val.(string)
+        }
+        if val, ok := m["key_revocation_action_type"]; ok && val != "" {
+            props["keyRevocationActionType"] = val.(string)
+        }
+        
+        // --- Advanced Machine Features ---
+        if val, ok := m["advanced_machine_features"]; ok && len(val.([]interface{})) > 0 {
+            amfList := val.([]interface{})
+            if amfList[0] != nil {
+                amf := amfList[0].(map[string]interface{})
+                amfObj := make(map[string]interface{})
+                if v, ok := amf["enable_nested_virtualization"]; ok {
+                    amfObj["enableNestedVirtualization"] = v.(bool)
+                }
+                if v, ok := amf["threads_per_core"]; ok && v.(int) > 0 {
+                    amfObj["threadsPerCore"] = v.(int)
+                }
+                if v, ok := amf["visible_core_count"]; ok && v.(int) > 0 {
+                    amfObj["visibleCoreCount"] = v.(int)
+                }
+                if v, ok := amf["enable_uefi_networking"]; ok {
+                    amfObj["enableUefiNetworking"] = v.(bool)
+                }
+                if len(amfObj) > 0 {
+                    props["advancedMachineFeatures"] = amfObj
+                }
+            }
+        }
+        
+        // --- Confidential Instance Config ---
+        if val, ok := m["confidential_instance_config"]; ok && len(val.([]interface{})) > 0 {
+            cicList := val.([]interface{})
+            if cicList[0] != nil {
+                cic := cicList[0].(map[string]interface{})
+                cicObj := make(map[string]interface{})
+                if v, ok := cic["enable_confidential_compute"]; ok {
+                    cicObj["enableConfidentialCompute"] = v.(bool)
+                }
+                if len(cicObj) > 0 {
+                    props["confidentialInstanceConfig"] = cicObj
+                }
+            }
+        }
+        
+        // --- Disks Configuration ---
+        if val, ok := m["disks"]; ok && len(val.([]interface{})) > 0 {
+            disksList := val.([]interface{})
+            disks := []map[string]interface{}{}
+            for _, disk := range disksList {
+                if disk == nil {
+                    continue
+                }
+                diskMap := disk.(map[string]interface{})
+                diskObj := make(map[string]interface{})
+                
+                if v, ok := diskMap["device_name"]; ok && v != "" {
+                    diskObj["deviceName"] = v.(string)
+                }
+                if v, ok := diskMap["kind"]; ok && v != "" {
+                    diskObj["kind"] = v.(string)
+                }
+                if v, ok := diskMap["mode"]; ok && v != "" {
+                    diskObj["mode"] = v.(string)
+                }
+                if v, ok := diskMap["source"]; ok && v != "" {
+                    diskObj["source"] = v.(string)
+                }
+                if v, ok := diskMap["index"]; ok {
+                    diskObj["index"] = v.(int)
+                }
+                if v, ok := diskMap["boot"]; ok {
+                    diskObj["boot"] = v.(bool)
+                }
+                if v, ok := diskMap["auto_delete"]; ok {
+                    diskObj["autoDelete"] = v.(bool)
+                }
+                if v, ok := diskMap["license"]; ok && len(v.([]interface{})) > 0 {
+                    diskObj["license"] = v.([]interface{})
+                }
+                if v, ok := diskMap["disk_interface"]; ok && v != "" {
+                    diskObj["diskInterface"] = v.(string)
+                }
+                if v, ok := diskMap["disk_size_gb"]; ok && v.(int) > 0 {
+                    diskObj["diskSizeGb"] = v.(int)
+                }
+                if v, ok := diskMap["saved_state"]; ok && v != "" {
+                    diskObj["savedState"] = v.(string)
+                }
+                if v, ok := diskMap["disk_type"]; ok && v != "" {
+                    diskObj["diskType"] = v.(string)
+                }
+                if v, ok := diskMap["type"]; ok && v != "" {
+                    diskObj["type"] = v.(string)
+                }
+                
+                // Initialize params
+                if v, ok := diskMap["initialize_params"]; ok && len(v.([]interface{})) > 0 {
+                    ipList := v.([]interface{})
+                    if ipList[0] != nil {
+                        ip := ipList[0].(map[string]interface{})
+                        ipObj := make(map[string]interface{})
+                        if dn, ok := ip["disk_name"]; ok && dn != "" {
+                            ipObj["diskName"] = dn.(string)
+                        }
+                        if rz, ok := ip["replica_zones"]; ok && len(rz.([]interface{})) > 0 {
+                            ipObj["replicaZones"] = rz.([]interface{})
+                        }
+                        if len(ipObj) > 0 {
+                            diskObj["initializeParams"] = ipObj
+                        }
+                    }
+                }
+                
+                // Guest OS features
+                if v, ok := diskMap["guest_os_feature"]; ok && len(v.([]interface{})) > 0 {
+                    if gofArr := processGuestOsFeatures(v.([]interface{})); gofArr != nil {
+                        diskObj["guestOsFeature"] = gofArr
+                    }
+                }
+                
+                // Disk encryption key
+                if v, ok := diskMap["disk_encryption_key"]; ok && len(v.([]interface{})) > 0 {
+                    if dekObj := processEncryptionKey(v.([]interface{})); dekObj != nil {
+                        diskObj["diskEncryptionKey"] = dekObj
+                    }
+                }
+                
+                if len(diskObj) > 0 {
+                    disks = append(disks, diskObj)
+                }
+            }
+            if len(disks) > 0 {
+                props["disks"] = disks
+            }
+        }
+        
+        // --- Display & Accelerators ---
+        // Display device
+        if val, ok := m["display_device"]; ok && len(val.([]interface{})) > 0 {
+            ddList := val.([]interface{})
+            if ddList[0] != nil {
+                dd := ddList[0].(map[string]interface{})
+                ddObj := make(map[string]interface{})
+                if v, ok := dd["enable_display"]; ok {
+                    ddObj["enableDisplay"] = v.(bool)
+                }
+                if len(ddObj) > 0 {
+                    props["displayDevice"] = ddObj
+                }
+            }
+        }
+        
+        // Guest accelerators
+        if val, ok := m["guest_accelerators"]; ok && len(val.([]interface{})) > 0 {
+            gaList := val.([]interface{})
+            gaArr := []map[string]interface{}{}
+            for _, ga := range gaList {
+                if ga == nil {
+                    continue
+                }
+                gaMap := ga.(map[string]interface{})
+                gaObj := make(map[string]interface{})
+                if at, ok := gaMap["accelerator_type"]; ok && at != "" {
+                    gaObj["acceleratorType"] = at.(string)
+                }
+                if ac, ok := gaMap["accelerator_count"]; ok {
+                    gaObj["acceleratorCount"] = ac.(int)
+                }
+                if len(gaObj) > 0 {
+                    gaArr = append(gaArr, gaObj)
+                }
+            }
+            if len(gaArr) > 0 {
+                props["guestAccelerators"] = gaArr
+            }
+        }
+        
+        // --- Security & Encryption ---
+        // Instance encryption key
+        if val, ok := m["instance_encryption_key"]; ok && len(val.([]interface{})) > 0 {
+            if iekObj := processEncryptionKey(val.([]interface{})); iekObj != nil {
+                props["instanceEncryptionKey"] = iekObj
+            }
+        }
+        
+        // --- Metadata & Labels ---
+        // Labels
+        if val, ok := m["labels"]; ok {
+            if labels := processLabels(val); labels != nil {
+                props["labels"] = labels
+            }
+        }
+        
+        // Metadata
+        if val, ok := m["metadata"]; ok && len(val.([]interface{})) > 0 {
+            mdList := val.([]interface{})
+            if mdList[0] != nil {
+                md := mdList[0].(map[string]interface{})
+                mdObj := make(map[string]interface{})
+                if items, ok := md["items"]; ok && len(items.([]interface{})) > 0 {
+                    itemsList := items.([]interface{})
+                    itemsArr := []map[string]interface{}{}
+                    for _, item := range itemsList {
+                        if item == nil {
+                            continue
+                        }
+                        itemMap := item.(map[string]interface{})
+                        itemObj := make(map[string]interface{})
+                        if k, ok := itemMap["key"]; ok && k != "" {
+                            itemObj["key"] = k.(string)
+                        }
+                        if v, ok := itemMap["value"]; ok && v != "" {
+                            itemObj["value"] = v.(string)
+                        }
+                        if len(itemObj) > 0 {
+                            itemsArr = append(itemsArr, itemObj)
+                        }
+                    }
+                    if len(itemsArr) > 0 {
+                        mdObj["items"] = itemsArr
+                    }
+                }
+                if len(mdObj) > 0 {
+                    props["metadata"] = mdObj
+                }
+            }
+        }
+        
+        // --- Networking ---
+        // Network interfaces
+        if val, ok := m["network_interfaces"]; ok && len(val.([]interface{})) > 0 {
+            niList := val.([]interface{})
+            niArr := []map[string]interface{}{}
+            for _, ni := range niList {
+                if ni == nil {
+                    continue
+                }
+                niMap := ni.(map[string]interface{})
+                niObj := make(map[string]interface{})
+                
+                if v, ok := niMap["network"]; ok && v != "" {
+                    niObj["network"] = v.(string)
+                }
+                if v, ok := niMap["subnetwork"]; ok && v != "" {
+                    niObj["subnetwork"] = v.(string)
+                }
+                if v, ok := niMap["ip_address"]; ok && v != "" {
+                    niObj["ipAddress"] = v.(string)
+                }
+                if v, ok := niMap["ipv6_address"]; ok && v != "" {
+                    niObj["ipv6Address"] = v.(string)
+                }
+                if v, ok := niMap["internal_ipv6_prefix_length"]; ok && v.(int) > 0 {
+                    niObj["internalIpv6PrefixLength"] = v.(int)
+                }
+                if v, ok := niMap["stack_type"]; ok && v != "" {
+                    niObj["stackType"] = v.(string)
+                }
+                if v, ok := niMap["ipv6_access_type"]; ok && v != "" {
+                    niObj["ipv6AccessType"] = v.(string)
+                }
+                if v, ok := niMap["queue_count"]; ok && v.(int) > 0 {
+                    niObj["queueCount"] = v.(int)
+                }
+                if v, ok := niMap["nic_type"]; ok && v != "" {
+                    niObj["nicType"] = v.(string)
+                }
+                if v, ok := niMap["network_attachment"]; ok && v != "" {
+                    niObj["networkAttachment"] = v.(string)
+                }
+                
+                // Access configs
+                if ac, ok := niMap["access_configs"]; ok && len(ac.([]interface{})) > 0 {
+                    acList := ac.([]interface{})
+                    acArr := []map[string]interface{}{}
+                    for _, acItem := range acList {
+                        if acItem == nil {
+                            continue
+                        }
+                        acMap := acItem.(map[string]interface{})
+                        acObj := make(map[string]interface{})
+                        if t, ok := acMap["type"]; ok && t != "" {
+                            acObj["type"] = t.(string)
+                        }
+                        if n, ok := acMap["name"]; ok && n != "" {
+                            acObj["name"] = n.(string)
+                        }
+                        if ei, ok := acMap["external_ip"]; ok && ei != "" {
+                            acObj["externalIp"] = ei.(string)
+                        }
+                        if eiv6, ok := acMap["external_ipv6"]; ok && eiv6 != "" {
+                            acObj["externalIpv6"] = eiv6.(string)
+                        }
+                        if eiv6pl, ok := acMap["external_ipv6_prefix_length"]; ok && eiv6pl.(int) > 0 {
+                            acObj["externalIpv6PrefixLength"] = eiv6pl.(int)
+                        }
+                        if spp, ok := acMap["set_public_ptr"]; ok {
+                            acObj["setPublicPtr"] = spp.(bool)
+                        }
+                        if ppdn, ok := acMap["public_ptr_domain_name"]; ok && ppdn != "" {
+                            acObj["publicPtrDomainName"] = ppdn.(string)
+                        }
+                        if nt, ok := acMap["network_tier"]; ok && nt != "" {
+                            acObj["networkTier"] = nt.(string)
+                        }
+                        if len(acObj) > 0 {
+                            acArr = append(acArr, acObj)
+                        }
+                    }
+                    if len(acArr) > 0 {
+                        niObj["accessConfigs"] = acArr
+                    }
+                }
+                
+                // IPv6 access configs
+                if iac, ok := niMap["ipv6_access_configs"]; ok && len(iac.([]interface{})) > 0 {
+                    iacList := iac.([]interface{})
+                    iacArr := []map[string]interface{}{}
+                    for _, iacItem := range iacList {
+                        if iacItem == nil {
+                            continue
+                        }
+                        iacMap := iacItem.(map[string]interface{})
+                        iacObj := make(map[string]interface{})
+                        if t, ok := iacMap["type"]; ok && t != "" {
+                            iacObj["type"] = t.(string)
+                        }
+                        if n, ok := iacMap["name"]; ok && n != "" {
+                            iacObj["name"] = n.(string)
+                        }
+                        if ei, ok := iacMap["external_ip"]; ok && ei != "" {
+                            iacObj["externalIp"] = ei.(string)
+                        }
+                        if eiv6, ok := iacMap["external_ipv6"]; ok && eiv6 != "" {
+                            iacObj["externalIpv6"] = eiv6.(string)
+                        }
+                        if eiv6pl, ok := iacMap["external_ipv6_prefix_length"]; ok && eiv6pl.(int) > 0 {
+                            iacObj["externalIpv6PrefixLength"] = eiv6pl.(int)
+                        }
+                        if spp, ok := iacMap["set_public_ptr"]; ok {
+                            iacObj["setPublicPtr"] = spp.(bool)
+                        }
+                        if ppdn, ok := iacMap["public_ptr_domain_name"]; ok && ppdn != "" {
+                            iacObj["publicPtrDomainName"] = ppdn.(string)
+                        }
+                        if nt, ok := iacMap["network_tier"]; ok && nt != "" {
+                            iacObj["networkTier"] = nt.(string)
+                        }
+                        if len(iacObj) > 0 {
+                            iacArr = append(iacArr, iacObj)
+                        }
+                    }
+                    if len(iacArr) > 0 {
+                        niObj["ipv6AccessConfigs"] = iacArr
+                    }
+                }
+                
+                // Alias IP ranges
+                if air, ok := niMap["alias_ip_ranges"]; ok && len(air.([]interface{})) > 0 {
+                    airList := air.([]interface{})
+                    airArr := []map[string]interface{}{}
+                    for _, airItem := range airList {
+                        if airItem == nil {
+                            continue
+                        }
+                        airMap := airItem.(map[string]interface{})
+                        airObj := make(map[string]interface{})
+                        if icr, ok := airMap["ip_cidr_range"]; ok && icr != "" {
+                            airObj["ipCidrRange"] = icr.(string)
+                        }
+                        if srn, ok := airMap["subnetwork_range_name"]; ok && srn != "" {
+                            airObj["subnetworkRangeName"] = srn.(string)
+                        }
+                        if len(airObj) > 0 {
+                            airArr = append(airArr, airObj)
+                        }
+                    }
+                    if len(airArr) > 0 {
+                        niObj["aliasIpRanges"] = airArr
+                    }
+                }
+                
+                if len(niObj) > 0 {
+                    niArr = append(niArr, niObj)
+                }
+            }
+            if len(niArr) > 0 {
+                props["networkInterfaces"] = niArr
+            }
+        }
+        
+        // Network performance config
+        if val, ok := m["network_performance_config"]; ok && len(val.([]interface{})) > 0 {
+            npcList := val.([]interface{})
+            if npcList[0] != nil {
+                npc := npcList[0].(map[string]interface{})
+                npcObj := make(map[string]interface{})
+                if tebt, ok := npc["total_egress_bandwidth_tier"]; ok && tebt != "" {
+                    npcObj["totalEgressBandwidthTier"] = tebt.(string)
+                }
+                if len(npcObj) > 0 {
+                    props["networkPerformanceConfig"] = npcObj
+                }
+            }
+        }
+        
+        // --- Resource Management ---
+        // Params
+        if val, ok := m["params"]; ok && len(val.([]interface{})) > 0 {
+            pList := val.([]interface{})
+            if pList[0] != nil {
+                p := pList[0].(map[string]interface{})
+                pObj := make(map[string]interface{})
+                if rmt, ok := p["resource_manager_tags"]; ok {
+                    rmtMap := make(map[string]string)
+                    if rmtMapVal, isMap := rmt.(map[string]interface{}); isMap {
+                        for k, v := range rmtMapVal {
+                            if vStr, ok := v.(string); ok {
+                                rmtMap[k] = vStr
+                            }
+                        }
+                    }
+                    if len(rmtMap) > 0 {
+                        pObj["resourceManagerTags"] = rmtMap
+                    }
+                }
+                if len(pObj) > 0 {
+                    props["params"] = pObj
+                }
+            }
+        }
+        
+        // Allocation affinity
+        if val, ok := m["allocation_affinity"]; ok && len(val.([]interface{})) > 0 {
+            aaList := val.([]interface{})
+            if aaList[0] != nil {
+                aa := aaList[0].(map[string]interface{})
+                aaObj := make(map[string]interface{})
+                if cat, ok := aa["consume_allocation_type"]; ok && cat != "" {
+                    aaObj["consumeAllocationType"] = cat.(string)
+                }
+                if k, ok := aa["key"]; ok && k != "" {
+                    aaObj["key"] = k.(string)
+                }
+                if v, ok := aa["values"]; ok && len(v.([]interface{})) > 0 {
+                    aaObj["values"] = v.([]interface{})
+                }
+                if len(aaObj) > 0 {
+                    props["allocationAffinity"] = aaObj
+                }
+            }
+        }
+        
+        // Resource policies
+        if val, ok := m["resource_policies"]; ok && len(val.([]interface{})) > 0 {
+            props["resourcePolicies"] = val.([]interface{})
+        }
+        
+        // Scheduling
+        if val, ok := m["scheduling"]; ok && len(val.([]interface{})) > 0 {
+            schedList := val.([]interface{})
+            if schedList[0] != nil {
+                sched := schedList[0].(map[string]interface{})
+                schedObj := make(map[string]interface{})
+                
+                if ohm, ok := sched["on_host_maintenance"]; ok && ohm != "" {
+                    schedObj["onHostMaintenance"] = ohm.(string)
+                }
+                if ar, ok := sched["automatic_restart"]; ok {
+                    schedObj["automaticRestart"] = ar.(bool)
+                }
+                if p, ok := sched["preemptible"]; ok {
+                    schedObj["preemptible"] = p.(bool)
+                }
+                if mnc, ok := sched["min_node_cpus"]; ok && mnc.(int) > 0 {
+                    schedObj["minNodeCpus"] = mnc.(int)
+                }
+                if pm, ok := sched["provisioning_model"]; ok && pm != "" {
+                    schedObj["provisioningModel"] = pm.(string)
+                }
+                if ita, ok := sched["instance_termination_action"]; ok && ita != "" {
+                    schedObj["instanceTerminationAction"] = ita.(string)
+                }
+                if tt, ok := sched["termination_time"]; ok && tt != "" {
+                    schedObj["terminationTime"] = tt.(string)
+                }
+                
+                // Node affinities
+                if na, ok := sched["node_affinities"]; ok && len(na.([]interface{})) > 0 {
+                    naList := na.([]interface{})
+                    naArr := []map[string]interface{}{}
+                    for _, naItem := range naList {
+                        if naItem == nil {
+                            continue
+                        }
+                        naMap := naItem.(map[string]interface{})
+                        naObj := make(map[string]interface{})
+                        if k, ok := naMap["key"]; ok && k != "" {
+                            naObj["key"] = k.(string)
+                        }
+                        if op, ok := naMap["operator"]; ok && op != "" {
+                            naObj["operator"] = op.(string)
+                        }
+                        if v, ok := naMap["values"]; ok && len(v.([]interface{})) > 0 {
+                            naObj["values"] = v.([]interface{})
+                        }
+                        if len(naObj) > 0 {
+                            naArr = append(naArr, naObj)
+                        }
+                    }
+                    if len(naArr) > 0 {
+                        schedObj["nodeAffinities"] = naArr
+                    }
+                }
+                
+                // Local SSD recovery timeout
+                if lsrt, ok := sched["local_ssd_recovery_timeout"]; ok && len(lsrt.([]interface{})) > 0 {
+                    lsrtList := lsrt.([]interface{})
+                    if lsrtList[0] != nil {
+                        lsrtMap := lsrtList[0].(map[string]interface{})
+                        lsrtObj := make(map[string]interface{})
+                        if s, ok := lsrtMap["seconds"]; ok && s.(int) > 0 {
+                            lsrtObj["seconds"] = s.(int)
+                        }
+                        if n, ok := lsrtMap["nanos"]; ok && n.(int) > 0 {
+                            lsrtObj["nanos"] = n.(int)
+                        }
+                        if len(lsrtObj) > 0 {
+                            schedObj["localSsdRecoveryTimeout"] = lsrtObj
+                        }
+                    }
+                }
+                
+                // Max run duration
+                if mrd, ok := sched["max_run_duration"]; ok && len(mrd.([]interface{})) > 0 {
+                    mrdList := mrd.([]interface{})
+                    if mrdList[0] != nil {
+                        mrdMap := mrdList[0].(map[string]interface{})
+                        mrdObj := make(map[string]interface{})
+                        if s, ok := mrdMap["seconds"]; ok && s.(int) > 0 {
+                            mrdObj["seconds"] = s.(int)
+                        }
+                        if n, ok := mrdMap["nanos"]; ok && n.(int) > 0 {
+                            mrdObj["nanos"] = n.(int)
+                        }
+                        if len(mrdObj) > 0 {
+                            schedObj["maxRunDuration"] = mrdObj
+                        }
+                    }
+                }
+                
+                if len(schedObj) > 0 {
+                    props["scheduling"] = schedObj
+                }
+            }
+        }
+        
+        // Service accounts
+        if val, ok := m["service_accounts"]; ok && len(val.([]interface{})) > 0 {
+            saList := val.([]interface{})
+            saArr := []map[string]interface{}{}
+            for _, sa := range saList {
+                if sa == nil {
+                    continue
+                }
+                saMap := sa.(map[string]interface{})
+                saObj := make(map[string]interface{})
+                if email, ok := saMap["email"]; ok && email != "" {
+                    saObj["email"] = email.(string)
+                }
+                if scopes, ok := saMap["scopes"]; ok && len(scopes.([]interface{})) > 0 {
+                    saObj["scopes"] = scopes.([]interface{})
+                }
+                if len(saObj) > 0 {
+                    saArr = append(saArr, saObj)
+                }
+            }
+            if len(saArr) > 0 {
+                props["serviceAccounts"] = saArr
+            }
+        }
+        
+        // Shielded instance config
+        if val, ok := m["shielded_instance_config"]; ok && len(val.([]interface{})) > 0 {
+            sicList := val.([]interface{})
+            if sicList[0] != nil {
+                sic := sicList[0].(map[string]interface{})
+                sicObj := make(map[string]interface{})
+                if esb, ok := sic["enable_secure_boot"]; ok {
+                    sicObj["enableSecureBoot"] = esb.(bool)
+                }
+                if ev, ok := sic["enable_vtpm"]; ok {
+                    sicObj["enableVtpm"] = ev.(bool)
+                }
+                if eim, ok := sic["enable_integrity_monitoring"]; ok {
+                    sicObj["enableIntegrityMonitoring"] = eim.(bool)
+                }
+                if len(sicObj) > 0 {
+                    props["shieldedInstanceConfig"] = sicObj
+                }
+            }
+        }
+        
+        // Tags
+        if val, ok := m["tags"]; ok && len(val.([]interface{})) > 0 {
+            tagsList := val.([]interface{})
+            if tagsList[0] != nil {
+                tags := tagsList[0].(map[string]interface{})
+                tagsObj := make(map[string]interface{})
+                if items, ok := tags["items"]; ok && len(items.([]interface{})) > 0 {
+                    tagsObj["items"] = items.([]interface{})
+                }
+                if len(tagsObj) > 0 {
+                    props["tags"] = tagsObj
+                }
+            }
+        }
+        
+        if len(props) > 0 {
+            obj["computeInstanceRestoreProperties"] = props
+        }
+    }
+}
+
+// ==================== Disk Restore Properties ====================
+if v, ok := d.GetOkExists("disk_restore_properties"); ok {
+    list := v.([]interface{})
+    if len(list) > 0 {
+        m := list[0].(map[string]interface{})
+        props := make(map[string]interface{})
+        
+        // Required fields
+        if val, ok := m["name"]; ok && val != "" {
+            props["name"] = val.(string)
+        }
+        if val, ok := m["size_gb"]; ok && val.(int) > 0 {
+            props["sizeGb"] = val.(int)
+        }
+        if val, ok := m["type"]; ok && val != "" {
+            props["type"] = val.(string)
+        }
+        
+        // Optional string fields
+        if val, ok := m["description"]; ok && val != "" {
+            props["description"] = val.(string)
+        }
+        if val, ok := m["storage_pool"]; ok && val != "" {
+            props["storagePool"] = val.(string)
+        }
+        if val, ok := m["access_mode"]; ok && val != "" {
+            props["accessMode"] = val.(string)
+        }
+        if val, ok := m["architecture"]; ok && val != "" {
+            props["architecture"] = val.(string)
+        }
+        
+        // Boolean fields
+        if val, ok := m["enable_confidential_compute"]; ok {
+            props["enableConfidentialCompute"] = val.(bool)
+        }
+        
+        // Integer fields
+        if val, ok := m["provisioned_iops"]; ok && val.(int) > 0 {
+            props["provisionedIops"] = val.(int)
+        }
+        if val, ok := m["provisioned_throughput"]; ok && val.(int) > 0 {
+            props["provisionedThroughput"] = val.(int)
+        }
+        if val, ok := m["physical_block_size_bytes"]; ok && val.(int) > 0 {
+            props["physicalBlockSizeBytes"] = val.(int)
+        }
+        
+        // Array fields
+        if val, ok := m["licenses"]; ok && len(val.([]interface{})) > 0 {
+            props["licenses"] = val.([]interface{})
+        }
+        if val, ok := m["resource_policy"]; ok && len(val.([]interface{})) > 0 {
+            props["resourcePolicy"] = val.([]interface{})
+        }
+        
+        // Guest OS features
+        if val, ok := m["guest_os_feature"]; ok && len(val.([]interface{})) > 0 {
+            if gofArr := processGuestOsFeatures(val.([]interface{})); gofArr != nil {
+                props["guestOsFeature"] = gofArr
+            }
+        }
+        
+        // Disk encryption key
+        if val, ok := m["disk_encryption_key"]; ok && len(val.([]interface{})) > 0 {
+            if dekObj := processEncryptionKey(val.([]interface{})); dekObj != nil {
+                props["diskEncryptionKey"] = dekObj
+            }
+        }
+        
+        // Labels
+        if val, ok := m["labels"]; ok {
+            if labels := processLabels(val); labels != nil {
+                props["labels"] = labels
+            }
+        }
+        
+        // Resource manager tags
+        if val, ok := m["resource_manager_tags"]; ok {
+            if rmtMap := processLabels(val); rmtMap != nil {
+                props["resourceManagerTags"] = rmtMap
+            }
+        }
+        
+        if len(props) > 0 {
+            obj["diskRestoreProperties"] = props
+        }
+    }
+}
+
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+    billingProject = bp
+}
+
+// ==================== Build Restore URL & Execute Request ====================
+// Construct the restore URL using base path and url params
+url := fmt.Sprintf("%sprojects/%s/locations/%s/backupVaults/%s/dataSources/%s/backups/%s:restore",
+    config.BackupDRBasePath,
+    project,
+    d.Get("location").(string),
+    d.Get("backup_vault_id").(string),
+    d.Get("data_source_id").(string),
+    d.Get("backup_id").(string),
+)
+
+log.Printf("[DEBUG] Creating RestoreWorkload (restore): %#v", obj)
+
+headers := make(http.Header)
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    Config:    config,
+    Method:    "POST",
+    Project:   billingProject,
+    RawURL:    url,
+    UserAgent: userAgent,
+    Body:      obj,
+    Timeout:   d.Timeout(schema.TimeoutCreate),
+    Headers:   headers,
+})
+if err != nil {
+    return fmt.Errorf("Error creating RestoreWorkload (restore): %s", err)
+}
+
+// Wait for the LRO to complete and provide the operation response in opRes
+var opRes map[string]interface{}
+err = BackupDROperationWaitTimeWithResponse(
+    config, res, &opRes, billingProject, "Restoring Workload", userAgent,
+    d.Timeout(schema.TimeoutCreate))
+if err != nil {
+    // Attempt to cancel the LRO if the op self link is present
+    opSelfLink, ok := res["selfLink"].(string)
+    if ok {
+        log.Printf("[DEBUG] Cancelling LRO: %s", opSelfLink)
+        opCancelUrl := fmt.Sprintf("%s/cancel", opSelfLink)
+        _, opCancelErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+            Config:    config,
+            Method:    "POST",
+            RawURL:    opCancelUrl,
+            UserAgent: userAgent,
+        })
+        if opCancelErr != nil {
+            return fmt.Errorf("Error cancelling the LRO: %s", opCancelErr)
+        }
+    }
+    return err
+}
+
+// ==================== Process Response & Set State ====================
+// Use the gcp resource name from the operation response as the resource ID
+if opRes != nil {
+    var tr map[string]interface{}
+    if v, ok := opRes["targetResource"].(map[string]interface{}); ok {
+        tr = v
+    } else if v, ok := opRes["target_resource"].(map[string]interface{}); ok {
+        tr = v
+    }
+
+    if tr != nil {
+        var gr map[string]interface{}
+        if v, ok := tr["gcpResource"].(map[string]interface{}); ok {
+            gr = v
+        } else if v, ok := tr["gcp_resource"].(map[string]interface{}); ok {
+            gr = v
+        }
+
+        if gr != nil {
+            // Set ID from response
+            if val, ok := gr["gcpResourcename"].(string); ok {
+                d.SetId(val)
+            } else if val, ok := gr["gcp_resourcename"].(string); ok {
+                d.SetId(val)
+            }
+
+            // Populate computed fields
+            g := make(map[string]interface{})
+            if val, ok := gr["gcpResourcename"].(string); ok {
+                g["gcp_resourcename"] = val
+            } else if val, ok := gr["gcp_resourcename"].(string); ok {
+                g["gcp_resourcename"] = val
+            }
+            if val, ok := gr["location"].(string); ok {
+                g["location"] = val
+            }
+            if val, ok := gr["type"].(string); ok {
+                g["type"] = val
+            }
+
+            if len(g) > 0 {
+                trMap := map[string]interface{}{
+                    "gcp_resource": []interface{}{g},
+                }
+                if err := d.Set("target_resource", []interface{}{trMap}); err != nil {
+                    return fmt.Errorf("Error setting target_resource from operation response: %s", err)
+                }
+            }
+        }
+    }
+}
+
+log.Printf("[DEBUG] Finished restoring RestoreWorkload %q: %#v", d.Id(), opRes)
+
+return nil

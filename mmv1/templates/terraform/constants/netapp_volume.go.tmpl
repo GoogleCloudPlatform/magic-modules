@@ -1,0 +1,42 @@
+// Suppress diffs when the value read from api
+// has the project ID instead of the project number
+func ProjectIDDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+
+	const marker = "/locations"
+
+	// Find the starting index of "/locations" in both strings.
+	index1 := strings.Index(old, marker)
+	index2 := strings.Index(new, marker)
+
+	// If "/locations" is not found in either string, they can't be compared as requested.
+	if index1 == -1 || index2 == -1 {
+		return false
+	}
+
+	// Extract the substrings from the marker to the end.
+	suffix1 := old[index1:]
+	suffix2 := new[index2:]
+
+	// Compare the extracted suffixes.
+	return suffix1 == suffix2
+}
+
+func SuppressSquashModeDiff(k, old, new string, d *schema.ResourceData) bool {
+    if new == "" {
+        return true
+    }
+    if old != new {
+        return false
+    }
+    return false
+}
+
+func SuppressHasRootAccessDiff(k, old, new string, d *schema.ResourceData) bool {
+    if new == "" {
+        return true
+    }
+    if old != new {
+        return false
+    }
+    return false
+}

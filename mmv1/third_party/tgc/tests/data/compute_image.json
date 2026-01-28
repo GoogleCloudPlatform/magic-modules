@@ -1,0 +1,37 @@
+[
+  {
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "asset_type": "compute.googleapis.com/Image",
+    "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/images/gg-asset-42745-fa77",
+    "resource": {
+      "data": {
+        "description": "Description for gg-asset-42745-fa77",
+        "diskSizeGb": 20,
+        "family": "gg-asset-family-42745-fa77",
+        "guestOsFeatures": [
+          {
+            "type": "UEFI_COMPATIBLE"
+          },
+          {
+            "type": "MULTI_IP_SUBNET"
+          }
+        ],
+        "labels": {
+          "gg-asset-label-42745-fa77": "gg-asset-value-42745-fa77",
+          "goog-terraform-provisioned": "true"
+        },
+        "licenses": [
+          "projects/vm-options/global/licenses/enable-vmx"
+        ],
+        "name": "gg-asset-42745-fa77",
+        "sourceDisk": "projects/{{.Provider.project}}/zones/us-central1-a/disks/gg-asset-source-disk-42745-fa77",
+        "storageLocations": [
+          "us-central1"
+        ]
+      },
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+      "discovery_name": "Image",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}"
+    }
+  }
+]

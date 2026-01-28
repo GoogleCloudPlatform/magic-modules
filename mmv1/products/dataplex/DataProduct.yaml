@@ -1,0 +1,149 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'DataProduct'
+description: |
+  A data product is a curated collection of data assets, packaged to address
+  specific use cases.
+references:
+  guides:
+    'Introduction to Data Products': 'https://cloud.google.com/dataplex/docs/data-products-overview'
+  api: 'https://cloud.google.com/dataplex/docs/reference/rest/v1/projects.locations.dataProducts'
+min_version: beta
+
+base_url: 'projects/{{project}}/locations/{{location}}/dataProducts'
+self_link: 'projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/dataProducts?dataProductId={{data_product_id}}'
+id_format: 'projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}'
+
+update_verb: 'PATCH'
+update_mask: true
+autogen_async: true
+
+timeouts:
+  insert_minutes: 5
+  update_minutes: 5
+  delete_minutes: 5
+
+# Added async block to wait for background creation/updates
+async:
+  actions: ['create', 'update', 'delete']
+  operation:
+    base_url: '{{op_id}}'
+
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}'
+  - '{{data_product_id}}'
+
+examples:
+  - name: 'dataplex_data_product_basic'
+    primary_resource_id: 'example'
+    vars:
+      data_product_id: 'data-product-basic'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+    test_vars_overrides:
+      data_product_id: 'fmt.Sprintf("tf-test-dp%s", acctest.RandString(t, 10))'
+  - name: 'dataplex_data_product_full'
+    primary_resource_id: 'example'
+    vars:
+      data_product_id: 'data-product-full'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+    test_vars_overrides:
+      data_product_id: 'fmt.Sprintf("tf-test-dp%s", acctest.RandString(t, 10))'
+
+parameters:
+  - name: 'location'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The location for the data product.
+  - name: 'data_product_id'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    api_name: 'name'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    description: |
+      The ID of the data product.
+
+properties:
+  - name: 'uid'
+    type: String
+    output: true
+    description: 'System generated unique ID.'
+  - name: 'displayName'
+    type: String
+    required: true
+    description: 'User-friendly display name.'
+  - name: 'createTime'
+    type: String
+    output: true
+    description: 'Creation timestamp.'
+  - name: 'updateTime'
+    type: String
+    output: true
+    description: 'Last update timestamp.'
+  - name: 'etag'
+    type: String
+    output: true
+    description: 'Checksum for concurrency control.'
+  - name: 'labels'
+    type: KeyValueLabels
+    description: 'User-defined labels.'
+  - name: 'description'
+    type: String
+    description: 'Description of the data product.'
+  - name: 'ownerEmails'
+    type: Array
+    item_type:
+      type: String
+    required: true
+    description: 'Emails of the owners.'
+  - name: 'assetCount'
+    type: Integer
+    output: true
+    description: 'Number of associated data assets.'
+  - name: 'accessGroups'
+    type: Map
+    key_name: 'id'
+    description: |
+      Custom user defined access groups at the data product level.
+    value_type:
+      type: NestedObject
+      properties:
+        - name: 'group_id'
+          api_name: 'id'
+          type: String
+          required: true
+          description: 'Unique identifier of the access group.'
+        - name: 'displayName'
+          type: String
+          required: true
+          description: 'User friendly display name.'
+        - name: 'description'
+          type: String
+          description: 'Description of the access group.'
+        - name: 'principal'
+          type: NestedObject
+          required: true
+          description: 'The principal entity.'
+          properties:
+            - name: 'googleGroup'
+              type: String
+              description: 'Email of the Google Group.'

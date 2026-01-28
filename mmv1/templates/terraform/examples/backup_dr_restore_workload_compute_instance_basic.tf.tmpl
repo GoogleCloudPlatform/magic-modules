@@ -1,0 +1,18 @@
+resource "google_backup_dr_restore_workload" "{{$.PrimaryResourceId}}" {
+  location         = "us-central1"
+  backup_vault_id  = "{{index $.Vars "backup_vault_id"}}"
+  data_source_id   = "{{index $.Vars "data_source_id"}}"
+  backup_id        = "{{index $.Vars "backup_id"}}"
+  
+  name = "{{index $.Vars "backup_name"}}"
+
+  compute_instance_target_environment {
+    project = "{{index $.TestEnvVars "project"}}"
+    zone    = "us-central1-a"
+  }
+
+  compute_instance_restore_properties {
+    name         = "{{index $.Vars "instance_name"}}"
+    machine_type = "e2-medium"
+  }
+}

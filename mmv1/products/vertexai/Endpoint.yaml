@@ -65,6 +65,8 @@ examples:
   - name: 'vertex_ai_endpoint_private_service_connect'
     primary_resource_id: 'endpoint'
     primary_resource_name: 'fmt.Sprintf("endpoint-name%s", context["random_suffix"])'
+    vars:
+      network_name: 'psc-network'
   - name: 'vertex_ai_endpoint_dedicated_endpoint'
     primary_resource_id: 'endpoint'
     primary_resource_name: 'fmt.Sprintf("endpoint-name%s", context["random_suffix"])'
@@ -462,6 +464,48 @@ properties:
         type: Boolean
         description:
           'If set to true, enable secure private service connect with IAM authorization. Otherwise, private service connect will be done without authorization. Note latency will be slightly increased if authorization is enabled.'
+      - name: 'pscAutomationConfigs'
+        type: Array
+        description:
+          'List of projects and networks where the PSC endpoints will be created. This field is used by Online Inference(Prediction) only.'
+        item_type:
+          type: NestedObject
+          description:
+            'PSC config that is used to automatically create PSC endpoints in the user projects.'
+          properties:
+            - name: 'projectId'
+              type: String
+              required: true
+              description:
+                'Project id used to create forwarding rule.'
+            - name: 'network'
+              type: String
+              required: true
+              description:
+                'The full name of the Google Compute Engine [network](https://cloud.google.com/compute/docs/networks-and-firewalls#networks). [Format](https://cloud.google.com/compute/docs/reference/rest/v1/networks/get): projects/{project}/global/networks/{network}.'
+            - name: 'ipAddress'
+              type: String
+              output: true
+              description:
+                'IP address rule created by the PSC service automation.'
+            - name: 'forwardingRule'
+              type: String
+              output: true
+              description:
+                'Forwarding rule created by the PSC service automation.'
+            - name: 'state'
+              type: Enum
+              output: true
+              description:
+                'The state of the PSC service automation.'
+              enum_values:
+                - PSC_AUTOMATION_STATE_FAILED
+                - PSC_AUTOMATION_STATE_SUCCESSFUL
+            - name: 'errorMessage'
+              type: String
+              output: true
+              description:
+                'Error message if the PSC service automation failed.'
   - name: 'modelDeploymentMonitoringJob'
     type: String
     description:

@@ -1,0 +1,7 @@
+resource "google_netapp_host_group" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "host_group_name"}}"
+  location = "us-central1"
+  os_type = "LINUX"
+  type = "ISCSI_INITIATOR"
+  hosts = ["iqn.1994-05.com.redhat:8518f79d5366"]
+}

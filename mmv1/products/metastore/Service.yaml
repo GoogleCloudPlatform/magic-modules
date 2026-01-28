@@ -419,10 +419,7 @@ properties:
           The key is the auxiliary service name and it must match the regular expression a-z?.
           This means that the first character must be a lowercase letter, and all the following characters must be hyphens, lowercase letters, or digits, except the last character, which cannot be a hyphen.
         key_name: 'key'
-        key_description: |
-          The auxiliary service name
         value_type:
-          name: auxiliaryVersions
           type: NestedObject
           properties:
             - name: 'version'

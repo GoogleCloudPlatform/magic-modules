@@ -20,49 +20,50 @@
 package {{ lower $.ProductMetadata.Name }}
 
 import (
-
-    "fmt"
-    "log"
-    "net/http"
-    "reflect"
+	"context"
+	"fmt"
+	"log"
+	"net/http"
 {{- if $.SupportsIndirectUserProjectOverride }}
-    "regexp"
+	"regexp"
 {{- end }}
 {{- if or (and (not $.Immutable) ($.UpdateMask)) $.LegacyLongFormProject }}
-    "strings"
+	"strings"
 {{- end }}
-    "time"
+	"time"
 
-{{/*     # We list all the v2 imports here, because we run 'goimports' to guess the correct */}}
-{{/*     # set of imports, which will never guess the major version correctly. */}}
+{{/*	 # We list all the v2 imports here, because we run 'goimports' to guess the correct */}}
+{{/*	 # set of imports, which will never guess the major version correctly. */}}
 {{/*
-    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
-    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
-    "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-    "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
-     */}}
-    "github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+	 */}}
 
-    "github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"{{ $.ImportPath }}/fwmodels"
 	"{{ $.ImportPath }}/fwresource"
 	"{{ $.ImportPath }}/fwtransport"
 
-    "{{ $.ImportPath }}/tpgresource"
-    transport_tpg "{{ $.ImportPath }}/transport"
-    "{{ $.ImportPath }}/verify"
+	"{{ $.ImportPath }}/tpgresource"
+	transport_tpg "{{ $.ImportPath }}/transport"
+	"{{ $.ImportPath }}/verify"
 
 {{ if $.FlattenedProperties }}
     "google.golang.org/api/googleapi"
@@ -70,7 +71,7 @@ import (
 )
 
 {{if $.CustomCode.Constants -}} 
-    {{- $.CustomTemplate $.CustomCode.Constants true -}}
+    {{- customTemplate $ $.CustomCode.Constants true -}}
 {{- end}}
 
 var (
@@ -157,7 +158,7 @@ func (d *{{$.ResourceName}}FWResource) Schema(ctx context.Context, _ resource.Sc
     {{template "SchemaFieldsFW" $prop -}}
 {{- end }}
 {{- if $.CustomCode.ExtraSchemaEntry }} 
-    {{ $.CustomTemplate $.CustomCode.ExtraSchemaEntry false -}}
+    {{ customTemplate $ $.CustomCode.ExtraSchemaEntry false -}}
 {{- end}}
 {{ if $.HasProject -}}
 			"project": schema.StringAttribute{
@@ -186,6 +187,8 @@ func (d *{{$.ResourceName}}FWResource) Schema(ctx context.Context, _ resource.Sc
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+        },
+		Blocks: map[string]schema.Block{
 			"timeouts": timeouts.Block(ctx, timeouts.Opts{
 				Create: true,
 				{{- if or $.Updatable $.RootLabels }}
@@ -193,7 +196,7 @@ func (d *{{$.ResourceName}}FWResource) Schema(ctx context.Context, _ resource.Sc
 				{{- end }}
 				Delete: true,
 				}),
-        },
+		},
 	}
 }
 
@@ -201,7 +204,7 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
 	var data {{$.ResourceName}}FWModel
 	var metaData *fwmodels.ProviderMetaModel
 {{ if $.CustomCode.CustomCreate -}}
-    {{ $.CustomTemplate $.CustomCode.CustomCreate false -}}
+    {{ customTemplate $ $.CustomCode.CustomCreate false -}}
 {{  else  -}}
 
     // Read Provider meta into the meta model
@@ -216,16 +219,17 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
 		return
 	}
 
-	var project, billingProject types.String
+	billingProject := ""
+	var project types.String
 {{ if $.HasProject -}}
     project = fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 {{ if $.LegacyLongFormProject -}}
-    billingProject = strings.TrimPrefix(project, "projects/")
+    billingProject = strings.TrimPrefix(project.ValueString(), "projects/")
 {{      else -}}
-    billingProject = project
+    billingProject = project.ValueString()
 {{- end }}
 {{- end }}
 {{ if $.HasRegion -}}
@@ -257,7 +261,7 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
 
     obj := make(map[string]interface{})
 
-{{- range $prop := $.OrderProperties $.AllUserProperties }}
+{{- range $prop := $.SettableProperties }}
     {{$prop.ApiName}}Prop, diags := data.{{camelize $prop.Name "upper"}}.To{{$prop.GetFWType}}Value(ctx)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -283,12 +287,12 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
 
     headers := make(http.Header)
 {{- if $.CustomCode.PreCreate }}
-    {{ $.CustomTemplate $.CustomCode.PreCreate false -}}
+    {{ customTemplate $ $.CustomCode.PreCreate false -}}
 {{- end}}
     res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.CreateVerb -}}",
-        Project: billingProject.ValueString(),
+        Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
         Body: obj,
@@ -345,7 +349,7 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
         {{/* if $.HasPostCreateComputedFields */}}
 		{{/* This may have caused the ID to update - update it if so. */}}
 {{    else -}}{{/* $.GetAsync.Result.ResourceInsideResponse */}}
-    err := {{ $.ClientNamePascal -}}OperationWaitTime(
+    err = {{ $.ClientNamePascal -}}OperationWaitTime(
     r.providerConfig, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project.ValueString()){{ else }}project.ValueString(){{ end }}, {{ end -}} "Creating {{ $.Name -}}", userAgent,
         createTimeout)
 
@@ -364,12 +368,12 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
 {{  end -}}{{/*if ($.GetAsync.IsA "OpAsync")*/}}
 {{end -}}{{/*if and $.GetAsync ($.GetAsync.Allow "Create")*/}}
 {{if $.CustomCode.PostCreate -}} 
-    {{- $.CustomTemplate $.CustomCode.PostCreate false -}}
+    {{- customTemplate $ $.CustomCode.PostCreate false -}}
 {{- end}}
 
 
 	// read back {{$.Name}}
-	r.{{$.ResourceName}}FWRefresh(ctx, &data, &resp.State, req, &resp.Diagnostics)
+	r.{{$.ResourceName}}FWRefresh(ctx, &data, &resp.State, req, &resp.Diagnostics, createTimeout)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -401,7 +405,7 @@ func (r *{{$.ResourceName}}FWResource) Read(ctx context.Context, req resource.Re
 	tflog.Trace(ctx, "read {{$.Name}} resource")
 
     // read back {{$.Name}}
-	r.{{$.ResourceName}}FWRefresh(ctx, &data, &resp.State, req, &resp.Diagnostics)
+	r.{{$.ResourceName}}FWRefresh(ctx, &data, &resp.State, req, &resp.Diagnostics, 0)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -430,16 +434,17 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-	var project, billingProject types.String
+	billingProject := ""
+	var project types.String
 {{ if $.HasProject -}}
-    project = fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
+    project = fwresource.GetProjectFramework(plan.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 {{ if $.LegacyLongFormProject -}}
-    billingProject = strings.TrimPrefix(project, "projects/")
+    billingProject = strings.TrimPrefix(project.ValueString(), "projects/")
 {{      else -}}
-    billingProject = project
+    billingProject = project.ValueString()
 {{- end }}
 {{- end }}
 {{ if $.HasRegion -}}
@@ -482,7 +487,7 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
 	}
 {{- end }}
 
-    updateTimeout, diags := data.Timeouts.Update(ctx, {{ $.Timeouts.UpdateMinutes }}*time.Minute)
+    updateTimeout, diags := plan.Timeouts.Update(ctx, {{ $.Timeouts.UpdateMinutes }}*time.Minute)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -498,16 +503,16 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
     headers := make(http.Header)
 
 {{- if $.UpdateMask }}
-{{ $.CustomTemplate "templates/terraform/update_mask_fw.go.tmpl" false -}}
+{{ customTemplate $ "templates/terraform/update_mask_fw.go.tmpl" false -}}
 {{  end}}
 
 {{- if $.CustomCode.PreUpdate }}
-    {{ $.CustomTemplate $.CustomCode.PreUpdate false -}}
+    {{ customTemplate $ $.CustomCode.PreUpdate false -}}
 {{- end}}
     res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.UpdateVerb -}}",
-        Project: billingProject.ValueString(),
+        Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
         Body: obj,
@@ -549,7 +554,7 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
 	tflog.Trace(ctx, "updated {{$.Name}} resource")
 
     // read back {{$.Name}}
-	r.{{$.ResourceName}}FWRefresh(ctx, &plan, &resp.State, req, &resp.Diagnostics)
+	r.{{$.ResourceName}}FWRefresh(ctx, &plan, &resp.State, req, &resp.Diagnostics, updateTimeout)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -582,16 +587,17 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
 		return
 	}
 
-	var project, billingProject types.String
+	billingProject := ""
+	var project types.String
 {{ if $.HasProject -}}
     project = fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 {{ if $.LegacyLongFormProject -}}
-    billingProject = strings.TrimPrefix(project, "projects/")
+    billingProject = strings.TrimPrefix(project.ValueString(), "projects/")
 {{      else -}}
-    billingProject = project
+    billingProject = project.ValueString()
 {{- end }}
 {{- end }}
 {{ if $.HasRegion -}}
@@ -634,19 +640,20 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
         return
     }
 
+	var err error
 {{ if $.CustomCode.CustomDelete }} 
-{{ $.CustomTemplate $.CustomCode.CustomDelete false -}}
+{{ customTemplate $ $.CustomCode.CustomDelete false -}}
 {{- else }}
     headers := make(http.Header)
     {{- if $.CustomCode.PreDelete }} 
-        {{ $.CustomTemplate $.CustomCode.PreDelete false -}}
+        {{ customTemplate $ $.CustomCode.PreDelete false -}}
     {{- end }}
 
     log.Printf("[DEBUG] Deleting {{ $.Name }} %q", data.Id.ValueString())
-    _, _ := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+    res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.DeleteVerb -}}",
-        Project: billingProject.ValueString(),
+        Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
         Body: obj,
@@ -665,7 +672,7 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
     }
 {{if and $.GetAsync ($.GetAsync.Allow "Delete") -}}
 {{  if $.GetAsync.IsA "PollAsync" }}
-    err := transport_tpg.PollingWaitTime(resource{{ $.ResourceName }}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncAbsence }}, "Deleting {{ $.Name }}", d.Timeout(schema.TimeoutCreate), {{ $.Async.TargetOccurrences }})
+    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName }}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncAbsence }}, "Deleting {{ $.Name }}", d.Timeout(schema.TimeoutCreate), {{ $.Async.TargetOccurrences }})
     if err != nil {
 {{-   if $.Async.SuppressError }}
 		log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", data.Id.ValueString(), err)
@@ -675,7 +682,7 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
 {{-   end }}
     }
 {{- else }}
-    err := {{ $.ClientNamePascal }}OperationWaitTime(
+    err = {{ $.ClientNamePascal }}OperationWaitTime(
         r.providerConfig, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project.ValueString()){{ else }}project.ValueString(){{ end }}, {{ end -}} "Deleting {{ $.Name -}}", userAgent,
         deleteTimeout)
 
@@ -687,7 +694,7 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
 {{- end }}{{/* if and $.GetAsync ($.GetAsync.Allow "Delete") */}}
 
 {{- if $.CustomCode.PostDelete }}
-    {{ $.CustomTemplate $.CustomCode.PostDelete false -}}
+    {{ customTemplate $ $.CustomCode.PostDelete false -}}
 {{- end }}
 
     log.Printf("[DEBUG] Finished deleting {{ $.Name }} %q: %#v", data.Id.ValueString(), res)
@@ -722,24 +729,31 @@ func (r *{{$.ResourceName}}FWResource) ImportState(ctx context.Context, req reso
 	}
 }
 
-func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.Context, data *{{$.ResourceName}}FWModel, state *tfsdk.State, req interface{}, diag *diag.Diagnostics) {
+func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.Context, data *{{$.ResourceName}}FWModel, state *tfsdk.State, req interface{}, diags *diag.Diagnostics, timeout time.Duration) {
 	var metaData *fwmodels.ProviderMetaModel
+    billingProject := ""
     //load default values
 {{ if $.HasProject -}}
-    project := fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
+    project := fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), diags)
+	if diags.HasError() {
 		return
 	}
+
+{{if $.LegacyLongFormProject -}}
+    billingProject = strings.TrimPrefix(project.ValueString(), "projects/")
+{{      else -}}
+    billingProject = project.ValueString()
+{{- end }}
 {{- end }}
 {{ if $.HasRegion -}}
-	region := fwresource.GetRegionFramework(data.Region, types.StringValue(r.providerConfig.Region), &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
+	region := fwresource.GetRegionFramework(data.Region, types.StringValue(r.providerConfig.Region), diags)
+	if diags.HasError() {
 		return
 	}
 {{- end }}
 {{ if $.HasZone -}}
-	zone := fwresource.GetZoneFramework(data.Zone, types.StringValue(r.providerConfig.Zone), &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
+	zone := fwresource.GetZoneFramework(data.Zone, types.StringValue(r.providerConfig.Zone), diags)
+	if diags.HasError() {
 		return
 	}
 {{- end }}
@@ -758,8 +772,8 @@ func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.C
 	// Use provider_meta to set User-Agent
 	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, r.providerConfig.UserAgent)
 
-	url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
-    if resp.Diagnostics.HasError() {
+	url := fwtransport.ReplaceVars(ctx, req, diags, schemaDefaultVals, r.providerConfig, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
+    if diags.HasError() {
         return
     }
 
@@ -767,15 +781,15 @@ func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.C
 
     headers := make(http.Header)
 {{- if $.CustomCode.PreRead }}
-    {{ $.CustomTemplate $.CustomCode.PreRead false -}}
+    {{ customTemplate $ $.CustomCode.PreRead false -}}
 {{- end}}
     res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.ReadVerb -}}",
-        Project: billingProject.ValueString(),
+        Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
-        Timeout: createTimeout,
+        Timeout: timeout,
         Headers: headers,
 {{- if $.ErrorRetryPredicates }}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
@@ -783,19 +797,19 @@ func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.C
 {{- if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{ join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
-    }, &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
-		fwtransport.HandleNotFoundError(ctx, err, &resp.State, fmt.Sprintf("{{ $.ResourceName }} %s", data.Id.ValueString()), &resp.Diagnostics)
-		if resp.Diagnostics.HasError() {
+    }, diags)
+	if diags.HasError() {
+		fwtransport.HandleNotFoundError(ctx, err, state, fmt.Sprintf("{{ $.ResourceName }} %s", data.Id.ValueString()), diags)
+		if diags.HasError() {
 			return
 		}
     }
 
-{{ range $prop := $.OrderProperties $.AllUserProperties }}
+{{ range $prop := $.ReadProperties }}
 	data.{{camelize $prop.Name "upper"}} = res["{{ $prop.ApiName -}}"]
-    {{$prop.ApiName}}Prop, diags := data.{{camelize $prop.Name "upper"}}.To{{$prop.GetFWType}}Value(ctx)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
+    {{$prop.ApiName}}Prop, d := data.{{camelize $prop.Name "upper"}}.To{{$prop.GetFWType}}Value(ctx)
+	diags.Append(d...)
+	if diags.HasError() {
 		return
 	}
 {{ end }}

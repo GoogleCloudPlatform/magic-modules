@@ -6,8 +6,8 @@ resource "google_compute_future_reservation" "{{$.PrimaryResourceId}}" {
   planning_status = "DRAFT"
   name_prefix = "fr-basic"
   time_window {
-    start_time = "2025-11-01T00:00:00Z"
-    end_time   = "2025-11-02T00:00:00Z"
+    start_time = "{{ index $.Vars "start_time" }}"
+    end_time   = "{{ index $.Vars "end_time" }}"
   }
   specific_sku_properties {
     total_count = "1"

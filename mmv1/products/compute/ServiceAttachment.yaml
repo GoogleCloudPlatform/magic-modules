@@ -160,6 +160,13 @@ properties:
         description: |
           The low 64 bits of the PSC service attachment ID.
         output: true
+  - name: 'showNatIps'
+    type: Boolean
+    description: |
+      NOTE: This field is temporarily non-functional due to an underlying API issue.
+      Any value provided here will be ignored until the API issue is resolved, expected around 2026-03.
+      [If true, show NAT IPs of all connected endpoints.]
+    url_param_only: true
   - name: 'connectionPreference'
     type: String
     description: |
@@ -201,6 +208,15 @@ properties:
           description: |
             The number of consumer Network Connectivity Center spokes that the connected Private Service Connect endpoint has propagated to.
           output: true
+        - name: 'natIps'
+          type: Array
+          description: |
+            NOTE: This field is temporarily non-functional due to an underlying API issue.
+            Any value provided here will be ignored until the API issue is resolved, expected around 2026-03.
+            'The nat IPs of the connected endpoint.'
+          output: true
+          item_type:
+            type: String
   - name: 'targetService'
     type: String
     description: |

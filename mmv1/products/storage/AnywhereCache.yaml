@@ -33,6 +33,8 @@ examples:
     vars:
       bucket_name: 'bucket-name'
     external_providers: ["time"]
+    ignore_read_extra:
+      - 'update_time'
 identity:
   - bucket
   - anywhereCacheId

@@ -1,0 +1,17 @@
+[
+  {
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "asset_type": "vmwareengine.googleapis.com/ExternalAddress",
+    "name": "//vmwareengine.googleapis.com/projects/{{.Provider.project}}/locations/us-central1-a/privateClouds/gg-asset-pc-03361-811b/externalAddresses/gg-asset-ext-addr-03361-811b",
+    "resource": {
+      "data": {
+        "description": "External address for testing",
+        "internalIp": "10.100.0.10"
+      },
+      "discovery_document_uri": "https://vmwareengine.googleapis.com/$discovery/rest",
+      "discovery_name": "ExternalAddress",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "version": "v1"
+    }
+  }
+]

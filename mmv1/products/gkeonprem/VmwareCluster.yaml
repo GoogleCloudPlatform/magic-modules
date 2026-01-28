@@ -20,8 +20,8 @@ docs:
 id_format: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters'
 self_link: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters?vmware_cluster_id={{name}}'
-update_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters?vmware_cluster_id={{name}}&skipValidations={{skip_validations}}'
+update_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}?skipValidations={{skip_validations}}'
 update_verb: 'PATCH'
 update_mask: true
 delete_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{name}}?force=true'
@@ -570,6 +570,46 @@ properties:
         type: Boolean
         description: |
           Controls whether the upgrade applies to the control plane only.
+  - name: skipValidations
+    type: Array
+    description: "A list of validations to skip during preflight checks."
+    url_param_only: true
+    item_type:
+      name: ValidationSkip
+      type: Enum
+      description: "Specific validation to skip."
+      enum_values:
+        - VALIDATION_SKIP_UNSPECIFIED
+        - ALL
+        - WORKSTATION
+        - CONFIG
+        - DOCKER
+        - INFRA
+        - LOAD_BALANCER
+        - VIPS
+        - NODE_IPS
+        - DNS
+        - TOD
+        - NET_CONFIG
+        - STORAGE_DRIVER
+        - PROXY
+        - INTERNET
+        - GCP
+        - GKEHUB
+        - RESERVED_IPS
+        - STACKDRIVER
+        - NODEPOOL_AUTOSCALING
+        - OS_IMAGES
+        - CLUSTER_VERSION
+        - CLUSTER_HEALTH
+        - WINDOWS
+        - HSM_SECRET_ENCRYPTION
+        - BACKUP_ADMIN
+        - CONNECTIVITY
+        - CLUSTER_SECRETS_CONFIG
+        - CSI_WORKLOAD
+        - VSPHERE_VERSION
+        - MIGRATION
   - name: 'uid'
     type: String
     description: |
