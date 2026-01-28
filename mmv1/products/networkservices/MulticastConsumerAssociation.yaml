@@ -15,6 +15,10 @@
 name: MulticastConsumerAssociation
 description: Create a multicast consumer association in the specified location
   of the current project.
+references:
+  guides:
+    'Create Multicast Consumer Association': 'https://docs.cloud.google.com/vpc/docs/multicast/enable-consumer-network#add-consumer'
+  api: 'https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastConsumerAssociations'
 base_url: projects/{{project}}/locations/{{location}}/multicastConsumerAssociations
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/multicastConsumerAssociations/{{multicast_consumer_association_id}}
@@ -82,7 +86,7 @@ properties:
     type: String
     description: |-
       The resource name of the multicast domain activation that is in the
-      same zone as this multicast producer association.
+      same zone as this multicast consumer association.
       Use the following format:
       // `projects/*/locations/*/multicastDomainActivations/*`.
     immutable: true

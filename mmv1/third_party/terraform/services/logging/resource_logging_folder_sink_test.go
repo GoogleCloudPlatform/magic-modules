@@ -21,7 +21,7 @@ func TestAccLoggingFolderSink_basic(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
-	folderName := "tf-test-folder-" + acctest.RandString(t, 10)
+	folderName := "tf-test-folder-skb-" + acctest.RandString(t, 10)
 
 	var sink logging.LogSink
 
@@ -51,7 +51,7 @@ func TestAccLoggingFolderSink_described(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
-	folderName := "tf-test-folder-" + acctest.RandString(t, 10)
+	folderName := "tf-test-folder-sded-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -75,7 +75,7 @@ func TestAccLoggingFolderSink_disabled(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
-	folderName := "tf-test-folder-" + acctest.RandString(t, 10)
+	folderName := "tf-test-folder-skdd-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -99,7 +99,7 @@ func TestAccLoggingFolderSink_removeOptionals(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
-	folderName := "tf-test-folder-" + acctest.RandString(t, 10)
+	folderName := "tf-test-folder-skop-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -132,7 +132,7 @@ func TestAccLoggingFolderSink_folderAcceptsFullFolderPath(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
-	folderName := "tf-test-folder-" + acctest.RandString(t, 10)
+	folderName := "tf-test-folder-path-" + acctest.RandString(t, 10)
 
 	var sink logging.LogSink
 
@@ -163,7 +163,7 @@ func TestAccLoggingFolderSink_update(t *testing.T) {
 	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
 	updatedBucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
-	folderName := "tf-test-folder-" + acctest.RandString(t, 10)
+	folderName := "tf-test-folder-skup-" + acctest.RandString(t, 10)
 	parent := "organizations/" + org
 
 	var sinkBefore, sinkAfter logging.LogSink
@@ -209,7 +209,7 @@ func TestAccLoggingFolderSink_updateBigquerySink(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
 	bqDatasetID := "tf_test_sink_" + acctest.RandString(t, 10)
-	folderName := "tf-test-folder-" + acctest.RandString(t, 10)
+	folderName := "tf-test-folder-upbq-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -242,7 +242,7 @@ func TestAccLoggingFolderSink_heredoc(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
 	sinkName := "tf-test-sink-" + acctest.RandString(t, 10)
 	bucketName := "tf-test-sink-bucket-" + acctest.RandString(t, 10)
-	folderName := "tf-test-folder-" + acctest.RandString(t, 10)
+	folderName := "tf-test-folder-skhd-" + acctest.RandString(t, 10)
 
 	var sink logging.LogSink
 

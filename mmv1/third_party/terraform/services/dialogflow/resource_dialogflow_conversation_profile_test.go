@@ -120,7 +120,7 @@ func testAccDialogflowConversationProfile_dialogflowAgentFull1(context map[strin
 
 	resource "google_dialogflow_agent" "agent" {
 		display_name = "tf-test-agent-%{random_suffix}"
-		default_language_code = "en-us"
+		default_language_code = "en"
 		time_zone = "America/New_York"
 		project = google_project.agent_project.name
 	}
@@ -303,7 +303,7 @@ func testAccDialogflowConversationProfile_dialogflowAgentFull2(context map[strin
 
 	resource "google_dialogflow_agent" "agent" {
 		display_name = "tf-test-agent-%{random_suffix}"
-		default_language_code = "en-us"
+		default_language_code = "en"
 		time_zone = "America/New_York"
 		project = google_project.agent_project.name
 	}
@@ -467,7 +467,7 @@ func testAccDialogflowConversationProfile_dialogflowRegional(context map[string]
 
 	resource "google_dialogflow_agent" "agent" {
 		display_name = "tf-test-agent-%{random_suffix}"
-		default_language_code = "en-us"
+		default_language_code = "en"
 		time_zone = "America/New_York"
 		project = google_project.agent_project.name
 	}

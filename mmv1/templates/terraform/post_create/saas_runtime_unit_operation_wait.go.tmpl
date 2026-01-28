@@ -1,0 +1,59 @@
+if d.Get("wait_for_completion").(bool) {
+	log.Printf("[DEBUG] Waiting for UnitOperation %q to reach terminal state", d.Id())
+	err := transport_tpg.Retry(transport_tpg.RetryOptions{
+		Timeout: d.Timeout(schema.TimeoutCreate),
+		RetryFunc: func() error {
+			url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}SaasRuntimeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/unitOperations/{{"{{"}}unit_operation_id{{"}}"}}")
+			if err != nil {
+				return err
+			}
+
+			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
+				UserAgent: userAgent,
+			})
+			if err != nil {
+				return fmt.Errorf("transient error retrieving UnitOperation state: %s", err)
+			}
+
+			state, ok := res["state"].(string)
+			if !ok {
+				return fmt.Errorf("UnitOperation %q did not return a state field", d.Id())
+			}
+
+			log.Printf("[DEBUG] UnitOperation %q state: %s", d.Id(), state)
+
+			switch state {
+			case "UNIT_OPERATION_STATE_SUCCEEDED":
+				return nil
+			case "UNIT_OPERATION_STATE_FAILED", "UNIT_OPERATION_STATE_CANCELLED":
+				return fmt.Errorf("UnitOperation %q reached terminal failure state: %s", d.Id(), state)
+			case "UNIT_OPERATION_STATE_UNKNOWN", "UNIT_OPERATION_STATE_PENDING", "UNIT_OPERATION_STATE_SCHEDULED", "UNIT_OPERATION_STATE_RUNNING":
+				return fmt.Errorf("UnitOperation %q is still in state %s", d.Id(), state)
+			default:
+				return fmt.Errorf("UnitOperation %q has unexpected state: %s", d.Id(), state)
+			}
+		},
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{
+			func(err error) (bool, string) {
+				if strings.Contains(err.Error(), "is still in state") {
+					return true, "retry pending state"
+				}
+				if strings.Contains(err.Error(), "transient error") {
+					return true, "retry transient error"
+				}
+				if strings.Contains(err.Error(), "did not return a state field") {
+					return true, "wait for state to be populated"
+				}
+				return false, ""
+			},
+		},
+	})
+
+	if err != nil {
+		return fmt.Errorf("Error waiting for UnitOperation to reach terminal state: %s", err)
+	}
+}

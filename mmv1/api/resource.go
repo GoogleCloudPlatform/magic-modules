@@ -14,8 +14,10 @@ package api
 
 import (
 	"fmt"
+	"io/fs"
 	"log"
 	"maps"
+	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -391,12 +393,6 @@ type TGCResource struct {
 	// and compute.googleapis.com/GlobalAddress has GlobalAddress for CaiResourceKind.
 	// But they have the same api resource type: address
 	CaiResourceKind string `yaml:"cai_resource_kind,omitempty"`
-
-	// If true, the Terraform custom encoder is not applied during tfplan2cai
-	TGCIgnoreTerraformEncoder bool `yaml:"tgc_ignore_terraform_encoder,omitempty"`
-
-	// If true, the Terraform custom decoder is not applied during cai2hcl
-	TGCIgnoreTerraformDecoder bool `yaml:"tgc_ignore_terraform_decoder,omitempty"`
 
 	// [Optional] The parameter that uniquely identifies the resource.
 	// Generally, it shouldn't be set when the identity can be decided.
@@ -1113,7 +1109,7 @@ func (r *Resource) ExcludeIfNotInVersion(version *product.Version) {
 // In newer resources there is much less standardisation in terms of value.
 // Generally for them though, it's the product.base_url + resource.name
 func (r Resource) SelfLinkUrl() string {
-	s := []string{r.ProductMetadata.BaseUrl, r.SelfLinkUri()}
+	s := []string{r.ProductMetadata.Version.BaseUrl, r.SelfLinkUri()}
 	return strings.Join(s, "")
 }
 
@@ -1131,7 +1127,7 @@ func (r Resource) SelfLinkUri() string {
 }
 
 func (r Resource) CollectionUrl() string {
-	s := []string{r.ProductMetadata.BaseUrl, r.collectionUri()}
+	s := []string{r.ProductMetadata.Version.BaseUrl, r.collectionUri()}
 	return strings.Join(s, "")
 }
 
@@ -1443,7 +1439,7 @@ func quoteStrings(strs []string) []string {
 func ignoreReadFields(props []*Type) []string {
 	var fields []string
 	for _, tp := range props {
-		if tp.IgnoreRead && !tp.UrlParamOnly && !tp.IsA("ResourceRef") {
+		if (tp.IgnoreRead || tp.ClientSide) && !tp.UrlParamOnly && !tp.IsA("ResourceRef") {
 			fields = append(fields, strings.Join(tp.Lineage(), ".0."))
 		} else if tp.IsA("NestedObject") && tp.AllProperties() != nil {
 			fields = append(fields, ignoreReadFields(tp.AllProperties())...)
@@ -1797,7 +1793,7 @@ func (r Resource) IamImportFormat() string {
 	importFormat := r.IamImportFormatTemplate()
 
 	importFormat = regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(importFormat, "%s")
-	return strings.ReplaceAll(importFormat, r.ProductMetadata.BaseUrl, "")
+	return strings.ReplaceAll(importFormat, r.ProductMetadata.Version.BaseUrl, "")
 }
 
 func (r Resource) IamImportParams() []string {
@@ -1975,7 +1971,7 @@ func (r Resource) ListUrlTemplate() string {
 }
 
 func (r Resource) DeleteUrlTemplate() string {
-	return fmt.Sprintf("%s%s", r.ProductMetadata.BaseUrl, r.DeleteUri())
+	return fmt.Sprintf("%s%s", r.ProductMetadata.Version.BaseUrl, r.DeleteUri())
 }
 
 func (r Resource) LastNestedQueryKey() string {
@@ -2090,7 +2086,7 @@ func (r Resource) TestSamples() []*resource.Sample {
 	})
 }
 
-func (r Resource) TestSampleSetUp() {
+func (r Resource) TestSampleSetUp(sysfs fs.FS) {
 	res := make(map[string]string)
 	for _, sample := range r.Samples {
 		sample.TargetVersionName = r.TargetVersionName
@@ -2106,7 +2102,7 @@ func (r Resource) TestSampleSetUp() {
 			if step.ConfigPath == "" {
 				step.ConfigPath = fmt.Sprintf("templates/terraform/samples/services/%s/%s.tf.tmpl", packageName, step.Name)
 			}
-			step.SetHCLText()
+			step.SetHCLText(sysfs)
 			configName := step.Name
 			if _, ok := res[step.Name]; !ok {
 				res[configName] = sample.Name
@@ -2534,12 +2530,34 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 		}
 	}
 
+	for _, e := range r.Examples {
+		for _, p := range e.IgnoreReadExtra {
+			props = append(props, p)
+		}
+	}
+
 	if r.IgnoreCaiAssetName() {
 		props = append(props, "ASSETNAME")
 	}
 
+	if r.CustomCode.ExtraSchemaEntry != "" {
+		b, err := os.ReadFile(r.CustomCode.ExtraSchemaEntry)
+
+		if err != nil {
+			log.Printf("Warning: failed to read extra_schema_entry file %s: %v", r.CustomCode.ExtraSchemaEntry, err)
+		} else {
+			re := regexp.MustCompile(`"([^"]+)"\s*:`)
+			matches := re.FindAllStringSubmatch(string(b), -1)
+			for _, match := range matches {
+				if len(match) > 1 {
+					props = append(props, match[1])
+				}
+			}
+		}
+	}
+
 	slices.Sort(props)
-	return props
+	return slices.Compact(props)
 }
 
 // Filters out computed properties during cai2hcl
