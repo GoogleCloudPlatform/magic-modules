@@ -328,6 +328,7 @@ func (l *Loader) AddExtraFields() error {
 	for _, product := range l.Products {
 		for _, resource := range product.Objects {
 			resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
+			resource.VirtualFields = resource.AddExtraVirtualFields(resource.VirtualFields, nil)
 			// SetDefault after AddExtraFields to ensure relevant metadata is available for the newly generated fields
 			resource.SetDefault(product)
 		}

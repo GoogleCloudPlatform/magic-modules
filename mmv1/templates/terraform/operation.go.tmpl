@@ -117,7 +117,7 @@ func {{ camelize $.ProductMetadata.Name "upper" }}OperationWaitTimeWithResponse(
       return err
   }
   if err := tpgresource.OperationWait(w, activity, timeout, config.PollInterval); err != nil {
-      return err
+    return err
   }
   rawResponse := []byte(w.CommonOperationWaiter.Op.Response)
   if len(rawResponse) == 0 {

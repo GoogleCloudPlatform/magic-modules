@@ -930,6 +930,24 @@ func (r *Resource) AddExtraFields(props []*Type, parent *Type) []*Type {
 	return props
 }
 
+func (r *Resource) AddExtraVirtualFields(virtualFields []*Type, parent *Type) []*Type {
+	if parent == nil && r.Async != nil && r.Async.AllowSkipWait {
+		virtualFields = append(virtualFields, buildSkipWaitField())
+	}
+	return virtualFields
+}
+
+func buildSkipWaitField() *Type {
+	options := []func(*Type){
+		propertyWithType("Boolean"),
+		propertyWithIgnoreWrite(true),
+		propertyWithImmutable(false),
+		propertyWithClientSide(true),
+		propertyWithDescription("If true, the asynchronous operation will not be awaited."),
+	}
+	return NewProperty("skip_wait", "skip_wait", options)
+}
+
 func (r *Resource) addLabelsFields(props []*Type, parent *Type, labels *Type) []*Type {
 	if parent == nil || parent.FlattenObject {
 		if r.ExcludeAttributionLabel {

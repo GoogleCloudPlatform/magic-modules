@@ -34,6 +34,9 @@ type Async struct {
 	// The list of methods where operations are used.
 	Actions []string `yaml:"actions,omitempty"`
 
+	// If true, the system will allow the user to skip waiting for the operation result.
+	AllowSkipWait bool `yaml:"allow_skip_wait,omitempty"`
+
 	OpAsync   `yaml:",inline"`
 	PollAsync `yaml:",inline"`
 }

@@ -1,0 +1,11 @@
+// If skip_wait, the LRO will not be complete so the response will not be populated.
+// Extract the index name from the metadata field.
+metadata, ok := res["metadata"].(map[string]interface{})
+if !ok {
+	return nil, fmt.Errorf("Error constructing id from result.")
+}
+index, ok := metadata["index"].(string)
+if !ok {
+	return nil, fmt.Errorf("Error constructing id from result.")
+}
+return map[string]interface{}{"name": index}, nil

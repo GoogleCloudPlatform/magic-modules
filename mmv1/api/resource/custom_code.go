@@ -140,6 +140,11 @@ type CustomCode struct {
 
 	ValidateRawResourceConfigFuncs string `yaml:"raw_resource_config_validation,omitempty"`
 
+	// This code is run for async operations when skip_wait is enabled and opted-in by
+	// the terraform user. This decoder is required for parsing the resource out of a
+	// in-progress operation response.
+	SkipWaitDecoder string `yaml:"skip_wait_decoder,omitempty"`
+
 	// ====================
 	// TGC Encoders & Decoders
 	// ====================
