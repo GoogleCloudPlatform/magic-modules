@@ -4316,12 +4316,12 @@ func TestAccContainerCluster_withDefaultComputeClassEnabled(t *testing.T) {
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withDefaultComputeClassEnabled(clusterName, networkName, subnetworkName, true),
+				Config: testAccContainerCluster_withDefaultComputeClassEnabled(clusterName, networkName, subnetworkName, true, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "cluster_autoscaling.0.default_compute_class_enabled", "true"),
 				),
@@ -4333,7 +4333,7 @@ func TestAccContainerCluster_withDefaultComputeClassEnabled(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_withDefaultComputeClassEnabled(clusterName, networkName, subnetworkName, false),
+				Config: testAccContainerCluster_withDefaultComputeClassEnabled(clusterName, networkName, subnetworkName, false, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "cluster_autoscaling.0.default_compute_class_enabled", "false"),
 				),
@@ -4348,19 +4348,69 @@ func TestAccContainerCluster_withDefaultComputeClassEnabled(t *testing.T) {
 	})
 }
 
-func testAccContainerCluster_withDefaultComputeClassEnabled(clusterName, networkName, subnetworkName string, enabled bool) string {
-	return fmt.Sprintf(`
+func TestAccContainerCluster_withAutopilotDefaultComputeClassEnabled(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withDefaultComputeClassEnabled(clusterName, networkName, subnetworkName, true, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "cluster_autoscaling.0.default_compute_class_enabled", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withDefaultComputeClassEnabled(clusterName, networkName, subnetworkName, false, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "cluster_autoscaling.0.default_compute_class_enabled", "false"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func testAccContainerCluster_withDefaultComputeClassEnabled(clusterName, networkName, subnetworkName string, enabled, autopilot bool) string {
+	var location string
+	if autopilot {
+		location = "us-central1"
+	} else {
+		location = "us-central1-a"
+	}
+	res := fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name               = "%s"
-  location           = "us-central1-a"
+  location           = "%s"
   initial_node_count = 1
   network            = "%s"
   subnetwork         = "%s"
+  enable_autopilot   = %t
   deletion_protection = false
 
   cluster_autoscaling {
-    enabled                         = true
     default_compute_class_enabled = %t
+`, clusterName, location, networkName, subnetworkName, autopilot, enabled)
+	if !autopilot {
+		res += `
+    enabled                         = true
     resource_limits {
       resource_type = "cpu"
       minimum       = 1
@@ -4371,9 +4421,12 @@ resource "google_container_cluster" "primary" {
       minimum       = 10
       maximum       = 100
     }
+`
+	}
+	res += `
   }
-}
-`, clusterName, networkName, subnetworkName, enabled)
+}`
+	return res
 }
 
 
