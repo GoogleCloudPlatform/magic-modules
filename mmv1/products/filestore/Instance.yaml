@@ -80,7 +80,6 @@ virtual_fields:
     enum_values:
       - 'PAUSE'
       - 'RESUME'
-    min_version: beta
     description: |
       Replicate action can perfrom p[ause and resume on replica
 parameters:

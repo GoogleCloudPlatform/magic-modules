@@ -1,4 +1,3 @@
-{{- if ne $.TargetVersionName "ga" }}
 config := meta.(*transport_tpg.Config)
 userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 if err != nil {
@@ -68,5 +67,4 @@ if d.HasChange("replica_action") {
 	d.Set("replica_action", replica_action_value)
 
 }
-{{- end }}
 return obj, nil

@@ -469,7 +469,7 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -527,7 +527,6 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 func testAccFilestoreInstance_replication(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_filestore_instance" "source_instance" {
-  provider         = google-beta
   name             = "tf-test-source-instance-%{random_suffix}"
   location         = "%{location_1}"
   tier             = "%{tier}"
@@ -545,7 +544,6 @@ resource "google_filestore_instance" "source_instance" {
 }
 
 resource "google_filestore_instance" "replica_instance" {
-  provider        	= google-beta
   name          	= "tf-test-replica-instance-%{random_suffix}"
   location      	= "%{location_2}"
   tier          	= "%{tier}"
@@ -573,7 +571,6 @@ resource "google_filestore_instance" "replica_instance" {
 func testAccFilestoreInstance_replication_pause(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_filestore_instance" "source_instance" {
-  provider         = google-beta
   name             = "tf-test-source-instance-%{random_suffix}"
   location         = "%{location_1}"
   tier             = "%{tier}"
@@ -591,7 +588,6 @@ resource "google_filestore_instance" "source_instance" {
 }
 
 resource "google_filestore_instance" "replica_instance" {
-  provider        	= google-beta
   name          	= "tf-test-replica-instance-%{random_suffix}"
   location      	= "%{location_2}"
   tier          	= "%{tier}"
@@ -620,7 +616,6 @@ resource "google_filestore_instance" "replica_instance" {
 func testAccFilestoreInstance_replication_resume(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_filestore_instance" "source_instance" {
-  provider         = google-beta
   name             = "tf-test-source-instance-%{random_suffix}"
   location         = "%{location_1}"
   tier             = "%{tier}"
@@ -638,7 +633,6 @@ resource "google_filestore_instance" "source_instance" {
 }
 
 resource "google_filestore_instance" "replica_instance" {
-  provider        	= google-beta
   name          	= "tf-test-replica-instance-%{random_suffix}"
   location      	= "%{location_2}"
   tier          	= "%{tier}"
