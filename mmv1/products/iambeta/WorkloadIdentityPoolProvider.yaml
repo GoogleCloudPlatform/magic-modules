@@ -313,7 +313,7 @@ properties:
           }
           ```
         required: false
-        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        diff_suppress_func: 'jwksJsonDiffSuppress'
         is_missing_in_cai: true
   - name: 'saml'
     type: NestedObject

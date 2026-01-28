@@ -210,6 +210,8 @@ Options are `VPC_NATIVE` or `ROUTES`. `VPC_NATIVE` enables [IP aliasing](https:/
 * `maintenance_policy` - (Optional) The maintenance policy to use for the cluster. Structure is
     [documented below](#nested_maintenance_policy).
 
+* `managed_opentelemetry_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the [GKE Managed OpenTelemetry](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/managed-otel-gke) feature. Structure is [documented below](#nested_managed_opentelemetry_config).
+
 * `master_auth` - (Optional) The authentication information for accessing the
 Kubernetes master. Some values in this block are only returned by the API if
 your service account has permission to get credentials for your GKE cluster. If
@@ -528,6 +530,8 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
    This flag is required to workaround a port conflict with the gke-metadata-server on GKE nodes.
    See [Enable Lustre CSI driver](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/lustre-csi-driver-new-volume) for more information.
 
+* `pod_snapshot_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The status of the Pod Snapshot addon. It is disabled by default. Set `enabled = true` to enable.
+
 This example `addons_config` disables two addons:
 
 ```hcl
@@ -694,6 +698,10 @@ This block also contains several computed attributes, documented below.
 *  `managed_prometheus` - (Optional) Configuration for Managed Service for Prometheus. Structure is [documented below](#nested_managed_prometheus).
 
 * `advanced_datapath_observability_config` - (Optional) Configuration for Advanced Datapath Monitoring. Structure is [documented below](#nested_advanced_datapath_observability_config).
+
+<a name="nested_managed_opentelemetry_config"></a>The `managed_opentelemetry_config` block supports:
+
+*  `scope` - (Required) The scope of the Managed OpenTelemetry pipeline. Supported values include: `SCOPE_UNSPECIFIED`, `NONE`, `COLLECTION_AND_INSTRUMENTATION_COMPONENTS`.
 
 <a name="nested_managed_prometheus"></a>The `managed_prometheus` block supports:
 
@@ -1663,6 +1671,41 @@ linux_node_config {
 * `writable_cgroups` (Optional) - Configuration for writable cgroups. This allows containers to have a writable `/sys/fs/cgroup` directory, which is required for some workloads to create their own sub-cgroups. The `writable_cgroups` block supports:
 
   * `enabled` (Required) - Whether writable cgroups are enabled.
+
+* `registry_hosts` (Optional) - Defines containerd registry host configuration. Each `registry_hosts` entry represents a `hosts.toml` file. See [customize containerd configuration in GKE nodes](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/customize-containerd-configuration#registryHosts) for more detail. Example:
+  ```hcl
+registry_hosts {
+  server = "REGISTRY_SERVER_FQDN"
+  hosts {
+    host = "MIRROR_FQDN"
+    capabilities = [
+      "HOST_CAPABILITY_PULL",
+      "HOST_CAPABILITY_RESOLVE",
+      "HOST_CAPABILITY_PUSH",
+    ]
+    override_path = false
+    dial_timeout = "30s"
+    header {
+      key = "HEADER_KEY"
+      value = [
+        "HEADER_VALUE_1",
+        "HEADER_VALUE_2",
+      ]
+    }
+    ca {
+      gcp_secret_manager_secret_uri = "projects/PROJECT_ID_OR_NUMBER/secrets/CA_SECRET/versions/VERSION"
+    }
+    client {
+      cert {
+        gcp_secret_manager_secret_uri = "projects/PROJECT_ID_OR_NUMBER/secrets/CLIENT_CERT_SECRET/versions/VERSION"
+      }
+      key {
+        gcp_secret_manager_secret_uri = "projects/PROJECT_ID_OR_NUMBER/secrets/CLIENT_KEY_SECRET/versions/VERSION"
+      }
+    }
+  }
+}
+  ```
 
 <a name="nested_vertical_pod_autoscaling"></a>The `vertical_pod_autoscaling` block supports:
 

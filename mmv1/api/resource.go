@@ -1444,7 +1444,7 @@ func quoteStrings(strs []string) []string {
 func ignoreReadFields(props []*Type) []string {
 	var fields []string
 	for _, tp := range props {
-		if tp.IgnoreRead && !tp.UrlParamOnly && !tp.IsA("ResourceRef") {
+		if (tp.IgnoreRead || tp.ClientSide) && !tp.UrlParamOnly && !tp.IsA("ResourceRef") {
 			fields = append(fields, strings.Join(tp.Lineage(), ".0."))
 		} else if tp.IsA("NestedObject") && tp.AllProperties() != nil {
 			fields = append(fields, ignoreReadFields(tp.AllProperties())...)
