@@ -1,0 +1,13 @@
+func validateReplicaAction(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	switch value {
+	case "PAUSE", "RESUME":
+		// Success: value matches a valid action
+		return
+	default:
+		// Failure: value matches neither
+		errors = append(errors, fmt.Errorf("%q replica_action only supports one of 'PAUSE' or 'RESUME'", k))
+	}
+
+	return
+}   

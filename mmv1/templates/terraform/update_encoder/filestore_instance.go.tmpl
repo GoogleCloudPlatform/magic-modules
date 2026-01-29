@@ -29,6 +29,7 @@ if d.HasChange("replica_action") {
 		endpoint = "resumeReplica"
 		replica_action_value = "RESUME"
 	}
+	
 	url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}:%s",endpoint))
 
 	if err != nil {
