@@ -1,10 +1,11 @@
 package networkservices_test
 
 import (
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"testing"
 )
 
 func TestAccNetworkServicesMulticastDomain_networkServicesMulticastDomainUpdateExample(t *testing.T) {
@@ -130,6 +131,7 @@ func testAccNetworkServicesMulticastDomain_networkServicesUllMulticastDomainUpda
 resource "google_compute_network" "network" {
   name                    = "tf-test-test-md-network%{random_suffix}"
   auto_create_subnetworks = false
+  network_profile = "us-south1-d-vpc-ull-operator"
 }
 resource "google_network_services_multicast_domain" md_test {
   multicast_domain_id = "tf-test-test-md-domain%{random_suffix}"
@@ -151,6 +153,7 @@ func testAccNetworkServicesMulticastDomain_networkServicesUllMulticastDomainUpda
 resource "google_compute_network" "network" {
   name                    = "tf-test-test-md-network%{random_suffix}"
   auto_create_subnetworks = false
+  network_profile = "us-south1-d-vpc-ull-operator"
 }
 resource "google_network_services_multicast_domain" md_test {
   multicast_domain_id = "tf-test-test-md-domain%{random_suffix}"
