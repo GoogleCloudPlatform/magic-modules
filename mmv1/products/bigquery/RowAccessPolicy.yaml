@@ -21,8 +21,11 @@ import_format:
   - projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}/rowAccessPolicies/{{policy_id}}
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/bigquery_row_access_policy.go.tmpl'
+# exluding resource_identity due to dataset_id fields
+exclude_identity_generation: true
 examples:
   - name: 'bigquery_row_access_policy_basic'
+    exclude_identity_import: true
     primary_resource_id: 'example'
     vars:
       dataset_id: 'dataset_id'

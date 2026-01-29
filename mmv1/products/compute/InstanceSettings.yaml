@@ -46,9 +46,12 @@ custom_code:
   pre_update: 'templates/terraform/pre_create/compute_instance_settings_fingerprint.go.tmpl'
   custom_delete: 'templates/terraform/custom_delete/clear_instance_settings.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
+# excluding identity due to zone value inconsistency
+exclude_identity_generation: true
 examples:
   - name: 'instance_settings_basic'
     primary_resource_id: 'gce_instance_settings'
+    exclude_identity_import: true
 parameters:
   - name: 'zone'
     type: ResourceRef
