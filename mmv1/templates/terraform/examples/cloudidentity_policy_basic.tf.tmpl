@@ -1,0 +1,16 @@
+resource "google_cloud_identity_policy" "{{$.PrimaryResourceId}}" {
+    provider = google-beta
+
+    customer = "{{index $.Vars "customer"}}"
+
+    policy_query {
+        org_unit = "{{index $.Vars "org_unit"}}"
+        group = "{{index $.Vars "group"}}"
+        query = "{{index $.Vars "query"}}"
+    }
+
+    setting {
+        type = "{{index $.Vars "setting_type"}}"
+	value_json = "{{index $.Vars "value_json"}}"
+    }
+}
