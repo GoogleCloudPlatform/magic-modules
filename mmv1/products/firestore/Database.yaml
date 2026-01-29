@@ -220,7 +220,8 @@ properties:
   - name: 'firestoreDataAccessMode'
     type: Enum
     description: |
-      The Firestore API data access mode to use for this database.
+      The Firestore API data access mode to use for this database. Can only be
+      specified for 'ENTERPRISE' edition databases.
     required: false
     default_from_api: true
     immutable: true
@@ -230,7 +231,8 @@ properties:
   - name: 'mongodbCompatibleDataAccessMode'
     type: Enum
     description: |
-      The MongoDB compatible API data access mode to use for this database.
+      The MongoDB compatible API data access mode to use for this database. Can
+      only be specified for 'ENTERPRISE' edition databases.
     required: false
     default_from_api: true
     immutable: true
@@ -240,7 +242,8 @@ properties:
   - name: 'realtimeUpdatesMode'
     type: Enum
     description: |
-      The Realtime Updates mode to use for this database..
+      The Realtime Updates mode to use for this database. Can only be specified
+      for 'ENTERPRISE' edition databases.
     required: false
     default_from_api: true
     immutable: true
