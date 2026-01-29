@@ -104,7 +104,7 @@ properties:
       `gs://my-bucket`.
       Output only when the catalog type is CATALOG_TYPE_GCS_BUCKET.
       Required when the catalog type is CATALOG_TYPE_BIGLAKE.
-    required: false 
+    required: false
   - name: 'storage_regions'
     api_name: 'storage-regions'
     type: Array

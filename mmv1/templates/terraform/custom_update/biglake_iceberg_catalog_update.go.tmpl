@@ -35,8 +35,8 @@ if tpgresource.IsEmptyValue(reflect.ValueOf(defaultLocationProp)) {
     return fmt.Errorf("CATALOG_TYPE_BIGLAKE requires a non-empty default_location.")
   }
 } else {
-  if v, ok := catalogTypeProp.(string); ok && v == "CATALOG_TYPE_GCS_BUCKET" {
-    return fmt.Errorf("CATALOG_TYPE_GCS_BUCKET outputs the default_location only. Do not set it.")
+  if v, ok := catalogTypeProp.(string); ok && v == "CATALOG_TYPE_GCS_BUCKET" && d.HasChange("default_location") {
+    return fmt.Errorf("CATALOG_TYPE_GCS_BUCKET outputs the default_location only. Do not change it.")
   }
 }
 
