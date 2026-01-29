@@ -41,6 +41,16 @@ examples:
       account_id: "my-custom"
     test_env_vars:
       project: "PROJECT_NAME"
+  - name: 'backup_dr_bpa_filestore'
+    primary_resource_id: 'my-backup-plan-association-filestore'
+    vars:
+      backup_plan_association_id: "my-bpa-filestore"
+      filestore_instance_id: "test-instance-bpa"
+      backup_vault_id: "bv-bpa-filestore"
+      backup_plan_id: "bp-bpa-filestore"
+    test_env_vars:
+      project: "PROJECT_NAME"
+
 parameters:
   - name: 'location'
     type: String
@@ -73,13 +83,14 @@ properties:
       Note:
       - A Backup Plan configured for 'compute.googleapis.com/Instance', can only protect instance type resources.
       - A Backup Plan configured for 'compute.googleapis.com/Disk' can be used to protect both standard Disks and Regional Disks resources.
+      - A Backup Plan configured for 'file.googleapis.com/Instance' can only protect Filestore instances.
     required: true
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - name: 'resourceType'
     type: String
     description: |
       The resource type of workload on which backupplan is applied.
-      Examples include, "compute.googleapis.com/Instance", "compute.googleapis.com/Disk", and "compute.googleapis.com/RegionDisk"
+      Examples include, "compute.googleapis.com/Instance", "compute.googleapis.com/Disk", "compute.googleapis.com/RegionDisk", and "file.googleapis.com/Instance"
     required: true
   - name: 'createTime'
     type: String
