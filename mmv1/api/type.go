@@ -1533,3 +1533,14 @@ func (t Type) TGCSendEmptyValue() bool {
 func (t Type) ShouldIgnoreCustomFlatten() bool {
 	return t.ResourceMetadata.IsTgcCompiler() && (t.IgnoreRead || t.TGCIgnoreTerraformCustomFlatten)
 }
+
+// It returns true if any of the nested properties are required, necessitating the initialization
+// of an empty map to prevent "missing argument" errors in Terraform when the field is missing in CAI.
+func (t Type) HasRequiredProperty() bool {
+	for _, prop := range t.UserProperties() {
+		if prop.Required {
+			return true
+		}
+	}
+	return false
+}
