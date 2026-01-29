@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -64,10 +65,13 @@ func TestAccBiglakeIcebergIcebergNamespaceIamBinding(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				PreConfig: func() {
-					acctest.CleanupBigLakeIcebergNamespace(t, catalogId, namespaceId)
-				},
 				Config: testAccBiglakeIcebergIcebergNamespace_catalogOnly(context),
+				Check: resource.ComposeTestCheckFunc(
+					func(s *terraform.State) error {
+						acctest.CleanupBigLakeIcebergNamespace(t, catalogId, namespaceId)
+						return nil
+					},
+				),
 			},
 		},
 	})
@@ -119,10 +123,13 @@ func TestAccBiglakeIcebergIcebergNamespaceIamMember(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				PreConfig: func() {
-					acctest.CleanupBigLakeIcebergNamespace(t, catalogId, namespaceId)
-				},
 				Config: testAccBiglakeIcebergIcebergNamespace_catalogOnly(context),
+				Check: resource.ComposeTestCheckFunc(
+					func(s *terraform.State) error {
+						acctest.CleanupBigLakeIcebergNamespace(t, catalogId, namespaceId)
+						return nil
+					},
+				),
 			},
 		},
 	})
@@ -180,10 +187,13 @@ func TestAccBiglakeIcebergIcebergNamespaceIamPolicy(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				PreConfig: func() {
-					acctest.CleanupBigLakeIcebergNamespace(t, catalogId, namespaceId)
-				},
 				Config: testAccBiglakeIcebergIcebergNamespace_catalogOnly(context),
+				Check: resource.ComposeTestCheckFunc(
+					func(s *terraform.State) error {
+						acctest.CleanupBigLakeIcebergNamespace(t, catalogId, namespaceId)
+						return nil
+					},
+				),
 			},
 		},
 	})
