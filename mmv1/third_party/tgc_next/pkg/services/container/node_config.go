@@ -15,7 +15,7 @@ import (
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
-	"google.golang.org/api/container/v1beta1"
+	container "google.golang.org/api/container/v1beta1"
 )
 
 // Matches gke-default scope from https://cloud.google.com/sdk/gcloud/reference/container/clusters/create
@@ -95,7 +95,7 @@ func schemaContainerdConfig() *schema.Schema {
 				Optional:    true,
 				Description: "Configures containerd registry host configuration. Each registry_hosts entry represents a hosts.toml file.",
 				Elem: &schema.Resource{
-				    Schema: map[string]*schema.Schema{
+					Schema: map[string]*schema.Schema{
 						"server": {
 							Type:        schema.TypeString,
 							Required:    true,
@@ -132,7 +132,7 @@ func schemaContainerdConfig() *schema.Schema {
 									Optional:    true,
 									Description: "Configures the registry host headers.",
 									Elem: &schema.Resource{Schema: map[string]*schema.Schema{
-									    "key": {
+										"key": {
 											Type:        schema.TypeString,
 											Required:    true,
 											Description: "Configures the header key.",
@@ -191,9 +191,9 @@ func schemaContainerdConfig() *schema.Schema {
 									}},
 								},
 							},
+							},
 						},
-					},
-				}},
+					}},
 			},
 		}},
 	}
@@ -207,16 +207,16 @@ func schemaInsecureKubeletReadonlyPortEnabled() *schema.Schema {
 		Optional:     true,
 		Computed:     true,
 		Description:  "Controls whether the kubelet read-only port is enabled. It is strongly recommended to set this to `FALSE`. Possible values: `TRUE`, `FALSE`.",
-		ValidateFunc: validation.StringInSlice([]string{"FALSE","TRUE"}, false),
+		ValidateFunc: validation.StringInSlice([]string{"FALSE", "TRUE"}, false),
 	}
 }
 
 func schemaLoggingVariant() *schema.Schema {
 	return &schema.Schema{
-		Type: schema.TypeString,
-		Optional: true,
-		Computed: true,
-		Description: `Type of logging agent that is used as the default value for node pools in the cluster. Valid values include DEFAULT and MAX_THROUGHPUT.`,
+		Type:         schema.TypeString,
+		Optional:     true,
+		Computed:     true,
+		Description:  `Type of logging agent that is used as the default value for node pools in the cluster. Valid values include DEFAULT and MAX_THROUGHPUT.`,
 		ValidateFunc: validation.StringInSlice([]string{"DEFAULT", "MAX_THROUGHPUT"}, false),
 	}
 }
@@ -228,7 +228,7 @@ func schemaGcfsConfig() *schema.Schema {
 		Computed:    true,
 		MaxItems:    1,
 		Description: `GCFS configuration for this node.`,
-		Elem:        &schema.Resource{
+		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"enabled": {
 					Type:        schema.TypeBool,
@@ -242,12 +242,12 @@ func schemaGcfsConfig() *schema.Schema {
 
 func schemaNodeConfig() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeList,
-		Optional: true,
-		Computed: true,
-		ForceNew: true,
+		Type:        schema.TypeList,
+		Optional:    true,
+		Computed:    true,
+		ForceNew:    true,
 		Description: `The configuration of the nodepool`,
-		MaxItems: 1,
+		MaxItems:    1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"containerd_config": schemaContainerdConfig(),
@@ -260,26 +260,26 @@ func schemaNodeConfig() *schema.Schema {
 				},
 
 				"disk_type": {
-					Type:         schema.TypeString,
-					Optional:     true,
-					Computed:     true,
-					Description:  `Type of the disk attached to each node. Such as pd-standard, pd-balanced or pd-ssd`,
+					Type:        schema.TypeString,
+					Optional:    true,
+					Computed:    true,
+					Description: `Type of the disk attached to each node. Such as pd-standard, pd-balanced or pd-ssd`,
 				},
 
 				"boot_disk": schemaBootDiskConfig(),
 
 				"guest_accelerator": {
-					Type:     schema.TypeList,
-					Optional: true,
-					Computed: true,
-					ForceNew: true,
+					Type:        schema.TypeList,
+					Optional:    true,
+					Computed:    true,
+					ForceNew:    true,
 					Description: `List of the type and count of accelerator cards attached to the instance.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"count": {
-								Type:     schema.TypeInt,
-								Required: true,
-								ForceNew: true,
+								Type:        schema.TypeInt,
+								Required:    true,
+								ForceNew:    true,
 								Description: `The number of the accelerator cards exposed to an instance.`,
 							},
 							"type": {
@@ -287,15 +287,15 @@ func schemaNodeConfig() *schema.Schema {
 								Required:         true,
 								ForceNew:         true,
 								DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
-								Description: `The accelerator type resource name.`,
+								Description:      `The accelerator type resource name.`,
 							},
 							"gpu_driver_installation_config": {
-								Type:         schema.TypeList,
-								MaxItems:     1,
-								Optional:     true,
-								Computed:     true,
-								ForceNew:     true,
-								Description:  `Configuration for auto installation of GPU driver.`,
+								Type:        schema.TypeList,
+								MaxItems:    1,
+								Optional:    true,
+								Computed:    true,
+								ForceNew:    true,
+								Description: `Configuration for auto installation of GPU driver.`,
 								Elem: &schema.Resource{
 									Schema: map[string]*schema.Schema{
 										"gpu_driver_version": {
@@ -309,17 +309,17 @@ func schemaNodeConfig() *schema.Schema {
 								},
 							},
 							"gpu_partition_size": {
-								Type:             schema.TypeString,
-								Optional:         true,
-								ForceNew:         true,
+								Type:        schema.TypeString,
+								Optional:    true,
+								ForceNew:    true,
 								Description: `Size of partitions to create on the GPU. Valid values are described in the NVIDIA mig user guide (https://docs.nvidia.com/datacenter/tesla/mig-user-guide/#partitioning)`,
 							},
 							"gpu_sharing_config": {
-								Type:         schema.TypeList,
-								MaxItems:     1,
-								Optional:     true,
-								ForceNew:     true,
-								Description:  `Configuration for GPU sharing.`,
+								Type:        schema.TypeList,
+								MaxItems:    1,
+								Optional:    true,
+								ForceNew:    true,
+								Description: `Configuration for GPU sharing.`,
 								Elem: &schema.Resource{
 									Schema: map[string]*schema.Schema{
 										"gpu_sharing_strategy": {
@@ -342,23 +342,21 @@ func schemaNodeConfig() *schema.Schema {
 				},
 
 				"image_type": {
-					Type:     schema.TypeString,
-					Optional: true,
-					Computed: true,
+					Type:             schema.TypeString,
+					Optional:         true,
+					Computed:         true,
 					DiffSuppressFunc: tpgresource.CaseDiffSuppress,
-					Description: `The image type to use for this node. Note that for a given image type, the latest version of it will be used.`,
+					Description:      `The image type to use for this node. Note that for a given image type, the latest version of it will be used.`,
 				},
 
 				"labels": {
 					Type:     schema.TypeMap,
 					Optional: true,
 					// Computed=true because GKE Sandbox will automatically add labels to nodes that can/cannot run sandboxed pods.
-					Computed: true,
-					Elem:     &schema.Schema{Type: schema.TypeString},
-					Description: `The map of Kubernetes labels (key/value pairs) to be applied to each node. These will added in addition to any default label(s) that Kubernetes may apply to the node.`,
-	{{- if not (or (eq $.TargetVersionName "") (eq $.TargetVersionName "ga")) }}
+					Computed:         true,
+					Elem:             &schema.Schema{Type: schema.TypeString},
+					Description:      `The map of Kubernetes labels (key/value pairs) to be applied to each node. These will added in addition to any default label(s) that Kubernetes may apply to the node.`,
 					DiffSuppressFunc: containerNodePoolLabelsSuppress,
-	{{- end }}
 				},
 
 				"resource_labels": {
@@ -379,14 +377,12 @@ func schemaNodeConfig() *schema.Schema {
 				},
 
 				"logging_variant": schemaLoggingVariant(),
-
-	{{ if ne $.TargetVersionName `ga` -}}
 				"ephemeral_storage_config": {
-					Type:     schema.TypeList,
-					Optional: true,
-					MaxItems: 1,
+					Type:        schema.TypeList,
+					Optional:    true,
+					MaxItems:    1,
 					Description: `Parameters for the ephemeral storage filesystem. If unspecified, ephemeral storage is backed by the boot disk.`,
-					ForceNew: true,
+					ForceNew:    true,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"local_ssd_count": {
@@ -399,40 +395,38 @@ func schemaNodeConfig() *schema.Schema {
 						},
 					},
 				},
-	{{- end }}
-
-        "ephemeral_storage_local_ssd_config": {
-          Type:     schema.TypeList,
-          Optional: true,
-          MaxItems: 1,
-          Description: `Parameters for the ephemeral storage filesystem. If unspecified, ephemeral storage is backed by the boot disk.`,
-          ForceNew: true,
-          Elem: &schema.Resource{
-            Schema: map[string]*schema.Schema{
-              "local_ssd_count": {
-                Type:         schema.TypeInt,
-                Required:     true,
-                ForceNew:     true,
-                ValidateFunc: validation.IntAtLeast(0),
-                Description:  `Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD must be 375 or 3000 GB in size, and all local SSDs must share the same size.`,
-              },
-              "data_cache_count": {
-                Type:         schema.TypeInt,
-				Optional:     true,
-                ForceNew:     true,
-                ValidateFunc: validation.IntAtLeast(0),
-                Description:  `Number of local SSDs to be utilized for GKE Data Cache. Uses NVMe interfaces.`,
-              },
-            },
-          },
-        },
+				"ephemeral_storage_local_ssd_config": {
+					Type:        schema.TypeList,
+					Optional:    true,
+					MaxItems:    1,
+					Description: `Parameters for the ephemeral storage filesystem. If unspecified, ephemeral storage is backed by the boot disk.`,
+					ForceNew:    true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"local_ssd_count": {
+								Type:         schema.TypeInt,
+								Required:     true,
+								ForceNew:     true,
+								ValidateFunc: validation.IntAtLeast(0),
+								Description:  `Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD must be 375 or 3000 GB in size, and all local SSDs must share the same size.`,
+							},
+							"data_cache_count": {
+								Type:         schema.TypeInt,
+								Optional:     true,
+								ForceNew:     true,
+								ValidateFunc: validation.IntAtLeast(0),
+								Description:  `Number of local SSDs to be utilized for GKE Data Cache. Uses NVMe interfaces.`,
+							},
+						},
+					},
+				},
 
 				"local_nvme_ssd_block_config": {
-					Type:     schema.TypeList,
-					Optional: true,
-					MaxItems: 1,
+					Type:        schema.TypeList,
+					Optional:    true,
+					MaxItems:    1,
 					Description: `Parameters for raw-block local NVMe SSDs.`,
-					ForceNew: true,
+					ForceNew:    true,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"local_ssd_count": {
@@ -447,25 +441,25 @@ func schemaNodeConfig() *schema.Schema {
 				},
 
 				"secondary_boot_disks": {
-					Type:     schema.TypeList,
-					Optional: true,
-					MaxItems: 127,
+					Type:        schema.TypeList,
+					Optional:    true,
+					MaxItems:    127,
 					Description: `Secondary boot disks for preloading data or container images.`,
-					ForceNew: true,
+					ForceNew:    true,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"disk_image": {
-								Type:         schema.TypeString,
-								Required:     true,
-								ForceNew:     true,
-								Description:  `Disk image to create the secondary boot disk from`,
+								Type:        schema.TypeString,
+								Required:    true,
+								ForceNew:    true,
+								Description: `Disk image to create the secondary boot disk from`,
 							},
 							"mode": {
-								Type:         schema.TypeString,
-								Optional:     true,
-								ForceNew:     true,
-								Description:  `Mode for how the secondary boot disk is used.`,
-              				},
+								Type:        schema.TypeString,
+								Optional:    true,
+								ForceNew:    true,
+								Description: `Mode for how the secondary boot disk is used.`,
+							},
 						},
 					},
 				},
@@ -473,9 +467,9 @@ func schemaNodeConfig() *schema.Schema {
 				"gcfs_config": schemaGcfsConfig(),
 
 				"gvnic": {
-					Type:     schema.TypeList,
-					Optional: true,
-					MaxItems: 1,
+					Type:        schema.TypeList,
+					Optional:    true,
+					MaxItems:    1,
 					Description: `Enable or disable gvnic in the node pool.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
@@ -489,34 +483,34 @@ func schemaNodeConfig() *schema.Schema {
 				},
 
 				"machine_type": {
-					Type:     schema.TypeString,
-					Optional: true,
-					Computed: true,
+					Type:        schema.TypeString,
+					Optional:    true,
+					Computed:    true,
 					Description: `The name of a Google Compute Engine machine type.`,
 				},
 
 				"metadata": {
-					Type:     schema.TypeMap,
-					Optional: true,
-					Computed: true,
-					ForceNew: true,
-					Elem:     &schema.Schema{Type: schema.TypeString},
+					Type:        schema.TypeMap,
+					Optional:    true,
+					Computed:    true,
+					ForceNew:    true,
+					Elem:        &schema.Schema{Type: schema.TypeString},
 					Description: `The metadata key/value pairs assigned to instances in the cluster.`,
 				},
 
 				"min_cpu_platform": {
-					Type:     schema.TypeString,
-					Optional: true,
-					Computed: true,
-					ForceNew: true,
+					Type:        schema.TypeString,
+					Optional:    true,
+					Computed:    true,
+					ForceNew:    true,
 					Description: `Minimum CPU platform to be used by this instance. The instance may be scheduled on the specified or newer CPU platform.`,
 				},
 
 				"oauth_scopes": {
-					Type:     schema.TypeSet,
-					Optional: true,
-					Computed: true,
-					ForceNew: true,
+					Type:        schema.TypeSet,
+					Optional:    true,
+					Computed:    true,
+					ForceNew:    true,
 					Description: `The set of Google API scopes to be made available on all of the node VMs.`,
 					Elem: &schema.Schema{
 						Type: schema.TypeString,
@@ -525,14 +519,14 @@ func schemaNodeConfig() *schema.Schema {
 						},
 					},
 					DiffSuppressFunc: containerClusterAddedScopesSuppress,
-					Set: tpgresource.StringScopeHashcode,
+					Set:              tpgresource.StringScopeHashcode,
 				},
 
 				"preemptible": {
-					Type:     schema.TypeBool,
-					Optional: true,
-					ForceNew: true,
-					Default:  false,
+					Type:        schema.TypeBool,
+					Optional:    true,
+					ForceNew:    true,
+					Default:     false,
 					Description: `Whether the nodes are created as preemptible VM instances.`,
 				},
 				"reservation_affinity": {
@@ -560,7 +554,7 @@ func schemaNodeConfig() *schema.Schema {
 								Type:        schema.TypeSet,
 								Description: "The label values of the reservation resource.",
 								ForceNew:    true,
-                                Optional:    true,
+								Optional:    true,
 								Elem: &schema.Schema{
 									Type: schema.TypeString,
 								},
@@ -577,48 +571,48 @@ func schemaNodeConfig() *schema.Schema {
 				},
 
 				"service_account": {
-					Type:     schema.TypeString,
-					Optional: true,
-					Computed: true,
-					ForceNew: true,
+					Type:        schema.TypeString,
+					Optional:    true,
+					Computed:    true,
+					ForceNew:    true,
 					Description: `The Google Cloud Platform Service Account to be used by the node VMs.`,
 				},
 
 				"tags": {
-					Type:     schema.TypeList,
-					Optional: true,
-					Elem:     &schema.Schema{Type: schema.TypeString},
+					Type:        schema.TypeList,
+					Optional:    true,
+					Elem:        &schema.Schema{Type: schema.TypeString},
 					Description: `The list of instance tags applied to all nodes.`,
 				},
 
 				"storage_pools": {
-					Type:     schema.TypeList,
-					Optional: true,
-					Elem:     &schema.Schema{Type: schema.TypeString},
+					Type:        schema.TypeList,
+					Optional:    true,
+					Elem:        &schema.Schema{Type: schema.TypeString},
 					Description: `The list of Storage Pools where boot disks are provisioned.`,
 				},
 
 				"shielded_instance_config": {
-					Type:     schema.TypeList,
-					Optional: true,
-					Computed: true,
-					ForceNew: true,
+					Type:        schema.TypeList,
+					Optional:    true,
+					Computed:    true,
+					ForceNew:    true,
 					Description: `Shielded Instance options.`,
-					MaxItems: 1,
+					MaxItems:    1,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"enable_secure_boot": {
-								Type:     schema.TypeBool,
-								Optional: true,
-								ForceNew: true,
-								Default:  false,
+								Type:        schema.TypeBool,
+								Optional:    true,
+								ForceNew:    true,
+								Default:     false,
 								Description: `Defines whether the instance has Secure Boot enabled.`,
 							},
 							"enable_integrity_monitoring": {
-								Type:     schema.TypeBool,
-								Optional: true,
-								ForceNew: true,
-								Default:  true,
+								Type:        schema.TypeBool,
+								Optional:    true,
+								ForceNew:    true,
+								Default:     true,
 								Description: `Defines whether the instance has integrity monitoring enabled.`,
 							},
 						},
@@ -632,44 +626,44 @@ func schemaNodeConfig() *schema.Schema {
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"key": {
-								Type:     schema.TypeString,
-								Required: true,
+								Type:        schema.TypeString,
+								Required:    true,
 								Description: `Key for taint.`,
 							},
 							"value": {
-								Type:     schema.TypeString,
-								Required: true,
+								Type:        schema.TypeString,
+								Required:    true,
 								Description: `Value for taint.`,
 							},
 							"effect": {
 								Type:         schema.TypeString,
 								Required:     true,
 								ValidateFunc: validation.StringInSlice([]string{"NO_SCHEDULE", "PREFER_NO_SCHEDULE", "NO_EXECUTE"}, false),
-								Description: `Effect for taint.`,
+								Description:  `Effect for taint.`,
 							},
 						},
 					},
 				},
 
 				"effective_taints": {
-					Type:             schema.TypeList,
-					Computed:         true,
+					Type:        schema.TypeList,
+					Computed:    true,
 					Description: `List of kubernetes taints applied to each node.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"key": {
-								Type:     schema.TypeString,
-								Computed: true,
+								Type:        schema.TypeString,
+								Computed:    true,
 								Description: `Key for taint.`,
 							},
 							"value": {
-								Type:     schema.TypeString,
-								Computed: true,
+								Type:        schema.TypeString,
+								Computed:    true,
 								Description: `Value for taint.`,
 							},
 							"effect": {
-								Type:         schema.TypeString,
-								Computed:     true,
+								Type:        schema.TypeString,
+								Computed:    true,
 								Description: `Effect for taint.`,
 							},
 						},
@@ -677,10 +671,10 @@ func schemaNodeConfig() *schema.Schema {
 				},
 
 				"workload_metadata_config": {
-					Computed:   true,
-					Type:       schema.TypeList,
-					Optional:   true,
-					MaxItems:   1,
+					Computed:    true,
+					Type:        schema.TypeList,
+					Optional:    true,
+					MaxItems:    1,
 					Description: `The workload metadata configuration for this node.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
@@ -693,39 +687,36 @@ func schemaNodeConfig() *schema.Schema {
 						},
 					},
 				},
-
-	{{ if ne $.TargetVersionName `ga` -}}
 				"sandbox_config": {
-					Type:       schema.TypeList,
-					Optional:   true,
-					ForceNew:   true,
-					MaxItems:   1,
+					Type:        schema.TypeList,
+					Optional:    true,
+					ForceNew:    true,
+					MaxItems:    1,
 					Description: `Sandbox configuration for this node.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"sandbox_type": {
 								Type:         schema.TypeString,
 								Required:     true,
-								Description: `Type of the sandbox to use for the node (e.g. 'gvisor')`,
+								Description:  `Type of the sandbox to use for the node (e.g. 'gvisor')`,
 								ValidateFunc: validation.StringInSlice([]string{"gvisor"}, false),
 							},
 						},
 					},
 				},
-	{{- end }}
 				"boot_disk_kms_key": {
-					Type:       schema.TypeString,
-					Optional:   true,
-					ForceNew:   true,
+					Type:        schema.TypeString,
+					Optional:    true,
+					ForceNew:    true,
 					Description: `The Customer Managed Encryption Key used to encrypt the boot disk attached to each node in the node pool.`,
 				},
 				// Note that AtLeastOneOf can't be set because this schema is reused by
 				// two different resources.
 				"kubelet_config": {
-					Type:     schema.TypeList,
-					Optional: true,
-					Computed: true,
-					MaxItems: 1,
+					Type:        schema.TypeList,
+					Optional:    true,
+					Computed:    true,
+					MaxItems:    1,
 					Description: `Node kubelet configs.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
@@ -743,10 +734,10 @@ func schemaNodeConfig() *schema.Schema {
 								Elem: &schema.Resource{
 									Schema: map[string]*schema.Schema{
 										"policy": {
-											Type:        schema.TypeString,
-											Optional:    true,
-											Computed:    true,
-											Description: `The Memory Manager policy to use. This policy guides how memory and hugepages are allocated and managed for pods on the node, influencing NUMA affinity.`,
+											Type:         schema.TypeString,
+											Optional:     true,
+											Computed:     true,
+											Description:  `The Memory Manager policy to use. This policy guides how memory and hugepages are allocated and managed for pods on the node, influencing NUMA affinity.`,
 											ValidateFunc: validation.StringInSlice([]string{"None", "Static", ""}, false),
 										},
 									},
@@ -760,32 +751,31 @@ func schemaNodeConfig() *schema.Schema {
 								Elem: &schema.Resource{
 									Schema: map[string]*schema.Schema{
 										"policy": {
-											Type:        schema.TypeString,
-											Optional:    true,
-											Computed:    true,
-											Description: `The Topology Manager policy to use. This policy dictates how resource alignment is handled on the node.`,
+											Type:         schema.TypeString,
+											Optional:     true,
+											Computed:     true,
+											Description:  `The Topology Manager policy to use. This policy dictates how resource alignment is handled on the node.`,
 											ValidateFunc: validation.StringInSlice([]string{"none", "restricted", "single-numa-node", "best-effort", ""}, false),
-
 										},
 										"scope": {
-											Type:        schema.TypeString,
-											Optional:    true,
-											Computed:    true,
-											Description: `The Topology Manager scope, defining the granularity at which policy decisions are applied. Valid values are "container" (resources are aligned per container within a pod) or "pod" (resources are aligned for the entire pod).`,
+											Type:         schema.TypeString,
+											Optional:     true,
+											Computed:     true,
+											Description:  `The Topology Manager scope, defining the granularity at which policy decisions are applied. Valid values are "container" (resources are aligned per container within a pod) or "pod" (resources are aligned for the entire pod).`,
 											ValidateFunc: validation.StringInSlice([]string{"container", "pod", ""}, false),
 										},
 									},
 								},
 							},
 							"cpu_cfs_quota": {
-								Type:     schema.TypeBool,
-								Computed: true,
-								Optional: true,
+								Type:        schema.TypeBool,
+								Computed:    true,
+								Optional:    true,
 								Description: `Enable CPU CFS quota enforcement for containers that specify CPU limits.`,
 							},
 							"cpu_cfs_quota_period": {
-								Type:     schema.TypeString,
-								Optional: true,
+								Type:        schema.TypeString,
+								Optional:    true,
 								Description: `Set the CPU CFS quota period value 'cpu.cfs_period_us'.`,
 							},
 							"insecure_kubelet_readonly_port_enabled": schemaInsecureKubeletReadonlyPortEnabled(),
@@ -801,51 +791,51 @@ func schemaNodeConfig() *schema.Schema {
 								Description: `Set the maximum number of image pulls in parallel.`,
 							},
 							"container_log_max_size": {
-							        Type:        schema.TypeString,
+								Type:        schema.TypeString,
 								Optional:    true,
 								Description: `Defines the maximum size of the container log file before it is rotated.`,
 							},
 							"container_log_max_files": {
-							        Type:        schema.TypeInt,
+								Type:        schema.TypeInt,
 								Optional:    true,
 								Description: `Defines the maximum number of container log files that can be present for a container.`,
 							},
 							"image_gc_low_threshold_percent": {
-							        Type:        schema.TypeInt,
+								Type:        schema.TypeInt,
 								Optional:    true,
 								Description: `Defines the percent of disk usage before which image garbage collection is never run. Lowest disk usage to garbage collect to.`,
 							},
 							"image_gc_high_threshold_percent": {
-							        Type:        schema.TypeInt,
+								Type:        schema.TypeInt,
 								Optional:    true,
 								Description: `Defines the percent of disk usage after which image garbage collection is always run.`,
 							},
 							"image_minimum_gc_age": {
-							        Type:        schema.TypeString,
+								Type:        schema.TypeString,
 								Optional:    true,
 								Description: `Defines the minimum age for an unused image before it is garbage collected.`,
 							},
 							"image_maximum_gc_age": {
-							        Type:        schema.TypeString,
+								Type:        schema.TypeString,
 								Optional:    true,
 								Description: `Defines the maximum age an image can be unused before it is garbage collected.`,
 							},
 							"allowed_unsafe_sysctls": {
-							        Type:        schema.TypeList,
+								Type:        schema.TypeList,
 								Optional:    true,
 								Description: `Defines a comma-separated allowlist of unsafe sysctls or sysctl patterns which can be set on the Pods.`,
 								Elem:        &schema.Schema{Type: schema.TypeString},
 							},
-							 "single_process_oom_kill": {
-							        Type:        schema.TypeBool,
+							"single_process_oom_kill": {
+								Type:        schema.TypeBool,
 								Optional:    true,
 								Description: `Defines whether to enable single process OOM killer.`,
 							},
 							"eviction_max_pod_grace_period_seconds": {
-                                                                Type:        schema.TypeInt,
-                                                                Optional:    true,
-                                                                Description: `Defines the maximum allowed grace period (in seconds) to use when terminating pods in response to a soft eviction threshold being met.`,
-                                                        },
+								Type:        schema.TypeInt,
+								Optional:    true,
+								Description: `Defines the maximum allowed grace period (in seconds) to use when terminating pods in response to a soft eviction threshold being met.`,
+							},
 							"eviction_soft": {
 								Type:        schema.TypeList,
 								Optional:    true,
@@ -864,10 +854,10 @@ func schemaNodeConfig() *schema.Schema {
 											Description: `Defines percentage of soft eviction threshold for nodefs.available.`,
 										},
 										"nodefs_inodes_free": {
-                                                                                        Type:        schema.TypeString,
-                                                                                        Optional:    true,
+											Type:        schema.TypeString,
+											Optional:    true,
 											Description: `Defines percentage of soft eviction threshold for nodefs.inodesFree.`,
-                                                                                },
+										},
 										"imagefs_available": {
 											Type:        schema.TypeString,
 											Optional:    true,
@@ -887,100 +877,100 @@ func schemaNodeConfig() *schema.Schema {
 								},
 							},
 							"eviction_soft_grace_period": {
-                                                                Type:        schema.TypeList,
-                                                                Optional:    true,
-                                                                MaxItems:    1,
-                                                                Description: `Defines a map of signal names to durations that defines grace periods for soft eviction thresholds. Each soft eviction threshold must have a corresponding grace period.`,
-                                                                Elem: &schema.Resource{
-                                                                        Schema: map[string]*schema.Schema{
-                                                                                "memory_available": {
-                                                                                        Type:        schema.TypeString,
-                                                                                        Optional:    true,
-                                                                                        Description: `Defines grace period for the memory.available soft eviction threshold.`,
-                                                                                },
-                                                                                "nodefs_available": {
-                                                                                        Type:        schema.TypeString,
-                                                                                        Optional:    true,
-                                                                                        Description: `Defines grace period for the nodefs.available soft eviction threshold.`,
-                                                                                },
-                                                                                "nodefs_inodes_free": {
-                                                                                        Type:        schema.TypeString,
-                                                                                        Optional:    true,
-                                                                                        Description: `Defines grace period for the nodefs.inodesFree soft eviction threshold.`,
-                                                                                },
-                                                                                "imagefs_available": {
-                                                                                        Type:        schema.TypeString,
-                                                                                        Optional:    true,
-                                                                                        Description: `Defines grace period for the imagefs.available soft eviction threshold`,
-                                                                                },
-                                                                                "imagefs_inodes_free": {
-                                                                                        Type:        schema.TypeString,
-                                                                                        Optional:    true,
-                                                                                        Description: `Defines grace period for the imagefs.inodesFree soft eviction threshold.`,
-                                                                                },
-                                                                                "pid_available": {
-                                                                                        Type:        schema.TypeString,
-                                                                                        Optional:    true,
-                                                                                        Description: `Defines grace period for the pid.available soft eviction threshold.`,
-                                                                                },
-                                                                        },
-                                                                },
-                                                        },
+								Type:        schema.TypeList,
+								Optional:    true,
+								MaxItems:    1,
+								Description: `Defines a map of signal names to durations that defines grace periods for soft eviction thresholds. Each soft eviction threshold must have a corresponding grace period.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"memory_available": {
+											Type:        schema.TypeString,
+											Optional:    true,
+											Description: `Defines grace period for the memory.available soft eviction threshold.`,
+										},
+										"nodefs_available": {
+											Type:        schema.TypeString,
+											Optional:    true,
+											Description: `Defines grace period for the nodefs.available soft eviction threshold.`,
+										},
+										"nodefs_inodes_free": {
+											Type:        schema.TypeString,
+											Optional:    true,
+											Description: `Defines grace period for the nodefs.inodesFree soft eviction threshold.`,
+										},
+										"imagefs_available": {
+											Type:        schema.TypeString,
+											Optional:    true,
+											Description: `Defines grace period for the imagefs.available soft eviction threshold`,
+										},
+										"imagefs_inodes_free": {
+											Type:        schema.TypeString,
+											Optional:    true,
+											Description: `Defines grace period for the imagefs.inodesFree soft eviction threshold.`,
+										},
+										"pid_available": {
+											Type:        schema.TypeString,
+											Optional:    true,
+											Description: `Defines grace period for the pid.available soft eviction threshold.`,
+										},
+									},
+								},
+							},
 							"eviction_minimum_reclaim": {
-                                                                Type:        schema.TypeList,
-                                                                Optional:    true,
-                                                                MaxItems:    1,
-                                                                Description: `Defines a map of signal names to percentage that defines minimum reclaims. It describes the minimum amount of a given resource the kubelet will reclaim when performing a pod eviction.`,
-                                                                Elem: &schema.Resource{
-                                                                        Schema: map[string]*schema.Schema{
-                                                                                "memory_available": {
-                                                                                        Type:        schema.TypeString,
-                                                                                        Optional:    true,
-                                                                                        Description: `Defines percentage of minimum reclaim for memory.available.`,
-                                                                                },
-                                                                                "nodefs_available": {
-                                                                                        Type:        schema.TypeString,
-                                                                                        Optional:    true,
-                                                                                        Description: `Defines percentage of minimum reclaim for nodefs.available.`,
-                                                                                },
-                                                                                "nodefs_inodes_free": {
-                                                                                        Type:        schema.TypeString,
-                                                                                        Optional:    true,
-                                                                                        Description: `Defines percentage of minimum reclaim for nodefs.inodesFree.`,
-                                                                                },
-                                                                                "imagefs_available": {
-                                                                                        Type:        schema.TypeString,
-                                                                                        Optional:    true,
-                                                                                        Description: `Defines percentage of minimum reclaim for imagefs.available.`,
-                                                                                },
-                                                                                "imagefs_inodes_free": {
-                                                                                        Type:        schema.TypeString,
-                                                                                        Optional:    true,
-                                                                                        Description: `Defines percentage of minimum reclaim for imagefs.inodesFree.`,
-                                                                                },
-                                                                                "pid_available": {
-                                                                                        Type:        schema.TypeString,
-                                                                                        Optional:    true,
-                                                                                        Description: `Defines percentage of minimum reclaim for pid.available.`,
-                                                                                },
-                                                                        },
-                                                                },
-                                                        },
+								Type:        schema.TypeList,
+								Optional:    true,
+								MaxItems:    1,
+								Description: `Defines a map of signal names to percentage that defines minimum reclaims. It describes the minimum amount of a given resource the kubelet will reclaim when performing a pod eviction.`,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"memory_available": {
+											Type:        schema.TypeString,
+											Optional:    true,
+											Description: `Defines percentage of minimum reclaim for memory.available.`,
+										},
+										"nodefs_available": {
+											Type:        schema.TypeString,
+											Optional:    true,
+											Description: `Defines percentage of minimum reclaim for nodefs.available.`,
+										},
+										"nodefs_inodes_free": {
+											Type:        schema.TypeString,
+											Optional:    true,
+											Description: `Defines percentage of minimum reclaim for nodefs.inodesFree.`,
+										},
+										"imagefs_available": {
+											Type:        schema.TypeString,
+											Optional:    true,
+											Description: `Defines percentage of minimum reclaim for imagefs.available.`,
+										},
+										"imagefs_inodes_free": {
+											Type:        schema.TypeString,
+											Optional:    true,
+											Description: `Defines percentage of minimum reclaim for imagefs.inodesFree.`,
+										},
+										"pid_available": {
+											Type:        schema.TypeString,
+											Optional:    true,
+											Description: `Defines percentage of minimum reclaim for pid.available.`,
+										},
+									},
+								},
+							},
 						},
 					},
 				},
 				"linux_node_config": {
-					Type:     schema.TypeList,
-					Optional: true,
-					MaxItems: 1,
-					Computed: true,
+					Type:        schema.TypeList,
+					Optional:    true,
+					MaxItems:    1,
+					Computed:    true,
 					Description: `Parameters that can be configured on Linux nodes.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"sysctls": {
-								Type:     schema.TypeMap,
-								Optional: true,
-								Elem:     &schema.Schema{Type: schema.TypeString},
+								Type:        schema.TypeMap,
+								Optional:    true,
+								Elem:        &schema.Schema{Type: schema.TypeString},
 								Description: `The Linux kernel parameters to be applied to the nodes and all pods running on the nodes.`,
 							},
 							"cgroup_mode": {
@@ -992,17 +982,17 @@ func schemaNodeConfig() *schema.Schema {
 								DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("CGROUP_MODE_UNSPECIFIED"),
 							},
 							"node_kernel_module_loading": {
-								Type:     schema.TypeList,
-								Optional: true,
-								MaxItems: 1,
+								Type:        schema.TypeList,
+								Optional:    true,
+								MaxItems:    1,
 								Description: `The settings for kernel module loading.`,
 								Elem: &schema.Resource{
 									Schema: map[string]*schema.Schema{
 										"policy": {
-											Type:        schema.TypeString,
-											Optional:    true,
-											ValidateFunc: validation.StringInSlice([]string{"POLICY_UNSPECIFIED", "ENFORCE_SIGNED_MODULES", "DO_NOT_ENFORCE_SIGNED_MODULES"}, false),
-											Description: `The policy for kernel module loading.`,
+											Type:             schema.TypeString,
+											Optional:         true,
+											ValidateFunc:     validation.StringInSlice([]string{"POLICY_UNSPECIFIED", "ENFORCE_SIGNED_MODULES", "DO_NOT_ENFORCE_SIGNED_MODULES"}, false),
+											Description:      `The policy for kernel module loading.`,
 											DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("POLICY_UNSPECIFIED"),
 										},
 									},
@@ -1024,9 +1014,9 @@ func schemaNodeConfig() *schema.Schema {
 								DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("TRANSPARENT_HUGEPAGE_DEFRAG_UNSPECIFIED"),
 							},
 							"hugepages_config": {
-								Type:     schema.TypeList,
-								Optional: true,
-								MaxItems: 1,
+								Type:        schema.TypeList,
+								Optional:    true,
+								MaxItems:    1,
 								Description: `Amounts for 2M and 1G hugepages.`,
 								Elem: &schema.Resource{
 									Schema: map[string]*schema.Schema{
@@ -1065,9 +1055,9 @@ func schemaNodeConfig() *schema.Schema {
 					},
 				},
 				"node_group": {
-					Type:     schema.TypeString,
-					Optional: true,
-					ForceNew: true,
+					Type:        schema.TypeString,
+					Optional:    true,
+					ForceNew:    true,
 					Description: `Setting this field will assign instances of this pool to run on the specified node group. This is useful for running workloads on sole tenant nodes.`,
 				},
 
@@ -1077,25 +1067,25 @@ func schemaNodeConfig() *schema.Schema {
 					MaxItems:    1,
 					Description: `Specifies options for controlling advanced machine features.`,
 					ForceNew:    true,
-					Elem:        &schema.Resource{
+					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"threads_per_core": {
 								Type:        schema.TypeInt,
-                                Required:    true,
-                                ForceNew:    true,
+								Required:    true,
+								ForceNew:    true,
 								Description: `The number of threads per physical core. To disable simultaneous multithreading (SMT) set this to 1. If unset, the maximum number of threads supported per core by the underlying processor is assumed.`,
 							},
 							"enable_nested_virtualization": {
-								Type: schema.TypeBool,
-								Optional: true,
-								ForceNew: true,
+								Type:        schema.TypeBool,
+								Optional:    true,
+								ForceNew:    true,
 								Description: `Whether the node should have nested virtualization enabled.`,
 							},
 							"performance_monitoring_unit": {
-								Type: schema.TypeString,
-								Optional: true,
+								Type:         schema.TypeString,
+								Optional:     true,
 								ValidateFunc: verify.ValidateEnum([]string{"ARCHITECTURAL", "STANDARD", "ENHANCED"}),
-								Description: `Level of Performance Monitoring Unit (PMU) requested. If unset, no access to the PMU is assumed.`,
+								Description:  `Level of Performance Monitoring Unit (PMU) requested. If unset, no access to the PMU is assumed.`,
 							},
 						},
 					},
@@ -1139,10 +1129,10 @@ func schemaNodeConfig() *schema.Schema {
 								},
 							},
 							"min_node_cpus": {
-                                                                Type:        schema.TypeInt,
-                                                                Optional:    true,
-                                                                Description: `Specifies the minimum number of vCPUs that each sole tenant node must have to use CPU overcommit. If not specified, the CPU overcommit feature is disabled.`,
-                                                        },
+								Type:        schema.TypeInt,
+								Optional:    true,
+								Description: `Specifies the minimum number of vCPUs that each sole tenant node must have to use CPU overcommit. If not specified, the CPU overcommit feature is disabled.`,
+							},
 						},
 					},
 				},
@@ -1155,7 +1145,7 @@ func schemaNodeConfig() *schema.Schema {
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"maintenance_interval": {
-								Type: schema.TypeString,
+								Type:         schema.TypeString,
 								Required:     true,
 								ForceNew:     true,
 								Description:  `.`,
@@ -1178,20 +1168,20 @@ func schemaNodeConfig() *schema.Schema {
 								Description: `Whether Confidential Nodes feature is enabled for all nodes in this pool.`,
 							},
 							"confidential_instance_type": {
-								Type:        schema.TypeString,
-								Optional:    true,
-								ForceNew:    true,
+								Type:             schema.TypeString,
+								Optional:         true,
+								ForceNew:         true,
 								DiffSuppressFunc: suppressDiffForConfidentialNodes,
-								Description: `Defines the type of technology used by the confidential node.`,
-								ValidateFunc: validation.StringInSlice([]string{"SEV", "SEV_SNP", "TDX"}, false),
+								Description:      `Defines the type of technology used by the confidential node.`,
+								ValidateFunc:     validation.StringInSlice([]string{"SEV", "SEV_SNP", "TDX"}, false),
 							},
 						},
 					},
 				},
 				"fast_socket": {
-					Type:     schema.TypeList,
-					Optional: true,
-					MaxItems: 1,
+					Type:        schema.TypeList,
+					Optional:    true,
+					MaxItems:    1,
 					Description: `Enable or disable NCCL Fast Socket in the node pool.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
@@ -1209,25 +1199,25 @@ func schemaNodeConfig() *schema.Schema {
 					Description: `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.`,
 				},
 				"enable_confidential_storage": {
-					Type:     schema.TypeBool,
-					Optional: true,
-					ForceNew: true,
+					Type:        schema.TypeBool,
+					Optional:    true,
+					ForceNew:    true,
 					Description: `If enabled boot disks are configured with confidential mode.`,
 				},
 				"local_ssd_encryption_mode": {
-					Type:             schema.TypeString,
-					Optional:         true,
-					ForceNew:         true,
-					ValidateFunc:     validation.StringInSlice([]string{"STANDARD_ENCRYPTION", "EPHEMERAL_KEY_ENCRYPTION"}, false),
-					Description:      `LocalSsdEncryptionMode specified the method used for encrypting the local SSDs attached to the node.`,
+					Type:         schema.TypeString,
+					Optional:     true,
+					ForceNew:     true,
+					ValidateFunc: validation.StringInSlice([]string{"STANDARD_ENCRYPTION", "EPHEMERAL_KEY_ENCRYPTION"}, false),
+					Description:  `LocalSsdEncryptionMode specified the method used for encrypting the local SSDs attached to the node.`,
 				},
-				"max_run_duration" : {
+				"max_run_duration": {
 					Type:        schema.TypeString,
 					Optional:    true,
 					ForceNew:    true,
 					Description: `The runtime of each node in the node pool in seconds, terminated by 's'. Example: "3600s".`,
 				},
-				"flex_start" : {
+				"flex_start": {
 					Type:        schema.TypeBool,
 					Optional:    true,
 					ForceNew:    true,
@@ -1238,21 +1228,20 @@ func schemaNodeConfig() *schema.Schema {
 	}
 }
 
-
 func schemaBootDiskConfig() *schema.Schema {
 	return &schema.Schema{
-		Type: schema.TypeList,
-		Optional: true,
-		Computed: true,
-		MaxItems: 1,
+		Type:        schema.TypeList,
+		Optional:    true,
+		Computed:    true,
+		MaxItems:    1,
 		Description: `Boot disk configuration for node pools nodes.`,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"disk_type": {
-					Type:         schema.TypeString,
-					Optional:     true,
-					Computed:     true,
-					Description:  `Type of the disk attached to each node. Such as pd-standard, pd-balanced or pd-ssd`,
+					Type:        schema.TypeString,
+					Optional:    true,
+					Computed:    true,
+					Description: `Type of the disk attached to each node. Such as pd-standard, pd-balanced or pd-ssd`,
 				},
 				"size_gb": {
 					Type:         schema.TypeInt,
@@ -1262,16 +1251,16 @@ func schemaBootDiskConfig() *schema.Schema {
 					Description:  `Size of the disk attached to each node, specified in GB. The smallest allowed disk size is 10GB.`,
 				},
 				"provisioned_iops": {
-					Type:         schema.TypeInt,
-					Optional:     true,
-					Computed:     true,
-					Description:  `Configured IOPs provisioning. Only valid with disk type hyperdisk-balanced.`,
+					Type:        schema.TypeInt,
+					Optional:    true,
+					Computed:    true,
+					Description: `Configured IOPs provisioning. Only valid with disk type hyperdisk-balanced.`,
 				},
 				"provisioned_throughput": {
-					Type:         schema.TypeInt,
-					Optional:     true,
-					Computed:     true,
-					Description:  `Configured throughput provisioning. Only valid with disk type hyperdisk-balanced.`,
+					Type:        schema.TypeInt,
+					Optional:    true,
+					Computed:    true,
+					Description: `Configured throughput provisioning. Only valid with disk type hyperdisk-balanced.`,
 				},
 			},
 		},
@@ -1281,7 +1270,7 @@ func schemaBootDiskConfig() *schema.Schema {
 // Separate since this currently only supports a single value -- a subset of
 // the overall NodeKubeletConfig
 func schemaNodePoolAutoConfigNodeKubeletConfig() *schema.Schema {
-  return &schema.Schema{
+	return &schema.Schema{
 		Type:        schema.TypeList,
 		Optional:    true,
 		Computed:    true,
@@ -1314,17 +1303,17 @@ func schemaNodePoolAutoConfigLinuxNodeConfig() *schema.Schema {
 					DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("CGROUP_MODE_UNSPECIFIED"),
 				},
 				"node_kernel_module_loading": {
-					Type:     schema.TypeList,
-					Optional: true,
-					MaxItems: 1,
+					Type:        schema.TypeList,
+					Optional:    true,
+					MaxItems:    1,
 					Description: `The settings for kernel module loading.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"policy": {
-								Type:        schema.TypeString,
-								Optional:    true,
-								ValidateFunc: validation.StringInSlice([]string{"POLICY_UNSPECIFIED", "ENFORCE_SIGNED_MODULES", "DO_NOT_ENFORCE_SIGNED_MODULES"}, false),
-								Description: `The policy for kernel module loading.`,
+								Type:             schema.TypeString,
+								Optional:         true,
+								ValidateFunc:     validation.StringInSlice([]string{"POLICY_UNSPECIFIED", "ENFORCE_SIGNED_MODULES", "DO_NOT_ENFORCE_SIGNED_MODULES"}, false),
+								Description:      `The policy for kernel module loading.`,
 								DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("POLICY_UNSPECIFIED"),
 							},
 						},
@@ -1412,7 +1401,7 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 			if v, ok := data["gpu_sharing_config"]; ok && len(v.([]interface{})) > 0 {
 				gpuSharingConfig := data["gpu_sharing_config"].([]interface{})[0].(map[string]interface{})
 				guestAcceleratorConfig.GpuSharingConfig = &container.GPUSharingConfig{
-					GpuSharingStrategy: gpuSharingConfig["gpu_sharing_strategy"].(string),
+					GpuSharingStrategy:     gpuSharingConfig["gpu_sharing_strategy"].(string),
 					MaxSharedClientsPerGpu: int64(gpuSharingConfig["max_shared_clients_per_gpu"].(int)),
 				}
 			}
@@ -1446,14 +1435,12 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 		}
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := nodeConfig["ephemeral_storage_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		nc.EphemeralStorageConfig = &container.EphemeralStorageConfig{
 			LocalSsdCount: int64(conf["local_ssd_count"].(int)),
 		}
 	}
-{{- end }}
 	if v, ok := nodeConfig["local_nvme_ssd_block_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		nc.LocalNvmeSsdBlockConfig = &container.LocalNvmeSsdBlockConfig{
@@ -1637,14 +1624,12 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 		nc.WorkloadMetadataConfig = expandWorkloadMetadataConfig(v)
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := nodeConfig["sandbox_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		nc.SandboxConfig = &container.SandboxConfig{
 			SandboxType: conf["sandbox_type"].(string),
 		}
 	}
-{{- end }}
 	if v, ok := nodeConfig["boot_disk_kms_key"]; ok {
 		nc.BootDiskKmsKey = v.(string)
 	}
@@ -1662,7 +1647,7 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 			parts := strings.Split(prefix, ".") // "node_pool.N." -> ["node_pool" "N", ""]
 			npIndex, err := strconv.Atoi(parts[1])
 			if err != nil { // no error return from expander
-			    panic(fmt.Errorf("unexpected format for node pool path prefix: %w. value: %v", err, prefix))
+				panic(fmt.Errorf("unexpected format for node pool path prefix: %w. value: %v", err, prefix))
 			}
 
 			rawConfigNPRoot = rawConfigNPRoot.GetAttr("node_pool").Index(cty.NumberIntVal(int64(npIndex)))
@@ -1670,9 +1655,9 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 
 		if vNC := rawConfigNPRoot.GetAttr("node_config"); vNC.LengthInt() > 0 {
 			if vKC := vNC.Index(cty.NumberIntVal(0)).GetAttr("kubelet_config"); vKC.LengthInt() > 0 {
-				v := vKC.Index(cty.NumberIntVal(0)).GetAttr("cpu_cfs_quota");
+				v := vKC.Index(cty.NumberIntVal(0)).GetAttr("cpu_cfs_quota")
 				if v == cty.NullVal(cty.Bool) {
-				    nc.KubeletConfig.CpuCfsQuota = true
+					nc.KubeletConfig.CpuCfsQuota = true
 				} else if v.False() { // force-send explicit false to API
 					nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "CpuCfsQuota")
 				}
@@ -1696,9 +1681,9 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 	if v, ok := nodeConfig["advanced_machine_features"]; ok && len(v.([]interface{})) > 0 {
 		advanced_machine_features := v.([]interface{})[0].(map[string]interface{})
 		nc.AdvancedMachineFeatures = &container.AdvancedMachineFeatures{
-			ThreadsPerCore: int64(advanced_machine_features["threads_per_core"].(int)),
+			ThreadsPerCore:             int64(advanced_machine_features["threads_per_core"].(int)),
 			EnableNestedVirtualization: advanced_machine_features["enable_nested_virtualization"].(bool),
-			PerformanceMonitoringUnit: advanced_machine_features["performance_monitoring_unit"].(string),
+			PerformanceMonitoringUnit:  advanced_machine_features["performance_monitoring_unit"].(string),
 		}
 	}
 
@@ -1706,27 +1691,25 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 		nc.SoleTenantConfig = expandSoleTenantConfig(v)
 	}
 
-	if v,ok := nodeConfig["enable_confidential_storage"]; ok {
+	if v, ok := nodeConfig["enable_confidential_storage"]; ok {
 		nc.EnableConfidentialStorage = v.(bool)
 	}
 
-	if v,ok := nodeConfig["local_ssd_encryption_mode"]; ok {
+	if v, ok := nodeConfig["local_ssd_encryption_mode"]; ok {
 		nc.LocalSsdEncryptionMode = v.(string)
 	}
 
-	if v,ok := nodeConfig["max_run_duration"]; ok {
+	if v, ok := nodeConfig["max_run_duration"]; ok {
 		nc.MaxRunDuration = v.(string)
 	}
 
-	if v,ok := nodeConfig["flex_start"]; ok {
+	if v, ok := nodeConfig["flex_start"]; ok {
 		nc.FlexStart = v.(bool)
 	}
 
-	{{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := nodeConfig["host_maintenance_policy"]; ok {
 		nc.HostMaintenancePolicy = expandHostMaintenancePolicy(v)
 	}
-	{{- end }}
 
 	if v, ok := nodeConfig["confidential_nodes"]; ok {
 		nc.ConfidentialNodes = expandConfidentialNodes(v)
@@ -1838,36 +1821,36 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 		kConfig.MaxParallelImagePulls = int64(maxParallelImagePulls.(int))
 	}
 	if containerLogMaxSize, ok := cfg["container_log_max_size"]; ok {
-	        kConfig.ContainerLogMaxSize = containerLogMaxSize.(string)
+		kConfig.ContainerLogMaxSize = containerLogMaxSize.(string)
 	}
 	if containerLogMaxFiles, ok := cfg["container_log_max_files"]; ok {
-    	        kConfig.ContainerLogMaxFiles = int64(containerLogMaxFiles.(int))
-        }
+		kConfig.ContainerLogMaxFiles = int64(containerLogMaxFiles.(int))
+	}
 	if imageGcLowThresholdPercent, ok := cfg["image_gc_low_threshold_percent"]; ok {
-    	        kConfig.ImageGcLowThresholdPercent = int64(imageGcLowThresholdPercent.(int))
+		kConfig.ImageGcLowThresholdPercent = int64(imageGcLowThresholdPercent.(int))
 	}
 	if imageGcHighThresholdPercent, ok := cfg["image_gc_high_threshold_percent"]; ok {
-    	        kConfig.ImageGcHighThresholdPercent = int64(imageGcHighThresholdPercent.(int))
+		kConfig.ImageGcHighThresholdPercent = int64(imageGcHighThresholdPercent.(int))
 	}
 	if imageMinimumGcAge, ok := cfg["image_minimum_gc_age"]; ok {
-    	        kConfig.ImageMinimumGcAge = imageMinimumGcAge.(string)
+		kConfig.ImageMinimumGcAge = imageMinimumGcAge.(string)
 	}
 	if imageMaximumGcAge, ok := cfg["image_maximum_gc_age"]; ok {
-    	        kConfig.ImageMaximumGcAge = imageMaximumGcAge.(string)
+		kConfig.ImageMaximumGcAge = imageMaximumGcAge.(string)
 	}
 	if allowedUnsafeSysctls, ok := cfg["allowed_unsafe_sysctls"]; ok {
-	        sysctls := allowedUnsafeSysctls.([]interface{})
+		sysctls := allowedUnsafeSysctls.([]interface{})
 		kConfig.AllowedUnsafeSysctls = make([]string, len(sysctls))
 		for i, s := range sysctls {
-		    kConfig.AllowedUnsafeSysctls[i] = s.(string)
+			kConfig.AllowedUnsafeSysctls[i] = s.(string)
 		}
 	}
 	if singleProcessOomKill, ok := cfg["single_process_oom_kill"]; ok {
-            kConfig.SingleProcessOomKill = singleProcessOomKill.(bool)
+		kConfig.SingleProcessOomKill = singleProcessOomKill.(bool)
 	}
 	if evictionMaxPodGracePeriodSeconds, ok := cfg["eviction_max_pod_grace_period_seconds"]; ok {
-                kConfig.EvictionMaxPodGracePeriodSeconds = int64(evictionMaxPodGracePeriodSeconds.(int))
-        }
+		kConfig.EvictionMaxPodGracePeriodSeconds = int64(evictionMaxPodGracePeriodSeconds.(int))
+	}
 	if v, ok := cfg["eviction_soft"]; ok && len(v.([]interface{})) > 0 {
 		es := v.([]interface{})[0].(map[string]interface{})
 		evictionSoft := &container.EvictionSignals{}
@@ -1875,7 +1858,7 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 			evictionSoft.MemoryAvailable = val.(string)
 		}
 		if val, ok := es["nodefs_available"]; ok {
-		        evictionSoft.NodefsAvailable = val.(string)
+			evictionSoft.NodefsAvailable = val.(string)
 		}
 		if val, ok := es["imagefs_available"]; ok {
 			evictionSoft.ImagefsAvailable = val.(string)
@@ -1900,51 +1883,51 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 	}
 
 	if v, ok := cfg["eviction_soft_grace_period"]; ok && len(v.([]interface{})) > 0 {
-                es := v.([]interface{})[0].(map[string]interface{})
-                periods := &container.EvictionGracePeriod{}
-                if val, ok := es["memory_available"]; ok {
-                        periods.MemoryAvailable = val.(string)
-                }
-                if val, ok := es["nodefs_available"]; ok {
-                        periods.NodefsAvailable = val.(string)
-                }
-                if val, ok := es["imagefs_available"]; ok {
-                        periods.ImagefsAvailable = val.(string)
-                }
-                if val, ok := es["imagefs_inodes_free"]; ok {
-                        periods.ImagefsInodesFree = val.(string)
-                }
-                if val, ok := es["nodefs_inodes_free"]; ok {
-                        periods.NodefsInodesFree = val.(string)
-                }
-                if val, ok := es["pid_available"]; ok {
-                        periods.PidAvailable = val.(string)
-                }
-                kConfig.EvictionSoftGracePeriod = periods
-        }
+		es := v.([]interface{})[0].(map[string]interface{})
+		periods := &container.EvictionGracePeriod{}
+		if val, ok := es["memory_available"]; ok {
+			periods.MemoryAvailable = val.(string)
+		}
+		if val, ok := es["nodefs_available"]; ok {
+			periods.NodefsAvailable = val.(string)
+		}
+		if val, ok := es["imagefs_available"]; ok {
+			periods.ImagefsAvailable = val.(string)
+		}
+		if val, ok := es["imagefs_inodes_free"]; ok {
+			periods.ImagefsInodesFree = val.(string)
+		}
+		if val, ok := es["nodefs_inodes_free"]; ok {
+			periods.NodefsInodesFree = val.(string)
+		}
+		if val, ok := es["pid_available"]; ok {
+			periods.PidAvailable = val.(string)
+		}
+		kConfig.EvictionSoftGracePeriod = periods
+	}
 	if v, ok := cfg["eviction_minimum_reclaim"]; ok && len(v.([]interface{})) > 0 {
-                es := v.([]interface{})[0].(map[string]interface{})
-                reclaim := &container.EvictionMinimumReclaim{}
-                if val, ok := es["memory_available"]; ok {
-                        reclaim.MemoryAvailable = val.(string)
-                }
-                if val, ok := es["nodefs_available"]; ok {
-                        reclaim.NodefsAvailable = val.(string)
-                }
-                if val, ok := es["imagefs_available"]; ok {
-                        reclaim.ImagefsAvailable = val.(string)
-                }
-                if val, ok := es["imagefs_inodes_free"]; ok {
-                        reclaim.ImagefsInodesFree = val.(string)
-                }
-                if val, ok := es["nodefs_inodes_free"]; ok {
-                        reclaim.NodefsInodesFree = val.(string)
-                }
-                if val, ok := es["pid_available"]; ok {
-                        reclaim.PidAvailable = val.(string)
-                }
-                kConfig.EvictionMinimumReclaim = reclaim
-        }
+		es := v.([]interface{})[0].(map[string]interface{})
+		reclaim := &container.EvictionMinimumReclaim{}
+		if val, ok := es["memory_available"]; ok {
+			reclaim.MemoryAvailable = val.(string)
+		}
+		if val, ok := es["nodefs_available"]; ok {
+			reclaim.NodefsAvailable = val.(string)
+		}
+		if val, ok := es["imagefs_available"]; ok {
+			reclaim.ImagefsAvailable = val.(string)
+		}
+		if val, ok := es["imagefs_inodes_free"]; ok {
+			reclaim.ImagefsInodesFree = val.(string)
+		}
+		if val, ok := es["nodefs_inodes_free"]; ok {
+			reclaim.NodefsInodesFree = val.(string)
+		}
+		if val, ok := es["pid_available"]; ok {
+			reclaim.PidAvailable = val.(string)
+		}
+		kConfig.EvictionMinimumReclaim = reclaim
+	}
 	return kConfig
 }
 
@@ -2029,7 +2012,7 @@ func expandLinuxNodeConfig(v interface{}) *container.LinuxNodeConfig {
 	if v, ok := cfg["hugepages_config"]; ok {
 		linuxNodeConfig.Hugepages = expandHugepagesConfig(v)
 	}
-	
+
 	if v, ok := cfg["node_kernel_module_loading"]; ok {
 		linuxNodeConfig.NodeKernelModuleLoading = expandNodeKernelModuleLoading(v)
 	}
@@ -2261,31 +2244,31 @@ func expandRegistryHosts(v interface{}) []*container.RegistryHostConfig {
 					h.DialTimeout = v.(string)
 				}
 				if v, ok := hostData["capabilities"]; ok {
-				    cap := v.([]interface{})
+					cap := v.([]interface{})
 					h.Capabilities = make([]string, len(cap))
 					for i, c := range cap {
 						h.Capabilities[i] = c.(string)
 					}
 				}
 				if v, ok := hostData["header"]; ok {
-				    headers := v.([]interface{})
+					headers := v.([]interface{})
 					h.Header = make([]*container.RegistryHeader, len(headers))
 					for i, headerRaw := range headers {
-					   h.Header[i] = expandRegistryHeader(headerRaw)
+						h.Header[i] = expandRegistryHeader(headerRaw)
 					}
 				}
 				if v, ok := hostData["ca"]; ok {
-				    ca := v.([]interface{})
+					ca := v.([]interface{})
 					h.Ca = make([]*container.CertificateConfig, len(ca))
 					for i, caRaw := range ca {
-					   h.Ca[i] = expandRegistryCertificateConfig(caRaw)
+						h.Ca[i] = expandRegistryCertificateConfig(caRaw)
 					}
 				}
 				if v, ok := hostData["client"]; ok {
-				    client := v.([]interface{})
+					client := v.([]interface{})
 					h.Client = make([]*container.CertificateConfigPair, len(client))
 					for i, clientRaw := range client {
-					   h.Client[i] = expandRegistryCertificateConfigPair(clientRaw)
+						h.Client[i] = expandRegistryCertificateConfigPair(clientRaw)
 					}
 				}
 				rh.Hosts = append(rh.Hosts, h)
@@ -2303,7 +2286,7 @@ func expandRegistryHeader(v interface{}) *container.RegistryHeader {
 	}
 	ls := v.(map[string]interface{})
 	if val, ok := ls["key"]; ok {
-	    header.Key = val.(string)
+		header.Key = val.(string)
 	}
 	if val, ok := ls["value"]; ok {
 		headerVal := val.([]interface{})
@@ -2322,7 +2305,7 @@ func expandRegistryCertificateConfig(v interface{}) *container.CertificateConfig
 	}
 	ls := v.(map[string]interface{})
 	if val, ok := ls["gcp_secret_manager_secret_uri"]; ok {
-	    cfg.GcpSecretManagerSecretUri = val.(string)
+		cfg.GcpSecretManagerSecretUri = val.(string)
 	}
 	return cfg
 }
@@ -2336,13 +2319,13 @@ func expandRegistryCertificateConfigPair(v interface{}) *container.CertificateCo
 	if val, ok := ls["cert"]; ok {
 		certRaw := val.([]interface{})
 		if len(certRaw) > 0 {
-		    cfg.Cert = expandRegistryCertificateConfig(certRaw[0])
+			cfg.Cert = expandRegistryCertificateConfig(certRaw[0])
 		}
 	}
 	if val, ok := ls["key"]; ok {
-	    keyRaw := val.([]interface{})
+		keyRaw := val.([]interface{})
 		if len(keyRaw) > 0 {
-		    cfg.Key = expandRegistryCertificateConfig(keyRaw[0])
+			cfg.Key = expandRegistryCertificateConfig(keyRaw[0])
 		}
 	}
 	return cfg
@@ -2359,11 +2342,11 @@ func expandSoleTenantConfig(v interface{}) *container.SoleTenantConfig {
 	stConfig := &container.SoleTenantConfig{}
 	cfg := ls[0].(map[string]interface{})
 	if affinitiesRaw, ok := cfg["node_affinity"]; ok {
-	        affinities := make([]*container.NodeAffinity, 0)
+		affinities := make([]*container.NodeAffinity, 0)
 		for _, v := range affinitiesRaw.(*schema.Set).List() {
-		        na := v.(map[string]interface{})
+			na := v.(map[string]interface{})
 			affinities = append(affinities, &container.NodeAffinity{
-			        Key:      na["key"].(string),
+				Key:      na["key"].(string),
 				Operator: na["operator"].(string),
 				Values:   tpgresource.ConvertStringArr(na["values"].([]interface{})),
 			})
@@ -2371,12 +2354,11 @@ func expandSoleTenantConfig(v interface{}) *container.SoleTenantConfig {
 		stConfig.NodeAffinities = affinities
 	}
 	if v, ok := cfg["min_node_cpus"]; ok {
-	        stConfig.MinNodeCpus = int64(v.(int))
+		stConfig.MinNodeCpus = int64(v.(int))
 	}
 	return stConfig
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func expandHostMaintenancePolicy(v interface{}) *container.HostMaintenancePolicy {
 	if v == nil {
 		return nil
@@ -2393,7 +2375,6 @@ func expandHostMaintenancePolicy(v interface{}) *container.HostMaintenancePolicy
 
 	return mPolicy
 }
-{{- end }}
 
 func expandConfidentialNodes(configured interface{}) *container.ConfidentialNodes {
 	l := configured.([]interface{})
@@ -2402,7 +2383,7 @@ func expandConfidentialNodes(configured interface{}) *container.ConfidentialNode
 	}
 	config := l[0].(map[string]interface{})
 	return &container.ConfidentialNodes{
-		Enabled: config["enabled"].(bool),
+		Enabled:                  config["enabled"].(bool),
 		ConfidentialInstanceType: config["confidential_instance_type"].(string),
 	}
 }
@@ -2446,55 +2427,51 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 	}
 
 	config = append(config, map[string]interface{}{
-		"machine_type":             c.MachineType,
-		"containerd_config":        flattenContainerdConfig(c.ContainerdConfig),
-		"disk_size_gb":             c.DiskSizeGb,
-		"disk_type":                c.DiskType,
-		"boot_disk":                flattenBootDiskConfig(c.BootDisk),
-		"guest_accelerator":        flattenContainerGuestAccelerators(c.Accelerators),
-		"local_ssd_count":          c.LocalSsdCount,
-		"logging_variant":          flattenLoggingVariant(c.LoggingConfig),
-{{- if ne $.TargetVersionName "ga" }}
-		"ephemeral_storage_config": flattenEphemeralStorageConfig(c.EphemeralStorageConfig),
-{{- end }}
-		"local_nvme_ssd_block_config": flattenLocalNvmeSsdBlockConfig(c.LocalNvmeSsdBlockConfig),
+		"machine_type":                       c.MachineType,
+		"containerd_config":                  flattenContainerdConfig(c.ContainerdConfig),
+		"disk_size_gb":                       c.DiskSizeGb,
+		"disk_type":                          c.DiskType,
+		"boot_disk":                          flattenBootDiskConfig(c.BootDisk),
+		"guest_accelerator":                  flattenContainerGuestAccelerators(c.Accelerators),
+		"local_ssd_count":                    c.LocalSsdCount,
+		"logging_variant":                    flattenLoggingVariant(c.LoggingConfig),
+		"ephemeral_storage_config":           flattenEphemeralStorageConfig(c.EphemeralStorageConfig),
+		"local_nvme_ssd_block_config":        flattenLocalNvmeSsdBlockConfig(c.LocalNvmeSsdBlockConfig),
 		"ephemeral_storage_local_ssd_config": flattenEphemeralStorageLocalSsdConfig(c.EphemeralStorageLocalSsdConfig),
-		"gcfs_config":              flattenGcfsConfig(c.GcfsConfig),
-		"gvnic":					flattenGvnic(c.Gvnic),
-		"reservation_affinity":     flattenGKEReservationAffinity(c.ReservationAffinity),
-		"service_account":          c.ServiceAccount,
-		"metadata":                 c.Metadata,
-		"image_type":               c.ImageType,
-		"labels":                   c.Labels,
-		"resource_labels":          c.ResourceLabels,
-		"tags":                     c.Tags,
-		"preemptible":              c.Preemptible,
-		"secondary_boot_disks":     flattenSecondaryBootDisks(c.SecondaryBootDisks),
-		"storage_pools":            c.StoragePools,
-		"spot":                     c.Spot,
-		"min_cpu_platform":         c.MinCpuPlatform,
-		"shielded_instance_config": flattenShieldedInstanceConfig(c.ShieldedInstanceConfig),
-		"taint":                    flattenTaints(c.Taints, oldTaints),
-		"effective_taints":         flattenEffectiveTaints(c.Taints),
-		"workload_metadata_config": flattenWorkloadMetadataConfig(c.WorkloadMetadataConfig),
-{{- if ne $.TargetVersionName "ga" }}
-		"sandbox_config": 			flattenSandboxConfig(c.SandboxConfig),
-		"host_maintenance_policy":  flattenHostMaintenancePolicy(c.HostMaintenancePolicy),
-{{- end }}
-		"confidential_nodes":       flattenConfidentialNodes(c.ConfidentialNodes),
-		"boot_disk_kms_key":        c.BootDiskKmsKey,
-		"kubelet_config":           flattenKubeletConfig(c.KubeletConfig),
-		"linux_node_config":        flattenLinuxNodeConfig(c.LinuxNodeConfig),
-		"windows_node_config":      flattenWindowsNodeConfig(c.WindowsNodeConfig),
-		"node_group":               c.NodeGroup,
-		"advanced_machine_features": flattenAdvancedMachineFeaturesConfig(c.AdvancedMachineFeatures),
-		"max_run_duration": 		 c.MaxRunDuration,
-		"flex_start":				 c.FlexStart,
-		"sole_tenant_config":        flattenSoleTenantConfig(c.SoleTenantConfig),
-		"fast_socket":               flattenFastSocket(c.FastSocket),
-		"resource_manager_tags":     flattenResourceManagerTags(c.ResourceManagerTags),
-		"enable_confidential_storage": c.EnableConfidentialStorage,
-		"local_ssd_encryption_mode":      c.LocalSsdEncryptionMode,
+		"gcfs_config":                        flattenGcfsConfig(c.GcfsConfig),
+		"gvnic":                              flattenGvnic(c.Gvnic),
+		"reservation_affinity":               flattenGKEReservationAffinity(c.ReservationAffinity),
+		"service_account":                    c.ServiceAccount,
+		"metadata":                           c.Metadata,
+		"image_type":                         c.ImageType,
+		"labels":                             c.Labels,
+		"resource_labels":                    c.ResourceLabels,
+		"tags":                               c.Tags,
+		"preemptible":                        c.Preemptible,
+		"secondary_boot_disks":               flattenSecondaryBootDisks(c.SecondaryBootDisks),
+		"storage_pools":                      c.StoragePools,
+		"spot":                               c.Spot,
+		"min_cpu_platform":                   c.MinCpuPlatform,
+		"shielded_instance_config":           flattenShieldedInstanceConfig(c.ShieldedInstanceConfig),
+		"taint":                              flattenTaints(c.Taints, oldTaints),
+		"effective_taints":                   flattenEffectiveTaints(c.Taints),
+		"workload_metadata_config":           flattenWorkloadMetadataConfig(c.WorkloadMetadataConfig),
+		"sandbox_config":                     flattenSandboxConfig(c.SandboxConfig),
+		"host_maintenance_policy":            flattenHostMaintenancePolicy(c.HostMaintenancePolicy),
+		"confidential_nodes":                 flattenConfidentialNodes(c.ConfidentialNodes),
+		"boot_disk_kms_key":                  c.BootDiskKmsKey,
+		"kubelet_config":                     flattenKubeletConfig(c.KubeletConfig),
+		"linux_node_config":                  flattenLinuxNodeConfig(c.LinuxNodeConfig),
+		"windows_node_config":                flattenWindowsNodeConfig(c.WindowsNodeConfig),
+		"node_group":                         c.NodeGroup,
+		"advanced_machine_features":          flattenAdvancedMachineFeaturesConfig(c.AdvancedMachineFeatures),
+		"max_run_duration":                   c.MaxRunDuration,
+		"flex_start":                         c.FlexStart,
+		"sole_tenant_config":                 flattenSoleTenantConfig(c.SoleTenantConfig),
+		"fast_socket":                        flattenFastSocket(c.FastSocket),
+		"resource_manager_tags":              flattenResourceManagerTags(c.ResourceManagerTags),
+		"enable_confidential_storage":        c.EnableConfidentialStorage,
+		"local_ssd_encryption_mode":          c.LocalSsdEncryptionMode,
 	})
 
 	if len(c.OauthScopes) > 0 {
@@ -2512,9 +2489,9 @@ func flattenBootDiskConfig(c *container.BootDisk) []map[string]interface{} {
 	}
 
 	config = append(config, map[string]interface{}{
-		"disk_type": c.DiskType,
-		"size_gb": c.SizeGb,
-		"provisioned_iops": c.ProvisionedIops,
+		"disk_type":              c.DiskType,
+		"size_gb":                c.SizeGb,
+		"provisioned_iops":       c.ProvisionedIops,
 		"provisioned_throughput": c.ProvisionedThroughput,
 	})
 
@@ -2539,9 +2516,9 @@ func flattenAdvancedMachineFeaturesConfig(c *container.AdvancedMachineFeatures) 
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"threads_per_core": c.ThreadsPerCore,
+			"threads_per_core":             c.ThreadsPerCore,
 			"enable_nested_virtualization": c.EnableNestedVirtualization,
-			"performance_monitoring_unit": c.PerformanceMonitoringUnit,
+			"performance_monitoring_unit":  c.PerformanceMonitoringUnit,
 		})
 	}
 	return result
@@ -2551,8 +2528,8 @@ func flattenContainerGuestAccelerators(c []*container.AcceleratorConfig) []map[s
 	result := []map[string]interface{}{}
 	for _, accel := range c {
 		accelerator := map[string]interface{}{
-			"count": accel.AcceleratorCount,
-			"type":  accel.AcceleratorType,
+			"count":              accel.AcceleratorCount,
+			"type":               accel.AcceleratorType,
 			"gpu_partition_size": accel.GpuPartitionSize,
 		}
 		if accel.GpuDriverInstallationConfig != nil {
@@ -2565,7 +2542,7 @@ func flattenContainerGuestAccelerators(c []*container.AcceleratorConfig) []map[s
 		if accel.GpuSharingConfig != nil {
 			accelerator["gpu_sharing_config"] = []map[string]interface{}{
 				{
-					"gpu_sharing_strategy": accel.GpuSharingConfig.GpuSharingStrategy,
+					"gpu_sharing_strategy":       accel.GpuSharingConfig.GpuSharingStrategy,
 					"max_shared_clients_per_gpu": accel.GpuSharingConfig.MaxSharedClientsPerGpu,
 				},
 			}
@@ -2586,7 +2563,6 @@ func flattenShieldedInstanceConfig(c *container.ShieldedInstanceConfig) []map[st
 	return result
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func flattenEphemeralStorageConfig(c *container.EphemeralStorageConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
@@ -2596,7 +2572,6 @@ func flattenEphemeralStorageConfig(c *container.EphemeralStorageConfig) []map[st
 	}
 	return result
 }
-{{- end }}
 
 func flattenLocalNvmeSsdBlockConfig(c *container.LocalNvmeSsdBlockConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
@@ -2612,7 +2587,7 @@ func flattenEphemeralStorageLocalSsdConfig(c *container.EphemeralStorageLocalSsd
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"local_ssd_count": c.LocalSsdCount,
+			"local_ssd_count":  c.LocalSsdCount,
 			"data_cache_count": c.DataCacheCount,
 		})
 	}
@@ -2625,7 +2600,7 @@ func flattenSecondaryBootDisks(c []*container.SecondaryBootDisk) []map[string]in
 		for _, disk := range c {
 			secondaryBootDisk := map[string]interface{}{
 				"disk_image": disk.DiskImage,
-				"mode": disk.Mode,
+				"mode":       disk.Mode,
 			}
 			result = append(result, secondaryBootDisk)
 		}
@@ -2722,12 +2697,11 @@ func flattenWorkloadMetadataConfig(c *container.WorkloadMetadataConfig) []map[st
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"mode":          c.Mode,
+			"mode": c.Mode,
 		})
 	}
 	return result
 }
-{{- if not (or (eq $.TargetVersionName "") (eq $.TargetVersionName "ga")) }}
 func flattenSandboxConfig(c *container.SandboxConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
@@ -2784,7 +2758,6 @@ func containerNodePoolLabelsSuppress(k, old, new string, d *schema.ResourceData)
 
 	return true
 }
-{{- end }}
 
 func containerNodePoolResourceLabelsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// Suppress diffs for server-specified labels prefixed with "goog-gke"
@@ -2809,7 +2782,7 @@ func flattenKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface
 			"cpu_cfs_quota_period":                   c.CpuCfsQuotaPeriod,
 			"cpu_manager_policy":                     c.CpuManagerPolicy,
 			"memory_manager":                         flattenMemoryManager(c.MemoryManager),
-			"topology_manager":                       flattenTopologyManager(c.TopologyManager),        
+			"topology_manager":                       flattenTopologyManager(c.TopologyManager),
 			"insecure_kubelet_readonly_port_enabled": flattenInsecureKubeletReadonlyPortEnabled(c),
 			"pod_pids_limit":                         c.PodPidsLimit,
 			"container_log_max_size":                 c.ContainerLogMaxSize,
@@ -2861,50 +2834,49 @@ func flattenNodePoolAutoConfigNodeKubeletConfig(c *container.NodeKubeletConfig) 
 	return result
 }
 
-
 func flattenEvictionSignals(c *container.EvictionSignals) []map[string]interface{} {
-        result := []map[string]interface{}{}
-        if c != nil {
-                result = append(result, map[string]interface{}{
-                        "memory_available":    c.MemoryAvailable,
-                        "nodefs_available":    c.NodefsAvailable,
-                        "nodefs_inodes_free":  c.NodefsInodesFree,
-                        "imagefs_available":   c.ImagefsAvailable,
-                        "imagefs_inodes_free": c.ImagefsInodesFree,
-                        "pid_available":       c.PidAvailable,
-                })
-        }
-        return result
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"memory_available":    c.MemoryAvailable,
+			"nodefs_available":    c.NodefsAvailable,
+			"nodefs_inodes_free":  c.NodefsInodesFree,
+			"imagefs_available":   c.ImagefsAvailable,
+			"imagefs_inodes_free": c.ImagefsInodesFree,
+			"pid_available":       c.PidAvailable,
+		})
+	}
+	return result
 }
 
 func flattenEvictionGracePeriod(c *container.EvictionGracePeriod) []map[string]interface{} {
-        result := []map[string]interface{}{}
-        if c != nil {
-                result = append(result, map[string]interface{}{
-                        "memory_available":    c.MemoryAvailable,
-                        "nodefs_available":    c.NodefsAvailable,
-                        "nodefs_inodes_free":  c.NodefsInodesFree,
-                        "imagefs_available":   c.ImagefsAvailable,
-                        "imagefs_inodes_free": c.ImagefsInodesFree,
-                        "pid_available":       c.PidAvailable,
-                })
-        }
-        return result
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"memory_available":    c.MemoryAvailable,
+			"nodefs_available":    c.NodefsAvailable,
+			"nodefs_inodes_free":  c.NodefsInodesFree,
+			"imagefs_available":   c.ImagefsAvailable,
+			"imagefs_inodes_free": c.ImagefsInodesFree,
+			"pid_available":       c.PidAvailable,
+		})
+	}
+	return result
 }
 
 func flattenEvictionMinimumReclaim(c *container.EvictionMinimumReclaim) []map[string]interface{} {
-        result := []map[string]interface{}{}
-        if c != nil {
-                result = append(result, map[string]interface{}{
-                        "memory_available":    c.MemoryAvailable,
-                        "nodefs_available":    c.NodefsAvailable,
-                        "nodefs_inodes_free":  c.NodefsInodesFree,
-                        "imagefs_available":   c.ImagefsAvailable,
-                        "imagefs_inodes_free": c.ImagefsInodesFree,
-                        "pid_available":       c.PidAvailable,
-                })
-        }
-        return result
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"memory_available":    c.MemoryAvailable,
+			"nodefs_available":    c.NodefsAvailable,
+			"nodefs_inodes_free":  c.NodefsInodesFree,
+			"imagefs_available":   c.ImagefsAvailable,
+			"imagefs_inodes_free": c.ImagefsInodesFree,
+			"pid_available":       c.PidAvailable,
+		})
+	}
+	return result
 }
 
 func flattenLinuxNodeConfig(c *container.LinuxNodeConfig) []map[string]interface{} {
@@ -2966,13 +2938,13 @@ func flattenContainerdConfig(c *container.ContainerdConfig) []map[string]interfa
 		r["writable_cgroups"] = flattenWritableCgroups(c.WritableCgroups)
 	}
 	if c.RegistryHosts != nil {
-	    r["registry_hosts"] = flattenRegistryHosts(c.RegistryHosts)
+		r["registry_hosts"] = flattenRegistryHosts(c.RegistryHosts)
 	}
 	return append(result, r)
 }
 
 func flattenRegistryHosts(registryHosts []*container.RegistryHostConfig) []map[string]interface{} {
-    items := []map[string]interface{}{}
+	items := []map[string]interface{}{}
 	if len(registryHosts) == 0 {
 		return items
 	}
@@ -2999,32 +2971,32 @@ func flattenHostInRegistryHosts(hosts []*container.HostConfig) []map[string]inte
 		item["dial_timeout"] = h.DialTimeout
 
 		if h.Header != nil {
-		    tmp := make([]interface{}, len(h.Header))
+			tmp := make([]interface{}, len(h.Header))
 			for i, val := range h.Header {
-			    tmp[i] = map[string]interface{}{
-					"key": val.Key,
+				tmp[i] = map[string]interface{}{
+					"key":   val.Key,
 					"value": val.Value,
 				}
 			}
-		    item["header"] = tmp
+			item["header"] = tmp
 		}
 
 		if h.Ca != nil {
-		    tmp := make([]interface{}, len(h.Ca))
+			tmp := make([]interface{}, len(h.Ca))
 			for i, val := range h.Ca {
-			    if val != nil && val.GcpSecretManagerSecretUri != "" {
-				    tmp[i] = map[string]interface{}{
+				if val != nil && val.GcpSecretManagerSecretUri != "" {
+					tmp[i] = map[string]interface{}{
 						"gcp_secret_manager_secret_uri": val.GcpSecretManagerSecretUri,
 					}
 				}
 			}
-		    item["ca"] = tmp
+			item["ca"] = tmp
 		}
 
 		if h.Client != nil {
-		    tmp := make([]interface{}, len(h.Client))
+			tmp := make([]interface{}, len(h.Client))
 			for i, val := range h.Client {
-			    currentClient := map[string]interface{}{}
+				currentClient := map[string]interface{}{}
 				if val != nil && val.Cert != nil && val.Cert.GcpSecretManagerSecretUri != "" {
 					currentClient["cert"] = []interface{}{
 						map[string]interface{}{
@@ -3041,7 +3013,7 @@ func flattenHostInRegistryHosts(hosts []*container.HostConfig) []map[string]inte
 				}
 				tmp[i] = currentClient
 			}
-		    item["client"] = tmp
+			item["client"] = tmp
 		}
 		items = append(items, item)
 	}
@@ -3119,7 +3091,7 @@ func flattenConfidentialNodes(c *container.ConfidentialNodes) []map[string]inter
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"enabled": c.Enabled,
+			"enabled":                    c.Enabled,
 			"confidential_instance_type": c.ConfidentialInstanceType,
 		})
 	}
@@ -3155,7 +3127,6 @@ func flattenFastSocket(c *container.FastSocket) []map[string]interface{} {
 	return result
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func flattenHostMaintenancePolicy(c *container.HostMaintenancePolicy) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
@@ -3166,7 +3137,6 @@ func flattenHostMaintenancePolicy(c *container.HostMaintenancePolicy) []map[stri
 
 	return result
 }
-{{- end }}
 
 // This portion of nodePoolUpdate() is moved here to be shared with
 // node pool updates in `resource_container_cluster`
@@ -3175,7 +3145,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 	// Nodepool write-lock will be acquired when update function is called.
 	npLockKey := nodePoolInfo.nodePoolLockKey(name)
 
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -3213,7 +3183,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				}
 
 				if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-						return err
+					return err
 				}
 
 				log.Printf("[INFO] Updated logging_variant for node pool %s", name)
@@ -3223,7 +3193,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 		if d.HasChange(prefix + "node_config.0.containerd_config") {
 			if _, ok := d.GetOk(prefix + "node_config.0.containerd_config"); ok {
 				req := &container.UpdateNodePoolRequest{
-					Name: name,
+					Name:             name,
 					ContainerdConfig: expandContainerdConfig(d.Get(prefix + "node_config.0.containerd_config")),
 				}
 				if req.ContainerdConfig == nil {
@@ -3249,7 +3219,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				}
 
 				if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-						return err
+					return err
 				}
 
 				log.Printf("[INFO] Updated containerd_config for node pool %s", name)
@@ -3259,7 +3229,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 		if d.HasChange(prefix + "node_config.0.confidential_nodes") {
 			if _, ok := d.GetOk(prefix + "node_config.0.confidential_nodes"); ok {
 				req := &container.UpdateNodePoolRequest{
-					Name: name,
+					Name:              name,
 					ConfidentialNodes: expandConfidentialNodes(d.Get(prefix + "node_config.0.confidential_nodes")),
 				}
 				if req.ConfidentialNodes == nil {
@@ -3285,7 +3255,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				}
 
 				if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-						return err
+					return err
 				}
 
 				log.Printf("[INFO] Updated confidential_nodes for node pool %s", name)
@@ -3418,7 +3388,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 			log.Printf("[INFO] Updated taints for Node Pool %s", d.Id())
 		}
@@ -3470,7 +3440,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 			log.Printf("[INFO] Updated tags for node pool %s", name)
 		}
@@ -3549,7 +3519,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 
 			// Call update serially.
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 
 			log.Printf("[INFO] Updated resource labels for node pool %s", name)
@@ -3587,7 +3557,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 
 			// Call update serially.
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 
 			log.Printf("[INFO] Updated labels for node pool %s", name)
@@ -3619,7 +3589,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 			log.Printf("[INFO] Updated image type in Node Pool %s", d.Id())
 		}
@@ -3635,7 +3605,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				req.ForceSendFields = []string{"WorkloadMetadataConfig"}
 			}
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
+				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
@@ -3654,7 +3624,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 			log.Printf("[INFO] Updated workload_metadata_config for node pool %s", name)
 		}
@@ -3668,7 +3638,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				},
 			}
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
+				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
@@ -3686,7 +3656,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 
 			log.Printf("[INFO] Updated gcfs_config for node pool %s", name)
@@ -3701,7 +3671,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				},
 			}
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
+				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
@@ -3719,7 +3689,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 
 			log.Printf("[INFO] Updated gvnic for node pool %s", name)
@@ -3736,7 +3706,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				req.ForceSendFields = []string{"KubeletConfig"}
 			}
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
+				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
@@ -3754,7 +3724,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 
 			log.Printf("[INFO] Updated kubelet_config for node pool %s", name)
@@ -3770,7 +3740,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				req.ForceSendFields = []string{"LinuxNodeConfig"}
 			}
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
+				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
@@ -3788,7 +3758,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 
 			log.Printf("[INFO] Updated linux_node_config for node pool %s", name)
@@ -3834,12 +3804,12 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 			if v, ok := d.GetOk(prefix + "node_config.0.fast_socket"); ok {
 				fastSocket := v.([]interface{})[0].(map[string]interface{})
-				req.FastSocket =  &container.FastSocket{
+				req.FastSocket = &container.FastSocket{
 					Enabled: fastSocket["enabled"].(bool),
 				}
 			}
 			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
+				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
@@ -3857,7 +3827,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
+				return err
 			}
 
 			log.Printf("[INFO] Updated fast_socket for node pool %s", name)
