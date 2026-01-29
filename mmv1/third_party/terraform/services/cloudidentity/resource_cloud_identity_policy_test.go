@@ -64,38 +64,38 @@ func testAccCloudIdentityPolicy_cloudidentityPolicyBasic(context map[string]inte
 resource "google_cloud_identity_policy" "primary" {
     provider = google-beta
 
-    customer = "customers/C01234567%{random_suffix}"
+    customer = "customers/C01234567"
 
     policy_query {
-        org_unit = "orgUnits/03abcxyz%{random_suffix}"
-        group = "groups/0123456789%{random_suffix}"
-        query = "true%{random_suffix}"
+        org_unit = "orgUnits/03abcxyz"
+        group = "groups/0123456789"
+        query = "true"
     }
 
     setting {
-        type = "something.googleapis.com/SettingType%{random_suffix}"
-	value_json = "{"enabled": true}%{random_suffix}"
+        type = "something.googleapis.com/SettingType"
+	value_json = "{\"enabled\": true}"
     }
 }
 `, context)
 }
 
 func testAccCloudIdentityPolicy_cloudidentityPolicyBasic_update(context map[string]interface{}) string {
-        return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_cloud_identity_policy" "primary" {
     provider = google-beta
 
-    customer = "customers/C01234567%{random_suffix}"
+    customer = "customers/C01234567"
 
     policy_query {
-        org_unit = "orgUnits/03abcxyz%{random_suffix}"
-        group = "groups/0123456789%{random_suffix}"
-        query = "true%{random_suffix}"
+        org_unit = "orgUnits/03abcxyz"
+        group = "groups/0123456789"
+        query = "true"
     }
 
     setting {
-        type = "something.googleapis.com/SettingType%{random_suffix}"
-        value_json = "{"enabled": false}"
+        type = "something.googleapis.com/SettingType"
+        value_json = "{\"enabled\": false}"
     }
 }
 `, context)
