@@ -140,9 +140,6 @@ resource "google_dataproc_workflow_template" "example" {
 
 The following arguments are supported:
 
-* `jobs` -
-  (Required) The Directed Acyclic Graph of Jobs to submit.
-
 * `location` -
   (Required)
   The location for the resource
@@ -153,25 +150,28 @@ The following arguments are supported:
 * `placement` -
   (Required) WorkflowTemplate scheduling information.
 
-* The `encryption_config` - (Optional) Encryption settings for encrypting workflow template job arguments.
+* `jobs` -
+  (Required) The Directed Acyclic Graph of Jobs to submit. Structure is [documented below](#nested_jobs)
 
-The `encryption_config` block supports:
+* The `encryption_config` - (Optional) Encryption settings for encrypting workflow template job arguments. Structure is [documented below](#nested_encryption_config)
+
+<a name="nested_encryption_config"></a>The `encryption_config` block supports:
 
 * `kms_key` - (Optional) The Cloud KMS key name to use for encrypting workflow template [job arguments](https://docs.docs.cloud.google.com/dataproc/docs/concepts/workflows/use-workflows).
 
-When this this key is provided, the following workflow template job arguments, if present, are [CMEK encrypted](https://docs.cloud.google.com/dataproc/docs/concepts/configuring-clusters/customer-managed-encryption?_gl=1*1n7st1x*_ga*MTA5NTk1NjQ5MC4xNzAyMzEzMTA2*_ga_WH2QY8WWF5*czE3NjgyNTk1Mjkkbzk1JGcxJHQxNzY4MjYxNTM0JGo1OSRsMCRoMA..#use_cmek_with_workflow_template_data):
+When this this key is provided, the following workflow template job arguments, if present, are [CMEK encrypted](https://docs.cloud.google.com/dataproc/docs/concepts/configuring-clusters/customer-managed-encryption#use_cmek_with_workflow_template_data):
 
-- [FlinkJob args](https://docs.cloud.google.com/dataproc/docs/reference/rest/v1/FlinkJob?_gl=1*1n7st1x*_ga*MTA5NTk1NjQ5MC4xNzAyMzEzMTA2*_ga_WH2QY8WWF5*czE3NjgyNTk1Mjkkbzk1JGcxJHQxNzY4MjYxNTM0JGo1OSRsMCRoMA..)
-- [HadoopJob args](https://docs.cloud.google.com/dataproc/docs/reference/rest/v1/HadoopJob?_gl=1*1n7st1x*_ga*MTA5NTk1NjQ5MC4xNzAyMzEzMTA2*_ga_WH2QY8WWF5*czE3NjgyNTk1Mjkkbzk1JGcxJHQxNzY4MjYxNTM0JGo1OSRsMCRoMA..)
-- [SparkJob args](https://docs.cloud.google.com/dataproc/docs/reference/rest/v1/SparkJob?_gl=1*1n7st1x*_ga*MTA5NTk1NjQ5MC4xNzAyMzEzMTA2*_ga_WH2QY8WWF5*czE3NjgyNTk1Mjkkbzk1JGcxJHQxNzY4MjYxNTM0JGo1OSRsMCRoMA..)
-- [SparkRJob args](https://docs.cloud.google.com/dataproc/docs/reference/rest/v1/SparkRJob?_gl=1*um6483*_ga*MTA5NTk1NjQ5MC4xNzAyMzEzMTA2*_ga_WH2QY8WWF5*czE3NjgyNTk1Mjkkbzk1JGcxJHQxNzY4MjYxNTM0JGo1OSRsMCRoMA..)
-- [PySparkJob args](https://docs.cloud.google.com/dataproc/docs/reference/rest/v1/PySparkJob?_gl=1*um6483*_ga*MTA5NTk1NjQ5MC4xNzAyMzEzMTA2*_ga_WH2QY8WWF5*czE3NjgyNTk1Mjkkbzk1JGcxJHQxNzY4MjYxNTM0JGo1OSRsMCRoMA..)
-- [SparkSqlJob](https://docs.cloud.google.com/dataproc/docs/reference/rest/v1/SparkSqlJob?_gl=1*um6483*_ga*MTA5NTk1NjQ5MC4xNzAyMzEzMTA2*_ga_WH2QY8WWF5*czE3NjgyNTk1Mjkkbzk1JGcxJHQxNzY4MjYxNTM0JGo1OSRsMCRoMA..) scriptVariables and queryList.queries
-- [HiveJob](https://docs.cloud.google.com/dataproc/docs/reference/rest/v1/HiveJob?_gl=1*um6483*_ga*MTA5NTk1NjQ5MC4xNzAyMzEzMTA2*_ga_WH2QY8WWF5*czE3NjgyNTk1Mjkkbzk1JGcxJHQxNzY4MjYxNTM0JGo1OSRsMCRoMA..) scriptVariables and queryList.queries
-- [PigJob](https://docs.cloud.google.com/dataproc/docs/reference/rest/v1/PigJob?_gl=1*um6483*_ga*MTA5NTk1NjQ5MC4xNzAyMzEzMTA2*_ga_WH2QY8WWF5*czE3NjgyNTk1Mjkkbzk1JGcxJHQxNzY4MjYxNTM0JGo1OSRsMCRoMA..) scriptVariables  and queryList.queries
-- [PrestoJob](https://docs.cloud.google.com/dataproc/docs/reference/rest/v1/PrestoJob?_gl=1*um6483*_ga*MTA5NTk1NjQ5MC4xNzAyMzEzMTA2*_ga_WH2QY8WWF5*czE3NjgyNTk1Mjkkbzk1JGcxJHQxNzY4MjYxNTM0JGo1OSRsMCRoMA..) scriptVariables and queryList.queries
+- [FlinkJob args](https://docs.cloud.google.com/dataproc/docs/reference/rest/v1/FlinkJob)
+- [HadoopJob args](https://docs.cloud.google.com/dataproc/docs/reference/rest/v1/HadoopJob)
+- [SparkJob args](https://docs.cloud.google.com/dataproc/docs/reference/rest/v1/SparkJob)
+- [SparkRJob args](https://docs.cloud.google.com/dataproc/docs/reference/rest/v1/SparkRJob)
+- [PySparkJob args](https://docs.cloud.google.com/dataproc/docs/reference/rest/v1/PySparkJob)
+- [SparkSqlJob](https://docs.cloud.google.com/dataproc/docs/reference/rest/v1/SparkSqlJob) scriptVariables and queryList.queries
+- [HiveJob](https://docs.cloud.google.com/dataproc/docs/reference/rest/v1/HiveJob) scriptVariables and queryList.queries
+- [PigJob](https://docs.cloud.google.com/dataproc/docs/reference/rest/v1/PigJob) scriptVariables  and queryList.queries
+- [PrestoJob](https://docs.cloud.google.com/dataproc/docs/reference/rest/v1/PrestoJob) scriptVariables and queryList.queries
 
-The `jobs` block supports:
+<a name="nested_jobs"></a>The `jobs` block supports:
 
 * `hadoop_job` -
   (Optional)
