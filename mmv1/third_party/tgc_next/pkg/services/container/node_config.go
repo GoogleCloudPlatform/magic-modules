@@ -11,11 +11,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg//tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg//transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg//verify"
-	"google.golang.org/api/container/v1"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
+	"google.golang.org/api/container/v1beta1"
 )
 
 // Matches gke-default scope from https://cloud.google.com/sdk/gcloud/reference/container/clusters/create
