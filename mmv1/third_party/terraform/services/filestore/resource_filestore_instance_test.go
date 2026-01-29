@@ -476,10 +476,15 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 				Config: testAccFilestoreInstance_replication(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
+						"effective_replication.0.replicas.0.peer_instance",
+						"projects/"+context["project"].(string)+"/locations/us-east1/instances/tf-test-source-instance-"+context["random_suffix"].(string),
+					),
+					resource.TestCheckResourceAttr(
 						"google_filestore_instance.replica_instance",
 						"effective_replication.0.replicas.0.state",
 						"READY",
 					),
+			
 				),
 			},
 			{
