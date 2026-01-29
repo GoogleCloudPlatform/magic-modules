@@ -36,6 +36,7 @@ import (
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 	backupdr "google.golang.org/api/backupdr/v1"
 	"cloud.google.com/go/bigquery"
+	"google.golang.org/api/option"
 )
 
 var SharedKeyRing = "tftest-shared-keyring-1"
@@ -2400,10 +2401,14 @@ func BootstrapIntegrationsClient(t *testing.T, locationID string) BootstrapClien
 		IsGMEK:    true,
 	}
 }
-func AddBigQueryDatasetReplica(projectID string, datasetID string, primaryLocation string, replicaLocation string) (string, error) {
+func AddBigQueryDatasetReplica(t *testing.T, projectID string, datasetID string, primaryLocation string, replicaLocation string) (string, error) {
 	ctx := context.Background()
+	config := BootstrapConfig(t)
+	if config == nil {
+		return "", fmt.Errorf("failed to bootstrap config")
+	}
 
-	client, err := bigquery.NewClient(ctx, projectID)
+	client, err := bigquery.NewClient(ctx, projectID, option.WithTokenSource(config.TokenSource), option.WithUserAgent(config.UserAgent))
 	if err != nil {
 		return "", fmt.Errorf("failed to create BigQuery client: %w", err)
 	}
@@ -2453,11 +2458,15 @@ func AddBigQueryDatasetReplica(projectID string, datasetID string, primaryLocati
 	return fullDatasetLocation, nil
 }
 
-func CleanupBigQueryDatasetAndReplica(projectID, datasetID, replicaLocation string) {
+func CleanupBigQueryDatasetAndReplica(t *testing.T, projectID, datasetID, replicaLocation string) {
 	log.Printf("[DEBUG] Cleanup: Starting cleanup for BigQuery dataset: projects/%s/datasets/%s", projectID, datasetID)
 	cleanupCtx := context.Background()
+	config := BootstrapConfig(t)
+	if config == nil {
+		return
+	}
 
-	client, cerr := bigquery.NewClient(cleanupCtx, projectID)
+	client, cerr := bigquery.NewClient(cleanupCtx, projectID, option.WithTokenSource(config.TokenSource), option.WithUserAgent(config.UserAgent))
 	if cerr != nil {
 		log.Printf("[ERROR] Cleanup: Failed to create BigQuery client for dataset %s: %v", datasetID, cerr)
 		return
