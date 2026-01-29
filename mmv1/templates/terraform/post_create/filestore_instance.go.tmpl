@@ -18,6 +18,8 @@ if d.HasChange("replica_action") {
 	case "RESUME":
 		endpoint = "resumeReplica"
 		replica_action_value = "RESUME"
+	case "":
+		return fmt.Errorf("Error: replica_action cannot be empty")
 	}
 
 	url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}:%s",endpoint))
@@ -28,7 +30,6 @@ if d.HasChange("replica_action") {
 		headers := make(http.Header)
 
 		emptyReqBody := make(map[string]interface{})
-
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "POST",
