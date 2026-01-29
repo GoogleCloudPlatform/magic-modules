@@ -189,10 +189,10 @@ func (vt *Tester) FetchCassettes(version provider.Version, baseBranch, head stri
 
 func (vt *Tester) fetchBucketPath(bucketPath, cassettePath string) error {
 	// Fetch the cassettes.
-	args := []string{"-m", "-q", "cp", bucketPath, cassettePath}
-	fmt.Println("Fetching cassettes:\n", "gsutil", strings.Join(args, " "))
-	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
-		return fmt.Errorf("error running gsutil: %v", err)
+	args := []string{"storage", "cp", bucketPath, cassettePath}
+	fmt.Println("Fetching cassettes:\n", "gcloud", strings.Join(args, " "))
+	if _, err := vt.rnr.Run("gcloud", args, nil); err != nil {
+		return fmt.Errorf("error running gcloud: %v", err)
 	}
 	return nil
 }
@@ -513,52 +513,50 @@ func (vt *Tester) UploadLogs(opts UploadLogsOptions) error {
 		suffix = "_after_recording"
 	}
 	args := []string{
-		"-h",
-		"Content-Type:text/plain",
-		"-q",
+		"storage",
+		"--content-type=text/plain",
+		"--quiet",
 		"cp",
-		"-r",
+		"--recursive",
 		filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", opts.Mode.Lower())),
 		fmt.Sprintf("%sbuild-log/%s_test%s.log", bucketPath, opts.Mode.Lower(), suffix),
 	}
-	fmt.Println("Uploading build log:\n", "gsutil", strings.Join(args, " "))
-	if out, err := vt.rnr.Run("gsutil", args, nil); err != nil {
+	fmt.Println("Uploading build log:\n", "gcloud", strings.Join(args, " "))
+	if out, err := vt.rnr.Run("gcloud", args, nil); err != nil {
 		fmt.Println("Error uploading build log: ", err)
 	} else {
-		fmt.Println("gsutil output: ", out)
+		fmt.Println("gcloud output: ", out)
 	}
 	if opts.Parallel {
 		args := []string{
-			"-h",
-			"Content-Type:text/plain",
-			"-m",
-			"-q",
+			"storage",
+			"--content-type=text/plain",
+			"--quiet",
 			"cp",
-			"-r",
+			"--recursive",
 			filepath.Join(vt.baseDir, "testlogs", opts.Mode.Lower()+"_build", "*"),
 			fmt.Sprintf("%sbuild-log/%s_build%s/", bucketPath, opts.Mode.Lower(), suffix),
 		}
-		fmt.Println("Uploading build logs:\n", "gsutil", strings.Join(args, " "))
-		if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
+		fmt.Println("Uploading build logs:\n", "gcloud", strings.Join(args, " "))
+		if _, err := vt.rnr.Run("gcloud", args, nil); err != nil {
 			fmt.Println("Error uploading build logs: ", err)
 		}
 	}
 	args = []string{
-		"-h",
-		"Content-Type:text/plain",
-		"-m",
-		"-q",
+		"storage",
+		"--content-type=text/plain",
+		"--quiet",
 		"cp",
-		"-r",
+		"--recursive",
 		filepath.Join(logPath, "*"),
 		fmt.Sprintf("%s%s%s/", bucketPath, opts.Mode.Lower(), suffix),
 	}
-	fmt.Println("Uploading logs:\n", "gsutil", strings.Join(args, " "))
-	if out, err := vt.rnr.Run("gsutil", args, nil); err != nil {
+	fmt.Println("Uploading logs:\n", "gcloud", strings.Join(args, " "))
+	if out, err := vt.rnr.Run("gcloud", args, nil); err != nil {
 		fmt.Println("Error uploading logs: ", err)
 		vt.printLogs(logPath)
 	} else {
-		fmt.Println("gsutil output: ", out)
+		fmt.Println("gcloud output: ", out)
 	}
 	return nil
 }
@@ -621,14 +619,13 @@ func (vt *Tester) asyncUploadCassettes(version provider.Version, branch string, 
 func (vt *Tester) uploadOneCassetteFile(head string, version provider.Version, fileName string) error {
 	uploadPath := fmt.Sprintf("gs://%s/%s/refs/heads/%s/fixtures/", vt.cassetteBucket, version, head)
 	args := []string{
-		"-m",
-		"-q",
 		"cp",
+		"--quiet",
 		fileName,
 		uploadPath,
 	}
-	fmt.Printf("Uploading %s to %s: %v\n", fileName, uploadPath, "gsutil "+strings.Join(args, " "))
-	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
+	fmt.Printf("Uploading %s to %s: %v\n", fileName, uploadPath, "gcloud "+strings.Join(args, " "))
+	if _, err := vt.rnr.Run("gcloud", args, nil); err != nil {
 		return fmt.Errorf("error uploading file %s: %s", fileName, err)
 	}
 	return nil
@@ -640,14 +637,14 @@ func (vt *Tester) UploadCassettes(head string, version provider.Version) error {
 		return fmt.Errorf("no cassettes found for version %s", version)
 	}
 	args := []string{
-		"-m",
-		"-q",
+		"storage",
 		"cp",
+		"--quiet",
 		filepath.Join(cassettePath, "*"),
 		fmt.Sprintf("gs://%s/%s/refs/heads/%s/fixtures/", vt.cassetteBucket, version, head),
 	}
-	fmt.Println("Uploading cassettes:\n", "gsutil", strings.Join(args, " "))
-	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
+	fmt.Println("Uploading cassettes:\n", "gcloud", strings.Join(args, " "))
+	if _, err := vt.rnr.Run("gcloud", args, nil); err != nil {
 		fmt.Println("Error uploading cassettes: ", err)
 	}
 	return nil
