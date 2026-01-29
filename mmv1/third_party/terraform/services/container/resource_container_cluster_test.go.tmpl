@@ -16692,6 +16692,7 @@ resource "google_container_cluster" "with_kubelet_config" {
 `, clusterName, networkName, subnetworkName, npName, npName)
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_nodePool_acceleratorNetworkProfile(clusterName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
@@ -16774,7 +16775,9 @@ func TestAccContainerCluster_nodePool_acceleratorNetworkProfile(t *testing.T) {
 		},
 	})
 }
+{{- end }}
 
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_nodePool_additionalNodeNetworkConfigs_manual(clusterName string) string {
     return fmt.Sprintf(`
 resource "google_compute_network" "main_net" {
@@ -17069,3 +17072,4 @@ func TestAccContainerCluster_nodePool_acceleratorNetworkProfile_Lifecycle(t *tes
 		},
 	})
 }
+{{- end }}
