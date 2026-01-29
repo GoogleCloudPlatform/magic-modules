@@ -12,7 +12,7 @@ import (
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	container "google.golang.org/api/container/v1"
+	container "google.golang.org/api/container/v1beta1"
 )
 
 const ContainerClusterSchemaName = "google_container_cluster"
