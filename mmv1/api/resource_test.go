@@ -727,4 +727,50 @@ func TestResourceAddExtraFields(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("Async SkipWait adds skip_wait field", func(t *testing.T) {
+		t.Parallel()
+
+		resource := createTestResource("testresource")
+		resource.Async = &Async{
+			AllowSkipWait: true,
+		}
+
+		props := []*Type{}
+		result := resource.AddExtraVirtualFields(props, nil)
+
+		if len(result) != 1 {
+			t.Errorf("Expected 1 property after adding skip_wait field, got %d", len(result))
+		}
+
+		skipWait := result[0]
+		if skipWait.Name != "skip_wait" {
+			t.Errorf("Expected property name to be skip_wait, got %s", skipWait.Name)
+		}
+		if skipWait.Type != "Boolean" {
+			t.Errorf("Expected property type to be Boolean, got %s", skipWait.Type)
+		}
+		if !skipWait.IgnoreWrite {
+			t.Error("Expected skip_wait to have IgnoreWrite=true")
+		}
+		if skipWait.Immutable {
+			t.Error("Expected skip_wait to have Immutable=false")
+		}
+	})
+
+	t.Run("Async without SkipWait does not add skip_wait field", func(t *testing.T) {
+		t.Parallel()
+
+		resource := createTestResource("testresource")
+		resource.Async = &Async{
+			AllowSkipWait: false,
+		}
+
+		props := []*Type{}
+		result := resource.AddExtraVirtualFields(props, nil)
+
+		if len(result) != 0 {
+			t.Errorf("Expected 0 properties, got %d", len(result))
+		}
+	})
 }
