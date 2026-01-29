@@ -485,7 +485,6 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 						"effective_replication.0.replicas.0.state",
 						"READY",
 					),
-			
 				),
 			},
 			{
