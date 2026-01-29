@@ -78,10 +78,9 @@ examples:
     exclude_test: true
 virtual_fields:
   - name: 'replica_action'
-    type: Enum
-    enum_values:
-      - 'PAUSE'
-      - 'RESUME'
+    type: Array
+    item_type:
+      type: String
     description: |
       Replica action can perform pause and resume on replica
     validation:
