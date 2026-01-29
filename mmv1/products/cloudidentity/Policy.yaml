@@ -107,11 +107,4 @@ examples:
   - name: "cloudidentity_policy_basic"
     primary_resource_id: "primary"
     vars:
-      # NOTE: These must be provided by the test environment/ recorded VCR cassette.
-      customer: "customers/C01234567"
-      org_unit: "orgUnits/03abcxyz"
-      group: "groups/0123456789"
-      query: "true"
-      setting_type: "something.googleapis.com/SettingType"
-      value_json: '{"enabled": true}'
     min_version: beta
