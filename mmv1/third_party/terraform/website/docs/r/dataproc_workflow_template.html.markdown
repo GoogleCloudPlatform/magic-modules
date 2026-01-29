@@ -153,7 +153,7 @@ The following arguments are supported:
 * `jobs` -
   (Required) The Directed Acyclic Graph of Jobs to submit. Structure is [documented below](#nested_jobs)
 
-* The `encryption_config` - (Optional) Encryption settings for encrypting workflow template job arguments. Structure is [documented below](#nested_encryption_config)
+* `encryption_config` - (Optional) Encryption settings for encrypting workflow template job arguments. Structure is [documented below](#nested_encryption_config)
 
 <a name="nested_encryption_config"></a>The `encryption_config` block supports:
 
