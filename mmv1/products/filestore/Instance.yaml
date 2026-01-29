@@ -41,7 +41,8 @@ async:
     resource_inside_response: true
 custom_code:
   pre_create: 'templates/terraform/pre_create/filestore_instance.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/filestore_instance.go.tmpl'
+  post_create: 'templates/terraform/post_create/filestore_instance.go.tmpl'
+  post_update: 'templates/terraform/post_update/filestore_instance.go.tmpl'
   constants: 'templates/terraform/constants/filestore_instance_validate_replica_action.go.tmpl'
 include_in_tgc_next: true
 error_abort_predicates:
