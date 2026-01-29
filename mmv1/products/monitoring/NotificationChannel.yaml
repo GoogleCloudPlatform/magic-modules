@@ -94,6 +94,7 @@ properties:
       the sensitive_labels block, but cannot be configured in both places.
   - name: 'sensitiveLabels'
     type: NestedObject
+    ignore_read: true
     description: |
       Different notification type behaviors are configured primarily using the the `labels` field on this
       resource. This block contains the labels which contain secrets or passwords so that they can be marked
