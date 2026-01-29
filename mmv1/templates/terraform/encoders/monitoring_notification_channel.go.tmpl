@@ -10,21 +10,29 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
-sensitiveLabels, hasSensitiveLabels := obj["sensitiveLabels"].(map[string]interface{})
-if !hasSensitiveLabels {
-	return obj, nil
-}
-
-// Merge sensitiveLabels into labels (write-only and sensitive fields)
-labels, ok := obj["labels"].(map[string]string)
+labelmap, ok := obj["labels"]
 if !ok {
-    labels = make(map[string]string)
+	labelmap = make(map[string]string)
 }
 
-for k, v := range sensitiveLabels {
-	if sLabel, ok := v.(string); ok {
-        labels[k] = sLabel
+var labels map[string]string
+labels = labelmap.(map[string]string)
+
+for _, sl := range sensitiveLabels {
+	if auth, _ := d.GetOkExists("sensitive_labels.0." + sl); auth != "" {
+
+		labels[sl] = auth.(string)
 	}
+}
+
+for _, slwov := range writeOnlySensitiveLabels {
+  if v, _ := d.GetOkExists("sensitive_labels.0." + slwov); v != "" {
+    target := strings.TrimSuffix(slwov, "_version")
+    woProp := tpgresource.GetRawConfigAttributeAsString(d, "sensitive_labels.0." + target)
+    if woProp != "" {
+      labels[strings.TrimSuffix(slwov, "_wo_version")] = woProp
+    }
+  }
 }
 
 obj["labels"] = labels
