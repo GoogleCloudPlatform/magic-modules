@@ -2690,8 +2690,6 @@ func resourceNodeConfigEmptyGuestAccelerator(_ context.Context, diff *schema.Res
 	return nil
 }
 
-
-
 func resourceContainerClusterStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
 
