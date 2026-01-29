@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"reflect"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -54,10 +56,11 @@ func ResourceServiceNetworkingConnection() *schema.Resource {
 				Description: `Provider peering service that is managing peering connectivity for a service provider organization. For Google services that support this functionality it is 'servicenetworking.googleapis.com'.`,
 			},
 			"reserved_peering_ranges": {
-				Type:        schema.TypeList,
-				Required:    true,
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Description: `Named IP address range(s) of PEERING type reserved for this service provider. Note that invoking this method with a different range when connection is already established will not reallocate already provisioned service producer subnetworks.`,
+				Type:             schema.TypeList,
+				Required:         true,
+				Elem:             &schema.Schema{Type: schema.TypeString},
+				DiffSuppressFunc: stringListDiffSuppress,
+				Description:      `Named IP address range(s) of PEERING type reserved for this service provider. Note that invoking this method with a different range when connection is already established will not reallocate already provisioned service producer subnetworks.`,
 			},
 			"deletion_policy": {
 				Type:         schema.TypeString,
@@ -431,4 +434,45 @@ func formatParentService(service string) string {
 	} else {
 		return service
 	}
+}
+
+func stringListDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Extract the root field name from k (e.g., "reserved_peering_ranges.0" -> "reserved_peering_ranges")
+	// DiffSuppressFunc is called for each element and for the count, so we need to handle both
+	rootKey := k
+	if idx := strings.Index(k, "."); idx != -1 {
+		rootKey = k[:idx]
+	}
+
+	// Only process once when k equals the root field name or when it's the count (e.g., "reserved_peering_ranges.#")
+	if k != rootKey && !strings.HasSuffix(k, ".#") {
+		return false
+	}
+
+	o, n := d.GetChange(rootKey)
+
+	// Cast to generic lists
+	oldList, ok1 := o.([]interface{})
+	newList, ok2 := n.([]interface{})
+
+	// If casting fails or lengths differ, don't suppress the diff
+	if !ok1 || !ok2 || len(oldList) != len(newList) {
+		return false
+	}
+
+	// Convert to string slices for sorting
+	oldStrs := make([]string, len(oldList))
+	for i, v := range oldList {
+		oldStrs[i] = fmt.Sprintf("%v", v)
+	}
+
+	newStrs := make([]string, len(newList))
+	for i, v := range newList {
+		newStrs[i] = fmt.Sprintf("%v", v)
+	}
+
+	sort.Strings(oldStrs)
+	sort.Strings(newStrs)
+
+	return reflect.DeepEqual(oldStrs, newStrs)
 }
