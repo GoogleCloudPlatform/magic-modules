@@ -67,6 +67,7 @@ properties:
     default_from_api: true
     enum_values:
       - 'VPC_POLICY'
+      - 'ULL_POLICY'
   - name: 'fingerprint'
     type: Fingerprint
     description: Fingerprint of the resource. This field is used internally during updates of this resource.

@@ -86,6 +86,7 @@ properties:
     default_from_api: true
     enum_values:
       - 'VPC_POLICY'
+      - 'ULL_POLICY'
   - name: 'rule'
     type: Array
     description: A list of firewall policy rules.
