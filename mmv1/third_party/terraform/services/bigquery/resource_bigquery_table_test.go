@@ -5734,3 +5734,263 @@ var TEST_INVALID_SCHEMA_JSON_LIST_WITH_NULL_ELEMENT = `[
       "type": "INT64"
     }
   ]`
+
+func TestAccBigQueryTable_PolicyTagsMerge(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+	datasetID := fmt.Sprintf("tf_test_dataset_%s", randomSuffix)
+	tableID := fmt.Sprintf("tf_test_table_%s", randomSuffix)
+	taxonomyName := fmt.Sprintf("tf_test_tax_%s", randomSuffix)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// Stage 1: Create table with NO policy tags
+			{
+				Config: testAccBigQueryTablePolicyTagsMergeStage1(datasetID, tableID, taxonomyName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_table.test", "table_id", tableID),
+					testAccCheckBigQueryTableMergedPolicyTags(t, datasetID, tableID, []string{}),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns", "ignore_schema_changes"},
+			},
+			// Stage 2: Add policy tags to col1, col2, nested_col.sub1, nested_col.sub2
+			{
+				Config: testAccBigQueryTablePolicyTagsMergeStage2(datasetID, tableID, taxonomyName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBigQueryTableMergedPolicyTags(t, datasetID, tableID, []string{
+						"col1", "col2",
+						"nested_col.sub1", "nested_col.sub2",
+					}),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns", "ignore_schema_changes"},
+			},
+			// Stage 3: ignore_schema_changes = ["policyTags"]
+			// col1: Policy tag removed from config (should be preserved from backend)
+			// col2: Policy tag kept + description updated
+			// col3: New policy tag added
+			// Same pattern for nested columns
+			{
+				Config: testAccBigQueryTablePolicyTagsMergeStage3(datasetID, tableID, taxonomyName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBigQueryTableColumnDescription(t, datasetID, tableID, "col2", "new description"),
+					testAccCheckBigQueryTableColumnDescription(t, datasetID, tableID, "nested_col.sub2", "new nested desc"),
+					testAccCheckBigQueryTableMergedPolicyTags(t, datasetID, tableID, []string{
+						"col1", "col2", "col3",
+						"nested_col.sub1", "nested_col.sub2", "nested_col.sub3",
+					}),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns", "ignore_schema_changes"},
+			},
+		},
+	})
+}
+
+// Verification: checks which columns have PolicyTags set (via BQ API)
+func testAccCheckBigQueryTableMergedPolicyTags(t *testing.T, datasetID, tableID string, expectedCols []string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+		res, err := config.NewBigQueryClient(config.UserAgent).Tables.Get(config.Project, datasetID, tableID).Do()
+		if err != nil {
+			return err
+		}
+
+		var foundPolicyTags []string
+
+		for _, field := range res.Schema.Fields {
+			if field.PolicyTags != nil && len(field.PolicyTags.Names) > 0 {
+				foundPolicyTags = append(foundPolicyTags, field.Name)
+			}
+			for _, subField := range field.Fields {
+				if subField.PolicyTags != nil && len(subField.PolicyTags.Names) > 0 {
+					foundPolicyTags = append(foundPolicyTags, fmt.Sprintf("%s.%s", field.Name, subField.Name))
+				}
+			}
+		}
+
+		policyMap := make(map[string]bool)
+		for _, p := range foundPolicyTags {
+			policyMap[p] = true
+		}
+
+		for _, expected := range expectedCols {
+			if !policyMap[expected] {
+				return fmt.Errorf("expected policy tag on column '%s', but none found. Found policy tags on: %v", expected, foundPolicyTags)
+			}
+		}
+
+		if len(foundPolicyTags) != len(expectedCols) {
+			return fmt.Errorf("expected %d columns with policy tags, found %d. Expected: %v, Found: %v", len(expectedCols), len(foundPolicyTags), expectedCols, foundPolicyTags)
+		}
+
+		return nil
+	}
+}
+
+func testAccBigQueryTablePolicyTagsBaseResources(datasetID, taxonomyName string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  location   = "us-central1"
+  dataset_id = "%s"
+}
+
+resource "google_data_catalog_taxonomy" "taxonomy" {
+  region                 = "us-central1"
+  display_name           = "%s"
+  activated_policy_types = ["FINE_GRAINED_ACCESS_CONTROL"]
+}
+
+resource "google_data_catalog_policy_tag" "tag1" {
+  taxonomy     = google_data_catalog_taxonomy.taxonomy.id
+  display_name = "policy-tag-1"
+}
+
+resource "google_data_catalog_policy_tag" "tag2" {
+  taxonomy     = google_data_catalog_taxonomy.taxonomy.id
+  display_name = "policy-tag-2"
+}
+`, datasetID, taxonomyName)
+}
+
+func testAccBigQueryTablePolicyTagsMergeStage1(datasetID, tableID, taxonomyName string) string {
+	return testAccBigQueryTablePolicyTagsBaseResources(datasetID, taxonomyName) + fmt.Sprintf(`
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id            = "%s"
+  dataset_id          = google_bigquery_dataset.test.dataset_id
+  description         = "Initial Table"
+
+  schema = <<EOF
+[
+  { "name": "col1", "type": "STRING" },
+  { "name": "col2", "type": "STRING", "description": "old description" },
+  { "name": "col3", "type": "STRING" },
+  {
+    "name": "nested_col",
+    "type": "RECORD",
+    "fields": [
+      { "name": "sub1", "type": "STRING" },
+      { "name": "sub2", "type": "STRING", "description": "old nested desc" },
+      { "name": "sub3", "type": "STRING" }
+    ]
+  }
+]
+EOF
+}
+`, tableID)
+}
+
+func testAccBigQueryTablePolicyTagsMergeStage2(datasetID, tableID, taxonomyName string) string {
+	return testAccBigQueryTablePolicyTagsBaseResources(datasetID, taxonomyName) + fmt.Sprintf(`
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id            = "%s"
+  dataset_id          = google_bigquery_dataset.test.dataset_id
+  description         = "Stage 2 Table"
+
+  schema = <<EOF
+[
+  {
+    "name": "col1",
+    "type": "STRING",
+    "policyTags": { "names": ["${google_data_catalog_policy_tag.tag1.name}"] }
+  },
+  {
+    "name": "col2",
+    "type": "STRING",
+    "description": "old description",
+    "policyTags": { "names": ["${google_data_catalog_policy_tag.tag2.name}"] }
+  },
+  { "name": "col3", "type": "STRING" },
+  {
+    "name": "nested_col",
+    "type": "RECORD",
+    "fields": [
+      {
+        "name": "sub1",
+        "type": "STRING",
+        "policyTags": { "names": ["${google_data_catalog_policy_tag.tag1.name}"] }
+      },
+      {
+        "name": "sub2",
+        "type": "STRING",
+        "description": "old nested desc",
+        "policyTags": { "names": ["${google_data_catalog_policy_tag.tag2.name}"] }
+      },
+      { "name": "sub3", "type": "STRING" }
+    ]
+  }
+]
+EOF
+}
+`, tableID)
+}
+
+func testAccBigQueryTablePolicyTagsMergeStage3(datasetID, tableID, taxonomyName string) string {
+	return testAccBigQueryTablePolicyTagsBaseResources(datasetID, taxonomyName) + fmt.Sprintf(`
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id            = "%s"
+  dataset_id          = google_bigquery_dataset.test.dataset_id
+  description         = "Updated Table"
+
+  ignore_schema_changes = ["policyTags"]
+
+  schema = <<EOF
+[
+  {
+    "name": "col1",
+    "type": "STRING"
+  },
+  {
+    "name": "col2",
+    "type": "STRING",
+    "description": "new description",
+    "policyTags": { "names": ["${google_data_catalog_policy_tag.tag2.name}"] }
+  },
+  {
+    "name": "col3",
+    "type": "STRING",
+    "policyTags": { "names": ["${google_data_catalog_policy_tag.tag1.name}"] }
+  },
+  {
+    "name": "nested_col",
+    "type": "RECORD",
+    "fields": [
+      { "name": "sub1", "type": "STRING" },
+      {
+        "name": "sub2",
+        "type": "STRING",
+        "description": "new nested desc",
+        "policyTags": { "names": ["${google_data_catalog_policy_tag.tag2.name}"] }
+      },
+      {
+        "name": "sub3",
+        "type": "STRING",
+        "policyTags": { "names": ["${google_data_catalog_policy_tag.tag1.name}"] }
+      }
+    ]
+  }
+]
+EOF
+}
+`, tableID)
+}
