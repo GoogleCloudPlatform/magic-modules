@@ -130,29 +130,24 @@ func testAccComputeInterconnectAttachment_computeInterconnectParams(context map[
 	return acctest.Nprintf(`
 data "google_project" "project" {}
 
-resource "google_compute_interconnect" "example-interconnect" {
-  name                 = "tf-test-example-interconnect%{random_suffix}"
-  customer_name        = "internal_customer" # Special customer only available for Google testing.
-  interconnect_type    = "DEDICATED"
-  link_type            = "LINK_TYPE_ETHERNET_100G_LR"
-  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.name}/global/interconnectLocations/z2z-us-west2-zone2-nclaxw-a" # Special location only available for Google testing.
-  requested_link_count = 1
-  admin_enabled        = true
-  description          = "example description"
-  macsec_enabled       = false
-  noc_contact_email    = "user@example.com"
-  requested_features   = ["IF_MACSEC"]
-  labels = {
-    mykey = "myvalue"
+resource "google_compute_router" "foobar" {
+  name    = "tf-test-router-%{random_suffix}"
+  network = google_compute_network.foobar.name
+  bgp {
+    asn = 16550
   }
+}
+resource "google_compute_network" "foobar" {
+  name                    = "tf-test-network-%{random_suffix}"
+  auto_create_subnetworks = false
 }
 resource "google_compute_interconnect_attachment" "attachment" {
   name           = "tf-test-attachment-%{random_suffix}"
-  interconnect   = google_compute_interconnect.example-interconnect.id
-  type           = "DEDICATED"
-  bandwidth      = "BPS_50M"
-  vlan_tag8021q  =  1000
-  region         = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.name}/regions/us-west2"
+  edge_availability_domain = "AVAILABILITY_DOMAIN_1"
+  type                     = "PARTNER"
+  router                   = google_compute_router.foobar.id
+  mtu                      = 1500
+  labels                   = { mykey = "myvalue" }
   params {
     resource_manager_tags = {
       "%{tag_key_id}" = "%{tag_value_id}"
