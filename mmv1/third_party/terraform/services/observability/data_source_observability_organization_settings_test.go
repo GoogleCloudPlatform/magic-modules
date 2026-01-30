@@ -22,6 +22,9 @@ func TestAccObservabilityOrganizationSettings_datasource(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccObservabilityOrganizationSettings_datasource(context),
@@ -37,9 +40,14 @@ func TestAccObservabilityOrganizationSettings_datasource(t *testing.T) {
 
 func testAccObservabilityOrganizationSettings_datasource(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+	resource "time_sleep" "wait_for_org" {
+		create_duration = "60s"
+	}
+
 data "google_observability_organization_settings" "settings" {
 	organization = "%{org_id}"
 	location = "%{location}"
+	depends_on = [time_sleep.wait_for_org]
 }
 `, context)
 }
