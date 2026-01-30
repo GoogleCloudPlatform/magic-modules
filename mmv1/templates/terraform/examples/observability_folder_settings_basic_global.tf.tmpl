@@ -1,0 +1,18 @@
+resource "google_folder" "test_folder" {
+  display_name = "tf-test-%{random_suffix}"
+  parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
+  deletion_protection = false
+}
+
+data "google_observability_folder_settings" "settings_data" {
+  folder   = google_folder.test_folder.folder_id
+  location = "global"
+  depends_on = [google_folder.test_folder]
+}
+
+resource "google_observability_folder_settings" "primary_global" {
+  location                 = "global"
+  folder                   = google_folder.test_folder.folder_id
+  default_storage_location = "us"
+  depends_on = [data.google_observability_folder_settings.settings_data]
+}

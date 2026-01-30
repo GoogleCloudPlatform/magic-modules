@@ -1,0 +1,81 @@
+  userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+  // Fetch folder and location from ResourceData
+  folder := d.Get("folder").(string)
+  location := d.Get("location").(string)
+
+	obj := make(map[string]interface{})
+  // In Create, we don't check HasChange, we just take what's in the config.
+  if val := d.GetRawConfig().GetAttr("default_storage_location"); !val.IsNull() {
+    v := d.Get("default_storage_location")
+    log.Printf("[DEBUG] default_storage_location In Config: v=%#v", v)
+    defaultStorageLocationProp, err := expandObservabilityFolderSettingsDefaultStorageLocation(v, d, config)
+    if err != nil {
+      return err
+    }
+    obj["defaultStorageLocation"] = defaultStorageLocationProp
+  }
+  if val := d.GetRawConfig().GetAttr("kms_key_name"); !val.IsNull() {
+    v := d.Get("kms_key_name")
+    log.Printf("[DEBUG] kms_key_name In Config: v=%#v", v)
+    kmsKeyNameProp, err := expandObservabilityFolderSettingsKmsKeyName(v, d, config)
+    if err != nil {
+      return err
+    }
+    obj["kmsKeyName"] = kmsKeyNameProp
+  }
+
+  // Construct URL with fetched folder and location
+  url := fmt.Sprintf("https://observability.googleapis.com/v1/folders/%s/locations/%s/settings", folder, location)
+
+	log.Printf("[DEBUG] Creating FolderSettings: %#v", obj)
+	headers := make(http.Header)
+	var masks []string
+	if _, ok := obj["defaultStorageLocation"]; ok {
+		masks = append(masks, "defaultStorageLocation")
+	}
+	if _, ok := obj["kmsKeyName"]; ok {
+		masks = append(masks, "kmsKeyName")
+	}
+
+	if len(masks) == 0 {
+    return fmt.Errorf("Cannot create FolderSettings: no optional fields were set in the configuration")
+	}
+  url = fmt.Sprintf("%s?updateMask=%s", url, strings.Join(masks, ","))
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "PATCH",
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      obj,
+		Timeout:   d.Timeout(schema.TimeoutCreate),
+		Headers:   headers,
+	})
+
+	if err != nil {
+		return fmt.Errorf("Error creating FolderSettings: %s", err)
+	}
+
+  // Store the ID now
+  id, err := tpgresource.ReplaceVars(d, config, "folders/" + folder + "/locations/" + location + "/settings")
+  if err != nil {
+    return fmt.Errorf("Error constructing id: %s", err)
+  }
+  d.SetId(id)
+
+	log.Printf("[DEBUG] Finished creating FolderSettings %q: %#v", d.Id(), res)
+
+	err = ObservabilityOperationWaitTime(
+		config, res, "Creating FolderSettings", userAgent,
+		d.Timeout(schema.TimeoutCreate))
+
+	if err != nil {
+    d.SetId("") // Clear ID on error
+		return err
+	}
+
+	return resourceObservabilityFolderSettingsRead(d, meta)
