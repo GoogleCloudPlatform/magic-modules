@@ -7,6 +7,7 @@ import (
 	  "github.com/hashicorp/terraform-provider-google/google/services/{{ $service }}"
 	{{- end }}
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/services/container"
 	"github.com/hashicorp/terraform-provider-google/google/services/containeraws"
 	"github.com/hashicorp/terraform-provider-google/google/services/containerazure"
@@ -320,7 +321,7 @@ var generatedIAMDatasources = map[string]*schema.Resource{
 	// ####### START generated IAM datasources ###########
 	{{- range $object := $.ResourcesForVersion }}
 	{{- if $object.IamClassName }}
-	"{{ $object.TerraformName }}_iam_policy":               tpgiamresource.DataSourceIamPolicy({{ $object.IamClassName }}IamSchema, {{ $object.IamClassName }}IamUpdaterProducer),
+	"{{ $object.TerraformName }}_iam_policy": registry.DataSource("{{ $object.TerraformName }}_iam_policy"),
 	{{- end }}
 	{{- end }}
 	// ####### END generated IAM datasources ###########
@@ -359,12 +360,12 @@ var handwrittenIAMDatasources = map[string]*schema.Resource{
 var generatedResources = map[string]*schema.Resource{
 	{{- range $object := $.ResourcesForVersion }}
 	{{- if $object.ResourceName }}
-		"{{ $object.TerraformName }}": {{ $object.ResourceName }}(),
+		"{{ $object.TerraformName }}": registry.Resource("{{ $object.TerraformName }}"),
 	{{- end }}
 	{{- if $object.IamClassName }}
-		"{{ $object.TerraformName }}_iam_binding":              tpgiamresource.ResourceIamBinding({{ $object.IamClassName }}IamSchema, {{ $object.IamClassName }}IamUpdaterProducer, {{ $object.IamClassName }}IdParseFunc),
-		"{{ $object.TerraformName }}_iam_member":               tpgiamresource.ResourceIamMember({{ $object.IamClassName }}IamSchema, {{ $object.IamClassName }}IamUpdaterProducer, {{ $object.IamClassName }}IdParseFunc),
-		"{{ $object.TerraformName }}_iam_policy":               tpgiamresource.ResourceIamPolicy({{ $object.IamClassName }}IamSchema, {{ $object.IamClassName }}IamUpdaterProducer, {{ $object.IamClassName }}IdParseFunc),
+		"{{ $object.TerraformName }}_iam_binding": registry.Resource("{{ $object.TerraformName }}_iam_binding"),
+		"{{ $object.TerraformName }}_iam_member":  registry.Resource("{{ $object.TerraformName }}_iam_member"),
+		"{{ $object.TerraformName }}_iam_policy":  registry.Resource("{{ $object.TerraformName }}_iam_policy"),
 	{{- end }}
 	{{- end }}
 }

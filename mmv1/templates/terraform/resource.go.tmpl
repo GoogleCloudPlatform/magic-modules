@@ -47,6 +47,7 @@ import (
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
     "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
+    "{{ $.ImportPath }}/registry"
     "{{ $.ImportPath }}/tpgresource"
     transport_tpg "{{ $.ImportPath }}/transport"
     "{{ $.ImportPath }}/verify"
@@ -89,6 +90,15 @@ var (
     _ = verify.ValidateEnum
     _ = googleapi.Error{}
 )
+
+func init() {
+    registry.Schema{
+        Name: "{{ $.TerraformName }}",
+        ProductName: "{{ lower $.ProductMetadata.Name }}",
+        Type: registry.SchemaTypeResource,
+        Schema: Resource{{ $.ResourceName -}}(),
+    }.Register()
+}
 
 func Resource{{ $.ResourceName -}}() *schema.Resource {
     return &schema.Resource{
