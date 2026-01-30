@@ -121,6 +121,17 @@ resource "google_discovery_engine_search_engine" "basic" {
     feedback = "FEATURE_STATE_OFF"
   }
   kms_key_name = "%{kms_key_name}"
+  knowledge_graph_config {
+    enable_cloud_knowledge_graph = true
+    cloud_knowledge_graph_types = ["foobar"]
+    enable_private_knowledge_graph = true
+    feature_config {
+      disable_private_kg_query_understanding = true
+      disable_private_kg_enrichment = true
+      disable_private_kg_auto_complete = true
+      disable_private_kg_query_ui_chips = true
+    }
+  }
 }
 `, context)
 }
