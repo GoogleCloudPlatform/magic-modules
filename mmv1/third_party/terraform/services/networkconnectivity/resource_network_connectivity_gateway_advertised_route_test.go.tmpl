@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+  "github.com/hashicorp/terraform-plugin-testing/plancheck"
 )
 
 func TestAccNetworkConnectivityGatewayAdvertisedRouter_test_basic(t *testing.T) {
@@ -34,6 +35,11 @@ func TestAccNetworkConnectivityGatewayAdvertisedRouter_test_basic(t *testing.T) 
 			},
 			{
 			 	Config: testAccNetworkConnectivitySpoke_test_update(context),
+        ConfigPlanChecks: resource.ConfigPlanChecks{
+               PreApply: []plancheck.PlanCheck{
+                  plancheck.ExpectResourceAction("google_network_connectivity_gateway_advertised_route.gateway-advertised-route", plancheck.ResourceActionUpdate),
+               },
+            },
 			},
 			{
 				ResourceName:            "google_network_connectivity_gateway_advertised_route.gateway-advertised-route",
