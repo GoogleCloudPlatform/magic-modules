@@ -209,7 +209,8 @@ properties:
   - name: 'databaseEdition'
     type: Enum
     description: |
-      The database edition.
+      The database edition. When set to 'ENTERPRISE', then type must be set to
+      'FIRESTORE_NATIVE'.
     required: false
     default_from_api: true
     # Picking a database edition is an irreversible decision
