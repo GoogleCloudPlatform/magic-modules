@@ -20,6 +20,9 @@ func TestAccObservabilityProjectSettings_datasource(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccObservabilityProjectSettings_datasource(context),
@@ -47,9 +50,15 @@ func testAccObservabilityProjectSettings_datasource(context map[string]interface
 		service = "observability.googleapis.com"
 		disable_on_destroy = false
 	}
+	resource "time_sleep" "wait_for_project" {
+		create_duration = "60s"
+		depends_on = [google_project_service.observability_service]
+	}
+
 	data "google_observability_project_settings" "settings" {
-		project  = google_project_service.observability_service.project
+		project  = google_project.default.project_id
 		location = "%{location}"
+		depends_on = [time_sleep.wait_for_project]
 	}
 `, context)
 }
