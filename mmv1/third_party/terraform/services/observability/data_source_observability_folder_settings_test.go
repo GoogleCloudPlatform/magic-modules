@@ -24,6 +24,9 @@ func TestAccObservabilityFolderSettings_datasource(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccObservabilityFolderSettings_datasource(context),
@@ -45,9 +48,15 @@ resource "google_folder" "test" {
 	deletion_protection = false
 }
 
-data "google_observability_folder_settings" "settings" {
-	folder   = google_folder.test.folder_id
-	location = "%{location}"
-}
+	resource "time_sleep" "wait_for_folder" {
+		create_duration = "90s"
+		depends_on = [google_folder.test]
+	}
+
+	data "google_observability_folder_settings" "settings" {
+		folder   = google_folder.test.folder_id
+		location = "%{location}"
+		depends_on = [time_sleep.wait_for_folder]
+	}
 `, context)
 }
