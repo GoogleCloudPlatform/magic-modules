@@ -48,12 +48,6 @@ examples:
       interconnect_attachment_name: 'on-prem-attachment'
       router_name: 'router-1'
       network_name: 'network-1'
-  - name: 'interconnect_attachment_tags'
-    primary_resource_id: 'interconnect-attachment-with-tags'
-    vars:
-      interconnect_attachment_name: 'on-prem-attachment'
-      router_name: 'router-1'
-      network_name: 'network-1'
   - name: 'interconnect_attachment_dedicated'
     primary_resource_id: 'on_prem'
     vars:
