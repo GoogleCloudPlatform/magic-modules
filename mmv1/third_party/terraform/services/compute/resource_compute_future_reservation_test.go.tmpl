@@ -17,8 +17,8 @@ func TestAccComputeFutureReservation_update(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"project":       envvar.GetTestProjectFromEnv(),
-		"end_time":        time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339),
-		"start_time":      time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 1).Format(time.RFC3339),
+		"end_time":      time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.UTC).AddDate(0, 0, 10).Format(time.RFC3339),
+		"start_time":    time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.UTC).AddDate(0, 0, 1).Format(time.RFC3339),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -47,6 +47,33 @@ func TestAccComputeFutureReservation_update(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"auto_delete_auto_created_reservations"},
+			},
+		},
+	})
+}
+
+func TestAccComputeFutureReservation_maintenance_protection(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"end_time":      time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.UTC).AddDate(0, 0, 10).Format(time.RFC3339),
+		"start_time":    time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.UTC).AddDate(0, 0, 1).Format(time.RFC3339),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeFutureReservation_maintenance_protection(context),
+			},
+			{
+				ResourceName:            "google_compute_future_reservation.gce_future_reservation",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"auto_delete_auto_created_reservations", "enable_emergent_maintenance"},
 			},
 		},
 	})
@@ -91,6 +118,33 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
     start_time = "%{start_time}"
     end_time   = "%{end_time}"
   }
+  specific_sku_properties {
+    total_count = "1"
+    instance_properties {
+      machine_type = "e2-standard-2"
+    }
+  }
+}
+`, context)
+}
+
+func testAccComputeFutureReservation_maintenance_protection(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_future_reservation" "gce_future_reservation" {
+  provider = google-beta
+  name     = "tf-test-fr%{random_suffix}"
+  name_prefix = "fr-%{random_suffix}"
+  project  = "%{project}"
+  planning_status = "DRAFT"
+  auto_delete_auto_created_reservations = true
+  enable_emergent_maintenance = true
+  protection_tier = "CAPACITY_OPTIMIZED"
+  description      = "test future reservation"
+  time_window {
+    start_time = "%{start_time}"
+    end_time   = "%{end_time}"
+  }
+
   specific_sku_properties {
     total_count = "1"
     instance_properties {
