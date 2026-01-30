@@ -516,6 +516,11 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Optional:    true,
 							Description: `Enables Vertex AI Integration.`,
 						},
+						"auto_upgrade_enabled": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: `Enables Automatic Version Upgrade feature. Can be used with MySQL only.`,
+						},
 						"enable_dataplex_integration": {
 							Type:             schema.TypeBool,
 							Optional:         true,
@@ -1526,6 +1531,10 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	cloneContext, cloneSource := expandCloneContext(d.Get("clone").([]interface{}))
 	pointInTimeRestoreContext := expandPointInTimeRestoreContext(d.Get("point_in_time_restore_context").([]interface{}))
 
+	if valueI, ok := d.GetOk("settings.0.auto_upgrade_enabled"); ok && !(valueI.(bool)) {
+		return fmt.Errorf("The setting auto_upgrade_enabled cannot be set to false.")
+	}
+
 	s, ok := d.GetOk("settings")
 	desiredSettings := expandSqlDatabaseInstanceSettings(s.([]interface{}), databaseVersion)
 	if ok {
@@ -1770,6 +1779,10 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 	resize := _settings["disk_autoresize"].(bool)
 	settings.StorageAutoResize = &resize
 	settings.StorageAutoResizeLimit = int64(_settings["disk_autoresize_limit"].(int))
+
+	if _settings["auto_upgrade_enabled"] != nil {
+		settings.AutoUpgradeEnabled = _settings["auto_upgrade_enabled"].(bool)
+	}
 
 	return settings
 }
@@ -2591,9 +2604,25 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		instance.PscServiceAttachmentLink = d.Get("psc_service_attachment_link").(string)
 	}
 
+	if d.HasChange("settings.0.auto_upgrade_enabled") {
+		_, newValue := d.GetChange("settings.0.auto_upgrade_enabled")
+		if newValue == nil || !(newValue.(bool)) {
+			return fmt.Errorf("The setting auto_upgrade_enabled cannot be unset once set.")
+		}
+	}
+
+	if autoUpgradeEnabledI, ok := d.GetOk("settings.0.auto_upgrade_enabled"); ok {
+		autoUpgradeEnabled := autoUpgradeEnabledI.(bool)
+		if autoUpgradeEnabled {
+			instance.DatabaseVersion = databaseVersion
+		} else {
+			return fmt.Errorf("The setting auto_upgrade_enabled cannot be set to false.")
+		}
+	}
+
 	// Database Version is required for all calls with Google ML integration enabled or it will be rejected by the API.
 	if d.Get("settings.0.enable_google_ml_integration").(bool) || len(_settings["connection_pool_config"].(*schema.Set).List()) > 0 {
-			instance.DatabaseVersion = databaseVersion
+		instance.DatabaseVersion = databaseVersion
 	}
 
 	failoverDrReplicaName := d.Get("replication_cluster.0.failover_dr_replica_name").(string)
@@ -2892,6 +2921,10 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 
 	data["enable_google_ml_integration"] = settings.EnableGoogleMlIntegration
 	data["enable_dataplex_integration"] = settings.EnableDataplexIntegration
+
+	if settings.AutoUpgradeEnabled {
+		data["auto_upgrade_enabled"] = settings.AutoUpgradeEnabled
+	}
 
 	if settings.UserLabels != nil {
 		data["user_labels"] = settings.UserLabels
