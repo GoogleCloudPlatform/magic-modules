@@ -13,6 +13,8 @@
 
 ---
 name: RepositoryGroup
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description: The resource for managing Repository Group for Gemini Code Assist.
 references:
   api: 'https://cloud.google.com/gemini/docs/api/reference/rest/v1/projects.locations.codeRepositoryIndexes.repositoryGroups'
