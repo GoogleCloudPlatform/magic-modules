@@ -57,6 +57,7 @@ examples:
     test_vars_overrides:
       # Mark for testing to avoid service networking connection usage that is not cleaned up
       'prober_test_run': '`options = { prober_test_run = "true" }`'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
   - name: 'data_fusion_instance_full'
     primary_resource_id: 'extended_instance'
     vars:
@@ -67,6 +68,7 @@ examples:
     test_vars_overrides:
       # Mark for testing to avoid service networking connection usage that is not cleaned up
       'prober_test_run': '`options = { prober_test_run = "true" }`'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
   - name: 'data_fusion_instance_psc'
     primary_resource_id: 'psc_instance'
     vars:
@@ -78,10 +80,12 @@ examples:
     test_vars_overrides:
       # Mark for testing to avoid service networking connection usage that is not cleaned up
       'prober_test_run': '`options = { prober_test_run = "true" }`'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
   - name: 'data_fusion_instance_cmek'
     primary_resource_id: 'cmek'
     vars:
       instance_name: 'my-instance'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
   - name: 'data_fusion_instance_enterprise'
     primary_resource_id: 'enterprise_instance'
     vars:
@@ -90,18 +94,29 @@ examples:
     test_vars_overrides:
       # Mark for testing to avoid service networking connection usage that is not cleaned up
       'prober_test_run': '`options = { prober_test_run = "true" }`'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
   - name: 'data_fusion_instance_event'
     primary_resource_id: 'event'
     vars:
       instance_name: 'my-instance'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
   - name: 'data_fusion_instance_zone'
     primary_resource_id: 'zone'
     vars:
       instance_name: 'my-instance'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
   - name: 'data_fusion_instance_patch_revision'
     primary_resource_id: 'data_fusion_instance_patch_revision'
     vars:
       instance_name: 'my-instance'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
+tgc_tests:
+  - name: 'TestAccDatafusionInstance_tags'
+    skip: 'fix it after patch_revision is released in v7.18.0'
+  - name: 'TestAccDataFusionInstance_update'
+    skip: 'fix it after patch_revision is released in v7.18.0'
+  - name: 'TestAccDataFusionInstanceEnterprise_update'
+    skip: 'fix it after patch_revision is released in v7.18.0'
 parameters:
   - name: 'region'
     type: String
