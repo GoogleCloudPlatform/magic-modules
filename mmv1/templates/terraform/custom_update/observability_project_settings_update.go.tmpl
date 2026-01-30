@@ -1,0 +1,69 @@
+  userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+  // Fetch project and location from ResourceData
+  project := d.Get("project").(string)
+  location := d.Get("location").(string)
+
+	obj := make(map[string]interface{})
+	if d.HasChange("default_storage_location") {
+		defaultStorageLocationProp, err := expandObservabilityProjectSettingsDefaultStorageLocation(d.Get("default_storage_location"), d, config)
+		if err != nil {
+			return err
+		}
+		obj["defaultStorageLocation"] = defaultStorageLocationProp
+	}
+	if d.HasChange("kms_key_name") {
+		kmsKeyNameProp, err := expandObservabilityProjectSettingsKmsKeyName(d.Get("kms_key_name"), d, config)
+		if err != nil {
+			return err
+		}
+		obj["kmsKeyName"] = kmsKeyNameProp
+	}
+
+  // Construct URL with fetched project and location
+  url := fmt.Sprintf("https://observability.googleapis.com/v1/projects/%s/locations/%s/settings", project, location)
+
+	log.Printf("[DEBUG] Updating ProjectSettings %q: %#v", d.Id(), obj)
+	headers := make(http.Header)
+	var masks []string
+	if d.HasChange("default_storage_location") {
+		masks = append(masks, "defaultStorageLocation")
+	}
+	if d.HasChange("kms_key_name") {
+		masks = append(masks, "kmsKeyName")
+	}
+
+	if len(masks) == 0 {
+
+		return fmt.Errorf("Cannot update ProjectSettings: no fields changed")
+	}
+  url = fmt.Sprintf("%s?updateMask=%s", url, strings.Join(masks, ","))
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "PATCH",
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      obj,
+		Timeout:   d.Timeout(schema.TimeoutUpdate),
+		Headers:   headers,
+	})
+
+	if err != nil {
+		return fmt.Errorf("Error updating ProjectSettings %q: %s", d.Id(), err)
+	} else {
+		log.Printf("[DEBUG] Finished updating ProjectSettings %q: %#v", d.Id(), res)
+	}
+
+	err = ObservabilityOperationWaitTime(
+		config, res, "Updating ProjectSettings", userAgent,
+		d.Timeout(schema.TimeoutUpdate))
+
+	if err != nil {
+		return err
+	}
+
+	return resourceObservabilityProjectSettingsRead(d, meta)
