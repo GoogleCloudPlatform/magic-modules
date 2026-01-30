@@ -149,7 +149,7 @@ resource "google_compute_interconnect" "example-interconnect" {
 resource "google_compute_interconnect_attachment" "attachment" {
   name           = "tf-test-attachment-%{random_suffix}"
   interconnect   = google_compute_interconnect.example-interconnect.id
-  type           = "L2_DEDICATED"
+  type           = "DEDICATED"
   bandwidth      = "BPS_50M"
   vlan_tag8021q  =  1000
   region         = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.name}/regions/us-west2"
