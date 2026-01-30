@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccComputeInterconnectAttachment_l2DedicatedExample(t *testing.T) {
@@ -88,6 +89,74 @@ resource "google_compute_interconnect_attachment" "attachment" {
     ignore_changes = [
       vlan_tag8021q
     ]
+  }
+}
+`, context)
+}
+
+func TestAccComputeInterconnectAttachment_resourceManagerTags(t *testing.T) {
+	t.Parallel()
+	org := envvar.GetTestOrgFromEnv(t)
+
+	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-interconnects-tagkey", "organizations/"+org, make(map[string]interface{}))
+	sharedTagkey, _ := tagKeyResult["shared_tag_key"]
+	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-interconnects-tagvalue", sharedTagkey, org)
+
+	context := map[string]interface{}{
+		"tag_key_id":    tagKeyResult["name"],
+		"tag_value_id":  tagValueResult["name"],
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInterconnectDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInterconnectAttachment_computeInterconnectParams(context),
+			},
+			{
+				ResourceName:            "google_compute_interconnect_attachment.attachment",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels", "params"},
+			},
+		},
+	})
+}
+
+func testAccComputeInterconnectAttachment_computeInterconnectParams(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_compute_interconnect" "example-interconnect" {
+  name                 = "tf-test-example-interconnect%{random_suffix}"
+  customer_name        = "internal_customer" # Special customer only available for Google testing.
+  interconnect_type    = "DEDICATED"
+  link_type            = "LINK_TYPE_ETHERNET_100G_LR"
+  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.name}/global/interconnectLocations/z2z-us-west2-zone2-nclaxw-a" # Special location only available for Google testing.
+  requested_link_count = 1
+  admin_enabled        = true
+  description          = "example description"
+  macsec_enabled       = false
+  noc_contact_email    = "user@example.com"
+  requested_features   = ["IF_MACSEC"]
+  labels = {
+    mykey = "myvalue"
+  }
+}
+resource "google_compute_interconnect_attachment" "attachment" {
+  name           = "tf-test-attachment-%{random_suffix}"
+  interconnect   = google_compute_interconnect.example-interconnect.id
+  type           = "L2_DEDICATED"
+  bandwidth      = "BPS_50M"
+  vlan_tag8021q  =  1000
+  region         = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.name}/regions/us-west2"
+  params {
+    resource_manager_tags = {
+      "%{tag_key_id}" = "%{tag_value_id}"
+    }
   }
 }
 `, context)
