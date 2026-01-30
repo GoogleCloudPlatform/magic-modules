@@ -50,6 +50,8 @@ custom_code:
   update_encoder: 'templates/terraform/update_encoder/reservation.go.tmpl'
   pre_update: 'templates/terraform/pre_update/shared_reservation_update.go.tmpl'
   post_read: templates/terraform/post_read/compute_reservetion.go.tmpl
+# excluding identity due to zone value inconsistency
+exclude_identity_generation: true
 sweeper:
   url_substitutions:
     - zone: "us-central1-a"
@@ -60,21 +62,25 @@ examples:
     primary_resource_id: 'gce_reservation'
     vars:
       reservation_name: 'gce-reservation'
+    exclude_identity_import: true
   - name: 'reservation_basic_beta'
     primary_resource_id: 'gce_reservation'
     vars:
       reservation_name: 'gce-reservation'
     min_version: 'beta'
+    exclude_identity_import: true
   - name: 'reservation_source_instance_template'
     primary_resource_id: 'gce_reservation_source_instance_template'
     vars:
       instance-template: 'instance-template'
       reservation_name: 'gce-reservation-source-instance-template'
+    exclude_identity_import: true
   - name: 'reservation_sharing_policy'
     primary_resource_id: 'gce_reservation_sharing_policy'
     vars:
       instance-template: 'instance-template'
       reservation_name: 'gce-reservation-sharing-policy'
+    exclude_identity_import: true
   - name: 'shared_reservation_basic'
     primary_resource_id: 'gce_reservation'
     vars:
@@ -84,6 +90,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
+    exclude_identity_import: true
     external_providers: ["time"]
   - name: 'shared_reservation_beta'
     primary_resource_id: 'gce_reservation'
