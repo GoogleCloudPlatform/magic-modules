@@ -1,0 +1,23 @@
+resource "google_compute_rollout_plan" "{{ .PrimaryResourceId }}" {
+  provider       = google-beta
+  name           = "test-rollout-plan"
+  description    = "A test rollout plan"
+  location_scope = "ZONAL"
+
+  waves {
+    display_name = "wave-1"
+    selectors {
+      location_selector {
+        included_locations = ["us-central1-a"]
+      }
+    }
+    validation {
+      type = "time"
+      time_based_validation_metadata {
+        wait_duration {
+          seconds = "30"
+        }
+      }
+    }
+  }
+}
