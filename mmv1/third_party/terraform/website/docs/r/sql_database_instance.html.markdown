@@ -193,6 +193,21 @@ resource "google_sql_database_instance" "instance" {
 }
 ```
 
+### Cloud SQL Instance with DB Engine Aligned Atomic Writes
+```hcl
+resource "google_sql_database_instance" "instance" {
+  name:            = "db-aligned-atomic-writes-enabled-instance"
+  region           = "us-central1"
+  database_version = "MYSQL_8_0"
+  settings {
+    tier = "db-perf-optimized-N-2"
+    db_aligned_atomic_writes_config {
+      db_aligned_atomic_writes = true
+    }
+  }
+}
+```
+
 ### Cloud SQL Instance with PSC connectivity
 
 ```hcl
@@ -747,6 +762,10 @@ The optional `settings.connection_pool_config.flags` sublist supports:
 * `name` - (Required) Name of the flag.
 
 * `value` - (Required) Value of the flag.
+
+The optional `settings.db_aligned_atomic_writes_config` subblock supports:
+
+* `db_aligned_atomic_writes`: (Optional) If set to `true`, enables Database Engine Aligned Atomic Writes for an instance to write data pages aligned to the database instead of the underlying operating system. Defaults to `false`. Can be used with MySQL only.
 
 ## Attributes Reference
 
