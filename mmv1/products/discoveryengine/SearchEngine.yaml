@@ -185,7 +185,6 @@ properties:
           Whether to enable the Cloud Knowledge Graph for the engine.
       - name: 'cloudKnowledgeGraphTypes'
         type: Array
-        default_from_api: true
         description: |
           Specify entity types to support.
         item_type:
