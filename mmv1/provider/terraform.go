@@ -65,9 +65,10 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time,
 	}
 
 	t.Product.SetCompiler(ProviderName(t))
+	t.Product.ImportPath = ImportPathFromVersion(versionName)
 	for _, r := range t.Product.Objects {
 		r.SetCompiler(ProviderName(t))
-		r.ImportPath = ImportPathFromVersion(versionName)
+		r.ImportPath = t.Product.ImportPath
 	}
 
 	return t
@@ -486,7 +487,7 @@ func (t Terraform) getCommonCopyFiles(versionName string, generateCode, generate
 	// save the folder name to foldersCopiedToGoogleDir
 	var foldersCopiedToGoogleDir []string
 	if generateCode {
-		foldersCopiedToGoogleDir = []string{"third_party/terraform/services", "third_party/terraform/acctest", "third_party/terraform/sweeper", "third_party/terraform/provider", "third_party/terraform/tpgdclresource", "third_party/terraform/tpgiamresource", "third_party/terraform/tpgresource", "third_party/terraform/transport", "third_party/terraform/fwmodels", "third_party/terraform/fwprovider", "third_party/terraform/fwtransport", "third_party/terraform/fwresource", "third_party/terraform/fwutils", "third_party/terraform/fwvalidators", "third_party/terraform/verify", "third_party/terraform/envvar", "third_party/terraform/functions", "third_party/terraform/test-fixtures"}
+		foldersCopiedToGoogleDir = []string{"third_party/terraform/services", "third_party/terraform/acctest", "third_party/terraform/sweeper", "third_party/terraform/provider", "third_party/terraform/registry", "third_party/terraform/tpgdclresource", "third_party/terraform/tpgiamresource", "third_party/terraform/tpgresource", "third_party/terraform/transport", "third_party/terraform/fwmodels", "third_party/terraform/fwprovider", "third_party/terraform/fwtransport", "third_party/terraform/fwresource", "third_party/terraform/fwutils", "third_party/terraform/fwvalidators", "third_party/terraform/verify", "third_party/terraform/envvar", "third_party/terraform/functions", "third_party/terraform/test-fixtures"}
 	}
 	googleDir := "google"
 	if versionName != "ga" {
