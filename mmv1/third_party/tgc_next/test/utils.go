@@ -130,15 +130,9 @@ type TestCase struct {
 }
 
 func GetSubTestName(fullTestName string) string {
-	parts := strings.Split(fullTestName, "/")
-
-	// Get the index of the last element
-	lastIndex := len(parts) - 1
-
-	// Check for an empty or malformed string
-	if lastIndex < 0 {
+	_, after, found := strings.Cut(fullTestName, "/")
+	if !found {
 		return ""
 	}
-
-	return parts[lastIndex]
+	return after
 }
