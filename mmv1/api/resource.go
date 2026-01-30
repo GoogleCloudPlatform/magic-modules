@@ -17,6 +17,7 @@ import (
 	"io/fs"
 	"log"
 	"maps"
+	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -393,12 +394,6 @@ type TGCResource struct {
 	// But they have the same api resource type: address
 	CaiResourceKind string `yaml:"cai_resource_kind,omitempty"`
 
-	// If true, the Terraform custom encoder is not applied during tfplan2cai
-	TGCIgnoreTerraformEncoder bool `yaml:"tgc_ignore_terraform_encoder,omitempty"`
-
-	// If true, the Terraform custom decoder is not applied during cai2hcl
-	TGCIgnoreTerraformDecoder bool `yaml:"tgc_ignore_terraform_decoder,omitempty"`
-
 	// [Optional] The parameter that uniquely identifies the resource.
 	// Generally, it shouldn't be set when the identity can be decided.
 	// Otherswise, it should be set.
@@ -731,10 +726,10 @@ func (r Resource) UnorderedListProperties() []*Type {
 	})
 }
 
-// Properties that will be returned in the API body
+// Properties that are read from the API response.
 func (r Resource) GettableProperties() []*Type {
 	return google.Reject(r.AllUserProperties(), func(v *Type) bool {
-		return v.UrlParamOnly
+		return v.UrlParamOnly || v.IgnoreRead
 	})
 }
 
@@ -1114,7 +1109,7 @@ func (r *Resource) ExcludeIfNotInVersion(version *product.Version) {
 // In newer resources there is much less standardisation in terms of value.
 // Generally for them though, it's the product.base_url + resource.name
 func (r Resource) SelfLinkUrl() string {
-	s := []string{r.ProductMetadata.BaseUrl, r.SelfLinkUri()}
+	s := []string{r.ProductMetadata.Version.BaseUrl, r.SelfLinkUri()}
 	return strings.Join(s, "")
 }
 
@@ -1132,7 +1127,7 @@ func (r Resource) SelfLinkUri() string {
 }
 
 func (r Resource) CollectionUrl() string {
-	s := []string{r.ProductMetadata.BaseUrl, r.collectionUri()}
+	s := []string{r.ProductMetadata.Version.BaseUrl, r.collectionUri()}
 	return strings.Join(s, "")
 }
 
@@ -1495,7 +1490,7 @@ func (r Resource) HasPostCreateComputedFields() bool {
 		if _, ok := fields[google.Underscore(p.Name)]; !ok {
 			continue
 		}
-		if (p.Output || p.DefaultFromApi) && !p.IgnoreRead {
+		if p.Output || p.DefaultFromApi {
 			return true
 		}
 	}
@@ -1506,14 +1501,8 @@ func (r Resource) HasPostCreateComputedFields() bool {
 // Template Methods
 // ====================
 // Functions used to create slices of resource properties that could not otherwise be called from within generating templates.
-func (r Resource) ReadProperties() []*Type {
-	return google.Reject(r.GettableProperties(), func(p *Type) bool {
-		return p.IgnoreRead
-	})
-}
-
 func (r Resource) FlattenedProperties() []*Type {
-	return google.Select(r.ReadProperties(), func(p *Type) bool {
+	return google.Select(r.GettableProperties(), func(p *Type) bool {
 		return p.FlattenObject
 	})
 }
@@ -1798,7 +1787,7 @@ func (r Resource) IamImportFormat() string {
 	importFormat := r.IamImportFormatTemplate()
 
 	importFormat = regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(importFormat, "%s")
-	return strings.ReplaceAll(importFormat, r.ProductMetadata.BaseUrl, "")
+	return strings.ReplaceAll(importFormat, r.ProductMetadata.Version.BaseUrl, "")
 }
 
 func (r Resource) IamImportParams() []string {
@@ -1976,7 +1965,7 @@ func (r Resource) ListUrlTemplate() string {
 }
 
 func (r Resource) DeleteUrlTemplate() string {
-	return fmt.Sprintf("%s%s", r.ProductMetadata.BaseUrl, r.DeleteUri())
+	return fmt.Sprintf("%s%s", r.ProductMetadata.Version.BaseUrl, r.DeleteUri())
 }
 
 func (r Resource) LastNestedQueryKey() string {
@@ -2543,6 +2532,22 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 
 	if r.IgnoreCaiAssetName() {
 		props = append(props, "ASSETNAME")
+	}
+
+	if r.CustomCode.ExtraSchemaEntry != "" {
+		b, err := os.ReadFile(r.CustomCode.ExtraSchemaEntry)
+
+		if err != nil {
+			log.Printf("Warning: failed to read extra_schema_entry file %s: %v", r.CustomCode.ExtraSchemaEntry, err)
+		} else {
+			re := regexp.MustCompile(`"([^"]+)"\s*:`)
+			matches := re.FindAllStringSubmatch(string(b), -1)
+			for _, match := range matches {
+				if len(match) > 1 {
+					props = append(props, match[1])
+				}
+			}
+		}
 	}
 
 	slices.Sort(props)

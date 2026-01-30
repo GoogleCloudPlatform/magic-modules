@@ -165,16 +165,12 @@ Replace `String` in the field type with one of the following options:
     description: |
       MULTILINE_FIELD_DESCRIPTION
     key_name: 'key_name'
-    key_description: |
-      MULTILINE_KEY_FIELD_DESCRIPTION
   # Map of primitive values
     value_type:
-      name: mapIntegerName
       type: Integer
 
   # Map of complex values
     value_type:
-      name: mapObjectName
       type: NestedObject
       properties:
       - name: 'FIELD_NAME'
@@ -185,7 +181,7 @@ Replace `String` in the field type with one of the following options:
 
 This type is used for general-case string -> non-string type mappings, use "KeyValuePairs" for string -> string mappings. Complex maps can't be represented natively in Terraform, and this type is transformed into an associative array (TypeSet) with the key merged into the object alongside other top-level fields.
 
-For `key_name` and `key_description`, provide a domain-appropriate name and description. For example, a map that references a specific type of resource would generally use the singular resource kind as the key name (such as "topic" for PubSub Topic) and a descriptor of the expected format depending on the context (such as resourceId vs full resource name).
+For `key_name`, provide a domain-appropriate field name. For example, a map that references a specific type of resource would generally use the singular resource kind as the key name (such as "topic" for PubSub Topic).
 
 {{< /tab >}}
 {{< /tabs >}}
