@@ -13,5 +13,3 @@ complete output, running presubmit tests, and updating the providers following y
 change.
 
 For information on how to use or contribute to Magic Modules, see [the documentation](https://googlecloudplatform.github.io/magic-modules).
-
-<!-- non-functional change to trigger ci: 2026-01-30 -->
