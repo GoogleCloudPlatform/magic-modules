@@ -126,7 +126,6 @@ examples:
       network_name: 'subnet-resolve-subnet-mask-test-network'
   - name: 'subnetwork_cidr_overlap'
     primary_resource_id: 'subnetwork-cidr-overlap'
-    min_version: 'beta'
     vars:
       subnetwork_name: 'subnet-cidr-overlap'
       network_name: 'net-cidr-overlap'
@@ -533,7 +532,6 @@ properties:
       existing resources are dropped and prevented from leaving the VPC.
       Setting this field to true will allow these packets to match dynamic routes injected
       via BGP even if their destinations match existing subnet ranges.
-    min_version: 'beta'
     default_from_api: true
     send_empty_value: true
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
