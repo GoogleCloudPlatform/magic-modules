@@ -28,8 +28,8 @@ sweeper:
     - region: "eu"
 
 examples:
-  - name: 'google_document_ai_schema_version'
-  - name: 'google_document_ai_schema_version_eu'
+  - name: 'google_documentai_schema'
+  - name: 'google_documentai_schema_eu'
     exclude_docs: true
 
 parameters:
@@ -47,6 +47,7 @@ properties:
       Identifier. The resource name of the Schema.
       Format:
       `projects/{project}/locations/{location}/schemas/{schema}`
+    output: true
   - name: 'displayName'
     type: String
     required: true
