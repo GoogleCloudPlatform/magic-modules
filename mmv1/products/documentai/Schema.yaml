@@ -28,8 +28,8 @@ sweeper:
     - region: "eu"
 
 examples:
-  - name: 'google_documentai_schema'
-  - name: 'google_documentai_schema_eu'
+  - name: 'documentai_schema'
+  - name: 'documentai_schema_eu'
     exclude_docs: true
 
 parameters:

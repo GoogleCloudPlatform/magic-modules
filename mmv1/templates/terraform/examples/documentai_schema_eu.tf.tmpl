@@ -1,4 +1,8 @@
-resource "google_documentai_schema_eu" "{{$.PrimaryResourceId}}" {
+resource "google_document_ai_schema_eu" "{{$.PrimaryResourceId}}" {
   display_name = "schema_eu"
   location     = "eu"
+  labels = {
+    "label" = "key",
+    "foo" = "bar",
+  }
 }
