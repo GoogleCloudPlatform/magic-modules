@@ -1,0 +1,352 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: ProcessorVersion
+description: A processor version is an implementation of a processor. Each processor can have multiple versions.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/document-ai/docs/overview'
+  api: 'https://cloud.google.com/document-ai/docs/reference/rest/v1/projects.locations.processors.processorVersions'
+base_url: 'projects/{{project}}/locations/{{location}}/processors/{{processor}}/processorVersions'
+create_url: 'projects/{{project}}/locations/{{location}}/processors/{{processor}}/processorVersions:train'
+immutable: true
+
+sweeper:
+  url_substitutions:
+    - region: "us"
+    - region: "eu"
+
+examples:
+  - name: 'documentai_processorversion'
+    primary_resource_id: 'processor_version'
+  - name: 'documentai_processorversion_eu'
+    primary_resource_id: 'processor_version_eu'
+    exclude_docs: true
+
+parameters:
+  - name: 'location'
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`.
+    immutable: true
+    url_param_only: true
+  - name: 'processor'
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: 'name'
+    type: String
+    description: |-
+      The resource name of the processor version.
+      Format: `projects/{project}/locations/{location}/processors/{processor}/processorVersions/{processor_version}`
+    output: true
+    immutable: true
+  - name: 'displayName'
+    type: String
+    description: The display name of the processor version.
+  - name: 'documentSchema'
+    type: NestedObject
+    output: true
+    description: The schema defines the output of the processed document by a processor.
+    properties:
+      - name: 'description'
+        type: String
+        description: Description of the schema.
+      - name: 'displayName'
+        type: String
+        description: Display name to show to users.
+      - name: 'entityTypes'
+        type: Array
+        description: Entity types of the schema.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'baseTypes'
+              type: Array
+              description: |-
+                The entity type that this type is derived from.  For now, one and only
+                one should be set.
+              item_type:
+                type: String
+            - name: 'displayName'
+              type: String
+              description: User defined name for the type.
+            - name: 'enumValues'
+              type: NestedObject
+              description: Defines the a list of enum values.
+              properties:
+                - name: 'values'
+                  type: Array
+                  description: The individual values that this enum values type can include.
+                  item_type:
+                    type: String
+            - name: 'name'
+              type: String
+              description: |-
+                Name of the type. It must be unique within the schema file and
+                cannot be a "Common Type".  The following naming conventions are used:
+
+                - Use `snake_casing`.
+                - Name matching is case-sensitive.
+                - Maximum 64 characters.
+                - Must start with a letter.
+                - Allowed characters: ASCII letters `[a-z0-9_-]`.  (For backward
+                compatibility internal infrastructure and tooling can handle any ascii
+                character.)
+                - The `/` is sometimes used to denote a property of a type.  For example
+                `line_item/amount`.  This convention is deprecated, but will still be
+                honored for backward compatibility.
+            - name: 'properties'
+              type: Array
+              description: Description the nested structure, or composition of an entity.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'displayName'
+                    type: String
+                    description: User defined name for the property.
+                  - name: 'method'
+                    type: Enum
+                    description: Specifies how the entity's value is obtained.
+                    enum_values:
+                      - 'EXTRACT'
+                      - 'DERIVE'
+                  - name: 'name'
+                    type: String
+                    description: |-
+                      The name of the property.  Follows the same guidelines as the
+                      EntityType name.
+                  - name: 'occurrenceType'
+                    type: Enum
+                    description: |-
+                      Occurrence type limits the number of instances an entity type appears
+                      in the document.
+                    enum_values:
+                      - 'OPTIONAL_ONCE'
+                      - 'OPTIONAL_MULTIPLE'
+                      - 'REQUIRED_ONCE'
+                      - 'REQUIRED_MULTIPLE'
+                  - name: 'valueType'
+                    type: String
+                    description: |-
+                      A reference to the value type of the property.  This type is subject
+                      to the same conventions as the `Entity.base_types` field.
+      - name: 'metadata'
+        type: NestedObject
+        description: Metadata for global schema behavior.
+        properties:
+          - name: 'documentAllowMultipleLabels'
+            type: Boolean
+            description: |-
+              If true, on a given page, there can be multiple `document` annotations
+              covering it.
+          - name: 'documentSplitter'
+            type: Boolean
+            description: |-
+              If true, a `document` entity type can be applied to subdocument
+              (splitting). Otherwise, it can only be applied to the entire document
+              (classification).
+          - name: 'prefixedNamingOnProperties'
+            type: Boolean
+            description: If set, all the nested entities must be prefixed with the parents.
+          - name: 'skipNamingValidation'
+            type: Boolean
+            description: |-
+              If set, we will skip the naming format validation in the schema. So the
+              string values in `DocumentSchema.EntityType.name` and
+              `DocumentSchema.EntityType.Property.name` will not be checked.
+      - name: 'documentPrompt'
+        type: string
+        description: |-
+          Document level prompt provided by the user. This custom text is injected
+          into the AI model's prompt to provide extra, document-wide guidance for
+          processing.
+  - name: 'state'
+    type: Enum
+    description: The state of the processor version.
+    enum_values:
+      - 'DEPLOYED'
+      - 'DEPLOYING'
+      - 'UNDEPLOYED'
+      - 'UNDEPLOYING'
+      - 'CREATING'
+      - 'DELETING'
+      - 'FAILED'
+      - 'IMPORTING'
+    output: true
+  - name: 'createTime'
+    type: String
+    description: The time the processor version was created.
+    output: true
+  - name: 'latestEvaluation'
+    type: NestedObject
+    description: The most recently invoked evaluation for the processor version.
+    output: true
+    properties:
+      - name: 'operation'
+        type: String
+        description: The long running operation for the evaluation.
+      - name: 'evaluation'
+        type: String
+        description: 'The resource name of the evaluation. Format: projects/{project}/locations/{location}/processors/{processor}/processorVersions/{processorVersion}/evaluations/{evaluation}'
+      - name: 'aggregateMetrics'
+        type: NestedObject
+        description: The aggregate metrics for the evaluation.
+        properties:
+          - name: 'precision'
+            type: Float
+            description: The calculated precision.
+          - name: 'recall'
+            type: Float
+            description: The calculated recall.
+          - name: 'f1Score'
+            type: Float
+            description: The calculated f1 score.
+          - name: 'predictedOccurrencesCount'
+            type: Integer
+            description: The amount of occurrences in predicted documents.
+          - name: 'groundTruthOccurrencesCount'
+            type: Integer
+            description: The amount of occurrences in ground truth documents.
+          - name: 'predictedDocumentCount'
+            type: Integer
+            description: The amount of documents with a predicted occurrence.
+          - name: 'groundTruthDocumentCount'
+            type: Integer
+            description: The amount of documents with a ground truth occurrence.
+          - name: 'truePositivesCount'
+            type: Integer
+            description: The amount of true positives.
+          - name: 'falsePositivesCount'
+            type: Integer
+            description: The amount of false positives.
+          - name: 'falseNegativesCount'
+            type: Integer
+            description: The amount of false negatives.
+          - name: 'totalDocumentsCount'
+            type: Integer
+            description: The amount of documents that had an occurrence of this label.
+      - name: 'aggregateMetricsExact'
+        type: NestedObject
+        description: The aggregate metrics for the evaluation (exact match).
+        properties:
+          - name: 'precision'
+            type: Float
+            description: The calculated precision.
+          - name: 'recall'
+            type: Float
+            description: The calculated recall.
+          - name: 'f1Score'
+            type: Float
+            description: The calculated f1 score.
+          - name: 'predictedOccurrencesCount'
+            type: Integer
+            description: The amount of occurrences in predicted documents.
+          - name: 'groundTruthOccurrencesCount'
+            type: Integer
+            description: The amount of occurrences in ground truth documents.
+          - name: 'predictedDocumentCount'
+            type: Integer
+            description: The amount of documents with a predicted occurrence.
+          - name: 'groundTruthDocumentCount'
+            type: Integer
+            description: The amount of documents with a ground truth occurrence.
+          - name: 'truePositivesCount'
+            type: Integer
+            description: The amount of true positives.
+          - name: 'falsePositivesCount'
+            type: Integer
+            description: The amount of false positives.
+          - name: 'falseNegativesCount'
+            type: Integer
+            description: The amount of false negatives.
+          - name: 'totalDocumentsCount'
+            type: Integer
+            description: The amount of documents that had an occurrence of this label.
+  - name: 'kmsKeyName'
+    type: String
+    description: The KMS key name used for encryption.
+    output: true
+  - name: 'kmsKeyVersionName'
+    type: String
+    description: The KMS key version with which data is encrypted.
+    output: true
+  - name: 'googleManaged'
+    type: Boolean
+    description: Denotes that this ProcessorVersion is managed by Google.
+    output: true
+  - name: 'deprecationInfo'
+    type: NestedObject
+    description: If set, information about the eventual deprecation of this version.
+    output: true
+    properties:
+      - name: 'deprecationTime'
+        type: String
+        description: The time at which this processor version will be deprecated.
+      - name: 'replacementProcessorVersion'
+        type: String
+        description: If set, the processor version that will be used as a replacement.
+  - name: 'modelType'
+    type: Enum
+    description: The model type of this processor version.
+    enum_values:
+      - 'MODEL_TYPE_GENERATIVE'
+      - 'MODEL_TYPE_CUSTOM'
+    output: true
+  - name: 'satisfiesPzs'
+    type: Boolean
+    description: Reserved for future use.
+    output: true
+  - name: 'satisfiesPzi'
+    type: Boolean
+    description: Reserved for future use.
+    output: true
+  - name: 'genAiModelInfo'
+    type: NestedObject
+    description: Information about Generative AI model-based processor versions.
+    output: true
+    properties:
+      - name: 'foundationGenAiModelInfo'
+        type: NestedObject
+        description: Information for a pretrained Google-managed foundation model.
+        properties:
+          - name: 'finetuningAllowed'
+            type: Boolean
+            description: Whether finetuning is allowed for this base processor version.
+          - name: 'minTrainLabeledDocuments'
+            type: Integer
+            description: The minimum number of labeled documents in the training dataset required for finetuning.
+      - name: 'customGenAiModelInfo'
+        type: NestedObject
+        description: Information for a custom Generative AI model created by the user.
+        properties:
+          - name: 'customModelType'
+            type: Enum
+            description: The type of custom model created by the user.
+            enum_values:
+              - 'VERSIONED_FOUNDATION'
+              - 'FINE_TUNED'
+          - name: 'baseProcessorVersionId'
+            type: String
+            description: The base processor version ID for the custom model.
+  - name: 'schemaVersion'
+    type: String
+    description: |-
+      SchemaVersion used by the ProcessorVersion.
+      Format is
+      `projects/{project}/locations/{location}/schemas/{schema}/schemaVersions/{schema_version}`
+    output: true
