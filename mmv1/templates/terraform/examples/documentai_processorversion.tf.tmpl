@@ -16,7 +16,7 @@ resource "google_document_ai_processor_version" "{{$.PrimaryResourceId}}" {
         method          = "EXTRACT"
         name            = "name"
         description = "description"
-        occurrence_type = "MULTIPLE_ONCE"
+        occurrence_type = "OPTIONAL_ONCE"
         value_type      = "string"
       }
     }
