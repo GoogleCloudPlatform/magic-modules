@@ -102,9 +102,11 @@ properties:
         - name: 'alias'
           type: String
           description: The alias in the form of `processor_version` resource name.
+          output: true
         - name: 'processorVersion'
           type: String
           description: The resource name of aliased processor version.
+          output: true
   - name: 'satisfiesPzi'
     type: Boolean
     description: Reserved for future use.
