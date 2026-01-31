@@ -53,8 +53,15 @@ collection_url_key: 'items'
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/ssl_certificate.tmpl'
   constants: 'templates/terraform/constants/compute_certificate.go.tmpl'
+  encoder: 'templates/terraform/encoders/region_ssl_certificate.go.tmpl'
 examples:
   - name: 'region_ssl_certificate_basic'
+    primary_resource_id: 'default'
+    ignore_read_extra:
+      - 'name_prefix'
+      # Uses id.UniqueId
+    skip_vcr: true
+  - name: 'region_ssl_certificate_basic_wo'
     primary_resource_id: 'default'
     ignore_read_extra:
       - 'name_prefix'
@@ -96,7 +103,8 @@ properties:
       The certificate in PEM format.
       The certificate chain must be no greater than 5 certs long.
       The chain must include at least one intermediate cert.
-    required: true
+    immutable: true
+    write_only: true
     sensitive: true
     is_missing_in_cai: true
   - name: 'creationTimestamp'
@@ -133,11 +141,11 @@ properties:
       function: 'verify.ValidateGCEName'
   - name: 'privateKey'
     type: String
-    description: 'The write-only private key in PEM format.'
-    required: true
+    description: 'The private key in PEM format.'
     immutable: true
     ignore_read: true
     sensitive: true
+    write_only: true
     diff_suppress_func: 'sha256DiffSuppress'
     custom_flatten: 'templates/terraform/custom_flatten/sha256.tmpl'
     is_missing_in_cai: true
