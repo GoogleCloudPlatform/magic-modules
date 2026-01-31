@@ -29,7 +29,9 @@ sweeper:
 
 examples:
   - name: 'documentai_schema'
+    primary_resource_id: 'schema'
   - name: 'documentai_schema_eu'
+    primary_resource_id: 'schema_eu'
     exclude_docs: true
 
 parameters:
