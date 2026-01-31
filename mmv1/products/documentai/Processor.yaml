@@ -73,3 +73,61 @@ properties:
     description: |
       The KMS key used for encryption/decryption in CMEK scenarios. See https://cloud.google.com/security-key-management.
     immutable: true
+  - name: 'activeSchemaVersion'
+    type: String
+    description: |-
+      SchemaVersion used by the Processor. It is the same as Processor's
+      DatasetSchema.schema_version
+      Format is
+      `projects/{project}/locations/{location}/schemas/{schema}/schemaVersions/{schema_version}
+    output: true
+  - name: 'createTime'
+    type: String
+    description: The time the processor was created.
+    output: true
+  - name: 'defaultProcessorVersion'
+    type: String
+    description: The default processor version.
+  - name: 'processEndpoint'
+    type: String
+    description: The http endpoint that can be called to invoke processing.
+    output: true
+    immutable: true
+  - name: 'processorVersionAliases'
+    type: Array
+    description: The processor version aliases.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'alias'
+          type: String
+          description: The alias in the form of `processor_version` resource name.
+          output: true
+        - name: 'processorVersion'
+          type: String
+          description: The resource name of aliased processor version.
+          output: true
+  - name: 'satisfiesPzi'
+    type: Boolean
+    description: Reserved for future use.
+    output: true
+  - name: 'satisfiesPzs'
+    type: Boolean
+    description: Reserved for future use.
+    output: true
+  - name: 'schema'
+    type: String
+    description: The Schema used by the Processor. All SchemaVersions must belong to this Schema to be bound to the Processor's dataset or ProcessorVersions. Format is `projects/{project}/locations/{location}/schemas/{schema}`
+  - name: 'state'
+    type: String
+    description: The state of the processor.
+    enum_values:
+      - 'ENABLED'
+      - 'DISABLED'
+      - 'ENABLING'
+      - 'DISABLING'
+      - 'CREATING'
+      - 'FAILED'
+      - 'DELETING'
+    output: true
