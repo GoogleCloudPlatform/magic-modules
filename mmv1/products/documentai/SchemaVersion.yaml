@@ -43,11 +43,13 @@ parameters:
 
 examples:
   - name: 'documentai_schemaversion'
+    primary_resource_id: 'schema_version_id'
     vars:
       schema_id: 'schema_id'
   - name: 'documentai_schemaversion_eu'
     vars:
       schema_id: 'schema_id_eu'
+    primary_resource_id: 'schema_version_id_eu'
     exclude_docs: true
 
 properties:
