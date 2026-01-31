@@ -28,12 +28,10 @@ sweeper:
     - region: "eu"
 
 examples:
-  - name: 'documentai_processor_version'
-    vars:
-      processor_version_name: 'test-processor-version'
-  - name: 'documentai_processor_version_eu'
-    vars:
-      processor_version_name: 'test-processor-version'
+  - name: 'documentai_processorversion'
+    primary_resource_id: 'processor_version'
+  - name: 'documentai_processorversion_eu'
+    primary_resource_id: 'processor_version_eu'
     exclude_docs: true
 
 parameters:
