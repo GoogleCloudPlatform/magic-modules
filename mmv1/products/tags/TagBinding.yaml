@@ -13,6 +13,8 @@
 
 ---
 name: 'TagBinding'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description:
   A TagBinding represents a connection between a TagValue and a cloud resource
   (currently project, folder, or organization). Once a TagBinding is created,
