@@ -80,6 +80,7 @@ properties:
       DatasetSchema.schema_version
       Format is
       `projects/{project}/locations/{location}/schemas/{schema}/schemaVersions/{schema_version}
+    output: true
   - name: 'createTime'
     type: String
     description: The time the processor was created.
