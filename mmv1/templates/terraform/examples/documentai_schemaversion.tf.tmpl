@@ -1,6 +1,10 @@
-resource "google_document_ai_schema_version_eu" "primary" {
-  display_name = "schema_version_eu"
-  location     = "eu"
+resource "google_document_ai_schema_version" "{{$.PrimaryResourceId}}" {
+  display_name = "schema_version"
+  location     = "us"
+  labels = {
+    "label" = "key",
+    "foo" = "bar",
+  }
   schema {
     description     = "schema_description"
     display_name    = "schema_description"

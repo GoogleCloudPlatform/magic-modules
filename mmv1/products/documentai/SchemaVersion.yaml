@@ -42,10 +42,10 @@ parameters:
     url_param_only: true
 
 examples:
-  - name: 'document_ai_schema_version'
+  - name: 'documentai_schemaversion'
     vars:
       schema_id: 'schema_id'
-  - name: 'document_ai_schema_version_eu'
+  - name: 'documentai_schemaversion_eu'
     vars:
       schema_id: 'schema_id_eu'
     exclude_docs: true
@@ -68,6 +68,7 @@ properties:
       Identifier. The resource name of the SchemaVersion.
       Format:
       `projects/{project}/locations/{location}/schemas/{schema}/schemaVersions/{schemaversion}`
+    output: true
   - name: 'schema'
     type: NestedObject
     required: true
@@ -185,4 +186,3 @@ properties:
           Document level prompt provided by the user. This custom text is injected
           into the AI model's prompt to provide extra, document-wide guidance for
           processing.
-          
