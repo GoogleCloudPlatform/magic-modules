@@ -12,7 +12,6 @@
 # limitations under the License.
 
 ---
-name: 'FolderSettings'
 api_resource_type_kind: AccessApprovalSettings
 api_variant_patterns:
   - 'folders/{folder}/accessApprovalSettings'
@@ -153,3 +152,4 @@ properties:
       correct permissions on it, etc.) This key version is not necessarily the effective key version at this level,
       as key versions are inherited top-down.
     output: true
+    required: true
