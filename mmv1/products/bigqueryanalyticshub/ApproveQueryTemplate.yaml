@@ -1,0 +1,57 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'ApproveQueryTemplate'
+description: |
+  Represents a resource to approve a Query Template within a Data Exchange.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/bigquery/docs/analytics-hub-introduction'
+create_url: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates/{{query_template_id}}:approve'
+immutable: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates/{{query_template_id}}'
+exclude_delete: true
+exclude_read: true
+exclude_import: true
+exclude_sweeper: true
+examples:
+  - name: 'bigquery_analyticshub_approve_query_template'
+    primary_resource_id: 'approvequerytemplate'
+    primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_query_template%s", context["random_suffix"])'
+    region_override: 'us'
+    vars:
+      data_exchange_id: 'my_data_exchange'
+      query_template_id: 'qt1'
+      desc: 'example of query template'
+    exclude_import_test: true
+properties:
+  - name: 'location'
+    type: String
+    description: 'The name of the location this data exchange query template.'
+    required: true
+    url_param_only: true
+    immutable: true
+  - name: 'data_exchange_id'
+    type: String
+    description: 'The ID of the data exchange. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.'
+    required: true
+    url_param_only: true
+    immutable: true
+  - name: 'query_template_id'
+    type: String
+    description: 'Unique QueryTemplate ID.'
+    required: true
+    url_param_only: true
+    immutable: true
