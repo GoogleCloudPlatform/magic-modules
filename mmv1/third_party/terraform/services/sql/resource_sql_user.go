@@ -225,9 +225,6 @@ func ResourceSqlUser() *schema.Resource {
 }
 
 func flattenSqlServerUserDetails(v *sqladmin.SqlServerUserDetails) []interface{} {
-	if v == nil {
-		return []interface{}{}
-	}
 	transformed := make(map[string]interface{})
 	transformed["disabled"] = v.Disabled
 	transformed["server_roles"] = v.ServerRoles
@@ -235,9 +232,6 @@ func flattenSqlServerUserDetails(v *sqladmin.SqlServerUserDetails) []interface{}
 }
 
 func expandPasswordPolicy(cfg interface{}) *sqladmin.UserPasswordValidationPolicy {
-	if len(cfg.([]interface{})) == 0 || cfg.([]interface{})[0] == nil {
-		return nil
-	}
 	raw := cfg.([]interface{})[0].(map[string]interface{})
 
 	upvp := &sqladmin.UserPasswordValidationPolicy{}
