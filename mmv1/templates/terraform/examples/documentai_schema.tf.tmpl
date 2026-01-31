@@ -1,0 +1,8 @@
+resource "google_document_ai_schema" "{{$.PrimaryResourceId}}" {
+  display_name = "schema"
+  location     = "us"
+  labels = {
+    "label" = "key",
+    "foo" = "bar",
+  }
+}
