@@ -16,6 +16,7 @@ import (
 
 func TestAccBiglakeIcebergIcebergNamespaceIamBinding(t *testing.T) {
 	t.Parallel()
+	acctest.SkipIfVcr(t)
 
 	suffix := acctest.RandString(t, 10)
 	catalogId := fmt.Sprintf("tf-test-catalog-%s", suffix)
@@ -83,6 +84,7 @@ func TestAccBiglakeIcebergIcebergNamespaceIamBinding(t *testing.T) {
 
 func TestAccBiglakeIcebergIcebergNamespaceIamMember(t *testing.T) {
 	t.Parallel()
+	acctest.SkipIfVcr(t)
 
 	suffix := acctest.RandString(t, 10)
 	catalogId := fmt.Sprintf("tf-test-catalog-%s", suffix)
@@ -141,6 +143,7 @@ func TestAccBiglakeIcebergIcebergNamespaceIamMember(t *testing.T) {
 
 func TestAccBiglakeIcebergIcebergNamespaceIamPolicy(t *testing.T) {
 	t.Parallel()
+	acctest.SkipIfVcr(t)
 
 	suffix := acctest.RandString(t, 10)
 	catalogId := fmt.Sprintf("tf-test-catalog-%s", suffix)
