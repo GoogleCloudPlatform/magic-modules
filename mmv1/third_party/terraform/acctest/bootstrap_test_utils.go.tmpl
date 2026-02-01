@@ -2495,3 +2495,73 @@ func CleanupBigQueryDatasetAndReplica(projectID, datasetID, replicaLocation stri
 		log.Printf("[INFO] Cleanup: Successfully deleted BigQuery dataset: %s", datasetID)
 	}
 }
+
+func BootstrapBigLakeIcebergNamespace(t *testing.T, catalogId, namespaceId string) string {
+	project := envvar.GetTestProjectFromEnv()
+	config := BootstrapConfig(t)
+	if config == nil {
+		return ""
+	}
+
+	log.Printf("[DEBUG] Creating BigLake Iceberg namespace %q in catalog %q", namespaceId, catalogId)
+
+	catalogPath := catalogId
+	if !strings.HasPrefix(catalogId, "projects/") {
+		catalogPath = fmt.Sprintf("projects/%s/catalogs/%s", project, catalogId)
+	}
+
+	url := fmt.Sprintf("%siceberg/v1/restcatalog/v1/%s/namespaces", config.BiglakeIcebergBasePath, catalogPath)
+
+	body := map[string]interface{}{
+		"namespace": []string{namespaceId},
+	}
+
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+		Body:      body,
+		Timeout:   4 * time.Minute,
+	})
+
+	if err != nil {
+		if !transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
+			t.Fatalf("Error bootstrapping BigLake Iceberg namespace %q: %s", namespaceId, err)
+		}
+		log.Printf("[DEBUG] BigLake Iceberg namespace %q already exists", namespaceId)
+	}
+
+	return namespaceId
+}
+
+func CleanupBigLakeIcebergNamespace(t *testing.T, catalogId, namespaceId string) {
+	project := envvar.GetTestProjectFromEnv()
+	config := BootstrapConfig(t)
+	if config == nil {
+		return
+	}
+
+	log.Printf("[DEBUG] Deleting BigLake Iceberg namespace %q in catalog %q", namespaceId, catalogId)
+
+	catalogPath := catalogId
+	if !strings.HasPrefix(catalogId, "projects/") {
+		catalogPath = fmt.Sprintf("projects/%s/catalogs/%s", project, catalogId)
+	}
+
+	url := fmt.Sprintf("%siceberg/v1/restcatalog/v1/%s/namespaces/%s", config.BiglakeIcebergBasePath, catalogPath, namespaceId)
+
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "DELETE",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+		Timeout:   4 * time.Minute,
+	})
+
+	if err != nil && !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		log.Printf("[ERROR] Error cleaning up BigLake Iceberg namespace %q: %s", namespaceId, err)
+	}
+}
