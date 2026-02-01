@@ -203,8 +203,7 @@ resource "google_backup_dr_restore_workload" "restore" {
   backup_vault_id  = "%{backup_vault_id}"
   data_source_id   = "%{data_source_id}"
   backup_id        = "%{backup_id}"
-  
-  name = "projects/%{project}/locations/us-central1/backups/test-backup"
+  name             = "projects/%{project}/locations/us-central1/backupVaults/%{backup_vault_id}/dataSources/%{data_source_id}/backups/%{backup_id}"
 
   compute_instance_target_environment {
     project = "%{project}"
@@ -226,8 +225,6 @@ resource "google_backup_dr_restore_workload" "restore" {
   backup_vault_id  = "%{backup_vault_id}"
   data_source_id   = "%{data_source_id}"
   backup_id        = "%{backup_id}"
-  
-  name = "projects/%{project}/locations/us-central1/backups/test-backup"
 
   compute_instance_target_environment {
     project = "%{project}"
@@ -253,8 +250,6 @@ resource "google_backup_dr_restore_workload" "restore" {
   backup_vault_id  = "%{backup_vault_id}"
   data_source_id   = "%{data_source_id}"
   backup_id        = "%{backup_id}"
-  
-  name = "projects/%{project}/locations/us-central1/backups/test-backup"
 
   disk_target_environment {
     project = "%{project}"
@@ -279,8 +274,6 @@ resource "google_backup_dr_restore_workload" "restore" {
   backup_vault_id  = "%{backup_vault_id}"
   data_source_id   = "%{data_source_id}"
   backup_id        = "%{backup_id}"
-  
-  name = "projects/%{project}/locations/us-central1/backups/test-backup"
 
   region_disk_target_environment {
     project = "%{project}"
@@ -307,8 +300,6 @@ resource "google_backup_dr_restore_workload" "restore" {
   backup_vault_id  = "%{backup_vault_id}"
   data_source_id   = "%{data_source_id}"
   backup_id        = "%{backup_id}"
-  
-  name = "projects/%{project}/locations/us-central1/backups/test-backup"
   
   delete_restored_instance = false
 
