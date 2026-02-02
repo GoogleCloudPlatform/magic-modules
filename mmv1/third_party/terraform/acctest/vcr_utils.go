@@ -171,6 +171,12 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 			s.ImportStateVerifyIgnore = append(s.ImportStateVerifyIgnore, "terraform_labels")
 		}
 		steps = append(steps, s)
+		// deletion_policy is a universal virtual attribute for managing the behavior of resources when a delete is attempted
+		// in Terraform. Because it is a virtual attribute, it needs to be excluded from these ImportStateVerifys.
+		if s.ImportStateVerify && !slices.Contains(s.ImportStateVerifyIgnore, "deletion_policy") {
+			s.ImportStateVerifyIgnore = append(s.ImportStateVerifyIgnore, "deletion_policy")
+		}
+		steps = append(steps, s)
 	}
 	c.Steps = steps
 
