@@ -157,5 +157,5 @@ resource "google_oracle_database_exascale_db_storage_vault" "exascaleDbStorageVa
 
   deletion_protection = false
 }
-`, acctest.RandString((t, 10), acctest.RandString(t, 10), getTestProjectFromEnv(), acctest.RandString(t, 10), acctest.RandString(t, 10), acctest.RandString(t, 10), acctest.RandString(t, 10), acctest.RandString(t, 10), getTestProjectFromEnv()))
+`, acctest.RandString((t, 10), acctest.RandString(t, 10), getTestProjectFromEnv(), acctest.RandString(t, 10), acctest.RandString(t, 10), acctest.RandString(t, 10), acctest.RandString(t, 10), acctest.RandString(t, 10), getTestProjectFromEnv())))
 }
