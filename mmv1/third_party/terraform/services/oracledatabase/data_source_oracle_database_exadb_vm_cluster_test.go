@@ -104,7 +104,7 @@ resource "google_oracle_database_exascale_db_storage_vault" "exascaleDbStorageVa
 }
 
 func testAccOracledatabaseExadbVmCluster_update(t *testing.T) string {
-	return fmt.Sprintf(Nprintf(t, `
+	return fmt.Sprintf(acctest.Nprintf(t, `
 resource "google_oracle_database_exadb_vm_cluster" "my_exadb_vm_cluster"{
     exadb_vm_cluster_id = "%s"
     display_name = "%s displayname"
