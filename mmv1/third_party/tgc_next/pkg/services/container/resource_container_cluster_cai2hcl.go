@@ -11,11 +11,8 @@ import (
 
 	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	container "google.golang.org/api/container/v1beta1"
+	"google.golang.org/api/container/v1"
 )
-
-const ContainerClusterSchemaName = "google_container_cluster"
 
 type ContainerClusterCai2hclConverter struct {
 	name   string
@@ -29,29 +26,41 @@ func NewContainerClusterCai2hclConverter(provider *schema.Provider) models.Cai2h
 	}
 }
 
-func (c *ContainerClusterCai2hclConverter) Convert(ctx models.Context) ([]*models.TerraformResourceBlock, error) {
-	if ctx.Asset.Resource == nil || ctx.Asset.Resource.Data == nil {
-		return nil, fmt.Errorf("Asset.Resource.Data is nil")
-	}
-
-	var containerCluster *container.Cluster
-	if err := caiasset.Decode(ctx.Asset.Resource.Data, &containerCluster); err != nil {
-		return nil, err
-	}
-
-	block, err := c.convertResourceData(containerCluster)
+func (c *ContainerClusterCai2hclConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
+	var blocks []*models.TerraformResourceBlock
+	block, err := c.convertResourceData(asset)
 	if err != nil {
 		return nil, err
 	}
-	return []*models.TerraformResourceBlock{block}, nil
+	blocks = append(blocks, block)
+	return blocks, nil
 }
 
-func (c *ContainerClusterCai2hclConverter) convertResourceData(cluster *container.Cluster) (*models.TerraformResourceBlock, error) {
+func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
+	if asset.Resource == nil || asset.Resource.Data == nil {
+		return nil, fmt.Errorf("asset resource data is nil")
+	}
+
+	var err error
+	// TODO: use transport.NewConfig()
+	// config := transport.NewConfig()
+
+	// This is a fake resource used to get fake d
+	// d.Get will return empty map, instead of nil
+	// fakeResource := &schema.Resource{
+	// 	Schema: c.schema,
+	// }
+	// d := fakeResource.TestResourceData()
+
+	var cluster *container.Cluster
+	if err := utils.DecodeJSON(asset.Resource.Data, &cluster); err != nil {
+		return nil, err
+	}
+
 	hclData := make(map[string]interface{})
 
 	hclData["name"] = cluster.Name
 	hclData["description"] = cluster.Description
-	hclData["protect_config"] = flattenProtectConfig(cluster.ProtectConfig)
 	hclData["security_posture_config"] = flattenSecurityPostureConfig(cluster.SecurityPostureConfig)
 	hclData["enterprise_config"] = flattenEnterpriseConfig(cluster.EnterpriseConfig)
 	hclData["anonymous_authentication_config"] = flattenAnonymousAuthenticationConfig(cluster.AnonymousAuthenticationConfig) // Assuming key
@@ -59,15 +68,14 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(cluster *containe
 	hclData["binary_authorization"] = flattenBinaryAuthorization(cluster.BinaryAuthorization)
 	hclData["network_policy"] = flattenNetworkPolicy(cluster.NetworkPolicy)
 	hclData["addons_config"] = flattenClusterAddonsConfig(cluster.AddonsConfig)
-	hclData["node_pool"] = flattenClusterNodePools(d, nil, cluster.NodePools)
+	// TODO: node_pool
 	hclData["authenticator_groups_config"] = flattenAuthenticatorGroupsConfig(cluster.AuthenticatorGroupsConfig)
 	hclData["control_plane_endpoints_config"] = flattenControlPlaneEndpointsConfig(cluster.ControlPlaneEndpointsConfig)
 	hclData["private_cluster_config"] = flattenPrivateClusterConfig(cluster.ControlPlaneEndpointsConfig, cluster.PrivateClusterConfig, cluster.NetworkConfig)
 	hclData["vertical_pod_autoscaling"] = flattenVerticalPodAutoscaling(cluster.VerticalPodAutoscaling)
 	hclData["release_channel"] = flattenReleaseChannel(cluster.ReleaseChannel)
-	hclData["gke_auto_upgrade_config"] = flattenGkeAutoUpgradeConfig(cluster.AutoUpgradeConfig) // key?
-	hclData["cluster_telemetry"] = flattenClusterTelemetry(cluster.ClusterTelemetry)
-	hclData["default_snat_status"] = flattenDefaultSnatStatus(cluster.DefaultSnatStatus)
+	hclData["gke_auto_upgrade_config"] = flattenGkeAutoUpgradeConfig(cluster.GkeAutoUpgradeConfig) // key?
+	hclData["default_snat_status"] = flattenDefaultSnatStatus(cluster.NetworkConfig.DefaultSnatStatus)
 	hclData["workload_identity_config"] = flattenWorkloadIdentityConfig(cluster.WorkloadIdentityConfig, nil, nil)
 	hclData["identity_service_config"] = flattenIdentityServiceConfig(cluster.IdentityServiceConfig, nil, nil)
 	if cluster.IpAllocationPolicy != nil {
@@ -88,27 +96,24 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(cluster *containe
 
 	hclData["maintenance_policy"] = flattenMaintenancePolicy(cluster.MaintenancePolicy)
 	hclData["master_auth"] = flattenMasterAuth(cluster.MasterAuth)
-	hclData["cluster_autoscaling"] = flattenClusterAutoscaling(cluster.ClusterAutoscaling)
+	hclData["cluster_autoscaling"] = flattenClusterAutoscaling(cluster.Autoscaling)
 	hclData["master_authorized_networks_config"] = flattenMasterAuthorizedNetworksConfig(cluster.MasterAuthorizedNetworksConfig)
-	hclData["pod_security_policy_config"] = flattenPodSecurityPolicyConfig(cluster.PodSecurityPolicyConfig)
 	hclData["pod_autoscaling"] = flattenPodAutoscaling(cluster.PodAutoscaling)
 	hclData["secret_manager_config"] = flattenSecretManagerConfig(cluster.SecretManagerConfig)
-	hclData["secret_sync_config"] = flattenSecretSyncConfig(cluster.SecretSyncConfig)
 	hclData["resource_usage_export_config"] = flattenResourceUsageExportConfig(cluster.ResourceUsageExportConfig)
-	hclData["service_external_ips_config"] = flattenServiceExternalIpsConfig(cluster.ServiceExternalIpsConfig)
+	hclData["service_external_ips_config"] = flattenServiceExternalIpsConfig(cluster.NetworkConfig.ServiceExternalIpsConfig)
 	hclData["mesh_certificates"] = flattenMeshCertificates(cluster.MeshCertificates)
 	hclData["cost_management_config"] = flattenManagementConfig(cluster.CostManagementConfig)
 	hclData["database_encryption"] = flattenDatabaseEncryption(cluster.DatabaseEncryption)
-	hclData["dns_config"] = flattenDnsConfig(cluster.DnsConfig)
-	hclData["network_performance_config"] = flattenNetworkPerformanceConfig(cluster.NetworkPerformanceConfig)
-	hclData["gateway_api_config"] = flattenGatewayApiConfig(cluster.GatewayApiConfig)
+	hclData["dns_config"] = flattenDnsConfig(cluster.NetworkConfig.DnsConfig)
+	hclData["network_performance_config"] = flattenNetworkPerformanceConfig(cluster.NetworkConfig.NetworkPerformanceConfig)
+	hclData["gateway_api_config"] = flattenGatewayApiConfig(cluster.NetworkConfig.GatewayApiConfig)
 	hclData["fleet"] = flattenFleet(cluster.Fleet)
 	hclData["user_managed_keys_config"] = flattenUserManagedKeysConfig(cluster.UserManagedKeysConfig)
-	hclData["enable_k8s_beta_apis"] = flattenEnableK8sBetaApis(cluster.K8sBetaAPIConfig)
+	hclData["enable_k8s_beta_apis"] = flattenEnableK8sBetaApis(cluster.EnableK8sBetaApis)
 	hclData["logging_config"] = flattenContainerClusterLoggingConfig(cluster.LoggingConfig)
 	hclData["monitoring_config"] = flattenMonitoringConfig(cluster.MonitoringConfig)
 	hclData["node_pool_auto_config"] = flattenNodePoolAutoConfig(cluster.NodePoolAutoConfig)
-	hclData["workload_alts_config"] = flattenWorkloadAltsConfig(cluster.WorkloadAltsConfig)
 	hclData["rbac_binding_config"] = flattenRBACBindingConfig(cluster.RbacBindingConfig)
 
 	ctyVal, err := utils.MapToCtyValWithSchema(hclData, c.schema)
@@ -121,29 +126,6 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(cluster *containe
 	}, nil
 }
 
-func flattenProtectConfig(pc *container.ProtectConfig) []map[string]interface{} {
-	if pc == nil {
-		return nil
-	}
-
-	result := make(map[string]interface{})
-
-	result["workload_config"] = flattenProtectConfigWorkloadConfig(pc.WorkloadConfig)
-	result["workload_vulnerability_mode"] = pc.WorkloadVulnerabilityMode
-
-	return []map[string]interface{}{result}
-}
-
-func flattenProtectConfigWorkloadConfig(wc *container.WorkloadConfig) []map[string]interface{} {
-	if wc == nil {
-		return nil
-	}
-
-	result := make(map[string]interface{})
-	result["audit_mode"] = wc.AuditMode
-
-	return []map[string]interface{}{result}
-}
 func flattenSecurityPostureConfig(spc *container.SecurityPostureConfig) []map[string]interface{} {
 	if spc == nil {
 		return nil
@@ -409,38 +391,7 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 		}
 	}
 
-	if c.IstioConfig != nil {
-		result["istio_config"] = []map[string]interface{}{
-			{
-				"disabled": c.IstioConfig.Disabled,
-				"auth":     c.IstioConfig.Auth,
-			},
-		}
-	}
-
-	if c.KalmConfig != nil {
-		result["kalm_config"] = []map[string]interface{}{
-			{
-				"enabled": c.KalmConfig.Enabled,
-			},
-		}
-	}
-
 	return []map[string]interface{}{result}
-}
-
-func flattenClusterNodePools(d *schema.ResourceData, config *transport_tpg.Config, c []*container.NodePool) ([]map[string]interface{}, error) {
-	nodePools := make([]map[string]interface{}, 0, len(c))
-
-	for i, np := range c {
-		nodePool, err := flattenNodePool(d, config, np, fmt.Sprintf("node_pool.%d.", i))
-		if err != nil {
-			return nil, err
-		}
-		nodePools = append(nodePools, nodePool)
-	}
-
-	return nodePools, nil
 }
 
 func flattenAuthenticatorGroupsConfig(c *container.AuthenticatorGroupsConfig) []map[string]interface{} {
@@ -560,16 +511,6 @@ func flattenGkeAutoUpgradeConfig(c *container.GkeAutoUpgradeConfig) []map[string
 		})
 	}
 
-	return result
-}
-
-func flattenClusterTelemetry(c *container.ClusterTelemetry) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"type": c.Type,
-		})
-	}
 	return result
 }
 
@@ -930,21 +871,6 @@ func flattenMasterAuthorizedNetworksConfig(c *container.MasterAuthorizedNetworks
 	return []map[string]interface{}{result}
 }
 
-func flattenPodSecurityPolicyConfig(c *container.PodSecurityPolicyConfig) []map[string]interface{} {
-	if c == nil {
-		return []map[string]interface{}{
-			{
-				"enabled": false,
-			},
-		}
-	}
-	return []map[string]interface{}{
-		{
-			"enabled": c.Enabled,
-		},
-	}
-}
-
 func flattenPodAutoscaling(c *container.PodAutoscaling) []map[string]interface{} {
 	config := make([]map[string]interface{}, 0, 1)
 
@@ -959,33 +885,6 @@ func flattenPodAutoscaling(c *container.PodAutoscaling) []map[string]interface{}
 }
 
 func flattenSecretManagerConfig(c *container.SecretManagerConfig) []map[string]interface{} {
-	if c == nil {
-		return []map[string]interface{}{
-			{
-				"enabled": false,
-			},
-		}
-	}
-
-	result := make(map[string]interface{})
-
-	result["enabled"] = c.Enabled
-
-	rotationList := []map[string]interface{}{}
-	if c.RotationConfig != nil {
-		rotationConfigMap := map[string]interface{}{
-			"enabled": c.RotationConfig.Enabled,
-		}
-		if c.RotationConfig.RotationInterval != "" {
-			rotationConfigMap["rotation_interval"] = c.RotationConfig.RotationInterval
-		}
-		rotationList = append(rotationList, rotationConfigMap)
-	}
-	result["rotation_config"] = rotationList
-	return []map[string]interface{}{result}
-}
-
-func flattenSecretSyncConfig(c *container.SecretSyncConfig) []map[string]interface{} {
 	if c == nil {
 		return []map[string]interface{}{
 			{
@@ -1283,17 +1182,6 @@ func flattenNodePoolAutoConfigNetworkTags(c *container.NetworkTags) []map[string
 	return []map[string]interface{}{result}
 }
 
-func flattenWorkloadAltsConfig(c *container.WorkloadALTSConfig) []map[string]interface{} {
-	if c == nil {
-		return nil
-	}
-	return []map[string]interface{}{
-		{
-			"enable_alts": c.EnableAlts,
-		},
-	}
-}
-
 func flattenRBACBindingConfig(c *container.RBACBindingConfig) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -1302,35 +1190,6 @@ func flattenRBACBindingConfig(c *container.RBACBindingConfig) []map[string]inter
 		{
 			"enable_insecure_binding_system_authenticated":   c.EnableInsecureBindingSystemAuthenticated,
 			"enable_insecure_binding_system_unauthenticated": c.EnableInsecureBindingSystemUnauthenticated,
-		},
-	}
-}
-
-var cidrBlockConfig = &schema.Resource{
-	Schema: map[string]*schema.Schema{
-		"cidr_block": {
-			Type:         schema.TypeString,
-			Required:     true,
-			ValidateFunc: validation.IsCIDRNetwork(0, 32),
-			Description:  `External network that can access Kubernetes master through HTTPS. Must be specified in CIDR notation.`,
-		},
-		"display_name": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Description: `Field for users to identify CIDR blocks.`,
-		},
-	},
-}
-
-func flattenShieldedInstanceConfig(c *container.ShieldedInstanceConfig) []map[string]interface{} {
-	if c == nil {
-		return nil
-	}
-
-	return []map[string]interface{}{
-		{
-			"enable_secure_boot":          c.EnableSecureBoot,
-			"enable_integrity_monitoring": c.EnableIntegrityMonitoring,
 		},
 	}
 }
