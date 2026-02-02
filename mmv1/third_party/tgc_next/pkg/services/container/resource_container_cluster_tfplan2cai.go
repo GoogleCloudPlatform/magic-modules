@@ -20,26 +20,28 @@ func ContainerClusterTfplan2CaiConverter() cai.Tfplan2caiConverter {
 	}
 }
 
-func GetContainerCluster(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (caiasset.Asset, error) {
+func GetContainerCluster(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]caiasset.Asset, error) {
 	name, err := cai.AssetName(d, config, "//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{name}}")
 	if err != nil {
-		return caiasset.Asset{}, err
+		return []caiasset.Asset{}, err
 	}
 	if data, err := GetContainerClusterData(d, config); err == nil {
 		location, _ := tpgresource.GetLocation(d, config)
-		return caiasset.Asset{
-			Name: name,
-			Type: ContainerClusterAssetType,
-			Resource: &caiasset.AssetResource{
-				Version:              "v1",
-				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/container/v1/rest",
-				DiscoveryName:        "Cluster",
-				Data:                 data,
-				Location:             location,
+		return []caiasset.Asset{
+			{
+				Name: name,
+				Type: ContainerClusterAssetType,
+				Resource: &caiasset.AssetResource{
+					Version:              "v1",
+					DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/container/v1/rest",
+					DiscoveryName:        "Cluster",
+					Data:                 data,
+					Location:             location,
+				},
 			},
 		}, nil
 	} else {
-		return caiasset.Asset{}, err
+		return []caiasset.Asset{}, err
 	}
 }
 
@@ -59,6 +61,20 @@ func GetContainerClusterData(d tpgresource.TerraformResourceData, config *transp
 
 func expandContainerCluster(project string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*container.Cluster, error) {
 	clusterName := d.Get("name").(string)
+
+	// TODO: check if needUpdateAfterCreate is needed
+	ipAllocationBlock, _, err := expandIPAllocationPolicy(d.Get("ip_allocation_policy"), d, d.Get("networking_mode").(string), d.Get("enable_autopilot").(bool), config)
+	if err != nil {
+		return nil, err
+	}
+
+	var workloadPolicyConfig *container.WorkloadPolicyConfig
+	if allowed := d.Get("allow_net_admin").(bool); allowed {
+		workloadPolicyConfig = &container.WorkloadPolicyConfig{
+			AllowNetAdmin: allowed,
+		}
+	}
+
 	cluster := &container.Cluster{
 		Name:                        clusterName,
 		InitialNodeCount:            int64(d.Get("initial_node_count").(int)),
@@ -75,15 +91,10 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 		MonitoringService:          d.Get("monitoring_service").(string),
 		NetworkPolicy:              expandNetworkPolicy(d.Get("network_policy")),
 		AddonsConfig:               expandClusterAddonsConfig(d.Get("addons_config")),
-		ManagedOpentelemetryConfig: expandManagedOpenTelemetryConfig(d.Get("managed_opentelemetry_config")),
 		EnableKubernetesAlpha:      d.Get("enable_kubernetes_alpha").(bool),
 		IpAllocationPolicy:         ipAllocationBlock,
-		PodSecurityPolicyConfig:    expandPodSecurityPolicyConfig(d.Get("pod_security_policy_config")),
-
-		PodAutoscaling:      expandPodAutoscaling(d.Get("pod_autoscaling")),
-		SecretManagerConfig: expandSecretManagerConfig(d.Get("secret_manager_config")),
-
-		SecretSyncConfig: expandSecretSyncConfig(d.Get("secret_sync_config")),
+		PodAutoscaling:             expandPodAutoscaling(d.Get("pod_autoscaling")),
+		SecretManagerConfig:        expandSecretManagerConfig(d.Get("secret_manager_config")),
 
 		Autoscaling:         expandClusterAutoscaling(d.Get("cluster_autoscaling"), d),
 		BinaryAuthorization: expandBinaryAuthorization(d.Get("binary_authorization")),
@@ -94,8 +105,6 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 		},
 		ReleaseChannel:       expandReleaseChannel(d.Get("release_channel")),
 		GkeAutoUpgradeConfig: expandGkeAutoUpgradeConfig(d.Get("gke_auto_upgrade_config")),
-
-		ClusterTelemetry: expandClusterTelemetry(d.Get("cluster_telemetry")),
 
 		EnableTpu: d.Get("enable_tpu").(bool),
 		NetworkConfig: &container.NetworkConfig{
@@ -119,9 +128,6 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 		ConfidentialNodes:  expandConfidentialNodes(d.Get("confidential_nodes")),
 		ResourceLabels:     tpgresource.ExpandStringMap(d, "effective_labels"),
 		NodePoolAutoConfig: expandNodePoolAutoConfig(d.Get("node_pool_auto_config")),
-
-		ProtectConfig: expandProtectConfig(d.Get("protect_config")),
-
 		CostManagementConfig: expandCostManagementConfig(d.Get("cost_management_config")),
 		EnableK8sBetaApis:    expandEnableK8sBetaApis(d.Get("enable_k8s_beta_apis"), nil),
 	}
@@ -143,14 +149,16 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 		mv := strings.Split(cluster.InitialClusterVersion, "-")[0]
 		nv := strings.Split(v.(string), "-")[0]
 		if mv != nv {
-			return fmt.Errorf("node_version and min_master_version must be set to equivalent values on create")
+			return nil, fmt.Errorf("node_version and min_master_version must be set to equivalent values on create")
 		}
 	}
 
+	// TODO: get location from d
+	location := ""
 	if v, ok := d.GetOk("node_locations"); ok {
 		locationsSet := v.(*schema.Set)
 		if locationsSet.Contains(location) {
-			return fmt.Errorf("when using a multi-zonal cluster, node_locations should not contain the original 'zone'")
+			return nil, fmt.Errorf("when using a multi-zonal cluster, node_locations should not contain the original 'zone'")
 		}
 
 		// GKE requires a full list of node locations
@@ -165,7 +173,7 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 	if v, ok := d.GetOk("network"); ok {
 		network, err := tpgresource.ParseNetworkFieldValue(v.(string), d, config)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		cluster.Network = network.RelativeLink()
 	}
@@ -173,23 +181,25 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 	if v, ok := d.GetOk("subnetwork"); ok {
 		subnetwork, err := tpgresource.ParseRegionalFieldValue("subnetworks", v.(string), "project", "location", "location", d, config, true) // variant of ParseSubnetworkFieldValue
 		if err != nil {
-			return err
+			return nil, err
 		}
 		cluster.Subnetwork = subnetwork.RelativeLink()
 	}
 
 	nodePoolsCount := d.Get("node_pool.#").(int)
 	if nodePoolsCount > 0 {
-		nodePools := make([]*container.NodePool, 0, nodePoolsCount)
-		for i := 0; i < nodePoolsCount; i++ {
-			prefix := fmt.Sprintf("node_pool.%d.", i)
-			nodePool, err := expandNodePool(d, prefix)
-			if err != nil {
-				return err
-			}
-			nodePools = append(nodePools, nodePool)
-		}
-		cluster.NodePools = nodePools
+		// TODO: implement expandNodePool
+
+		// nodePools := make([]*container.NodePool, 0, nodePoolsCount)
+		// for i := 0; i < nodePoolsCount; i++ {
+		// 	prefix := fmt.Sprintf("node_pool.%d.", i)
+		// 	nodePool, err := expandNodePool(d, prefix)
+		// 	if err != nil {
+		// 		return err
+		// 	}
+		// 	nodePools = append(nodePools, nodePool)
+		// }
+		// cluster.NodePools = nodePools
 	} else {
 		// Node Configs have default values that are set in the expand function,
 		// but can only be set if node pools are unspecified.
@@ -236,10 +246,6 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 		cluster.IdentityServiceConfig = expandIdentityServiceConfig(v)
 	}
 
-	if v, ok := d.GetOk("tpu_config"); ok {
-		cluster.TpuConfig = expandContainerClusterTpuConfig(v)
-	}
-
 	if v, ok := d.GetOk("resource_usage_export_config"); ok {
 		cluster.ResourceUsageExportConfig = expandResourceUsageExportConfig(v)
 	}
@@ -261,7 +267,7 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 	}
 
 	if err := validateNodePoolAutoConfig(cluster); err != nil {
-		return err
+		return nil, err
 	}
 
 	if v, ok := d.GetOk("security_posture_config"); ok {
@@ -280,6 +286,24 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 		cluster.RbacBindingConfig = expandRBACBindingConfig(v)
 	}
 	return cluster, nil
+}
+
+func expandEnterpriseConfig(configured interface{}) *container.EnterpriseConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 {
+		return nil
+	}
+
+	ec := &container.EnterpriseConfig{}
+	enterpriseConfig := l[0].(map[string]interface{})
+	if v, ok := enterpriseConfig["cluster_tier"]; ok {
+		ec.ClusterTier = v.(string)
+	}
+
+	if v, ok := enterpriseConfig["desired_tier"]; ok {
+		ec.DesiredTier = v.(string)
+	}
+	return ec
 }
 
 func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
@@ -423,23 +447,6 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 		}
 	}
 
-	if v, ok := config["istio_config"]; ok && len(v.([]interface{})) > 0 {
-		addon := v.([]interface{})[0].(map[string]interface{})
-		ac.IstioConfig = &container.IstioConfig{
-			Disabled:        addon["disabled"].(bool),
-			Auth:            addon["auth"].(string),
-			ForceSendFields: []string{"Disabled"},
-		}
-	}
-
-	if v, ok := config["kalm_config"]; ok && len(v.([]interface{})) > 0 {
-		addon := v.([]interface{})[0].(map[string]interface{})
-		ac.KalmConfig = &container.KalmConfig{
-			Enabled:         addon["enabled"].(bool),
-			ForceSendFields: []string{"Enabled"},
-		}
-	}
-
 	return ac
 }
 
@@ -467,7 +474,7 @@ func expandPodIpv4RangeNames(configured interface{}) []string {
 	return ranges
 }
 
-func expandAdditionalIpRangesConfigs(configured interface{}, d *schema.ResourceData, c *transport_tpg.Config) ([]*container.AdditionalIPRangesConfig, error) {
+func expandAdditionalIpRangesConfigs(configured interface{}, d tpgresource.TerraformResourceData, c *transport_tpg.Config) ([]*container.AdditionalIPRangesConfig, error) {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -488,7 +495,7 @@ func expandAdditionalIpRangesConfigs(configured interface{}, d *schema.ResourceD
 	return additionalIpRangesConfig, nil
 }
 
-func expandIPAllocationPolicy(configured interface{}, d *schema.ResourceData, networkingMode string, autopilot bool, c *transport_tpg.Config) (*container.IPAllocationPolicy, []*container.AdditionalIPRangesConfig, error) {
+func expandIPAllocationPolicy(configured interface{}, d tpgresource.TerraformResourceData, networkingMode string, autopilot bool, c *transport_tpg.Config) (*container.IPAllocationPolicy, []*container.AdditionalIPRangesConfig, error) {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		if networkingMode == "VPC_NATIVE" {
@@ -553,7 +560,7 @@ func expandAutoIpamConfig(configured interface{}) *container.AutoIpamConfig {
 	}
 }
 
-func expandMaintenancePolicy(d *schema.ResourceData, config *transport_tpg.Config) *container.MaintenancePolicy {
+func expandMaintenancePolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) *container.MaintenancePolicy {
 	// We have to perform a full Get() as part of this, to get the fingerprint.  We can't do this
 	// at any other time, because the fingerprint update might happen between plan and apply.
 	// We can omit error checks, since to have gotten this far, a project is definitely configured.
@@ -656,7 +663,7 @@ func expandMaintenancePolicy(d *schema.ResourceData, config *transport_tpg.Confi
 	return nil
 }
 
-func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) *container.ClusterAutoscaling {
+func expandClusterAutoscaling(configured interface{}, d tpgresource.TerraformResourceData) *container.ClusterAutoscaling {
 	l, ok := configured.([]interface{})
 	enableAutopilot := false
 	if v, ok := d.GetOk("enable_autopilot"); ok && v == true {
@@ -712,7 +719,7 @@ func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) *c
 	}
 }
 
-func expandAutoProvisioningDefaults(configured interface{}, d *schema.ResourceData) *container.AutoprovisioningNodePoolDefaults {
+func expandAutoProvisioningDefaults(configured interface{}, d tpgresource.TerraformResourceData) *container.AutoprovisioningNodePoolDefaults {
 	l, ok := configured.([]interface{})
 	if !ok || l == nil || len(l) == 0 || l[0] == nil {
 		return &container.AutoprovisioningNodePoolDefaults{}
@@ -841,32 +848,6 @@ func expandAuthenticatorGroupsConfig(configured interface{}) *container.Authenti
 	return result
 }
 
-func expandProtectConfig(configured interface{}) *container.ProtectConfig {
-	l := configured.([]interface{})
-	if len(l) == 0 || l[0] == nil {
-		return nil
-	}
-
-	pc := &container.ProtectConfig{}
-	protectConfig := l[0].(map[string]interface{})
-	pc.WorkloadConfig = expandProtectConfigWorkloadConfig(protectConfig["workload_config"])
-	if v, ok := protectConfig["workload_vulnerability_mode"]; ok {
-		pc.WorkloadVulnerabilityMode = v.(string)
-	}
-	return pc
-}
-
-func expandProtectConfigWorkloadConfig(configured interface{}) *container.WorkloadConfig {
-	l := configured.([]interface{})
-	if len(l) == 0 || l[0] == nil {
-		return nil
-	}
-	workloadConfig := l[0].(map[string]interface{})
-	return &container.WorkloadConfig{
-		AuditMode: workloadConfig["audit_mode"].(string),
-	}
-}
-
 func expandSecurityPostureConfig(configured interface{}) *container.SecurityPostureConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -963,7 +944,7 @@ func expandMasterAuth(configured interface{}) *container.MasterAuth {
 	return result
 }
 
-func expandMasterAuthorizedNetworksConfig(d *schema.ResourceData) *container.MasterAuthorizedNetworksConfig {
+func expandMasterAuthorizedNetworksConfig(d tpgresource.TerraformResourceData) *container.MasterAuthorizedNetworksConfig {
 	v := d.Get("master_authorized_networks_config").([]interface{})
 	if len(v) == 0 {
 		// TF doesn't have an explicit enabled field for authorized networks, it is assumed to be enabled based
@@ -1058,7 +1039,7 @@ func expandPrivateClusterConfigMasterIpv4CidrBlock(configured interface{}, c *co
 	}
 }
 
-func expandDefaultEnablePrivateNodes(d *schema.ResourceData) bool {
+func expandDefaultEnablePrivateNodes(d tpgresource.TerraformResourceData) bool {
 	b, ok := d.GetOk("private_cluster_config.0.enable_private_nodes")
 	if ok {
 		v, _ := b.(bool)
@@ -1067,7 +1048,7 @@ func expandDefaultEnablePrivateNodes(d *schema.ResourceData) bool {
 	return false
 }
 
-func expandControlPlaneEndpointsConfig(d *schema.ResourceData) *container.ControlPlaneEndpointsConfig {
+func expandControlPlaneEndpointsConfig(d tpgresource.TerraformResourceData) *container.ControlPlaneEndpointsConfig {
 	dns := &container.DNSEndpointConfig{}
 	if v := d.Get("control_plane_endpoints_config.0.dns_endpoint_config.0.allow_external_traffic"); v != nil {
 		dns.AllowExternalTraffic = v.(bool)
@@ -1187,17 +1168,6 @@ func expandGkeAutoUpgradeConfig(configured interface{}) *container.GkeAutoUpgrad
 	}
 }
 
-func expandClusterTelemetry(configured interface{}) *container.ClusterTelemetry {
-	l := configured.([]interface{})
-	if len(l) == 0 || l[0] == nil {
-		return nil
-	}
-	config := l[0].(map[string]interface{})
-	return &container.ClusterTelemetry{
-		Type: config["type"].(string),
-	}
-}
-
 func expandDefaultSnatStatus(configured interface{}) *container.DefaultSnatStatus {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -1236,19 +1206,6 @@ func expandIdentityServiceConfig(configured interface{}) *container.IdentityServ
 	v.Enabled = config["enabled"].(bool)
 
 	return v
-}
-
-func expandPodSecurityPolicyConfig(configured interface{}) *container.PodSecurityPolicyConfig {
-	l := configured.([]interface{})
-	if len(l) == 0 || l[0] == nil {
-		return nil
-	}
-
-	config := l[0].(map[string]interface{})
-	return &container.PodSecurityPolicyConfig{
-		Enabled:         config["enabled"].(bool),
-		ForceSendFields: []string{"Enabled"},
-	}
 }
 
 func expandPodAutoscaling(configured interface{}) *container.PodAutoscaling {
@@ -1295,37 +1252,6 @@ func expandSecretManagerConfig(configured interface{}) *container.SecretManagerC
 					}
 				} else {
 					sc.RotationConfig = &container.RotationConfig{
-						Enabled: autoRotationConfig["enabled"].(bool),
-					}
-				}
-			}
-		}
-	}
-	return sc
-}
-
-func expandSecretSyncConfig(configured interface{}) *container.SecretSyncConfig {
-	l := configured.([]interface{})
-	if len(l) == 0 || l[0] == nil {
-		return nil
-	}
-
-	config := l[0].(map[string]interface{})
-	sc := &container.SecretSyncConfig{
-		Enabled:         config["enabled"].(bool),
-		ForceSendFields: []string{"Enabled"},
-	}
-	if autoRotation, ok := config["rotation_config"]; ok {
-		if autoRotationList, ok := autoRotation.([]interface{}); ok {
-			if len(autoRotationList) > 0 {
-				autoRotationConfig := autoRotationList[0].(map[string]interface{})
-				if rotationInterval, ok := autoRotationConfig["rotation_interval"].(string); ok && rotationInterval != "" {
-					sc.RotationConfig = &container.SyncRotationConfig{
-						Enabled:          autoRotationConfig["enabled"].(bool),
-						RotationInterval: rotationInterval,
-					}
-				} else {
-					sc.RotationConfig = &container.SyncRotationConfig{
 						Enabled: autoRotationConfig["enabled"].(bool),
 					}
 				}
@@ -1557,19 +1483,6 @@ func expandMonitoringConfig(configured interface{}) *container.MonitoringConfig 
 	return mc
 }
 
-func expandContainerClusterTpuConfig(configured interface{}) *container.TpuConfig {
-	l := configured.([]interface{})
-	if len(l) == 0 || l[0] == nil {
-		return nil
-	}
-
-	config := l[0].(map[string]interface{})
-	return &container.TpuConfig{
-		Enabled:              config["enabled"].(bool),
-		UseServiceNetworking: config["use_service_networking"].(bool),
-	}
-}
-
 func expandContainerClusterAuthenticatorGroupsConfig(configured interface{}) *container.AuthenticatorGroupsConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -1651,19 +1564,6 @@ func expandNodePoolAutoConfigNetworkTags(configured interface{}) *container.Netw
 		nt.Tags = tpgresource.ConvertStringArr(v.([]interface{}))
 	}
 	return nt
-}
-
-func expandWorkloadAltsConfig(configured interface{}) *container.WorkloadALTSConfig {
-	l := configured.([]interface{})
-	if len(l) == 0 || l[0] == nil {
-		return nil
-	}
-
-	config := l[0].(map[string]interface{})
-	return &container.WorkloadALTSConfig{
-		EnableAlts:      config["enable_alts"].(bool),
-		ForceSendFields: []string{"EnableAlts"},
-	}
 }
 
 func expandRBACBindingConfig(configured interface{}) *container.RBACBindingConfig {
