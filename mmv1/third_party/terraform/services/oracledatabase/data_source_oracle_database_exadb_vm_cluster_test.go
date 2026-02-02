@@ -120,7 +120,6 @@ resource "google_oracle_database_exascale_db_storage_vault" "exascaleDbStorageVa
 		"exascale_db_storage_vault_id": acctest.RandString(t, 10),
 	})
 }
-}
 
 func testAccOracledatabaseExadbVmCluster_update(t *testing.T) string {
 	project, err := tpgresource.GetProject(d, config)
