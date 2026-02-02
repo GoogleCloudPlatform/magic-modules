@@ -13,6 +13,8 @@
 
 ---
 name: 'DefaultSupportedIdpConfig'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description: |
   Configurations options for authenticating with a the standard set of Identity Toolkit-trusted IDPs.
 

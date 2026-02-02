@@ -12,6 +12,8 @@
 # limitations under the License.
 
 name: Group
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 legacy_long_form_project: true
 base_url: projects/{{project}}/locations/global/hubs/{{hub}}/groups
 create_url: projects/{{project}}/locations/global/hubs/{{hub}}/groups/{{name}}?updateMask=autoAccept.autoAcceptProjects,labels,description

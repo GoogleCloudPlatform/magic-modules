@@ -13,6 +13,8 @@
 
 ---
 name: 'GitRepositoryLink'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description: "A git repository link to a parent connection."
 references:
   guides:

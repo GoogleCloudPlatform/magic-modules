@@ -13,6 +13,8 @@
 
 ---
 name: CodeRepositoryIndex
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description: The resource for managing Code Repository Index for Gemini Code Assist.
 references:
   guides:

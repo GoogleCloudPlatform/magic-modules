@@ -13,6 +13,8 @@
 
 ---
 name: 'MigrationJob'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description: 'A migration job definition.'
 references:
   guides:

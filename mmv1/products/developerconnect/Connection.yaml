@@ -13,6 +13,8 @@
 
 ---
 name: Connection
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description: A connection for GitHub, GitHub Enterprise, GitLab, and GitLab Enterprise.
 references:
   guides:

@@ -34,6 +34,8 @@ autogen_async: true
 custom_code:
   pre_create: 'templates/terraform/pre_create/privateca_certificate.go.tmpl'
 exclude_sweeper: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 examples:
   - name: 'privateca_certificate_config'
     primary_resource_id: 'default'

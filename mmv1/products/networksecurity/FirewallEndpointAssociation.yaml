@@ -13,6 +13,8 @@
 
 ---
 name: 'FirewallEndpointAssociation'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description: |
   Firewall endpoint association links a firewall endpoint to a VPC network in
   the same zone. After you define this association, Cloud Firewall forwards the
