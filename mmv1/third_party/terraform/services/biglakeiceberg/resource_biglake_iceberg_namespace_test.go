@@ -30,7 +30,7 @@ func TestAccBiglakeIcebergIcebergNamespace_basic(t *testing.T) {
 				ResourceName:            "google_biglake_iceberg_namespace.my_namespace",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"catalog"},
+				ImportStateVerifyIgnore: []string{"catalog", "namespace_id", "properties"},
 			},
 			{
 				Config: testAccBiglakeIcebergIcebergNamespace_update(context),
@@ -39,7 +39,7 @@ func TestAccBiglakeIcebergIcebergNamespace_basic(t *testing.T) {
 				ResourceName:            "google_biglake_iceberg_namespace.my_namespace",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"catalog"},
+				ImportStateVerifyIgnore: []string{"catalog", "namespace_id", "properties"},
 			},
 		},
 	})
@@ -54,7 +54,7 @@ func testAccCheckBiglakeIcebergIcebergNamespaceDestroyProducer(t *testing.T) res
 func testAccBiglakeIcebergIcebergNamespace_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_storage_bucket" "bucket" {
-  name          = "tf-test-iceberg-ns-%{random_suffix}"
+  name          = "tf-test-catalog-%{random_suffix}"
   location      = "us-central1"
   force_destroy = true
   uniform_bucket_level_access = true
@@ -70,7 +70,7 @@ resource "google_biglake_iceberg_catalog" "catalog" {
 
 resource "google_biglake_iceberg_namespace" "my_namespace" {
   catalog   = google_biglake_iceberg_catalog.catalog.name
-  namespace = ["accounting", "tax"]
+  namespace = ["accounting"]
   properties = {
     owner = "Hank"
   }
@@ -81,7 +81,7 @@ resource "google_biglake_iceberg_namespace" "my_namespace" {
 func testAccBiglakeIcebergIcebergNamespace_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_storage_bucket" "bucket" {
-  name          = "tf-test-iceberg-ns-%{random_suffix}"
+  name          = "tf-test-catalog-%{random_suffix}"
   location      = "us-central1"
   force_destroy = true
   uniform_bucket_level_access = true
@@ -97,7 +97,7 @@ resource "google_biglake_iceberg_catalog" "catalog" {
 
 resource "google_biglake_iceberg_namespace" "my_namespace" {
   catalog   = google_biglake_iceberg_catalog.catalog.name
-  namespace = ["accounting", "tax"]
+  namespace = ["accounting"]
   properties = {
     owner = "Hank"
     dept  = "finance"

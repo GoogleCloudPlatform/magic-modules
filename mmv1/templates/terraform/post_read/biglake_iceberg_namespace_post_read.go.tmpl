@@ -1,0 +1,32 @@
+// Custom logic for properties vs output_properties
+	if apiPropsRaw, ok := res["properties"]; ok && apiPropsRaw != nil {
+		apiProps := apiPropsRaw.(map[string]interface{})
+
+		// 1. Set output_properties to the full map from API
+		if err := d.Set("output_properties", apiProps); err != nil {
+			return fmt.Errorf("Error setting output_properties: %s", err)
+		}
+
+		// 2. Set properties to the intersection of API response and User Config
+		// Since 'properties' has ignore_read: true, d.Get("properties") returns state/config.
+		userPropsMap := make(map[string]interface{})
+		if v, ok := d.Get("properties").(map[string]interface{}); ok {
+			userPropsMap = v
+		}
+
+		newProps := make(map[string]interface{})
+		for k := range userPropsMap {
+			if v, ok := apiProps[k]; ok {
+				newProps[k] = v
+			}
+			// If key is in user config but missing in API, we omit it from newProps.
+			// Terraform will detect this as a removal (drift), which is correct.
+		}
+		if err := d.Set("properties", newProps); err != nil {
+			return fmt.Errorf("Error setting properties: %s", err)
+		}
+	} else {
+		// No properties returned
+		d.Set("output_properties", nil)
+		d.Set("properties", nil)
+	}

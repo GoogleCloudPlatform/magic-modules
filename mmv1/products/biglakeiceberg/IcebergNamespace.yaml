@@ -16,8 +16,8 @@ name: 'IcebergNamespace'
 description: |
   IcebergNamespaces are containers for Apache Iceberg Tables within an IcebergCatalog.
 exclude_resource: true
-base_url: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs/{{catalog}}/namespaces'
-self_link: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}'
+base_url: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces'
+self_link: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}'
 immutable: false
 parameters:
   - name: 'catalog'
@@ -39,4 +39,5 @@ properties:
   - name: 'properties'
     type: KeyValuePairs
     description: |
-      A map of key value pairs defining the properties of the namespace.
+      User-defined properties for the namespace.
+    required: false

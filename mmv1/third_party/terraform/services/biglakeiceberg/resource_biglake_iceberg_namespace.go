@@ -13,6 +13,19 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
+var icebergNamespaceIgnoredProperties = []string{
+	"location",
+}
+
+func isIgnoredProperty(k string) bool {
+	for _, p := range icebergNamespaceIgnoredProperties {
+		if k == p {
+			return true
+		}
+	}
+	return false
+}
+
 func ResourceBiglakeIcebergIcebergNamespace() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceBiglakeIcebergIcebergNamespaceCreate,
@@ -43,6 +56,7 @@ func ResourceBiglakeIcebergIcebergNamespace() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				DiffSuppressFunc: icebergNamespacePropertiesDiffSuppress,
 			},
 			"project": {
 				Type:     schema.TypeString,
@@ -50,8 +64,22 @@ func ResourceBiglakeIcebergIcebergNamespace() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+			// Hidden field to facilitate import parsing
+			"namespace_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
+}
+
+func icebergNamespacePropertiesDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// properties.KEY
+	parts := strings.Split(k, ".")
+	if len(parts) == 2 && isIgnoredProperty(parts[1]) {
+		return true
+	}
+	return false
 }
 
 func encodeNamespace(ns []string) string {
@@ -75,7 +103,7 @@ func resourceBiglakeIcebergIcebergNamespaceCreate(d *schema.ResourceData, meta i
 
 	catalog := d.Get("catalog").(string)
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{BiglakeIcebergBasePath}}iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs/{{catalog}}/namespaces")
+	url, err := tpgresource.ReplaceVars(d, config, "{{BiglakeIcebergBasePath}}iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces")
 	if err != nil {
 		return err
 	}
@@ -124,7 +152,8 @@ func resourceBiglakeIcebergIcebergNamespaceRead(d *schema.ResourceData, meta int
 		ns[i] = v.(string)
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{BiglakeIcebergBasePath}}iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs/{{catalog}}/namespaces/%s", encodeNamespace(ns)))
+	encodedNs := encodeNamespace(ns)
+	url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{BiglakeIcebergBasePath}}iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/%s", encodedNs))
 	if err != nil {
 		return err
 	}
@@ -151,6 +180,9 @@ func resourceBiglakeIcebergIcebergNamespaceRead(d *schema.ResourceData, meta int
 	if err := d.Set("catalog", catalog); err != nil {
 		return fmt.Errorf("Error setting catalog: %s", err)
 	}
+	if err := d.Set("namespace_id", encodedNs); err != nil {
+		return fmt.Errorf("Error setting namespace_id: %s", err)
+	}
 
 	return nil
 }
@@ -171,6 +203,9 @@ func resourceBiglakeIcebergIcebergNamespaceUpdate(d *schema.ResourceData, meta i
 
 		removals := []string{}
 		for k := range oldMap {
+			if isIgnoredProperty(k) {
+				continue
+			}
 			if _, ok := newMap[k]; !ok {
 				removals = append(removals, k)
 			}
@@ -178,6 +213,9 @@ func resourceBiglakeIcebergIcebergNamespaceUpdate(d *schema.ResourceData, meta i
 
 		updates := map[string]string{}
 		for k, v := range newMap {
+			if isIgnoredProperty(k) {
+				continue
+			}
 			updates[k] = v.(string)
 		}
 
@@ -186,7 +224,7 @@ func resourceBiglakeIcebergIcebergNamespaceUpdate(d *schema.ResourceData, meta i
 			"updates":  updates,
 		}
 
-		url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{BiglakeIcebergBasePath}}iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs/{{catalog}}/namespaces/%s/properties", encodeNamespace(ns)))
+		url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{BiglakeIcebergBasePath}}iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/%s/properties", encodeNamespace(ns)))
 		if err != nil {
 			return err
 		}
@@ -215,7 +253,7 @@ func resourceBiglakeIcebergIcebergNamespaceDelete(d *schema.ResourceData, meta i
 		ns[i] = v.(string)
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{BiglakeIcebergBasePath}}iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs/{{catalog}}/namespaces/%s", encodeNamespace(ns)))
+	url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{BiglakeIcebergBasePath}}iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/%s", encodeNamespace(ns)))
 	if err != nil {
 		return err
 	}
@@ -236,21 +274,42 @@ func resourceBiglakeIcebergIcebergNamespaceDelete(d *schema.ResourceData, meta i
 
 func resourceBiglakeIcebergIcebergNamespaceImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
+
 	if err := tpgresource.ParseImportId([]string{
-		"projects/(?P<project>[^/]+)/catalogs/(?P<catalog>[^/]+)/namespaces/(?P<namespace>.+)",
-		"(?P<project>[^/]+)/(?P<catalog>[^/]+)/(?P<namespace>.+)",
-		"(?P<catalog>[^/]+)/(?P<namespace>.+)",
+		"projects/(?P<project>[^/]+)/catalogs/(?P<catalog>[^/]+)/namespaces/(?P<namespace_id>.+)",
+		"(?P<project>[^/]+)/(?P<catalog>[^/]+)/namespaces/(?P<namespace_id>.+)",
+		"(?P<catalog>[^/]+)/namespaces/(?P<namespace_id>.+)",
 	}, d, config); err != nil {
 		return nil, err
 	}
 
-	nsStr := d.Get("namespace").(string)
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return nil, err
+	}
+	d.Set("project", project)
+
+	nsStr := d.Get("namespace_id").(string)
 	ns, err := decodeNamespace(nsStr)
 	if err != nil {
 		return nil, fmt.Errorf("Error decoding namespace from ID: %s", err)
 	}
-	if err := d.Set("namespace", ns); err != nil {
-		return nil, err
+
+	nsI := make([]interface{}, len(ns))
+	for i, v := range ns {
+		nsI[i] = v
+	}
+
+	if err := d.Set("namespace", nsI); err != nil {
+		return nil, fmt.Errorf("Error setting namespace in import: %s", err)
+	}
+
+	catalog := d.Get("catalog").(string)
+	id := fmt.Sprintf("projects/%s/catalogs/%s/namespaces/%s", project, catalog, nsStr)
+	d.SetId(id)
+
+	if err := resourceBiglakeIcebergIcebergNamespaceRead(d, meta); err != nil {
+		return nil, fmt.Errorf("Error calling Read during import: %s", err)
 	}
 
 	return []*schema.ResourceData{d}, nil
