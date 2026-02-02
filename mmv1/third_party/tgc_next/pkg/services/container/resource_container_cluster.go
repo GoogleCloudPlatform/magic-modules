@@ -10,12 +10,17 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"google.golang.org/api/container/v1beta1"
+	"google.golang.org/api/container/v1"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
 )
+
+// ContainerClusterAssetType is the CAI asset type name for container cluster.
+const ContainerClusterAssetType string = "container.googleapis.com/Cluster"
+
+// ContainerClusterSchemaName is the TF resource schema name for container cluster.
+const ContainerClusterSchemaName string = "google_container_cluster"
 
 // Single-digit hour is equivalent to hour with leading zero e.g. suppress diff 1:00 => 01:00.
 // Assume either value could be in either format.
@@ -949,38 +954,6 @@ func ResourceContainerCluster() *schema.Resource {
 				Optional:      true,
 				ForceNew:      true,
 				Description:   `Whether to enable Cloud TPU resources in this cluster.`,
-				ConflictsWith: []string{"tpu_config"},
-				Computed:      true,
-				// TODO: deprecate when tpu_config is correctly returned by the API
-				// Deprecated: "Deprecated in favor of tpu_config",
-			},
-			"tpu_config": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Computed:    true,
-				MaxItems:    1,
-				Description: `TPU configuration for the cluster.`,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"enabled": {
-							Type:        schema.TypeBool,
-							Required:    true,
-							ForceNew:    true,
-							Description: `Whether Cloud TPU integration is enabled or not`,
-						},
-						"ipv4_cidr_block": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: `IPv4 CIDR block reserved for Cloud TPU in the VPC.`,
-						},
-						"use_service_networking": {
-							Type:        schema.TypeBool,
-							Optional:    true,
-							ForceNew:    true,
-							Description: `Whether to use service networking for Cloud TPU or not`,
-						},
-					},
-				},
 			},
 
 			"enable_legacy_abac": {
@@ -1505,18 +1478,6 @@ func ResourceContainerCluster() *schema.Resource {
 			},
 
 			"node_config": schemaNodeConfig(),
-
-			"node_pool": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
-				ForceNew: true, // TODO: Add ability to add/remove nodePools
-				Elem: &schema.Resource{
-					Schema: schemaNodePool,
-				},
-				Description:   `List of node pools associated with this cluster. See google_container_node_pool for schema. Warning: node pools defined inside a cluster can't be changed (or added/removed) after cluster creation without deleting and recreating the entire cluster. Unless you absolutely need the ability to say "these are the only node pools associated with this cluster", use the google_container_node_pool resource instead of this property.`,
-				ConflictsWith: []string{"enable_autopilot"},
-			},
 
 			"node_pool_defaults": clusterSchemaNodePoolDefaults(),
 
@@ -2689,70 +2650,12 @@ func resourceNodeConfigEmptyGuestAccelerator(_ context.Context, diff *schema.Res
 	return nil
 }
 
-func resourceContainerClusterStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*transport_tpg.Config)
-
-	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := tpgresource.ParseImportId([]string{"projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/clusters/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<location>[^/]+)/(?P<name>[^/]+)", "(?P<location>[^/]+)/(?P<name>[^/]+)"}, d, config); err != nil {
-		return nil, err
-	}
-	project, err := tpgresource.GetProject(d, config)
-	if err != nil {
-		return nil, err
-	}
-
-	location, err := tpgresource.GetLocation(d, config)
-	if err != nil {
-		return nil, err
-	}
-
-	clusterName := d.Get("name").(string)
-
-	if err := d.Set("location", location); err != nil {
-		return nil, fmt.Errorf("Error setting location: %s", err)
-	}
-
-	if err := d.Set("deletion_protection", true); err != nil {
-		return nil, fmt.Errorf("Error setting deletion_protection: %s", err)
-	}
-
-	if _, err := containerClusterAwaitRestingState(config, project, location, clusterName, userAgent, d.Timeout(schema.TimeoutCreate)); err != nil {
-		return nil, err
-	}
-
-	d.SetId(containerClusterFullName(project, location, clusterName))
-
-	return []*schema.ResourceData{d}, nil
-}
-
 func containerClusterMutexKey(project, location, clusterName string) string {
 	return fmt.Sprintf("google-container-cluster/%s/%s/%s", project, location, clusterName)
 }
 
 func containerClusterFullName(project, location, cluster string) string {
 	return fmt.Sprintf("projects/%s/locations/%s/clusters/%s", project, location, cluster)
-}
-
-func extractNodePoolInformationFromCluster(d *schema.ResourceData, config *transport_tpg.Config, clusterName string) (*NodePoolInformation, error) {
-	project, err := tpgresource.GetProject(d, config)
-	if err != nil {
-		return nil, err
-	}
-
-	location, err := tpgresource.GetLocation(d, config)
-	if err != nil {
-		return nil, err
-	}
-
-	return &NodePoolInformation{
-		project:  project,
-		location: location,
-		cluster:  d.Get("name").(string),
-	}, nil
 }
 
 // Suppress unremovable default scope values from GCP.
