@@ -2,6 +2,7 @@ package filestore_test
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -179,4 +180,94 @@ resource "google_filestore_backup" "backup" {
   }
 }
 `, context)
+}
+
+func TestAccFilestoreInstance_restoreBackupDR(t *testing.T) {
+	t.Parallel()
+
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	backupName := "projects/my-project/locations/us-central1/backupVaults/my-vault/dataSources/my-source/backups/my-backup"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFilestoreInstance_restoreBackupDR(name, backupName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_filestore_instance.instance", "file_shares.0.source_backupdr_backup", backupName),
+				),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone", "location"},
+			},
+		},
+	})
+}
+
+func testAccFilestoreInstance_restoreBackupDR(name, backupName string) string {
+	return fmt.Sprintf(`
+resource "google_filestore_instance" "instance" {
+  name     = "tf-instance-%s"
+  location = "us-central1-b"
+  tier     = "BASIC_HDD"
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share"
+    source_backupdr_backup = "%s"
+  }
+
+  networks {
+    network = "default"
+    modes   = ["MODE_IPV4"]
+  }
+}
+`, name, backupName)
+}
+
+func TestAccFilestoreInstance_restoreBackupDR_conflicts(t *testing.T) {
+	t.Parallel()
+
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	backupName := "projects/my-project/locations/us-central1/backups/my-backup"
+	backupdrName := "projects/my-project/locations/us-central1/backupVaults/my-vault/dataSources/my-source/backups/my-backup"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccFilestoreInstance_sourceBackupDRConflicts(name, backupName, backupdrName),
+				ExpectError: regexp.MustCompile(`"source_backupdr_backup": conflicts with "source_backup"`),
+			},
+		},
+	})
+}
+
+func testAccFilestoreInstance_sourceBackupDRConflicts(name, backupName, backupdrName string) string {
+	return fmt.Sprintf(`
+resource "google_filestore_instance" "instance" {
+  name     = "tf-instance-%s"
+  location = "us-central1-b"
+  tier     = "BASIC_HDD"
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share"
+    source_backup = "%s"
+    source_backupdr_backup = "%s"
+  }
+
+  networks {
+    network = "default"
+    modes   = ["MODE_IPV4"]
+  }
+}
+`, name, backupName, backupdrName)
 }
