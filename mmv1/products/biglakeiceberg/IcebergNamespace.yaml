@@ -41,3 +41,27 @@ properties:
     description: |
       User-defined properties for the namespace.
     required: false
+  - name: 'namespace_id'
+    type: String
+    description: |
+      The unique identifier of the namespace.
+    output: true
+iam_policy:
+  base_url: 'v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
+  parent_resource_attribute: 'namespace_id'
+  method_name_separator: ":"
+  fetch_iam_policy_verb: 'GET'
+  import_format:
+    - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
+  allowed_iam_role: 'roles/biglake.editor'
+  example_config_body: 'templates/terraform/iam/example_config_body/biglake_iceberg_namespace.tf.tmpl'
+examples:
+  - name: 'biglake_iceberg_namespace'
+    primary_resource_id: 'my_iceberg_namespace'
+    vars:
+      name: 'my_iceberg_namespace'
+      catalog: 'my_iceberg_catalog'
+    test_env_vars:
+      GOOGLE_BILLING_PROJECT: 'PROJECT'
+      USER_PROJECT_OVERRIDE: 'true'
+    
