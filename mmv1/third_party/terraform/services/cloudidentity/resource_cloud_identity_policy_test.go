@@ -61,20 +61,47 @@ func TestAccCloudIdentityPolicy_cloudidentityPolicyBasic(t *testing.T) {
 
 func testAccCloudIdentityPolicy_cloudidentityPolicyBasic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+provider "google-beta" {
+  # Your project ID, if needed for other resources
+  project = "oneplatform-api-478612"
+  scopes = [
+    "https://www.googleapis.com/auth/cloud-identity.policies",
+    "https://www.googleapis.com/auth/cloud-platform",
+    "https://www.googleapis.com/auth/userinfo.email"
+  ]
+}
+
 resource "google_cloud_identity_policy" "primary" {
     provider = google-beta
-
-    customer = "customers/C01234567"
+    customer = "customers/C02v7e0bo"
 
     policy_query {
-        org_unit = "orgUnits/03abcxyz"
-        group = "groups/0123456789"
-        query = "true"
+	query = "entity.org_units.exists(org_unit, org_unit.org_unit_id == orgUnitId('03ph8a2z0qz586j'))"
+	org_unit = "orgUnits/03ph8a2z0qz586j"
     }
 
     setting {
-        type = "something.googleapis.com/SettingType"
-	value_json = "{\"enabled\": true}"
+        type = "settings/rule.dlp"
+        value_json = jsonencode({
+                      action           = {
+                          gmailAction       = {
+                              auditOnly = {
+                                  actionParams = {
+                                      applyExternalMessages = true
+                                      applyInternalMessages = true
+                                    }
+                                }
+                            }
+                        }
+                      condition        = {
+                          contentCondition = "all_content.contains_word('secret')"
+                        }
+                      displayName      = "SecretShareGmail"
+                      state            = "ACTIVE"
+                      triggers         = [
+                          "google.workspace.gmail.email.v1.send",
+                        ]
+                    })
     }
 }
 `, context)
@@ -82,20 +109,45 @@ resource "google_cloud_identity_policy" "primary" {
 
 func testAccCloudIdentityPolicy_cloudidentityPolicyBasic_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+provider "google-beta" {
+  # Your project ID, if needed for other resources
+  project = "oneplatform-api-478612"
+  scopes = [
+    "https://www.googleapis.com/auth/cloud-identity.policies",
+    "https://www.googleapis.com/auth/cloud-platform",
+    "https://www.googleapis.com/auth/userinfo.email"
+  ]
+}
 resource "google_cloud_identity_policy" "primary" {
     provider = google-beta
-
-    customer = "customers/C01234567"
+    customer = "customers/C02v7e0bo"
 
     policy_query {
-        org_unit = "orgUnits/03abcxyz"
-        group = "groups/0123456789"
-        query = "true"
+      query = "entity.org_units.exists(org_unit, org_unit.org_unit_id == orgUnitId('03ph8a2z0qz586j'))"
+      org_unit = "orgUnits/03ph8a2z0qz586j"
     }
 
     setting {
-        type = "something.googleapis.com/SettingType"
-        value_json = "{\"enabled\": false}"
+        type = "settings/rule.dlp"
+        value_json = jsonencode({
+                      action           = {
+			      gmailAction       = {
+                              auditOnly = {
+                                  actionParams = {
+                                      applyExternalMessages = true
+                                    }
+                                }
+                            }
+                        }
+                      condition        = {
+                          contentCondition = "all_content.contains_word('secret')"
+                        }
+                      displayName      = "SecretShareGmail"
+                      state            = "ACTIVE"
+                      triggers         = [
+                          "google.workspace.gmail.email.v1.send",
+                        ]
+                    })
     }
 }
 `, context)

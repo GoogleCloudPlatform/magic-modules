@@ -20,7 +20,7 @@ references:
   guides:
     'Policy API overview': 'https://docs.cloud.google.com/identity/docs/concepts/overview-policies'
   api: 'https://cloud.google.com/identity/docs/reference/rest/v1beta1/policies'
-min_version: 'beta'
+min_version: beta
 
 docs:
   note: 'This is available only in beta'
@@ -34,7 +34,6 @@ create_verb: 'POST'
 
 update_url: '{{name}}'
 update_verb: 'PATCH'
-update_mask: true
 
 delete_url: '{{name}}'
 delete_verb: 'DELETE'
@@ -44,6 +43,8 @@ async:
   actions: ['create', 'update', 'delete']
   operation:
     base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
 
 properties:
   - name: 'name'
@@ -102,9 +103,17 @@ properties:
         required: true
         custom_expand: 'templates/terraform/custom_expand/cloudidentity_policy_setting_value_json.go.tmpl'
         custom_flatten: 'templates/terraform/custom_flatten/cloudidentity_policy_setting_value_json.go.tmpl'
+        diff_suppress_func: 'jsonSettingsDiffSuppress'
 
 examples:
   - name: "cloudidentity_policy_basic"
     primary_resource_id: "primary"
+    # Created a handwritten test as otherwise example will have to override scopes causing confusion for end users.
+    exclude_test: true
     vars:
     min_version: beta
+
+custom_code:
+  update_encoder: 'templates/terraform/update_encoder/cloud_identity_policy_update_mask.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/cloud_identity_policy_custom_import.go.tmpl'
+  constants: 'templates/terraform/custom_code/cloud_identity_policy_constants.go.tmpl'
