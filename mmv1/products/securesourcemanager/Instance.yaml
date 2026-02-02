@@ -13,6 +13,8 @@
 
 ---
 name: 'Instance'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 kind: 'securesourcemanager#instance'
 description: 'Instances are deployed to an available Google Cloud region and are accessible via their web interface.'
 references:
