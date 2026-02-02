@@ -5,8 +5,14 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
+
+func TestAccPreCheck(t *testing.T) {
+	acctest.TestAccPreCheck(t)
+}
 
 func TestAccOracledatabaseExadbVmCluster_update(t *testing.T) {
 	t.Parallel()
@@ -47,15 +53,19 @@ func TestAccOracledatabaseExadbVmCluster_update(t *testing.T) {
 }
 
 func testAccOracledatabaseExadbVmCluster_full(t *testing.T) string {
-	return fmt.Sprintf(acctest.Nprintf(t, `
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return fmt.Errorf("Error fetching project for ExadbVmCluster: %s", err)
+	}
+	return acctest.Nprintf(t, `
 resource "google_oracle_database_exadb_vm_cluster" "my_exadb_vm_cluster"{
-    exadb_vm_cluster_id = "%s"
-    display_name = "%s displayname"
+    exadb_vm_cluster_id = "%{exadb_vm_cluster_id}"
+    display_name = "%{display_name} displayname"
     location = "europe-west2"
-    project = "%s"
-    odb_network = "%s"
-    odb_subnet = "%s"
-    backup_odb_subnet = "%s"
+    project = "%{project}"
+    odb_network = "%{odb_network}"
+    odb_subnet = "%{odb_subnet}"
+    backup_odb_subnet = "%{backup_odb_subnet}"
     labels = {
         "label-one" = "value-one"
     }
@@ -88,10 +98,10 @@ resource "google_oracle_database_exadb_vm_cluster" "my_exadb_vm_cluster"{
 }
 
 resource "google_oracle_database_exascale_db_storage_vault" "exascaleDbStorageVaults"{
-  exascale_db_storage_vault_id = "%s"
-  display_name = "%s displayname"
+  exascale_db_storage_vault_id = "%{exascale_db_storage_vault_id}"
+  display_name = "%{display_name} displayname"
   location = "europe-west2"
-  project = "%s"
+  project = "%{project}"
   properties {
     exascale_db_storage_details {
         total_size_gbs = 512
@@ -100,19 +110,32 @@ resource "google_oracle_database_exascale_db_storage_vault" "exascaleDbStorageVa
 
   deletion_protection = false
 }
-`, acctest.RandString(t, 10), acctest.RandString(t, 10), getTestProjectFromEnv(), acctest.RandString(t, 10), acctest.RandString(t, 10), acctest.RandString(t, 10), acctest.RandString(t, 10), acctest.RandString(t, 10), getTestProjectFromEnv()))
+`, map[string]interface{}{
+		"exadb_vm_cluster_id":        acctest.RandString(t, 10),
+		"display_name":               acctest.RandString(t, 10),
+		"project":                    project,
+		"odb_network":                acctest.RandString(t, 10),
+		"odb_subnet":                 acctest.RandString(t, 10),
+		"backup_odb_subnet":          acctest.RandString(t, 10),
+		"exascale_db_storage_vault_id": acctest.RandString(t, 10),
+	})
+}
 }
 
 func testAccOracledatabaseExadbVmCluster_update(t *testing.T) string {
-	return fmt.Sprintf(acctest.Nprintf(t, `
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return fmt.Errorf("Error fetching project for DbServer: %s", err)
+	}
+	return acctest.Nprintf(t, `
 resource "google_oracle_database_exadb_vm_cluster" "my_exadb_vm_cluster"{
-    exadb_vm_cluster_id = "%s"
-    display_name = "%s displayname"
+    exadb_vm_cluster_id = "%{exadb_vm_cluster_id}"
+    display_name = "%{display_name} displayname"
     location = "europe-west2"
-    project = "%s"
-    odb_network = "%s"
-    odb_subnet = "%s"
-    backup_odb_subnet = "%s"
+    project = "%{project}"
+    odb_network = "%{odb_network}"
+    odb_subnet = "%{odb_subnet}"
+    backup_odb_subnet = "%{backup_odb_subnet}"
     labels = {
         "label-one" = "value-one"
     }
@@ -145,10 +168,10 @@ resource "google_oracle_database_exadb_vm_cluster" "my_exadb_vm_cluster"{
 }
 
 resource "google_oracle_database_exascale_db_storage_vault" "exascaleDbStorageVaults"{
-  exascale_db_storage_vault_id = "%s"
-  display_name = "%s displayname"
+  exascale_db_storage_vault_id = "%{exascale_db_storage_vault_id}"
+  display_name = "%{display_name} displayname"
   location = "europe-west2"
-  project = "%s"
+  project = "%{project}"
   properties {
     exascale_db_storage_details {
         total_size_gbs = 512
@@ -157,5 +180,13 @@ resource "google_oracle_database_exascale_db_storage_vault" "exascaleDbStorageVa
 
   deletion_protection = false
 }
-`, acctest.RandString(t, 10), acctest.RandString(t, 10), getTestProjectFromEnv(), acctest.RandString(t, 10), acctest.RandString(t, 10), acctest.RandString(t, 10), acctest.RandString(t, 10), acctest.RandString(t, 10), getTestProjectFromEnv()))
+`, map[string]interface{}{
+		"exadb_vm_cluster_id":        acctest.RandString(t, 10),
+		"display_name":               acctest.RandString(t, 10),
+		"project":                    project,
+		"odb_network":                acctest.RandString(t, 10),
+		"odb_subnet":                 acctest.RandString(t, 10),
+		"backup_odb_subnet":          acctest.RandString(t, 10),
+		"exascale_db_storage_vault_id": acctest.RandString(t, 10),
+	})
 }
