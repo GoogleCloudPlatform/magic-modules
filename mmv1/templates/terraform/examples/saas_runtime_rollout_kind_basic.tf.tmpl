@@ -1,0 +1,29 @@
+resource "google_saas_runtime_saas" "example_saas" {
+  provider = google-beta
+  saas_id  = "{{index $.Vars "saas_name"}}"
+  location = "global"
+
+  locations {
+    name = "us-central1"
+  }
+}
+
+resource "google_saas_runtime_unit_kind" "example_unitkind" {
+  provider     = google-beta
+  location     = "global"
+  unit_kind_id = "{{index $.Vars "unitkind_name"}}"
+  saas         = google_saas_runtime_saas.example_saas.id
+}
+
+resource "google_saas_runtime_rollout_kind" "{{$.PrimaryResourceId}}" {
+  provider          = google-beta
+  location          = "global"
+  rollout_kind_id   = "{{index $.Vars "rolloutkind_name"}}"
+  unit_kind         = google_saas_runtime_unit_kind.example_unitkind.id
+
+  rollout_orchestration_strategy = "Google.Cloud.Simple.OneLocationAtATime"
+  error_budget {
+    allowed_count = 1
+  }
+  unit_filter = "unit.labels['key1'] == 'value1'"
+}

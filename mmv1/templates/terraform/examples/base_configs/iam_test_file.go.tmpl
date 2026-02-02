@@ -7,16 +7,24 @@ package {{ lower $.ProductMetadata.Name }}_test
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath }}/envvar"
-	{{- if $.IamPolicy.IamConditionsRequestType }}
 	"{{ $.ImportPath }}/tpgresource"
-	{{- end }}
 )
+
+var (
+    _ = fmt.Sprintf
+    _ = strings.Trim
+    _ = envvar.TestEnvVar
+    _ = tpgresource.SetLabels
+)
+
 {{ $example := $.FirstTestExample }}
 func TestAcc{{ $.ResourceName }}IamBindingGenerated(t *testing.T) {
 	t.Parallel()
@@ -43,7 +51,7 @@ func TestAcc{{ $.ResourceName }}IamBindingGenerated(t *testing.T) {
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_binding.foo",
-				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }} {{ $.IamPolicy.AllowedIamRole }}", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("{{ $.IamTerraformName }}_binding.foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -55,7 +63,7 @@ func TestAcc{{ $.ResourceName }}IamBindingGenerated(t *testing.T) {
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_binding.foo",
-				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }} {{ $.IamPolicy.AllowedIamRole }}", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("{{ $.IamTerraformName }}_binding.foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -90,7 +98,7 @@ func TestAcc{{ $.ResourceName }}IamMemberGenerated(t *testing.T) {
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_member.foo",
-				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }} {{ $.IamPolicy.AllowedIamRole }} user:admin@hashicorptest.com", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMMemberStateID("{{ $.IamTerraformName }}_member.foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -131,7 +139,7 @@ func TestAcc{{ $.ResourceName }}IamPolicyGenerated(t *testing.T) {
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_policy.foo",
-				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }}", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMPolicyStateID("{{ $.IamTerraformName }}_policy.foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -142,7 +150,7 @@ func TestAcc{{ $.ResourceName }}IamPolicyGenerated(t *testing.T) {
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_policy.foo",
-				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }}", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMPolicyStateID("{{ $.IamTerraformName }}_policy.foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -176,7 +184,7 @@ func TestAcc{{ $.ResourceName }}IamBindingGenerated_withCondition(t *testing.T) 
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_binding.foo",
-				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }} {{ $.IamPolicy.AllowedIamRole }} %s", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}, context["condition_title"]),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("{{ $.IamTerraformName }}_binding.foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -212,19 +220,19 @@ func TestAcc{{ $.ResourceName }}IamBindingGenerated_withAndWithoutCondition(t *t
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_binding.foo",
-				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }} {{ $.IamPolicy.AllowedIamRole }}", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("{{ $.IamTerraformName }}_binding.foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_binding.foo2",
-				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }} {{ $.IamPolicy.AllowedIamRole }} %s", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}, context["condition_title"]),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("{{ $.IamTerraformName }}_binding.foo2"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_binding.foo3",
-				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }} {{ $.IamPolicy.AllowedIamRole }} %s", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}, context["condition_title_no_desc"]),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("{{ $.IamTerraformName }}_binding.foo3"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -259,7 +267,7 @@ func TestAcc{{ $.ResourceName }}IamMemberGenerated_withCondition(t *testing.T) {
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_member.foo",
-				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }} {{ $.IamPolicy.AllowedIamRole }} user:admin@hashicorptest.com %s", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}, context["condition_title"]),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMMemberStateID("{{ $.IamTerraformName }}_member.foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -295,19 +303,19 @@ func TestAcc{{ $.ResourceName }}IamMemberGenerated_withAndWithoutCondition(t *te
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_member.foo",
-				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }} {{ $.IamPolicy.AllowedIamRole }} user:admin@hashicorptest.com", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMMemberStateID("{{ $.IamTerraformName }}_member.foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_member.foo2",
-				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }} {{ $.IamPolicy.AllowedIamRole }} user:admin@hashicorptest.com %s", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}, context["condition_title"]),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMMemberStateID("{{ $.IamTerraformName }}_member.foo2"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_member.foo3",
-				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }} {{ $.IamPolicy.AllowedIamRole }} user:admin@hashicorptest.com %s", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}, context["condition_title_no_desc"]),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMMemberStateID("{{ $.IamTerraformName }}_member.foo3"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -353,7 +361,7 @@ func TestAcc{{ $.ResourceName }}IamPolicyGenerated_withCondition(t *testing.T) {
 			{
 				Config: testAcc{{ $.ResourceName }}IamPolicy_withConditionGenerated(context),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					// TODO(SarahFrench) - uncomment once https://github.com/GoogleCloudPlatform/magic-modules/pull/6466 merged
+					// TODO - uncomment once https://github.com/GoogleCloudPlatform/magic-modules/pull/6466 merged
 					// resource.TestCheckResourceAttr("data.google_iam_policy.foo", "policy_data", expectedPolicyData),
 					resource.TestCheckResourceAttr("{{ $.IamTerraformName }}_policy.foo", "policy_data", expectedPolicyData),
 					resource.TestCheckResourceAttrWith("data.google_iam_policy.foo", "policy_data", tpgresource.CheckGoogleIamPolicy),
@@ -362,7 +370,7 @@ func TestAcc{{ $.ResourceName }}IamPolicyGenerated_withCondition(t *testing.T) {
 {{- if not $.IamPolicy.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $.IamTerraformName }}_policy.foo",
-				ImportStateId:     fmt.Sprintf("{{ $.IamImportFormat }}", {{ if ne $.IamImportQualifiersForTest "" }}{{ $.IamImportQualifiersForTest }}, {{ end }}{{ $example.PrimaryResourceName }}),
+				ImportStateIdFunc: generate{{ $.ResourceName }}IAMPolicyStateID("{{ $.IamTerraformName }}_policy.foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -379,7 +387,7 @@ resource "{{ $.IamTerraformName }}_member" "foo" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.ExampleConfigBody false }}
   role = "%{role}"
   member = "user:admin@hashicorptest.com"
 }
@@ -409,7 +417,7 @@ resource "{{ $.IamTerraformName }}_policy" "foo" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.ExampleConfigBody false }}
   policy_data = data.google_iam_policy.foo.policy_data
 }
 
@@ -417,7 +425,7 @@ data "{{ $.IamTerraformName }}_policy" "foo" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.ExampleConfigBody false }}
   depends_on = [
     {{ $.IamTerraformName }}_policy.foo
   ]
@@ -438,7 +446,7 @@ resource "{{ $.IamTerraformName }}_policy" "foo" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.ExampleConfigBody false }}
   policy_data = data.google_iam_policy.foo.policy_data
 }
 `, context)
@@ -451,7 +459,7 @@ resource "{{ $.IamTerraformName }}_binding" "foo" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.ExampleConfigBody false }}
   role = "%{role}"
   members = ["user:admin@hashicorptest.com"]
 }
@@ -465,7 +473,7 @@ resource "{{ $.IamTerraformName }}_binding" "foo" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.ExampleConfigBody false }}
   role = "%{role}"
   members = ["user:admin@hashicorptest.com", "user:gterraformtest1@gmail.com"]
 }
@@ -479,7 +487,7 @@ resource "{{ $.IamTerraformName }}_binding" "foo" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.ExampleConfigBody false }}
   role = "%{role}"
   members = ["user:admin@hashicorptest.com"]
   condition {
@@ -498,7 +506,7 @@ resource "{{ $.IamTerraformName }}_binding" "foo" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.ExampleConfigBody false }}
   role = "%{role}"
   members = ["user:admin@hashicorptest.com"]
 }
@@ -507,7 +515,7 @@ resource "{{ $.IamTerraformName }}_binding" "foo2" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.ExampleConfigBody false }}
   role = "%{role}"
   members = ["user:admin@hashicorptest.com"]
   condition {
@@ -521,7 +529,7 @@ resource "{{ $.IamTerraformName }}_binding" "foo3" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.ExampleConfigBody false }}
   role = "%{role}"
   members = ["user:admin@hashicorptest.com"]
   condition {
@@ -541,7 +549,7 @@ resource "{{ $.IamTerraformName }}_member" "foo" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.ExampleConfigBody false }}
   role = "%{role}"
   member = "user:admin@hashicorptest.com"
   condition {
@@ -560,7 +568,7 @@ resource "{{ $.IamTerraformName }}_member" "foo" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.ExampleConfigBody false }}
   role = "%{role}"
   member = "user:admin@hashicorptest.com"
 }
@@ -569,7 +577,7 @@ resource "{{ $.IamTerraformName }}_member" "foo2" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.ExampleConfigBody false }}
   role = "%{role}"
   member = "user:admin@hashicorptest.com"
   condition {
@@ -583,7 +591,7 @@ resource "{{ $.IamTerraformName }}_member" "foo3" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.ExampleConfigBody false }}
   role = "%{role}"
   member = "user:admin@hashicorptest.com"
   condition {
@@ -634,9 +642,79 @@ resource "{{ $.IamTerraformName }}_policy" "foo" {
 {{- if eq $.MinVersionObj.Name "beta" }}
   provider = google-beta
 {{-  end }}
-{{- $.CustomTemplate $.IamPolicy.ExampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.ExampleConfigBody false }}
   policy_data = data.google_iam_policy.foo.policy_data
 }
 `, context)
 }
 {{- end }}{{/* if $.IamPolicy.IamConditionsRequestType */}}
+
+{{- if $.IamPolicy.CustomImportStateIDFuncs }}
+{{ customTemplate $ $.IamPolicy.CustomImportStateIDFuncs true }}
+{{- else }}
+func generate{{ $.ResourceName }}IAMPolicyStateID(iamResourceAddr string) func (*terraform.State) (string, error) {
+	return func (state *terraform.State) (string, error) {
+		var rawState map[string]string
+		for _, m := range state.Modules {
+			if len(m.Resources) > 0 {
+				if v, ok := m.Resources[iamResourceAddr]; ok {
+					rawState = v.Primary.Attributes
+				}
+			}
+		}
+		fmt.Printf("raw state %s\n", rawState)
+		{{- range $p := $.IamImportParams }}
+			{{- if contains $.IamImportFormatTemplate (printf "{{%%%s}}" $p) }}
+		{{ $p }} := rawState["{{ underscore $p }}"]
+			{{- else }}
+		{{ $p }} := tpgresource.GetResourceNameFromSelfLink(rawState["{{ underscore $p }}"])
+			{{- end }}
+		{{- end }}
+		return acctest.BuildIAMImportId(fmt.Sprintf("{{ $.IamImportFormat }}", {{ join $.IamImportParams ", " }}), "", "", rawState["condition.0.title"]), nil
+	}
+}
+
+func generate{{ $.ResourceName }}IAMBindingStateID(iamResourceAddr string) func (*terraform.State) (string, error) {
+	return func (state *terraform.State) (string, error) {
+		var rawState map[string]string
+		for _, m := range state.Modules {
+			if len(m.Resources) > 0 {
+				if v, ok := m.Resources[iamResourceAddr]; ok {
+					rawState = v.Primary.Attributes
+				}
+			}
+		}
+		fmt.Printf("raw state %s\n", rawState)
+		{{- range $p := $.IamImportParams }}
+			{{- if contains $.IamImportFormatTemplate (printf "{{%%%s}}" $p) }}
+		{{ $p }} := rawState["{{ underscore $p }}"]
+			{{- else }}
+		{{ $p }} := tpgresource.GetResourceNameFromSelfLink(rawState["{{ underscore $p }}"])
+			{{- end }}
+		{{- end }}
+		return acctest.BuildIAMImportId(fmt.Sprintf("{{ $.IamImportFormat }}", {{ join $.IamImportParams ", " }}), rawState["role"], "", rawState["condition.0.title"]), nil
+	}
+}
+
+func generate{{ $.ResourceName }}IAMMemberStateID(iamResourceAddr string) func (*terraform.State) (string, error) {
+	return func (state *terraform.State) (string, error) {
+		var rawState map[string]string
+		for _, m := range state.Modules {
+			if len(m.Resources) > 0 {
+				if v, ok := m.Resources[iamResourceAddr]; ok {
+					rawState = v.Primary.Attributes
+				}
+			}
+		}
+		fmt.Printf("raw state %s\n", rawState)
+		{{- range $p := $.IamImportParams }}
+			{{- if contains $.IamImportFormatTemplate (printf "{{%%%s}}" $p) }}
+		{{ $p }} := rawState["{{ underscore $p }}"]
+			{{- else }}
+		{{ $p }} := tpgresource.GetResourceNameFromSelfLink(rawState["{{ underscore $p }}"])
+			{{- end }}
+		{{- end }}
+		return acctest.BuildIAMImportId(fmt.Sprintf("{{ $.IamImportFormat }}", {{ join $.IamImportParams ", " }}), rawState["role"], rawState["member"], rawState["condition.0.title"]), nil
+	}
+}
+{{- end }}

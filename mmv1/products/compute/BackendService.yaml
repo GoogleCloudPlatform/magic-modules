@@ -43,11 +43,12 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 iam_policy:
   allowed_iam_role: 'roles/compute.admin'
   parent_resource_attribute: 'name'
   iam_conditions_request_type: 'QUERY_PARAM'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   min_version: 'beta'
 custom_code:
   constants: 'templates/terraform/constants/backend_service.go.tmpl'
@@ -55,6 +56,7 @@ custom_code:
   decoder: 'templates/terraform/decoders/backend_service.go.tmpl'
   post_create: 'templates/terraform/post_create/compute_backend_service_security_policy.go.tmpl'
   post_update: 'templates/terraform/post_create/compute_backend_service_security_policy.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/compute_backend_service.go.tmpl'
 schema_version: 1
 examples:
   - name: 'backend_service_basic'
@@ -114,6 +116,12 @@ examples:
     vars:
       backend_service_name: 'backend-service'
       neg_name: 'network-endpoint'
+  - name: 'backend_service_in_flight'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
   - name: 'backend_service_external_managed'
     primary_resource_id: 'default'
     vars:
@@ -132,7 +140,6 @@ examples:
       network_name: 'network'
   - name: 'backend_service_tls_settings'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
@@ -158,6 +165,7 @@ properties:
       maximum allowed value for TTL is one day.
 
       When the load balancing scheme is INTERNAL, this field is not used.
+    include_empty_value_in_cai: true
   - name: 'backend'
     type: Array
     description: |
@@ -185,6 +193,7 @@ properties:
             - 'RATE'
             - 'CONNECTION'
             - 'CUSTOM_METRICS'
+            - 'IN_FLIGHT'
         - name: 'capacityScaler'
           type: Double
           description: |
@@ -301,6 +310,39 @@ properties:
             Used when balancingMode is UTILIZATION. This ratio defines the
             CPU utilization target for the group. Valid range is [0.0, 1.0].
           default_from_api: true
+        - name: 'maxInFlightRequests'
+          type: Integer
+          description: |
+            Defines a maximum number of in-flight requests for the whole NEG
+            or instance group. Not available if backend's balancingMode is RATE
+            or CONNECTION.
+          default_from_api: true
+          min_version: 'beta'
+        - name: 'maxInFlightRequestsPerInstance'
+          type: Integer
+          description: |
+            Defines a maximum number of in-flight requests for a single VM.
+            Not available if backend's balancingMode is RATE or CONNECTION.
+          default_from_api: true
+          min_version: 'beta'
+        - name: 'maxInFlightRequestsPerEndpoint'
+          type: Integer
+          description: |
+            Defines a maximum number of in-flight requests for a single endpoint.
+            Not available if backend's balancingMode is RATE or CONNECTION.
+          default_from_api: true
+          min_version: 'beta'
+        - name: 'trafficDuration'
+          type: Enum
+          description: |
+            This field specifies how long a connection should be kept alive for:
+            - LONG: Most of the requests are expected to take more than multiple
+              seconds to finish.
+            - SHORT: Most requests are expected to finish with a sub-second latency.
+          enum_values:
+            - 'LONG'
+            - 'SHORT'
+          min_version: 'beta'
         - name: 'customMetrics'
           type: Array
           description: |
@@ -321,6 +363,7 @@ properties:
                   field can only be used for a global or regional backend service with the
                   loadBalancingScheme set to <code>EXTERNAL_MANAGED</code>,
                   <code>INTERNAL_MANAGED</code> <code>INTERNAL_SELF_MANAGED</code>.
+                is_missing_in_cai: true
               - name: 'dryRun'
                 type: Boolean
                 required: true
@@ -527,6 +570,7 @@ properties:
     type: NestedObject
     description: 'Cloud CDN configuration for this BackendService.'
     default_from_api: true
+    is_missing_in_cai: true
     properties:
       - name: 'requestCoalescing'
         type: Boolean
@@ -608,6 +652,7 @@ properties:
               - 'cdn_policy.0.cache_key_policy.0.include_named_cookies'
             item_type:
               type: String
+            custom_tgc_expand: 'templates/tgc_next/custom_expand/set_to_slice_or_nil.go.tmpl'
           - name: 'queryStringWhitelist'
             type: Array
             description: |
@@ -619,6 +664,7 @@ properties:
               delimiters.
             is_set: true
             send_empty_value: true
+            custom_tgc_expand: 'templates/tgc_next/custom_expand/set_to_slice_or_nil.go.tmpl'
             at_least_one_of:
               - 'cdn_policy.0.cache_key_policy.0.include_host'
               - 'cdn_policy.0.cache_key_policy.0.include_protocol'
@@ -677,6 +723,7 @@ properties:
           - 'cdn_policy.0.cache_key_policy'
           - 'cdn_policy.0.signed_url_cache_max_age_sec'
         default_value: 3600
+        custom_tgc_flatten: 'templates/tgc_next/custom_flatten/compute_backend_service_signed_url_cache_max_age_sec.go.tmpl'
       - name: 'defaultTtl'
         type: Integer
         description: |
@@ -795,6 +842,7 @@ properties:
     type: Boolean
     description: |
       If true, enable Cloud CDN for this BackendService.
+    include_empty_value_in_cai: true
   - name: 'healthChecks'
     type: Array
     description: |
@@ -844,6 +892,7 @@ properties:
         ignore_read: true
         sensitive: true
         send_empty_value: true
+        is_missing_in_cai: true
       - name: 'oauth2ClientSecretSha256'
         type: String
         description: |
@@ -1565,7 +1614,6 @@ properties:
     type: NestedObject
     description: |
       Configuration for Backend Authenticated TLS and mTLS. May only be specified when the backend protocol is SSL, HTTPS or HTTP2.
-    min_version: beta
     properties:
       - name: 'sni'
         type: String
@@ -1660,6 +1708,7 @@ properties:
       Dynamic forwarding configuration. This field is used to configure the backend service with dynamic forwarding
       feature which together with Service Extension allows customized and complex routing logic.
     min_version: beta
+    is_missing_in_cai: true
     properties:
       - name: 'ipPortSelection'
         type: NestedObject
@@ -1673,3 +1722,19 @@ properties:
             description: |
               A boolean flag enabling IP:PORT based dynamic forwarding.
             immutable: true
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+      Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the backend service. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        api_name: resourceManagerTags
+        ignore_read: true
+        immutable: true

@@ -105,7 +105,6 @@ properties:
     description: |
       Target number of physical links in the link bundle, as requested by the customer.
     required: true
-    immutable: true
   - name: 'interconnectType'
     type: Enum
     description: |
@@ -128,6 +127,21 @@ properties:
       interconnect and no BGP routes are exchanged over it. By default, the status is set to true.
     send_empty_value: true
     default_value: true
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the interconnect. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        api_name: resourceManagerTags
+        ignore_read: true
   - name: 'nocContactEmail'
     type: String
     description: |
@@ -389,11 +403,12 @@ properties:
   - name: 'requestedFeatures'
     type: Array
     description: |
-      interconnects.list of features requested for this Interconnect connection. Options: IF_MACSEC (
-      If specified then the connection is created on MACsec capable hardware ports. If not
-      specified, the default value is false, which allocates non-MACsec capable ports first if
-      available). Note that MACSEC is still technically allowed for compatibility reasons, but it
-      does not work with the API, and will be removed in an upcoming major version.
+      List of features to request for this Interconnect connection. This field is only applicable during Interconnect creation and cannot be modified later.
+      Possible values include:
+      - 'IF_MACSEC': Provisions the connection on hardware ports that support MACsec (Media Access Control Security). If not specified, the system may allocate non-MACsec capable ports if available.
+      - 'IF_L2_FORWARDING': Provisions the connection for Layer 2 (L2) traffic forwarding. If not specified, the connection defaults to Layer 3 (L3) traffic forwarding.
+      - 'IF_CROSS_SITE_NETWORK': Provisions the connection exclusively for Cross-Site Networking.
+      Note: 'MACSEC' is a legacy value for compatibility reasons and has the same effect as 'IF_MACSEC'. 'IF_MACSEC' is preferred.
     immutable: true
     item_type:
       type: Enum
@@ -403,13 +418,16 @@ properties:
         - 'MACSEC'
         - 'CROSS_SITE_NETWORK'
         - 'IF_MACSEC'
+        - 'IF_L2_FORWARDING'
   - name: 'availableFeatures'
     type: Array
     description: |
-      interconnects.list of features available for this Interconnect connection. Can take the value:
-      MACSEC. If present then the Interconnect connection is provisioned on MACsec capable hardware
-      ports. If not present then the Interconnect connection is provisioned on non-MACsec capable
-      ports and MACsec isn't supported and enabling MACsec fails).
+      [Output Only] List of features that are available on this Interconnect connection based on the provisioned hardware and configuration.
+      Possible values include:
+      - 'IF_MACSEC': Indicates the Interconnect connection is provisioned on MACsec capable hardware ports. If this feature is not present, the connection does not support MACsec, and any attempt to enable it will fail.
+      - 'IF_L2_FORWARDING': Indicates the Interconnect connection can be used for Layer 2 (L2) traffic forwarding. If not present, the connection cannot be used with L2 forwarding attachments.
+      - 'IF_CROSS_SITE_NETWORK': Indicates the Interconnect connection is provisioned for Cross-Site Networking.
+      Note: 'MACSEC' is a legacy value and has the same meaning as 'IF_MACSEC'.
     output: true
     item_type:
       type: Enum
@@ -417,9 +435,9 @@ properties:
         - 'IF_CROSS_SITE_NETWORK'
         - 'IF_MACSEC'
         - 'MACSEC'
+        - 'IF_L2_FORWARDING'
   - name: 'wireGroups'
     type: Array
-    min_version: beta
     description: |
       A list of the URLs of all CrossSiteNetwork WireGroups configured to use this Interconnect. The Interconnect cannot be deleted if this list is non-empty.
     output: true
@@ -434,3 +452,92 @@ properties:
     is_set: true
     item_type:
       type: String
+  - name: 'aaiEnabled'
+    type: Boolean
+    description: |
+      Enable or disable the Application Aware Interconnect(AAI) feature on this interconnect.
+    min_version: beta
+  - name: 'applicationAwareInterconnect'
+    type: NestedObject
+    description: |
+      Configuration that enables Media Access Control security (MACsec) on the Cloud
+      Interconnect connection between Google and your on-premises router.
+    min_version: beta
+    properties:
+      - name: 'profileDescription'
+        type: String
+        description: |
+          A description for the AAI profile on this interconnect.
+        min_version: beta
+      - name: 'strictPriorityPolicy'
+        type: NestedObject
+        allow_empty_object: true
+        description: |
+          Specify configuration for StrictPriorityPolicy.
+        properties: []
+        min_version: beta
+      - name: 'bandwidthPercentagePolicy'
+        type: NestedObject
+        description: |
+          Bandwidth Percentage policy allows you to have granular control over how your Interconnect
+          bandwidth is utilized among your workloads mapping to different traffic classes.
+        min_version: beta
+        properties:
+          - name: bandwidthPercentage
+            type: Array
+            description: |
+              Specify bandwidth percentages for various traffic classes for queuing
+              type Bandwidth Percent.
+            api_name: bandwidthPercentages
+            min_version: beta
+            item_type:
+              type: NestedObject
+              properties:
+                - name: trafficClass
+                  type: Enum
+                  description: |
+                    Enum representing the various traffic classes offered by AAI.
+                  default_value: "TC_UNSPECIFIED"
+                  enum_values:
+                    - 'TC_UNSPECIFIED'
+                    - 'TC1'
+                    - 'TC2'
+                    - 'TC3'
+                    - 'TC4'
+                    - 'TC5'
+                    - 'TC6'
+                  min_version: beta
+                - name: percentage
+                  type: Integer
+                  description: |
+                    Bandwidth percentage for a specific traffic class.
+                  min_version: beta
+      - name: shapeAveragePercentage
+        type: Array
+        description: |
+          Optional field to specify a list of shape average percentages to be
+          applied in conjunction with StrictPriorityPolicy or BandwidthPercentagePolicy
+        min_version: beta
+        api_name: shapeAveragePercentages
+        item_type:
+          type: NestedObject
+          properties:
+            - name: trafficClass
+              type: Enum
+              description: |
+                Enum representing the various traffic classes offered by AAI.
+              default_value: "TC_UNSPECIFIED"
+              enum_values:
+                - 'TC_UNSPECIFIED'
+                - 'TC1'
+                - 'TC2'
+                - 'TC3'
+                - 'TC4'
+                - 'TC5'
+                - 'TC6'
+              min_version: beta
+            - name: percentage
+              type: Integer
+              description: |
+                Bandwidth percentage for a specific traffic class.
+              min_version: beta

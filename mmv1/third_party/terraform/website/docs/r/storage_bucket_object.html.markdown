@@ -40,6 +40,26 @@ resource "google_storage_bucket_object" "empty_folder" {
 }
 ```
 
+Example creating an contexts for an object.
+
+```hcl
+resource "google_storage_bucket_object" "bucket_object" {
+  bucket  = "test-bucket"
+  name    = "test-object"
+  content = "test-content"
+  contexts{
+    custom{
+      key   ="testKey"
+      value ="test"
+    }
+    custom{
+      key   ="testKeyTwo"
+      value ="test"
+    }
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -81,6 +101,8 @@ One of the following is required:
 
 * `detect_md5hash` - (Optional) Detect changes to local file or changes made outside of Terraform to the file stored on the server. MD5 hash of the data, encoded using [base64](https://datatracker.ietf.org/doc/html/rfc4648#section-4). This field is not present for [composite objects](https://cloud.google.com/storage/docs/composite-objects). For more information about using the MD5 hash, see [Hashes and ETags: Best Practices](https://cloud.google.com/storage/docs/hashes-etags#json-api).
 
+  ~> **Warning:** For dynamically populated files or objects, `detect_md5hash` cannot track or detect changes and will not trigger updates to the objects in the bucket. Please use `source_md5hash` instead.
+
 * `storage_class` - (Optional) The [StorageClass](https://cloud.google.com/storage/docs/storage-classes) of the new bucket object.
     Supported values include: `MULTI_REGIONAL`, `REGIONAL`, `NEARLINE`, `COLDLINE`, `ARCHIVE`. If not provided, this defaults to the bucket's default
     storage class or to a [standard](https://cloud.google.com/storage/docs/storage-classes#standard) class.
@@ -88,6 +110,12 @@ One of the following is required:
 * `kms_key_name` - (Optional) The resource name of the Cloud KMS key that will be used to [encrypt](https://cloud.google.com/storage/docs/encryption/using-customer-managed-keys) the object.
 
 * `source_md5hash` - (Optional) User-provided md5hash to trigger replacement of object in storage bucket, Must be Base 64 MD5 hash of the object data. The usual way to set this is filemd5("file.zip"), where "file.zip" is the local filename
+
+* `force_empty_content_type` - (Optional) When set to true, it ensure the object's Content-Type is empty.
+
+* `deletion_policy` - (Optional) When set to ABANDON, the object won't be deleted from storage bucket. Instead, it will only be removed from terraform's state file.
+
+* `contexts` - (Optional) Contexts attached to an object, in key-value pairs. For more information about object contexts, see [Object contexts overview](https://cloud.google.com/storage/docs/object-contexts). Structure is [documented below](#nested_contexts).
 
 ---
 
@@ -102,6 +130,20 @@ One of the following is required:
 * `mode` - (Required) The retention policy mode. Either `Locked` or `Unlocked`.
 
 * `retain_until_time` - (Required) The time to retain the object until in RFC 3339 format, for example 2012-11-15T16:19:00.094Z.
+
+<a name="nested_contexts"></a> The `contexts` block supports - 
+
+* `custom` - (Optional) User-provided object contexts. Structure is [documented below](#nested_custom_key_value).
+
+<a name="nested_custom_key_value"></a>The `custom` block supports:
+
+* `key` - (Required) An individual object context. Context keys and their corresponding values must start with an alphanumeric character.
+
+* `value` - (Required) The value associated with this context. This field holds the primary information for the given context key.
+
+* `create_time` - (Computed) The time when context was first added to the storage object in RFC 3399 format.
+
+* `update_time` - (Computed) The time when context was last updated in RFC 3399 format.
 
 <a name>
 

@@ -31,9 +31,10 @@ timeouts:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'attestor'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
   constants: 'templates/terraform/constants/binaryauthorization_attestor.go.tmpl'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 examples:
   - name: 'binary_authorization_attestor_basic'
     primary_resource_id: 'attestor'
@@ -114,7 +115,7 @@ properties:
               default_from_api: true
             - name: 'asciiArmoredPgpPublicKey'
               type: String
-              # TODO (mbang): Exactly one of asciiArmoredPgpPublicKey or pkixPublicKey must be set
+              # TODO: Exactly one of asciiArmoredPgpPublicKey or pkixPublicKey must be set
               description: |
                 ASCII-armored representation of a PGP public key, as the
                 entire output by the command
@@ -127,7 +128,7 @@ properties:
                 be overwritten by the API-calculated ID.
             - name: 'pkixPublicKey'
               type: NestedObject
-              # TODO (mbang): Exactly one of asciiArmoredPgpPublicKey or pkixPublicKey must be set
+              # TODO: Exactly one of asciiArmoredPgpPublicKey or pkixPublicKey must be set
               description: |
                 A raw PKIX SubjectPublicKeyInfo format public key.
 

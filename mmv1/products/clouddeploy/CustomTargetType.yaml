@@ -45,11 +45,11 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/locations/{{location}}/customTargetTypes/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/customTargetTypes/{{name}}'
     - '{{name}}'
 custom_code:
+include_in_tgc_next: true
 examples:
   - name: 'clouddeploy_custom_target_type_basic'
     primary_resource_id: 'custom-target-type'

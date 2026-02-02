@@ -1,5 +1,4 @@
 resource "google_gkeonprem_vmware_admin_cluster" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   name = "{{index $.Vars "name"}}"
   location = "us-west1"
   description = "test admin cluster"
@@ -88,5 +87,9 @@ resource "google_gkeonprem_vmware_admin_cluster" "{{$.PrimaryResourceId}}" {
   private_registry_config {
     address = "test-address"
     ca_cert = "test-ca-cert"
+  }
+  proxy {
+    url = "http://my-proxy.example.local:80"
+    no_proxy = "10.151.222.0/24,my-host.example.local,10.151.2.1"
   }
 }

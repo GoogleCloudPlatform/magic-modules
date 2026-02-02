@@ -4,11 +4,11 @@ resource "google_cloud_run_v2_service" "{{$.PrimaryResourceId}}" {
   deletion_protection = false
   ingress = "INGRESS_TRAFFIC_ALL"
   
-  template {
-    scaling {
-      max_instance_count = 2
-    }
-  
+  scaling {
+    max_instance_count = 2
+  }
+
+  template { 
     volumes {
       name = "cloudsql"
       cloud_sql_instance {

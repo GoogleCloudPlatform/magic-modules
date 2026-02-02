@@ -24,7 +24,6 @@ create_url: 'projects/{{project}}/locations/{{location}}/backendAuthenticationCo
 update_verb: 'PATCH'
 update_mask: true
 autogen_async: true
-min_version: 'beta'
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -46,7 +45,6 @@ examples:
       trust_config_name: 'my-trust-config'
   - name: 'backend_service_tls_settings'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'

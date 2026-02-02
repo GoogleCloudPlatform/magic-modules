@@ -40,6 +40,8 @@ async:
     resource_inside_response: false
   include_project: true
 custom_code:
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 sweeper:
   url_substitutions:
     - parent: "organizations/${ORG_ID}"
@@ -68,6 +70,24 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
   - name: 'network_security_security_profile_intercept'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-security-profile'
+      network_name: 'my-network'
+      deployment_group_id: 'my-dg'
+      endpoint_group_id: 'my-eg'
+    test_env_vars:
+      org_id: 'ORG_ID'
+  - name: 'network_security_security_profile_url_filtering'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-security-profile'
+    test_env_vars:
+      org_id: 'ORG_ID'
+    tgc_skip_test: The ENUM value URL_FILTERING in type field is transformed to UNKNOWN_ENUM_VALUE_ProfileType_5 in CAI asset. The reason could be that URL_FILTERING is not supported in CAI yet. Will check if the value in CAI assets will be correct later.
+  - name: network_security_security_profile_broker
     min_version: 'beta'
     primary_resource_id: 'default'
     vars:
@@ -222,6 +242,49 @@ properties:
                 - 'DEFAULT_ACTION'
                 - 'DENY'
     conflicts:
+      - 'urlFilteringProfile'
+      - 'customMirroringProfile'
+      - 'customInterceptProfile'
+  - name: 'urlFilteringProfile'
+    min_version: 'beta'
+    type: NestedObject
+    is_missing_in_cai: true
+    description: The url filtering configuration for the security profile.
+    custom_flatten: 'templates/terraform/custom_flatten/network_security_security_profile_url_filters_flatten.go.tmpl'
+    properties:
+      - name: 'urlFilters'
+        type: Array
+        is_set: true
+        description: |
+          The configuration for action to take based on domain name match.
+          A domain name would be checked for matching filters through the list in order of highest to lowest priority,
+          and the first filter that a domain name matches with is the one whose actions gets applied.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'filteringAction'
+              type: Enum
+              description: The action to take when the filter is applied.
+              required: true
+              enum_values:
+                - 'ALLOW'
+                - 'DENY'
+            - name: 'urls'
+              type: Array
+              description: |
+                A list of domain matcher strings that a domain name gets compared with to determine if the filter is applicable.
+                A domain name must match with at least one of the strings in the list for a filter to be applicable.
+              item_type:
+                type: String
+            - name: 'priority'
+              type: Integer
+              description: |
+                The priority of the filter within the URL filtering profile.
+                Must be an integer from 0 and 2147483647, inclusive. Lower integers indicate higher priorities.
+                The priority of a filter must be unique within a URL filtering profile.
+              required: true
+    conflicts:
+      - 'threatPreventionProfile'
       - 'customMirroringProfile'
       - 'customInterceptProfile'
   - name: 'customMirroringProfile'
@@ -233,11 +296,33 @@ properties:
       - name: mirroringEndpointGroup
         type: String
         description: |
-          The Mirroring Endpoint Group to which matching traffic should be mirrored.
+          The target Mirroring Endpoint Group.
+          When a mirroring rule with this security profile attached matches a packet,
+          a replica will be mirrored to the location-local target in this group.
           Format: projects/{project_id}/locations/global/mirroringEndpointGroups/{endpoint_group_id}
         required: true
+      - name: mirroringDeploymentGroups
+        type: Array
+        item_type:
+          type: String
+        description: |
+          The target downstream Mirroring Deployment Groups.
+          This field is used for Packet Broker mirroring endpoint groups to specify
+          the deployment groups that the packet should be mirrored to by the broker.
+          Format: projects/{project_id}/locations/global/mirroringDeploymentGroups/{deployment_group_id}
+        min_version: 'beta'
+      - name: 'mirroringEndpointGroupType'
+        type: String
+        description: |-
+          The type of the mirroring endpoint group this profile is attached to.
+          Possible values:
+          DIRECT
+          BROKER
+        output: true
+        min_version: 'beta'
     conflicts:
       - 'threatPreventionProfile'
+      - 'urlFilteringProfile'
       - 'customInterceptProfile'
   - name: 'customInterceptProfile'
     type: NestedObject
@@ -253,6 +338,7 @@ properties:
         required: true
     conflicts:
       - 'threatPreventionProfile'
+      - 'urlFilteringProfile'
       - 'customMirroringProfile'
   - name: 'type'
     type: Enum
@@ -261,5 +347,6 @@ properties:
     immutable: true
     enum_values:
       - 'THREAT_PREVENTION'
+      - 'URL_FILTERING'
       - 'CUSTOM_MIRRORING'
       - 'CUSTOM_INTERCEPT'

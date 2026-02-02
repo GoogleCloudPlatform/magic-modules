@@ -61,6 +61,7 @@ var (
 		"cluster_config.0.gce_cluster_config.0.internal_ip_only",
 		"cluster_config.0.gce_cluster_config.0.shielded_instance_config",
 		"cluster_config.0.gce_cluster_config.0.metadata",
+		"cluster_config.0.gce_cluster_config.0.resource_manager_tags",
 		"cluster_config.0.gce_cluster_config.0.reservation_affinity",
 		"cluster_config.0.gce_cluster_config.0.node_group_affinity",
 		"cluster_config.0.gce_cluster_config.0.confidential_instance_config",
@@ -102,6 +103,7 @@ var (
 	}
 
 	clusterConfigKeys = []string{
+		"cluster_config.0.cluster_tier",
 		"cluster_config.0.staging_bucket",
 		"cluster_config.0.temp_bucket",
 		"cluster_config.0.gce_cluster_config",
@@ -552,7 +554,15 @@ func ResourceDataprocCluster() *schema.Resource {
 				Description: `Allows you to configure various aspects of the cluster.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-
+						"cluster_tier": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							Description:  `Specifies the tier of the cluster created.`,
+							AtLeastOneOf: clusterConfigKeys,
+							ForceNew:     true,
+							ValidateFunc: validation.StringInSlice([]string{"CLUSTER_TIER_UNSPECIFIED", "CLUSTER_TIER_STANDARD", "CLUSTER_TIER_PREMIUM"}, false),
+						},
 						"staging_bucket": {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -665,10 +675,21 @@ func ResourceDataprocCluster() *schema.Resource {
 									"metadata": {
 										Type:         schema.TypeMap,
 										Optional:     true,
+										Computed:     true,
 										AtLeastOneOf: gceClusterConfigKeys,
 										Elem:         &schema.Schema{Type: schema.TypeString},
 										ForceNew:     true,
 										Description:  `A map of the Compute Engine metadata entries to add to all instances`,
+									},
+
+									"resource_manager_tags": {
+										Type:         schema.TypeMap,
+										Optional:     true,
+										Computed:     true,
+										AtLeastOneOf: gceClusterConfigKeys,
+										Elem:         &schema.Schema{Type: schema.TypeString},
+										ForceNew:     true,
+										Description:  `A map of resource manager tags to add to all instances. Keys must be in the format tagKeys/{tag_key_id} and values in the format tagValues/{tag_value_id}.`,
 									},
 
 									"shielded_instance_config": {
@@ -1300,9 +1321,13 @@ func ResourceDataprocCluster() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"kerberos_config": {
 										Type:        schema.TypeList,
-										Required:    true,
 										Description: "Kerberos related configuration",
-										MaxItems:    1,
+										Optional:    true,
+										ExactlyOneOf: []string{
+											"cluster_config.0.security_config.0.kerberos_config",
+											"cluster_config.0.security_config.0.identity_config",
+										},
+										MaxItems: 1,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"cross_realm_trust_admin_server": {
@@ -1382,6 +1407,26 @@ by Dataproc`,
 													Type:        schema.TypeString,
 													Optional:    true,
 													Description: `The Cloud Storage URI of the truststore file used for SSL encryption. If not provided, Dataproc will provide a self-signed certificate.`,
+												},
+											},
+										},
+									},
+									"identity_config": {
+										Type:        schema.TypeList,
+										Description: "Identity related configuration",
+										Optional:    true,
+										ExactlyOneOf: []string{
+											"cluster_config.0.security_config.0.kerberos_config",
+											"cluster_config.0.security_config.0.identity_config",
+										},
+										MaxItems: 1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"user_service_account_mapping": {
+													Type:        schema.TypeMap,
+													Required:    true,
+													Elem:        &schema.Schema{Type: schema.TypeString},
+													Description: `User to service account mappings for multi-tenancy.`,
 												},
 											},
 										},
@@ -1526,7 +1571,7 @@ by Dataproc`,
 							Optional:     true,
 							MaxItems:     1,
 							AtLeastOneOf: clusterConfigKeys,
-							Description:  `The settings for auto deletion cluster schedule.`,
+							Description:  `The settings for auto stop and deletion cluster schedule.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"idle_delete_ttl": {
@@ -1536,6 +1581,8 @@ by Dataproc`,
 										AtLeastOneOf: []string{
 											"cluster_config.0.lifecycle_config.0.idle_delete_ttl",
 											"cluster_config.0.lifecycle_config.0.auto_delete_time",
+											"cluster_config.0.lifecycle_config.0.idle_stop_ttl",
+											"cluster_config.0.lifecycle_config.0.auto_stop_time",
 										},
 									},
 									"idle_start_time": {
@@ -1555,6 +1602,35 @@ by Dataproc`,
 										AtLeastOneOf: []string{
 											"cluster_config.0.lifecycle_config.0.idle_delete_ttl",
 											"cluster_config.0.lifecycle_config.0.auto_delete_time",
+											"cluster_config.0.lifecycle_config.0.idle_stop_ttl",
+											"cluster_config.0.lifecycle_config.0.auto_stop_time",
+										},
+									},
+									"idle_stop_ttl": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `The duration to keep the cluster started while idling (no jobs running). After this TTL, the cluster will be stopped. Valid range: [10m, 14d].`,
+										AtLeastOneOf: []string{
+											"cluster_config.0.lifecycle_config.0.idle_delete_ttl",
+											"cluster_config.0.lifecycle_config.0.auto_delete_time",
+											"cluster_config.0.lifecycle_config.0.idle_stop_ttl",
+											"cluster_config.0.lifecycle_config.0.auto_stop_time",
+										},
+									},
+									// the API also has the auto_stop_ttl option in its request, however,
+									// the value is not returned in the response, rather the auto_stop_time
+									// after calculating ttl with the update time is returned, thus, for now
+									// we will only allow auto_stop_time to updated.
+									"auto_stop_time": {
+										Type:             schema.TypeString,
+										Optional:         true,
+										Description:      `The time when cluster will be auto-stopped. A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".`,
+										DiffSuppressFunc: tpgresource.TimestampDiffSuppress(time.RFC3339Nano),
+										AtLeastOneOf: []string{
+											"cluster_config.0.lifecycle_config.0.idle_delete_ttl",
+											"cluster_config.0.lifecycle_config.0.auto_delete_time",
+											"cluster_config.0.lifecycle_config.0.idle_stop_ttl",
+											"cluster_config.0.lifecycle_config.0.auto_stop_time",
 										},
 									},
 								},
@@ -2048,6 +2124,10 @@ func expandClusterConfig(d *schema.ResourceData, config *transport_tpg.Config) (
 		conf.TempBucket = v.(string)
 	}
 
+	if v, ok := d.GetOk("cluster_config.0.cluster_tier"); ok {
+		conf.ClusterTier = v.(string)
+	}
+
 	c, err := expandGceClusterConfig(d, config)
 	if err != nil {
 		return nil, err
@@ -2239,6 +2319,9 @@ func expandGceClusterConfig(d *schema.ResourceData, config *transport_tpg.Config
 	if v, ok := cfg["metadata"]; ok {
 		conf.Metadata = tpgresource.ConvertStringMap(v.(map[string]interface{}))
 	}
+	if v, ok := cfg["resource_manager_tags"]; ok {
+		conf.ResourceManagerTags = tpgresource.ConvertStringMap(v.(map[string]interface{}))
+	}
 	if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.shielded_instance_config"); ok {
 		cfgSic := v.([]interface{})[0].(map[string]interface{})
 		conf.ShieldedInstanceConfig = &dataproc.ShieldedInstanceConfig{}
@@ -2286,7 +2369,28 @@ func expandGceClusterConfig(d *schema.ResourceData, config *transport_tpg.Config
 func expandSecurityConfig(cfg map[string]interface{}) *dataproc.SecurityConfig {
 	conf := &dataproc.SecurityConfig{}
 	if kfg, ok := cfg["kerberos_config"]; ok {
-		conf.KerberosConfig = expandKerberosConfig(kfg.([]interface{})[0].(map[string]interface{}))
+		k := kfg.([]interface{})
+		if len(k) > 0 {
+			conf.KerberosConfig = expandKerberosConfig(k[0].(map[string]interface{}))
+		}
+	}
+	if ifg, ok := cfg["identity_config"]; ok {
+		i := ifg.([]interface{})
+		if len(i) > 0 {
+			conf.IdentityConfig = expandIdentityConfig(i[0].(map[string]interface{}))
+		}
+	}
+	return conf
+}
+
+func expandIdentityConfig(cfg map[string]interface{}) *dataproc.IdentityConfig {
+	conf := &dataproc.IdentityConfig{}
+	if v, ok := cfg["user_service_account_mapping"]; ok {
+		m := make(map[string]string)
+		for k, val := range v.(map[string]interface{}) {
+			m[k] = val.(string)
+		}
+		conf.UserServiceAccountMapping = m
 	}
 	return conf
 }
@@ -2388,6 +2492,12 @@ func expandLifecycleConfig(cfg map[string]interface{}) *dataproc.LifecycleConfig
 	}
 	if v, ok := cfg["auto_delete_time"]; ok {
 		conf.AutoDeleteTime = v.(string)
+	}
+	if v, ok := cfg["idle_stop_ttl"]; ok {
+		conf.IdleStopTtl = v.(string)
+	}
+	if v, ok := cfg["auto_stop_time"]; ok {
+		conf.AutoStopTime = v.(string)
 	}
 	return conf
 }
@@ -2707,6 +2817,28 @@ func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) err
 		updMask = append(updMask, "config.lifecycle_config.auto_delete_time")
 	}
 
+	if d.HasChange("cluster_config.0.lifecycle_config.0.idle_stop_ttl") {
+		idleStopTtl := d.Get("cluster_config.0.lifecycle_config.0.idle_stop_ttl").(string)
+		cluster.Config.LifecycleConfig = &dataproc.LifecycleConfig{
+			IdleStopTtl: idleStopTtl,
+		}
+
+		updMask = append(updMask, "config.lifecycle_config.idle_stop_ttl")
+	}
+
+	if d.HasChange("cluster_config.0.lifecycle_config.0.auto_stop_time") {
+		desiredStopTime := d.Get("cluster_config.0.lifecycle_config.0.auto_stop_time").(string)
+		if cluster.Config.LifecycleConfig != nil {
+			cluster.Config.LifecycleConfig.AutoStopTime = desiredStopTime
+		} else {
+			cluster.Config.LifecycleConfig = &dataproc.LifecycleConfig{
+				AutoStopTime: desiredStopTime,
+			}
+		}
+
+		updMask = append(updMask, "config.lifecycle_config.auto_stop_time")
+	}
+
 	if len(updMask) > 0 {
 		gracefulDecommissionTimeout := d.Get("graceful_decommission_timeout").(string)
 
@@ -2923,8 +3055,8 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 	}
 
 	data := map[string]interface{}{
-		"staging_bucket": d.Get("cluster_config.0.staging_bucket").(string),
-
+		"staging_bucket":            d.Get("cluster_config.0.staging_bucket").(string),
+		"cluster_tier":              d.Get("cluster_config.0.cluster_tier").(string),
 		"bucket":                    cfg.ConfigBucket,
 		"temp_bucket":               cfg.TempBucket,
 		"gce_cluster_config":        flattenGceClusterConfig(d, cfg.GceClusterConfig),
@@ -2966,6 +3098,7 @@ func flattenSecurityConfig(d *schema.ResourceData, sc *dataproc.SecurityConfig) 
 	}
 	data := map[string]interface{}{
 		"kerberos_config": flattenKerberosConfig(d, sc.KerberosConfig),
+		"identity_config": flattenIdentityConfig(d, sc.IdentityConfig),
 	}
 
 	return []map[string]interface{}{data}
@@ -2991,6 +3124,17 @@ func flattenKerberosConfig(d *schema.ResourceData, kfg *dataproc.KerberosConfig)
 		"kdc_db_key_uri":                        kfg.KdcDbKeyUri,
 		"tgt_lifetime_hours":                    kfg.TgtLifetimeHours,
 		"realm":                                 kfg.Realm,
+	}
+
+	return []map[string]interface{}{data}
+}
+
+func flattenIdentityConfig(d *schema.ResourceData, ifg *dataproc.IdentityConfig) []map[string]interface{} {
+	if ifg == nil {
+		return nil
+	}
+	data := map[string]interface{}{
+		"user_service_account_mapping": d.Get("cluster_config.0.security_config.0.identity_config.0.user_service_account_mapping").(map[string]interface{}),
 	}
 
 	return []map[string]interface{}{data}
@@ -3039,6 +3183,8 @@ func flattenLifecycleConfig(d *schema.ResourceData, lc *dataproc.LifecycleConfig
 	data := map[string]interface{}{
 		"idle_delete_ttl":  lc.IdleDeleteTtl,
 		"auto_delete_time": lc.AutoDeleteTime,
+		"idle_stop_ttl":    lc.IdleStopTtl,
+		"auto_stop_time":   lc.AutoStopTime,
 	}
 
 	return []map[string]interface{}{data}
@@ -3187,11 +3333,12 @@ func flattenGceClusterConfig(d *schema.ResourceData, gcc *dataproc.GceClusterCon
 	}
 
 	gceConfig := map[string]interface{}{
-		"tags":             schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(gcc.Tags)),
-		"service_account":  gcc.ServiceAccount,
-		"zone":             tpgresource.GetResourceNameFromSelfLink(gcc.ZoneUri),
-		"internal_ip_only": gcc.InternalIpOnly,
-		"metadata":         gcc.Metadata,
+		"tags":                  schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(gcc.Tags)),
+		"service_account":       gcc.ServiceAccount,
+		"zone":                  tpgresource.GetResourceNameFromSelfLink(gcc.ZoneUri),
+		"internal_ip_only":      gcc.InternalIpOnly,
+		"metadata":              gcc.Metadata,
+		"resource_manager_tags": gcc.ResourceManagerTags,
 	}
 
 	if gcc.NetworkUri != "" {

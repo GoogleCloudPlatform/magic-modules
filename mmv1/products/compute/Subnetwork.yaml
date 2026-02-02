@@ -45,6 +45,8 @@ references:
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/subnetworks'
 has_self_link: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 immutable: true
 timeouts:
   insert_minutes: 20
@@ -62,11 +64,11 @@ iam_policy:
   allowed_iam_role: 'roles/compute.networkUser'
   parent_resource_attribute: 'subnetwork'
   iam_conditions_request_type: 'QUERY_PARAM'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/subnetwork.tmpl'
   constants: 'templates/terraform/constants/subnetwork.tmpl'
   post_update: 'templates/terraform/post_update/compute_subnetwork.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/compute_subnetwork.go.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)'
   - 'sendSecondaryIpRangeIfEmptyDiff'
@@ -116,6 +118,12 @@ examples:
     vars:
       subnetwork_name: 'subnet-purpose-test-subnetwork'
       network_name: 'subnet-purpose-test-network'
+  - name: 'subnetwork_resolve_subnet_mask'
+    primary_resource_id: 'subnetwork-resolve-subnet-mask'
+    min_version: 'beta'
+    vars:
+      subnetwork_name: 'subnet-resolve-subnet-mask-test-subnetwork'
+      network_name: 'subnet-resolve-subnet-mask-test-network'
   - name: 'subnetwork_cidr_overlap'
     primary_resource_id: 'subnetwork-cidr-overlap'
     min_version: 'beta'
@@ -151,6 +159,26 @@ examples:
       ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
     test_vars_overrides:
       ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
+  - name: 'subnetwork_with_internal_subnet_mode_pdp'
+    primary_resource_id: 'subnetwork-with-internal-subnet-mode-pdp'
+    exclude_docs: true
+    vars:
+      subnetwork_name: 'internal-subnet-mode-pdp-subnet'
+      network_name: 'network-byoipv6-internal'
+      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp"'
+    test_vars_overrides:
+      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp"'
+  - name: 'subnetwork_with_internal_subnet_mode_pdp_explicit_ip_prefix'
+    primary_resource_id: 'subnetwork-with-internal-subnet-mode-pdp-explicit-ip-prefix'
+    exclude_docs: true
+    vars:
+      subnetwork_name: 'subnet-mode-pdp-subnet-internal-prefix'
+      network_name: 'network-byoipv6-internal-prefix'
+      internal_ipv6_prefix: '"2001:db8:1::/64"'
+      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp-explicit-prefix"'
+    test_vars_overrides:
+      internal_ipv6_prefix: 'fmt.Sprintf("2001:db8:1:%d::/64", acctest.RandIntRange(t, 0, 9999))'
+      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp-explicit-prefix"'
   - name: 'subnetwork_ipv6_only_external'
     primary_resource_id: 'subnetwork-ipv6-only'
     exclude_docs: true
@@ -238,7 +266,7 @@ properties:
   - name: 'purpose'
     type: String
     description: |
-      The purpose of the resource. This field can be either `PRIVATE`, `REGIONAL_MANAGED_PROXY`, `GLOBAL_MANAGED_PROXY`, `PRIVATE_SERVICE_CONNECT`, `PEER_MIGRATION` or `PRIVATE_NAT`([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
+      The purpose of the resource. This field can be either `PRIVATE`, `REGIONAL_MANAGED_PROXY`, `GLOBAL_MANAGED_PROXY`, `PRIVATE_SERVICE_CONNECT`, `PEER_MIGRATION` or `PRIVATE_NAT`([Beta](../guides/provider_versions.html.markdown)).
       A subnet with purpose set to `REGIONAL_MANAGED_PROXY` is a user-created subnetwork that is reserved for regional Envoy-based load balancers.
       A subnetwork in a given region with purpose set to `GLOBAL_MANAGED_PROXY` is a proxy-only subnet and is shared between all the cross-regional Envoy-based load balancers.
       A subnetwork with purpose set to `PRIVATE_SERVICE_CONNECT` reserves the subnet for hosting a Private Service Connect published service.
@@ -274,7 +302,7 @@ properties:
       to the primary ipCidrRange of the subnetwork. The alias IPs may belong
       to either primary or secondary ranges.
 
-      **Note**: This field uses [attr-as-block mode](https://www.terraform.io/docs/configuration/attr-as-blocks.html) to avoid
+      **Note**: This field uses [attr-as-block mode](https://developer.hashicorp.com/terraform/language/attr-as-blocks) to avoid
       breaking users during the 0.12 upgrade. To explicitly send a list of zero objects,
       set `send_secondary_ip_range_if_empty = true`
     api_name: secondaryIpRanges
@@ -357,7 +385,6 @@ properties:
     fingerprint_name: 'fingerprint'
     custom_flatten: 'templates/terraform/custom_flatten/subnetwork_log_config.go.tmpl'
     custom_expand: 'templates/terraform/custom_expand/subnetwork_log_config.go.tmpl'
-    diff_suppress_func: 'subnetworkLogConfigDiffSuppress'
     properties:
       - name: 'aggregationInterval'
         type: Enum
@@ -451,6 +478,7 @@ properties:
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
     update_verb: 'PATCH'
     fingerprint_name: 'fingerprint'
+    is_missing_in_cai: true
     enum_values:
       - 'EXTERNAL'
       - 'INTERNAL'
@@ -461,9 +489,12 @@ properties:
     output: true
   - name: 'internalIpv6Prefix'
     type: String
+    diff_suppress_func: 'IpDiffSuppress'
     description: |
       The internal IPv6 address range that is assigned to this subnetwork.
-    output: true
+    default_from_api: true
+    validation:
+      function: 'verify.ValidateIpCidrRange'
   - name: 'externalIpv6Prefix'
     type: String
     description: |
@@ -472,11 +503,12 @@ properties:
   - name: 'ipCollection'
     type: String
     ignore_read: true
+    is_missing_in_cai: true
     description: |
       Resource reference of a PublicDelegatedPrefix. The PDP must be a sub-PDP
-      in EXTERNAL_IPV6_SUBNETWORK_CREATION mode.
-      Use one of the following formats to specify a sub-PDP when creating an
-      IPv6 NetLB forwarding rule using BYOIP:
+      in EXTERNAL_IPV6_SUBNETWORK_CREATION or INTERNAL_IPV6_SUBNETWORK_CREATION
+      mode. Use one of the following formats to specify a sub-PDP when creating
+      a dual stack or IPv6-only subnetwork using BYOIP:
       Full resource URL, as in:
         * `https://www.googleapis.com/compute/v1/projects/{{projectId}}/regions/{{region}}/publicDelegatedPrefixes/{{sub-pdp-name}}`
       Partial URL, as in:
@@ -507,15 +539,7 @@ properties:
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
     update_verb: 'PATCH'
     fingerprint_name: 'fingerprint'
-  - name: 'enableFlowLogs'
-    type: Boolean
-    description: |
-      Whether to enable flow logging for this subnetwork. If this field is not explicitly set,
-      it will not appear in get listings. If not set the default behavior is determined by the
-      org policy, if there is no org policy specified, then it will default to disabled.
-      This field isn't supported if the subnet purpose field is set to REGIONAL_MANAGED_PROXY.
-    default_from_api: true
-    deprecation_message: 'This field is being removed in favor of log_config. If log_config is present, flow logs are enabled.'
+    is_missing_in_cai: true
   - name: 'state'
     type: Enum
     description: |
@@ -524,3 +548,30 @@ properties:
       set to INTERNAL_HTTPS_LOAD_BALANCER and indicates that connections to the load balancer are being drained.
       A subnetwork that is draining cannot be used or modified until it reaches a status of READY'
     output: true
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the subnetwork. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456. The field is ignored when empty.
+          The field is immutable and causes resource replacement when mutated. This field is only
+          set at create time and modifying this field after creation will trigger recreation.
+          To apply tags to an existing resource, see the google_tags_tag_binding resource.
+        ignore_read: true
+        immutable: true
+  - name: 'resolveSubnetMask'
+    type: Enum
+    description: |
+      'Configures subnet mask resolution for this subnetwork.'
+    enum_values:
+      - 'ARP_ALL_RANGES'
+      - 'ARP_PRIMARY_RANGE'
+    min_version: beta
+    immutable: true

@@ -138,6 +138,38 @@ examples:
       login_region_backend_service_name: 'login'
       home_region_backend_service_name: 'home'
       region_health_check_name: 'health-check'
+  - name: 'region_url_map_default_mirror_percent'
+    primary_resource_id: 'regionurlmap'
+    min_version: 'beta'
+    vars:
+      region_url_map_name: 'regionurlmap'
+      home_backend_service_name: 'home'
+      mirror_backend_service_name: 'mirror'
+      region_health_check_name: 'health-check'
+  - name: 'region_url_map_path_matcher_default_mirror_percent'
+    primary_resource_id: 'regionurlmap'
+    min_version: 'beta'
+    vars:
+      region_url_map_name: 'regionurlmap'
+      home_backend_service_name: 'home'
+      mirror_backend_service_name: 'mirror'
+      region_health_check_name: 'health-check'
+  - name: 'region_url_map_path_rule_mirror_percent'
+    primary_resource_id: 'regionurlmap'
+    min_version: 'beta'
+    vars:
+      region_url_map_name: 'regionurlmap'
+      home_backend_service_name: 'home'
+      mirror_backend_service_name: 'mirror'
+      region_health_check_name: 'health-check'
+  - name: 'region_url_map_route_rule_mirror_percent'
+    primary_resource_id: 'regionurlmap'
+    min_version: 'beta'
+    vars:
+      region_url_map_name: 'regionurlmap'
+      home_backend_service_name: 'home'
+      mirror_backend_service_name: 'mirror'
+      region_health_check_name: 'health-check'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -238,6 +270,64 @@ properties:
     item_type:
       type: NestedObject
       properties:
+        - name: 'headerAction'
+          type: NestedObject
+          description: |
+            Specifies changes to request and response headers that need to take effect for the selected backendService.
+            headerAction specified here take effect before headerAction in the enclosing HttpRouteRule, PathMatcher and UrlMap.
+            headerAction is not supported for load balancers that have their loadBalancingScheme set to EXTERNAL.
+            Not supported when the URL map is bound to a target gRPC proxy that has validateForProxyless field set to true.
+          properties:
+            - name: 'requestHeadersToRemove'
+              type: Array
+              description: |
+                A list of header names for headers that need to be removed from the request before forwarding the request to the backendService.
+              item_type:
+                type: String
+            - name: 'requestHeadersToAdd'
+              type: Array
+              description: |
+                Headers to add to a matching request before forwarding the request to the backendService.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'headerName'
+                    type: String
+                    description: 'The name of the header.'
+                  - name: 'headerValue'
+                    type: String
+                    description: 'The value of the header to add.'
+                  - name: 'replace'
+                    type: Boolean
+                    description: |
+                      If false, headerValue is appended to any values that already exist for the header. If true, headerValue is set for the header, discarding any values that were set for that header.
+                      The default value is false.
+                    default_value: false
+            - name: 'responseHeadersToRemove'
+              type: Array
+              description: |
+                A list of header names for headers that need to be removed from the response before sending the response back to the client.
+              item_type:
+                type: String
+            - name: 'responseHeadersToAdd'
+              type: Array
+              description: |
+                Headers to add the response before sending the response back to the client.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'headerName'
+                    type: String
+                    description: 'The name of the header.'
+                  - name: 'headerValue'
+                    type: String
+                    description: 'The value of the header to add.'
+                  - name: 'replace'
+                    type: Boolean
+                    description: |
+                      If false, headerValue is appended to any values that already exist for the header. If true, headerValue is set for the header, discarding any values that were set for that header.
+                      The default value is false.
+                    default_value: false
         - name: 'defaultService'
           type: ResourceRef
           description: |
@@ -733,6 +823,14 @@ properties:
                         custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
                         resource: 'RegionBackendService'
                         imports: 'selfLink'
+                      - name: 'mirrorPercent'
+                        min_version: beta
+                        type: Double
+                        description: |
+                          The percentage of requests to be mirrored to backendService.
+                          The value must be between 0.0 and 100.0 inclusive.
+                        validation:
+                          function: 'validation.FloatBetween(0, 100)'
                   - name: 'retryPolicy'
                     type: NestedObject
                     description: |
@@ -1195,6 +1293,14 @@ properties:
                         custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
                         resource: 'RegionBackendService'
                         imports: 'selfLink'
+                      - name: 'mirrorPercent'
+                        min_version: beta
+                        type: Double
+                        description: |
+                          The percentage of requests to be mirrored to backendService.
+                          The value must be between 0.0 and 100.0 inclusive.
+                        validation:
+                          function: 'validation.FloatBetween(0, 100)'
                   - name: 'retryPolicy'
                     type: NestedObject
                     description: |
@@ -1802,6 +1908,14 @@ properties:
                   custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
                   resource: 'BackendService'
                   imports: 'selfLink'
+                - name: 'mirrorPercent'
+                  min_version: beta
+                  type: Double
+                  description: |
+                    The percentage of requests to be mirrored to backendService.
+                    The value must be between 0.0 and 100.0 inclusive.
+                  validation:
+                    function: 'validation.FloatBetween(0, 100)'
             - name: 'corsPolicy'
               type: NestedObject
               description: |
@@ -2283,6 +2397,14 @@ properties:
             custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
             resource: 'RegionBackendService'
             imports: 'selfLink'
+          - name: 'mirrorPercent'
+            min_version: beta
+            type: Double
+            description: |
+              The percentage of requests to be mirrored to backendService.
+              The value must be between 0.0 and 100.0 inclusive.
+            validation:
+              function: 'validation.FloatBetween(0, 100)'
       - name: 'corsPolicy'
         type: NestedObject
         description: |
@@ -2507,3 +2629,61 @@ properties:
                   - 'default_route_action.0.fault_injection_policy.0.abort.0.percentage'
                 validation:
                   function: 'validation.FloatBetween(0, 100)'
+  - name: 'headerAction'
+    type: NestedObject
+    description: |
+      Specifies changes to request and response headers that need to take effect for the selected backendService.
+      headerAction specified here take effect before headerAction in the enclosing HttpRouteRule, PathMatcher and UrlMap.
+      headerAction is not supported for load balancers that have their loadBalancingScheme set to EXTERNAL.
+      Not supported when the URL map is bound to a target gRPC proxy that has validateForProxyless field set to true.
+    properties:
+      - name: 'requestHeadersToRemove'
+        type: Array
+        description: |
+          A list of header names for headers that need to be removed from the request before forwarding the request to the backendService.
+        item_type:
+          type: String
+      - name: 'requestHeadersToAdd'
+        type: Array
+        description: |
+          Headers to add to a matching request before forwarding the request to the backendService.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'headerName'
+              type: String
+              description: 'The name of the header.'
+            - name: 'headerValue'
+              type: String
+              description: 'The value of the header to add.'
+            - name: 'replace'
+              type: Boolean
+              description: |
+                If false, headerValue is appended to any values that already exist for the header. If true, headerValue is set for the header, discarding any values that were set for that header.
+                The default value is false.
+              default_value: false
+      - name: 'responseHeadersToRemove'
+        type: Array
+        description: |
+          A list of header names for headers that need to be removed from the response before sending the response back to the client.
+        item_type:
+          type: String
+      - name: 'responseHeadersToAdd'
+        type: Array
+        description: |
+          Headers to add the response before sending the response back to the client.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'headerName'
+              type: String
+              description: 'The name of the header.'
+            - name: 'headerValue'
+              type: String
+              description: 'The value of the header to add.'
+            - name: 'replace'
+              type: Boolean
+              description: |
+                If false, headerValue is appended to any values that already exist for the header. If true, headerValue is set for the header, discarding any values that were set for that header.
+                The default value is false.
+              default_value: false

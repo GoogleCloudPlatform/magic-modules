@@ -146,7 +146,7 @@ func flattenDatasourceGoogleDatabaseInstancesList(fetchedInstances []*sqladmin.D
 		instance["available_maintenance_versions"] = rawInstance.AvailableMaintenanceVersions
 		instance["instance_type"] = rawInstance.InstanceType
 		instance["service_account_email_address"] = rawInstance.ServiceAccountEmailAddress
-		instance["settings"] = flattenSettings(rawInstance.Settings, d)
+		instance["settings"] = flattenSettings(rawInstance.Settings, rawInstance.InstanceType, d)
 
 		if rawInstance.DiskEncryptionConfiguration != nil {
 			instance["encryption_key_name"] = rawInstance.DiskEncryptionConfiguration.KmsKeyName
@@ -179,6 +179,7 @@ func flattenDatasourceGoogleDatabaseInstancesList(fetchedInstances []*sqladmin.D
 		instance["master_instance_name"] = strings.TrimPrefix(rawInstance.MasterInstanceName, project+":")
 		instance["project"] = project
 		instance["self_link"] = rawInstance.SelfLink
+		instance["psc_service_attachment_link"] = rawInstance.PscServiceAttachmentLink
 
 		instances = append(instances, instance)
 	}

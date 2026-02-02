@@ -132,7 +132,7 @@ Eg. `"nodejs20"`, `"python39"`, `"dotnet3"`, `"go116"`, `"java11"`, `"ruby30"`, 
 
 * `ingress_settings` - (Optional) String value that controls what traffic can reach the function. Allowed values are `ALLOW_ALL`, `ALLOW_INTERNAL_AND_GCLB` and `ALLOW_INTERNAL_ONLY`. Check [ingress documentation](https://cloud.google.com/functions/docs/networking/network-settings#ingress_settings) to see the impact of each settings value. Changes to this field will recreate the cloud function.
 
-* `labels` - (Optional) A set of key/value label pairs to assign to the function. Label keys must follow the requirements at https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements.
+* `labels` - (Optional) A set of key/value label pairs to assign to the function. Label keys must follow the requirements at https://docs.cloud.google.com/resource-manager/docs/creating-managing-labels#requirements.
 
 **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
 Please refer to the field 'effective_labels' for all of the labels present on the resource.
@@ -179,6 +179,10 @@ Please refer to the field 'effective_labels' for all of the labels present on th
 
 * `secret_volumes` - (Optional) Secret volumes configuration. Structure is [documented below](#nested_secret_volumes).
 
+* `automatic_update_policy` - (Optional) Security patches are applied automatically to the runtime without requiring the function to be redeployed. This should be specified as an empty block and cannot be set alongside `on_deploy_update_policy`.
+
+* `on_deploy_update_policy` - (Optional) Security patches are only applied when a function is redeployed. This should be specified as an empty block and cannot be set alongside `automatic_update_policy`. Structure is [documented below](#nested_on_deploy_update_policy).
+
 <a name="nested_event_trigger"></a>The `event_trigger` block supports:
 
 * `event_type` - (Required) The type of event to observe. For example: `"google.storage.object.finalize"`.
@@ -211,6 +215,10 @@ which to observe events. For example, `"myBucket"` or `"projects/my-project/topi
 * `secret` - (Required) ID of the secret in secret manager (not the full resource name).
 
 * `version` - (Required) Version of the secret (version number or the string "latest"). It is recommended to use a numeric version for secret environment variables as any updates to the secret value is not reflected until new clones start.
+
+<a name="nested_on_deploy_update_policy"></a>The `on_deploy_update_policy` block supports:
+
+* `runtime_version` - (Output) The runtime version which was used during latest function deployment.
 
 <a name="nested_secret_volumes"></a>The `secret_volumes` block supports:
 

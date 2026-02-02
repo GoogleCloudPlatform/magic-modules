@@ -191,6 +191,16 @@ The following arguments are supported:
   * `CLOUD_ARMOR_INTERNAL_SERVICE` - Cloud Armor internal service policies can be configured to filter HTTP requests targeting services
     managed by Traffic Director in a service mesh. They filter requests before the request is served from the application.
 
+* `labels` - Labels to apply to this address. A list of key->value pairs.
+  **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+  Please refer to the field `effective_labels` for all of the labels present on the resource.
+
+* `effective_labels` - All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
+
+* `terraform_labels` - The combination of labels configured directly on the resource and default labels configured on the provider.
+
+* `label_fingerprint` - The unique fingerprint of the labels.
+
 <a name="nested_advanced_options_config"></a>The `advanced_options_config` block supports:
 
 * `json_parsing` - Whether or not to JSON parse the payload body. Defaults to `DISABLED`.
@@ -206,6 +216,8 @@ The following arguments are supported:
   * `VERBOSE` - Verbose log level.
 
 * `user_ip_request_headers` - (Optional) An optional list of case-insensitive request header names to use for resolving the callers client IP address.
+
+* `request_body_inspection_size` - (Optional) The maximum request size chosen by the customer with Waf enabled. Values supported are "8KB", "16KB, "32KB", "48KB" and "64KB". Values are case insensitive.
 
 <a name="nested_json_custom_config"></a>The `json_custom_config` block supports:
 
@@ -359,7 +371,7 @@ The following arguments are supported:
   * `HTTP_HEADER` -- Name of the HTTP header whose value is taken as the key value.
   * `HTTP_COOKIE` -- Name of the HTTP cookie whose value is taken as the key value.
 
-* `enforce_on_key_configs` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) If specified, any combination of values of enforce_on_key_type/enforce_on_key_name is treated as the key on which rate limit threshold/action is enforced. You can specify up to 3 enforce_on_key_configs. If `enforce_on_key_configs` is specified, `enforce_on_key` must be set to an empty string. Structure is [documented below](#nested_enforce_on_key_configs).
+* `enforce_on_key_configs` - (Optional, [Beta](../guides/provider_versions.html.markdown)) If specified, any combination of values of enforce_on_key_type/enforce_on_key_name is treated as the key on which rate limit threshold/action is enforced. You can specify up to 3 enforce_on_key_configs. If `enforce_on_key_configs` is specified, `enforce_on_key` must be set to an empty string. Structure is [documented below](#nested_enforce_on_key_configs).
 
   **Note:** To avoid the conflict between `enforce_on_key` and `enforce_on_key_configs`, the field [`enforce_on_key`](#enforce_on_key) needs to be set to an empty string.
 
@@ -421,7 +433,7 @@ The following arguments are supported:
 
 * `layer_7_ddos_defense_config` - (Optional) Configuration for [Google Cloud Armor Adaptive Protection Layer 7 DDoS Defense](https://cloud.google.com/armor/docs/adaptive-protection-overview?hl=en). Structure is [documented below](#nested_layer_7_ddos_defense_config).
 
-* `auto_deploy_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for [Automatically deploy Adaptive Protection suggested rules](https://cloud.google.com/armor/docs/adaptive-protection-auto-deploy?hl=en). Structure is [documented below](#nested_auto_deploy_config).
+* `auto_deploy_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)) Configuration for [Automatically deploy Adaptive Protection suggested rules](https://cloud.google.com/armor/docs/adaptive-protection-auto-deploy?hl=en). Structure is [documented below](#nested_auto_deploy_config).
 
 <a name="nested_layer_7_ddos_defense_config"></a>The `layer_7_ddos_defense_config` block supports:
 

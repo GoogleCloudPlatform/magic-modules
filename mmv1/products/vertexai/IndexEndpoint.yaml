@@ -47,9 +47,12 @@ examples:
     primary_resource_id: 'index_endpoint'
     vars:
       network_name: 'network-name'
+      kms_key_name: 'kms-name'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     exclude_docs: true
+    min_version: beta
   - name: 'vertex_ai_index_endpoint_with_psc'
     primary_resource_id: 'index_endpoint'
   - name: 'vertex_ai_index_endpoint_with_false_psc'
@@ -128,6 +131,20 @@ properties:
         immutable: true
         item_type:
           type: String
+      - name: 'pscAutomationConfigs'
+        type: Array
+        description: List of projects and networks where the PSC endpoints will be created. This field is used by Online Inference(Prediction) only.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'projectId'
+              type: String
+              required: true
+              description: Project id used to create forwarding rule.
+            - name: 'network'
+              type: String
+              required: true
+              description: 'The full name of the Google Compute Engine [network](https://cloud.google.com/compute/docs/networks-and-firewalls#networks). [Format](https://cloud.google.com/compute/docs/reference/rest/v1/networks/get): projects/{project}/global/networks/{network}.'
   - name: 'publicEndpointEnabled'
     type: Boolean
     description: If true, the deployed index will be accessible through public endpoint.
@@ -137,3 +154,19 @@ properties:
     type: String
     description: If publicEndpointEnabled is true, this field will be populated with the domain name to use for this index endpoint.
     output: true
+  - name: 'encryptionSpec'
+    type: NestedObject
+    description:
+      Customer-managed encryption key spec for an IndexEndpoint. If set, this IndexEndpoint and all sub-resources of this IndexEndpoint will be secured by this key.
+    immutable: true
+    properties:
+      - name: 'kmsKeyName'
+        type: String
+        description:
+          'Required. The Cloud KMS resource identifier of the customer managed
+          encryption key used to protect a resource. Has the form:
+          `projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key`.
+          The key needs to be in the same region as where the compute resource
+          is created.'
+        required: true
+        immutable: true

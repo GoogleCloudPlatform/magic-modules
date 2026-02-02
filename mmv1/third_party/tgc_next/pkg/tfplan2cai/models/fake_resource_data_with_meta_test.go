@@ -16,7 +16,7 @@ package models
 import (
 	"testing"
 
-	provider "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/provider"
+	provider "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/provider"
 	"github.com/stretchr/testify/assert"
 )
 

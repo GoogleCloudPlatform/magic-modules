@@ -8,10 +8,10 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/models"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/tfplan"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/models"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/tfplan"
 
-	provider "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/provider"
+	provider "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/provider"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 

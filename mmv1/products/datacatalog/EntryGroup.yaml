@@ -41,7 +41,6 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'entry_group'
   base_url: 'projects/{{project}}/locations/{{region}}/entryGroups/{{entry_group}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{region}}/entryGroups/{{entry_group}}'
     - '{{entry_group}}'

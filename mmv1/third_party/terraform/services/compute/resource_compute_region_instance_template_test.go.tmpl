@@ -94,6 +94,35 @@ func TestAccComputeRegionInstanceTemplate_imageShorthand(t *testing.T) {
 	})
 }
 
+func TestAccComputeRegionInstanceTemplate_metadataGceContainerDeclaration(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionInstanceTemplate_metadataGceContainerDeclaration(acctest.RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstanceTemplateExists(
+						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
+					testAccCheckComputeRegionInstanceTemplateMetadata(&instanceTemplate, "foo", "bar"),
+					testAccCheckComputeRegionInstanceTemplateMetadata(&instanceTemplate, "gce-container-declaration", "spec:\n containers:\n - name: test\n image: gcr.io/google-containers/busybox\n"),
+				),
+			},
+			{
+				ResourceName:            "google_compute_region_instance_template.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "metadata.foo", "metadata.gce-container-declaration"},
+			},
+		},
+	})
+}
+
 func TestAccComputeRegionInstanceTemplate_preemptible(t *testing.T) {
 	t.Parallel()
 
@@ -399,6 +428,9 @@ func TestAccComputeRegionInstanceTemplate_subnet_xpn(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories:    acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -809,10 +841,6 @@ func TestAccComputeRegionInstanceTemplate_performanceMonitoringUnit(t *testing.T
 		"instance_name":               fmt.Sprintf("tf-test-instance-template-%s", acctest.RandString(t, 10)),
 		"performance_monitoring_unit": "STANDARD",
 	}
-	context_2 := map[string]interface{}{
-		"instance_name":               context_1["instance_name"].(string),
-		"performance_monitoring_unit": "ENHANCED",
-	}
 	context_3 := map[string]interface{}{
 		"instance_name":               context_1["instance_name"].(string),
 		"performance_monitoring_unit": "ARCHITECTURAL",
@@ -828,18 +856,6 @@ func TestAccComputeRegionInstanceTemplate_performanceMonitoringUnit(t *testing.T
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &instanceTemplate),
 					resource.TestCheckResourceAttr("google_compute_region_instance_template.foobar", "advanced_machine_features.0.performance_monitoring_unit", "STANDARD"),
-				),
-			},
-			{
-				ResourceName:      "google_compute_region_instance_template.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeRegionInstanceTemplate_performanceMonitoringUnit(context_2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &instanceTemplate),
-					resource.TestCheckResourceAttr("google_compute_region_instance_template.foobar", "advanced_machine_features.0.performance_monitoring_unit", "ENHANCED"),
 				),
 			},
 			{
@@ -1643,7 +1659,7 @@ func TestAccComputeRegionInstanceTemplate_gracefulShutdown(t *testing.T) {
 			},
 			{
 				Config:      testAccComputeRegionInstanceTemplate_gracefulShutdown(invalid_4),
-				ExpectError: regexp.MustCompile("Must be less than or equal to 999999999, invalid"),
+				ExpectError: regexp.MustCompile("Must be less than or equal to 999999999"),
 			},
 			{
 				Config: testAccComputeRegionInstanceTemplate_gracefulShutdown(acceptableByApi_1),
@@ -1653,6 +1669,40 @@ func TestAccComputeRegionInstanceTemplate_gracefulShutdown(t *testing.T) {
 					resource.TestCheckResourceAttr("google_compute_region_instance_template.foobar", "scheduling.0.graceful_shutdown.0.max_duration.0.seconds", "1"),
 					resource.TestCheckResourceAttr("google_compute_region_instance_template.foobar", "scheduling.0.graceful_shutdown.0.max_duration.0.nanos", "1000000"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccComputeRegionInstanceTemplate_schedulingSkipGuestOSShutdown(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+	instanceName := fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
+
+	variant_1 := map[string]interface{}{
+		"instance_name": instanceName,
+		"skip_guest_os_shutdown": true,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionInstanceTemplate_schedulingSkipGuestOSShutdown(variant_1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstanceTemplateExists(
+						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
+					resource.TestCheckResourceAttr("google_compute_region_instance_template.foobar", "scheduling.0.skip_guest_os_shutdown", "true"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
 	})
@@ -2315,6 +2365,51 @@ resource "google_compute_region_instance_template" "foobar" {
 `, context)
 }
 
+func testAccComputeRegionInstanceTemplate_metadataGceContainerDeclaration(suffix string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_region_instance_template" "foobar" {
+  name           = "tf-test-instance-template-%s"
+  region      = "us-central1"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+    preemptible       = false
+    automatic_restart = true
+  }
+
+  metadata = {
+    foo                       = "bar"
+    gce-container-declaration = "spec:\n containers:\n - name: test\n image: gcr.io/google-containers/busybox\n"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+
+  labels = {
+    my_label = "foobar"
+  }
+}
+`, suffix)
+}
+
 func testAccComputeRegionInstanceTemplate_preemptible(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -2853,9 +2948,16 @@ resource "google_project" "host_project" {
   deletion_policy = "DELETE"
 }
 
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on = [google_project.host_project, google_project.service_project]
+}
+
+
 resource "google_project_service" "host_project" {
   project = google_project.host_project.project_id
   service = "compute.googleapis.com"
+  depends_on = [time_sleep.wait_60_seconds]
 }
 
 resource "google_compute_shared_vpc_host_project" "host_project" {
@@ -2873,6 +2975,7 @@ resource "google_project" "service_project" {
 resource "google_project_service" "service_project" {
   project = google_project.service_project.project_id
   service = "compute.googleapis.com"
+  depends_on = [time_sleep.wait_60_seconds]
 }
 
 resource "google_compute_shared_vpc_service_project" "service_project" {
@@ -2880,10 +2983,16 @@ resource "google_compute_shared_vpc_service_project" "service_project" {
   service_project = google_project_service.service_project.project
 }
 
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_project_service.host_project, google_project_service.service_project]
+}
+
 resource "google_compute_network" "network" {
   name                    = "tf-test-network-%s"
   auto_create_subnetworks = false
   project                 = google_compute_shared_vpc_host_project.host_project.project
+  depends_on              = [time_sleep.wait_120_seconds]
 }
 
 resource "google_compute_subnetwork" "subnetwork" {
@@ -3554,7 +3663,7 @@ data "google_compute_image" "my_image" {
 resource "google_compute_region_instance_template" "foobar" {
   name         = "tf-test-instance-template-%s"
   region       = "us-central1"
-  machine_type = "c2-standard-2"
+  machine_type = "n2-standard-2"
 
   disk {
     source_image = data.google_compute_image.my_image.self_link
@@ -4701,6 +4810,35 @@ resource "google_compute_region_instance_template" "foobar" {
 		%{nanos}
 	  }
 	}
+  }
+}
+`, context)
+}
+
+func testAccComputeRegionInstanceTemplate_schedulingSkipGuestOSShutdown(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_region_instance_template" "foobar" {
+  name         = "%{instance_name}"
+  machine_type = "e2-medium"
+  region       = "us-central1"
+
+  disk {
+	source_image = data.google_compute_image.my_image.self_link
+	auto_delete  = true
+	boot         = true
+  }
+
+  network_interface {
+	network = "default"
+  }
+
+  scheduling {
+	skip_guest_os_shutdown = %{skip_guest_os_shutdown}
   }
 }
 `, context)

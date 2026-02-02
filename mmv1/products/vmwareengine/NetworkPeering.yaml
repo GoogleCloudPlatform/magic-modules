@@ -25,6 +25,8 @@ create_url: 'projects/{{project}}/locations/global/networkPeerings?networkPeerin
 update_verb: 'PATCH'
 import_format:
   - 'projects/{{project}}/locations/global/networkPeerings/{{name}}'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -138,6 +140,7 @@ properties:
       - 'NETAPP_CLOUD_VOLUMES'
       - 'THIRD_PARTY_SERVICE'
       - 'DELL_POWERSCALE'
+      - 'GOOGLE_CLOUD_NETAPP_VOLUMES'
   - name: 'uid'
     type: String
     description: |
