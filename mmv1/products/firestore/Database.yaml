@@ -152,7 +152,18 @@ examples:
       - 'etag'
       - 'deletion_policy'
   - name: 'firestore_database_data_access'
+    exclude_test: true
     primary_resource_id: 'firestore_access_database'
+    vars:
+      database_id: 'data-access-database-id'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'project'
+      - 'etag'
+      - 'deletion_policy'
+  - name: 'firestore_database_data_access_test'
+    primary_resource_id: 'firestore_access_database_test'
     vars:
       database_id: 'data-access-database-id'
     test_env_vars:
@@ -223,7 +234,6 @@ properties:
     description: |
       The Firestore API data access mode to use for this database. Can only be
       specified for 'ENTERPRISE' edition databases.
-    required: false
     default_from_api: true
     immutable: true
     enum_values:
@@ -234,7 +244,6 @@ properties:
     description: |
       The MongoDB compatible API data access mode to use for this database. Can
       only be specified for 'ENTERPRISE' edition databases.
-    required: false
     default_from_api: true
     immutable: true
     enum_values:
@@ -245,7 +254,6 @@ properties:
     description: |
       The Realtime Updates mode to use for this database. Can only be specified
       for 'ENTERPRISE' edition databases.
-    required: false
     default_from_api: true
     immutable: true
     enum_values:

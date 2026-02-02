@@ -7,4 +7,5 @@ resource "google_firestore_database" "{{$.PrimaryResourceId}}" {
   firestore_data_access_mode          = "DATA_ACCESS_MODE_ENABLED"
   mongodb_compatible_data_access_mode = "DATA_ACCESS_MODE_DISABLED"
   realtime_updates_mode               = "REALTIME_UPDATES_MODE_DISABLED"
+  deletion_policy                     = "DELETE"
 }
