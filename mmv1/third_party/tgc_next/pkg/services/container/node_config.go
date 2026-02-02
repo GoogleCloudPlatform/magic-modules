@@ -1,21 +1,15 @@
 package container
 
 import (
-	"fmt"
-	"log"
-	"strconv"
 	"strings"
-	"time"
 
-	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
-	container "google.golang.org/api/container/v1beta1"
+	"google.golang.org/api/container/v1"
 )
 
 // Matches gke-default scope from https://cloud.google.com/sdk/gcloud/reference/container/clusters/create
@@ -1357,7 +1351,7 @@ func expandNodeConfigDefaults(configured interface{}) *container.NodeConfigDefau
 	return nodeConfigDefaults
 }
 
-func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *container.NodeConfig {
+func expandNodeConfig(d tpgresource.TerraformResourceData, prefix string, v interface{}) *container.NodeConfig {
 	nodeConfigs := v.([]interface{})
 	nc := &container.NodeConfig{
 		// Defaults can't be set on a list/set in the schema, so set the default on create here.
@@ -1435,12 +1429,6 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 		}
 	}
 
-	if v, ok := nodeConfig["ephemeral_storage_config"]; ok && len(v.([]interface{})) > 0 {
-		conf := v.([]interface{})[0].(map[string]interface{})
-		nc.EphemeralStorageConfig = &container.EphemeralStorageConfig{
-			LocalSsdCount: int64(conf["local_ssd_count"].(int)),
-		}
-	}
 	if v, ok := nodeConfig["local_nvme_ssd_block_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		nc.LocalNvmeSsdBlockConfig = &container.LocalNvmeSsdBlockConfig{
@@ -1624,12 +1612,6 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 		nc.WorkloadMetadataConfig = expandWorkloadMetadataConfig(v)
 	}
 
-	if v, ok := nodeConfig["sandbox_config"]; ok && len(v.([]interface{})) > 0 {
-		conf := v.([]interface{})[0].(map[string]interface{})
-		nc.SandboxConfig = &container.SandboxConfig{
-			SandboxType: conf["sandbox_type"].(string),
-		}
-	}
 	if v, ok := nodeConfig["boot_disk_kms_key"]; ok {
 		nc.BootDiskKmsKey = v.(string)
 	}
@@ -1637,32 +1619,32 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 	if v, ok := nodeConfig["kubelet_config"]; ok {
 		nc.KubeletConfig = expandKubeletConfig(v)
 
-		// start cpu_cfs_quota fix https://github.com/hashicorp/terraform-provider-google/issues/15767
-		// this makes the field conditional on appearance in configuration. This allows the API `true` default
-		// to override null, where currently we force-send null as false, which is wrong.
-		rawConfigNPRoot := d.GetRawConfig()
-		// if we have a prefix, we're in `node_pool.N.` in GKE Cluster. Traverse the RawConfig object to reach that
-		// root, at which point local references work going forwards.
-		if prefix != "" {
-			parts := strings.Split(prefix, ".") // "node_pool.N." -> ["node_pool" "N", ""]
-			npIndex, err := strconv.Atoi(parts[1])
-			if err != nil { // no error return from expander
-				panic(fmt.Errorf("unexpected format for node pool path prefix: %w. value: %v", err, prefix))
-			}
+		// // start cpu_cfs_quota fix https://github.com/hashicorp/terraform-provider-google/issues/15767
+		// // this makes the field conditional on appearance in configuration. This allows the API `true` default
+		// // to override null, where currently we force-send null as false, which is wrong.
+		// rawConfigNPRoot := d.GetRawConfig()
+		// // if we have a prefix, we're in `node_pool.N.` in GKE Cluster. Traverse the RawConfig object to reach that
+		// // root, at which point local references work going forwards.
+		// if prefix != "" {
+		// 	parts := strings.Split(prefix, ".") // "node_pool.N." -> ["node_pool" "N", ""]
+		// 	npIndex, err := strconv.Atoi(parts[1])
+		// 	if err != nil { // no error return from expander
+		// 		panic(fmt.Errorf("unexpected format for node pool path prefix: %w. value: %v", err, prefix))
+		// 	}
 
-			rawConfigNPRoot = rawConfigNPRoot.GetAttr("node_pool").Index(cty.NumberIntVal(int64(npIndex)))
-		}
+		// 	rawConfigNPRoot = rawConfigNPRoot.GetAttr("node_pool").Index(cty.NumberIntVal(int64(npIndex)))
+		// }
 
-		if vNC := rawConfigNPRoot.GetAttr("node_config"); vNC.LengthInt() > 0 {
-			if vKC := vNC.Index(cty.NumberIntVal(0)).GetAttr("kubelet_config"); vKC.LengthInt() > 0 {
-				v := vKC.Index(cty.NumberIntVal(0)).GetAttr("cpu_cfs_quota")
-				if v == cty.NullVal(cty.Bool) {
-					nc.KubeletConfig.CpuCfsQuota = true
-				} else if v.False() { // force-send explicit false to API
-					nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "CpuCfsQuota")
-				}
-			}
-		}
+		// if vNC := rawConfigNPRoot.GetAttr("node_config"); vNC.LengthInt() > 0 {
+		// 	if vKC := vNC.Index(cty.NumberIntVal(0)).GetAttr("kubelet_config"); vKC.LengthInt() > 0 {
+		// 		v := vKC.Index(cty.NumberIntVal(0)).GetAttr("cpu_cfs_quota")
+		// 		if v == cty.NullVal(cty.Bool) {
+		// 			nc.KubeletConfig.CpuCfsQuota = true
+		// 		} else if v.False() { // force-send explicit false to API
+		// 			nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "CpuCfsQuota")
+		// 		}
+		// 	}
+		// }
 		// end cpu_cfs_quota fix
 	}
 
@@ -1705,10 +1687,6 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 
 	if v, ok := nodeConfig["flex_start"]; ok {
 		nc.FlexStart = v.(bool)
-	}
-
-	if v, ok := nodeConfig["host_maintenance_policy"]; ok {
-		nc.HostMaintenancePolicy = expandHostMaintenancePolicy(v)
 	}
 
 	if v, ok := nodeConfig["confidential_nodes"]; ok {
@@ -2359,23 +2337,6 @@ func expandSoleTenantConfig(v interface{}) *container.SoleTenantConfig {
 	return stConfig
 }
 
-func expandHostMaintenancePolicy(v interface{}) *container.HostMaintenancePolicy {
-	if v == nil {
-		return nil
-	}
-	ls := v.([]interface{})
-	if len(ls) == 0 {
-		return nil
-	}
-	cfg := ls[0].(map[string]interface{})
-	mPolicy := &container.HostMaintenancePolicy{}
-	if maintenanceInterval, ok := cfg["maintenance_interval"]; ok {
-		mPolicy.MaintenanceInterval = maintenanceInterval.(string)
-	}
-
-	return mPolicy
-}
-
 func expandConfidentialNodes(configured interface{}) *container.ConfidentialNodes {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -2435,10 +2396,9 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"guest_accelerator":                  flattenContainerGuestAccelerators(c.Accelerators),
 		"local_ssd_count":                    c.LocalSsdCount,
 		"logging_variant":                    flattenLoggingVariant(c.LoggingConfig),
-		"ephemeral_storage_config":           flattenEphemeralStorageConfig(c.EphemeralStorageConfig),
 		"local_nvme_ssd_block_config":        flattenLocalNvmeSsdBlockConfig(c.LocalNvmeSsdBlockConfig),
-		"ephemeral_storage_local_ssd_config": flattenEphemeralStorageLocalSsdConfig(c.EphemeralStorageLocalSsdConfig),
 		"gcfs_config":                        flattenGcfsConfig(c.GcfsConfig),
+		"ephemeral_storage_local_ssd_config": flattenEphemeralStorageLocalSsdConfig(c.EphemeralStorageLocalSsdConfig),
 		"gvnic":                              flattenGvnic(c.Gvnic),
 		"reservation_affinity":               flattenGKEReservationAffinity(c.ReservationAffinity),
 		"service_account":                    c.ServiceAccount,
@@ -2456,8 +2416,6 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"taint":                              flattenTaints(c.Taints, oldTaints),
 		"effective_taints":                   flattenEffectiveTaints(c.Taints),
 		"workload_metadata_config":           flattenWorkloadMetadataConfig(c.WorkloadMetadataConfig),
-		"sandbox_config":                     flattenSandboxConfig(c.SandboxConfig),
-		"host_maintenance_policy":            flattenHostMaintenancePolicy(c.HostMaintenancePolicy),
 		"confidential_nodes":                 flattenConfidentialNodes(c.ConfidentialNodes),
 		"boot_disk_kms_key":                  c.BootDiskKmsKey,
 		"kubelet_config":                     flattenKubeletConfig(c.KubeletConfig),
@@ -2558,16 +2516,6 @@ func flattenShieldedInstanceConfig(c *container.ShieldedInstanceConfig) []map[st
 		result = append(result, map[string]interface{}{
 			"enable_secure_boot":          c.EnableSecureBoot,
 			"enable_integrity_monitoring": c.EnableIntegrityMonitoring,
-		})
-	}
-	return result
-}
-
-func flattenEphemeralStorageConfig(c *container.EphemeralStorageConfig) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"local_ssd_count": c.LocalSsdCount,
 		})
 	}
 	return result
@@ -2698,15 +2646,6 @@ func flattenWorkloadMetadataConfig(c *container.WorkloadMetadataConfig) []map[st
 	if c != nil {
 		result = append(result, map[string]interface{}{
 			"mode": c.Mode,
-		})
-	}
-	return result
-}
-func flattenSandboxConfig(c *container.SandboxConfig) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"sandbox_type": c.SandboxType,
 		})
 	}
 	return result
@@ -3125,714 +3064,4 @@ func flattenFastSocket(c *container.FastSocket) []map[string]interface{} {
 		})
 	}
 	return result
-}
-
-func flattenHostMaintenancePolicy(c *container.HostMaintenancePolicy) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"maintenance_interval": c.MaintenanceInterval,
-		})
-	}
-
-	return result
-}
-
-// This portion of nodePoolUpdate() is moved here to be shared with
-// node pool updates in `resource_container_cluster`
-func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Config, nodePoolInfo *NodePoolInformation, prefix, name string, timeout time.Duration) error {
-
-	// Nodepool write-lock will be acquired when update function is called.
-	npLockKey := nodePoolInfo.nodePoolLockKey(name)
-
-	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
-	if err != nil {
-		return err
-	}
-
-	if d.HasChange(prefix + "node_config") {
-
-		if d.HasChange(prefix + "node_config.0.logging_variant") {
-			if v, ok := d.GetOk(prefix + "node_config.0.logging_variant"); ok {
-				loggingVariant := v.(string)
-				req := &container.UpdateNodePoolRequest{
-					Name: name,
-					LoggingConfig: &container.NodePoolLoggingConfig{
-						VariantConfig: &container.LoggingVariantConfig{
-							Variant: loggingVariant,
-						},
-					},
-				}
-
-				updateF := func() error {
-					clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-					if config.UserProjectOverride {
-						clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-					}
-					op, err := clusterNodePoolsUpdateCall.Do()
-					if err != nil {
-						return err
-					}
-
-					// Wait until it's updated
-					return ContainerOperationWait(config, op,
-						nodePoolInfo.project,
-						nodePoolInfo.location,
-						"updating GKE node pool logging_variant", userAgent,
-						timeout)
-				}
-
-				if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
-				}
-
-				log.Printf("[INFO] Updated logging_variant for node pool %s", name)
-			}
-		}
-
-		if d.HasChange(prefix + "node_config.0.containerd_config") {
-			if _, ok := d.GetOk(prefix + "node_config.0.containerd_config"); ok {
-				req := &container.UpdateNodePoolRequest{
-					Name:             name,
-					ContainerdConfig: expandContainerdConfig(d.Get(prefix + "node_config.0.containerd_config")),
-				}
-				if req.ContainerdConfig == nil {
-					req.ContainerdConfig = &container.ContainerdConfig{}
-					req.ForceSendFields = []string{"ContainerdConfig"}
-				}
-				updateF := func() error {
-					clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-					if config.UserProjectOverride {
-						clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-					}
-					op, err := clusterNodePoolsUpdateCall.Do()
-					if err != nil {
-						return err
-					}
-
-					// Wait until it's updated
-					return ContainerOperationWait(config, op,
-						nodePoolInfo.project,
-						nodePoolInfo.location,
-						"updating GKE node pool containerd_config", userAgent,
-						timeout)
-				}
-
-				if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
-				}
-
-				log.Printf("[INFO] Updated containerd_config for node pool %s", name)
-			}
-		}
-
-		if d.HasChange(prefix + "node_config.0.confidential_nodes") {
-			if _, ok := d.GetOk(prefix + "node_config.0.confidential_nodes"); ok {
-				req := &container.UpdateNodePoolRequest{
-					Name:              name,
-					ConfidentialNodes: expandConfidentialNodes(d.Get(prefix + "node_config.0.confidential_nodes")),
-				}
-				if req.ConfidentialNodes == nil {
-					req.ConfidentialNodes = &container.ConfidentialNodes{}
-					req.ForceSendFields = []string{"ConfidentialNodes"}
-				}
-				updateF := func() error {
-					clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-					if config.UserProjectOverride {
-						clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-					}
-					op, err := clusterNodePoolsUpdateCall.Do()
-					if err != nil {
-						return err
-					}
-
-					// Wait until it's updated
-					return ContainerOperationWait(config, op,
-						nodePoolInfo.project,
-						nodePoolInfo.location,
-						"updating GKE node pool confidential_nodes", userAgent,
-						timeout)
-				}
-
-				if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-					return err
-				}
-
-				log.Printf("[INFO] Updated confidential_nodes for node pool %s", name)
-			}
-		}
-
-		if d.HasChange("node_config.0.disk_size_gb") ||
-			d.HasChange("node_config.0.disk_type") ||
-			d.HasChange("node_config.0.machine_type") ||
-			d.HasChange("node_config.0.storage_pools") ||
-			d.HasChange("node_config.0.boot_disk") {
-
-			req := &container.UpdateNodePoolRequest{
-				Name:        name,
-				DiskSizeGb:  int64(d.Get("node_config.0.disk_size_gb").(int)),
-				DiskType:    d.Get("node_config.0.disk_type").(string),
-				MachineType: d.Get("node_config.0.machine_type").(string),
-			}
-			if v, ok := d.GetOk("node_config.0.storage_pools"); ok {
-				spList := v.([]interface{})
-				storagePools := []string{}
-				for _, v := range spList {
-					if v != nil {
-						storagePools = append(storagePools, v.(string))
-					}
-				}
-				req.StoragePools = storagePools
-			}
-
-			if v, ok := d.GetOk("node_config.0.boot_disk"); ok {
-				bd := expandBootDiskConfig(v)
-				req.BootDisk = bd
-
-				// The following checks are to ensure that the migrating fields are handled properly.
-				// Migrating fields are disk_type -> boot_disk.disk_type and disk_size_gb -> boot_disk.size_gb
-				// If the legacy (top level) disk_type field is not changing, nil it out to allow the API to fill it in.
-				legacyDiskTypeOld, legacyDiskTypeNew := d.GetChange("node_config.0.disk_type")
-				if legacyDiskTypeOld == legacyDiskTypeNew {
-					req.DiskType = ""
-				}
-				// If the new boot disk configuration disk_filed is not changing, nil it out to allow the API to fill it in.
-				bootDiskTypeOld, bootDiskTypeNew := d.GetChange("node_config.0.boot_disk.0.disk_type")
-				if bootDiskTypeOld == bootDiskTypeNew {
-					req.BootDisk.DiskType = ""
-				}
-				// If the legacy (top level) disk_size_gb field is not changing, nil it out to allow the API to fill it in.
-				legacyDiskSizeGbOld, legacyDiskSizeGbNew := d.GetChange("node_config.0.disk_size_gb")
-				if legacyDiskSizeGbOld == legacyDiskSizeGbNew {
-					req.DiskSizeGb = 0
-				}
-				// if the new boot disk configuration size_gb field is not changing, nil it out to allow the API to fill it in.
-				bootDiskSizeGbOld, bootDiskSizeGbNew := d.GetChange("node_config.0.boot_disk.0.size_gb")
-				if bootDiskSizeGbOld == bootDiskSizeGbNew {
-					req.BootDisk.SizeGb = 0
-				}
-			}
-
-			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
-				if err != nil {
-					return err
-				}
-
-				// Wait until it's updated
-				return ContainerOperationWait(config, op,
-					nodePoolInfo.project,
-					nodePoolInfo.location,
-					"updating GKE node pool disk_size_gb/disk_type/machine_type/storage_pools/boot_disk", userAgent,
-					timeout)
-			}
-
-			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-				return err
-			}
-			log.Printf("[INFO] Updated disk disk_size_gb/disk_type/machine_type/storage_pools/boot_disk for Node Pool %s", d.Id())
-		}
-
-		if d.HasChange(prefix + "node_config.0.taint") {
-			req := &container.UpdateNodePoolRequest{
-				Name: name,
-			}
-			if v, ok := d.GetOk(prefix + "node_config.0.taint"); ok {
-				taintsList := v.([]interface{})
-				taints := make([]*container.NodeTaint, 0, len(taintsList))
-				for _, v := range taintsList {
-					if v != nil {
-						data := v.(map[string]interface{})
-						taint := &container.NodeTaint{
-							Key:    data["key"].(string),
-							Value:  data["value"].(string),
-							Effect: data["effect"].(string),
-						}
-						taints = append(taints, taint)
-					}
-				}
-				ntaints := &container.NodeTaints{
-					Taints: taints,
-				}
-				req.Taints = ntaints
-			}
-
-			if req.Taints == nil {
-				taints := make([]*container.NodeTaint, 0, 0)
-				ntaints := &container.NodeTaints{
-					Taints: taints,
-				}
-				req.Taints = ntaints
-			}
-
-			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
-				if err != nil {
-					return err
-				}
-
-				// Wait until it's updated
-				return ContainerOperationWait(config, op,
-					nodePoolInfo.project,
-					nodePoolInfo.location,
-					"updating GKE node pool taints", userAgent,
-					timeout)
-			}
-
-			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-				return err
-			}
-			log.Printf("[INFO] Updated taints for Node Pool %s", d.Id())
-		}
-
-		if d.HasChange(prefix + "node_config.0.tags") {
-			req := &container.UpdateNodePoolRequest{
-				Name: name,
-			}
-			if v, ok := d.GetOk(prefix + "node_config.0.tags"); ok {
-				tagsList := v.([]interface{})
-				tags := []string{}
-				for _, v := range tagsList {
-					if v != nil {
-						tags = append(tags, v.(string))
-					}
-				}
-				ntags := &container.NetworkTags{
-					Tags: tags,
-				}
-				req.Tags = ntags
-			}
-
-			// sets tags to the empty list when user removes a previously defined list of tags entriely
-			// aka the node pool goes from having tags to no longer having any
-			if req.Tags == nil {
-				tags := []string{}
-				ntags := &container.NetworkTags{
-					Tags: tags,
-				}
-				req.Tags = ntags
-			}
-
-			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
-				if err != nil {
-					return err
-				}
-
-				// Wait until it's updated
-				return ContainerOperationWait(config, op,
-					nodePoolInfo.project,
-					nodePoolInfo.location,
-					"updating GKE node pool tags", userAgent,
-					timeout)
-			}
-
-			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-				return err
-			}
-			log.Printf("[INFO] Updated tags for node pool %s", name)
-		}
-
-		if d.HasChange(prefix + "node_config.0.resource_manager_tags") {
-			req := &container.UpdateNodePoolRequest{
-				Name: name,
-			}
-			if v, ok := d.GetOk(prefix + "node_config.0.resource_manager_tags"); ok {
-				req.ResourceManagerTags = expandResourceManagerTags(v)
-			}
-
-			// sets resource manager tags to the empty list when user removes a previously defined list of tags entriely
-			// aka the node pool goes from having tags to no longer having any
-			if req.ResourceManagerTags == nil {
-				tags := make(map[string]string)
-				rmTags := &container.ResourceManagerTags{
-					Tags: tags,
-				}
-				req.ResourceManagerTags = rmTags
-			}
-
-			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
-				if err != nil {
-					return err
-				}
-
-				// Wait until it's updated
-				return ContainerOperationWait(config, op,
-					nodePoolInfo.project,
-					nodePoolInfo.location,
-					"updating GKE node pool resource manager tags", userAgent,
-					timeout)
-			}
-
-			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-				return err
-			}
-			log.Printf("[INFO] Updated resource manager tags for node pool %s", name)
-		}
-
-		if d.HasChange(prefix + "node_config.0.resource_labels") {
-			req := &container.UpdateNodePoolRequest{
-				Name: name,
-			}
-
-			if v, ok := d.GetOk(prefix + "node_config.0.resource_labels"); ok {
-				resourceLabels := v.(map[string]interface{})
-				req.ResourceLabels = &container.ResourceLabels{
-					Labels: tpgresource.ConvertStringMap(resourceLabels),
-				}
-			}
-
-			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
-				if err != nil {
-					return err
-				}
-
-				// Wait until it's updated
-				return ContainerOperationWait(config, op,
-					nodePoolInfo.project,
-					nodePoolInfo.location,
-					"updating GKE node pool resource labels", userAgent,
-					timeout)
-			}
-
-			// Call update serially.
-			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-				return err
-			}
-
-			log.Printf("[INFO] Updated resource labels for node pool %s", name)
-		}
-
-		if d.HasChange(prefix + "node_config.0.labels") {
-			req := &container.UpdateNodePoolRequest{
-				Name: name,
-			}
-
-			if v, ok := d.GetOk(prefix + "node_config.0.labels"); ok {
-				labels := v.(map[string]interface{})
-				req.Labels = &container.NodeLabels{
-					Labels: tpgresource.ConvertStringMap(labels),
-				}
-			}
-
-			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
-				if err != nil {
-					return err
-				}
-
-				// Wait until it's updated
-				return ContainerOperationWait(config, op,
-					nodePoolInfo.project,
-					nodePoolInfo.location,
-					"updating GKE node pool labels", userAgent,
-					timeout)
-			}
-
-			// Call update serially.
-			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-				return err
-			}
-
-			log.Printf("[INFO] Updated labels for node pool %s", name)
-		}
-
-		if d.HasChange(prefix + "node_config.0.image_type") {
-			req := &container.UpdateClusterRequest{
-				Update: &container.ClusterUpdate{
-					DesiredNodePoolId: name,
-					DesiredImageType:  d.Get(prefix + "node_config.0.image_type").(string),
-				},
-			}
-
-			updateF := func() error {
-				clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(nodePoolInfo.parent(), req)
-				if config.UserProjectOverride {
-					clusterUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterUpdateCall.Do()
-				if err != nil {
-					return err
-				}
-
-				// Wait until it's updated
-				return ContainerOperationWait(config, op,
-					nodePoolInfo.project,
-					nodePoolInfo.location, "updating GKE node pool", userAgent,
-					timeout)
-			}
-
-			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-				return err
-			}
-			log.Printf("[INFO] Updated image type in Node Pool %s", d.Id())
-		}
-
-		if d.HasChange(prefix + "node_config.0.workload_metadata_config") {
-			req := &container.UpdateNodePoolRequest{
-				NodePoolId: name,
-				WorkloadMetadataConfig: expandWorkloadMetadataConfig(
-					d.Get(prefix + "node_config.0.workload_metadata_config")),
-			}
-			if req.WorkloadMetadataConfig == nil {
-				req.WorkloadMetadataConfig = &container.WorkloadMetadataConfig{}
-				req.ForceSendFields = []string{"WorkloadMetadataConfig"}
-			}
-			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
-
-				if err != nil {
-					return err
-				}
-
-				// Wait until it's updated
-				return ContainerOperationWait(config, op,
-					nodePoolInfo.project,
-					nodePoolInfo.location,
-					"updating GKE node pool workload_metadata_config", userAgent,
-					timeout)
-			}
-
-			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-				return err
-			}
-			log.Printf("[INFO] Updated workload_metadata_config for node pool %s", name)
-		}
-
-		if d.HasChange(prefix + "node_config.0.gcfs_config") {
-			gcfsEnabled := bool(d.Get(prefix + "node_config.0.gcfs_config.0.enabled").(bool))
-			req := &container.UpdateNodePoolRequest{
-				NodePoolId: name,
-				GcfsConfig: &container.GcfsConfig{
-					Enabled: gcfsEnabled,
-				},
-			}
-			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
-				if err != nil {
-					return err
-				}
-
-				// Wait until it's updated
-				return ContainerOperationWait(config, op,
-					nodePoolInfo.project,
-					nodePoolInfo.location,
-					"updating GKE node pool gcfs_config", userAgent,
-					timeout)
-			}
-
-			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-				return err
-			}
-
-			log.Printf("[INFO] Updated gcfs_config for node pool %s", name)
-		}
-
-		if d.HasChange(prefix + "node_config.0.gvnic") {
-			gvnicEnabled := bool(d.Get(prefix + "node_config.0.gvnic.0.enabled").(bool))
-			req := &container.UpdateNodePoolRequest{
-				NodePoolId: name,
-				Gvnic: &container.VirtualNIC{
-					Enabled: gvnicEnabled,
-				},
-			}
-			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
-				if err != nil {
-					return err
-				}
-
-				// Wait until it's updated
-				return ContainerOperationWait(config, op,
-					nodePoolInfo.project,
-					nodePoolInfo.location,
-					"updating GKE node pool gvnic", userAgent,
-					timeout)
-			}
-
-			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-				return err
-			}
-
-			log.Printf("[INFO] Updated gvnic for node pool %s", name)
-		}
-
-		if d.HasChange(prefix + "node_config.0.kubelet_config") {
-			req := &container.UpdateNodePoolRequest{
-				NodePoolId: name,
-				KubeletConfig: expandKubeletConfig(
-					d.Get(prefix + "node_config.0.kubelet_config")),
-			}
-			if req.KubeletConfig == nil {
-				req.KubeletConfig = &container.NodeKubeletConfig{}
-				req.ForceSendFields = []string{"KubeletConfig"}
-			}
-			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
-				if err != nil {
-					return err
-				}
-
-				// Wait until it's updated
-				return ContainerOperationWait(config, op,
-					nodePoolInfo.project,
-					nodePoolInfo.location,
-					"updating GKE node pool kubelet_config", userAgent,
-					timeout)
-			}
-
-			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-				return err
-			}
-
-			log.Printf("[INFO] Updated kubelet_config for node pool %s", name)
-		}
-		if d.HasChange(prefix + "node_config.0.linux_node_config") {
-			req := &container.UpdateNodePoolRequest{
-				NodePoolId: name,
-				LinuxNodeConfig: expandLinuxNodeConfig(
-					d.Get(prefix + "node_config.0.linux_node_config")),
-			}
-			if req.LinuxNodeConfig == nil {
-				req.LinuxNodeConfig = &container.LinuxNodeConfig{}
-				req.ForceSendFields = []string{"LinuxNodeConfig"}
-			}
-			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
-				if err != nil {
-					return err
-				}
-
-				// Wait until it's updated
-				return ContainerOperationWait(config, op,
-					nodePoolInfo.project,
-					nodePoolInfo.location,
-					"updating GKE node pool linux_node_config", userAgent,
-					timeout)
-			}
-
-			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-				return err
-			}
-
-			log.Printf("[INFO] Updated linux_node_config for node pool %s", name)
-		}
-		if d.HasChange(prefix + "node_config.0.windows_node_config") {
-			req := &container.UpdateNodePoolRequest{
-				NodePoolId: name,
-				WindowsNodeConfig: expandWindowsNodeConfig(
-					d.Get(prefix + "node_config.0.windows_node_config")),
-			}
-			if req.WindowsNodeConfig == nil {
-				req.WindowsNodeConfig = &container.WindowsNodeConfig{}
-				req.ForceSendFields = []string{"WindowsNodeConfig"}
-			}
-			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
-				if err != nil {
-					return err
-				}
-
-				// Wait until it's updated
-				return ContainerOperationWait(config, op,
-					nodePoolInfo.project,
-					nodePoolInfo.location,
-					"updating GKE node pool windows_node_config", userAgent,
-					timeout)
-			}
-
-			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-				return err
-			}
-
-			log.Printf("[INFO] Updated windows_node_config for node pool %s", name)
-		}
-		if d.HasChange(prefix + "node_config.0.fast_socket") {
-			req := &container.UpdateNodePoolRequest{
-				NodePoolId: name,
-				FastSocket: &container.FastSocket{},
-			}
-			if v, ok := d.GetOk(prefix + "node_config.0.fast_socket"); ok {
-				fastSocket := v.([]interface{})[0].(map[string]interface{})
-				req.FastSocket = &container.FastSocket{
-					Enabled: fastSocket["enabled"].(bool),
-				}
-			}
-			updateF := func() error {
-				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
-				if config.UserProjectOverride {
-					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-				}
-				op, err := clusterNodePoolsUpdateCall.Do()
-				if err != nil {
-					return err
-				}
-
-				// Wait until it's updated
-				return ContainerOperationWait(config, op,
-					nodePoolInfo.project,
-					nodePoolInfo.location,
-					"updating GKE node pool fast_socket", userAgent,
-					timeout)
-			}
-
-			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-				return err
-			}
-
-			log.Printf("[INFO] Updated fast_socket for node pool %s", name)
-		}
-	}
-
-	return nil
 }
