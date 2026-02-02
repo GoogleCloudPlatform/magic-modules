@@ -35,6 +35,8 @@ var (
 )
 
 func TestAccCloudIdentityPolicy_cloudidentityPolicyBasic(t *testing.T) {
+	// Comment below line and run the test in local mode with super admin credentials to verify new changes.
+	t.Skip("Tests are disabled until service accounts can call these APIs")
 	t.Parallel()
 
 	context := map[string]interface{}{
