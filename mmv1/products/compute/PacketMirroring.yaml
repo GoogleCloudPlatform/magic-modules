@@ -48,6 +48,16 @@ examples:
       mirroring_name: 'my-mirroring'
       ilb_rule_name: 'my-ilb'
       network_name: 'my-network'
+  - name: 'compute_packet_mirroring_update'
+    primary_resource_id: 'foobar_update'
+    vars:
+      instance_name: 'my-instance'
+      subnetwork_name: 'my-subnetwork'
+      service_name: 'my-service'
+      hc_name: 'my-healthcheck'
+      mirroring_name: 'my-mirroring'
+      ilb_rule_name: 'my-ilb'
+      network_name: 'my-network'
 parameters:
 properties:
   - name: 'name'
@@ -204,7 +214,7 @@ properties:
     description: |
       Indicates whether or not this packet mirroring takes effect. If set to FALSE, this packet mirroring
       policy will not be enforced on the network. The default is TRUE.
-    default_value: "TRUE"
+    default_from_api: true
     enum_values:
       - 'TRUE'
       - 'FALSE'
