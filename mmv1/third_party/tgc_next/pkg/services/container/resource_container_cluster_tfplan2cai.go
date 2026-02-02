@@ -60,6 +60,11 @@ func GetContainerClusterData(d tpgresource.TerraformResourceData, config *transp
 }
 
 func expandContainerCluster(project string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*container.Cluster, error) {
+	location, err := tpgresource.GetLocation(d, config)
+	if err != nil {
+		return nil, err
+	}
+
 	clusterName := d.Get("name").(string)
 
 	// TODO: check if needUpdateAfterCreate is needed
@@ -87,14 +92,14 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 			Enabled:         d.Get("enable_legacy_abac").(bool),
 			ForceSendFields: []string{"Enabled"},
 		},
-		LoggingService:             d.Get("logging_service").(string),
-		MonitoringService:          d.Get("monitoring_service").(string),
-		NetworkPolicy:              expandNetworkPolicy(d.Get("network_policy")),
-		AddonsConfig:               expandClusterAddonsConfig(d.Get("addons_config")),
-		EnableKubernetesAlpha:      d.Get("enable_kubernetes_alpha").(bool),
-		IpAllocationPolicy:         ipAllocationBlock,
-		PodAutoscaling:             expandPodAutoscaling(d.Get("pod_autoscaling")),
-		SecretManagerConfig:        expandSecretManagerConfig(d.Get("secret_manager_config")),
+		LoggingService:        d.Get("logging_service").(string),
+		MonitoringService:     d.Get("monitoring_service").(string),
+		NetworkPolicy:         expandNetworkPolicy(d.Get("network_policy")),
+		AddonsConfig:          expandClusterAddonsConfig(d.Get("addons_config")),
+		EnableKubernetesAlpha: d.Get("enable_kubernetes_alpha").(bool),
+		IpAllocationPolicy:    ipAllocationBlock,
+		PodAutoscaling:        expandPodAutoscaling(d.Get("pod_autoscaling")),
+		SecretManagerConfig:   expandSecretManagerConfig(d.Get("secret_manager_config")),
 
 		Autoscaling:         expandClusterAutoscaling(d.Get("cluster_autoscaling"), d),
 		BinaryAuthorization: expandBinaryAuthorization(d.Get("binary_authorization")),
@@ -123,11 +128,11 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 			EnableFqdnNetworkPolicy:              d.Get("enable_fqdn_network_policy").(bool),
 			NetworkPerformanceConfig:             expandNetworkPerformanceConfig(d.Get("network_performance_config")),
 		},
-		MasterAuth:         expandMasterAuth(d.Get("master_auth")),
-		NotificationConfig: expandNotificationConfig(d.Get("notification_config")),
-		ConfidentialNodes:  expandConfidentialNodes(d.Get("confidential_nodes")),
-		ResourceLabels:     tpgresource.ExpandStringMap(d, "effective_labels"),
-		NodePoolAutoConfig: expandNodePoolAutoConfig(d.Get("node_pool_auto_config")),
+		MasterAuth:           expandMasterAuth(d.Get("master_auth")),
+		NotificationConfig:   expandNotificationConfig(d.Get("notification_config")),
+		ConfidentialNodes:    expandConfidentialNodes(d.Get("confidential_nodes")),
+		ResourceLabels:       tpgresource.ExpandStringMap(d, "effective_labels"),
+		NodePoolAutoConfig:   expandNodePoolAutoConfig(d.Get("node_pool_auto_config")),
 		CostManagementConfig: expandCostManagementConfig(d.Get("cost_management_config")),
 		EnableK8sBetaApis:    expandEnableK8sBetaApis(d.Get("enable_k8s_beta_apis"), nil),
 	}
@@ -153,8 +158,6 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 		}
 	}
 
-	// TODO: get location from d
-	location := ""
 	if v, ok := d.GetOk("node_locations"); ok {
 		locationsSet := v.(*schema.Set)
 		if locationsSet.Contains(location) {
