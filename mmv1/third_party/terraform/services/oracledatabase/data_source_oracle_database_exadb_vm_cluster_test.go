@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccOracledatabaseExadbVmCluster_update(t *testing.T) {
 	t.Parallel()
 
-	VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { TestAccPreCheck(t) },
-		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOracledatabaseExadbVmCluster_full(t),
@@ -47,7 +47,7 @@ func TestAccOracledatabaseExadbVmCluster_update(t *testing.T) {
 }
 
 func testAccOracledatabaseExadbVmCluster_full(t *testing.T) string {
-	return fmt.Sprintf(Nprintf(t, `
+	return fmt.Sprintf(acctest.Nprintf(t, `
 resource "google_oracle_database_exadb_vm_cluster" "my_exadb_vm_cluster"{
     exadb_vm_cluster_id = "%s"
     display_name = "%s displayname"
@@ -100,7 +100,7 @@ resource "google_oracle_database_exascale_db_storage_vault" "exascaleDbStorageVa
 
   deletion_protection = false
 }
-`, randString(t, 10), randString(t, 10), getTestProjectFromEnv(), randString(t, 10), randString(t, 10), randString(t, 10), randString(t, 10), randString(t, 10), getTestProjectFromEnv()))
+`, acctest.RandString(t, 10), acctest.RandString(t, 10), getTestProjectFromEnv(), acctest.RandString(t, 10), acctest.RandString(t, 10), acctest.RandString(t, 10), acctest.RandString(t, 10), acctest.RandString(t, 10), getTestProjectFromEnv()))
 }
 
 func testAccOracledatabaseExadbVmCluster_update(t *testing.T) string {
@@ -157,5 +157,5 @@ resource "google_oracle_database_exascale_db_storage_vault" "exascaleDbStorageVa
 
   deletion_protection = false
 }
-`, randString(t, 10), randString(t, 10), getTestProjectFromEnv(), randString(t, 10), randString(t, 10), randString(t, 10), randString(t, 10), randString(t, 10), getTestProjectFromEnv()))
+`, acctest.RandString((t, 10), acctest.RandString(t, 10), getTestProjectFromEnv(), acctest.RandString(t, 10), acctest.RandString(t, 10), acctest.RandString(t, 10), acctest.RandString(t, 10), acctest.RandString(t, 10), getTestProjectFromEnv()))
 }
