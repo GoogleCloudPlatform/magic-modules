@@ -950,10 +950,10 @@ func ResourceContainerCluster() *schema.Resource {
 			},
 
 			"enable_tpu": {
-				Type:          schema.TypeBool,
-				Optional:      true,
-				ForceNew:      true,
-				Description:   `Whether to enable Cloud TPU resources in this cluster.`,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: `Whether to enable Cloud TPU resources in this cluster.`,
 			},
 
 			"enable_legacy_abac": {
