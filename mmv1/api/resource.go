@@ -2526,7 +2526,7 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 
 	for _, e := range r.Examples {
 		for _, p := range e.IgnoreReadExtra {
-			props = append(props, p)
+			props = append(props, strings.ReplaceAll(p, ".0.", "."))
 		}
 	}
 
