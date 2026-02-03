@@ -29,7 +29,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"{{ $.ImportPath }}/acctest"
+{{- if $.Res.NeedsEnvVar }}
 	"{{ $.ImportPath  }}/envvar"
+{{- end }}
 	"{{ $.ImportPath  }}/tpgresource"
 	transport_tpg "{{ $.ImportPath  }}/transport"
 
@@ -44,7 +46,9 @@ var (
     _ = time.Now
 	_ = resource.TestMain
 	_ = terraform.NewState
+{{- if $.Res.NeedsEnvVar }}
     _ = envvar.TestEnvVar
+{{- end }}
     _ = tpgresource.SetLabels
     _ = transport_tpg.Config{}
     _ = googleapi.Error{}

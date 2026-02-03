@@ -272,17 +272,13 @@ func TestValidateResourceMetadata(t *testing.T) {
 			if r.ApiServiceName == "" {
 				t.Errorf("%s: `api_service_name` is required and not set", r.FileName)
 			}
-			// Allowlist google_biglake_iceberg_catalog as a pre-existing case. I believe
+			ignoredResources := []string{"google_biglake_iceberg_catalog", "google_biglake_iceberg_namespace"}
+			// Allowlist google_biglake_iceberg_catalog and google_biglake_iceberg_namespace as a pre-existing case. I believe
 			// that's a mistake which should be corrected at some point in the future.
-			if r.ApiVersion == "" && resourceName != "google_biglake_iceberg_catalog" {
-				t.Errorf("%s: `api_version` is required and not set", r.FileName)
-			}
-
-			// Allowlist google_biglake_iceberg_namespace as a pre-existing case. I believe
-			// that's a mistake which should be corrected at some point in the future.
-			if r.ApiVersion == "" && resourceName != "google_biglake_iceberg_namespace" {
+			if r.ApiVersion == "" && !slices.Contains(ignoredResources, resourceName) {
 				t.Errorf("%s: `api_version` is required and not set", r.Resource)
 			}
+
 			if r.ApiResourceTypeKind == "" {
 				t.Errorf("%s: `api_resource_type_kind` is required and not set", r.FileName)
 			}
