@@ -29,8 +29,6 @@ update_verb: 'PATCH'
 async:
   type: 'OpAsync'
   actions: ['delete']
-  operation:
-    full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
 custom_code:
   encoder: 'templates/terraform/encoders/colab_schedule.go.tmpl'
   post_create: 'templates/terraform/post_create/colab_schedule.go.tmpl'
