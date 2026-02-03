@@ -77,6 +77,10 @@ resource "google_discovery_engine_search_engine" "basic" {
     search_tier = "SEARCH_TIER_ENTERPRISE"
     search_add_ons = ["SEARCH_ADD_ON_LLM"]
   }
+  knowledge_graph_config {
+    enable_cloud_knowledge_graph = true
+    enable_private_knowledge_graph = true
+  }
 }
 `, context)
 }
@@ -119,9 +123,9 @@ resource "google_discovery_engine_search_engine" "basic" {
     feedback = "FEATURE_STATE_OFF"
   }
   knowledge_graph_config {
-    enable_cloud_knowledge_graph = true
+    enable_cloud_knowledge_graph = false
     cloud_knowledge_graph_types = ["foobar"]
-    enable_private_knowledge_graph = true
+    enable_private_knowledge_graph = false
     feature_config {
       disable_private_kg_query_understanding = true
       disable_private_kg_enrichment = true
