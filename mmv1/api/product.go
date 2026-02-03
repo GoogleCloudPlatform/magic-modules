@@ -83,7 +83,7 @@ type Product struct {
 
 	// Used for controlling merges of deletion policy in batches by product
 	// Will be removed prior to main merge
-	DeletionPolicyOptIn bool  `yaml:"deletion_policy_opt_in,omitempty"`
+	DeletionPolicyOptIn bool `yaml:"deletion_policy_opt_in,omitempty"`
 }
 
 func (p *Product) UnmarshalYAML(value *yaml.Node) error {
