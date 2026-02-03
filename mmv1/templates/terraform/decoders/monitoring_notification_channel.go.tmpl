@@ -27,9 +27,6 @@ if sensitiveLabelsRaw != nil {
 				sensitiveLabels[configKey] = configVal
 			}
 
-			if len(sensitiveLabels) > 0 {
-				res["sensitiveLabels"] = sensitiveLabels
-			}
 			return res, nil
 		}
 	}
