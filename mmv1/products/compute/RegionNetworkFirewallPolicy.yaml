@@ -78,6 +78,8 @@ properties:
     enum_values:
       - 'VPC_POLICY'
       - 'RDMA_ROCE_POLICY'
+      - 'RDMA_FALCON_POLICY'
+      - 'ULL_POLICY'
   - name: 'fingerprint'
     type: Fingerprint
     description: Fingerprint of the resource. This field is used internally during updates of this resource.
