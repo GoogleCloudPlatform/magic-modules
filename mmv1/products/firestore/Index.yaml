@@ -52,8 +52,8 @@ custom_code:
   encoder: 'templates/terraform/encoders/index.go.tmpl'
   custom_import: 'templates/terraform/custom_import/index_self_link_as_name_set_project.go.tmpl'
   custom_create: 'templates/terraform/custom_create/firestore_index.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/firestore_index.go.tmpl'
 error_retry_predicates:
-
   - 'transport_tpg.FirestoreIndex409Retry'
 examples:
   - name: 'firestore_index_basic'
@@ -107,12 +107,37 @@ examples:
       project_id: 'PROJECT_NAME'
     ignore_read_extra:
       - 'skip_wait'
+  - name: 'firestore_index_deletion_policy'
+    primary_resource_id: 'my-index'
+    vars:
+      database_id: 'database-id-deletion-policy'
+      deletion_policy: '"PREVENT"'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    # Example will show delete_protection as true, but in test we will actually set to false
+    # so the test can cleanup after itself.
+    test_vars_overrides:
+      'deletion_policy': '"DELETE"'
+    ignore_read_extra:
+      - 'deletion_policy'
 virtual_fields:
   - name: "skip_wait"
     type: Boolean
     default_value: false
     description: "Whether to skip waiting for the index to be created."
     ignore_read: true
+  - name: 'deletion_policy'
+    type: Enum
+    default_value: 'DELETE'
+    ignore_read: true
+    enum_values:
+      - 'DELETE'
+      - 'PREVENT'
+    description: |
+      Deletion behavior for this index.
+      If the deletion policy is `PREVENT`, the index cannot be deleted and a terraform destroy will fail.
+      If the deletion policy is `DELETE`, the index will both be removed from Terraform state and deleted from Google Cloud upon destruction.
+      The default value is `DELETE`.
 parameters:
 # Firestore uses a custom create function. Any new fields must be explicitly handled there.
 properties:
