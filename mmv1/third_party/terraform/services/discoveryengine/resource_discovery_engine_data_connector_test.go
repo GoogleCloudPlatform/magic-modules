@@ -32,7 +32,7 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params"},
+				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params", "action_config.0.action_params", "action_config.0.create_bap_connection"},
 			},
 			{
 				Config: testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_update(context),
@@ -41,7 +41,7 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params"},
+				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params", "action_config.0.action_params", "action_config.0.create_bap_connection"},
 			},
 		},
 	})
@@ -97,10 +97,31 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
   }
   static_ip_enabled            = false
   incremental_refresh_interval = "21600s"
-  connector_modes              = ["DATA_INGESTION"]
+  connector_modes              = ["DATA_INGESTION", "ACTIONS"]
   sync_mode                    = "PERIODIC"
   auto_run_disabled            = true
   incremental_sync_disabled    = true
+  action_config {
+    action_params = {
+      instance_uri  = "https://example.atlassian.net"
+      instance_id   = "unused"
+      client_id     = "unused"
+      client_secret = "unused"
+      auth_type     = "OAUTH"
+    }
+    create_bap_connection = true
+  }
+  bap_config {
+    supported_connector_modes = ["ACTIONS"]
+    enabled_actions = [
+      "create_issue",
+      "update_issue",
+      "change_issue_status",
+      "create_comment",
+      "update_comment",
+      "upload_attachment",
+    ]
+  }
 }
 `, context)
 }
@@ -153,10 +174,31 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
   }
   static_ip_enabled            = false
   incremental_refresh_interval = "21600s"
-  connector_modes              = ["DATA_INGESTION"]
+  connector_modes              = ["DATA_INGESTION", "ACTIONS"]
   sync_mode                    = "PERIODIC"
   auto_run_disabled            = false
   incremental_sync_disabled    = false
+  action_config {
+    action_params = {
+      instance_uri  = "https://example.atlassian.net"
+      instance_id   = "unused"
+      client_id     = "unused"
+      client_secret = "unused"
+      auth_type     = "OAUTH"
+    }
+    create_bap_connection = true
+  }
+  bap_config {
+    supported_connector_modes = ["ACTIONS"]
+    enabled_actions = [
+      "create_issue",
+      "update_issue",
+      "change_issue_status",
+      "create_comment",
+      "update_comment",
+      "upload_attachment",
+    ]
+  }
 }
 `, context)
 }

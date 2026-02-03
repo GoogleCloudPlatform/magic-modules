@@ -54,6 +54,10 @@ examples:
     primary_resource_id: 'servicenow-basic'
     vars:
       collection_id: 'collection-id'
+  - name: 'discoveryengine_dataconnector_jira_with_actions'
+    primary_resource_id: 'jira-with-actions'
+    vars:
+      collection_id: 'collection-id'
 parameters:
   - name: 'location'
     type: String
@@ -232,6 +236,54 @@ properties:
       If this field is set and processed successfully, the DataStores created by
       this connector will be protected by the KMS key.
     immutable: true
+  - name: 'actionConfig'
+    type: NestedObject
+    description: |
+      Action configuration for the data connector. Configures action
+      capabilities for connectors that support the ACTIONS connector mode.
+    properties:
+      - name: 'actionParams'
+        type: KeyValuePairs
+        description: |
+          Params needed to configure the actions in the format of
+          String-to-String (Key, Value) pairs. Contains connection
+          credentials and configuration for the action connector.
+        ignore_read: true
+      - name: 'isActionConfigured'
+        type: Boolean
+        description: |
+          Whether the action connector is fully configured. Set by the system
+          after the action configuration is validated.
+        output: true
+      - name: 'createBapConnection'
+        type: Boolean
+        description: |
+          Whether to create a BAP (Business Application Platform) connection
+          for this action connector.
+        ignore_read: true
+  - name: 'bapConfig'
+    type: NestedObject
+    description: |
+      BAP (Business Application Platform) configuration for the data
+      connector. Controls which actions are enabled for connectors
+      using the ACTIONS connector mode.
+    properties:
+      - name: 'enabledActions'
+        type: Array
+        description: |
+          The list of enabled actions for this connector. Supported
+          values include: `create_issue`, `update_issue`,
+          `change_issue_status`, `create_comment`, `update_comment`,
+          `upload_attachment`.
+        item_type:
+          type: String
+      - name: 'supportedConnectorModes'
+        type: Array
+        description: |
+          The connector modes supported by the BAP configuration.
+          The possible values include: `ACTIONS`.
+        item_type:
+          type: String
   - name: 'actionState'
     type: String
     description: |

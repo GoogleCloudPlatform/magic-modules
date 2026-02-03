@@ -1,0 +1,53 @@
+resource "google_discovery_engine_data_connector" "jira-with-actions" {
+  location                     = "global"
+  collection_id                = "{{index $.Vars "collection_id"}}"
+  collection_display_name      = "Jira Federated"
+  data_source                  = "jira"
+  params = {
+    instance_uri               = "https://example.atlassian.net"
+    instance_id                = "SECRET_MANAGER_RESOURCE_NAME"
+    client_id                  = "SECRET_MANAGER_RESOURCE_NAME"
+    client_secret              = "SECRET_MANAGER_RESOURCE_NAME"
+    refresh_token              = "SECRET_MANAGER_RESOURCE_NAME"
+    auth_type                  = "OAUTH"
+  }
+  refresh_interval             = "86400s"
+  entities {
+    entity_name                = "project"
+  }
+  entities {
+    entity_name                = "issue"
+  }
+  entities {
+    entity_name                = "comment"
+  }
+  entities {
+    entity_name                = "attachment"
+  }
+  static_ip_enabled            = false
+  connector_modes              = ["FEDERATED", "ACTIONS"]
+  sync_mode                    = "PERIODIC"
+  auto_run_disabled            = true
+  incremental_sync_disabled    = true
+  action_config {
+    action_params = {
+      instance_uri             = "https://example.atlassian.net"
+      instance_id              = "SECRET_MANAGER_RESOURCE_NAME"
+      client_id                = "SECRET_MANAGER_RESOURCE_NAME"
+      client_secret            = "SECRET_MANAGER_RESOURCE_NAME"
+      auth_type                = "OAUTH"
+    }
+    create_bap_connection      = true
+  }
+  bap_config {
+    supported_connector_modes = ["ACTIONS"]
+    enabled_actions = [
+      "create_issue",
+      "update_issue",
+      "change_issue_status",
+      "create_comment",
+      "update_comment",
+      "upload_attachment",
+    ]
+  }
+}

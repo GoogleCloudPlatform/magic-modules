@@ -181,6 +181,47 @@ this connector will be protected by the KMS key.`,
 				Description: `The data synchronization mode supported by the data connector. The possible value can be:
 'PERIODIC', 'STREAMING'.`,
 			},
+			"action_config": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"action_params": {
+							Type:     schema.TypeMap,
+							Optional: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+						"is_action_configured": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"create_bap_connection": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+					},
+				},
+			},
+			"bap_config": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled_actions": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+						"supported_connector_modes": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+					},
+				},
+			},
 			"action_state": {
 				Type:     schema.TypeString,
 				Computed: true,
