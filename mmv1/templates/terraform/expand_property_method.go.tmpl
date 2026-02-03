@@ -26,9 +26,9 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
     original := raw.(map[string]interface{})
     transformed := make(map[string]interface{})
       {{- range $prop := $.NestedProperties }}
-        {{- if not (eq $prop.Name $prop.KeyName) }}
+        {{- if not (or (eq $prop.Name $prop.KeyName) $prop.ClientSide) }}
 
-    transformed{{$prop.TitlelizeProperty}}, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ underscore $prop.Name }}"], d, config)
+    transformed{{$prop.TitlelizeProperty}}, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}({{if $prop.WriteOnly }}tpgresource.GetRawConfigAttributeAsString(d.(*schema.ResourceData), "{{ join $prop.Lineage ".0." }}"){{ else }}original["{{ underscore $prop.Name }}"]{{ end }}, d, config)
     if err != nil {
       return nil, err
           {{- if or ($prop.SendEmptyValue) (and $prop.TGCSendEmptyValue $.ResourceMetadata.IsTgcCompiler) }}
@@ -65,8 +65,8 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
   transformed := make(map[string]interface{})
       {{- range $prop := $.NestedProperties }}
-        {{- if not (and (hasPrefix $prop.Type "KeyValue") $prop.IgnoreWrite) }}
-  transformed{{$prop.TitlelizeProperty}}, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}({{ if $prop.FlattenObject }}nil{{ else }}d.Get("{{ underscore $prop.Name }}"), d, config)
+        {{- if not (or (and (hasPrefix $prop.Type "KeyValue") $prop.IgnoreWrite) $prop.ClientSide) }}
+  transformed{{$prop.TitlelizeProperty}}, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}({{ if $prop.FlattenObject }}nil{{ else if $prop.WriteOnly }}tpgresource.GetRawConfigAttributeAsString(d.(*schema.ResourceData), "{{ join $prop.Lineage ".0." }}"){{ else }}d.Get("{{ underscore $prop.Name }}"), d, config)
   if err != nil {
     return nil, err
           {{- if or ($prop.SendEmptyValue) (and $prop.TGCSendEmptyValue $.ResourceMetadata.IsTgcCompiler) }}
@@ -121,8 +121,8 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
         {{- end }}{{/* if $.IsA "Array */}}
     transformed := make(map[string]interface{})
         {{ range $prop := $.NestedProperties }}
-          {{- if not (and (hasPrefix $prop.Type "KeyValue") $prop.IgnoreWrite) }}
-      transformed{{$prop.TitlelizeProperty}}, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ underscore $prop.Name }}"], d, config)
+          {{- if not (or (and (hasPrefix $prop.Type "KeyValue") $prop.IgnoreWrite) $prop.ClientSide) }}
+      transformed{{$prop.TitlelizeProperty}}, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}({{if $prop.WriteOnly }}tpgresource.GetRawConfigAttributeAsString(d.(*schema.ResourceData), "{{ join $prop.Lineage ".0." }}"){{ else }}original["{{ underscore $prop.Name }}"]{{ end }}, d, config)
       if err != nil {
         return nil, err
             {{- if or ($prop.SendEmptyValue) (and $prop.TGCSendEmptyValue $.ResourceMetadata.IsTgcCompiler) }}
