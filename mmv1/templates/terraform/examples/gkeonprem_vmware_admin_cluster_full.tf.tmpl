@@ -1,5 +1,6 @@
 resource "google_gkeonprem_vmware_admin_cluster" "{{$.PrimaryResourceId}}" {
   name = "{{index $.Vars "name"}}"
+  skip_validations = ["WORKSTATION", "CONFIG", "DOCKER"]
   location = "us-west1"
   description = "test admin cluster"
   bootstrap_cluster_membership = "projects/870316890899/locations/global/memberships/gkeonprem-terraform-test"
