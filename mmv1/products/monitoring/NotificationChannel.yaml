@@ -94,6 +94,7 @@ properties:
       the sensitive_labels block, but cannot be configured in both places.
   - name: 'sensitiveLabels'
     type: NestedObject
+    ignore_read: true
     description: |
       Different notification type behaviors are configured primarily using the the `labels` field on this
       resource. This block contains the labels which contain secrets or passwords so that they can be marked
@@ -102,13 +103,14 @@ properties:
 
       Credentials may not be specified in both locations and will cause an error. Changing from one location
       to a different credential configuration in the config will require an apply to update state.
-    url_param_only: true
     properties:
       - name: 'authToken'
         type: String
+        api_name: 'auth_token'
         description: |
           An authorization token for a notification channel. Channel types that support this field include: slack
         sensitive: true
+        write_only: true
         exactly_one_of:
           - 'sensitive_labels.0.auth_token'
           - 'sensitive_labels.0.password'
@@ -118,15 +120,18 @@ properties:
         description: |
           An password for a notification channel. Channel types that support this field include: webhook_basicauth
         sensitive: true
+        write_only: true
         exactly_one_of:
           - 'sensitive_labels.0.auth_token'
           - 'sensitive_labels.0.password'
           - 'sensitive_labels.0.service_key'
       - name: 'serviceKey'
         type: String
+        api_name: 'service_key'
         description: |
           An servicekey token for a notification channel. Channel types that support this field include: pagerduty
         sensitive: true
+        write_only: true
         exactly_one_of:
           - 'sensitive_labels.0.auth_token'
           - 'sensitive_labels.0.password'
