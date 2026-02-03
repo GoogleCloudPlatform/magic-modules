@@ -25,6 +25,7 @@ for _, sl := range sensitiveLabels {
 	}
 }
 
+{{- if not (contains $.Compiler "terraformgoogleconversion") }}
 for _, slwov := range writeOnlySensitiveLabels {
   if v, _ := d.GetOkExists("sensitive_labels.0." + slwov); v != "" {
     target := strings.TrimSuffix(slwov, "_version")
@@ -34,6 +35,7 @@ for _, slwov := range writeOnlySensitiveLabels {
     }
   }
 }
+{{- end }}
 
 obj["labels"] = labels
 delete(obj, "sensitiveLabels")
