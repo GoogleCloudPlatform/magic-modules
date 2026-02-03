@@ -377,15 +377,15 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 	}
 
 	matches := testRegex.FindAllSubmatch(data, -1)
-	tests := make([]resource.TGCTest, len(matches))
-	for i, match := range matches {
+	tests := make([]resource.TGCTest, 0)
+	for _, match := range matches {
 		if len(match) == 2 {
 			if _, ok := testNamesInYAML[string(match[1])]; ok {
 				continue
 			}
-			tests[i] = resource.TGCTest{
+			tests = append(tests, resource.TGCTest{
 				Name: string(match[1]),
-			}
+			})
 		}
 	}
 
