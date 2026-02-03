@@ -61,11 +61,7 @@ func (w *{{ $.ProductMetadata.Name }}OperationWaiter) QueryOp() (interface{}, er
     return nil, fmt.Errorf("Cannot query operation, it's unset or nil.")
   }
   // Returns the proper get.
-  {{- if $.GetAsync.Operation.FullUrl }}
-  url := fmt.Sprintf("{{ replaceAll $.GetAsync.Operation.FullUrl "{{op_id}}" "%s" }}", w.CommonOperationWaiter.Op.Name)
-  {{- else }}
   url := fmt.Sprintf("%s{{ replaceAll $.GetAsync.Operation.BaseUrl "{{op_id}}" "%s" }}", w.Config.{{ $.ProductMetadata.Name }}BasePath, w.CommonOperationWaiter.Op.Name)
-  {{- end }}
 
   return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
     Config: w.Config,
