@@ -173,3 +173,47 @@ properties:
 
       If this field is set and processed successfully, the Engine will be
       protected by the KMS key, as indicated in the cmek_config field.
+  - name: 'knowledgeGraphConfig'
+    type: NestedObject
+    description: |
+      Configurations for the Knowledge Graph.
+    properties:
+      - name: 'enableCloudKnowledgeGraph'
+        type: Boolean
+        default_from_api: true
+        description: |
+          Whether to enable the Cloud Knowledge Graph for the engine.
+      - name: 'cloudKnowledgeGraphTypes'
+        type: Array
+        description: |
+          Specify entity types to support.
+        item_type:
+          type: String
+          description: |
+            Specify entity types to support.
+      - name: 'enablePrivateKnowledgeGraph'
+        type: Boolean
+        default_from_api: true
+        description: |
+          Whether to enable the Private Knowledge Graph for the engine.
+      - name: 'featureConfig'
+        type: NestedObject
+        description: |
+          Feature config for the Knowledge Graph.
+        properties:
+          - name: 'disablePrivateKgQueryUnderstanding'
+            type: Boolean
+            description: |
+              Whether to disable the private KG query understanding for the engine.
+          - name: 'disablePrivateKgEnrichment'
+            type: Boolean
+            description: |
+              Whether to disable the private KG enrichment for the engine.
+          - name: 'disablePrivateKgAutoComplete'
+            type: Boolean
+            description: |
+              Whether to disable the private KG auto complete for the engine.
+          - name: 'disablePrivateKgQueryUiChips'
+            type: Boolean
+            description: |
+              Whether to disable the private KG for query UI chips.
