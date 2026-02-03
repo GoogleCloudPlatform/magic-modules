@@ -15,6 +15,7 @@
 name: 'IcebergNamespace'
 description: |
   IcebergNamespaces are containers for Apache Iceberg Tables within an IcebergCatalog.
+supports_indirect_user_project_override: true
 base_url: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces'
 self_link: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
 id_format: 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
@@ -60,6 +61,7 @@ iam_policy:
   parent_resource_attribute: 'namespace_id'
   method_name_separator: ":"
   fetch_iam_policy_verb: 'GET'
+  supports_user_project_override: true
   import_format:
     - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
   allowed_iam_role: 'roles/biglake.editor'
