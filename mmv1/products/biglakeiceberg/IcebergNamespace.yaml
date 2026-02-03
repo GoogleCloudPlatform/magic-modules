@@ -65,13 +65,41 @@ iam_policy:
     - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
   allowed_iam_role: 'roles/biglake.editor'
   example_config_body: 'templates/terraform/iam/example_config_body/biglake_iceberg_namespace.tf.tmpl'
-examples:
+  exclude_import_test: true
+samples:
   - name: 'biglake_iceberg_namespace'
     primary_resource_id: 'my_iceberg_namespace'
-    vars:
-      name: 'my_iceberg_namespace'
-      catalog: 'my_iceberg_catalog'
-    test_env_vars:
-      GOOGLE_BILLING_PROJECT: 'PROJECT'
-      USER_PROJECT_OVERRIDE: 'true'
+    steps:
+      - name: 'basic'
+        vars:
+          name: 'my_iceberg_namespace'
+          catalog: 'my_iceberg_catalog'
+          random_suffix: ''
+        test_env_vars:
+          GOOGLE_BILLING_PROJECT: 'PROJECT'
+          USER_PROJECT_OVERRIDE: 'true'
+        config_path: 'templates/terraform/examples/biglake_iceberg_namespace.tf.tmpl'
+  - name: 'biglake_iceberg_namespace_update'
+    primary_resource_id: 'my_iceberg_namespace'
+    steps:
+      - name: 'initial'
+        vars:
+          name: 'my_iceberg_namespace'
+          catalog: 'my_iceberg_catalog'
+          prop_val: 'initial'
+          random_suffix: ''
+        test_env_vars:
+          GOOGLE_BILLING_PROJECT: 'PROJECT'
+          USER_PROJECT_OVERRIDE: 'true'
+        config_path: 'templates/terraform/examples/biglake_iceberg_namespace_update.tf.tmpl'
+      - name: 'updated'
+        vars:
+          name: 'my_iceberg_namespace'
+          catalog: 'my_iceberg_catalog'
+          prop_val: 'updated'
+          random_suffix: ''
+        test_env_vars:
+          GOOGLE_BILLING_PROJECT: 'PROJECT'
+          USER_PROJECT_OVERRIDE: 'true'
+        config_path: 'templates/terraform/examples/biglake_iceberg_namespace_update.tf.tmpl'
     

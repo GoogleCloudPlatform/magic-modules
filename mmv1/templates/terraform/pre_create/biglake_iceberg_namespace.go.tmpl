@@ -1,4 +1,4 @@
-	nsRaw_pre := d.Get("namespace").([]interface{})
+nsRaw_pre := d.Get("namespace").([]interface{})
 	ns_pre := make([]string, len(nsRaw_pre))
 	for i, v := range nsRaw_pre {
 		ns_pre[i] = v.(string)
@@ -8,13 +8,14 @@
         return fmt.Errorf("Error setting namespace_id in pre-create: %s", err)
     }
     
-    // Use existing project and err variables
+    // variables 'project' and 'err' are already declared in the base template's Create function
     project, err = tpgresource.GetProject(d, config)
     if err != nil {
         return err
     }
     catalog_pre := d.Get("catalog").(string)
     
-    // Set ID early using a unique variable name
-    resID_pre := fmt.Sprintf("projects/%s/catalogs/%s/namespaces/%s", project, catalog_pre, encodedNs_pre)
-    d.SetId(resID_pre)
+    // Set ID early to ensure consistency. 
+    // Avoid naming this 'id' to prevent conflict with the 'id' package.
+    resourceID_pre := fmt.Sprintf("projects/%s/catalogs/%s/namespaces/%s", project, catalog_pre, encodedNs_pre)
+    d.SetId(resourceID_pre)

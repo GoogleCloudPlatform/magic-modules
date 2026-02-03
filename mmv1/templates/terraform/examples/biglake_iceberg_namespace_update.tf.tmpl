@@ -13,10 +13,10 @@ resource "google_biglake_iceberg_catalog" "catalog" {
   ]
 }
 
-resource "google_biglake_iceberg_namespace" "my_iceberg_namespace" {
+resource "google_biglake_iceberg_namespace" "{{$.PrimaryResourceId}}" {
   catalog = google_biglake_iceberg_catalog.catalog.name
   namespace = ["{{index $.Vars "name"}}"]
   properties = {
-    key = "value"
+    key = "{{index $.Vars "prop_val"}}"
   }
 }

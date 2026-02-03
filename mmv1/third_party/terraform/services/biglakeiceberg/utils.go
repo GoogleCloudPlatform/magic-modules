@@ -1,3 +1,15 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
+package biglakeiceberg
+
+import (
+	"net/url"
+	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
+
 var icebergNamespaceIgnoredProperties = []string{
 	"location",
 }

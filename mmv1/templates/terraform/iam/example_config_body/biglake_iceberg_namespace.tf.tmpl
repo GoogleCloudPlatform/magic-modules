@@ -1,3 +1,19 @@
-project = google_biglake_iceberg_namespace.my_iceberg_namespace.project
-  catalog = google_biglake_iceberg_namespace.my_iceberg_namespace.catalog
-  namespace_id = google_biglake_iceberg_namespace.my_iceberg_namespace.id
+resource "google_storage_bucket" "bucket" {
+  name          = "tf-test-my_iceberg_catalog%{random_suffix}"
+  location      = "us-central1"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_biglake_iceberg_catalog" "catalog" {
+  name = "tf-test-my_iceberg_catalog%{random_suffix}"
+  catalog_type = "CATALOG_TYPE_GCS_BUCKET"
+  depends_on = [
+    google_storage_bucket.bucket
+  ]
+}
+
+resource "google_biglake_iceberg_namespace" "my_iceberg_namespace" {
+  catalog = google_biglake_iceberg_catalog.catalog.name
+  namespace = ["tf_test_my_iceberg_namespace%{random_suffix}"]
+}
