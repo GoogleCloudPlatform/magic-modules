@@ -17,10 +17,19 @@ resource "google_backup_dr_restore_workload" "{{$.PrimaryResourceId}}" {
     can_ip_forward      = true
     deletion_protection = false
     
-    labels = {
-      environment = "production"
-      restored    = "true"
-      team        = "infrastructure"
+    labels {
+      key   = "environment"
+      value = "production"
+    }
+
+    labels {
+      key   = "restored"
+      value = "true"
+    }
+
+    labels {
+      key   = "team"
+      value = "infrastructure"
     }
     
     tags {
@@ -28,11 +37,11 @@ resource "google_backup_dr_restore_workload" "{{$.PrimaryResourceId}}" {
     }
     
     network_interfaces {
-      network    = "default"
+      network    = "projects/{{index $.TestEnvVars "project"}}/global/networks/default"
       subnetwork = "projects/{{index $.TestEnvVars "project"}}/regions/us-central1/subnetworks/default"
       
       access_configs {
-        name         = "External NAT"
+        name         = "ONE_TO_ONE_NAT"
         network_tier = "PREMIUM"
       }
     }

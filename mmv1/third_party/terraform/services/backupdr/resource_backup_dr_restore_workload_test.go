@@ -238,6 +238,72 @@ resource "google_backup_dr_restore_workload" "restore" {
     
     can_ip_forward      = true
     deletion_protection = false
+
+    labels {
+      key   = "environment"
+      value = "production"
+    }
+
+    labels {
+      key   = "restored"
+      value = "true"
+    }
+
+    labels {
+      key   = "team"
+      value = "infrastructure"
+    }
+
+    tags {
+      items = ["web", "https-server", "restored"]
+    }
+
+    network_interfaces {
+      network    = "projects/%{project}/global/networks/default"
+      subnetwork = "projects/%{project}/regions/us-central1/subnetworks/default"
+      
+      access_configs {
+        name         = "ONE_TO_ONE_NAT"
+        network_tier = "PREMIUM"
+      }
+    }
+    
+    scheduling {
+      automatic_restart   = true
+      on_host_maintenance = "MIGRATE"
+      preemptible         = false
+      provisioning_model  = "STANDARD"
+    }
+    
+    service_accounts {
+      email  = "default"
+      scopes = [
+        "https://www.googleapis.com/auth/cloud-platform",
+        "https://www.googleapis.com/auth/compute"
+      ]
+    }
+    
+    shielded_instance_config {
+      enable_secure_boot          = true
+      enable_vtpm                 = true
+      enable_integrity_monitoring = true
+    }
+    
+    advanced_machine_features {
+      enable_nested_virtualization = false
+      threads_per_core            = 1
+    }
+    
+    metadata {
+      items {
+        key   = "startup-script"
+        value = "#!/bin/bash\necho 'Instance restored' > /tmp/restored.txt"
+      }
+      items {
+        key   = "enable-oslogin"
+        value = "TRUE"
+      }
+    }
   }
 }
 `, context)

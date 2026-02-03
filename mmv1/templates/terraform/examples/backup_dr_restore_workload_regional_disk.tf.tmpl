@@ -8,8 +8,8 @@ resource "google_backup_dr_restore_workload" "{{$.PrimaryResourceId}}" {
     project = "{{index $.TestEnvVars "project"}}"
     region  = "us-central1"
     replica_zones = [
-      "us-central1-a",
-      "us-central1-b"
+      "projects/{{index $.TestEnvVars "project"}}/zones/us-central1-a",
+      "projects/{{index $.TestEnvVars "project"}}/zones/us-central1-b"
     ]
   }
 
