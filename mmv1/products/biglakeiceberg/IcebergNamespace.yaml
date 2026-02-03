@@ -101,4 +101,3 @@ samples:
           GOOGLE_BILLING_PROJECT: 'PROJECT'
           USER_PROJECT_OVERRIDE: 'true'
         config_path: 'templates/terraform/examples/biglake_iceberg_namespace_update.tf.tmpl'
-
