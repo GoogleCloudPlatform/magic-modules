@@ -107,31 +107,37 @@ examples:
       project_id: 'PROJECT_NAME'
     ignore_read_extra:
       - 'skip_wait'
-  - name: 'firestore_index_delete_protection'
+  - name: 'firestore_index_deletion_policy'
     primary_resource_id: 'my-index'
     vars:
-      database_id: 'database-id-delete-protection'
-      delete_protection: true
+      database_id: 'database-id-deletion-policy'
+      deletion_policy: '"PREVENT"'
     test_env_vars:
       project_id: 'PROJECT_NAME'
     # Example will show delete_protection as true, but in test we will actually set to false
     # so the test can cleanup after itself.
     test_vars_overrides:
-      'delete_protection': 'false'
+      'deletion_policy': '"DELETE"'
     ignore_read_extra:
-      - 'delete_protection'
+      - 'deletion_policy'
 virtual_fields:
   - name: "skip_wait"
     type: Boolean
     default_value: false
     description: "Whether to skip waiting for the index to be created."
     ignore_read: true
-  - name: 'delete_protection'
-    type: Boolean
-    default_value: false
+  - name: 'deletion_policy'
+    type: Enum
+    default_value: 'DELETE'
+    ignore_read: true
+    enum_values:
+      - 'DELETE'
+      - 'PREVENT'
     description: |
-      Whether or not to allow Terraform to destroy the index. If this field is true,
-      a terraform destroy or terraform apply that would delete the index will fail.
+      Deletion behavior for this index.
+      If the deletion policy is `PREVENT`, the index cannot be deleted and a terraform destroy will fail.
+      If the deletion policy is `DELETE`, the index will both be removed from Terraform state and deleted from Google Cloud upon destruction.
+      The default value is `DELETE`.
 parameters:
 # Firestore uses a custom create function. Any new fields must be explicitly handled there.
 properties:

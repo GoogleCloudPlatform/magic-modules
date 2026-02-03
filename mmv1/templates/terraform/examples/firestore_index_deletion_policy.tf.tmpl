@@ -22,5 +22,5 @@ resource "google_firestore_index" "{{$.PrimaryResourceId}}" {
     field_path = "description"
     order      = "DESCENDING"
   }
-  delete_protection = "{{index $.Vars "delete_protection"}}"
+  deletion_policy = "{{index $.Vars "deletion_policy"}}"
 }
