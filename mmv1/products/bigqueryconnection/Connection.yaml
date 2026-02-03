@@ -147,7 +147,7 @@ properties:
       The resource name of the connection in the form of:
       "projects/{project_id}/locations/{location_id}/connections/{connectionId}"
     output: true
-  - name: 'connection_id'
+  - name: 'connectionId'
     type: String
     description: |
       Optional connection id that should be assigned to the created connection.

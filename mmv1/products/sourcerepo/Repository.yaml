@@ -39,6 +39,7 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'repository'
   custom_diff_suppress: 'templates/terraform/iam/sourcerepo_diff_suppress.go.tmpl'
+  custom_import_state_id_funcs: 'templates/terraform/iam/sourcerepo_state_id_funcs.go.tmpl'
 custom_code:
   constants: 'templates/terraform/constants/source_repo_repository.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/source_repo_repository.tmpl'
@@ -87,12 +88,7 @@ properties:
     key_expander: 'expandSourceRepoRepositoryPubsubConfigsTopic'
     set_hash_func: 'resourceSourceRepoRepositoryPubSubConfigsHash'
     key_name: 'topic'
-    key_description: |
-      A Cloud Pub/Sub topic in this repo's project. Values are of the form
-      `projects/<project>/topics/<topic>` or `<topic>` (where the topic will
-      be inferred).
     value_type:
-      name: pubsubConfig
       type: NestedObject
       properties:
         - name: 'messageFormat'

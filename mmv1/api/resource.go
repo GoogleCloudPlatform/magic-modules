@@ -14,8 +14,10 @@ package api
 
 import (
 	"fmt"
+	"io/fs"
 	"log"
 	"maps"
+	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -392,12 +394,6 @@ type TGCResource struct {
 	// But they have the same api resource type: address
 	CaiResourceKind string `yaml:"cai_resource_kind,omitempty"`
 
-	// If true, the Terraform custom encoder is not applied during tfplan2cai
-	TGCIgnoreTerraformEncoder bool `yaml:"tgc_ignore_terraform_encoder,omitempty"`
-
-	// If true, the Terraform custom decoder is not applied during cai2hcl
-	TGCIgnoreTerraformDecoder bool `yaml:"tgc_ignore_terraform_decoder,omitempty"`
-
 	// [Optional] The parameter that uniquely identifies the resource.
 	// Generally, it shouldn't be set when the identity can be decided.
 	// Otherswise, it should be set.
@@ -572,10 +568,6 @@ func (r *Resource) Validate() {
 	for _, sample := range r.Samples {
 		sample.Validate(r.Name)
 	}
-
-	if r.Async != nil {
-		r.Async.Validate()
-	}
 }
 
 // ====================
@@ -678,7 +670,7 @@ func (r Resource) SensitivePropsToString() string {
 	var props []string
 
 	for _, prop := range r.SensitiveProps() {
-		props = append(props, fmt.Sprintf("`%s`", prop.Lineage()))
+		props = append(props, fmt.Sprintf("`%s`", strings.Join(prop.Lineage(), ".")))
 	}
 
 	return strings.Join(props, ", ")
@@ -688,7 +680,7 @@ func (r Resource) WriteOnlyPropsToString() string {
 	var props []string
 
 	for _, prop := range r.WriteOnlyProps() {
-		props = append(props, fmt.Sprintf("`%s`", prop.Lineage()))
+		props = append(props, fmt.Sprintf("`%s`", strings.Join(prop.Lineage(), ".")))
 	}
 
 	return strings.Join(props, ", ")
@@ -730,10 +722,10 @@ func (r Resource) UnorderedListProperties() []*Type {
 	})
 }
 
-// Properties that will be returned in the API body
+// Properties that are read from the API response.
 func (r Resource) GettableProperties() []*Type {
 	return google.Reject(r.AllUserProperties(), func(v *Type) bool {
-		return v.UrlParamOnly
+		return v.UrlParamOnly || v.IgnoreRead
 	})
 }
 
@@ -750,28 +742,6 @@ func (r Resource) RootProperties() []*Type {
 		}
 	}
 	return props
-}
-
-// Returns a sorted list of all "leaf" properties, meaning properties that have
-// no children.
-func (r Resource) LeafProperties() []*Type {
-	types := r.AllNestedProperties(google.Concat(r.RootProperties(), r.UserVirtualFields()))
-
-	// Remove types that have children, because we only want "leaf" fields
-	types = slices.DeleteFunc(types, func(t *Type) bool {
-		nestedProperties := t.NestedProperties()
-		return len(nestedProperties) > 0
-	})
-
-	// Sort types by lineage
-	slices.SortFunc(types, func(a, b *Type) int {
-		if a.MetadataLineage() < b.MetadataLineage() {
-			return -1
-		}
-		return 1
-	})
-
-	return types
 }
 
 // Return the product-level async object, or the resource-specific one
@@ -855,7 +825,7 @@ func (r *Resource) attachConstraintGroup(groupType string, source []string) *[]s
 }
 
 func buildWriteOnlyField(name string, versionFieldName string, originalField *Type) *Type {
-	originalFieldLineage := originalField.TerraformLineage()
+	originalFieldLineage := strings.Join(originalField.Lineage(), ".0.")
 	newFieldLineage := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(name))
 	requiredWith := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(versionFieldName))
 
@@ -907,7 +877,7 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 
 func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField *Type) *Type {
 	description := fmt.Sprintf("Triggers update of `%s` write-only. Increment this value when an update to `%s` is needed. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)", google.Underscore(writeOnlyField.Name), google.Underscore(writeOnlyField.Name))
-	requiredWith := strings.ReplaceAll(originalField.TerraformLineage(), google.Underscore(originalField.Name), google.Underscore(writeOnlyField.Name))
+	requiredWith := strings.ReplaceAll(strings.Join(originalField.Lineage(), ".0."), google.Underscore(originalField.Name), google.Underscore(writeOnlyField.Name))
 
 	options := []func(*Type){
 		propertyWithType("Int"),
@@ -1069,7 +1039,7 @@ func (r Resource) IgnoreReadLabelsFields(props []*Type) []string {
 		if p.IsA("KeyValueLabels") ||
 			p.IsA("KeyValueTerraformLabels") ||
 			p.IsA("KeyValueAnnotations") {
-			fields = append(fields, p.TerraformLineage())
+			fields = append(fields, strings.Join(p.Lineage(), ".0."))
 		} else if p.IsA("NestedObject") && len(p.AllProperties()) > 0 {
 			fields = google.Concat(fields, r.IgnoreReadLabelsFields(p.AllProperties()))
 		}
@@ -1135,7 +1105,7 @@ func (r *Resource) ExcludeIfNotInVersion(version *product.Version) {
 // In newer resources there is much less standardisation in terms of value.
 // Generally for them though, it's the product.base_url + resource.name
 func (r Resource) SelfLinkUrl() string {
-	s := []string{r.ProductMetadata.BaseUrl, r.SelfLinkUri()}
+	s := []string{r.ProductMetadata.Version.BaseUrl, r.SelfLinkUri()}
 	return strings.Join(s, "")
 }
 
@@ -1153,7 +1123,7 @@ func (r Resource) SelfLinkUri() string {
 }
 
 func (r Resource) CollectionUrl() string {
-	s := []string{r.ProductMetadata.BaseUrl, r.collectionUri()}
+	s := []string{r.ProductMetadata.Version.BaseUrl, r.collectionUri()}
 	return strings.Join(s, "")
 }
 
@@ -1465,8 +1435,8 @@ func quoteStrings(strs []string) []string {
 func ignoreReadFields(props []*Type) []string {
 	var fields []string
 	for _, tp := range props {
-		if tp.IgnoreRead && !tp.UrlParamOnly && !tp.IsA("ResourceRef") {
-			fields = append(fields, tp.TerraformLineage())
+		if (tp.IgnoreRead || tp.ClientSide) && !tp.UrlParamOnly && !tp.IsA("ResourceRef") {
+			fields = append(fields, strings.Join(tp.Lineage(), ".0."))
 		} else if tp.IsA("NestedObject") && tp.AllProperties() != nil {
 			fields = append(fields, ignoreReadFields(tp.AllProperties())...)
 		}
@@ -1516,7 +1486,7 @@ func (r Resource) HasPostCreateComputedFields() bool {
 		if _, ok := fields[google.Underscore(p.Name)]; !ok {
 			continue
 		}
-		if (p.Output || p.DefaultFromApi) && !p.IgnoreRead {
+		if p.Output || p.DefaultFromApi {
 			return true
 		}
 	}
@@ -1527,14 +1497,8 @@ func (r Resource) HasPostCreateComputedFields() bool {
 // Template Methods
 // ====================
 // Functions used to create slices of resource properties that could not otherwise be called from within generating templates.
-func (r Resource) ReadProperties() []*Type {
-	return google.Reject(r.GettableProperties(), func(p *Type) bool {
-		return p.IgnoreRead
-	})
-}
-
 func (r Resource) FlattenedProperties() []*Type {
-	return google.Select(r.ReadProperties(), func(p *Type) bool {
+	return google.Select(r.GettableProperties(), func(p *Type) bool {
 		return p.FlattenObject
 	})
 }
@@ -1798,33 +1762,38 @@ func (r Resource) IamParentSourceType() string {
 	return t
 }
 
-func (r Resource) IamImportFormat() string {
+func (r Resource) IamImportFormatTemplate() string {
 	var importFormat string
 	if len(r.IamPolicy.ImportFormat) > 0 {
 		importFormat = r.IamPolicy.ImportFormat[0]
 	} else {
 		importFormat = r.IamPolicy.SelfLink
 		if importFormat == "" {
-			importFormat = r.SelfLinkUrl()
+			if len(r.ImportFormat) > 0 {
+				importFormat = r.ImportFormat[0]
+			} else {
+				importFormat = r.SelfLinkUrl()
+			}
 		}
 	}
+	return strings.ReplaceAll(importFormat, "{{name}}", fmt.Sprintf("{{%s}}", r.IamParentResourceName()))
+}
+
+func (r Resource) IamImportFormat() string {
+	importFormat := r.IamImportFormatTemplate()
 
 	importFormat = regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(importFormat, "%s")
-	return strings.ReplaceAll(importFormat, r.ProductMetadata.BaseUrl, "")
+	return strings.ReplaceAll(importFormat, r.ProductMetadata.Version.BaseUrl, "")
+}
+
+func (r Resource) IamImportParams() []string {
+	importFormat := r.IamImportFormatTemplate()
+
+	return r.ExtractIdentifiers(importFormat)
 }
 
 func (r Resource) IamImportQualifiersForTest() string {
-	var importFormat string
-	if len(r.IamPolicy.ImportFormat) > 0 {
-		importFormat = r.IamPolicy.ImportFormat[0]
-	} else {
-		importFormat = r.IamPolicy.SelfLink
-		if importFormat == "" {
-			importFormat = r.SelfLinkUrl()
-		}
-	}
-
-	params := r.ExtractIdentifiers(importFormat)
+	params := r.IamImportParams()
 	var importQualifiers []string
 	for i, param := range params {
 		if param == "project" {
@@ -1992,7 +1961,7 @@ func (r Resource) ListUrlTemplate() string {
 }
 
 func (r Resource) DeleteUrlTemplate() string {
-	return fmt.Sprintf("%s%s", r.ProductMetadata.BaseUrl, r.DeleteUri())
+	return fmt.Sprintf("%s%s", r.ProductMetadata.Version.BaseUrl, r.DeleteUri())
 }
 
 func (r Resource) LastNestedQueryKey() string {
@@ -2107,7 +2076,7 @@ func (r Resource) TestSamples() []*resource.Sample {
 	})
 }
 
-func (r Resource) TestSampleSetUp() {
+func (r Resource) TestSampleSetUp(sysfs fs.FS) {
 	res := make(map[string]string)
 	for _, sample := range r.Samples {
 		sample.TargetVersionName = r.TargetVersionName
@@ -2123,7 +2092,7 @@ func (r Resource) TestSampleSetUp() {
 			if step.ConfigPath == "" {
 				step.ConfigPath = fmt.Sprintf("templates/terraform/samples/services/%s/%s.tf.tmpl", packageName, step.Name)
 			}
-			step.SetHCLText()
+			step.SetHCLText(sysfs)
 			configName := step.Name
 			if _, ok := res[step.Name]; !ok {
 				res[configName] = sample.Name
@@ -2541,13 +2510,19 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 		"timeouts",
 	}
 	for _, tp := range r.VirtualFields {
-		props = append(props, tp.MetadataLineage())
+		props = append(props, strings.Join(tp.Lineage(), "."))
 	}
 	for _, tp := range r.AllNestedProperties(r.RootProperties()) {
 		if tp.UrlParamOnly {
 			props = append(props, google.Underscore(tp.Name))
 		} else if tp.IsMissingInCai || tp.IgnoreRead || tp.ClientSide || tp.WriteOnlyLegacy {
-			props = append(props, tp.MetadataLineage())
+			props = append(props, strings.Join(tp.Lineage(), "."))
+		}
+	}
+
+	for _, e := range r.Examples {
+		for _, p := range e.IgnoreReadExtra {
+			props = append(props, strings.ReplaceAll(p, ".0.", "."))
 		}
 	}
 
@@ -2555,8 +2530,24 @@ func (r Resource) TGCTestIgnorePropertiesToStrings() []string {
 		props = append(props, "ASSETNAME")
 	}
 
+	if r.CustomCode.ExtraSchemaEntry != "" {
+		b, err := os.ReadFile(r.CustomCode.ExtraSchemaEntry)
+
+		if err != nil {
+			log.Printf("Warning: failed to read extra_schema_entry file %s: %v", r.CustomCode.ExtraSchemaEntry, err)
+		} else {
+			re := regexp.MustCompile(`"([^"]+)"\s*:`)
+			matches := re.FindAllStringSubmatch(string(b), -1)
+			for _, match := range matches {
+				if len(match) > 1 {
+					props = append(props, match[1])
+				}
+			}
+		}
+	}
+
 	slices.Sort(props)
-	return props
+	return slices.Compact(props)
 }
 
 // Filters out computed properties during cai2hcl

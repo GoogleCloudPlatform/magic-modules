@@ -7,6 +7,7 @@ import (
 	  "github.com/hashicorp/terraform-provider-google/google/services/{{ $service }}"
 	{{- end }}
 
+	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/services/container"
 	"github.com/hashicorp/terraform-provider-google/google/services/containeraws"
 	"github.com/hashicorp/terraform-provider-google/google/services/containerazure"
@@ -42,6 +43,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_artifact_registry_tag":                     artifactregistry.DataSourceArtifactRegistryTag(),
 	"google_artifact_registry_tags":                    artifactregistry.DataSourceArtifactRegistryTags(),
 	"google_artifact_registry_version":                 artifactregistry.DataSourceArtifactRegistryVersion(),
+	"google_artifact_registry_versions":                artifactregistry.DataSourceArtifactRegistryVersions(),
 	"google_apphub_discovered_workload":		    apphub.DataSourceApphubDiscoveredWorkload(),
 	"google_app_engine_default_service_account":        appengine.DataSourceGoogleAppEngineDefaultServiceAccount(),
 	"google_apphub_application":						apphub.DataSourceGoogleApphubApplication(),
@@ -79,6 +81,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_cloud_identity_group_memberships":          cloudidentity.DataSourceGoogleCloudIdentityGroupMemberships(),
 	"google_cloud_identity_group_transitive_memberships":  cloudidentity.DataSourceGoogleCloudIdentityGroupTransitiveMemberships(),
 	"google_cloud_identity_group_lookup":               cloudidentity.DataSourceGoogleCloudIdentityGroupLookup(),
+	"google_cloud_identity_policies":              cloudidentity.DataSourceGoogleCloudIdentityPolicies(),
 	"google_cloud_identity_policy":               cloudidentity.DataSourceGoogleCloudIdentityPolicy(),
 	"google_cloud_quotas_quota_info":                   cloudquotas.DataSourceGoogleCloudQuotasQuotaInfo(),
 	"google_cloud_quotas_quota_infos":                  cloudquotas.DataSourceGoogleCloudQuotasQuotaInfos(),
@@ -135,6 +138,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_reservation_sub_block":             compute.DataSourceGoogleComputeReservationSubBlock(),
 	"google_compute_resource_policy":                   compute.DataSourceGoogleComputeResourcePolicy(),
 	"google_compute_router":                            compute.DataSourceGoogleComputeRouter(),
+	"google_compute_routers":                           compute.DataSourceGoogleComputeRouters(),
 	"google_compute_router_nat":                        compute.DataSourceGoogleComputeRouterNat(),
 	"google_compute_router_status":                     compute.DataSourceGoogleComputeRouterStatus(),
 	"google_compute_security_policy":                   compute.DataSourceGoogleComputeSecurityPolicy(),
@@ -306,6 +310,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_vmwareengine_private_cloud":                vmwareengine.DataSourceVmwareenginePrivateCloud(),
 	"google_vmwareengine_subnet":                       vmwareengine.DataSourceVmwareengineSubnet(),
 	"google_vmwareengine_vcenter_credentials":          vmwareengine.DataSourceVmwareengineVcenterCredentials(),
+	"google_vmwareengine_datastore":                    vmwareengine.DataSourceVmwareengineDatastore(),
 	"google_compute_region_backend_service":            compute.DataSourceGoogleComputeRegionBackendService(),
 	"google_network_management_connectivity_test_run":  networkmanagement.DataSourceGoogleNetworkManagementTestRun(),
 	"google_network_management_connectivity_tests":  	networkmanagement.DataSourceGoogleNetworkManagementConnectivityTests(),
@@ -316,7 +321,7 @@ var generatedIAMDatasources = map[string]*schema.Resource{
 	// ####### START generated IAM datasources ###########
 	{{- range $object := $.ResourcesForVersion }}
 	{{- if $object.IamClassName }}
-	"{{ $object.TerraformName }}_iam_policy":               tpgiamresource.DataSourceIamPolicy({{ $object.IamClassName }}IamSchema, {{ $object.IamClassName }}IamUpdaterProducer),
+	"{{ $object.TerraformName }}_iam_policy": registry.DataSource("{{ $object.TerraformName }}_iam_policy"),
 	{{- end }}
 	{{- end }}
 	// ####### END generated IAM datasources ###########
@@ -355,12 +360,12 @@ var handwrittenIAMDatasources = map[string]*schema.Resource{
 var generatedResources = map[string]*schema.Resource{
 	{{- range $object := $.ResourcesForVersion }}
 	{{- if $object.ResourceName }}
-		"{{ $object.TerraformName }}": {{ $object.ResourceName }}(),
+		"{{ $object.TerraformName }}": registry.Resource("{{ $object.TerraformName }}"),
 	{{- end }}
 	{{- if $object.IamClassName }}
-		"{{ $object.TerraformName }}_iam_binding":              tpgiamresource.ResourceIamBinding({{ $object.IamClassName }}IamSchema, {{ $object.IamClassName }}IamUpdaterProducer, {{ $object.IamClassName }}IdParseFunc),
-		"{{ $object.TerraformName }}_iam_member":               tpgiamresource.ResourceIamMember({{ $object.IamClassName }}IamSchema, {{ $object.IamClassName }}IamUpdaterProducer, {{ $object.IamClassName }}IdParseFunc),
-		"{{ $object.TerraformName }}_iam_policy":               tpgiamresource.ResourceIamPolicy({{ $object.IamClassName }}IamSchema, {{ $object.IamClassName }}IamUpdaterProducer, {{ $object.IamClassName }}IdParseFunc),
+		"{{ $object.TerraformName }}_iam_binding": registry.Resource("{{ $object.TerraformName }}_iam_binding"),
+		"{{ $object.TerraformName }}_iam_member":  registry.Resource("{{ $object.TerraformName }}_iam_member"),
+		"{{ $object.TerraformName }}_iam_policy":  registry.Resource("{{ $object.TerraformName }}_iam_policy"),
 	{{- end }}
 	{{- end }}
 }

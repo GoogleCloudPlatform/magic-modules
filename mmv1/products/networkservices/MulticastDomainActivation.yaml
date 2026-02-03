@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,6 +15,10 @@
 name: MulticastDomainActivation
 description: Create a multicast domain activation in the specified location of
   the current project.
+references:
+  guides:
+    'Create Multicast Domain Activation': 'https://docs.cloud.google.com/vpc/docs/multicast/create-domains#activate-domain'
+  api: 'https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastDomainActivations'
 base_url: projects/{{project}}/locations/{{location}}/multicastDomainActivations
 update_mask: true
 self_link:
@@ -72,17 +76,25 @@ parameters:
 properties:
   - name: adminNetwork
     type: String
-    description: '[Output only] The URL of the admin network.'
+    description: 'The URL of the admin network.'
     output: true
   - name: createTime
     type: String
     description: |-
-      [Output only] The timestamp when the multicast domain activation was
+      The timestamp when the multicast domain activation was
       created.
     output: true
   - name: description
     type: String
     description: An optional text description of the multicast domain activation.
+  - name: disablePlacementPolicy
+    type: Boolean
+    description: |-
+      Option to allow disabling placement policy for multicast infrastructure.
+      Only applicable if the activation is for a domain associating with a
+      multicast domain group.
+    immutable: true
+    default_from_api: true
   - name: labels
     type: KeyValueLabels
     description: Labels as key-value pairs
@@ -93,6 +105,7 @@ properties:
       Use the following format:
       `projects/*/locations/global/multicastDomains/*`.
     immutable: true
+    required: true
   - name: name
     type: String
     description: |-
@@ -100,6 +113,24 @@ properties:
       Use the following format:
       `projects/*/locations/*/multicastDomainActivations/*`.
     output: true
+  - name: state
+    type: NestedObject
+    description: The multicast resource's state.
+    output: true
+    properties:
+      - name: state
+        type: String
+        description: |-
+          The state of the multicast resource.
+          Possible values:
+          CREATING
+          ACTIVE
+          DELETING
+          DELETE_FAILED
+          UPDATING
+          UPDATE_FAILED
+          INACTIVE
+        output: true
   - name: trafficSpec
     type: NestedObject
     description: |-
@@ -111,29 +142,34 @@ properties:
         description: |-
           Aggregated egress Packet-Per-Second for all multicast groups in the domain
           in this zone.
+        default_from_api: true
       - name: aggrIngressPps
         type: String
         description: |-
           Aggregated ingress Packet-Per-Second for all multicast groups in the domain
           in this zone. Default to (aggregated_egress_pps /
           max_per_group_subscribers) * 2.
+        default_from_api: true
       - name: avgPacketSize
         type: Integer
         description: Average packet size (Default to 512 bytes).
+        default_from_api: true
       - name: maxPerGroupIngressPps
         type: String
         description: |-
           Maximum ingress Packet-Per-Second for a single multicast group in this
           zone. Default to aggregated_ingress_pps / 2.
+        default_from_api: true
       - name: maxPerGroupSubscribers
         type: String
         description: |-
           Maximum number of subscribers for a single multicast group in this zone.
           Default to max(50, aggregated_egress_pps / aggregated_ingress_pps).
+        default_from_api: true
   - name: uniqueId
     type: String
     description: |-
-      [Output only] The Google-generated UUID for the resource. This value is
+      The Google-generated UUID for the resource. This value is
       unique across all multicast domain activation resources. If a domain
       activation is deleted and another with the same name is created, the new
       domain activation is assigned a different unique_id.
@@ -141,6 +177,6 @@ properties:
   - name: updateTime
     type: String
     description: |-
-      [Output only] The timestamp when the multicast domain activation was most
+      The timestamp when the multicast domain activation was most
       recently updated.
     output: true

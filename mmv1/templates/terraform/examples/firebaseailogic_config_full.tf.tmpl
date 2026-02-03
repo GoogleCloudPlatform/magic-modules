@@ -1,0 +1,71 @@
+resource "google_project" "project" {
+  provider = google-beta
+
+  project_id      = "{{index $.Vars "project_id"}}"
+  name            = "Firebase Project"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_firebase_project" "default" {
+  provider = google-beta
+
+  project  = google_project.project.project_id
+}
+
+resource "google_project_service" "firebase" {
+  provider = google-beta
+
+  project = google_project.project.project_id
+  service = "firebase.googleapis.com"
+}
+
+resource "google_project_service" "ailogic" {
+  provider = google-beta
+
+  project = google_project.project.project_id
+  service = "firebasevertexai.googleapis.com"
+}
+
+resource "google_apikeys_key" "gemini" {
+  provider  = google-beta
+  project  = google_project.project.project_id
+
+  name         = "{{index $.Vars "api_key_id"}}"
+  display_name = "Gemini Developer API key"
+
+  restrictions {
+    api_targets {
+      service = "generativelanguage.googleapis.com"
+    }
+  }
+}
+
+# It takes a while for permissions to propagate
+# If your Terraform setup has a retry mechanism, this wait is unnecessary
+resource "time_sleep" "wait_30s" {
+  depends_on = [
+    google_project_service.ailogic,
+    google_project_service.firebase
+  ]
+
+  create_duration = "30s"
+}
+
+resource "google_firebase_ai_logic_config" "default" {
+  provider  = google-beta
+  project   = google_firebase_project.default.project
+  location  = "global"
+
+  generative_language_config {
+    api_key = google_apikeys_key.gemini.key_string
+  }
+
+  telemetry_config {
+    mode = "ALL"
+    sampling_rate = 1.0
+  }
+
+  depends_on = [time_sleep.wait_30s]
+}

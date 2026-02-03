@@ -240,7 +240,7 @@ type Type struct {
 	// The name of the key. Used in the Terraform schema as a field name.
 	KeyName string `yaml:"key_name,omitempty"`
 
-	// A description of the key's format. Used in Terraform to describe
+	// Deprecated. A description of the key's format. Used in Terraform to describe
 	// the field in documentation.
 	KeyDescription string `yaml:"key_description,omitempty"`
 
@@ -467,7 +467,9 @@ func (t *Type) SetDefault(r *Resource) {
 		if t.ValueType != nil {
 			t.ValueType.ParentName = t.Name
 			t.ValueType.ParentMetadata = t
-			t.ValueType.SetDefault(r) // Recurse
+			oldName := t.ValueType.Name
+			t.ValueType.SetDefault(r)  // Recurse
+			t.ValueType.Name = oldName // unset name if it was previously unset
 		}
 	case t.IsA("NestedObject"):
 		for _, p := range t.Properties {
@@ -498,13 +500,25 @@ func (t *Type) Validate(rName string) {
 		log.Fatalf("Property %s cannot be write_only and sensitive at the same time in resource %s", t.Name, rName)
 	}
 
+	if t.KeyDescription != "" {
+		log.Fatalf("Property %s key_description can't be set in resource %s; it's deprecated", t.Name, rName)
+	}
+
 	t.validateLabelsField()
 
 	switch {
 	case t.IsA("Array"):
 		t.ItemType.Validate(rName)
 	case t.IsA("Map"):
+		// ValueType.Name should be empty (because it's unused) but we require types to have names in all other cases.
+		// This logic allows both to be validated.
+		oldName := t.ValueType.Name
+		t.ValueType.Name = "any_value"
 		t.ValueType.Validate(rName)
+		t.ValueType.Name = oldName
+		if t.ValueType.Name != "" {
+			log.Fatalf("Property %s value_type.name can't be set in resource %s", t.Name, rName)
+		}
 	case t.IsA("NestedObject"):
 		for _, p := range t.Properties {
 			p.Validate(rName)
@@ -524,82 +538,44 @@ func (t *Type) Validate(rName string) {
 // check the allowed types for Type field
 // check the allowed fields for each type, for example, KeyName is only allowed for Map
 
-// Prints a dot notation path to where the field is nested within the parent
-// object. eg: parent.meta.label.foo
-// The only intended purpose is to allow better error messages. Some objects
-// and at some points in the build this doesn't output a valid output.
-func (t Type) Lineage() string {
-	if t.ParentMetadata == nil {
-		return google.Underscore(t.Name)
-	}
-
-	return fmt.Sprintf("%s.%s", t.ParentMetadata.Lineage(), google.Underscore(t.Name))
-}
-
-// Returns the actual Terraform lineage for the field, formatted for resource metadata.
-// This will return a simple dot notation path, like: foo_field.bar_field
-func (t Type) MetadataLineage() string {
+// Returns a slice of Terraform field names representing where the field is nested within the parent resource.
+// For example, []string{"parent_field", "meta", "label", "foo_bar"}.
+func (t Type) Lineage() []string {
 	if t.ParentMetadata == nil || t.ParentMetadata.FlattenObject {
-		return google.Underscore(t.Name)
+		return []string{google.Underscore(t.Name)}
 	}
 
-	// Skip arrays because otherwise the array name will be included twice
-	if t.ParentMetadata.IsA("Array") {
-		return t.ParentMetadata.MetadataLineage()
+	// Skip arrays & maps because otherwise the parent field name will be duplicated
+	if t.ParentMetadata.IsA("Array") || t.ParentMetadata.IsA("Map") {
+		return t.ParentMetadata.Lineage()
 	}
 
-	return fmt.Sprintf("%s.%s", t.ParentMetadata.MetadataLineage(), google.Underscore(t.Name))
+	return append(t.ParentMetadata.Lineage(), google.Underscore(t.Name))
 }
 
-// Returns the default Terraform lineage for the field, based on converting MetadataApiLineage
-// to snake_case. This is used to determine whether an explicit Terraform field name is required.
-// This will return a simple dot notation path like: foo_field.bar_field
-func (t Type) MetadataDefaultLineage() string {
-	apiLineage := t.MetadataApiLineage()
-	parts := strings.Split(apiLineage, ".")
-	var snakeParts []string
-	for _, p := range parts {
-		snakeParts = append(snakeParts, google.Underscore(p))
-	}
-	return strings.Join(snakeParts, ".")
-}
-
-// Returns the actual API lineage for the field (that is, using API names), formatted for
-// resource metadata. This will return a simple dot notation path, like: fooField.barField
-// This format is intended for to represent an API type.
-func (t Type) MetadataApiLineage() string {
-	apiName := t.ApiName
+// Returns a slice of API field names representing where the field is nested within the parent resource.
+// For example, []string{"parentField", "meta", "label", "fooBar"}. For fine-grained resources, this will
+// include the field on the API resource that the fine-grained resource manages.
+func (t Type) ApiLineage() []string {
 	if t.ParentMetadata == nil {
 		if !t.UrlParamOnly && t.ResourceMetadata.ApiResourceField != "" {
-			apiName = fmt.Sprintf("%s.%s", t.ResourceMetadata.ApiResourceField, apiName)
+			return []string{t.ResourceMetadata.ApiResourceField, t.ApiName}
 		}
-		return apiName
+		return []string{t.ApiName}
 	}
 
+	// Skip arrays because otherwise the array will be included twice
 	if t.ParentMetadata.IsA("Array") {
-		return t.ParentMetadata.MetadataApiLineage()
+		return t.ParentMetadata.ApiLineage()
 	}
 
-	return fmt.Sprintf("%s.%s", t.ParentMetadata.MetadataApiLineage(), apiName)
-}
-
-// Returns the lineage in snake case
-func (t Type) LineageAsSnakeCase() string {
-	if t.ParentMetadata == nil {
-		return google.Underscore(t.Name)
+	// Insert `value` for children of Map fields, and exclude this type because
+	// it will have the same Name as the parent field.
+	if t.ParentMetadata.IsA("Map") {
+		return append(t.ParentMetadata.ApiLineage(), "value")
 	}
 
-	return fmt.Sprintf("%s_%s", t.ParentMetadata.LineageAsSnakeCase(), google.Underscore(t.Name))
-}
-
-// Prints the access path of the field in the configration eg: metadata.0.labels
-// The only intended purpose is to get the value of the labes field by calling d.Get().
-func (t Type) TerraformLineage() string {
-	if t.ParentMetadata == nil || t.ParentMetadata.FlattenObject {
-		return google.Underscore(t.Name)
-	}
-
-	return fmt.Sprintf("%s.0.%s", t.ParentMetadata.TerraformLineage(), google.Underscore(t.Name))
+	return append(t.ParentMetadata.ApiLineage(), t.ApiName)
 }
 
 func (t Type) EnumValuesToString(quoteSeperator string, addEmpty bool) string {
@@ -878,6 +854,29 @@ func (t Type) WriteOnlyProperties() []*Type {
 	return props
 }
 
+// AllUniqueNestedProperties Returns all unique nested properties (regular and write-only), preserving order and sorted by name.
+func (t Type) AllUniqueNestedProperties() []*Type {
+	seen := make(map[string]bool)
+	var result []*Type
+
+	for _, p := range t.NestedProperties() {
+		key := strings.Join(p.Lineage(), "|")
+		if !seen[key] {
+			result = append(result, p)
+			seen[key] = true
+		}
+	}
+	for _, p := range t.WriteOnlyProperties() {
+		key := strings.Join(p.Lineage(), "|")
+		if !seen[key] {
+			result = append(result, p)
+			seen[key] = true
+		}
+	}
+
+	return result
+}
+
 func (t Type) Removed() bool {
 	return t.RemovedMessage != ""
 }
@@ -905,7 +904,7 @@ func (t *Type) FieldType() []string {
 	}
 
 	if t.MinVersion == "beta" && t.ResourceMetadata.MinVersion != "beta" {
-		ret = append(ret, "[Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)")
+		ret = append(ret, "[Beta](../guides/provider_versions.html.markdown)")
 	}
 
 	if t.DeprecationMessage != "" {
@@ -1114,7 +1113,7 @@ func (t Type) AllProperties() []*Type {
 func (t Type) UserProperties() []*Type {
 	if t.IsA("NestedObject") {
 		if t.Properties == nil {
-			log.Fatalf("Field '{%s}' properties are nil!", t.Lineage())
+			log.Fatalf("Field '{%s}' properties are nil!", strings.Join(t.Lineage(), "."))
 		}
 
 		return google.Reject(t.Properties, func(p *Type) bool {
@@ -1268,7 +1267,7 @@ func propertyWithAtLeastOneOfPointer(ptr *[]string) func(*Type) {
 func (t *Type) validateLabelsField() {
 	productName := t.ResourceMetadata.ProductMetadata.Name
 	resourceName := t.ResourceMetadata.Name
-	lineage := t.Lineage()
+	lineage := strings.Join(t.Lineage(), ".")
 	if lineage == "labels" || lineage == "metadata.labels" || lineage == "configuration.labels" {
 		if !t.IsA("KeyValueLabels") &&
 			// The label value must be empty string, so skip this resource
@@ -1348,7 +1347,6 @@ func (t Type) fieldMinVersion() string {
 //   func (t *Type) validate
 //     super
 //     check :key_name, type: ::String, required: true
-//     check :key_description, type: ::String
 //     check :value_type, type: Api::Type::NestedObject, required: true
 //     raise "Invalid type //{@value_type}" unless type?(@value_type)
 //   end
@@ -1557,4 +1555,15 @@ func (t Type) TGCSendEmptyValue() bool {
 
 func (t Type) ShouldIgnoreCustomFlatten() bool {
 	return t.ResourceMetadata.IsTgcCompiler() && (t.IgnoreRead || t.TGCIgnoreTerraformCustomFlatten)
+}
+
+// It returns true if any of the nested properties are required, necessitating the initialization
+// of an empty map to prevent "missing argument" errors in Terraform when the field is missing in CAI.
+func (t Type) HasRequiredProperty() bool {
+	for _, prop := range t.UserProperties() {
+		if prop.Required {
+			return true
+		}
+	}
+	return false
 }
