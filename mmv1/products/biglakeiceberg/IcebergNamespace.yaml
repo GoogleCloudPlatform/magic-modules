@@ -20,7 +20,6 @@ self_link: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/
 id_format: 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
 immutable: false
 custom_code:
-  constants: 'templates/terraform/constants/biglake_iceberg_namespace.go.tmpl'
   custom_import: 'templates/terraform/custom_import/biglake_iceberg_namespace.go.tmpl'
   custom_update: 'templates/terraform/custom_update/biglake_iceberg_namespace.go.tmpl'
   pre_create: 'templates/terraform/pre_create/biglake_iceberg_namespace.go.tmpl'
@@ -102,4 +101,4 @@ samples:
           GOOGLE_BILLING_PROJECT: 'PROJECT'
           USER_PROJECT_OVERRIDE: 'true'
         config_path: 'templates/terraform/examples/biglake_iceberg_namespace_update.tf.tmpl'
-    
+
