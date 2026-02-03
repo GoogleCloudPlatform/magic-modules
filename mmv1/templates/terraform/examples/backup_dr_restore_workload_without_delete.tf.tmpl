@@ -4,8 +4,6 @@ resource "google_backup_dr_restore_workload" "{{$.PrimaryResourceId}}" {
   data_source_id   = "{{index $.Vars "data_source_id"}}"
   backup_id        = "{{index $.Vars "backup_id"}}"
   
-  name = "{{index $.Vars "backup_name"}}"
-  
   # Set to false to keep the restored resource in GCP after terraform destroy
   delete_restored_instance = false
 
@@ -15,8 +13,8 @@ resource "google_backup_dr_restore_workload" "{{$.PrimaryResourceId}}" {
   }
 
   disk_restore_properties {
-    name    = "{{index $.Vars "disk_name"}}"
-    size_gb = 50
-    type    = "pd-standard"
+    name        = "{{index $.Vars "disk_name"}}"
+    size_gb     = 100
+    type        = "projects/{{index $.TestEnvVars "project"}}/zones/us-central1-a/diskTypes/pd-standard"
   }
 }
