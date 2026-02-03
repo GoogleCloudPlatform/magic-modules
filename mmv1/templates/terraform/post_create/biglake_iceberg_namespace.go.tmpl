@@ -1,0 +1,22 @@
+	// namespace_id might be cleared by PostCreateSetComputedFields because it's not in the response.
+    // Re-calculate it from the input namespace.
+	if v_post, ok := d.GetOk("namespace"); ok {
+        nsRaw_post := v_post.([]interface{})
+        ns_post := make([]string, len(nsRaw_post))
+        for i, val := range nsRaw_post {
+            ns_post[i] = val.(string)
+        }
+        encodedNs_post := encodeNamespace(ns_post)
+        if err := d.Set("namespace_id", encodedNs_post); err != nil {
+            return fmt.Errorf("Error setting namespace_id in post-create: %s", err)
+        }
+        
+        // Re-set the ID since the previous SetId used the empty namespace_id
+        project_post, err := tpgresource.GetProject(d, config)
+        if err != nil {
+            return err
+        }
+        catalog_post := d.Get("catalog").(string)
+        resID_post := fmt.Sprintf("projects/%s/catalogs/%s/namespaces/%s", project_post, catalog_post, encodedNs_post)
+        d.SetId(resID_post)
+    }

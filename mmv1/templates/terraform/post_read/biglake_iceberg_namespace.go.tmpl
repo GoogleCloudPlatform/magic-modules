@@ -1,0 +1,14 @@
+// Ensure namespace_id is set correctly from the read namespace
+    log.Printf("[DEBUG] res: %+v", res)
+    if v, ok := res["namespace"]; ok {
+        nsRaw := v.([]interface{})
+        ns := make([]string, len(nsRaw))
+        for i, val := range nsRaw {
+            ns[i] = val.(string)
+        }
+        encodedNs := encodeNamespace(ns)
+        log.Printf("[DEBUG] setting namespace_id to %s", encodedNs)
+        if err := d.Set("namespace_id", encodedNs); err != nil {
+            return fmt.Errorf("Error setting namespace_id in post-read: %s", err)
+        }
+    }

@@ -1,0 +1,40 @@
+	config := meta.(*transport_tpg.Config)
+
+	if err := tpgresource.ParseImportId([]string{
+		"projects/(?P<project>[^/]+)/catalogs/(?P<catalog>[^/]+)/namespaces/(?P<namespace_id>.+)",
+		"(?P<project>[^/]+)/(?P<catalog>[^/]+)/namespaces/(?P<namespace_id>.+)",
+		"(?P<catalog>[^/]+)/namespaces/(?P<namespace_id>.+)",
+	}, d, config); err != nil {
+		return nil, err
+	}
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return nil, err
+	}
+	d.Set("project", project)
+
+	nsStr := d.Get("namespace_id").(string)
+	ns, err := decodeNamespace(nsStr)
+	if err != nil {
+		return nil, fmt.Errorf("Error decoding namespace from ID: %s", err)
+	}
+
+	nsI := make([]interface{}, len(ns))
+	for i, v := range ns {
+		nsI[i] = v
+	}
+
+	if err := d.Set("namespace", nsI); err != nil {
+		return nil, fmt.Errorf("Error setting namespace in import: %s", err)
+	}
+
+	catalog := d.Get("catalog").(string)
+	id := fmt.Sprintf("projects/%s/catalogs/%s/namespaces/%s", project, catalog, nsStr)
+	d.SetId(id)
+
+	if err := resourceBiglakeIcebergIcebergNamespaceRead(d, meta); err != nil {
+		return nil, fmt.Errorf("Error calling Read during import: %s", err)
+	}
+
+	return []*schema.ResourceData{d}, nil

@@ -15,10 +15,17 @@
 name: 'IcebergNamespace'
 description: |
   IcebergNamespaces are containers for Apache Iceberg Tables within an IcebergCatalog.
-exclude_resource: true
 base_url: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces'
-self_link: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}'
+self_link: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
+id_format: 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
 immutable: false
+custom_code:
+  constants: 'templates/terraform/constants/biglake_iceberg_namespace.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/biglake_iceberg_namespace.go.tmpl'
+  custom_update: 'templates/terraform/custom_update/biglake_iceberg_namespace.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/biglake_iceberg_namespace.go.tmpl'
+  post_create: 'templates/terraform/post_create/biglake_iceberg_namespace.go.tmpl'
+  post_read: 'templates/terraform/post_read/biglake_iceberg_namespace.go.tmpl'
 parameters:
   - name: 'catalog'
     type: String
@@ -41,11 +48,14 @@ properties:
     description: |
       User-defined properties for the namespace.
     required: false
+    default_from_api: true
+    diff_suppress_func: 'icebergNamespacePropertiesDiffSuppress'
   - name: 'namespace_id'
     type: String
     description: |
       The unique identifier of the namespace.
     output: true
+    url_param_only: true
 iam_policy:
   base_url: 'v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
   parent_resource_attribute: 'namespace_id'
