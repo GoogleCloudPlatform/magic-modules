@@ -197,7 +197,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
                 Computed: true,
             },
 {{- end}}
-{{- if $.DeletionPolicy }}
+{{- if and $.DeletionPolicy $.ProductMetadata.DeletionPolicyOptIn}}
             "deletion_policy": {
                 Type:     schema.TypeString,
                 Optional: true,
@@ -1149,7 +1149,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     {{- if $.CustomCode.PreDelete }} 
         {{ customTemplate $ $.CustomCode.PreDelete false -}}
     {{- end }}
-    {{- if $.DeletionPolicy }}
+    {{- if and $.DeletionPolicy $.ProductMetadata.DeletionPolicyOptIn }}
     if d.Get("deletion_policy").(string) == "PREVENT" {
         return fmt.Errorf("cannot destroy {{$.ResourceName}} without setting deletion_policy=\"DELETE\" and running `terraform apply`")
     }
