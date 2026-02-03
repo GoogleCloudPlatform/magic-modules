@@ -13,7 +13,7 @@
   See the License for the specific language governing permissions and
   limitations under the License. */ -}}
 {{- define "flattenPropertyMethod" }}
-{{- if or $.WriteOnlyLegacy $.WriteOnly }}
+{{- if and (or $.WriteOnlyLegacy $.WriteOnly) }}
 {{- else if and $.CustomFlatten (not $.ShouldIgnoreCustomFlatten) }}
     {{- customTemplate $ $.CustomFlatten false -}}
 {{- else -}}
