@@ -12,12 +12,7 @@ resource "google_compute_rollout_plan" "{{ .PrimaryResourceId }}" {
       }
     }
     validation {
-      type = "time"
-      time_based_validation_metadata {
-        wait_duration {
-          seconds = "30"
-        }
-      }
+      type = "manual"
     }
   }
 }
