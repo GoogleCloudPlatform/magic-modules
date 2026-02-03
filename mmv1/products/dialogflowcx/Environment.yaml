@@ -35,12 +35,6 @@ timeouts:
 async:
   actions: ['create', 'update']
   type: 'OpAsync'
-  operation:
-    full_url: 'https://{{location}}-dialogflow.googleapis.com/v3/{{op_id}}'
-    timeouts:
-      insert_minutes: 60
-      update_minutes: 60
-      delete_minutes: 20
   result:
     resource_inside_response: true
 custom_code:

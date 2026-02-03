@@ -37,10 +37,6 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    full_url: 'https://{{location}}-gkemulticloud.googleapis.com/v1/{{op_id}}'
   result:
     resource_inside_response: true
 custom_code:

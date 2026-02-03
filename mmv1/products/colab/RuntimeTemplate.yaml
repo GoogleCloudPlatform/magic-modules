@@ -28,12 +28,6 @@ base_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates'
 self_link: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates/{{name}}'
 immutable: true
 create_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates?notebook_runtime_template_id={{name}}'
-async:
-  type: 'OpAsync'
-  operation:
-    full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
-  result:
-    resource_inside_response: true
 iam_policy:
   parent_resource_attribute: 'runtime_template'
   method_name_separator: ':'

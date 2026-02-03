@@ -26,10 +26,6 @@ base_url: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs'
 self_link: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs/{{notebook_execution_job_id}}'
 immutable: true
 create_url: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs?notebook_execution_job_id={{notebook_execution_job_id}}'
-async:
-  type: 'OpAsync'
-  operation:
-    full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs/{{notebook_execution_job_id}}'
 custom_code:
