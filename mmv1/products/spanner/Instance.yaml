@@ -74,6 +74,9 @@ virtual_fields:
       This must be set to true if you created a backup manually in the console.
     type: Boolean
     default_value: false
+tgc_tests:
+  - name: 'TestAccSpannerInstance_basicWithAutoscalingUsingNodeConfigUpdateDisableAutoscaling'
+    skip: 'sometimes the CAI asset data for step3 is unavailable'
 parameters:
 properties:
   - name: 'name'
