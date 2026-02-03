@@ -854,6 +854,29 @@ func (t Type) WriteOnlyProperties() []*Type {
 	return props
 }
 
+// AllUniqueNestedProperties Returns all unique nested properties (regular and write-only), preserving order and sorted by name.
+func (t Type) AllUniqueNestedProperties() []*Type {
+	seen := make(map[string]bool)
+	var result []*Type
+
+	for _, p := range t.NestedProperties() {
+		key := strings.Join(p.Lineage(), "|")
+		if !seen[key] {
+			result = append(result, p)
+			seen[key] = true
+		}
+	}
+	for _, p := range t.WriteOnlyProperties() {
+		key := strings.Join(p.Lineage(), "|")
+		if !seen[key] {
+			result = append(result, p)
+			seen[key] = true
+		}
+	}
+
+	return result
+}
+
 func (t Type) Removed() bool {
 	return t.RemovedMessage != ""
 }
