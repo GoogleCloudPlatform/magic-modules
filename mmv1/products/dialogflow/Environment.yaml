@@ -99,8 +99,6 @@ properties:
           Configuration of how speech should be synthesized, mapping from
           language to SynthesizeSpeechConfig.
         key_name: language
-        key_description: |
-          The language.
         value_type:
           name: synthesizeSpeechConfig
           type: NestedObject
