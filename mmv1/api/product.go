@@ -122,10 +122,6 @@ func (p *Product) Validate() {
 	for _, v := range p.Versions {
 		v.Validate(p.Name)
 	}
-
-	if p.Async != nil {
-		p.Async.Validate()
-	}
 }
 
 // ====================

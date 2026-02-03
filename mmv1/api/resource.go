@@ -568,10 +568,6 @@ func (r *Resource) Validate() {
 	for _, sample := range r.Samples {
 		sample.Validate(r.Name)
 	}
-
-	if r.Async != nil {
-		r.Async.Validate()
-	}
 }
 
 // ====================

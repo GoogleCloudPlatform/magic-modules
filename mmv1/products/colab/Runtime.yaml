@@ -27,8 +27,6 @@ self_link: 'projects/{{project}}/locations/{{location}}/notebookRuntimes/{{name}
 create_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimes:assign?notebook_runtime_id={{name}}'
 async:
   type: 'OpAsync'
-  operation:
-    full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
 custom_code:
   encoder: 'templates/terraform/encoders/colab_runtime.go.tmpl'
   post_create: 'templates/terraform/post_create/colab_runtime.go.tmpl'
