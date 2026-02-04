@@ -225,6 +225,23 @@ examples:
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     oics_vars_overrides:
       'deletion_protection_enabled': 'false'
+  - name: 'redis_cluster_flexible_ca'
+    primary_resource_id: 'test-cluster'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@cloud-redis.iam.gserviceaccount.com"
+        role: "roles/privateca.certificateRequester"
+    vars:
+      cluster_name: 'ca-cluster'
+      policy_name: 'ca-policy'
+      subnet_name: 'ca-subnet'
+      network_name: 'ca-network'
+      ca_pool_name: 'ca-pool'
+      ca_auth_id: 'ca-auth'
+      deletion_protection_enabled: 'true'
+    test_vars_overrides:
+      'deletion_protection_enabled': 'false'
+    oics_vars_overrides:
+      'deletion_protection_enabled': 'false'
 parameters:
   - name: 'name'
     type: String
@@ -867,3 +884,20 @@ properties:
               description: The certificates that form the CA chain, from leaf to root order
               item_type:
                 type: String
+  - name: 'serverCaMode'
+    type: Enum
+    description: |
+      The serverCaMode for the TLS enabled Redis cluster.
+      If not provided, SERVER_CA_MODE_GOOGLE_MANAGED_PER_INSTANCE_CA will be used as default
+    required: false
+    default_from_api: true
+    enum_values:
+      - SERVER_CA_MODE_GOOGLE_MANAGED_PER_INSTANCE_CA
+      - SERVER_CA_MODE_GOOGLE_MANAGED_SHARED_CA
+      - SERVER_CA_MODE_CUSTOMER_MANAGED_CAS_CA
+  - name: 'serverCaPool'
+    type: String
+    description: |
+      The resource name of the server CA pool for an instance with SERVER_CA_MODE_CUSTOMER_MANAGED_CAS_CA
+      as the server_ca_mode.
+      Format: projects/{project}/locations/{region}/caPools/{caPoolId}
