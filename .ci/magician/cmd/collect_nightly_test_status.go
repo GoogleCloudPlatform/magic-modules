@@ -139,7 +139,7 @@ func execCollectNightlyTestStatus(now time.Time, tc TeamcityClient, gcs Cloudsto
 func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs CloudstorageClient, formattedStartCut, formattedFinishCut, date string) error {
 
 	// Check Queued Builds
-	queuedBuilds, err := tc.GetBuilds("queued", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
+	queuedBuilds, err := tc.GetBuilds("queued", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut, "")
 	if err != nil {
 		return fmt.Errorf("failed to get queued builds: %w", err)
 	}
@@ -149,7 +149,7 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 	}
 
 	// Check Running Builds
-	runningBuilds, err := tc.GetBuilds("running", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
+	runningBuilds, err := tc.GetBuilds("running", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut, "cron-trigger")
 	if err != nil {
 		return fmt.Errorf("failed to get running builds: %w", err)
 	}
@@ -159,7 +159,7 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 	}
 
 	// Get all service test builds
-	builds, err := tc.GetBuilds("finished", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
+	builds, err := tc.GetBuilds("finished", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut, "cron-trigger")
 	if err != nil {
 		return fmt.Errorf("failed to get finished builds: %w", err)
 	}

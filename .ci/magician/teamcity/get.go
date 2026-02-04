@@ -54,8 +54,15 @@ type FirstFailed struct {
 	Href string `json:"href"`
 }
 
-func (tc *Client) GetBuilds(state, project, finishCut, startCut string) (Builds, error) {
-	url := fmt.Sprintf("https://hashicorp.teamcity.com/app/rest/builds?locator=state:%s,count:500,tag:cron-trigger,project:%s,branch:refs/heads/nightly-test,queuedDate:(date:%s,condition:before),queuedDate:(date:%s,condition:after)&fields=build(id,buildTypeId,buildConfName,webUrl,number,queuedDate,startDate,finishDate)", state, project, finishCut, startCut)
+func (tc *Client) GetBuilds(state, project, finishCut, startCut, tag string) (Builds, error) {
+	locator := fmt.Sprintf("state:%s,count:500,project:%s,branch:refs/heads/nightly-test,queuedDate:(date:%s,condition:before),queuedDate:(date:%s,condition:after)", state, project, finishCut, startCut)
+
+	// Conditionally append tag if not empty
+	if tag != "" {
+		locator += fmt.Sprintf(",tag:%s", tag)
+	}
+
+	url := fmt.Sprintf("https://hashicorp.teamcity.com/app/rest/builds?locator=%s&fields=build(id,buildTypeId,buildConfName,webUrl,number,queuedDate,startDate,finishDate)", locator)
 
 	var builds Builds
 
