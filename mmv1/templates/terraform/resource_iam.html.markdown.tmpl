@@ -64,7 +64,7 @@ A data source can be used to retrieve policy data in advent you do not need crea
 {{- end }}
 {{ if or (eq $.MinVersionObj.Name "beta") (eq $.IamPolicy.MinVersion "beta") }}
 ~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
+See [Provider Versions](../guides/provider_versions.html.markdown) for more details on beta resources.
 {{- end }}
 
 ## {{ $.IamTerraformName }}_policy
@@ -87,11 +87,11 @@ resource "{{ $.IamTerraformName }}_policy" "policy" {
   provider = google-beta
 {{- end }}
 {{- if $.IamPolicy.ExampleConfigBody}}
-{{- customTemplate $ $.IamPolicy.ExampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.ExampleConfigBody false }}
 {{- end }}
 
 {{- if $.IamPolicy.SampleConfigBody}}
-{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
 {{- end }}
   policy_data = data.google_iam_policy.admin.policy_data
 }
@@ -123,11 +123,11 @@ resource "{{ $.IamTerraformName }}_policy" "policy" {
   provider = google-beta
 {{- end }}
 {{- if $.IamPolicy.ExampleConfigBody}}
-{{- customTemplate $ $.IamPolicy.ExampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.ExampleConfigBody false }}
 {{- end }}
 
 {{- if $.IamPolicy.SampleConfigBody}}
-{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
 {{- end }}
   policy_data = data.google_iam_policy.admin.policy_data
 }
@@ -141,11 +141,11 @@ resource "{{ $.IamTerraformName }}_binding" "binding" {
   provider = google-beta
 {{- end }}
 {{- if $.IamPolicy.ExampleConfigBody}}
-{{- customTemplate $ $.IamPolicy.ExampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.ExampleConfigBody false }}
 {{- end }}
 
 {{- if $.IamPolicy.SampleConfigBody}}
-{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
 {{- end }}
   role = "{{if $.IamPolicy.AdminIamRole}}{{$.IamPolicy.AdminIamRole }}{{else}}{{$.IamPolicy.AllowedIamRole}}{{end}}"
   members = [
@@ -162,11 +162,11 @@ resource "{{ $.IamTerraformName }}_binding" "binding" {
   provider = google-beta
 {{- end }}
 {{- if $.IamPolicy.ExampleConfigBody}}
-{{- customTemplate $ $.IamPolicy.ExampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.ExampleConfigBody false }}
 {{- end }}
 
 {{- if $.IamPolicy.SampleConfigBody}}
-{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
 {{- end }}
   role = "{{if $.IamPolicy.AdminIamRole}}{{$.IamPolicy.AdminIamRole }}{{else}}{{$.IamPolicy.AllowedIamRole}}{{end}}"
   members = [
@@ -189,11 +189,11 @@ resource "{{ $.IamTerraformName }}_member" "member" {
   provider = google-beta
 {{- end }}
 {{- if $.IamPolicy.ExampleConfigBody}}
-{{- customTemplate $ $.IamPolicy.ExampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.ExampleConfigBody false }}
 {{- end }}
 
 {{- if $.IamPolicy.SampleConfigBody}}
-{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
 {{- end }}
   role = "{{if $.IamPolicy.AdminIamRole}}{{$.IamPolicy.AdminIamRole }}{{else}}{{$.IamPolicy.AllowedIamRole}}{{end}}"
   member = "user:jane@example.com"
@@ -208,11 +208,11 @@ resource "{{ $.IamTerraformName }}_member" "member" {
   provider = google-beta
 {{- end }}
 {{- if $.IamPolicy.ExampleConfigBody}}
-{{- customTemplate $ $.IamPolicy.ExampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.ExampleConfigBody false }}
 {{- end }}
 
 {{- if $.IamPolicy.SampleConfigBody}}
-{{- customTemplate $ $.IamPolicy.SampleConfigBody false }}
+{{ customTemplate $ $.IamPolicy.SampleConfigBody false }}
 {{- end }}
   role = "{{if $.IamPolicy.AdminIamRole}}{{$.IamPolicy.AdminIamRole}}{{else}}{{$.IamPolicy.AllowedIamRole}}{{end}}"
   member = "user:jane@example.com"

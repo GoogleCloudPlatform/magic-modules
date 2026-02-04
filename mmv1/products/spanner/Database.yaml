@@ -40,7 +40,6 @@ import_format:
 cai_asset_name_format: 'projects/{{project}}/instances/{{instance}}/databases/{{name}}'
 include_in_tgc_next: true
 tgc_include_handwritten_tests: true
-tgc_ignore_terraform_decoder: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -62,6 +61,7 @@ custom_code:
   pre_update: 'templates/terraform/pre_update/spanner_database.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/resource_spanner_database.go.tmpl'
   tgc_decoder: 'templates/tgc_next/decoders/spanner_database.go.tmpl'
+  tgc_ignore_terraform_decoder: true
 custom_diff:
   - 'resourceSpannerDBDdlCustomDiff'
   - 'resourceSpannerEncryptionConfigCustomDiff'
