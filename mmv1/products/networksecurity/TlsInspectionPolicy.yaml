@@ -13,6 +13,8 @@
 
 ---
 name: 'TlsInspectionPolicy'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description:
   'The TlsInspectionPolicy resource contains references to CA pools in
   Certificate Authority Service and associated metadata.'

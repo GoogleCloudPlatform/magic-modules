@@ -485,7 +485,6 @@ properties:
                 key_name: 'language_code'
                 output: true
                 value_type:
-                  name: SynthesizeSpeechConfig
                   type: NestedObject
                   description: Configuration for speech synthesis for a specific language.
                   output: true
