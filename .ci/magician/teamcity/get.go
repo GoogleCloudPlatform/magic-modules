@@ -18,7 +18,7 @@ package teamcity
 import (
 	"fmt"
 
-	// "regexp"
+	"strings"
 	utils "magician/utility"
 )
 
@@ -54,15 +54,22 @@ type FirstFailed struct {
 	Href string `json:"href"`
 }
 
-func (tc *Client) GetBuilds(state, project, finishCut, startCut, tag string) (Builds, error) {
-	locator := fmt.Sprintf("state:%s,count:500,project:%s,branch:refs/heads/nightly-test,queuedDate:(date:%s,condition:before),queuedDate:(date:%s,condition:after)", state, project, finishCut, startCut)
+func (tc *Client) GetBuilds(locator, fields string) (Builds, error) {
+	url := "https://hashicorp.teamcity.com/app/rest/builds"
+	var params []string
 
-	// Conditionally append tag if not empty
-	if tag != "" {
-		locator += fmt.Sprintf(",tag:%s", tag)
+	// Only append parameters if they are not empty
+	if locator != "" {
+		params = append(params, fmt.Sprintf("locator=%s", locator))
+	}
+	if fields != "" {
+		params = append(params, fmt.Sprintf("fields=%s", fields))
 	}
 
-	url := fmt.Sprintf("https://hashicorp.teamcity.com/app/rest/builds?locator=%s&fields=build(id,buildTypeId,buildConfName,webUrl,number,queuedDate,startDate,finishDate)", locator)
+	// If params has items, join them with "&" and prepends "?"
+	if len(params) > 0 {
+		url += "?" + strings.Join(params, "&")
+	}
 
 	var builds Builds
 
