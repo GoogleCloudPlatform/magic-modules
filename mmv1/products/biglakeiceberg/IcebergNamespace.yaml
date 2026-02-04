@@ -20,6 +20,12 @@ base_url: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/n
 self_link: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
 id_format: 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
 immutable: false
+virtual_fields:
+  - name: 'namespace_id'
+    type: String
+    description: |
+      The unique identifier of the namespace.
+    output: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/biglake_iceberg_namespace.go.tmpl'
   custom_update: 'templates/terraform/custom_update/biglake_iceberg_namespace.go.tmpl'
@@ -50,12 +56,6 @@ properties:
     required: false
     default_from_api: true
     diff_suppress_func: 'icebergNamespacePropertiesDiffSuppress'
-  - name: 'namespace_id'
-    type: String
-    description: |
-      The unique identifier of the namespace.
-    output: true
-    url_param_only: true
 iam_policy:
   base_url: 'v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
   parent_resource_attribute: 'namespace_id'
@@ -66,6 +66,7 @@ iam_policy:
     - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
   allowed_iam_role: 'roles/biglake.editor'
   example_config_body: 'templates/terraform/iam/example_config_body/biglake_iceberg_namespace.tf.tmpl'
+  sample_config_body: 'templates/terraform/iam/example_config_body/biglake_iceberg_namespace.tf.tmpl'
   exclude_import_test: true
 samples:
   - name: 'biglake_iceberg_namespace'
@@ -99,7 +100,6 @@ samples:
           catalog: 'my_iceberg_catalog'
           prop_val: 'updated'
           random_suffix: ''
-        test_env_vars:
           GOOGLE_BILLING_PROJECT: 'PROJECT'
           USER_PROJECT_OVERRIDE: 'true'
         config_path: 'templates/terraform/examples/biglake_iceberg_namespace_update.tf.tmpl'
