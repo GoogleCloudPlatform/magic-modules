@@ -197,6 +197,20 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
                 Computed: true,
             },
 {{- end}}
+{{- if and (not $.DeletionPolicyExclude) $.ProductMetadata.DeletionPolicyOptIn}}
+            "deletion_policy": {
+                Type:     schema.TypeString,
+                Optional: true,
+                Description: `Whether Terraform will be prevented from destroying the instance. Defaults to "{{$.DeletionPolicyDefault}}".
+When a 'terraform destroy' or 'terraform apply' would delete the instance,
+the command will fail if this field is set to "PREVENT" in Terraform state.
+When set to "ABANDON", the command will remove the resource from Terraform
+management without updating or deleting the resource in the API.
+When set to "DELETE", deleting the resource is allowed.
+`,
+                Default: "{{$.DeletionPolicyDefault}}",
+            },
+{{- end}}
         },
         UseJSONNumber: true,
     }
@@ -661,7 +675,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return nil
     }
 {{ end}}
-{{- if $.VirtualFields }}
+{{- if or $.VirtualFields (and $.ProductMetadata.DeletionPolicyOptIn (not $.DeletionPolicyExclude)) }}
 
   // Explicitly set virtual fields to default values if unset
 {{- range $prop := $.VirtualFields }}
@@ -672,6 +686,13 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         }
     }
 {{- end}}
+{{- end}}
+{{- if and $.ProductMetadata.DeletionPolicyOptIn (not $.DeletionPolicyExclude) }}
+    if _, ok := d.GetOkExists("deletion_policy"); !ok {
+        if err := d.Set("deletion_policy", {{ $.DeletionPolicyDefault -}}); err != nil {
+            return fmt.Errorf("Error setting deletion_policy: %s", err)
+        }
+    }
 {{- end}}
 {{- end}}
 {{- if $.HasProject }}
@@ -1134,6 +1155,15 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     headers := make(http.Header)
     {{- if $.CustomCode.PreDelete }} 
         {{ customTemplate $ $.CustomCode.PreDelete false -}}
+    {{- end }}
+    {{- if and (not $.DeletionPolicyExclude) $.ProductMetadata.DeletionPolicyOptIn }}
+    if d.Get("deletion_policy").(string) == "PREVENT" {
+        return fmt.Errorf("cannot destroy {{$.ResourceName}} without setting deletion_policy=\"DELETE\" and running `terraform apply`")
+    }
+    if d.Get("deletion_policy").(string) == "ABANDON" {
+        log.Printf("[DEBUG] deletion_policy set to \"ABANDON\", removing {{ $.Name }} %q from Terraform state without deletion", d.Id())
+        return nil
+    }
     {{- end }}
 
     log.Printf("[DEBUG] Deleting {{ $.Name }} %q", d.Id())
