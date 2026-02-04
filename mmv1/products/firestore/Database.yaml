@@ -163,6 +163,7 @@ examples:
       - 'etag'
       - 'deletion_policy'
   - name: 'firestore_database_data_access_test'
+    exclude_docs: true
     primary_resource_id: 'firestore_access_database_test'
     vars:
       database_id: 'data-access-database-id'
