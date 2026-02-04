@@ -12,7 +12,7 @@ Compute Engine. For more information see the official documentation for [Beam](h
 and [Dataflow](https://cloud.google.com/dataflow/).
 
 ~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
+See [Provider Versions](../guides/provider_versions.html.markdown) for more details on beta resources.
 
 ## Example Usage
 
@@ -92,6 +92,8 @@ Template.
 - - -
 
 * `additional_experiments` - (Optional) List of experiments that should be used by the job. An example value is `["enable_stackdriver_agent_metrics"]`.
+
+* `additional_pipeline_options` - (Optional) List of pipeline options that should be used by the job. An example value is `["numberOfWorkerHarnessThreads=20"]`.
 
 * `autoscaling_algorithm` - (Optional) The algorithm to use for autoscaling.
 

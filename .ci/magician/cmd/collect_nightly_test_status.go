@@ -30,7 +30,8 @@ import (
 )
 
 const (
-	NightlyDataBucket = "nightly-test-data"
+	nightlyDataBucket = "nightly-test-data"
+	tcTimeFormat      = "20060102T150405Z0700"
 )
 
 var cntsRequiredEnvironmentVariables = [...]string{
@@ -38,11 +39,18 @@ var cntsRequiredEnvironmentVariables = [...]string{
 }
 
 type TestInfo struct {
-	Name         string `json:"name"`
-	Status       string `json:"status"`
-	Service      string `json:"service"`
-	ErrorMessage string `json:"error_message"`
-	LogLink      string `json"log_link`
+	Name            string    `json:"name"`
+	Status          string    `json:"status"`
+	Service         string    `json:"service"`
+	Resource        string    `json:"resource"`
+	CommitSha       string    `json:"commit_sha"`
+	ErrorMessage    string    `json:"error_message"`
+	LogLink         string    `json:"log_link"`
+	ProviderVersion string    `json:"provider_version"`
+	QueuedDate      time.Time `json:"queued_date"`
+	StartDate       time.Time `json:"start_date"`
+	FinishDate      time.Time `json:"finish_date"`
+	Duration        int       `json:"duration"`
 }
 
 // collectNightlyTestStatusCmd represents the collectNightlyTestStatus command
@@ -76,23 +84,26 @@ var collectNightlyTestStatusCmd = &cobra.Command{
 		tc := teamcity.NewClient(env["TEAMCITY_TOKEN"])
 		gcs := cloudstorage.NewClient()
 
-		now := time.Now()
-
 		loc, err := time.LoadLocation("America/Los_Angeles")
 		if err != nil {
 			return fmt.Errorf("Error loading location: %s", err)
 		}
-		date := now.In(loc)
+
+		now := time.Now().In(loc)
+		year, month, day := now.Date()
+
 		customDate := args[0]
 		// check if a specific date is provided
 		if customDate != "" {
 			parsedDate, err := time.Parse("2006-01-02", customDate) // input format YYYY-MM-DD
-			// Set the time to 6pm PT
-			date = time.Date(parsedDate.Year(), parsedDate.Month(), parsedDate.Day(), 18, 0, 0, 0, loc)
 			if err != nil {
 				return fmt.Errorf("invalid input time format: %w", err)
 			}
+			year, month, day = parsedDate.Date()
 		}
+
+		// Set the time to 7pm PT
+		date := time.Date(year, month, day, 19, 0, 0, 0, loc)
 
 		return execCollectNightlyTestStatus(date, tc, gcs)
 	},
@@ -126,10 +137,31 @@ func execCollectNightlyTestStatus(now time.Time, tc TeamcityClient, gcs Cloudsto
 }
 
 func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs CloudstorageClient, formattedStartCut, formattedFinishCut, date string) error {
-	// Get all service test builds
-	builds, err := tc.GetBuilds(pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
+
+	// Check Queued Builds
+	queuedBuilds, err := tc.GetBuilds("queued", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get queued builds: %w", err)
+	}
+	if len(queuedBuilds.Builds) > 0 {
+		fmt.Printf("%s Test unfinished: there are still %d builds queued.\n", strings.ToUpper(pVersion.String()), len(queuedBuilds.Builds))
+		return nil
+	}
+
+	// Check Running Builds
+	runningBuilds, err := tc.GetBuilds("running", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
+	if err != nil {
+		return fmt.Errorf("failed to get running builds: %w", err)
+	}
+	if len(runningBuilds.Builds) > 0 {
+		fmt.Printf("%s Test unfinished: there are still %d builds running.\n", strings.ToUpper(pVersion.String()), len(runningBuilds.Builds))
+		return nil
+	}
+
+	// Get all service test builds
+	builds, err := tc.GetBuilds("finished", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
+	if err != nil {
+		return fmt.Errorf("failed to get finished builds: %w", err)
 	}
 
 	var testInfoList []TestInfo
@@ -163,12 +195,33 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 			if testResult.Status == "FAILURE" || testResult.Status == "UNKNOWN" {
 				errorMessage = convertErrorMessage(testResult.ErrorMessage)
 			}
+
+			queuedTime, err := time.Parse(tcTimeFormat, build.QueuedDate)
+			if err != nil {
+				return fmt.Errorf("failed to parse QueuedDate: %v", err)
+			}
+			startTime, err := time.Parse(tcTimeFormat, build.StartDate)
+			if err != nil {
+				return fmt.Errorf("failed to parse StartDate: %v", err)
+			}
+			finishTime, err := time.Parse(tcTimeFormat, build.FinishDate)
+			if err != nil {
+				return fmt.Errorf("failed to parse FinishDate: %v", err)
+			}
+
 			testInfoList = append(testInfoList, TestInfo{
-				Name:         testResult.Name,
-				Status:       testResult.Status,
-				Service:      serviceName,
-				ErrorMessage: errorMessage,
-				LogLink:      logLink,
+				Name:            testResult.Name,
+				Status:          testResult.Status,
+				Service:         serviceName,
+				Resource:        convertTestNameToResource(testResult.Name),
+				CommitSha:       build.Number,
+				ErrorMessage:    errorMessage,
+				LogLink:         logLink,
+				ProviderVersion: strings.ToUpper(pVersion.String()),
+				Duration:        testResult.Duration,
+				QueuedDate:      queuedTime,
+				StartDate:       startTime,
+				FinishDate:      finishTime,
 			})
 		}
 	}
@@ -182,8 +235,8 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 	}
 
 	// Upload test status data file to gcs bucket
-	objectName := pVersion.String() + "/" + testStatusFileName
-	err = gcs.WriteToGCSBucket(NightlyDataBucket, objectName, testStatusFileName)
+	objectName := fmt.Sprintf("test-metadata/%s/%s", pVersion.String(), testStatusFileName)
+	err = gcs.WriteToGCSBucket(nightlyDataBucket, objectName, testStatusFileName)
 	if err != nil {
 		return err
 	}

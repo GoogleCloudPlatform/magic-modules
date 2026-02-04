@@ -34,6 +34,13 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     return sorted
 }
 
+func flattenStringArrayToStringSet(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return v
+	}
+	return schema.NewSet(schema.HashString, v.([]interface{}))
+}
+
 func flattenAccessContextManagerServicePerimetersServicePerimetersName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
@@ -220,6 +227,8 @@ func flattenAccessContextManagerServicePerimetersServicePerimetersStatusIngressP
 		flattenAccessContextManagerServicePerimetersServicePerimetersStatusIngressPoliciesIngressToResources(original["resources"], d, config)
 	transformed["operations"] =
 		flattenAccessContextManagerServicePerimetersServicePerimetersStatusIngressPoliciesIngressToOperations(original["operations"], d, config)
+	transformed["roles"] =
+		flattenStringArrayToStringSet(original["roles"], d, config)
 	return []interface{}{transformed}
 }
 func flattenAccessContextManagerServicePerimetersServicePerimetersStatusIngressPoliciesIngressToResources(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
@@ -379,8 +388,11 @@ func flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPo
 		flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPoliciesEgressToExternalResources(original["externalResources"], d, config)
 	transformed["operations"] =
 		flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPoliciesEgressToOperations(original["operations"], d, config)
+	transformed["roles"] =
+		flattenStringArrayToStringSet(original["roles"], d, config)
 	return []interface{}{transformed}
 }
+
 func flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPoliciesEgressToResources(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return v
@@ -607,6 +619,8 @@ func flattenAccessContextManagerServicePerimetersServicePerimetersSpecIngressPol
 		flattenAccessContextManagerServicePerimetersServicePerimetersSpecIngressPoliciesIngressToResources(original["resources"], d, config)
 	transformed["operations"] =
 		flattenAccessContextManagerServicePerimetersServicePerimetersSpecIngressPoliciesIngressToOperations(original["operations"], d, config)
+	transformed["roles"] =
+		flattenStringArrayToStringSet(original["roles"], d, config)
 	return []interface{}{transformed}
 }
 func flattenAccessContextManagerServicePerimetersServicePerimetersSpecIngressPoliciesIngressToResources(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
@@ -766,8 +780,11 @@ func flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoli
 		flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoliciesEgressToExternalResources(original["externalResources"], d, config)
 	transformed["operations"] =
 		flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoliciesEgressToOperations(original["operations"], d, config)
+	transformed["roles"] =
+		flattenStringArrayToStringSet(original["roles"], d, config)
 	return []interface{}{transformed}
 }
+
 func flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoliciesEgressToResources(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return v

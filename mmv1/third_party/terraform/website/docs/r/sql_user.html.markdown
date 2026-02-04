@@ -9,7 +9,7 @@ description: |-
 Creates a new Google SQL User on a Google SQL User Instance. For more information, see the [official documentation](https://cloud.google.com/sql/), or the [JSON API](https://cloud.google.com/sql/docs/admin-api/v1beta4/users).
 
 ~> **Note:** All arguments including the username and password will be stored in the raw state as plain-text.
-[Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data). Passwords will not be retrieved when running
+[Read more about sensitive data in state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data). Passwords will not be retrieved when running
 "terraform import".
 
 ## Example Usage
@@ -141,7 +141,7 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
 
-The optional `password_policy` block is only supported by Mysql. The `password_policy` block supports:
+The optional `password_policy` block is only supported for creating MySQL and Postgres users. The `password_policy` block supports:
 
 * `allowed_failed_attempts` - (Optional) Number of failed attempts allowed before the user get locked.
 

@@ -190,6 +190,11 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 		scheduling.GracefulShutdown = transformedGracefulShutdown
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "GracefulShutdown")
 	}
+
+	if v, ok := original["skip_guest_os_shutdown"]; ok {
+		scheduling.SkipGuestOsShutdown = v.(bool)
+		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "SkipGuestOsShutdown")
+	}
 {{- end }}
 	if v, ok := original["local_ssd_recovery_timeout"]; ok {
 		transformedLocalSsdRecoveryTimeout, err := expandComputeLocalSsdRecoveryTimeout(v)
@@ -341,13 +346,13 @@ func expandGracefulShutdownMaxDuration(v interface{}) (*compute.Duration, error)
 
 func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 	schedulingMap := map[string]interface{}{
-		"on_host_maintenance": resp.OnHostMaintenance,
-		"preemptible":         resp.Preemptible,
-		"min_node_cpus":       resp.MinNodeCpus,
-		"provisioning_model":  resp.ProvisioningModel,
+		"on_host_maintenance":         resp.OnHostMaintenance,
+		"preemptible":                 resp.Preemptible,
+		"min_node_cpus":               resp.MinNodeCpus,
+		"provisioning_model":          resp.ProvisioningModel,
 		"instance_termination_action": resp.InstanceTerminationAction,
-		"availability_domain": resp.AvailabilityDomain,
-		"termination_time":    resp.TerminationTime,
+		"availability_domain":         resp.AvailabilityDomain,
+		"termination_time":            resp.TerminationTime,
 	}
 
 	if resp.AutomaticRestart != nil {
@@ -363,6 +368,8 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 	}
 
 {{ if ne $.TargetVersionName `ga` -}}
+	schedulingMap["skip_guest_os_shutdown"] = resp.SkipGuestOsShutdown
+
 	if resp.HostErrorTimeoutSeconds != 0 {
 		schedulingMap["host_error_timeout_seconds"] = resp.HostErrorTimeoutSeconds
 	}
@@ -513,6 +520,7 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 			"ipv6_address":        iface.Ipv6Address,
 			"queue_count":         iface.QueueCount,
 			"internal_ipv6_prefix_length": iface.InternalIpv6PrefixLength,
+			"igmp_query":          iface.IgmpQuery,
 		}
 		// Instance template interfaces never have names, so they're absent
 		// in the instance template network_interface schema. We want to use the
@@ -521,6 +529,11 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 		if iface.Name != "" {
 			flattened[i]["name"] = iface.Name
 		}
+		{{- if ne $.TargetVersionName "ga" }}
+		if iface.MacAddress != "" {
+			flattened[i]["mac_address"] = iface.MacAddress
+		}
+		{{- end }}
 		if internalIP == "" {
 			internalIP = iface.NetworkIP
 		}
@@ -620,6 +633,13 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 			return nil, fmt.Errorf("cannot determine self_link for subnetwork %q: %s", subnetwork, err)
 		}
 
+		{{- if ne $.TargetVersionName "ga" }}
+		var macAddress = ""
+		if macAddressObj, ok := data["mac_address"]; ok {
+			macAddress = macAddressObj.(string)
+		}
+		{{- end }}
+
 		ifaces[i] = &compute.NetworkInterface{
 			NetworkIP:         data["network_ip"].(string),
 			Network:           nf.RelativeLink(),
@@ -633,6 +653,10 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 			Ipv6AccessConfigs: expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{})),
 			Ipv6Address:       data["ipv6_address"].(string),
 			InternalIpv6PrefixLength: int64(data["internal_ipv6_prefix_length"].(int)),
+			IgmpQuery:         data["igmp_query"].(string),
+			{{- if ne $.TargetVersionName "ga" }}
+			MacAddress: macAddress,
+			{{- end }}
 		}
 	}
 	return ifaces, nil
@@ -849,6 +873,10 @@ func schedulingHasChangeWithoutReboot(d *schema.ResourceData) bool {
 	}
 {{- if ne $.TargetVersionName "ga" }}
 	if oScheduling["host_error_timeout_seconds"] != newScheduling["host_error_timeout_seconds"] {
+		return true
+	}
+
+	if oScheduling["skip_guest_os_shutdown"] != newScheduling["skip_guest_os_shutdown"] {
 		return true
 	}
 
@@ -1086,6 +1114,64 @@ func flattenNetworkPerformanceConfig(c *compute.NetworkPerformanceConfig) []map[
 	return []map[string]interface{}{
 		{
 			"total_egress_bandwidth_tier": c.TotalEgressBandwidthTier,
+		},
+	}
+}
+
+func expandComputeInstanceEncryptionKey(d tpgresource.TerraformResourceData) *compute.CustomerEncryptionKey {
+	iek, ok := d.GetOk("instance_encryption_key")
+	if !ok {
+		return nil
+	}
+
+	iekRes := iek.([]interface{})[0].(map[string]interface{})
+	return &compute.CustomerEncryptionKey{
+		KmsKeyName:      	  iekRes["kms_key_self_link"].(string),
+		Sha256:          	  iekRes["sha256"].(string),
+		KmsKeyServiceAccount: iekRes["kms_key_service_account"].(string),
+	}
+}
+
+func flattenComputeInstanceEncryptionKey(v *compute.CustomerEncryptionKey) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"kms_key_self_link": 	   v.KmsKeyName,
+			"sha256":            	   v.Sha256,
+			"kms_key_service_account": v.KmsKeyServiceAccount,
+		},
+	}
+}
+
+func expandComputeInstanceSourceEncryptionKey(d tpgresource.TerraformResourceData, field string) *compute.CustomerEncryptionKey {
+	cek, ok := d.GetOk(field)
+	if !ok {
+		return nil
+	}
+
+	cekRes := cek.([]interface{})[0].(map[string]interface{})
+	return &compute.CustomerEncryptionKey{
+		RsaEncryptedKey:      cekRes["rsa_encrypted_key"].(string),
+		RawKey:               cekRes["raw_key"].(string),
+		KmsKeyName:           cekRes["kms_key_self_link"].(string),
+		Sha256:               cekRes["sha256"].(string),
+		KmsKeyServiceAccount: cekRes["kms_key_service_account"].(string),
+	}
+}
+
+func flattenComputeInstanceSourceEncryptionKey(v *compute.CustomerEncryptionKey) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"rsa_encrypted_key":       v.RsaEncryptedKey,
+			"raw_key":                 v.RawKey,
+			"kms_key_self_link":       v.KmsKeyName,
+			"sha256":                  v.Sha256,
+			"kms_key_service_account": v.KmsKeyServiceAccount,
 		},
 	}
 }

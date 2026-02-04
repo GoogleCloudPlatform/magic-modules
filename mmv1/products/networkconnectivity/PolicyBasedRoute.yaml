@@ -13,6 +13,8 @@
 
 ---
 name: 'PolicyBasedRoute'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description:
   'Policy-based Routes are more powerful routes that route L4 network traffic based on not just destination IP, but also source IP, protocol and more. A Policy-based Route always take precedence when it conflicts with other types of routes.'
 references:
@@ -87,6 +89,7 @@ properties:
         required: true
         enum_values:
           - 'IPV4'
+          - 'IPV6'
  # probably could have been an enum, but it's a string in the API
       - name: 'ipProtocol'
         type: String
@@ -96,12 +99,12 @@ properties:
       - name: 'srcRange'
         type: String
         description: |
-          The source IP range of outgoing packets that this policy-based route applies to. Default is "0.0.0.0/0" if protocol version is IPv4.
+          The source IP range of outgoing packets that this policy-based route applies to. Default is "0.0.0.0/0".
         default_value: "0.0.0.0/0"
       - name: 'destRange'
         type: String
         description: |
-          The destination IP range of outgoing packets that this policy-based route applies to. Default is "0.0.0.0/0" if protocol version is IPv4.
+          The destination IP range of outgoing packets that this policy-based route applies to. Default is "0.0.0.0/0".
         default_value: "0.0.0.0/0"
   - name: 'nextHopOtherRoutes'
     type: Enum

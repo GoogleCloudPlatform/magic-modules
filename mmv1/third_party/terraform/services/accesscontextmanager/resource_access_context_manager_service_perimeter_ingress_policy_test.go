@@ -2,6 +2,7 @@ package accesscontextmanager_test
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -20,6 +21,11 @@ func testAccAccessContextManagerServicePerimeterIngressPolicy_basicTest(t *testi
 	acctest.SkipIfVcr(t)
 	org := envvar.GetTestOrgFromEnv(t)
 	//projects := acctest.BootstrapServicePerimeterProjects(t, 1)
+
+	// Bootstrap a service account to use as ingress from identity
+	initialServiceAccount := envvar.GetTestServiceAccountFromEnv(t)
+	serviceAccount := acctest.BootstrapServiceAccount(t, "acm-ingress-2", initialServiceAccount)
+
 	policyTitle := acctest.RandString(t, 10)
 	perimeterTitle := "perimeter"
 
@@ -28,7 +34,7 @@ func testAccAccessContextManagerServicePerimeterIngressPolicy_basicTest(t *testi
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_basic(org, policyTitle, perimeterTitle),
+				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_basic(org, policyTitle, perimeterTitle, serviceAccount),
 			},
 			{
 				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitle),
@@ -85,7 +91,7 @@ func testAccCheckAccessContextManagerServicePerimeterIngressPolicyDestroyProduce
 	}
 }
 
-func testAccAccessContextManagerServicePerimeterIngressPolicy_basic(org, policyTitle, perimeterTitleName string) string {
+func testAccAccessContextManagerServicePerimeterIngressPolicy_basic(org, policyTitle, perimeterTitleName, serviceAccount string) string {
 	return fmt.Sprintf(`
 %s
 
@@ -128,9 +134,28 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
 	ingress_from {
 		identity_type = "ANY_IDENTITY"
 	}
+	ingress_to {
+		resources = ["*"]
+		roles = ["roles/bigquery.admin"]
+	}
 }
 
-`, testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName))
+resource "google_access_context_manager_service_perimeter_ingress_policy" "test-identity1" {
+	perimeter = google_access_context_manager_service_perimeter.test-access.name
+	ingress_from {
+		identities = ["serviceAccount:%s"]
+		sources {
+			access_level = google_access_context_manager_access_level.test-access.name
+		}
+	}
+	ingress_to {
+		resources = ["*"]
+		roles = ["roles/bigquery.admin"]
+	}
+}
+
+`, testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName), strings.ToUpper(serviceAccount))
+	// Using an uppercase service account to test normalization of IAM principal casing
 }
 
 func testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName string) string {

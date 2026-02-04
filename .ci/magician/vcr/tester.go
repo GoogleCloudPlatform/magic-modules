@@ -4,19 +4,26 @@ import (
 	"fmt"
 	"io/fs"
 	"magician/provider"
+	"math"
 	"path/filepath"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
+
+	"github.com/fsnotify/fsnotify"
 )
 
 type Result struct {
-	PassedTests  []string
-	SkippedTests []string
-	FailedTests  []string
-	Panics       []string
+	PassedTests     []string
+	SkippedTests    []string
+	FailedTests     []string
+	PassedSubtests  []string
+	SkippedSubtests []string
+	FailedSubtests  []string
+	Panics          []string
 }
 
 type Mode int
@@ -57,16 +64,23 @@ type Tester struct {
 	cassettePaths  map[provider.Version]string // where cassettes are relative to baseDir by version
 	logPaths       map[logKey]string           // where logs are relative to baseDir by version and mode
 	repoPaths      map[provider.Version]string // relative paths of already cloned repos by version
+
+	// the following are for async upload cassettes
+	enableAsyncUploadCassettes bool
+	watcher                    *fsnotify.Watcher
+	uploadFunc                 func(head string, version provider.Version, fileName string) error
 }
 
 const accTestParallelism = 32
 const parallelJobs = 16
 
-const replayingTimeout = "240m"
+const replayingTimeout = "360m"
 
 var testResultsExpression = regexp.MustCompile(`(?m:^--- (PASS|FAIL|SKIP): (TestAcc\w+))`)
 
-var testPanicExpression = regexp.MustCompile(`^panic: .*`)
+var subtestResultsExpression = regexp.MustCompile(`(?m:^    --- (PASS|FAIL|SKIP): (TestAcc\w+)/(\w+))`)
+
+var testPanicExpression = regexp.MustCompile(`(?m:^panic: .*)`)
 
 var safeToLog = map[string]bool{
 	"ACCTEST_PARALLELISM":                        true,
@@ -99,7 +113,9 @@ var safeToLog = map[string]bool{
 	"PATH":                                       true,
 	"SA_KEY":                                     false,
 	"TF_ACC":                                     true,
+	"TF_ACC_REFRESH_AFTER_APPLY":                 true,
 	"TF_LOG":                                     true,
+	"TF_LOG_CORE":                                true,
 	"TF_LOG_PATH_MASK":                           true,
 	"TF_LOG_SDK_FRAMEWORK":                       true,
 	"TF_SCHEMA_PANIC_ON_ERROR":                   true,
@@ -109,7 +125,7 @@ var safeToLog = map[string]bool{
 } // true if shown, false if hidden (default false)
 
 // Create a new tester in the current working directory and write the service account key file.
-func NewTester(env map[string]string, cassetteBucket, logBucket string, rnr ExecRunner) (*Tester, error) {
+func NewTester(env map[string]string, cassetteBucket, logBucket string, rnr ExecRunner, enableAsyncUpload bool) (*Tester, error) {
 	var saKeyPath string
 	if saKeyVal, ok := env["SA_KEY"]; ok {
 		saKeyPath = "sa_key.json"
@@ -117,7 +133,7 @@ func NewTester(env map[string]string, cassetteBucket, logBucket string, rnr Exec
 			return nil, err
 		}
 	}
-	return &Tester{
+	vt := &Tester{
 		env:            env,
 		rnr:            rnr,
 		cassetteBucket: cassetteBucket,
@@ -127,7 +143,13 @@ func NewTester(env map[string]string, cassetteBucket, logBucket string, rnr Exec
 		cassettePaths:  make(map[provider.Version]string, provider.NumVersions),
 		logPaths:       make(map[logKey]string, provider.NumVersions*numModes),
 		repoPaths:      make(map[provider.Version]string, provider.NumVersions),
-	}, nil
+	}
+
+	if enableAsyncUpload {
+		vt.enableAsyncUploadCassettes = true
+		vt.uploadFunc = vt.uploadOneCassetteFile
+	}
+	return vt, nil
 }
 
 func (vt *Tester) SetRepoPath(version provider.Version, repoPath string) {
@@ -187,10 +209,11 @@ func (vt *Tester) LogPath(mode Mode, version provider.Version) string {
 }
 
 type RunOptions struct {
-	Mode     Mode
-	Version  provider.Version
-	TestDirs []string
-	Tests    []string
+	Mode             Mode
+	Version          provider.Version
+	TestDirs         []string
+	Tests            []string
+	UploadBranchName string
 }
 
 // Run the vcr tests in the given mode and provider version and return the result.
@@ -247,16 +270,18 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 		"-vet=off",
 	)
 	env := map[string]string{
-		"VCR_PATH":                 cassettePath,
-		"VCR_MODE":                 opt.Mode.Upper(),
-		"ACCTEST_PARALLELISM":      strconv.Itoa(accTestParallelism),
-		"GOOGLE_CREDENTIALS":       vt.env["SA_KEY"],
-		"GOOGLE_TEST_DIRECTORY":    strings.Join(opt.TestDirs, " "),
-		"TF_LOG":                   "DEBUG",
-		"TF_LOG_SDK_FRAMEWORK":     "INFO",
-		"TF_LOG_PATH_MASK":         filepath.Join(logPath, "%s.log"),
-		"TF_ACC":                   "1",
-		"TF_SCHEMA_PANIC_ON_ERROR": "1",
+		"VCR_PATH":                   cassettePath,
+		"VCR_MODE":                   opt.Mode.Upper(),
+		"ACCTEST_PARALLELISM":        strconv.Itoa(accTestParallelism),
+		"GOOGLE_CREDENTIALS":         vt.env["SA_KEY"],
+		"GOOGLE_TEST_DIRECTORY":      strings.Join(opt.TestDirs, " "),
+		"TF_LOG":                     "DEBUG",
+		"TF_LOG_CORE":                "WARN",
+		"TF_LOG_SDK_FRAMEWORK":       "INFO",
+		"TF_LOG_PATH_MASK":           filepath.Join(logPath, "%s.log"),
+		"TF_ACC":                     "1",
+		"TF_ACC_REFRESH_AFTER_APPLY": "1",
+		"TF_SCHEMA_PANIC_ON_ERROR":   "1",
 	}
 	if vt.saKeyPath != "" {
 		env["GOOGLE_APPLICATION_CREDENTIALS"] = filepath.Join(vt.baseDir, vt.saKeyPath)
@@ -339,6 +364,19 @@ func (vt *Tester) RunParallel(opt RunOptions) (Result, error) {
 			return Result{}, fmt.Errorf("error creating cassette dir: %v", err)
 		}
 		vt.cassettePaths[opt.Version] = cassettePath
+
+		if vt.enableAsyncUploadCassettes {
+			w, err := fsnotify.NewWatcher()
+			if err != nil {
+				return Result{}, fmt.Errorf("failed to create watcher")
+			}
+			defer w.Close()
+			if err := w.Add(cassettePath); err != nil {
+				return Result{}, fmt.Errorf("failed to add cassette path into watcher")
+			}
+			vt.watcher = w
+			go vt.asyncUploadCassettes(opt.Version, opt.UploadBranchName, w)
+		}
 	}
 
 	running := make(chan struct{}, parallelJobs)
@@ -394,16 +432,18 @@ func (vt *Tester) runInParallel(mode Mode, version provider.Version, testDir, te
 		"-vet=off",
 	}
 	env := map[string]string{
-		"VCR_PATH":                 cassettePath,
-		"VCR_MODE":                 mode.Upper(),
-		"ACCTEST_PARALLELISM":      "1",
-		"GOOGLE_CREDENTIALS":       vt.env["SA_KEY"],
-		"GOOGLE_TEST_DIRECTORY":    testDir,
-		"TF_LOG":                   "DEBUG",
-		"TF_LOG_SDK_FRAMEWORK":     "INFO",
-		"TF_LOG_PATH_MASK":         filepath.Join(logPath, "%s.log"),
-		"TF_ACC":                   "1",
-		"TF_SCHEMA_PANIC_ON_ERROR": "1",
+		"VCR_PATH":                   cassettePath,
+		"VCR_MODE":                   mode.Upper(),
+		"ACCTEST_PARALLELISM":        "1",
+		"GOOGLE_CREDENTIALS":         vt.env["SA_KEY"],
+		"GOOGLE_TEST_DIRECTORY":      testDir,
+		"TF_LOG":                     "DEBUG",
+		"TF_LOG_CORE":                "WARN",
+		"TF_LOG_SDK_FRAMEWORK":       "INFO",
+		"TF_LOG_PATH_MASK":           filepath.Join(logPath, "%s.log"),
+		"TF_ACC":                     "1",
+		"TF_ACC_REFRESH_AFTER_APPLY": "1",
+		"TF_SCHEMA_PANIC_ON_ERROR":   "1",
 	}
 	if vt.saKeyPath != "" {
 		env["GOOGLE_APPLICATION_CREDENTIALS"] = filepath.Join(vt.baseDir, vt.saKeyPath)
@@ -523,6 +563,77 @@ func (vt *Tester) UploadLogs(opts UploadLogsOptions) error {
 	return nil
 }
 
+func (vt *Tester) asyncUploadCassettes(version provider.Version, branch string, w *fsnotify.Watcher) error {
+	var (
+		waitFor = 100 * time.Millisecond
+		mu      sync.Mutex
+		timers  = make(map[string]*time.Timer)
+
+		// Callback we run.
+		cb = func(e fsnotify.Event) {
+			err := vt.uploadFunc(branch, version, e.Name)
+			if err != nil {
+				fmt.Println("upload failed: ", err)
+			}
+			mu.Lock()
+			delete(timers, e.Name)
+			mu.Unlock()
+		}
+	)
+
+	for {
+		select {
+		case err, ok := <-w.Errors:
+			if !ok { // Channel was closed (i.e. Watcher.Close() was called).
+				return nil
+			}
+			fmt.Println(err)
+		case e, ok := <-w.Events:
+			if !ok { // Channel was closed (i.e. Watcher.Close() was called).
+				return nil
+			}
+			// ignore everything outside of Create and Write.
+			if !e.Has(fsnotify.Create) && !e.Has(fsnotify.Write) {
+				continue
+			}
+
+			// Get timer.
+			mu.Lock()
+			t, ok := timers[e.Name]
+			mu.Unlock()
+
+			// No timer yet, so create one.
+			if !ok {
+				t = time.AfterFunc(math.MaxInt64, func() { cb(e) })
+				t.Stop()
+
+				mu.Lock()
+				timers[e.Name] = t
+				mu.Unlock()
+			}
+
+			// Reset the timer for this path, so it will start from 100ms again.
+			t.Reset(waitFor)
+		}
+	}
+}
+
+func (vt *Tester) uploadOneCassetteFile(head string, version provider.Version, fileName string) error {
+	uploadPath := fmt.Sprintf("gs://%s/%s/refs/heads/%s/fixtures/", vt.cassetteBucket, version, head)
+	args := []string{
+		"-m",
+		"-q",
+		"cp",
+		fileName,
+		uploadPath,
+	}
+	fmt.Printf("Uploading %s to %s: %v\n", fileName, uploadPath, "gsutil "+strings.Join(args, " "))
+	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
+		return fmt.Errorf("error uploading file %s: %s", fileName, err)
+	}
+	return nil
+}
+
 func (vt *Tester) UploadCassettes(head string, version provider.Version) error {
 	cassettePath, ok := vt.cassettePaths[version]
 	if !ok {
@@ -603,19 +714,39 @@ func collectResult(output string) Result {
 		}
 		resultSets[submatches[1]][submatches[2]] = struct{}{}
 	}
+	matches = subtestResultsExpression.FindAllStringSubmatch(output, -1)
+	subtestResultSets := make(map[string]map[string]struct{}, 4)
+	for _, submatches := range matches {
+		if len(submatches) != 4 {
+			fmt.Printf("Warning: unexpected regex match found in test output: %v", submatches)
+			continue
+		}
+		if _, ok := subtestResultSets[submatches[1]]; !ok {
+			subtestResultSets[submatches[1]] = make(map[string]struct{})
+		}
+		subtestResultSets[submatches[1]][fmt.Sprintf("%s__%s", submatches[2], submatches[3])] = struct{}{}
+	}
 	results := make(map[string][]string, 4)
 	results["PANIC"] = testPanicExpression.FindAllString(output, -1)
 	sort.Strings(results["PANIC"])
+	subtestResults := make(map[string][]string, 3)
 	for _, kind := range []string{"FAIL", "PASS", "SKIP"} {
 		for test := range resultSets[kind] {
 			results[kind] = append(results[kind], test)
 		}
 		sort.Strings(results[kind])
+		for subtest := range subtestResultSets[kind] {
+			subtestResults[kind] = append(subtestResults[kind], subtest)
+		}
+		sort.Strings(subtestResults[kind])
 	}
 	return Result{
-		FailedTests:  results["FAIL"],
-		PassedTests:  results["PASS"],
-		SkippedTests: results["SKIP"],
-		Panics:       results["PANIC"],
+		FailedTests:     results["FAIL"],
+		PassedTests:     results["PASS"],
+		SkippedTests:    results["SKIP"],
+		FailedSubtests:  subtestResults["FAIL"],
+		PassedSubtests:  subtestResults["PASS"],
+		SkippedSubtests: subtestResults["SKIP"],
+		Panics:          results["PANIC"],
 	}
 }

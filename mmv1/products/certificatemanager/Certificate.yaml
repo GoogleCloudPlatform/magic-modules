@@ -16,6 +16,10 @@ name: 'Certificate'
 description: |
   Certificate represents a HTTP-reachable backend for a Certificate.
 docs:
+references:
+  guides:
+    'Official Documentation': 'https://docs.cloud.google.com/certificate-manager/docs/certificates'
+  api: 'https://docs.cloud.google.com/certificate-manager/docs/reference/certificate-manager/rest/v1/projects.locations.certificates'
 id_format: 'projects/{{project}}/locations/{{location}}/certificates/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/certificates'
 self_link: 'projects/{{project}}/locations/{{location}}/certificates/{{name}}'
@@ -28,6 +32,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
@@ -38,15 +44,24 @@ async:
     resource_inside_response: false
 custom_code:
   constants: 'templates/terraform/constants/cert_manager.tmpl'
+  tgc_encoder: 'templates/tgc_next/encoders/certificatemanager_certificate.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/certificatemanager_certificate.go.tmpl'
 schema_version: 1
 state_upgraders: true
 sweeper:
   url_substitutions:
     - region: "us-central1"
     - region: "us-east1"
+    - region: "global"
     - region: "us-west2"
-    - region: "us-west1"
     - region: "us-south1"
+    - region: "us-west1"
+  dependencies:
+    - "google_compute_region_target_https_proxy"
+    - "google_network_security_backend_authentication_config"
+    - "google_network_services_gateway"
+    - "google_compute_target_https_proxy"
+    - "google_compute_network"
 examples:
   - name: 'certificate_manager_google_managed_certificate_dns'
     primary_resource_id: 'default'
@@ -167,6 +182,7 @@ properties:
           Leaf certificate comes first, followed by intermediate ones if any.
         immutable: true
         sensitive: true
+        is_missing_in_cai: true
         exactly_one_of:
           - 'self_managed.0.certificate_pem'
           - 'self_managed.0.pem_certificate'
@@ -177,6 +193,7 @@ properties:
           The private key of the leaf certificate in PEM-encoded form.
         immutable: true
         sensitive: true
+        is_missing_in_cai: true
         exactly_one_of:
           - 'self_managed.0.private_key_pem'
           - 'self_managed.0.pem_private_key'
@@ -197,6 +214,7 @@ properties:
           The private key of the leaf certificate in PEM-encoded form.
         immutable: true
         sensitive: true
+        is_missing_in_cai: true
         exactly_one_of:
           - 'self_managed.0.private_key_pem'
           - 'self_managed.0.pem_private_key'

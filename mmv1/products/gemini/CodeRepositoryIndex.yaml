@@ -13,6 +13,8 @@
 
 ---
 name: CodeRepositoryIndex
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description: The resource for managing Code Repository Index for Gemini Code Assist.
 references:
   guides:
@@ -21,6 +23,8 @@ references:
 base_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes
 self_link: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}
 create_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes?codeRepositoryIndexId={{code_repository_index_id}}
+delete_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}?force={{force_destroy}}
+collection_url_key: 'codeRepositoryIndexes'
 update_verb: 'PATCH'
 update_mask: true
 id_format: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}
@@ -53,11 +57,12 @@ async:
   result:
     resource_inside_response: true
   include_project: false
-custom_code:
-  pre_delete: templates/terraform/pre_delete/code_repository_index_force_delete.go.tmpl
 error_retry_predicates:
   - 'transport_tpg.IsCodeRepositoryIndexUnreadyError'
   - 'transport_tpg.IsRepositoryGroupQueueError'
+sweeper:
+  url_substitutions:
+    - force_destroy: true
 virtual_fields:
   - name: 'force_destroy'
     description:

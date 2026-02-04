@@ -79,7 +79,7 @@ A create test is an **acceptance test** that creates the target resource and imm
 
 > **Note:** All resources should have a "basic" create test, which uses the smallest possible number of fields. Additional create tests can be used to ensure all fields on the resource are used in at least one test.
 
-{{< tabs "create" >}}
+{{% tabs "create" %}}
 {{< tab "MMv1" >}}
 1. Add an entry to your `RESOURCE_NAME.yaml` file's `examples`. The fields listed here are the most commonly-used. For a comprehensive reference, see [MMv1 resource reference: `examples` ↗]({{<ref "/reference/resource#examples" >}}).
    ```yaml
@@ -143,8 +143,10 @@ This section assumes you've used the [Add a resource]({{< ref "/develop/add-reso
    - If beta-only fields are being tested, do the following:
      - Change the file suffix to `.go.tmpl`
      - Wrap each beta-only test in a separate version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`
+     - In each beta-only test, ensure that the TestCase sets `ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t)`
+     - In each beta-only test, ensure that all Terraform resources in all configs have `provider = google-beta` set
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 ## Add an update test
 
@@ -152,7 +154,7 @@ An update test is an **acceptance test** that creates the target resource and th
 
 > **Note:** All updatable fields must be covered by at least one update test. In most cases, only a single update test is needed to test all fields at once.
 
-{{< tabs "update" >}}
+{{% tabs "update" %}}
 {{< tab "MMv1" >}}
 1. [Generate the beta provider]({{< ref "/develop/generate-providers" >}}).
 2. From the beta provider, copy and paste the generated `*_generated_test.go` file into the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services) as a new file call `*_test.go`.
@@ -165,6 +167,8 @@ An update test is an **acceptance test** that creates the target resource and th
    - Add `ConfigPlanChecks` to the update step of the test to ensure the resource is updated in-place.
    - The resulting test function would look similar to this:
    ```go
+   import "github.com/hashicorp/terraform-plugin-testing/plancheck"
+
    func TestAccPubsubTopic_update(t *testing.T) {
       ...
       acctest.VcrTest(t, resource.TestCase{
@@ -225,6 +229,8 @@ An update test is an **acceptance test** that creates the target resource and th
    - Add `ConfigPlanChecks` to the update step of the test to ensure the resource is updated in-place.
    - The resulting test function would look similar to this:
    ```go
+   import "github.com/hashicorp/terraform-plugin-testing/plancheck"
+
    func TestAccPubsubTopic_update(t *testing.T) {
       ...
       acctest.VcrTest(t, resource.TestCase{
@@ -269,9 +275,9 @@ An update test is an **acceptance test** that creates the target resource and th
      - In each beta-only test, ensure that the TestCase sets `ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t)`
      - In each beta-only test, ensure that all Terraform resources in all configs have `provider = google-beta` set
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
-## Bootstrapping API resources {#bootstrapping}
+## Bootstrap API resources {#bootstrapping}
 
 Most acceptance tests run in a the default org and default test project, which means that they can conflict for quota, resource namespaces, and control over shared resources. You can work around these limitations with "bootstrapped" resources.
 
@@ -291,7 +297,7 @@ There are a few functions provided for bootstrapping CryptoKeys, depending on yo
 
 Example usage:
 
-{{< tabs "bootstrap-cryptokeys" >}}
+{{% tabs "bootstrap-cryptokeys" %}}
 {{< tab "MMv1" >}}
 ```yaml
 examples:
@@ -316,49 +322,83 @@ func TestAccProductResource_update(t *testing.T) {
 }
 ```
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 ### IAM resources
 
-Specify member/role pairs that should always exist. `{project_number}` will be replaced with the default project's project number, and `{organization_id}` will be replaced with the test organization's ID.
+Specify member/role pairs that should always exist. `{project_number}` will be replaced with the default project's project number. `{organization_id}` will be replaced with the "target" test organization's ID – we don't modify IAM in the main test org to avoid accidentally locking ourselves out.
 
 Permissions attached to resources created _in_ a test should instead be provisioned with standard terraform resources.
 
 Example usage:
 
-{{< tabs "bootstrap-iam" >}}
+{{% tabs "bootstrap-iam" %}}
 {{< tab "MMv1" >}}
 ```yaml
+# Project-level IAM
 examples:
   - name: service_resource_basic
     primary_resource_id: example
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-healthcare.iam.gserviceaccount.com"
         role: "roles/bigquery.dataEditor"
+```
+
+```yaml
+# Org-level IAM
+examples:
+  - name: service_resource_basic
+    primary_resource_id: example
+    bootstrap_iam:
       - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
         role: "roles/osconfig.serviceAgent"
+    test_env_vars:
+      org_id: ORG_TARGET
 ```
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 ```go
-func TestAccProductResource_update(t *testing.T) {
-   t.Parallel()
+// Project-level IAM
+import (
+  "github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+)
 
-   acctest.BootstrapIamMembers(t, []acctest.IamMember{
-      {
-         Member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
-         Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
-      },
-      {
-         Member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com",
-         Role:   "roles/osconfig.serviceAgent",
-      },
-   })
-   // rest of test
+func TestAccProductResource_update(t *testing.T) {
+    t.Parallel()
+
+    acctest.BootstrapIamMembers(t, []acctest.IamMember{
+        {
+            Member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
+            Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+        },
+    })
+    // rest of test
+}
+```
+```go
+// Org-level IAM
+import (
+  "github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+  "github.com/hashicorp/terraform-provider-google-beta/google-beta/envvar"
+)
+
+func TestAccProductResource_update(t *testing.T) {
+    t.Parallel()
+
+    acctest.BootstrapIamMembers(t, []acctest.IamMember{
+        {
+            Member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com",
+            Role:   "roles/osconfig.serviceAgent",
+        },
+    })
+    context := map[string]string{
+        "org_id": envvar.GetTestOrgTargetFromEnv(t),
+    }
+    // rest of test
 }
 ```
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 ### Networks
 
@@ -373,7 +413,7 @@ You can also bootstrap one or more subnetworks within a bootstrapped network if 
 
 Example usage:
 
-{{< tabs "bootstrap-networks" >}}
+{{% tabs "bootstrap-networks" %}}
 {{< tab "MMv1" >}}
 ```yaml
 examples:
@@ -403,43 +443,115 @@ func TestAccProductResource_update(t *testing.T) {
 }
 ```
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
+
+## Create test projects
+If [bootstrapping]({{< ref "#bootstrapping" >}}) doesn't work or isn't an option for some reason, you can also work around project quota issues or test project-global resources by creating a new test project. You will also need to enable any necessary APIs and wait for their enablement to propagate.
+
+```go
+import (
+  "testing"
+
+
+  "github.com/hashicorp/terraform-plugin-testing/helper/resource"
+  "github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+  "github.com/hashicorp/terraform-provider-google-beta/google-beta/envvar"
+)
+func TestAccProductResourceName_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix":   acctest.RandString(t, 10),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+	}
+  acctest.VcrTest(t, resource.TestCase{
+    // ...
+    // Add ExternalProviders so you can use `time_sleep`
+    ExternalProviders: map[string]resource.ExternalProvider{
+      "time": {},
+    },
+    Steps: []resource.TestStep{
+      {
+        testAccProductResourceName_update1(context),
+      },
+      // ...
+    },
+  })
+}
+
+func testAccProductResourceName_update1(context map[string]interface{}) string {
+  return accest.Nprintf(`
+// Set up a test project
+resource "google_project" "project" {
+  project_id      = "tf-test%{random_suffix}"
+  name            = "tf-test%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
+}
+
+// Enable APIs in a deterministic order to avoid inconsistent VCR recordings
+resource "google_project_service" "servicenetworking" {
+  project = google_project.project.project_id
+  service = "servicenetworking.googleapis.com"
+}
+
+resource "google_project_service" "compute" {
+  project = google_project.project.project_id
+  service = "compute.googleapis.com"
+  depends_on = [google_project_service.servicenetworking]
+}
+
+// wait for API enablement
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_project_service.compute]
+}
+
+resource "google_product_resource" "example" {
+  // ...
+  depends_on = [time_sleep.wait_120_seconds]
+}
+
+`, context)
+}
+```
 
 ## Skip tests in VCR replaying mode {#skip-vcr}
 
 Acceptance tests are run in VCR replaying mode on PRs (using pre-recorded HTTP requests and responses) to reduce the time it takes to present results to contributors. However, not all resources or tests are possible to run in replaying mode. Incompatible tests should be skipped during VCR replaying mode. They will still run in our nightly test suite.
 
-{{< tabs "skipping-tests-in-vcr-replaying" >}}
+{{% tabs "skipping-tests-in-vcr-replaying" %}}
+{{< tab "Skip a generated test" >}}
+Skipping acceptance tests that are generated from example files can be achieved by adding `skip_vcr: true` in the example's YAML:
 
-   {{< tab "Skip a generated test" >}}
-   Skipping acceptance tests that are generated from example files can be achieved by adding `skip_vcr: true` in the example's YAML:
+```yaml
+examples:
+- name: 'bigtable_app_profile_anycluster'
+   ...
 
-   ```yaml
-   examples:
-   - name: 'bigtable_app_profile_anycluster'
-      ...
+   # bigtable instance does not use the shared HTTP client, this test creates an instance
+   skip_vcr: true
+```
 
-      # bigtable instance does not use the shared HTTP client, this test creates an instance
-      skip_vcr: true
-   ```
+If you skip a test in VCR mode, include a code comment explaining the reason for skipping (for example, a link to a GitHub issue.)
 
-   If you skip a test in VCR mode, include a code comment explaining the reason for skipping (for example, a link to a GitHub issue.)
+{{< /tab >}}
+{{< tab "Skip a handwritten test" >}}
+Skipping acceptance tests that are handwritten can be achieved by adding `acctest.SkipIfVcr(t)` at the start of the test:
 
-   {{< /tab >}}
-   {{< tab "Skip a handwritten test" >}}
-   Skipping acceptance tests that are handwritten can be achieved by adding `acctest.SkipIfVcr(t)` at the start of the test:
+```go
+func TestAccPubsubTopic_update(t *testing.T) {
+      acctest.SkipIfVcr(t) // See: https://github.com/hashicorp/terraform-provider-google/issues/9999
+      acctest.VcrTest(t, resource.TestCase{ ... })
+}
+```
 
-   ```go
-   func TestAccPubsubTopic_update(t *testing.T) {
-         acctest.SkipIfVcr(t) // See: https://github.com/hashicorp/terraform-provider-google/issues/9999
-         acctest.VcrTest(t, resource.TestCase{ ... })
-   }
-   ```
+If you skip a test in VCR mode, include a code comment explaining the reason for skipping (for example, a link to a GitHub issue.)
 
-   If you skip a test in VCR mode, include a code comment explaining the reason for skipping (for example, a link to a GitHub issue.)
-
-   {{< /tab >}}
-{{< /tabs >}}
+{{< /tab >}}
+{{% /tabs %}}
 
 ### Reasons that tests are skipped in VCR replaying mode
 

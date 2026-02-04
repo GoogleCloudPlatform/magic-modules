@@ -52,6 +52,11 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/alloydb_instance.go.tmpl'
 # Skipping the sweeper because instances will be deleted during cluster sweeps
 exclude_sweeper: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
+tgc_tests:
+  - name: 'TestAccAlloydbInstance_connectionPoolConfig'
+    skip: 'fix it after the next release, as connection_pool_config will be in the next release'
 examples:
   - name: 'alloydb_instance_basic'
     primary_resource_id: 'default'
@@ -82,7 +87,7 @@ examples:
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
@@ -96,7 +101,7 @@ examples:
       alloydb_secondary_instance_name: 'alloydb-secondary-instance'
       network_name: 'alloydb-secondary-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
@@ -200,6 +205,22 @@ properties:
       - 'AVAILABILITY_TYPE_UNSPECIFIED'
       - 'ZONAL'
       - 'REGIONAL'
+  - name: 'activationPolicy'
+    type: Enum
+    description: |
+      'Specifies whether an instance needs to spin up. Once the instance is
+      active, the activation policy can be updated to the `NEVER` to stop the
+      instance. Likewise, the activation policy can be updated to `ALWAYS` to
+      start the instance.
+      There are restrictions around when an instance can/cannot be activated (for
+      example, a read pool instance should be stopped before stopping primary
+      etc.). Please refer to the API documentation for more details.
+      Possible values are: `ACTIVATION_POLICY_UNSPECIFIED`, `ALWAYS`, `NEVER`.'
+    default_from_api: true
+    enum_values:
+      - 'ACTIVATION_POLICY_UNSPECIFIED'
+      - 'ALWAYS'
+      - 'NEVER'
   - name: 'instanceType'
     type: Enum
     description: |
@@ -232,9 +253,11 @@ properties:
       - name: 'recordApplicationTags'
         type: Boolean
         description: 'Record application tags for an instance. This flag is turned "on" by default.'
+        include_empty_value_in_cai: true  # Default value is false in CAI asset
       - name: 'recordClientAddress'
         type: Boolean
         description: 'Record client address for an instance. Client address is PII information. This flag is turned "on" by default.'
+        include_empty_value_in_cai: true  # Default value is false in CAI asset
       - name: 'queryPlansPerMinute'
         type: Integer
         description: 'Number of query execution plans captured by Insights per minute for all queries combined. The default value is 5. Any integer between 0 and 20 is considered valid.'
@@ -243,31 +266,55 @@ properties:
     description: 'Configuration for enhanced query insights.'
     min_version: 'beta'
     default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/alloydb_instance_observability_config.go.tmpl'
     properties:
       - name: 'enabled'
         type: Boolean
         description: 'Observability feature status for an instance.'
+        include_empty_value_in_cai: true  # Default value is false in CAI asset
+        send_empty_value: true
+        default_from_api: true
       - name: 'preserveComments'
         type: Boolean
         description: 'Preserve comments in the query string.'
+        include_empty_value_in_cai: true  # Default value is false in CAI asset
+        send_empty_value: true
+        default_from_api: true
       - name: 'trackWaitEvents'
         type: Boolean
         description: 'Record wait events during query execution for an instance.'
+        send_empty_value: true
+        default_from_api: true
       - name: 'trackWaitEventTypes'
         type: Boolean
         description: 'Record wait event types during query execution for an instance.'
+        send_empty_value: true
+        default_from_api: true
       - name: 'maxQueryStringLength'
         type: Integer
         description: 'Query string length. The default value is 10240. Any integer between 1024 and 100000 is considered valid.'
+        default_from_api: true
       - name: 'recordApplicationTags'
         type: Boolean
         description: 'Record application tags for an instance. This flag is turned "on" by default.'
+        include_empty_value_in_cai: true  # Default value is false in CAI asset
+        send_empty_value: true
+        default_from_api: true
       - name: 'queryPlansPerMinute'
         type: Integer
         description: 'Number of query execution plans captured by Insights per minute for all queries combined. The default value is 5. Any integer between 0 and 200 is considered valid.'
+        default_from_api: true
       - name: 'trackActiveQueries'
         type: Boolean
         description: 'Track actively running queries. If not set, default value is "off".'
+        include_empty_value_in_cai: true  # Default value is false in CAI asset
+        send_empty_value: true
+        default_from_api: true
+      - name: 'assistiveExperiencesEnabled'
+        type: Boolean
+        description: 'Whether assistive experiences are enabled for this AlloyDB instance.'
+        send_empty_value: true
+        default_from_api: true
   - name: 'readPoolConfig'
     type: NestedObject
     description: 'Read pool specific config. If the instance type is READ_POOL, this configuration must be provided.'
@@ -285,7 +332,13 @@ properties:
       - name: 'cpuCount'
         type: Integer
         description: "The number of CPU's in the VM instance."
-
+        default_from_api: true
+      - name: 'machineType'
+        type: String
+        description: |
+          Machine type of the VM instance.
+          E.g. "n2-highmem-4", "n2-highmem-8", "c4a-highmem-4-lssd".
+          `cpu_count` must match the number of vCPUs in the machine type.
         default_from_api: true
   - name: 'clientConnectionConfig'
     type: NestedObject
@@ -352,8 +405,45 @@ properties:
                 The network attachment resource created in the consumer project to which the PSC interface will be linked.
                 This is of the format: "projects/${CONSUMER_PROJECT}/regions/${REGION}/networkAttachments/${NETWORK_ATTACHMENT_NAME}".
                 The network attachment must be in the same region as the instance.
+      - name: 'pscAutoConnections'
+        type: Array
+        description: |
+          Configurations for setting up PSC service automation.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'consumerProject'
+              type: String
+              description: |
+                The consumer project to which the PSC service automation endpoint will
+                be created. The API expects the consumer project to be the project ID(
+                and not the project number).
+            - name: 'consumerNetwork'
+              type: String
+              description: |
+                The consumer network for the PSC service automation, example:
+                "projects/vpc-host-project/global/networks/default".
+                The consumer network might be hosted a different project than the
+                consumer project. The API expects the consumer project specified to be
+                the project ID (and not the project number)
+            - name: 'ipAddress'
+              type: String
+              description: |
+                The IP address of the PSC service automation endpoint.
+              output: true
+            - name: 'status'
+              type: String
+              description: |
+                The status of the PSC service automation connection.
+              output: true
+            - name: 'consumerNetworkStatus'
+              type: String
+              description: |
+                The status of the service connection policy.
+              output: true
   - name: 'networkConfig'
     type: NestedObject
+    default_from_api: true
     description: |
       Instance level network configuration.
     properties:
@@ -381,6 +471,13 @@ properties:
         type: Boolean
         description: |
           Enabling outbound public ip for the instance.
+      - name: 'allocatedIpRangeOverride'
+        type: String
+        immutable: true
+        description: |
+          Name of the allocated IP range for the private IP AlloyDB instance, for example: "google-managed-services-default".
+          If set, the instance IPs will be created from this allocated range and will override the IP range used by the parent cluster.
+          The range name must comply with RFC 1035. Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.
   - name: 'publicIpAddress'
     type: String
     description: |
@@ -397,3 +494,31 @@ properties:
     output: true
     item_type:
       type: String
+  - name: 'connectionPoolConfig'
+    type: NestedObject
+    description: |
+      Configuration for Managed Connection Pool.
+    custom_flatten: 'templates/terraform/custom_flatten/alloydb_instance_connectionpoolconfig_flatten.go.tmpl'
+    properties:
+      - name: 'enabled'
+        type: Boolean
+        description: |
+          Whether to enabled Managed Connection Pool.
+        required: true
+      - name: 'poolerCount'
+        type: Integer
+        output: true
+        description: |
+          The number of running poolers per instance.
+      - name: 'flags'
+        type: KeyValuePairs
+        description: |
+          Flags for configuring managed connection pooling when it is enabled.
+          These flags will only be set if `connection_pool_config.enabled` is
+          true.
+          Please see
+          https://cloud.google.com/alloydb/docs/configure-managed-connection-pooling#configuration-options
+          for a comprehensive list of flags that can be set. To specify the flags
+          in Terraform, please remove the "connection-pooling-" prefix and use
+          underscores instead of dashes in the name. For example,
+          "connection-pooling-pool-mode" would be "pool_mode".

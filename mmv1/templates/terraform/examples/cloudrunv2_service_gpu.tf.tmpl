@@ -3,7 +3,10 @@ resource "google_cloud_run_v2_service" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
   deletion_protection = false
   ingress = "INGRESS_TRAFFIC_ALL"
-  launch_stage = "BETA"
+
+  scaling {
+    max_instance_count = 1
+  }
 
   template {
     containers {
@@ -20,8 +23,6 @@ resource "google_cloud_run_v2_service" "{{$.PrimaryResourceId}}" {
     node_selector {
       accelerator = "nvidia-l4"
     }
-    scaling {
-      max_instance_count = 1
-    }
+    gpu_zonal_redundancy_disabled = true
   }
 }

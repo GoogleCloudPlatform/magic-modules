@@ -18,6 +18,9 @@ kind: 'compute#backendService'
 description: |
   A Region Backend Service defines a regionally-scoped group of virtual
   machines that will serve traffic for load balancing.
+
+  ~> **Note:** Recreating a `google_compute_region_backend_service` that references other dependent resources like `google_compute_instance_group` will give a `resourceInUseByAnotherResource` error, when decreasing the number of other dependent resources.
+  Use `lifecycle.create_before_destroy` on the dependent resources to avoid this type of error as shown in the Dynamic Backend Count example.
 references:
   guides:
     'Internal TCP/UDP Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/internal/'
@@ -41,7 +44,6 @@ iam_policy:
   allowed_iam_role: 'roles/compute.admin'
   parent_resource_attribute: 'name'
   iam_conditions_request_type: 'QUERY_PARAM'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   min_version: 'beta'
 custom_code:
   constants: 'templates/terraform/constants/region_backend_service.go.tmpl'
@@ -128,6 +130,38 @@ examples:
       default_neg_name: 'network-endpoint'
       health_check_name: 'rbs-health-check'
       network_name: 'network'
+  - name: 'region_backend_service_dynamic_backend_count'
+    primary_resource_id: 'default'
+    vars:
+      region_backend_service_name: 'region-service'
+      health_check_name: 'health-check'
+      instance_group_name: 'instance_group'
+      network_name: 'network'
+    exclude_test: true
+  - name: 'region_backend_service_dynamic_forwarding'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      region_backend_service_name: 'region-service'
+  - name: 'region_backend_service_ha_policy'
+    primary_resource_id: 'default'
+    vars:
+      region_backend_service_name: 'region-service'
+      network_name: 'rbs-net'
+  - name: 'region_backend_service_ha_policy_manual_leader'
+    primary_resource_id: 'default'
+    vars:
+      region_backend_service_name: 'region-service'
+      network_name: 'rbs-net'
+      subnetwork_name: 'rbs-subnet'
+      instance_name: 'rbs-instance'
+      neg_name: 'rbs-neg'
+  - name: 'region_backend_service_tls_settings'
+    primary_resource_id: 'default'
+    vars:
+      region_backend_service_name: 'region-service'
+      health_check_name: 'health-check'
+      authentication_name: 'authentication'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -222,7 +256,7 @@ properties:
             Group resource using the fully-qualified URL, rather than a
             partial URL.
           required: true
-          diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+          diff_suppress_func: 'tpgresource.CompareSelfLinkCanonicalPaths'
           custom_flatten: 'templates/terraform/custom_flatten/guard_self_link.go.tmpl'
         - name: 'maxConnections'
           type: Integer
@@ -288,6 +322,39 @@ properties:
             Used when balancingMode is UTILIZATION. This ratio defines the
             CPU utilization target for the group. Valid range is [0.0, 1.0].
             Cannot be set for INTERNAL backend services.
+        - name: 'maxInFlightRequests'
+          type: Integer
+          description: |
+            Defines a maximum number of in-flight requests for the whole NEG
+            or instance group. Not available if backend's balancingMode is RATE
+            or CONNECTION.
+          default_from_api: true
+          min_version: 'beta'
+        - name: 'maxInFlightRequestsPerInstance'
+          type: Integer
+          description: |
+            Defines a maximum number of in-flight requests for a single VM.
+            Not available if backend's balancingMode is RATE or CONNECTION.
+          default_from_api: true
+          min_version: 'beta'
+        - name: 'maxInFlightRequestsPerEndpoint'
+          type: Integer
+          description: |
+            Defines a maximum number of in-flight requests for a single endpoint.
+            Not available if backend's balancingMode is RATE or CONNECTION.
+          default_from_api: true
+          min_version: 'beta'
+        - name: 'trafficDuration'
+          type: Enum
+          description: |
+            This field specifies how long a connection should be kept alive for:
+            - LONG: Most of the requests are expected to take more than multiple
+              seconds to finish.
+            - SHORT: Most requests are expected to finish with a sub-second latency.
+          enum_values:
+            - 'LONG'
+            - 'SHORT'
+          min_version: 'beta'
         - name: 'customMetrics'
           type: Array
           description: |
@@ -325,7 +392,7 @@ properties:
     description: |
       Settings controlling the volume of connections to a backend service. This field
       is applicable only when the `load_balancing_scheme` is set to INTERNAL_MANAGED
-      and the `protocol` is set to HTTP, HTTPS, or HTTP2.
+      and the `protocol` is set to HTTP, HTTPS, HTTP2 or H2C.
     properties:
       - name: 'connectTimeout'
         type: NestedObject
@@ -430,7 +497,7 @@ properties:
       hashing.
       This field only applies when all of the following are true -
         * `load_balancing_scheme` is set to INTERNAL_MANAGED
-        * `protocol` is set to HTTP, HTTPS, or HTTP2
+        * `protocol` is set to HTTP, HTTPS, HTTP2 or H2C
         * `locality_lb_policy` is set to MAGLEV or RING_HASH
     properties:
       - name: 'httpCookie'
@@ -900,7 +967,7 @@ properties:
 
       locality_lb_policy is applicable to either:
 
-      * A regional backend service with the service_protocol set to HTTP, HTTPS, or HTTP2,
+      * A regional backend service with the service_protocol set to HTTP, HTTPS, HTTP2 or H2C,
         and loadBalancingScheme set to INTERNAL_MANAGED.
       * A global backend service with the load_balancing_scheme set to INTERNAL_SELF_MANAGED.
       * A regional backend service with loadBalancingScheme set to EXTERNAL (External Network
@@ -959,12 +1026,42 @@ properties:
           required: true
           description: |
             If true, the metric data is not used for load balancing.
+  - name: 'networkPassThroughLbTrafficPolicy'
+    type: NestedObject
+    description: |
+      Configures traffic steering properties of internal passthrough Network Load Balancers.
+    min_version: beta
+    properties:
+      - name: 'zonalAffinity'
+        type: NestedObject
+        description: |
+          When configured, new connections are load balanced across healthy backend endpoints in the local zone.
+        properties:
+          - name: 'spillover'
+            type: Enum
+            description: |
+              This field indicates whether zonal affinity is enabled or not.
+            enum_values:
+              - 'ZONAL_AFFINITY_DISABLED'
+              - 'ZONAL_AFFINITY_SPILL_CROSS_ZONE'
+              - 'ZONAL_AFFINITY_STAY_WITHIN_ZONE'
+            default_value: 'ZONAL_AFFINITY_DISABLED'
+            min_version: beta
+          - name: 'spilloverRatio'
+            type: Double
+            description: |
+              The value of the field must be in [0, 1]. When the ratio of the count of healthy backend endpoints in a zone
+              to the count of backend endpoints in that same zone is equal to or above this threshold, the load balancer
+              distributes new connections to all healthy endpoints in the local zone only. When the ratio of the count
+              of healthy backend endpoints in a zone to the count of backend endpoints in that same zone is below this
+              threshold, the load balancer distributes all new connections to all healthy endpoints across all zones.
+            min_version: beta
   - name: 'outlierDetection'
     type: NestedObject
     description: |
       Settings controlling eviction of unhealthy hosts from the load balancing pool.
       This field is applicable only when the `load_balancing_scheme` is set
-      to INTERNAL_MANAGED and the `protocol` is set to HTTP, HTTPS, or HTTP2.
+      to INTERNAL_MANAGED and the `protocol` is set to HTTP, HTTPS, HTTP2 or H2C.
     properties:
       - name: 'baseEjectionTime'
         type: NestedObject
@@ -1208,27 +1305,25 @@ properties:
   - name: 'protocol'
     type: Enum
     description: |
-      The protocol this RegionBackendService uses to communicate with backends.
-      The default is HTTP. **NOTE**: HTTP2 is only valid for beta HTTP/2 load balancer
-      types and may result in errors if used with the GA API.
+      The protocol this BackendService uses to communicate with backends.
+      The default is HTTP. Possible values are HTTP, HTTPS, HTTP2, H2C, TCP, SSL, UDP
+      or GRPC. Refer to the documentation for the load balancers or for Traffic Director
+      for more information.
     default_from_api: true
-    # This is removed to avoid breaking terraform, as default values cannot be
-    # unspecified. Providers should include this as needed via overrides
-    # default_value: :TCP
     enum_values:
       - 'HTTP'
       - 'HTTPS'
       - 'HTTP2'
-      - 'SSL'
       - 'TCP'
+      - 'SSL'
       - 'UDP'
       - 'GRPC'
       - 'UNSPECIFIED'
+      - 'H2C'
   - name: 'securityPolicy'
     type: String
     description: |
       The security policy associated with this backend service.
-    min_version: 'beta'
     update_url: 'projects/{{project}}/regions/{{region}}/backendServices/{{name}}/setSecurityPolicy'
     update_verb: 'POST'
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
@@ -1411,10 +1506,13 @@ properties:
     type: ResourceRef
     description: |
       The URL of the network to which this backend service belongs.
-      This field can only be specified when the load balancing scheme is set to INTERNAL.
+      This field must be set for Internal Passthrough Network Load Balancers when the haPolicy is enabled, and for External Passthrough Network Load Balancers when the haPolicy fastIpMove is enabled.
+      This field can only be specified when the load balancing scheme is set to INTERNAL, or when the load balancing scheme is set to EXTERNAL and haPolicy fastIpMove is enabled.
+      Changes to this field force recreation of the resource.
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
+    immutable: true
   - name: 'subsetting'
     type: NestedObject
     description: |
@@ -1428,3 +1526,148 @@ properties:
         required: true
         enum_values:
           - 'CONSISTENT_HASH_SUBSETTING'
+      - name: 'subsetSize'
+        type: Integer
+        description: |
+          The number of backends per backend group assigned to each proxy instance or each service mesh client.
+          An input parameter to the CONSISTENT_HASH_SUBSETTING algorithm. Can only be set if policy is set to
+          CONSISTENT_HASH_SUBSETTING. Can only be set if load balancing scheme is INTERNAL_MANAGED or INTERNAL_SELF_MANAGED.
+          subsetSize is optional for Internal HTTP(S) load balancing and required for Traffic Director.
+          If you do not provide this value, Cloud Load Balancing will calculate it dynamically to optimize the number
+          of proxies/clients visible to each backend and vice versa.
+          Must be greater than 0. If subsetSize is larger than the number of backends/endpoints, then subsetting is disabled.
+  - name: 'dynamicForwarding'
+    type: NestedObject
+    description: |
+      Dynamic forwarding configuration. This field is used to configure the backend service with dynamic forwarding
+      feature which together with Service Extension allows customized and complex routing logic.
+    min_version: beta
+    properties:
+      - name: 'ipPortSelection'
+        type: NestedObject
+        description: |
+          IP:PORT based dynamic forwarding configuration.
+        min_version: beta
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            min_version: beta
+            description: |
+              A boolean flag enabling IP:PORT based dynamic forwarding.
+            immutable: true
+  - name: 'haPolicy'
+    type: NestedObject
+    description: |
+      Configures self-managed High Availability (HA) for External and Internal Protocol Forwarding.
+      The backends of this regional backend service must only specify zonal network endpoint groups
+      (NEGs) of type GCE_VM_IP. Note that haPolicy is not for load balancing, and therefore cannot
+      be specified with sessionAffinity, connectionTrackingPolicy, and failoverPolicy. haPolicy
+      requires customers to be responsible for tracking backend endpoint health and electing a
+      leader among the healthy endpoints. Therefore, haPolicy cannot be specified with healthChecks.
+      haPolicy can only be specified for External Passthrough Network Load Balancers and Internal
+      Passthrough Network Load Balancers.
+    conflicts:
+      - sessionAffinity
+      - connectionTrackingPolicy
+      - failoverPolicy
+      - healthChecks
+    properties:
+      - name: 'fastIPMove'
+        type: Enum
+        description: |
+          Specifies whether fast IP move is enabled, and if so, the mechanism to achieve it.
+          Supported values are:
+
+          * `DISABLED`: Fast IP Move is disabled. You can only use the haPolicy.leader API to
+                        update the leader.
+
+          * `GARP_RA`: Provides a method to very quickly define a new network endpoint as the
+                       leader. This method is faster than updating the leader using the
+                       haPolicy.leader API. Fast IP move works as follows: The VM hosting the
+                       network endpoint that should become the new leader sends either a
+                       Gratuitous ARP (GARP) packet (IPv4) or an ICMPv6 Router Advertisement(RA)
+                       packet (IPv6). Google Cloud immediately but temporarily associates the
+                       forwarding rule IP address with that VM, and both new and in-flight packets
+                       are quickly delivered to that VM.
+        immutable: true
+        enum_values:
+          - 'DISABLED'
+          - 'GARP_RA'
+      - name: 'leader'
+        type: NestedObject
+        description: |
+          Selects one of the network endpoints attached to the backend NEGs of this service as the
+          active endpoint (the leader) that receives all traffic.
+        properties:
+          - name: 'backendGroup'
+            type: ResourceRef
+            description: |
+              A fully-qualified URL of the zonal Network Endpoint Group (NEG) that the leader is
+              attached to.
+          - name: 'networkEndpoint'
+            type: NestedObject
+            description: |
+              The network endpoint within the leader.backendGroup that is designated as the leader.
+            properties:
+              - name: 'instance'
+                type: String
+                description: |
+                  The name of the VM instance of the leader network endpoint. The instance must
+                  already be attached to the NEG specified in the haPolicy.leader.backendGroup.
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+      Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the region backend service. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        api_name: resourceManagerTags
+        ignore_read: true
+        immutable: true
+  - name: 'tlsSettings'
+    type: NestedObject
+    description: |
+      Configuration for Backend Authenticated TLS and mTLS. May only be specified when the backend protocol is SSL, HTTPS or HTTP2.
+    properties:
+      - name: 'sni'
+        type: String
+        description: |
+          Server Name Indication - see RFC3546 section 3.1. If set, the load balancer sends this string as the SNI hostname in the
+          TLS connection to the backend, and requires that this string match a Subject Alternative Name (SAN) in the backend's
+          server certificate. With a Regional Internet NEG backend, if the SNI is specified here, the load balancer uses it
+          regardless of whether the Regional Internet NEG is specified with FQDN or IP address and port.
+      - name: 'subjectAltNames'
+        type: Array
+        description: |
+          A list of Subject Alternative Names (SANs) that the Load Balancer verifies during a TLS handshake with the backend.
+          When the server presents its X.509 certificate to the Load Balancer, the Load Balancer inspects the certificate's SAN field,
+          and requires that at least one SAN match one of the subjectAltNames in the list. This field is limited to 5 entries.
+          When both sni and subjectAltNames are specified, the load balancer matches the backend certificate's SAN only to
+          subjectAltNames.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'dnsName'
+              type: String
+              description: The SAN specified as a DNS Name.
+              exactly_one_of:
+                - tlsSettings.0.uniform_resource_identifier
+                - tlsSettings.0.dns_name
+            - name: 'uniformResourceIdentifier'
+              type: String
+              description: The SAN specified as a URI.
+              exactly_one_of:
+                - tlsSettings.0.uniform_resource_identifier
+                - tlsSettings.0.dns_name
+      - name: 'authenticationConfig'
+        type: String
+        description: |
+          Reference to the BackendAuthenticationConfig resource from the networksecurity.googleapis.com namespace.
+          Can be used in authenticating TLS connections to the backend, as specified by the authenticationMode field.
+          Can only be specified if authenticationMode is not NONE.

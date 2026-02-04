@@ -1,0 +1,102 @@
+log.Printf("[DEBUG] Beginning custom_delete for Vertex AI Endpoint with Model Garden Deployment")
+
+// Log resource ID for debugging purposes
+log.Printf("[DEBUG] Resource ID: %s", d.Id())
+
+billingProject := ""
+
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+    return fmt.Errorf("Error fetching project for EndpointWithModelGardenDeployment: %s", err)
+}
+billingProject = project
+
+// err == nil indicates that the billing_project value was found
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+    billingProject = bp
+}
+
+// Retrieve deployed model ID and display name from Terraform fields
+deployedModelId, ok := d.Get("deployed_model_id").(string)
+if !ok {
+    return fmt.Errorf("wrong type for deployedModelId field (%T), expected string", d.Get("deployedModelId"))
+}
+
+
+deployedModelDisplayName, ok := d.Get("deployed_model_display_name").(string)
+if !ok {
+    return fmt.Errorf("wrong type for deployedModelDisplayName field (%T), expected string", d.Get("deployedModelDisplayName"))
+}
+
+// Undeploy the model
+undeployUrl, err := tpgresource.ReplaceVars(d, config,  "{{"{{"}}VertexAIBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/endpoints/{{"{{"}}endpoint{{"}}"}}:undeployModel")
+if err != nil {
+    return err
+}
+undeployHeaders := make(http.Header)
+
+undeployBody := map[string]interface{}{
+    "deployedModelId": deployedModelId,
+}
+
+log.Printf("[DEBUG] Undeploying model %s from EndpointWithModelGardenDeployment %q", deployedModelDisplayName, d.Id())
+
+undeployRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    Config:    config,
+    Method:    "POST",
+    Project:   billingProject,
+    RawURL:    undeployUrl,
+    UserAgent: userAgent,
+    Body:      undeployBody,
+    Timeout:   d.Timeout(schema.TimeoutDelete),
+    Headers:   undeployHeaders,
+})
+if err != nil {
+    return fmt.Errorf("Error undeploying model from EndpointWithModelGardenDeployment: %s", err)
+}
+
+err = VertexAIOperationWaitTime(
+    config, undeployRes, project, fmt.Sprintf("Undeploying model %s from EndpointWithModelGardenDeployment", deployedModelDisplayName), userAgent,
+    d.Timeout(schema.TimeoutDelete))
+
+if err != nil {
+    // The model could not be undeployed
+    return fmt.Errorf("Error waiting to undeploy model %s from EndpointWithModelGardenDeployment: %s", deployedModelDisplayName, err)
+}
+
+log.Printf("[DEBUG] Finished undeploying model %s from EndpointWithModelGardenDeployment %q: %#v", deployedModelDisplayName, d.Id(), undeployRes)
+
+
+// Delete Endpoint
+deleteUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}VertexAIBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/endpoints/{{"{{"}}endpoint{{"}}"}}")
+if err != nil {
+    return err
+}
+deleteHeaders := make(http.Header)
+var deleteBody map[string]interface{}
+
+log.Printf("[DEBUG] Deleting EndpointWithModelGardenDeployment %q", d.Id())
+deleteRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    Config:    config,
+    Method:    "DELETE",
+    Project:   billingProject,
+    RawURL:    deleteUrl,
+    UserAgent: userAgent,
+    Body:      deleteBody,
+    Timeout:   d.Timeout(schema.TimeoutDelete),
+    Headers:   deleteHeaders,
+})
+if err != nil {
+    return transport_tpg.HandleNotFoundError(err, d, "EndpointWithModelGardenDeployment")
+}
+
+err = VertexAIOperationWaitTime(
+    config, deleteRes, project, "Deleting EndpointWithModelGardenDeployment", userAgent,
+    d.Timeout(schema.TimeoutDelete))
+
+if err != nil {
+    return err
+}
+
+log.Printf("[DEBUG] Finished deleting EndpointWithModelGardenDeployment %q: %#v", d.Id(), deleteRes)
+return nil

@@ -1,11 +1,9 @@
 resource "google_compute_network" "network" {
-  provider                = google-beta
   name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_network_security_intercept_deployment_group" "{{$.PrimaryResourceId}}" {
-  provider                      = google-beta
   intercept_deployment_group_id = "{{index $.Vars "deployment_group_id"}}"
   location                      = "global"
   network                       = google_compute_network.network.id

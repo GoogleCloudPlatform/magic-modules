@@ -39,6 +39,7 @@ examples:
       billing_account: "BILLING_ACCT"
     exclude_docs: true
     skip_vcr: true
+    external_providers: ["time"]
   - name: "apigee_app_group_with_attributes"
     vars:
       app_group_name: "my-app-group"
@@ -50,6 +51,7 @@ examples:
       billing_account: "BILLING_ACCT"
     exclude_docs: true
     skip_vcr: true
+    external_providers: ["time"]
 parameters:
   - name: "orgId"
     type: String

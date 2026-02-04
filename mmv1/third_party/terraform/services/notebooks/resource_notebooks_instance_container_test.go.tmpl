@@ -26,7 +26,7 @@ func TestAccNotebooksInstance_create_container(t *testing.T) {
 				ImportState:        true,
 				ImportStateVerify:  true,
 				ExpectNonEmptyPlan: true,
-				ImportStateVerifyIgnore: []string{"container_image", "metadata", "vm_image"},
+				ImportStateVerifyIgnore: []string{"container_image", "metadata", "vm_image", "update_time"},
 			},
 		},
 	})

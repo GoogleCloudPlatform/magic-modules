@@ -1,5 +1,4 @@
 package parametermanagerregional
-{{ if ne $.TargetVersionName `ga` -}}
 
 import (
 	"encoding/base64"
@@ -172,5 +171,3 @@ func dataSourceParameterManagerRegionalRegionalParameterVersionRenderRead(d *sch
 	d.SetId(nameValue.(string))
 	return nil
 }
-
-{{ end }}

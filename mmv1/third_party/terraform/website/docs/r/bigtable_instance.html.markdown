@@ -103,7 +103,7 @@ to default to the backend value. See [structure below](#nested_cluster).
   When the field is set to true or unset in Terraform state, a `terraform apply` or `terraform destroy` that would delete
   the instance will fail. When the field is set to false, deleting the instance is allowed.
 
-* `labels` - (Optional) A set of key/value label pairs to assign to the resource. Label keys must follow the requirements at https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements.
+* `labels` - (Optional) A set of key/value label pairs to assign to the resource. Label keys must follow the requirements at https://docs.cloud.google.com/resource-manager/docs/creating-managing-labels#requirements.
 
   **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
   Please refer to the field 'effective_labels' for all of the labels present on the resource.
@@ -140,6 +140,8 @@ If no value is set, Cloud Bigtable automatically allocates nodes based on your d
 `"HDD"`. Defaults to `"SSD"`.
 
 * `kms_key_name` - (Optional) Describes the Cloud KMS encryption key that will be used to protect the destination Bigtable cluster. The requirements for this key are: 1) The Cloud Bigtable service account associated with the project that contains this cluster must be granted the `cloudkms.cryptoKeyEncrypterDecrypter` role on the CMEK key. 2) Only regional keys can be used and the region of the CMEK key must match the region of the cluster.
+
+* `node_scaling_factor` - (Optional) The node scaling factor for this cluster. One of `"NodeScalingFactor1X"` or `"NodeScalingFactor2X"`. Defaults to `"NodeScalingFactor1X"`. If `"NodeScalingFactor2X"` is specified, then `num_nodes`, `min_nodes`, and `max_nodes` would need to be specified in increments of 2. This value cannot be updated after the cluster is created.
 
 -> **Note**: Removing the field entirely from the config will cause the provider to default to the backend value.
 

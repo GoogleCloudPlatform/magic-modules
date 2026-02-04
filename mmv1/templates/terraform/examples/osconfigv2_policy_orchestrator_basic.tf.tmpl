@@ -1,5 +1,4 @@
 resource "google_os_config_v2_policy_orchestrator" "{{$.PrimaryResourceId}}" {
-    provider = google-beta
     policy_orchestrator_id = "{{index $.Vars "policy_orchestrator_id"}}"
     
     state = "ACTIVE"

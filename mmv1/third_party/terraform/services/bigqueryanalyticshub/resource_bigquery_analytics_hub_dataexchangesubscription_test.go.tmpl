@@ -1,0 +1,153 @@
+package bigqueryanalyticshub_test
+{{- if ne $.TargetVersionName "ga" }}
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+)
+
+func TestAccBigqueryAnalyticsHubDataExchangeSubscription_bigqueryAnalyticshubDataexchangeSubscriptionUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckBigqueryAnalyticsHubDataExchangeSubscriptionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigqueryAnalyticsHubDataExchangeSubscription_bigqueryAnalyticshubDataexchangeSubscriptionBasicExample(context),
+				Check: resource.ComposeTestCheckFunc(
+					// Verify the initial refresh_policy is ON_READ
+					resource.TestCheckResourceAttr(
+						"google_bigquery_analytics_hub_data_exchange_subscription.subscription", "refresh_policy", "ON_READ"),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_analytics_hub_data_exchange_subscription.subscription",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"data_exchange_id", "data_exchange_location", "data_exchange_project", "destination_dataset", "last_modify_time", "linked_dataset_map", "linked_resources", "location", "state", "refresh_policy"},
+			},
+			{
+				Config: testAccBigqueryAnalyticsHubDataExchangeSubscription_bigqueryAnalyticshubDataexchangeSubscriptionUpdate(context),
+				Check: resource.ComposeTestCheckFunc(
+					// Verify the refresh_policy has been updated to ON_STALE
+					resource.TestCheckResourceAttr(
+						"google_bigquery_analytics_hub_data_exchange_subscription.subscription", "refresh_policy", "ON_STALE"),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_analytics_hub_data_exchange_subscription.subscription",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"data_exchange_id", "data_exchange_location", "data_exchange_project", "destination_dataset", "last_modify_time", "linked_dataset_map", "linked_resources", "location", "state", "refresh_policy"},
+			},
+		},
+	})
+}
+
+func testAccBigqueryAnalyticsHubDataExchangeSubscription_bigqueryAnalyticshubDataexchangeSubscriptionUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_bigquery_analytics_hub_data_exchange" "subscription" {
+  provider = google-beta
+  location            = "us"
+  data_exchange_id    = "tf_test_my_test_dataexchange%{random_suffix}"
+  display_name        = "tf_test_my_test_dataexchange%{random_suffix}"
+  description         = "Test Data Exchange"
+  sharing_environment_config {
+    dcr_exchange_config {}
+  }
+}
+
+resource "google_bigquery_dataset" "subscription" {
+  provider = google-beta
+  dataset_id    = "tf_test_listing_src_dataset%{random_suffix}"
+  friendly_name = "tf_test_listing_src_dataset%{random_suffix}"
+  description   = "Dataset for Listing"
+  location      = "us"
+}
+
+resource "google_bigquery_table" "subscription" {
+  provider = google-beta
+  deletion_protection = false
+  table_id            = "tf_test_listing_src_table%{random_suffix}"
+  dataset_id          = google_bigquery_dataset.subscription.dataset_id
+  schema              = <<EOF
+[
+  {
+    "name": "name",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "post_abbr",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "date",
+    "type": "DATE",
+    "mode": "NULLABLE"
+  }
+]
+EOF
+}
+
+resource "google_bigquery_analytics_hub_listing" "subscription" {
+  provider = google-beta
+  location             = "us"
+  data_exchange_id     = google_bigquery_analytics_hub_data_exchange.subscription.data_exchange_id
+  listing_id           = "tf_test_my_test_listing%{random_suffix}"
+  display_name         = "tf_test_my_test_listing%{random_suffix}"
+  description          = "Test Listing"
+
+  restricted_export_config {
+    enabled = true
+  }
+
+  bigquery_dataset {
+    dataset = google_bigquery_dataset.subscription.id
+    selected_resources {
+      table = google_bigquery_table.subscription.id
+    }
+  }
+}
+
+resource "google_bigquery_analytics_hub_data_exchange_subscription" "subscription" {
+  provider = google-beta
+  project                = google_bigquery_dataset.subscription.project #Subscriber's project
+  location               = "us"
+
+  data_exchange_project  = google_bigquery_analytics_hub_data_exchange.subscription.project
+  data_exchange_location = google_bigquery_analytics_hub_data_exchange.subscription.location
+  data_exchange_id       = google_bigquery_analytics_hub_data_exchange.subscription.data_exchange_id
+
+  subscription_id    = "tf_test_my_subscription_id%{random_suffix}"
+  subscriber_contact = "testuser@example.com%{random_suffix}"
+
+  destination_dataset {
+    location = "us"
+
+    dataset_reference {
+      project_id = google_bigquery_dataset.subscription.project #Subscriber's project
+      dataset_id = "tf_test_subscribed_dest_dataset%{random_suffix}"
+    }
+    friendly_name = "Subscribed Destination Dataset%{random_suffix}"
+    description   = "Destination dataset for subscription"
+    labels = {
+      environment = "development"
+      owner       = "team-a"
+    }
+  }
+
+  refresh_policy="ON_STALE"
+}
+`, context)
+}
+{{- end }}

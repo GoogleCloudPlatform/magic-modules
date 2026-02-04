@@ -13,6 +13,8 @@
 
 ---
 name: 'FirewallEndpoint'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description: |
   A Firewall endpoint is a Cloud Firewall resource that enables
   layer 7 advanced protection capabilities, such as intrusion prevention,
@@ -125,3 +127,14 @@ properties:
     description: |
       Project to bill on endpoint uptime usage.
     required: true
+  - name: 'endpointSettings'
+    type: NestedObject
+    description: |
+      Settings for the endpoint.
+    properties:
+      - name: 'jumboFramesEnabled'
+        type: Boolean
+        send_empty_value: true
+        immutable: true
+        description: |
+          Indicates whether Jumbo Frames are enabled for the firewall endpoint.

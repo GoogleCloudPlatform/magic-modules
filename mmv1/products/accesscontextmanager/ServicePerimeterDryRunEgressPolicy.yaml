@@ -80,10 +80,15 @@ custom_code:
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
 exclude_sweeper: true
+# Exclude tests for examples becauses tests run in parallel and will conflict when trying to create the org level access policy
 examples:
   - name: 'access_context_manager_service_perimeter_dry_run_egress_policy'
     vars:
       egress_policy_title: 'egress policy title'
+    exclude_test: true
+  - name: 'access_context_manager_service_perimeter_dry_run_egress_policy_granular_controls'
+    vars:
+      egress_policy_title: 'granular controls egress policy title'
     exclude_test: true
 parameters:
   - name: 'perimeter'
@@ -173,6 +178,14 @@ properties:
           s3://bucket/path). Currently '*' is not allowed.
         item_type:
           type: String
+      - name: 'roles'
+        type: Array
+        item_type:
+          type: String
+        description: |
+          A list of IAM roles that represent the set of operations that the sources
+          specified in the corresponding `EgressFrom`
+          are allowed to perform.
       - name: 'operations'
         type: Array
         description: |

@@ -24,7 +24,6 @@ create_url: 'projects/{{project}}/locations/{{location}}/backendAuthenticationCo
 update_verb: 'PATCH'
 update_mask: true
 autogen_async: true
-min_version: 'beta'
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -32,7 +31,7 @@ async:
     base_url: '{{op_id}}'
 sweeper:
   url_substitutions:
-    - region: 'global'
+    - region: "global"
 examples:
   - name: 'network_security_backend_authentication_config_basic'
     primary_resource_id: 'default'
@@ -44,6 +43,12 @@ examples:
       resource_name: 'my-backend-authentication-config'
       certificate_name: 'my-certificate'
       trust_config_name: 'my-trust-config'
+  - name: 'backend_service_tls_settings'
+    primary_resource_id: 'default'
+    vars:
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
+      authentication_name: 'authentication'
 
 parameters:
   - name: 'name'

@@ -38,6 +38,8 @@ update_verb: 'PATCH'
 update_mask: true
 import_format:
   - '{{key_ring}}/cryptoKeys/{{name}}'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -75,8 +77,9 @@ parameters:
       If set to true, the request will create a CryptoKey without any CryptoKeyVersions.
       You must use the `google_kms_crypto_key_version` resource to create a new CryptoKeyVersion
       or `google_kms_key_ring_import_job` resource to import the CryptoKeyVersion.
+      This field is only applicable during initial CryptoKey creation.
     url_param_only: true
-    immutable: true
+    ignore_read: true
 properties:
   - name: 'name'
     type: String

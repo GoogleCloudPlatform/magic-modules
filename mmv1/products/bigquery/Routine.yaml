@@ -79,6 +79,12 @@ examples:
       connection_id: 'connection_id'
       routine_id: 'routine_id'
     exclude_test: true
+  - name: 'bigquery_routine_python_function'
+    primary_resource_id: 'python_function'
+    vars:
+      dataset_id: 'dataset_id'
+      routine_id: 'routine_id'
+    min_version: beta
 parameters:
 properties:
   - name: 'routineReference'
@@ -233,6 +239,12 @@ properties:
     description: If set to DATA_MASKING, the function is validated and made available as a masking function. For more information, see https://cloud.google.com/bigquery/docs/user-defined-functions#custom-mask
     enum_values:
       - 'DATA_MASKING'
+  - name: 'securityMode'
+    type: Enum
+    description: Optional. The security mode of the routine, if defined. If not defined, the security mode is automatically determined from the routine's configuration.
+    enum_values:
+      - 'DEFINER'
+      - 'INVOKER'
   - name: 'sparkOptions'
     type: NestedObject
     description: |
@@ -325,3 +337,60 @@ properties:
         description: |
           Max number of rows in each batch sent to the remote service. If absent or if 0,
           BigQuery dynamically decides the number of rows in a batch.
+  - name: 'pythonOptions'
+    type: NestedObject
+    description: |
+      Options for a user-defined Python function.
+    min_version: beta
+    properties:
+      - name: 'entryPoint'
+        type: String
+        description: |
+          The name of the function defined in Python code as the entry point when the
+          Python UDF is invoked.
+        required: true
+      - name: 'packages'
+        type: Array
+        description: |
+          A list of Python package names along with versions to be installed.
+          Example: ["pandas>=2.1", "google-cloud-translate==3.11"]. For more
+          information, see [Use third-party
+          packages](https://cloud.google.com/bigquery/docs/user-defined-functions-python#third-party-packages).
+        item_type:
+          type: String
+  - name: 'externalRuntimeOptions'
+    type: NestedObject
+    description: |
+      Options for the runtime of the external system.
+      This field is only applicable for Python UDFs.
+    min_version: beta
+    properties:
+      - name: 'containerMemory'
+        type: String
+        description: |
+          Amount of memory provisioned for a Python UDF container instance. Format:
+          {number}{unit} where unit is one of "M", "G", "Mi" and "Gi" (e.g. 1G,
+          512Mi). If not specified, the default value is 512Mi. For more information,
+          see [Configure container limits for Python
+          UDFs](https://cloud.google.com/bigquery/docs/user-defined-functions-python#configure-container-limits)
+      - name: 'containerCpu'
+        type: Double
+        description: |
+          Amount of CPU provisioned for a Python UDF container instance. For more
+          information, see [Configure container limits for Python
+          UDFs](https://cloud.google.com/bigquery/docs/user-defined-functions-python#configure-container-limits)
+      - name: 'runtimeConnection'
+        type: String
+        description: |
+          Fully qualified name of the connection whose service account will be used
+          to execute the code in the container. Format:
+          `"projects/{project_id}/locations/{location_id}/connections/{connection_id}"`
+      - name: 'maxBatchingRows'
+        type: String
+        description: |
+          Maximum number of rows in each batch sent to the external runtime. If
+          absent or if 0, BigQuery dynamically decides the number of rows in a batch.
+      - name: 'runtimeVersion'
+        type: String
+        description: |
+          Language runtime version. Example: `python-3.11`.

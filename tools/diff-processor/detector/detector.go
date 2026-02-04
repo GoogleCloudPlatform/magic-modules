@@ -62,9 +62,16 @@ func getChangedFieldsFromSchemaDiff(schemaDiff diff.SchemaDiff) map[string]Resou
 				// Skip the project field.
 				continue
 			}
-			if strings.Contains(resource, "iam") && field == "condition" {
-				// Skip the condition field of iam resources because some iam resources do not support it.
-				continue
+			// Ignore condition fields on iam resources because we always generate them whether or not
+			// they're supported.
+			// Longer-term fix tracked at https://github.com/hashicorp/terraform-provider-google/issues/18412
+			if strings.HasPrefix(field, "condition.") {
+				switch {
+				case strings.HasSuffix(resource, "_iam_member"),
+					strings.HasSuffix(resource, "_iam_policy"),
+					strings.HasSuffix(resource, "_iam_binding"):
+					continue
+				}
 			}
 			if fieldDiff.New == nil {
 				// Skip deleted fields.
@@ -166,15 +173,16 @@ func suggestedTest(resourceName string, untested []string) string {
 
 // DetectMissingDocs detect new fields that are missing docs given the schema diffs.
 // Return a map of resource names to missing doc info.
+// It parses the document to see if the field is present within the resource document file,
+// and is therefore heavily reliant on the document being written in the expected format.
+// Should avoid printing to stdout since the output will be consumed in generate_comment.go.
 func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string) (map[string]MissingDocDetails, error) {
 	ret := make(map[string]MissingDocDetails)
 	for resource, resourceDiff := range schemaDiff {
 		fieldsInDoc := make(map[string]bool)
 
 		docFilePath, err := resourceToDocFile(resource, repoPath)
-		if err != nil {
-			fmt.Printf("Warning: %s.\n", err)
-		} else {
+		if err == nil {
 			content, err := os.ReadFile(docFilePath)
 			if err != nil {
 				return nil, fmt.Errorf("failed to read resource doc %s: %w", docFilePath, err)
@@ -218,6 +226,10 @@ func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string) (map[string]
 	return ret, nil
 }
 
+// DetectMissingDocsForDatasource detect new fields that are missing docs given the schema diffs.
+// Return a map of resource names to missing doc info.
+// It only checks whether the data source doc file exists.
+// Should avoid printing to stdout since the output will be consumed in generate_comment.go.
 func DetectMissingDocsForDatasource(schemaDiff diff.SchemaDiff, repoPath string) (map[string]MissingDocDetails, error) {
 	ret := make(map[string]MissingDocDetails)
 	for resource, resourceDiff := range schemaDiff {

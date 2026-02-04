@@ -39,11 +39,11 @@ iam_policy:
   exclude_import_test: true
   method_name_separator: ':'
   parent_resource_attribute: 'federation_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/federations/{{federation_id}}'
     - '{{federation_id}}'
 custom_code:
+  pre_delete: 'templates/terraform/pre_delete/metastore_federation.go.tmpl'
 examples:
   - name: 'dataproc_metastore_federation_basic'
     primary_resource_id: 'default'
@@ -51,12 +51,22 @@ examples:
     vars:
       federation_id: 'metastore-fed'
       service_id: 'metastore-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'dataproc_metastore_federation_bigquery'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])'
     vars:
       federation_id: 'metastore-fed'
       service_id: 'metastore-service'
+virtual_fields:
+  - name: 'deletion_protection'
+    description: |
+      Whether Terraform will be prevented from destroying the federation. Defaults to false.
+      When the field is set to true in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the federation will fail.
+    type: Boolean
+    default_value: false
 parameters:
   - name: 'federationId'
     type: String
@@ -124,10 +134,7 @@ properties:
       A map from BackendMetastore rank to BackendMetastores from which the federation service serves metadata at query time. The map key represents the order in which BackendMetastores should be evaluated to resolve database names at query time and should be greater than or equal to zero. A BackendMetastore with a lower number will be evaluated before a BackendMetastore with a higher number.
     required: true
     key_name: 'rank'
-    key_description: |
-      represents the order in which BackendMetastores should be evaluated to resolve database names at query time and should be greater than or equal to zero.
     value_type:
-      name: backendMetastores
       type: NestedObject
       properties:
         - name: 'name'
@@ -144,3 +151,11 @@ properties:
             - 'METASTORE_TYPE_UNSPECIFIED'
             - 'DATAPROC_METASTORE'
             - 'BIGQUERY'
+  - name: 'tags'
+    type: KeyValuePairs
+    description: |
+      A map of resource manager tags.
+      Resource manager tag keys and values have the same definition as resource manager tags.
+      Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/{tag_value_id}.
+    immutable: true
+    ignore_read: true

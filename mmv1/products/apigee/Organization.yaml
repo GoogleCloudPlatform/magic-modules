@@ -18,6 +18,7 @@ description: |
 references:
   guides:
     'Creating an API organization': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-org'
+    'Setting a custom endpoint (required for data residency)': 'https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#advanced-settings-configuration'
   api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations'
 docs:
 base_url: 'organizations'
@@ -30,6 +31,7 @@ timeouts:
   delete_minutes: 45
 autogen_async: true
 async:
+  # b/242358013 blocks adding delete operation support. Once that's resolved, we can also remove sleep-after-delete from tests.
   actions: ['create']
   type: 'OpAsync'
   operation:
@@ -58,8 +60,6 @@ examples:
     ignore_read_extra:
       - 'properties'
     exclude_docs: true
-    # Resource creation race
-    skip_vcr: true
     external_providers: ["time"]
   - name: 'apigee_organization_cloud_basic_disable_vpc_peering'
     exclude_test: true
@@ -73,16 +73,29 @@ examples:
     ignore_read_extra:
       - 'properties'
     exclude_docs: true
-    # Resource creation race
-    skip_vcr: true
+    external_providers: ["time"]
+  - name: 'apigee_organization_cloud_basic_data_residency'
+    exclude_test: true
+  # This is a more verbose version of the above that creates all
+  # the resources needed for the acceptance test.
+  - name: 'apigee_organization_cloud_basic_data_residency_test'
+    primary_resource_id: 'org'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    ignore_read_extra:
+      - 'properties'
+    exclude_docs: true
+    external_providers: ["time"]
   - name: 'apigee_organization_cloud_full'
     exclude_test: true
   # This is a more verbose version of the above that creates all
-  # the resources needed for the acceptance test. While all Apigee
-  # resources in this test are in the GA API, we depend on a service
-  # identity resource which is only available in the beta provider.
+  # the resources needed for the acceptance test.
   - name: 'apigee_organization_cloud_full_test'
     primary_resource_id: 'org'
+    # While all Apigee resources in this test are in the GA API, we
+    # depend on a service identity resource which is only available
+    # in the beta provider.
     min_version: 'beta'
     test_env_vars:
       org_id: 'ORG_ID'
@@ -90,17 +103,16 @@ examples:
     ignore_read_extra:
       - 'properties'
     exclude_docs: true
-    # Resource creation race
-    skip_vcr: true
     external_providers: ["time"]
   - name: 'apigee_organization_cloud_full_disable_vpc_peering'
     exclude_test: true
   # This is a more verbose version of the above that creates all
-  # the resources needed for the acceptance test. While all Apigee
-  # resources in this test are in the GA API, we depend on a service
-  # identity resource which is only available in the beta provider.
+  # the resources needed for the acceptance test.
   - name: 'apigee_organization_cloud_full_disable_vpc_peering_test'
     primary_resource_id: 'org'
+    # While all Apigee resources in this test are in the GA API, we
+    # depend on a service identity resource which is only available
+    # in the beta provider.
     min_version: 'beta'
     test_env_vars:
       org_id: 'ORG_ID'
@@ -108,8 +120,6 @@ examples:
     ignore_read_extra:
       - 'properties'
     exclude_docs: true
-    # Resource creation race
-    skip_vcr: true
     external_providers: ["time"]
   - name: 'apigee_organization_retention_test'
     primary_resource_id: 'org'
@@ -118,8 +128,6 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
-    # Resource creation race
-    skip_vcr: true
     external_providers: ["time"]
   - name: 'apigee_organization_drz_test'
     primary_resource_id: 'org'
@@ -128,8 +136,6 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
-      # Resource creation race
-    skip_vcr: true
     external_providers: ["time"]
 parameters:
   - name: 'projectId'

@@ -1,33 +1,25 @@
-resource "google_compute_network" "mkc_network" {
-  name                    = "{{index $.Vars "network_id"}}"
-  auto_create_subnetworks = false
+data "google_project" "project" {
 }
 
-resource "google_compute_subnetwork" "mkc_subnet" {
-  name          = "{{index $.Vars "subnetwork_id"}}"
-  ip_cidr_range = "10.2.0.0/16"
-  region        = "us-central1"
-  network       = google_compute_network.mkc_network.id
-}
-
-resource "google_compute_subnetwork" "mkc_additional_subnet" {
-  name          = "{{index $.Vars "additional_subnet_id"}}"
+resource "google_compute_subnetwork" "mkc_secondary_subnet" {
+  project       = data.google_project.project.project_id
+  name          = "{{index $.Vars "secondary_subnet_id"}}"
   ip_cidr_range = "10.3.0.0/16"
   region        = "us-central1"
-  network       = google_compute_network.mkc_network.id
+  network       = "default"
 }
 
-resource "google_managed_kafka_cluster" "gmk_cluster" {
+resource "google_managed_kafka_cluster" "cluster" {
   cluster_id = "{{index $.Vars "cluster_id"}}"
-  location = "us-central1"
+  location   = "us-central1"
   capacity_config {
-    vcpu_count = 3
+    vcpu_count   = 3
     memory_bytes = 3221225472
   }
   gcp_config {
     access_config {
       network_configs {
-        subnet = "projects/${data.google_project.project.project_id}/regions/us-central1/subnetworks/${google_compute_subnetwork.mkc_subnet.id}"
+        subnet = "projects/${data.google_project.project.number}/regions/us-central1/subnetworks/default"
       }
     }
   }
@@ -35,25 +27,23 @@ resource "google_managed_kafka_cluster" "gmk_cluster" {
 
 resource "google_managed_kafka_connect_cluster" "{{$.PrimaryResourceId}}" {
   connect_cluster_id = "{{index $.Vars "connect_cluster_id"}}"
-  kafka_cluster = "projects/${data.google_project.project.project_id}/locations/us-central1/clusters/${google_managed_kafka_cluster.gmk_cluster.cluster_id}"
-  location = "us-central1"
+  kafka_cluster      = "projects/${data.google_project.project.project_id}/locations/us-central1/clusters/${google_managed_kafka_cluster.cluster.cluster_id}"
+  location           = "us-central1"
+
   capacity_config {
-    vcpu_count = 12
+    vcpu_count   = 12
     memory_bytes = 21474836480
   }
   gcp_config {
     access_config {
       network_configs {
-        primary_subnet = "projects/${data.google_project.project.project_id}/regions/us-central1/subnetworks/${google_compute_subnetwork.mkc_subnet.id}"
-        additional_subnets = ["${google_compute_subnetwork.mkc_additional_subnet.id}"]
-        dns_domain_names = ["${google_managed_kafka_cluster.gmk_cluster.cluster_id}.us-central1.managedkafka-staging.${data.google_project.project.project_id}.cloud-staging.goog"]
+        primary_subnet = "projects/${data.google_project.project.number}/regions/us-central1/subnetworks/default"
+        additional_subnets = [google_compute_subnetwork.mkc_secondary_subnet.id]
+        dns_domain_names = ["${google_managed_kafka_cluster.cluster.cluster_id}.us-central1.managedkafka.${data.google_project.project.project_id}.cloud.goog"]
       }
     }
   }
   labels = {
     key = "value"
   }
-}
-
-data "google_project" "project" {
 }

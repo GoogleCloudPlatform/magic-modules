@@ -19,7 +19,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io/fs"
 	"log"
 	"os"
 	"path"
@@ -31,7 +31,6 @@ import (
 	"golang.org/x/exp/slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
 
@@ -44,22 +43,22 @@ type TerraformGoogleConversion struct {
 
 	TargetVersionName string
 
-	Version product.Version
-
 	Product *api.Product
 
 	StartTime time.Time
+
+	templateFS fs.FS
 }
 
-func NewTerraformGoogleConversion(product *api.Product, versionName string, startTime time.Time) TerraformGoogleConversion {
+func NewTerraformGoogleConversion(product *api.Product, versionName string, startTime time.Time, templateFS fs.FS) TerraformGoogleConversion {
 	t := TerraformGoogleConversion{
 		Product:           product,
 		TargetVersionName: versionName,
-		Version:           *product.VersionObjOrClosest(versionName),
 		StartTime:         startTime,
+		templateFS:        templateFS,
 	}
 
-	t.Product.SetPropertiesBasedOnVersion(&t.Version)
+	t.Product.SetCompiler(ProviderName(t))
 	for _, r := range t.Product.Objects {
 		r.SetCompiler(ProviderName(t))
 		r.ImportPath = ImportPathFromVersion(versionName)
@@ -68,7 +67,7 @@ func NewTerraformGoogleConversion(product *api.Product, versionName string, star
 	return t
 }
 
-func (tgc TerraformGoogleConversion) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
+func (tgc TerraformGoogleConversion) Generate(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 	// Temporary shim to generate the missing resources directory. Can be removed
 	// once the folder exists downstream.
 	resourcesFolder := path.Join(outputFolder, "converters/google/resources")
@@ -80,7 +79,7 @@ func (tgc TerraformGoogleConversion) Generate(outputFolder, productPath, resourc
 
 func (tgc TerraformGoogleConversion) GenerateObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 	for _, object := range tgc.Product.Objects {
-		object.ExcludeIfNotInVersion(&tgc.Version)
+		object.ExcludeIfNotInVersion(tgc.Product.Version)
 
 		if resourceToGenerate != "" && object.Name != resourceToGenerate {
 			log.Printf("Excluding %s per user request", object.Name)
@@ -97,7 +96,7 @@ func (tgc TerraformGoogleConversion) GenerateObject(object api.Resource, outputF
 		return
 	}
 
-	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
+	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, tgc.templateFS)
 
 	if !object.IsExcluded() {
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
@@ -123,8 +122,9 @@ func (tgc TerraformGoogleConversion) GenerateResource(object api.Resource, templ
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
 
+	templatePath := "templates/tgc/resource_converter.go.tmpl"
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s.go", productName, google.Underscore(object.Name)))
-	templateData.GenerateTGCResourceFile(targetFilePath, object)
+	templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
 }
 
 // Generate the IAM policy for this object. This is used to query and test
@@ -184,21 +184,21 @@ func (tgc TerraformGoogleConversion) CompileCommonFiles(outputFolder string, pro
 	log.Printf("Compiling common files for tgc.")
 
 	tgc.generateCaiIamResources(products)
-	tgc.NonDefinedTests = retrieveFullManifestOfNonDefinedTests()
+	tgc.NonDefinedTests = retrieveFullManifestOfNonDefinedTests(tgc.templateFS)
 
-	files := retrieveFullListOfTestFiles()
+	files := retrieveFullListOfTestFiles(tgc.templateFS)
 	for _, file := range files {
 		tgc.Tests = append(tgc.Tests, strings.Split(file, ".")[0])
 	}
 	tgc.Tests = slices.Compact(tgc.Tests)
 
 	testSource := make(map[string]string)
-	for target, source := range retrieveTestSourceCodeWithLocation(".tmpl") {
+	for target, source := range retrieveTestSourceCodeWithLocation(tgc.templateFS, ".tmpl") {
 		target := strings.Replace(target, "go.tmpl", "go", 1)
 		testSource[target] = source
 	}
 
-	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
+	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, tgc.templateFS)
 	tgc.CompileFileList(outputFolder, testSource, *templateData, products)
 
 	resourceConverters := map[string]string{
@@ -235,18 +235,18 @@ func (tgc TerraformGoogleConversion) CompileFileList(outputFolder string, files 
 	}
 }
 
-func retrieveFullManifestOfNonDefinedTests() []string {
+func retrieveFullManifestOfNonDefinedTests(fs fs.FS) []string {
 	var tests []string
 	fileMap := make(map[string]bool)
 
-	files := retrieveFullListOfTestFiles()
+	files := retrieveFullListOfTestFiles(fs)
 	for _, file := range files {
 		tests = append(tests, strings.Split(file, ".")[0])
 		fileMap[file] = true
 	}
 	tests = slices.Compact(tests)
 
-	nonDefinedTests := google.Diff(tests, retrieveListOfManuallyDefinedTests())
+	nonDefinedTests := google.Diff(tests, retrieveListOfManuallyDefinedTests(fs))
 	nonDefinedTests = google.Reject(nonDefinedTests, func(file string) bool {
 		return strings.HasSuffix(file, "_without_default_project")
 	})
@@ -267,10 +267,10 @@ func retrieveFullManifestOfNonDefinedTests() []string {
 }
 
 // Gets all of the test files in the folder third_party/tgc/tests/data
-func retrieveFullListOfTestFiles() []string {
+func retrieveFullListOfTestFiles(fsys fs.FS) []string {
 	var testFiles []string
 
-	files, err := ioutil.ReadDir("third_party/tgc/tests/data")
+	files, err := fs.ReadDir(fsys, "third_party/tgc/tests/data")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -283,9 +283,9 @@ func retrieveFullListOfTestFiles() []string {
 }
 
 // Gets all of files in the folder third_party/tgc/tests/data
-func retrieveFullListOfTestTilesWithLocation() map[string]string {
+func retrieveFullListOfTestTilesWithLocation(fs fs.FS) map[string]string {
 	testFiles := make(map[string]string)
-	files := retrieveFullListOfTestFiles()
+	files := retrieveFullListOfTestFiles(fs)
 	for _, file := range files {
 		target := fmt.Sprintf("testdata/templates/%s", file)
 		source := fmt.Sprintf("third_party/tgc/tests/data/%s", file)
@@ -294,10 +294,10 @@ func retrieveFullListOfTestTilesWithLocation() map[string]string {
 	return testFiles
 }
 
-func retrieveTestSourceCodeWithLocation(suffix string) map[string]string {
+func retrieveTestSourceCodeWithLocation(fsys fs.FS, suffix string) map[string]string {
 	var fileNames []string
 	path := "third_party/tgc/tests/source"
-	files, err := ioutil.ReadDir(path)
+	files, err := fs.ReadDir(fsys, path)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -319,15 +319,15 @@ func retrieveTestSourceCodeWithLocation(suffix string) map[string]string {
 	return testSource
 }
 
-func retrieveListOfManuallyDefinedTests() []string {
-	m1 := retrieveListOfManuallyDefinedTestsFromFile("third_party/tgc/tests/source/cli_test.go.tmpl")
-	m2 := retrieveListOfManuallyDefinedTestsFromFile("third_party/tgc/tests/source/read_test.go.tmpl")
+func retrieveListOfManuallyDefinedTests(fs fs.FS) []string {
+	m1 := retrieveListOfManuallyDefinedTestsFromFile(fs, "third_party/tgc/tests/source/cli_test.go.tmpl")
+	m2 := retrieveListOfManuallyDefinedTestsFromFile(fs, "third_party/tgc/tests/source/read_test.go.tmpl")
 	return google.Concat(m1, m2)
 }
 
 // Reads the content of the file and then finds all of the tests in the contents
-func retrieveListOfManuallyDefinedTestsFromFile(file string) []string {
-	data, err := os.ReadFile(file)
+func retrieveListOfManuallyDefinedTestsFromFile(fsys fs.FS, file string) []string {
+	data, err := fs.ReadFile(fsys, file)
 	if err != nil {
 		log.Fatalf("Cannot open the file: %v", file)
 	}
@@ -348,10 +348,11 @@ func (tgc TerraformGoogleConversion) CopyCommonFiles(outputFolder string, genera
 		return
 	}
 
-	tgc.CopyFileList(outputFolder, retrieveFullListOfTestTilesWithLocation())
-	tgc.CopyFileList(outputFolder, retrieveTestSourceCodeWithLocation(".go"))
+	tgc.CopyFileList(outputFolder, retrieveFullListOfTestTilesWithLocation(tgc.templateFS))
+	tgc.CopyFileList(outputFolder, retrieveTestSourceCodeWithLocation(tgc.templateFS, ".go"))
 
 	resourceConverters := map[string]string{
+		"../caiasset/asset.go":                                                                  "third_party/tgc/caiasset/asset.go",
 		"converters/google/resources/cai/constants.go":                                          "third_party/tgc/cai/constants.go",
 		"converters/google/resources/constants.go":                                              "third_party/tgc/constants.go",
 		"converters/google/resources/cai.go":                                                    "third_party/tgc/cai.go",
@@ -431,6 +432,16 @@ func (tgc TerraformGoogleConversion) CopyCommonFiles(outputFolder string, genera
 		"converters/google/resources/services/logging/logging_project_bucket_config.go":         "third_party/tgc/services/logging/logging_project_bucket_config.go",
 		"converters/google/resources/services/logging/logging_billing_account_bucket_config.go": "third_party/tgc/services/logging/logging_billing_account_bucket_config.go",
 		"converters/google/resources/services/appengine/appengine_standard_version.go":          "third_party/tgc/services/appengine/appengine_standard_version.go",
+		"converters/google/resources/services/logging/logging_project_sink.go":                  "third_party/tgc/services/logging/logging_project_sink.go",
+		"converters/google/resources/services/logging/logging_folder_sink.go":                   "third_party/tgc/services/logging/logging_folder_sink.go",
+		"converters/google/resources/services/logging/logging_organization_sink.go":             "third_party/tgc/services/logging/logging_organization_sink.go",
+		"../cmd/tfplan2cai/convert.go":                                                          "third_party/tgc/cmd/tfplan2cai/convert.go",
+		"../cmd/tfplan2cai/convert_test.go":                                                     "third_party/tgc/cmd/tfplan2cai/convert_test.go",
+		"../cmd/tfplan2cai/list_supported_resources.go":                                         "third_party/tgc/cmd/tfplan2cai/list_supported_resources.go",
+		"../cmd/tfplan2cai/logger.go":                                                           "third_party/tgc/cmd/tfplan2cai/logger.go",
+		"../cmd/tfplan2cai/logger_test.go":                                                      "third_party/tgc/cmd/tfplan2cai/logger_test.go",
+		"../cmd/tfplan2cai/main.go":                                                             "third_party/tgc/cmd/tfplan2cai/main.go",
+		"../cmd/tfplan2cai/root.go":                                                             "third_party/tgc/cmd/tfplan2cai/root.go",
 	}
 	tgc.CopyFileList(outputFolder, resourceConverters)
 }
@@ -449,7 +460,7 @@ func (tgc TerraformGoogleConversion) CopyFileList(outputFolder string, files map
 			log.Fatalf("%s was already modified during this run at %s", targetFile, info.ModTime().String())
 		}
 
-		sourceByte, err := os.ReadFile(source)
+		sourceByte, err := fs.ReadFile(tgc.templateFS, source)
 		if err != nil {
 			log.Fatalf("Cannot read source file %s while copying: %s", source, err)
 		}

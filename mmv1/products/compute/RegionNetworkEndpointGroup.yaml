@@ -163,6 +163,7 @@ properties:
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
+    default_from_api: true
   - name: 'subnetwork'
     type: ResourceRef
     description: |

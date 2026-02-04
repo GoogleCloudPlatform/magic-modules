@@ -53,7 +53,9 @@ resource "google_folder" "security_policy_target" {
 resource "google_compute_organization_security_policy" "policy" {
   display_name = "tf-test%{random_suffix}"
   parent       = google_folder.security_policy_target.name
+  type         = "FIREWALL"
 }
+
 resource "google_compute_organization_security_policy_rule" "policy" {
   policy_id = google_compute_organization_security_policy.policy.id
   action = "allow"
@@ -88,6 +90,7 @@ resource "google_folder" "security_policy_target" {
 resource "google_compute_organization_security_policy" "policy" {
   display_name = "tf-test%{random_suffix}"
   parent       = google_folder.security_policy_target.name
+  type         = "FIREWALL"
 }
 
 resource "google_compute_organization_security_policy_rule" "policy" {

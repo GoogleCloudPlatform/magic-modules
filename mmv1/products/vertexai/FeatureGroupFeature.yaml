@@ -14,6 +14,8 @@
 ---
 name: 'FeatureGroupFeature'
 api_resource_type_kind: Feature
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/featureGroups/{featureGroup}/features/{feature}'
 description: Vertex AI Feature Group Feature is feature metadata information.
 references:
   guides:

@@ -14,6 +14,8 @@
 ---
 name: 'FolderSettings'
 api_resource_type_kind: AccessApprovalSettings
+api_variant_patterns:
+  - 'folders/{folder}/accessApprovalSettings'
 legacy_name: 'google_folder_access_approval_settings'
 description: |
   Access Approval enables you to require your explicit approval whenever Google support and engineering need to access your customer content.
@@ -42,14 +44,14 @@ examples:
   - name: 'folder_access_approval_full'
     primary_resource_id: 'folder_access_approval'
     vars:
-      folder_name: 'my-folder'
+      folder_name: 'folder-faaf'
     test_env_vars:
       org_id: 'ORG_ID'
     exclude_test: true
   - name: 'folder_access_approval_active_key_version'
     primary_resource_id: 'folder_access_approval'
     vars:
-      folder_name: 'my-folder'
+      folder_name: 'folder-faak'
     test_env_vars:
       org_id: 'ORG_ID'
     exclude_test: true

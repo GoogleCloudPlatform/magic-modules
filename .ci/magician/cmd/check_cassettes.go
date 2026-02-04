@@ -77,7 +77,7 @@ var checkCassettesCmd = &cobra.Command{
 
 		ctlr := source.NewController(env["GOPATH"], "modular-magician", githubToken, rnr)
 
-		vt, err := vcr.NewTester(env, "ci-vcr-cassettes", "vcr-check-cassettes", rnr)
+		vt, err := vcr.NewTester(env, "ci-vcr-cassettes", "vcr-check-cassettes", rnr, false)
 		if err != nil {
 			return fmt.Errorf("error creating VCR tester: %w", err)
 		}
@@ -130,7 +130,7 @@ func execCheckCassettes(commit string, vt *vcr.Tester, ctlr *source.Controller) 
 		return fmt.Errorf("error uploading logs: %w", err)
 	}
 	fmt.Println(len(result.FailedTests), " failed tests: ", result.FailedTests)
-	// TODO(trodge) report these failures to bigquery
+	// TODO report these failures to bigquery
 	fmt.Println(len(result.PassedTests), " passed tests: ", result.PassedTests)
 	fmt.Println(len(result.SkippedTests), " skipped tests: ", result.SkippedTests)
 

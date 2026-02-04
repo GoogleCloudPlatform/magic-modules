@@ -37,6 +37,9 @@ import_format:
   - 'instances/{{instance}}/databases/{{name}}'
   - '{{project}}/{{instance}}/{{name}}'
   - '{{instance}}/{{name}}'
+cai_asset_name_format: 'projects/{{project}}/instances/{{instance}}/databases/{{name}}'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -57,8 +60,11 @@ custom_code:
   post_create: 'templates/terraform/post_create/spanner_database.go.tmpl'
   pre_update: 'templates/terraform/pre_update/spanner_database.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/resource_spanner_database.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/spanner_database.go.tmpl'
+  tgc_ignore_terraform_decoder: true
 custom_diff:
   - 'resourceSpannerDBDdlCustomDiff'
+  - 'resourceSpannerEncryptionConfigCustomDiff'
 # Sweeper skipped as this resource has customized deletion.
 exclude_sweeper: true
 examples:
@@ -68,6 +74,7 @@ examples:
       database_name: 'my-database'
     ignore_read_extra:
       - 'deletion_protection'
+      - 'default_time_zone'
       # Randomness due to spanner instance
     skip_vcr: true
 virtual_fields:
@@ -81,6 +88,11 @@ virtual_fields:
       When the field is set to false, deleting the database is allowed.
     type: Boolean
     default_value: true
+  - name: 'default_time_zone'
+    description: |
+      The default time zone for the database. The default time zone must be a valid name
+      from the tz database. Default value is "America/Los_angeles".
+    type: String
 parameters:
   - name: 'instance'
     type: ResourceRef
@@ -90,6 +102,7 @@ parameters:
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Instance'
     imports: 'name'
+    tgc_ignore_read: true
 properties:
   # This resource returns only one attribute ("name") from which we parse
   # "instance", "name", and "project".  You will need custom code handling
@@ -104,6 +117,7 @@ properties:
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     validation:
       regex: '^[a-z][a-z0-9_\-]*[a-z0-9]$'
+    tgc_ignore_read: true
   - name: 'versionRetentionPeriod'
     type: String
     description: |
@@ -117,10 +131,16 @@ properties:
   - name: 'ddl'
     type: Array
     description: |
-      An optional list of DDL statements to run inside the newly created
-      database. Statements can create tables, indexes, etc. These statements
-      execute atomically with the creation of the database: if there is an
-      error in any statement, the database is not created.
+      An optional list of DDL statements to run inside the database. Statements can create
+      tables, indexes, etc.
+
+      During creation these statements execute atomically with the creation of the database
+      and if there is an error in any statement, the database is not created.
+
+      Terraform does not perform drift detection on this field and assumes that the values
+      recorded in state are accurate. Limited updates to this field are supported, and
+      newly appended DDL statements can be executed in an update. However, modifications
+      to prior statements will create a plan that marks the resource for recreation.
     api_name: extraStatements
     ignore_read: true
     update_url: 'projects/{{project}}/instances/{{instance}}/databases/{{name}}/ddl'
@@ -154,6 +174,7 @@ properties:
           Fully qualified name of the KMS keys to use to encrypt this database. The keys must exist
           in the same locations as the Spanner Database.
         immutable: true
+        default_from_api: true
         custom_flatten: templates/terraform/custom_flatten/spanner_database_kms_key_names.go.tmpl
         item_type:
           type: String
@@ -181,3 +202,4 @@ properties:
       (2) Setting "enableDropProtection" to true also prevents the deletion of the parent instance containing the database.
       "deletion_protection" attribute does not provide protection against the deletion of the parent instance.
     default_value: false
+    is_missing_in_cai: true

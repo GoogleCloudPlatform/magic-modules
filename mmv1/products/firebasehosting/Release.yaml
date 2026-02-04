@@ -37,7 +37,6 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  decoder: 'templates/terraform/decoders/firebasehosting_release.go.tmpl'
   post_create: 'templates/terraform/post_create/firebasehosting_release.tmpl'
 exclude_sweeper: true
 examples:
@@ -103,10 +102,11 @@ properties:
     min_version: 'beta'
     output: true
   - name: 'release_id'
+    api_name: 'name'
     type: String
     description: The unique identifier for the Release.
     min_version: 'beta'
-    ignore_read: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
     output: true
   - name: 'type'
     type: Enum

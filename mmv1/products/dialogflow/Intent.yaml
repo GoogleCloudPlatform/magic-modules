@@ -19,7 +19,7 @@ description: |
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/dialogflow/docs/'
-  api: 'https://cloud.google.com/dialogflow/docs/reference/rest/v2/projects.agent.intents'
+  api: 'https://docs.cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.agent.intents'
 docs:
 id_format: '{{name}}'
 base_url: 'projects/{{project}}/agent/intents/'
@@ -32,7 +32,6 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project.go.tmpl'
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true

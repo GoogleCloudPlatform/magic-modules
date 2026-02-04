@@ -48,13 +48,14 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'topic'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
   encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/pubsub_topic.tmpl'
+  tgc_ignore_terraform_encoder: true
 error_retry_predicates:
-
   - 'transport_tpg.PubsubTopicProjectNotReady'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 examples:
   - name: 'pubsub_topic_basic'
     primary_resource_id: 'example'
@@ -99,6 +100,21 @@ examples:
     primary_resource_id: 'example'
     vars:
       topic_name: 'example-topic'
+  - name: 'pubsub_topic_single_smt'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+  - name: 'pubsub_topic_multiple_smts'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+    tgc_skip_test: 'The dynamic block is in test configuration. The test takes time to fix.'
+  - name: 'pubsub_topic_tags'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+      tag_key: 'tag_key'
+      tag_value: 'tag_value'
 parameters:
 properties:
   - name: 'name'
@@ -130,6 +146,7 @@ properties:
     default_from_api: true
     properties:
       - name: 'allowedPersistenceRegions'
+        is_set: true
         type: Array
         description: |
           A list of IDs of GCP regions where messages that are published to
@@ -149,10 +166,12 @@ properties:
           operations on this topic and subscribe operations on any subscription
           attached to this topic in any region that is not in `allowedPersistenceRegions`.
         required: false
+        is_missing_in_cai: true
   - name: 'schemaSettings'
     type: NestedObject
     description: |
       Settings for validating messages published against a schema.
+    is_missing_in_cai: true
     properties:
       - name: 'schema'
         type: String
@@ -181,6 +200,7 @@ properties:
       set, message retention is controlled by settings on individual subscriptions.
       The rotation period has the format of a decimal number, followed by the
       letter `s` (seconds). Cannot be more than 31 days or less than 10 minutes.
+    is_missing_in_cai: true
   - name: 'ingestionDataSourceSettings'
     type: NestedObject
     description: |
@@ -437,3 +457,74 @@ properties:
               The GCP service account to be used for Federated Identity authentication
               with Confluent Cloud.
             required: true
+  - name: messageTransforms
+    type: Array
+    description: |
+      Transforms to be applied to messages published to the topic. Transforms are applied in the
+      order specified.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: javascriptUdf
+          type: NestedObject
+          description: |
+            Javascript User Defined Function. If multiple Javascript UDFs are specified on a resource,
+            each one must have a unique `function_name`.
+          is_missing_in_cai: true
+          properties:
+            - name: functionName
+              type: String
+              required: true
+              description: |
+                Name of the JavaScript function that should be applied to Pub/Sub messages.
+            - name: code
+              type: String
+              required: true
+              description: |
+                JavaScript code that contains a function `function_name` with the
+                following signature:
+                ```
+                  /**
+                  * Transforms a Pub/Sub message.
+                  *
+                  * @return {(Object<string, (string | Object<string, string>)>|null)} - To
+                  * filter a message, return `null`. To transform a message return a map
+                  * with the following keys:
+                  *   - (required) 'data' : {string}
+                  *   - (optional) 'attributes' : {Object<string, string>}
+                  * Returning empty `attributes` will remove all attributes from the
+                  * message.
+                  *
+                  * @param  {(Object<string, (string | Object<string, string>)>} Pub/Sub
+                  * message. Keys:
+                  *   - (required) 'data' : {string}
+                  *   - (required) 'attributes' : {Object<string, string>}
+                  *
+                  * @param  {Object<string, any>} metadata - Pub/Sub message metadata.
+                  * Keys:
+                  *   - (required) 'message_id'  : {string}
+                  *   - (optional) 'publish_time': {string} YYYY-MM-DDTHH:MM:SSZ format
+                  *   - (optional) 'ordering_key': {string}
+                  */
+                  function <function_name>(message, metadata) {
+                  }
+                ```
+        - name: disabled
+          type: Boolean
+          default_value: false
+          description: |
+            Controls whether or not to use this transform. If not set or `false`,
+            the transform will be applied to messages. Default: `true`.
+  - name: 'tags'
+    type: KeyValuePairs
+    description: |
+      Input only. Resource manager tags to be bound to the topic. Tag keys and
+      values have the same definition as resource manager tags. Keys must be in
+      the format tagKeys/{tag_key_id}, and values are in the format
+      tagValues/456. The field is ignored when empty. The field is immutable and
+      causes resource replacement when mutated. This field is only set at create
+      time and modifying this field after creation will trigger recreation. To
+      apply tags to an existing resource, see the `google_tags_tag_value`
+      resource.
+    immutable: true
+    ignore_read: true

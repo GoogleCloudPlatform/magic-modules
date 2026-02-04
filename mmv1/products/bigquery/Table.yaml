@@ -34,7 +34,6 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   allowed_iam_role: 'roles/bigquery.dataOwner'
   parent_resource_attribute: 'table_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   iam_policy_version: '1'
 custom_code:
 examples:
@@ -45,7 +44,7 @@ examples:
       dataset_id: 'dataset_id'
       table_id: 'table_id'
 parameters:
-  # TODO(alexstephen): Remove once we have support for placing
+  # TODO: Remove once we have support for placing
   # nested object fields in URL
   - name: 'dataset'
     type: String
@@ -277,12 +276,10 @@ properties:
                 Definition of the foreign data type.
                 Only valid for top-level schema fields (not nested fields).
                 If the type is FOREIGN, this field is required.
-              min_version: beta
   - name: 'schemaForeignTypeInfo'
     type: NestedObject
     description: |
       Specifies metadata of the foreign data type definition in field schema.
-    min_version: beta
     properties:
       - name: 'typeSystem'
         type: Enum
@@ -291,7 +288,6 @@ properties:
         required: true
         enum_values:
           - 'HIVE'
-        min_version: beta
   - name: 'encryptionConfiguration'
     type: NestedObject
     description: Custom encryption configuration
@@ -541,6 +537,24 @@ properties:
                     - 'INTEGER'
                     - 'FLOAT'
                     - 'BOOLEAN'
+      - name: 'decimalTargetTypes'
+        type: Array
+        is_set: true
+        description: |
+          Defines the list of possible SQL data types to which the source decimal values are converted. This list and the precision and the scale parameters of the decimal field determine the target type. In the order of NUMERIC, BIGNUMERIC, and STRING, a type is picked if it is in the specified list and if it supports the precision and the scale. STRING supports all precision and scale values. If none of the listed types supports the precision and the scale, the type supporting the widest range in the specified list is picked, and if a value exceeds the supported range when reading the data, an error will be thrown.
+
+          Example: Suppose the value of this field is ["NUMERIC", "BIGNUMERIC"]. If (precision,scale) is:
+
+          (38,9) -> NUMERIC;
+          (39,9) -> BIGNUMERIC (NUMERIC cannot hold 30 integer digits);
+          (38,10) -> BIGNUMERIC (NUMERIC cannot hold 10 fractional digits);
+          (76,38) -> BIGNUMERIC;
+          (77,38) -> BIGNUMERIC (error if value exceeds supported range).
+          This field cannot contain duplicate types. The order of the types in this field is ignored. For example, ["BIGNUMERIC", "NUMERIC"] is the same as ["NUMERIC", "BIGNUMERIC"] and NUMERIC always takes precedence over BIGNUMERIC.
+
+          Defaults to ["NUMERIC", "STRING"] for ORC and ["NUMERIC"] for the other file formats.
+        item_type:
+          type: String
   - name: 'tableReplicationInfo'
     type: NestedObject
     description: |
@@ -577,51 +591,43 @@ properties:
     type: NestedObject
     description: |
       Options defining open source compatible table.
-    min_version: beta
     properties:
       - name: 'parameters'
         type: KeyValuePairs
         description: |
           A map of key value pairs defining the parameters and properties of the open source table.
           Corresponds with hive meta store table parameters. Maximum size of 4Mib.
-        min_version: beta
       - name: 'storageDescriptor'
         type: NestedObject
         description: |
           A storage descriptor containing information about the physical storage of this table.
-        min_version: beta
         properties:
           - name: 'storageUri'
             type: String
             description: |
               The physical location of the table (e.g. `gs://spark-dataproc-data/pangea-data/case_sensitive/`
               or `gs://spark-dataproc-data/pangea-data/*`). The maximum length is 2056 bytes.
-            min_version: beta
           - name: 'inputFormat'
             type: String
             description: |
               Specifies the fully qualified class name of the InputFormat
               (e.g. "org.apache.hadoop.hive.ql.io.orc.OrcInputFormat").
               The maximum length is 128 characters.
-            min_version: beta
           - name: 'outputFormat'
             type: String
             description: |
               Specifies the fully qualified class name of the OutputFormat
               (e.g. "org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat").
               The maximum length is 128 characters.
-            min_version: beta
           - name: 'serdeInfo'
             type: NestedObject
             description: |
               Serializer and deserializer information.
-            min_version: beta
             properties:
               - name: 'name'
                 type: String
                 description: |
                   Name of the SerDe. The maximum length is 256 characters.
-                min_version: beta
               - name: 'serializationLibrary'
                 type: String
                 description: |
@@ -630,13 +636,11 @@ properties:
                   underlying low-level input and output format structures.
                   The maximum length is 256 characters.
                 required: true
-                min_version: beta
               - name: 'parameters'
                 type: KeyValuePairs
                 description: |
                   Key-value pairs that define the initialization parameters for the serialization
                   library. Maximum size 10 Kib.
-                min_version: beta
       - name: 'connectionId'
         type: String
         description: |
@@ -644,7 +648,6 @@ properties:
           Azure Blob, Cloud Storage, or S3. The connection is needed to read the open source table
           from BigQuery Engine. The connection_id can have the form `<project_id>.<location_id>.<connection_id>`
           or `projects/<project_id>/locations/<location_id>/connections/<connection_id>`.
-        min_version: beta
 virtual_fields:
   - name: 'table_metadata_view'
     type: String
@@ -652,3 +655,11 @@ virtual_fields:
       View sets the optional parameter "view": Specifies the view that determines which table information is
       returned. By default, basic table information and storage statistics (STORAGE_STATS) are returned.
       Possible values: TABLE_METADATA_VIEW_UNSPECIFIED, BASIC, STORAGE_STATS, FULL
+  - name: 'ignore_auto_generated_schema'
+    type: Boolean
+    description: |
+      If set to true, Terraform will prevent implicitly added columns in schema from showing diff.
+  - name: 'generated_schema_columns'
+    type: String
+    description: |
+      (Output-only) A list of autogenerated schema fields.

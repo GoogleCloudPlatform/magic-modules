@@ -13,6 +13,8 @@
 
 ---
 name: 'Instance'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description: |
   A Google Cloud Looker instance.
 references:
@@ -153,6 +155,31 @@ properties:
       Network name in the consumer project in the format of: projects/{project}/global/networks/{network}
       Note that the consumer network may be in a different GCP project than the consumer
       project that is hosting the Looker Instance.
+  # Controlled Egress Config Object
+  - name: 'controlledEgressConfig'
+    type: NestedObject
+    description: |
+      Controlled egress configuration.
+    update_mask_fields:
+      - 'controlled_egress_config.marketplace_enabled'
+      - 'controlled_egress_config.egress_fqdns'
+    properties:
+      - name: 'marketplaceEnabled'
+        type: Boolean
+        description: |
+          Whether the Looker Marketplace is enabled.
+      - name: 'egressFqdns'
+        type: Array
+        description: |
+          List of fully qualified domain names to be added to the allowlist for
+          outbound traffic.
+        item_type:
+          type: String
+  # Controlled Egress Config Object - End
+  - name: 'controlledEgressEnabled'
+    type: Boolean
+    description: |
+      Whether controlled egress is enabled on the Looker instance.
   - name: 'createTime'
     type: Time
     description: |
@@ -287,6 +314,10 @@ properties:
     type: Boolean
     description: |
       FIPS 140-2 Encryption enablement for Looker (Google Cloud Core).
+  - name: 'geminiEnabled'
+    type: Boolean
+    description: |
+      Gemini enablement for Looker (Google Cloud Core).
   - name: 'ingressPrivateIp'
     type: String
     description: |
@@ -397,6 +428,58 @@ properties:
           The client secret for the Oauth config.
         required: true
   # Oauth Object - End
+  # Periodic Export Config Object
+  - name: 'periodicExportConfig'
+    type: NestedObject
+    description: |
+      Configuration for periodic export.
+    update_mask_fields:
+      - 'periodic_export_config'
+    properties:
+      - name: 'kmsKey'
+        type: String
+        description: |
+          Name of the CMEK key in KMS.
+          Format:
+          projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}
+        required: true
+      - name: 'gcsUri'
+        type: String
+        description: |
+          Cloud Storage bucket URI for periodic export.
+          Format: gs://{bucket_name}
+        required: true
+      - name: 'startTime'
+        type: NestedObject
+        description: |
+          Time in UTC to start the periodic export job.
+        required: true
+        properties:
+          - name: 'hours'
+            type: Integer
+            description: |
+              Hours of day in 24 hour format. Should be from 0 to 23.
+            validation:
+              function: 'validation.IntBetween(0,23)'
+          - name: 'minutes'
+            type: Integer
+            description: |
+              Minutes of hour of day. Must be from 0 to 59.
+            validation:
+              function: 'validation.IntBetween(0,60)'
+          - name: 'seconds'
+            type: Integer
+            description: |
+              Seconds of minutes of the time. Must normally be from 0 to 59.
+            validation:
+              function: 'validation.IntBetween(0,60)'
+          - name: 'nanos'
+            type: Integer
+            description: |
+              Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+            validation:
+              function: 'validation.IntBetween(0,999999999)'
+  # Periodic Export Config Object - End
   - name: 'platformEdition'
     type: Enum
     description: |
@@ -409,6 +492,9 @@ properties:
       - LOOKER_CORE_NONPROD_STANDARD_ANNUAL: nonprod subscription standard instance
       - LOOKER_CORE_NONPROD_ENTERPRISE_ANNUAL: nonprod subscription enterprise instance
       - LOOKER_CORE_NONPROD_EMBED_ANNUAL: nonprod subscription embed instance
+      - LOOKER_CORE_TRIAL_STANDARD: A standard trial edition of Looker (Google Cloud core) product.
+      - LOOKER_CORE_TRIAL_ENTERPRISE: An enterprise trial edition of Looker (Google Cloud core) product.
+      - LOOKER_CORE_TRIAL_EMBED: An embed trial edition of Looker (Google Cloud core) product.
     immutable: true
     default_value: "LOOKER_CORE_TRIAL"
     enum_values:
@@ -420,6 +506,9 @@ properties:
       - 'LOOKER_CORE_NONPROD_STANDARD_ANNUAL'
       - 'LOOKER_CORE_NONPROD_ENTERPRISE_ANNUAL'
       - 'LOOKER_CORE_NONPROD_EMBED_ANNUAL'
+      - 'LOOKER_CORE_TRIAL_STANDARD'
+      - 'LOOKER_CORE_TRIAL_ENTERPRISE'
+      - 'LOOKER_CORE_TRIAL_EMBED'
   - name: 'privateIpEnabled'
     type: Boolean
     description: |
@@ -430,6 +519,7 @@ properties:
     type: NestedObject
     description: |
       Information for Private Service Connect (PSC) setup for a Looker instance.
+    default_from_api: true
     update_mask_fields:
       - 'psc_config.allowed_vpcs'
       - 'psc_config.service_attachments'

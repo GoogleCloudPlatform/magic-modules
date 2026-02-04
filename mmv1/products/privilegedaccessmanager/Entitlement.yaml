@@ -13,6 +13,10 @@
 
 ---
 name: 'Entitlement'
+api_variant_patterns:
+  - 'folders/{folder}/locations/{location}/entitlements/{entitlement}'
+  - 'organizations/{organization}/locations/{location}/entitlements/{entitlement}'
+  - 'projects/{project}/locations/{location}/entitlements/{entitlement}'
 description: |
   An Entitlement defines the eligibility of a set of users to obtain a predefined access for some time possibly after going through an approval workflow.
 references:
@@ -141,7 +145,7 @@ properties:
           - name: 'steps'
             type: Array
             description: |
-              List of approval steps in this workflow. These steps would be followed in the specified order sequentially.  1 step is supported for now.
+              List of approval steps in this workflow. These steps would be followed in the specified order sequentially.
             required: true
             item_type:
               type: NestedObject
@@ -181,6 +185,12 @@ properties:
                   is_set: true
                   item_type:
                     type: String
+                - name: 'id'
+                  type: String
+                  description: |
+                    Output Only. The ID of the approval step.
+                  min_version: beta
+                  output: true
   - name: 'privilegedAccess'
     type: NestedObject
     description: |
@@ -221,6 +231,12 @@ properties:
                   description: |
                     The expression field of the IAM condition to be associated with the role. If specified, a user with an active grant for this entitlement would be able to access the resource only if this condition evaluates to true for their request.
                     https://cloud.google.com/iam/docs/conditions-overview#attributes.
+                - name: 'id'
+                  type: String
+                  description: |
+                    Output Only. The ID corresponding to this role binding in the policy binding. This will be unique within an entitlement across time. Gets re-generated each time the entitlement is updated.
+                  min_version: beta
+                  output: true
   - name: 'maxRequestDuration'
     type: String
     description: |

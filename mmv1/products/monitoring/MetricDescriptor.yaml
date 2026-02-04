@@ -156,20 +156,15 @@ properties:
       The supported units are a subset of The Unified Code for Units of Measure standard.
       More info can be found in the API documentation
       (https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors).
-    immutable: true
   - name: 'description'
     type: String
     description:
       A detailed description of the metric, which can be used in documentation.
-    required: true
-    immutable: true
   - name: 'displayName'
     type: String
     description:
       A concise name for the metric, which can be displayed in user interfaces.
       Use sentence case without an ending period, for example "Request count".
-    required: true
-    immutable: true
   - name: 'metadata'
     type: NestedObject
     description: Metadata which can be used to guide usage of the metric.

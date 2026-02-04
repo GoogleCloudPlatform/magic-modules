@@ -14,7 +14,6 @@
 ---
 name: 'ConnectCluster'
 description: A Managed Service for Kafka Connect cluster.
-min_version: 'beta'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/connectClusters/{{connect_cluster_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/connectClusters'
@@ -41,13 +40,14 @@ custom_code:
 examples:
   - name: 'managedkafka_connect_cluster_basic'
     primary_resource_id: 'example'
-    min_version: 'beta'
     vars:
       connect_cluster_id: 'my-connect-cluster'
       cluster_id: 'my-cluster'
-      additional_subnet_id: 'my-additional-subnetwork-0'
-      subnetwork_id: 'my-subnetwork'
-      network_id: 'my-network'
+      secondary_subnet_id: 'my-secondary-subnetwork'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    external_providers: ["time"]
 parameters:
   - name: 'location'
     type: String
@@ -135,6 +135,7 @@ properties:
                     network endpoints in either the primary or additional subnets."
                   item_type:
                     type: String
+                  deprecation_message: '`additionalSubnets` is deprecated and will be removed in a future major release. Managed Kafka Connect clusters can now reach any endpoint accessible from the primary subnet without the need to define additional subnets. Please see https://cloud.google.com/managed-service-for-apache-kafka/docs/connect-cluster/create-connect-cluster#worker-subnet for more information.'
                 - name: 'dnsDomainNames'
                   type: Array
                   description: "Additional DNS domain names from the subnet's network to be made visible to the Connect Cluster. When using

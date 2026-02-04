@@ -1,6 +1,6 @@
 
 {{- if $.HasLabelsField }}
-if v, ok := d.GetOkExists("effective_labels"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, labelsProp)) {
+if v, ok := d.GetOkExists("effective_labels"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, effectiveLabelsProp)) {
 	labels := d.Get("labels")
 	terraformLables := d.Get("terraform_labels")
 

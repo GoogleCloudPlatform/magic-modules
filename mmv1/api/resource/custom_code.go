@@ -28,7 +28,7 @@ type CustomCode struct {
 	// Extra Schema Entries go below all other schema entries in the
 	// resource's Resource.Schema map.  They should be formatted as
 	// entries in the map, e.g. `"foo": &schema.Schema{ ... },`.
-	ExtraSchemaEntry string `yaml:"extra_schema_entry"`
+	ExtraSchemaEntry string `yaml:"extra_schema_entry,omitempty"`
 
 	// ====================
 	// Encoders & Decoders
@@ -41,7 +41,7 @@ type CustomCode struct {
 	// Because the call signature of this function cannot be changed,
 	// the template will place the function header and closing } for
 	// you, and your custom code template should *not* include them.
-	Encoder string
+	Encoder string `yaml:"encoder,omitempty"`
 
 	// The update encoder is the encoder used in Update - if one is
 	// not provided, the regular encoder is used.  If neither is
@@ -50,13 +50,13 @@ type CustomCode struct {
 	// Update encoders are only used if object.input is false,
 	// because when object.input is true, only individual fields
 	// can be updated - in that case, use a custom expander.
-	UpdateEncoder string `yaml:"update_encoder"`
+	UpdateEncoder string `yaml:"update_encoder,omitempty"`
 
 	// The decoder is the opposite of the encoder - it's called
 	// after the Read succeeds, rather than before Create / Update
 	// are called.  Like with encoders, the decoder should not
 	// include the function header or closing }.
-	Decoder string
+	Decoder string `yaml:"decoder,omitempty"`
 
 	// =====================
 	// Simple customizations
@@ -65,78 +65,91 @@ type CustomCode struct {
 	// things like methods that will be referred to by name elsewhere
 	// (e.g. "fooBarDiffSuppress") and regexes that are necessarily
 	// exported (e.g. "fooBarValidationRegex").
-	Constants string
+	Constants string `yaml:"constants,omitempty"`
 
 	// This code is run before the Create call happens.  It's placed
 	// in the Create function, just before the Create call is made.
-	PreCreate string `yaml:"pre_create"`
+	PreCreate string `yaml:"pre_create,omitempty"`
 
 	// This code is run after the Create call succeeds.  It's placed
 	// in the Create function directly without modification.
-	PostCreate string `yaml:"post_create"`
+	PostCreate string `yaml:"post_create,omitempty"`
 
 	// This code is run after the Create call fails before the error is
 	// returned. It's placed in the Create function directly without
 	// modification.
-	PostCreateFailure string `yaml:"post_create_failure"`
+	PostCreateFailure string `yaml:"post_create_failure,omitempty"`
 
 	// This code replaces the entire contents of the Create call. It
 	// should be used for resources that don't have normal creation
 	// semantics that cannot be supported well by other MM features.
-	CustomCreate string `yaml:"custom_create"`
+	CustomCreate string `yaml:"custom_create,omitempty"`
 
 	// This code is run before the Read call happens.  It's placed
 	// in the Read function.
-	PreRead string `yaml:"pre_read"`
+	PreRead string `yaml:"pre_read,omitempty"`
 
 	// This code is run after Read calls happen.  It's placed in the
 	// Read function and also after the nested_query read call.
-	PostRead string `yaml:"post_read"`
+	PostRead string `yaml:"post_read,omitempty"`
 
 	// This code is run before the Update call happens.  It's placed
 	// in the Update function, just after the encoder call, before
 	// the Update call.  Just like the encoder, it is only used if
 	// object.input is false.
-	PreUpdate string `yaml:"pre_update"`
+	PreUpdate string `yaml:"pre_update,omitempty"`
 
 	// This code is run after the Update call happens.  It's placed
 	// in the Update function, just after the call succeeds.
 	// Just like the encoder, it is only used if object.input is
 	// false.
-	PostUpdate string `yaml:"post_update"`
+	PostUpdate string `yaml:"post_update,omitempty"`
 
 	// This code replaces the entire contents of the Update call. It
 	// should be used for resources that don't have normal update
 	// semantics that cannot be supported well by other MM features.
-	CustomUpdate string `yaml:"custom_update"`
+	CustomUpdate string `yaml:"custom_update,omitempty"`
 
 	// This code is run just before the Delete call happens.  It's
 	// useful to prepare an object for deletion, e.g. by detaching
 	// a disk before deleting it.
-	PreDelete string `yaml:"pre_delete"`
+	PreDelete string `yaml:"pre_delete,omitempty"`
 
 	// This code is run just after the Delete call happens.
-	PostDelete string `yaml:"post_delete"`
+	PostDelete string `yaml:"post_delete,omitempty"`
 
 	// This code replaces the entire delete method.  Since the delete
 	// method's function header can't be changed, the template
 	// inserts that for you - do not include it in your custom code.
-	CustomDelete string `yaml:"custom_delete"`
+	CustomDelete string `yaml:"custom_delete,omitempty"`
 
 	// This code replaces the entire import method.  Since the import
 	// method's function header can't be changed, the template
 	// inserts that for you - do not include it in your custom code.
-	CustomImport string `yaml:"custom_import"`
+	CustomImport string `yaml:"custom_import,omitempty"`
 
 	// This code is run just after the import method succeeds - it
 	// is useful for parsing attributes that are necessary for
 	// the Read() method to succeed.
-	PostImport string `yaml:"post_import"`
+	PostImport string `yaml:"post_import,omitempty"`
 
 	// This code is run in the generated test file to check that the
 	// resource was successfully deleted. Use this if the API responds
 	// with a success HTTP code for deleted resources
-	TestCheckDestroy string `yaml:"test_check_destroy"`
+	TestCheckDestroy string `yaml:"test_check_destroy,omitempty"`
 
-	ValidateRawResourceConfigFuncs string `yaml:"raw_resource_config_validation"`
+	ValidateRawResourceConfigFuncs string `yaml:"raw_resource_config_validation,omitempty"`
+
+	// ====================
+	// TGC Encoders & Decoders
+	// ====================
+	TgcEncoder string `yaml:"tgc_encoder,omitempty"`
+
+	TgcDecoder string `yaml:"tgc_decoder,omitempty"`
+
+	// If true, the Terraform custom encoder is not applied during tfplan2cai
+	TGCIgnoreTerraformEncoder bool `yaml:"tgc_ignore_terraform_encoder,omitempty"`
+
+	// If true, the Terraform custom decoder is not applied during cai2hcl
+	TGCIgnoreTerraformDecoder bool `yaml:"tgc_ignore_terraform_decoder,omitempty"`
 }

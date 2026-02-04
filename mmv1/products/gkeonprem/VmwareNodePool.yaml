@@ -13,7 +13,11 @@
 
 ---
 name: 'VmwareNodePool'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description: "A Google Vmware Node Pool."
+references:
+  api: 'https://cloud.google.com/kubernetes-engine/distributed-cloud/reference/on-prem-api/rest/v1/projects.locations.vmwareClusters.vmwareNodePools'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools'
@@ -125,6 +129,7 @@ properties:
       - name: 'image'
         type: String
         description: The OS image name in vCenter, only valid when using Windows.
+        default_from_api: true
       - name: 'bootDiskSizeGb'
         type: Integer
         description: VMware disk size to be used during creation.
@@ -295,4 +300,3 @@ properties:
     type: String
     description: |
       Anthos version for the node pool. Defaults to the user cluster version.
-    output: true

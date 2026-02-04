@@ -46,12 +46,19 @@ examples:
     vars:
       key_ring_name: 'my-keyring'
       crypto_key_name: 'my-crypto-key'
-      service_account_id: 'service-acc'
     test_vars_overrides:
       key_ring_name: '"tftest-shared-keyring-1"'
       crypto_key_name: '"tftest-shared-key-1"'
       kms_key: 'acctest.BootstrapKMSKeyInLocation(t, "us-east1")'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-integrations.iam.gserviceaccount.com"
+        role: "roles/cloudkmskacls.serviceAgent"
     skip_vcr: true
+  - name: 'integrations_client_service_account'
+    primary_resource_id: 'example'
+    vars:
+      service_account_id: 'service-acc'
+    exclude_docs: true
 parameters:
   - name: 'location'
     type: String
@@ -113,3 +120,4 @@ properties:
       User input run-as service account, if empty, will bring up a new default service account.
     immutable: true
     ignore_read: true
+    deprecation_message: '`run_as_service_account` is deprecated and will be removed in a future major release.'

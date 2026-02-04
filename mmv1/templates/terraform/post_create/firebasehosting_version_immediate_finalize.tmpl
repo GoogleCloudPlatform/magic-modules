@@ -1,14 +1,7 @@
-	// Store the name as ID
-	d.SetId(res["name"].(string))
-
-	if err = d.Set("version_id", tpgresource.GetResourceNameFromSelfLink(res["name"].(string))); err != nil {
-		return fmt.Errorf("Error setting version_id: %s", err)
-	}
-
 	obj = make(map[string]interface{})
 	obj["status"] = "FINALIZED"
 
-	url, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}FirebaseHostingBasePath{{"}}"}}{{"{{"}}name{{"}}"}}")
+	url, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}FirebaseHostingBasePath{{"}}"}}sites/{{"{{"}}site_id{{"}}"}}/versions/{{"{{"}}version_id{{"}}"}}")
 	if err != nil {
 		return err
 	}

@@ -33,6 +33,7 @@ docs:
 id_format: '{{name}}'
 base_url: 'accessPolicies'
 self_link: 'accessPolicies/{{name}}'
+cai_asset_name_format: 'accessPolicies/{{name}}'
 update_verb: 'PATCH'
 update_mask: true
 import_format:
@@ -55,12 +56,9 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   allowed_iam_role: 'roles/accesscontextmanager.policyAdmin'
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'accessPolicies/{{name}}'
     - '{{name}}'
-custom_code:
-  post_create: 'templates/terraform/post_create/accesspolicy.tmpl'
 # Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
 examples:
@@ -92,6 +90,7 @@ parameters:
     description: |
       Folder or project on which this policy is applicable.
       Format: 'folders/{{folder_id}}' or 'projects/{{project_number}}'
+    immutable: true
     item_type:
       type: String
     max_size: 1

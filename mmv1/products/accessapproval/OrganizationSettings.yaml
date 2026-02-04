@@ -14,6 +14,8 @@
 ---
 name: 'OrganizationSettings'
 api_resource_type_kind: AccessApprovalSettings
+api_variant_patterns:
+  - 'organizations/{organization}/accessApprovalSettings'
 legacy_name: 'google_organization_access_approval_settings'
 description: |
   Access Approval enables you to require your explicit approval whenever Google support and engineering need to access your customer content.

@@ -9,18 +9,29 @@
 
 ### Failure rates
 
-- GA: {{.GaFailureRate}}
-- Beta: {{.BetaFailureRate}}
+{{ range $providerVersion, $failureRate := .FailureRates }}
 
+- {{ $providerVersion }}: {{ $failureRate }}
+
+{{ end }}
 
 ### Message(s)
 
-```
-{{.ErrorMessage}}
+{{ range $providerVersion, $errorMessageLink := .ErrorMessageLinks }}
 
-```
+{{ if $errorMessageLink }}
+- [{{ $providerVersion }} error message]({{ $errorMessageLink }})
+{{ end }}
+
+{{ end }}
 
 
 ### Test Debug Log
 
-- [link]({{.DebugLogLink}})
+{{ range $providerVersion, $debugLogLink := .DebugLogLinks }}
+
+{{ if $debugLogLink }}
+- [{{ $providerVersion }} debug log]({{ $debugLogLink }})
+{{ end }}
+
+{{ end }}

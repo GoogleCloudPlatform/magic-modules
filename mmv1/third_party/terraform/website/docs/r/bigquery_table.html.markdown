@@ -133,9 +133,10 @@ The following arguments are supported:
     ~>**NOTE:** Because this field expects a JSON string, any changes to the
     string will create a diff, even if the JSON itself hasn't changed.
     If the API returns a different value for the same schema, e.g. it
-    switched the order of values or replaced `STRUCT` field type with `RECORD`
-    field type, we currently cannot suppress the recurring diff this causes.
-    As a workaround, we recommend using the schema as returned by the API.
+    switched the order of values or replaced a field data type (`STRUCT` with
+    `RECORD`, `DECIMAL` with `NUMERIC`, etc.), we currently cannot suppress
+    the recurring diff this causes. As a workaround, we recommend using the
+    schema as returned by the API.
 
     ~>**NOTE:**  If you use `external_data_configuration`
     [documented below](#nested_external_data_configuration) and do **not** set
@@ -143,10 +144,16 @@ The following arguments are supported:
     with `external_data_configuration.schema`. Otherwise, schemas must be
     specified with this top-level field.
 
-* `schema_foreign_type_info` - (Optional, [Beta]
-(https://terraform.io/docs/providers/google/guides/provider_versions.html))
-  Specifies metadata of the foreign data type definition in field schema.
-  Structure is [documented below](#nested_schema_foreign_type_info).
+* `ignore_schema_changes` - (Optional)  A list of fields which would act non-authoritative for each column in schema.
+    **NOTE:** Right now only `dataPolicies` field is supported(others might be supported in the future). It means that any `dataPolicies` updated outside terraform will be ignored if this option is used.
+    If there is no policy in config for a column but there are in live state, the policy will persist.
+    If the policy in config is updated, it will override the policy in the live state. Other fields
+    like `description` for a column will keep behaving as they are(authoritatively).
+
+* `ignore_auto_generated_schema` - (Optional)  If true, Terraform will prevent columns added by the server(e.g. hive partitioned columns) in schema from showing diff.
+
+* `schema_foreign_type_info` - (Optional) Specifies metadata of the foreign data
+    type definition in field schema. Structure is [documented below](#nested_schema_foreign_type_info).
 
 * `time_partitioning` - (Optional) If specified, configures time-based
     partitioning for this table. Structure is [documented below](#nested_time_partitioning).
@@ -188,10 +195,8 @@ The following arguments are supported:
     expected to be the short name, for example "Production". See [Tag definitions](https://cloud.google.com/iam/docs/tags-access-control#definitions)
     for more details.
 
-* `external_catalog_table_options` - (Optional, [Beta]
-(https://terraform.io/docs/providers/google/guides/provider_versions.html))
-    Options defining open source compatible table.
-    Structure is [documented below](#nested_external_catalog_table_options).
+* `external_catalog_table_options` - (Optional) Options defining open source
+    compatible table. Structure is [documented below](#nested_external_catalog_table_options).
 
 <a name="nested_external_data_configuration"></a>The `external_data_configuration` block supports:
 
@@ -280,6 +285,20 @@ The following arguments are supported:
 
 * `object_metadata` - (Optional) Object Metadata is used to create Object Tables. Object Tables contain a listing of objects (with their metadata) found at the sourceUris. If `object_metadata` is set, `source_format` should be omitted.
 
+* `decimal_target_types` - (Optional) Defines the list of possible SQL data types to which the source decimal values are converted. This list and the precision and the scale parameters of the decimal field determine the target type. In the order of NUMERIC, BIGNUMERIC, and STRING, a type is picked if it is in the specified list and if it supports the precision and the scale. STRING supports all precision and scale values. If none of the listed types supports the precision and the scale, the type supporting the widest range in the specified list is picked, and if a value exceeds the supported range when reading the data, an error will be thrown.
+
+    Example: Suppose the value of this field is ["NUMERIC", "BIGNUMERIC"]. If (precision,scale) is:
+
+    (38,9) -> NUMERIC;
+    (39,9) -> BIGNUMERIC (NUMERIC cannot hold 30 integer digits);
+    (38,10) -> BIGNUMERIC (NUMERIC cannot hold 10 fractional digits);
+    (76,38) -> BIGNUMERIC;
+    (77,38) -> BIGNUMERIC (error if value exceeds supported range).
+
+    This field cannot contain duplicate types. The order of the types in this field is ignored. For example, ["BIGNUMERIC", "NUMERIC"] is the same as ["NUMERIC", "BIGNUMERIC"] and NUMERIC always takes precedence over BIGNUMERIC.
+
+    Defaults to ["NUMERIC", "STRING"] for ORC and ["NUMERIC"] for the other file formats.
+
 <a name="nested_csv_options"></a>The `csv_options` block supports:
 
 * `quote` - (Required) The value that is used to quote data sections in a
@@ -304,6 +323,13 @@ The following arguments are supported:
 
 * `skip_leading_rows` - (Optional) The number of rows at the top of a CSV
     file that BigQuery will skip when reading the data.
+
+* `source_column_match` - (Optional) Specifies how source columns are matched
+    to the table schema. Valid values are `POSITION` (columns matched by position,
+    assuming same ordering as the schema) or `NAME` (columns matched by name,
+    reads the header row and reorders columns to align with schema field names).
+    If not set, a default is chosen based on how the schema is provided: when
+    autodetect is used, columns are matched by name; otherwise, by position.
 
 <a name="nested_bigtable_options"></a>The `bigtable_options` block supports:
 
@@ -382,9 +408,8 @@ The following arguments are supported:
 
 <a name="nested_schema_foreign_type_info"></a>The `schema_foreign_type_info` block supports:
 
-* `type_system` - (Required, [Beta]
-(https://terraform.io/docs/providers/google/guides/provider_versions.html))
-  Specifies the system which defines the foreign data type.
+* `type_system` - (Required) Specifies the system which defines the foreign data
+    type.
 
 <a name="nested_time_partitioning"></a>The `time_partitioning` block supports:
 
@@ -424,7 +449,12 @@ The following arguments are supported:
 * `query` - (Required) A query that BigQuery executes when the view is referenced.
 
 * `use_legacy_sql` - (Optional) Specifies whether to use BigQuery's legacy SQL for this view.
-    The default value is true. If set to false, the view will use BigQuery's standard SQL.
+    If set to `false`, the view will use BigQuery's standard SQL. If set to
+    `true`, the view will use BigQuery's legacy SQL. If unset, the API will
+    interpret it as a `true` and assumes the legacy SQL dialect for its query
+    according to the [API documentation](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#ViewDefinition).
+    -> **Note**: Starting in provider version `7.0.0`, no default value is
+    provided for this field unless explicitly set in the configuration.
 
 <a name="nested_materialized_view"></a>The `materialized_view` block supports:
 
@@ -519,64 +549,45 @@ The following arguments are supported:
 
 <a name="nested_external_catalog_table_options"></a>The `external_catalog_table_options` block supports:
 
-* `parameters` - (Optional, [Beta]
-(https://terraform.io/docs/providers/google/guides/provider_versions.html))
-  A map of key value pairs defining the parameters and properties of the open
-  source table. Corresponds with hive meta store table parameters. Maximum size
-  of 4Mib.
-* `storage_descriptor` - (Optional, [Beta]
-(https://terraform.io/docs/providers/google/guides/provider_versions.html))
-  A storage descriptor containing information about the physical storage of this
-  table.
-  Structure is [documented below](#nested_storage_descriptor).
-* `connection_id` - (Optional, [Beta]
-(https://terraform.io/docs/providers/google/guides/provider_versions.html))
-  The connection specifying the credentials to be used to read external storage,
-  such as Azure Blob, Cloud Storage, or S3. The connection is needed to read the
-  open source table from BigQuery Engine. The connection_id can have the form
-  `<project_id>.<location_id>.<connection_id>` or `projects/<project_id>/locations/<location_id>/connections/<connection_id>`.
+* `parameters` - (Optional) A map of key value pairs defining the parameters and
+  properties of the open source table. Corresponds with hive meta store table
+  parameters. Maximum size of 4Mib.
+* `storage_descriptor` - (Optional) A storage descriptor containing information
+  about the physical storage of this table. Structure is [documented below](#nested_storage_descriptor).
+* `connection_id` - (Optional) The connection specifying the credentials to be
+  used to read external storage, such as Azure Blob, Cloud Storage, or S3. The
+  connection is needed to read the open source table from BigQuery Engine. The
+  connection_id can have the form `<project_id>.<location_id>.<connection_id>`
+  or `projects/<project_id>/locations/<location_id>/connections/<connection_id>`.
 
 <a name="nested_storage_descriptor"></a>The `storage_descriptor` block supports:
 
-* `location_uri` - (Optional, [Beta]
-(https://terraform.io/docs/providers/google/guides/provider_versions.html))
-  The physical location of the table (e.g. 'gs://spark-dataproc-data/pangea-data/case_sensitive/' or 'gs://spark-dataproc-data/pangea-data/*').
-  The maximum length is 2056 bytes.
+* `location_uri` - (Optional) The physical location of the table (e.g.
+  'gs://spark-dataproc-data/pangea-data/case_sensitive/' or
+  'gs://spark-dataproc-data/pangea-data/*'). The maximum length is 2056 bytes.
 
-* `input_format` - (Optional, [Beta]
-(https://terraform.io/docs/providers/google/guides/provider_versions.html))
-  Specifies the fully qualified class name of the InputFormat (e.g. "org.apache.hadoop.hive.ql.io.orc.OrcInputFormat").
-  The maximum length is 128 characters.
+* `input_format` - (Optional) Specifies the fully qualified class name of the
+  InputFormat (e.g. "org.apache.hadoop.hive.ql.io.orc.OrcInputFormat"). The
+  maximum length is 128 characters.
 
-* `output_format` - (Optional, [Beta]
-(https://terraform.io/docs/providers/google/guides/provider_versions.html))
-  Specifies the fully qualified class name of the OutputFormat (e.g. "org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat").
-  The maximum length is 128 characters.
+* `output_format` - (Optional) Specifies the fully qualified class name of the
+  OutputFormat (e.g. "org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat"). The
+  maximum length is 128 characters.
 
-* `serde_info` - (Optional, [Beta]
-(https://terraform.io/docs/providers/google/guides/provider_versions.html))
-  Serializer and deserializer information.
-  Structure is [documented below](#nested_serde_info).
+* `serde_info` - (Optional) Serializer and deserializer information. Structure
+  is [documented below](#nested_serde_info).
 
 <a name="nested_serde_info"></a>The `serde_info` block supports:
 
-* `name` - (Optional, [Beta]
-(https://terraform.io/docs/providers/google/guides/provider_versions.html))
-  Name of the SerDe.
-  The maximum length is 256 characters.
+* `name` - (Optional) Name of the SerDe. The maximum length is 256 characters.
 
-* `serialization_library` - (Required, [Beta]
-(https://terraform.io/docs/providers/google/guides/provider_versions.html))
-  Specifies a fully-qualified class name of the serialization library that is
-  responsible for the translation of data between table representation and the
-  underlying low-level input and output format structures.
-  The maximum length is 256 characters.
+* `serialization_library` - (Required) Specifies a fully-qualified class name of
+  the serialization library that is responsible for the translation of data
+  between table representation and the underlying low-level input and output
+  format structures. The maximum length is 256 characters.
 
-* `parameters` - (Optional, [Beta]
-(https://terraform.io/docs/providers/google/guides/provider_versions.html))
-  Key-value pairs that define the initialization parameters for the
-  serialization library.
-  Maximum size 10 Kib.
+* `parameters` - (Optional) Key-value pairs that define the initialization
+  parameters for the serialization library. Maximum size 10 Kib.
 
 ## Attributes Reference
 

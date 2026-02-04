@@ -1,4 +1,3 @@
-{{- if ne $.TargetVersionName "ga" -}}
 natType := d.Get("type").(string)
 if natType == "PRIVATE" {
 	rules := d.Get("rules").(*schema.Set)
@@ -25,4 +24,3 @@ if natType == "PRIVATE" {
 		}
 	}
 }
-{{- end }}

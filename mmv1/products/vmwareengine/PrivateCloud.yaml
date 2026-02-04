@@ -26,7 +26,7 @@ delete_url: 'projects/{{project}}/locations/{{location}}/privateClouds/{{name}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/privateClouds/{{name}}'
 timeouts:
-  insert_minutes: 240
+  insert_minutes: 360
   update_minutes: 190
   delete_minutes: 150
 autogen_async: true
@@ -36,7 +36,7 @@ async:
   operation:
     base_url: '{{op_id}}'
     timeouts:
-      insert_minutes: 240
+      insert_minutes: 360
       update_minutes: 190
       delete_minutes: 150
   result:
@@ -47,11 +47,17 @@ custom_code:
   decoder: 'templates/terraform/decoders/private_cloud.go.tmpl'
   pre_create: 'templates/terraform/pre_create/vmwareengine_private_cloud.go.tmpl'
   post_create: 'templates/terraform/post_create/private_cloud.go.tmpl'
-  post_delete: 'templates/terraform/post_delete/private_cloud.go.tmpl'
   post_update: 'templates/terraform/post_update/private_cloud.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/vmwareengine_private_cloud.go.tmpl'
+  post_delete: 'templates/terraform/post_delete/private_cloud.go.tmpl'
+sweeper:
+  query_string: "?delay_hours=0"
+  url_substitutions:
+    - region: "us-central1-a"
+    - region: "southamerica-west1-a"
+    - region: "me-west1-a"
+    - region: "me-west1-b"
 error_abort_predicates:
-
   - 'transport_tpg.Is429QuotaError'
 examples:
   - name: 'vmware_engine_private_cloud_basic'
@@ -103,6 +109,34 @@ properties:
     type: String
     description: |
       User-provided description for this private cloud.
+  - name: 'createTime'
+    type: Time
+    description: |
+      Creation time of this resource.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Last update time of this resource.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'deleteTime'
+    type: Time
+    description: |
+      Time when the resource was scheduled for deletion.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'expireTime'
+    type: Time
+    description: |
+      Time when the resource will be irreversibly deleted.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
   - name: 'uid'
     type: String
     description: |
@@ -181,10 +215,7 @@ properties:
           The map of cluster node types in this cluster,
           where the key is canonical identifier of the node type (corresponds to the NodeType).
         key_name: 'node_type_id'
-        key_description: |
-          Canonical identifier of the NodeType.
         value_type:
-          name: nodeTypeConfig
           type: NestedObject
           properties:
             - name: 'nodeCount'
@@ -237,9 +268,7 @@ properties:
               Currently the map must contain only one element
               that describes the autoscaling policy for compute nodes.
             key_name: 'autoscale_policy_id'
-            key_description: 'The key is the identifier of the policy.'
             value_type:
-              name: AutoscalingPolicy
               type: NestedObject
               properties:
                 - name: 'nodeTypeId'

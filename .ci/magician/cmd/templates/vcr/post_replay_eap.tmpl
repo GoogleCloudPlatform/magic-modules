@@ -1,0 +1,46 @@
+{{- if or (gt (len .NotRunBetaTests) 0) (gt (len .NotRunGATests) 0)}}
+#### Non-exercised tests
+
+{{if gt (len .NotRunBetaTests) 0 -}}
+{{color "red" "Tests were added that are skipped in VCR:"}}
+{{range .NotRunBetaTests}}{{. | printf "- %s\n"}}{{end}}
+{{end}}
+
+{{if gt (len .NotRunGATests) 0 -}}
+{{color "red" "Tests were added that are GA-only additions and require manual runs:"}}
+{{range .NotRunGATests}}{{. | printf "- %s\n"}}{{end}}
+{{end}}
+{{end}}
+#### Tests analytics
+Total tests: {{add (add (len .ReplayingResult.PassedTests) (len .ReplayingResult.SkippedTests)) (len .ReplayingResult.FailedTests) }}
+Passed tests: {{len .ReplayingResult.PassedTests}}
+Skipped tests: {{len .ReplayingResult.SkippedTests}}
+Affected tests: {{len .ReplayingResult.FailedTests}}
+
+Affected service packages:
+{{if .RunFullVCR}}
+All service packages are affected
+{{else if gt (len .AffectedServices) 0}}
+{{range .AffectedServices}}
+`{{.}}` {{/* remove trailing whitespace */ -}}
+{{end}}
+{{else}}
+None
+{{end}}
+{{ if gt (len .ReplayingResult.FailedTests) 0 -}}
+#### Action taken
+Found {{len .ReplayingResult.FailedTests}} affected test(s) by replaying old test recordings. Starting RECORDING based on the most recent commit. Affected tests:
+{{range .ReplayingResult.FailedTests}}
+`{{.}}` {{/* remove trailing whitespace */ -}}
+{{end}}
+
+[Get to know how VCR tests work](https://googlecloudplatform.github.io/magic-modules/develop/test/test/)
+{{ else -}}
+{{- if .ReplayingErr -}}
+{{color "red" "Errors occurred during REPLAYING mode. Please fix them to complete your PR."}}
+{{- else -}}
+{{color "green" "All tests passed!"}}
+{{- end}}
+
+View the [build log](https://storage.cloud.google.com/{{.LogBucket}}/{{.Version}}/refs/heads/{{.Head}}/artifacts/{{.BuildID}}/build-log/replaying_test.log)
+{{- end}}

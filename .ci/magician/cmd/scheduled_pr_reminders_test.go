@@ -6,7 +6,7 @@ import (
 
 	membership "magician/github"
 
-	"github.com/google/go-github/v61/github"
+	"github.com/google/go-github/v68/github"
 	"github.com/stretchr/testify/assert"
 )
 

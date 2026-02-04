@@ -495,7 +495,7 @@ The following arguments are supported:
   dependencies.
 
 * `maintenance_window` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  (Optional, [Beta](../guides/provider_versions.html.markdown))
   The configuration settings for Cloud Composer maintenance windows.
 
 * `master_authorized_networks_config` -
@@ -571,7 +571,7 @@ The following arguments are supported:
   Cannot be updated.
 
 * `max_pods_per_node` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html),
+  (Optional, [Beta](../guides/provider_versions.html.markdown),
   Cloud Composer 1 only)
   The maximum pods per node in the GKE cluster allocated during environment
   creation. Lowering this value reduces IP address consumption by the Cloud
@@ -1275,7 +1275,7 @@ The `worker` block supports:
 * `min_count` -
   (Optional)
   The minimum number of Airflow workers that the environment can run. The number of workers in the
-  environment does not go above this number, even if a lower number of workers can handle the load.
+  environment does not go below this number, even if a lower number of workers can handle the load.
 
 * `max_count` -
   (Optional)
@@ -1421,6 +1421,8 @@ The following arguments are supported:
   Compute Engine service account is used. Cannot be updated. If given,
   note that the service account must have `roles/composer.worker`
   for any GCP resources created under the Cloud Composer Environment.
+
+  This field is required for newly created environments.
 
 * `tags` -
   (Optional)
@@ -1621,7 +1623,7 @@ The `worker` block supports:
 * `min_count` -
   (Optional)
   The minimum number of Airflow workers that the environment can run. The number of workers in the
-  environment does not go above this number, even if a lower number of workers can handle the load.
+  environment does not go below this number, even if a lower number of workers can handle the load.
 
 * `max_count` -
   (Optional)

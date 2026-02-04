@@ -85,7 +85,7 @@ resource "google_compute_instance" "confidential_instance" {
 
   boot_disk {
     initialize_params {
-      image = "ubuntu-os-cloud/ubuntu-2004-lts"
+      image = "ubuntu-os-cloud/ubuntu-2204-lts"
       labels = {
         my_label = "value"
       }
@@ -241,16 +241,18 @@ is desired, you will need to modify your state file manually using
 
 * `advanced_machine_features` (Optional) - Configure Nested Virtualisation and Simultaneous Hyper Threading  on this VM. Structure is [documented below](#nested_advanced_machine_features)
 
-* `network_performance_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)
+* `network_performance_config` (Optional, [Beta](../guides/provider_versions.html.markdown)
     Configures network performance settings for the instance. Structure is
     [documented below](#nested_network_performance_config). **Note**: [`machine_type`](#machine_type) must be a [supported type](https://cloud.google.com/compute/docs/networking/configure-vm-with-high-bandwidth-configuration),
     the [`image`](#image) used must include the [`GVNIC`](https://cloud.google.com/compute/docs/networking/using-gvnic#create-instance-gvnic-image)
     in `guest-os-features`, and `network_interface.0.nic-type` must be `GVNIC`
     in order for this setting to take effect.
 
-* `partner_metadata` - (optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) key/value pair represents partner metadata assigned to instance where key represent a defined namespace and value is a json string represent the entries associted with the namespace.
+* `partner_metadata` - (optional) [Beta](../guides/provider_versions.html.markdown) key/value pair represents partner metadata assigned to instance where key represent a defined namespace and value is a json string represent the entries associted with the namespace.
 
 * `key_revocation_action_type` - (optional) Action to be taken when a customer's encryption key is revoked. Supports `STOP` and `NONE`, with `NONE` being the default.
+
+* `instance_encryption_key` - (optional) Configuration for data encryption on the instance with encryption keys. Structure is [documented below](#nested_instance_encryption_key`).
 
 ---
 
@@ -270,12 +272,18 @@ is desired, you will need to modify your state file manually using
 * `disk_encryption_key_raw` - (Optional) A 256-bit [customer-supplied encryption key]
     (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption),
     encoded in [RFC 4648 base64](https://tools.ietf.org/html/rfc4648#section-4)
-    to encrypt this disk. Only one of `kms_key_self_link` and `disk_encryption_key_raw`
+    to encrypt this disk. Only one of `kms_key_self_link`, `disk_encryption_key_rsa` and `disk_encryption_key_raw`
     may be set.
 
+* `disk_encryption_key_rsa` - (Optional) Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit [customer-supplied encryption key]
+    (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption) to encrypt this disk. Only one of `kms_key_self_link`, `disk_encryption_key_rsa` and `disk_encryption_key_raw`
+
 * `kms_key_self_link` - (Optional) The self_link of the encryption key that is
-    stored in Google Cloud KMS to encrypt this disk. Only one of `kms_key_self_link`
-    and `disk_encryption_key_raw` may be set.
+    stored in Google Cloud KMS to encrypt this disk. Only one of `kms_key_self_link`,
+    `disk_encryption_key_rsa` and `disk_encryption_key_raw`
+    may be set.
+
+* `disk_encryption_service_account` - (Optional) The service account being used for the encryption request for the given KMS key. If absent, the Compute Engine default service account is used.
 
 * `initialize_params` - (Optional) Parameters for a new disk that will be created
     alongside the new instance. Either `initialize_params` or `source` must be set.
@@ -284,6 +292,10 @@ is desired, you will need to modify your state file manually using
 * `source` - (Optional) The name or self_link of the existing disk (such as those managed by
     `google_compute_disk`) or disk image. To create an instance from a snapshot, first create a
     `google_compute_disk` from a snapshot and reference it here.
+
+* `force_attach` - (Optional) boolean field that determines whether to force attach the regional
+    disk even if it's currently attached to another instance. If you try to force attach a zonal
+    disk to an instance, you will receive an error. Setting this parameter cause VM recreation.
 
 <a name="nested_initialize_params"></a>The `initialize_params` block supports:
 
@@ -304,6 +316,12 @@ is desired, you will need to modify your state file manually using
 
 * `labels` - (Optional) A set of key/value label pairs assigned to the disk. This
     field is only applicable for persistent disks.
+
+* `source_image_encryption_key` - (Optional) Encryption key used to decrypt the given image. Structure is [documented below](#nested_source_image_encryption_key).
+
+* `snapshot` - (Optional) The snapshot from which to initialize this disk. To create a disk with a snapshot that you created, specify the snapshot name in the following format: `global/snapshots/my-backup`
+
+* `source_snapshot_encryption_key` - (Optional) Encryption key used to decrypt the given snapshot. Structure is [documented below](#nested_source_snapshot_ecryption_key).
 
 * `architecture` - (Optional) The architecture of the attached disk. Valid values are `ARM64` or `x86_64`.
 
@@ -356,11 +374,58 @@ is desired, you will need to modify your state file manually using
 * `disk_encryption_key_raw` - (Optional) A 256-bit [customer-supplied encryption key]
     (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption),
     encoded in [RFC 4648 base64](https://tools.ietf.org/html/rfc4648#section-4)
-    to encrypt this disk. Only one of `kms_key_self_link` and `disk_encryption_key_raw` may be set.
+    to encrypt this disk. Only one of `kms_key_self_link`, `disk_encryption_key_rsa` and `disk_encryption_key_raw`
+    may be set.
+
+* `disk_encryption_key_rsa` - (Optional) Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit [customer-supplied encryption key]
+    (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption) to encrypt this disk. Only one of `kms_key_self_link`, `disk_encryption_key_rsa` and `disk_encryption_key_raw`
+    may be set.
 
 * `kms_key_self_link` - (Optional) The self_link of the encryption key that is
-    stored in Google Cloud KMS to encrypt this disk. Only one of `kms_key_self_link`
-    and `disk_encryption_key_raw` may be set.
+    stored in Google Cloud KMS to encrypt this disk. Only one of `kms_key_self_link`, `disk_encryption_key_rsa` and `disk_encryption_key_raw`
+    may be set.
+
+* `disk_encryption_service_account` - (Optional) The service account being used for the encryption request for the given KMS key. If absent, the Compute Engine default service account is used.
+
+<a name="nested_source_image_encryption_key"></a>The `source_snapshot_encryption_key` block supports:
+
+* `raw_key` - (Optional)  A 256-bit [customer-supplied encryption key]
+    (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption),
+    encoded in [RFC 4648 base64](https://tools.ietf.org/html/rfc4648#section-4)
+    to decrypt the given image. Only one of `kms_key_self_link`, `rsa_encrypted_key` and `raw_key`
+    may be set.
+
+* `rsa_encrypted_key` - (Optional) Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit [customer-supplied encryption key]
+    (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption) to decrypt the given image. Only one of `kms_key_self_link`, `rsa_encrypted_key` and `raw_key`
+    may be set.
+
+* `kms_key_self_link` - (Optional) The self_link of the encryption key that is
+    stored in Google Cloud KMS to decrypt the given image. Only one of `kms_key_self_link`, `rsa_encrypted_key` and `raw_key`
+    may be set.
+
+* `kms_key_service_account` - (Optional) The service account being used for the encryption request for the given KMS key. If absent, the Compute Engine default service account is used.
+
+<a name="nested_source_snapshot_encryption_key"></a>The `source_snapshot_encryption_key` block supports:
+
+* `raw_key` - (Optional) A 256-bit [customer-supplied encryption key]
+    (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption),
+    encoded in [RFC 4648 base64](https://tools.ietf.org/html/rfc4648#section-4)
+    to decrypt the given snapshot. Only one of `kms_key_self_link`, `rsa_encrypted_key` and `raw_key`
+    may be set.
+
+* `rsa_encrypted_key` - (Optional) Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit [customer-supplied encryption key]
+    (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption) to decrypt the given snapshot. Only one of `kms_key_self_link`, `rsa_encrypted_key` and `raw_key`
+    may be set.
+
+* `kms_key_self_link` - (Optional) The self_link of the encryption key that is
+    stored in Google Cloud KMS to decrypt the given image. Only one of `kms_key_self_link`, `rsa_encrypted_key` and `raw_key`
+    may be set.
+
+* `kms_key_service_account` - (Optional) The service account being used for the encryption request for the given KMS key. If absent, the Compute Engine default service account is used.
+
+* `force_attach` - (Optional) boolean field that determines whether to force attach the regional
+    disk even if it's currently attached to another instance. If you try to force attach a zonal
+    disk to an instance, you will receive an error. Setting this parameter cause VM recreation.
 
 <a name="nested_network_performance_config"></a>The `network_performance_config` block supports:
 
@@ -390,6 +455,8 @@ is desired, you will need to modify your state file manually using
 * `network_ip` - (Optional) The private IP address to assign to the instance. If
     empty, the address will be automatically assigned.
 
+* `mac_address` - (Optional) [Beta] MAC address assigned to this network interface
+
 * `access_config` - (Optional) Access configurations, i.e. IPs via which this
     instance can be accessed via the Internet. Omit to ensure that the instance
     is not accessible from the Internet. If omitted, ssh provisioners will not
@@ -405,6 +472,8 @@ is desired, you will need to modify your state file manually using
 
 * `network_attachment` - (Optional) The URL of the network attachment that this interface should connect to in the following format: `projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}`.
 
+* `igmp_query` - (Optional) Indicates whether igmp query is enabled on the network interface or not. If enabled, also indicates the version of IGMP supported.
+
 * `stack_type` - (Optional) The stack type for this network interface to identify whether the IPv6 feature is enabled or not. Values are IPV4_IPV6, IPV6_ONLY or IPV4_ONLY. If not specified, IPV4_ONLY will be used.
 
 * `ipv6_access_config` - (Optional) An array of IPv6 access configurations for this interface.
@@ -413,7 +482,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `queue_count` - (Optional) The networking queue count that's specified by users for the network interface. Both Rx and Tx queues will be set to this number. It will be empty if not specified.
 
-* `security_policy` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) A full or partial URL to a security policy to add to this instance. If this field is set to an empty string it will remove the associated security policy.
+* `security_policy` - (Optional) [Beta](../guides/provider_versions.html.markdown) A full or partial URL to a security policy to add to this instance. If this field is set to an empty string it will remove the associated security policy.
 
 <a name="nested_access_config"></a>The `access_config` block supports:
 
@@ -468,6 +537,13 @@ specified, then this instance will have no external IPv6 Internet access. Struct
     `cloud-platform` scope. See a complete list of scopes [here](https://cloud.google.com/sdk/gcloud/reference/alpha/compute/instances/set-scopes#--scopes).
     **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
 
+<a name="nested_instance_encryption_key"></a>The `instance_encryption_key` block supports:
+
+* `kms_key_self_link` - (Optional) The self_link of the encryption key that is
+    stored in Google Cloud KMS to encrypt the data on this instance.
+
+* `kms_key_service_account` - (Optional) The service account being used for the encryption request for the given KMS key. If absent, the Compute Engine default service account is used.
+
 <a name="nested_scheduling"></a>The `scheduling` block supports:
 
 * `preemptible` - (Optional) Specifies if the instance is preemptible.
@@ -506,13 +582,15 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `on_instance_stop_action` - (Optional) Specifies the action to be performed when the instance is terminated using `max_run_duration` and `STOP` `instance_termination_action`. Only support `true` `discard_local_ssd` at this point. Structure is [documented below](#nested_on_instance_stop_action).
 
-* `host_error_timeout_seconds` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the time in seconds for host error detection, the value must be within the range of [90, 330] with the increment of 30, if unset, the default behavior of host error recovery will be used.
+* `host_error_timeout_seconds` - (Optional) [Beta](../guides/provider_versions.html.markdown) Specifies the time in seconds for host error detection, the value must be within the range of [90, 330] with the increment of 30, if unset, the default behavior of host error recovery will be used.
 
-* `maintenance_interval` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the frequency of planned maintenance events. The accepted values are: `PERIODIC`.
+* `maintenance_interval` - (Optional) [Beta](../guides/provider_versions.html.markdown) Specifies the frequency of planned maintenance events. The accepted values are: `PERIODIC`.
 
-* `local_ssd_recovery_timeout` -  (Optional) (https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the maximum amount of time a Local Ssd Vm should wait while recovery of the Local Ssd state is attempted. Its value should be in between 0 and 168 hours with hour granularity and the default value being 1 hour. Structure is [documented below](#nested_local_ssd_recovery_timeout).
+* `local_ssd_recovery_timeout` -  (Optional) (../guides/provider_versions.html.markdown) Specifies the maximum amount of time a Local Ssd Vm should wait while recovery of the Local Ssd state is attempted. Its value should be in between 0 and 168 hours with hour granularity and the default value being 1 hour. Structure is [documented below](#nested_local_ssd_recovery_timeout).
 
-* `graceful_shutdown` -  (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Settings for the instance to perform a graceful shutdown. Structure is [documented below](#nested_graceful_shutdown).
+* `graceful_shutdown` -  (Optional) [Beta](../guides/provider_versions.html.markdown) Settings for the instance to perform a graceful shutdown. Structure is [documented below](#nested_graceful_shutdown).
+
+* `skip_guest_os_shutdown` - (Optional) [Beta](../guides/provider_versions.html.markdown) Boolean parameter. Default is false and there will be 120 seconds between GCE ACPI G2 Soft Off and ACPI G3 Mechanical Off for Standard VMs and 30 seconds for Spot VMs.
 
 <a name="nested_graceful_shutdown"></a>The `graceful_shutdown` block supports:
 
@@ -654,6 +732,14 @@ This field is always inherited from its subnetwork.
     (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption) that protects this resource.
 
 * `boot_disk.disk_encryption_key_sha256` - The [RFC 4648 base64](https://tools.ietf.org/html/rfc4648#section-4)
+    encoded SHA-256 hash of the [customer-supplied encryption key]
+    (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption) that protects this resource.
+
+* `boot_disk.initialize_params.source_image_encryption_key.sha256` - The [RFC 4648 base64](https://tools.ietf.org/html/rfc4648#section-4)
+    encoded SHA-256 hash of the [customer-supplied encryption key]
+    (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption) that protects this resource.
+
+* `boot_disk.initialize_params.source_snapshot_encryption_key.sha256` - The [RFC 4648 base64](https://tools.ietf.org/html/rfc4648#section-4)
     encoded SHA-256 hash of the [customer-supplied encryption key]
     (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption) that protects this resource.
 

@@ -38,11 +38,14 @@ async:
 collection_url_key: 'items'
 custom_code:
   constants: 'templates/terraform/constants/compute_resource_policy.go.tmpl'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 sweeper:
   url_substitutions:
-    - region: "us-east4"
     - region: "us-central1"
     - region: "europe-west1"
+    - region: "us-east4"
+    - region: "europe-west9"
 examples:
   - name: 'resource_policy_basic'
     primary_resource_id: 'foo'
@@ -80,20 +83,21 @@ examples:
       name: 'gce-policy'
   - name: 'resource_policy_workload_policy'
     primary_resource_id: 'bar'
-    min_version: 'beta'
     vars:
       name: 'gce-policy'
   - name: 'resource_policy_workload_policy_accelerator_topology'
     primary_resource_id: 'bar'
-    min_version: 'beta'
     vars:
       name: 'gce-policy'
   - name: 'resource_policy_workload_policy_max_topology_distance'
     primary_resource_id: 'bar'
-    min_version: 'beta'
     vars:
       name: 'gce-policy'
   - name: 'resource_policy_placement_policy_gpu_topology'
+    primary_resource_id: 'baz'
+    vars:
+      name: 'gce-policy'
+  - name: 'resource_policy_placement_policy_tpu_topology'
     primary_resource_id: 'baz'
     min_version: 'beta'
     vars:
@@ -330,6 +334,11 @@ properties:
         conflicts:
           - group_placement_policy.0.max_distance
         immutable: true
+      - name: 'tpuTopology'
+        type: String
+        description: |
+          Specifies the shape of the TPU slice.
+        immutable: true
         min_version: 'beta'
   - name: 'instanceSchedulePolicy'
     type: NestedObject
@@ -402,7 +411,6 @@ properties:
     type: NestedObject
     description: |
       Represents the workload policy.
-    min_version: 'beta'
     properties:
       - name: 'type'
         type: Enum

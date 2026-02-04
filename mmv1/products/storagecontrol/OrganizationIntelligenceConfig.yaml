@@ -14,6 +14,9 @@
 ---
 # API resource name
 name: 'OrganizationIntelligenceConfig'
+api_resource_type_kind: 'IntelligenceConfig'
+api_variant_patterns:
+  - "organizations/{org}/locations/{location}/intelligenceConfig"
 kind: 'storagecontrol#intelligenceconfig'
 # Resource description for the provider documentation.
 description: |
@@ -24,14 +27,15 @@ description: |
 docs:
   warning: |
     Storage Intelligence is a singleton resource which cannot be created or deleted. A single instance of Storage Intelligence exist for each GCP Organization. Terraform does not create or destroy this resource.
-    Terraform resource creation for this resource is simply an update operation on existing resource with specified properties. Terraform deletion won't have any effect on this resource rather it will only remove it from the state file.
+    Terraform resource creation for this resource is simply an update operation on existing resource with specified properties, absence of any optional field in the create operation will result in clearance of that field. Terraform deletion won't have any effect on this resource rather it will only remove it from the state file.
 
 # URL for the resource's standard Get method. https://google.aip.dev/131
 self_link: 'organizations/{{name}}/locations/global/intelligenceConfig'
 
 custom_code:
-  custom_create: templates/terraform/custom_create/storage_control_organization_intelligence.go.tmpl
+  pre_create: templates/terraform/pre_create/storage_control_intelligence_config.go.tmpl
 
+create_verb: 'PATCH'
 # The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.
 update_verb: 'PATCH'
 # If true, the resource sets an `updateMask` query parameter listing modified
@@ -46,6 +50,10 @@ import_format:
 # If true, code for handling long-running operations is generated along with
 # the resource. If false, that code is not generated.
 autogen_async: false
+
+datasource_experimental:
+  generate: true
+  exclude_test: true
 
 examples:
   - name: storage_control_organization_intelligence_config_basic
@@ -184,3 +192,14 @@ properties:
         output: true
         description: |
           The `StorageIntelligence` edition that is applicable for the resource.
+  - name: 'trialConfig'
+    output: true
+    description: |
+      The trial configuration of the Storage Intelligence resource.
+    type: NestedObject
+    properties:
+      - name: expireTime
+        type: String
+        output: true
+        description: |
+          The time at which the trial expires.

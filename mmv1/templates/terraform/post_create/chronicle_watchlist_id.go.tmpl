@@ -1,7 +1,0 @@
-if tpgresource.IsEmptyValue(reflect.ValueOf(d.Get("watchlist_id"))) {
-	// watchlist id is set by API when unset and required to GET the connection
-	// it is set by reading the "name" field rather than a field in the response
-	if err := d.Set("watchlist_id", flattenChronicleWatchlistWatchlistId("", d, config)); err != nil {
-		return fmt.Errorf("Error reading Watchlist ID: %s", err)
-	}
-}

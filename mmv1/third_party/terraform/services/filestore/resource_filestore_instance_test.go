@@ -3,7 +3,9 @@ package filestore_test
 import (
 	"context"
 	"fmt"
+	"net/netip"
 	"reflect"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -185,7 +187,7 @@ resource "google_filestore_instance" "instance" {
   networks {
     network           = "default"
     modes             = ["MODE_IPV4"]
-    reserved_ip_range = "172.19.31.8/29"
+    reserved_ip_range = "172.30.250.0/29"
   }
 }
 `, name)
@@ -323,13 +325,8 @@ func TestAccFilestoreInstance_performanceConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"zone"},
 			},
 			{
-				Config: testAccFilestoreInstance_defaultConfig(name, location, tier),
-			},
-			{
-				ResourceName:            "google_filestore_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone"},
+				Config:      testAccFilestoreInstance_defaultConfig(name, location, tier),
+				ExpectError: regexp.MustCompile("custom performance cannot be cleared"),
 			},
 		},
 	})
@@ -412,10 +409,14 @@ resource "google_filestore_instance" "instance" {
 
 func TestAccFilestoreInstance_tags(t *testing.T) {
 	t.Parallel()
-	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
-	org := envvar.GetTestOrgFromEnv(t)
-	tagKey := acctest.BootstrapSharedTestTagKey(t, "filestore-instances-tagkey")
-	tagValue := acctest.BootstrapSharedTestTagValue(t, "filestore-instances-tagvalue", tagKey)
+
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "filestore-instances-tagkey", nil)
+	context := map[string]interface{}{
+		"org":           envvar.GetTestOrgFromEnv(t),
+		"tagKey":        tagKey,
+		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "filestore-instances-tagvalue", tagKey),
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -423,7 +424,7 @@ func TestAccFilestoreInstance_tags(t *testing.T) {
 		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFileInstanceTags(name, map[string]string{org + "/" + tagKey: tagValue}),
+				Config: testAccFileInstanceTags(context),
 			},
 			{
 				ResourceName:            "google_filestore_instance.instance",
@@ -435,10 +436,10 @@ func TestAccFilestoreInstance_tags(t *testing.T) {
 	})
 }
 
-func testAccFileInstanceTags(name string, tags map[string]string) string {
-	r := fmt.Sprintf(`
+func testAccFileInstanceTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 resource "google_filestore_instance" "instance" {
-  name = "tf-test-instance-%s"
+  name = "tf-test-instance-%{random_suffix}"
   zone = "us-central1-b"
   tier = "BASIC_HDD"
   file_shares {
@@ -450,15 +451,11 @@ resource "google_filestore_instance" "instance" {
     modes             = ["MODE_IPV4"]
     reserved_ip_range = "172.19.31.8/29"
   }
-tags = {`, name)
-
-	l := ""
-	for key, value := range tags {
-		l += fmt.Sprintf("%q = %q\n", key, value)
-	}
-
-	l += fmt.Sprintf("}\n}")
-	return r + l
+  tags = {
+    "%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}
+`, context)
 }
 
 func TestAccFilestoreInstance_replication(t *testing.T) {
@@ -469,6 +466,7 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 		"location_1":    "us-east1",
 		"location_2":    "us-west1",
 		"tier":          "ENTERPRISE",
+		"project":       envvar.GetTestProjectFromEnv(),
 	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -477,9 +475,21 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFilestoreInstance_replication(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_filestore_instance.replica_instance",
+						"effective_replication.0.replicas.0.peer_instance",
+						"projects/"+context["project"].(string)+"/locations/us-east1/instances/tf-test-source-instance-"+context["random_suffix"].(string),
+					),
+					resource.TestCheckResourceAttr(
+						"google_filestore_instance.replica_instance",
+						"effective_replication.0.role",
+						"STANDBY",
+					),
+				),
 			},
 			{
-				ResourceName:            "google_filestore_instance.replica-instance",
+				ResourceName:            "google_filestore_instance.replica_instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"zone", "initial_replication"},
@@ -490,11 +500,11 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 
 func testAccFilestoreInstance_replication(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_filestore_instance" "instance" {
-  name             = "tf-test-instance-%{random_suffix}"
+resource "google_filestore_instance" "source_instance" {
+  name             = "tf-test-source-instance-%{random_suffix}"
   location         = "%{location_1}"
   tier             = "%{tier}"
-  description      = "An instance created during testing."
+  description      = "An source instance created during testing."
 
   file_shares {
     capacity_gb    = 1024
@@ -507,8 +517,8 @@ resource "google_filestore_instance" "instance" {
   }
 }
 
-resource "google_filestore_instance" "replica-instance" {
-  name          	= "tf-test-instance-%{random_suffix}"
+resource "google_filestore_instance" "replica_instance" {
+  name          	= "tf-test-replica-instance-%{random_suffix}"
   location      	= "%{location_2}"
   tier          	= "%{tier}"
   description   	= "An replica instance created during testing."
@@ -525,7 +535,371 @@ resource "google_filestore_instance" "replica-instance" {
 
   initial_replication {
     replicas {
-      peer_instance = google_filestore_instance.instance.id
+      peer_instance = google_filestore_instance.source_instance.id
+    }
+  }
+}
+`, context)
+}
+
+func TestAccFilestoreInstance_directoryServices(t *testing.T) {
+	t.Parallel()
+
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	location := "us-central1"
+	tier := "REGIONAL"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFilestoreInstance_ldap(name, location, tier, "example.com"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_filestore_instance.instance", "directory_services.0.ldap.0.domain", "example.com"),
+					resource.TestCheckResourceAttr("google_filestore_instance.instance", "directory_services.0.ldap.0.servers.0", "ldap.example.com"),
+					resource.TestCheckResourceAttr("google_filestore_instance.instance", "directory_services.0.ldap.0.users_ou", "users"),
+					resource.TestCheckResourceAttr("google_filestore_instance.instance", "directory_services.0.ldap.0.groups_ou", "groups"),
+				),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone"},
+			},
+			{
+				Config: testAccFilestoreInstance_nfs_v4(name, location, tier),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_filestore_instance.instance", "directory_services.0.ldap.0.domain"),
+				),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone"},
+			},
+			{
+				Config: testAccFilestoreInstance_ldap(name, location, tier, "example.com"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_filestore_instance.instance", "directory_services.0.ldap.0.domain", "example.com"),
+					resource.TestCheckResourceAttr("google_filestore_instance.instance", "directory_services.0.ldap.0.servers.0", "ldap.example.com"),
+					resource.TestCheckResourceAttr("google_filestore_instance.instance", "directory_services.0.ldap.0.users_ou", "users"),
+					resource.TestCheckResourceAttr("google_filestore_instance.instance", "directory_services.0.ldap.0.groups_ou", "groups"),
+				),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone"},
+			},
+			{
+				Config:      testAccFilestoreInstance_ldap(name, location, tier, "other.com"),
+				ExpectError: regexp.MustCompile("cannot update existing directory services configuration"),
+			},
+		},
+	})
+}
+
+func testAccFilestoreInstance_nfs_v4(name, location, tier string) string {
+	return fmt.Sprintf(`
+resource "google_filestore_instance" "instance" {
+  name        = "%s"
+  location    = "%s"
+  tier        = "%s"
+  description = "An instance created during testing."
+  protocol    = "NFS_V4_1"
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share"
+  }
+
+  networks {
+    network = "default"
+		modes   = ["MODE_IPV4"]
+  }
+}
+`, name, location, tier)
+}
+
+func testAccFilestoreInstance_ldap(name, location, tier, domain string) string {
+	return fmt.Sprintf(`
+resource "google_filestore_instance" "instance" {
+  name        = "%s"
+  location    = "%s"
+  tier        = "%s"
+  description = "An instance created during testing."
+  protocol    = "NFS_V4_1"
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share"
+  }
+
+  networks {
+    network = "default"
+		modes   = ["MODE_IPV4"]
+  }
+
+  directory_services {
+    ldap {
+      domain = "%s"
+      servers = ["ldap.example.com"]
+      users_ou = "users"
+      groups_ou = "groups"
+    }
+  }
+}
+`, name, location, tier, domain)
+}
+
+func TestAccFilestoreInstance_psc(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"name":     fmt.Sprintf("tf-test-%d", acctest.RandInt(t)),
+		"location": "us-central1",
+		"tier":     "REGIONAL",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFilestoreInstance_psc(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_filestore_instance.instance", "networks.0.connect_mode", "PRIVATE_SERVICE_CONNECT"),
+				),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone"},
+			},
+		},
+	})
+}
+
+func testAccFilestoreInstance_psc(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_client_config" "current" {}
+
+resource "google_compute_network" "psc_network" {
+  name                    = "%{name}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "psc_subnet" {
+  name          = "%{name}"
+  ip_cidr_range = "10.2.0.0/16"
+  region        = "%{location}"
+  network       = google_compute_network.psc_network.id
+}
+
+resource "google_network_connectivity_service_connection_policy" "default" {
+  name          = "%{name}"
+  location      = "%{location}"
+  service_class = "google-cloud-filestore"
+  network       = google_compute_network.psc_network.id
+  psc_config {
+    subnetworks = [google_compute_subnetwork.psc_subnet.id]
+  }
+}
+
+resource "google_filestore_instance" "instance" {
+  depends_on = [
+    google_network_connectivity_service_connection_policy.default
+  ]
+  name        = "%{name}"
+  location    = "%{location}"
+  tier        = "%{tier}"
+  description = "An instance created during testing."
+  protocol    = "NFS_V4_1"
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share"
+
+    nfs_export_options {
+      ip_ranges = ["70.0.0.1/24"]
+      network   = google_compute_network.psc_network.name
+    }
+  }
+
+  networks {
+    network      = google_compute_network.psc_network.name
+    modes        = ["MODE_IPV4"]
+    connect_mode = "PRIVATE_SERVICE_CONNECT"
+    psc_config {
+      endpoint_project = data.google_client_config.current.project
+    }
+  }
+}
+`, context)
+}
+
+func TestAccFilestoreInstance_nfsExportOptionsNetwork_update(t *testing.T) {
+	t.Parallel()
+
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	location := "us-central1-a"
+	tier := "ZONAL"
+
+	// Currently, we can only alternate between an empty network and the instance network of non-PSC instances.
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFilestoreInstance_nfsExportOptionsNetwork_update(name, location, tier, ""),
+				Check:  resource.TestCheckResourceAttr("google_filestore_instance.instance", "file_shares.0.nfs_export_options.0.network", ""),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone"},
+			},
+			{
+				Config: testAccFilestoreInstance_nfsExportOptionsNetwork_update(name, location, tier, "default"),
+				Check:  resource.TestCheckResourceAttr("google_filestore_instance.instance", "file_shares.0.nfs_export_options.0.network", "default"),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone"},
+			},
+		},
+	})
+}
+
+func testAccFilestoreInstance_nfsExportOptionsNetwork_update(name, location, tier, network string) string {
+	return fmt.Sprintf(`
+resource "google_filestore_instance" "instance" {
+  name        = "%s"
+  zone        = "%s"
+  tier        = "%s"
+  description = "An instance created during testing."
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share"
+
+	nfs_export_options {
+      ip_ranges = ["70.0.0.1/24"]
+      network   = "%s"
+    }
+  }
+
+  networks {
+    network = "default"
+	modes   = ["MODE_IPV4"]
+  }
+}
+`, name, location, tier, network)
+}
+
+func TestAccFilestoreInstance_psc_ipv6(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"name":     fmt.Sprintf("tf-test-%d", acctest.RandInt(t)),
+		"location": "us-central1",
+		"tier":     "REGIONAL",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFilestoreInstance_psc_ipv6(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_filestore_instance.instance", "networks.0.connect_mode", "PRIVATE_SERVICE_CONNECT"),
+					resource.TestCheckResourceAttr("google_filestore_instance.instance", "networks.0.modes.0", "MODE_IPV6"),
+					resource.TestCheckResourceAttrWith("google_filestore_instance.instance", "networks.0.ip_addresses.0", func(value string) error {
+						if value == "" {
+							return fmt.Errorf("should not be empty")
+						}
+
+						ip, err := netip.ParseAddr(value)
+						if err != nil || !ip.Is6() {
+							return fmt.Errorf("should contain a valid IPv6 address")
+						}
+
+						return nil
+					}),
+				),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone"},
+			},
+		},
+	})
+}
+
+func testAccFilestoreInstance_psc_ipv6(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_client_config" "current" {}
+
+resource "google_compute_network" "psc_network" {
+  name                     = "%{name}"
+  auto_create_subnetworks  = false
+  enable_ula_internal_ipv6 = true
+}
+
+resource "google_compute_subnetwork" "psc_subnet" {
+  name             = "%{name}"
+  ip_cidr_range    = "10.2.0.0/16"
+  region           = "%{location}"
+  stack_type       = "IPV4_IPV6"
+  ipv6_access_type = "INTERNAL"
+  network          = google_compute_network.psc_network.id
+}
+
+resource "google_network_connectivity_service_connection_policy" "default" {
+  name          = "%{name}"
+  location      = "%{location}"
+  service_class = "google-cloud-filestore"
+  network       = google_compute_network.psc_network.id
+  psc_config {
+    subnetworks = [google_compute_subnetwork.psc_subnet.id]
+  }
+}
+
+resource "google_filestore_instance" "instance" {
+  depends_on = [
+    google_network_connectivity_service_connection_policy.default
+  ]
+  name        = "%{name}"
+  location    = "%{location}"
+  tier        = "%{tier}"
+  description = "An instance created during testing."
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share"
+  }
+
+  networks {
+    network      = google_compute_network.psc_network.name
+    modes        = ["MODE_IPV6"]
+    connect_mode = "PRIVATE_SERVICE_CONNECT"
+    psc_config {
+      endpoint_project = data.google_client_config.current.project
     }
   }
 }

@@ -53,6 +53,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
+    external_providers: ["time"]
 parameters:
   - name: 'envId'
     type: String
@@ -141,6 +142,10 @@ properties:
             type: Boolean
             description: |
               Indicates whether the cert should be matched against as a wildcard cert.
+      - name: 'enforce'
+        type: Boolean
+        description: |
+          If true, TLS is strictly enforced.
 
   - name: 'protocol'
     type: Enum

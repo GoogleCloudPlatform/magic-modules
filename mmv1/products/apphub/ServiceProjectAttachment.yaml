@@ -38,6 +38,8 @@ async:
     resource_inside_response: true
 custom_code:
   constants: 'templates/terraform/constants/apphub_service_project.go.tmpl'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 examples:
   - name: 'service_project_attachment_basic'
     config_path: 'templates/terraform/examples/apphub_service_project_attachment_basic.tf.tmpl'
@@ -81,6 +83,7 @@ properties:
     immutable: true
     diff_suppress_func: 'ServiceProjectDiffSuppress'
     custom_flatten: 'templates/terraform/custom_flatten/apphub_service_project.go.tmpl'
+    tgc_ignore_terraform_custom_flatten: true
     custom_expand: 'templates/terraform/custom_expand/apphub_service_project.go.tmpl'
   - name: 'createTime'
     type: String

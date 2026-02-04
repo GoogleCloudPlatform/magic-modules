@@ -17,6 +17,10 @@ description: |
   A CaPool represents a group of CertificateAuthorities that form a trust anchor. A CaPool can be used to manage
   issuance policies for one or more CertificateAuthority resources and to rotate CA certificates in and out of the
   trust anchor.
+references:
+  guides:
+    'Certificate Authority Service Overview': 'https://cloud.google.com/certificate-authority-service/docs/overview'
+  api: 'https://cloud.google.com/certificate-authority-service/docs/reference/rest/v1/projects.locations.caPools'
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/caPools'
 self_link: 'projects/{{project}}/locations/{{location}}/caPools/{{name}}'
@@ -44,6 +48,7 @@ iam_policy:
   iam_conditions_request_type: 'QUERY_PARAM_NESTED'
   example_config_body: 'templates/terraform/iam/example_config_body/privateca_ca_pool.tf.tmpl'
 custom_code:
+  tgc_decoder: 'templates/tgc_next/decoders/privateca_capool.go.tmpl'
 examples:
   - name: 'privateca_capool_basic'
     primary_resource_id: 'default'
@@ -54,6 +59,11 @@ examples:
     primary_resource_id: 'default'
     vars:
       name: 'my-pool'
+      cloud_kms_key: 'projects/keys-project/locations/us-central1/keyRings/key-ring/cryptoKeys/crypto-key'
+    test_vars_overrides:
+      'cloud_kms_key': 'acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "us-central1").CryptoKey.Name'
+    # Test requires a beta-only resource
+    min_version: beta
   - name: 'privateca_quickstart'
     primary_resource_id: 'default'
     vars:
@@ -61,6 +71,8 @@ examples:
       my_certificate: 'my-certificate'
     exclude_test: true
     exclude_docs: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 parameters:
   - name: 'location'
     type: String
@@ -96,7 +108,7 @@ properties:
         type: Array
         description: |
           If any AllowedKeyType is specified, then the certificate request's public key must match one of the key types listed here.
-          Otherwise, any key may be used.
+          Otherwise, any key may be used. You can specify only one key type of those listed here.
         item_type:
           type: NestedObject
           properties:
@@ -129,6 +141,14 @@ properties:
                     - 'ECDSA_P256'
                     - 'ECDSA_P384'
                     - 'EDDSA_25519'
+      - name: 'backdateDuration'
+        type: String
+        description: |
+          The duration to backdate all certificates issued from this CaPool. If not set, the
+          certificates will be issued with a not_before_time of the issuance time (i.e. the current
+          time). If set, the certificates will be issued with a not_before_time of the issuance
+          time minus the backdate_duration. The not_after_time will be adjusted to preserve the
+          requested lifetime. The backdate_duration must be less than or equal to 48 hours.
       - name: 'maximumLifetime'
         type: String
         description: |
@@ -495,3 +515,15 @@ properties:
 
       An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass":
       "1.3kg", "count": "3" }.
+  - name: 'encryptionSpec'
+    type: NestedObject
+    description: |
+      Used when customer would like to encrypt data at rest. The customer-provided key will be used
+      to encrypt the Subject, SubjectAltNames and PEM-encoded certificate fields. When unspecified,
+      customer data will remain unencrypted.
+    properties:
+      - name: 'cloudKmsKey'
+        type: String
+        description: |
+          The resource name for an existing Cloud KMS key in the format
+          `projects/*/locations/*/keyRings/*/cryptoKeys/*`.

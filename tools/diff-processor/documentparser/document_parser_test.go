@@ -78,6 +78,10 @@ func TestParse(t *testing.T) {
 		"workload_identity_config.issuer_uri",
 		"workload_identity_config.workload_pool",
 		"errors.message",
+		// The below are from the ephemeral attributes section.
+		"shared_secret_wo",
+		"sensitive_params",
+		"sensitive_params.secret_access_key_wo",
 	}
 	got := parser.FlattenFields()
 	// gotAttributes := parser.Attributes()

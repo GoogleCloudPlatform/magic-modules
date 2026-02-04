@@ -13,6 +13,8 @@
 
 ---
 name: 'Agent'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description: |
   A Dialogflow agent is a virtual agent that handles conversations with your end-users. It is a natural language
   understanding module that understands the nuances of human language. Dialogflow translates end-user text or audio
@@ -21,7 +23,7 @@ description: |
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/dialogflow/docs/'
-  api: 'https://cloud.google.com/dialogflow/docs/reference/rest/v2/projects/agent'
+  api: 'https://docs.cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.agent'
 docs:
 # Only one agent per project, API does not have an agent ID
 id_format: '{{project}}'
@@ -40,7 +42,11 @@ examples:
   - name: 'dialogflow_agent_full'
     primary_resource_id: 'full_agent'
     vars:
+      project_id: 'my-project'
+      account_id: 'my-account'
       agent_name: 'dialogflow-agent'
+    test_env_vars:
+      org_id: 'ORG_ID'
 parameters:
 properties:
   - name: 'displayName'

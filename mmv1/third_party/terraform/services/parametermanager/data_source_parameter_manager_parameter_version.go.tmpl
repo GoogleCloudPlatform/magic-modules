@@ -1,5 +1,4 @@
 package parametermanager
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"encoding/base64"
@@ -168,5 +167,3 @@ func dataSourceParameterManagerParameterVersionRead(d *schema.ResourceData, meta
 	d.SetId(nameValue.(string))
 	return nil
 }
-
-{{ end }}

@@ -13,6 +13,8 @@
 
 ---
 name: 'Batch'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/batches/{batch}'
 description: |
   Dataproc Serverless Batches lets you run Spark workloads without requiring you to
   provision and manage your own Dataproc cluster.
@@ -42,7 +44,10 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'batches'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 custom_code:
+  tgc_ignore_terraform_decoder: true
   constants: 'templates/terraform/constants/cloud_dataproc_batch.go.tmpl'
   decoder: 'templates/terraform/decoders/cloud_dataproc_batch.go.tmpl'
 examples:
@@ -286,6 +291,8 @@ properties:
         type: KeyValuePairs
         description: |
           A mapping of property names to values, which are used to configure workload execution.
+        custom_tgc_expand: 'templates/tgc_next/custom_expand/dataproc_batch.go.tmpl'
+        custom_tgc_flatten: 'templates/tgc_next/custom_flatten/dataproc_batch.go.tmpl'
       - name: 'effective_properties'
         type: KeyValuePairs
         description: |
@@ -355,6 +362,7 @@ properties:
               the conditions are treated as OR conditions: the workload will be terminated when it has been idle for idleTtl or
               when ttl has been exceeded, whichever occurs first.
             default_from_api: true
+            is_missing_in_cai: true
           - name: 'stagingBucket'
             type: String
             description: |
@@ -375,6 +383,18 @@ properties:
               Subnetwork configuration for workload execution.
             conflicts:
               - environment_config.0.execution_config.0.network_uri
+          - name: 'authenticationConfig'
+            type: NestedObject
+            description: |
+              Authentication configuration for a workload is used to set the default identity for the workload execution.
+            properties:
+              - name: userWorkloadAuthenticationType
+                type: Enum
+                description: |
+                  Authentication type for the user workload running in containers.
+                enum_values:
+                  - SERVICE_ACCOUNT
+                  - END_USER_CREDENTIALS
       - name: 'peripheralsConfig'
         type: NestedObject
         description: |
@@ -442,6 +462,7 @@ properties:
         description: |
           The arguments to pass to the driver. Do not include arguments that can be set as batch
           properties, such as --conf, since a collision can occur that causes an incorrect batch submission.
+        is_missing_in_cai: true
         item_type:
           type: String
       - name: 'pythonFileUris'
@@ -482,6 +503,7 @@ properties:
     properties:
       - name: 'args'
         type: Array
+        is_missing_in_cai: true
         description: |
           The arguments to pass to the driver. Do not include arguments that can be set as batch
           properties, such as --conf, since a collision can occur that causes an incorrect batch submission.
@@ -538,6 +560,7 @@ properties:
         description: |
           The arguments to pass to the driver. Do not include arguments that can be set as batch
           properties, such as --conf, since a collision can occur that causes an incorrect batch submission.
+        is_missing_in_cai: true
         item_type:
           type: String
       - name: 'fileUris'
@@ -577,3 +600,4 @@ properties:
         type: KeyValuePairs
         description: |
           Mapping of query variable names to values (equivalent to the Spark SQL command: SET name="value";).
+        is_missing_in_cai: true

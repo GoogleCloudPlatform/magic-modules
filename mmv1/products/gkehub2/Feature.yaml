@@ -22,8 +22,9 @@ references:
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/features/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/features'
-self_link: 'projects/{{project}}/locations/{{location}}/features/{{name}}'
+self_link: 'projects/{{project}}/locations/{{location}}/features/{{name}}?return_partial_success=true'
 create_url: 'projects/{{project}}/locations/{{location}}/features?featureId={{name}}'
+delete_url: 'projects/{{project}}/locations/{{location}}/features/{{name}}'
 update_url: 'projects/{{project}}/locations/{{location}}/features/{{name}}'
 update_verb: 'PATCH'
 update_mask: true
@@ -44,11 +45,13 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  base_url: 'projects/{{project}}/locations/{{location}}/features/{{name}}'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/features/{{name}}'
     - '{{name}}'
 custom_code:
+  pre_create: templates/terraform/pre_create/gkehub_existing_feature.go.tmpl
+  pre_delete: templates/terraform/pre_delete/gkehub_existing_feature.go.tmpl
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
 legacy_long_form_project: true
@@ -100,6 +103,10 @@ examples:
   - name: 'gkehub_feature_clusterupgrade'
     primary_resource_id: 'feature'
     primary_resource_name: 'fmt.Sprint("clusterupgrade")'
+    exclude_test: true
+  - name: 'gkehub_feature_rbacrolebinding_actuation'
+    primary_resource_id: 'feature'
+    primary_resource_name: 'fmt.Sprint("rbacrolebindingactuation")'
     exclude_test: true
 parameters:
   - name: 'location'
@@ -239,6 +246,15 @@ properties:
                       description: |
                         Amount of time to "soak" after a rollout has been finished before marking it COMPLETE. Cannot exceed 30 days.
                       required: true
+      - name: 'rbacrolebindingactuation'
+        type: NestedObject
+        description: RBACRolebinding Actuation feature spec.
+        properties:
+          - name: 'allowedCustomRoles'
+            type: Array
+            description: 'The list of allowed custom roles (ClusterRoles). If a custom role is not part of this list, it cannot be used in a fleet scope RBACRoleBinding. If a custom role in this list is in use, it cannot be removed from the list until the scope RBACRolebindings using it are deleted.'
+            item_type:
+              type: String
   - name: 'fleetDefaultMemberConfig'
     type: NestedObject
     description: Optional. Fleet Default Membership Configuration.
@@ -365,6 +381,7 @@ properties:
               - name: 'auditIntervalSeconds'
                 type: Integer
                 description: 'Interval for Policy Controller Audit scans (in seconds). When set to 0, this disables audit functionality altogether.'
+                default_from_api: true
               - name: 'exemptableNamespaces'
                 type: Array
                 description: 'The set of namespaces that are excluded from Policy Controller checks. Namespaces do not need to currently exist on the cluster.'
@@ -403,10 +420,8 @@ properties:
                 description: 'Map of deployment configs to deployments ("admission", "audit", "mutation").'
                 default_from_api: true
                 key_name: 'component'
-                key_description: 'Specifies which component to apply the deployment config to. Accepted values are "admission", "audit" and "mutation".'
                 value_type:
                   description: 'Configures deployment-specific options, such as high availability.'
-                  name: deploymentConfig
                   type: NestedObject
                   properties:
                     - name: 'replicaCount'
@@ -487,10 +502,8 @@ properties:
                     type: Map
                     description: 'Configures which bundles to install and their corresponding install specs.'
                     key_name: 'bundle'
-                    key_description: 'A bundle name supported in this version. Values configure the exempted namespaces for this bundle.'
                     value_type:
                       description: 'The specification configuration for a single managed bundle.'
-                      name: bundleInstallSpec
                       type: NestedObject
                       properties:
                         - name: 'exemptedNamespaces'

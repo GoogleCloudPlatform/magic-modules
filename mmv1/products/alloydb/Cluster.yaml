@@ -61,27 +61,41 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/alloydb_cluster.go.tmpl'
 # Skipping the sweeper because we need to force-delete clusters.
 exclude_sweeper: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 examples:
   - name: 'alloydb_cluster_basic'
     primary_resource_id: 'default'
     vars:
       alloydb_cluster_name: 'alloydb-cluster'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'alloydb_cluster_before_upgrade'
     primary_resource_id: 'default'
     vars:
       alloydb_cluster_name: 'alloydb-cluster'
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
+    test_vars_overrides:
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "alloydb-1")'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'alloydb_cluster_after_upgrade'
     primary_resource_id: 'default'
     vars:
       alloydb_cluster_name: 'alloydb-cluster'
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
+    test_vars_overrides:
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "alloydb-1")'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'alloydb_cluster_full'
     primary_resource_id: 'full'
     vars:
       alloydb_cluster_name: 'alloydb-cluster-full'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'alloydb_cluster_restore'
     primary_resource_id: 'source'
     vars:
@@ -94,6 +108,7 @@ examples:
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "alloydb-instance-basic")'
     ignore_read_extra:
+      - 'deletion_protection'
       - 'reconciling'
       - 'update_time'
     exclude_test: true
@@ -103,6 +118,8 @@ examples:
       alloydb_primary_cluster_name: 'alloydb-primary-cluster'
       alloydb_primary_instance_name: 'alloydb-primary-instance'
       alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
+    ignore_read_extra:
+      - 'deletion_protection'
     exclude_test: true
   - name: 'alloydb_secondary_cluster_basic_test'
     primary_resource_id: 'secondary'
@@ -112,7 +129,9 @@ examples:
       alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
+    ignore_read_extra:
+      - 'deletion_protection'
     exclude_docs: true
 virtual_fields:
   - name: 'deletion_policy'
@@ -123,6 +142,14 @@ virtual_fields:
       Possible values: DEFAULT, FORCE
     type: String
     default_value: "DEFAULT"
+  - name: 'deletion_protection'
+    description: |
+      Whether Terraform will be prevented from destroying the cluster.
+      When the field is set to true or unset in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the cluster will fail.
+      When the field is set to false, deleting the cluster is allowed.
+    type: Boolean
+    default_value: true
   - name: 'skip_await_major_version_upgrade'
     type: Boolean
     default_value: true
@@ -295,7 +322,7 @@ properties:
   - name: 'initialUser'
     type: NestedObject
     description: |
-      Initial user to setup during cluster creation.
+      Initial user to setup during cluster creation. If unset for new Clusters, a postgres role with null password is created. You will need to create additional users or set the password in order to log in.
     ignore_read: true
     custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_input_user_flatten.go.tmpl'
     properties:
@@ -303,20 +330,29 @@ properties:
         type: String
         description: |
           The database username.
+        is_missing_in_cai: true
+        at_least_one_of:
+          - 'initial_user.0.user'
+          - 'initial_user.0.password'
       - name: 'password'
         type: String
         description: |
           The initial password for the user.
-        required: true
         sensitive: true
+        is_missing_in_cai: true
+        at_least_one_of:
+          - 'initial_user.0.user'
+          - 'initial_user.0.password'
   - name: 'restoreBackupSource'
     type: NestedObject
     description: |
-      The source when restoring from a backup. Conflicts with 'restore_continuous_backup_source', both can't be set together.
+      The source when restoring from a backup. Conflicts with 'restore_continuous_backup_source', 'restore_backupdr_backup_source' and 'restore_backupdr_pitr_source', they can't be set together.
     immutable: true
     ignore_read: true
     conflicts:
       - restore_continuous_backup_source
+      - restore_backupdr_backup_source
+      - restore_backupdr_pitr_source
     properties:
       - name: 'backupName'
         type: String
@@ -327,16 +363,58 @@ properties:
   - name: 'restoreContinuousBackupSource'
     type: NestedObject
     description: |
-      The source when restoring via point in time recovery (PITR). Conflicts with 'restore_backup_source', both can't be set together.
+      The source when restoring via point in time recovery (PITR). Conflicts with 'restore_backup_source', 'restore_backupdr_backup_source' and 'restore_backupdr_pitr_source', they can't be set together.
     immutable: true
     ignore_read: true
     conflicts:
       - restore_backup_source
+      - restore_backupdr_backup_source
+      - restore_backupdr_pitr_source
     properties:
       - name: 'cluster'
         type: String
         description: |
           The name of the source cluster that this cluster is restored from.
+        required: true
+        immutable: true
+      - name: 'pointInTime'
+        type: String
+        description: |
+          The point in time that this cluster is restored to, in RFC 3339 format.
+        required: true
+        immutable: true
+  - name: 'restoreBackupdrBackupSource'
+    type: NestedObject
+    description: |
+      The source when restoring from a backup. Conflicts with 'restore_continuous_backup_source',  'restore_backup_source' and 'restore_backupdr_pitr_source', they can't be set together.
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - restore_continuous_backup_source
+      - restore_backup_source
+      - restore_backupdr_pitr_source
+    properties:
+      - name: 'backup'
+        type: String
+        description: |
+          The name of the BackupDR backup that this cluster is restored from. It must be of the format "projects/[PROJECT]/locations/[LOCATION]/backupVaults/[VAULT_ID]/dataSources/[DATASOURCE_ID]/backups/[BACKUP_ID]"
+        required: true
+        immutable: true
+  - name: 'restoreBackupdrPitrSource'
+    type: NestedObject
+    description: |
+       The BackupDR source used for point in time recovery. Conflicts with 'restore_backupdr_backup_source', 'restore_continuous_backup_source' and 'restore_backupdr_backup_source', they can't be set togeter.
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - restore_backup_source
+      - restore_continuous_backup_source
+      - restore_backupdr_backup_source
+    properties:
+      - name: 'dataSource'
+        type: String
+        description: |
+          The name of the BackupDR data source that this cluster is restore from. It must be of the format "projects/[PROJECT]/locations/[LOCATION]/backupVaults/[VAULT_ID]/dataSources/[DATASOURCE_ID]"
         required: true
         immutable: true
       - name: 'pointInTime'
@@ -443,14 +521,17 @@ properties:
                     Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
                 - name: 'minutes'
                   type: Integer
+                  is_missing_in_cai: true
                   description: |
                     Minutes of hour of day. Currently, only the value 0 is supported.
                 - name: 'seconds'
                   type: Integer
+                  is_missing_in_cai: true
                   description: |
                     Seconds of minutes of the time. Currently, only the value 0 is supported.
                 - name: 'nanos'
                   type: Integer
+                  is_missing_in_cai: true
                   description: |
                     Fractions of seconds in nanoseconds. Currently, only the value 0 is supported.
       - name: 'timeBasedRetention'
@@ -506,6 +587,14 @@ properties:
       - name: 'sourceType'
         type: String
         description: 'Type of migration source.'
+  - name: 'backupdrBackupSource'
+    type: NestedObject
+    description: 'Cluster created from a BackupDR backup.'
+    output: true
+    properties:
+      - name: 'backup'
+        type: String
+        description: 'The name of the BackupDR backup resource.'
   - name: 'clusterType'
     type: Enum
     description: |

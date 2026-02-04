@@ -42,7 +42,6 @@ iam_policy:
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'tag_template'
   base_url: 'projects/{{project}}/locations/{{region}}/tagTemplates/{{tag_template}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{region}}/tagTemplates/{{tag_template}}'
     - '{{tag_template}}'
@@ -105,7 +104,6 @@ properties:
     required: true
     key_name: 'field_id'
     value_type:
-      name: field
       type: NestedObject
       properties:
         - name: 'name'

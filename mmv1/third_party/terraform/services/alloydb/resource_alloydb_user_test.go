@@ -11,7 +11,7 @@ func TestAccAlloydbUser_updateRoles_BuiltIn(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -60,6 +60,8 @@ resource "google_alloydb_cluster" "default" {
   initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
+
+  deletion_protection = false
 }
 
 data "google_project" "project" {}
@@ -83,7 +85,7 @@ func TestAccAlloydbUser_updatePassword_BuiltIn(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -132,6 +134,8 @@ resource "google_alloydb_cluster" "default" {
   initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
+
+  deletion_protection = false
 }
 
 data "google_project" "project" {}
@@ -155,7 +159,7 @@ func TestAccAlloydbUser_updateRoles_IAM(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -202,6 +206,8 @@ resource "google_alloydb_cluster" "default" {
   initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }
+
+  deletion_protection = false
 }
 data "google_project" "project" {}
 data "google_compute_network" "default" {
@@ -212,6 +218,133 @@ resource "google_alloydb_user" "user2" {
   user_id = "user2@foo.com%{random_suffix}"
   user_type = "ALLOYDB_IAM_USER"
   database_roles = ["alloydbiamuser", "alloydbsuperuser"]
+  depends_on = [google_alloydb_instance.default]
+}`, context)
+}
+
+func TestAccAlloydbUser_alloydbUserBuiltinWithPasswordWo(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbUserDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbUser_alloydbUserBuiltinWithPasswordWo(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_alloydb_user.user1", "password_wo"),
+					resource.TestCheckResourceAttr("google_alloydb_user.user1", "password_wo_version", "1"),
+				),
+			},
+			{
+				ResourceName:            "google_alloydb_user.user1",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password"},
+			},
+		},
+	})
+}
+
+func testAccAlloydbUser_alloydbUserBuiltinWithPasswordWo(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_instance" "default" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+}
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  network_config {
+    network = data.google_compute_network.default.id
+  }
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+  deletion_protection = false
+}
+data "google_project" "project" {}
+data "google_compute_network" "default" {
+  name = "%{network_name}"
+}
+resource "google_alloydb_user" "user1" {
+  cluster = google_alloydb_cluster.default.name
+  user_id = "user1%{random_suffix}"
+  user_type = "ALLOYDB_BUILT_IN"
+  password_wo = "tf_test_user_secret%{random_suffix}"
+  password_wo_version = 1
+  database_roles = ["alloydbsuperuser"]
+  depends_on = [google_alloydb_instance.default]
+}`, context)
+}
+
+func TestAccAlloydbUser_alloydbUserBuiltinWithPasswordWo_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbUserDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbUser_alloydbUserBuiltinWithPasswordWo(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_alloydb_user.user1", "password_wo"),
+					resource.TestCheckResourceAttr("google_alloydb_user.user1", "password_wo_version", "1"),
+				),
+			},
+			{
+				Config: testAccAlloydbUser_alloydbUserBuiltinWithPasswordWo_update(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_alloydb_user.user1", "password_wo"),
+					resource.TestCheckResourceAttr("google_alloydb_user.user1", "password_wo_version", "2"),
+				),
+			},
+		},
+	})
+}
+
+func testAccAlloydbUser_alloydbUserBuiltinWithPasswordWo_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_instance" "default" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+}
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  network_config {
+    network = data.google_compute_network.default.id
+  }
+  initial_user {
+    password = "tf_test_cluster_secret%{random_suffix}"
+  }
+  deletion_protection = false
+}
+data "google_project" "project" {}
+data "google_compute_network" "default" {
+  name = "%{network_name}"
+}
+resource "google_alloydb_user" "user1" {
+  cluster = google_alloydb_cluster.default.name
+  user_id = "user1%{random_suffix}"
+  user_type = "ALLOYDB_BUILT_IN"
+  password_wo = "tf_test_user_updated_secret%{random_suffix}"
+  password_wo_version = 2
+  database_roles = ["alloydbsuperuser"]
   depends_on = [google_alloydb_instance.default]
 }`, context)
 }
