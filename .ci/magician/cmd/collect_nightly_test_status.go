@@ -84,23 +84,26 @@ var collectNightlyTestStatusCmd = &cobra.Command{
 		tc := teamcity.NewClient(env["TEAMCITY_TOKEN"])
 		gcs := cloudstorage.NewClient()
 
-		now := time.Now()
-
 		loc, err := time.LoadLocation("America/Los_Angeles")
 		if err != nil {
 			return fmt.Errorf("Error loading location: %s", err)
 		}
-		date := now.In(loc)
+
+		now := time.Now().In(loc)
+		year, month, day := now.Date()
+
 		customDate := args[0]
 		// check if a specific date is provided
 		if customDate != "" {
 			parsedDate, err := time.Parse("2006-01-02", customDate) // input format YYYY-MM-DD
-			// Set the time to 7pm PT
-			date = time.Date(parsedDate.Year(), parsedDate.Month(), parsedDate.Day(), 19, 0, 0, 0, loc)
 			if err != nil {
 				return fmt.Errorf("invalid input time format: %w", err)
 			}
+			year, month, day = parsedDate.Date()
 		}
+
+		// Set the time to 7pm PT
+		date := time.Date(year, month, day, 19, 0, 0, 0, loc)
 
 		return execCollectNightlyTestStatus(date, tc, gcs)
 	},
@@ -134,10 +137,31 @@ func execCollectNightlyTestStatus(now time.Time, tc TeamcityClient, gcs Cloudsto
 }
 
 func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs CloudstorageClient, formattedStartCut, formattedFinishCut, date string) error {
-	// Get all service test builds
-	builds, err := tc.GetBuilds(pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
+
+	// Check Queued Builds
+	queuedBuilds, err := tc.GetBuilds("queued", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get queued builds: %w", err)
+	}
+	if len(queuedBuilds.Builds) > 0 {
+		fmt.Printf("%s Test unfinished: there are still %d builds queued.\n", strings.ToUpper(pVersion.String()), len(queuedBuilds.Builds))
+		return nil
+	}
+
+	// Check Running Builds
+	runningBuilds, err := tc.GetBuilds("running", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
+	if err != nil {
+		return fmt.Errorf("failed to get running builds: %w", err)
+	}
+	if len(runningBuilds.Builds) > 0 {
+		fmt.Printf("%s Test unfinished: there are still %d builds running.\n", strings.ToUpper(pVersion.String()), len(runningBuilds.Builds))
+		return nil
+	}
+
+	// Get all service test builds
+	builds, err := tc.GetBuilds("finished", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
+	if err != nil {
+		return fmt.Errorf("failed to get finished builds: %w", err)
 	}
 
 	var testInfoList []TestInfo
