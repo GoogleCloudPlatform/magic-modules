@@ -30,7 +30,7 @@ cai_base_url: 'projects/{{project}}/locations/{{location}}/services'
 cai_asset_name_format: 'projects/{{project}}/locations/{{location}}/services/{{name}}'
 import_format:
   - 'locations/{{location}}/namespaces/{{project}}/services/{{name}}'
-datasource:
+datasource_experimental:
   generate: true
   exclude_test: true
 timeouts:
