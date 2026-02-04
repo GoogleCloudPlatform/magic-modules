@@ -3,8 +3,6 @@ resource "google_backup_dr_restore_workload" "{{$.PrimaryResourceId}}" {
   backup_vault_id  = "{{index $.Vars "backup_vault_id"}}"
   data_source_id   = "{{index $.Vars "data_source_id"}}"
   backup_id        = "{{index $.Vars "backup_id"}}"
-  
-  name = "{{index $.Vars "backup_name"}}"
 
   compute_instance_target_environment {
     project = "{{index $.TestEnvVars "project"}}"
@@ -13,16 +11,25 @@ resource "google_backup_dr_restore_workload" "{{$.PrimaryResourceId}}" {
 
   compute_instance_restore_properties {
     name         = "{{index $.Vars "instance_name"}}"
-    machine_type = "e2-medium"
+    machine_type = "zones/us-central1-a/machineTypes/e2-medium"
     description  = "Restored compute instance with advanced configuration"
     
     can_ip_forward      = true
     deletion_protection = false
     
-    labels = {
-      environment = "production"
-      restored    = "true"
-      team        = "infrastructure"
+    labels {
+      key   = "environment"
+      value = "production"
+    }
+
+    labels {
+      key   = "restored"
+      value = "true"
+    }
+
+    labels {
+      key   = "team"
+      value = "infrastructure"
     }
     
     tags {
@@ -30,11 +37,11 @@ resource "google_backup_dr_restore_workload" "{{$.PrimaryResourceId}}" {
     }
     
     network_interfaces {
-      network    = "default"
+      network    = "projects/{{index $.TestEnvVars "project"}}/global/networks/default"
       subnetwork = "projects/{{index $.TestEnvVars "project"}}/regions/us-central1/subnetworks/default"
       
       access_configs {
-        name         = "External NAT"
+        name         = "ONE_TO_ONE_NAT"
         network_tier = "PREMIUM"
       }
     }
