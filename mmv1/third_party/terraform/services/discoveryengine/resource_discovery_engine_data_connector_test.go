@@ -32,7 +32,7 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params", "action_config.0.action_params", "action_config.0.create_bap_connection"},
+				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params", "update_time", "action_config.0.action_params", "action_config.0.create_bap_connection"},
 			},
 			{
 				Config: testAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowBasicExample_update(context),
@@ -41,7 +41,7 @@ func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorServicenowB
 				ResourceName:            "google_discovery_engine_data_connector.servicenow-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params", "action_config.0.action_params", "action_config.0.create_bap_connection"},
+				ImportStateVerifyIgnore: []string{"collection_display_name", "collection_id", "location", "params", "update_time", "action_config.0.action_params", "action_config.0.create_bap_connection"},
 			},
 		},
 	})
@@ -55,6 +55,7 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
   collection_id                = "tf-test-collection-id%{random_suffix}"
   collection_display_name      = "tf-test-dataconnector-servicenow"
   data_source                  = "servicenow"
+  data_source_version          = 3
   params = {
     auth_type                  = "OAUTH_PASSWORD_GRANT"
     instance_uri               = "https://gcpconnector1.service-now.com/"
@@ -96,6 +97,12 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
     })
   }
   static_ip_enabled            = false
+  destination_configs {
+    key = "url"
+    destinations {
+      host = "https://gcpconnector1.service-now.com/"
+    }
+  }
   incremental_refresh_interval = "21600s"
   connector_modes              = ["DATA_INGESTION", "ACTIONS"]
   sync_mode                    = "PERIODIC"
@@ -173,6 +180,12 @@ resource "google_discovery_engine_data_connector" "servicenow-basic" {
     })
   }
   static_ip_enabled            = false
+  destination_configs {
+    key = "url"
+    destinations {
+      host = "https://gcpconnector1.service-now.com/"
+    }
+  }
   incremental_refresh_interval = "21600s"
   connector_modes              = ["DATA_INGESTION", "ACTIONS"]
   sync_mode                    = "PERIODIC"

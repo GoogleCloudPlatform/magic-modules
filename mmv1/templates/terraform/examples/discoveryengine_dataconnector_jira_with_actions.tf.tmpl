@@ -3,6 +3,7 @@ resource "google_discovery_engine_data_connector" "jira-with-actions" {
   collection_id                = "{{index $.Vars "collection_id"}}"
   collection_display_name      = "Jira Federated"
   data_source                  = "jira"
+  data_source_version          = 3
   params = {
     instance_uri               = "https://example.atlassian.net"
     instance_id                = "SECRET_MANAGER_RESOURCE_NAME"
@@ -25,6 +26,12 @@ resource "google_discovery_engine_data_connector" "jira-with-actions" {
     entity_name                = "attachment"
   }
   static_ip_enabled            = false
+  destination_configs {
+    key = "url"
+    destinations {
+      host = "https://example.atlassian.net"
+    }
+  }
   connector_modes              = ["FEDERATED", "ACTIONS"]
   sync_mode                    = "PERIODIC"
   auto_run_disabled            = true

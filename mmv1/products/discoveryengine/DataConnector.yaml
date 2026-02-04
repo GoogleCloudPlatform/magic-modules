@@ -111,6 +111,11 @@ properties:
       Supported values: `salesforce`, `jira`, `confluence`, `bigquery`.
     required: true
     immutable: true
+  - name: 'dataSourceVersion'
+    type: Integer
+    description: |
+      The version of the data source. For example, `3` for Jira v3.
+    default_from_api: true
   - name: 'params'
     type: KeyValuePairs
     description: |
@@ -157,6 +162,7 @@ properties:
         - name: 'keyPropertyMappings'
           type: KeyValuePairs
           diff_suppress_func: 'DataConnectorEntitiesFieldsDiffSuppress'
+          default_from_api: true
           description: |
             Attributes for indexing.
             Key: Field name.
@@ -297,6 +303,30 @@ properties:
     description: |
       Whether customer has enabled static IP addresses for this connector.
     immutable: true
+  - name: 'destinationConfigs'
+    type: Array
+    description: |
+      Destination connector configurations for the data connector,
+      used to configure where data is served.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'key'
+          type: String
+          description: |
+            The key of the destination configuration, for example `url`.
+        - name: 'destinations'
+          type: Array
+          description: |
+            The list of destinations for this configuration.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'host'
+                type: String
+                description: |
+                  The host of the destination, for example
+                  `https://example.atlassian.net`.
   - name: 'staticIpAddresses'
     type: Array
     description: |
