@@ -21,11 +21,11 @@ import (
 	"magician/provider"
 	"magician/teamcity"
 	utils "magician/utility"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
 	"time"
-	"net/url"
 
 	"github.com/spf13/cobra"
 )
@@ -143,7 +143,7 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 	fields := "build(id,buildTypeId,buildConfName,webUrl,number,queuedDate,startDate,finishDate)"
 	params := url.Values{}
 
-	Check Queued Builds
+	// Check Queued Builds
 	params.Set("locator", fmt.Sprintf("%s,state:queued", baseLocator))
 	queuedBuilds, err := tc.GetBuilds(params)
 	if err != nil {
