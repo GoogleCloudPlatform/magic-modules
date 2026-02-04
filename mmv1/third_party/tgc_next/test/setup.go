@@ -69,6 +69,7 @@ var (
 	setupDone     = false
 )
 
+// test
 func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 	if !setupDone {
 		bucketName := "cai_assets_metadata"
