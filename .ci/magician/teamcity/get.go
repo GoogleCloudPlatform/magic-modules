@@ -18,8 +18,8 @@ package teamcity
 import (
 	"fmt"
 
-	"strings"
 	utils "magician/utility"
+	"strings"
 )
 
 type Build struct {
