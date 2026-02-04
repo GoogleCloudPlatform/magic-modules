@@ -130,18 +130,10 @@ properties:
               description: 'Metadata required if type = "time".'
               properties:
                 - name: 'waitDuration'
-                  type: NestedObject
+                  type: String
                   description: |
                     The duration that the system waits in between waves. This wait starts
                     after all changes in the wave are rolled out.
-                  properties:
-                    - name: 'seconds'
-                      type: String
-                      required: true
-                      description: 'Span of time at a resolution of a second.'
-                    - name: 'nanos'
-                      type: Integer
-                      description: 'Span of time that is a fraction of a second at nanosecond resolution.'
         - name: 'orchestrationOptions'
           type: NestedObject
           description: 'Options to control the pace of orchestration of a wave.'
@@ -159,14 +151,8 @@ properties:
                 type: NestedObject
                 properties:
                   - name: 'duration'
-                    type: NestedObject
+                    type: String
                     description: 'The duration of the delay, if any, to be added between batches of projects.'
-                    properties:
-                      - name: 'seconds'
-                        type: String
-                        required: true
-                      - name: 'nanos'
-                        type: Integer
                   - name: 'delimiter'
                     type: Enum
                     description: 'Controls whether the delay should only be added between batches of projects corresponding to different locations, or also between batches of projects corresponding to the same location.'
