@@ -19,7 +19,7 @@ import (
 	"fmt"
 
 	utils "magician/utility"
-	"strings"
+	"net/url"
 )
 
 type Build struct {
@@ -54,26 +54,14 @@ type FirstFailed struct {
 	Href string `json:"href"`
 }
 
-func (tc *Client) GetBuilds(locator, fields string) (Builds, error) {
-	url := "https://hashicorp.teamcity.com/app/rest/builds"
-	var params []string
+func (tc *Client) GetBuilds(params url.Values) (Builds, error) {
+	u, _ := url.Parse("https://hashicorp.teamcity.com/app/rest/builds")
 
-	// Only append parameters if they are not empty
-	if locator != "" {
-		params = append(params, fmt.Sprintf("locator=%s", locator))
-	}
-	if fields != "" {
-		params = append(params, fmt.Sprintf("fields=%s", fields))
-	}
-
-	// If params has items, join them with "&" and prepends "?"
-	if len(params) > 0 {
-		url += "?" + strings.Join(params, "&")
-	}
+	u.RawQuery = params.Encode()
 
 	var builds Builds
 
-	err := utils.RequestCall(url, "GET", tc.token, &builds, nil)
+	err := utils.RequestCall(u.String(), "GET", tc.token, &builds, nil)
 
 	return builds, err
 }

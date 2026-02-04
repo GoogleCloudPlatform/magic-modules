@@ -18,6 +18,7 @@ package cmd
 import (
 	"magician/github"
 	"magician/teamcity"
+	"net/url"
 )
 
 type GithubClient interface {
@@ -50,7 +51,7 @@ type CloudstorageClient interface {
 }
 
 type TeamcityClient interface {
-	GetBuilds(locator, fields string) (teamcity.Builds, error)
+	GetBuilds(params url.Values) (teamcity.Builds, error)
 	GetTestResults(build teamcity.Build) (teamcity.TestResults, error)
 }
 

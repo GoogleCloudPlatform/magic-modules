@@ -25,6 +25,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"net/url"
 
 	"github.com/spf13/cobra"
 )
@@ -140,10 +141,11 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 
 	baseLocator := fmt.Sprintf("count:500,project:%s,branch:refs/heads/nightly-test,queuedDate:(date:%s,condition:before),queuedDate:(date:%s,condition:after)", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
 	fields := "build(id,buildTypeId,buildConfName,webUrl,number,queuedDate,startDate,finishDate)"
+	params := url.Values{}
 
-	// Check Queued Builds
-	queuedLocator := fmt.Sprintf("%s,state:queued", baseLocator)
-	queuedBuilds, err := tc.GetBuilds(queuedLocator, "")
+	Check Queued Builds
+	params.Set("locator", fmt.Sprintf("%s,state:queued", baseLocator))
+	queuedBuilds, err := tc.GetBuilds(params)
 	if err != nil {
 		return fmt.Errorf("failed to get queued builds: %w", err)
 	}
@@ -153,8 +155,9 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 	}
 
 	// Check Running Builds
-	runningLocator := fmt.Sprintf("%s,state:running,tag:cron-trigger", baseLocator)
-	runningBuilds, err := tc.GetBuilds(runningLocator, fields)
+	params.Set("locator", fmt.Sprintf("%s,state:running,tag:cron-trigger", baseLocator))
+	params.Set("fields", fields)
+	runningBuilds, err := tc.GetBuilds(params)
 	if err != nil {
 		return fmt.Errorf("failed to get running builds: %w", err)
 	}
@@ -164,8 +167,9 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 	}
 
 	// Get all service test builds
-	finishedLocator := fmt.Sprintf("%s,state:finished,tag:cron-trigger", baseLocator)
-	builds, err := tc.GetBuilds(finishedLocator, fields)
+	params.Set("locator", fmt.Sprintf("%s,state:finished,tag:cron-trigger", baseLocator))
+	params.Set("fields", fields)
+	builds, err := tc.GetBuilds(params)
 	if err != nil {
 		return fmt.Errorf("failed to get finished builds: %w", err)
 	}
