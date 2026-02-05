@@ -77,6 +77,9 @@ type Product struct {
 
 	// The compiler to generate the downstream files, for example "terraformgoogleconversion-codegen".
 	Compiler string `yaml:"-"`
+
+	// ImportPath contains the prefix used for importing packages in generated files.
+	ImportPath string `yaml:"-"`
 }
 
 func (p *Product) UnmarshalYAML(value *yaml.Node) error {
@@ -118,10 +121,6 @@ func (p *Product) Validate() {
 
 	for _, v := range p.Versions {
 		v.Validate(p.Name)
-	}
-
-	if p.Async != nil {
-		p.Async.Validate()
 	}
 }
 

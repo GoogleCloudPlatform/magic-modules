@@ -1,18 +1,15 @@
 resource "google_compute_network" "network" {
-  provider                = google-beta
   name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_network_security_mirroring_deployment_group" "deployment_group" {
-  provider                      = google-beta
   mirroring_deployment_group_id = "{{index $.Vars "deployment_group_id"}}"
   location                      = "global"
   network                       = google_compute_network.network.id
 }
 
 resource "google_network_security_mirroring_endpoint_group" "endpoint_group" {
-  provider                    = google-beta
   mirroring_endpoint_group_id = "{{index $.Vars "endpoint_group_id"}}"
   location                    = "global"
   type                        = "BROKER"
@@ -20,7 +17,6 @@ resource "google_network_security_mirroring_endpoint_group" "endpoint_group" {
 }
 
 resource "google_network_security_mirroring_endpoint" "{{$.PrimaryResourceId}}" {
-  provider                 = google-beta
   mirroring_endpoint_id    = "{{index $.Vars "endpoint_id"}}"
   location                 = "us-west2-a"
   mirroring_endpoint_group = google_network_security_mirroring_endpoint_group.endpoint_group.id
