@@ -19,7 +19,7 @@ func TestAccObservabilityProjectSettings_datasource(t *testing.T) {
 	dataResourceName := "data.google_observability_project_settings.settings"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
@@ -39,6 +39,7 @@ func TestAccObservabilityProjectSettings_datasource(t *testing.T) {
 func testAccObservabilityProjectSettings_datasource(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_project" "default" {
+		provider        = "google-beta"
 		project_id      = "%{project_name}"
 		name            = "%{project_name}"
 		org_id          = "%{org_id}"
@@ -46,18 +47,20 @@ func testAccObservabilityProjectSettings_datasource(context map[string]interface
 		deletion_policy = "DELETE"
 	}
 	resource "google_project_service" "observability_service" {
-		project = google_project.default.project_id
-		service = "observability.googleapis.com"
+		provider           = "google-beta"
+		project            = google_project.default.project_id
+		service            = "observability.googleapis.com"
 		disable_on_destroy = false
 	}
 	resource "time_sleep" "wait_for_project" {
 		create_duration = "60s"
-		depends_on = [google_project_service.observability_service]
+		depends_on      = [google_project_service.observability_service]
 	}
 
 	data "google_observability_project_settings" "settings" {
-		project  = google_project.default.project_id
-		location = "%{location}"
+		provider   = "google-beta"
+		project    = google_project.default.project_id
+		location   = "%{location}"
 		depends_on = [time_sleep.wait_for_project]
 	}
 `, context)
