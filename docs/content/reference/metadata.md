@@ -5,7 +5,7 @@ weight: 35
 
 # Metadata (meta.yaml) reference
 
-This page documents the properties available in meta.yaml files. These files make it easy to access data about the provider implementation without needing to compile the provider. They are used for coverage metrics, CAI-related overrides, and potentially other use cases.
+This page documents the properties available in meta.yaml files. These files make it easy to access data about the provider implementation without needing to compile the provider. They are used for coverage metrics and CAI-related overrides.
 
 Meta.yaml files are auto-generated for MMv1 generated resources.
 
