@@ -164,16 +164,16 @@ resource "google_storage_bucket" "hns-enabled" {
   location      = "US"
   force_destroy = true
 
-  customer_managed_encryption_enforcement_config {
-    restriction_mode = "FullyRestricted"
-  }
-
-  customer_supplied_encryption_enforcement_config {
-    restriction_mode = "FullyRestricted"
-  }
-
-  google_managed_encryption_enforcement_config {
-    restriction_mode = "NotRestricted"
+  encryption  {
+    google_managed_encryption_enforcement_config {
+      restriction_mode = "%s"
+    }
+    customer_managed_encryption_enforcement_config {
+      restriction_mode = "FullyRestricted"
+    }
+    customer_supplied_encryption_enforcement_config {
+      restriction_mode = "FullyRestricted"
+    }
   }
 }
 ```
@@ -386,19 +386,19 @@ The following arguments are supported:
 
 * `allowed_ip_cidr_ranges` - The list of public or private IPv4 and IPv6 CIDR ranges that can access the bucket.
 
-<a name="google_managed_encryption_enforcement_config"></a>The `google_managed_encryption_enforcement_config` block supports:
+<a name="nested_google_managed_encryption_enforcement_config"></a>The `google_managed_encryption_enforcement_config` block supports:
 
 * `restriction_mode` - (Required) Whether Google Managed Encryption (GMEK) is restricted for new objects within the bucket. If FullyRestricted, new objects can't be created using GMEK encryption. If NotRestricted or unset, creation of new objects with GMEK encryption is allowed.
 
 * `effective_time` - Time from which the config was effective.
 
-<a name="customer_supplied_encryption_enforcement_config"></a>The `customer_supplied_encryption_enforcement_config` block supports:
+<a name="nested_customer_supplied_encryption_enforcement_config"></a>The `customer_supplied_encryption_enforcement_config` block supports:
 
 * `restriction_mode` - (Required) Whether Customer Supplied Encryption (CSEK) is restricted for new objects within the bucket. If FullyRestricted, new objects can't be created using CSEK encryption. If NotRestricted or unset, creation of new objects with CSEK encryption is allowed.
 
 * `effective_time` - Time from which the config was effective.
 
-<a name="customer_managed_encryption_enforcement_config"></a>The `customer_managed_encryption_enforcement_config` block supports:
+<a name="nested_customer_managed_encryption_enforcement_config"></a>The `customer_managed_encryption_enforcement_config` block supports:
 
 * `restriction_mode` - (Required) Whether Customer Managed Encryption (CMEK) is restricted for new objects within the bucket. If FullyRestricted, new objects can't be created using CMEK encryption. If NotRestricted or unset, creation of new objects with CMEK encryption is allowed.
 
