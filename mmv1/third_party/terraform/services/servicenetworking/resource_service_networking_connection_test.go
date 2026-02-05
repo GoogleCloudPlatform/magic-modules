@@ -373,7 +373,9 @@ resource "google_project_service" "servicenetworking" {
 }
 
 resource "google_compute_network" "servicenet" {
-  name = "%s"
+  name       = "%s"
+  # FIX: Create this inside the new project
+  project    = google_project.project.project_id
   depends_on = [google_project_service.servicenetworking]
 }
 
@@ -382,8 +384,10 @@ resource "google_compute_global_address" "r1" {
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
+  # FIX: Create this inside the new project
+  project       = google_project.project.project_id
   network       = google_compute_network.servicenet.self_link
-  depends_on = [google_project_service.servicenetworking]
+  depends_on    = [google_project_service.servicenetworking]
 }
 
 resource "google_compute_global_address" "r2" {
@@ -391,8 +395,10 @@ resource "google_compute_global_address" "r2" {
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
+  # FIX: Create this inside the new project
+  project       = google_project.project.project_id
   network       = google_compute_network.servicenet.self_link
-  depends_on = [google_project_service.servicenetworking]
+  depends_on    = [google_project_service.servicenetworking]
 }
 
 resource "google_service_networking_connection" "foobar" {
