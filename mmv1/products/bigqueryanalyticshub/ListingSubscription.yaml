@@ -41,17 +41,22 @@ sweeper:
 examples:
   - name: 'bigquery_analyticshub_listing_subscription_basic'
     primary_resource_id: 'subscription'
-    primary_resource_name: 'fmt.Sprintf(\"tf_test_my_data_exchange%s\",
-      context[\"\
-      random_suffix\"]), fmt.Sprintf(\"tf_test_my_listing%s\",
-      context[\"random_suffix\"\
-      ])'
+    primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
     region_override: 'US'
     vars:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
       destination_dataset_id: 'destination_dataset'
       description: 'example data exchange'
+  - name: 'bigquery_analyticshub_listing_subscription_multiregion'
+    primary_resource_id: 'subscription'
+    min_version: beta
+    exclude_test: true
+    vars:
+      data_exchange_id: 'my_data_exchange'
+      listing_id: 'my_listing'
+      destination_dataset_id: 'destination_dataset'
+      description: 'example listing multiregion subscription'
 parameters:
   - name: 'dataExchangeId'
     type: String
@@ -112,6 +117,16 @@ properties:
         description: |
           The labels associated with this dataset. You can use these to
           organize and group your datasets.
+      - name: 'replicaLocations'
+        is_set: true
+        type: Array
+        min_version: 'beta'
+        set_hash_func: 'tpgresource.CaseInsensitiveHash'
+        description: |
+          List of regions where the subscriber wants dataset replicas.
+        item_type:
+          type: String
+        diff_suppress_func: 'tpgresource.CaseDiffSuppress'
   - name: 'name'
     type: String
     description: |-
@@ -165,9 +180,7 @@ properties:
       Output only. Map of listing resource names to associated linked resource,
       e.g. projects/123/locations/US/dataExchanges/456/listings/789 -> projects/123/datasets/my_dataset
     key_name: resource_name
-    key_description: The associated linked resource
     value_type:
-      name: linked_resource
       type: NestedObject
       properties:
         - name: listing

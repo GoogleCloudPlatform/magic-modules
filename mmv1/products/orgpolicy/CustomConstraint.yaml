@@ -17,9 +17,9 @@ description: |
   Custom constraints are created by administrators to provide more granular and customizable control over the specific fields that are restricted by your organization policies.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/resource-manager/docs/organization-policy/creating-managing-custom-constraints'
-    'Supported Services': 'https://cloud.google.com/resource-manager/docs/organization-policy/custom-constraint-supported-services'
-  api: 'https://cloud.google.com/resource-manager/docs/reference/orgpolicy/rest/v2/organizations.constraints'
+    'Official Documentation': 'https://docs.cloud.google.com/resource-manager/docs/organization-policy/creating-managing-custom-constraints'
+    'Supported Services': 'https://docs.cloud.google.com/resource-manager/docs/organization-policy/custom-constraint-supported-services'
+  api: 'https://docs.cloud.google.com/resource-manager/docs/reference/orgpolicy/rest/v2/organizations.constraints'
 docs:
 id_format: '{{parent}}/customConstraints/{{name}}'
 base_url: '{{parent}}/customConstraints'
@@ -78,7 +78,7 @@ properties:
   - name: 'condition'
     type: String
     description: |
-      A CEL condition that refers to a supported service resource, for example `resource.management.autoUpgrade == false`. For details about CEL usage, see [Common Expression Language](https://cloud.google.com/resource-manager/docs/organization-policy/creating-managing-custom-constraints#common_expression_language).
+      A CEL condition that refers to a supported service resource, for example `resource.management.autoUpgrade == false`. For details about CEL usage, see [Common Expression Language](https://docs.cloud.google.com/resource-manager/docs/organization-policy/creating-managing-custom-constraints#common_expression_language).
     required: true
   - name: 'actionType'
     type: Enum
@@ -91,7 +91,7 @@ properties:
   - name: 'methodTypes'
     type: Array
     description: |
-      A list of RESTful methods for which to enforce the constraint. Can be `CREATE`, `UPDATE`, or both. Not all Google Cloud services support both methods. To see supported methods for each service, find the service in [Supported services](https://cloud.google.com/resource-manager/docs/organization-policy/custom-constraint-supported-services).
+      A list of RESTful methods for which to enforce the constraint. Can be `CREATE`, `UPDATE`, or both. Not all Google Cloud services support both methods. To see supported methods for each service, find the service in [Supported services](https://docs.cloud.google.com/resource-manager/docs/organization-policy/custom-constraint-supported-services).
     required: true
     item_type:
       type: String

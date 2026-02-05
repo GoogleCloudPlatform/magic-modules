@@ -138,7 +138,6 @@ properties:
     required: true
     key_name: 'field_name'
     value_type:
-      name: field_value
       type: NestedObject
       properties:
         - name: 'displayName'

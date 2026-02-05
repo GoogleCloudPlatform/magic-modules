@@ -132,11 +132,9 @@ properties:
       All versions of this WasmPlugin resource in the key-value format. The key is the resource ID, and the value is the VersionDetails object.
     required: true
     key_name: 'version_name'
-    key_description: 'Name of the WasmPluginVersion'
     # custom_expand is used for both preventing empty maps being created on update and to remove output fields that are being incorrecty included in the expand when inside a map
     custom_expand: 'templates/terraform/custom_expand/wasm_plugin_skip_empty_versions.go.tmpl'
     value_type:
-      name: value
       type: NestedObject
       properties:
         - name: 'createTime'
