@@ -682,6 +682,7 @@ func ResourceContainerCluster() *schema.Resource {
 						"resource_limits": {
 							Type:             schema.TypeList,
 							Optional:         true,
+							Computed:         true,
 							ConflictsWith:    []string{"enable_autopilot"},
 							DiffSuppressFunc: suppressDiffForAutopilot,
 							Description:      `Global constraints for machine resources in the cluster. Configuring the cpu and memory types is required if node auto-provisioning is enabled. These limits will apply to node pool autoscaling in addition to node auto-provisioning.`,
@@ -5943,12 +5944,6 @@ func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) *c
 
 	config := l[0].(map[string]interface{})
 
-	// Conditionally provide an empty list to preserve a legacy 2.X behaviour
-	// when `enabled` is false and resource_limits is unset, allowing users to
-	// explicitly disable the feature. resource_limits don't work when node
-	// auto-provisioning is disabled at time of writing. This may change API-side
-	// in the future though, as the feature is intended to apply to both node
-	// auto-provisioning and node autoscaling.
 	var resourceLimits []*container.ResourceLimit
 	if limits, ok := config["resource_limits"]; ok {
 		resourceLimits = make([]*container.ResourceLimit, 0)
@@ -5971,13 +5966,17 @@ func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) *c
 	    Enabled: defaultCCEnabled.(bool),
 	  }
 	}
+	var defaults *container.AutoprovisioningNodePoolDefaults
+	if shouldInclude(d, "cluster_autoscaling.0.auto_provisioning_defaults") {
+		defaults = expandAutoProvisioningDefaults(config["auto_provisioning_defaults"], d)
+	}
 	return &container.ClusterAutoscaling{
-		EnableNodeAutoprovisioning: config["enabled"].(bool),
-		ResourceLimits:             resourceLimits,
-		DefaultComputeClassConfig:  defaultCCConfig,
-		AutoscalingProfile: config["autoscaling_profile"].(string),
-		AutoprovisioningNodePoolDefaults: expandAutoProvisioningDefaults(config["auto_provisioning_defaults"], d),
-		AutoprovisioningLocations: 	tpgresource.ConvertStringArr(config["auto_provisioning_locations"].([]interface{})),
+		EnableNodeAutoprovisioning:       config["enabled"].(bool),
+		ResourceLimits:                   resourceLimits,
+		DefaultComputeClassConfig:        defaultCCConfig,
+		AutoscalingProfile:               config["autoscaling_profile"].(string),
+		AutoprovisioningNodePoolDefaults: defaults,
+		AutoprovisioningLocations:        tpgresource.ConvertStringArr(config["auto_provisioning_locations"].([]interface{})),
 	}
 }
 
@@ -5988,15 +5987,23 @@ func expandAutoProvisioningDefaults(configured interface{}, d *schema.ResourceDa
 	}
 	config := l[0].(map[string]interface{})
 
+	var management *container.NodeManagement
+	if shouldInclude(d, "cluster_autoscaling.0.auto_provisioning_defaults.0.management") {
+		management = expandManagement(config["management"])
+	}
+	var upgradeSettings *container.UpgradeSettings
+	if shouldInclude(d, "cluster_autoscaling.0.auto_provisioning_defaults.0.upgrade_settings") {
+		upgradeSettings = expandUpgradeSettings(config["upgrade_settings"], d)
+	}
 	npd := &container.AutoprovisioningNodePoolDefaults{
-		OauthScopes:      tpgresource.ConvertStringArr(config["oauth_scopes"].([]interface{})),
-		ServiceAccount:   config["service_account"].(string),
-		DiskSizeGb:       int64(config["disk_size"].(int)),
-		DiskType:         config["disk_type"].(string),
-		ImageType:        config["image_type"].(string),
-		BootDiskKmsKey:   config["boot_disk_kms_key"].(string),
-		Management:       expandManagement(config["management"]),
-		UpgradeSettings:  expandUpgradeSettings(config["upgrade_settings"]),
+		OauthScopes:     tpgresource.ConvertStringArr(config["oauth_scopes"].([]interface{})),
+		ServiceAccount:  config["service_account"].(string),
+		DiskSizeGb:      int64(config["disk_size"].(int)),
+		DiskType:        config["disk_type"].(string),
+		ImageType:       config["image_type"].(string),
+		BootDiskKmsKey:  config["boot_disk_kms_key"].(string),
+		Management:      management,
+		UpgradeSettings: upgradeSettings,
 	}
 
 	if v, ok := config["shielded_instance_config"]; ok && len(v.([]interface{})) > 0 {
@@ -6017,18 +6024,22 @@ func expandAutoProvisioningDefaults(configured interface{}, d *schema.ResourceDa
 	return npd
 }
 
-func expandUpgradeSettings(configured interface{}) *container.UpgradeSettings {
+func expandUpgradeSettings(configured interface{}, d *schema.ResourceData) *container.UpgradeSettings {
 	l, ok := configured.([]interface{})
 	if !ok || l == nil || len(l) == 0 || l[0] == nil {
 		return &container.UpgradeSettings{}
 	}
 	config := l[0].(map[string]interface{})
 
+	var blueGreenSettings *container.BlueGreenSettings
+	if shouldInclude(d, "cluster_autoscaling.0.auto_provisioning_defaults.0.upgrade_settings.0.blue_green_settings") {
+		blueGreenSettings = expandBlueGreenSettings(config["blue_green_settings"])
+	}
 	upgradeSettings := &container.UpgradeSettings{
 		MaxSurge:          int64(config["max_surge"].(int)),
 		MaxUnavailable:    int64(config["max_unavailable"].(int)),
 		Strategy:          config["strategy"].(string),
-		BlueGreenSettings: expandBlueGreenSettings(config["blue_green_settings"]),
+		BlueGreenSettings: blueGreenSettings,
 	}
 
 	return upgradeSettings
@@ -6094,6 +6105,10 @@ func expandUpgradeOptions(configured interface{}) *container.AutoUpgradeOptions 
 	}
 
 	return upgradeOptions
+}
+
+func shouldInclude(d *schema.ResourceData, key string) bool {
+	return d.IsNewResource() || d.HasChange(key)
 }
 
 func expandAuthenticatorGroupsConfig(configured interface{}) *container.AuthenticatorGroupsConfig {
@@ -7727,23 +7742,25 @@ func flattenClusterAutoscaling(a *container.ClusterAutoscaling) []map[string]int
 		return []map[string]interface{}{r}
 	}
 
-	if a.EnableNodeAutoprovisioning {
-		resourceLimits := make([]interface{}, 0, len(a.ResourceLimits))
-		for _, rl := range a.ResourceLimits {
-			resourceLimits = append(resourceLimits, map[string]interface{}{
-				"resource_type": rl.ResourceType,
-				"minimum":       rl.Minimum,
-				"maximum":       rl.Maximum,
-			})
+	r["enabled"] = a.EnableNodeAutoprovisioning
+	resourceLimits := make([]interface{}, 0, len(a.ResourceLimits))
+	for _, rl := range a.ResourceLimits {
+		if rl == nil {
+			continue
 		}
-		r["resource_limits"] = resourceLimits
-		r["enabled"] = true
-		r["auto_provisioning_defaults"] = flattenAutoProvisioningDefaults(a.AutoprovisioningNodePoolDefaults)
-		r["auto_provisioning_locations"] = a.AutoprovisioningLocations
-	} else {
-		r["enabled"] = false
+		resourceLimits = append(resourceLimits, map[string]interface{}{
+			"resource_type": rl.ResourceType,
+			"minimum":       rl.Minimum,
+			"maximum":       rl.Maximum,
+		})
 	}
+	r["resource_limits"] = resourceLimits
 	r["autoscaling_profile"] = a.AutoscalingProfile
+	if a.AutoprovisioningNodePoolDefaults != nil {
+		r["auto_provisioning_defaults"] = flattenAutoProvisioningDefaults(a.AutoprovisioningNodePoolDefaults)
+	}
+	r["auto_provisioning_locations"] = a.AutoprovisioningLocations
+
 	if a.DefaultComputeClassConfig != nil {
 	  r["default_compute_class_enabled"] = a.DefaultComputeClassConfig.Enabled
 	}

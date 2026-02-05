@@ -29,6 +29,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 
+{{ if not (contains $.Compiler "terraformgoogleconversion") -}}
+	"{{ $.ImportPath }}/registry"
+{{- end }}
 	"{{ $.ImportPath }}/tpgiamresource"
 	"{{ $.ImportPath }}/tpgresource"
 	transport_tpg "{{ $.ImportPath }}/transport"
@@ -40,6 +43,35 @@ var (
     _ = errwrap.Wrap
     _ = schema.Noop
 )
+
+{{- if not (contains $.Compiler "terraformgoogleconversion") }}
+func init() {
+    registry.Schema{
+        Name: "{{ $.TerraformName }}_iam_binding",
+        ProductName: "{{ $.ProductMetadata.Name }}",
+        Type: registry.SchemaTypeIAMResource,
+        Schema: tpgiamresource.ResourceIamBinding({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer, {{ $.ResourceName }}IdParseFunc),
+    }.Register()
+    registry.Schema{
+        Name: "{{ $.TerraformName }}_iam_member",
+        ProductName: "{{ $.ProductMetadata.Name }}",
+        Type: registry.SchemaTypeIAMResource,
+        Schema: tpgiamresource.ResourceIamMember({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer, {{ $.ResourceName }}IdParseFunc),
+    }.Register()
+    registry.Schema{
+        Name: "{{ $.TerraformName }}_iam_policy",
+        ProductName: "{{ $.ProductMetadata.Name }}",
+        Type: registry.SchemaTypeIAMResource,
+        Schema: tpgiamresource.ResourceIamPolicy({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer, {{ $.ResourceName }}IdParseFunc),
+    }.Register()
+    registry.Schema{
+        Name: "{{ $.TerraformName }}_iam_policy",
+        ProductName: "{{ $.ProductMetadata.Name }}",
+        Type: registry.SchemaTypeIAMDataSource,
+        Schema: tpgiamresource.DataSourceIamPolicy({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer),
+    }.Register()
+}
+{{- end }}
 
 var {{ $.ResourceName }}IamSchema = map[string]*schema.Schema{
 {{- range $i, $param := $.IamResourceParams }}

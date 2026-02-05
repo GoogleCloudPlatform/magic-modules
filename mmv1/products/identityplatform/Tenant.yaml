@@ -13,6 +13,8 @@
 
 ---
 name: 'Tenant'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description: |
   Tenant configuration in a multi-tenant project.
 

@@ -13,6 +13,8 @@
 
 ---
 name: 'AuthzPolicy'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description: |
   AuthzPolicy is a resource that allows to forward traffic to a callout backend designed to scan the traffic for security purposes.
 references:

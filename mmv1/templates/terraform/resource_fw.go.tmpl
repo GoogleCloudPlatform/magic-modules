@@ -805,7 +805,7 @@ func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.C
 		}
     }
 
-{{ range $prop := $.ReadProperties }}
+{{ range $prop := $.GettableProperties }}
 	data.{{camelize $prop.Name "upper"}} = res["{{ $prop.ApiName -}}"]
     {{$prop.ApiName}}Prop, d := data.{{camelize $prop.Name "upper"}}.To{{$prop.GetFWType}}Value(ctx)
 	diags.Append(d...)
