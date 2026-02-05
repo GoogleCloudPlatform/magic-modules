@@ -1547,19 +1547,19 @@ func TestProvider_ProviderConfigure_pollInterval(t *testing.T) {
 			ExpectError:         true,
 			ExpectFieldUnset:    false,
 		},
-		"when poll_interval is unset in the config, the default value is 0s. (initially; this value is subsequently overwritten)": {
+		"when poll_interval is unset in the config, the default value is 10s": {
 			ConfigValues: map[string]interface{}{
 				"credentials": transport_tpg.TestFakeCredentialsPath,
 			},
-			ExpectedValue:    "0s", // zero value for time.Duration
+			ExpectedValue:    "10s",
 			ExpectFieldUnset: true,
 		},
-		"when poll_interval is set as an empty string, the default value is 0s. (initially; this value is subsequently overwritten)": {
+		"when poll_interval is set as an empty string, the default value is 10s": {
 			ConfigValues: map[string]interface{}{
 				"poll_interval": "",
 				"credentials":   transport_tpg.TestFakeCredentialsPath,
 			},
-			ExpectedValue: "0s", // zero value for time.Duration
+			ExpectedValue: "10s",
 		},
 	}
 
