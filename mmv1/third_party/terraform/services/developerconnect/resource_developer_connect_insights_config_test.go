@@ -315,9 +315,9 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 		project = google_project.project.project_id
 		depends_on = [time_sleep.wait_for_propagation]
 	}
-	resource "google_developer_connect_insights_config" "insights_config" {
+	resource "google_developer_connect_insights_config" "insights_config_apphub" {
 		location           = "us-central1"
-		insights_config_id = "tf-test-ic%{random_suffix}"
+		insights_config_id = "tf-test-ic-apphub-%{random_suffix}"
 		project            = google_project.project.project_id
 		annotations = {}
     	labels = {}
@@ -337,5 +337,16 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 		}
 		depends_on = [time_sleep.wait_for_propagation]
     }
+	resource "google_developer_connect_insights_config" "insights_config_projects" {
+  		location           = "us-central1"
+		insights_config_id = "tf-test-ic-projects-%{random_suffix}"
+		project            = google_project.project.project_id
+		annotations        = {}
+		labels             = {}
+		projects {
+			project_ids = ["projects/${google_project.project.project_id}"]
+		}
+		depends_on = [time_sleep.wait_for_propagation]
+	}
   `, context)
 }

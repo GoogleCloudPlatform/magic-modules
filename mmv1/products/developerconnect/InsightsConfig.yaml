@@ -67,7 +67,20 @@ properties:
       The name of the App Hub Application.
       Format:
       projects/{project}/locations/{location}/applications/{application}
-    required: true
+    conflicts:
+      - projects
+  - name: projects
+    type: NestedObject
+    description: The projects to track with the InsightsConfig.
+    conflicts:
+      - appHubApplication
+    properties:
+      - name: projectIds
+        type: Array
+        description: The project IDs. Format {project}.
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+        item_type:
+          type: String
   - name: name
     type: String
     description: |-
