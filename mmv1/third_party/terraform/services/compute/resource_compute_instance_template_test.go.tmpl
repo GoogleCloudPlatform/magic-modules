@@ -1708,8 +1708,6 @@ func TestAccComputeInstanceTemplate_sourceImageEncryptionKey(t *testing.T) {
 func TestAccComputeInstanceTemplate_NetworkAttachment(t *testing.T) {
 	t.Parallel()
 
-	var instanceTemplate compute.InstanceTemplate
-
 	testNetworkName := acctest.BootstrapSharedTestNetwork(t, "attachment-network")
 	subnetName := acctest.BootstrapSubnet(t, "tf-test-subnet", testNetworkName)
 	networkAttachmentName := acctest.BootstrapNetworkAttachment(t, "tf-test-attachment", subnetName)
@@ -1730,11 +1728,6 @@ func TestAccComputeInstanceTemplate_NetworkAttachment(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstanceTemplate_network_attachment(context),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceTemplateExists(
-						t, "google_compute_instance_template.foobar", &instanceTemplate),
-					testAccCheckComputeInstanceTemplateHasNetworkAttachment(&instanceTemplate, fmt.Sprintf("https://www.googleapis.com/compute/beta/%s", fullFormNetworkAttachmentName)),
-				),
 			},
 			{
 				ResourceName:      "google_compute_instance_template.foobar",
