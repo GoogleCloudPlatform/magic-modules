@@ -368,6 +368,32 @@ properties:
                   Optional. The version of Python to use. Support version
                   includes 3.9, 3.10, 3.11, 3.12, 3.13. If not specified,
                   default value is 3.10.
+          - name: 'developerConnectSource'
+            type: NestedObject
+            description: |-
+              Specification for source code to be fetched from a Git repository managed through the Developer Connect service.
+            properties:
+              - name: 'config'
+                type: NestedObject
+                required: true
+                description: |-
+                  The Developer Connect configuration that defines the specific repository, revision, and directory to use as the source code root.
+                properties:
+                  - name: 'gitRepositoryLink'
+                    type: String
+                    required: true
+                    description: |
+                      The Developer Connect Git repository link, formatted as projects/*/locations/*/connections/*/gitRepositoryLink/*.
+                  - name: 'dir'
+                    type: String
+                    required: true
+                    description: |
+                      Directory, relative to the source root, in which to run the build.
+                  - name: 'revision'
+                    type: String
+                    required: true
+                    description: |
+                      The revision to fetch from the Git repository such as a branch, a tag, a commit SHA, or any Git ref.
       - name: 'serviceAccount'
         type: String
         description: |-
