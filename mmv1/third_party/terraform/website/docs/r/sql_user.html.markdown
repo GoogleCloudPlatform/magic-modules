@@ -193,6 +193,8 @@ The read only `password_policy.status` subblock supports:
 
 * `password_expiration_time` - (read only) Password expiration duration with one week grace period.
 
+* `iam_email` - (read only) IAM email address for MySQL IAM database users.
+
 ## Ephemeral Attributes Reference
 
 The following write-only attributes are supported:
@@ -201,6 +203,14 @@ The following write-only attributes are supported:
     instances this is a Required field, unless type is set to either CLOUD_IAM_USER
     or CLOUD_IAM_SERVICE_ACCOUNT. Don't set this field for CLOUD_IAM_USER
     and CLOUD_IAM_SERVICE_ACCOUNT user types for any Cloud SQL instance.
+  **Note**: This property is write-only and will not be read from the API.
+
+* `database_roles` - (Optional) A list of database roles to be assigned to the user.
+    This option is only available for MySQL 8+ and PostgreSQL instances. You
+    can include predefined Cloud SQL roles, like cloudsqlsuperuser, or your
+    own custom roles. Custom roles must be created in the database before
+    you can assign them. You can create roles using the CREATE ROLE
+    statement for both MySQL and PostgreSQL.
   **Note**: This property is write-only and will not be read from the API.
 
 ## Attributes Reference
