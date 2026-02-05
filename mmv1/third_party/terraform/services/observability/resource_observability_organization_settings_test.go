@@ -21,7 +21,7 @@ func TestAccObservabilityOrganizationSettings_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
@@ -56,28 +56,32 @@ func TestAccObservabilityOrganizationSettings_update(t *testing.T) {
 func testAccObservabilityOrganizationSettings_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_observability_organization_settings" "settings_data" {
-  organization = "%{org_id}"
-  location     = "us"
+  provider      = "google-beta"
+  organization  = "%{org_id}"
+  location      = "us"
 }
 
 # Add a delay to allow the service account to propagate
 resource "time_sleep" "wait_for_sa_propagation" {
+  provider        = "google-beta"
   create_duration = "90s"
-  depends_on = [data.google_observability_organization_settings.settings_data]
+  depends_on      = [data.google_observability_organization_settings.settings_data]
 }
 
 resource "google_kms_crypto_key_iam_member" "iam" {
+  provider      = "google-beta"
   crypto_key_id = "%{kms_key_name}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${data.google_observability_organization_settings.settings_data.service_account_id}"
-  depends_on = [time_sleep.wait_for_sa_propagation]
+  depends_on    = [time_sleep.wait_for_sa_propagation]
 }
 
 resource "google_observability_organization_settings" "primary" {
-  location                 = "us"
-  organization             = "%{org_id}"
-  kms_key_name             = "%{kms_key_name}"
-  depends_on = [google_kms_crypto_key_iam_member.iam]
+  provider      = "google-beta"
+  location      = "us"
+  organization  = "%{org_id}"
+  kms_key_name  = "%{kms_key_name}"
+  depends_on    = [google_kms_crypto_key_iam_member.iam]
 }
 `, context)
 }
@@ -85,24 +89,28 @@ resource "google_observability_organization_settings" "primary" {
 func testAccObservabilityOrganizationSettings_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_observability_organization_settings" "settings_data" {
-  organization = "%{org_id}"
-  location     = "us"
+  provider      = "google-beta"
+  organization  = "%{org_id}"
+  location      = "us"
 }
 
 # Add a delay to allow the service account to propagate
 resource "time_sleep" "wait_for_sa_propagation" {
+  provider        = "google-beta"
   create_duration = "90s"
-  depends_on = [data.google_observability_organization_settings.settings_data]
+  depends_on      = [data.google_observability_organization_settings.settings_data]
 }
 
 resource "google_kms_crypto_key_iam_member" "iam" {
+  provider      = "google-beta"
   crypto_key_id = "%{kms_key_name}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${data.google_observability_organization_settings.settings_data.service_account_id}"
-  depends_on = [time_sleep.wait_for_sa_propagation]
+  depends_on    = [time_sleep.wait_for_sa_propagation]
 }
 
 resource "google_observability_organization_settings" "primary" {
+  provider                 = "google-beta"
   location                 = "us"
   organization             = "%{org_id}"
   kms_key_name             = "" # Unset KMS key
@@ -120,7 +128,7 @@ func TestAccObservabilityOrganizationSettings_globalUpdate(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccObservabilityOrganizationSettings_global(context, "us"),
@@ -152,11 +160,13 @@ func TestAccObservabilityOrganizationSettings_globalUpdate(t *testing.T) {
 func testAccObservabilityOrganizationSettings_global(context map[string]interface{}, defaultLocation string) string {
 	return acctest.Nprintf(fmt.Sprintf(`
 data "google_observability_organization_settings" "settings_data" {
+  provider     = "google-beta"
   organization = "%%{org_id}"
   location     = "global"
 }
 
 resource "google_observability_organization_settings" "primary_global" {
+  provider                 = "google-beta"
   location                 = "global"
   organization             = "%%{org_id}"
   default_storage_location = "%s"
@@ -168,11 +178,13 @@ resource "google_observability_organization_settings" "primary_global" {
 func testAccObservabilityOrganizationSettings_globalUpdate(context map[string]interface{}, defaultLocation string) string {
 	return acctest.Nprintf(fmt.Sprintf(`
 data "google_observability_organization_settings" "settings_data" {
+  provider     = "google-beta"
   organization = "%%{org_id}"
   location     = "global"
 }
 
 resource "google_observability_organization_settings" "primary_global" {
+	provider                 = "google-beta"
   location                 = "global"
   organization             = "%%{org_id}"
   default_storage_location = "%s"

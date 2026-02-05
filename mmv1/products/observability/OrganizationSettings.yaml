@@ -14,7 +14,7 @@
 ---
 name: 'OrganizationSettings'
 description: Manages Cloud Observability settings for an organization.
-min_version: 'ga'
+min_version: 'beta'
 base_url: 'organizations/{{organization}}/locations/{{location}}/settings'
 self_link: 'organizations/{{organization}}/locations/{{location}}/settings'
 
@@ -80,7 +80,7 @@ examples:
     external_providers: ["time"]
     vars:
       location: "us"
-      kms_key_name: "example-key"  # Placeholder, will be overridden
+      kms_key_name: "example-key"
     test_vars_overrides:
       kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
     test_env_vars:
