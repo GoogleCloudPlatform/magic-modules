@@ -48,6 +48,7 @@ type GoogleProviderConfigPluginFrameworkModel struct {
 	UserProjectOverride                       types.Bool   `tfsdk:"user_project_override"`
 	RequestTimeout                            types.String `tfsdk:"request_timeout"`
 	RequestReason                             types.String `tfsdk:"request_reason"`
+	PollInterval                              types.String `tfsdk:"poll_interval"`
 	UniverseDomain                            types.String `tfsdk:"universe_domain"`
 	DefaultLabels                             types.Map    `tfsdk:"default_labels"`
 	AddTerraformAttributionLabel              types.Bool   `tfsdk:"add_terraform_attribution_label"`
@@ -133,6 +134,11 @@ func (d *GoogleProviderConfigPluginFrameworkDataSource) Schema(ctx context.Conte
 			"request_timeout": schema.StringAttribute{
 				Description:         "The request_timeout argument used to configure the provider.",
 				MarkdownDescription: "The request_timeout argument used to configure the provider.",
+				Computed:            true,
+			},
+			"poll_interval": schema.StringAttribute{
+				Description:         "The poll_interval argument used to configure the provider.",
+				MarkdownDescription: "The poll_interval argument used to configure the provider.",
 				Computed:            true,
 			},
 			"default_labels": schema.MapAttribute{
