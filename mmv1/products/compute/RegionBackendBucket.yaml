@@ -15,7 +15,7 @@
 name: 'RegionBackendBucket'
 kind: 'compute#backendBucket'
 description: |
-  Regional backend buckets allow you to use Google Cloud Storage buckets with 
+  Regional backend buckets allow you to use Google Cloud Storage buckets with
   regional HTTP(S) load balancing.
 
   A regional HTTP(S) load balancer can direct traffic to specified URLs to a
@@ -150,4 +150,4 @@ properties:
       - 'INTERNAL_MANAGED'
       - 'EXTERNAL_MANAGED'
     required: false
-    default_from_api: true  
+    default_from_api: true
