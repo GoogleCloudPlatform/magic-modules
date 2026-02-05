@@ -1,4 +1,5 @@
 resource "google_project" "project" {
+  provider   = "google-beta"
   project_id = "tf-test%{random_suffix}"
   name       = "tf-test%{random_suffix}"
   org_id     = "{{index $.TestEnvVars "org_id"}}"
@@ -6,8 +7,9 @@ resource "google_project" "project" {
 }
 
 resource "google_project_service" "observability_api" {
-  project = google_project.project.project_id
-  service = "observability.googleapis.com"
+  provider           = "google-beta"
+  project            = google_project.project.project_id
+  service            = "observability.googleapis.com"
   disable_on_destroy = false
 }
 
@@ -18,6 +20,7 @@ resource "time_sleep" "wait_for_settings_propagation" {
 }
 
 resource "google_observability_project_settings" "primary_global" {
+  provider                 = "google-beta"
   location                 = "global"
   project                  = google_project.project.project_id
   default_storage_location = "eu"

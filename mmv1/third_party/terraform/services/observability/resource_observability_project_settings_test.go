@@ -22,7 +22,7 @@ func TestAccObservabilityProjectSettings_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
@@ -57,15 +57,17 @@ func TestAccObservabilityProjectSettings_update(t *testing.T) {
 func testAccObservabilityProjectSettings_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_project" "project" {
-  project_id = "tf-test%{random_suffix}"
-  name       = "tf-test%{random_suffix}"
-  org_id     = "%{org_id}"
+	provider        = "google-beta"
+  project_id      = "tf-test%{random_suffix}"
+  name            = "tf-test%{random_suffix}"
+  org_id          = "%{org_id}"
   deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "observability_api" {
-  project = google_project.project.project_id
-  service = "observability.googleapis.com"
+	provider           = "google-beta"
+  project            = google_project.project.project_id
+  service            = "observability.googleapis.com"
   disable_on_destroy = false
 }
 
@@ -76,12 +78,14 @@ resource "time_sleep" "wait_for_sa_propagation" {
 }
 
 data "google_observability_project_settings" "settings" {
-  location = "us"
-  project  = google_project.project.project_id
+	provider   = "google-beta"
+  location   = "us"
+  project    = google_project.project.project_id
   depends_on = [time_sleep.wait_for_sa_propagation]
 }
 
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
+	provider      = "google-beta"
   crypto_key_id = "%{kms_key_name}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${data.google_observability_project_settings.settings.service_account_id}"
@@ -91,6 +95,7 @@ resource "google_kms_crypto_key_iam_member" "crypto_key" {
 }
 
 resource "google_observability_project_settings" "primary" {
+	provider = "google-beta"
   location = "us"
   project  = google_project.project.project_id
   kms_key_name             = "%{kms_key_name}"
@@ -104,15 +109,17 @@ resource "google_observability_project_settings" "primary" {
 func testAccObservabilityProjectSettings_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_project" "project" {
-  project_id = "tf-test%{random_suffix}"
-  name       = "tf-test%{random_suffix}"
-  org_id     = "%{org_id}"
+	provider        = "google-beta"
+  project_id      = "tf-test%{random_suffix}"
+  name            = "tf-test%{random_suffix}"
+  org_id          = "%{org_id}"
   deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "observability_api" {
-  project = google_project.project.project_id
-  service = "observability.googleapis.com"
+	provider           = "google-beta"
+  project            = google_project.project.project_id
+  service            = "observability.googleapis.com"
   disable_on_destroy = false
 }
 
@@ -123,12 +130,14 @@ resource "time_sleep" "wait_for_sa_propagation" {
 }
 
 data "google_observability_project_settings" "settings" {
-  location = "us"
-  project  = google_project.project.project_id
+	provider   = "google-beta"
+  location   = "us"
+  project    = google_project.project.project_id
   depends_on = [time_sleep.wait_for_sa_propagation]
 }
 
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
+	provider      = "google-beta"
   crypto_key_id = "%{kms_key_name}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${data.google_observability_project_settings.settings.service_account_id}"
@@ -138,6 +147,7 @@ resource "google_kms_crypto_key_iam_member" "crypto_key" {
 }
 
 resource "google_observability_project_settings" "primary" {
+	provider = "google-beta"
   location = "us"
   project  = google_project.project.project_id
   kms_key_name             = "" # Unset KMS key
@@ -158,7 +168,7 @@ func TestAccObservabilityProjectSettings_globalUpdate(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccObservabilityProjectSettings_global(context, "eu"),
@@ -190,26 +200,30 @@ func TestAccObservabilityProjectSettings_globalUpdate(t *testing.T) {
 func testAccObservabilityProjectSettings_global(context map[string]interface{}, defaultLocation string) string {
 	return acctest.Nprintf(fmt.Sprintf(`
 resource "google_project" "project" {
-  project_id = "tf-test%%{random_suffix}"
-  name       = "tf-test%%{random_suffix}"
-  org_id     = "%%{org_id}"
+	provider        = "google-beta"
+  project_id      = "tf-test%%{random_suffix}"
+  name            = "tf-test%%{random_suffix}"
+  org_id          = "%%{org_id}"
   deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "observability_api" {
-  project = google_project.project.project_id
-  service = "observability.googleapis.com"
+	provider           = "google-beta"
+  project            = google_project.project.project_id
+  service            = "observability.googleapis.com"
   disable_on_destroy = false
 }
 
 # Data source read to wait for project/API propagation
 data "google_observability_project_settings" "wait_for_propagation" {
+	provider   = "google-beta"
   location   = "global"
   project    = google_project.project.project_id
   depends_on = [google_project_service.observability_api]
 }
 
 resource "google_observability_project_settings" "primary_global" {
+	provider                 = "google-beta"
   location                 = "global"
   project                  = google_project.project.project_id
   default_storage_location = "%s"
@@ -221,26 +235,30 @@ resource "google_observability_project_settings" "primary_global" {
 func testAccObservabilityProjectSettings_globalUpdate(context map[string]interface{}, defaultLocation string) string {
 	return acctest.Nprintf(fmt.Sprintf(`
 resource "google_project" "project" {
-  project_id = "tf-test%%{random_suffix}"
-  name       = "tf-test%%{random_suffix}"
-  org_id     = "%%{org_id}"
+	provider        = "google-beta"
+  project_id      = "tf-test%%{random_suffix}"
+  name            = "tf-test%%{random_suffix}"
+  org_id          = "%%{org_id}"
   deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "observability_api" {
-  project = google_project.project.project_id
-  service = "observability.googleapis.com"
+	provider           = "google-beta"
+  project            = google_project.project.project_id
+  service            = "observability.googleapis.com"
   disable_on_destroy = false
 }
 
 # Data source read to wait for project/API propagation
 data "google_observability_project_settings" "wait_for_propagation" {
+	provider   = "google-beta"
   location   = "global"
   project    = google_project.project.project_id
   depends_on = [google_project_service.observability_api]
 }
 
 resource "google_observability_project_settings" "primary_global" {
+	provider                 = "google-beta"
   location                 = "global"
   project                  = google_project.project.project_id
   default_storage_location = "%s"
