@@ -24,7 +24,7 @@ func NewParentResourceResolver(errorLogger *zap.Logger) *ParentResourceResolver 
 	}
 }
 
-func (r *ParentResourceResolver) ResolveParents(jsonPlan []byte) map[string][]string {
+func (r *ParentResourceResolver) Resolve(jsonPlan []byte) map[string][]string {
 	parentToChildMap := make(map[string][]string)
 
 	// Read elements from the resouce config
@@ -35,14 +35,23 @@ func (r *ParentResourceResolver) ResolveParents(jsonPlan []byte) map[string][]st
 
 	for _, resource := range resourceConfig.RootModule.Resources {
 		for _, expression := range resource.Expressions {
+			if expression.ExpressionData.NestedBlocks != nil {
+				for _, innerExexpression := range expression.ExpressionData.NestedBlocks {
+					for _, v := range innerExexpression {
+						reference := v.References
+						if reference != nil {
+							if strings.HasSuffix(reference[0], ".id") {
+								parentToChildMap[reference[1]] = append(parentToChildMap[reference[1]], resource.Address)
+							}
+						}
+					}
+				}
+			}
 			reference := expression.ExpressionData.References
 			if reference != nil {
-				if strings.Contains(reference[0], ".id") {
-					parentToChildMap[reference[1]] = append(parentToChildMap[reference[1]], resource.Type)
-				} else {
-					parentToChildMap[reference[0]] = append(parentToChildMap[reference[1]], resource.Type)
+				if strings.HasSuffix(reference[0], ".id") {
+					parentToChildMap[reference[1]] = append(parentToChildMap[reference[1]], resource.Address)
 				}
-
 			}
 		}
 	}
