@@ -348,9 +348,10 @@ environment variable.
 * `poll_interval` - (Optional) A duration string controlling the amount of time
 the provider should wait between calls polling long-running operations. Defaults
 to 10 seconds (`"10s"`). Setting this is not recommended outside highly
-latency-sensitive use cases, as quota usage will go up quickly,
-particularly if `-parallelism` is set. Most slow plan/apply cycles are
-addressed with `-parallelism` instead.
+latency-sensitive use cases, as quota usage will go up quickly, particularly if
+the [`-parallelism` option](https://developer.hashicorp.com/terraform/cli/commands/apply#parallelism-n)
+is set. Most slow plan/apply cycles are addressed with [`-parallelism`](https://developer.hashicorp.com/terraform/cli/commands/apply#parallelism-n)
+instead.
 
 ---
 

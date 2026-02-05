@@ -235,6 +235,7 @@ func (d *GoogleProviderConfigPluginFrameworkDataSource) Read(ctx context.Context
 	data.UserProjectOverride = types.BoolValue(d.providerConfig.UserProjectOverride)
 	data.RequestReason = types.StringValue(d.providerConfig.RequestReason)
 	data.RequestTimeout = types.StringValue(d.providerConfig.RequestTimeout.String())
+	data.PollInterval = types.StringValue(d.providerConfig.PollInterval.String())
 
 	labels, di := types.MapValueFrom(ctx, types.StringType, d.providerConfig.DefaultLabels)
 	if di.HasError() {
