@@ -224,6 +224,9 @@ fields:
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'managedOpentelemetryConfig.scope'
 {{- end }}
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'managedMachineLearningDiagnosticsConfig.enabled'
+{{- end }}
   - api_field: 'masterAuth.clientCertificate'
   - api_field: 'masterAuth.clientCertificateConfig.issueClientCertificate'
   - api_field: 'masterAuth.clientKey'
