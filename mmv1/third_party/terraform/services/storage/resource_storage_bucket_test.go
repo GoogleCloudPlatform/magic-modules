@@ -3104,7 +3104,7 @@ func TestAccStorageBucket_encryptionCmek(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy", "effective_time"},
+				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 		},
 	})
@@ -3135,7 +3135,7 @@ func TestAccStorageBucket_encryptionCsek(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy", "effective_time"},
+				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
 				Config: testAccStorageBucket_withCsekEncryption(bucketName, "NotRestricted"),
@@ -3144,7 +3144,7 @@ func TestAccStorageBucket_encryptionCsek(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy", "effective_time"},
+				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 		},
 	})
@@ -3175,7 +3175,7 @@ func TestAccStorageBucket_encryptionGmek(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy", "effective_time"},
+				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
 				Config: testAccStorageBucket_encryptionGmek(bucketName, "FullyRestricted"),
@@ -3184,7 +3184,7 @@ func TestAccStorageBucket_encryptionGmek(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy", "effective_time"},
+				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 		},
 	})
