@@ -1,11 +1,15 @@
 ---
-title: "MMv1 metadata reference"
+title: "Metadata (meta.yaml) reference"
 weight: 35
 ---
 
-# MMv1 metadata reference
+# Metadata (meta.yaml) reference
 
-This page documents all properties for metadata. Metadata does not impact the provider itself, but is used by Google internally for coverage metrics.
+This page documents the properties available in meta.yaml files. These files make it easy to access data about the provider implementation without needing to compile the provider. They are used for coverage metrics, CAI-related overrides, and potentially other use cases.
+
+Meta.yaml files are auto-generated for MMv1 generated resources. DCL and Handwritten resources will have handwritten meta.yaml files in the appropriate service directory in [mmv1/third_party/terraform/services/](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services). Handwritten meta.yaml files can use version guards (`{{- if ne $.TargetVersionName "ga" }}...{{- else}}...{{- end}}`) to exclude beta fields from the `google` provider.
+
+All resources and fields must be present in meta.yaml files for the provider(s) they're available in.
 
 ## Required
 
