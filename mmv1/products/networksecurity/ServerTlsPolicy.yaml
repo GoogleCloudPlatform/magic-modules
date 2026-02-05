@@ -146,6 +146,15 @@ properties:
       This field is required if the policy is used with external HTTPS load balancers. This field can be empty for Traffic Director.
       Defines a mechanism to provision peer validation certificates for peer to peer authentication (Mutual TLS - mTLS). If not specified, client certificate will not be requested. The connection is treated as TLS and not mTLS. If allowOpen and mtlsPolicy are set, server allows both plain text and mTLS connections.
     properties:
+      - name: 'tier'
+        type: Enum
+        default_from_api: true
+        description: |
+          Mutual TLS tier for XLB. Allowed only if the policy is to be used with Application Load Balancers.
+        immutable: true
+        enum_values:
+          - 'STANDARD'
+          - 'ADVANCED'
       - name: 'clientValidationMode'
         type: Enum
         description: |
