@@ -42,7 +42,6 @@ func buckeEncryptionEnforcementConfigSchema(encryptionType string) *schema.Schem
 				},
 				"effective_time": {
 					Type:        schema.TypeString,
-					Optional:    true,
 					Computed:    true,
 					Description: `Time from which the config was effective. This is service-provided.`,
 				},
