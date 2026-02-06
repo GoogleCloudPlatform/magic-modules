@@ -303,8 +303,6 @@ var (
 )
 
 func categorizeError(errMsg string) string {
-
-	// 2. Simple Substring Matches (LIKE %...%)
 	if strings.Contains(errMsg, "Error code 13") {
 		return "Error code 13"
 	}
