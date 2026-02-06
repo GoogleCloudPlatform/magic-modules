@@ -28,6 +28,8 @@ import_format:
 examples:
   - name: "ces_toolset_openapi_service_account_auth_config"
     primary_resource_id: "ces_toolset_openapi_service_account_auth_config"  # yamllint disable rule:line-length
+    test_env_vars:
+      service_account: 'SERVICE_ACCT'
     vars:
       app_display_name: 'my-app'
       app_id: 'app-id'
@@ -56,6 +58,43 @@ examples:
       location: 'us'
   - name: "ces_toolset_bearer_token_config"
     primary_resource_id: "ces_toolset_bearer_token_config"
+    vars:
+      app_display_name: 'my-app'
+      app_id: 'app-id'
+      toolset_id: 'toolset1'
+      location: 'us'
+  - name: "ces_toolset_mcp_service_account_auth_config"
+    primary_resource_id: "ces_toolset_mcp_service_account_auth_config"
+    test_env_vars:
+      service_account: 'SERVICE_ACCT'
+    vars:
+      app_display_name: 'my-app'
+      app_id: 'app-id'
+      toolset_id: 'toolset1'
+      location: 'us'
+  - name: "ces_toolset_mcp_oauth_config"
+    primary_resource_id: "ces_toolset_mcp_oauth_config"
+    vars:
+      app_display_name: 'my-app'
+      app_id: 'app-id'
+      toolset_id: 'toolset1'
+      location: 'us'
+  - name: "ces_toolset_mcp_service_agent_id_token_auth_config"
+    primary_resource_id: "ces_toolset_mcp_service_agent_id_token_auth_config"
+    vars:
+      app_display_name: 'my-app'
+      app_id: 'app-id'
+      toolset_id: 'toolset1'
+      location: 'us'
+  - name: "ces_toolset_mcp_api_key_config"
+    primary_resource_id: "ces_toolset_mcp_api_key_config"
+    vars:
+      app_display_name: 'my-app'
+      app_id: 'app-id'
+      toolset_id: 'toolset1'
+      location: 'us'
+  - name: "ces_toolset_mcp_bearer_token_config"
+    primary_resource_id: "ces_toolset_mcp_bearer_token_config"
     vars:
       app_display_name: 'my-app'
       app_id: 'app-id'
@@ -293,6 +332,174 @@ properties:
           and the schema has the $env_var placeholder,
           it will replace the placeholder in the schema.
         output: true
+  - name: mcpToolset
+    type: NestedObject
+    description: |-
+      A toolset that contains a list of tools that are offered by the MCP
+      server.
+    properties:
+      - name: serverAddress
+        type: String
+        description: |-
+          The address of the MCP server, for example, "https://example.com/mcp/". If
+          the server is built with the MCP SDK, the url should be suffixed with
+          "/mcp/". Only Streamable HTTP transport based servers are supported. See
+          https://modelcontextprotocol.io/specification/2025-03-26/basic/transports#streamable-http
+          for more details.
+        required: true
+      - name: apiAuthentication
+        type: NestedObject
+        description: |-
+          Authentication information required to access tools and execute a tool
+          against the MCP server. For API key auth, the API key can only be sent in
+          the request header; sending it via query parameters is not supported.
+        properties:
+          - name: apiKeyConfig
+            type: NestedObject
+            description: Configurations for authentication with API key.
+            properties:
+              - name: apiKeySecretVersion
+                type: String
+                description: |-
+                  The name of the SecretManager secret version resource storing the API key.
+                  Format: `projects/{project}/secrets/{secret}/versions/{version}`
+                  Note: You should grant `roles/secretmanager.secretAccessor` role to the CES
+                  service agent
+                  `service-@gcp-sa-ces.iam.gserviceaccount.com`.
+                required: true
+              - name: keyName
+                type: String
+                description: |-
+                  The parameter name or the header name of the API key.
+                  E.g., If the API request is "https://example.com/act?X-Api-Key=", "X-Api-Key" would be the parameter name.
+                required: true
+              - name: requestLocation
+                type: String
+                description: |-
+                  Key location in the request. For API key auth on MCP toolsets,
+                  the API key can only be sent in the request header.
+                  Possible values:
+                  HEADER
+                required: true
+          - name: oauthConfig
+            type: NestedObject
+            description: Configurations for authentication with OAuth.
+            properties:
+              - name: clientId
+                type: String
+                description: The client ID from the OAuth provider.
+                required: true
+              - name: clientSecretVersion
+                type: String
+                description: |-
+                  The name of the SecretManager secret version resource storing the
+                  client secret.
+                  Format: `projects/{project}/secrets/{secret}/versions/{version}`
+
+                  Note: You should grant `roles/secretmanager.secretAccessor` role to the CES
+                  service agent
+                  `service-@gcp-sa-ces.iam.gserviceaccount.com`.
+                required: true
+              - name: oauthGrantType
+                type: String
+                description: |-
+                  OAuth grant types.
+                  Possible values:
+                  CLIENT_CREDENTIAL
+                required: true
+              - name: scopes
+                type: Array
+                description: The OAuth scopes to grant.
+                item_type:
+                  type: String
+              - name: tokenEndpoint
+                type: String
+                description: The token endpoint in the OAuth provider to exchange for an
+                  access token.
+                required: true
+          - name: serviceAccountAuthConfig
+            type: NestedObject
+            description: Configurations for authentication using a custom service
+              account.
+            properties:
+              - name: serviceAccount
+                type: String
+                description: |-
+                  The email address of the service account used for authenticatation. CES
+                  uses this service account to exchange an access token and the access token
+                  is then sent in the `Authorization` header of the request.
+
+                  The service account must have the
+                  `roles/iam.serviceAccountTokenCreator` role granted to the
+                  CES service agent
+                  `service-@gcp-sa-ces.iam.gserviceaccount.com`.
+                required: true
+          - name: serviceAgentIdTokenAuthConfig
+            type: NestedObject
+            description: |-
+              Configurations for authentication with [ID
+              token](https://cloud.google.com/docs/authentication/token-types#id) generated
+              from service agent.
+            allow_empty_object: true
+            send_empty_value: true
+            properties: []
+          - name: bearerTokenConfig
+            type: NestedObject
+            description: Configurations for authentication with a bearer token.
+            properties:
+              - name: token
+                type: String
+      - name: serviceDirectoryConfig
+        type: NestedObject
+        description: |-
+          Service Directory configuration for VPC-SC, used to resolve service names
+          within a perimeter.
+        properties:
+          - name: service
+            type: String
+            description: |-
+              The name of [Service
+              Directory](https://cloud.google.com/service-directory) service.
+              Format:
+              `projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}`.
+              Location of the service directory must be the same as the location of the
+              app.
+            required: true
+      - name: tlsConfig
+        type: NestedObject
+        description: |-
+          The TLS configuration. Includes the custom server certificates that the
+          client should trust.
+        properties:
+          - name: caCerts
+            type: Array
+            description: |-
+              Specifies a list of allowed custom CA certificates for HTTPS
+              verification.
+            required: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: cert
+                  type: String
+                  description: |-
+                    The allowed custom CA certificates (in DER format) for
+                    HTTPS verification. This overrides the default SSL trust store. If this
+                    is empty or unspecified, CES will use Google's default trust
+                    store to verify certificates. N.B. Make sure the HTTPS server
+                    certificates are signed with "subject alt name". For instance a
+                    certificate can be self-signed using the following command,
+                    openssl x509 -req -days 200 -in example.com.csr \
+                    -signkey example.com.key \
+                    -out example.com.crt \
+                    -extfile <(printf "\nsubjectAltName='DNS:www.example.com'")
+                  required: true
+                - name: displayName
+                  type: String
+                  description: |-
+                    The name of the allowed custom CA certificates. This
+                    can be used to disambiguate the custom CA certificates.
+                  required: true
   - name: updateTime
     type: String
     description: Timestamp when the toolset was last updated.
