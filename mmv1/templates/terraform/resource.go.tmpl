@@ -104,7 +104,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
     return &schema.Resource{
         Create: resource{{ $.ResourceName -}}Create,
         Read: resource{{ $.ResourceName -}}Read,
-{{- if or (or $.Updatable $.RootLabels) $.VirtualFields }}
+{{- if or (or $.Updatable $.RootLabels (and (not $.ExcludeDelete) (not $.DeletionPolicyExclude) $.ProductMetadata.DeletionPolicyOptIn)) $.VirtualFields }}
         Update: resource{{ $.ResourceName -}}Update,
 {{- end}}
         Delete: resource{{ $.ResourceName -}}Delete,
