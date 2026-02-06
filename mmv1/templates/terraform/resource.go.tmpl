@@ -1551,9 +1551,6 @@ func resource{{ $.ResourceName -}}PostCreateSetComputedFields(d *schema.Resource
 {{ if $.FlattenAllInMethod }}
 func flatten{{ $.ResourceName -}}(d *schema.ResourceData, meta interface{}, res map[string]interface{}) error {
     config := meta.(*transport_tpg.Config)
-    {{- if $.CustomCode.PostRead }}
-    {{ customTemplate $ $.CustomCode.PostRead false -}}
-{{- end }}
 
 {{if $.NestedQuery -}}
     res, err := flattenNested{{ $.ResourceName -}}(d, meta, res)
