@@ -1,0 +1,79 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Space'
+description: |
+  A Space in Apigee
+references:
+  guides:
+    "Managing Spaces": "https://cloud.google.com/apigee/docs/api-platform/system-administration/spaces/manage-spaces"
+  api: "https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.spaces"
+docs:
+base_url: "organizations/{{org_id}}/spaces"
+self_link: "organizations/{{org_id}}/spaces/{{name}}"
+import_format:
+  - "organizations/{{org_id}}/spaces/{{name}}"
+  - "{{org_id}}/{{name}}"
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: 'space'
+  fetch_iam_policy_verb: 'GET'
+  set_iam_policy_verb: 'POST'
+  wrapped_policy_obj: false
+  allowed_iam_role: 'roles/apigee.spaceViewer'
+examples:
+  - name: "apigee_space_basic"
+    primary_resource_id: "apigee_space"
+    vars:
+      name: "my-space"
+      display_name: "My Space"
+    test_env_vars:
+      org_id: "ORG_ID"
+parameters:
+  - name: "orgId"
+    type: String
+    description: |
+      The Apigee Organization associated with the Apigee Space,
+      in the format `organizations/{{org_name}}`.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'spaceId'
+    type: String
+    description: |
+      Space ID of the Apigee Space.
+    required: true
+    immutable: true
+    url_param_only: true
+properties:
+  - name: "name"
+    type: String
+    description: |
+      Identifier. Id of the space. 
+      This field is used as the resource name, and must follow AIP-122 guidelines.
+    output: true
+  - name: "displayName"
+    type: String
+    description: |
+      The display name of the Space.
+  - name: "createTime"
+    type: String
+    description: |
+      Create timestamp of the space.
+    output: true
+  - name: "updateTime"
+    type: String
+    description: |
+      Last modified timestamp of the space.
+    output: true

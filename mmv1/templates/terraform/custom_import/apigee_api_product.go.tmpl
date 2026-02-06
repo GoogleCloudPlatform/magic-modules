@@ -1,3 +1,6 @@
+var id string
+var err error 
+
 config := meta.(*transport_tpg.Config)
 
 // current import_formats cannot import fields with forward slashes in their value
@@ -6,7 +9,22 @@ if err := tpgresource.ParseImportId([]string{"(?P<name>.+)"}, d, config); err !=
 }
 
 nameParts := strings.Split(d.Get("name").(string), "/")
-if len(nameParts) == 4 {
+if len(nameParts) == 6 {
+	// `organizations/{{"{{"}}org_name{{"}}"}}/spaces/{{"{{"}}space_name{{"}}"}}/apiproducts/{{"{{"}}name{{"}}"}}`
+	orgId := fmt.Sprintf("organizations/%s", nameParts[1])
+	if err := d.Set("org_id", orgId); err != nil {
+		return nil, fmt.Errorf("Error setting org_id: %s", err)
+	}
+	if err := d.Set("space", nameParts[3]); err != nil {
+		return nil, fmt.Errorf("Error setting space: %s", err)
+	}
+	if err := d.Set("name", nameParts[5]); err != nil {
+		return nil, fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("parent_path", fmt.Sprintf("spaces/%s/apiproducts", nameParts[3])); err != nil {
+		return nil, fmt.Errorf("Error setting parent_path: %s", err)
+	}
+} else if len(nameParts) == 4 {
 	// `organizations/{{"{{"}}org_name{{"}}"}}/apiproducts/{{"{{"}}name{{"}}"}}`
 	orgId := fmt.Sprintf("organizations/%s", nameParts[1])
 	if err := d.Set("org_id", orgId); err != nil {
@@ -14,6 +32,9 @@ if len(nameParts) == 4 {
 	}
 	if err := d.Set("name", nameParts[3]); err != nil {
 		return nil, fmt.Errorf("Error setting name: %s", err)
+	}
+	if err := d.Set("parent_path", "apiproducts"); err != nil {
+		return nil, fmt.Errorf("Error setting parent_path: %s", err)
 	}
 } else if len(nameParts) == 3 {
 	// `organizations/{{"{{"}}org_name{{"}}"}}/{{"{{"}}name{{"}}"}}`
@@ -24,16 +45,25 @@ if len(nameParts) == 4 {
 	if err := d.Set("name", nameParts[2]); err != nil {
 		return nil, fmt.Errorf("Error setting name: %s", err)
 	}
+	if err := d.Set("parent_path", "apiproducts"); err != nil {
+		return nil, fmt.Errorf("Error setting parent_path: %s", err)
+	}
 } else {
 	return nil, fmt.Errorf(
-		"Saw %s when the name is expected to have shape %s or %s",
+		"Saw %s when the name is expected to have shape %s, %s or %s",
 		d.Get("name"),
+		"organizations/{{"{{"}}org_name{{"}}"}}/spaces/{{"{{"}}space_name{{"}}"}}/apiproducts/{{"{{"}}name{{"}}"}}",
 		"organizations/{{"{{"}}org_name{{"}}"}}/apiproducts/{{"{{"}}name{{"}}"}}",
 		"organizations/{{"{{"}}org_name{{"}}"}}/{{"{{"}}name{{"}}"}}")
 }
 
 // Replace import id for the resource id
-id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}org_id{{"}}"}}/apiproducts/{{"{{"}}name{{"}}"}}")
+if d.Get("space").(string) != "" {
+	id, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}org_id{{"}}"}}/spaces/{{"{{"}}space{{"}}"}}/apiproducts/{{"{{"}}name{{"}}"}}")
+} else {
+	id, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}org_id{{"}}"}}/apiproducts/{{"{{"}}name{{"}}"}}")
+}
+
 if err != nil {
 	return nil, fmt.Errorf("Error constructing id: %s", err)
 }

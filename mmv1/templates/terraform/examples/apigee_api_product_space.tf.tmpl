@@ -1,0 +1,53 @@
+data "google_client_config" "current" {}
+
+resource "google_compute_network" "apigee_network" {
+  name = "apigee-network"
+}
+
+resource "google_compute_global_address" "apigee_range" {
+  name          = "apigee-range"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = google_compute_network.apigee_network.id
+}
+
+resource "google_service_networking_connection" "apigee_vpc_connection" {
+  network                 = google_compute_network.apigee_network.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.apigee_range.name]
+}
+
+resource "google_apigee_organization" "apigee_org" {
+  analytics_region   = "us-central1"
+  project_id         = data.google_client_config.current.project
+  authorized_network = google_compute_network.apigee_network.id
+  depends_on         = [google_service_networking_connection.apigee_vpc_connection]
+}
+
+resource "google_apigee_instance" "apigee_instance" {
+  name               = "{{index $.Vars "instance_name"}}"
+  location           = "us-central1"
+  org_id             = google_apigee_organization.apigee_org.id
+  peering_cidr_range = "SLASH_22"
+}
+
+resource "google_apigee_space" "space" {
+  org_id       = google_apigee_organization.apigee_org.id
+  name         = "{{index $.Vars "space_name"}}"
+  display_name = "{{index $.Vars "space_display_name"}}"
+}
+
+resource "google_apigee_api_product" "space_api_product" {
+  org_id        = google_apigee_organization.apigee_org.id
+  space         = google_apigee_space.space.name
+  name          = "{{index $.Vars "product_name"}}"
+  display_name  = "My Space API Product"
+
+  approval_type = "auto"
+
+  depends_on = [
+    google_apigee_instance.apigee_instance,
+    google_apigee_space.space
+  ]
+}
