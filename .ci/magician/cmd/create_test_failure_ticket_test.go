@@ -16,15 +16,10 @@
 package cmd
 
 import (
-	"context"
-	"encoding/json"
-	"net/http"
 	"testing"
 
 	"magician/provider"
 
-	"github.com/google/go-github/v68/github"
-	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -72,12 +67,13 @@ func TestConvertTestNameToResource(t *testing.T) {
 			got := convertTestNameToResource(tc.testName)
 			assert.Equal(t, tc.want, got)
 		})
-	}}
+	}
+}
 
 func TestIsTerraformTeamOwned(t *testing.T) {
 	cases := map[string]struct {
-		tf      testFailure
-		want    bool
+		tf   testFailure
+		want bool
 	}{
 		"GA Quota Error": {
 			tf: testFailure{
@@ -127,7 +123,7 @@ func TestIsTerraformTeamOwned(t *testing.T) {
 			want: false,
 		},
 		"Nil Error Types": {
-			tf: testFailure{},
+			tf:   testFailure{},
 			want: false,
 		},
 	}
@@ -165,7 +161,7 @@ func TestShouldCreateTicket(t *testing.T) {
 				},
 			},
 			existTestNames: []string{"TestAccExisting"},
-			want: false,
+			want:           false,
 		},
 		"Closed today": {
 			tf: testFailure{
@@ -175,11 +171,11 @@ func TestShouldCreateTicket(t *testing.T) {
 				},
 			},
 			todayClosedTestNames: []string{"TestAccClosed"},
-			want: false,
+			want:                 false,
 		},
 		"Team owned error - create": {
 			tf: testFailure{
-				TestName: "TestAccTeamOwned",
+				TestName:   "TestAccTeamOwned",
 				ErrorTypes: map[provider.Version]string{provider.GA: "Quota"},
 				FailureRateLabels: map[provider.Version]testFailureRateLabel{
 					provider.GA:   testFailure10, // Normally wouldn't create
@@ -226,7 +222,7 @@ func TestShouldCreateTicket(t *testing.T) {
 	}
 }
 
-func TestCreateTicket_Labeling(t *testing.T) {
+func TestGetTicketLabels(t *testing.T) {
 	cases := map[string]struct {
 		tf           testFailure
 		expectLabels []string
@@ -239,10 +235,6 @@ func TestCreateTicket_Labeling(t *testing.T) {
 				FailureRateLabels: map[provider.Version]testFailureRateLabel{
 					provider.GA: testFailure10,
 				},
-				// Ensure maps are initialized
-				DebugLogLinks:     map[provider.Version]string{provider.GA: "", provider.Beta: ""},
-				ErrorMessageLinks: map[provider.Version]string{provider.GA: "", provider.Beta: ""},
-				FailureRates:      map[provider.Version]string{provider.GA: "", provider.Beta: ""},
 			},
 			expectLabels: []string{"size/xs", "test-failure", "test-failure-10", "service/terraform"},
 		},
@@ -254,10 +246,6 @@ func TestCreateTicket_Labeling(t *testing.T) {
 				FailureRateLabels: map[provider.Version]testFailureRateLabel{
 					provider.GA: testFailure50,
 				},
-				// Ensure maps are initialized
-				DebugLogLinks:     map[provider.Version]string{provider.GA: "", provider.Beta: ""},
-				ErrorMessageLinks: map[provider.Version]string{provider.GA: "", provider.Beta: ""},
-				FailureRates:      map[provider.Version]string{provider.GA: "", provider.Beta: ""},
 			},
 			expectLabels: []string{"size/xs", "test-failure", "test-failure-50", "service/compute-instances"},
 		},
@@ -269,10 +257,6 @@ func TestCreateTicket_Labeling(t *testing.T) {
 				FailureRateLabels: map[provider.Version]testFailureRateLabel{
 					provider.GA: testFailure100,
 				},
-				// Ensure maps are initialized
-				DebugLogLinks:     map[provider.Version]string{provider.GA: "", provider.Beta: ""},
-				ErrorMessageLinks: map[provider.Version]string{provider.GA: "", provider.Beta: ""},
-				FailureRates:      map[provider.Version]string{provider.GA: "", provider.Beta: ""},
 			},
 			expectLabels: []string{"size/xs", "test-failure", "test-failure-100", "service/terraform"},
 		},
@@ -280,27 +264,9 @@ func TestCreateTicket_Labeling(t *testing.T) {
 
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
-			httpmock.Activate()
-			defer httpmock.DeactivateAndReset()
-
-			httpmock.RegisterResponder("POST", "https://api.github.com/repos/hashicorp/terraform-provider-google/issues",
-				func(req *http.Request) (*http.Response, error) {
-					var issueReq github.IssueRequest
-					if err := json.NewDecoder(req.Body).Decode(&issueReq); err != nil {
-						return httpmock.NewStringResponse(400, "Invalid request body"), nil
-					}
-
-					assert.ElementsMatch(t, tc.expectLabels, *issueReq.Labels)
-
-					return httpmock.NewStringResponse(201, `{}`),
-						nil
-				},
-			)
-
-			ghClient := github.NewClient(nil)
-			ctx := context.Background()
-			err := createTicket(ctx, ghClient, &tc.tf)
+			labels, err := computeTicketLabels(&tc.tf)
 			assert.NoError(t, err)
+			assert.ElementsMatch(t, tc.expectLabels, labels)
 		})
 	}
 }

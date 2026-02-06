@@ -416,13 +416,7 @@ func ListIssuesWithOpts(ctx context.Context, gh *github.Client, opts *github.Iss
 	return allIssues, nil
 }
 
-func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailure) error {
-	issueTitle := fmt.Sprintf("Failing test(s): %s", testFailure.TestName)
-	issueBody, err := formatIssueBody(*testFailure)
-	if err != nil {
-		return fmt.Errorf("error formatting issue body: %w", err)
-	}
-
+func computeTicketLabels(testFailure *testFailure) ([]string, error) {
 	failureRatelabel := testFailure.FailureRateLabels[provider.GA].String()
 
 	if testFailure.FailureRateLabels[provider.Beta] > testFailure.FailureRateLabels[provider.GA] {
@@ -443,7 +437,7 @@ func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailu
 		// Apply service labels to forward test failure ticket automatically
 		regexpLabels, err := labeler.BuildRegexLabels(labeler.EnrolledTeamsYaml)
 		if err != nil {
-			return fmt.Errorf("error building regex labels: %w", err)
+			return nil, fmt.Errorf("error building regex labels: %w", err)
 		}
 		labels = labeler.ComputeLabels([]string{testFailure.AffectedResource}, regexpLabels)
 
@@ -453,6 +447,20 @@ func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailu
 		}
 	}
 	ticketLabels = append(ticketLabels, labels...)
+	return ticketLabels, nil
+}
+
+func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailure) error {
+	issueTitle := fmt.Sprintf("Failing test(s): %s", testFailure.TestName)
+	issueBody, err := formatIssueBody(*testFailure)
+	if err != nil {
+		return fmt.Errorf("error formatting issue body: %w", err)
+	}
+
+	ticketLabels, err := computeTicketLabels(testFailure)
+	if err != nil {
+		return fmt.Errorf("error getting ticket labels: %w", err)
+	}
 
 	issueRquest := &github.IssueRequest{
 		Title:  github.String(issueTitle),
