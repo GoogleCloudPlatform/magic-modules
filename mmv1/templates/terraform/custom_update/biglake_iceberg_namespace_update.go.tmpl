@@ -26,7 +26,7 @@ if d.HasChange("properties") {
 		"updates":  updates,
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ "{{" }}BiglakeIcebergBasePath{{ "}}" }}restcatalog/v1/projects/{{ "{{" }}project{{ "}}" }}/catalogs/{{ "{{" }}catalog{{ "}}" }}/namespaces/{{ "{{" }}namespace_id{{ "}}" }}/properties")
+	url, err := tpgresource.ReplaceVars(d, config, "{{ "{{" }}BiglakeIcebergBasePath{{ "}}" }}iceberg/v1/restcatalog/v1/projects/{{ "{{" }}project{{ "}}" }}/catalogs/{{ "{{" }}catalog{{ "}}" }}/namespaces/{{ "{{" }}namespace_id{{ "}}" }}/properties")
 	if err != nil {
 		return err
 	}

@@ -16,9 +16,13 @@ name: 'IcebergNamespace'
 description: |
   IcebergNamespaces are containers for Apache Iceberg Tables within an IcebergCatalog.
 supports_indirect_user_project_override: true
-base_url: 'restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces'
-self_link: 'restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
+base_url: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces'
+self_link: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
 id_format: 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
+import_format:
+  - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
+  - '{{project}}/{{catalog}}/{{namespace_id}}'
+  - '{{catalog}}/{{namespace_id}}'
 immutable: false
 custom_code:
   custom_update: 'templates/terraform/custom_update/biglake_iceberg_namespace_update.go.tmpl'
@@ -33,9 +37,7 @@ parameters:
 properties:
   - name: 'namespace_id'
     api_name: 'namespace'
-    type: Array
-    item_type:
-      type: String
+    type: String
     description: |
       The unique identifier of the namespace.
     required: true
@@ -50,7 +52,7 @@ properties:
     default_from_api: true
     diff_suppress_func: 'icebergNamespacePropertiesDiffSuppress'
 iam_policy:
-  base_url: '../../v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
+  base_url: 'v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
   parent_resource_attribute: 'namespace_id'
   method_name_separator: ":"
   fetch_iam_policy_verb: 'GET'
