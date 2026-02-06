@@ -78,6 +78,8 @@ type Product struct {
 	// The compiler to generate the downstream files, for example "terraformgoogleconversion-codegen".
 	Compiler string `yaml:"-"`
 
+	ProviderName string `yaml:"-"`
+
 	// ImportPath contains the prefix used for importing packages in generated files.
 	ImportPath string `yaml:"-"`
 }

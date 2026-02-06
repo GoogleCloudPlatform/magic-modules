@@ -896,11 +896,15 @@ func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type)
 	if len(propWithWoConfigured.RequiredWith) > 0 {
 		log.Fatalf("WriteOnly property '%s' in resource '%s' cannot have RequiredWith set. This combination is not supported.", propWithWoConfigured.Name, r.Name)
 	}
-	woFieldName := fmt.Sprintf("%sWo", propWithWoConfigured.Name)
-	woVersionFieldName := fmt.Sprintf("%sVersion", woFieldName)
-	writeOnlyField := buildWriteOnlyField(woFieldName, woVersionFieldName, propWithWoConfigured)
-	writeOnlyVersionField := buildWriteOnlyVersionField(woVersionFieldName, propWithWoConfigured, writeOnlyField)
-	props = append(props, writeOnlyField, writeOnlyVersionField)
+	// Don't add write only fields to tgc, as write only fields don't exist in tfplan json,
+	// the input of tfplan2cai.
+	if !strings.HasPrefix(r.ProductMetadata.ProviderName, "tgc") {
+		woFieldName := fmt.Sprintf("%sWo", propWithWoConfigured.Name)
+		woVersionFieldName := fmt.Sprintf("%sVersion", woFieldName)
+		writeOnlyField := buildWriteOnlyField(woFieldName, woVersionFieldName, propWithWoConfigured)
+		writeOnlyVersionField := buildWriteOnlyVersionField(woVersionFieldName, propWithWoConfigured, writeOnlyField)
+		props = append(props, writeOnlyField, writeOnlyVersionField)
+	}
 	return props
 }
 
