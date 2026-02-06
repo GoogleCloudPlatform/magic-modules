@@ -19,22 +19,28 @@ references:
   guides:
     "Managing Spaces": "https://cloud.google.com/apigee/docs/api-platform/system-administration/spaces/manage-spaces"
   api: "https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.spaces"
-docs:
-base_url: "organizations/{{org_id}}/spaces"
-self_link: "organizations/{{org_id}}/spaces/{{name}}"
+base_url: "{{org_id}}/spaces"
+create_url: "{{org_id}}/spaces?spaceId={{space_id}}"
+self_link: "{{org_id}}/spaces/{{space_id}}"
+update_verb: 'PATCH'
+update_mask: true
 import_format:
-  - "organizations/{{org_id}}/spaces/{{name}}"
-  - "{{org_id}}/{{name}}"
+  - "{{org_id}}/spaces/{{space_id}}"
+  - "{{org_id}}/{{space_id}}"
+autogen_async: true
 iam_policy:
   method_name_separator: ':'
-  parent_resource_attribute: 'space'
+  parent_resource_attribute: 'name'
   fetch_iam_policy_verb: 'GET'
   set_iam_policy_verb: 'POST'
   wrapped_policy_obj: false
   allowed_iam_role: 'roles/apigee.spaceViewer'
+  import_format:
+    - "{{org_id}}/spaces/{{space_id}}"
+    - "{{org_id}}/{{space_id}}"
 examples:
   - name: "apigee_space_basic"
-    primary_resource_id: "apigee_space"
+    primary_resource_id: "space"
     vars:
       name: "my-space"
       display_name: "My Space"
@@ -44,8 +50,7 @@ parameters:
   - name: "orgId"
     type: String
     description: |
-      The Apigee Organization associated with the Apigee Space,
-      in the format `organizations/{{org_name}}`.
+      The Apigee Organization associated with the Apigee Space, in the format `organizations/{{org_name}}`.
     url_param_only: true
     required: true
     immutable: true
@@ -60,8 +65,7 @@ properties:
   - name: "name"
     type: String
     description: |
-      Identifier. Id of the space. 
-      This field is used as the resource name, and must follow AIP-122 guidelines.
+      Identifier. Id of the space. This field is used as the resource name, and must follow AIP-122 guidelines.
     output: true
   - name: "displayName"
     type: String

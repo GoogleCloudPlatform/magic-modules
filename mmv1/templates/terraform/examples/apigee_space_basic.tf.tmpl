@@ -1,11 +1,11 @@
 data "google_client_config" "current" {}
 
 resource "google_compute_network" "apigee_network" {
-  name = "apigee-network"
+  name = "apigee-network-{{index $.Vars "name"}}"
 }
 
 resource "google_compute_global_address" "apigee_range" {
-  name          = "apigee-range"
+  name          = "apigee-range-{{index $.Vars "name"}}"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
@@ -28,6 +28,5 @@ resource "google_apigee_organization" "apigee_org" {
 resource "google_apigee_space" "space" {
   org_id       = google_apigee_organization.apigee_org.id
   space_id     = "{{index $.Vars "name"}}"
-  name         = "organizations/${google_apigee_organization.apigee_org.name}/spaces/{{index $.Vars "name"}}"
   display_name = "{{index $.Vars "display_name"}}"
 }

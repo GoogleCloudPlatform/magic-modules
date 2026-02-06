@@ -8,23 +8,27 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccApigeeSpace_handwritten(t *testing.T) {
+func TestAccApigeeSpace_basicTest(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
 		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
-		"space_name":      "test-space-" + acctest.RandString(t, 10),
+		"space_id":      "test-space",
 		"display_name":    "Test Space",
+		"random_suffix":   acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		CheckDestroy:             testAccCheckApigeeSpaceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccApigeeSpace_handwrittenConfig(context),
+				Config: testAccApigeeSpace_basicTest(context),
 			},
 			{
 				ResourceName:      "google_apigee_space.primary",
@@ -35,11 +39,11 @@ func TestAccApigeeSpace_handwritten(t *testing.T) {
 	})
 }
 
-func testAccApigeeSpace_handwrittenConfig(context map[string]interface{}) string {
+func testAccApigeeSpace_basicTest(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_project" "project" {
-  project_id      = "%{org_id}-%{space_name}"
-  name            = "%{org_id}-%{space_name}"
+  project_id      = "tf-test%{random_suffix}"
+  name            = "tf-test%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
   deletion_policy = "DELETE"
@@ -50,9 +54,25 @@ resource "google_project_service" "apigee" {
   service = "apigee.googleapis.com"
 }
 
+resource "google_project_service" "compute" {
+  project = google_project.project.project_id
+  service = "compute.googleapis.com"
+}
+
+resource "google_project_service" "servicenetworking" {
+  project = google_project.project.project_id
+  service = "servicenetworking.googleapis.com"
+}
+
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_project_service.compute, google_project_service.servicenetworking]
+}
+
 resource "google_compute_network" "apigee_network" {
   name    = "apigee-network"
   project = google_project.project.project_id
+  depends_on = [time_sleep.wait_120_seconds]
 }
 
 resource "google_compute_global_address" "apigee_range" {
@@ -82,9 +102,9 @@ resource "google_apigee_organization" "apigee_org" {
 
 resource "google_apigee_space" "primary" {
   org_id       = google_apigee_organization.apigee_org.id
-  space_id     = "%{space_name}"
-  name         = "organizations/${google_apigee_organization.apigee_org.name}/spaces/%{space_name}"
+  space_id     = "%{space_id}"
   display_name = "%{display_name}"
 }
 `, context)
 }
+

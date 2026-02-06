@@ -34,7 +34,7 @@ The following arguments are supported:
   (Required)
   Path to the config zip bundle.
 
-* `space_id` -
+* `space` -
   (Optional)
   The id of the space.
 
