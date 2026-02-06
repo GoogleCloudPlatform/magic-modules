@@ -1,4 +1,4 @@
-data "google_project" {}
+data "google_project" "project" {}
 
 resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
   display_name = "{{index $.Vars "name"}}"
@@ -9,7 +9,7 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
     source_code_spec {
       developer_connect_source {
         config {
-          git_repository_link = "projects/${data.google_project.project_id}/locations/us-central1/connections/tpg-test-bot-github/gitRepositoryLinks/tpg-test-vertex-reasoning"
+          git_repository_link = "projects/${data.google_project.project.project_id}/locations/us-central1/connections/tpg-test-bot-github/gitRepositoryLinks/tpg-test-vertex-reasoning"
           dir                 = "source"
           revision            = "main"
         }
