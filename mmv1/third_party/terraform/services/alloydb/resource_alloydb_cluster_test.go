@@ -1814,7 +1814,7 @@ func TestAccAlloydbCluster_withPasswordWo(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix":     acctest.RandString(t, 10),
 		"random_password_1": acctest.RandString(t, 16),
 		"random_password_2": acctest.RandString(t, 16),
 	}
@@ -1919,4 +1919,3 @@ resource "google_compute_network" "default" {
 }
 `, context)
 }
-
