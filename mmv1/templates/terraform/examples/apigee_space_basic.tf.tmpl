@@ -27,6 +27,7 @@ resource "google_apigee_organization" "apigee_org" {
 
 resource "google_apigee_space" "space" {
   org_id       = google_apigee_organization.apigee_org.id
-  name         = "{{index $.Vars "name"}}"
+  space_id     = "{{index $.Vars "name"}}"
+  name         = "organizations/${google_apigee_organization.apigee_org.name}/spaces/{{index $.Vars "name"}}"
   display_name = "{{index $.Vars "display_name"}}"
 }
