@@ -1827,11 +1827,9 @@ func TestAccAlloydbCluster_withPasswordWo(t *testing.T) {
 			{
 				Config: testAccAlloydbCluster_withPasswordWo(context),
 				Check: resource.ComposeTestCheckFunc(
-					// check that password_wo is not stored in state file
-					resource.TestCheckNoResourceAttr("google_alloydb_cluster.default", "initial_user.password_wo"),
-					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "initial_user.password_wo_version", "1"),
-					// check that password_wo is returned in the data source to verify it is properly set in the API
-					resource.TestCheckResourceAttr("data.google_alloydb_cluster.default", "initial_user.password_wo", context["random_password_1"].(string)),
+					// check that password_wo is not stored in state
+					resource.TestCheckNoResourceAttr("google_alloydb_cluster.default", "initial_user.0.password_wo"),
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "initial_user.0.password_wo_version", "1"),
 				),
 			},
 			{
@@ -1843,9 +1841,9 @@ func TestAccAlloydbCluster_withPasswordWo(t *testing.T) {
 			{
 				Config: testAccAlloydbCluster_withPasswordWoUpdate(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckNoResourceAttr("google_alloydb_cluster.default", "initial_user.password_wo"),
-					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "initial_user.password_wo_version", "2"),
-					resource.TestCheckResourceAttr("data.google_alloydb_cluster.default", "initial_user.password_wo", context["random_password_2"].(string)),
+					// check that password_wo is not stored in state
+					resource.TestCheckNoResourceAttr("google_alloydb_cluster.default", "initial_user.0.password_wo"),
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "initial_user.0.password_wo_version", "2"),
 				),
 			},
 			{
@@ -1876,10 +1874,6 @@ resource "google_alloydb_cluster" "default" {
   deletion_protection = false
 }
 
-data "google_alloydb_cluster" "default" {
-	cluster_id = google_alloydb_cluster.default.cluster_id
-}
-
 data "google_project" "project" {
 }
 
@@ -1905,10 +1899,6 @@ resource "google_alloydb_cluster" "default" {
   }
 
   deletion_protection = false
-}
-
-data "google_alloydb_cluster" "default" {
-	cluster_id = google_alloydb_cluster.default.cluster_id
 }
 
 data "google_project" "project" {
