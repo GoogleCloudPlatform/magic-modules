@@ -149,6 +149,7 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
 		resources = ["*"]
 		roles = ["roles/bigquery.admin"]
 	}
+	depends_on = [google_access_context_manager_service_perimeter_ingress_policy.test-access1]
 }
 
 resource "google_access_context_manager_service_perimeter_ingress_policy" "test-identity1" {
@@ -163,6 +164,7 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
 		resources = ["*"]
 		roles = ["roles/bigquery.admin"]
 	}
+	depends_on = [google_access_context_manager_service_perimeter_ingress_policy.test-access2]
 }
 
 `, testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName), strings.ToUpper(serviceAccount))

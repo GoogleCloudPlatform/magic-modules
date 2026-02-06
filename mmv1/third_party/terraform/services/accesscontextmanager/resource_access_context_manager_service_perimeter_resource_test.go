@@ -106,6 +106,8 @@ resource "google_access_context_manager_service_perimeter_resource" "test-access
 resource "google_access_context_manager_service_perimeter_resource" "test-access2" {
   perimeter_name = google_access_context_manager_service_perimeter.test-access.name
   resource = "projects/%d"
+
+  depends_on = [google_access_context_manager_service_perimeter_resource.test-access1]
 }
 `, testAccAccessContextManagerServicePerimeterResource_destroy(org, policyTitle, perimeterTitleName), projectNumber1, projectNumber2)
 }
