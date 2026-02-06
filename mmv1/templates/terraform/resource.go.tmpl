@@ -689,7 +689,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 {{- end}}
 {{- if and $.ProductMetadata.DeletionPolicyOptIn (not $.DeletionPolicyExclude) }}
     if _, ok := d.GetOkExists("deletion_policy"); !ok {
-        if err := d.Set("deletion_policy", {{ $.DeletionPolicyDefault -}}); err != nil {
+        if err := d.Set("deletion_policy", "{{ $.DeletionPolicyDefault -}}"); err != nil {
             return fmt.Errorf("Error setting deletion_policy: %s", err)
         }
     }
