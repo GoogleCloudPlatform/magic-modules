@@ -33,11 +33,15 @@ import (
 {{- end }}
 
 	"{{ $.ImportPath }}/acctest"
-{{- if $.Res.NeedsEnvVar }}
 	"{{ $.ImportPath  }}/envvar"
-{{- end }}
 	"{{ $.ImportPath  }}/tpgresource"
 	transport_tpg "{{ $.ImportPath  }}/transport"
+)
+
+var (
+	_ = envvar.TestEnvVar
+	_ = tpgresource.SetLabels
+	_ = plancheck.ExpectNonEmptyPlan
 )
 
 {{ range $s := $.Res.TestSamples }}

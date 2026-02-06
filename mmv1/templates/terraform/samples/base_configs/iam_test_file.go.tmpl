@@ -11,9 +11,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-{{- if $.IamPolicy.IamConditionsRequestType }}
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
-{{- end }}
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath }}/envvar"
@@ -25,6 +23,7 @@ var (
     _ = strings.Trim
     _ = envvar.TestEnvVar
     _ = tpgresource.SetLabels
+    _ = plancheck.ExpectNonEmptyPlan
 )
 
 

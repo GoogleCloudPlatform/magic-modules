@@ -26,15 +26,15 @@ docs:
     Your account must have the `serviceusage.services.use` permission on the
     `billing_project` you defined.
 supports_indirect_user_project_override: true
-base_url: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs'
-self_link: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs/{{name}}'
+base_url: 'restcatalog/extensions/projects/{{project}}/catalogs'
+self_link: 'restcatalog/extensions/projects/{{project}}/catalogs/{{name}}'
 immutable: false
-create_url: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs?iceberg-catalog-id={{name}}'
+create_url: 'restcatalog/extensions/projects/{{project}}/catalogs?iceberg-catalog-id={{name}}'
 custom_code:
   custom_update:
     templates/terraform/custom_update/biglake_iceberg_catalog_update.go.tmpl
 iam_policy:
-  base_url: 'v1/projects/{{project}}/catalogs/{{name}}'
+  base_url: '../../v1/projects/{{project}}/catalogs/{{name}}'
   parent_resource_attribute: 'name'
   method_name_separator: ":"
   fetch_iam_policy_verb: 'GET'
