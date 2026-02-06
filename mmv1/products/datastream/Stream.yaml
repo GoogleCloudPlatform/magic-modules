@@ -1686,7 +1686,7 @@ properties:
                       See https://cloud.google.com/bigquery/docs/customer-managed-encryption for more information.
                     immutable: true
               - name: 'projectId'
-                type: string
+                type: String
                 description: |
                   Optional. The project id of the BigQuery dataset. If not specified, the project will be inferred from the stream resource.
           - name: 'blmtConfig'

@@ -107,7 +107,7 @@ properties:
               Map of interconnect details.
             properties:
               - name: interconnect
-                type: string
+                type: String
               - name: vlanTags
                 type: Array
                 description: |
@@ -126,7 +126,7 @@ properties:
     min_version: 'beta'
     properties:
       - name: type
-        type: enum
+        type: Enum
         description: |
           Type of wire group (enum).
           WIRE: a single pseudowire over two Interconnect connections   with no redundancy.
@@ -146,7 +146,7 @@ properties:
         description: |
           The unmetered bandwidth setting.
       - name: faultResponse
-        type: enum
+        type: Enum
         description: |
           Response when a fault is detected in a pseudowire:
           NONE: default.
@@ -155,7 +155,7 @@ properties:
           - 'NONE'
           - 'DISABLE_PORT'
       - name: bandwidthAllocation
-        type: enum
+        type: Enum
         required: true
         description: |
           The configuration of a wire's bandwidth allocation.
@@ -175,7 +175,7 @@ properties:
       type: NestedObject
       properties:
         - name: label
-          type: string
+          type: String
           output: true
         - name: endpoints
           type: Array
@@ -186,7 +186,7 @@ properties:
             type: NestedObject
             properties:
               - name: interconnect
-                type: string
+                type: String
                 output: true
               - name: vlanTag
                 type: Integer
@@ -199,7 +199,7 @@ properties:
               type: Integer
               output: true
             - name: faultResponse
-              type: enum
+              type: Enum
               output: true
               enum_values:
                 - 'NONE'
@@ -220,8 +220,8 @@ properties:
           type: NestedObject
           properties:
             - name: label
-              type: string
+              type: String
               output: true
             - name: city
-              type: string
+              type: String
               output: true
