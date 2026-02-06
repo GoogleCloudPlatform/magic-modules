@@ -3,15 +3,13 @@ resource "google_backup_dr_restore_workload" "{{$.PrimaryResourceId}}" {
   backup_vault_id  = "{{index $.Vars "backup_vault_id"}}"
   data_source_id   = "{{index $.Vars "data_source_id"}}"
   backup_id        = "{{index $.Vars "backup_id"}}"
-  
-  name = "{{index $.Vars "backup_name"}}"
 
   region_disk_target_environment {
     project = "{{index $.TestEnvVars "project"}}"
     region  = "us-central1"
     replica_zones = [
-      "us-central1-a",
-      "us-central1-b"
+      "projects/{{index $.TestEnvVars "project"}}/zones/us-central1-a",
+      "projects/{{index $.TestEnvVars "project"}}/zones/us-central1-b"
     ]
   }
 

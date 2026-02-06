@@ -21,6 +21,7 @@ import (
 	"magician/provider"
 	"magician/teamcity"
 	utils "magician/utility"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -138,8 +139,13 @@ func execCollectNightlyTestStatus(now time.Time, tc TeamcityClient, gcs Cloudsto
 
 func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs CloudstorageClient, formattedStartCut, formattedFinishCut, date string) error {
 
+	baseLocator := fmt.Sprintf("count:500,project:%s,branch:refs/heads/nightly-test,queuedDate:(date:%s,condition:before),queuedDate:(date:%s,condition:after)", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
+	fields := "build(id,buildTypeId,buildConfName,webUrl,number,queuedDate,startDate,finishDate)"
+	params := url.Values{}
+
 	// Check Queued Builds
-	queuedBuilds, err := tc.GetBuilds("queued", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
+	params.Set("locator", fmt.Sprintf("%s,state:queued", baseLocator))
+	queuedBuilds, err := tc.GetBuilds(params)
 	if err != nil {
 		return fmt.Errorf("failed to get queued builds: %w", err)
 	}
@@ -149,7 +155,9 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 	}
 
 	// Check Running Builds
-	runningBuilds, err := tc.GetBuilds("running", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
+	params.Set("locator", fmt.Sprintf("%s,state:running,tag:cron-trigger", baseLocator))
+	params.Set("fields", fields)
+	runningBuilds, err := tc.GetBuilds(params)
 	if err != nil {
 		return fmt.Errorf("failed to get running builds: %w", err)
 	}
@@ -159,7 +167,9 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 	}
 
 	// Get all service test builds
-	builds, err := tc.GetBuilds("finished", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
+	params.Set("locator", fmt.Sprintf("%s,state:finished,tag:cron-trigger", baseLocator))
+	params.Set("fields", fields)
+	builds, err := tc.GetBuilds(params)
 	if err != nil {
 		return fmt.Errorf("failed to get finished builds: %w", err)
 	}

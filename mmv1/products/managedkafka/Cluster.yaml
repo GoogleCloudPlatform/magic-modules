@@ -13,6 +13,8 @@
 
 ---
 name: 'Cluster'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description: A Managed Service for Apache Kafka cluster. Apache Kafka is a trademark owned by the Apache Software Foundation.
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}'
