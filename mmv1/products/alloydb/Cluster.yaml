@@ -339,6 +339,7 @@ properties:
         description: |
           The initial password for the user.
         sensitive: true
+        write_only: true
         is_missing_in_cai: true
         at_least_one_of:
           - 'initial_user.0.user'
