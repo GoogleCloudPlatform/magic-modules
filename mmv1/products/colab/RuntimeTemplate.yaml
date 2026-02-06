@@ -90,15 +90,9 @@ properties:
         description: |
                 The Compute Engine machine type selected for the runtime.
       - name: 'acceleratorType'
-        type: Enum
+        type: String
         description: |
                 The type of hardware accelerator used by the runtime. If specified, acceleratorCount must also be specified.
-        enum_values:
-          - 'NVIDIA_TESLA_V100'
-          - 'NVIDIA_TESLA_T4'
-          - 'NVIDIA_TESLA_A100'
-          - 'NVIDIA_A100_80GB'
-          - 'NVIDIA_L4'
       - name: 'acceleratorCount'
         type: Integer
         default_from_api: true

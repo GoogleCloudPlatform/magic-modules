@@ -163,7 +163,6 @@ properties:
           SHARED_WITH_WIRE_GROUP: this is the default behavior, which configures one unmetered bandwidth allocation for the wire group. The unmetered bandwidth is divided equally across each wire in the group, but dynamic
           throttling reallocates unused unmetered bandwidth from unused or underused wires to other wires in the group.
         enum_values:
-          - 'UNSPECIFIED_BANDWIDTH_ALLOCATION'
           - 'ALLOCATE_PER_WIRE'
           - 'SHARED_WITH_WIRE_GROUP'
   - name: wires
