@@ -32,7 +32,7 @@ import_format:
   - projects/{{project}}/locations/{{location}}/multicastDomainActivations/{{multicast_domain_activation_id}}
 sweeper:
   url_substitutions:
-    - zone: "us-central1-b"
+    - location: "us-central1-b"
 examples:
   - name: network_services_multicast_domain_activation_basic
     primary_resource_id: mda_test
