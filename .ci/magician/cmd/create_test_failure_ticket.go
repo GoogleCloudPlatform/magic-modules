@@ -80,9 +80,18 @@ type testFailure struct {
 	AffectedResource  string
 	DebugLogLinks     map[provider.Version]string
 	ErrorMessageLinks map[provider.Version]string
+	ErrorTypes        map[provider.Version]string
 	FailureRates      map[provider.Version]string
 	FailureRateLabels map[provider.Version]testFailureRateLabel
 }
+
+var (
+	// teamOwnedErrorTypes defines errors owned by terraform team
+	teamOwnedErrorTypes = map[string]bool{
+		"Quota":                             true,
+		"API enablement (Test environment)": true,
+	}
+)
 
 // createTestFailureTicketCmd represents the createTestFailureTicket command
 var createTestFailureTicketCmd = &cobra.Command{
@@ -172,7 +181,7 @@ func execCreateTestFailureTicket(now time.Time, gh *github.Client, gcs Cloudstor
 
 	// Create tickets
 	for _, testFailure := range testFailuresToday {
-		if shouldCreateTicket(*testFailure, existTestNames, closedTestNames) {
+		if shouldCreateTicket(testFailure, existTestNames, closedTestNames) {
 			err := createTicket(ctx, gh, testFailure)
 			if err != nil {
 				return fmt.Errorf("error creating test failure ticket: %w", err)
@@ -202,6 +211,7 @@ func lastNDaysTestFailureMap(pVersion provider.Version, n int, now time.Time, gc
 						TestName:          testName,
 						AffectedResource:  testInfo.Resource,
 						ErrorMessageLinks: map[provider.Version]string{provider.GA: "", provider.Beta: ""},
+						ErrorTypes:        map[provider.Version]string{provider.GA: "", provider.Beta: ""},
 						DebugLogLinks:     map[provider.Version]string{provider.GA: "", provider.Beta: ""},
 						FailureRates:      map[provider.Version]string{provider.GA: "N/A", provider.Beta: "N/A"},
 						FailureRateLabels: map[provider.Version]testFailureRateLabel{provider.GA: testFailure0, provider.Beta: testFailure0},
@@ -215,6 +225,7 @@ func lastNDaysTestFailureMap(pVersion provider.Version, n int, now time.Time, gc
 					return err
 				}
 				testFailuresToday[testName].ErrorMessageLinks[pVersion] = errorMessageLink
+				testFailuresToday[testName].ErrorTypes[pVersion] = testInfo.ErrorType
 				testFailuresToday[testName].DebugLogLinks[pVersion] = testInfo.LogLink
 			}
 		}
@@ -280,7 +291,7 @@ func getTestInfoList(pVersion provider.Version, date time.Time, gcs Cloudstorage
 	return testInfoList, nil
 }
 
-func shouldCreateTicket(testfailure testFailure, existTestNames []string, todayClosedTestNames []string) bool {
+func shouldCreateTicket(testfailure *testFailure, existTestNames []string, todayClosedTestNames []string) bool {
 	if testfailure.FailureRateLabels[provider.GA] == testFailureNone && testfailure.FailureRateLabels[provider.Beta] == testFailureNone {
 		return false
 	}
@@ -293,6 +304,11 @@ func shouldCreateTicket(testfailure testFailure, existTestNames []string, todayC
 		if t == testfailure.TestName {
 			return false
 		}
+	}
+
+	// Immediately create team-owned test ticket
+	if IsTerraformTeamOwned(testfailure) {
+		return true
 	}
 
 	if testfailure.FailureRateLabels[provider.GA] >= testFailure50 || testfailure.FailureRateLabels[provider.Beta] >= testFailure50 {
@@ -334,6 +350,11 @@ func convertTestNameToResource(testName string) string {
 	}
 
 	return resourceName
+}
+
+func IsTerraformTeamOwned(testFailure *testFailure) bool {
+	return teamOwnedErrorTypes[testFailure.ErrorTypes[provider.GA]] ||
+		teamOwnedErrorTypes[testFailure.ErrorTypes[provider.Beta]]
 }
 
 func failingTestNamesFromActiveIssues(ctx context.Context, gh *github.Client) ([]string, error) {
@@ -395,13 +416,7 @@ func ListIssuesWithOpts(ctx context.Context, gh *github.Client, opts *github.Iss
 	return allIssues, nil
 }
 
-func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailure) error {
-	issueTitle := fmt.Sprintf("Failing test(s): %s", testFailure.TestName)
-	issueBody, err := formatIssueBody(*testFailure)
-	if err != nil {
-		return fmt.Errorf("error formatting issue body: %w", err)
-	}
-
+func computeTicketLabels(testFailure *testFailure) ([]string, error) {
 	failureRatelabel := testFailure.FailureRateLabels[provider.GA].String()
 
 	if testFailure.FailureRateLabels[provider.Beta] > testFailure.FailureRateLabels[provider.GA] {
@@ -414,14 +429,38 @@ func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailu
 		failureRatelabel,
 	}
 
-	// Apply service labels to forward test failure ticket automatically
-	regexpLabels, err := labeler.BuildRegexLabels(labeler.EnrolledTeamsYaml)
+	var labels []string
+	if IsTerraformTeamOwned(testFailure) {
+		// Apply terraform team label for team owned ticket
+		labels = []string{"service/terraform"}
+	} else {
+		// Apply service labels to forward test failure ticket automatically
+		regexpLabels, err := labeler.BuildRegexLabels(labeler.EnrolledTeamsYaml)
+		if err != nil {
+			return nil, fmt.Errorf("error building regex labels: %w", err)
+		}
+		labels = labeler.ComputeLabels([]string{testFailure.AffectedResource}, regexpLabels)
+
+		// Apply terraform team label if no service labels applied
+		if len(labels) == 0 {
+			labels = append(labels, "service/terraform")
+		}
+	}
+	ticketLabels = append(ticketLabels, labels...)
+	return ticketLabels, nil
+}
+
+func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailure) error {
+	issueTitle := fmt.Sprintf("Failing test(s): %s", testFailure.TestName)
+	issueBody, err := formatIssueBody(*testFailure)
 	if err != nil {
-		return fmt.Errorf("error building regex labels: %w", err)
+		return fmt.Errorf("error formatting issue body: %w", err)
 	}
 
-	labels := labeler.ComputeLabels([]string{testFailure.AffectedResource}, regexpLabels)
-	ticketLabels = append(ticketLabels, labels...)
+	ticketLabels, err := computeTicketLabels(testFailure)
+	if err != nil {
+		return fmt.Errorf("error getting ticket labels: %w", err)
+	}
 
 	issueRquest := &github.IssueRequest{
 		Title:  github.String(issueTitle),
