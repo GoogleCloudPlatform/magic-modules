@@ -629,7 +629,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("{{ $.ResourceName }} %q", d.Id()))
 {{- end}}
     }
-{{- if and $.CustomCode.PostRead }}
+{{- if and $.CustomCode.PostRead (not $.FlattenAllInMethod)}}
     {{ customTemplate $ $.CustomCode.PostRead false -}}
 {{- end }}
 
@@ -700,7 +700,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     }
 {{- end}}
 {{ if $.FlattenAllInMethod }}
-    err = flatten{{ $.ResourceName -}}(d, meta, res)
+    err = flatten{{ $.ResourceName -}}(d, meta, res, config, {{- if $.HasProject }}project{{ else }}""{{ end }}, userAgent)
     if err != nil {
         return err
     }
@@ -1325,9 +1325,10 @@ func resource{{ $.ResourceName -}}PostCreateSetComputedFields(d *schema.Resource
 {{- end }}
 
 {{ if $.FlattenAllInMethod }}
-func flatten{{ $.ResourceName -}}(d *schema.ResourceData, meta interface{}, res map[string]interface{}) error {
-    config := meta.(*transport_tpg.Config)
-
+func flatten{{ $.ResourceName -}}(d *schema.ResourceData, meta interface{}, res map[string]interface{}, config *transport_tpg.Config, project string, userAgent string) error {
+{{- if and $.CustomCode.PostRead }}
+    {{ customTemplate $ $.CustomCode.PostRead false -}}
+{{- end }}
 {{if $.NestedQuery -}}
     res, err := flattenNested{{ $.ResourceName -}}(d, meta, res)
     if err != nil {
