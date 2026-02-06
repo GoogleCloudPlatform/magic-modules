@@ -45,6 +45,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+flatten_all_in_method: true
 custom_code:
   constants: 'templates/terraform/constants/reservation.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/reservation.go.tmpl'
