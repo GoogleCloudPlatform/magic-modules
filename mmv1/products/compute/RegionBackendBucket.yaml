@@ -53,7 +53,9 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 iam_policy:
+  allowed_iam_role: 'roles/compute.admin'
   parent_resource_attribute: 'name'
+  iam_conditions_request_type: 'QUERY_PARAM'
   import_format:
     - 'projects/{{project}}/regions/{{region}}/backendBuckets/{{name}}'
     - '{{name}}'
