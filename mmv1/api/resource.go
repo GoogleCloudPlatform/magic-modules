@@ -1722,13 +1722,6 @@ func (r Resource) FirstTestConfig() TestConfig {
 	return TestConfig{}
 }
 
-func (r Resource) NeedsEnvVar() bool {
-	if r.ProductMetadata != nil && r.ProductMetadata.Name == "BiglakeIceberg" && (r.Name == "IcebergNamespace" || r.Name == "IcebergCatalog") {
-		return false
-	}
-	return true
-}
-
 func (r Resource) ExamplePrimaryResourceId() string {
 	examples := google.Reject(r.Examples, func(e *resource.Examples) bool {
 		return e.ExcludeTest
