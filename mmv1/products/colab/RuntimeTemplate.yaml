@@ -118,7 +118,7 @@ properties:
           - 'pd-balanced'
           - 'pd-extreme'
       - name: 'diskSizeGb'
-        type: String # Integer
+        type: String  # Integer
         default_from_api: true
         description: |
                 The disk size of the runtime in GB. If specified, the diskType must also be specified. The minimum size is 10GB and the maximum is 65536GB.
