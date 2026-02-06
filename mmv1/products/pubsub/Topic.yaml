@@ -113,14 +113,14 @@ examples:
       topic_name: 'example-topic'
       tag_key: 'tag_key'
       tag_value: 'tag_value'
-  - name: 'pubsub_topic_ai_inference'
-    primary_resource_id: 'example'
+  - name: pubsub_topic_ai_inference
+    primary_resource_id: example
     external_providers: ["time"]
     vars:
-      topic_name: 'example-topic'
-      service_account_id: 'example-sa'
+      topic_name: example-topic
+      service_account_id: example-sa
     test_env_vars:
-      project_name: 'PROJECT_NAME'
+      project_name: PROJECT_NAME
 parameters:
 properties:
   - name: 'name'
