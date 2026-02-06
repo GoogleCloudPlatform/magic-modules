@@ -38,6 +38,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+flatten_all_in_method: true
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/sql_database_deletion_policy.tmpl'
   pre_read: 'templates/terraform/pre_read/sql_database_activation_policy.tmpl'
