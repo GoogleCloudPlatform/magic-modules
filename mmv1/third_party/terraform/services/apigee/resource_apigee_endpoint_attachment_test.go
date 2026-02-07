@@ -34,7 +34,7 @@ func TestAccApigeeEndpointAttachment_apigeeEndpointAttachmentBasicTestExample(t 
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
-		CheckDestroy: testAccCheckApigeeEndpointAttachmentDestroyDefaultProducer(t),
+		CheckDestroy: testAccCheckApigeeEndpointAttachmentDefaultDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApigeeEndpointAttachment_apigeeEndpointAttachmentBasicTestExample(context),
@@ -220,7 +220,7 @@ resource "google_apigee_endpoint_attachment" "apigee_endpoint_attachment" {
 `, context)
 }
 
-func testAccCheckApigeeEndpointAttachmentDestroyDefaultProducer(t *testing.T) func(s *terraform.State) error {
+func testAccCheckApigeeEndpointAttachmentDefaultDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {
 			if rs.Type != "google_apigee_endpoint_attachment" {
