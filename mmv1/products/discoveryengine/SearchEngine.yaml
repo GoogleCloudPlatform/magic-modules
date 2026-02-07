@@ -134,7 +134,10 @@ properties:
       - name: 'requiredSubscriptionTier'
         type: Enum
         description: |
-          The required subscription tier of this engine. They cannot be modified after engine creation. If the required subscription tier is search, user with higher license tier like assist can still access the standalone app associated with this engine.
+          Optional. The required subscription tier of this engine. 
+          
+          They cannot be modified after engine creation. If the required subscription tier is search, user with 
+          higher license tier like assist can still access the standalone app associated with this engine.
         immutable: true
         required: false
         default_value: "SUBSCRIPTION_TIER_UNSPECIFIED"
