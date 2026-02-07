@@ -27,6 +27,24 @@ func TestAccComputeAddress_networkTier(t *testing.T) {
 	})
 }
 
+func TestAccComputeAddress_ipCollection(t *testing.T) {
+	t.Parallel()
+
+	suffix := acctest.RandString(t, 10)
+	octet := acctest.RandIntRange(t, 120, 127)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeAddressDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeAddress_ipCollection(suffix, octet),
+			},
+		},
+	})
+}
+
 func TestAccComputeAddress_internal(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -768,6 +786,23 @@ resource "google_compute_address" "foobar" {
   network_tier = "STANDARD"
 }
 `, i)
+}
+
+func testAccComputeAddress_ipCollection(suffix string, ipOctet int) string {
+	return fmt.Sprintf(`
+resource "google_compute_public_delegated_prefix" "sub_pdp" {
+  name          = "tf-test-sub-pdp-%s"
+  region        = "us-central1"
+  ip_cidr_range = "136.124.3.%d/32"
+  parent_prefix = "projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-enhanced-pdp-136-124-3-120-29"
+}
+
+resource "google_compute_address" "ip_collection" {
+  name          = "tf-test-address-%s"
+  region        = "us-central1"
+  ip_collection = google_compute_public_delegated_prefix.sub_pdp.self_link
+}
+`, suffix, ipOctet, suffix)
 }
 
 func TestAccComputeAddress_internalIpv6(t *testing.T) {
