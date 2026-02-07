@@ -182,13 +182,8 @@ properties:
         description: 'The configuration for the data disk of the runtime.'
         properties:
           - name: 'diskType'
-            type: Enum
+            type: String
             description: 'The type of the persistent disk.'
-            enum_values:
-              - 'pd-standard'
-              - 'pd-ssd'
-              - 'pd-balanced'
-              - 'pd-extreme'
           - name: 'diskSizeGb'
             type: String  # Integer
             description: |
