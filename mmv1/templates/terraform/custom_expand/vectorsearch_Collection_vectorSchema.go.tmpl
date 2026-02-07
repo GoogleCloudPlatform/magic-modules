@@ -1,0 +1,57 @@
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+  if v == nil {
+    return nil, nil
+  }
+
+  ls := v.([]interface{})
+  if len(ls) == 0 {
+    return nil, nil
+  }
+
+  apiMap := make(map[string]interface{})
+
+  for _, item := range ls {
+    itemMap := item.(map[string]interface{})
+    fieldName := itemMap["field_name"].(string)
+
+    vectorConfig := make(map[string]interface{})
+
+    if denseVectorList := itemMap["dense_vector"].([]interface{}); len(denseVectorList) > 0 {
+      denseVectorData := denseVectorList[0].(map[string]interface{})
+      vectorConfig["denseVector"] = expand{{$.GetPrefix}}{{$.TitlelizeProperty}}DenseVector(denseVectorData)
+    } else if sparseVectorList := itemMap["sparse_vector"].([]interface{}); len(sparseVectorList) > 0 {
+      // Assuming sparse_vector has no inner properties
+      vectorConfig["sparseVector"] = make(map[string]interface{})
+    } else {
+      // Should not happen if schema validation (conflicts_with) is working
+      return nil, fmt.Errorf("each vector_schema entry must have either dense_vector or sparse_vector")
+    }
+    apiMap[fieldName] = vectorConfig
+  }
+
+  return apiMap, nil
+}
+
+// Helper function to expand the dense_vector structure
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}DenseVector(data map[string]interface{}) map[string]interface{} {
+  denseMap := make(map[string]interface{})
+  if dim, ok := data["dimensions"]; ok {
+    denseMap["dimensions"] = dim.(int)
+  }
+
+  if vecList := data["vertex_embedding_config"].([]interface{}); len(vecList) > 0 {
+    vecData := vecList[0].(map[string]interface{})
+    vecMap := make(map[string]interface{})
+    if modelId, ok := vecData["model_id"]; ok {
+      vecMap["modelId"] = modelId.(string)
+    }
+    if taskType, ok := vecData["task_type"]; ok {
+      vecMap["taskType"] = taskType.(string)
+    }
+    if textTemplate, ok := vecData["text_template"]; ok {
+      vecMap["textTemplate"] = textTemplate.(string)
+    }
+    denseMap["vertexEmbeddingConfig"] = vecMap
+  }
+  return denseMap
+}
