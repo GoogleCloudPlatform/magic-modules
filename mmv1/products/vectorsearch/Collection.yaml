@@ -96,14 +96,12 @@ properties:
   - name: vectorSchema
     type: Map
     key_name: 'field_name'
-    properties:
     description: |-
       Schema for vector fields. Only vector fields in this schema will be
       searchable.
       Field names must contain only alphanumeric characters,
       underscores, and hyphens.
     value_type:
-      name: 'vectorField'
       type: NestedObject
       properties:
         - name: denseVector
