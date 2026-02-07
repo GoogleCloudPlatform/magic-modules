@@ -48,16 +48,6 @@ examples:
       mirroring_name: 'my-mirroring'
       ilb_rule_name: 'my-ilb'
       network_name: 'my-network'
-  - name: 'compute_packet_mirroring_update'
-    primary_resource_id: 'foobar_update'
-    vars:
-      instance_name: 'my-instance'
-      subnetwork_name: 'my-subnetwork'
-      service_name: 'my-service'
-      hc_name: 'my-healthcheck'
-      mirroring_name: 'my-mirroring'
-      ilb_rule_name: 'my-ilb'
-      network_name: 'my-network'
 parameters:
 properties:
   - name: 'name'
