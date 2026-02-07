@@ -48,8 +48,6 @@ func TestAccVectorSearchCollection_update(t *testing.T) {
 func testAccVectorSearchCollection_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vector_search_collection" "example-collection" {
-  provider = google-beta
-
   location      = "us-central1"
   collection_id = "tf-test-example-collection-id%{random_suffix}"
 
@@ -93,8 +91,6 @@ EOF
 func testAccVectorSearchCollection_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vector_search_collection" "example-collection" {
-  provider = google-beta
-
   location      = "us-central1"
   collection_id = "tf-test-example-collection-id%{random_suffix}"
 
