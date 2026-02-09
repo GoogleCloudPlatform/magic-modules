@@ -83,12 +83,12 @@ properties:
       System generated unique id for the GlossaryCategory. This ID will be different if the GlossaryCategory is deleted and re-created with the same name.
     output: true
   - name: 'createTime'
-    type: Timestamp
+    type: Time
     description: |
       The time at which the GlossaryCategory was created.
     output: true
   - name: 'updateTime'
-    type: Timestamp
+    type: Time
     description: |
       The time at which the GlossaryCategory was last updated.
     output: true

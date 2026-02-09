@@ -107,7 +107,7 @@ properties:
               Map of interconnect details.
             properties:
               - name: interconnect
-                type: string
+                type: String
               - name: vlanTags
                 type: Array
                 description: |
@@ -126,16 +126,12 @@ properties:
     min_version: 'beta'
     properties:
       - name: type
-        type: enum
+        type: String  # Enum
         description: |
           Type of wire group (enum).
           WIRE: a single pseudowire over two Interconnect connections   with no redundancy.
           REDUNDANT: two pseudowires over four Interconnect connections, with two connections in one metro and two connections in another metro.
           BOX_AND_CROSS: four pseudowires over four Interconnect connections, with two connections in one metro and two connections in another metro.
-        enum_values:
-          - 'WIRE'
-          - 'REDUNDANT'
-          - 'BOX_AND_CROSS'
   - name: wireProperties
     type: NestedObject
     description: |
@@ -146,26 +142,19 @@ properties:
         description: |
           The unmetered bandwidth setting.
       - name: faultResponse
-        type: enum
+        type: String  # Enum
         description: |
           Response when a fault is detected in a pseudowire:
           NONE: default.
           DISABLE_PORT: set the port line protocol down when inline probes detect a fault. This setting is only permitted on port mode pseudowires.
-        enum_values:
-          - 'NONE'
-          - 'DISABLE_PORT'
       - name: bandwidthAllocation
-        type: enum
+        type: String  # Enum
         required: true
         description: |
           The configuration of a wire's bandwidth allocation.
           ALLOCATE_PER_WIRE: configures a separate unmetered bandwidth allocation (and associated charges) for each wire in the group.
           SHARED_WITH_WIRE_GROUP: this is the default behavior, which configures one unmetered bandwidth allocation for the wire group. The unmetered bandwidth is divided equally across each wire in the group, but dynamic
           throttling reallocates unused unmetered bandwidth from unused or underused wires to other wires in the group.
-        enum_values:
-          - 'UNSPECIFIED_BANDWIDTH_ALLOCATION'
-          - 'ALLOCATE_PER_WIRE'
-          - 'SHARED_WITH_WIRE_GROUP'
   - name: wires
     type: Array
     description: |
@@ -175,7 +164,7 @@ properties:
       type: NestedObject
       properties:
         - name: label
-          type: string
+          type: String
           output: true
         - name: endpoints
           type: Array
@@ -186,7 +175,7 @@ properties:
             type: NestedObject
             properties:
               - name: interconnect
-                type: string
+                type: String
                 output: true
               - name: vlanTag
                 type: Integer
@@ -199,7 +188,7 @@ properties:
               type: Integer
               output: true
             - name: faultResponse
-              type: enum
+              type: Enum
               output: true
               enum_values:
                 - 'NONE'
@@ -220,8 +209,8 @@ properties:
           type: NestedObject
           properties:
             - name: label
-              type: string
+              type: String
               output: true
             - name: city
-              type: string
+              type: String
               output: true
