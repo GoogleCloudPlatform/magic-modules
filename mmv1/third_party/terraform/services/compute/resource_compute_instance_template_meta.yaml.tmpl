@@ -147,14 +147,18 @@ fields:
     api_field: 'properties.networkInterfaces.name'
   - field: 'network_interface.network'
     api_field: 'properties.networkInterfaces.network'
-{{- if ne $.TargetVersionName "ga" }}
   - field: 'network_interface.network_attachment'
     api_field: 'properties.networkInterfaces.networkAttachment'
-{{- end }}
+  - api_field: 'networkInterfaces.parentNicName'
+    field: 'network_interface.parent_nic_name'
+  - api_field: 'networkInterfaces.vlan'
+    field: 'network_interface.vlan'
   - field: 'network_interface.network_ip'
     api_field: 'properties.networkInterfaces.networkIP'
   - field: 'network_interface.nic_type'
     api_field: 'properties.networkInterfaces.nicType'
+  - field: 'network_interface.igmp_query'
+    api_field: 'properties.networkInterfaces.igmpQuery'
   - field: 'network_interface.queue_count'
     api_field: 'properties.networkInterfaces.queueCount'
   - field: 'network_interface.stack_type'
@@ -169,7 +173,9 @@ fields:
     field: 'numeric_id'
 {{- if ne $.TargetVersionName "ga" }}
   - field: 'partner_metadata'
-    api_field: 'properties.partnerMetadata'
+    api_field: 'properties.partnerMetadata.key'
+  - field: 'partner_metadata'
+    api_field: 'properties.partnerMetadata.value.entries'
 {{- end }}
   - field: 'project'
   - api_field: 'region'

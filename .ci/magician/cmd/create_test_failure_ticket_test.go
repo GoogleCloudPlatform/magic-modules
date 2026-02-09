@@ -16,8 +16,11 @@
 package cmd
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"magician/provider"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestConvertTestNameToResource(t *testing.T) {
@@ -63,6 +66,207 @@ func TestConvertTestNameToResource(t *testing.T) {
 		t.Run(tn, func(t *testing.T) {
 			got := convertTestNameToResource(tc.testName)
 			assert.Equal(t, tc.want, got)
+		})
+	}
+}
+
+func TestIsTerraformTeamOwned(t *testing.T) {
+	cases := map[string]struct {
+		tf   testFailure
+		want bool
+	}{
+		"GA Quota Error": {
+			tf: testFailure{
+				ErrorTypes: map[provider.Version]string{
+					provider.GA: "Quota",
+				},
+			},
+			want: true,
+		},
+		"Beta API Enablement Error": {
+			tf: testFailure{
+				ErrorTypes: map[provider.Version]string{
+					provider.Beta: "API enablement (Test environment)",
+				},
+			},
+			want: true,
+		},
+		"GA Other Error": {
+			tf: testFailure{
+				ErrorTypes: map[provider.Version]string{
+					provider.GA: "Some other error",
+				},
+			},
+			want: false,
+		},
+		"Beta Other Error": {
+			tf: testFailure{
+				ErrorTypes: map[provider.Version]string{
+					provider.Beta: "Another different error",
+				},
+			},
+			want: false,
+		},
+		"Mixed Errors - One TF Owned": {
+			tf: testFailure{
+				ErrorTypes: map[provider.Version]string{
+					provider.GA:   "Some other error",
+					provider.Beta: "Quota",
+				},
+			},
+			want: true,
+		},
+		"No Error Types": {
+			tf: testFailure{
+				ErrorTypes: make(map[provider.Version]string),
+			},
+			want: false,
+		},
+		"Nil Error Types": {
+			tf:   testFailure{},
+			want: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			got := IsTerraformTeamOwned(&tc.tf)
+			assert.Equal(t, tc.want, got)
+		})
+	}
+}
+
+func TestShouldCreateTicket(t *testing.T) {
+	cases := map[string]struct {
+		tf                   testFailure
+		existTestNames       []string
+		todayClosedTestNames []string
+		want                 bool
+	}{
+		"No failures": {
+			tf: testFailure{
+				TestName: "TestAccSomething",
+				FailureRateLabels: map[provider.Version]testFailureRateLabel{
+					provider.GA:   testFailureNone,
+					provider.Beta: testFailureNone,
+				},
+			},
+			want: false,
+		},
+		"Already exists": {
+			tf: testFailure{
+				TestName: "TestAccExisting",
+				FailureRateLabels: map[provider.Version]testFailureRateLabel{
+					provider.GA: testFailure100,
+				},
+			},
+			existTestNames: []string{"TestAccExisting"},
+			want:           false,
+		},
+		"Closed today": {
+			tf: testFailure{
+				TestName: "TestAccClosed",
+				FailureRateLabels: map[provider.Version]testFailureRateLabel{
+					provider.GA: testFailure100,
+				},
+			},
+			todayClosedTestNames: []string{"TestAccClosed"},
+			want:                 false,
+		},
+		"Team owned error - create": {
+			tf: testFailure{
+				TestName:   "TestAccTeamOwned",
+				ErrorTypes: map[provider.Version]string{provider.GA: "Quota"},
+				FailureRateLabels: map[provider.Version]testFailureRateLabel{
+					provider.GA:   testFailure10, // Normally wouldn't create
+					provider.Beta: testFailureNone,
+				},
+			},
+			want: true,
+		},
+		"GA 50% failure - create": {
+			tf: testFailure{
+				TestName: "TestAccGA50",
+				FailureRateLabels: map[provider.Version]testFailureRateLabel{
+					provider.GA: testFailure50,
+				},
+			},
+			want: true,
+		},
+		"Beta 100% failure - create": {
+			tf: testFailure{
+				TestName: "TestAccBeta100",
+				FailureRateLabels: map[provider.Version]testFailureRateLabel{
+					provider.Beta: testFailure100,
+				},
+			},
+			want: true,
+		},
+		"Low failure - don't create": {
+			tf: testFailure{
+				TestName: "TestAccLowFailure",
+				FailureRateLabels: map[provider.Version]testFailureRateLabel{
+					provider.GA:   testFailure10,
+					provider.Beta: testFailure10,
+				},
+			},
+			want: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			got := shouldCreateTicket(&tc.tf, tc.existTestNames, tc.todayClosedTestNames)
+			assert.Equal(t, tc.want, got)
+		})
+	}
+}
+
+func TestGetTicketLabels(t *testing.T) {
+	cases := map[string]struct {
+		tf           testFailure
+		expectLabels []string
+	}{
+		"Team owned error": {
+			tf: testFailure{
+				TestName:         "TestAccTeamOwnedQuota",
+				AffectedResource: "google_compute_instance",
+				ErrorTypes:       map[provider.Version]string{provider.GA: "Quota"},
+				FailureRateLabels: map[provider.Version]testFailureRateLabel{
+					provider.GA: testFailure10,
+				},
+			},
+			expectLabels: []string{"size/xs", "test-failure", "test-failure-10", "service/terraform"},
+		},
+		"Non-Team owned - has service label": {
+			tf: testFailure{
+				TestName:         "TestAccComputeInstance",
+				AffectedResource: "google_compute_instance",
+				ErrorTypes:       map[provider.Version]string{provider.GA: "API Error"},
+				FailureRateLabels: map[provider.Version]testFailureRateLabel{
+					provider.GA: testFailure50,
+				},
+			},
+			expectLabels: []string{"size/xs", "test-failure", "test-failure-50", "service/compute-instances"},
+		},
+		"Non-Team owned - fallback label": {
+			tf: testFailure{
+				TestName:         "TestAccUnknownResource",
+				AffectedResource: "google_unknown_resource",
+				ErrorTypes:       map[provider.Version]string{provider.GA: "API Error"},
+				FailureRateLabels: map[provider.Version]testFailureRateLabel{
+					provider.GA: testFailure100,
+				},
+			},
+			expectLabels: []string{"size/xs", "test-failure", "test-failure-100", "service/terraform"},
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			labels, err := computeTicketLabels(&tc.tf)
+			assert.NoError(t, err)
+			assert.ElementsMatch(t, tc.expectLabels, labels)
 		})
 	}
 }

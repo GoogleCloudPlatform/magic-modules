@@ -37,7 +37,7 @@ self_link: '{{brand}}/identityAwareProxyClients/{{client_id}}'
 immutable: true
 import_format:
   - '{{brand}}/identityAwareProxyClients/{{client_id}}'
-datasource:
+datasource_experimental:
   generate: true
 timeouts:
   insert_minutes: 20

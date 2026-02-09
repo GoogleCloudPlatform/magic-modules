@@ -12,7 +12,7 @@ development environment.
 
 1. [Install the gcloud CLI.](https://cloud.google.com/sdk/docs/install)
 1. In the Google Cloud console, on the project selector page, select or
-   [create a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects).
+   [create a Google Cloud project](https://docs.cloud.google.com/resource-manager/docs/creating-managing-projects).
 
    > [!NOTE]
    > **Note:** If you don't already have a project to use for testing changes to

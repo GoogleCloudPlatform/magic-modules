@@ -91,6 +91,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Biglake",
         "path" to "./google/services/biglake"
     ),
+    "biglakeiceberg" to mapOf(
+        "name" to "biglakeiceberg",
+        "displayName" to "BiglakeIceberg",
+        "path" to "./google/services/biglakeiceberg"
+    ),
     "bigquery" to mapOf(
         "name" to "bigquery",
         "displayName" to "Bigquery",
@@ -415,6 +420,11 @@ var ServicesListGa = mapOf(
         "name" to "firebase",
         "displayName" to "Firebase",
         "path" to "./google/services/firebase"
+    ),
+    "firebaseailogic" to mapOf(
+        "name" to "firebaseailogic",
+        "displayName" to "Firebase AI Logic",
+        "path" to "./google/services/firebaseailogic"
     ),
     "firebaseappcheck" to mapOf(
         "name" to "firebaseappcheck",

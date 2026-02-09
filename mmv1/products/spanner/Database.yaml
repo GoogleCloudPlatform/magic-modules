@@ -38,6 +38,8 @@ import_format:
   - '{{project}}/{{instance}}/{{name}}'
   - '{{instance}}/{{name}}'
 cai_asset_name_format: 'projects/{{project}}/instances/{{instance}}/databases/{{name}}'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -58,6 +60,8 @@ custom_code:
   post_create: 'templates/terraform/post_create/spanner_database.go.tmpl'
   pre_update: 'templates/terraform/pre_update/spanner_database.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/resource_spanner_database.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/spanner_database.go.tmpl'
+  tgc_ignore_terraform_decoder: true
 custom_diff:
   - 'resourceSpannerDBDdlCustomDiff'
   - 'resourceSpannerEncryptionConfigCustomDiff'
@@ -98,6 +102,7 @@ parameters:
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Instance'
     imports: 'name'
+    tgc_ignore_read: true
 properties:
   # This resource returns only one attribute ("name") from which we parse
   # "instance", "name", and "project".  You will need custom code handling
@@ -112,6 +117,7 @@ properties:
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     validation:
       regex: '^[a-z][a-z0-9_\-]*[a-z0-9]$'
+    tgc_ignore_read: true
   - name: 'versionRetentionPeriod'
     type: String
     description: |
@@ -196,3 +202,4 @@ properties:
       (2) Setting "enableDropProtection" to true also prevents the deletion of the parent instance containing the database.
       "deletion_protection" attribute does not provide protection against the deletion of the parent instance.
     default_value: false
+    is_missing_in_cai: true

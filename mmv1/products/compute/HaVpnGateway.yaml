@@ -41,6 +41,8 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 schema_version: 1
 state_upgraders: true
 examples:

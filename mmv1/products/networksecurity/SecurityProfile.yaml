@@ -40,7 +40,8 @@ async:
     resource_inside_response: false
   include_project: true
 custom_code:
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 sweeper:
   url_substitutions:
     - parent: "organizations/${ORG_ID}"
@@ -309,7 +310,6 @@ properties:
           This field is used for Packet Broker mirroring endpoint groups to specify
           the deployment groups that the packet should be mirrored to by the broker.
           Format: projects/{project_id}/locations/global/mirroringDeploymentGroups/{deployment_group_id}
-        immutable: true
         min_version: 'beta'
       - name: 'mirroringEndpointGroupType'
         type: String

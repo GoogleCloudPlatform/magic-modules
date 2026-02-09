@@ -13,6 +13,8 @@
 
 ---
 name: 'Instance'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description: |
   A Google Cloud Looker instance.
 references:
@@ -426,6 +428,58 @@ properties:
           The client secret for the Oauth config.
         required: true
   # Oauth Object - End
+  # Periodic Export Config Object
+  - name: 'periodicExportConfig'
+    type: NestedObject
+    description: |
+      Configuration for periodic export.
+    update_mask_fields:
+      - 'periodic_export_config'
+    properties:
+      - name: 'kmsKey'
+        type: String
+        description: |
+          Name of the CMEK key in KMS.
+          Format:
+          projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}
+        required: true
+      - name: 'gcsUri'
+        type: String
+        description: |
+          Cloud Storage bucket URI for periodic export.
+          Format: gs://{bucket_name}
+        required: true
+      - name: 'startTime'
+        type: NestedObject
+        description: |
+          Time in UTC to start the periodic export job.
+        required: true
+        properties:
+          - name: 'hours'
+            type: Integer
+            description: |
+              Hours of day in 24 hour format. Should be from 0 to 23.
+            validation:
+              function: 'validation.IntBetween(0,23)'
+          - name: 'minutes'
+            type: Integer
+            description: |
+              Minutes of hour of day. Must be from 0 to 59.
+            validation:
+              function: 'validation.IntBetween(0,60)'
+          - name: 'seconds'
+            type: Integer
+            description: |
+              Seconds of minutes of the time. Must normally be from 0 to 59.
+            validation:
+              function: 'validation.IntBetween(0,60)'
+          - name: 'nanos'
+            type: Integer
+            description: |
+              Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+            validation:
+              function: 'validation.IntBetween(0,999999999)'
+  # Periodic Export Config Object - End
   - name: 'platformEdition'
     type: Enum
     description: |
