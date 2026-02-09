@@ -124,7 +124,7 @@ type IamPolicy struct {
 	SubstituteZoneValue bool `yaml:"substitute_zone_value,omitempty"`
 
 	// [Optional] If true, this resource supports User Project Overrides
-	SupportsUserProjectOverride bool `yaml:"supports_user_project_override,omitempty"`
+	SupportsIndirectUserProjectOverride bool `yaml:"supports_indirect_user_project_override,omitempty"`
 
 	// Add a deprecation message for a resource that's been deprecated in the API.
 	DeprecationMessage string `yaml:"deprecation_message,omitempty"`
