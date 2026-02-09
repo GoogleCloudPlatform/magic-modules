@@ -1,5 +1,7 @@
 package vectorsearch_test
 
+{{- if ne $.TargetVersionName "ga" }}
+
 import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
@@ -137,3 +139,5 @@ EOF
 }
 `, context)
 }
+
+{{- end }}
