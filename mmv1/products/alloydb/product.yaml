@@ -16,8 +16,9 @@ name: 'Alloydb'
 display_name: 'AlloyDB'
 versions:
   - name: 'beta'
-    base_url: 'https://alloydb.googleapis.com/v1beta/'
+    base_url: 'https://alloydb.{{location}}.rep.googleapis.com/v1beta/'
   - name: 'ga'
     base_url: 'https://alloydb.googleapis.com/v1/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-identity'
+rep_enabled: true

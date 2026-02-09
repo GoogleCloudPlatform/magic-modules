@@ -80,6 +80,8 @@ type Product struct {
 
 	// ImportPath contains the prefix used for importing packages in generated files.
 	ImportPath string `yaml:"-"`
+
+	RepEnabled bool `yaml:"rep_enabled,omitempty"`
 }
 
 func (p *Product) UnmarshalYAML(value *yaml.Node) error {
