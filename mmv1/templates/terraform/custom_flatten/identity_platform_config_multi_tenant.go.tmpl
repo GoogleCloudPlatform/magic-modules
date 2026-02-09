@@ -1,20 +1,25 @@
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-  transformed := make(map[string]interface{})
-
   if v == nil {
     return nil
+  }
+  
+  original := v.(map[string]interface{})
+
+  if len(original) == 0 {
+    // return nil if api returned empty object
+    return nil;
+  }
+
+  transformed := make(map[string]interface{})
+
+  if original["allowTenants"] == nil {
+    transformed["allow_tenants"] = false
   } else {
-    original := v.(map[string]interface{})
+    transformed["allow_tenants"] = original["allowTenants"]
+  }
 
-    if original["allowTenants"] == nil {
-      transformed["allow_tenants"] = false
-    } else {
-      transformed["allow_tenants"] = original["allowTenants"]
-    }
-
-    if original["defaultTenantLocation"] != nil {
-      transformed["default_tenant_location"] = original["defaultTenantLocation"]
-    }
+  if original["defaultTenantLocation"] != nil {
+    transformed["default_tenant_location"] = original["defaultTenantLocation"]
   }
 
   return []interface{}{transformed}
