@@ -17,7 +17,6 @@ description: |
   An imperative resource that triggers a GCBDR restoration event.
   Creating this resource will initiate a restore operation from a specified backup.
   The resource represents the restore operation and its result.
-min_version: beta
 # Immutable ensures any config change triggers a fresh restore rather than an invalid update
 # TODO: Remove this once update operations are supported.
 immutable: true
@@ -45,7 +44,6 @@ examples:
       backup_vault_id: 'backup-vault'
       data_source_id: 'data-source'
       backup_id: 'backup'
-      backup_name: 'projects/my-project/locations/us-central1/backups/my-backup'
       instance_name: 'restored-instance'
   - name: 'backup_dr_restore_workload_compute_instance_full'
     primary_resource_id: 'restore_compute_full'
@@ -56,7 +54,6 @@ examples:
       backup_vault_id: 'backup-vault'
       data_source_id: 'data-source'
       backup_id: 'backup'
-      backup_name: 'projects/my-project/locations/us-central1/backups/my-backup'
       instance_name: 'restored-instance-full'
   - name: 'backup_dr_restore_workload_disk_basic'
     primary_resource_id: 'restore_disk_basic'
@@ -67,7 +64,6 @@ examples:
       backup_vault_id: 'backup-vault'
       data_source_id: 'data-source'
       backup_id: 'backup'
-      backup_name: 'projects/my-project/locations/us-central1/backups/my-backup'
       disk_name: 'restored-disk'
   - name: 'backup_dr_restore_workload_regional_disk'
     primary_resource_id: 'restore_regional_disk'
@@ -78,7 +74,6 @@ examples:
       backup_vault_id: 'backup-vault'
       data_source_id: 'data-source'
       backup_id: 'backup'
-      backup_name: 'projects/my-project/locations/us-central1/backups/my-backup'
       disk_name: 'restored-regional-disk'
   - name: 'backup_dr_restore_workload_without_delete'
     primary_resource_id: 'restore_without_delete'
@@ -89,7 +84,6 @@ examples:
       backup_vault_id: 'backup-vault'
       data_source_id: 'data-source'
       backup_id: 'backup'
-      backup_name: 'projects/my-project/locations/us-central1/backups/my-backup'
       disk_name: 'persistent-disk'
 parameters:
   - name: 'location'
@@ -115,8 +109,9 @@ parameters:
 properties:
   - name: 'name'
     type: String
-    description: 'Required. The resource name of the backup instance.'
-    required: true
+    description: 'The resource name of the backup instance.'
+    deprecation_message: '`name` is deprecated and will be removed in a future major release. The backup is identified by the parameters (location, backup_vault_id, data_source_id, backup_id).'
+    ignore_read: true
   - name: 'requestId'
     type: String
     description: |

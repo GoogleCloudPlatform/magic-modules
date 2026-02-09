@@ -51,7 +51,7 @@ import_format:
 # the resource. If false, that code is not generated.
 autogen_async: false
 
-datasource:
+datasource_experimental:
   generate: true
   exclude_test: true
 

@@ -3,8 +3,6 @@ resource "google_backup_dr_restore_workload" "{{$.PrimaryResourceId}}" {
   backup_vault_id  = "{{index $.Vars "backup_vault_id"}}"
   data_source_id   = "{{index $.Vars "data_source_id"}}"
   backup_id        = "{{index $.Vars "backup_id"}}"
-  
-  name = "{{index $.Vars "backup_name"}}"
 
   disk_target_environment {
     project = "{{index $.TestEnvVars "project"}}"
@@ -14,7 +12,7 @@ resource "google_backup_dr_restore_workload" "{{$.PrimaryResourceId}}" {
   disk_restore_properties {
     name    = "{{index $.Vars "disk_name"}}"
     size_gb = 100
-    type    = "pd-standard"
+    type    = "projects/{{index $.TestEnvVars "project"}}/zones/us-central1-a/diskTypes/pd-standard"
     
     description = "Restored persistent disk from backup"
     

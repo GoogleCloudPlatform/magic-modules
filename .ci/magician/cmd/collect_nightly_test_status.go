@@ -21,7 +21,9 @@ import (
 	"magician/provider"
 	"magician/teamcity"
 	utils "magician/utility"
+	"net/url"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -45,6 +47,7 @@ type TestInfo struct {
 	Resource        string    `json:"resource"`
 	CommitSha       string    `json:"commit_sha"`
 	ErrorMessage    string    `json:"error_message"`
+	ErrorType       string    `json:"error_type"`
 	LogLink         string    `json:"log_link"`
 	ProviderVersion string    `json:"provider_version"`
 	QueuedDate      time.Time `json:"queued_date"`
@@ -138,8 +141,13 @@ func execCollectNightlyTestStatus(now time.Time, tc TeamcityClient, gcs Cloudsto
 
 func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs CloudstorageClient, formattedStartCut, formattedFinishCut, date string) error {
 
+	baseLocator := fmt.Sprintf("count:500,project:%s,branch:refs/heads/nightly-test,queuedDate:(date:%s,condition:before),queuedDate:(date:%s,condition:after)", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
+	fields := "build(id,buildTypeId,buildConfName,webUrl,number,queuedDate,startDate,finishDate)"
+	params := url.Values{}
+
 	// Check Queued Builds
-	queuedBuilds, err := tc.GetBuilds("queued", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
+	params.Set("locator", fmt.Sprintf("%s,state:queued", baseLocator))
+	queuedBuilds, err := tc.GetBuilds(params)
 	if err != nil {
 		return fmt.Errorf("failed to get queued builds: %w", err)
 	}
@@ -149,7 +157,9 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 	}
 
 	// Check Running Builds
-	runningBuilds, err := tc.GetBuilds("running", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
+	params.Set("locator", fmt.Sprintf("%s,state:running,tag:cron-trigger", baseLocator))
+	params.Set("fields", fields)
+	runningBuilds, err := tc.GetBuilds(params)
 	if err != nil {
 		return fmt.Errorf("failed to get running builds: %w", err)
 	}
@@ -159,7 +169,9 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 	}
 
 	// Get all service test builds
-	builds, err := tc.GetBuilds("finished", pVersion.TeamCityNightlyProjectName(), formattedFinishCut, formattedStartCut)
+	params.Set("locator", fmt.Sprintf("%s,state:finished,tag:cron-trigger", baseLocator))
+	params.Set("fields", fields)
+	builds, err := tc.GetBuilds(params)
 	if err != nil {
 		return fmt.Errorf("failed to get finished builds: %w", err)
 	}
@@ -188,12 +200,14 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 
 		for _, testResult := range serviceTestResults.TestResults {
 			var errorMessage string
+			var errorType string
 			// Get test debug log gcs link
 			logLink := fmt.Sprintf("https://storage.cloud.google.com/teamcity-logs/nightly/%s/%s/%s/debug-%s-%s-%s-%s.txt", pVersion.TeamCityNightlyProjectName(), date, build.Number, pVersion.ProviderName(), build.Number, strconv.Itoa(build.Id), testResult.Name)
 			// Get concise error message for failed and skipped tests
 			// Skipped tests have a status of "UNKNOWN" on TC
 			if testResult.Status == "FAILURE" || testResult.Status == "UNKNOWN" {
 				errorMessage = convertErrorMessage(testResult.ErrorMessage)
+				errorType = categorizeError(errorMessage)
 			}
 
 			queuedTime, err := time.Parse(tcTimeFormat, build.QueuedDate)
@@ -216,6 +230,7 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 				Resource:        convertTestNameToResource(testResult.Name),
 				CommitSha:       build.Number,
 				ErrorMessage:    errorMessage,
+				ErrorType:       errorType,
 				LogLink:         logLink,
 				ProviderVersion: strings.ToUpper(pVersion.String()),
 				Duration:        testResult.Duration,
@@ -275,6 +290,145 @@ func convertErrorMessage(rawErrorMessage string) string {
 	}
 
 	return strings.TrimSpace(rawErrorMessage[startIndex:endIndex])
+}
+
+var (
+	reSubnetNotReady   = regexp.MustCompile(`The resource '[^']+/subnetworks/[^']+' is not ready`)
+	reApiEnv           = regexp.MustCompile(`has not been used in project (ci-test-project-188019|1067888929963|ci-test-project-nightly-ga|594424405950|ci-test-project-nightly-beta|653407317329|tf-vcr-private|808590572184) before or it is disabled`)
+	reAttrSet          = regexp.MustCompile(`Attribute '[^']+' expected to be set`)
+	reQuotaLimit       = regexp.MustCompile(`Quota limit '[^']+' has been exceeded`)
+	reGoogleApi4xx     = regexp.MustCompile(`googleapi: Error 4\d\d`)
+	reGoogleApi5xx     = regexp.MustCompile(`googleapi: Error 5\d\d`)
+	reGoogleApiGeneric = regexp.MustCompile(`googleapi: Error`)
+)
+
+func categorizeError(errMsg string) string {
+	if strings.Contains(errMsg, "Error code 13") {
+		return "Error code 13"
+	}
+	if strings.Contains(errMsg, "Precondition check failed") {
+		return "Precondition check failed"
+	}
+
+	// Diff Category
+	if strings.Contains(errMsg, "After applying this test step, the plan was not empty") ||
+		strings.Contains(errMsg, "After applying this test step and performing a `terraform refresh`") ||
+		strings.Contains(errMsg, "Expected a non-empty plan, but got an empty plan") ||
+		strings.Contains(errMsg, "error: Check failed") {
+		return "Diff"
+	}
+
+	if strings.Contains(errMsg, "timeout while waiting for state") {
+		return "Operation timeout"
+	}
+
+	// Regex: Subnetwork not ready
+	if reSubnetNotReady.MatchString(errMsg) {
+		return "Subnetwork not ready"
+	}
+
+	// ImportStateVerify Category
+	if strings.Contains(errMsg, "ImportStateVerify attributes not equivalent") ||
+		strings.Contains(errMsg, "Cannot import non-existent remote object") ||
+		strings.Contains(errMsg, "Error: Unexpected Import Identifier") {
+		return "ImportStateVerify"
+	}
+
+	// Deprecated (Case-insensitive check)
+	if strings.Contains(strings.ToLower(errMsg), "deprecated") {
+		return "Deprecated"
+	}
+
+	if strings.Contains(errMsg, "Provider produced inconsistent result after apply") &&
+		strings.Contains(errMsg, "Root object was present, but now absent") {
+		return "Root object was present, but now absent"
+	}
+
+	if strings.Contains(errMsg, "Provider produced inconsistent final plan") {
+		return "Provider produced inconsistent final plan"
+	}
+
+	// API Enablement
+	if reApiEnv.MatchString(errMsg) {
+		return "API enablement (Test environment)"
+	}
+	if strings.Contains(errMsg, "has not been used in project") && strings.Contains(errMsg, "before or it is disabled") {
+		return "API enablement (Created project)"
+	}
+
+	if strings.Contains(errMsg, "does not have required permissions") {
+		return "Permissions"
+	}
+	if strings.Contains(errMsg, "bootstrap_iam_test_utils.go") {
+		return "Bootstrapping"
+	}
+
+	// Bad Config Category
+	if strings.Contains(errMsg, "Inconsistent dependency lock file") ||
+		strings.Contains(errMsg, "Invalid resource type") ||
+		strings.Contains(errMsg, "Blocks of type") && strings.Contains(errMsg, "are not expected here") ||
+		strings.Contains(errMsg, "Conflicting configuration arguments") ||
+		reAttrSet.MatchString(errMsg) {
+		return "Bad config"
+	}
+
+	// Quota Category
+	if strings.Contains(errMsg, "Quota exhausted") ||
+		strings.Contains(errMsg, "Quota exceeded") ||
+		strings.Contains(errMsg, "You do not have quota") ||
+		reQuotaLimit.MatchString(errMsg) {
+		return "Quota"
+	}
+
+	if strings.Contains(errMsg, "does not have enough resources available") {
+		return "Resource availability"
+	}
+
+	// API Create/Read/Update/Delete
+	if strings.Contains(errMsg, "Error: Error waiting to create") ||
+		strings.Contains(errMsg, "Error: Error waiting for Create") ||
+		strings.Contains(errMsg, "Error: Error waiting for creating") ||
+		strings.Contains(errMsg, "Error: Error creating") ||
+		strings.Contains(errMsg, "was created in the error state") ||
+		strings.Contains(errMsg, "Error: Error changing instance status after creation:") {
+		return "API Create"
+	}
+
+	if strings.Contains(errMsg, "Error: Error reading") {
+		return "API Read"
+	}
+
+	if strings.Contains(errMsg, "Error setting IAM policy") ||
+		strings.Contains(errMsg, "Error applying IAM policy") {
+		return "API IAM"
+	}
+
+	if strings.Contains(errMsg, "Error: Error waiting for Updating") ||
+		strings.Contains(errMsg, "Error: Error updating") {
+		return "API Update"
+	}
+
+	if strings.Contains(errMsg, "Error: Error waiting for Deleting") ||
+		strings.Contains(errMsg, "Error running post-test destroy") {
+		return "API Delete"
+	}
+
+	// Google API Errors (Order matters: check specific codes before generic)
+	if reGoogleApi4xx.MatchString(errMsg) {
+		return "API (4xx)"
+	}
+	if reGoogleApi5xx.MatchString(errMsg) {
+		return "API (5xx)"
+	}
+	if reGoogleApiGeneric.MatchString(errMsg) ||
+		strings.Contains(errMsg, "Error: Error when reading or editing") ||
+		strings.Contains(errMsg, "Error: Error waiting") ||
+		strings.Contains(errMsg, "unable to queue the operation") ||
+		strings.Contains(errMsg, "Error waiting for Switching runtime") {
+		return "API (Other)"
+	}
+
+	return "Other"
 }
 
 func init() {
