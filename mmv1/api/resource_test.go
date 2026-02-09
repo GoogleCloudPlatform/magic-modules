@@ -399,13 +399,14 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Parallel()
 
 	createTestResource := func(name, pn string) *Resource {
-		return &Resource{
+		r := &Resource{
 			Name: name,
 			ProductMetadata: &Product{
-				Name:         "testproduct",
-				ProviderName: pn,
+				Name: "testproduct",
 			},
 		}
+		r.ProductMetadata.SetCompiler(pn)
+		return r
 	}
 
 	createTestType := func(name, typeStr string, options ...func(*Type)) *Type {
@@ -488,7 +489,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("WriteOnly property doesn't add companion fields for tgc", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource", "tgc")
+		resource := createTestResource("testresource", "terraformgoogleconversionnext")
 		writeOnlyProp := createTestType("password", "String",
 			withWriteOnly(true),
 			withRequired(true),

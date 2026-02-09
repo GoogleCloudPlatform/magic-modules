@@ -340,9 +340,6 @@ type Resource struct {
 	// The version name provided by the user through CI
 	TargetVersionName string `yaml:"-"`
 
-	// The compiler to generate the downstream files, for example "terraformgoogleconversion-codegen".
-	Compiler string `yaml:"-"`
-
 	// The API "resource type kind" used for this resource e.g., "Function".
 	// If this is not set, then :name is used instead, which is strongly
 	// preferred wherever possible. Its main purpose is for supporting
@@ -898,7 +895,7 @@ func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type)
 	}
 	// Don't add write only fields to tgc, as write only fields don't exist in tfplan json,
 	// the input of tfplan2cai.
-	if !strings.HasPrefix(r.ProductMetadata.ProviderName, "tgc") {
+	if !strings.Contains(r.ProductMetadata.Compiler, "terraformgoogleconversion") {
 		woFieldName := fmt.Sprintf("%sWo", propWithWoConfigured.Name)
 		woVersionFieldName := fmt.Sprintf("%sVersion", woFieldName)
 		writeOnlyField := buildWriteOnlyField(woFieldName, woVersionFieldName, propWithWoConfigured)
@@ -1446,10 +1443,6 @@ func ignoreReadFields(props []*Type) []string {
 		}
 	}
 	return fields
-}
-
-func (r *Resource) SetCompiler(t string) {
-	r.Compiler = fmt.Sprintf("%s-codegen", strings.ToLower(t))
 }
 
 // Returns the id format of an object, or self_link_uri if none is explicitly defined
@@ -2596,5 +2589,5 @@ func (r Resource) CaiResourceName() string {
 }
 
 func (r Resource) IsTgcCompiler() bool {
-	return r.Compiler == "terraformgoogleconversionnext-codegen"
+	return r.ProductMetadata.Compiler == "terraformgoogleconversionnext-codegen"
 }

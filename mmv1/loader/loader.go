@@ -154,9 +154,7 @@ func (l *Loader) batchLoadProducts(productNames []string, providerName string) m
 // Load compiles a product with all its resources from the given path and optional overrides
 // This loads the product configuration and all its resources into memory without generating any files
 func (l *Loader) LoadProduct(productName, providerName string) (*api.Product, error) {
-	p := &api.Product{
-		ProviderName: providerName,
-	}
+	p := &api.Product{}
 	productYamlPath := filepath.Join(productName, "product.yaml")
 
 	var productOverridePath string
@@ -202,6 +200,7 @@ func (l *Loader) LoadProduct(productName, providerName string) (*api.Product, er
 	p.Version = p.VersionObjOrClosest(l.version)
 
 	p.Objects = resources
+	p.SetCompiler(providerName)
 	p.Validate()
 
 	return p, nil
