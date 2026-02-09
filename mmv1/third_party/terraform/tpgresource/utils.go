@@ -1003,3 +1003,34 @@ func IpAddrSetHashFunc(v interface{}) int {
 	log.Printf("[DEBUG] computed hash value of %v from %v", Hashcode(ipnet.String()), ipnet.String())
 	return Hashcode(ipnet.String())
 }
+
+func RepUrl(url string) string {
+	location := LocationFromId(url)
+	
+}
+
+func LocationFromId(id string) string {
+	re := regexp.MustCompile(`/locations/([^/]+)/`)
+
+	match := re.FindStringSubmatch(id)
+
+	if len(match) > 1 {
+		return match[1]
+	}
+	re = regexp.MustCompile(`/regions/([^/]+)/`)
+
+	match = re.FindStringSubmatch(id)
+
+	if len(match) > 1 {
+		return match[1]
+	}
+
+	re = regexp.MustCompile(`/zones/([^/]+)/`)
+
+	match = re.FindStringSubmatch(id)
+
+	if len(match) > 1 {
+		return GetRegionFromZone(match[1])
+	}
+	return ""
+}

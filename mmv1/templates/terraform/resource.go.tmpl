@@ -352,11 +352,15 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{if and $.GetAsync ($.GetAsync.Allow "Create") -}}
 {{  if ($.GetAsync.IsA "OpAsync") -}}
 {{    if and $.GetAsync.Result.ResourceInsideResponse $.HasPostCreateComputedFields -}}
+{{- if $.ProductMetadata.RepEnabled }}
+    // Derive location for use in REP endpoints
+    location := tpgresource.LocationFromId(d.Id())
+{{- end}}
     // Use the resource in the operation response to populate
     // identity fields and d.Id() before read
     var opRes map[string]interface{}
     err = {{ $.ClientNamePascal -}}OperationWaitTimeWithResponse(
-    config, res, &opRes, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Creating {{ $.Name -}}", userAgent,
+    config, res, &opRes, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }},{{if $.ProductMetadata.RepEnabled }} location,{{ end -}}{{ end -}} "Creating {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutCreate))
     if err != nil {
 {{if $.CustomCode.PostCreateFailure -}}
@@ -430,8 +434,12 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     d.SetId(id)
 
 {{        else -}}
+{{- if $.ProductMetadata.RepEnabled }}
+    // Derive location for use in REP endpoints
+    location := tpgresource.LocationFromId(d.Id())
+{{- end}}
     err = {{ $.ClientNamePascal -}}OperationWaitTime(
-    config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Creating {{ $.Name -}}", userAgent,
+    config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.RepEnabled }} location,{{ end -}} "Creating {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutCreate))
 
     if err != nil {
@@ -863,8 +871,12 @@ if len(updateMask) > 0 {
 
 {{              if and ($.GetAsync) ($.GetAsync.Allow "update") -}}
 {{                  if $.GetAsync.IsA "OpAsync" -}}
+{{- if $.ProductMetadata.RepEnabled }}
+    // Derive location for use in REP endpoints
+    location := tpgresource.LocationFromId(d.Id())
+{{- end}}
     err = {{ $.ClientNamePascal -}}OperationWaitTime(
-        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Updating {{ $.Name -}}", userAgent,
+        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.RepEnabled }} location,{{ end -}} "Updating {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutUpdate))
 
     if err != nil {
@@ -1022,8 +1034,12 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 
 {{                  if and ($.GetAsync) ($.GetAsync.Allow "update") -}}
 {{                      if $.GetAsync.IsA "OpAsync" -}}
+{{- if $.ProductMetadata.RepEnabled }}
+    // Derive location for use in REP endpoints
+    location := tpgresource.LocationFromId(d.Id())
+{{- end}}
 	    err = {{ $.ClientNamePascal -}}OperationWaitTime(
-	        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Updating {{ $.Name -}}", userAgent,
+	        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.RepEnabled }} location,{{ end -}} "Updating {{ $.Name -}}", userAgent,
 	        d.Timeout(schema.TimeoutUpdate))
 	    if err != nil {
 	        return err
@@ -1167,8 +1183,12 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
             {{- end }}
     }
         {{- else }}
+{{- if $.ProductMetadata.RepEnabled }}
+    // Derive location for use in REP endpoints
+    location := tpgresource.LocationFromId(d.Id())
+{{- end}}
     err = {{ $.ClientNamePascal }}OperationWaitTime(
-        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}} "Deleting {{ $.Name -}}", userAgent,
+        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.RepEnabled }} location,{{ end -}} "Deleting {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutDelete))
 
     if err != nil {
