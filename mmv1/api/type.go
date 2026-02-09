@@ -481,7 +481,12 @@ func (t *Type) SetDefault(r *Resource) {
 
 func (t *Type) Validate(rName string) {
 	if t.Name == "" {
-		log.Fatalf("Missing `name` for proprty with type %s in resource %s", t.Type, rName)
+		log.Fatalf("Missing `name` for property with type %s in resource %s", t.Type, rName)
+	}
+
+	// Check type is valid. Also allow empty as it's currently used in unit tests.
+	if !slices.Contains([]string{"", "Boolean", "Double", "Integer", "String", "Time", "Enum", "ResourceRef", "NestedObject", "Array", "KeyValuePairs", "KeyValueLabels", "KeyValueTerraformLabels", "KeyValueEffectiveLabels", "KeyValueAnnotations", "Map", "Fingerprint"}, t.Type) {
+		log.Fatalf("Unknown type %q for property %q in resource %s", t.Type, t.Name, rName)
 	}
 
 	if t.Output && t.Required {
@@ -535,7 +540,6 @@ func (t *Type) Validate(rName string) {
 // check_at_least_one_of
 // check_exactly_one_of
 // check_required_with
-// check the allowed types for Type field
 // check the allowed fields for each type, for example, KeyName is only allowed for Map
 
 // Returns a slice of Terraform field names representing where the field is nested within the parent resource.

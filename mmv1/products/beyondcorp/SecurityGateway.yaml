@@ -156,7 +156,7 @@ properties:
         type: Array
         description: The configuration for the proxy.
         item_type:
-          type: string
+          type: String
       - name: contextualHeaders
         type: NestedObject
         description: Configuration for the contextual headers.
