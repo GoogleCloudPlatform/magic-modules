@@ -211,18 +211,18 @@ properties:
       type: NestedObject
       properties:
         - name: 'listing'
-          type: string
+          type: String
           description: Output only. Listing for which linked resource is created.
           output: true
         - name: 'linkedDataset'
-          type: string
+          type: String
           description: Output only. Name of the linked dataset, e.g. projects/subscriberproject/datasets/linkedDataset
           output: true
           exactly_one_of:
             - 'linkedDataset'
             - 'linkedPubsubSubscription'
         - name: 'linkedPubsubSubscription'
-          type: string
+          type: String
           description: Output only. Name of the Pub/Sub subscription, e.g. projects/subscriberproject/subscriptions/subscriptions/sub_id
           output: true
           exactly_one_of:
@@ -237,11 +237,11 @@ properties:
       type: NestedObject
       properties:
         - name: 'listing'
-          type: string
+          type: String
           description: Output only. Listing for which linked resource is created.
           output: true
         - name: 'linkedDataset'
-          type: string
+          type: String
           description: Output only. Name of the linked dataset, e.g. projects/subscriberproject/datasets/linkedDataset
           output: true
   - name: 'dataExchange'

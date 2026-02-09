@@ -184,11 +184,11 @@ properties:
       type: NestedObject
       properties:
         - name: listing
-          type: string
+          type: String
           description: Output only. Listing for which linked resource is created.
           output: true
         - name: linkedDataset
-          type: string
+          type: String
           description: Output only. Name of the linked dataset, e.g. projects/subscriberproject/datasets/linkedDataset
           output: true
   - name: linkedResources
@@ -200,11 +200,11 @@ properties:
       type: NestedObject
       properties:
         - name: listing
-          type: string
+          type: String
           description: Output only. Listing for which linked resource is created.
           output: true
         - name: linkedDataset
-          type: string
+          type: String
           description: Output only. Name of the linked dataset, e.g. projects/subscriberproject/datasets/linkedDataset
           output: true
   - name: 'logLinkedDatasetQueryUserEmail'

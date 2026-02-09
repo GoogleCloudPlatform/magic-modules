@@ -880,7 +880,7 @@ func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField
 	requiredWith := strings.ReplaceAll(strings.Join(originalField.Lineage(), ".0."), google.Underscore(originalField.Name), google.Underscore(writeOnlyField.Name))
 
 	options := []func(*Type){
-		propertyWithType("Int"),
+		propertyWithType("String"),
 		propertyWithImmutable(originalField.IsForceNew()),
 		propertyWithDescription(description),
 		propertyWithRequiredWith([]string{requiredWith}),

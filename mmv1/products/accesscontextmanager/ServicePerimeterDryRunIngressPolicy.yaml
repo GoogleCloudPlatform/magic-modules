@@ -222,7 +222,7 @@ properties:
                       Value for permission should be a valid Cloud IAM permission for the
                       corresponding `serviceName` in `ApiOperation`.
   - name: 'title'
-    type: 'string'
+    type: String
     description: |
       Human readable title. Must be unique within the perimeter. Does not affect behavior.
   - name: 'accessPolicyId'

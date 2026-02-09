@@ -106,7 +106,7 @@ properties:
           type: NestedObject
           properties:
             - name: 'bucket'
-              type: string
+              type: String
               required: true
               immutable: true
               description: 'Bucket name for the objects to be transformed.'
@@ -276,13 +276,13 @@ properties:
       - 'put_object_hold'
     properties:
       - name: 'eventBasedHold'
-        type: TypeString
+        type: String
         immutable: true
         description: 'set/unset to update event based hold for objects.'
         validation:
           function: 'validation.StringInSlice([]string{"SET", "UNSET"}, false)'
       - name: 'temporaryHold'
-        type: TypeString
+        type: String
         immutable: true
         description: 'set/unset to update temporary based hold for objects.'
         validation:
