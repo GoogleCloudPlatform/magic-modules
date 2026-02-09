@@ -19,7 +19,7 @@ description: |
   A rule for the OrganizationSecurityPolicy.
 references:
   guides:
-    'Creating firewall rules': 'https://cloud.google.com/vpc/docs/using-firewall-policies#create-rules'
+    'Configure hierarchical security policies': 'https://docs.cloud.google.com/armor/docs/hierarchical-policies-using'
   api: 'https://cloud.google.com/compute/docs/reference/rest/beta/organizationSecurityPolicies/addRule'
 docs:
 id_format: '{{policy_id}}/priority/{{priority}}'
