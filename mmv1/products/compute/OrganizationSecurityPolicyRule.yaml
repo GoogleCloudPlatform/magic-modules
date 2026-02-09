@@ -49,6 +49,11 @@ examples:
     min_version: 'beta'
     test_env_vars:
       org_id: 'ORG_ID'
+  - name: 'organization_security_policy_rule_cloud_armor'
+    primary_resource_id: 'policy'
+    min_version: 'beta'
+    test_env_vars:
+      folder_id: 'FOLDER_ID'
 parameters:
   - name: 'policyId'
     type: String
@@ -89,17 +94,36 @@ properties:
       - name: 'versionedExpr'
         type: Enum
         description: |
-          Preconfigured versioned expression. For organization security policy rules,
-          the only supported type is "FIREWALL".
+          Preconfigured versioned expression. For FIREWALL type organization security policy rules,
+          the only supported type is "FIREWALL". For CLOUD_ARMOR type rules using config block,
+          use "SRC_IPS_V1". This field should not be set when using the expr block.
         min_version: 'beta'
-        default_value: "FIREWALL"
         enum_values:
           - 'FIREWALL'
+          - 'SRC_IPS_V1'
+      - name: 'expr'
+        type: NestedObject
+        description: |
+          User defined CEVAL expression. A CEVAL expression is used to specify match criteria
+          such as origin.ip, source.region_code and contents in the request header.
+          This field is only supported for CLOUD_ARMOR organization security policies.
+        min_version: 'beta'
+        properties:
+          - name: 'expression'
+            type: String
+            description: |
+              Textual representation of an expression in Common Expression Language syntax.
+              The application context of the containing message determines which well-known
+              feature set of CEL is supported.
+            min_version: 'beta'
+            required: true
       - name: 'config'
         type: NestedObject
-        description: The configuration options for matching the rule.
+        description: |
+          The configuration options for matching the rule. This field is required for
+          FIREWALL type organization security policies. For CLOUD_ARMOR type policies,
+          use the expr field instead.
         min_version: 'beta'
-        required: true
         properties:
           - name: 'srcIpRanges'
             type: Array
@@ -107,9 +131,6 @@ properties:
               Source IP address range in CIDR format. Required for
               INGRESS rules.
             min_version: 'beta'
-            exactly_one_of:
-              - 'match.0.config.0.src_ip_ranges'
-              - 'match.0.config.0.dest_ip_ranges'
             item_type:
               type: String
           - name: 'destIpRanges'
@@ -118,9 +139,6 @@ properties:
               Destination IP address range in CIDR format. Required for
               EGRESS rules.
             min_version: 'beta'
-            exactly_one_of:
-              - 'match.0.config.0.src_ip_ranges'
-              - 'match.0.config.0.dest_ip_ranges'
             item_type:
               type: String
           - name: 'layer4Config'
@@ -129,7 +147,6 @@ properties:
               Pairs of IP protocols and ports that the rule should match.
             api_name: layer4Configs
             min_version: 'beta'
-            required: true
             item_type:
               type: NestedObject
               properties:
