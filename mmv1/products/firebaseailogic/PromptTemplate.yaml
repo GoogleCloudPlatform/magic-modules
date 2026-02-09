@@ -85,6 +85,11 @@ properties:
     output: true
 min_version: beta
 examples:
+  - name: firebaseailogic_prompt_template_file
+    min_version: beta
+    primary_resource_id: file
+    vars:
+      template_id: 'file-template'
   - name: firebaseailogic_prompt_template_basic
     min_version: beta
     primary_resource_id: basic
