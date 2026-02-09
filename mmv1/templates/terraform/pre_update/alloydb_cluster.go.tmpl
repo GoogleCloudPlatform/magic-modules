@@ -1,3 +1,4 @@
+location := tpgresource.LocationFromId(d.Id())
 // Implementation for cluster upgrade
 if d.HasChange("database_version") && !tpgresource.IsEmptyValue(reflect.ValueOf(d.Get("database_version"))) {
     upgradeUrl := strings.Split(url, "?updateMask")[0] + ":upgrade"
@@ -42,7 +43,7 @@ if d.HasChange("database_version") && !tpgresource.IsEmptyValue(reflect.ValueOf(
 
     if d.Get("skip_await_major_version_upgrade") == false {
         err = AlloydbOperationWaitTime(
-            config, res, project, "Upgrading cluster", userAgent,
+            config, res, project, location, "Upgrading cluster", userAgent,
             upgradeClusterTimeout)
 
         if err != nil {
@@ -112,7 +113,7 @@ if d.HasChange("cluster_type") && d.Get("cluster_type") == "PRIMARY" {
     }
 
     err = AlloydbOperationWaitTime(
-        config, res, project, "Promoting Cluster", userAgent,
+        config, res, project, location, "Promoting Cluster", userAgent,
         d.Timeout(schema.TimeoutCreate))
 
     if err != nil {
