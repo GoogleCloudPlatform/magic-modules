@@ -868,7 +868,6 @@ Structure is [documented below](#nested_additional_ip_ranges_config).
 
 * `status`- (Optional) Status of the subnetwork. Additional subnet with DRAINING status will not be selected during new node pool creation
     Accepted values are:
-    * `STATUS_UNSPECIFIED`: (Default) Not set, same as ACTIVE.
     * `ACTIVE`: ACTIVE status indicates that the subnet is available for new node pool creation.
     * `DRAINING`: DRAINING status indicates that the subnet is not used for new node pool creation.
 
