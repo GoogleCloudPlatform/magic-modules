@@ -39,6 +39,7 @@ timeouts:
   delete_minutes: 20
 include_in_tgc_next: true
 tgc_include_handwritten_tests: true
+flatten_all_in_method: true
 custom_code:
   constants: 'templates/terraform/constants/bigquery_dataset.go.tmpl'
   pre_read: 'templates/terraform/pre_read/bigquery_dataset.go.tmpl'

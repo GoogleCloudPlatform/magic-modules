@@ -36,6 +36,7 @@ self_link: '{{key_ring}}/cryptoKeys/{{name}}'
 create_url: '{{key_ring}}/cryptoKeys?cryptoKeyId={{name}}&skipInitialVersionCreation={{skip_initial_version_creation}}'
 update_verb: 'PATCH'
 update_mask: true
+flatten_all_in_method: true
 import_format:
   - '{{key_ring}}/cryptoKeys/{{name}}'
 include_in_tgc_next: true

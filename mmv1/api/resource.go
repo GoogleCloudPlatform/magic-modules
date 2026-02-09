@@ -343,6 +343,9 @@ type Resource struct {
 	// The compiler to generate the downstream files, for example "terraformgoogleconversion-codegen".
 	Compiler string `yaml:"-"`
 
+	// If true it will generate all flatteners in a flatten{{resourceName}} method instead of generating all flatteners in Read()
+	FlattenAllInMethod bool `yaml:"flatten_all_in_method,omitempty"`
+
 	// The API "resource type kind" used for this resource e.g., "Function".
 	// If this is not set, then :name is used instead, which is strongly
 	// preferred wherever possible. Its main purpose is for supporting
