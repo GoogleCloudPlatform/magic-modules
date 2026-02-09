@@ -26,7 +26,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccDeveloperConnectInsightsConfig_update(t *testing.T) {
+func TestAccDeveloperConnectInsightsConfigProjects_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -44,24 +44,24 @@ func TestAccDeveloperConnectInsightsConfig_update(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDeveloperConnectInsightsConfig_basic(context),
+				Config: testAccDeveloperConnectInsightsConfigProjects_basic(context),
 			},
 			{
-				ResourceName:            "google_developer_connect_insights_config.insights_config",
+				ResourceName:            "google_developer_connect_insights_config.insights_config_projects",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"insights_config_id", "labels", "location", "terraform_labels", "workload"},
 			},
 			{
-				Config: testAccDeveloperConnectInsightsConfig_update(context),
+				Config: testAccDeveloperConnectInsightsConfigProjects_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_developer_connect_insights_config.insights_config", plancheck.ResourceActionDestroyBeforeCreate),
+						plancheck.ExpectResourceAction("google_developer_connect_insights_config.insights_config_projects", plancheck.ResourceActionDestroyBeforeCreate),
 					},
 				},
 			},
 			{
-				ResourceName:            "google_developer_connect_insights_config.insights_config",
+				ResourceName:            "google_developer_connect_insights_config.insights_config_projects",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"insights_config_id", "location", "labels", "terraform_labels", "workload"},
@@ -70,7 +70,7 @@ func TestAccDeveloperConnectInsightsConfig_update(t *testing.T) {
 	})
 }
 
-func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{}) string {
+func testAccDeveloperConnectInsightsConfigProjects_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_project" "project" {
 		project_id = "dci-tf-%{random_suffix}"
@@ -174,34 +174,22 @@ func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{})
 		]
 		create_duration  = "120s"
 	}
-
-	resource "google_apphub_application" "my_apphub_application" {
-		location = "us-central1"
-		application_id = "tf-test-example-application%{random_suffix}"
-		scope {
-			type = "REGIONAL"
+	
+	resource "google_developer_connect_insights_config" "insights_config_projects" {
+  		location           = "us-central1"
+		insights_config_id = "tf-test-ic-projects-%{random_suffix}"
+		project            = google_project.project.project_id
+		annotations        = {}
+		labels             = {}
+		projects {
+			project_ids = ["projects/${google_project.project.project_id}"]
 		}
-		project = google_project.project.project_id
 		depends_on = [time_sleep.wait_for_propagation]
 	}
-	
-	resource "google_developer_connect_insights_config" "insights_config" {
-		location           = "us-central1"
-		insights_config_id = "tf-test-ic%{random_suffix}"
-		project            = google_project.project.project_id
-		annotations = {}
-    	labels = {}
-    	app_hub_application = format("//apphub.googleapis.com/projects/%s/locations/%s/applications/%s",
-			google_project.project.number,
-        	google_apphub_application.my_apphub_application.location,
-        	google_apphub_application.my_apphub_application.application_id)
-		
-		depends_on = [time_sleep.wait_for_propagation]
-    }
   `, context)
 }
 
-func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}) string {
+func testAccDeveloperConnectInsightsConfigProjects_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_project" "project" {
 		project_id = "dci-tf-%{random_suffix}"
@@ -306,26 +294,15 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 		create_duration  = "120s"
 	}
 
-	resource "google_apphub_application" "my_apphub_application" {
-		location = "us-central1"
-		application_id = "tf-test-example-application%{random_suffix}"
-		scope {
-			type = "REGIONAL"
-		}
-		project = google_project.project.project_id
-		depends_on = [time_sleep.wait_for_propagation]
-	}
-
-	resource "google_developer_connect_insights_config" "insights_config" {
-		location           = "us-central1"
-		insights_config_id = "tf-test-ic-%{random_suffix}"
+	resource "google_developer_connect_insights_config" "insights_config_projects" {
+  		location           = "us-central1"
+		insights_config_id = "tf-test-ic-projects-%{random_suffix}"
 		project            = google_project.project.project_id
-		annotations = {}
-    	labels = {}
-    	app_hub_application = format("//apphub.googleapis.com/projects/%s/locations/%s/applications/%s",
-        	google_project.project.number,
-        	google_apphub_application.my_apphub_application.location,
-        	google_apphub_application.my_apphub_application.application_id)
+		annotations        = {}
+		labels             = {}
+		projects {
+			project_ids = ["projects/${google_project.project.project_id}"]
+		}
 		artifact_configs {
 			google_artifact_analysis {
 				project_id = google_project.project.project_id
@@ -337,6 +314,6 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 			uri = "us-docker.pkg.dev/my-project/my-repo/my-image"
 		}
 		depends_on = [time_sleep.wait_for_propagation]
-    }
+	}
   `, context)
 }
