@@ -32,7 +32,6 @@ timeouts:
   update_minutes: 30
   delete_minutes: 30
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']

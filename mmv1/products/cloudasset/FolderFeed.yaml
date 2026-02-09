@@ -42,7 +42,6 @@ custom_code:
   tgc_ignore_terraform_encoder: true
 supports_indirect_user_project_override: true
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 cai_base_url: 'folders/{{folder}}/feeds'
 cai_asset_name_format: 'folders/{{folder}}/feeds/{{feed_id}}'
 examples:

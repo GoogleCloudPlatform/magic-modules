@@ -14,7 +14,6 @@
 ---
 name: 'CertificateMap'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 description: |
   CertificateMap defines a collection of certificate configurations,
   which are usable by any associated target proxies
