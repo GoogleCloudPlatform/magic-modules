@@ -166,7 +166,7 @@ resource "google_storage_bucket" "hns-enabled" {
 
   encryption  {
     google_managed_encryption_enforcement_config {
-      restriction_mode = "%s"
+      restriction_mode = "FullyRestricted"
     }
     customer_managed_encryption_enforcement_config {
       restriction_mode = "FullyRestricted"
