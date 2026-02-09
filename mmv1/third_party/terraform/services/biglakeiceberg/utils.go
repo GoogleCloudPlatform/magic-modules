@@ -32,14 +32,3 @@ func icebergNamespacePropertiesDiffSuppress(k, old, new string, d *schema.Resour
 	return false
 }
 
-func encodeNamespace(ns []string) string {
-	return url.PathEscape(strings.Join(ns, "\x1f"))
-}
-
-func decodeNamespace(nsStr string) ([]string, error) {
-	decoded, err := url.PathUnescape(nsStr)
-	if err != nil {
-		return nil, err
-	}
-	return strings.Split(decoded, "\x1f"), nil
-}
