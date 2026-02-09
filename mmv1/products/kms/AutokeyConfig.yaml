@@ -1,6 +1,20 @@
 # Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'AutokeyConfig'
+# This resource is currently in public preview.
+description: |
   `AutokeyConfig` is a singleton resource used to configure the auto-provisioning
   flow of CryptoKeys for CMEK.
 
@@ -8,22 +22,18 @@
   ~> **Note:** AutokeyConfigs cannot be deleted from Google Cloud Platform.
   Destroying a Terraform-managed AutokeyConfig will remove it from state but
   *will not delete the resource from the project.*
-# See the License for the specific language governing permissions and
-# limitations under the License.
+references:
+  guides:
+    'Cloud KMS with Autokey': 'https://cloud.google.com/kms/docs/kms-with-autokey'
+  api: 'https://cloud.google.com/kms/docs/reference/rest/v1/AutokeyConfig'
 
----
-# This resource is currently in public preview.
 # Base URL now needs to be dynamic
 base_url: '{{parent}}/autokeyConfig'
 self_link: '{{name}}' # This will be set by the decoder
-      key_project_name: 'key-proj'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    external_providers: ["random", "time"]
+
 parameters:
   - name: 'folder'
-    required: false
+    type: String
     description: |
       The folder for which to retrieve config.
     url_param_only: true
@@ -41,6 +51,7 @@ parameters:
     immutable: true
     conflicts:
       - 'folder'
+    diff_suppress_func: 'projectPrefixSuppress'
 
 properties:
   - name: 'name'

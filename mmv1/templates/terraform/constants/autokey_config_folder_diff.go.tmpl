@@ -53,3 +53,7 @@ func normalizeParent(parent, kind string) string {
 func folderPrefixSuppress(k, old, new string, d *schema.ResourceData) bool {
     return autokeyTrimPrefix(old, autokeyFolderPrefix) == autokeyTrimPrefix(new, autokeyFolderPrefix)
 }
+
+func projectPrefixSuppress(k, old, new string, d *schema.ResourceData) bool {
+    return autokeyTrimPrefix(old, autokeyProjectPrefix) == autokeyTrimPrefix(new, autokeyProjectPrefix)
+}
