@@ -37,6 +37,12 @@ examples:
     region_override: 'global'
     vars:
       security_gateway_name: default
+  - name: beyondcorp_security_gateway_logging
+    primary_resource_id: example-logging
+    primary_resource_name: 'fmt.Sprintf("default-logging%s", context["random_suffix"])'
+    region_override: 'global'
+    vars:
+      security_gateway_name: default-logging
   - name: beyondcorp_security_gateway_spa
     primary_resource_id: example-spa
     primary_resource_name: 'fmt.Sprintf("default-spa%s", context["random_suffix"])'
@@ -234,3 +240,10 @@ properties:
               - name: path
                 type: String
                 description: Contains uri path fragment where HTTP request is sent.
+  - name: logging
+    type: NestedObject
+    send_empty_value: true
+    allow_empty_object: true
+    description: Settings related to Cloud Logging.
+    properties:
+      [] # Meant to be an empty object with no properties for now.
