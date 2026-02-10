@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/services/redis"
@@ -1365,6 +1366,11 @@ func TestAccRedisCluster_redisClusterMaintenanceVersion(t *testing.T) {
 			},
 			{
 				Config: testAccRedisCluster_redisClusterMaintenanceVersionUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_redis_cluster.cluster-ms", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_redis_cluster.cluster-ms",
@@ -1407,7 +1413,7 @@ resource "google_redis_cluster" "cluster-ms" {
   node_type 				 = "REDIS_SHARED_CORE_NANO"
   transit_encryption_mode 	 = "TRANSIT_ENCRYPTION_MODE_SERVER_AUTHENTICATION"
   authorization_mode 		 = "AUTH_MODE_DISABLED"
-  # maintenance_version 		 = "REDISCLUSTER_20251008.00_p00"
+  maintenance_version 		 = "REDISCLUSTER_20251008_00_00"
   redis_configs = { 
     maxmemory-policy		 = "volatile-ttl"
   }
@@ -1443,6 +1449,11 @@ func TestAccRedisCluster_redisClusterHaWithLabelsUpdate(t *testing.T) {
 			},
 			{
 				Config: testAccRedisCluster_redisClusterHaWithLabelsUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_redis_cluster.cluster-ha-with-labels", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_redis_cluster.cluster-ha-with-labels",
@@ -1461,7 +1472,7 @@ resource "google_redis_cluster" "cluster-ha-with-labels" {
   shard_count    = 3
   labels = {
     my_key = "my_val"
-    other_key = "other_val" 
+    other_key = "other_val_update" 
   }
   psc_configs {
     network = google_compute_network.consumer_net.id

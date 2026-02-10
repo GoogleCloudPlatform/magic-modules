@@ -436,7 +436,6 @@ properties:
                 external IP address.
               immutable: true
               default_from_api: true
-              custom_tgc_flatten: 'templates/tgc_next/custom_flatten/workbench_instance_access_configs.go.tmpl'
               item_type:
                 type: NestedObject
                 properties:

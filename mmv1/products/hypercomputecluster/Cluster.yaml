@@ -61,7 +61,6 @@ properties:
       to [RFC-1034](https://datatracker.ietf.org/doc/html/rfc1034) (lower-case,
       alphanumeric, and at most 63 characters).
     value_type:
-      name: computeResource
       type: NestedObject
       properties:
         - name: config
@@ -165,7 +164,7 @@ properties:
                     Must be in the same region as the cluster, and must match the zone of any
                     other resources specified in the cluster.
                   immutable: true
-    key_name: compute_resource_id
+    key_name: id
   - name: createTime
     type: String
     description: Time that the cluster was originally created.
@@ -194,7 +193,6 @@ properties:
       [RFC-1034](https://datatracker.ietf.org/doc/html/rfc1034) (lower-case,
       alphanumeric, and at most 63 characters).
     value_type:
-      name: networkResource
       type: NestedObject
       properties:
         - name: config
@@ -260,7 +258,7 @@ properties:
                 `projects/{project}/regions/{region}/subnetworks/{subnetwork}`.
               output: true
           output: true
-    key_name: network_resource_id
+    key_name: id
   - name: orchestrator
     type: NestedObject
     description: |-
@@ -533,7 +531,6 @@ properties:
       to [RFC-1034](https://datatracker.ietf.org/doc/html/rfc1034) (lower-case,
       alphanumeric, and at most 63 characters).
     value_type:
-      name: storageResource
       type: NestedObject
       properties:
         - name: bucket
@@ -751,7 +748,7 @@ properties:
                 `projects/{project}/locations/{location}/instances/{instance}`
               output: true
           output: true
-    key_name: storage_resource_id
+    key_name: id
   - name: updateTime
     type: String
     description: Time that the cluster was most recently updated.

@@ -15,13 +15,13 @@ To get more information about GKE clusters, see:
     * [About cluster configuration choices](https://cloud.google.com/kubernetes-engine/docs/concepts/types-of-clusters)
   * Terraform guidance
     * [Using GKE with Terraform](/docs/providers/google/guides/using_gke_with_terraform.html)
-    * [Provision a GKE Cluster (Google Cloud) Learn tutorial](https://learn.hashicorp.com/tutorials/terraform/gke?in=terraform/kubernetes&utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS)
+    * [Provision a GKE Cluster (Google Cloud) Learn tutorial](https://developer.hashicorp.com/terraform/tutorials/kubernetes/gke)
 
 -> On version 5.0.0+ of the provider, you must explicitly set `deletion_protection = false`
 and run `terraform apply` to write the field to state in order to destroy a cluster.
 
 ~> All arguments and attributes (including certificate outputs) will be stored in the raw state as
-plaintext. [Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data).
+plaintext. [Read more about sensitive data in state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data).
 
 ## Example Usage - with a separately managed node pool (recommended)
 
@@ -210,6 +210,8 @@ Options are `VPC_NATIVE` or `ROUTES`. `VPC_NATIVE` enables [IP aliasing](https:/
 * `maintenance_policy` - (Optional) The maintenance policy to use for the cluster. Structure is
     [documented below](#nested_maintenance_policy).
 
+* `managed_opentelemetry_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)) Configuration for the [GKE Managed OpenTelemetry](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/managed-otel-gke) feature. Structure is [documented below](#nested_managed_opentelemetry_config).
+
 * `master_auth` - (Optional) The authentication information for accessing the
 Kubernetes master. Some values in this block are only returned by the API if
 your service account has permission to get credentials for your GKE cluster. If
@@ -289,7 +291,7 @@ region are guaranteed to support the same version.
 
 * `confidential_nodes` - Configuration for [Confidential Nodes](https://cloud.google.com/kubernetes-engine/docs/how-to/confidential-gke-nodes) feature. Structure is documented below [documented below](#nested_confidential_nodes).
 
-* `pod_security_policy_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the
+* `pod_security_policy_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)) Configuration for the
     [PodSecurityPolicy](https://cloud.google.com/kubernetes-engine/docs/how-to/pod-security-policies) feature.
     Structure is [documented below](#nested_pod_security_policy_config).
 
@@ -300,7 +302,7 @@ region are guaranteed to support the same version.
     [SecretManagerConfig](https://cloud.google.com/secret-manager/docs/secret-manager-managed-csi-component) feature.
     Structure is [documented below](#nested_secret_manager_config).
 
-* `secret_sync_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the
+* `secret_sync_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)) Configuration for the
     [SecretSyncConfig](https://cloud.google.com/secret-manager/docs/sync-k8-secrets) feature.
     Structure is [documented below](#nested_secret_sync_config).
 
@@ -316,7 +318,7 @@ region are guaranteed to support the same version.
 * `private_cluster_config` - (Optional) Configuration for [private clusters](https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters),
 clusters with private nodes. Structure is [documented below](#nested_private_cluster_config).
 
-* `cluster_telemetry` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for
+* `cluster_telemetry` - (Optional, [Beta](../guides/provider_versions.html.markdown)) Configuration for
    [ClusterTelemetry](https://cloud.google.com/monitoring/kubernetes-engine/installing#controlling_the_collection_of_application_logs) feature,
    Structure is [documented below](#nested_cluster_telemetry).
 
@@ -412,7 +414,7 @@ subnetwork in which the cluster's instances are launched.
 * `gateway_api_config` - (Optional)
   Configuration for [GKE Gateway API controller](https://cloud.google.com/kubernetes-engine/docs/concepts/gateway-api). Structure is [documented below](#nested_gateway_api_config).
 
-* `protect_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+* `protect_config` - (Optional, [Beta](../guides/provider_versions.html.markdown))
   Enable/Disable Protect API features for the cluster. Structure is [documented below](#nested_protect_config).
 
 * `security_posture_config` - (Optional)
@@ -421,7 +423,7 @@ Enable/Disable Security Posture API features for the cluster. Structure is [docu
 * `fleet` - (Optional)
 Fleet configuration for the cluster. Structure is [documented below](#nested_fleet).
 
-* `workload_alts_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+* `workload_alts_config` - (Optional, [Beta](../guides/provider_versions.html.markdown))
   Configuration for [direct-path (via ALTS) with workload identity.](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#workloadaltsconfig). Structure is [documented below](#nested_workload_alts_config).
 
 * `enterprise_config` - (Optional)
@@ -472,7 +474,7 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 
 * `cloudrun_config` - (Optional). Structure is [documented below](#nested_cloudrun_config).
 
-* `istio_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
+* `istio_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)).
     Structure is [documented below](#nested_istio_config).
 
 * `dns_cache_config` - (Optional).
@@ -490,7 +492,7 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 *  `gke_backup_agent_config` -  (Optional).
     The status of the Backup for GKE agent addon. It is disabled by default; Set `enabled = true` to enable.
 
-* `kalm_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
+* `kalm_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)).
     Configuration for the KALM addon, which manages the lifecycle of k8s. It is disabled by default; Set `enabled = true` to enable.
 
 *  `config_connector_config` -  (Optional).
@@ -513,6 +515,10 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
    GKE](https://cloud.google.com/kubernetes-engine/docs/add-on/ray-on-gke/how-to/collect-view-logs-metrics)
    for more information.
 
+*  `slice_controller` - (Optional). 
+   The status of the slice controller addon.
+   It is disabled by default. Set `enabled = true` to enable.
+
 *  `parallelstore_csi_driver_config` - (Optional) The status of the Parallelstore CSI driver addon,
    which allows the usage of a Parallelstore instances as volumes.
    It is disabled by default for Standard clusters; set `enabled = true` to enable.
@@ -528,7 +534,7 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
    This flag is required to workaround a port conflict with the gke-metadata-server on GKE nodes.
    See [Enable Lustre CSI driver](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/lustre-csi-driver-new-volume) for more information.
 
-* `pod_snapshot_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The status of the Pod Snapshot addon. It is disabled by default. Set `enabled = true` to enable.
+* `pod_snapshot_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)) The status of the Pod Snapshot addon. It is disabled by default. Set `enabled = true` to enable.
 
 This example `addons_config` disables two addons:
 
@@ -594,7 +600,7 @@ for autopilot clusters. Resource limits for `cpu` and `memory` must be defined t
 * `resource_limits` - (Optional) Global constraints for machine resources in the
 cluster. Configuring the `cpu` and `memory` types is required if node
 auto-provisioning is enabled. These limits will apply to node pool autoscaling
-in addition to node auto-provisioning. Structure is [documented below](#nested_resource_limits).
+in addition to node auto-provisioning. Limits can't be unset entirely, they can only be replaced. Structure is [documented below](#nested_resource_limits).
 
 * `auto_provisioning_defaults` - (Optional) Contains defaults for a node pool created by NAP. A subset of fields also apply to
 GKE Autopilot clusters.
@@ -623,7 +629,7 @@ for a list of types.
 
 <a name="nested_auto_provisioning_defaults"></a>The `auto_provisioning_defaults` block supports:
 
-* `min_cpu_platform` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+* `min_cpu_platform` - (Optional, [Beta](../guides/provider_versions.html.markdown))
 Minimum CPU platform to be used for NAP created node pools. The instance may be scheduled on the
 specified or newer CPU platform. Applicable values are the friendly names of CPU platforms, such
 as "Intel Haswell" or "Intel Sandy Bridge".
@@ -696,6 +702,10 @@ This block also contains several computed attributes, documented below.
 *  `managed_prometheus` - (Optional) Configuration for Managed Service for Prometheus. Structure is [documented below](#nested_managed_prometheus).
 
 * `advanced_datapath_observability_config` - (Optional) Configuration for Advanced Datapath Monitoring. Structure is [documented below](#nested_advanced_datapath_observability_config).
+
+<a name="nested_managed_opentelemetry_config"></a>The `managed_opentelemetry_config` block supports:
+
+*  `scope` - (Required) The scope of the Managed OpenTelemetry pipeline. Supported values include: `SCOPE_UNSPECIFIED`, `NONE`, `COLLECTION_AND_INSTRUMENTATION_COMPONENTS`.
 
 <a name="nested_managed_prometheus"></a>The `managed_prometheus` block supports:
 
@@ -922,7 +932,7 @@ The `master_authorized_networks_config.cidr_blocks` block supports:
     * `STANDARD_ENCRYPTION`: The given node will be encrypted using keys managed by Google infrastructure and the keys wll be deleted when the node is deleted.
     * `EPHEMERAL_KEY_ENCRYPTION`: The given node will opt-in for using ephemeral key for encrypting Local SSDs. The Local SSDs will not be able to recover data in case of node crash.
 
-* `ephemeral_storage_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Parameters for the ephemeral storage filesystem. If unspecified, ephemeral storage is backed by the boot disk. Structure is [documented below](#nested_ephemeral_storage_config).
+* `ephemeral_storage_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)) Parameters for the ephemeral storage filesystem. If unspecified, ephemeral storage is backed by the boot disk. Structure is [documented below](#nested_ephemeral_storage_config).
 
 ```hcl
 ephemeral_storage_config {
@@ -1031,7 +1041,7 @@ gvnic {
     See the [official documentation](https://cloud.google.com/kubernetes-engine/docs/concepts/spot-vms)
     for more information. Defaults to false.
 
-* `sandbox_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) [GKE Sandbox](https://cloud.google.com/kubernetes-engine/docs/how-to/sandbox-pods) configuration. When enabling this feature you must specify `image_type = "COS_CONTAINERD"` and `node_version = "1.12.7-gke.17"` or later to use it.
+* `sandbox_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)) [GKE Sandbox](https://cloud.google.com/kubernetes-engine/docs/how-to/sandbox-pods) configuration. When enabling this feature you must specify `image_type = "COS_CONTAINERD"` and `node_version = "1.12.7-gke.17"` or later to use it.
     Structure is [documented below](#nested_sandbox_config).
 
 * `boot_disk_kms_key` - (Optional) The Customer Managed Encryption Key used to encrypt the boot disk attached to each node in the node pool. This should be of the form projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKeys/[KEY_NAME]. For more information about protecting resources with Cloud KMS Keys please see: https://cloud.google.com/compute/docs/disks/customer-managed-encryption
@@ -1317,13 +1327,13 @@ notification_config {
 
 <a name="nested_secret_sync_config"></a>The `secret_sync_config` block supports:
 
-* `enabled` (Required, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - Enable the Sync as K8s secret feature for this cluster.
-* `rotation_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - config for secret sync auto rotation. Structure is [docuemented below](#sync_rotation_config)
+* `enabled` (Required, [Beta](../guides/provider_versions.html.markdown)) - Enable the Sync as K8s secret feature for this cluster.
+* `rotation_config` (Optional, [Beta](../guides/provider_versions.html.markdown)) - config for secret sync auto rotation. Structure is [docuemented below](#sync_rotation_config)
 
 <a name="sync_rotation_config"></a>The `rotation_config` block supports:
 
-* `enabled` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - Enable the roation in Sync as K8s secret feature for this cluster.
-* `rotation_interval` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) - The interval between two consecutive rotations. Default rotation interval is 2 minutes.
+* `enabled` (Optional, [Beta](../guides/provider_versions.html.markdown)) - Enable the roation in Sync as K8s secret feature for this cluster.
+* `rotation_interval` (Optional, [Beta](../guides/provider_versions.html.markdown)) - The interval between two consecutive rotations. Default rotation interval is 2 minutes.
 
 <a name="nested_user_managed_keys_config"></a>The `user_managed_keys_config` block supports:
 
@@ -1721,13 +1731,13 @@ registry_hosts {
 
 <a name="nested_protect_config"></a>The `protect_config` block supports:
 
-* `workload_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) WorkloadConfig defines which actions are enabled for a cluster's workload configurations. Structure is [documented below](#nested_workload_config)
+* `workload_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)) WorkloadConfig defines which actions are enabled for a cluster's workload configurations. Structure is [documented below](#nested_workload_config)
 
-* `workload_vulnerability_mode` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Sets which mode to use for Protect workload vulnerability scanning feature. Accepted values are DISABLED, BASIC.
+* `workload_vulnerability_mode` - (Optional, [Beta](../guides/provider_versions.html.markdown)) Sets which mode to use for Protect workload vulnerability scanning feature. Accepted values are DISABLED, BASIC.
 
 <a name="nested_workload_config"></a>The `protect_config.workload_config` block supports:
 
-* `audit_mode` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Sets which mode of auditing should be used for the cluster's workloads. Accepted values are DISABLED, BASIC.
+* `audit_mode` - (Optional, [Beta](../guides/provider_versions.html.markdown)) Sets which mode of auditing should be used for the cluster's workloads. Accepted values are DISABLED, BASIC.
 
 <a name="nested_security_posture_config"></a>The `security_posture_config` block supports:
 

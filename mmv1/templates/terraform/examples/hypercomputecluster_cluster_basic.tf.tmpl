@@ -10,7 +10,7 @@ resource "google_hypercomputecluster_cluster" "{{$.PrimaryResourceId}}" {
   location                    = "us-central1"
   description                 = "Cluster Director instance created through Terraform"
   network_resources {
-    network_resource_id = "network1"
+    id = "network1"
     config {
       new_network {
         description = "Network one"
@@ -19,7 +19,7 @@ resource "google_hypercomputecluster_cluster" "{{$.PrimaryResourceId}}" {
     }
   }
   compute_resources {
-    compute_resource_id = "compute1"
+    id = "compute1"
     config {
       new_on_demand_instances {
         machine_type = "n2-standard-2"

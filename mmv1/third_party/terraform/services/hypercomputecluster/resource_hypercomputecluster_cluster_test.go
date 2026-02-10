@@ -67,7 +67,7 @@ resource "google_hypercomputecluster_cluster" "cluster" {
     old-key = "old-value"
   }
   network_resources {
-    network_resource_id = "network-default"
+    id = "network-default"
     config {
       new_network {
         network = "projects/${local.project_id}/global/networks/net-%{random_suffix}"
@@ -75,7 +75,7 @@ resource "google_hypercomputecluster_cluster" "cluster" {
     }
   }
   compute_resources {
-    compute_resource_id = "compute-spot"
+    id = "compute-spot"
     config {
       new_spot_instances {
         machine_type = "n2-standard-2"
@@ -85,7 +85,7 @@ resource "google_hypercomputecluster_cluster" "cluster" {
     }
   }
   storage_resources {
-    storage_resource_id = "storage-old"
+    id = "storage-old"
     config {
       new_bucket {
         storage_class = "STANDARD"
@@ -164,7 +164,7 @@ resource "google_hypercomputecluster_cluster" "cluster" {
     new-key = "new-value"
   }
   network_resources {
-    network_resource_id = "network-default"
+    id = "network-default"
     config {
       new_network {
         network = "projects/${local.project_id}/global/networks/net-%{random_suffix}"
@@ -172,7 +172,7 @@ resource "google_hypercomputecluster_cluster" "cluster" {
     }
   }
   compute_resources {
-    compute_resource_id = "compute-spot-new"
+    id = "compute-spot-new"
     config {
       new_spot_instances {
         machine_type = "n2-standard-2"
@@ -182,7 +182,7 @@ resource "google_hypercomputecluster_cluster" "cluster" {
     }
   }
   storage_resources {
-    storage_resource_id = "storage-new"
+    id = "storage-new"
     config {
       new_bucket {
         storage_class = "STANDARD"

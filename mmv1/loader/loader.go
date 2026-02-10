@@ -197,6 +197,8 @@ func (l *Loader) LoadProduct(productName string) (*api.Product, error) {
 		return nil, err
 	}
 
+	p.Version = p.VersionObjOrClosest(l.version)
+
 	p.Objects = resources
 	p.Validate()
 

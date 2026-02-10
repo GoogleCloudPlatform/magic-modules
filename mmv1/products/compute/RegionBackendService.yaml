@@ -1030,7 +1030,6 @@ properties:
     type: NestedObject
     description: |
       Configures traffic steering properties of internal passthrough Network Load Balancers.
-    min_version: beta
     properties:
       - name: 'zonalAffinity'
         type: NestedObject
@@ -1046,7 +1045,6 @@ properties:
               - 'ZONAL_AFFINITY_SPILL_CROSS_ZONE'
               - 'ZONAL_AFFINITY_STAY_WITHIN_ZONE'
             default_value: 'ZONAL_AFFINITY_DISABLED'
-            min_version: beta
           - name: 'spilloverRatio'
             type: Double
             description: |
@@ -1055,7 +1053,6 @@ properties:
               distributes new connections to all healthy endpoints in the local zone only. When the ratio of the count
               of healthy backend endpoints in a zone to the count of backend endpoints in that same zone is below this
               threshold, the load balancer distributes all new connections to all healthy endpoints across all zones.
-            min_version: beta
   - name: 'outlierDetection'
     type: NestedObject
     description: |

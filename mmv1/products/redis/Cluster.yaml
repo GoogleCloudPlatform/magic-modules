@@ -119,6 +119,7 @@ include_in_tgc_next: true
 custom_code:
   encoder: 'templates/terraform/encoders/redis_cluster.go.tmpl'
   decoder: 'templates/terraform/decoders/redis_cluster.go.tmpl'
+  tgc_ignore_terraform_decoder: true
 sweeper:
   ensure_value:
     field: deletionProtectionEnabled
