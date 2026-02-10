@@ -13,6 +13,8 @@
 
 ---
 name: 'Endpoint'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 description: |
   Cloud IDS is an intrusion detection service that provides threat detection for intrusions, malware, spyware, and command-and-control attacks on your network.
 references:
