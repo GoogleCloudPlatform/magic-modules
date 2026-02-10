@@ -1,0 +1,120 @@
+resource "google_dialogflow_cx_agent" "agent" {
+  provider = google-beta
+  display_name = "{{index $.Vars "agent_name"}}"
+  location = "us-central1"
+  default_language_code = "en"
+  time_zone = "America/New_York"
+  description = "Example description."
+  delete_chat_engine_on_destroy = true
+}
+
+resource "google_integration_connectors_connection" "integration_connector" {
+  provider = google-beta
+  name     = "{{index $.Vars "connection_name"}}"
+  location = "us-central1"
+  connector_version = "projects/${google_dialogflow_cx_agent.agent.project}/locations/global/providers/gcp/connectors/bigquery/versions/1"
+  description = "tf created description"
+  config_variable {
+      key = "dataset_id"
+      string_value = google_bigquery_dataset.bq_dataset.dataset_id
+  }
+    config_variable {
+      key = "project_id"
+      string_value = google_dialogflow_cx_agent.agent.project
+  }
+  config_variable {
+    key = "support_native_data_type"
+    boolean_value = false
+  }
+  config_variable {
+    key = "proxy_enabled"
+    boolean_value = false
+  }
+
+  service_account = "${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"
+
+  auth_config {
+    auth_type = "AUTH_TYPE_UNSPECIFIED"
+  }
+  lifecycle {
+    ignore_changes = [
+      auth_config,
+    ]
+  }
+}
+
+resource "google_bigquery_dataset" "bq_dataset" {
+  provider = google-beta
+  dataset_id    = "{{index $.Vars "dataset_id"}}"
+  friendly_name = "test"
+  description   = "This is a test description"
+  location      = "us-central1"
+  delete_contents_on_destroy = true
+}
+
+resource "google_bigquery_table" "bq_table" {
+  provider = google-beta
+  deletion_protection = false
+  dataset_id = google_bigquery_dataset.bq_dataset.dataset_id
+  table_id   = "{{index $.Vars "table_id"}}"
+}
+
+
+resource "google_bigquery_dataset_iam_member" "connector_sa_dataset_perms" {
+  provider   = google-beta
+  project    = data.google_project.test_project.project_id
+  dataset_id = google_bigquery_dataset.bq_dataset.dataset_id
+  role       = "roles/bigquery.dataEditor"
+  member     = "serviceAccount:${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"
+}
+
+resource "google_dialogflow_cx_tool" "tool" {
+  provider = google-beta
+  parent       = google_dialogflow_cx_agent.agent.id
+  display_name = "{{index $.Vars "tool_name"}}"
+  description  = "Example Description"
+
+  connector_spec {
+    name = "projects/${google_dialogflow_cx_agent.agent.project}/locations/us-central1/connections/${google_integration_connectors_connection.integration_connector.name}"
+    actions {
+      connection_action_id = "ExecuteCustomQuery"
+      input_fields = ["test1"]
+      output_fields = ["test1"]
+    }
+    actions {
+      entity_operation {
+        entity_id = google_bigquery_table.bq_table.table_id
+        operation = "LIST"
+      }
+    }
+  }
+}
+
+resource "google_dialogflow_cx_tool_version" "{{$.PrimaryResourceId}}" {
+  parent       = google_dialogflow_cx_tool.tool.id
+  provider = google-beta
+  display_name = "Example Connector Tool Version"
+  tool {
+    display_name = "{{index $.Vars "tool_name"}}"
+    description  = "Example Description"
+
+    connector_spec {
+      name = "projects/${google_dialogflow_cx_agent.agent.project}/locations/us-central1/connections/${google_integration_connectors_connection.integration_connector.name}"
+      actions {
+        connection_action_id = "ExecuteCustomQuery"
+        input_fields = ["test1"]
+        output_fields = ["test1"]
+      }
+      actions {
+        entity_operation {
+          entity_id = google_bigquery_table.bq_table.table_id
+          operation = "LIST"
+        }
+      }
+    }
+  }
+}
+
+data "google_project" "test_project" {
+  provider = google-beta
+}

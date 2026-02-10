@@ -26,6 +26,7 @@ update_verb: 'PATCH'
 import_format:
   - 'projects/{{project}}/locations/global/networkPeerings/{{name}}'
 include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20

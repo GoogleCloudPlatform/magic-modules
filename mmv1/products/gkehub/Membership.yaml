@@ -49,6 +49,8 @@ iam_policy:
     - '{{membership_id}}'
 custom_code:
   constants: 'templates/terraform/constants/gke_hub_membership_diff.go.tmpl'
+include_in_tgc_next: true
+tgc_include_handwritten_tests: true
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
 schema_version: 1
