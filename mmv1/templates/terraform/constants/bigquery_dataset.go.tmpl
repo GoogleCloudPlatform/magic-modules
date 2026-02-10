@@ -30,7 +30,7 @@ func validateDefaultTableExpirationMs(v interface{}, k string) (ws []string, err
     return
 }
 
-{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
+{{- if ne $.ProductMetadata.Compiler "terraformgoogleconversion-codegen" }}
 // bigqueryDatasetAccessHash is a custom hash function for the access block.
 // It normalizes
 // 1) the 'role' field before hashing, treating legacy roles
