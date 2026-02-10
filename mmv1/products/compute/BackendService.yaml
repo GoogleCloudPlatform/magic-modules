@@ -44,7 +44,6 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 iam_policy:
   allowed_iam_role: 'roles/compute.admin'
   parent_resource_attribute: 'name'

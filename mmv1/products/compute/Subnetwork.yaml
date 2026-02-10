@@ -46,7 +46,6 @@ docs:
 base_url: 'projects/{{project}}/regions/{{region}}/subnetworks'
 has_self_link: true
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 immutable: true
 timeouts:
   insert_minutes: 20

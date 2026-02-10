@@ -56,7 +56,6 @@ custom_code:
 # Using a handwritten sweeper because of pre_delete.
 exclude_sweeper: true
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 examples:
   - name: 'kms_autokey_config_all'
     primary_resource_id: 'example-autokeyconfig'

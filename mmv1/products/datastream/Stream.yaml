@@ -47,7 +47,6 @@ custom_code:
   post_update: 'templates/terraform/post_update/datastream_stream.go.tmpl'
   post_import: 'templates/terraform/post_import/datastream_stream.go.tmpl'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 tgc_tests:
   - name: 'TestAccDatastreamStream_mongoDb'
     skip: 'Test data has mismatched steps'

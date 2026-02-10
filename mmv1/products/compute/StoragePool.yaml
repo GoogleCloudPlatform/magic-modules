@@ -293,4 +293,3 @@ virtual_fields:
 custom_code:
   pre_delete: templates/terraform/pre_delete/compute_storage_pool.go.tmpl
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true

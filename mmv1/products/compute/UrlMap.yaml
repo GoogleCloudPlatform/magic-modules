@@ -37,7 +37,6 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 examples:
   - name: 'url_map_bucket_and_service'
     primary_resource_id: 'urlmap'
