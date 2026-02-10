@@ -25,7 +25,8 @@ import_format:
   - '{{catalog}}/{{namespace_id}}'
 immutable: false
 custom_code:
-  custom_update: 'templates/terraform/custom_update/biglake_iceberg_namespace_update.go.tmpl'
+  constants: 'templates/terraform/constants/biglake_iceberg_namespace.go.tmpl'
+  update_encoder: 'templates/terraform/encoders/biglake_iceberg_namespace.go.tmpl'
 parameters:
   - name: 'catalog'
     type: String
@@ -51,12 +52,14 @@ properties:
     required: false
     default_from_api: true
     diff_suppress_func: 'icebergNamespacePropertiesDiffSuppress'
+update_verb: 'POST'
+update_url: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}/properties'
 iam_policy:
   base_url: 'v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
   parent_resource_attribute: 'namespace_id'
   method_name_separator: ":"
   fetch_iam_policy_verb: 'GET'
-  supports_user_project_override: true
+  supports_indirect_user_project_override: true
   import_format:
     - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
   allowed_iam_role: 'roles/biglake.editor'
@@ -68,32 +71,35 @@ samples:
     steps:
       - name: 'basic'
         vars:
-          name: 'my_iceberg_namespace'
-          catalog: 'my_iceberg_catalog'
-          random_suffix: ''
+          bucket_suffix: '%{bucket_suffix}'
+        test_vars_overrides:
+          bucket_suffix: 'acctest.RandString(t, 10)'
         test_env_vars:
-          GOOGLE_BILLING_PROJECT: 'PROJECT'
+          GOOGLE_BILLING_PROJECT: 'PROJECT_NAME'
           USER_PROJECT_OVERRIDE: 'true'
-        config_path: 'templates/terraform/examples/biglake_iceberg_namespace.tf.tmpl'
+        config_path: 'templates/terraform/samples/biglake_iceberg_namespace.tf.tmpl'
   - name: 'biglake_iceberg_namespace_update'
     primary_resource_id: 'my_iceberg_namespace'
     steps:
       - name: 'initial'
         vars:
-          name: 'my_iceberg_namespace'
-          catalog: 'my_iceberg_catalog'
-          prop_val: 'initial'
-          random_suffix: ''
+          prop_val: '%{prop_val}'
+          bucket_suffix: '%{bucket_suffix}'
+        test_vars_overrides:
+          prop_val: '"initial"'
+          bucket_suffix: 'acctest.RandString(t, 10)'
         test_env_vars:
-          GOOGLE_BILLING_PROJECT: 'PROJECT'
+          GOOGLE_BILLING_PROJECT: 'PROJECT_NAME'
           USER_PROJECT_OVERRIDE: 'true'
-        config_path: 'templates/terraform/examples/biglake_iceberg_namespace_update.tf.tmpl'
+        config_path: 'templates/terraform/samples/biglake_iceberg_namespace_update.tf.tmpl'
       - name: 'updated'
         vars:
-          name: 'my_iceberg_namespace'
-          catalog: 'my_iceberg_catalog'
-          prop_val: 'updated'
-          random_suffix: ''
-          GOOGLE_BILLING_PROJECT: 'PROJECT'
+          prop_val: '%{prop_val}'
+          bucket_suffix: '%{bucket_suffix}'
+        test_vars_overrides:
+          prop_val: '"updated"'
+          bucket_suffix: 'context["bucket_suffix"]'
+        test_env_vars:
+          GOOGLE_BILLING_PROJECT: 'PROJECT_NAME'
           USER_PROJECT_OVERRIDE: 'true'
-        config_path: 'templates/terraform/examples/biglake_iceberg_namespace_update.tf.tmpl'
+        config_path: 'templates/terraform/samples/biglake_iceberg_namespace_update.tf.tmpl'

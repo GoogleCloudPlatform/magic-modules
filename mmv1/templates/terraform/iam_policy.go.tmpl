@@ -252,9 +252,6 @@ func (u *{{ $.ResourceName }}IamUpdater) GetResourceIamPolicy() (*cloudresourcem
 	}
 
 	headers := make(http.Header)
-{{- if $.IamPolicy.SupportsUserProjectOverride }}
-  headers.Set("x-goog-user-project", project)
-{{- end }}
 
 	policy, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config: u.Config,
@@ -321,9 +318,6 @@ func (u *{{ $.ResourceName }}IamUpdater) SetResourceIamPolicy(policy *cloudresou
 	}
 
 	headers := make(http.Header)
-{{- if $.IamPolicy.SupportsUserProjectOverride }}
-  headers.Set("x-goog-user-project", project)
-{{- end }}
 
 	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config: u.Config,
