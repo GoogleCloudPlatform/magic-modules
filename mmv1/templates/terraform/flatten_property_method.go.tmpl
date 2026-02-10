@@ -13,46 +13,80 @@
   See the License for the specific language governing permissions and
   limitations under the License. */ -}}
 {{- define "flattenPropertyMethod" }}
-{{- if or $.WriteOnlyLegacy $.WriteOnly }}
+{{- if and (or $.WriteOnlyLegacy $.WriteOnly) }}
 {{- else if and $.CustomFlatten (not $.ShouldIgnoreCustomFlatten) }}
     {{- customTemplate $ $.CustomFlatten false -}}
 {{- else -}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-  {{- if or (and $.IgnoreRead (not $.ResourceMetadata.IsTgcCompiler)) $.ClientSide }}
+  {{- if or (and $.IgnoreRead (not $.ResourceMetadata.ProductMetadata.IsTgcCompiler)) $.ClientSide }}
   return d.Get("{{ join $.Lineage ".0." }}")
   {{- else if $.IsA "NestedObject" }}
+    {{- if $.ResourceMetadata.ProductMetadata.IsTgcCompiler }}
+      {{- if and $.HasRequiredProperty $.FlattenObject }}
+        {{- if $.UserProperties }}
+  original := make(map[string]interface{}, 0)
+  if v != nil {
+    original = v.(map[string]interface{})
+  }
+        {{- end }}
+      {{- else }}
   if v == nil {
     return nil
   }
-    {{- if not $.AllowEmptyObject }}
+        {{- if $.UserProperties }}
   original := v.(map[string]interface{})
-  if len(original) == 0 {
-    return nil
-  }
-    {{- else if $.UserProperties }}
-  original := v.(map[string]interface{})
-    {{- end }}
+        {{- end }}
+      {{- end }}
   transformed := make(map[string]interface{})
-    {{- range $prop := $.UserProperties }}
-      {{- if or $prop.WriteOnlyLegacy $prop.WriteOnly }}
-      {{- else if $prop.FlattenObject }}
+      {{- range $prop := $.UserProperties }}
+        {{- if or $prop.WriteOnlyLegacy $prop.WriteOnly }}
+        {{- else if $prop.FlattenObject }}
     if {{ $prop.ApiName }} := flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config); {{ $prop.ApiName }} != nil {
       obj := {{ $prop.ApiName }}.([]interface{})[0]
       for k, v := range obj.(map[string]interface{}) {
         transformed[k] = v
       }
     }
-      {{- else }}
+        {{- else }}
     transformed["{{ underscore $prop.Name }}"] =
     flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config)
-      {{- end }}
-    {{- end }}
-    {{- if and $.ResourceMetadata.IsTgcCompiler (not $.AllowEmptyObject) }}
+        {{- end }}
+      {{- end }}{{/* range $prop := $.UserProperties */}}
+      {{- if not $.AllowEmptyObject }}
     if tgcresource.AllValuesAreNil(transformed) {
       return nil
     }
-    {{- end }}
-  return []interface{}{transformed}
+      {{- end }}
+  return []interface{}{transformed}{{/* if $.IsA "NestedObject" */}}
+    {{- else }}{{/* $.ResourceMetadata.ProductMetadata.IsTgcCompiler */}}
+  if v == nil {
+    return nil
+  }
+        {{- if not $.AllowEmptyObject }}
+  original := v.(map[string]interface{})
+  if len(original) == 0 {
+    return nil
+  }
+        {{- else if $.UserProperties }}
+  original := v.(map[string]interface{})
+        {{- end }}
+  transformed := make(map[string]interface{})
+        {{- range $prop := $.UserProperties }}
+            {{- if or $prop.WriteOnlyLegacy $prop.WriteOnly }}
+            {{- else if $prop.FlattenObject }}
+    if {{ $prop.ApiName }} := flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config); {{ $prop.ApiName }} != nil {
+      obj := {{ $prop.ApiName }}.([]interface{})[0]
+      for k, v := range obj.(map[string]interface{}) {
+        transformed[k] = v
+      }
+    }
+            {{- else }}
+    transformed["{{ underscore $prop.Name }}"] =
+    flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config)
+            {{- end }}
+        {{- end }}{{/* range $prop := $.UserProperties */}}
+  return []interface{}{transformed}{{/* if $.IsA "NestedObject" */}}
+    {{- end }}{{/* not $.ResourceMetadata.ProductMetadata.IsTgcCompiler */}}
   {{- else if and ($.IsA "Array") ($.ItemType.IsA "NestedObject") }}
   if v == nil {
     return v
@@ -130,7 +164,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 		return intVal
 	}
 
- {{- if and $.ResourceMetadata.IsTgcCompiler $.Required }}
+ {{- if and $.ResourceMetadata.ProductMetadata.IsTgcCompiler $.Required }}
 	if v == nil {
 		return 0
 	}
@@ -143,7 +177,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
   }
   return tpgresource.ConvertAndMapStringArr(v.([]interface{}), tpgresource.ConvertSelfLinkToV1)
   {{- else if $.IsA "ResourceRef" }}
-    {{- if $.ResourceMetadata.IsTgcCompiler }}
+    {{- if $.ResourceMetadata.ProductMetadata.IsTgcCompiler }}
   {{- template "fullToRelativePath" $ -}}
     {{- else }}
   if v == nil {
@@ -160,9 +194,18 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     {{- else if or ($.ItemType.IsA "String") ($.ItemType.IsA "Enum") }}
   return schema.NewSet(schema.HashString, v.([]interface{}))
     {{- end }}
-  {{- else if and ($.ResourceMetadata.IsTgcCompiler) ($.IsA "Boolean") ($.Required) }}
+  {{- else if and ($.ResourceMetadata.ProductMetadata.IsTgcCompiler) ($.IsA "Boolean") ($.Required) }}
 	if v == nil {
 		return false
+	}
+	return v
+  {{- else if and ($.ResourceMetadata.ProductMetadata.IsTgcCompiler) ($.IsA "String") ($.Required) }}
+	if v == nil {
+		return "unknown"
+	}
+	transformed := v.(string)
+	if transformed == "" {
+		return "unknown"
 	}
 	return v
   {{- else }}
@@ -171,7 +214,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 }
 {{- if $.NestedProperties }}
     {{- range $prop := $.NestedProperties }}
-      {{- if $.ResourceMetadata.IsTgcCompiler }}
+      {{- if $.ResourceMetadata.ProductMetadata.IsTgcCompiler }}
       {{ template "flattenTgcPropertyMethod" $prop -}}
       {{- else }}
       {{ template "flattenPropertyMethod" $prop -}}

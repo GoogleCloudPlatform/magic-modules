@@ -17,4 +17,6 @@ resource "google_discovery_engine_search_engine" "agentspace_basic" {
   app_type                    = "APP_TYPE_INTRANET"
   search_engine_config {
   }
+  knowledge_graph_config {
+  }
 }

@@ -35,7 +35,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project_location_and_config_id.go.tmpl'
 sweeper:
   url_substitutions:
     - region: "global"
@@ -48,7 +48,6 @@ examples:
     test_env_vars:
       project: 'PROJECT_NAME'
     ignore_read_extra:
-      - 'location'
       - 'project'
 parameters:
   - name: 'configId'
@@ -61,7 +60,7 @@ parameters:
   - name: 'location'
     type: String
     description: |
-      Location ID of the parent organization. Only global is supported at the moment.
+      Location ID for the parent project. Defaults to `global` if location is not provided.
     url_param_only: true
     required: false
     immutable: true

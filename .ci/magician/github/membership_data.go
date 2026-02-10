@@ -134,16 +134,16 @@ var (
 		"shuyama1": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 11, 25),
-					endDate:   newDate(2025, 12, 3),
+					startDate: newDate(2026, 01, 29),
+					endDate:   newDate(2026, 02, 04),
 				},
 			},
 		},
 		"SirGitsalot": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 1, 18),
-					endDate:   newDate(2025, 1, 25),
+					startDate: newDate(2026, 1, 18),
+					endDate:   newDate(2026, 1, 27),
 				},
 			},
 		},

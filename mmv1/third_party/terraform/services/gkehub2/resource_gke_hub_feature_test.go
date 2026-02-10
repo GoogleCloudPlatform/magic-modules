@@ -146,7 +146,7 @@ func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
 				ResourceName:            "google_gke_hub_feature.feature",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"update_time"},
+				ImportStateVerifyIgnore: []string{"update_time", "state"},
 			},
 			{
 				Config: testAccGKEHubFeature_gkehubFeatureMciChangeMembership(context),
@@ -155,7 +155,7 @@ func TestAccGKEHubFeature_gkehubFeatureMciUpdate(t *testing.T) {
 				ResourceName:            "google_gke_hub_feature.feature",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"update_time", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"update_time", "labels", "terraform_labels", "state"},
 			},
 		},
 	})

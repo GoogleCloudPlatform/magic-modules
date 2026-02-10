@@ -5,7 +5,6 @@ resource "google_pubsub_topic" "scc_v2_project_notification" {
 resource "google_scc_v2_project_notification_config" "{{$.PrimaryResourceId}}" {
   config_id    = "{{index $.Vars "config_id"}}"
   project      = "{{index $.TestEnvVars "project"}}"
-  location     = "global"
   description  = "My custom Cloud Security Command Center Finding Notification Configuration"
   pubsub_topic =  google_pubsub_topic.scc_v2_project_notification.id
 

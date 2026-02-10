@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"path"
@@ -28,7 +29,6 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/otiai10/copy"
@@ -49,11 +49,11 @@ type TerraformGoogleConversionNext struct {
 
 	TargetVersionName string
 
-	Version product.Version
-
 	Product *api.Product
 
 	StartTime time.Time
+
+	templateFS fs.FS
 }
 
 type ResourceIdentifier struct {
@@ -62,22 +62,20 @@ type ResourceIdentifier struct {
 	ResourceName       string
 	AliasName          string // It can be "Default" or the same with ResourceName
 	CaiAssetNameFormat string
+	ImportFormats      []string
 	IdentityParam      string
 }
 
-func NewTerraformGoogleConversionNext(product *api.Product, versionName string, startTime time.Time) TerraformGoogleConversionNext {
+func NewTerraformGoogleConversionNext(product *api.Product, versionName string, startTime time.Time, templateFS fs.FS) TerraformGoogleConversionNext {
 	t := TerraformGoogleConversionNext{
 		Product:                    product,
 		TargetVersionName:          versionName,
-		Version:                    *product.VersionObjOrClosest(versionName),
 		StartTime:                  startTime,
 		ResourcesByCaiResourceType: make(map[string][]ResourceIdentifier),
+		templateFS:                 templateFS,
 	}
 
-	t.Product.SetPropertiesBasedOnVersion(&t.Version)
-	t.Product.SetCompiler(ProviderName(t))
 	for _, r := range t.Product.Objects {
-		r.SetCompiler(ProviderName(t))
 		r.ImportPath = ImportPathFromVersion(versionName)
 	}
 
@@ -86,7 +84,7 @@ func NewTerraformGoogleConversionNext(product *api.Product, versionName string, 
 
 func (tgc TerraformGoogleConversionNext) Generate(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 	for _, object := range tgc.Product.Objects {
-		object.ExcludeIfNotInVersion(&tgc.Version)
+		object.ExcludeIfNotInVersion(tgc.Product.Version)
 
 		if resourceToGenerate != "" && object.Name != resourceToGenerate {
 			log.Printf("Excluding %s per user request", object.Name)
@@ -102,15 +100,13 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 		return
 	}
 
-	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
+	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, tgc.templateFS)
 
 	if !object.IsExcluded() {
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 		tgc.addTestsFromSamples(&object)
-		if object.TGCIncludeHandwrittenTests {
-			if err := tgc.addTestsFromHandwrittenTests(&object); err != nil {
-				log.Printf("Error adding examples from handwritten tests: %v", err)
-			}
+		if err := tgc.addTestsFromHandwrittenTests(&object); err != nil {
+			log.Printf("Error adding examples from handwritten tests: %v", err)
 		}
 		tgc.GenerateResourceTests(object, *templateData, outputFolder)
 	}
@@ -176,7 +172,7 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 		"pkg/cai2hcl/converters/convert_resource.go":    "templates/tgc_next/cai2hcl/convert_resource.go.tmpl",
 	}
 
-	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
+	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, tgc.templateFS)
 	tgc.CompileFileList(outputFolder, resourceConverters, *templateData, products)
 }
 
@@ -280,7 +276,7 @@ func (tgc TerraformGoogleConversionNext) CopyFileList(outputFolder string, files
 			log.Fatalf("%s was already modified during this run at %s", targetFile, info.ModTime().String())
 		}
 
-		sourceByte, err := os.ReadFile(source)
+		sourceByte, err := fs.ReadFile(tgc.templateFS, source)
 		if err != nil {
 			log.Fatalf("Cannot read source file %s while copying: %s", source, err)
 		}
@@ -321,7 +317,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromExamples(object *api.Resour
 		if example.ExcludeTest {
 			continue
 		}
-		if object.ProductMetadata.VersionObjOrClosest(tgc.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) < 0 {
+		if object.ProductMetadata.VersionObjOrClosest(tgc.Product.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) < 0 {
 			continue
 		}
 		object.TGCTests = append(object.TGCTests, resource.TGCTest{
@@ -340,7 +336,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromSamples(object *api.Resourc
 		if sample.ExcludeTest {
 			continue
 		}
-		if object.ProductMetadata.VersionObjOrClosest(tgc.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0 {
+		if object.ProductMetadata.VersionObjOrClosest(tgc.Product.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0 {
 			continue
 		}
 		object.TGCTests = append(object.TGCTests, resource.TGCTest{
@@ -353,11 +349,10 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 	if object.ProductMetadata == nil {
 		return nil
 	}
-	product := object.ProductMetadata
-	productName := google.Underscore(product.Name)
-	resourceFullName := fmt.Sprintf("%s_%s", productName, google.Underscore(object.Name))
+	productName := strings.ToLower(tgc.Product.Name)
+	resourceFullName := tgc.ResourceGoFilename(*object)
 	handwrittenTestFilePath := fmt.Sprintf("third_party/terraform/services/%s/resource_%s_test.go", productName, resourceFullName)
-	data, err := os.ReadFile(handwrittenTestFilePath)
+	data, err := fs.ReadFile(tgc.templateFS, handwrittenTestFilePath)
 	for err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			if strings.HasSuffix(handwrittenTestFilePath, ".tmpl") {
@@ -365,7 +360,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 				return nil
 			}
 			handwrittenTestFilePath += ".tmpl"
-			data, err = os.ReadFile(handwrittenTestFilePath)
+			data, err = fs.ReadFile(tgc.templateFS, handwrittenTestFilePath)
 		} else {
 			return fmt.Errorf("error reading handwritten test file %s: %v", handwrittenTestFilePath, err)
 		}
@@ -380,21 +375,57 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 	}
 
 	matches := testRegex.FindAllSubmatch(data, -1)
-	tests := make([]resource.TGCTest, len(matches))
-	for i, match := range matches {
+	tests := make([]resource.TGCTest, 0)
+	for _, match := range matches {
 		if len(match) == 2 {
 			if _, ok := testNamesInYAML[string(match[1])]; ok {
 				continue
 			}
-			tests[i] = resource.TGCTest{
+			tests = append(tests, resource.TGCTest{
 				Name: string(match[1]),
-			}
+			})
 		}
 	}
 
 	object.TGCTests = append(object.TGCTests, tests...)
 
 	return nil
+}
+
+// Similar to FullResourceName, but override-aware to prevent things like ending in _test.
+// Non-Go files should just use FullResourceName.
+func (tgc *TerraformGoogleConversionNext) ResourceGoFilename(object api.Resource) string {
+	// early exit if no override is set
+	if object.FilenameOverride == "" {
+		return tgc.FullResourceName(object)
+	}
+
+	resName := object.FilenameOverride
+
+	var productName string
+	if tgc.Product.LegacyName != "" {
+		productName = tgc.Product.LegacyName
+	} else {
+		productName = google.Underscore(tgc.Product.Name)
+	}
+
+	return fmt.Sprintf("%s_%s", productName, resName)
+}
+
+func (tgc *TerraformGoogleConversionNext) FullResourceName(object api.Resource) string {
+	// early exit- resource-level legacy names override the product too
+	if object.LegacyName != "" {
+		return strings.Replace(object.LegacyName, "google_", "", 1)
+	}
+
+	var productName string
+	if tgc.Product.LegacyName != "" {
+		productName = tgc.Product.LegacyName
+	} else {
+		productName = google.Underscore(tgc.Product.Name)
+	}
+
+	return fmt.Sprintf("%s_%s", productName, google.Underscore(object.Name))
 }
 
 // Generates the list of resources, and gets the count of resources.
@@ -429,6 +460,7 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 				ResourceName:       object.ResourceName(),
 				AliasName:          object.ResourceName(),
 				CaiAssetNameFormat: object.GetCaiAssetNameTemplate(),
+				ImportFormats:      object.ImportFormat,
 			}
 			tgc.ResourcesForVersion = append(tgc.ResourcesForVersion, resourceIdentifier)
 
@@ -462,19 +494,7 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 func FindIdentityParams(rids []ResourceIdentifier) []ResourceIdentifier {
 	segmentsList := make([][]string, len(rids))
 	for i, rid := range rids {
-		urlPath := rid.CaiAssetNameFormat
-		urlPath = strings.Trim(urlPath, "/")
-
-		processedURL := regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(urlPath, "")
-		segments := strings.Split(processedURL, "/")
-		var cleanSegments []string
-		for _, seg := range segments {
-			if seg != "" {
-				cleanSegments = append(cleanSegments, seg)
-			}
-		}
-
-		segmentsList[i] = cleanSegments
+		segmentsList[i] = processPathIntoSegments(rid.CaiAssetNameFormat)
 	}
 
 	segmentsList = removeSharedElements(segmentsList)
@@ -484,6 +504,44 @@ func FindIdentityParams(rids []ResourceIdentifier) []ResourceIdentifier {
 			rids[i].IdentityParam = ""
 		} else {
 			rids[i].IdentityParam = segments[0]
+		}
+	}
+
+	// Check if we have multiple resources with the same IdentityParam
+	identityParams := make(map[string]int)
+	for _, rid := range rids {
+		identityParams[rid.IdentityParam]++
+	}
+
+	// If we have collisions or empty params, try using ImportFormats
+	hasCollision := false
+	for _, count := range identityParams {
+		if count > 1 {
+			hasCollision = true
+			break
+		}
+	}
+
+	if hasCollision {
+		// Reset segmentsList using ImportFormats
+		for i, rid := range rids {
+			if len(rid.ImportFormats) > 0 {
+				segmentsList[i] = processPathIntoSegments(rid.ImportFormats[0])
+			} else {
+				// If no import format, fallback to previous empty list or keep as is?
+				// For now let's assume if we are falling back, we want fresh segments.
+				segmentsList[i] = []string{}
+			}
+		}
+
+		segmentsList = removeSharedElements(segmentsList)
+
+		for i, segments := range segmentsList {
+			if len(segments) == 0 {
+				rids[i].IdentityParam = ""
+			} else {
+				rids[i].IdentityParam = segments[0]
+			}
 		}
 	}
 
@@ -501,6 +559,25 @@ func FindIdentityParams(rids []ResourceIdentifier) []ResourceIdentifier {
 	}
 
 	return rids
+}
+
+// processPathIntoSegments processes a URL path or import format string
+// into a list of cleaned segments by removing variables and empty segments.
+// It handles both standard variables {{var}} and import format variables {{%var}}.
+func processPathIntoSegments(path string) []string {
+	// ImportFormat often has {{%variable}}, remove strict format
+	path = strings.ReplaceAll(path, "%", "")
+	path = strings.Trim(path, "/")
+
+	processedURL := regexp.MustCompile(`\{\{[a-zA-Z0-9_]+\}\}`).ReplaceAllString(path, "")
+	segments := strings.Split(processedURL, "/")
+	var cleanSegments []string
+	for _, seg := range segments {
+		if seg != "" {
+			cleanSegments = append(cleanSegments, seg)
+		}
+	}
+	return cleanSegments
 }
 
 // Finds elements common to ALL lists in a list of lists

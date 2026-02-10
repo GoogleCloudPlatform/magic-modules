@@ -17,7 +17,7 @@ description: Create a multicast group range activation in the specified location
   of the current project.
 references:
   guides:
-    'Create Multicast Producer Association': 'https://docs.cloud.google.com/vpc/docs/multicast/create-group-ranges#activate_the_group_range'
+    'Create Multicast Group Range Activation': 'https://docs.cloud.google.com/vpc/docs/multicast/create-group-ranges#activate_the_group_range'
   api: 'https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastGroupRangeActivations'
 base_url: projects/{{project}}/locations/{{location}}/multicastGroupRangeActivations
 update_mask: true
@@ -27,6 +27,9 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/multicastGroupRangeActivations/{{multicast_group_range_activation_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/multicastGroupRangeActivations/{{multicast_group_range_activation_id}}
+sweeper:
+  url_substitutions:
+    - location: "us-central1-b"
 examples:
   - name: network_services_multicast_group_range_activation_basic
     primary_resource_id: mgra_test

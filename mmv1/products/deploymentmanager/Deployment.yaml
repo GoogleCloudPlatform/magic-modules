@@ -50,8 +50,6 @@ timeouts:
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
-  operation:
-    full_url: 'selfLink'
   result:
     resource_inside_response: false
 custom_code:
