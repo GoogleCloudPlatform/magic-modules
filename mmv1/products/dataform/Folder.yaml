@@ -52,9 +52,9 @@ properties:
       Format: `projects/*/locations/*/folders/*` or `projects/*/locations/*/teamFolders/*`.
     min_version: 'beta'
 examples:
-  - name: 'dataform_folder'
-    primary_resource_id: 'dataform_folder'
+  - name: 'dataform_folder_basic'
+    primary_resource_id: 'dataform_folder_basic'
     primary_resource_name: 'fmt.Sprintf("tf_test_dataform_folder%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
-      dataform_folder_name: 'dataform_folder'
+      dataform_folder_name: 'dataform_folder_basic'
