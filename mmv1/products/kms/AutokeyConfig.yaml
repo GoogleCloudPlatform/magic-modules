@@ -89,3 +89,12 @@ properties:
     type: String
     description: 'The etag of the AutokeyConfig for optimistic concurrency control.'
     output: true
+  - name: 'keyProjectResolutionMode'
+    type: Enum
+    api_name: keyProjectResolutionMode
+    description: 'How Autokey determines which project to use when provisioning CMEK keys.'
+    enum_values:
+      - 'KEY_PROJECT_RESOLUTION_MODE_UNSPECIFIED'
+      - 'DEDICATED_KEY_PROJECT'
+      - 'RESOURCE_PROJECT'
+      - 'DISABLED'
