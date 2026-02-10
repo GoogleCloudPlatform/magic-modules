@@ -46,6 +46,11 @@ examples:
     primary_resource_id: 'reasoning_engine'
     vars:
       name: 'reasoning-engine'
+  - name: 'vertex_ai_reasoning_engine_developer_connect_source'
+    skip_docs: true  # skip docs until templatized (or decide to skip docs permanently then)
+    primary_resource_id: 'reasoning_engine'
+    vars:
+      name: 'reasoning-engine'
   - name: 'vertex_ai_reasoning_engine_psc_interface'
     primary_resource_id: 'reasoning_engine'
     vars:
