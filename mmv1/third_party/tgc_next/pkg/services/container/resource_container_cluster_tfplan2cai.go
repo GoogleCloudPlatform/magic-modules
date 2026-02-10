@@ -191,18 +191,16 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 
 	nodePoolsCount := d.Get("node_pool.#").(int)
 	if nodePoolsCount > 0 {
-		// TODO: implement expandNodePool
-
-		// nodePools := make([]*container.NodePool, 0, nodePoolsCount)
-		// for i := 0; i < nodePoolsCount; i++ {
-		// 	prefix := fmt.Sprintf("node_pool.%d.", i)
-		// 	nodePool, err := expandNodePool(d, prefix)
-		// 	if err != nil {
-		// 		return err
-		// 	}
-		// 	nodePools = append(nodePools, nodePool)
-		// }
-		// cluster.NodePools = nodePools
+		nodePools := make([]*container.NodePool, nodePoolsCount)
+		for i := 0; i < nodePoolsCount; i++ {
+			prefix := fmt.Sprintf("node_pool.%d.", i)
+			nodePool, err := expandNodePool(d, prefix)
+			if err != nil {
+				return nil, err
+			}
+			nodePools[i] = nodePool
+		}
+		cluster.NodePools = nodePools
 	} else {
 		// Node Configs have default values that are set in the expand function,
 		// but can only be set if node pools are unspecified.

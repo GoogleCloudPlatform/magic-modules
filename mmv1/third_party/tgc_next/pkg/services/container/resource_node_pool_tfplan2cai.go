@@ -443,7 +443,7 @@ func expandContainerNodePoolLocation(v interface{}, d tpgresource.TerraformResou
 	return v, nil
 }
 
-func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool, error) {
+func expandNodePool(d tpgresource.TerraformResourceData, prefix string) (*container.NodePool, error) {
 	var name string
 	if v, ok := d.GetOk(prefix + "name"); ok {
 		if _, ok := d.GetOk(prefix + "name_prefix"); ok {

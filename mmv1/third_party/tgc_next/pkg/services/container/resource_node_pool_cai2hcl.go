@@ -235,7 +235,8 @@ func flattenNodeNetworkConfig(c *container.NodeNetworkConfig, d *schema.Resource
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"create_pod_range":                d.Get(prefix + "network_config.0.create_pod_range"), // API doesn't return this value so we set the old one. Field is ForceNew + Required
+			// TODO: investigate why create_pod_range is not returned by the API
+			// "create_pod_range": d.Get(prefix + "network_config.0.create_pod_range"), // API doesn't return this value so we set the old one. Field is ForceNew + Required
 			"pod_ipv4_cidr_block":             c.PodIpv4CidrBlock,
 			"pod_range":                       c.PodRange,
 			"enable_private_nodes":            c.EnablePrivateNodes,
