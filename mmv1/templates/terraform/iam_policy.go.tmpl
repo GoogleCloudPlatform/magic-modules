@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License. */ -}}
-{{- if not (contains $.Compiler "terraformgoogleconversion") }}
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 {{ end }}
@@ -29,7 +29,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 
-{{ if not (contains $.Compiler "terraformgoogleconversion") -}}
+{{ if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") -}}
 	"{{ $.ImportPath }}/registry"
 {{- end }}
 	"{{ $.ImportPath }}/tpgiamresource"
@@ -44,7 +44,7 @@ var (
     _ = schema.Noop
 )
 
-{{- if not (contains $.Compiler "terraformgoogleconversion") }}
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 func init() {
     registry.Schema{
         Name: "{{ $.TerraformName }}_iam_binding",
