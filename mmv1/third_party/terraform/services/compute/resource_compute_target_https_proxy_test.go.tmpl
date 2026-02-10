@@ -325,7 +325,6 @@ resource "google_compute_target_https_proxy" "foobar" {
   ssl_certificates = [
     google_compute_ssl_certificate.foobar1.self_link,
     google_compute_ssl_certificate.foobar2.self_link,
-    google_compute_ssl_certificate.foobar3.self_link,
   ]
   ssl_policy        = google_compute_ssl_policy.foobar2.self_link
   quic_override     = "ENABLE"
