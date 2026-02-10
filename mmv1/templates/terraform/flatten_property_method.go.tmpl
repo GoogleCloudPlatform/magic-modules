@@ -18,10 +18,10 @@
     {{- customTemplate $ $.CustomFlatten false -}}
 {{- else -}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-  {{- if or (and $.IgnoreRead (not $.ResourceMetadata.IsTgcCompiler)) $.ClientSide }}
+  {{- if or (and $.IgnoreRead (not $.ResourceMetadata.ProductMetadata.IsTgcCompiler)) $.ClientSide }}
   return d.Get("{{ join $.Lineage ".0." }}")
   {{- else if $.IsA "NestedObject" }}
-    {{- if $.ResourceMetadata.IsTgcCompiler }}
+    {{- if $.ResourceMetadata.ProductMetadata.IsTgcCompiler }}
       {{- if and $.HasRequiredProperty $.FlattenObject }}
         {{- if $.UserProperties }}
   original := make(map[string]interface{}, 0)
@@ -58,7 +58,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     }
       {{- end }}
   return []interface{}{transformed}{{/* if $.IsA "NestedObject" */}}
-    {{- else }}{{/* $.ResourceMetadata.IsTgcCompiler */}}
+    {{- else }}{{/* $.ResourceMetadata.ProductMetadata.IsTgcCompiler */}}
   if v == nil {
     return nil
   }
@@ -86,7 +86,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
             {{- end }}
         {{- end }}{{/* range $prop := $.UserProperties */}}
   return []interface{}{transformed}{{/* if $.IsA "NestedObject" */}}
-    {{- end }}{{/* not $.ResourceMetadata.IsTgcCompiler */}}
+    {{- end }}{{/* not $.ResourceMetadata.ProductMetadata.IsTgcCompiler */}}
   {{- else if and ($.IsA "Array") ($.ItemType.IsA "NestedObject") }}
   if v == nil {
     return v
@@ -164,7 +164,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 		return intVal
 	}
 
- {{- if and $.ResourceMetadata.IsTgcCompiler $.Required }}
+ {{- if and $.ResourceMetadata.ProductMetadata.IsTgcCompiler $.Required }}
 	if v == nil {
 		return 0
 	}
@@ -177,7 +177,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
   }
   return tpgresource.ConvertAndMapStringArr(v.([]interface{}), tpgresource.ConvertSelfLinkToV1)
   {{- else if $.IsA "ResourceRef" }}
-    {{- if $.ResourceMetadata.IsTgcCompiler }}
+    {{- if $.ResourceMetadata.ProductMetadata.IsTgcCompiler }}
   {{- template "fullToRelativePath" $ -}}
     {{- else }}
   if v == nil {
@@ -194,12 +194,12 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     {{- else if or ($.ItemType.IsA "String") ($.ItemType.IsA "Enum") }}
   return schema.NewSet(schema.HashString, v.([]interface{}))
     {{- end }}
-  {{- else if and ($.ResourceMetadata.IsTgcCompiler) ($.IsA "Boolean") ($.Required) }}
+  {{- else if and ($.ResourceMetadata.ProductMetadata.IsTgcCompiler) ($.IsA "Boolean") ($.Required) }}
 	if v == nil {
 		return false
 	}
 	return v
-  {{- else if and ($.ResourceMetadata.IsTgcCompiler) ($.IsA "String") ($.Required) }}
+  {{- else if and ($.ResourceMetadata.ProductMetadata.IsTgcCompiler) ($.IsA "String") ($.Required) }}
 	if v == nil {
 		return "unknown"
 	}
@@ -214,7 +214,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 }
 {{- if $.NestedProperties }}
     {{- range $prop := $.NestedProperties }}
-      {{- if $.ResourceMetadata.IsTgcCompiler }}
+      {{- if $.ResourceMetadata.ProductMetadata.IsTgcCompiler }}
       {{ template "flattenTgcPropertyMethod" $prop -}}
       {{- else }}
       {{ template "flattenPropertyMethod" $prop -}}

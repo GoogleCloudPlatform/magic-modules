@@ -64,10 +64,8 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time,
 		templateFS:        templateFS,
 	}
 
-	t.Product.SetCompiler(ProviderName(t))
 	t.Product.ImportPath = ImportPathFromVersion(versionName)
 	for _, r := range t.Product.Objects {
-		r.SetCompiler(ProviderName(t))
 		r.ImportPath = t.Product.ImportPath
 	}
 
