@@ -5,9 +5,9 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
   
   original := v.(map[string]interface{})
 
+  // return nil if api returned empty object
   if len(original) == 0 {
-    // return nil if api returned empty object
-    return nil;
+    return nil
   }
 
   transformed := make(map[string]interface{})
