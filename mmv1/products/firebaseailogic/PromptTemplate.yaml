@@ -17,7 +17,10 @@ description: The PromptTemplate resource for Firebase AI Logic.
 base_url: projects/{{project}}/locations/{{location}}/templates
 references:
   guides:
-    'Official Documentation': 'https://firebase.google.com/docs/ai-logic'
+    # These names are deliberately chosen to preserve this order after sorting
+    'Get started with server prompt templates': 'https://firebase.google.com/docs/ai-logic/server-prompt-templates/get-started'
+    'Product documentation for Firebase AI Logic': 'https://firebase.google.com/docs/ai-logic'
+    'Specification for Dotprompt format': 'https://google.github.io/dotprompt/getting-started'
   api: 'https://firebase.google.com/docs/reference/ai-logic/rest/v1beta/projects.locations.templates'
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
@@ -78,7 +81,7 @@ properties:
   - name: templateString
     type: String
     required: true
-    description: The DotPrompt raw template string.
+    description: The [Dotprompt](https://google.github.io/dotprompt/getting-started) raw template string.
   - name: updateTime
     type: String
     description: Timestamp when the PromptTemplate was last updated.
@@ -95,5 +98,3 @@ examples:
     primary_resource_id: basic
     vars:
       template_id: 'basic-template'
-    # Need the time_sleep resource
-    external_providers: ["time"]
