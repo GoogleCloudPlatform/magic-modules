@@ -64,13 +64,13 @@ Every resource or datasource documentation page must include the following secti
    {{< tab "Resource" >}}
    ```markdown
    ~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
-   See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
+   See [Provider Versions](../guides/provider_versions.html.markdown) for more details on beta resources.
    ```
    {{< /tab >}}
    {{< tab "Data source" >}}
    ```markdown
    ~> **Warning:** This data source is in beta, and should be used with the terraform-provider-google-beta provider.
-   See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
+   See [Provider Versions](../guides/provider_versions.html.markdown) for more details on beta resources.
    ```
    {{< /tab >}}
    {{% /tabs %}}
@@ -87,7 +87,7 @@ Every resource or datasource documentation page must include the following secti
 
    * `project` - (Optional) The ID of the project in which the resource belongs. If it
        is not provided, the provider project is used.
-   * `beta_field` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) This field is in beta.
+   * `beta_field` - (Optional, [Beta](../guides/provider_versions.html.markdown)) This field is in beta.
    * `roles` - The MembershipRoles that apply to the Membership. Structure is [documented below](#nested_roles).
 
    <a name="nested_roles"></a>The `roles` block supports:

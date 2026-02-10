@@ -1,0 +1,31 @@
+resource "google_backup_dr_restore_workload" "{{$.PrimaryResourceId}}" {
+  location         = "us-central1"
+  backup_vault_id  = "{{index $.Vars "backup_vault_id"}}"
+  data_source_id   = "{{index $.Vars "data_source_id"}}"
+  backup_id        = "{{index $.Vars "backup_id"}}"
+
+  region_disk_target_environment {
+    project = "{{index $.TestEnvVars "project"}}"
+    region  = "us-central1"
+    replica_zones = [
+      "projects/{{index $.TestEnvVars "project"}}/zones/us-central1-a",
+      "projects/{{index $.TestEnvVars "project"}}/zones/us-central1-b"
+    ]
+  }
+
+  disk_restore_properties {
+    name    = "{{index $.Vars "disk_name"}}"
+    size_gb = 200
+    type    = "pd-balanced"
+    
+    description = "Restored regional persistent disk"
+    
+    labels = {
+      type        = "regional"
+      environment = "production"
+    }
+    
+    provisioned_iops       = 3000
+    provisioned_throughput = 140
+  }
+}

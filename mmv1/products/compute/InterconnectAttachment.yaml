@@ -118,6 +118,20 @@ properties:
       Valid values are 1440, 1460, 1500, and 8896. If not specified, the value will default to 1440.
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/float64_to_int_to_string.go.tmpl'
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the interconnect attachment. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        ignore_read: true
   - name: 'bandwidth'
     type: Enum
     description: |
@@ -141,6 +155,7 @@ properties:
       - 'BPS_20G'
       - 'BPS_50G'
       - 'BPS_100G'
+      - 'BPS_400G'
   - name: 'edgeAvailabilityDomain'
     type: String
     description: |
@@ -190,6 +205,7 @@ properties:
       - 'DEDICATED'
       - 'PARTNER'
       - 'PARTNER_PROVIDER'
+      - 'L2_DEDICATED'
   - name: 'state'
     type: Enum
     description: |
@@ -215,7 +231,6 @@ properties:
       the same region as this InterconnectAttachment. The InterconnectAttachment will
       automatically connect the Interconnect to the network & region within which the
       Cloud Router is configured.
-    required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
@@ -304,6 +319,7 @@ properties:
       attachment must be created with this option.
     immutable: true
     custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/interconnect_attachment_encryption_mapping.tmpl'
     default_value: "NONE"
     enum_values:
       - 'NONE'
@@ -389,3 +405,57 @@ properties:
     description: |
       URL of the AttachmentGroup that includes this Attachment.
     output: true
+  - name: 'l2Forwarding'
+    type: NestedObject
+    description: 'L2 Interconnect Attachment related configuration.'
+    properties:
+      - name: 'network'
+        type: ResourceRef
+        description: 'URL of the network to which this attachment belongs.'
+        custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+        resource: 'Network'
+        imports: 'selfLink'
+      - name: 'tunnelEndpointIpAddress'
+        type: String
+        description: 'The tunnel endpoint IP address.'
+      - name: 'defaultApplianceIpAddress'
+        type: String
+        description: 'The default appliance IP address.'
+      - name: 'geneveHeader'
+        type: NestedObject
+        description: 'GeneveHeader related configurations.'
+        properties:
+          - name: 'vni'
+            type: Integer
+            description: 'VNI is a 24-bit unique virtual network identifier.'
+      - name: 'applianceMappings'
+        type: Array
+        description: 'A map of VLAN tags to appliances and optional inner mapping rules.'
+        custom_flatten: 'templates/terraform/custom_flatten/interconnect_attachment_application_mapping.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/interconnect_attachment_application_mapping.tmpl'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'vlanId'  # Represents the map key (VLAN tag)
+              type: String
+              description: 'The VLAN tag.'
+            - name: 'name'
+              type: String
+              description: 'The name of this appliance mapping rule.'
+            - name: 'applianceIpAddress'
+              type: String
+              description: 'The appliance IP address.'
+            - name: 'innerVlanToApplianceMappings'
+              type: Array
+              item_type:
+                type: NestedObject
+                description: 'The inner VLAN-to-Appliance mapping.'
+                properties:
+                  - name: 'innerVlanTags'
+                    description: 'List of inner VLAN tags.'
+                    type: Array
+                    item_type:
+                      type: String
+                  - name: 'innerApplianceIpAddress'
+                    type: String
+                    description: 'The inner appliance IP address.'

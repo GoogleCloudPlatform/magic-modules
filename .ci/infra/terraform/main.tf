@@ -295,6 +295,7 @@ module "project-services" {
     "firebaseremoteconfig.googleapis.com",
     "firebaserules.googleapis.com",
     "firebasestorage.googleapis.com",
+    "firebasevertexai.googleapis.com",
     "firestore.googleapis.com",
     "firestorekeyvisualizer.googleapis.com",
     "gkebackup.googleapis.com",
