@@ -54,7 +54,7 @@ func NewLoader(config Config) *Loader {
 	return l
 }
 
-func (l *Loader) LoadProducts() {
+func (l *Loader) LoadProducts(providerName string) {
 	if l.version == "" {
 		log.Printf("No version specified, assuming ga")
 		l.version = "ga"
@@ -91,10 +91,10 @@ func (l *Loader) LoadProducts() {
 		}
 	}
 
-	l.Products = l.batchLoadProducts(allProductFiles)
+	l.Products = l.batchLoadProducts(allProductFiles, providerName)
 }
 
-func (l *Loader) batchLoadProducts(productNames []string) map[string]*api.Product {
+func (l *Loader) batchLoadProducts(productNames []string, providerName string) map[string]*api.Product {
 	products := make(map[string]*api.Product)
 
 	// Create result type for clarity
@@ -116,7 +116,7 @@ func (l *Loader) batchLoadProducts(productNames []string) map[string]*api.Produc
 		go func(name string) {
 			defer wg.Done()
 
-			product, err := l.LoadProduct(name)
+			product, err := l.LoadProduct(name, providerName)
 			productChan <- loadResult{
 				name:    name,
 				product: product,
@@ -153,7 +153,7 @@ func (l *Loader) batchLoadProducts(productNames []string) map[string]*api.Produc
 
 // Load compiles a product with all its resources from the given path and optional overrides
 // This loads the product configuration and all its resources into memory without generating any files
-func (l *Loader) LoadProduct(productName string) (*api.Product, error) {
+func (l *Loader) LoadProduct(productName, providerName string) (*api.Product, error) {
 	p := &api.Product{}
 	productYamlPath := filepath.Join(productName, "product.yaml")
 
@@ -200,6 +200,7 @@ func (l *Loader) LoadProduct(productName string) (*api.Product, error) {
 	p.Version = p.VersionObjOrClosest(l.version)
 
 	p.Objects = resources
+	p.SetCompiler(providerName)
 	p.Validate()
 
 	return p, nil
