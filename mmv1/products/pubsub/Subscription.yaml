@@ -290,6 +290,7 @@ properties:
           If set, message data will be written to Cloud Storage in text format.
         send_empty_value: true
         allow_empty_object: true
+        default_from_api: true
         properties:
           - name: 'state'
             type: String
