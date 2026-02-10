@@ -258,7 +258,21 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 {{- end}}
 
+{{- if $.ProductMetadata.RepEnabled }}
+    urlFormatted, err := tpgresource.ReplaceVars(d, config, "{{$.CreateUri}}")
+    if err != nil {
+        return err
+    }
+    loc := tpgresource.LocationFromId(urlFormatted)
+    basePath := tpgresource.RepQualifiedBasePath(config.{{$.ProductMetadata.Name}}BasePath, loc)
+    
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.CreateUri}}")
+    url = fmt.Sprintf("%s%s", basePath, url)
+{{ else }}
+
     url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.CreateUri}}")
+{{- end }}
+
     if err != nil {
         return err
     }
@@ -582,7 +596,21 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return err
     }
 
+{{- if $.ProductMetadata.RepEnabled }}
+    urlFormatted, err := tpgresource.ReplaceVars(d, config, "{{$.CreateUri}}")
+    if err != nil {
+        return err
+    }
+    loc := tpgresource.LocationFromId(urlFormatted)
+    basePath := tpgresource.RepQualifiedBasePath(config.{{$.ProductMetadata.Name}}BasePath, loc)
+    
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
+    url = fmt.Sprintf("%s%s", basePath, url)
+{{ else }}
+
     url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
+{{- end }}
+
     if err != nil {
         return err
     }
@@ -809,7 +837,21 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     defer transport_tpg.MutexStore.Unlock(lockName)
 {{-             end}}
 
+
+{{- if $.ProductMetadata.RepEnabled }}
+    urlFormatted, err := tpgresource.ReplaceVars(d, config, "{{$.CreateUri}}")
+    if err != nil {
+        return err
+    }
+    loc := tpgresource.LocationFromId(urlFormatted)
+    basePath := tpgresource.RepQualifiedBasePath(config.{{$.ProductMetadata.Name}}BasePath, loc)
+    
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.UpdateUri }}")
+    url = fmt.Sprintf("%s%s", basePath, url)
+{{ else }}
+
     url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{ $.UpdateUri }}")
+{{- end }}
     if err != nil {
         return err
     }
@@ -1116,8 +1158,20 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     transport_tpg.MutexStore.Lock(lockName)
     defer transport_tpg.MutexStore.Unlock(lockName)
     {{- end }}
+{{- if $.ProductMetadata.RepEnabled }}
+    urlFormatted, err := tpgresource.ReplaceVars(d, config, "{{$.CreateUri}}")
+    if err != nil {
+        return err
+    }
+    loc := tpgresource.LocationFromId(urlFormatted)
+    basePath := tpgresource.RepQualifiedBasePath(config.{{$.ProductMetadata.Name}}BasePath, loc)
+    
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.DeleteUri}}")
+    url = fmt.Sprintf("%s%s", basePath, url)
+{{ else }}
 
     url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.DeleteUri}}")
+{{- end }}
     if err != nil {
         return err
     }
