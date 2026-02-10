@@ -32,7 +32,6 @@ timeouts:
 custom_code:
   tgc_decoder: 'templates/tgc_next/decoders/backup_dr_backup_plan.go.tmpl'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 examples:
   - name: 'backup_dr_backup_plan_simple'
     primary_resource_id: 'my-backup-plan-1'
