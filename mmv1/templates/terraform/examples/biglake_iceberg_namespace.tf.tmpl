@@ -1,5 +1,5 @@
 resource "google_storage_bucket" "bucket" {
-  name          = "my-bucket-%{bucket_suffix}"
+  name          = "{{index $.Vars "bucket_name"}}"
   location      = "us-central1"
   force_destroy = true
   uniform_bucket_level_access = true
@@ -12,7 +12,7 @@ resource "google_biglake_iceberg_catalog" "catalog" {
 
 resource "google_biglake_iceberg_namespace" "{{$.PrimaryResourceId}}" {
   catalog = google_biglake_iceberg_catalog.catalog.name
-  namespace_id = "my-namespace-%{bucket_suffix}"
+  namespace_id = "{{$.PrimaryResourceId}}"
   properties = {
     key = "value"
   }
