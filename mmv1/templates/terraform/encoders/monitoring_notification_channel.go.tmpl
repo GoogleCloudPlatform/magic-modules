@@ -25,7 +25,7 @@ for _, sl := range sensitiveLabels {
 	}
 }
 
-{{- if not (contains $.Compiler "terraformgoogleconversion") }}
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 for _, slwov := range writeOnlySensitiveLabels {
   if v, _ := d.GetOkExists("sensitive_labels.0." + slwov); v != "" {
     target := strings.TrimSuffix(slwov, "_version")
