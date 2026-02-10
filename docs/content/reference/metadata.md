@@ -37,9 +37,9 @@ The API "resource type kind" used for this resource. For example, "Function".
 
 ## Optional
 
-### `cai_asset_name_format`
+### `cai_asset_name_formats`
 
-The custom CAI asset name format for this resource is typically specified (for example, //cloudsql.googleapis.com/projects/{{project}}/instances/{{name}}). This should only have a value if it's different than the Terraform resource ID format.
+The custom CAI asset name formats for this resource are typically specified (for example, //cloudsql.googleapis.com/projects/{{project}}/instances/{{name}}). This should only have a value if they are different than the Terraform resource ID format.
 
 ### `api_variant_patterns`
 
