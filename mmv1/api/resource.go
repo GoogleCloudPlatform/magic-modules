@@ -396,9 +396,6 @@ type TGCResource struct {
 	// Otherswise, it should be set.
 	CaiIdentity string `yaml:"cai_identity,omitempty"`
 
-	// If true, create TGC tests automatically for all handwritten provider tests.
-	TGCIncludeHandwrittenTests bool `yaml:"tgc_include_handwritten_tests,omitempty"`
-
 	// Tests for TGC, will automatically be filled with resource's examples
 	// and handwritten tests. Can be specified in order to skip specific tests.
 	TGCTests []resource.TGCTest `yaml:"tgc_tests,omitempty"`
