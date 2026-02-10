@@ -1004,9 +1004,8 @@ func IpAddrSetHashFunc(v interface{}) int {
 	return Hashcode(ipnet.String())
 }
 
-func RepUrl(url string) string {
-	location := LocationFromId(url)
-	
+func RepQualifiedBasePath(basePath, location string) string {
+	return strings.ReplaceAll(basePath, "{{location}}", location)
 }
 
 func LocationFromId(id string) string {

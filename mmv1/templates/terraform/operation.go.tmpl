@@ -50,6 +50,9 @@ type {{ $.ProductMetadata.Name }}OperationWaiter struct {
 {{- if $.IncludeProjectForOperation }}
   Project string
 {{- end }}
+{{- if $.ProductMetadata.RepEnabled }}
+  Location string
+{{- end }}
 {{- if $.ProductMetadata.OperationRetry }}
   retryCount int
 {{- end }}
@@ -60,8 +63,13 @@ func (w *{{ $.ProductMetadata.Name }}OperationWaiter) QueryOp() (interface{}, er
   if w == nil {
     return nil, fmt.Errorf("Cannot query operation, it's unset or nil.")
   }
+{{- if $.ProductMetadata.RepEnabled }}
+  url := fmt.Sprintf("%s{{ replaceAll $.GetAsync.Operation.BaseUrl "{{op_id}}" "%s" }}", w.Config.{{ $.ProductMetadata.Name }}BasePath, w.CommonOperationWaiter.Op.Name)
+  url = strings.ReplaceAll(url, "{{`{{location}}`}}", w.Location)
+{{ else }}
   // Returns the proper get.
   url := fmt.Sprintf("%s{{ replaceAll $.GetAsync.Operation.BaseUrl "{{op_id}}" "%s" }}", w.Config.{{ $.ProductMetadata.Name }}BasePath, w.CommonOperationWaiter.Op.Name)
+{{- end }}
 
   return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
     Config: w.Config,
@@ -87,12 +95,15 @@ func (w *{{ $.ProductMetadata.Name }}OperationWaiter) IsRetryable(err error) boo
 {{- end }}
 
 
-func create{{ $.ProductMetadata.Name }}Waiter(config *transport_tpg.Config, op map[string]interface{}, {{- if $.IncludeProjectForOperation }} project, {{- end }} activity, userAgent string) (*{{ $.ProductMetadata.Name }}OperationWaiter, error) {
+func create{{ $.ProductMetadata.Name }}Waiter(config *transport_tpg.Config, op map[string]interface{}, {{- if $.IncludeProjectForOperation }} project,{{- end }}{{- if $.ProductMetadata.RepEnabled }} location, {{- end }} activity, userAgent string) (*{{ $.ProductMetadata.Name }}OperationWaiter, error) {
   w := &{{ $.ProductMetadata.Name }}OperationWaiter{
     Config:    config,
     UserAgent: userAgent,
 {{- if $.IncludeProjectForOperation }}
     Project: project,
+{{- end }}
+{{- if $.ProductMetadata.RepEnabled }}
+    Location: location,
 {{- end }}
   }
   if err := w.CommonOperationWaiter.SetOp(op); err != nil {
@@ -107,8 +118,8 @@ func create{{ $.ProductMetadata.Name }}Waiter(config *transport_tpg.Config, op m
 */}}
 
 // nolint: deadcode,unused {{/* TODO rewrite: remove the comment */}}
-func {{ camelize $.ProductMetadata.Name "upper" }}OperationWaitTimeWithResponse(config *transport_tpg.Config, op map[string]interface{}, response *map[string]interface{},{{- if $.IncludeProjectForOperation }} project,{{- end }} activity, userAgent string, timeout time.Duration) error {
-  w, err := create{{ $.ProductMetadata.Name }}Waiter(config, op, {{- if $.IncludeProjectForOperation }} project, {{ end }} activity, userAgent)
+func {{ camelize $.ProductMetadata.Name "upper" }}OperationWaitTimeWithResponse(config *transport_tpg.Config, op map[string]interface{}, response *map[string]interface{},{{- if $.IncludeProjectForOperation }} project,{{- end }}{{- if $.ProductMetadata.RepEnabled }} location,{{- end }} activity, userAgent string, timeout time.Duration) error {
+  w, err := create{{ $.ProductMetadata.Name }}Waiter(config, op, {{- if $.IncludeProjectForOperation }} project, {{- end }}{{- if $.ProductMetadata.RepEnabled }} location, {{ end }} activity, userAgent)
   if err != nil {
       return err
   }
@@ -122,12 +133,12 @@ func {{ camelize $.ProductMetadata.Name "upper" }}OperationWaitTimeWithResponse(
   return json.Unmarshal(rawResponse, response)
 }
 
-func {{ camelize $.ProductMetadata.Name "upper" }}OperationWaitTime(config *transport_tpg.Config, op map[string]interface{}, {{- if $.IncludeProjectForOperation }} project,{{- end }} activity, userAgent string, timeout time.Duration) error {
+func {{ camelize $.ProductMetadata.Name "upper" }}OperationWaitTime(config *transport_tpg.Config, op map[string]interface{}, {{- if $.IncludeProjectForOperation }} project,{{- end }}{{- if $.ProductMetadata.RepEnabled }} location,{{- end }} activity, userAgent string, timeout time.Duration) error {
   if val, ok := op["name"]; !ok || val == "" {
     // This was a synchronous call - there is no operation to wait for.
     return nil
   }
-  w, err := create{{ $.ProductMetadata.Name }}Waiter(config, op, {{- if $.IncludeProjectForOperation }} project, {{ end }} activity, userAgent)
+  w, err := create{{ $.ProductMetadata.Name }}Waiter(config, op, {{- if $.IncludeProjectForOperation }} project, {{- end }}{{- if $.ProductMetadata.RepEnabled }} location, {{ end }} activity, userAgent)
   if err != nil {
       // If w is nil, the op was synchronous.
       return err
