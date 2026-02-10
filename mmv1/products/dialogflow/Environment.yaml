@@ -100,7 +100,6 @@ properties:
           language to SynthesizeSpeechConfig.
         key_name: language
         value_type:
-          name: synthesizeSpeechConfig
           type: NestedObject
           properties:
             - type: Double
