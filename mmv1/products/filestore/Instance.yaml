@@ -168,8 +168,6 @@ properties:
             projects/{projectId}/locations/{locationId}/backups/{backupId},
             that this file share has been restored from.
           immutable: true
-          conflicts:
-            - 'sourceBackupdrBackup'
         - name: 'sourceBackupdrBackup'
           type: String
           description: |
@@ -177,8 +175,6 @@ properties:
             `projects/{project_id}/locations/{location_id}/backupVaults/{backupvault_id}/dataSources/{datasource_id}/backups/{backup_id}`,
             that this file share has been restored from.
           immutable: true
-          conflicts:
-            - 'sourceBackup'
         - name: 'nfsExportOptions'
           type: Array
           description: |
