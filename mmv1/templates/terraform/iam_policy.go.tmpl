@@ -22,7 +22,6 @@ package {{ lower $.ProductMetadata.Name }}
 
 import (
 	"fmt"
-	"net/http"
 	"regexp"
 	"strings"
 
@@ -251,8 +250,6 @@ func (u *{{ $.ResourceName }}IamUpdater) GetResourceIamPolicy() (*cloudresourcem
 		return nil, err
 	}
 
-	headers := make(http.Header)
-
 	policy, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config: u.Config,
 		Method: "{{ $.IamPolicy.FetchIamPolicyVerb }}",
@@ -262,7 +259,6 @@ func (u *{{ $.ResourceName }}IamUpdater) GetResourceIamPolicy() (*cloudresourcem
 		RawURL: url,
 		UserAgent: userAgent,
 		Body: obj,
-		Headers: headers,
 {{- if $.ErrorRetryPredicates }}
 		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{ join $.ErrorRetryPredicates "," }} },
 {{- end }}
@@ -317,8 +313,6 @@ func (u *{{ $.ResourceName }}IamUpdater) SetResourceIamPolicy(policy *cloudresou
 		return err
 	}
 
-	headers := make(http.Header)
-
 	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config: u.Config,
 		Method: "{{ $.IamPolicy.SetIamPolicyVerb }}",
@@ -329,7 +323,6 @@ func (u *{{ $.ResourceName }}IamUpdater) SetResourceIamPolicy(policy *cloudresou
 		UserAgent: userAgent,
 		Body: obj,
 		Timeout: u.d.Timeout(schema.TimeoutCreate),
-		Headers: headers,
 {{- if $.ErrorRetryPredicates }}
 		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{ join $.ErrorRetryPredicates "," }} },
 {{- end }}
