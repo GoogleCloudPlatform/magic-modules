@@ -846,6 +846,77 @@ resource "google_gke_hub_feature" "feature" {
 `, context)
 }
 
+func TestAccGKEHubFeature_WorkloadIdentity(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix":   acctest.RandString(t, 10),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: TestAccGKEHubFeature_WorkloadIdentity(context),
+			},
+			{
+				ResourceName:            "google_gke_hub_feature.feature",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"project", "labels", "terraform_labels"},
+			},
+			{
+				Config: TestAccGKEHubFeature_WorkloadIdentityUpdate(context),
+			},
+			{
+				ResourceName:            "google_gke_hub_feature.feature",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func TestAccGKEHubFeature_WorkloadIdentity(context map[string]interface{}) string {
+	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
+resource "google_gke_hub_feature" "feature" {
+  name = "workloadidentity"
+  location = "global"
+  spec {
+    workloadidentity {
+	    scope_tenancy_pool = [projects/12345/locations/global/workloadIdentityPools/my-pool]
+    }
+  }
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
+  project = google_project.project.project_id
+}
+`, context)
+}
+
+func TestAccGKEHubFeature_WorkloadIdentityUpdate(context map[string]interface{}) string {
+	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
+resource "google_gke_hub_feature" "feature" {
+  name = "workloadidentity"
+  location = "global"
+  spec {
+    workloadidentity {
+	    scope_tenancy_pool = [projects/12345/locations/global/workloadIdentityPools/my-other-pool]
+    }
+  }
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
+  project = google_project.project.project_id
+}
+`, context)
+}
+
 func TestAccGKEHubFeature_Rbacrolebindingactuation(t *testing.T) {
 	t.Parallel()
 
