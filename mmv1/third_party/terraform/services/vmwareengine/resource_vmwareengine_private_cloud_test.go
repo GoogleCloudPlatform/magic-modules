@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"net/url"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -409,3 +410,208 @@ func testAccCheckVmwareenginePrivateCloudDestroyProducer(t *testing.T) func(s *t
 		return nil
 	}
 }
+
+func TestAccVmwareenginePrivateCloud_tags(t *testing.T) {
+	t.Parallel()
+
+	org := envvar.GetTestOrgFromEnv(t)
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "venpc-tagkey", map[string]interface{}{})
+	tagValue := acctest.BootstrapSharedTestOrganizationTagValue(t, "venpc-tagvalue", tagKey)
+
+	venSuffix := acctest.RandString(t, 10)
+	venName := "tf-test-ven-" + venSuffix
+	pcSuffix := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"random_suffix": pcSuffix,
+		"org":           org,
+		"tagKey":        tagKey,
+		"tagValue":      tagValue,
+		"ven_suffix":    venSuffix,
+		"ven_name":      venName,
+		"zone":          "me-west1-b",
+		// Management CIDR must not overlap with any on-prem or VPC subnets
+		"management_cidr": "192.168.101.0/24",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVmwareenginePrivateCloudDestroyProducer(t), // Assuming this exists
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVmwareenginePrivateCloudTags(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_vmwareengine_private_cloud.default", "tags.%"),
+					testAccCheckVmwareenginePrivateCloudHasTagBindings(t),
+				),
+			},
+			{
+				ResourceName:      "google_vmwareengine_private_cloud.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"name",
+					"location",
+					"network_config",
+					"management_cluster",
+					"tags",
+				},
+			},
+		},
+	})
+}
+
+func testAccVmwareenginePrivateCloudTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vmwareengine_network" "ven" {
+  name        = "%{ven_name}"
+  location    = "global"
+  type        = "STANDARD"
+  description = "Terraform test network for PC"
+}
+
+resource "google_vmwareengine_private_cloud" "default" {
+  name     = "tf-test-pc-%{random_suffix}"
+  location = "%{zone}"
+
+  network_config {
+    vmware_engine_network = google_vmwareengine_network.ven.id
+    management_cidr     = "%{management_cidr}"
+  }
+
+  management_cluster {
+    cluster_id = "tf-test-cluster-%{random_suffix}"
+    node_type_configs {
+      node_type_id = "standard-72"
+      node_count   = 3
+    }
+    # Add other node_type_configs blocks here if needed for other node types
+  }
+  # description = "Optional description"
+
+  tags = {
+    "%{org}/%{tagKey}" = "%{tagValue}"
+  }
+
+}
+`, context)
+}
+
+func testAccCheckVmwareenginePrivateCloudHasTagBindings(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_vmwareengine_private_cloud" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+
+			// 1. Get the configured tag key and value from the state.
+			var configuredTagValueNamespacedName string
+			for key, val := range rs.Primary.Attributes {
+				if strings.HasPrefix(key, "tags.") && key != "tags.#" {
+					tagKeyNamespacedName := strings.TrimPrefix(key, "tags.")
+					tagValueShortName := val
+					if tagValueShortName != "" {
+						configuredTagValueNamespacedName = fmt.Sprintf("%s/%s", tagKeyNamespacedName, tagValueShortName)
+						break
+					}
+				}
+			}
+
+			if configuredTagValueNamespacedName == "" {
+				return fmt.Errorf("could not find a configured tag value in the state for resource %s", rs.Primary.ID)
+			}
+			if strings.Contains(configuredTagValueNamespacedName, "%{") {
+				return fmt.Errorf("tag namespaced name contains unsubstituted variables: %q", configuredTagValueNamespacedName)
+			}
+
+			// 2. Describe the tag value to get its full resource name.
+			safeNamespacedName := url.QueryEscape(configuredTagValueNamespacedName)
+			describeTagValueURL := fmt.Sprintf("https://cloudresourcemanager.googleapis.com/v3/tagValues/namespaced?name=%s", safeNamespacedName)
+
+			respDescribe, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				RawURL:    describeTagValueURL,
+				UserAgent: config.UserAgent,
+			})
+			if err != nil {
+				return fmt.Errorf("error describing tag value %q: %v", configuredTagValueNamespacedName, err)
+			}
+			fullTagValueName, ok := respDescribe["name"].(string)
+			if !ok || fullTagValueName == "" {
+				return fmt.Errorf("tag value name not found for %q: %v", configuredTagValueNamespacedName, respDescribe)
+			}
+
+			// 3. Get the tag bindings from the VMware Engine Private Cloud.
+			// ID format: projects/{project}/locations/{zone}/privateClouds/{privateCloudId}
+			parts := strings.Split(rs.Primary.ID, "/")
+			if len(parts) != 6 {
+				return fmt.Errorf("invalid resource ID format: %s", rs.Primary.ID)
+			}
+			zone := parts[3]
+			region, err := zoneToRegion(zone)
+			if err != nil {
+				return fmt.Errorf("could not determine region from zone %s: %v", zone, err)
+			}
+
+			parentURL := fmt.Sprintf("//vmwareengine.googleapis.com/%s", rs.Primary.ID)
+			// Private Cloud is zonal, but TagBindings API is regional.
+			listBindingsURL := fmt.Sprintf("https://%s-cloudresourcemanager.googleapis.com/v3/tagBindings?parent=%s", region, url.QueryEscape(parentURL))
+
+			resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				RawURL:    listBindingsURL,
+				UserAgent: config.UserAgent,
+			})
+			if err != nil {
+				return fmt.Errorf("error calling TagBindings API for %s: %v", parentURL, err)
+			}
+
+			tagBindingsVal, exists := resp["tagBindings"]
+			if !exists {
+				tagBindingsVal = []interface{}{}
+			}
+			tagBindings, ok := tagBindingsVal.([]interface{})
+			if !ok {
+				return fmt.Errorf("'tagBindings' is not a slice for %s: %v", rs.Primary.ID, resp)
+			}
+
+			// 4. Perform the comparison.
+			foundMatch := false
+			for _, binding := range tagBindings {
+				bindingMap, ok := binding.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				if bindingMap["tagValue"] == fullTagValueName {
+					foundMatch = true
+					break
+				}
+			}
+
+			if !foundMatch {
+				return fmt.Errorf("expected tag value %s (from %q) not found in bindings for %s. Bindings: %v", fullTagValueName, configuredTagValueNamespacedName, rs.Primary.ID, tagBindings)
+			}
+			t.Logf("Successfully found matching tag binding for %s with tagValue %s", rs.Primary.ID, fullTagValueName)
+		}
+		return nil
+	}
+}
+
+// zoneToRegion extracts the region from a zone name.
+// Example: "us-central1-a" -> "us-central1"
+func zoneToRegion(zone string) (string, error) {
+	parts := strings.Split(zone, "-")
+	if len(parts) < 2 {
+		return "", fmt.Errorf("invalid zone format: %s", zone)
+	}
+	return strings.Join(parts[0:2], "-"), nil
+}
+

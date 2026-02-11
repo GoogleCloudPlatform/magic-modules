@@ -153,3 +153,11 @@ properties:
       Checksum that may be sent on update and delete requests to ensure that the user-provided value is up to date befor
       The server computes checksums based on the value of other fields in the request.
     output: true
+  - name: 'tags'
+    type: KeyValuePairs
+    description: |
+      A map of resource manager tags.
+      Resource manager tag keys and values have the same definition as resource manager tags.
+      Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/{tag_value_id}.
+    immutable: true
+    ignore_read: true
