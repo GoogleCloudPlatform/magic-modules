@@ -1,5 +1,4 @@
 resource "google_network_security_backend_authentication_config" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   name             = "{{index $.Vars "resource_name"}}"
   labels           = {
     foo = "bar"

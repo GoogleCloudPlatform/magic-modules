@@ -38,7 +38,6 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'connection_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/connections/{{connection_id}}'
     - '{{connection_id}}'
@@ -148,7 +147,7 @@ properties:
       The resource name of the connection in the form of:
       "projects/{project_id}/locations/{location_id}/connections/{connectionId}"
     output: true
-  - name: 'connection_id'
+  - name: 'connectionId'
     type: String
     description: |
       Optional connection id that should be assigned to the created connection.

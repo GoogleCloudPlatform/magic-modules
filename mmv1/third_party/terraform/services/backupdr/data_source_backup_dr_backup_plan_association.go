@@ -2,6 +2,7 @@ package backupdr
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -13,7 +14,6 @@ func DataSourceGoogleCloudBackupDRBackupPlanAssociation() *schema.Resource {
 	// Set 'Required' schema elements
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "backup_plan_association_id", "location")
 
-	// Set 'Optional' schema elements
 	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
 	return &schema.Resource{
 		Read:   dataSourceGoogleCloudBackupDRBackupPlanAssociationRead,
@@ -43,4 +43,186 @@ func dataSourceGoogleCloudBackupDRBackupPlanAssociationRead(d *schema.ResourceDa
 		return fmt.Errorf("%s not found", id)
 	}
 	return nil
+}
+
+// Plural datasource to Fetch BackupPlanAssociations for a given resource type
+func DataSourceGoogleCloudBackupDRBackupPlanAssociations() *schema.Resource {
+	return &schema.Resource{
+		Read: dataSourceGoogleCloudBackupDRBackupPlanAssociationsRead,
+		Schema: map[string]*schema.Schema{
+			"location": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The location to list the backup plan associations from.",
+			},
+			"project": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The ID of the project in which the resource belongs.",
+			},
+			"resource_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `The resource type of workload on which backup plan is applied. Examples include, "compute.googleapis.com/Instance", "compute.googleapis.com/Disk".`,
+				Deprecated:  "`resource_type` is deprecated and will be removed in a future major release.",
+			},
+			"associations": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "A list of the backup plan associations found.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"resource": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"backup_plan": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"create_time": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"data_source": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"rules_config_info": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "Message for rules config info",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"rule_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Backup Rule id fetched from backup plan.",
+									},
+									"last_backup_state": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "State of last backup taken.",
+									},
+									"last_backup_error": {
+										Type:        schema.TypeList,
+										Computed:    true,
+										Description: "google.rpc.Status object to store the last backup error",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"code": {
+													Type:        schema.TypeInt,
+													Computed:    true,
+													Description: "The status code, which should be an enum value of [google.rpc.Code]",
+												},
+												"message": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "A developer-facing error message, which should be in English.",
+												},
+											},
+										},
+									},
+									"last_successful_backup_consistency_time": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The point in time when the last successful backup was captured from the source",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func dataSourceGoogleCloudBackupDRBackupPlanAssociationsRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	location := d.Get("location").(string)
+
+	url := fmt.Sprintf("%sprojects/%s/locations/%s/backupPlanAssociations", config.BackupDRBasePath, project, location)
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return fmt.Errorf("Error reading BackupPlanAssociations: %s", err)
+	}
+
+	// Adjust "backupPlanAssociations" to match the key in the actual API response.
+	items, ok := res["backupPlanAssociations"].([]interface{})
+	if !ok {
+		items = make([]interface{}, 0)
+	}
+
+	// Flatten the list of items from the API response into the schema
+	associations := make([]map[string]interface{}, 0, len(items))
+	for _, item := range items {
+		association := item.(map[string]interface{})
+		flattened := map[string]interface{}{
+			"name":        association["name"],
+			"resource":    association["resource"],
+			"backup_plan": association["backupPlan"],
+			"data_source": association["dataSource"],
+		}
+		if rules, ok := association["rulesConfigInfo"].([]interface{}); ok {
+			flattened["rules_config_info"] = flattenRulesConfigInfo(rules)
+		}
+		associations = append(associations, flattened)
+	}
+
+	if err := d.Set("associations", associations); err != nil {
+		return fmt.Errorf("Error setting associations: %s", err)
+	}
+
+	d.SetId(url)
+
+	return nil
+}
+
+func flattenRulesConfigInfo(rules []interface{}) []map[string]interface{} {
+	result := make([]map[string]interface{}, 0, len(rules))
+	for _, rule := range rules {
+		ruleMap := rule.(map[string]interface{})
+		flatRule := map[string]interface{}{
+			"rule_id":           ruleMap["ruleId"],
+			"last_backup_state": ruleMap["lastBackupState"],
+		}
+
+		if consistencyTime, ok := ruleMap["lastSuccessfulBackupConsistencyTime"].(string); ok {
+			flatRule["last_successful_backup_consistency_time"] = consistencyTime
+		}
+
+		if errInfo, ok := ruleMap["lastBackupError"].(map[string]interface{}); ok {
+			flatRule["last_backup_error"] = []map[string]interface{}{
+				{
+					"code":    errInfo["code"],
+					"message": errInfo["message"],
+				},
+			}
+		}
+		result = append(result, flatRule)
+	}
+	return result
 }

@@ -146,6 +146,8 @@
                     "oracleSourceConfig": null,
                     "postgresqlSourceConfig": null,
                     "salesforceSourceConfig": null,
+                    "spannerSourceConfig": null,
+                    "mongodbSourceConfig": null,
                     "sqlServerSourceConfig": null
                 }
             }

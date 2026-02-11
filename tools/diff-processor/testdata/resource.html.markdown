@@ -148,7 +148,7 @@ The following arguments are supported:
 
 * `nic_type` - (Optional) The type of vNIC to be used on this interface. Possible values: GVNIC, VIRTIO_NET.
 
-* `network_attachment` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The URL of the network attachment that this interface should connect to in the following format: `projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}`.
+* `network_attachment` - (Optional) [Beta](../guides/provider_versions.html.markdown) The URL of the network attachment that this interface should connect to in the following format: `projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}`.
 
 * `stack_type` - (Optional) The stack type for this network interface to identify whether the IPv6 feature is enabled or not. Values are IPV4_IPV6 or IPV4_ONLY. If not specified, IPV4_ONLY will be used.
 
@@ -158,7 +158,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `queue_count` - (Optional) The networking queue count that's specified by users for the network interface. Both Rx and Tx queues will be set to this number. It will be empty if not specified.
 
-* `security_policy` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) A full or partial URL to a security policy to add to this instance. If this field is set to an empty string it will remove the associated security policy.
+* `security_policy` - (Optional) [Beta](../guides/provider_versions.html.markdown) A full or partial URL to a security policy to add to this instance. If this field is set to an empty string it will remove the associated security policy.
 
 <a name="nested_access_config"></a>The `access_config` block supports:
 
@@ -274,6 +274,34 @@ exported:
 * `message` -
   (Optional)
   Human-friendly description of the error.
+
+## Ephemeral Attributes Reference
+
+The following write-only attributes are supported:
+
+* `shared_secret_wo` -
+  (Optional)
+  Shared secret used to set the secure session between the Cloud VPN
+  gateway and the peer VPN gateway.
+  Note: This property is write-only and will not be read from the API. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
+  **Note**: This property is write-only and will not be read from the API.
+
+* `sensitive_params` -
+  (Optional)
+  Different parameters are configured primarily using the the `params` field on this
+  resource. This block contains the parameters which contain secrets or passwords so that they can be marked
+  sensitive and hidden from plan output. The name of the field, eg: secret_access_key, will be the key
+  in the `params` map in the api request.
+  Credentials may not be specified in both locations and will cause an error. Changing from one location
+  to a different credential configuration in the config will require an apply to update state.
+  Structure is [documented below](#nested_sensitive_params).
+
+<a name="nested_sensitive_params"></a>The `sensitive_params` block supports:
+
+* `secret_access_key_wo` -
+  (Optional)
+  The Secret Access Key of the AWS account transferring data from.
+  **Note**: This property is write-only and will not be read from the API.
 
 ## Timeouts
 

@@ -1086,6 +1086,14 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 							ForceNew:    true,
 							Description: `Whether Confidential Nodes feature is enabled for all nodes in this cluster.`,
 						},
+						"confidential_instance_type": {
+                                                        Type:        schema.TypeString,
+                                                        Optional:    true,
+                                                        ForceNew:    true,
+                                                        DiffSuppressFunc: suppressDiffForConfidentialNodes,
+							Description: `Defines the type of technology used by the confidential node.`,
+                                                        ValidateFunc: validation.StringInSlice([]string{"SEV", "SEV_SNP", "TDX"}, false),
+                                                },
 					},
 				},
 			},
@@ -1810,7 +1818,7 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 						"cluster_dns": {
 							Type:         schema.TypeString,
 							Default:      "PROVIDER_UNSPECIFIED",
-							ValidateFunc: validation.StringInSlice([]string{"PROVIDER_UNSPECIFIED", "PLATFORM_DEFAULT", "CLOUD_DNS"}, false),
+							ValidateFunc: validation.StringInSlice([]string{"PROVIDER_UNSPECIFIED", "PLATFORM_DEFAULT", "CLOUD_DNS", "KUBE_DNS"}, false),
 							Description:  `Which in-cluster DNS provider should be used.`,
 							Optional:     true,
 						},

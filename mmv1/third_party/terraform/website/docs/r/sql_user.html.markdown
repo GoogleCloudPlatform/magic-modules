@@ -9,7 +9,7 @@ description: |-
 Creates a new Google SQL User on a Google SQL User Instance. For more information, see the [official documentation](https://cloud.google.com/sql/), or the [JSON API](https://cloud.google.com/sql/docs/admin-api/v1beta4/users).
 
 ~> **Note:** All arguments including the username and password will be stored in the raw state as plain-text.
-[Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data). Passwords will not be retrieved when running
+[Read more about sensitive data in state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data). Passwords will not be retrieved when running
 "terraform import".
 
 ## Example Usage
@@ -35,6 +35,32 @@ resource "google_sql_user" "users" {
   instance = google_sql_database_instance.main.name
   host     = "me.com"
   password = "changeme"
+}
+```
+
+Example creating a SQL User with database roles(applicable for Postgres/MySQL
+only).
+
+```hcl
+resource "random_id" "db_name_suffix" {
+  byte_length = 4
+}
+
+resource "google_sql_database_instance" "main" {
+  name             = "main-instance-${random_id.db_name_suffix.hex}"
+  database_version = "POSTGRES_15"
+
+  settings {
+    tier = "db-f1-micro"
+  }
+}
+
+resource "google_sql_user" "users" {
+  name     = "me"
+  instance = google_sql_database_instance.main.name
+  host     = "me.com"
+  password = "changeme"
+  database_roles = ["cloudsqlsuperuser"]
 }
 ```
 
@@ -141,7 +167,17 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
 
-The optional `password_policy` block is only supported by Mysql. The `password_policy` block supports:
+* `iam_email` - (read only) IAM email address for MySQL IAM database users.
+
+* `database_roles` - (Optional) A list of database roles to be assigned to the user.
+    This option is only available for MySQL 8+ and PostgreSQL instances. You
+    can include predefined Cloud SQL roles, like cloudsqlsuperuser, or your
+    own custom roles. Custom roles must be created in the database before
+    you can assign them. You can create roles using the CREATE ROLE
+    statement for both MySQL and PostgreSQL.
+  **Note**: This property is write-only and will not be read from the API.
+
+The optional `password_policy` block is only supported for creating MySQL and Postgres users. The `password_policy` block supports:
 
 * `allowed_failed_attempts` - (Optional) Number of failed attempts allowed before the user get locked.
 

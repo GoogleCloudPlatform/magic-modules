@@ -15,12 +15,12 @@ package provider
 
 import (
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/otiai10/copy"
 )
 
@@ -28,32 +28,29 @@ import (
 type CaiToTerraformConversion struct {
 	TargetVersionName string
 
-	Version product.Version
-
 	Product *api.Product
 
 	StartTime time.Time
+
+	templateFS fs.FS
 }
 
-func NewCaiToTerraformConversion(product *api.Product, versionName string, startTime time.Time) CaiToTerraformConversion {
+func NewCaiToTerraformConversion(product *api.Product, versionName string, startTime time.Time, templateFS fs.FS) CaiToTerraformConversion {
 	t := CaiToTerraformConversion{
 		Product:           product,
 		TargetVersionName: versionName,
-		Version:           *product.VersionObjOrClosest(versionName),
 		StartTime:         startTime,
+		templateFS:        templateFS,
 	}
 
-	t.Product.SetPropertiesBasedOnVersion(&t.Version)
-	t.Product.SetCompiler(ProviderName(t))
 	for _, r := range t.Product.Objects {
-		r.SetCompiler(ProviderName(t))
 		r.ImportPath = ImportPathFromVersion(versionName)
 	}
 
 	return t
 }
 
-func (cai2hcl CaiToTerraformConversion) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
+func (cai2hcl CaiToTerraformConversion) Generate(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 }
 
 func (cai2hcl CaiToTerraformConversion) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {

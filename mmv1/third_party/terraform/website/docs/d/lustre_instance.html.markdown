@@ -6,14 +6,14 @@ description: |-
 
 # google_lustre_instance
 
-Use this data source to get information about a Lustre instance. For more information see the [API docs](https://cloud.google.com/filestore/docs/lustre/reference/rest/v1/projects.locations.instances).
+Use this data source to get information about a Lustre instance. For more information see the [API docs](https://docs.cloud.google.com/managed-lustre/docs/reference/rest/v1/projects.locations.instances).
 
 ## Example Usage
 
 ```hcl
 data "google_lustre_instance" "instance" {
   name   = "my-instance"
-  location = "us-central1"
+  zone   = "us-central1-a"
 }
 ```
 

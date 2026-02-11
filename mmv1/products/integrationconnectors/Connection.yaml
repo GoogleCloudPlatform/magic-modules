@@ -306,12 +306,6 @@ properties:
         type: NestedObject
         description: |
           User password for Authentication.
-        exactly_one_of:
-          - 'auth_config.0.user_password'
-          - 'auth_config.0.oauth2_jwt_bearer'
-          - 'auth_config.0.oauth2_client_credentials'
-          - 'auth_config.0.ssh_public_key'
-          - 'auth_config.0.oauth2_auth_code_flow'
         properties:
           - name: 'username'
             type: String
@@ -333,12 +327,6 @@ properties:
         type: NestedObject
         description: |
           OAuth2 JWT Bearer for Authentication.
-        exactly_one_of:
-          - 'auth_config.0.user_password'
-          - 'auth_config.0.oauth2_jwt_bearer'
-          - 'auth_config.0.oauth2_client_credentials'
-          - 'auth_config.0.ssh_public_key'
-          - 'auth_config.0.oauth2_auth_code_flow'
         properties:
           - name: 'clientKey'
             type: NestedObject
@@ -374,12 +362,6 @@ properties:
         type: NestedObject
         description: |
           OAuth3 Client Credentials for Authentication.
-        exactly_one_of:
-          - 'auth_config.0.user_password'
-          - 'auth_config.0.oauth2_jwt_bearer'
-          - 'auth_config.0.oauth2_client_credentials'
-          - 'auth_config.0.ssh_public_key'
-          - 'auth_config.0.oauth2_auth_code_flow'
         properties:
           - name: 'clientId'
             type: String
@@ -401,12 +383,6 @@ properties:
         type: NestedObject
         description: |
           SSH Public Key for Authentication.
-        exactly_one_of:
-          - 'auth_config.0.user_password'
-          - 'auth_config.0.oauth2_jwt_bearer'
-          - 'auth_config.0.oauth2_client_credentials'
-          - 'auth_config.0.ssh_public_key'
-          - 'auth_config.0.oauth2_auth_code_flow'
         properties:
           - name: 'username'
             type: String
@@ -443,12 +419,6 @@ properties:
         type: NestedObject
         description: |
           Parameters to support Oauth 2.0 Auth Code Grant Authentication.
-        exactly_one_of:
-          - 'auth_config.0.user_password'
-          - 'auth_config.0.oauth2_jwt_bearer'
-          - 'auth_config.0.oauth2_client_credentials'
-          - 'auth_config.0.ssh_public_key'
-          - 'auth_config.0.oauth2_auth_code_flow'
         properties:
           - name: 'clientId'
             type: String

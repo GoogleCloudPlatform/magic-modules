@@ -36,6 +36,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next: true
 sweeper:
   dependencies:
     # - "google_network_security_intercept_endpoint_group" (beta only)
@@ -76,6 +77,12 @@ examples:
     test_env_vars:
       project: 'PROJECT_NAME'
   - name: 'network_bgp_best_path_selection_mode_standard_custom_fields'
+    primary_resource_id: 'vpc_network'
+    vars:
+      network_name: 'vpc-network'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'network_bgp_standard_mode_delete_med'
     primary_resource_id: 'vpc_network'
     vars:
       network_name: 'vpc-network'
@@ -176,6 +183,7 @@ properties:
         enum_values:
           - 'LEGACY'
           - 'STANDARD'
+        is_missing_in_cai: true
       - name: 'bgpAlwaysCompareMed'
         type: Boolean
         description: |
@@ -185,6 +193,7 @@ properties:
         default_from_api: true
         update_url: 'projects/{{project}}/global/networks/{{name}}'
         update_verb: 'PATCH'
+        is_missing_in_cai: true
       - name: 'bgpInterRegionCost'
         type: Enum
         description: |
@@ -196,6 +205,16 @@ properties:
         enum_values:
           - 'DEFAULT'
           - 'ADD_COST_TO_MED'
+        is_missing_in_cai: true
+      - name: 'delete_bgp_always_compare_med'
+        type: Boolean
+        default_value: false
+        update_verb: 'PATCH'
+        update_url: 'projects/{{project}}/global/networks/{{name}}'
+        client_side: true
+        description: |
+          If set to `true`, the `bgp_always_compare_med` field will be cleared.
+          If set to `false` (the default), `bgp_always_compare_med` will be set to the value specified in the configuration.
   - name: 'mtu'
     type: Integer
     description: |
@@ -214,7 +233,9 @@ properties:
     description: |
       Enable ULA internal ipv6 on this network. Enabling this feature will assign
       a /48 from google defined ULA prefix fd20::/20.
-    immutable: true
+    update_url: 'projects/{{project}}/global/networks/{{name}}'
+    update_verb: 'PATCH'
+    update_id: 'enableUlaInternalIpv6'
   - name: 'internalIpv6Range'
     type: String
     description: |
@@ -245,3 +266,18 @@ properties:
       * https://www.googleapis.com/compute/v1/projects/{projectId}/global/networkProfiles/{network_profile_name}
       * projects/{projectId}/global/networkProfiles/{network_profile_name}
     diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the network. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        api_name: resourceManagerTags
+        ignore_read: true

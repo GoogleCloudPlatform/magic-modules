@@ -16,6 +16,7 @@ name: 'Queue'
 description: |
   A named resource to which messages are sent by publishers.
 docs:
+include_in_tgc_next: true
 id_format: 'projects/{{project}}/locations/{{location}}/queues/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/queues'
 update_verb: 'PATCH'
@@ -28,12 +29,13 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/queues/{{name}}'
     - '{{name}}'
 custom_code:
   constants: 'templates/terraform/constants/cloud_tasks_retry_config_custom_diff.go.tmpl'
+  post_create: 'templates/terraform/post_create/cloud_tasks_queue_state.go.tmpl'
+  post_update: 'templates/terraform/post_update/cloud_tasks_queue_state.go.tmpl'
 examples:
   - name: 'queue_basic'
     primary_resource_id: 'default'
@@ -56,6 +58,18 @@ examples:
     primary_resource_id: 'http_target_oauth'
     vars:
       name: 'cloud-tasks-queue-http-target-oauth'
+virtual_fields:
+  - name: 'desired_state'
+    type: Enum
+    description: |
+      The desired state of the queue. Use this to pause and resume the queue.
+
+      * RUNNING: The queue is running. Tasks can be dispatched.
+      * PAUSED: The queue is paused. Tasks are not dispatched but can be added to the queue.
+    default_value: 'RUNNING'
+    enum_values:
+      - 'RUNNING'
+      - 'PAUSED'
 parameters:
   - name: 'location'
     type: String
@@ -67,6 +81,7 @@ properties:
   - name: 'name'
     type: String
     description: The queue name.
+    required: true
     immutable: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     custom_expand: 'templates/terraform/custom_expand/qualify_queue_name.go.tmpl'
@@ -76,6 +91,7 @@ properties:
       Overrides for task-level appEngineRouting. These settings apply only
       to App Engine tasks in this queue
     custom_flatten: 'templates/terraform/custom_flatten/cloudtasks_queue_appenginerouting.go.tmpl'
+    tgc_ignore_terraform_custom_flatten: true
     properties:
       - name: 'service'
         type: String
@@ -169,6 +185,7 @@ properties:
           If zero, then the task age is unlimited.
         default_from_api: true
         diff_suppress_func: 'suppressOmittedMaxDuration'
+        custom_tgc_flatten: 'templates/tgc_next/custom_flatten/cloudtasks_queue_max_retry_duration.go.tmpl'
       - name: 'minBackoff'
         type: String
         description: |
@@ -206,6 +223,15 @@ properties:
           This field may contain any value between 0.0 and 1.0, inclusive. 0.0 is the
           default and means that no operations are logged.
         required: true
+  - name: 'state'
+    type: Enum
+    description: |
+      The current state of the queue.
+    output: true
+    enum_values:
+      - 'RUNNING'
+      - 'PAUSED'
+      - 'DISABLED'
   - name: 'httpTarget'
     type: NestedObject
     description: Modifies HTTP target for HTTP tasks.
@@ -335,6 +361,7 @@ properties:
           Note that both the service account email and the scope MUST be specified when using the queue-level authorization override.
         conflicts:
           - oidcToken
+        is_missing_in_cai: true
         properties:
           - name: 'serviceAccountEmail'
             type: String

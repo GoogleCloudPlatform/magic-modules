@@ -53,19 +53,47 @@ examples:
     primary_resource_id: 'gce_future_reservation'
     vars:
       future_reservation_name: 'gce-future-reservation'
+      start_time: '2025-11-01T00:00:00Z'
+      end_time: '2025-11-02T00:00:00Z'
+    test_vars_overrides:
+      start_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 1).Format(time.RFC3339)'
+      end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339)'
     test_env_vars:
       project: 'PROJECT_NAME'
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
+  - name: 'future_reservation_aggregate_reservation'
+    primary_resource_id: 'gce_future_reservation'
+    vars:
+      future_reservation_name: 'gce-future-reservation-aggregate-reservation'
+      start_time: '2025-11-01T00:00:00Z'
+      end_time: '2025-11-02T00:00:00Z'
+    test_vars_overrides:
+      start_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 1).Format(time.RFC3339)'
+      end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339)'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    # Skip in VCR until the test issue is resolved
+    # https://github.com/hashicorp/terraform-provider-google/issues/25087
+    skip_vcr: true
   - name: 'shared_future_reservation'
     primary_resource_id: 'gce_future_reservation'
     vars:
       future_reservation_name: 'gce-shared-future-reservation'
+      start_time: '2025-08-01T00:00:00Z'
+      end_time: '2025-08-02T00:00:00Z'
+    test_vars_overrides:
+      start_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 1).Format(time.RFC3339)'
+      end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339)'
     test_env_vars:
       project: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
+      org_id: 'ORG_TARGET'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
+    # Skip in VCR until the test issue is resolved
+    # https://github.com/hashicorp/terraform-provider-google/issues/25063
     skip_vcr: true
 parameters:
   - name: 'name'
@@ -153,10 +181,7 @@ properties:
         description: |
           A map of project id and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
         key_name: 'id'
-        key_description: |
-          The project id/number which is deleting or adding to the project list.
         value_type:
-          name: 'projectConfig'
           type: NestedObject
           properties:
             - name: 'projectId'
@@ -348,12 +373,9 @@ properties:
                   - name: 'projectMap'
                     type: Map
                     key_name: project
-                    key_description: |
-                      The project ID, used as the key in this map.
                     description: |
                       A map of project id and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
                     value_type:
-                      name: 'projectConfig'
                       type: NestedObject
                       properties:
                         - name: 'projectId'
@@ -545,3 +567,56 @@ properties:
         type: Integer
         description: |
           Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
+  - name: 'aggregateReservation'
+    type: NestedObject
+    description: |
+      Aggregate reservation details for the future reservation.
+    immutable: true
+    properties:
+      - name: 'vmFamily'
+        type: Enum
+        description: |
+          The VM family that all instances scheduled against this reservation must belong to.
+        immutable: true
+        enum_values:
+          - 'VM_FAMILY_CLOUD_TPU_DEVICE_CT3'
+          - 'VM_FAMILY_CLOUD_TPU_LITE_DEVICE_CT5L'
+          - 'VM_FAMILY_CLOUD_TPU_LITE_POD_SLICE_CT5LP'
+          - 'VM_FAMILY_CLOUD_TPU_LITE_POD_SLICE_CT6E'
+          - 'VM_FAMILY_CLOUD_TPU_POD_SLICE_CT3P'
+          - 'VM_FAMILY_CLOUD_TPU_POD_SLICE_CT4P'
+          - 'VM_FAMILY_CLOUD_TPU_POD_SLICE_CT5P'
+      - name: reservedResources
+        type: Array
+        description: |
+          futureReservations.list of reserved resources (CPUs, memory, accelerators).
+        required: true
+        immutable: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'accelerator'
+              type: NestedObject
+              description: |
+                Properties of accelerator resources in this reservation.
+              immutable: true
+              properties:
+                - name: 'acceleratorCount'
+                  type: Integer
+                  description: |
+                    Number of accelerators of specified type.
+                  immutable: true
+                - name: 'acceleratorType'
+                  type: String
+                  description: |
+                    Full or partial URL to accelerator type. e.g. "projects/{PROJECT}/zones/{ZONE}/acceleratorTypes/ct4l"
+                  immutable: true
+      - name: 'workloadType'
+        type: Enum
+        description: |
+          The workload type of the instances that will target this reservation.
+        immutable: true
+        enum_values:
+          - 'BATCH'
+          - 'SERVING'
+          - 'UNSPECIFIED'

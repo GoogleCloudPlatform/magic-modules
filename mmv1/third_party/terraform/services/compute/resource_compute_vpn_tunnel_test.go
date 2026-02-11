@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -12,6 +13,7 @@ import (
 func TestAccComputeVpnTunnel_regionFromGateway(t *testing.T) {
 	t.Parallel()
 	region := "us-central1"
+	suffix := acctest.RandString(t, 10)
 	if envvar.GetTestRegionFromEnv() == region {
 		// Make sure we choose a region that isn't the provider default
 		// in order to test getting the region from the gateway and not the
@@ -25,7 +27,7 @@ func TestAccComputeVpnTunnel_regionFromGateway(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeVpnTunnelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeVpnTunnel_regionFromGateway(acctest.RandString(t, 10), region),
+				Config: testAccComputeVpnTunnel_regionFromGateway(suffix, region),
 			},
 			{
 				ResourceName:            "google_compute_vpn_tunnel.foobar",
@@ -40,6 +42,7 @@ func TestAccComputeVpnTunnel_regionFromGateway(t *testing.T) {
 func TestAccComputeVpnTunnel_router(t *testing.T) {
 	t.Parallel()
 
+	suffix := acctest.RandString(t, 10)
 	router := fmt.Sprintf("tf-test-tunnel-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -47,7 +50,52 @@ func TestAccComputeVpnTunnel_router(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeVpnTunnelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeVpnTunnelRouter(acctest.RandString(t, 10), router),
+				Config: testAccComputeVpnTunnelRouter(suffix, router),
+			},
+			{
+				ResourceName:            "google_compute_vpn_tunnel.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"shared_secret", "detailed_status"},
+			},
+		},
+	})
+}
+
+func TestAccComputeVpnTunnel_routerWithSharedSecretWo_update(t *testing.T) {
+	t.Parallel()
+
+	router := fmt.Sprintf("tf-test-tunnel-%s", acctest.RandString(t, 10))
+	suffix := acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeVpnTunnelDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeVpnTunnelRouterWithSharedSecretWo(suffix, router),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_compute_vpn_tunnel.foobar", "shared_secret_wo"),
+					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.foobar", "shared_secret_wo_version", "1"),
+				),
+			},
+			{
+				ResourceName:            "google_compute_vpn_tunnel.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"shared_secret", "detailed_status"},
+			},
+			{
+				Config: testAccComputeVpnTunnelRouterWithSharedSecretWo_update(suffix, router),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_vpn_tunnel.foobar", plancheck.ResourceActionDestroyBeforeCreate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr("google_compute_vpn_tunnel.foobar", "shared_secret_wo"),
+					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.foobar", "shared_secret_wo_version", "2"),
+				),
 			},
 			{
 				ResourceName:            "google_compute_vpn_tunnel.foobar",
@@ -62,13 +110,14 @@ func TestAccComputeVpnTunnel_router(t *testing.T) {
 func TestAccComputeVpnTunnel_defaultTrafficSelectors(t *testing.T) {
 	t.Parallel()
 
+	suffix := acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeVpnTunnelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeVpnTunnelDefaultTrafficSelectors(acctest.RandString(t, 10)),
+				Config: testAccComputeVpnTunnelDefaultTrafficSelectors(suffix),
 			},
 			{
 				ResourceName:            "google_compute_vpn_tunnel.foobar",
@@ -78,6 +127,99 @@ func TestAccComputeVpnTunnel_defaultTrafficSelectors(t *testing.T) {
 			},
 		},
 	})
+}
+
+// TestAccComputeVpnTunnel_cipherSuite tests the 'cipher_suite' block in the google_compute_vpn_tunnel resource.
+func TestAccComputeVpnTunnel_cipherSuite(t *testing.T) {
+	t.Parallel()
+
+	// A unique name for the test resources
+	suffix := acctest.RandString(t, 10)
+	// Other necessary resources like network, gateway, etc. would be defined here.
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeVpnTunnelDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Test case 1: Basic cipher suite configuration
+				Config: testAccComputeVpnTunnel_basicCipherSuite(suffix),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase1.0.encryption.0", "AES-GCM-16-128"),
+					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase1.0.encryption.1", "AES-GCM-16-192"),
+					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase2.0.integrity.0", "HMAC-SHA2-256-128"),
+					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.test_tunnel", "cipher_suite.0.phase2.0.integrity.1", "HMAC-SHA1-96"),
+				),
+			},
+		},
+	})
+}
+
+func testAccComputeVpnTunnel_basicCipherSuite(suffix string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name                    = "tf-test-network-%[1]s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "foobar" {
+  name          = "tf-test-subnetwork-%[1]s"
+  network       = google_compute_network.foobar.self_link
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+}
+
+resource "google_compute_address" "foobar" {
+  name   = "tf-test-%[1]s"
+  region = google_compute_subnetwork.foobar.region
+}
+
+resource "google_compute_ha_vpn_gateway" "foobar" {
+  name    = "tf-test-%[1]s"
+  network = google_compute_network.foobar.self_link
+  region  = google_compute_subnetwork.foobar.region
+}
+
+resource "google_compute_external_vpn_gateway" "external_gateway" {
+  name            = "external-gateway-%[1]s"
+  redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
+  description     = "An externally managed VPN gateway"
+  interface {
+    id         = 0
+    ip_address = "8.8.8.8"
+  }
+}
+
+resource "google_compute_router" "foobar" {
+  name    = "tf-test-router-%[1]s"
+  region  = google_compute_subnetwork.foobar.region
+  network = google_compute_network.foobar.self_link
+  bgp {
+    asn = 64514
+  }
+}
+
+resource "google_compute_vpn_tunnel" "test_tunnel" {
+  name          = "tf-test-ha-vpn-tunnel-%[1]s"
+  region        = "us-central1"
+  vpn_gateway = google_compute_ha_vpn_gateway.foobar.id
+  peer_external_gateway           = google_compute_external_vpn_gateway.external_gateway.id
+  peer_external_gateway_interface = 0  
+  shared_secret      = "unguessable"
+  router             = google_compute_router.foobar.self_link
+  vpn_gateway_interface           = 0 
+
+  cipher_suite {
+    phase1 {
+      encryption = ["AES-GCM-16-128", "AES-GCM-16-192"]
+    }
+    phase2 {
+      integrity  = ["HMAC-SHA2-256-128", "HMAC-SHA1-96"]
+    }
+  }
+}
+`, suffix)
 }
 
 func testAccComputeVpnTunnel_regionFromGateway(suffix, region string) string {
@@ -196,6 +338,122 @@ resource "google_compute_vpn_tunnel" "foobar" {
   peer_external_gateway_interface = 0  
   shared_secret      = "unguessable"
   router             = google_compute_router.foobar.self_link
+  vpn_gateway_interface           = 0  
+}
+`, suffix, router)
+}
+
+func testAccComputeVpnTunnelRouterWithSharedSecretWo(suffix, router string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name                    = "tf-test-%[1]s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "foobar" {
+  name          = "tf-test-subnetwork-%[1]s"
+  network       = google_compute_network.foobar.self_link
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+}
+
+resource "google_compute_address" "foobar" {
+  name   = "tf-test-%[1]s"
+  region = google_compute_subnetwork.foobar.region
+}
+
+resource "google_compute_ha_vpn_gateway" "foobar" {
+  name    = "tf-test-%[1]s"
+  network = google_compute_network.foobar.self_link
+  region  = google_compute_subnetwork.foobar.region
+}
+
+resource "google_compute_external_vpn_gateway" "external_gateway" {
+  name            = "external-gateway-%[1]s"
+  redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
+  description     = "An externally managed VPN gateway"
+  interface {
+    id         = 0
+    ip_address = "8.8.8.8"
+  }
+}
+
+resource "google_compute_router" "foobar" {
+  name    = "%[2]s"
+  region  = google_compute_subnetwork.foobar.region
+  network = google_compute_network.foobar.self_link
+  bgp {
+    asn = 64514
+  }
+}
+
+resource "google_compute_vpn_tunnel" "foobar" {
+  name                            = "tf-test-%[1]s"
+  region                          = google_compute_subnetwork.foobar.region
+  vpn_gateway                     = google_compute_ha_vpn_gateway.foobar.id
+  peer_external_gateway           = google_compute_external_vpn_gateway.external_gateway.id
+  peer_external_gateway_interface = 0  
+  shared_secret_wo                = "I am write only, and should not be written to state"
+  shared_secret_wo_version        = 1
+  router                          = google_compute_router.foobar.self_link
+  vpn_gateway_interface           = 0  
+}
+`, suffix, router)
+}
+
+func testAccComputeVpnTunnelRouterWithSharedSecretWo_update(suffix, router string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name                    = "tf-test-%[1]s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "foobar" {
+  name          = "tf-test-subnetwork-%[1]s"
+  network       = google_compute_network.foobar.self_link
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+}
+
+resource "google_compute_address" "foobar" {
+  name   = "tf-test-%[1]s"
+  region = google_compute_subnetwork.foobar.region
+}
+
+resource "google_compute_ha_vpn_gateway" "foobar" {
+  name    = "tf-test-%[1]s"
+  network = google_compute_network.foobar.self_link
+  region  = google_compute_subnetwork.foobar.region
+}
+
+resource "google_compute_external_vpn_gateway" "external_gateway" {
+  name            = "external-gateway-%[1]s"
+  redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
+  description     = "An externally managed VPN gateway"
+  interface {
+    id         = 0
+    ip_address = "8.8.8.8"
+  }
+}
+
+resource "google_compute_router" "foobar" {
+  name    = "%[2]s"
+  region  = google_compute_subnetwork.foobar.region
+  network = google_compute_network.foobar.self_link
+  bgp {
+    asn = 64514
+  }
+}
+
+resource "google_compute_vpn_tunnel" "foobar" {
+  name                            = "tf-test-%[1]s"
+  region                          = google_compute_subnetwork.foobar.region
+  vpn_gateway                     = google_compute_ha_vpn_gateway.foobar.id
+  peer_external_gateway           = google_compute_external_vpn_gateway.external_gateway.id
+  peer_external_gateway_interface = 0  
+  shared_secret_wo                = "This is another secret, but still write only"
+  shared_secret_wo_version        = 2
+  router                          = google_compute_router.foobar.self_link
   vpn_gateway_interface           = 0  
 }
 `, suffix, router)

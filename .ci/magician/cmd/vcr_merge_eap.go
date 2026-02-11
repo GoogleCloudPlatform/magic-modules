@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"magician/exec"
-	"magician/github"
 	"magician/source"
 	"os"
 
@@ -26,11 +25,6 @@ var vcrMergeEapCmd = &cobra.Command{
 		clNumber := args[0]
 		fmt.Println("CL number:", clNumber)
 
-		githubToken, ok := os.LookupEnv("GITHUB_TOKEN_CLASSIC")
-		if !ok {
-			return fmt.Errorf("did not provide GITHUB_TOKEN_CLASSIC environment variable")
-		}
-
 		baseBranch := os.Getenv("BASE_BRANCH")
 		if baseBranch == "" {
 			return fmt.Errorf("environment variable BASE_BRANCH is empty")
@@ -41,12 +35,11 @@ var vcrMergeEapCmd = &cobra.Command{
 			return fmt.Errorf("error creating Runner: %w", err)
 		}
 
-		gh := github.NewClient(githubToken)
-		return execVCRMergeEAP(gh, clNumber, baseBranch, rnr)
+		return execVCRMergeEAP(clNumber, baseBranch, rnr)
 	},
 }
 
-func execVCRMergeEAP(gh GithubClient, clNumber, baseBranch string, runner source.Runner) error {
+func execVCRMergeEAP(clNumber, baseBranch string, runner source.Runner) error {
 	head := "auto-cl-" + clNumber
 	mergeCassettes("gs://ci-vcr-cassettes/private", baseBranch, fmt.Sprintf("refs/heads/%s", head), runner)
 	return nil

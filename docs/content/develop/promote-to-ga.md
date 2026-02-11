@@ -26,7 +26,7 @@ For more information about types of resources and the generation process overall
 
 ## Promote fields and resources
 
-{{< tabs "resources" >}}
+{{% tabs "resources" %}}
 {{< tab "MMv1" >}}
 1. Remove `min_version: 'beta'` from the resource's or field's configuration in `ResourceName.yaml`.
 2. If necessary, remove version guards from resource-level `custom_code`.
@@ -46,7 +46,7 @@ For more information about types of resources and the generation process overall
    - For other fields, expanders and flatteners
    - Any other resource-specific code
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 ## Promote tests
 
@@ -65,7 +65,7 @@ For handwritten resources, modify the documentation as appropriate for your chan
 3. Add `Beta` as an annotation on any fields or subfields that remained beta-only. For example:
 
    ```markdown
-   * `FIELD_NAME` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) FIELD_DESCRIPTION
+   * `FIELD_NAME` - (Optional, [Beta](../guides/provider_versions.html.markdown)) FIELD_DESCRIPTION
    ```
 
    Replace `FIELD_NAME` and `FIELD_DESCRIPTION` with the field's name and description.

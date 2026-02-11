@@ -1,0 +1,30 @@
+resource "google_bigtable_instance" "instance" {
+  name = "{{index $.Vars "instance_name"}}"
+  cluster {
+    cluster_id   = "cluster-1"
+    zone         = "us-east1-b"
+    num_nodes    = 1
+    storage_type = "HDD"
+  }
+
+  deletion_protection  = false
+}
+
+resource "google_bigtable_table" "table" {
+  name          = "{{index $.Vars "table_name"}}"
+  instance_name = google_bigtable_instance.instance.name
+
+  column_family {
+	family = "CF"
+  }
+}
+
+resource "google_bigtable_schema_bundle" "{{$.PrimaryResourceId}}" {
+  schema_bundle_id = "{{index $.Vars "schema_bundle_name"}}"
+  instance         = google_bigtable_instance.instance.name
+  table            = google_bigtable_table.table.name
+
+  proto_schema {
+    proto_descriptors = filebase64("test-fixtures/proto_schema_bundle.pb")
+  }
+}

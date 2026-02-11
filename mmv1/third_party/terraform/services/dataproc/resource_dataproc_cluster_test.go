@@ -352,6 +352,41 @@ func TestAccDataprocCluster_withMetadataAndTags(t *testing.T) {
 	})
 }
 
+func TestAccDataprocCluster_withResourceManagerTags(t *testing.T) {
+	t.Parallel()
+
+	var cluster dataproc.Cluster
+	pid := envvar.GetTestProjectFromEnv()
+	projectNumber := envvar.GetTestProjectNumberFromEnv()
+	rnd := acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+	// TODO: remove this IAM binding once tagUser permissions are present in Dataproc Service Agent role.
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: fmt.Sprintf("serviceAccount:service-%s@dataproc-accounts.iam.gserviceaccount.com", projectNumber),
+			Role:   "roles/resourcemanager.tagUser",
+		},
+	})
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_withResourceManagerTags(pid, rnd, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.basic", &cluster),
+
+					testAccCheckDataprocClusterResourceManagerTags(t, "google_dataproc_cluster.basic"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDataprocCluster_withMinNumInstances(t *testing.T) {
 	t.Parallel()
 
@@ -596,6 +631,108 @@ func TestAccDataprocCluster_spotWithInstanceFlexibilityPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr("google_dataproc_cluster.spot_with_instance_flexibility_policy", "cluster_config.0.preemptible_worker_config.0.preemptibility", "SPOT"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.spot_with_instance_flexibility_policy", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n2d-standard-2"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.spot_with_instance_flexibility_policy", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.rank", "3"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataprocCluster_allInstanceFlexibilityPolicy(t *testing.T) {
+	t.Parallel()
+
+	rnd := acctest.RandString(t, 10)
+	expectedMasterMachines := []string{"n2d-standard-2", "e2-standard-2"}
+	expectedWorkerMachines := []string{"n2d-standard-2", "e2-standard-2"}
+	expectedPreemptibleWorkerMachines := []string{"n2d-standard-2", "e2-standard-2"}
+	var cluster dataproc.Cluster
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_allInstanceFlexibilityPolicy(rnd),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.all_instance_flexibility_policy", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.master_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n2d-standard-2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n2d-standard-2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n2d-standard-2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.master_config.0.instance_flexibility_policy.0.instance_selection_list.0.rank", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.rank", "2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.rank", "1"),
+					resource.TestCheckResourceAttrWith("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.master_config.0.instance_flexibility_policy.0.instance_selection_results.0.machine_type", validateMachineTypeExpected(expectedMasterMachines)),
+					resource.TestCheckResourceAttrWith("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_results.0.machine_type", validateMachineTypeExpected(expectedWorkerMachines)),
+					resource.TestCheckResourceAttrWith("google_dataproc_cluster.all_instance_flexibility_policy", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_results.0.machine_type", validateMachineTypeExpected(expectedPreemptibleWorkerMachines)),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataprocCluster_masterInstanceFlexibilityPolicy(t *testing.T) {
+	t.Parallel()
+
+	rnd := acctest.RandString(t, 10)
+	expectedMasterMachines := []string{"n2d-standard-2", "e2-standard-2"}
+	var cluster dataproc.Cluster
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_masterInstanceFlexibilityPolicy(rnd),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.master_instance_flexibility_policy", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.master_instance_flexibility_policy", "cluster_config.0.master_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n2d-standard-2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.master_instance_flexibility_policy", "cluster_config.0.master_config.0.instance_flexibility_policy.0.instance_selection_list.0.rank", "1"),
+					resource.TestCheckResourceAttrWith("google_dataproc_cluster.master_instance_flexibility_policy", "cluster_config.0.master_config.0.instance_flexibility_policy.0.instance_selection_results.0.machine_type", validateMachineTypeExpected(expectedMasterMachines)),
+				),
+			},
+		},
+	})
+}
+
+// validateMachineTypeExpected returns a function that checks if the given machineTypeURI string
+// corresponds to one of the exact machine type names in the expectedMachineTypes list.
+func validateMachineTypeExpected(expectedMachineTypes []string) func(string) error {
+	return func(machineTypeURI string) error {
+		if machineTypeURI == "" {
+			return fmt.Errorf("expected a machine type URI, but got an empty string")
+		}
+
+		// Extract the machine type name from the URI
+		// Example URI: https://www.googleapis.com/compute/v1/projects/PROJECT/zones/ZONE/machineTypes/n2-standard-2
+		parts := strings.Split(machineTypeURI, "/")
+		machineType := parts[len(parts)-1]
+
+		for _, expected := range expectedMachineTypes {
+			if machineType == expected {
+				return nil // Match found: The selected machine type is one of the expected types.
+			}
+		}
+		return fmt.Errorf("selected machine type %q (from URI %q) is not one of the expected machine types: %v", machineType, machineTypeURI, expectedMachineTypes)
+	}
+}
+
+func TestAccDataprocCluster_workerInstanceFlexibilityPolicy(t *testing.T) {
+	t.Parallel()
+
+	rnd := acctest.RandString(t, 10)
+	expectedWorkerMachines := []string{"n2d-standard-2", "e2-standard-2"}
+	var cluster dataproc.Cluster
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_workerInstanceFlexibilityPolicy(rnd),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.worker_instance_flexibility_policy", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.worker_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n2d-standard-2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.worker_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.rank", "1"),
+					resource.TestCheckResourceAttrWith("google_dataproc_cluster.worker_instance_flexibility_policy", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_results.0.machine_type", validateMachineTypeExpected(expectedWorkerMachines)),
 				),
 			},
 		},
@@ -933,6 +1070,69 @@ func TestAccDataprocCluster_withLifecycleConfigAutoDeletion(t *testing.T) {
 	})
 }
 
+func TestAccDataprocCluster_withLifecycleConfigIdleStopTtl(t *testing.T) {
+	t.Parallel()
+
+	rnd := acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+	var cluster dataproc.Cluster
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_withLifecycleConfigIdleStopTtl(rnd, "600s", subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_lifecycle_config", &cluster),
+				),
+			},
+			{
+				Config: testAccDataprocCluster_withLifecycleConfigIdleStopTtl(rnd, "610s", subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_lifecycle_config", &cluster),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataprocCluster_withLifecycleConfigAutoStop(t *testing.T) {
+	// Uses time.Now
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	rnd := acctest.RandString(t, 10)
+	now := time.Now()
+	fmtString := "2006-01-02T15:04:05.072Z"
+	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+
+	var cluster dataproc.Cluster
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_withLifecycleConfigAutoStopTime(rnd, now.Add(time.Hour*10).Format(fmtString), subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_lifecycle_config", &cluster),
+				),
+			},
+			{
+				Config: testAccDataprocCluster_withLifecycleConfigAutoStopTime(rnd, now.Add(time.Hour*20).Format(fmtString), subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_lifecycle_config", &cluster),
+				),
+			},
+		},
+	})
+}
 func TestAccDataprocCluster_withLabels(t *testing.T) {
 	t.Parallel()
 
@@ -1100,6 +1300,64 @@ func TestAccDataprocCluster_withKerberos(t *testing.T) {
 	})
 }
 
+func TestAccDataprocCluster_withIdentityConfig(t *testing.T) {
+	t.Parallel()
+
+	rnd := acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+
+	var cluster dataproc.Cluster
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_withIdentityConfig(rnd, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.identity_config", &cluster),
+				),
+			},
+		},
+	})
+}
+
+// Test updating identity_config.user_service_account_mapping field
+func TestAccDataprocCluster_updateIdentityConfigUserMapping(t *testing.T) {
+	t.Parallel()
+
+	rnd := acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+
+	var cluster dataproc.Cluster
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_updateIdentityConfig(rnd, subnetworkName, "bob@company.com", "bob-sa@iam.gserviceaccount.com"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.identity_config_user_mapping", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.identity_config_user_mapping", "cluster_config.0.security_config.0.identity_config.0.user_service_account_mapping.bob@company.com", "bob-sa@iam.gserviceaccount.com"),
+				),
+			},
+			{
+				Config: testAccDataprocCluster_updateIdentityConfig(rnd, subnetworkName, "alice@company.com", "alice-sa@iam.gserviceaccount.com"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.identity_config_user_mapping", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.identity_config_user_mapping", "cluster_config.0.security_config.0.identity_config.0.user_service_account_mapping.alice@company.com", "alice-sa@iam.gserviceaccount.com"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDataprocCluster_withAutoscalingPolicy(t *testing.T) {
 	t.Parallel()
 
@@ -1164,6 +1422,76 @@ func TestAccDataprocCluster_withMetastoreConfig(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccDataprocCluster_withClusterTier(t *testing.T) {
+	t.Parallel()
+
+	var cluster dataproc.Cluster
+	rnd := acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				// Set tier to CLUSTER_TIER_STANDARD
+				Config: testAccDataprocCluster_withClusterTier(rnd, subnetworkName, "CLUSTER_TIER_STANDARD"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.tier_cluster", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tier_cluster", "cluster_config.0.cluster_tier", "CLUSTER_TIER_STANDARD"),
+				),
+			},
+			{
+				// Set tier to CLUSTER_TIER_PREMIUM
+				Config: testAccDataprocCluster_withClusterTier(rnd, subnetworkName, "CLUSTER_TIER_PREMIUM"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.tier_cluster", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.tier_cluster", "cluster_config.0.cluster_tier", "CLUSTER_TIER_PREMIUM"),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataprocCluster_withClusterTier(rnd, subnetworkName, tier string) string {
+	tierConfig := ""
+	if tier != "" {
+		tierConfig = fmt.Sprintf(`cluster_tier = "%s"`, tier)
+	}
+	clusterName := fmt.Sprintf("tf-test-dproc-tier-%s", rnd)
+	bucketName := clusterName + "-temp-bucket"
+
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = "true"
+}
+
+resource "google_dataproc_cluster" "tier_cluster" {
+  name   = "%s"
+  region = "us-central1"
+
+  cluster_config {
+	%s
+	staging_bucket = google_storage_bucket.bucket.name
+	temp_bucket = google_storage_bucket.bucket.name
+
+    software_config {
+      image_version = "2.3.4-debian12"
+    }
+
+    gce_cluster_config {
+      subnetwork = "%s"
+    }
+  }
+}
+`, bucketName, clusterName, tierConfig, subnetworkName)
 }
 
 func testAccCheckDataprocClusterDestroy(t *testing.T) resource.TestCheckFunc {
@@ -1394,6 +1722,40 @@ func testAccCheckDataprocClusterExists(t *testing.T, n string, cluster *dataproc
 	}
 }
 
+func testAccCheckDataprocClusterResourceManagerTags(t *testing.T, n string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Terraform resource Not found: %s", n)
+		}
+
+		// Find the tags and validate key/value formats.
+		tagPrefix := "cluster_config.0.gce_cluster_config.0.resource_manager_tags."
+		keyRegex := regexp.MustCompile(`^tagKeys/`)
+		valueRegex := regexp.MustCompile(`^tagValues/`)
+
+		foundTags := 0
+		for attr, value := range rs.Primary.Attributes {
+			if strings.HasPrefix(attr, tagPrefix) && !strings.HasSuffix(attr, ".#") && !strings.HasSuffix(attr, ".%") {
+				foundTags++
+				key := strings.TrimPrefix(attr, tagPrefix)
+
+				if !keyRegex.MatchString(key) {
+					return fmt.Errorf("resource manager tag key %q does not have expected prefix 'tagKeys/'", key)
+				}
+				if !valueRegex.MatchString(value) {
+					return fmt.Errorf("resource manager tag value %q for key %q does not have expected prefix 'tagValues/'", value, key)
+				}
+			}
+		}
+
+		if foundTags != 2 {
+			return fmt.Errorf("expected to find 2 resource manager tags, but found %d", foundTags)
+		}
+
+		return nil
+	}
+}
 func testAccCheckDataproc_missingZoneGlobalRegion1(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "basic" {
@@ -1676,6 +2038,45 @@ resource "google_dataproc_cluster" "basic" {
   }
 }
 `, rnd, subnetworkName)
+}
+
+func testAccDataprocCluster_withResourceManagerTags(pid, rnd, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_tags_tag_key" "tag_key" {
+  parent = "projects/%s"
+  short_name = "key-%s"
+}
+
+resource "google_tags_tag_value" "tag_value" {
+  parent = "tagKeys/${google_tags_tag_key.tag_key.name}"
+  short_name = "val-%s"
+}
+
+resource "google_tags_tag_key" "tag_key_2" {
+  parent = "projects/%s"
+  short_name = "key-2-%s"
+}
+
+resource "google_tags_tag_value" "tag_value_2" {
+  parent = "tagKeys/${google_tags_tag_key.tag_key_2.name}"
+  short_name = "val-2-%s"
+}
+
+resource "google_dataproc_cluster" "basic" {
+  name   = "tf-test-dproc-%s"
+  region = "us-central1"
+
+  cluster_config {
+    gce_cluster_config {
+      subnetwork = "%s"
+      resource_manager_tags = {
+		"${google_tags_tag_key.tag_key.id}" = "${google_tags_tag_value.tag_value.id}",
+		"${google_tags_tag_key.tag_key_2.id}" = "${google_tags_tag_value.tag_value_2.id}"
+      }
+    }
+  }
+}
+`, pid, rnd, rnd, pid, rnd, rnd, rnd, subnetworkName)
 }
 
 func testAccDataprocCluster_withMinNumInstances(rnd, subnetworkName string) string {
@@ -2056,7 +2457,148 @@ resource "google_dataproc_cluster" "spot_secondary" {
 }
 	`, rnd, subnetworkName)
 }
+func testAccDataprocCluster_allInstanceFlexibilityPolicy(rnd string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "all_instance_flexibility_policy" {
+  name   = "tf-test-dproc-%s"
+  region = "us-central1"
 
+  cluster_config {
+
+    master_config {
+      num_instances = "1"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+			instance_flexibility_policy {
+				instance_selection_list {
+					machine_types = ["n2d-standard-2"]
+					rank          = 1
+				}
+				instance_selection_list {
+					machine_types = ["e2-standard-2"]
+					rank          = 2
+				}
+			}
+    }
+
+    worker_config {
+      num_instances = "2"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+      instance_flexibility_policy {
+				instance_selection_list {
+					machine_types = ["n2d-standard-2"]
+					rank          = 2
+				}
+				instance_selection_list {
+					machine_types = ["e2-standard-2"]
+					rank          = 1
+				}
+			}
+    }
+
+    preemptible_worker_config {
+      num_instances = "3"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+      instance_flexibility_policy {
+				instance_selection_list {
+					machine_types = ["n2d-standard-2"]
+					rank          = 1
+				}
+				instance_selection_list {
+					machine_types = ["e2-standard-2"]
+					rank          = 2
+				}
+			}
+    }
+  }
+}
+	`, rnd)
+}
+func testAccDataprocCluster_workerInstanceFlexibilityPolicy(rnd string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "worker_instance_flexibility_policy" {
+  name   = "tf-test-dproc-%s"
+  region = "us-central1"
+
+  cluster_config {
+
+    master_config {
+      num_instances = "1"
+      machine_type  = "e2-medium"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
+
+    worker_config {
+      num_instances = "2"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+      instance_flexibility_policy {
+				instance_selection_list {
+					machine_types = ["n2d-standard-2"]
+					rank          = 1
+				}
+				instance_selection_list {
+					machine_types = ["e2-standard-2"]
+					rank          = 3
+				}
+			}
+    }
+  }
+}
+	`, rnd)
+}
+
+func testAccDataprocCluster_masterInstanceFlexibilityPolicy(rnd string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "master_instance_flexibility_policy" {
+  name   = "tf-test-dproc-%s"
+  region = "us-central1"
+
+  cluster_config {
+
+    master_config {
+      num_instances = "1"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+			instance_flexibility_policy {
+				instance_selection_list {
+					machine_types = ["n2d-standard-2"]
+					rank          = 1
+				}
+				instance_selection_list {
+					machine_types = ["e2-standard-2"]
+					rank          = 2
+				}
+			}
+    }
+
+    worker_config {
+      num_instances = "2"
+      machine_type  = "e2-standard-2"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
+
+    preemptible_worker_config {
+      num_instances = "3"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
+  }
+}
+	`, rnd)
+}
 func testAccDataprocCluster_spotWithInstanceFlexibilityPolicy(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "spot_with_instance_flexibility_policy" {
@@ -2433,6 +2975,44 @@ resource "google_dataproc_cluster" "with_lifecycle_config" {
 `, rnd, subnetworkName, tm)
 }
 
+func testAccDataprocCluster_withLifecycleConfigIdleStopTtl(rnd, tm, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "with_lifecycle_config" {
+  name   = "tf-test-dproc-%s"
+  region = "us-central1"
+
+  cluster_config {
+    gce_cluster_config {
+      subnetwork = "%s"
+    }
+
+    lifecycle_config {
+      idle_stop_ttl = "%s"
+    }
+  }
+}
+`, rnd, subnetworkName, tm)
+}
+
+func testAccDataprocCluster_withLifecycleConfigAutoStopTime(rnd, tm, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "with_lifecycle_config" {
+ name   = "tf-test-dproc-%s"
+ region = "us-central1"
+
+ cluster_config {
+  gce_cluster_config {
+     subnetwork = "%s"
+   }
+
+   lifecycle_config {
+     auto_stop_time = "%s"
+   }
+ }
+}
+`, rnd, subnetworkName, tm)
+}
+
 func testAccDataprocCluster_withServiceAcc(sa, rnd, subnetworkName string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
@@ -2639,6 +3219,57 @@ resource "google_dataproc_cluster" "kerb" {
   }
 }
 `, rnd, rnd, rnd, subnetworkName, kmsKey)
+}
+
+func testAccDataprocCluster_withIdentityConfig(rnd, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "identity_config" {
+  name   = "tf-test-dataproc-identity-%s"
+  region = "us-central1"
+  cluster_config {
+    gce_cluster_config {
+      subnetwork = "%s"
+    }
+    security_config {
+      identity_config {
+        user_service_account_mapping = {
+          "bob@company.com" = "bob-sa@iam.gserviceaccouts.com"
+        }
+      }
+    }
+  }
+}
+`, rnd, subnetworkName)
+}
+
+func testAccDataprocCluster_updateIdentityConfig(rnd, subnetworkName, user, sa string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "identity_config_user_mapping" {
+  name   = "tf-test-dataproc-update-identity-%s"
+  region = "us-central1"
+
+  cluster_config {
+	gce_cluster_config {
+	  subnetwork = "%s"
+	}
+	security_config {
+	  identity_config {
+		user_service_account_mapping = {
+		  "%s" = "%s"
+		}
+	  }
+	}
+	master_config {
+	  num_instances = 1
+	  machine_type  = "n1-standard-2"
+	}
+	worker_config {
+	  num_instances = 2
+	  machine_type  = "n1-standard-2"
+	}
+  }
+}
+`, rnd, subnetworkName, user, sa)
 }
 
 func testAccDataprocCluster_withAutoscalingPolicy(rnd, subnetworkName string) string {

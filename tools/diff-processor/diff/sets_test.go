@@ -1,10 +1,15 @@
 package diff
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 )
+
+func removeZeroPadding(s string) string {
+	return strings.ReplaceAll(s, ".0", "")
+}
 
 func TestRemoveZeroPadding(t *testing.T) {
 	for _, tc := range []struct {

@@ -8,7 +8,7 @@ resource "google_redis_instance" "{{$.PrimaryResourceId}}" {
 
   authorized_network = data.google_compute_network.redis-network.id
 
-  redis_version     = "REDIS_4_0"
+  redis_version     = "REDIS_7_2"
   display_name      = "Terraform Test Instance"
   reserved_ip_range = "192.168.0.0/29"
 

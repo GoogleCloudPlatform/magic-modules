@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccComputeFirewall_update(t *testing.T) {
@@ -311,6 +312,107 @@ func TestAccComputeFirewall_moduleOutput(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccComputeFirewall_resourceManagerTags(t *testing.T) {
+	t.Parallel()
+
+	org := envvar.GetTestOrgFromEnv(t)
+
+	networkName := fmt.Sprintf("tf-test-firewall-%s", acctest.RandString(t, 10))
+	firewallName := fmt.Sprintf("tf-test-firewall-%s", acctest.RandString(t, 10))
+
+	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-firewall-tagkey", "organizations/"+org, make(map[string]interface{}))
+	sharedTagkey, _ := tagKeyResult["shared_tag_key"]
+	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-firewall-tagvalue", sharedTagkey, org)
+
+	context := map[string]interface{}{
+		"network_name":  networkName,
+		"firewall_name": firewallName,
+		"tag_key_id":    tagKeyResult["name"],
+		"tag_value_id":  tagValueResult["name"],
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeFirewallDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeFirewall_resourceManagerTags(context),
+			},
+			{
+				ResourceName:            "google_compute_firewall.acc_firewall_with_resource_manager_tags",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"params"}, // we don't read tags back. The whole params block is input only
+			},
+		},
+	})
+}
+
+func TestAccComputeFirewall_sourceRangesIpv6(t *testing.T) {
+	t.Parallel()
+
+	networkName := fmt.Sprintf("tf-test-firewall-%s", acctest.RandString(t, 10))
+	firewallName := fmt.Sprintf("tf-test-firewall-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeFirewallDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeFirewall_sourceRangesIpv6(networkName, firewallName),
+			},
+			{
+				ResourceName:      "google_compute_firewall.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeFirewall_sourceRangesIpv6(networkName, firewallName),
+			},
+			{
+				ResourceName:      "google_compute_firewall.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeFirewall_sourceRangesIpv6Update(networkName, firewallName),
+			},
+			{
+				ResourceName:      "google_compute_firewall.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeFirewall_resourceManagerTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_network" "foobar" {
+  name                    = "%{network_name}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_firewall" "acc_firewall_with_resource_manager_tags" {
+  name        = "%{firewall_name}"
+  description = "Resource created for Terraform acceptance testing"
+  network     = google_compute_network.foobar.name
+  source_tags = ["foo"]
+
+  allow {
+    protocol = "icmp"
+  }
+  params {
+	resource_manager_tags = {
+	  "%{tag_key_id}" = "%{tag_value_id}"
+	}
+  }
+ }
+`, context)
 }
 
 func testAccComputeFirewall_basic(network, firewall string) string {
@@ -622,4 +724,48 @@ resource "google_compute_firewall" "foobar" {
   }
 }
 `, network, network, network, firewall)
+}
+
+func testAccComputeFirewall_sourceRangesIpv6(network, firewall string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_firewall" "foobar" {
+  name        = "%s"
+  description = "Resource created for Terraform acceptance testing"
+  network     = google_compute_network.foobar.name
+  source_tags = ["foo"]
+
+  source_ranges      = ["2001:db8:0000:0:00::/32"]
+
+  allow {
+    protocol = "all"
+  }
+}
+`, network, firewall)
+}
+
+func testAccComputeFirewall_sourceRangesIpv6Update(network, firewall string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_firewall" "foobar" {
+  name        = "%s"
+  description = "Resource created for Terraform acceptance testing"
+  network     = google_compute_network.foobar.name
+  source_tags = ["foo"]
+
+  source_ranges      = ["2001:db8:0::/32"]
+
+  allow {
+    protocol = "all"
+  }
+}
+`, network, firewall)
 }

@@ -1,27 +1,30 @@
-var WorkbenchInstanceProvidedLabels = []string{
-	"consumer-project-id",
-	"consumer-project-number",
-	"notebooks-product",
-	"resource-name",
+var metadataDefaults = map[string]string{
+        "enable-jupyterlab4": "true",
+    }
+
+var WorkbenchInstanceSettableUnmodifiableDefaultMetadata = []string{
+	"install-monitoring-agent",
+	"serial-port-logging-enable",
+	"report-notebook-metrics",
 }
 
-func WorkbenchInstanceLabelsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	// Suppress diffs for the labels
-	for _, label := range WorkbenchInstanceProvidedLabels {
-		if strings.Contains(k, label) && new == "" {
-			return true
-		}
-	}
-
-	// Let diff be determined by labels (above)
-	if strings.Contains(k, "labels.%") {
-		return true
-	}
-
-	// For other keys, don't suppress diff.
-	return false
+var WorkbenchInstanceEUCSettableUnmodifiableDefaultMetadata = []string{
+	"post-startup-script",
+	"post-startup-script-behavior",
 }
 
+var WorkbenchInstanceEUCProvidedAdditionalMetadata = []string{
+	"enable-oslogin",
+	"disable-ssh",
+	"ssh-keys",
+	"block-project-ssh-keys",
+	"startup-script",
+	"startup-script-url",
+	"gce-container-declaration",
+	"gce-software-declaration",
+	"serial-port-enable",
+	"euc-enabled",
+}
 
 var WorkbenchInstanceProvidedMetadata = []string{
     "agent-health-check-interval-seconds",
@@ -41,13 +44,13 @@ var WorkbenchInstanceProvidedMetadata = []string{
     "dataproc-region",
     "dataproc-service-account",
     "disable-check-xsrf",
+    "enable-euc",
     "framework",
     "generate-diagnostics-bucket",
     "generate-diagnostics-file",
     "generate-diagnostics-options",
     "google-logging-enabled",
     "image-url",
-    "install-monitoring-agent",
     "install-nvidia-driver",
     "installed-extensions",
     "instance-region",
@@ -64,12 +67,10 @@ var WorkbenchInstanceProvidedMetadata = []string{
     "proxy-user-mail",
     "report-container-health",
     "report-event-url",
-    "report-notebook-metrics",
     "report-system-health",
     "report-system-status",
     "resource-url",
     "restriction",
-    "serial-port-logging-enable",
     "service-account-mode",
     "shutdown-script",
     "title",
@@ -93,6 +94,32 @@ func WorkbenchInstanceMetadataDiffSuppress(k, old, new string, d *schema.Resourc
 			return true
 		}
 	}
+	
+	if d.Get("enable_managed_euc").(bool){
+		for _, metadata := range WorkbenchInstanceEUCProvidedAdditionalMetadata {
+			if key == metadata {
+				return true
+			}
+		}
+
+		for _, metadata := range WorkbenchInstanceEUCSettableUnmodifiableDefaultMetadata {
+			if key == metadata && new == "" {
+				return true
+			}
+		}
+	}
+
+	for _, metadata := range WorkbenchInstanceSettableUnmodifiableDefaultMetadata {
+		if strings.Contains(k, metadata) && new == "" {
+			return true
+		}
+	}
+
+	if defaultValue, exists := metadataDefaults[key]; exists {
+        if new == "" && old == defaultValue {
+            return true
+        }
+    }
 
 	// Let diff be determined by metadata
 	if strings.Contains(k, "gce_setup.0.metadata.%") {
@@ -142,7 +169,7 @@ func WorkbenchInstanceAcceleratorDiffSuppress(_, _, _ string, d *schema.Resource
 	return false
   }
 
-{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 // waitForWorkbenchInstanceActive waits for an workbench instance to become "ACTIVE"
 func waitForWorkbenchInstanceActive(d *schema.ResourceData, config *transport_tpg.Config, timeout time.Duration) error {
 	return retry.Retry(timeout, func() *retry.RetryError {
@@ -189,7 +216,7 @@ func WorkbenchInstanceKmsDiffSuppress(_, old, new string, _ *schema.ResourceData
 	return false
 }
 
-{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 func waitForWorkbenchOperation(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string, response map[string]interface{}) error {
 	var opRes map[string]interface{}
 	err := WorkbenchOperationWaitTimeWithResponse(
@@ -229,6 +256,7 @@ func resizeWorkbenchInstanceDisk(config *transport_tpg.Config, d *schema.Resourc
 	  UserAgent: userAgent,
 	  Body: diskObj,
 	  Timeout: d.Timeout(schema.TimeoutUpdate),
+	  ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsWorkbenchQueueError},
 	})
   
 	if err != nil {
@@ -266,3 +294,37 @@ func mergeMaps(oldMap, newMap map[string]interface{}) map[string]string {
 	return modifiedMap
 }
 {{- end }}
+
+
+func workbenchMetadataCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	if diff.HasChange("gce_setup.0.metadata") {
+		o, n := diff.GetChange("gce_setup.0.metadata")
+		oldMetadata := o.(map[string]interface{})
+		newMetadata := n.(map[string]interface{})
+
+		unmodifiableKeys := append([]string{}, WorkbenchInstanceSettableUnmodifiableDefaultMetadata...)
+        if v, ok := diff.GetOk("enable_managed_euc"); ok && v.(bool) {
+            unmodifiableKeys = append(unmodifiableKeys, WorkbenchInstanceEUCSettableUnmodifiableDefaultMetadata...)
+        }
+
+		for _, key := range unmodifiableKeys {
+			oldValue, oldOk := oldMetadata[key]
+			newValue, newOk := newMetadata[key]
+
+			// Condition to force new:
+			// 1. The key exists in both old and new metadata AND their values differ.
+			// 2. The key exists in new but not in old (meaning it was added).
+			//
+			// The key exists in old but not in new (meaning it was removed) is ignored.
+			if (oldOk && newOk && oldValue != newValue) ||
+				(!oldOk && newOk) {
+				// If a change is detected for this specific key, force a new resource and stop checking.
+				if err := diff.ForceNew("gce_setup.0.metadata"); err != nil {
+					return err
+				}
+				return nil // Return nil immediately after forcing new
+			}
+		}
+	}
+	return nil
+}

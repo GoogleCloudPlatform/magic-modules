@@ -264,7 +264,7 @@ func resource{{$.PathType}}Create(d *schema.ResourceData, meta interface{}) erro
 {{ end }}
 
 {{- if $.UseTerraformID }}
-{{/* TODO(magic-modules-eng): When the DCL can correctly handle IDs for regional/global splits, all resources
+{{/* TODO: When the DCL can correctly handle IDs for regional/global splits, all resources
 should be converted to use the DCL's ID method, so normalization can be uniform. */}}
 	id, err := {{ $.IDFunction }}(d, config, "{{$.ID}}")
 {{- else }}

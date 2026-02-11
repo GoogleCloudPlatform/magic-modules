@@ -39,14 +39,11 @@ timeouts:
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
-  operation:
-    full_url: 'selfLink'
   result:
     resource_inside_response: false
 collection_url_key: 'items'
 iam_policy:
   parent_resource_attribute: 'name'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   iam_conditions_request_type: 'QUERY_PARAM'
   allowed_iam_role: 'roles/compute.storageAdmin'
   import_format:

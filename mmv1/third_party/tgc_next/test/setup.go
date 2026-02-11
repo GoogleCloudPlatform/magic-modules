@@ -7,13 +7,11 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
-	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/hcl/v2/hclparse"
-	"github.com/hashicorp/hcl/v2/hclsyntax"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
 )
 
 type ResourceMetadata struct {
@@ -29,151 +27,244 @@ type CaiData struct {
 	CaiAsset caiasset.Asset `json:"cai_asset,omitempty"`
 }
 
+type NightlyRun struct {
+	MetadataByTestAndStep map[string]map[int]TgcMetadataPayload
+	Date                  time.Time
+}
+
+// The metadata for each step in one test
 type TgcMetadataPayload struct {
 	TestName         string                       `json:"test_name"`
+	StepNumber       int                          `json:"step_number"`
 	RawConfig        string                       `json:"raw_config"`
 	ResourceMetadata map[string]*ResourceMetadata `json:"resource_metadata"`
 	PrimaryResource  string                       `json:"primary_resource"`
+	CaiReadTime      time.Time                    `json:"cai_read_time"`
 }
 
 type ResourceTestData struct {
-	ParsedRawConfig  map[string]interface{} `json:"parsed_raw_config"`
+	ParsedRawConfig  map[string]any `json:"parsed_raw_config"`
 	ResourceMetadata `json:"resource_metadata"`
 }
 
+type StepTestData struct {
+	StepNumber       int
+	PrimaryResource  string
+	ResourceTestData map[string]ResourceTestData // key is resource address
+}
+
+type Resource struct {
+	Type       string         `json:"type"`
+	Name       string         `json:"name"`
+	Attributes map[string]any `json:"attributes"`
+}
+
+const (
+	ymdFormat   = "2006-01-02"
+	maxAttempts = 5
+)
+
 var (
-	TestsMetadata = make(map[string]TgcMetadataPayload)
+	TestsMetadata = make([]NightlyRun, maxAttempts)
 	setupDone     = false
 )
 
-func ReadTestsDataFromGcs() (map[string]TgcMetadataPayload, error) {
+func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 	if !setupDone {
 		bucketName := "cai_assets_metadata"
 		currentDate := time.Now()
+		ctx := context.Background()
 
-		for len(TestsMetadata) == 0 {
-			objectName := fmt.Sprintf("nightly_tests/%s/nightly_tests_meta.json", currentDate.Format("2006-01-02"))
-			log.Printf("Read object  %s from the bucket %s", objectName, bucketName)
+		var client *storage.Client
+		var bucket *storage.BucketHandle
+		var err error
 
-			ctx := context.Background()
-			client, err := storage.NewClient(ctx)
-			if err != nil {
-				return nil, fmt.Errorf("storage.NewClient: %v", err)
-			}
-			defer client.Close()
-
-			currentDate = currentDate.AddDate(0, 0, -1)
-
-			rc, err := client.Bucket(bucketName).Object(objectName).NewReader(ctx)
-			if err != nil {
-				if err == storage.ErrObjectNotExist {
-					log.Printf("Object '%s' in bucket '%s' does NOT exist.\n", objectName, bucketName)
-					continue
-				} else {
-					return nil, fmt.Errorf("Object(%q).NewReader: %v", objectName, err)
+		var allErrs error
+		retries := 0
+		for i := 0; i < len(TestsMetadata); i++ {
+			var metadata map[string]map[int]TgcMetadataPayload
+			if os.Getenv("WRITE_FILES") != "" {
+				filename := fmt.Sprintf("../../tests_metadata_%s.json", currentDate.Format(ymdFormat))
+				_, err := os.Stat(filename)
+				if !os.IsNotExist(err) {
+					metadata = readTestsDataFromLocalFile(filename)
 				}
 			}
-			defer rc.Close()
+			if metadata == nil {
+				if client == nil {
+					client, err = storage.NewClient(ctx)
+					if err != nil {
+						return nil, fmt.Errorf("storage.NewClient: %v", err)
+					}
+					defer client.Close()
+					bucket = client.Bucket(bucketName)
+				}
+				metadata, err = readTestsDataFromGCSForRun(ctx, currentDate, bucketName, bucket)
+				if os.Getenv("WRITE_FILES") != "" {
+					writeJSONFile(fmt.Sprintf("../../tests_metadata_%s.json", currentDate.Format(ymdFormat)), metadata)
+				}
 
-			data, err := io.ReadAll(rc)
-			if err != nil {
-				return nil, fmt.Errorf("io.ReadAll: %v", err)
+				if err != nil {
+					if allErrs == nil {
+						allErrs = fmt.Errorf("reading tests data from gcs: %v", err)
+					} else {
+						allErrs = fmt.Errorf("%v, %v", allErrs, err)
+					}
+				}
 			}
-
-			err = json.Unmarshal(data, &TestsMetadata)
-			if err != nil {
-				return nil, fmt.Errorf("json.Unmarshal: %v", err)
+			if metadata == nil {
+				// Keep looking until we find a date with metadata.
+				i--
+				retries++
+				if retries > maxAttempts {
+					// Stop looking when we find maxAttempts dates with no metadata.
+					return nil, fmt.Errorf("too many retries, %v", allErrs)
+				}
+			} else {
+				TestsMetadata[i] = NightlyRun{
+					MetadataByTestAndStep: metadata,
+					Date:                  currentDate,
+				}
 			}
+			currentDate = currentDate.AddDate(0, 0, -1)
 		}
 
-		// Uncomment this line to debug issues locally
-		// writeJSONFile("../../tests_metadata.json", TestsMetadata)
+		if allErrs != nil {
+			return nil, allErrs
+		}
 		setupDone = true
 	}
 	return TestsMetadata, nil
 }
 
-func prepareTestData(testName string) (map[string]ResourceTestData, string, error) {
+func readTestsDataFromGCSForRun(ctx context.Context, currentDate time.Time, bucketName string, bucket *storage.BucketHandle) (map[string]map[int]TgcMetadataPayload, error) {
+	metadata := make(map[string]map[int]TgcMetadataPayload)
+	objectName := fmt.Sprintf("nightly_tests/%s/nightly_tests_meta.json", currentDate.Format(ymdFormat))
+	log.Printf("Read object  %s from the bucket %s", objectName, bucketName)
+
+	rc, err := bucket.Object(objectName).NewReader(ctx)
+	if err != nil {
+		if err == storage.ErrObjectNotExist {
+			log.Printf("Object '%s' in bucket '%s' does NOT exist.\n", objectName, bucketName)
+			return nil, nil
+		} else {
+			return nil, fmt.Errorf("Object(%q).NewReader: %v", objectName, err)
+		}
+	}
+	defer rc.Close()
+
+	data, err := io.ReadAll(rc)
+	if err != nil {
+		return nil, fmt.Errorf("io.ReadAll: %v", err)
+	}
+
+	err = json.Unmarshal(data, &metadata)
+	if err != nil {
+		return nil, fmt.Errorf("json.Unmarshal: %v", err)
+	}
+
+	return metadata, nil
+}
+
+func readTestsDataFromLocalFile(filename string) map[string]map[int]TgcMetadataPayload {
+	metadata := make(map[string]map[int]TgcMetadataPayload, 0)
+	log.Printf("Read the the local file %s", filename)
+
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return nil
+	}
+
+	if err != nil {
+		return nil
+	}
+
+	err = json.Unmarshal(data, &metadata)
+	if err != nil {
+		return nil
+	}
+
+	return metadata
+}
+
+func getStepNumbers(testName string) ([]int, error) {
 	var err error
 	cacheMutex.Lock()
 	defer cacheMutex.Unlock()
 	TestsMetadata, err = ReadTestsDataFromGcs()
 	if err != nil {
-		return nil, "", err
+		return nil, err
 	}
 
-	testMetadata := TestsMetadata[testName]
-	resourceMetadata := testMetadata.ResourceMetadata
-	if len(resourceMetadata) == 0 {
-		log.Printf("Data of test is unavailable: %s", testName)
-		return nil, "", nil
-	}
-
-	rawTfFile := fmt.Sprintf("%s.tf", testName)
-	err = os.WriteFile(rawTfFile, []byte(testMetadata.RawConfig), 0644)
-	if err != nil {
-		return nil, "", fmt.Errorf("error writing to file %s: %#v", rawTfFile, err)
-	}
-	defer os.Remove(rawTfFile)
-
-	rawResourceConfigs, err := parseResourceConfigs(rawTfFile)
-	if err != nil {
-		return nil, "", fmt.Errorf("error parsing resource configs: %#v", err)
-	}
-
-	if len(rawResourceConfigs) == 0 {
-		return nil, "", fmt.Errorf("Test %s fails: raw config is unavailable", testName)
-	}
-
-	rawConfigMap := convertToConfigMap(rawResourceConfigs)
-
-	resourceTestData := make(map[string]ResourceTestData, 0)
-	for address, metadata := range resourceMetadata {
-		resourceTestData[address] = ResourceTestData{
-			ParsedRawConfig:  rawConfigMap[address],
-			ResourceMetadata: *metadata,
-		}
-	}
-
-	return resourceTestData, testMetadata.PrimaryResource, nil
-}
-
-type Resource struct {
-	Type       string                 `json:"type"`
-	Name       string                 `json:"name"`
-	Attributes map[string]interface{} `json:"attributes"`
-}
-
-// parseHCLBody recursively parses attributes and nested blocks from an HCL body.
-func parseHCLBody(body hcl.Body, filePath string) (
-	attributes map[string]interface{},
-	diags hcl.Diagnostics,
-) {
-	attributes = make(map[string]interface{})
-	var allDiags hcl.Diagnostics
-
-	if syntaxBody, ok := body.(*hclsyntax.Body); ok {
-		for _, attr := range syntaxBody.Attributes {
-			attributes[attr.Name] = true
-		}
-
-		for _, block := range syntaxBody.Blocks {
-			nestedAttr, diags := parseHCLBody(block.Body, filePath)
-			if diags.HasErrors() {
-				allDiags = append(allDiags, diags...)
+	stepNumbers := make([]int, 0)
+	for _, run := range TestsMetadata {
+		testMetadata, ok := run.MetadataByTestAndStep[testName]
+		if ok && len(testMetadata) > 0 {
+			for stepNumber := range testMetadata {
+				stepNumbers = append(stepNumbers, stepNumber)
 			}
-
-			attributes[block.Type] = nestedAttr
+			break
 		}
-	} else {
-		allDiags = append(allDiags, &hcl.Diagnostic{
-			Severity: hcl.DiagWarning,
-			Summary:  "Body type assertion to *hclsyntax.Body failed",
-			Detail:   fmt.Sprintf("Cannot directly parse attributes for body of type %T. Attribute parsing may be incomplete.", body),
-		})
+	}
+	return stepNumbers, nil
+}
+
+func prepareTestData(testName string, stepNumber int, retries int) (*StepTestData, error) {
+	var err error
+
+	var testMetadata map[int]TgcMetadataPayload
+
+	run := TestsMetadata[retries]
+	testMetadata, ok := run.MetadataByTestAndStep[testName]
+	if !ok {
+		log.Printf("Data of test is unavailable: %s", testName)
+		return nil, nil
 	}
 
-	return attributes, allDiags
+	log.Printf("Found metadata for %s from run on %s", testName, run.Date.Format(ymdFormat))
+
+	if stepMetadata, ok := testMetadata[stepNumber]; ok {
+		resourceMetadata := stepMetadata.ResourceMetadata
+
+		rawTfFile := fmt.Sprintf("%s_step%d.tf", testName, stepNumber)
+		err = os.WriteFile(rawTfFile, []byte(stepMetadata.RawConfig), 0644)
+		if err != nil {
+			return nil, fmt.Errorf("error writing to file %s: %#v", rawTfFile, err)
+		}
+		if os.Getenv("WRITE_FILES") == "" {
+			defer os.Remove(rawTfFile)
+		}
+
+		rawResourceConfigs, err := parseResourceConfigs(rawTfFile)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing resource configs: %#v", err)
+		}
+
+		if len(rawResourceConfigs) == 0 {
+			return nil, fmt.Errorf("test %s fails: raw config is unavailable", testName)
+		}
+
+		if os.Getenv("WRITE_FILES") != "" {
+			writeJSONFile(fmt.Sprintf("%s_attrs", testName), rawResourceConfigs)
+		}
+
+		rawConfigMap := convertToConfigMap(rawResourceConfigs)
+
+		resourceTestData := make(map[string]ResourceTestData, 0)
+		for address, metadata := range resourceMetadata {
+			resourceTestData[address] = ResourceTestData{
+				ParsedRawConfig:  rawConfigMap[address],
+				ResourceMetadata: *metadata,
+			}
+		}
+		return &StepTestData{
+			StepNumber:       stepNumber,
+			PrimaryResource:  stepMetadata.PrimaryResource,
+			ResourceTestData: resourceTestData,
+		}, nil
+	}
+
+	return nil, nil
 }
 
 // Parses a Terraform configuation file written with HCL
@@ -183,51 +274,29 @@ func parseResourceConfigs(filePath string) ([]Resource, error) {
 		return nil, fmt.Errorf("failed to read file %s: %s", filePath, err)
 	}
 
-	parser := hclparse.NewParser()
-	hclFile, diags := parser.ParseHCL(src, filePath)
-	if diags.HasErrors() {
-		return nil, fmt.Errorf("parse HCL: %w", diags)
-	}
-
-	if hclFile == nil {
-		return nil, fmt.Errorf("parsed HCL file %s is nil cannot proceed", filePath)
+	topLevel, err := parseHCLBytes(src, filePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse hcl bytes: %s", err)
 	}
 
 	var allParsedResources []Resource
-
-	for _, block := range hclFile.Body.(*hclsyntax.Body).Blocks {
-		if block.Type == "resource" {
-			if len(block.Labels) != 2 {
-				log.Printf("Skipping address block with unexpected number of labels: %v", block.Labels)
-				continue
-			}
-
-			resType := block.Labels[0]
-			resName := block.Labels[1]
-			attrs, procDiags := parseHCLBody(block.Body, filePath)
-
-			if procDiags.HasErrors() {
-				log.Printf("Diagnostics while processing address %s.%s body in %s:", resType, resName, filePath)
-				for _, diag := range procDiags {
-					log.Printf("  - %s (Severity)", diag.Error())
-				}
-			}
-
-			gr := Resource{
-				Type:       resType,
-				Name:       resName,
-				Attributes: attrs,
-			}
-			allParsedResources = append(allParsedResources, gr)
+	for addr, attrs := range topLevel {
+		addrParts := strings.Split(addr, ".")
+		if len(addrParts) != 2 {
+			return nil, fmt.Errorf("invalid resource address %s", addr)
 		}
+		allParsedResources = append(allParsedResources, Resource{
+			Type:       addrParts[0],
+			Name:       addrParts[1],
+			Attributes: attrs,
+		})
 	}
-
 	return allParsedResources, nil
 }
 
 // Converts the slice to map with resource address as the key
-func convertToConfigMap(resources []Resource) map[string]map[string]interface{} {
-	configMap := make(map[string]map[string]interface{}, 0)
+func convertToConfigMap(resources []Resource) map[string]map[string]any {
+	configMap := make(map[string]map[string]any, 0)
 
 	for _, r := range resources {
 		addr := fmt.Sprintf("%s.%s", r.Type, r.Name)

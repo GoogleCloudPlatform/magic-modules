@@ -6,6 +6,7 @@ import (
 	"log"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -16,7 +17,7 @@ import (
 )
 
 func iamMemberCaseDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	isCaseSensitive := iamMemberIsCaseSensitive(old) || iamMemberIsCaseSensitive(new)
+	isCaseSensitive := tpgresource.IamPrincipalIsCaseSensitive(old) || tpgresource.IamPrincipalIsCaseSensitive(new)
 	if isCaseSensitive {
 		return old == new
 	}
@@ -113,7 +114,7 @@ func iamMemberImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser 
 		if err := d.Set("role", role); err != nil {
 			return nil, fmt.Errorf("Error setting role: %s", err)
 		}
-		if err := d.Set("member", normalizeIamMemberCasing(member)); err != nil {
+		if err := d.Set("member", tpgresource.NormalizeIamPrincipalCasing(member)); err != nil {
 			return nil, fmt.Errorf("Error setting member: %s", err)
 		}
 
@@ -124,7 +125,7 @@ func iamMemberImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser 
 
 		// Set the ID again so that the ID matches the ID it would have if it had been created via TF.
 		// Use the current ID in case it changed in the ResourceIdParserFunc.
-		d.SetId(d.Id() + "/" + role + "/" + normalizeIamMemberCasing(member))
+		d.SetId(d.Id() + "/" + role + "/" + tpgresource.NormalizeIamPrincipalCasing(member))
 
 		// Read the upstream policy so we can set the full condition.
 		updater, err := newUpdaterFunc(d, config)
@@ -172,7 +173,9 @@ func iamMemberImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser 
 func ResourceIamMember(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser ResourceIdParserFunc, options ...func(*IamSettings)) *schema.Resource {
 	settings := NewIamSettings(options...)
 
-	return &schema.Resource{
+	createTimeOut := time.Duration(settings.CreateTimeOut) * time.Minute
+
+	resourceSchema := &schema.Resource{
 		Create: resourceIamMemberCreate(newUpdaterFunc, settings.EnableBatching),
 		Read:   resourceIamMemberRead(newUpdaterFunc),
 		Delete: resourceIamMemberDelete(newUpdaterFunc, settings.EnableBatching),
@@ -181,12 +184,21 @@ func ResourceIamMember(parentSpecificSchema map[string]*schema.Schema, newUpdate
 		// resource is used.
 		DeprecationMessage: settings.DeprecationMessage,
 
-		Schema: tpgresource.MergeSchemas(IamMemberBaseSchema, parentSpecificSchema),
+		Schema:         tpgresource.MergeSchemas(IamMemberBaseSchema, parentSpecificSchema),
+		SchemaVersion:  settings.SchemaVersion,
+		StateUpgraders: settings.StateUpgraders,
 		Importer: &schema.ResourceImporter{
 			State: iamMemberImport(newUpdaterFunc, resourceIdParser),
 		},
 		UseJSONNumber: true,
 	}
+
+	if createTimeOut > 0 {
+		resourceSchema.Timeouts = &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(createTimeOut),
+		}
+	}
+	return resourceSchema
 }
 
 func getResourceIamMember(d *schema.ResourceData) *cloudresourcemanager.Binding {
@@ -225,7 +237,7 @@ func resourceIamMemberCreate(newUpdaterFunc NewResourceIamUpdaterFunc, enableBat
 		if err != nil {
 			return err
 		}
-		d.SetId(updater.GetResourceId() + "/" + memberBind.Role + "/" + normalizeIamMemberCasing(memberBind.Members[0]))
+		d.SetId(updater.GetResourceId() + "/" + memberBind.Role + "/" + tpgresource.NormalizeIamPrincipalCasing(memberBind.Members[0]))
 		if k := conditionKeyFromCondition(memberBind.Condition); !k.Empty() {
 			d.SetId(d.Id() + "/" + k.String())
 		}

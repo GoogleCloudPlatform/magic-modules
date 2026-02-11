@@ -603,7 +603,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 
 		if v, ok := v.Extension["x-dcl-conflicts"].([]interface{}); ok {
 			// NOTE: DCL not label x-dcl-conflicts for reused types
-			// TODO(shuya): handle nested field when b/213503595 got fixed
+			// TODO: handle nested field when b/213503595 got fixed
 
 			if parent == nil {
 				for _, ci := range v {

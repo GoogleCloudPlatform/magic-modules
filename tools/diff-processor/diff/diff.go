@@ -35,8 +35,6 @@ type ResourceFieldSets struct {
 	RequiredWith  map[string]FieldSet
 }
 
-type FieldSet map[string]struct{}
-
 type ResourceConfigDiff struct {
 	Old *schema.Resource
 	New *schema.Resource

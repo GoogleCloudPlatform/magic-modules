@@ -29,6 +29,7 @@ create_verb: 'PUT'
 update_url: 'projects/{{project}}/subscriptions/{{name}}'
 update_verb: 'PATCH'
 update_mask: true
+include_in_tgc_next: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -41,9 +42,11 @@ async:
   target_occurrences: 1
   actions: ['create']
 custom_code:
+  pre_update: 'templates/terraform/pre_update/pubsub_subscription.go.tmpl'
   constants: 'templates/terraform/constants/subscription.go.tmpl'
   encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/pubsub_subscription.tmpl'
+  tgc_ignore_terraform_encoder: true
 examples:
   - name: 'pubsub_subscription_push'
     primary_resource_id: 'example'
@@ -116,6 +119,24 @@ examples:
       subscription_name: 'example-subscription'
       bucket_name: 'example-bucket'
       service_account_id: 'example-stw'
+  - name: 'pubsub_subscription_single_smt'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+      subscription_name: 'example-subscription'
+  - name: 'pubsub_subscription_multiple_smts'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+      subscription_name: 'example-subscription'
+    tgc_skip_test: 'The dynamic block is in test configuration. The test takes time to fix.'
+  - name: 'pubsub_subscription_tags'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+      subscription_name: 'example-subscription'
+      tag_key: 'tag_key'
+      tag_value: 'tag_value'
 parameters:
 properties:
   - name: 'name'
@@ -156,6 +177,7 @@ properties:
         description: |
           The name of the table to which to write data, of the form {projectId}.{datasetId}.{tableId}
         required: true
+        is_missing_in_cai: true
       - name: 'useTopicSchema'
         type: Boolean
         description: |
@@ -170,11 +192,13 @@ properties:
           must be published in JSON format. Only one of use_topic_schema and use_table_schema can be set.
         conflicts:
           - use_topic_schema
+        is_missing_in_cai: true
       - name: 'writeMetadata'
         type: Boolean
         description: |
           When true, write the subscription name, messageId, publishTime, attributes, and orderingKey to additional columns in the table.
           The subscription name, messageId, and publishTime fields are put in their own columns while all other message properties (other than data) are written to a JSON object in the attributes column.
+        is_missing_in_cai: true
       - name: 'dropUnknownFields'
         type: Boolean
         description: |
@@ -187,6 +211,7 @@ properties:
           The service account to use to write to BigQuery. If not specified, the Pub/Sub
           [service agent](https://cloud.google.com/iam/docs/service-agents),
           service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com, is used.
+        is_missing_in_cai: true
   - name: 'cloudStorageConfig'
     type: NestedObject
     description: |
@@ -196,6 +221,7 @@ properties:
     conflicts:
       - push_config
       - bigquery_config
+    is_missing_in_cai: true
     properties:
       - name: 'bucket'
         type: String
@@ -251,6 +277,7 @@ properties:
             send_empty_value: true
             description: |
               When true, write the subscription name, messageId, publishTime, attributes, and orderingKey as additional fields in the output.
+            is_missing_in_cai: true
           - name: 'useTopicSchema'
             type: Boolean
             send_empty_value: true
@@ -329,6 +356,7 @@ properties:
           - v1beta1: uses the push format defined in the v1beta1 Pub/Sub API.
           - v1 or v1beta2: uses the push format defined in the v1 Pub/Sub API.
         diff_suppress_func: 'IgnoreMissingKeyInMap("x-goog-version")'
+        custom_tgc_expand: templates/tgc_next/custom_expand/pubsub_subscription_attributes.go.tmpl
       - name: 'noWrapper'
         type: NestedObject
         description: |
@@ -344,6 +372,7 @@ properties:
               Pub/Sub message attributes to `<KEY>:<VAL>` headers of the HTTP request.
             required: true
             send_empty_value: true
+            is_missing_in_cai: true
   - name: 'ackDeadlineSeconds'
     type: Integer
     description: |
@@ -410,6 +439,7 @@ properties:
           Example - "3.5s".
         required: true
         diff_suppress_func: 'comparePubsubSubscriptionExpirationPolicy'
+        is_missing_in_cai: true
   - name: 'filter'
     type: String
     description: |
@@ -519,6 +549,7 @@ properties:
           description: |
             Javascript User Defined Function. If multiple Javascript UDFs are specified on a resource,
             each one must have a unique `function_name`.
+          is_missing_in_cai: true
           properties:
             - name: functionName
               type: String
@@ -563,3 +594,16 @@ properties:
           description: |
             Controls whether or not to use this transform. If not set or `false`,
             the transform will be applied to messages. Default: `true`.
+  - name: 'tags'
+    type: KeyValuePairs
+    description: |
+      Input only. Resource manager tags to be bound to the subscription. Tag
+      keys and values have the same definition as resource manager tags. Keys
+      must be in the format tagKeys/{tag_key_id}, and values are in the format
+      tagValues/456. The field is ignored when empty. The field is immutable and
+      causes resource replacement when mutated. This field is only set at create
+      time and modifying this field after creation will trigger recreation. To
+      apply tags to an existing resource, see the `google_tags_tag_value`
+      resource.
+    immutable: true
+    ignore_read: true

@@ -39,6 +39,7 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
+include_in_tgc_next: true
 examples:
   - name: 'node_template_basic'
     primary_resource_id: 'template'
@@ -79,6 +80,7 @@ properties:
   - name: 'name'
     type: String
     description: 'Name of the resource.'
+    required: true
   - name: 'nodeAffinityLabels'
     type: KeyValuePairs
     description: |

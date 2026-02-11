@@ -277,6 +277,10 @@ properties:
       - "STANDARD"
       - "ADVANCED"
     default_from_api: true
+  - name: "labels"
+    type: KeyValueLabels
+    description: |
+      Labels to apply to this storage pool. These can be later modified by the setLabels method.
 virtual_fields:
   - name: "deletion_protection"
     type: Boolean
@@ -288,3 +292,4 @@ virtual_fields:
       When the field is set to false, deleting the StoragePool is allowed.
 custom_code:
   pre_delete: templates/terraform/pre_delete/compute_storage_pool.go.tmpl
+include_in_tgc_next: true

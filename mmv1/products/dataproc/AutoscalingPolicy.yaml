@@ -13,6 +13,7 @@
 
 ---
 name: 'AutoscalingPolicy'
+include_in_tgc_next: true
 api_variant_patterns:
   - 'projects/{project}/locations/{location}/autoscalingPolicies/{autoscalingPolicy}'
 description: |
@@ -23,6 +24,7 @@ base_url: 'projects/{{project}}/locations/{{location}}/autoscalingPolicies'
 self_link: 'projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}'
+cai_asset_name_format: 'projects/{{project}}/regions/{{location}}/autoscalingPolicies/{{policy_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -32,7 +34,6 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'policy_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}'
     - '{{policy_id}}'

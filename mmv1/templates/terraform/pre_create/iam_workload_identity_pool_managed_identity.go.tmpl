@@ -1,0 +1,7 @@
+	// see if we need to create attestation_rules
+	_, hasRule := d.GetOk("attestation_rules")
+	ruleObj := make(map[string]interface{})
+	if hasRule {
+		ruleObj["attestationRules"] = attestationRulesProp
+		delete(obj, "attestationRules")
+	}

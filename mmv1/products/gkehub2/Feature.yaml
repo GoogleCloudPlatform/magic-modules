@@ -46,7 +46,6 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/locations/{{location}}/features/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/features/{{name}}'
     - '{{name}}'
@@ -382,6 +381,7 @@ properties:
               - name: 'auditIntervalSeconds'
                 type: Integer
                 description: 'Interval for Policy Controller Audit scans (in seconds). When set to 0, this disables audit functionality altogether.'
+                default_from_api: true
               - name: 'exemptableNamespaces'
                 type: Array
                 description: 'The set of namespaces that are excluded from Policy Controller checks. Namespaces do not need to currently exist on the cluster.'
@@ -420,10 +420,8 @@ properties:
                 description: 'Map of deployment configs to deployments ("admission", "audit", "mutation").'
                 default_from_api: true
                 key_name: 'component'
-                key_description: 'Specifies which component to apply the deployment config to. Accepted values are "admission", "audit" and "mutation".'
                 value_type:
                   description: 'Configures deployment-specific options, such as high availability.'
-                  name: deploymentConfig
                   type: NestedObject
                   properties:
                     - name: 'replicaCount'
@@ -504,10 +502,8 @@ properties:
                     type: Map
                     description: 'Configures which bundles to install and their corresponding install specs.'
                     key_name: 'bundle'
-                    key_description: 'A bundle name supported in this version. Values configure the exempted namespaces for this bundle.'
                     value_type:
                       description: 'The specification configuration for a single managed bundle.'
-                      name: bundleInstallSpec
                       type: NestedObject
                       properties:
                         - name: 'exemptedNamespaces'
