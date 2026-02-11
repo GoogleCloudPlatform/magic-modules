@@ -123,7 +123,6 @@ type IamPolicy struct {
 	// Defaults to true
 	SubstituteZoneValue bool `yaml:"substitute_zone_value,omitempty"`
 
-
 	// Add a deprecation message for a resource that's been deprecated in the API.
 	DeprecationMessage string `yaml:"deprecation_message,omitempty"`
 }

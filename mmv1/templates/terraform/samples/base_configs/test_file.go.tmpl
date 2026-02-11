@@ -27,7 +27,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-  "github.com/hashicorp/terraform-plugin-testing/plancheck"
 {{- if not $.Res.ExcludeDelete }}
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 {{- end }}
@@ -36,12 +35,6 @@ import (
 	"{{ $.ImportPath  }}/envvar"
 	"{{ $.ImportPath  }}/tpgresource"
 	transport_tpg "{{ $.ImportPath  }}/transport"
-)
-
-var (
-	_ = envvar.TestEnvVar
-	_ = tpgresource.SetLabels
-	_ = plancheck.ExpectNonEmptyPlan
 )
 
 {{ range $s := $.Res.TestSamples }}
