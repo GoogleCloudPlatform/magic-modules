@@ -59,7 +59,6 @@ iam_policy:
   parent_resource_attribute: 'namespace_id'
   method_name_separator: ":"
   fetch_iam_policy_verb: 'GET'
-  supports_indirect_user_project_override: true
   import_format:
     - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
   allowed_iam_role: 'roles/biglake.editor'
