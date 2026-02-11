@@ -118,6 +118,20 @@ properties:
       Valid values are 1440, 1460, 1500, and 8896. If not specified, the value will default to 1440.
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/float64_to_int_to_string.go.tmpl'
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the interconnect attachment. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        ignore_read: true
   - name: 'bandwidth'
     type: Enum
     description: |

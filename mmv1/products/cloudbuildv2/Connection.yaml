@@ -49,7 +49,6 @@ custom_code:
 exclude_tgc: true
 legacy_long_form_project: true
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 sweeper:
   url_substitutions:
     - region: "us-central1"

@@ -48,7 +48,6 @@ error_retry_predicates:
   - 'transport_tpg.IsApigeeRetryableError'
 exclude_sweeper: true
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 examples:
   - name: 'apigee_instance_basic'
     vars:
