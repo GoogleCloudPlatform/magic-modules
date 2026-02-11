@@ -13,7 +13,6 @@
 
 ---
 name: 'Datascan'
-include_in_tgc_next: true
 api_resource_type_kind: DataScan
 description: |
   Represents a user-visible job which provides the insights for the related data source.
