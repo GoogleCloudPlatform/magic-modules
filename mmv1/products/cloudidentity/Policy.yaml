@@ -1,0 +1,119 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# mmv1/products/cloudidentity/Policy.yaml
+---
+name: 'Policy'
+description: |
+  A Cloud Identity Policy binds a Setting to a PolicyQuery for a Google Workspace / Cloud Identity customer.
+references:
+  guides:
+    'Policy API overview': 'https://docs.cloud.google.com/identity/docs/concepts/overview-policies'
+  api: 'https://cloud.google.com/identity/docs/reference/rest/v1beta1/policies'
+min_version: beta
+
+docs:
+  note: 'This is available only in beta'
+
+# API settings
+base_url: 'policies'
+self_link: '{{name}}'
+
+create_url: 'policies'
+create_verb: 'POST'
+
+update_url: '{{name}}'
+update_verb: 'PATCH'
+
+delete_url: '{{name}}'
+delete_verb: 'DELETE'
+
+autogen_async: true
+async:
+  actions: ['create', 'update', 'delete']
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+
+properties:
+  - name: 'name'
+    description: |
+      The resource name of the Policy. Format: `policies/{policy_id}`.
+    type: String
+    output: true
+
+  - name: 'customer'
+    description: |
+      The customer that the Policy belongs to. Format: `customers/{customer_id}`.
+    type: String
+    required: true
+    immutable: true
+
+  - name: 'policyQuery'
+    description: |
+      The PolicyQuery the Setting applies to.
+    type: NestedObject
+    required: true
+    immutable: true
+    properties:
+      - name: 'query'
+        description: 'The CEL query that defines which entities the Policy applies to.'
+        type: String
+        immutable: true
+      - name: 'orgUnit'
+        description: 'The OrgUnit the query applies to.'
+        type: String
+        immutable: true
+        required: true
+      - name: 'group'
+        description: 'The group that the query applies to.'
+        type: String
+        immutable: true
+      - name: 'sortOrder'
+        description: 'Decimal sort order of this PolicyQuery.'
+        type: Integer
+        output: true
+
+  - name: 'setting'
+    description: |
+      The Setting configured by this Policy.
+    type: NestedObject
+    required: true
+    properties:
+      - name: 'type'
+        description: 'The type of the Setting.'
+        type: String
+        required: true
+        immutable: true
+      - name: 'valueJson'
+        api_name: 'value'
+        description: 'The value of the Setting as JSON string.'
+        type: String
+        required: true
+        custom_expand: 'templates/terraform/custom_expand/cloudidentity_policy_setting_value_json.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/cloudidentity_policy_setting_value_json.go.tmpl'
+        diff_suppress_func: 'jsonSettingsDiffSuppress'
+
+examples:
+  - name: "cloudidentity_policy_basic"
+    primary_resource_id: "primary"
+    # Created a handwritten test as otherwise example will have to override scopes causing confusion for end users.
+    exclude_test: true
+    vars:
+    min_version: beta
+
+custom_code:
+  update_encoder: 'templates/terraform/update_encoder/cloud_identity_policy_update_mask.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/cloud_identity_policy_custom_import.go.tmpl'
+  constants: 'templates/terraform/custom_code/cloud_identity_policy_constants.go.tmpl'
