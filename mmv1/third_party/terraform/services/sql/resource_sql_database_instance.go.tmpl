@@ -805,7 +805,7 @@ API (for read pools, effective_availability_type may differ from availability_ty
 										Computed:     true,
 										ValidateFunc: validation.IntBetween(1, 1048576),
 										AtLeastOneOf: insightsConfigKeys,
-										Description:  `Maximum query length stored in bytes. Between 256 and 4500. Default to 1024. For Enterprise Plus instances, from 1 to 1048576.`,
+										Description:  `Maximum query length stored in bytes. Between 256 and 4500. Default to 1024. For Enterprise Plus instances, from 1024 to 100000.`,
 									},
 									"record_application_tags": {
 										Type:         schema.TypeBool,

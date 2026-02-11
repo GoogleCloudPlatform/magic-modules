@@ -148,7 +148,7 @@ properties:
           description: Network to forward traffic to.
           properties:
             - name: name
-              type: string
+              type: String
               description: |-
                 Required. Network name is of the format:
                 `projects/{project}/global/networks/{network}`
@@ -180,7 +180,7 @@ properties:
               type: Array
               description: The configuration for the proxy.
               item_type:
-                type: string
+                type: String
             - name: contextualHeaders
               type: NestedObject
               description: Configuration for the contextual headers.

@@ -43,7 +43,6 @@ async:
   result:
     resource_inside_response: false
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 custom_code:
 sweeper:
   url_substitutions:

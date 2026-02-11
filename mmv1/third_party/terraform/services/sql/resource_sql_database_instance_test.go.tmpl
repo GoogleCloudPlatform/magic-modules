@@ -7638,14 +7638,13 @@ func testGoogleSqlDatabaseInstance_insights_enhanced_postgres17(instanceName str
 	region              = "us-central1"
 	database_version    = "POSTGRES_17"
 	deletion_protection = false
-	disk_autoresize	   	= true
-	edition = "ENTERPRISE_PLUS"
 	settings {
 		tier = "db-perf-optimized-N-2"
-
+		edition = "ENTERPRISE_PLUS"
+		disk_autoresize	   	= true
 		insights_config {
 			query_insights_enabled  = true
-			query_string_length     = 256
+			query_string_length     = 2048
 			record_application_tags = true
 			record_client_address   = true
 			query_plans_per_minute  = 10
