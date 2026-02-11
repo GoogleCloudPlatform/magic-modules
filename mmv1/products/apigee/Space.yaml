@@ -27,6 +27,8 @@ update_mask: true
 import_format:
   - "{{org_id}}/spaces/{{space_id}}"
   - "{{org_id}}/{{space_id}}"
+custom_code:
+  custom_import: "templates/terraform/custom_import/apigee_space.go.tmpl"
 autogen_async: true
 iam_policy:
   method_name_separator: ':'
