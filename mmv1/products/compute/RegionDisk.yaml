@@ -13,7 +13,6 @@
 
 ---
 name: 'RegionDisk'
-include_in_tgc_next: true
 api_resource_type_kind: Disk
 kind: 'compute#disk'
 description: |
