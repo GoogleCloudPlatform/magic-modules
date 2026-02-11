@@ -89,10 +89,14 @@ func TestAccFilestoreInstance_restoreBackupDR(t *testing.T) {
 
 	instanceName := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 	backupName := fmt.Sprintf("tf-test-backup-%d", acctest.RandInt(t))
+	providerFactories := acctest.ProtoV5ProviderFactories(t)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
+		ProtoV5ProviderFactories: providerFactories,
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckFilestoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFilestoreInstance_restoreBackupDR(instanceName, backupName),
@@ -130,6 +134,12 @@ resource "google_filestore_instance" "source_instance" {
     network = "default"
     modes   = ["MODE_IPV4"]
   }
+
+  performance_config {
+    fixed_iops {
+      max_iops = "5000"
+    }
+  }
 }
 
 resource "google_backup_dr_backup_vault" "backup_vault" {
@@ -158,14 +168,14 @@ resource "google_backup_dr_backup_plan" "backup_plan" {
      time_zone           = "UTC"
 
      backup_window {
-       start_hour_of_day = 12
-       end_hour_of_day   = 18
+       start_hour_of_day = 0
+       end_hour_of_day   = 23
      }
     }
  }
 }
 
-resource "google_backup_dr_backup_plan_association" "backcup_association" {
+resource "google_backup_dr_backup_plan_association" "bpa" {
  location = "us-central1"
  backup_plan_association_id = "tf-backup-plan-association-${local.backup_name}"
  resource = google_filestore_instance.source_instance.id
@@ -174,11 +184,21 @@ resource "google_backup_dr_backup_plan_association" "backcup_association" {
  depends_on = [ google_filestore_instance.source_instance ]
 }
 
-data "google_backup_dr_data_source_references" "all_refs" {
-	project       = data.google_project.project.project_id
-	location      = "us-central1"
-	resource_type = "file.googleapis.com/Instance"
-	depends_on    = [google_backup_dr_backup_plan_association.backcup_association]
+// Wait for the first backup to be created
+resource "time_sleep" "wait_10_mins" {
+  depends_on = [google_backup_dr_backup_plan_association.bpa]
+  create_duration = "600s"
+}
+
+data "google_backup_dr_backup" "filestore_backups" {
+  project = data.google_project.project.project_id
+  location      	= "us-central1"
+  backup_vault_id 	= "tf-backup-vault-${local.backup_name}"
+  data_source_id 	= element(
+  	split("/", google_backup_dr_backup_plan_association.bpa.data_source), 
+	length(split("/", google_backup_dr_backup_plan_association.bpa.data_source)) - 1)
+  
+  depends_on = [time_sleep.wait_10_mins]
 }
 
 
@@ -190,7 +210,7 @@ resource "google_filestore_instance" "instance" {
   file_shares {
     capacity_gb = 1024
     name        = "share"
-    source_backupdr_backup = data.google_backup_dr_data_source_references.all_refs.data_source_references[0].name
+    source_backupdr_backup = data.google_backup_dr_backup.filestore_backups.backups[0].name
   }
 
   networks {
@@ -198,7 +218,13 @@ resource "google_filestore_instance" "instance" {
     modes   = ["MODE_IPV4"]
   }
 
-  depends_on = [data.google_backup_dr_data_source_references.all_refs]  
+  performance_config {
+    fixed_iops {
+      max_iops = "5000"
+    }
+  }
+
+  depends_on = [data.google_backup_dr_backup.filestore_backups]  
 }
 `, instanceName, backupName)
 }
