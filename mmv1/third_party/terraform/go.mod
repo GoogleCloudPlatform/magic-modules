@@ -134,5 +134,3 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20260316180232-0b37fe3546d5 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/hashicorp/terraform-plugin-testing => github.com/BBBmau/terraform-plugin-testing v0.0.0-20260202183319-28c63bff4413 // resolve-testing-bugs-GCP branch
