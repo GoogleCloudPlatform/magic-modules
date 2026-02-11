@@ -13,7 +13,6 @@
 
 ---
 name: 'ForwardingRule'
-include_in_tgc_next: true
 api_variant_patterns:
   - 'projects/{project}/regions/{region}/forwardingRules/{forwardingRule}'
 kind: 'compute#forwardingRule'
