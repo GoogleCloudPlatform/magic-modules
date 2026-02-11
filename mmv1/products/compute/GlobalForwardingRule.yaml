@@ -13,7 +13,6 @@
 
 ---
 name: 'GlobalForwardingRule'
-include_in_tgc_next: true
 api_resource_type_kind: ForwardingRule
 api_variant_patterns:
   - 'projects/{project}/global/forwardingRules/{forwardingRule}'
