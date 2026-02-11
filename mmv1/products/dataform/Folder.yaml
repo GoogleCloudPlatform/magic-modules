@@ -70,4 +70,3 @@ examples:
   - name: 'dataform_folder_full'
     primary_resource_id: 'dataform_folder_full'
     min_version: 'beta'
-
