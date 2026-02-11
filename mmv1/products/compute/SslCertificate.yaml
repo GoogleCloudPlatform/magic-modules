@@ -56,6 +56,12 @@ examples:
       - 'name_prefix'
       # Uses id.UniqueId
     skip_vcr: true
+  - name: 'ssl_certificate_basic_wo'
+    primary_resource_id: 'default'
+    ignore_read_extra:
+      - 'name_prefix'
+      # Uses id.UniqueId
+    skip_vcr: true
   - name: 'ssl_certificate_random_provider'
     primary_resource_id: 'default'
     external_providers: ["random", "time"]
@@ -81,7 +87,7 @@ properties:
       The certificate chain must be no greater than 5 certs long.
       The chain must include at least one intermediate cert.
     required: true
-    sensitive: true
+    write_only: true
   - name: 'creationTimestamp'
     type: Time
     description: 'Creation timestamp in RFC3339 text format.'
@@ -116,10 +122,7 @@ properties:
       function: 'verify.ValidateGCEName'
   - name: 'privateKey'
     type: String
-    description: 'The write-only private key in PEM format.'
-    required: true
+    description: 'The private key in PEM format.'
+    write_only: true
     immutable: true
-    ignore_read: true
-    sensitive: true
     diff_suppress_func: 'sha256DiffSuppress'
-    custom_flatten: 'templates/terraform/custom_flatten/sha256.tmpl'
