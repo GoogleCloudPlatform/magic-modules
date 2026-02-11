@@ -101,35 +101,24 @@ resource "time_sleep" "wait_for_propagation" {
   create_duration  = "120s"
 }
 
-resource "google_apphub_application" "my_apphub_application" {
-  location = "us-central1"
-  application_id = "tf-test-example-application%{random_suffix}"
-  scope {
-    type = "REGIONAL"
-  }
-  project = google_project.project.project_id
-  depends_on = [time_sleep.wait_for_propagation]
-}
-
-resource "google_developer_connect_insights_config" "insights_config" {
-  location = "us-central1"
-  insights_config_id = "tf-test-ic-apphub-%{random_suffix}"
-  project = google_project.project.project_id
-  annotations = {}
-  labels = {}
-  app_hub_application = format("//apphub.googleapis.com/projects/%s/locations/%s/applications/%s",
-        google_project.project.number,
-        google_apphub_application.my_apphub_application.location,
-        google_apphub_application.my_apphub_application.application_id)
-  artifact_configs {
-    google_artifact_analysis {
-        project_id = google_project.project.project_id
+resource "google_developer_connect_insights_config" "insights_config_projects" {
+    location           = "us-central1"
+    insights_config_id = "tf-test-ic-projects-%{random_suffix}"
+    project            = google_project.project.project_id
+    annotations        = {}
+    labels             = {}
+    target_projects {
+        project_ids = ["projects/${google_project.project.project_id}"]
     }
-    google_artifact_registry {
-        artifact_registry_package = "my-package"
-        project_id                = google_project.project.project_id
+    artifact_configs {
+        google_artifact_analysis {
+            project_id = google_project.project.project_id
+        }
+        google_artifact_registry {
+            artifact_registry_package = "my-package"
+            project_id                = google_project.project.project_id
+        }
+        uri = "us-docker.pkg.dev/my-project/my-repo/my-image"
     }
-    uri = "us-docker.pkg.dev/my-project/my-repo/my-image"
-  }
-  depends_on = [time_sleep.wait_for_propagation]
+    depends_on = [time_sleep.wait_for_propagation]
 }
