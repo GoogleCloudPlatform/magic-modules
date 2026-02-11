@@ -58,7 +58,6 @@ async:
   result:
     resource_inside_response: false
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
 examples:

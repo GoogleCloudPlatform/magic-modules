@@ -72,7 +72,6 @@ examples:
     exclude_test: true
     exclude_docs: true
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 parameters:
   - name: 'location'
     type: String

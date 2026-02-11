@@ -31,7 +31,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
     transformed{{$prop.TitlelizeProperty}}, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}({{if $prop.WriteOnly }}tpgresource.GetRawConfigAttributeAsString(d.(*schema.ResourceData), "{{ join $prop.Lineage ".0." }}"){{ else }}original["{{ underscore $prop.Name }}"]{{ end }}, d, config)
     if err != nil {
       return nil, err
-          {{- if or ($prop.SendEmptyValue) (and $prop.TGCSendEmptyValue $.ResourceMetadata.IsTgcCompiler) }}
+          {{- if or ($prop.SendEmptyValue) (and $prop.TGCSendEmptyValue $.ResourceMetadata.ProductMetadata.IsTgcCompiler) }}
     } else {
       transformed["{{$prop.ApiName}}"] = transformed{{$prop.TitlelizeProperty}}
           {{- else }}
@@ -69,7 +69,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
   transformed{{$prop.TitlelizeProperty}}, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}({{ if $prop.FlattenObject }}nil{{ else if $prop.WriteOnly }}tpgresource.GetRawConfigAttributeAsString(d.(*schema.ResourceData), "{{ join $prop.Lineage ".0." }}"){{ else }}d.Get("{{ underscore $prop.Name }}"), d, config)
   if err != nil {
     return nil, err
-          {{- if or ($prop.SendEmptyValue) (and $prop.TGCSendEmptyValue $.ResourceMetadata.IsTgcCompiler) }}
+          {{- if or ($prop.SendEmptyValue) (and $prop.TGCSendEmptyValue $.ResourceMetadata.ProductMetadata.IsTgcCompiler) }}
   } else {
     transformed["{{$prop.ApiName}}"] = transformed{{$prop.TitlelizeProperty}}
           {{- else }}
@@ -125,7 +125,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
       transformed{{$prop.TitlelizeProperty}}, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}({{if $prop.WriteOnly }}tpgresource.GetRawConfigAttributeAsString(d.(*schema.ResourceData), "{{ join $prop.Lineage ".0." }}"){{ else }}original["{{ underscore $prop.Name }}"]{{ end }}, d, config)
       if err != nil {
         return nil, err
-            {{- if or ($prop.SendEmptyValue) (and $prop.TGCSendEmptyValue $.ResourceMetadata.IsTgcCompiler) }}
+            {{- if or ($prop.SendEmptyValue) (and $prop.TGCSendEmptyValue $.ResourceMetadata.ProductMetadata.IsTgcCompiler) }}
       } else {
         transformed["{{$prop.ApiName}}"] = transformed{{$prop.TitlelizeProperty}}
             {{- else }}
@@ -163,7 +163,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
     {{ if $.NestedProperties }}
       {{- range $prop := $.NestedProperties }}
         {{- if not (and (hasPrefix $prop.Type "KeyValue") $prop.IgnoreWrite) }}
-          {{- if $.ResourceMetadata.IsTgcCompiler }}
+          {{- if $.ResourceMetadata.ProductMetadata.IsTgcCompiler }}
           {{- template "expandTgcPropertyMethod" $prop -}}
           {{- else }}
           {{- template "expandPropertyMethod" $prop -}}

@@ -37,7 +37,6 @@ immutable: true
 import_format:
   - '{{name}}'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 cai_asset_name_format: '{{key_ring}}/importJobs/{{import_job_id}}'
 timeouts:
   insert_minutes: 20

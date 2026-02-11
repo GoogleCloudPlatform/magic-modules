@@ -142,7 +142,22 @@ func (p *Product) SetDisplayName() {
 }
 
 func (p *Product) SetCompiler(t string) {
-	p.Compiler = fmt.Sprintf("%s-codegen", strings.ToLower(t))
+	switch t {
+	case "tgc":
+		p.Compiler = "terraformgoogleconversion-codegen"
+	case "tgc_next":
+		p.Compiler = "terraformgoogleconversionnext-codegen"
+	case "tgc_cai2hcl":
+		p.Compiler = "caitoterraformconversion-codegen"
+	case "terraform", "oics", "bics":
+		p.Compiler = "terraform-codegen"
+	default:
+		p.Compiler = fmt.Sprintf("%s-codegen", strings.ToLower(t))
+	}
+}
+
+func (p Product) IsTgcCompiler() bool {
+	return p.Compiler == "terraformgoogleconversionnext-codegen"
 }
 
 // ====================

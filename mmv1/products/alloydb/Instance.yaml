@@ -53,7 +53,6 @@ custom_code:
 # Skipping the sweeper because instances will be deleted during cluster sweeps
 exclude_sweeper: true
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 tgc_tests:
   - name: 'TestAccAlloydbInstance_connectionPoolConfig'
     skip: 'fix it after the next release, as connection_pool_config will be in the next release'

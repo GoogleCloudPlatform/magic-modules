@@ -58,9 +58,7 @@ func NewTerraformGoogleConversion(product *api.Product, versionName string, star
 		templateFS:        templateFS,
 	}
 
-	t.Product.SetCompiler(ProviderName(t))
 	for _, r := range t.Product.Objects {
-		r.SetCompiler(ProviderName(t))
 		r.ImportPath = ImportPathFromVersion(versionName)
 	}
 
