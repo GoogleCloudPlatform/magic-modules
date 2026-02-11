@@ -13,7 +13,6 @@
 
 ---
 name: 'RegionNetworkEndpointGroup'
-include_in_tgc_next: true
 api_resource_type_kind: NetworkEndpointGroup
 kind: 'compute#networkEndpointGroup'
 description: |
