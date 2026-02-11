@@ -76,8 +76,9 @@ properties:
       projects/{project}/locations/{location}/applications/{application}
     conflicts:
       - targetProjects
-  - name: projects
+  - name: targetProjects
     type: NestedObject
+    api_name: projects
     description: The projects to track with the InsightsConfig.
     conflicts:
       - appHubApplication
