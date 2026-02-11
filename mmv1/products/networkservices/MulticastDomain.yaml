@@ -119,6 +119,15 @@ properties:
       Use the following format:
       `projects/{project}/locations/global/multicastDomainGroups/{multicast_domain_group}`.
     immutable: true
+  - name: ullMulticastDomain
+    type: NestedObject
+    description: Information for an Ultra-Low-Latency multicast domain.
+    immutable: true
+    properties:
+      - name: preconfiguredUllDomain
+        type: String
+        description: The preconfigured Ultra-Low-Latency domain name.
+        immutable: true
   - name: name
     type: String
     description: |-
