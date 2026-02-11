@@ -19,6 +19,7 @@ type Loader struct {
 	// baseDirectory points to mmv1 root, if cwd can be empty as relative paths are used
 	baseDirectory     string
 	overrideDirectory string
+	Products          map[string]*api.Product
 	version           string
 	sysfs             google.ReadDirReadFileFS
 }
@@ -53,7 +54,7 @@ func NewLoader(config Config) *Loader {
 	return l
 }
 
-func (l *Loader) LoadProducts() map[string]*api.Product {
+func (l *Loader) LoadProducts(providerName string) {
 	if l.version == "" {
 		log.Printf("No version specified, assuming ga")
 		l.version = "ga"
@@ -90,10 +91,10 @@ func (l *Loader) LoadProducts() map[string]*api.Product {
 		}
 	}
 
-	return l.batchLoadProducts(allProductFiles)
+	l.Products = l.batchLoadProducts(allProductFiles, providerName)
 }
 
-func (l *Loader) batchLoadProducts(productNames []string) map[string]*api.Product {
+func (l *Loader) batchLoadProducts(productNames []string, providerName string) map[string]*api.Product {
 	products := make(map[string]*api.Product)
 
 	// Create result type for clarity
@@ -115,7 +116,7 @@ func (l *Loader) batchLoadProducts(productNames []string) map[string]*api.Produc
 		go func(name string) {
 			defer wg.Done()
 
-			product, err := l.LoadProduct(name)
+			product, err := l.LoadProduct(name, providerName)
 			productChan <- loadResult{
 				name:    name,
 				product: product,
@@ -152,7 +153,7 @@ func (l *Loader) batchLoadProducts(productNames []string) map[string]*api.Produc
 
 // Load compiles a product with all its resources from the given path and optional overrides
 // This loads the product configuration and all its resources into memory without generating any files
-func (l *Loader) LoadProduct(productName string) (*api.Product, error) {
+func (l *Loader) LoadProduct(productName, providerName string) (*api.Product, error) {
 	p := &api.Product{}
 	productYamlPath := filepath.Join(productName, "product.yaml")
 
@@ -196,7 +197,10 @@ func (l *Loader) LoadProduct(productName string) (*api.Product, error) {
 		return nil, err
 	}
 
+	p.Version = p.VersionObjOrClosest(l.version)
+
 	p.Objects = resources
+	p.SetCompiler(providerName)
 	p.Validate()
 
 	return p, nil
@@ -306,10 +310,6 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 	resource.TargetVersionName = l.version
 	// SetDefault before AddExtraFields to ensure relevant metadata is available on existing fields
 	resource.SetDefault(product)
-	resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
-	// SetDefault after AddExtraFields to ensure relevant metadata is available for the newly generated fields
-	resource.SetDefault(product)
-	resource.Validate()
 	resource.TestSampleSetUp(l.sysfs)
 
 	for _, e := range resource.Examples {
@@ -319,4 +319,32 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 	}
 
 	return resource
+}
+
+func (l *Loader) AddExtraFields() error {
+	if l.Products == nil {
+		return errors.New("products have not been loaded into memory")
+	}
+
+	for _, product := range l.Products {
+		for _, resource := range product.Objects {
+			resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
+			// SetDefault after AddExtraFields to ensure relevant metadata is available for the newly generated fields
+			resource.SetDefault(product)
+		}
+	}
+
+	return nil
+}
+
+func (l *Loader) Validate() {
+	if l.Products == nil {
+		log.Fatalln("products have not been loaded into memory")
+	}
+
+	for _, product := range l.Products {
+		for _, resource := range product.Objects {
+			resource.Validate()
+		}
+	}
 }

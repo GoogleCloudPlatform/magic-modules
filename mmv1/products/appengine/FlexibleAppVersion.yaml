@@ -551,10 +551,7 @@ properties:
           - 'deployment.0.files'
           - 'deployment.0.container'
         key_name: 'name'
-        key_description: |
-          name of file
         value_type:
-          name: files
           type: NestedObject
           properties:
             - name: 'sha1Sum'

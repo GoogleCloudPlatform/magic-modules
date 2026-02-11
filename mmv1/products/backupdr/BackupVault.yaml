@@ -40,7 +40,6 @@ async:
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/backup_dr_backup_vault.go.tmpl'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 examples:
   - name: 'backup_dr_backup_vault_simple'
     primary_resource_id: 'backup-vault-test'

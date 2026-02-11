@@ -47,7 +47,6 @@ custom_code:
   post_update: 'templates/terraform/post_update/datastream_stream.go.tmpl'
   post_import: 'templates/terraform/post_import/datastream_stream.go.tmpl'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 tgc_tests:
   - name: 'TestAccDatastreamStream_mongoDb'
     skip: 'Test data has mismatched steps'
@@ -258,6 +257,13 @@ examples:
       source_connection_profile_id: 'source-profile'
       destination_connection_profile_id: 'destination-profile'
     exclude_test: true
+  - name: 'datastream_stream_spanner'
+    primary_resource_id: 'default'
+    vars:
+      stream_id: 'spanner-stream'
+      source_connection_profile_id: 'source-profile'
+      destination_connection_profile_id: 'destination-profile'
+    exclude_test: true
   - name: 'datastream_stream_mongodb'
     primary_resource_id: 'default'
     vars:
@@ -334,6 +340,7 @@ properties:
           - 'source_config.0.postgresql_source_config'
           - 'source_config.0.sql_server_source_config'
           - 'source_config.0.salesforce_source_config'
+          - 'source_config.0.spanner_source_config'
           - 'source_config.0.mongodb_source_config'
         properties:
           - name: 'includeObjects'
@@ -542,6 +549,7 @@ properties:
           - 'source_config.0.postgresql_source_config'
           - 'source_config.0.sql_server_source_config'
           - 'source_config.0.salesforce_source_config'
+          - 'source_config.0.spanner_source_config'
           - 'source_config.0.mongodb_source_config'
         properties:
           - name: 'includeObjects'
@@ -770,6 +778,7 @@ properties:
           - 'source_config.0.postgresql_source_config'
           - 'source_config.0.sql_server_source_config'
           - 'source_config.0.salesforce_source_config'
+          - 'source_config.0.spanner_source_config'
           - 'source_config.0.mongodb_source_config'
         properties:
           - name: 'includeObjects'
@@ -969,6 +978,7 @@ properties:
           - 'source_config.0.postgresql_source_config'
           - 'source_config.0.sql_server_source_config'
           - 'source_config.0.salesforce_source_config'
+          - 'source_config.0.spanner_source_config'
           - 'source_config.0.mongodb_source_config'
         properties:
           - name: 'includeObjects'
@@ -1185,6 +1195,7 @@ properties:
           - 'source_config.0.postgresql_source_config'
           - 'source_config.0.sql_server_source_config'
           - 'source_config.0.salesforce_source_config'
+          - 'source_config.0.spanner_source_config'
           - 'source_config.0.mongodb_source_config'
         properties:
           - name: 'includeObjects'
@@ -1260,6 +1271,189 @@ properties:
             description: |
               Salesforce objects polling interval. The interval at which new changes will be polled for each object. The duration must be between 5 minutes and 24 hours.
             required: true
+      - name: 'spannerSourceConfig'
+        type: NestedObject
+        description: |
+          Spanner data source configuration.
+        send_empty_value: true
+        allow_empty_object: true
+        exactly_one_of:
+          - 'source_config.0.mysql_source_config'
+          - 'source_config.0.oracle_source_config'
+          - 'source_config.0.postgresql_source_config'
+          - 'source_config.0.sql_server_source_config'
+          - 'source_config.0.salesforce_source_config'
+          - 'source_config.0.spanner_source_config'
+          - 'source_config.0.mongodb_source_config'
+        properties:
+          - name: 'changeStreamName'
+            type: String
+            description: |
+              The Spanner change stream name to use.
+          - name: 'spannerRpcPriority'
+            type: Enum
+            description: |
+              The RPC priority to use for Spanner queries.
+            enum_values:
+              - 'LOW'
+              - 'MEDIUM'
+              - 'HIGH'
+          - name: 'fgacRole'
+            type: String
+            description: |
+              The FGAC role to use for Spanner queries.
+          - name: 'maxConcurrentCdcTasks'
+            type: Integer
+            description: |
+              Max concurrent CDC tasks.
+            default_from_api: true
+            send_empty_value: true
+            validation:
+              function: 'validation.IntAtLeast(0)'
+          - name: 'maxConcurrentBackfillTasks'
+            type: Integer
+            description: |
+              Max concurrent backfill tasks.
+            default_from_api: true
+            send_empty_value: true
+            validation:
+              function: 'validation.IntAtLeast(0)'
+          - name: 'includeObjects'
+            type: NestedObject
+            description: |
+              Spanner objects to retrieve from the source.
+            properties:
+              - name: 'schemas'
+                type: Array
+                description: |
+                  Spanner schemas in the database
+                required: true
+                min_size: 1
+                item_type:
+                  description: |
+                    Spanner schema
+                  type: NestedObject
+                  properties:
+                    - name: 'schema'
+                      type: String
+                      description: |
+                        Schema name.
+                      required: true
+                    - name: 'tables'
+                      type: Array
+                      description: |
+                        Tables in the schema.
+                      min_size: 1
+                      item_type:
+                        description: |
+                          Spanner table.
+                        type: NestedObject
+                        properties:
+                          - name: 'table'
+                            type: String
+                            description: |
+                              Table name.
+                            required: true
+                          - name: 'columns'
+                            type: Array
+                            description: |
+                              Spanner columns in the table. When unspecified as part of include/exclude objects, includes/excludes everything.
+                            min_size: 1
+                            item_type:
+                              description: |
+                                Spanner column.
+                              type: NestedObject
+                              properties:
+                                - name: 'column'
+                                  type: String
+                                  description: |
+                                    Column name.
+                                - name: 'dataType'
+                                  type: String
+                                  description: |
+                                    The Spanner data type. Full data types list can be found here:
+                                    https://docs.cloud.google.com/spanner/docs/reference/standard-sql/data-types
+                                  output: true
+                                - name: 'isPrimaryKey'
+                                  type: Boolean
+                                  description: |
+                                    Whether or not the column is a primary key.
+                                  output: true
+                                - name: 'ordinalPosition'
+                                  type: Integer
+                                  description: |
+                                    The ordinal position of the column in the table.
+                                  output: true
+          - name: 'excludeObjects'
+            type: NestedObject
+            description: |
+              Spanner objects to retrieve from the source.
+            properties:
+              - name: 'schemas'
+                type: Array
+                description: |
+                  Spanner schemas in the database
+                required: true
+                min_size: 1
+                item_type:
+                  description: |
+                    Spanner schema
+                  type: NestedObject
+                  properties:
+                    - name: 'schema'
+                      type: String
+                      description: |
+                        Schema name.
+                      required: true
+                    - name: 'tables'
+                      type: Array
+                      description: |
+                        Tables in the schema.
+                      min_size: 1
+                      item_type:
+                        description: |
+                          Spanner table.
+                        type: NestedObject
+                        properties:
+                          - name: 'table'
+                            type: String
+                            description: |
+                              Table name.
+                            required: true
+                          - name: 'columns'
+                            type: Array
+                            description: |
+                              Spanner columns in the table. When unspecified as part of include/exclude objects, includes/excludes everything.
+                            min_size: 1
+                            item_type:
+                              description: |
+                                Spanner column.
+                              type: NestedObject
+                              properties:
+                                - name: 'column'
+                                  type: String
+                                  description: |
+                                    Column name.
+                                - name: 'dataType'
+                                  type: String
+                                  description: |
+                                    The Spanner data type. Full data types list can be found here:
+                                    https://docs.cloud.google.com/spanner/docs/reference/standard-sql/data-types
+                                  output: true
+                                - name: 'isPrimaryKey'
+                                  type: Boolean
+                                  description: |
+                                    Whether the column is a primary key.
+                                  output: true
+                                - name: 'ordinalPosition'
+                                  type: Integer
+                                  description: |
+                                    The ordinal position of the column in the table.
+                                  output: true
+          - name: 'backfillDataBoostEnabled'
+            type: Boolean
+            description: |
+              Whether to use DataBoost for backfill queries.
       - name: 'mongodbSourceConfig'
         description: |
           MongoDB source configuration.
@@ -1272,6 +1466,7 @@ properties:
           - 'source_config.0.postgresql_source_config'
           - 'source_config.0.sql_server_source_config'
           - 'source_config.0.salesforce_source_config'
+          - 'source_config.0.spanner_source_config'
           - 'source_config.0.mongodb_source_config'
         properties:
           - name: 'includeObjects'
@@ -1490,7 +1685,7 @@ properties:
                       See https://cloud.google.com/bigquery/docs/customer-managed-encryption for more information.
                     immutable: true
               - name: 'projectId'
-                type: string
+                type: String
                 description: |
                   Optional. The project id of the BigQuery dataset. If not specified, the project will be inferred from the stream resource.
           - name: 'blmtConfig'
@@ -1937,6 +2132,73 @@ properties:
                         type: String
                         description: |
                           Field name.
+      - name: 'spannerExcludedObjects'
+        type: NestedObject
+        description: |
+          Spanner objects to avoid backfilling.
+        properties:
+          - name: 'schemas'
+            type: Array
+            description: |
+              Spanner schemas in the database
+            required: true
+            min_size: 1
+            item_type:
+              description: |
+                Spanner schema
+              type: NestedObject
+              properties:
+                - name: 'schema'
+                  type: String
+                  description: |
+                    Schema name.
+                  required: true
+                - name: 'tables'
+                  type: Array
+                  description: |
+                    Tables in the schema.
+                  min_size: 1
+                  item_type:
+                    description: |
+                      Spanner table.
+                    type: NestedObject
+                    properties:
+                      - name: 'table'
+                        type: String
+                        description: |
+                          Table name.
+                        required: true
+                      - name: 'columns'
+                        type: Array
+                        description: |
+                          Spanner columns in the table. When unspecified as part of include/exclude objects, includes/excludes everything.
+                        min_size: 1
+                        item_type:
+                          description: |
+                            Spanner column.
+                          type: NestedObject
+                          properties:
+                            - name: 'column'
+                              type: String
+                              description: |
+                                Column name.
+                              required: true
+                            - name: 'dataType'
+                              type: String
+                              description: |
+                                The Spanner data type. Full data types list can be found here:
+                                https://docs.cloud.google.com/spanner/docs/reference/standard-sql/data-types
+                              output: true
+                            - name: 'isPrimaryKey'
+                              type: Boolean
+                              description: |
+                                Whether the column is a primary key.
+                              output: true
+                            - name: 'ordinalPosition'
+                              type: Integer
+                              description: |
+                                The ordinal position of the column in the table.
+                              output: true
       - name: 'mongodbExcludedObjects'
         type: NestedObject
         description: |
@@ -2137,6 +2399,16 @@ properties:
                     - name: 'objectName'
                       type: String
                       description: 'The Salesforce object name.'
+                      required: true
+                - name: 'spannerIdentifier'
+                  type: NestedObject
+                  properties:
+                    - name: 'schema'
+                      type: String
+                      description: 'The schema name.'
+                    - name: 'table'
+                      type: String
+                      description: 'The table name.'
                       required: true
                 - name: 'mongodbIdentifier'
                   type: NestedObject
