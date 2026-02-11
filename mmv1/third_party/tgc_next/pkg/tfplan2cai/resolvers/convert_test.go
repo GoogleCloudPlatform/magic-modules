@@ -56,3 +56,23 @@ func TestResolveParentsNested(t *testing.T) {
 	parentToChildMap := NewParentResourceResolver(logger).Resolve(jsonPlan)
 	assert.Equal(t, "google_compute_disk.secondary", parentToChildMap["google_compute_disk.primary"][0])
 }
+
+func TestSortTraversalOrder(t *testing.T) {
+	testMap := map[string][]string{
+		"A": {"AA", "BB"},
+	}
+
+	testMap2 := map[string][]string{
+		"A":  {"AA", "BB"},
+		"AA": {"CC"},
+	}
+
+	result := sortTraversalOrder(testMap)
+	result2 := sortTraversalOrder(testMap2)
+
+	assert.Equal(t, "A", result[0][0])
+	assert.Equal(t, "AA", result[1][0])
+	assert.Equal(t, "BB", result[1][1])
+	assert.Equal(t, "A", result2[0][0])
+	assert.Equal(t, "AA", result2[1][0])
+}
