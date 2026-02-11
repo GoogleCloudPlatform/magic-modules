@@ -111,6 +111,8 @@ examples:
   - name: 'gkehub_feature_workload_identity'
     primary_resource_id: 'feature'
     primary_resource_name: 'fmt.Sprint("workloadidentity")'
+    vars:
+      workload_identity_pool_id: 'example-pool'
     exclude_test: true
 parameters:
   - name: 'location'
