@@ -107,7 +107,7 @@ resource "google_developer_connect_insights_config" "insights_config_projects" {
     project            = google_project.project.project_id
     annotations        = {}
     labels             = {}
-    projects {
+    target_projects {
         project_ids = ["projects/${google_project.project.project_id}"]
     }
     artifact_configs {
