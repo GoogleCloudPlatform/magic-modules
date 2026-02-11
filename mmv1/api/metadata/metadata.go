@@ -34,7 +34,7 @@ func FromResource(r api.Resource) Metadata {
 	}
 	if !r.DeletionPolicyExclude && !r.ExcludeDelete && r.ProductMetadata.DeletionPolicyOptIn {
 		m.Fields = append(m.Fields, Field{
-			Field:        "deletionPolicy",
+			Field:        "deletion_policy",
 			ProviderOnly: true,
 		})
 	}
