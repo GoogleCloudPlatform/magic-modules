@@ -57,6 +57,7 @@ resource "google_compute_forwarding_rule" "default" {
 resource "google_compute_packet_mirroring" "{{$.PrimaryResourceId}}" {
   name = "{{index $.Vars "mirroring_name"}}"
   description = "bar"
+  enable = "TRUE"
   network {
     url = google_compute_network.default.id
   }
