@@ -20,10 +20,13 @@ references:
   guides:
     'Official Documentation': 'https://cloud.google.com/dataform/docs/'
   api: 'https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.folders'
-self_link: 'projects/{{project}}/locations/{{region}}/folders/{{name}}'
+self_link: 'projects/{{project}}/locations/{{region}}/folders/{{folder_id}}'
 create_url: 'projects/{{project}}/locations/{{region}}/folders?folderId={{name}}'
+id_format: 'projects/{{project}}/locations/{{region}}/folders/{{folder_id}}'
 update_verb: 'PATCH'
 update_mask: true
+custom_code:
+  post_create: 'templates/terraform/post_create/dataform_folder.tmpl'
 parameters:
   - name: 'region'
     type: String
@@ -39,7 +42,13 @@ properties:
     min_version: 'beta'
     required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'folder_id'
+    api_name: 'name'
+    type: String
+    description: The unique identifier for the Folder.
+    min_version: 'beta'
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    output: true
   - name: 'displayName'
     type: String
     description: Required. The Folder's user-friendly name.
@@ -55,6 +64,12 @@ examples:
   - name: 'dataform_folder_basic'
     primary_resource_id: 'dataform_folder_basic'
     primary_resource_name: 'fmt.Sprintf("tf_test_dataform_folder%s", context["random_suffix"])'
+    min_version: 'beta'
+    vars:
+      dataform_folder_name: 'dataform_folder_basic'
+  - name: dataform_folder_full'
+    primary_resource_id: 'dataform_folder_full'
+    primary_resource_name: 'fmt.Sprintf("tf_test_dataform_folder_full%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       dataform_folder_name: 'dataform_folder_basic'
