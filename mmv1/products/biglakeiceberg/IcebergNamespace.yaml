@@ -61,6 +61,7 @@ iam_policy:
   fetch_iam_policy_verb: 'GET'
   import_format:
     - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
+    - '{{namespace_id}}'
   allowed_iam_role: 'roles/biglake.editor'
   sample_config_body: 'templates/terraform/iam/example_config_body/biglake_iceberg_namespace.tf.tmpl'
 examples:
