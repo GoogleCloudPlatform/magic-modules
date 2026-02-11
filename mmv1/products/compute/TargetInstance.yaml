@@ -13,6 +13,7 @@
 
 ---
 name: 'TargetInstance'
+include_in_tgc_next: true
 kind: 'compute#targetInstance'
 description: |
   Represents a TargetInstance resource which defines an endpoint instance

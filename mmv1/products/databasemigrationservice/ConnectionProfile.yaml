@@ -13,6 +13,7 @@
 
 ---
 name: 'ConnectionProfile'
+include_in_tgc_next: true
 description: 'A connection profile definition.'
 references:
   guides:

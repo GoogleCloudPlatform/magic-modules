@@ -13,6 +13,7 @@
 
 ---
 name: 'TargetHttpProxy'
+include_in_tgc_next: true
 kind: 'compute#targetHttpProxy'
 description: |
   Represents a TargetHttpProxy resource, which is used by one or more global

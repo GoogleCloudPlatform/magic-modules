@@ -13,6 +13,7 @@
 
 ---
 name: Pipeline
+include_in_tgc_next: true
 base_url: projects/{{project}}/locations/{{location}}/pipelines
 self_link: projects/{{project}}/locations/{{location}}/pipelines/{{pipeline_id}}
 create_url: projects/{{project}}/locations/{{location}}/pipelines?pipelineId={{pipeline_id}}

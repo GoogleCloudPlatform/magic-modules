@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionUrlMap'
+include_in_tgc_next: true
 api_resource_type_kind: UrlMap
 kind: 'compute#urlMap'
 description: |

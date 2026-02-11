@@ -13,6 +13,7 @@
 
 ---
 name: 'Snapshot'
+include_in_tgc_next: true
 kind: 'compute#snapshot'
 description: |
   Represents a Persistent Disk Snapshot resource.

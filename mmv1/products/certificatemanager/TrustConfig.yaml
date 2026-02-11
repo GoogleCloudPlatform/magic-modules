@@ -13,6 +13,7 @@
 
 ---
 name: 'TrustConfig'
+include_in_tgc_next: true
 description: |
   TrustConfig represents a resource that represents your Public Key Infrastructure (PKI) configuration in Certificate Manager for use in mutual TLS authentication scenarios.
 references:

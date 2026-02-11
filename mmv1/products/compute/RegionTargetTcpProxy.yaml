@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionTargetTcpProxy'
+include_in_tgc_next: true
 api_resource_type_kind: TargetTcpProxy
 description: |
   Represents a RegionTargetTcpProxy resource, which is used by one or more
