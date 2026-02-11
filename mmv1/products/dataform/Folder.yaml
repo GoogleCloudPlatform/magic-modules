@@ -67,7 +67,7 @@ examples:
     min_version: 'beta'
     vars:
       dataform_folder_name: 'dataform_folder_basic'
-  - name: dataform_folder_full'
+  - name: 'dataform_folder_full'
     primary_resource_id: 'dataform_folder_full'
     primary_resource_name: 'fmt.Sprintf("tf_test_dataform_folder_full%s", context["random_suffix"])'
     min_version: 'beta'
