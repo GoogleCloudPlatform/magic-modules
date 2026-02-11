@@ -1,0 +1,65 @@
+package dataform_test
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+)
+
+func TestAccDataformFolder_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckDataformFolderDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataformFolder_basic(context),
+			},
+			{
+				ResourceName:            "google_dataform_folder.dataform_folder_basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"region"},
+			},
+			{
+				Config: testAccDataformFolder_update(context),
+			},
+			{
+				ResourceName:            "google_dataform_folder.dataform_folder_basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"region"},
+			},
+		},
+	})
+}
+
+func testAccDataformFolder_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dataform_folder" "dataform_folder_basic" {
+  provider = google-beta
+  region = "us-central1"
+  display_name = "Basic Folder-%{random_suffix}"
+}
+`, context)
+}
+
+func testAccDataformFolder_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dataform_folder" "dataform_folder_basic" {
+  provider = google-beta
+  region = "us-central1"
+  display_name = "Basic Folder Update-%{random_suffix}"
+}
+`, context)
+}
+{{- end }}
