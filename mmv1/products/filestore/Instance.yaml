@@ -76,11 +76,11 @@ examples:
     # https://github.com/GoogleCloudPlatform/magic-modules/pull/5875#discussion_r844285335
     exclude_test: true
 virtual_fields:
-  - name: 'replica_state'
+  - name: 'desired_replica_state'
     type: Enum
     enum_values:
-      - 'PAUSE'
-      - 'RESUME'
+      - 'PAUSED'
+      - 'READY'
     description: |
      The desired_replica_state field controls the state of a replica. Terraform will attempt to make the actual state of the replica match the desired state.
 parameters:
