@@ -167,6 +167,13 @@ properties:
             projects/{projectId}/locations/{locationId}/backups/{backupId},
             that this file share has been restored from.
           immutable: true
+        - name: 'sourceBackupdrBackup'
+          type: String
+          description: |
+            The resource name of the BackupDR backup, in the format
+            `projects/{project_id}/locations/{location_id}/backupVaults/{backupvault_id}/dataSources/{datasource_id}/backups/{backup_id}`,
+            that this file share has been restored from.
+          immutable: true
         - name: 'nfsExportOptions'
           type: Array
           description: |
