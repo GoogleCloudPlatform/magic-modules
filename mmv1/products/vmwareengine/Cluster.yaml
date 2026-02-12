@@ -382,4 +382,3 @@ properties:
             If set to false, the colocation requirement will be enforced.
             Colocation requirement is the requirement that the cluster must be in the
             same region/zone of datastore.
-                                                                                                                                                                                                                             151,1         Bo
