@@ -630,6 +630,12 @@ properties:
                     NEARLINE
                     COLDLINE
                     ARCHIVE
+                  enum_values:
+                    - 'STORAGE_CLASS_UNSPECIFIED'
+                    - 'STANDARD'
+                    - 'NEARLINE'
+                    - 'COLDLINE'
+                    - 'ARCHIVE'
             - name: newFilestore
               type: NestedObject
               description: |-
