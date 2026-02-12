@@ -21,7 +21,7 @@ func DataSourceVmwareengineAnnouncements() *schema.Resource {
 			},
 			"name": {
 				Type:        schema.TypeString,
-				Optional: true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: `The resource name of the specific Announcements to retrieve. If provided, the 'announcements' list will contain only this announcement.`,
 			},
