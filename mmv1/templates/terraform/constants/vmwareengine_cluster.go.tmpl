@@ -53,7 +53,7 @@ func RemoveDatastoreMountConfigFieldFromUpdateMask (url string) (string) {
     return url
 }
 
-{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
+{{- if ne $.ProductMetadata.Compiler "terraformgoogleconversion-codegen" }}
 func mountDatastores(mountsToAdd []interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
     var project string
     userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
@@ -120,7 +120,7 @@ func mountDatastores(mountsToAdd []interface{}, d *schema.ResourceData, config *
 }
 {{- end }}
 
-{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
+{{- if ne $.ProductMetadata.Compiler "terraformgoogleconversion-codegen" }}
 func unmountDatastores(mountsToRemove []interface{}, d *schema.ResourceData, config *transport_tpg.Config) error {
     var project string
     userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
