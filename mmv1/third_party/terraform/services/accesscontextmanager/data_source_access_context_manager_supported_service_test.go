@@ -39,15 +39,6 @@ func testAccCheckAccessContextManagerSupportedService(n string) resource.TestChe
 			return errors.New("data source ID not set")
 		}
 
-		name, ok := rs.Primary.Attributes["name"]
-		if !ok || name == "" {
-			return errors.New("expected 'name' attribute to be set")
-		}
-
-		if name != "storage.googleapis.com" {
-			return fmt.Errorf("expected name to be 'storage.googleapis.com', got %q", name)
-		}
-
 		title, ok := rs.Primary.Attributes["title"]
 		if !ok || title == "" {
 			return errors.New("expected 'title' attribute to be set")

@@ -15,33 +15,40 @@ func DataSourceAccessContextManagerSupportedServices() *schema.Resource {
 		Read: dataSourceAccessContextManagerSupportedServicesRead,
 		Schema: map[string]*schema.Schema{
 			"supported_services": {
-				Type:     schema.TypeList,
-				Computed: true,
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "The list of VPC-SC supported services.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The service name or address of the supported service, such as `storage.googleapis.com`.",
 						},
 						"title": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The name of the supported product, such as 'Cloud Storage'.",
 						},
 						"support_stage": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The support stage of the service.",
 						},
 						"available_on_restricted_vip": {
-							Type:     schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "True if the service is available on the restricted VIP. Services on the restricted VIP typically either support VPC Service Controls or are core infrastructure services required for the functioning of Google Cloud.",
 						},
 						"known_limitations": {
-							Type:     schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "True if the service is supported with some limitations. Check documentation for details.",
 						},
 						"service_support_stage": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The support stage of the service. Values are `GA`, `PREVIEW`, and `DEPRECATED`.",
 						},
 					},
 				},

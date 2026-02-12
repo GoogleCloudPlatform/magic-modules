@@ -16,44 +16,48 @@ func DataSourceAccessContextManagerSupportedService() *schema.Resource {
 			"service_name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The name of the service to get information about, e.g. `storage.googleapis.com`.",
-			},
-			"name": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The name of the service to get information about. The names must be in the same format as used in defining a service perimeter, for example, `storage.googleapis.com`.",
 			},
 			"title": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The name of the supported product, such as 'Cloud Storage'.",
 			},
 			"support_stage": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The support stage of the service.",
 			},
 			"available_on_restricted_vip": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "True if the service is available on the restricted VIP. Services on the restricted VIP typically either support VPC Service Controls or are core infrastructure services required for the functioning of Google Cloud.",
 			},
 			"known_limitations": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "True if the service is supported with some limitations. Check documentation for details.",
 			},
 			"service_support_stage": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The support stage of the service. Values are `GA`, `PREVIEW`, and `DEPRECATED`.",
 			},
 			"supported_methods": {
-				Type:     schema.TypeList,
-				Computed: true,
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "The list of supported methods for this service.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"method": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "A valid method name for the respective request mode. Must be a fully qualified name, for example, `storage.googleapis.com/BucketService.GetBucket`.",
 						},
 						"permission": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "A valid Cloud IAM permission for the respective request mode, for example, `storage.buckets.get`.",
 						},
 					},
 				},
@@ -98,9 +102,6 @@ func dataSourceAccessContextManagerSupportedServiceRead(d *schema.ResourceData, 
 		return false
 	}
 
-	if err := d.Set("name", getString(res, "name")); err != nil {
-		return fmt.Errorf("error setting name: %s", err)
-	}
 	if err := d.Set("title", getString(res, "title")); err != nil {
 		return fmt.Errorf("error setting title: %s", err)
 	}
