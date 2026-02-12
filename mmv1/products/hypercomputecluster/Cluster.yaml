@@ -563,7 +563,6 @@ properties:
                   type: String
                   required: true
                   description: Name of the Cloud Storage bucket to import.
-                  immutable: true
             - name: existingFilestore
               type: NestedObject
               description: |-
@@ -576,7 +575,6 @@ properties:
                   description: |-
                     Name of the Filestore instance to import, in the format
                     `projects/{project}/locations/{location}/instances/{instance}`
-                  immutable: true
             - name: existingLustre
               type: NestedObject
               description: |-
@@ -590,7 +588,6 @@ properties:
                   description: |-
                     Name of the Managed Lustre instance to import, in the format
                     `projects/{project}/locations/{location}/instances/{instance}`
-                  immutable: true
             - name: newBucket
               type: NestedObject
               description: |-
@@ -615,7 +612,6 @@ properties:
                   type: String
                   required: true
                   description: Name of the Cloud Storage bucket to create.
-                  immutable: true
                 - name: hierarchicalNamespace
                   type: NestedObject
                   description: Message describing Google Cloud Storage hierarchical namespace configuration
@@ -634,7 +630,6 @@ properties:
                     NEARLINE
                     COLDLINE
                     ARCHIVE
-                  immutable: true
             - name: newFilestore
               type: NestedObject
               description: |-
@@ -644,14 +639,12 @@ properties:
                 - name: description
                   type: String
                   description: Description of the instance. Maximum of 2048 characters.
-                  immutable: true
                 - name: fileShares
                   type: Array
                   required: true
                   description: |-
                     File system shares on the instance. Exactly one file share must be
                     specified.
-                  immutable: true
                   item_type:
                     type: NestedObject
                     properties:
@@ -672,25 +665,30 @@ properties:
                   description: |-
                     Name of the Filestore instance to create, in the format
                     `projects/{project}/locations/{location}/instances/{instance}`
-                  immutable: true
                 - name: protocol
-                  type: String
+                  type: Enum
                   description: |-
                     Access protocol to use for all file shares in the instance. Defaults to NFS
                     V3 if not set.
                     Possible values:
                     NFSV3
                     NFSV41
-                  immutable: true
+                  enum_values:
+                    - 'PROTOCOL_UNSPECIFIED'
+                    - 'NFSV3'
+                    - 'NFSV41'
                 - name: tier
-                  type: String
+                  type: Enum
                   required: true
                   description: |-
                     Service tier to use for the instance.
                     Possible values:
                     ZONAL
                     REGIONAL
-                  immutable: true
+                  enum_values:
+                    - 'TIER_UNSPECIFIED'
+                    - 'ZONAL'
+                    - 'REGIONAL'
             - name: newLustre
               type: NestedObject
               description: |-
@@ -704,11 +702,9 @@ properties:
                   description: |-
                     Storage capacity of the instance in gibibytes (GiB). Allowed values are
                     between 18000 and 7632000.
-                  immutable: true
                 - name: description
                   type: String
                   description: Description of the Managed Lustre instance. Maximum of 2048 characters.
-                  immutable: true
                 - name: filesystem
                   type: String
                   required: true
@@ -716,14 +712,12 @@ properties:
                     Filesystem name for this instance. This name is used by client-side tools,
                     including when mounting the instance. Must be 8 characters or less and can
                     only contain letters and numbers.
-                  immutable: true
                 - name: lustre
                   type: String
                   required: true
                   description: |-
                     Name of the Managed Lustre instance to create, in the format
                     `projects/{project}/locations/{location}/instances/{instance}`
-                  immutable: true
         - name: filestore
           type: NestedObject
           description: A reference to a [Filestore](https://cloud.google.com/filestore) instance.
@@ -758,4 +752,5 @@ examples:
     primary_resource_id: 'cluster'
     vars:
       cluster_id: 'my-cluster'
-      network_id: 'my-cluster-net'
+    test_vars_overrides:
+      cluster_id: 'fmt.Sprintf("tf%s", acctest.RandString(t, 8))'

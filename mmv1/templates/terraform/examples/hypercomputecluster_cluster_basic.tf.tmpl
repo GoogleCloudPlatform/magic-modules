@@ -6,7 +6,7 @@ locals {
 }
 
 resource "google_hypercomputecluster_cluster" "{{$.PrimaryResourceId}}" {
-  cluster_id                  = "cdcluster1"
+  cluster_id                  = "{{index $.Vars "cluster_id"}}"
   location                    = "us-central1"
   description                 = "Cluster Director instance created through Terraform"
   network_resources {
