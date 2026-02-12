@@ -440,25 +440,23 @@ func formatParentService(service string) string {
 }
 
 func stringListDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	// Extract the root field name from k (e.g., "reserved_peering_ranges.0" -> "reserved_peering_ranges")
-	// DiffSuppressFunc is called for each element and for the count, so we need to handle both
-	rootKey := k
-	if idx := strings.Index(k, "."); idx != -1 {
-		rootKey = k[:idx]
-	}
+	// The key (k) can be "reserved_peering_ranges", "reserved_peering_ranges.#", or "reserved_peering_ranges.0", etc.
+	// We want to check the *entire* list equality whenever any part of it is questioned.
+	root := "reserved_peering_ranges"
 
-	// Only process once when k equals the root field name or when it's the count (e.g., "reserved_peering_ranges.#")
-	if k != rootKey && !strings.HasSuffix(k, ".#") {
+	// If this key doesn't belong to our field, ignore it.
+	if k != root && !strings.HasPrefix(k, root+".") {
 		return false
 	}
 
-	o, n := d.GetChange(rootKey)
+	// Get the full list values (Old and New) from the resource data
+	o, n := d.GetChange(root)
 
 	// Cast to generic lists
 	oldList, ok1 := o.([]interface{})
 	newList, ok2 := n.([]interface{})
 
-	// If casting fails or lengths differ, don't suppress the diff
+	// If casting fails or lengths differ, we definitely have a change, so don't suppress.
 	if !ok1 || !ok2 || len(oldList) != len(newList) {
 		return false
 	}
@@ -474,8 +472,10 @@ func stringListDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 		newStrs[i] = fmt.Sprintf("%v", v)
 	}
 
+	// Sort both lists to compare content regardless of order
 	sort.Strings(oldStrs)
 	sort.Strings(newStrs)
 
+	// If the sorted lists are identical, return true to SUPPRESS the diff.
 	return reflect.DeepEqual(oldStrs, newStrs)
 }
