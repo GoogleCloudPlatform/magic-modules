@@ -312,6 +312,7 @@ resource "google_service_networking_connection" "foobar" {
 `, addressRangeName, addressRangeName, org_id, billing_account, networkName, addressRangeName, serviceName)
 }
 
+// MODIFIED BY FLOW AI: Fixed test to use default project instead of creating a new one
 func TestAccServiceNetworkingConnection_reorder(t *testing.T) {
 	t.Parallel()
 
@@ -322,8 +323,7 @@ func TestAccServiceNetworkingConnection_reorder(t *testing.T) {
 	range2 := fmt.Sprintf("tf-test-range2-%s", acctest.RandString(t, 10))
 
 	service := "servicenetworking.googleapis.com"
-	org_id := envvar.GetTestOrgFromEnv(t)
-	billing_account := envvar.GetTestBillingAccountFromEnv(t)
+	// MODIFIED: Removed org_id and billing_account retrieval as they are not needed for default project
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -332,7 +332,8 @@ func TestAccServiceNetworkingConnection_reorder(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Step 1: Create with Order [Range1, Range2]
 			{
-				Config: testAccServiceNetworkingConnectionOrder(network, range1, range2, service, org_id, billing_account, "forward"),
+				// MODIFIED: Removed org_id and billing_account arguments
+				Config: testAccServiceNetworkingConnectionOrder(network, range1, range2, service, "forward"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_service_networking_connection.foobar", "reserved_peering_ranges.#", "2"),
 				),
@@ -345,38 +346,27 @@ func TestAccServiceNetworkingConnection_reorder(t *testing.T) {
 			// Step 2: Update with Order [Range2, Range1]
 			// We expect an Empty Plan. If the bug exists, this step fails with "Plan not empty".
 			{
-				Config:   testAccServiceNetworkingConnectionOrder(network, range1, range2, service, org_id, billing_account, "reverse"),
+				// MODIFIED: Removed org_id and billing_account arguments
+				Config:   testAccServiceNetworkingConnectionOrder(network, range1, range2, service, "reverse"),
 				PlanOnly: true,
 			},
 		},
 	})
 }
 
-func testAccServiceNetworkingConnectionOrder(networkName, r1, r2, serviceName, org_id, billing_account, order string) string {
+func testAccServiceNetworkingConnectionOrder(networkName, r1, r2, serviceName, order string) string {
 	ranges := fmt.Sprintf(`["%s", "%s"]`, r1, r2)
 	if order == "reverse" {
 		ranges = fmt.Sprintf(`["%s", "%s"]`, r2, r1)
 	}
 
 	return fmt.Sprintf(`
-resource "google_project" "project" {
-  project_id      = "%s"
-  name            = "%s"
-  org_id          = "%s"
-  billing_account = "%s"
-  deletion_policy = "DELETE"
-}
-
-resource "google_project_service" "servicenetworking" {
-  project = google_project.project.project_id
-  service = "servicenetworking.googleapis.com"
-}
+# MODIFIED: Removed google_project and google_project_service resources.
+# The test now relies on the default provider project which already has APIs enabled.
 
 resource "google_compute_network" "servicenet" {
   name       = "%s"
-  # FIX: Create this inside the new project
-  project    = google_project.project.project_id
-  depends_on = [google_project_service.servicenetworking]
+  # MODIFIED: Removed project = google_project.project.project_id
 }
 
 resource "google_compute_global_address" "r1" {
@@ -384,10 +374,8 @@ resource "google_compute_global_address" "r1" {
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
-  # FIX: Create this inside the new project
-  project       = google_project.project.project_id
+  # MODIFIED: Removed project = ...
   network       = google_compute_network.servicenet.self_link
-  depends_on    = [google_project_service.servicenetworking]
 }
 
 resource "google_compute_global_address" "r2" {
@@ -395,17 +383,16 @@ resource "google_compute_global_address" "r2" {
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
-  # FIX: Create this inside the new project
-  project       = google_project.project.project_id
+  # MODIFIED: Removed project = ...
   network       = google_compute_network.servicenet.self_link
-  depends_on    = [google_project_service.servicenetworking]
 }
 
 resource "google_service_networking_connection" "foobar" {
   network                 = google_compute_network.servicenet.self_link
   service                 = "%s"
   reserved_peering_ranges = %s
-  depends_on = [google_project_service.servicenetworking, google_compute_global_address.r1, google_compute_global_address.r2]
+  # MODIFIED: Removed depends_on for google_project_service
+  depends_on = [google_compute_global_address.r1, google_compute_global_address.r2]
 }
-`, networkName, networkName, org_id, billing_account, networkName, r1, r2, serviceName, ranges)
+`, networkName, r1, r2, serviceName, ranges)
 }
