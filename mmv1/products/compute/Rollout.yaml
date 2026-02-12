@@ -1,0 +1,52 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: "Rollout"
+kind: "compute#rollout"
+description: |
+  A Rollout resource.
+min_version: "beta"
+exclude: true
+readonly: true
+docs:
+base_url: "projects/{{project}}/global/rollouts"
+has_self_link: true
+examples:
+  - name: "compute_rollout_data_source"
+    primary_resource_id: "default"
+    vars:
+      provider_project: "my-project"
+  - name: "compute_rollouts_data_source"
+    primary_resource_id: "all"
+    vars:
+      provider_project: "my-project"
+properties:
+  - name: "name"
+    type: String
+    description: "Name of the resource."
+  - name: "description"
+    type: String
+    description: "An optional description of this resource."
+  - name: "rolloutPlan"
+    type: String
+    description: "The rollout plan."
+  - name: "state"
+    type: String
+    description: "The state of the rollout."
+  - name: "currentWaveNumber"
+    type: Integer
+    description: "The current wave number."
+  - name: "project"
+    type: String
+    description: "The project."

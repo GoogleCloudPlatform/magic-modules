@@ -1,0 +1,9 @@
+data "google_compute_rollouts" "all" {
+  provider       = google-beta
+  project = "{{index $.Vars "provider_project"}}"
+  filter  = "state = COMPLETED"
+}
+
+output "rollouts" {
+  value = data.google_compute_rollouts.all.rollouts
+}
