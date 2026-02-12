@@ -14,6 +14,7 @@
 ---
 name: 'ActiveDirectory'
 display_name: 'Managed Microsoft Active Directory'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://managedidentities.googleapis.com/v1/'
