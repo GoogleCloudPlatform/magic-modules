@@ -86,7 +86,7 @@ func TestAccDataSourceGoogleCloudBackupDRDataSources_basic(t *testing.T) {
 					// Basic checks for the input attributes
 					resource.TestCheckResourceAttr("data.google_backup_dr_data_sources.all", "project", project),
 					resource.TestCheckResourceAttr("data.google_backup_dr_data_sources.all", "location", "us-central1"),
-					resource.TestCheckResourceAttr("data.google_backup_dr_data_sources.all", "backup_vault_id", "default-vault-us-central1"),
+					resource.TestCheckResourceAttr("data.google_backup_dr_data_sources.all", "backup_vault_id", "bv-test"),
 				),
 			},
 		},
