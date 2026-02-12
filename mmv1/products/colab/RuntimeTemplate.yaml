@@ -196,6 +196,17 @@ properties:
                             If a variable cannot be resolved, the reference in the input string will be unchanged.
                             The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped
                             references will never be expanded, regardless of whether the variable exists or not.'
+      - name: 'colabImage'
+        type: NestedObject
+        description: 'Colab image of the runtime.'
+        properties:
+          - name: 'releaseName'
+            type: String
+            description: 'The release name of the NotebookRuntime Colab image, e.g. "py310". If not specified, detault to the latest release.'
+          - name: 'description'
+            type: String
+            description: 'A human-readable description of the specified colab image release, populated by the system. Example: "Python 3.10", "Latest - current Python 3.11"'
+            output: true
       - name: 'postStartupScriptConfig'
         type: NestedObject
         description: 'Post startup script config.'
