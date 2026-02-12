@@ -887,12 +887,19 @@ func TestAccGKEHubFeature_WorkloadIdentity(t *testing.T) {
 
 func testAccGKEHubFeature_WorkloadIdentity(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
+resource "google_iam_workload_identity_pool" "my-pool" {
+  provider = google-beta
+
+  workload_identity_pool_id = "my-pool"
+  mode                      = "TRUST_DOMAIN"
+}
+
 resource "google_gke_hub_feature" "feature" {
   name = "workloadidentity"
   location = "global"
   spec {
     workloadidentity {
-	    scope_tenancy_pool = [projects/12345/locations/global/workloadIdentityPools/my-pool]
+	    scope_tenancy_pool = google_iam_workload_identity_pool.my-pool.name
     }
   }
   depends_on = [time_sleep.wait_for_gkehub_enablement]
@@ -903,12 +910,19 @@ resource "google_gke_hub_feature" "feature" {
 
 func testAccGKEHubFeature_WorkloadIdentityUpdate(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
+resource "google_iam_workload_identity_pool" "my-other-pool" {
+  provider = google-beta
+
+  workload_identity_pool_id = "my-other-pool"
+  mode                      = "TRUST_DOMAIN"
+}
+
 resource "google_gke_hub_feature" "feature" {
   name = "workloadidentity"
   location = "global"
   spec {
     workloadidentity {
-	    scope_tenancy_pool = [projects/12345/locations/global/workloadIdentityPools/my-other-pool]
+	    scope_tenancy_pool = google_iam_workload_identity_pool.my-other-pool.name
     }
   }
   depends_on = [time_sleep.wait_for_gkehub_enablement]
