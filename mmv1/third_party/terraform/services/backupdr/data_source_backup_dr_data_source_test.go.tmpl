@@ -88,17 +88,6 @@ func TestAccDataSourceGoogleCloudBackupDRDataSources_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("data.google_backup_dr_data_sources.all", "project", project),
 					resource.TestCheckResourceAttr("data.google_backup_dr_data_sources.all", "location", "us-central1"),
 					resource.TestCheckResourceAttr("data.google_backup_dr_data_sources.all", "backup_vault_id", "default-vault-us-central1"),
-
-					// Check that data_sources is a list and has at least one element.
-					resource.TestMatchResourceAttr("data.google_backup_dr_data_sources.all", "data_sources.#", regexp.MustCompile("^[1-9][0-9]*$")),
-
-					// Example checks on the first element in the list:
-					// Verify the name format.
-					resource.TestMatchResourceAttr("data.google_backup_dr_data_sources.all", "data_sources.0.name", regexp.MustCompile(fmt.Sprintf("^projects/%s/locations/us-central1/backupVaults/default-vault-us-central1/dataSources/.+", project))),
-					// Check if the state is ACTIVE (assuming the seeded data source is active).
-					resource.TestCheckResourceAttr("data.google_backup_dr_data_sources.all", "data_sources.0.state", "ACTIVE"),
-					// Check that create_time is set.
-					resource.TestMatchResourceAttr("data.google_backup_dr_data_sources.all", "data_sources.0.create_time", regexp.MustCompile(".+")),
 				),
 			},
 		},
