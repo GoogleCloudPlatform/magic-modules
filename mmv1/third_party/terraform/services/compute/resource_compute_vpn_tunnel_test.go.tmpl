@@ -7,7 +7,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
+{{- if ne $.TargetVersionName "ga" }}
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+{{- end }}
+
 )
 
 func TestAccComputeVpnTunnel_regionFromGateway(t *testing.T) {
