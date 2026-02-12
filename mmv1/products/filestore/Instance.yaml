@@ -82,8 +82,7 @@ virtual_fields:
       - 'PAUSE'
       - 'RESUME'
     description: |
-     The replica_state field controls the pause and resume operations on a replica instance. It's intended for use after the replica has been created. 
-     This field reflects the last state set by Terraform. For example, if the last operation run by Terraform was to resume, the field's value will be RESUME.
+     The desired_replica_state field controls the state of a replica. Terraform will attempt to make the actual state of the replica match the desired state.
 parameters:
   - name: 'zone'
     type: String
