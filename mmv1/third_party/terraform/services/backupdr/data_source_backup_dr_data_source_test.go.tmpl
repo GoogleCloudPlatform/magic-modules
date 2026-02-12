@@ -101,7 +101,7 @@ data "google_project" "project" {
 data "google_backup_dr_data_sources" "all" {
   project = data.google_project.project.project_id
   location      = "us-central1"
-  backup_vault_id = "default-vault-us-central1"
+  backup_vault_id = "bv-test"
 }
 `, context)
 }
