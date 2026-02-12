@@ -40,6 +40,8 @@ async:
     resource_inside_response: false
 custom_code:
   constants: 'templates/terraform/constants/region_security_policy.go.tmpl'
+# excluding identity due to name value inconsistency
+exclude_identity_generation: true
 sweeper:
   url_substitutions:
     - region: "us-south1"
@@ -51,18 +53,22 @@ sweeper:
     - region: "us-central1"
 examples:
   - name: 'region_security_policy_basic'
+    exclude_identity_import: true
     primary_resource_id: 'region-sec-policy-basic'
     vars:
       sec_policy_name: 'my-sec-policy-basic'
   - name: 'region_security_policy_with_ddos_protection_config'
+    exclude_identity_import: true
     primary_resource_id: 'region-sec-policy-ddos-protection'
     vars:
       sec_policy_name: 'my-sec-policy-ddos-protection'
   - name: 'region_security_policy_with_user_defined_fields'
+    exclude_identity_import: true
     primary_resource_id: 'region-sec-policy-user-defined-fields'
     vars:
       sec_policy_name: 'my-sec-policy-user-defined-fields'
   - name: 'region_security_policy_with_rules'
+    exclude_identity_import: true
     primary_resource_id: 'region-sec-policy-with-rules'
     vars:
       sec_policy_name: 'my-sec-policy-with-rules'

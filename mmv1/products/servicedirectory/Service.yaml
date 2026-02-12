@@ -35,6 +35,7 @@ iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'name'
+exclude_identity_generation: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/service_directory_service.go.tmpl'
   encoder: 'templates/terraform/encoders/service_directory_metadata_to_annotations.go.tmpl'
@@ -44,6 +45,7 @@ custom_code:
 exclude_sweeper: true
 examples:
   - name: 'service_directory_service_basic'
+    exclude_identity_import: true
     primary_resource_id: 'example'
     vars:
       service_id: 'example-service'

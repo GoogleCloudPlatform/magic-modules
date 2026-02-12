@@ -41,10 +41,13 @@ custom_code:
   post_update: 'templates/terraform/constants/compute_firewall_policy_operation.go.tmpl'
 custom_diff:
   - 'tpgresource.DefaultProviderProject'
+# excluding identity due to name value inconsistency
+exclude_identity_generation: true
 include_in_tgc_next: true
 examples:
   - name: 'firewall_policy'
     primary_resource_id: 'default'
+    exclude_identity_import: true
     vars:
       policy_name: 'my-policy'
     test_env_vars:

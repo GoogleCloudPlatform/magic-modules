@@ -38,6 +38,8 @@ custom_code:
   post_update: 'templates/terraform/post_update/org_security_policy.go.tmpl'
   # TODO: Remove once b/154369201 is closed.
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
+# excluding identity due to policy_id value inconsistency
+exclude_identity_generation: true
 examples:
   - name: 'organization_security_policy_basic'
     primary_resource_id: 'policy'

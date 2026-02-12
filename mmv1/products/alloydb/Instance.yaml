@@ -52,6 +52,8 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/alloydb_instance.go.tmpl'
 # Skipping the sweeper because instances will be deleted during cluster sweeps
 exclude_sweeper: true
+# exluding resource_identity due to custom_import
+exclude_identity_generation: true
 include_in_tgc_next: true
 tgc_tests:
   - name: 'TestAccAlloydbInstance_connectionPoolConfig'
@@ -66,6 +68,7 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
+    exclude_identity_import: true
     exclude_test: true
   - name: 'alloydb_secondary_instance_basic'
     primary_resource_id: 'secondary'
@@ -75,6 +78,7 @@ examples:
       alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
       alloydb_secondary_instance_name: 'alloydb-secondary-instance'
       network_name: 'alloydb-secondary-network'
+    exclude_identity_import: true
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
@@ -85,6 +89,7 @@ examples:
       alloydb_cluster_name: 'alloydb-cluster'
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
+    exclude_identity_import: true
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
     ignore_read_extra:
@@ -99,6 +104,7 @@ examples:
       alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
       alloydb_secondary_instance_name: 'alloydb-secondary-instance'
       network_name: 'alloydb-secondary-network'
+    exclude_identity_import: true
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
     ignore_read_extra:
@@ -111,6 +117,7 @@ examples:
       alloydb_cluster_name: 'alloydb-cluster'
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
+    exclude_identity_import: true
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
