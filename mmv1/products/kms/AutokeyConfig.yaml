@@ -98,7 +98,6 @@ timeouts:
 # These are now dynamic and handled by custom code.
 exclude_sweeper: true
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 examples:
   - name: 'kms_autokey_config_folder' # Example for folder
     primary_resource_id: 'example-autokeyconfig-folder'
