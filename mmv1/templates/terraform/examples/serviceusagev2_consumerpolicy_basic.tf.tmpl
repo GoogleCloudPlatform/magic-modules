@@ -1,0 +1,22 @@
+provider "google-beta" {
+  user_project_override = true
+  billing_project = "{{index $.TestEnvVars "project_id"}}"
+}
+
+resource "google_folder" "basic" {
+  provider = google-beta
+  parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
+  display_name = "{{index $.Vars "folder"}}"
+  deletion_protection = false
+}
+
+resource "google_service_usage_v2_consumer_policy" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  parent = "folders/${google_folder.basic.folder_id}"
+  name   = "default"
+  enable_rules  {
+    services = ["services/oslogin.googleapis.com"]
+  }
+  validate_dependencies = true
+  check_usage_on_remove = false
+}
