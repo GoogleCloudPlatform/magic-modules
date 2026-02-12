@@ -119,6 +119,7 @@ var (
 		"settings.0.insights_config.0.record_application_tags",
 		"settings.0.insights_config.0.record_client_address",
 		"settings.0.insights_config.0.query_plans_per_minute",
+		"settings.0.insights_config.0.enhanced_query_insights_enabled",
 	}
 
 	sqlServerAuditConfigurationKeys = []string{
@@ -801,10 +802,16 @@ API (for read pools, effective_availability_type may differ from availability_ty
 										AtLeastOneOf: insightsConfigKeys,
 										Description:  `True if Query Insights feature is enabled.`,
 									},
+									"enhanced_query_insights_enabled": {
+										Type:         schema.TypeBool,
+										Optional:     true,
+										AtLeastOneOf: insightsConfigKeys,
+										Description:  `True if Enhanced Query Insights feature is enabled.`,
+									},
 									"query_string_length": {
 										Type:         schema.TypeInt,
 										Optional:     true,
-										Default:      1024,
+										Computed:     true,
 										ValidateFunc: validation.IntBetween(1, 1048576),
 										AtLeastOneOf: insightsConfigKeys,
 										Description:  `Maximum query length stored in bytes. Between 256 and 4500. Default to 1024. For Enterprise Plus instances, from 1 to 1048576.`,
@@ -2104,6 +2111,11 @@ func expandInsightsConfig(configured []interface{}) *sqladmin.InsightsConfig {
 		RecordApplicationTags: _insightsConfig["record_application_tags"].(bool),
 		RecordClientAddress:   _insightsConfig["record_client_address"].(bool),
 		QueryPlansPerMinute:   int64(_insightsConfig["query_plans_per_minute"].(int)),
+		EnhancedQueryInsightsEnabled: _insightsConfig["enhanced_query_insights_enabled"].(bool),
+		// Ensure boolean fields that may be set to false are always sent in API requests
+		// so Terraform can disable features (false) instead of leaving them as the
+		// server-side defaults when omitted.
+		ForceSendFields: []string{"EnhancedQueryInsightsEnabled"},
 	}
 }
 
@@ -3284,6 +3296,7 @@ func flattenInsightsConfig(insightsConfig *sqladmin.InsightsConfig) interface{} 
 		"record_application_tags": insightsConfig.RecordApplicationTags,
 		"record_client_address":   insightsConfig.RecordClientAddress,
 		"query_plans_per_minute":  insightsConfig.QueryPlansPerMinute,
+		"enhanced_query_insights_enabled": insightsConfig.EnhancedQueryInsightsEnabled,
 	}
 
 	return []map[string]interface{}{data}
