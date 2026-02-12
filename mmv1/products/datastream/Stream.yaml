@@ -47,7 +47,6 @@ custom_code:
   post_update: 'templates/terraform/post_update/datastream_stream.go.tmpl'
   post_import: 'templates/terraform/post_import/datastream_stream.go.tmpl'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 tgc_tests:
   - name: 'TestAccDatastreamStream_mongoDb'
     skip: 'Test data has mismatched steps'
@@ -1686,7 +1685,7 @@ properties:
                       See https://cloud.google.com/bigquery/docs/customer-managed-encryption for more information.
                     immutable: true
               - name: 'projectId'
-                type: string
+                type: String
                 description: |
                   Optional. The project id of the BigQuery dataset. If not specified, the project will be inferred from the stream resource.
           - name: 'blmtConfig'

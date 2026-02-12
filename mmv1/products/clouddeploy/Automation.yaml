@@ -42,7 +42,6 @@ async:
     resource_inside_response: false
 custom_code:
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 examples:
   - name: 'clouddeploy_automation_basic'
     primary_resource_id: 'b-automation'

@@ -30,7 +30,6 @@ update_url: 'projects/{{project}}/subscriptions/{{name}}'
 update_verb: 'PATCH'
 update_mask: true
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
