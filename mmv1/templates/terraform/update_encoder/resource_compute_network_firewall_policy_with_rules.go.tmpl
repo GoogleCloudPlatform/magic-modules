@@ -1,10 +1,5 @@
 config := meta.(*transport_tpg.Config)
 
-
-oldTestObj, newTestObj := d.GetChange("rule")
-log.Printf("[DEBUG12345] ENCODE12356: log %s |||||| %s", oldTestObj, newTestObj)
-
-
 predefinedRulesProp, err := expandComputeNetworkFirewallPolicyWithRulesRule(d.Get("predefined_rules"), d, config)
 if err != nil {
   return nil, err
