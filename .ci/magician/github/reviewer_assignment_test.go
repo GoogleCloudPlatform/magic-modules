@@ -137,8 +137,8 @@ func TestFormatReviewerComment(t *testing.T) {
 			if !strings.Contains(comment, fmt.Sprintf("@%s", tc.Reviewer)) {
 				t.Errorf("wanted comment to contain @%s; does not.", tc.Reviewer)
 			}
-			if !strings.Contains(comment, "Tests will require approval") {
-				t.Errorf("wanted comment to say tests will require approval; does not")
+			if !strings.Contains(comment, "go/terraform-auto-test-runs") {
+				t.Errorf("wanted comment to say go/terraform-auto-test-runs; does not")
 			}
 		})
 
