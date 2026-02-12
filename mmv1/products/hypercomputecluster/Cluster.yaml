@@ -155,7 +155,6 @@ properties:
                     Possible values:
                     STOP
                     DELETE
-                  immutable: true
                 - name: zone
                   type: String
                   required: true
