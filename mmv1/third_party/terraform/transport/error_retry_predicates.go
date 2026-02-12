@@ -194,6 +194,7 @@ func IsFingerprintError(err error) (bool, string) {
 	if gerr.Code != 412 {
 		return false, ""
 	}
+	log.Printf("[DEBUG] Got a 412 error, checking for fingerprint mismatch: %s", err)
 
 	for _, msg := range FINGERPRINT_FAIL_ERRORS {
 		if strings.Contains(err.Error(), msg) {
@@ -296,6 +297,17 @@ func IsBigqueryIAMQuotaError(err error) (bool, string) {
 // Retry if Repository Group operation returns a 409 with a specific message for
 // enqueued operations.
 func IsRepositoryGroupQueueError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 409 && (strings.Contains(strings.ToLower(gerr.Body), "unable to queue the operation")) {
+			return true, "Waiting for other enqueued operations to finish"
+		}
+	}
+	return false, ""
+}
+
+// Retry if Workbench operation returns a 409 with a specific message for
+// enqueued operations.
+func IsWorkbenchQueueError(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 409 && (strings.Contains(strings.ToLower(gerr.Body), "unable to queue the operation")) {
 			return true, "Waiting for other enqueued operations to finish"
@@ -633,6 +645,16 @@ func IsSiteVerificationRetryableError(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 400 && strings.Contains(strings.ToLower(gerr.Body), "verification token could not be found") {
 			return true, "Waiting for verification token to be visible"
+		}
+	}
+	return false, ""
+}
+
+// Retry when waiting for ingestion to create a 1P Dataplex entry corresponding to some other resource.
+func IsDataplex1PEntryIngestedError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 403 && strings.Contains(gerr.Body, "The action is not allowed on the Dataplex managed entry group") {
+			return true, fmt.Sprintf("Retry 403s for Dataplex Ingestion")
 		}
 	}
 	return false, ""

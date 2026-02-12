@@ -343,9 +343,7 @@ resource "google_cloud_run_v2_service" "default" {
       gcs {
         bucket = "gcp-public-data-landsat"
         read_only = true
-{{ if ne $.TargetVersionName `ga` -}}
-	mount_options = ["log-severity=info"]
-{{ end }}
+        mount_options = ["log-severity=info"]
       }
     }
     containers {
@@ -1145,9 +1143,6 @@ resource "google_cloud_run_v2_service" "default" {
 `, context)
 }
 
-
-{{ if ne $.TargetVersionName `ga` -}}
-
 func TestAccCloudRunV2Service_cloudrunv2ServiceWithDefaultUriDisabled(t *testing.T) {
   t.Parallel()
   context := map[string]interface{} {
@@ -1165,7 +1160,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceWithDefaultUriDisabled(t *testing
         ResourceName: "google_cloud_run_v2_service.default",
         ImportState: true,
         ImportStateVerify: true,
-        ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "launch_stage", "deletion_protection"},
+        ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "deletion_protection"},
       },
       {
         Config: testAccCloudRunV2Service_cloudrunv2ServiceWithNoMinInstances(context),
@@ -1174,7 +1169,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceWithDefaultUriDisabled(t *testing
         ResourceName: "google_cloud_run_v2_service.default",
         ImportState: true,
         ImportStateVerify: true,
-        ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "launch_stage", "deletion_protection"},
+        ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "deletion_protection"},
       },
 
     }, 
@@ -1188,7 +1183,6 @@ resource "google_cloud_run_v2_service" "default" {
   description = "description creating"
   location = "us-central1"
   deletion_protection = false
-  launch_stage = "BETA"
   annotations = {
     generated-by = "magic-modules"
   }
@@ -1203,22 +1197,16 @@ resource "google_cloud_run_v2_service" "default" {
   }
   default_uri_disabled = true
   template {
+    health_check_disabled = true
     containers {
       name = "container-1"
       image = "us-docker.pkg.dev/cloudrun/container/hello"
     }
   }
-  lifecycle {
-    ignore_changes = [
-      launch_stage,
-    ]
-  }
 }
 
 `, context)
 }
-
-{{ end }}
 
 {{ if ne $.TargetVersionName `ga` -}}
 func TestAccCloudRunV2Service_cloudrunv2ServiceMeshUpdate(t *testing.T) {
@@ -1768,7 +1756,6 @@ resource "google_cloud_run_v2_service" "default" {
     generated-by = "magic-modules"
   }
   ingress = "INGRESS_TRAFFIC_ALL"
-  launch_stage = "BETA"
   scaling {
     scaling_mode = "MANUAL"
     manual_instance_count = 2
@@ -1793,7 +1780,6 @@ resource "google_cloud_run_v2_service" "default" {
     generated-by = "magic-modules"
   }
   ingress = "INGRESS_TRAFFIC_ALL"
-  launch_stage = "BETA"
   scaling {
     scaling_mode = "MANUAL"
     manual_instance_count = 10
@@ -1806,6 +1792,124 @@ resource "google_cloud_run_v2_service" "default" {
 }
 `, context)
 }
+
+func TestAccCloudRunV2Service_cloudrunv2ServiceWithReadinessProbe(t *testing.T) {
+  t.Parallel()
+  context := map[string]interface{} {
+    "random_suffix" : acctest.RandString(t, 10),
+  }
+  acctest.VcrTest(t, resource.TestCase {
+    PreCheck: func() { acctest.AccTestPreCheck(t)},
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    CheckDestroy: testAccCheckCloudRunV2ServiceDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccCloudRunV2Service_cloudrunv2ServiceWithHTTPReadinessProbe(context),
+      },
+      {
+        ResourceName: "google_cloud_run_v2_service.default",
+        ImportState: true,
+        ImportStateVerify: true,
+        ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "launch_stage", "deletion_protection"},
+      },
+      {
+        Config: testAccCloudRunV2Service_cloudrunv2ServiceUpdateWithHTTPReadinessProbe(context),
+      },
+      {
+        ResourceName: "google_cloud_run_v2_service.default",
+        ImportState: true,
+        ImportStateVerify: true,
+        ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "launch_stage", "deletion_protection"},
+      },
+      {
+        Config: testAccCloudRunV2Service_cloudrunv2ServiceUpdateWithGRPCReadinessProbe(context),
+      },
+      {
+        ResourceName: "google_cloud_run_v2_service.default",
+        ImportState: true,
+        ImportStateVerify: true,
+        ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "launch_stage", "deletion_protection"},
+      },
+    }, 
+  })
+}
+
+func testAccCloudRunV2Service_cloudrunv2ServiceWithHTTPReadinessProbe(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  name     = "tf-test-cloudrun-service%{random_suffix}"
+  location = "us-central1"
+  launch_stage = "BETA"
+  deletion_protection = false
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+      ports {
+        container_port = 8080
+      }
+      readiness_probe {
+        http_get {}
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccCloudRunV2Service_cloudrunv2ServiceUpdateWithHTTPReadinessProbe(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  name     = "tf-test-cloudrun-service%{random_suffix}"
+  location = "us-central1"
+  launch_stage = "BETA"
+  deletion_protection = false
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+      ports {
+        container_port = 8080
+      }
+      readiness_probe {
+        period_seconds = 30
+        timeout_seconds = 20
+        failure_threshold = 1
+        success_threshold = 1
+        http_get {
+          path = "/some-path"
+          port = 8080
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccCloudRunV2Service_cloudrunv2ServiceUpdateWithGRPCReadinessProbe(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  name     = "tf-test-cloudrun-service%{random_suffix}"
+  location = "us-central1"
+  launch_stage = "BETA"
+  deletion_protection = false
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+      readiness_probe {
+        grpc {
+          port = 8080
+          service = "health"
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
 
 {{ if ne $.TargetVersionName `ga` -}}
 func TestAccCloudRunV2Service_cloudrunv2ServiceIapUpdate(t *testing.T) {

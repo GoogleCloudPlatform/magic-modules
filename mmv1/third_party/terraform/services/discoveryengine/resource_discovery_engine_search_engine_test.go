@@ -28,7 +28,7 @@ func TestAccDiscoveryEngineSearchEngine_discoveryengineSearchengineBasicExample_
 				ResourceName:            "google_discovery_engine_search_engine.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"engine_id", "collection_id", "location"},
+				ImportStateVerifyIgnore: []string{"engine_id", "collection_id", "location", "kms_key_name"},
 			},
 			{
 				Config: testAccDiscoveryEngineSearchEngine_discoveryengineSearchengineBasicExample_update(context),
@@ -37,7 +37,7 @@ func TestAccDiscoveryEngineSearchEngine_discoveryengineSearchengineBasicExample_
 				ResourceName:            "google_discovery_engine_search_engine.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"engine_id", "collection_id", "location"},
+				ImportStateVerifyIgnore: []string{"engine_id", "collection_id", "location", "kms_key_name"},
 			},
 		},
 	})
@@ -77,6 +77,10 @@ resource "google_discovery_engine_search_engine" "basic" {
     search_tier = "SEARCH_TIER_ENTERPRISE"
     search_add_ons = ["SEARCH_ADD_ON_LLM"]
   }
+  knowledge_graph_config {
+    enable_cloud_knowledge_graph = true
+    enable_private_knowledge_graph = true
+  }
 }
 `, context)
 }
@@ -114,6 +118,20 @@ resource "google_discovery_engine_search_engine" "basic" {
   search_engine_config {
     search_tier = "SEARCH_TIER_STANDARD"
     search_add_ons = ["SEARCH_ADD_ON_LLM"]
+  }
+  features = {
+    feedback = "FEATURE_STATE_OFF"
+  }
+  knowledge_graph_config {
+    enable_cloud_knowledge_graph = false
+    cloud_knowledge_graph_types = ["foobar"]
+    enable_private_knowledge_graph = false
+    feature_config {
+      disable_private_kg_query_understanding = true
+      disable_private_kg_enrichment = true
+      disable_private_kg_auto_complete = true
+      disable_private_kg_query_ui_chips = true
+    }
   }
 }
 `, context)

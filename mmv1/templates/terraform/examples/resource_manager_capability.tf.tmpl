@@ -1,5 +1,4 @@
 resource "google_folder" "folder" {
-  provider         = google-beta
   display_name     = "{{index $.Vars "display_name"}}"
   parent           = "organizations/{{index $.TestEnvVars "org_id"}}"
   deletion_protection = false
@@ -9,7 +8,6 @@ resource "time_sleep" "wait_60s" {
   create_duration = "60s"
 }
 resource "google_resource_manager_capability" "{{$.PrimaryResourceId}}" {
-  provider         = google-beta
   value            = true
   parent           = "${google_folder.folder.name}"
   capability_name  = "app-management"

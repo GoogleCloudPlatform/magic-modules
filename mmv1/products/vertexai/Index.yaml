@@ -39,12 +39,16 @@ custom_code:
   custom_update: 'templates/terraform/custom_update/vertex_ai_index.go.tmpl'
 examples:
   - name: 'vertex_ai_index'
+    min_version: beta
     primary_resource_id: 'index'
     vars:
       display_name: 'test-index'
       bucket_name: 'vertex-ai-index-test'
+      kms_key_name: 'kms-name'
     test_env_vars:
       project: 'PROJECT_NAME'
+    test_vars_overrides:
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     ignore_read_extra:
       - 'metadata.0.contents_delta_uri'
       - 'metadata.0.is_complete_overwrite'
@@ -53,8 +57,11 @@ examples:
     vars:
       display_name: 'test-index'
       bucket_name: 'vertex-ai-index-test'
+      kms_key_name: 'kms-name'
     test_env_vars:
       project: 'PROJECT_NAME'
+    test_vars_overrides:
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     ignore_read_extra:
       - 'metadata.0.contents_delta_uri'
       - 'metadata.0.is_complete_overwrite'
@@ -253,3 +260,19 @@ properties:
       * STREAM_UPDATE: user can call indexes.upsertDatapoints/DeleteDatapoints to update the Index and the updates will be applied in corresponding DeployedIndexes in nearly real-time.
     immutable: true
     default_value: "BATCH_UPDATE"
+  - name: 'encryptionSpec'
+    type: NestedObject
+    description:
+      Customer-managed encryption key spec for an Index. If set, this Index and all sub-resources of this Index will be secured by this key.
+    immutable: true
+    properties:
+      - name: 'kmsKeyName'
+        type: String
+        description:
+          'Required. The Cloud KMS resource identifier of the customer managed
+          encryption key used to protect a resource. Has the form:
+          `projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key`.
+          The key needs to be in the same region as where the compute resource
+          is created.'
+        required: true
+        immutable: true

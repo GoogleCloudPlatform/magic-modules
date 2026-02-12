@@ -40,7 +40,6 @@ examples:
       policy_name: 'tf-test-policy'
   - name: 'region_network_firewall_policy_roce'
     primary_resource_id: 'policy'
-    min_version: beta
     vars:
       policy_name: 'rnf-policy'
 parameters:
@@ -75,11 +74,12 @@ properties:
       Policy type is used to determine which resources (networks) the policy can be associated with.
       A policy can be associated with a network only if the network has the matching policyType in its network profile.
       Different policy types may support some of the Firewall Rules features.
-    min_version: 'beta'
     default_from_api: true
     enum_values:
       - 'VPC_POLICY'
       - 'RDMA_ROCE_POLICY'
+      - 'RDMA_FALCON_POLICY'
+      - 'ULL_POLICY'
   - name: 'fingerprint'
     type: Fingerprint
     description: Fingerprint of the resource. This field is used internally during updates of this resource.

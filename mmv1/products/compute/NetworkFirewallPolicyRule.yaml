@@ -14,6 +14,7 @@
 ---
 name: 'NetworkFirewallPolicyRule'
 api_resource_type_kind: FirewallPolicy
+api_resource_field: 'rules'
 kind: 'compute#firewallPolicyRule'
 description: |
   Represents a rule that describes one or more match conditions along with the action to be taken when traffic matches this condition (allow or deny).
@@ -376,6 +377,7 @@ properties:
             - 'INEFFECTIVE'
   - name: 'disabled'
     type: Boolean
+    send_empty_value: true
     description: |
       Denotes whether the firewall policy rule is disabled.
       When set to true, the firewall policy rule is not enforced and traffic behaves as if it did not exist.

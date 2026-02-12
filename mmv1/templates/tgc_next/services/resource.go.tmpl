@@ -17,14 +17,50 @@
 package {{ lower $.ProductMetadata.Name }}
 
 import (
+  "bytes"
+  "context"
+  "encoding/json"
+  "fmt"
+  "log"
+  "reflect"
+  "regexp"
+  "sort"
+  "strconv"
+  "strings"
+
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 
-  "github.com/apparentlymart/go-cidr/cidr"
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tgcresource"
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tpgresource"
-  transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/verify"
+
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tgcresource"
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
+  transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/verify"
+)
+
+{{if $.CustomCode.Constants -}} 
+    {{- customTemplate $ $.CustomCode.Constants true -}}
+{{- end}}
+
+var (
+    _ = bytes.Clone
+    _ = context.WithCancel
+    _ = fmt.Sprintf
+    _ = json.Unmarshal
+    _ = log.Print
+    _ = reflect.ValueOf
+    _ = regexp.Match
+    _ = sort.IntSlice{}
+    _ = strconv.Atoi
+    _ = strings.Trim
+    _ = schema.Noop
+    _ = structure.NormalizeJsonString
+    _ = validation.All
+    _ = tgcresource.RemoveTerraformAttributionLabel
+    _ = tpgresource.GetRegion
+    _ = transport_tpg.Config{}
+    _ = verify.ProjectRegex
 )
 
 {{ if $.DefineAssetTypeForResourceInProduct -}}
@@ -32,10 +68,6 @@ const {{ $.CaiResourceType -}}AssetType string = "{{ $.CaiAssetType }}"
 {{- end }}
 
 const {{ $.ResourceName -}}SchemaName string = "{{ $.TerraformName }}"
-
-{{if $.CustomCode.Constants -}} 
-    {{- $.CustomTemplate $.CustomCode.Constants true -}}
-{{- end}}
 
 func Resource{{ $.ResourceName -}}() *schema.Resource {
     return &schema.Resource{
@@ -47,7 +79,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{template "SchemaFields" $prop -}}
             {{- end }}
 {{- if $.CustomCode.ExtraSchemaEntry }} 
-    {{ $.CustomTemplate $.CustomCode.ExtraSchemaEntry false -}}
+    {{ customTemplate $ $.CustomCode.ExtraSchemaEntry false -}}
 {{- end}}
 {{ if $.HasProject -}}
             "project": {

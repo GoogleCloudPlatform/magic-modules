@@ -401,6 +401,148 @@ func TestAccComputeRegionBackendService_subsettingUpdate(t *testing.T) {
 		},
 	})
 }
+
+func TestAccComputeRegionBackendService_withMaxInFlightRequests(t *testing.T) {
+	t.Parallel()
+
+	serviceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	igName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	itName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	checkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionBackendService_withMaxInFlightRequests(
+					serviceName, igName, itName, checkName, 10),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.lipsum",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionBackendService_withMaxInFlightRequests(
+					serviceName, igName, itName, checkName, 20),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.lipsum",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeRegionBackendService_withMaxInFlightRequestsPerInstance(t *testing.T) {
+	t.Parallel()
+
+	serviceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	igName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	itName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	checkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionBackendService_withMaxInFlightRequestsPerInstance(
+					serviceName, igName, itName, checkName, 10),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.lipsum",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionBackendService_withMaxInFlightRequestsPerInstance(
+					serviceName, igName, itName, checkName, 20),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.lipsum",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeRegionBackendService_withMaxInFlightRequestsPerEndpoint(t *testing.T) {
+	t.Parallel()
+
+	randSuffix := acctest.RandString(t, 10)
+	service := fmt.Sprintf("tf-test-%s", randSuffix)
+	instance := fmt.Sprintf("tf-test-%s", randSuffix)
+	neg := fmt.Sprintf("tf-test-%s", randSuffix)
+	network := fmt.Sprintf("tf-test-%s", randSuffix)
+	check := fmt.Sprintf("tf-test-%s", randSuffix)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionBackendService_withMaxInFlightRequestsPerEndpoint(
+					service, instance, neg, network, check, 5),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.lipsum",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionBackendService_withMaxInFlightRequestsPerEndpoint(
+					service, instance, neg, network, check, 10),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.lipsum",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeRegionBackendService_withTrafficDuration(t *testing.T) {
+	t.Parallel()
+
+	serviceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	igName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	itName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	checkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionBackendService_withTrafficDuration(
+					serviceName, igName, itName, checkName, "LONG"),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.lipsum",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionBackendService_withTrafficDuration(
+					serviceName, igName, itName, checkName, "SHORT"),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.lipsum",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
 {{- end }}
 
 func TestAccComputeRegionBackendService_withLogConfig(t *testing.T) {
@@ -1741,6 +1883,289 @@ resource "google_compute_region_security_policy" "policy" {
 }
 `, serviceName, polLink, polName)
 }
+
+func testAccComputeRegionBackendService_withMaxInFlightRequests(
+	serviceName, igName, itName, checkName string, maxInFlight int64) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_region_backend_service" "lipsum" {
+  name                  = "%s"
+  description           = "Hello World 1234"
+  port_name             = "http"
+  protocol              = "TCP"
+  region                = "us-central1"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+
+  backend {
+    group                  = google_compute_instance_group_manager.foobar.instance_group
+    balancing_mode         = "UTILIZATION"
+    traffic_duration       = "LONG"
+    capacity_scaler        = 1.0
+    max_in_flight_requests = %d
+  }
+
+  health_checks = [google_compute_region_health_check.hc1.self_link]
+}
+
+resource "google_compute_instance_group_manager" "foobar" {
+  name = "%s"
+  version {
+    instance_template = google_compute_instance_template.foobar.self_link
+    name              = "primary"
+  }
+  base_instance_name = "tf-test-foobar"
+  zone               = "us-central1-f"
+  target_size        = 1
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+
+  network_interface {
+    network = "default"
+  }
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+}
+
+resource "google_compute_region_health_check" "hc1" {
+  name   = "%s"
+  region = "us-central1"
+  tcp_health_check {
+    port = "110"
+  }
+}
+`, serviceName, maxInFlight, igName, itName, checkName)
+}
+
+func testAccComputeRegionBackendService_withMaxInFlightRequestsPerInstance(
+	serviceName, igName, itName, checkName string, maxPerInstance int64) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_region_backend_service" "lipsum" {
+  name                  = "%s"
+  description           = "Hello World 1234"
+  port_name             = "http"
+  protocol              = "TCP"
+  region                = "us-central1"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+
+  backend {
+    group             = google_compute_instance_group_manager.foobar.instance_group
+    traffic_duration  = "LONG"
+    capacity_scaler   = 1.0
+    max_in_flight_requests_per_instance = %d
+  }
+
+  health_checks = [google_compute_region_health_check.hc1.self_link]
+}
+
+resource "google_compute_instance_group_manager" "foobar" {
+  name = "%s"
+  version {
+    instance_template = google_compute_instance_template.foobar.self_link
+    name              = "primary"
+  }
+  base_instance_name = "tf-test-foobar"
+  zone               = "us-central1-f"
+  target_size        = 1
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+
+  network_interface {
+    network = "default"
+  }
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+}
+
+resource "google_compute_region_health_check" "hc1" {
+  name   = "%s"
+  region = "us-central1"
+  tcp_health_check {
+    port = "110"
+  }
+}
+`, serviceName, maxPerInstance, igName, itName, checkName)
+}
+
+func testAccComputeRegionBackendService_withMaxInFlightRequestsPerEndpoint(
+	service, instance, neg, network, check string, maxPerEndpoint int64) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_backend_service" "lipsum" {
+  name                  = "%s"
+  description           = "Hello World 1234"
+  region                = "us-central1"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  locality_lb_policy    = "WEIGHTED_ROUND_ROBIN"
+  custom_metrics {
+    name    = "orca.application_utilization"
+    # At least one metric should be not dry_run.
+    dry_run = false
+  }
+
+  backend {
+    group            = google_compute_network_endpoint_group.lb-neg.self_link
+    traffic_duration = "LONG"
+    capacity_scaler  = 1.0
+    balancing_mode = "CUSTOM_METRICS"
+    custom_metrics {
+      name    = "orca.cpu_utilization"
+      dry_run = true
+	    max_utilization = 0.9
+    }
+    custom_metrics {
+      name    = "orca.named_metrics.foo"
+      max_utilization = 0.9
+      # At least one metric should be not dry_run.
+      dry_run = false
+    }
+    max_in_flight_requests_per_endpoint = %d
+  }
+
+  health_checks = [google_compute_region_health_check.hc1.self_link]
+}
+
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "endpoint-instance" {
+  name         = "%s"
+  machine_type = "e2-medium"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.default.self_link
+    access_config {
+      network_tier = "PREMIUM"
+    }
+  }
+}
+
+resource "google_compute_network_endpoint_group" "lb-neg" {
+  name         = "%s"
+  network      = google_compute_network.default.self_link
+  subnetwork   = google_compute_subnetwork.default.self_link
+  default_port = "90"
+  zone         = "us-central1-a"
+}
+
+resource "google_compute_network_endpoint" "lb-endpoint" {
+  network_endpoint_group = google_compute_network_endpoint_group.lb-neg.name
+  instance               = google_compute_instance.endpoint-instance.name
+  port                   = google_compute_network_endpoint_group.lb-neg.default_port
+  ip_address             = google_compute_instance.endpoint-instance.network_interface[0].network_ip
+}
+
+resource "google_compute_network" "default" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "%s"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.default.self_link
+}
+
+resource "google_compute_region_health_check" "hc1" {
+  name   = "%s"
+  region = "us-central1"
+  tcp_health_check {
+    port = "110"
+  }
+}
+`, service, maxPerEndpoint, instance, neg, network, network, check)
+}
+
+func testAccComputeRegionBackendService_withTrafficDuration(
+	serviceName, igName, itName, checkName, duration string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_region_backend_service" "lipsum" {
+  name                  = "%s"
+  description           = "Hello World 1234"
+  port_name             = "http"
+  protocol              = "TCP"
+  region                = "us-central1"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+
+  backend {
+    group            = google_compute_instance_group_manager.foobar.instance_group
+    traffic_duration = "%s"
+    capacity_scaler  = 1.0
+  }
+
+  health_checks = [google_compute_region_health_check.hc1.self_link]
+}
+
+resource "google_compute_instance_group_manager" "foobar" {
+  name = "%s"
+  version {
+    instance_template = google_compute_instance_template.foobar.self_link
+    name              = "primary"
+  }
+  base_instance_name = "tf-test-foobar"
+  zone               = "us-central1-f"
+  target_size        = 1
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+
+  network_interface {
+    network = "default"
+  }
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+}
+
+resource "google_compute_region_health_check" "hc1" {
+  name   = "%s"
+  region = "us-central1"
+  tcp_health_check {
+    port = "110"
+  }
+}
+`, serviceName, duration, igName, itName, checkName)
+}
 {{- end }}
 
 func testAccComputeRegionBackendService_withLogConfig(serviceName, checkName string) string {
@@ -1824,4 +2249,116 @@ resource "google_compute_health_check" "zero" {
   }
 }
 `, serviceName, tagKey, tagValue, checkName)
+}
+
+func TestAccComputeRegionBackendService_withNetworkPassThroughLbTrafficPolicy(t *testing.T) {
+	t.Parallel()
+
+	randString := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionBackendService_withNetworkPassThroughLbTrafficPolicy(randString, "ZONAL_AFFINITY_DISABLED", 0.5),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.nptlbtp",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionBackendService_withNetworkPassThroughLbTrafficPolicy(randString, "ZONAL_AFFINITY_SPILL_CROSS_ZONE", 0.6),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.nptlbtp",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionBackendService_withNetworkPassThroughLbTrafficPolicy(randString, "ZONAL_AFFINITY_STAY_WITHIN_ZONE", 0.2),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.nptlbtp",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config:      testAccComputeRegionBackendService_withNetworkPassThroughLbTrafficPolicy(randString, "ZONAL_AFFINITY_STAY_WITHIN_ZONE", 1.001),
+				ExpectError: regexp.MustCompile("Must be less than or equal to 1.0"),
+			},
+		},
+	})
+}
+
+func testAccComputeRegionBackendService_withNetworkPassThroughLbTrafficPolicy(randString, spillover string, ratio float64) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "default" {
+  name                    = "tf-test-network-%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "tf-test-subnet-%s"
+  ip_cidr_range = "10.10.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.default.id
+}
+
+resource "google_compute_region_health_check" "default" {
+  name     = "tf-test-health-check-%s"
+  region   = "us-central1"
+  tcp_health_check {
+    port         = 80
+  }
+}
+
+resource "google_compute_instance_template" "default" {
+  name  = "tf-test-instance-template-%s"
+  machine_type = "e2-micro"
+
+  disk {
+    source_image = "debian-cloud/debian-11"
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+
+resource "google_compute_instance_group_manager" "default" {
+  name     = "tf-test-igm-%s"
+  zone     = "us-central1-a"
+  version {
+    instance_template  = google_compute_instance_template.default.id
+    name               = "primary"
+  }
+  base_instance_name = "tf-test-instance-%s"
+  target_size        = 1
+}
+
+resource "google_compute_region_backend_service" "nptlbtp" {
+  name                  = "tf-test-region-backend-service-%s"
+  region                = "us-central1"
+  load_balancing_scheme = "INTERNAL"
+  health_checks         = [google_compute_region_health_check.default.id]
+  protocol              = "TCP"
+
+  backend {
+    group          = google_compute_instance_group_manager.default.instance_group
+    balancing_mode = "CONNECTION"
+  }
+
+  network_pass_through_lb_traffic_policy {
+    zonal_affinity {
+      spillover       = "%s"
+      spillover_ratio = %f
+    }
+  }
+}
+`, randString, randString, randString, randString, randString, randString, randString, spillover, ratio)
 }

@@ -36,8 +36,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
-include_in_tgc_next_DO_NOT_USE: true
-custom_code:
+include_in_tgc_next: true
 examples:
   - name: 'url_map_bucket_and_service'
     primary_resource_id: 'urlmap'
@@ -53,8 +52,6 @@ examples:
       url_map_name: 'urlmap'
       home_backend_service_name: 'home'
       health_check_name: 'health-check'
-    tgc_test_ignore_extra:
-      - 'path_matcher.route_rules.url_redirect.https_redirect'
   - name: 'url_map_traffic_director_route_partial'
     primary_resource_id: 'urlmap'
     vars:

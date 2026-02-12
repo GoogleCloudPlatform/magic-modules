@@ -43,7 +43,6 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/locations/{{location}}/services/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/services/{{name}}'
     - '{{name}}'
@@ -109,6 +108,13 @@ examples:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
       - 'deletion_protection'
+  - name: 'cloudrunv2_service_readiness_probes'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'cloudrunv2_service_secret'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
@@ -160,24 +166,21 @@ examples:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
       - 'deletion_protection'
-  - name: 'cloudrunv2_service_function'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    vars:
-      cloud_run_service_name: 'cloudrun-service'
-      bucket_name: 'gcf-source'
-      zip_path: 'function_source.zip'
-      sa_name: 'build-sa'
-    test_vars_overrides:
-      'zip_path': '"./test-fixtures/function-source.zip"'
-    ignore_read_extra:
-      - 'deletion_protection'
   - name: 'cloudrunv2_service_iap'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-iap-service%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       cloud_run_service_name: 'cloudrun-iap-service'
+    ignore_read_extra:
+      - 'deletion_protection'
+  - name: 'cloudrunv2_service_zip_deploy'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service%s", context["random_suffix"])'
+    min_version: 'beta'
+    vars:
+      cloud_run_service_name: 'cloudrun-zip-service'
+      targz_path: './test-fixtures/function-source.tar.gz'
     ignore_read_extra:
       - 'deletion_protection'
 virtual_fields:
@@ -227,7 +230,7 @@ properties:
     type: KeyValueLabels
     description: |-
       Unstructured key value map that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter, or break down billing charges by team, component,
-      environment, state, etc. For more information, visit https://cloud.google.com/resource-manager/docs/creating-managing-labels or https://cloud.google.com/run/docs/configuring/labels.
+      environment, state, etc. For more information, visit https://docs.cloud.google.com/resource-manager/docs/creating-managing-labels or https://cloud.google.com/run/docs/configuring/labels.
 
       Cloud Run API v2 does not support labels with  `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
       All system labels in v1 now have a corresponding field in v2 Service.
@@ -335,15 +338,19 @@ properties:
     type: NestedObject
     description: |
       Scaling settings that apply to the whole service
+    default_from_api: true
+    diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
     properties:
       - name: 'minInstanceCount'
         type: Integer
         description: |
           Minimum number of instances for the service, to be divided among all revisions receiving traffic.
+        default_from_api: true
       - name: 'maxInstanceCount'
         type: Integer
         description: |
           Combined maximum number of instances for all revisions receiving traffic.
+        default_from_api: true
       - name: 'scalingMode'
         type: Enum
         description: |
@@ -355,11 +362,11 @@ properties:
         type: Integer
         description: |
           Total instance count for the service in manual scaling mode. This number of instances is divided among all revisions with specified traffic based on the percent of traffic they are receiving.
+        default_from_api: true
   - name: 'defaultUriDisabled'
     type: Boolean
     description: |-
       Disables public resolution of the default URI of this service.
-    min_version: 'beta'
   - name: 'template'
     type: NestedObject
     description: |
@@ -374,7 +381,7 @@ properties:
         type: KeyValuePairs
         description: |-
           Unstructured key value map that can be used to organize and categorize objects. User-provided labels are shared with Google's billing system, so they can be used to filter, or break down billing charges by team, component, environment, state, etc.
-          For more information, visit https://cloud.google.com/resource-manager/docs/creating-managing-labels or https://cloud.google.com/run/docs/configuring/labels.
+          For more information, visit https://docs.cloud.google.com/resource-manager/docs/creating-managing-labels or https://cloud.google.com/run/docs/configuring/labels.
 
           Cloud Run API v2 does not support labels with `run.googleapis.com`, `cloud.googleapis.com`, `serving.knative.dev`, or `autoscaling.knative.dev` namespaces, and they will be rejected.
           All system labels in v1 now have a corresponding field in v2 RevisionTemplate.
@@ -543,7 +550,7 @@ properties:
                 - name: 'limits'
                   type: KeyValuePairs
                   description: |-
-                    Only memory, CPU, and nvidia.com/gpu are supported. Use key `cpu` for CPU limit, `memory` for memory limit, `nvidia.com/gpu` for gpu limit. Note: The only supported values for CPU are '1', '2', '4', and '8'. Setting 4 CPU requires at least 2Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
+                    Only memory, CPU, and nvidia.com/gpu are supported. Use key `cpu` for CPU limit, `memory` for memory limit, `nvidia.com/gpu` for gpu limit. Note: The only supported values for CPU are '1', '2', '4', '6' and '8'. Setting 4 CPU requires at least 2Gi of memory, setting 6 or more CPU requires at least 4Gi of memory. The values of the map is string form of the 'quantity' k8s type: https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go
                   default_from_api: true
                 - name: 'cpuIdle'
                   type: Boolean
@@ -796,6 +803,78 @@ properties:
                         The name of the service to place in the gRPC HealthCheckRequest
                         (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
                         If this is not specified, the default behavior is defined by gRPC.
+            - name: 'readinessProbe'
+              type: NestedObject
+              description: |-
+                Periodic probe of container readiness.
+              properties:
+                - name: 'timeoutSeconds'
+                  type: Integer
+                  description: |-
+                    Number of seconds after which the probe times out.
+                    Defaults to 1 second. Must be smaller than period_seconds.
+                  default_from_api: true
+                - name: 'periodSeconds'
+                  type: Integer
+                  description: |-
+                    How often (in seconds) to perform the probe.
+                    Default to 10 seconds.
+                  default_from_api: true
+                - name: 'failureThreshold'
+                  type: Integer
+                  description: |-
+                    Minimum consecutive failures for the probe to be considered failed after
+                    having succeeded. Defaults to 3.
+                  default_from_api: true
+                - name: 'successThreshold'
+                  type: Integer
+                  description: |-
+                    Minimum consecutive successes for the probe to be considered successful after having failed.
+                    Defaults to 2.
+                  default_from_api: true
+                - name: 'httpGet'
+                  type: NestedObject
+                  description: |-
+                    HttpGet specifies the http request to perform.
+                  send_empty_value: true
+                  allow_empty_object: true
+                  # exactly_one_of:
+                  #   - template.0.containers.0.readinessProbe.0.httpGet
+                  #   - template.0.containers.0.readinessProbe.0.grpc
+                  properties:
+                    - name: 'path'
+                      type: String
+                      description: |-
+                        Path to access on the HTTP server. If set, it should not be empty string.
+                      default_from_api: true
+                    - name: 'port'
+                      type: Integer
+                      description: |-
+                        Port number to access on the container. Number must be in the range 1 to 65535.
+                        If not specified, defaults to the same value as container.ports[0].containerPort.
+                      default_from_api: true
+                - name: 'grpc'
+                  type: NestedObject
+                  description: |-
+                    GRPC specifies an action involving a GRPC port.
+                  send_empty_value: true
+                  allow_empty_object: true
+                  # exactly_one_of:
+                  #   - template.0.containers.0.readinessProbe.0.httpGet
+                  #   - template.0.containers.0.readinessProbe.0.grpc
+                  properties:
+                    - name: 'port'
+                      type: Integer
+                      description: |-
+                        Port number to access on the container. Number must be in the range 1 to 65535.
+                        If not specified, defaults to the same value as container.ports[0].containerPort.
+                      default_from_api: true
+                    - name: 'service'
+                      type: String
+                      description: |-
+                        The name of the service to place in the gRPC HealthCheckRequest
+                        (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+                        If this is not specified, the default behavior is defined by gRPC.
             - name: 'dependsOn'
               type: Array
               description: |-
@@ -822,6 +901,33 @@ properties:
                   description: |-
                     Source code location of the image.
                   output: true
+            - name: 'sourceCode'
+              type: NestedObject
+              description: |-
+                Location of the source.
+              min_version: 'beta'
+              properties:
+                - name: 'cloudStorageSource'
+                  type: NestedObject
+                  description: |-
+                    Cloud Storage source.
+                  exactly_one_of:
+                    - 'cloud_storage_source'
+                  properties:
+                    - name: 'bucket'
+                      type: String
+                      description: |-
+                        The Cloud Storage bucket name.
+                      required: true
+                    - name: 'object'
+                      type: String
+                      description: |-
+                        The Cloud Storage object name.
+                      required: true
+                    - name: 'generation'
+                      type: String
+                      description: |-
+                        The Cloud Storage object generation. The is an int64 value. As with most Google APIs, its JSON representation will be a string instead of an integer.
       - name: 'volumes'
         type: Array
         description: |-
@@ -929,7 +1035,6 @@ properties:
                   description: If true, mount the GCS bucket as read-only
                   required: false
                 - name: 'mountOptions'
-                  min_version: 'beta'
                   type: Array
                   description: |
                     A list of flags to pass to the gcsfuse command for configuring this volume.
@@ -995,6 +1100,9 @@ properties:
       - name: 'gpuZonalRedundancyDisabled'
         type: Boolean
         description: True if GPU zonal redundancy is disabled on this revision.
+      - name: 'healthCheckDisabled'
+        type: Boolean
+        description: Disables health checking containers during deployment.
   - name: 'traffic'
     type: Array
     description: |-

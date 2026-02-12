@@ -34,6 +34,11 @@ resource "google_org_policy_policy" "shared_reservation_org_policy" {
   }
 }
 
+resource "time_sleep" "wait_orgpolicy" {
+  depends_on = [google_org_policy_policy.shared_reservation_org_policy, google_project_service.compute]
+  create_duration = "120s"
+}
+
 resource "google_compute_reservation" "{{$.PrimaryResourceId}}" {
   provider = google-beta
   project  = google_project.owner_project.project_id
@@ -51,5 +56,5 @@ resource "google_compute_reservation" "{{$.PrimaryResourceId}}" {
     share_type = "SPECIFIC_PROJECTS"
     projects = [google_project.guest_project.name]
   }
-  depends_on = [google_org_policy_policy.shared_reservation_org_policy,google_project_service.compute]
+  depends_on = [time_sleep.wait_orgpolicy]
 }

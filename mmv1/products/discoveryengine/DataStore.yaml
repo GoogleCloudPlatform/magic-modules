@@ -187,7 +187,7 @@ properties:
     type: NestedObject
     description: |
       Configuration data for advance site search.
-    required: false
+    default_from_api: true
     immutable: true
     properties:
       - name: 'disableInitialIndex'
@@ -345,7 +345,6 @@ properties:
             * `docx`: Override parsing config for DOCX files, only digital parsing and or layout parsing are supported.
         key_name: 'file_type'
         value_type:
-          name: parsingConfigOverrides
           type: NestedObject
           properties:
             - name: 'digitalParsingConfig'

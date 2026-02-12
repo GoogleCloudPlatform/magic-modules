@@ -207,6 +207,7 @@ fun ParametrizedWithType.configureGoogleSpecificTestParameters(config: AccTestCo
 //  acceptance tests are templated
 fun ParametrizedWithType.acceptanceTestBuildParams(parallelism: Int, prefix: String, timeout: String, releaseDiffTest: Boolean) {
     hiddenVariable("env.TF_ACC", "1", "Set to a value to run the Acceptance Tests")
+    hiddenVariable("env.TF_ACC_REFRESH_AFTER_APPLY", "1", "Set to a value to refresh the state after apply")
     text("PARALLELISM", "%d".format(parallelism))
     text("TEST_PREFIX", prefix)
     text("TIMEOUT", timeout)
@@ -224,27 +225,33 @@ fun ParametrizedWithType.sweeperParameters(sweeperRegions: String, sweepRun: Str
     text("SWEEP_RUN", sweepRun)
 }
 
-// ParametrizedWithType.terraformSkipProjectSweeper sets an environment variable to skip the sweeper for project resources
-fun ParametrizedWithType.terraformSkipProjectSweeper() {
-    text("env.SKIP_PROJECT_SWEEPER", "1")
+// ParametrizedWithType.terraformSkipSweeper sets an environment variable used to skip the sweeper for resources
+fun ParametrizedWithType.terraformSkipSweeper(resourceType: String) {
+    // Converts "PROJECT" into "env.SKIP_PROJECT_SWEEPER"
+    // Converts "FOLDER" into "env.SKIP_FOLDER_SWEEPER"
+    text("env.SKIP_${resourceType.uppercase()}_SWEEPER", "1")
 }
 
 // BuildType.disableProjectSweep disabled sweeping project resources after a build configuration has been initialised
 fun BuildType.disableProjectSweep(){
     params {
-        terraformSkipProjectSweeper()
+        terraformSkipSweeper("PROJECT")
+        terraformSkipSweeper("FOLDER")
     }
 }
 
-// ParametrizedWithType.terraformEnableProjectSweeper unsets an environment variable used to skip the sweeper for project resources
-fun ParametrizedWithType.terraformEnableProjectSweeper() {
-    text("env.SKIP_PROJECT_SWEEPER", "")
+// ParametrizedWithType.terraformEnableSweeper unsets an environment variable used to skip the sweeper for resources
+fun ParametrizedWithType.terraformEnableSweeper(resourceType: String) {
+    // Converts "PROJECT" into "env.SKIP_PROJECT_SWEEPER"
+    // Converts "FOLDER" into "env.SKIP_FOLDER_SWEEPER"
+    text("env.SKIP_${resourceType.uppercase()}_SWEEPER", "")
 }
 
 // BuildType.enableProjectSweep enables sweeping project resources after a build configuration has been initialised
 fun BuildType.enableProjectSweep(){
     params {
-        terraformEnableProjectSweeper()
+        terraformEnableSweeper("PROJECT")
+        terraformEnableSweeper("FOLDER")
     }
 }
 

@@ -48,14 +48,13 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'topic'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
   encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/pubsub_topic.tmpl'
-tgc_ignore_terraform_encoder: true
+  tgc_ignore_terraform_encoder: true
 error_retry_predicates:
   - 'transport_tpg.PubsubTopicProjectNotReady'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 examples:
   - name: 'pubsub_topic_basic'
     primary_resource_id: 'example'
@@ -109,6 +108,12 @@ examples:
     vars:
       topic_name: 'example-topic'
     tgc_skip_test: 'The dynamic block is in test configuration. The test takes time to fix.'
+  - name: 'pubsub_topic_tags'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+      tag_key: 'tag_key'
+      tag_value: 'tag_value'
 parameters:
 properties:
   - name: 'name'
@@ -464,6 +469,7 @@ properties:
           description: |
             Javascript User Defined Function. If multiple Javascript UDFs are specified on a resource,
             each one must have a unique `function_name`.
+          is_missing_in_cai: true
           properties:
             - name: functionName
               type: String
@@ -508,3 +514,16 @@ properties:
           description: |
             Controls whether or not to use this transform. If not set or `false`,
             the transform will be applied to messages. Default: `true`.
+  - name: 'tags'
+    type: KeyValuePairs
+    description: |
+      Input only. Resource manager tags to be bound to the topic. Tag keys and
+      values have the same definition as resource manager tags. Keys must be in
+      the format tagKeys/{tag_key_id}, and values are in the format
+      tagValues/456. The field is ignored when empty. The field is immutable and
+      causes resource replacement when mutated. This field is only set at create
+      time and modifying this field after creation will trigger recreation. To
+      apply tags to an existing resource, see the `google_tags_tag_value`
+      resource.
+    immutable: true
+    ignore_read: true

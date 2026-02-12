@@ -1,0 +1,184 @@
+data "google_project" "project" {}
+
+resource "google_secret_manager_secret" "fake_private_key_secret" {
+  secret_id = "fake-pk-secret-app-tf1"
+
+  replication {
+    auto{}
+  }
+}
+
+resource "google_secret_manager_secret_version" "fake_secret_version" {
+  secret = google_secret_manager_secret.fake_private_key_secret.id
+  secret_data = file("test-fixtures/test.key")
+}
+resource "google_secret_manager_secret_iam_member" "private_key_accessor" {
+  project   = google_secret_manager_secret.fake_private_key_secret.project
+  secret_id = google_secret_manager_secret.fake_private_key_secret.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-ces.iam.gserviceaccount.com"
+  }
+
+resource "google_ces_app" "ces_app_basic" {
+  app_id = "{{index $.Vars "app_id"}}"
+  location = "us"
+  description = "Basic CES App example"
+  display_name = "{{index $.Vars "display_name"}}"
+  pinned = true
+
+  language_settings {
+    default_language_code    = "en-US"
+    supported_language_codes = ["es-ES", "fr-FR"]
+    enable_multilingual_support = true
+    fallback_action          = "escalate"
+  }
+
+  audio_processing_config {
+    synthesize_speech_configs {
+      language_code = "en-US"
+      voice         = "en-US-Standard-A"
+      speaking_rate = 1.0
+    }
+    synthesize_speech_configs {
+      language_code = "es-ES"
+      voice         = "es-ES-Standard-A"
+      speaking_rate = 0.95
+    }
+
+    barge_in_config {
+      barge_in_awareness = true
+    }
+
+    inactivity_timeout = "300s"
+
+    ambient_sound_config {
+      prebuilt_ambient_sound = "room_2"
+      volume_gain_db         = -6.0
+    }
+  }
+
+  logging_settings {
+    redaction_config {
+      enable_redaction   = true
+      inspect_template   = "projects/fake-project/locations/us/inspectTemplates/example-inspect"
+      deidentify_template = "projects/fake-project/locations/us/deidentifyTemplates/example-deidentify"
+    }
+
+    audio_recording_config {
+      gcs_bucket      = "gs://fake-app-audio-recordings"
+      gcs_path_prefix = "projects/fake-project/location/us/app/test-app/123/$session/123"
+    }
+
+    bigquery_export_settings {
+      dataset = "projects/fake-project/datasets/fake_app_logs"
+      enabled = false
+      project = "projects/fake-project"
+    }
+
+    cloud_logging_settings {
+      enable_cloud_logging = true
+    }
+
+    conversation_logging_settings {
+      disable_conversation_logging = true
+    }
+  }
+
+  model_settings {
+    model       = "gemini-1.5-flash"
+    temperature = 0.5
+  }
+
+  evaluation_metrics_thresholds {
+    golden_evaluation_metrics_thresholds {
+      turn_level_metrics_thresholds {
+        semantic_similarity_success_threshold        = 3
+        overall_tool_invocation_correctness_threshold = 1.0
+      }
+      expectation_level_metrics_thresholds {
+        tool_invocation_parameter_correctness_threshold = 1.0
+      }
+    }
+  }
+
+variable_declarations {
+    name        = "test"
+    description = "test"
+    schema {
+      description = "schema description"
+      type        = "ARRAY"
+      title = "title"
+      nullable    = true
+      required = ["some_property"]
+      enum = ["VALUE_A", "VALUE_B"]
+      ref = "#/defs/MyDefinition"
+      unique_items = true
+      defs = jsonencode({
+        SimpleString = {
+          type        = "STRING"
+          description = "A simple string definition"
+      }})
+      any_of = jsonencode([
+        {
+          type        = "STRING"
+          description = "any_of option 1: string"
+        },])
+      default = jsonencode(
+        false)
+      prefix_items = jsonencode([
+        {
+          type        = "ARRAY"
+          description = "prefix item 1"
+        },])
+      additional_properties = jsonencode(
+        {
+          type        = "BOOLEAN"
+        })
+      properties = jsonencode({
+        name = {
+          type        = "STRING"
+          description = "A name"
+      }})
+      items = jsonencode({
+          type        = "ARRAY"
+          description = "An array"
+      })
+    }
+  }
+
+  global_instruction = "You are a virtual assistant for an e-commerce platform. Be friendly and helpful."
+
+  guardrails = [
+  ]
+
+  default_channel_profile {
+    channel_type = "WEB_UI"
+    disable_barge_in_control = false
+    disable_dtmf = true
+    persona_property {
+      persona = "CONCISE"
+    }
+    profile_id = "profile-id"
+    web_widget_config {
+      modality = "CHAT_ONLY"
+      theme    = "LIGHT"
+      web_widget_title = "Help Assistant"
+    }
+  }
+
+  metadata = {
+    "deployment_env" = "test"
+  }
+
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+
+  client_certificate_settings {
+    tls_certificate = file("test-fixtures/cert.pem")
+    private_key = google_secret_manager_secret_version.fake_secret_version.name
+    passphrase = google_secret_manager_secret_version.fake_secret_version.name
+  }
+
+  # Root agent should not be specified when creating an app
+}

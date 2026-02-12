@@ -36,7 +36,6 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'consent_store_id'
   base_url: '{{%dataset}}/consentStores/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   self_link: '{{%dataset}}/consentStores/{{name}}'
   import_format:
     - '{{%dataset}}/consentStores/{{name}}'

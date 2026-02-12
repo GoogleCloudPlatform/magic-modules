@@ -45,7 +45,7 @@ For more information about types of resources and the generation process overall
 
 ## Add a resource
 
-{{< tabs "resource" >}}
+{{% tabs "resource" %}}
 {{< tab "MMv1" >}}
 1. Using an editor of your choice, in the appropriate [product folder]({{<ref "/#mmv1" >}}), create a file called `RESOURCE_NAME.yaml`. Replace `RESOURCE_NAME` with the name of the API resource you are adding support for. For example, a configuration file for [NatAddress](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses) would be called `NatAddress.yaml`.
 2. Copy the following template into the new file:
@@ -158,7 +158,7 @@ For more information about types of resources and the generation process overall
    - Documentation: [`magic-modules/mmv1/third_party/terraform/website/docs/r`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r)
    - Tests: Copy to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services), and remove `_generated` from the filename
    - Sweepers: Put to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services), and add `_sweeper` suffix to the filename
-   - Metadata: Copy `*_meta.yaml` to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services), and remove `_generated` from the filename
+   - Metadata: Copy `*_meta.yaml` to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services), and remove `_generated` from the filename. For more information, see [Metadata (meta.yaml) reference]({{< ref "/reference/metadata" >}}).
 4. Modify the Go code as needed.
    - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
    - Remove the `Example` suffix from all test function names.
@@ -172,7 +172,7 @@ For more information about types of resources and the generation process overall
     - [Add IAM support]({{<ref "/develop/add-iam-support" >}})
 7. Delete the MMv1 configuration file.
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 ## What's next?
 

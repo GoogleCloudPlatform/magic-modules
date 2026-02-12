@@ -26,7 +26,7 @@ For more information about types of resources and the generation process overall
 
 ## Add documentation
 
-{{< tabs "docs" >}}
+{{% tabs "docs" %}}
 {{< tab "MMv1" >}}
 To preview the documentation:
 
@@ -43,7 +43,7 @@ To preview the documentation:
 3. [Generate the providers]({{< ref "/develop/generate-providers" >}})
 4. Copy and paste the generated documentation into the Hashicorp Registry's [Doc Preview Tool](https://registry.terraform.io/tools/doc-preview) to see how it is rendered.
 {{< /tab >}}
-{{< /tabs >}}
+{{% /tabs %}}
 
 ## What's next?
 

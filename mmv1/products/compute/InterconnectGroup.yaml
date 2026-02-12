@@ -75,10 +75,7 @@ properties:
       Note that there are add-members and remove-members methods in gcloud.
       The size of this map is limited by an "Interconnects per group" quota.
     key_name: 'name'
-    key_description: |
-      Resource name
     value_type:
-      name: mapObjectName
       type: NestedObject
       properties:
         - name: 'interconnect'

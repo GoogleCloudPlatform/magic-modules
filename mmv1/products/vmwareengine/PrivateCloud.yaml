@@ -49,6 +49,7 @@ custom_code:
   post_create: 'templates/terraform/post_create/private_cloud.go.tmpl'
   post_update: 'templates/terraform/post_update/private_cloud.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/vmwareengine_private_cloud.go.tmpl'
+  post_delete: 'templates/terraform/post_delete/private_cloud.go.tmpl'
 sweeper:
   query_string: "?delay_hours=0"
   url_substitutions:
@@ -108,6 +109,34 @@ properties:
     type: String
     description: |
       User-provided description for this private cloud.
+  - name: 'createTime'
+    type: Time
+    description: |
+      Creation time of this resource.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Last update time of this resource.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'deleteTime'
+    type: Time
+    description: |
+      Time when the resource was scheduled for deletion.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+  - name: 'expireTime'
+    type: Time
+    description: |
+      Time when the resource will be irreversibly deleted.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+      Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
   - name: 'uid'
     type: String
     description: |
@@ -186,10 +215,7 @@ properties:
           The map of cluster node types in this cluster,
           where the key is canonical identifier of the node type (corresponds to the NodeType).
         key_name: 'node_type_id'
-        key_description: |
-          Canonical identifier of the NodeType.
         value_type:
-          name: nodeTypeConfig
           type: NestedObject
           properties:
             - name: 'nodeCount'
@@ -242,9 +268,7 @@ properties:
               Currently the map must contain only one element
               that describes the autoscaling policy for compute nodes.
             key_name: 'autoscale_policy_id'
-            key_description: 'The key is the identifier of the policy.'
             value_type:
-              name: AutoscalingPolicy
               type: NestedObject
               properties:
                 - name: 'nodeTypeId'

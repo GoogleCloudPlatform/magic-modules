@@ -37,6 +37,8 @@ import_format:
   - 'instances/{{instance}}/databases/{{name}}'
   - '{{project}}/{{instance}}/{{name}}'
   - '{{instance}}/{{name}}'
+cai_asset_name_format: 'projects/{{project}}/instances/{{instance}}/databases/{{name}}'
+include_in_tgc_next: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -57,8 +59,11 @@ custom_code:
   post_create: 'templates/terraform/post_create/spanner_database.go.tmpl'
   pre_update: 'templates/terraform/pre_update/spanner_database.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/resource_spanner_database.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/spanner_database.go.tmpl'
+  tgc_ignore_terraform_decoder: true
 custom_diff:
   - 'resourceSpannerDBDdlCustomDiff'
+  - 'resourceSpannerEncryptionConfigCustomDiff'
 # Sweeper skipped as this resource has customized deletion.
 exclude_sweeper: true
 examples:
@@ -96,6 +101,7 @@ parameters:
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Instance'
     imports: 'name'
+    tgc_ignore_read: true
 properties:
   # This resource returns only one attribute ("name") from which we parse
   # "instance", "name", and "project".  You will need custom code handling
@@ -110,6 +116,7 @@ properties:
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     validation:
       regex: '^[a-z][a-z0-9_\-]*[a-z0-9]$'
+    tgc_ignore_read: true
   - name: 'versionRetentionPeriod'
     type: String
     description: |
@@ -166,6 +173,7 @@ properties:
           Fully qualified name of the KMS keys to use to encrypt this database. The keys must exist
           in the same locations as the Spanner Database.
         immutable: true
+        default_from_api: true
         custom_flatten: templates/terraform/custom_flatten/spanner_database_kms_key_names.go.tmpl
         item_type:
           type: String
@@ -193,3 +201,4 @@ properties:
       (2) Setting "enableDropProtection" to true also prevents the deletion of the parent instance containing the database.
       "deletion_protection" attribute does not provide protection against the deletion of the parent instance.
     default_value: false
+    is_missing_in_cai: true

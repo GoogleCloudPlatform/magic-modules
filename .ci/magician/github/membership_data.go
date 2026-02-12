@@ -72,30 +72,42 @@ var (
 		"c2thorn": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 4, 9),
-					endDate:   newDate(2025, 4, 15),
+					startDate: newDate(2025, 12, 3),
+					endDate:   newDate(2025, 12, 15),
 				},
 			},
 		},
 		"hao-nan-li": {
 			vacations: []Vacation{},
 		},
+		"malhotrasagar2212": {
+			vacations: []Vacation{},
+		},
 		"melinath": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 6, 26),
-					endDate:   newDate(2025, 7, 7),
+					startDate: newDate(2025, 12, 18),
+					endDate:   newDate(2026, 1, 6),
 				},
 			},
 		},
 		"NickElliot": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 10, 22),
+					endDate:   newDate(2025, 10, 28),
+				},
+			},
 		},
 		"rileykarson": {
 			vacations: []Vacation{
 				{
 					startDate: newDate(2025, 2, 25),
 					endDate:   newDate(2025, 3, 10),
+				},
+				{
+					startDate: newDate(2025, 11, 11),
+					endDate:   newDate(2025, 11, 24),
 				},
 			},
 		},
@@ -105,24 +117,33 @@ var (
 					startDate: newDate(2025, 8, 1),
 					endDate:   newDate(2025, 8, 11),
 				},
+				{
+					startDate: newDate(2025, 9, 23),
+					endDate:   newDate(2025, 9, 29),
+				},
 			},
 		},
 		"ScottSuarez": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 12, 5),
+					endDate:   newDate(2025, 12, 15),
+				},
+			},
 		},
 		"shuyama1": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 5, 23),
-					endDate:   newDate(2025, 5, 30),
+					startDate: newDate(2026, 01, 29),
+					endDate:   newDate(2026, 02, 04),
 				},
 			},
 		},
 		"SirGitsalot": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 1, 18),
-					endDate:   newDate(2025, 1, 25),
+					startDate: newDate(2026, 1, 18),
+					endDate:   newDate(2026, 1, 27),
 				},
 			},
 		},
@@ -158,7 +179,6 @@ var (
 
 	// This is for new team members who are onboarding
 	trustedContributors = map[string]struct{}{
-		"bbasata":           struct{}{},
-		"malhotrasagar2212": struct{}{},
+		"bbasata": struct{}{},
 	}
 )
