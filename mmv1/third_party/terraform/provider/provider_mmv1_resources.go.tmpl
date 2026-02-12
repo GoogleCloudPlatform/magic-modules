@@ -137,6 +137,10 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_reservation_block":                 compute.DataSourceGoogleComputeReservationBlock(),
 	"google_compute_reservation_sub_block":             compute.DataSourceGoogleComputeReservationSubBlock(),
 	"google_compute_resource_policy":                   compute.DataSourceGoogleComputeResourcePolicy(),
+	{{- if ne $.TargetVersionName "ga" }}
+	"google_compute_rollout":                           compute.DataSourceGoogleComputeRollout(),
+	"google_compute_rollouts":                          compute.DataSourceGoogleComputeRollouts(),
+	{{- end }}
 	"google_compute_router":                            compute.DataSourceGoogleComputeRouter(),
 	"google_compute_routers":                           compute.DataSourceGoogleComputeRouters(),
 	"google_compute_router_nat":                        compute.DataSourceGoogleComputeRouterNat(),
