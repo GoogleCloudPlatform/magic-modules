@@ -15,6 +15,7 @@
 name: 'CloudBuild'
 legacy_name: 'cloudbuild'
 display_name: 'Cloud Build'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://cloudbuild.googleapis.com/v1/'
