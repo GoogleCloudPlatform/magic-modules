@@ -491,7 +491,7 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 				ResourceName:            "google_filestore_instance.replica_instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone", "initial_replication", "replica_state", "effective_replication.0.replicas.0.last_active_sync_time"},
+				ImportStateVerifyIgnore: []string{"zone", "initial_replication", "desired_replica_state", "effective_replication.0.replicas.0.last_active_sync_time"},
 			},
 			{
 				Config: testAccFilestoreInstance_replication_pause(context),
@@ -507,7 +507,7 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 				ResourceName:            "google_filestore_instance.replica_instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone", "initial_replication", "replica_state", "effective_replication.0.replicas.0.last_active_sync_time"},
+				ImportStateVerifyIgnore: []string{"zone", "initial_replication", "desired_replica_state", "effective_replication.0.replicas.0.last_active_sync_time"},
 			},
 			{
 				Config: testAccFilestoreInstance_replication_resume(context),
@@ -523,7 +523,7 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 				ResourceName:            "google_filestore_instance.replica_instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone", "initial_replication", "replica_state", "effective_replication.0.replicas.0.last_active_sync_time"},
+				ImportStateVerifyIgnore: []string{"zone", "initial_replication", "desired_replica_state", "effective_replication.0.replicas.0.last_active_sync_time"},
 			},
 		},
 	})
@@ -597,7 +597,7 @@ resource "google_filestore_instance" "replica_instance" {
   location      	= "%{location_2}"
   tier          	= "%{tier}"
   description   	= "An replica instance created during testing."
-  replica_state    = "PAUSE"
+  desired_replica_state    = "PAUSED"
 
   file_shares {	
     capacity_gb 	= 1024
@@ -642,7 +642,7 @@ resource "google_filestore_instance" "replica_instance" {
   location      	= "%{location_2}"
   tier          	= "%{tier}"
   description   	= "An replica instance created during testing."
-  replica_state    = "RESUME"
+  desired_replica_state    = "READY"
 
   file_shares {	
     capacity_gb 	= 1024

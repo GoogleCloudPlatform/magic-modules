@@ -1,49 +1,42 @@
 
-if d.HasChange("replica_state") {
-	obj := make(map[string]interface{})
-	endpoint := ""
-	replica_state_value := ""
-
-	replicaActionProp := d.Get("replica_action")
-	if err != nil {
-		return err
-	} else if v, ok := d.GetOkExists("replica_action"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, replicaActionProp)) {
-		obj["replicaAction"] = replicaActionProp
+if d.HasChange("desired_replica_state") {
+	log.Printf("[DEBUG] desired_replica_state has changed")
+	billingProject := ""
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+	  billingProject = bp
 	}
 
-	switch replicaActionProp {
-	}
+	desired_replica_state := d.Get("desired_replica_state").(string)
+	log.Printf("[DEBUG] desired_replica_state: %s", desired_replica_state)
 
-	url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}:%s",endpoint))
-		if err != nil {
-			return err
-		}
+	effective_replication := d.Get("effective_replication").([]interface{})
+	if len(effective_replication) > 0 {
+		effective_replication_map := effective_replication[0].(map[string]interface{})
+		replicas := effective_replication_map["replicas"].([]interface{})
+		if len(replicas) > 0 {
+			replica := replicas[0].(map[string]interface{})
+			state := replica["state"].(string)
+			log.Printf("[DEBUG] current replica state: %s", state)
 
-		headers := make(http.Header)
-
-		emptyReqBody := make(map[string]interface{})
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "POST",
-			Project:   project,
-			RawURL:    url,
-			UserAgent: userAgent,
-			Body:      emptyReqBody,
-			Timeout:   d.Timeout(schema.TimeoutUpdate),
-			Headers:   headers,
-		})
-		if err != nil {
-			return fmt.Errorf("Error Pausing/Resuming Instance %q: %s", d.Id(), err)
+			if desired_replica_state == "PAUSED" && state == "READY" {
+				log.Printf("[DEBUG] Pausing replica")
+				if err := ModifyFilestoreInstanceReplica(config, d, project, billingProject, userAgent, "pauseReplica"); err != nil {
+					return err
+				}
+			} else if desired_replica_state == "READY" && state == "PAUSED" {
+				log.Printf("[DEBUG] Resuming replica")
+				if err := ModifyFilestoreInstanceReplica(config, d, project, billingProject, userAgent, "resumeReplica"); err != nil {
+					return err
+				}
+			} else {
+				log.Printf("[DEBUG] No state transition needed")
+			}
 		} else {
-			log.Printf("[DEBUG] Finished Pausing/Resuming Instance %q: %#v", d.Id(), res)
+			log.Printf("[DEBUG] No replicas found in effective_replication")
 		}
-
-		err = FilestoreOperationWaitTime(
-			config, res, project, "Pausing/Resuming Instance", userAgent,
-			d.Timeout(schema.TimeoutUpdate))
-		if err != nil {
-			return err
-		}
-
-		d.Set("replica_state", replica_state_value)
+	} else {
+		log.Printf("[DEBUG] effective_replication is empty")
 	}
+} else {
+	log.Printf("[DEBUG] desired_replica_state has NOT changed")
+}
