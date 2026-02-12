@@ -864,7 +864,7 @@ func TestAccGKEHubFeature_WorkloadIdentity(t *testing.T) {
 		CheckDestroy: testAccCheckGKEHubFeatureDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccGKEHubFeature_WorkloadIdentity(context),
+				Config: testAccGKEHubFeature_WorkloadIdentity(context),
 			},
 			{
 				ResourceName:            "google_gke_hub_feature.feature",
@@ -873,7 +873,7 @@ func TestAccGKEHubFeature_WorkloadIdentity(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"project", "labels", "terraform_labels"},
 			},
 			{
-				Config: TestAccGKEHubFeature_WorkloadIdentityUpdate(context),
+				Config: testAccGKEHubFeature_WorkloadIdentityUpdate(context),
 			},
 			{
 				ResourceName:            "google_gke_hub_feature.feature",
@@ -885,7 +885,7 @@ func TestAccGKEHubFeature_WorkloadIdentity(t *testing.T) {
 	})
 }
 
-func TestAccGKEHubFeature_WorkloadIdentity(context map[string]interface{}) string {
+func testAccGKEHubFeature_WorkloadIdentity(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   name = "workloadidentity"
@@ -901,7 +901,7 @@ resource "google_gke_hub_feature" "feature" {
 `, context)
 }
 
-func TestAccGKEHubFeature_WorkloadIdentityUpdate(context map[string]interface{}) string {
+func testAccGKEHubFeature_WorkloadIdentityUpdate(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_gke_hub_feature" "feature" {
   name = "workloadidentity"
