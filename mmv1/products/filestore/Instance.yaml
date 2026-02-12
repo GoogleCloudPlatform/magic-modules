@@ -41,6 +41,9 @@ async:
     resource_inside_response: true
 custom_code:
   pre_create: 'templates/terraform/pre_create/filestore_instance.go.tmpl'
+  post_create: 'templates/terraform/post_create/filestore_instance.go.tmpl'
+  post_update: 'templates/terraform/post_update/filestore_instance.go.tmpl'
+  constants: 'templates/terraform/constants/filestore_instance.go.tmpl'
 include_in_tgc_next: true
 tgc_tests:
   - name: 'TestAccFilestoreInstance_directoryServices'
@@ -75,6 +78,15 @@ examples:
       instance_name: 'test-instance'
     # https://github.com/GoogleCloudPlatform/magic-modules/pull/5875#discussion_r844285335
     exclude_test: true
+virtual_fields:
+  - name: 'desired_replica_state'
+    type: Enum
+    enum_values:
+      - 'PAUSED'
+      - 'READY'
+    default_value: 'READY'
+    description: |
+     The desired_replica_state field controls the state of a replica. Terraform will attempt to make the actual state of the replica match the desired state.
 parameters:
   - name: 'zone'
     type: String
