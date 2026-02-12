@@ -53,7 +53,6 @@ custom_code:
 custom_diff:
   - 'healthCheckCustomizeDiff'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 tgc_tests:
   - name: 'TestAccComputeRegionHealthCheck_typeTransition'
     skip: 'Test data has mismatched steps'

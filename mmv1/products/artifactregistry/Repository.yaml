@@ -40,7 +40,6 @@ async:
   result:
     resource_inside_response: true
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 iam_policy:
   method_name_separator: ':'
   allowed_iam_role: 'roles/artifactregistry.reader'
