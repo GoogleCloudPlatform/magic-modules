@@ -1,8 +1,8 @@
 
-if d.HasChange("replica_action") {
+if d.HasChange("replica_state") {
 	obj := make(map[string]interface{})
 	endpoint := ""
-	replica_action_value := ""
+	replica_state_value := ""
 
 	replicaActionProp := d.Get("replica_action")
 	if err != nil {
@@ -14,12 +14,12 @@ if d.HasChange("replica_action") {
 	switch replicaActionProp {
 	case "PAUSE":
 		endpoint = "pauseReplica"
-		replica_action_value = "PAUSE"
+		replica_state_value = "PAUSE"
 	case "RESUME":
 		endpoint = "resumeReplica"
-		replica_action_value = "RESUME"
+		replica_state_value = "RESUME"
 	case "":
-		return fmt.Errorf("Error: replica_action cannot be empty")
+		return fmt.Errorf("Error: replica_state cannot be empty")
 	}
 
 	url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}:%s",endpoint))
@@ -53,5 +53,5 @@ if d.HasChange("replica_action") {
 			return err
 		}
 
-		d.Set("replica_action", replica_action_value)
+		d.Set("replica_state", replica_state_value)
 	}

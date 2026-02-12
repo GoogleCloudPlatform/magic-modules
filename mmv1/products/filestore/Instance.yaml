@@ -76,14 +76,14 @@ examples:
     # https://github.com/GoogleCloudPlatform/magic-modules/pull/5875#discussion_r844285335
     exclude_test: true
 virtual_fields:
-  - name: 'replica_action'
+  - name: 'replica_state'
     type: Enum
     enum_values:
       - 'PAUSE'
       - 'RESUME'
     description: |
-      Replica action can perform pause and resume on replica.
-      Intented to be used after creation of replica instance.
+     The replica_state field controls the pause and resume operations on a replica instance. It's intended for use after the replica has been created. 
+     This field reflects the last state set by Terraform. For example, if the last operation run by Terraform was to resume, the field's value will be RESUME.
 parameters:
   - name: 'zone'
     type: String
