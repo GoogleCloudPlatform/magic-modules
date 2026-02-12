@@ -148,7 +148,7 @@ The following arguments are supported:
 
 * `nic_type` - (Optional) The type of vNIC to be used on this interface. Possible values: GVNIC, VIRTIO_NET.
 
-* `network_attachment` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The URL of the network attachment that this interface should connect to in the following format: `projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}`.
+* `network_attachment` - (Optional) [Beta](../guides/provider_versions.html.markdown) The URL of the network attachment that this interface should connect to in the following format: `projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}`.
 
 * `stack_type` - (Optional) The stack type for this network interface to identify whether the IPv6 feature is enabled or not. Values are IPV4_IPV6 or IPV4_ONLY. If not specified, IPV4_ONLY will be used.
 
@@ -158,7 +158,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `queue_count` - (Optional) The networking queue count that's specified by users for the network interface. Both Rx and Tx queues will be set to this number. It will be empty if not specified.
 
-* `security_policy` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) A full or partial URL to a security policy to add to this instance. If this field is set to an empty string it will remove the associated security policy.
+* `security_policy` - (Optional) [Beta](../guides/provider_versions.html.markdown) A full or partial URL to a security policy to add to this instance. If this field is set to an empty string it will remove the associated security policy.
 
 <a name="nested_access_config"></a>The `access_config` block supports:
 

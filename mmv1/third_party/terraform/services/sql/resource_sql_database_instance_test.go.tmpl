@@ -1452,15 +1452,17 @@ func TestAccSqlDatabaseInstance_createFromBackupDR(t *testing.T) {
 
 	// Bootstrap the BackupDR vault
     backupVaultID := "bv-test"
-    location := "us-central1"
+    vaultLocation := "us-central1"
     project := envvar.GetTestProjectFromEnv()
-    backupvault := acctest.BootstrapBackupDRVault(t, backupVaultID, location)
+    backupvault := acctest.BootstrapBackupDRVault(t, backupVaultID, vaultLocation)
 
     context := map[string]interface{}{
         "random_suffix":  acctest.RandString(t, 10),
         "project":        project,
         "backup_vault_id": backupVaultID,
         "backup_vault":   backupvault,
+		"target_instance_region": "us-central1",
+		"vault_location": vaultLocation,
     }
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1560,6 +1562,123 @@ func TestAccSqlDatabaseInstance_BackupDRUpdate(t *testing.T) {
 			},
 			{
 				Config: testAccSqlDatabaseInstance_updateFromBackupDR(context),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "backupdr_backup"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_createFromCrossRegionBackupDrBackup(t *testing.T) {
+	t.Parallel()
+
+	// Bootstrap the BackupDR vault
+    backupVaultID := "bv-test"
+	vaultLocation := "us-central1"
+    project := envvar.GetTestProjectFromEnv()
+    backupvault := acctest.BootstrapBackupDRVault(t, backupVaultID, vaultLocation)
+
+    context := map[string]interface{}{
+        "random_suffix":  acctest.RandString(t, 10),
+        "project":        project,
+        "backup_vault_id": backupVaultID,
+        "backup_vault":   backupvault,
+		"target_instance_region": "us-east1",
+		"vault_location": vaultLocation,
+    }
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_createFromBackupDR(context),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "backupdr_backup"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_createFromMultiRegionBackupDrBackup(t *testing.T) {
+	t.Parallel()
+
+	// Bootstrap the BackupDR vault
+    backupVaultID := "bv-test-mr"
+	vaultLocation := "us"
+    project := envvar.GetTestProjectFromEnv()
+    backupvault := acctest.BootstrapBackupDRVault(t, backupVaultID, vaultLocation)
+
+    context := map[string]interface{}{
+        "random_suffix":  acctest.RandString(t, 10),
+        "project":        project,
+        "backup_vault_id": backupVaultID,
+        "backup_vault":   backupvault,
+		"target_instance_region": "us-central1",
+		"vault_location": vaultLocation,
+    }
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_createFromBackupDR(context),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "backupdr_backup"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_createFromMultiRegionBackupDrBackupCrossRegion(t *testing.T) {
+	t.Parallel()
+
+	// Bootstrap the BackupDR vault
+    backupVaultID := "bv-test-mr"
+	vaultLocation := "us"
+    project := envvar.GetTestProjectFromEnv()
+    backupvault := acctest.BootstrapBackupDRVault(t, backupVaultID, vaultLocation)
+
+    context := map[string]interface{}{
+        "random_suffix":  acctest.RandString(t, 10),
+        "project":        project,
+        "backup_vault_id": backupVaultID,
+        "backup_vault":   backupvault,
+		"target_instance_region": "us-east1",
+		"vault_location": vaultLocation,
+    }
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_createFromBackupDR(context),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -3789,6 +3908,7 @@ func TestAccSqlDatabaseInstance_useInternalCaByDefault(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_mode", "GOOGLE_MANAGED_INTERNAL_CA"),
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_pool", ""),
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_certificate_rotation_mode", "SERVER_CERTIFICATE_ROTATION_MODE_UNSPECIFIED"),
 				),
 			},
 			{
@@ -3818,6 +3938,7 @@ func TestAccSqlDatabaseInstance_useCasBasedServerCa(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_mode", "GOOGLE_MANAGED_CAS_CA"),
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_pool", ""),
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_certificate_rotation_mode", "SERVER_CERTIFICATE_ROTATION_MODE_UNSPECIFIED"),
 					resource.TestCheckResourceAttr(resourceName, "dns_names.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "dns_names.0.connection_type", "PUBLIC"),
 					resource.TestCheckResourceAttr(resourceName, "dns_names.0.dns_scope", "INSTANCE"),
@@ -3832,6 +3953,37 @@ func TestAccSqlDatabaseInstance_useCasBasedServerCa(t *testing.T) {
 		},
 	})
 }
+
+func TestAccSqlDatabaseInstance_setServerCertRotationMode(t *testing.T) {
+	t.Parallel()
+
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	resourceName := "google_sql_database_instance.instance"
+	rotationMode := "AUTOMATIC_ROTATION_DURING_MAINTENANCE"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_setServerCertRotationMode(databaseName, rotationMode),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_certificate_rotation_mode", rotationMode),
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_mode", "GOOGLE_MANAGED_CAS_CA"),
+				),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 
 func TestAccSqlDatabaseInstance_useCustomSubjectAlternateName(t *testing.T) {
 	t.Parallel()
@@ -4550,6 +4702,7 @@ resource "google_sql_database_instance" "instance" {
 		ipv4_enabled    = "true"
 		server_ca_mode  = "CUSTOMER_MANAGED_CAS_CA"
 		server_ca_pool  = google_privateca_ca_pool.customer_ca_pool.id
+		server_certificate_rotation_mode = "AUTOMATIC_ROTATION_DURING_MAINTENANCE"
 		custom_subject_alternative_names = ["%{customSan}"]
 	}
   }
@@ -4638,9 +4791,10 @@ resource "google_sql_database_instance" "instance" {
   settings {
 	tier = "db-f1-micro"
 	ip_configuration {
-		ipv4_enabled    = "true"
-		server_ca_mode  = "CUSTOMER_MANAGED_CAS_CA"
-		server_ca_pool  = google_privateca_ca_pool.customer_ca_pool.id
+		ipv4_enabled                     = "true"
+		server_ca_mode                   = "CUSTOMER_MANAGED_CAS_CA"
+		server_ca_pool                   = google_privateca_ca_pool.customer_ca_pool.id
+		server_certificate_rotation_mode = "AUTOMATIC_ROTATION_DURING_MAINTENANCE"
 	}
   }
 
@@ -4665,6 +4819,25 @@ resource "google_sql_database_instance" "instance" {
   }
 }
 `, databaseName, serverCaMode)
+}
+
+func testGoogleSqlDatabaseInstance_setServerCertRotationMode(databaseName, rotationMode string) string {
+        return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "POSTGRES_15"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+    ip_configuration {
+      ipv4_enabled    = "true"
+      server_ca_mode  = "GOOGLE_MANAGED_CAS_CA"
+      server_certificate_rotation_mode = "%s"
+    }
+  }
+}
+`, databaseName, rotationMode)
 }
 
 func testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName string, databaseVersion string, sslMode string) string {
@@ -7863,7 +8036,7 @@ resource "time_sleep" "wait_10_mins" {
 
 data "google_backup_dr_backup" "sql_backups" {
   project			= "%{project}"
-  location      	= "us-central1"
+  location      	= "%{vault_location}"
   backup_vault_id 	= "%{backup_vault_id}"
   data_source_id 	= element(split("/", google_backup_dr_backup_plan_association.association.data_source), length(split("/", google_backup_dr_backup_plan_association.association.data_source)) - 1)
 
@@ -7873,7 +8046,7 @@ data "google_backup_dr_backup" "sql_backups" {
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-%{random_suffix}"
   database_version = "MYSQL_8_0_41"
-  region           = "us-central1"
+  region           = "%{target_instance_region}"
 
   settings {
     tier = "db-g1-small"

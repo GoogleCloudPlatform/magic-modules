@@ -481,7 +481,12 @@ func (t *Type) SetDefault(r *Resource) {
 
 func (t *Type) Validate(rName string) {
 	if t.Name == "" {
-		log.Fatalf("Missing `name` for proprty with type %s in resource %s", t.Type, rName)
+		log.Fatalf("Missing `name` for property with type %s in resource %s", t.Type, rName)
+	}
+
+	// Check type is valid. Also allow empty as it's currently used in unit tests.
+	if !slices.Contains([]string{"", "Boolean", "Double", "Integer", "String", "Time", "Enum", "ResourceRef", "NestedObject", "Array", "KeyValuePairs", "KeyValueLabels", "KeyValueTerraformLabels", "KeyValueEffectiveLabels", "KeyValueAnnotations", "Map", "Fingerprint"}, t.Type) {
+		log.Fatalf("Unknown type %q for property %q in resource %s", t.Type, t.Name, rName)
 	}
 
 	if t.Output && t.Required {
@@ -501,7 +506,7 @@ func (t *Type) Validate(rName string) {
 	}
 
 	if t.KeyDescription != "" {
-		log.Fatalf("Property %s.key_description can't be set in resource %s; it's deprecated", t.Name, rName)
+		log.Fatalf("Property %s key_description can't be set in resource %s; it's deprecated", t.Name, rName)
 	}
 
 	t.validateLabelsField()
@@ -517,7 +522,7 @@ func (t *Type) Validate(rName string) {
 		t.ValueType.Validate(rName)
 		t.ValueType.Name = oldName
 		if t.ValueType.Name != "" {
-			log.Fatalf("Property %s.name can't be set in resource %s", t.Name, rName)
+			log.Fatalf("Property %s value_type.name can't be set in resource %s", t.Name, rName)
 		}
 	case t.IsA("NestedObject"):
 		for _, p := range t.Properties {
@@ -535,7 +540,6 @@ func (t *Type) Validate(rName string) {
 // check_at_least_one_of
 // check_exactly_one_of
 // check_required_with
-// check the allowed types for Type field
 // check the allowed fields for each type, for example, KeyName is only allowed for Map
 
 // Returns a slice of Terraform field names representing where the field is nested within the parent resource.
@@ -607,7 +611,7 @@ func (t *Type) GetPrefix() string {
 		if t.ParentMetadata == nil {
 			nestedPrefix := ""
 			// TODO: Use the nestedPrefix for tgc provider to be consistent with terraform provider
-			if t.ResourceMetadata.NestedQuery != nil && !strings.Contains(t.ResourceMetadata.Compiler, "terraformgoogleconversion") {
+			if t.ResourceMetadata.NestedQuery != nil && !strings.Contains(t.ResourceMetadata.ProductMetadata.Compiler, "terraformgoogleconversion") {
 				nestedPrefix = "Nested"
 			}
 
@@ -854,6 +858,29 @@ func (t Type) WriteOnlyProperties() []*Type {
 	return props
 }
 
+// AllUniqueNestedProperties Returns all unique nested properties (regular and write-only), preserving order and sorted by name.
+func (t Type) AllUniqueNestedProperties() []*Type {
+	seen := make(map[string]bool)
+	var result []*Type
+
+	for _, p := range t.NestedProperties() {
+		key := strings.Join(p.Lineage(), "|")
+		if !seen[key] {
+			result = append(result, p)
+			seen[key] = true
+		}
+	}
+	for _, p := range t.WriteOnlyProperties() {
+		key := strings.Join(p.Lineage(), "|")
+		if !seen[key] {
+			result = append(result, p)
+			seen[key] = true
+		}
+	}
+
+	return result
+}
+
 func (t Type) Removed() bool {
 	return t.RemovedMessage != ""
 }
@@ -881,7 +908,7 @@ func (t *Type) FieldType() []string {
 	}
 
 	if t.MinVersion == "beta" && t.ResourceMetadata.MinVersion != "beta" {
-		ret = append(ret, "[Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)")
+		ret = append(ret, "[Beta](../guides/provider_versions.html.markdown)")
 	}
 
 	if t.DeprecationMessage != "" {
@@ -1532,4 +1559,15 @@ func (t Type) TGCSendEmptyValue() bool {
 
 func (t Type) ShouldIgnoreCustomFlatten() bool {
 	return t.ResourceMetadata.IsTgcCompiler() && (t.IgnoreRead || t.TGCIgnoreTerraformCustomFlatten)
+}
+
+// It returns true if any of the nested properties are required, necessitating the initialization
+// of an empty map to prevent "missing argument" errors in Terraform when the field is missing in CAI.
+func (t Type) HasRequiredProperty() bool {
+	for _, prop := range t.UserProperties() {
+		if prop.Required {
+			return true
+		}
+	}
+	return false
 }

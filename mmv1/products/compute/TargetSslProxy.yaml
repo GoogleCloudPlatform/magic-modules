@@ -104,9 +104,6 @@ properties:
       SSL certificate must be specified.
     update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setSslCertificates'
     update_verb: 'POST'
-    exactly_one_of:
-      - 'sslCertificates'
-      - 'certificateMap'
     custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
     item_type:
       name: 'sslCertificate'
@@ -122,9 +119,6 @@ properties:
       Accepted format is `//certificatemanager.googleapis.com/projects/{project}/locations/{location}/certificateMaps/{resourceName}`.
     update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setCertificateMap'
     update_verb: 'POST'
-    exactly_one_of:
-      - 'sslCertificates'
-      - 'certificateMap'
   - name: 'sslPolicy'
     type: ResourceRef
     description: |

@@ -42,7 +42,6 @@ custom_code:
 custom_diff:
   - 'tpgresource.DefaultProviderProject'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 examples:
   - name: 'firewall_policy'
     primary_resource_id: 'default'

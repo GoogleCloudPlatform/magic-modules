@@ -29,7 +29,6 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/otiai10/copy"
@@ -50,8 +49,6 @@ type TerraformGoogleConversionNext struct {
 
 	TargetVersionName string
 
-	Version product.Version
-
 	Product *api.Product
 
 	StartTime time.Time
@@ -65,6 +62,7 @@ type ResourceIdentifier struct {
 	ResourceName       string
 	AliasName          string // It can be "Default" or the same with ResourceName
 	CaiAssetNameFormat string
+	ImportFormats      []string
 	IdentityParam      string
 }
 
@@ -72,16 +70,12 @@ func NewTerraformGoogleConversionNext(product *api.Product, versionName string, 
 	t := TerraformGoogleConversionNext{
 		Product:                    product,
 		TargetVersionName:          versionName,
-		Version:                    *product.VersionObjOrClosest(versionName),
 		StartTime:                  startTime,
 		ResourcesByCaiResourceType: make(map[string][]ResourceIdentifier),
 		templateFS:                 templateFS,
 	}
 
-	t.Product.SetPropertiesBasedOnVersion(&t.Version)
-	t.Product.SetCompiler(ProviderName(t))
 	for _, r := range t.Product.Objects {
-		r.SetCompiler(ProviderName(t))
 		r.ImportPath = ImportPathFromVersion(versionName)
 	}
 
@@ -90,7 +84,7 @@ func NewTerraformGoogleConversionNext(product *api.Product, versionName string, 
 
 func (tgc TerraformGoogleConversionNext) Generate(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 	for _, object := range tgc.Product.Objects {
-		object.ExcludeIfNotInVersion(&tgc.Version)
+		object.ExcludeIfNotInVersion(tgc.Product.Version)
 
 		if resourceToGenerate != "" && object.Name != resourceToGenerate {
 			log.Printf("Excluding %s per user request", object.Name)
@@ -111,10 +105,8 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 	if !object.IsExcluded() {
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 		tgc.addTestsFromSamples(&object)
-		if object.TGCIncludeHandwrittenTests {
-			if err := tgc.addTestsFromHandwrittenTests(&object); err != nil {
-				log.Printf("Error adding examples from handwritten tests: %v", err)
-			}
+		if err := tgc.addTestsFromHandwrittenTests(&object); err != nil {
+			log.Printf("Error adding examples from handwritten tests: %v", err)
 		}
 		tgc.GenerateResourceTests(object, *templateData, outputFolder)
 	}
@@ -325,7 +317,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromExamples(object *api.Resour
 		if example.ExcludeTest {
 			continue
 		}
-		if object.ProductMetadata.VersionObjOrClosest(tgc.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) < 0 {
+		if object.ProductMetadata.VersionObjOrClosest(tgc.Product.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) < 0 {
 			continue
 		}
 		object.TGCTests = append(object.TGCTests, resource.TGCTest{
@@ -344,7 +336,7 @@ func (tgc TerraformGoogleConversionNext) addTestsFromSamples(object *api.Resourc
 		if sample.ExcludeTest {
 			continue
 		}
-		if object.ProductMetadata.VersionObjOrClosest(tgc.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0 {
+		if object.ProductMetadata.VersionObjOrClosest(tgc.Product.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) < 0 {
 			continue
 		}
 		object.TGCTests = append(object.TGCTests, resource.TGCTest{
@@ -383,15 +375,15 @@ func (tgc TerraformGoogleConversionNext) addTestsFromHandwrittenTests(object *ap
 	}
 
 	matches := testRegex.FindAllSubmatch(data, -1)
-	tests := make([]resource.TGCTest, len(matches))
-	for i, match := range matches {
+	tests := make([]resource.TGCTest, 0)
+	for _, match := range matches {
 		if len(match) == 2 {
 			if _, ok := testNamesInYAML[string(match[1])]; ok {
 				continue
 			}
-			tests[i] = resource.TGCTest{
+			tests = append(tests, resource.TGCTest{
 				Name: string(match[1]),
-			}
+			})
 		}
 	}
 
@@ -468,6 +460,7 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 				ResourceName:       object.ResourceName(),
 				AliasName:          object.ResourceName(),
 				CaiAssetNameFormat: object.GetCaiAssetNameTemplate(),
+				ImportFormats:      object.ImportFormat,
 			}
 			tgc.ResourcesForVersion = append(tgc.ResourcesForVersion, resourceIdentifier)
 
@@ -501,19 +494,7 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 func FindIdentityParams(rids []ResourceIdentifier) []ResourceIdentifier {
 	segmentsList := make([][]string, len(rids))
 	for i, rid := range rids {
-		urlPath := rid.CaiAssetNameFormat
-		urlPath = strings.Trim(urlPath, "/")
-
-		processedURL := regexp.MustCompile(`\{\{%?(\w+)\}\}`).ReplaceAllString(urlPath, "")
-		segments := strings.Split(processedURL, "/")
-		var cleanSegments []string
-		for _, seg := range segments {
-			if seg != "" {
-				cleanSegments = append(cleanSegments, seg)
-			}
-		}
-
-		segmentsList[i] = cleanSegments
+		segmentsList[i] = processPathIntoSegments(rid.CaiAssetNameFormat)
 	}
 
 	segmentsList = removeSharedElements(segmentsList)
@@ -523,6 +504,44 @@ func FindIdentityParams(rids []ResourceIdentifier) []ResourceIdentifier {
 			rids[i].IdentityParam = ""
 		} else {
 			rids[i].IdentityParam = segments[0]
+		}
+	}
+
+	// Check if we have multiple resources with the same IdentityParam
+	identityParams := make(map[string]int)
+	for _, rid := range rids {
+		identityParams[rid.IdentityParam]++
+	}
+
+	// If we have collisions or empty params, try using ImportFormats
+	hasCollision := false
+	for _, count := range identityParams {
+		if count > 1 {
+			hasCollision = true
+			break
+		}
+	}
+
+	if hasCollision {
+		// Reset segmentsList using ImportFormats
+		for i, rid := range rids {
+			if len(rid.ImportFormats) > 0 {
+				segmentsList[i] = processPathIntoSegments(rid.ImportFormats[0])
+			} else {
+				// If no import format, fallback to previous empty list or keep as is?
+				// For now let's assume if we are falling back, we want fresh segments.
+				segmentsList[i] = []string{}
+			}
+		}
+
+		segmentsList = removeSharedElements(segmentsList)
+
+		for i, segments := range segmentsList {
+			if len(segments) == 0 {
+				rids[i].IdentityParam = ""
+			} else {
+				rids[i].IdentityParam = segments[0]
+			}
 		}
 	}
 
@@ -540,6 +559,25 @@ func FindIdentityParams(rids []ResourceIdentifier) []ResourceIdentifier {
 	}
 
 	return rids
+}
+
+// processPathIntoSegments processes a URL path or import format string
+// into a list of cleaned segments by removing variables and empty segments.
+// It handles both standard variables {{var}} and import format variables {{%var}}.
+func processPathIntoSegments(path string) []string {
+	// ImportFormat often has {{%variable}}, remove strict format
+	path = strings.ReplaceAll(path, "%", "")
+	path = strings.Trim(path, "/")
+
+	processedURL := regexp.MustCompile(`\{\{[a-zA-Z0-9_]+\}\}`).ReplaceAllString(path, "")
+	segments := strings.Split(processedURL, "/")
+	var cleanSegments []string
+	for _, seg := range segments {
+		if seg != "" {
+			cleanSegments = append(cleanSegments, seg)
+		}
+	}
+	return cleanSegments
 }
 
 // Finds elements common to ALL lists in a list of lists
