@@ -8,10 +8,9 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/converters/utils"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/models"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/transport"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
 
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
+	transport "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/container/v1"
 )
@@ -525,7 +524,7 @@ func flattenDefaultSnatStatus(c *container.DefaultSnatStatus) []map[string]inter
 	return result
 }
 
-func flattenWorkloadIdentityConfig(c *container.WorkloadIdentityConfig, d *schema.ResourceData, config *transport_tpg.Config) []map[string]interface{} {
+func flattenWorkloadIdentityConfig(c *container.WorkloadIdentityConfig, d *schema.ResourceData, config *transport.Config) []map[string]interface{} {
 	if c == nil {
 		return nil
 	}
@@ -537,7 +536,7 @@ func flattenWorkloadIdentityConfig(c *container.WorkloadIdentityConfig, d *schem
 	}
 }
 
-func flattenIdentityServiceConfig(c *container.IdentityServiceConfig, d *schema.ResourceData, config *transport_tpg.Config) []map[string]interface{} {
+func flattenIdentityServiceConfig(c *container.IdentityServiceConfig, d *schema.ResourceData, config *transport.Config) []map[string]interface{} {
 	if c == nil {
 		return nil
 	}
@@ -590,7 +589,7 @@ func flattenNetworkTierConfig(ntc *container.NetworkTierConfig) []map[string]int
 	}
 }
 
-func flattenIPAllocationPolicy(c *container.Cluster, d *schema.ResourceData, config *transport_tpg.Config) ([]map[string]interface{}, error) {
+func flattenIPAllocationPolicy(c *container.Cluster, d *schema.ResourceData, config *transport.Config) ([]map[string]interface{}, error) {
 	// If IP aliasing isn't enabled, none of the values in this block can be set.
 	if c == nil || c.IpAllocationPolicy == nil || !c.IpAllocationPolicy.UseIpAliases {
 		if d != nil {
@@ -1183,7 +1182,7 @@ func flattenNodePoolAutoConfigNetworkTags(c *container.NetworkTags) []map[string
 	return []map[string]interface{}{result}
 }
 
-func flattenContainerClusterNodePools(d *schema.ResourceData, config *transport_tpg.Config, c *container.Cluster) []map[string]interface{} {
+func flattenContainerClusterNodePools(d *schema.ResourceData, config *transport.Config, c *container.Cluster) []map[string]interface{} {
 	if len(c.NodePools) == 0 {
 		return nil
 	}
