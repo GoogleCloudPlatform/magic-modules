@@ -100,6 +100,7 @@ func testAccDialogflowEnvionment_full1(context map[string]interface{}) string {
 				}
 			}
 		}
+		depends_on = [google_dialogflow_agent.agent]
 	}
 	`, context)
 }
@@ -169,6 +170,7 @@ func testAccDialogflowEnvionment_full2(context map[string]interface{}) string {
 				}
 			}
 		}
+		depends_on = [google_dialogflow_agent.agent]
 	}
 	`, context)
 }
