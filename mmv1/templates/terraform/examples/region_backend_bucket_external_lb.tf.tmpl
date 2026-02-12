@@ -1,21 +1,17 @@
 resource "google_compute_region_backend_bucket" "{{$.PrimaryResourceId}}" {
   name                  = "{{index $.Vars "backend_bucket_name"}}"
-  region                = "us-central1"
+  region                = "us-east1"
   bucket_name           = google_storage_bucket.{{$.PrimaryResourceId}}.name
   load_balancing_scheme = "EXTERNAL_MANAGED"
   description           = "Regional external backend bucket for static content"
   
-  compression_mode = "AUTOMATIC"
-  
-  custom_response_headers = [
-    "X-Cache-Status: {cdn_cache_status}",
-    "X-Client-Region: {client_region}",
-  ]
+  # REMOVED: compression_mode (Not supported)
+  # REMOVED: custom_response_headers (Not supported)
 }
 
 resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
   name                        = "{{index $.Vars "bucket_name"}}"
-  location                    = "US-CENTRAL1"
+  location                    = "US-EAST1"
   force_destroy               = true
   uniform_bucket_level_access = true
   
