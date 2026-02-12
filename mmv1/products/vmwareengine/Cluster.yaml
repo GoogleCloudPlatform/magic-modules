@@ -45,10 +45,14 @@ async:
     resource_inside_response: false
   include_project: true
 custom_code:
+  encoder: 'templates/terraform/encoders/vmwareengine_cluster.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/vmwareengine_cluster.go.tmpl'
+  post_update: 'templates/terraform/post_update/vmwareengine_cluster.go.tmpl'
+  post_create: 'templates/terraform/post_create/vmwareengine_cluster.go.tmpl'
+  constants: 'templates/terraform/constants/vmwareengine_cluster.go.tmpl'
 # There is a handwritten sweeper that provides a list of locations to sweep
 exclude_sweeper: true
 error_abort_predicates:
-
   - 'transport_tpg.Is429QuotaError'
 examples:
   - name: 'vmware_engine_cluster_basic'
@@ -60,7 +64,7 @@ examples:
       management_cluster_id: 'sample-mgmt-cluster'
     test_env_vars:
       region: 'REGION'
- # update tests will take care of create and update. PC and cluster creation is expensive and node reservation is required.
+    # update tests will take care of create and update. PC and cluster creation is expensive and node reservation is required.
     exclude_test: true
   - name: 'vmware_engine_cluster_full'
     primary_resource_id: 'vmw-ext-cluster'
@@ -71,8 +75,39 @@ examples:
       management_cluster_id: 'sample-mgmt-cluster'
     test_env_vars:
       region: 'REGION'
- # update tests will take care of create and update. PC and cluster creation is expensive and node reservation is required.
+    # update tests will take care of create and update. PC and cluster creation is expensive and node reservation is required.
     exclude_test: true
+  - name: 'vmware_engine_cluster_nfs_datastore_filestore'
+    primary_resource_id: 'vmw-ext-cluster'
+    vars:
+      name: 'ext-cluster'
+      private_cloud_id: 'sample-pc'
+      network_id: 'pc-nw'
+      management_cluster_id: 'sample-mgmt-cluster'
+      filestore_instance_id: 'test-fs-filestore'
+      datastore_id: ext-fs-datastore
+      svc_ip_cidr: '10.0.0.0/24'
+    test_env_vars:
+      region: 'REGION'
+      zone: 'ZONE'
+    # Parent PC creation is expensive and requires node reservation. The update test tests all operations.
+    exclude_test: true
+  - name: 'vmware_engine_cluster_nfs_datastore_netapp'
+    primary_resource_id: 'vmw-ext-cluster'
+    vars:
+      name: 'ext-cluster'
+      private_cloud_id: 'sample-pc'
+      network_id: 'pc-nw'
+      management_cluster_id: 'sample-mgmt-cluster'
+      filestore_instance_id: 'test-fs-filestore'
+      datastore_id: ext-fs-datastore
+      svc_ip_cidr: '10.0.0.0/24'
+    test_env_vars:
+      region: 'REGION'
+      zone: 'ZONE'
+    # Parent PC creation is expensive and requires node reservation. The update test tests all operations.
+    exclude_test: true
+
 parameters:
   - name: 'parent'
     type: String
@@ -252,3 +287,98 @@ properties:
           Minimum cool down period is 30m.
           Cool down period must be in whole minutes (for example, 30m, 31m, 50m).
           Mandatory for successful addition of autoscaling settings in cluster.
+  - name: datastoreMountConfig
+    type: Array
+    description: |
+      Optional. Configuration to mount a datastore.
+      Mount can be done along with cluster create or during cluster update
+      Since service subnet is not configured with ip range on mgmt cluster creation, mount on management cluster is done as update only
+      for unmount remove 'datastore_mount_config' config from the update of cluster resource
+    item_type:
+      type: NestedObject
+      properties:
+        - name: datastore
+          type: String
+          description: |-
+            The resource name of the datastore to unmount.
+            The datastore requested to be mounted should be in same region/zone as the
+            cluster.
+            Resource names are schemeless URIs that follow the conventions in
+            https://cloud.google.com/apis/design/resource_names.
+            For example:
+            `projects/my-project/locations/us-central1/datastores/my-datastore`
+          required: true
+          diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+        - name: datastoreNetwork
+          type: NestedObject
+          description: The network configuration for the datastore.
+          required: true
+          properties:
+            - name: connectionCount
+              type: Integer
+              default_value: 4
+              description: |-
+                Optional. The number of connections of the NFS volume.
+                Supported from vsphere 8.0u1. Possible values are 1-4.
+                Default value is 4.
+            - name: mtu
+              type: Integer
+              description: |-
+                Optional. The Maximal Transmission Unit (MTU) of the datastore.
+                MTU value can range from 1330-9000. If not set, system sets
+                default MTU size to 1500.
+            - name: networkPeering
+              type: String
+              description: |-
+                The resource name of the network peering, used to access the
+                file share by clients on private cloud. Resource names are schemeless
+                URIs that follow the conventions in
+                https://cloud.google.com/apis/design/resource_names.
+                e.g.
+                projects/my-project/locations/us-central1/networkPeerings/my-network-peering
+              output: true
+            - name: subnet
+              type: String
+              description: |-
+                The resource name of the subnet
+                Resource names are schemeless URIs that follow the conventions in
+                https://cloud.google.com/apis/design/resource_names.
+                e.g. projects/my-project/locations/us-central1/subnets/my-subnet
+              required: true
+        - name: fileShare
+          type: String
+          description: File share name.
+          output: true
+        - name: nfsVersion
+          type: String
+          description: |-
+            Optional. The NFS protocol supported by the NFS volume.
+            Default value used will be NFS_V3
+            Possible values:
+            NFS_V3
+          default_value: 'NFS_V3'
+        - name: accessMode
+          type: String
+          description: |-
+            Optional. NFS is accessed by hosts in either read or read_write mode
+            Default value used will be READ_WRITE
+            Possible values:
+            READ_ONLY
+            READ_WRITE
+        - name: servers
+          type: Array
+          description: |-
+            Server IP addresses of the NFS volume.
+            For NFS 3, you can only provide a single
+            server IP address or DNS names.
+          output: true
+          item_type:
+            type: String
+        - name: ignoreColocation
+          type: Boolean
+          ignore_read: true
+          description: |-
+            Optional. If set to true, the colocation requirement will be ignored.
+            If set to false, the colocation requirement will be enforced.
+            Colocation requirement is the requirement that the cluster must be in the
+            same region/zone of datastore.
