@@ -179,13 +179,16 @@ properties:
         type: String
         description: |
           mTLS Endpoint associated with this AgentGateway.
+        output: true
       - name: 'rootCertificates'
         type: Array
         description: |
           Root Certificates for Agents to validate this AgentGateway.
+        output: true
         item_type:
           type: String
       - name: 'serviceExtensionsServiceAccount'
         type: String
         description: |
           Service Account used by Service Extensions to operate.
+        output: true
