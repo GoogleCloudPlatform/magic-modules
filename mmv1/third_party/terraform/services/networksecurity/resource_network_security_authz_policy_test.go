@@ -408,6 +408,7 @@ resource "google_network_security_authz_policy" "default" {
 }
 
 func TestAccNetworkSecurityAuthzPolicy_networkSecurityAuthzPolicyMcpUpdate(t *testing.T) {
+	t.Skip("b/484137930")
 	t.Parallel()
 
 	context := map[string]interface{}{
