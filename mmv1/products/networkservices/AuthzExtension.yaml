@@ -118,7 +118,6 @@ properties:
     type: ResourceRef
     description: |
       The service that runs the extension.
-      
       The following values and formats are accepted:
       * `iap.googleapis.com` when the policyProfile is set to REQUEST_AUTHZ
       * `modelarmor.{{region}}.rep.googleapis.com` when the policyProfile is set to CONTENT_AUTHZ

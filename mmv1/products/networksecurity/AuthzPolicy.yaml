@@ -71,8 +71,8 @@ examples:
       project: 'PROJECT_NAME'
   - name: 'network_security_authz_policy_mcp'
     primary_resource_id: 'default'
-    skip_docs: true # temporary b/484137930
-    skip_test: true # temporary b/484137930
+    skip_docs: true  # temporary b/484137930
+    skip_test: true  # temporary b/484137930
     vars:
       policy_name: 'my-mcp-policy'
 parameters:
