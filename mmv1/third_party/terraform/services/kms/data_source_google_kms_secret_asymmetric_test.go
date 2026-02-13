@@ -1,7 +1,5 @@
 package kms_test
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 import (
 	"crypto/rand"
 	"crypto/rsa"
@@ -156,5 +154,3 @@ data "google_kms_crypto_key_version" "crypto_key" {
 }
 `, projectID, projectID, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)
 }
-
-{{ end }}
