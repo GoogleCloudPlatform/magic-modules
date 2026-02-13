@@ -65,7 +65,7 @@ resource "google_kms_autokey_config" "{{$.PrimaryResourceId}}" {
   provider    = google-beta
   folder      = google_folder.autokms_folder.id
   key_project = "projects/${google_project.key_project.project_id}"
-  key_project_resolution_mode = "RESOURCE_PROJECT"
+  key_project_resolution_mode = "DEDICATED_KEY_PROJECT"
   depends_on  = [time_sleep.wait_srv_acc_permissions]
 }
 
