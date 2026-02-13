@@ -2,6 +2,7 @@ package container
 
 import (
 	"fmt"
+	"log"
 	"regexp"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/converters/utils"
@@ -9,7 +10,7 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
 
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/container/v1"
 )
@@ -42,15 +43,14 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 	}
 
 	var err error
-	// TODO: use transport.NewConfig()
-	// config := transport.NewConfig()
+	config := transport.NewConfig()
 
 	// This is a fake resource used to get fake d
 	// d.Get will return empty map, instead of nil
-	// fakeResource := &schema.Resource{
-	// 	Schema: c.schema,
-	// }
-	// d := fakeResource.TestResourceData()
+	fakeResource := &schema.Resource{
+		Schema: c.schema,
+	}
+	d := fakeResource.TestResourceData()
 
 	var cluster *container.Cluster
 	if err := utils.DecodeJSON(asset.Resource.Data, &cluster); err != nil {
@@ -68,7 +68,7 @@ func (c *ContainerClusterCai2hclConverter) convertResourceData(asset caiasset.As
 	hclData["binary_authorization"] = flattenBinaryAuthorization(cluster.BinaryAuthorization)
 	hclData["network_policy"] = flattenNetworkPolicy(cluster.NetworkPolicy)
 	hclData["addons_config"] = flattenClusterAddonsConfig(cluster.AddonsConfig)
-	// TODO: node_pool
+	hclData["node_pool"] = flattenContainerClusterNodePools(d, config, cluster)
 	hclData["authenticator_groups_config"] = flattenAuthenticatorGroupsConfig(cluster.AuthenticatorGroupsConfig)
 	hclData["control_plane_endpoints_config"] = flattenControlPlaneEndpointsConfig(cluster.ControlPlaneEndpointsConfig)
 	hclData["private_cluster_config"] = flattenPrivateClusterConfig(cluster.ControlPlaneEndpointsConfig, cluster.PrivateClusterConfig, cluster.NetworkConfig)
@@ -524,7 +524,7 @@ func flattenDefaultSnatStatus(c *container.DefaultSnatStatus) []map[string]inter
 	return result
 }
 
-func flattenWorkloadIdentityConfig(c *container.WorkloadIdentityConfig, d *schema.ResourceData, config *transport_tpg.Config) []map[string]interface{} {
+func flattenWorkloadIdentityConfig(c *container.WorkloadIdentityConfig, d *schema.ResourceData, config *transport.Config) []map[string]interface{} {
 	if c == nil {
 		return nil
 	}
@@ -536,7 +536,7 @@ func flattenWorkloadIdentityConfig(c *container.WorkloadIdentityConfig, d *schem
 	}
 }
 
-func flattenIdentityServiceConfig(c *container.IdentityServiceConfig, d *schema.ResourceData, config *transport_tpg.Config) []map[string]interface{} {
+func flattenIdentityServiceConfig(c *container.IdentityServiceConfig, d *schema.ResourceData, config *transport.Config) []map[string]interface{} {
 	if c == nil {
 		return nil
 	}
@@ -589,7 +589,7 @@ func flattenNetworkTierConfig(ntc *container.NetworkTierConfig) []map[string]int
 	}
 }
 
-func flattenIPAllocationPolicy(c *container.Cluster, d *schema.ResourceData, config *transport_tpg.Config) ([]map[string]interface{}, error) {
+func flattenIPAllocationPolicy(c *container.Cluster, d *schema.ResourceData, config *transport.Config) ([]map[string]interface{}, error) {
 	// If IP aliasing isn't enabled, none of the values in this block can be set.
 	if c == nil || c.IpAllocationPolicy == nil || !c.IpAllocationPolicy.UseIpAliases {
 		if d != nil {
@@ -1180,6 +1180,22 @@ func flattenNodePoolAutoConfigNetworkTags(c *container.NetworkTags) []map[string
 		result["tags"] = c.Tags
 	}
 	return []map[string]interface{}{result}
+}
+
+func flattenContainerClusterNodePools(d *schema.ResourceData, config *transport.Config, c *container.Cluster) []map[string]interface{} {
+	if len(c.NodePools) == 0 {
+		return nil
+	}
+	result := make([]map[string]interface{}, 0, len(c.NodePools))
+	for _, np := range c.NodePools {
+		nodePool, err := flattenNodePool(d, config, np, "")
+		if err != nil {
+			log.Printf("Error flattening node pool %s: %s", np.Name, err)
+			continue
+		}
+		result = append(result, nodePool)
+	}
+	return result
 }
 
 func flattenRBACBindingConfig(c *container.RBACBindingConfig) []map[string]interface{} {
