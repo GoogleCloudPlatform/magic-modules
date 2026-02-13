@@ -191,8 +191,8 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_kms_key_handles":							kms.DataSourceGoogleKmsKeyHandles(),
 	"google_kms_secret":                                kms.DataSourceGoogleKmsSecret(),
 	"google_kms_secret_ciphertext":                     kms.DataSourceGoogleKmsSecretCiphertext(),
-	{{- if ne $.TargetVersionName "ga" }}
 	"google_kms_secret_asymmetric":                     kms.DataSourceGoogleKmsSecretAsymmetric(),
+	{{- if ne $.TargetVersionName "ga" }}
 	"google_firebase_android_app":                      firebase.DataSourceGoogleFirebaseAndroidApp(),
 	"google_firebase_apple_app":                        firebase.DataSourceGoogleFirebaseAppleApp(),
 	"google_firebase_hosting_channel":                  firebasehosting.DataSourceGoogleFirebaseHostingChannel(),
