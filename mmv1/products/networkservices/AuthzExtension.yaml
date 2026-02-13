@@ -63,6 +63,12 @@ examples:
       backend_name: 'authz-service-grpc'
     test_env_vars:
       project: 'PROJECT_NAME'
+  - name: 'network_services_authz_extension_iap'
+    skip_docs: true  # temporary b/484137930
+    skip_test: true  # temporary b/484137930
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-authz-ext'
 parameters:
   - name: 'name'
     type: String
@@ -99,9 +105,9 @@ properties:
   - name: 'loadBalancingScheme'
     type: Enum
     description: |
-      All backend services and forwarding rules referenced by this extension must share the same load balancing scheme.
-      For more information, refer to [Backend services overview](https://cloud.google.com/load-balancing/docs/backend-service).
-    required: true
+      Required when the service points to a backend service. All backend services and forwarding rules referenced by
+      this extension must share the same load balancing scheme. For more information, refer to
+      [Backend services overview](https://cloud.google.com/load-balancing/docs/backend-service).
     enum_values:
       - 'INTERNAL_MANAGED'
       - 'EXTERNAL_MANAGED'
@@ -113,9 +119,12 @@ properties:
   - name: 'service'
     type: ResourceRef
     description: |
-      The reference to the service that runs the extension.
-      To configure a callout extension, service must be a fully-qualified reference to a [backend service](https://cloud.google.com/compute/docs/reference/rest/v1/backendServices) in the format:
-      https://www.googleapis.com/compute/v1/projects/{project}/regions/{region}/backendServices/{backendService} or https://www.googleapis.com/compute/v1/projects/{project}/global/backendServices/{backendService}.
+      The service that runs the extension.
+      The following values and formats are accepted:
+      * `iap.googleapis.com` when the policyProfile is set to REQUEST_AUTHZ
+      * `modelarmor.{{region}}.rep.googleapis.com` when the policyProfile is set to CONTENT_AUTHZ
+      * A fully qualified domain name that can be resolved by the dataplane
+      * Backend service resource URI of the form `https://www.googleapis.com/compute/v1/projects/{{project}}/regions/{{region}}/backendServices/{{name}}` or `https://www.googleapis.com/compute/v1/projects/{{project}}/global/backendServices/{{name}}}}`
     required: true
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
     resource: 'BackendService'
@@ -150,8 +159,10 @@ properties:
   - name: 'wireFormat'
     type: Enum
     description: |
-      Specifies the communication protocol used by the callout extension
-      to communicate with its backend service.
+      The format of communication supported by the callout extension. Applicable only when the policyProfile is REQUEST_AUTHZ.
+      This field is supported only for regional AuthzExtension resources. If not specified, the default value
+      EXT_PROC_GRPC is used. Global AuthzExtension resources use the EXT_PROC_GRPC wire format.
+
       Supported values:
       - WIRE_FORMAT_UNSPECIFIED:
           No wire format is explicitly specified. The backend automatically
