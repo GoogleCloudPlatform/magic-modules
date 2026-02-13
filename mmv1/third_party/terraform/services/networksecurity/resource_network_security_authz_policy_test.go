@@ -406,3 +406,86 @@ resource "google_network_security_authz_policy" "default" {
 }
 `, context)
 }
+
+func TestAccNetworkSecurityAuthzPolicy_networkSecurityAuthzPolicyMcpUpdate(t *testing.T) {
+	t.Skip("b/484137930")
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetworkSecurityAuthzPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkSecurityAuthzPolicy_networkSecurityAuthzPolicyMcpUpdate(context),
+			},
+			{
+				ResourceName:            "google_network_security_authz_policy.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
+			},
+			{
+				Config: testAccNetworkSecurityAuthzPolicy_networkSecurityAuthzPolicyMcpExample(context),
+			},
+			{
+				ResourceName:            "google_network_security_authz_policy.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
+			},
+			{
+				Config: testAccNetworkSecurityAuthzPolicy_networkSecurityAuthzPolicyMcpUpdate(context),
+			},
+			{
+				ResourceName:            "google_network_security_authz_policy.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccNetworkSecurityAuthzPolicy_networkSecurityAuthzPolicyMcpUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_network_security_authz_policy" "default" {
+  name        = "tf-test-my-mcp-policy%{random_suffix}"
+  location    = "us-west1"
+
+  target {
+    resources = [ "projects/${data.google_project.project.project_id}/locations/us-west1/agentGateways/gateway1" ]
+  }
+
+  policy_profile = "REQUEST_AUTHZ"
+  action = "ALLOW"
+
+  http_rules {
+    to {
+      operations {
+        mcp {
+          base_protocol_methods_option = "SKIP_BASE_PROTOCOL_METHODS"
+          methods {
+            name = "resources"
+          }
+
+          methods {
+            name = "tools/call"
+            params {
+              prefix = "foo"
+              ignore_case = false
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`, context)
+}
