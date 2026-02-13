@@ -1,13 +1,3 @@
-func SecurityProfileGroupPrefixSlashes(_, old, new string, _ *schema.ResourceData) bool {
-	if strings.HasPrefix(old, "//") {
-        old = old[1:]
-	}
-	if strings.HasPrefix(new, "//") {
-		new = new[1:]
-	}
-	return old == new
-}
-
 //It adjusts obj in case network scope/context fields are used - in beta API both network scope/context fields are available.
 //The GET method returns both of them with the same value (you can think of network scope field as an alias for the network context field).
 // Terraform allows only one of them to be used (using 'conflicts' annotation) but because the terraform state has both of them we have
@@ -19,7 +9,7 @@ func SecurityProfileGroupPrefixSlashes(_, old, new string, _ *schema.ResourceDat
 // Hence, there's an exact copy of this function for org/global and regional firewall policy rules.
 // Inner function are created just to avoid code duplication but if defined as regular functions I would get 'function is already defined'
 // error - to avoid it I just create them as inner functions.
-func adjustGlobalNetworkFirewallPolicyRuleNetworkContextFields(obj map[string]interface{}, oldMatch interface{}, newMatch interface{}) error {
+func adjustRegionNetworkFirewallPolicyRuleNetworkContextFields(obj map[string]interface{}, oldMatch interface{}, newMatch interface{}) error {
 	adjustFieldsFunc := func(match map[string]interface{}, fieldName1 string, fieldName2 string) error {
 		getFieldValueFunc := func(match any, fieldName string) string {
 			// Extract the nested field value from the old match
