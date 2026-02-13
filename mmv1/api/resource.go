@@ -492,13 +492,13 @@ func (r *Resource) SetDefault(product *Product) {
 	}
 }
 
-func (r *Resource) Validate() {
+func (r *Resource) Validate() (es []error) {
 	if r.Name == "" {
-		log.Fatalf("Missing `name` for resource")
+		es = append(es, fmt.Errorf("missing `name` for resource"))
 	}
 
 	if r.NestedQuery != nil && r.NestedQuery.IsListOfIds && len(r.Identity) != 1 {
-		log.Fatalf("`is_list_of_ids: true` implies resource has exactly one `identity` property")
+		es = append(es, fmt.Errorf("`is_list_of_ids: true` implies resource has exactly one `identity` property"))
 	}
 
 	// Ensures we have all properties defined
@@ -507,61 +507,63 @@ func (r *Resource) Validate() {
 			return p.Name == i
 		})
 		if !hasIdentify {
-			log.Fatalf("Missing property/parameter for identity %s", i)
+			es = append(es, fmt.Errorf("missing property/parameter for identity %s", i))
 		}
 	}
 
 	if r.Description == "" {
-		log.Fatalf("Missing `description` for resource %s", r.Name)
+		es = append(es, fmt.Errorf("missing `description` for resource %s", r.Name))
 	}
 
 	if !r.Exclude {
 		if len(r.Properties) == 0 {
-			log.Fatalf("Missing `properties` for resource %s", r.Name)
+			es = append(es, fmt.Errorf("missing `properties` for resource %s", r.Name))
 		}
 	}
 
 	allowed := []string{"POST", "PUT", "PATCH"}
 	if !slices.Contains(allowed, r.CreateVerb) {
-		log.Fatalf("Value on `create_verb` should be one of %#v", allowed)
+		es = append(es, fmt.Errorf("value on `create_verb` should be one of %#v", allowed))
 	}
 
 	allowed = []string{"GET", "POST"}
 	if !slices.Contains(allowed, r.ReadVerb) {
-		log.Fatalf("Value on `read_verb` should be one of %#v", allowed)
+		es = append(es, fmt.Errorf("value on `read_verb` should be one of %#v", allowed))
 	}
 
 	allowed = []string{"POST", "PUT", "PATCH", "DELETE"}
 	if !slices.Contains(allowed, r.DeleteVerb) {
-		log.Fatalf("Value on `delete_verb` should be one of %#v", allowed)
+		es = append(es, fmt.Errorf("value on `delete_verb` should be one of %#v", allowed))
 	}
 
 	allowed = []string{"POST", "PUT", "PATCH"}
 	if !slices.Contains(allowed, r.UpdateVerb) {
-		log.Fatalf("Value on `update_verb` should be one of %#v", allowed)
+		es = append(es, fmt.Errorf("value on `update_verb` should be one of %#v", allowed))
 	}
 
 	for _, property := range r.AllProperties() {
-		property.Validate(r.Name)
+		es = append(es, property.Validate(r.Name)...)
 	}
 
 	if r.IamPolicy != nil {
-		r.IamPolicy.Validate(r.Name)
+		es = append(es, r.IamPolicy.Validate(r.Name)...)
 	}
 
 	if r.NestedQuery != nil {
-		r.NestedQuery.Validate(r.Name)
+		es = append(es, r.NestedQuery.Validate(r.Name)...)
 	}
 
 	for _, example := range r.Examples {
 		if err := example.Validate(r.Name); err != nil {
-			log.Fatalln(err)
+			es = append(es, err)
 		}
 	}
 
 	for _, sample := range r.Samples {
-		sample.Validate(r.Name)
+		es = append(es, sample.Validate(r.Name)...)
 	}
+
+	return es
 }
 
 // ====================

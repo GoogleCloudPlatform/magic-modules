@@ -118,11 +118,13 @@ func (s *Step) TestStepSlug(productName, resourceName string) string {
 	return ret
 }
 
-func (s *Step) Validate(rName, sName string) {
+func (s *Step) Validate(rName, sName string) (es []error) {
 	// TODO: Add check identifier when it's implemented
 	if s.Name == "" {
-		log.Fatalf("Missing `name` for one step in test sample %s in resource %s", sName, rName)
+		es = append(es, fmt.Errorf("missing `name` for one step in test sample %s in resource %s", sName, rName))
 	}
+
+	return es
 }
 
 func validateRegexForContents(r *regexp.Regexp, contents string, configPath string, objName string, vars map[string]string) {

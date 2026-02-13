@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/golang/glog"
 	"golang.org/x/exp/slices"
@@ -344,7 +345,13 @@ func (l *Loader) Validate() {
 
 	for _, product := range l.Products {
 		for _, resource := range product.Objects {
-			resource.Validate()
+			es := resource.Validate()
+			if len(es) > 0 {
+				es = utils.TransformErrs(func(e error) error {
+					return fmt.Errorf("%s%s%s: %w", utils.ColorRed, resource.SourceYamlFile, utils.ColorReset, e)
+				}, es)
+				log.Fatalf("%v", errors.Join(es...))
+			}
 		}
 	}
 }
