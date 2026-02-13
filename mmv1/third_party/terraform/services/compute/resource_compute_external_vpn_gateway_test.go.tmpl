@@ -6,6 +6,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+
+{{- if ne $.TargetVersionName "ga" }}
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+{{- end }}
+
 )
 
 func TestAccComputeExternalVPNGateway_updateLabels(t *testing.T) {
@@ -104,3 +109,59 @@ resource "google_compute_external_vpn_gateway" "external_gateway" {
 }
 `, suffix, ipv6_address)
 }
+
+
+{{- if ne $.TargetVersionName "ga" }}
+func TestAccComputeExternalVPNGateway_resourceManagerTags(t *testing.T) {
+	t.Parallel()
+
+	org := envvar.GetTestOrgFromEnv(t)
+	suffix := acctest.RandString(t, 10)
+	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-ext-vpn-tagkey", "organizations/"+org, make(map[string]interface{}))
+	sharedTagkey, _ := tagKeyResult["shared_tag_key"]
+	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-ext-vpn-tagvalue", sharedTagkey, org)
+
+	context := map[string]interface{}{
+		"suffix":       suffix,
+		"tag_key_id":   tagKeyResult["name"],
+		"tag_value_id": tagValueResult["name"],
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeExternalVPNGateway_resourceManagerTags(context),
+			},
+			{
+				ResourceName:            "google_compute_external_vpn_gateway.external_gateway",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"params"},
+			},
+		},
+	})
+}
+
+func testAccComputeExternalVPNGateway_resourceManagerTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_external_vpn_gateway" "external_gateway" {
+  provider = google-beta
+  name            = "tf-test-external-gateway-%{suffix}"
+  redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
+  description     = "An externally managed VPN gateway"
+  interface {
+    id         = 0
+    ip_address = "8.8.8.8"
+  }
+
+  params {
+    resource_manager_tags = {
+      "%{tag_key_id}" = "%{tag_value_id}"
+    }
+  }
+}
+`, context)
+}
+{{- end }}
