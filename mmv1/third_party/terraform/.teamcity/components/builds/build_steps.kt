@@ -145,6 +145,8 @@ fun BuildSteps.saveArtifactsToGCS() {
             gcloud auth activate-service-account --key-file=google-account.json
 
             # Get current date for nightly tests
+            # %system.build.start.date% is a TeamCity parameter that evaluates to the timestamp when the build started.
+            # Using this ensures all tests in the same Nightly run get the same date, even if they cross midnight.
             RAW_DATE="%system.build.start.date%"
             # TeamCity start format is strictly YYYYMMDDTHHmmss+ZZZZ (e.g., 20241027T040001+0000)
             # We use `cut` to slice out the Year, Month, and Date strings sequentially to build YYYY-MM-DD
