@@ -1,3 +1,4 @@
+{{color "red" "Tests were added that are GA-only additions and require manual runs:"}}
 {{- if or (gt (len .NotRunBetaTests) 0) (gt (len .NotRunGATests) 0)}}
 #### Non-exercised tests
 
@@ -7,7 +8,7 @@
 {{end}}
 
 {{if gt (len .NotRunGATests) 0 -}}
-{{color "red" "Tests were added that are GA-only additions and [require manual runs:](https://googlecloudplatform.github.io/magic-modules/test/run-tests/#run-automated-tests)"}}
+{{color "red" "Tests were added that are GA-only additions and require manual runs:"}}
 {{range .NotRunGATests}}{{. | printf "- %s\n"}}{{end}}
 {{end}}
 {{end}}
