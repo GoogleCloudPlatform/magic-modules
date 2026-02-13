@@ -42,7 +42,7 @@ For more information about types of resources and the generation process overall
     cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
     git checkout main && git clean -f . && git checkout -- . && git pull
     ```
-    > **Note:** If you are running this for the first time or if the directories specifically do not exist, the update commands above will fail. You must first create the         directory structure and clone the repositories:
+    > **Note:** If you are running this for the first time or if the directories specifically do not exist, the update commands above will fail. You must first create the directory structure and clone the repositories:
     >
     > ```bash
     > mkdir -p $GOPATH/src/github.com/hashicorp
