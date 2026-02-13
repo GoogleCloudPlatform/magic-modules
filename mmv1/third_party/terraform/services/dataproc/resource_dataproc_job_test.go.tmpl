@@ -395,7 +395,7 @@ func testAccCheckDataprocJobCompletesSuccessfully(t *testing.T, n string, job *d
 
 		jobCompleteTimeoutMins := 5 * time.Minute
 		waitErr := tpgdataproc.DataprocJobOperationWait(config, region, project, job.Reference.JobId,
-			"Awaiting Dataproc job completion", config.UserAgent, jobCompleteTimeoutMins)
+			"Awaiting Dataproc job completion", config.UserAgent, jobCompleteTimeoutMins, false)
 		if waitErr != nil {
 			return waitErr
 		}
