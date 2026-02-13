@@ -8,7 +8,7 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/models"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/container/v1"
 )
@@ -47,7 +47,7 @@ func (c *ContainerNodePoolCai2hclConverter) convertResourceData(asset caiasset.A
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
 
-	config := transport_tpg.NewConfig()
+	config := transport.NewConfig()
 
 	// This is a fake resource used to get fake d
 	// d.Get will return empty map, instead of nil
@@ -134,7 +134,7 @@ func flattenNodePoolNodeDrainConfig(ndc *container.NodeDrainConfig) []map[string
 	return []map[string]interface{}{nodeDrainConfig}
 }
 
-func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *container.NodePool, prefix string) (map[string]interface{}, error) {
+func flattenNodePool(d *schema.ResourceData, config *transport.Config, np *container.NodePool, prefix string) (map[string]interface{}, error) {
 	// Node pools don't expose the current node count in their API, so read the
 	// instance groups instead. They should all have the same size, but in case a resize
 	// failed or something else strange happened, we'll just use the average size.
@@ -235,7 +235,8 @@ func flattenNodeNetworkConfig(c *container.NodeNetworkConfig, d *schema.Resource
 	result := []map[string]interface{}{}
 	if c != nil {
 		result = append(result, map[string]interface{}{
-			"create_pod_range":                d.Get(prefix + "network_config.0.create_pod_range"), // API doesn't return this value so we set the old one. Field is ForceNew + Required
+			// TODO: investigate why create_pod_range is not returned by the API
+			// "create_pod_range": d.Get(prefix + "network_config.0.create_pod_range"), // API doesn't return this value so we set the old one. Field is ForceNew + Required
 			"pod_ipv4_cidr_block":             c.PodIpv4CidrBlock,
 			"pod_range":                       c.PodRange,
 			"enable_private_nodes":            c.EnablePrivateNodes,
