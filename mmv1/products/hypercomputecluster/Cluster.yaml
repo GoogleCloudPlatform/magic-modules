@@ -82,14 +82,12 @@ properties:
                     Name of the Compute Engine [machine
                     type](https://cloud.google.com/compute/docs/machine-resource) to use, e.g.
                     `n2-standard-2`.
-                  immutable: true
                 - name: maxDuration
                   type: String
                   required: true
                   description: |-
                     Specifies the time limit for created instances. Instances will be
                     terminated at the end of this duration.
-                  immutable: true
                 - name: zone
                   type: String
                   required: true
@@ -97,7 +95,6 @@ properties:
                     Name of the zone in which VM instances should run, e.g., `us-central1-a`.
                     Must be in the same region as the cluster, and must match the zone of any
                     other resources specified in the cluster.
-                  immutable: true
             - name: newOnDemandInstances
               type: NestedObject
               description: |-
@@ -111,7 +108,6 @@ properties:
                     Name of the Compute Engine [machine
                     type](https://cloud.google.com/compute/docs/machine-resource) to use, e.g.
                     `n2-standard-2`.
-                  immutable: true
                 - name: zone
                   type: String
                   required: true
@@ -119,7 +115,6 @@ properties:
                     Name of the zone in which VM instances should run, e.g., `us-central1-a`.
                     Must be in the same region as the cluster, and must match the zone of any
                     other resources specified in the cluster.
-                  immutable: true
             - name: newReservedInstances
               type: NestedObject
               description: |-
@@ -132,7 +127,6 @@ properties:
                   description: |-
                     Name of the reservation from which VM instances should be created, in the
                     format `projects/{project}/zones/{zone}/reservations/{reservation}`.
-                  immutable: true
             - name: newSpotInstances
               type: NestedObject
               description: |-
@@ -147,7 +141,6 @@ properties:
                     Name of the Compute Engine [machine
                     type](https://cloud.google.com/compute/docs/machine-resource) to use, e.g.
                     `n2-standard-2`.
-                  immutable: true
                 - name: terminationAction
                   type: String
                   description: |-
@@ -162,7 +155,6 @@ properties:
                     Name of the zone in which VM instances should run, e.g., `us-central1-a`.
                     Must be in the same region as the cluster, and must match the zone of any
                     other resources specified in the cluster.
-                  immutable: true
     key_name: id
   - name: createTime
     type: String
@@ -213,14 +205,12 @@ properties:
                   description: |-
                     Name of the network to import, in the format
                     `projects/{project}/global/networks/{network}`.
-                  immutable: true
                 - name: subnetwork
                   type: String
                   required: true
                   description: |-
                     Particular subnetwork to use, in the format
                     `projects/{project}/regions/{region}/subnetworks/{subnetwork}`.
-                  immutable: true
             - name: newNetwork
               type: NestedObject
               description: |-
@@ -230,14 +220,12 @@ properties:
                 - name: description
                   type: String
                   description: Description of the network. Maximum of 2048 characters.
-                  immutable: true
                 - name: network
                   type: String
                   required: true
                   description: |-
                     Name of the network to create, in the format
                     `projects/{project}/global/networks/{network}`.
-                  immutable: true
         - name: network
           type: NestedObject
           description: |-
