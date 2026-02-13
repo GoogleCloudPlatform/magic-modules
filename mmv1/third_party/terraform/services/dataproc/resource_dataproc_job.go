@@ -198,6 +198,13 @@ func ResourceDataprocJob() *schema.Resource {
 				},
 			},
 
+			"wait_for_completion": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "If set to true, Terraform will wait for the job to reach a terminal state (DONE, ERROR, CANCELLED). Otherwise, Terraform will consider the job 'created' once it is in the RUNNING state.",
+			},
+
 			"pyspark_config":  pySparkSchema,
 			"spark_config":    sparkSchema,
 			"hadoop_config":   hadoopSchema,
@@ -299,8 +306,9 @@ func resourceDataprocJobCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 	d.SetId(fmt.Sprintf("projects/%s/regions/%s/jobs/%s", project, region, job.Reference.JobId))
 
+	waitForCompletion := d.Get("wait_for_completion").(bool)
 	waitErr := DataprocJobOperationWait(config, region, project, job.Reference.JobId,
-		"Creating Dataproc job", userAgent, d.Timeout(schema.TimeoutCreate))
+		"Creating Dataproc job", userAgent, d.Timeout(schema.TimeoutCreate), waitForCompletion)
 	if waitErr != nil {
 		return waitErr
 	}
@@ -430,7 +438,7 @@ func resourceDataprocJobDelete(d *schema.ResourceData, meta interface{}) error {
 		_, _ = config.NewDataprocClient(userAgent).Projects.Regions.Jobs.Cancel(project, region, jobId, &dataproc.CancelJobRequest{}).Do()
 
 		waitErr := DataprocJobOperationWait(config, region, project, jobId,
-			"Cancelling Dataproc job", userAgent, d.Timeout(schema.TimeoutDelete))
+			"Cancelling Dataproc job", userAgent, d.Timeout(schema.TimeoutDelete), false)
 		if waitErr != nil {
 			return waitErr
 		}
