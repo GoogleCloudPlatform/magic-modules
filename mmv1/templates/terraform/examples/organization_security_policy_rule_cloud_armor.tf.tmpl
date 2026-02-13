@@ -1,7 +1,12 @@
+resource "google_folder" "my_folder" {
+  display_name = "fldr-test%{random_suffix}"
+  parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
+}
+
 resource "google_compute_organization_security_policy" "{{$.PrimaryResourceId}}" {
   provider     = google-beta
   display_name = "tf-test%{random_suffix}"
-  parent       = "folders/{{index $.TestEnvVars "folder_id"}}"
+  parent       = google_folder.my_folder.folder_id
   type         = "CLOUD_ARMOR"
 }
 
