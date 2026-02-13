@@ -13,6 +13,7 @@
 
 ---
 name: 'QueryTemplate'
+min_version: beta
 description: |
   Represents a BigQuery Query Template within a Data Exchange.
   This resource defines a reusable SQL routine (e.g., a TVF) that can be
