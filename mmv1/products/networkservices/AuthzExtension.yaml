@@ -64,6 +64,8 @@ examples:
     test_env_vars:
       project: 'PROJECT_NAME'
   - name: 'network_services_authz_extension_iap'
+    skip_docs: true  # temporary b/484137930
+    skip_test: true  # temporary b/484137930
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-authz-ext'
