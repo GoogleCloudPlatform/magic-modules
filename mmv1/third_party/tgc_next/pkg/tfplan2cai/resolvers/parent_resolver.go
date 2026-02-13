@@ -1,6 +1,7 @@
 package resolvers
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 
@@ -60,7 +61,7 @@ func (r *ParentResourceResolver) Resolve(jsonPlan []byte) map[string][]string {
 	return parentToChildMap
 }
 
-func sortTraversalOrder(graph map[string][]string) map[int][]string {
+func sortTraversalOrder(graph map[string][]string) (map[int][]string, error) {
 	inDegree := make(map[string]int)
 	allNodes := make(map[string]bool)
 
@@ -131,6 +132,7 @@ func sortTraversalOrder(graph map[string][]string) map[int][]string {
 			}
 		}
 		sort.Strings(cycleRelatedNodes)
+		return nil, fmt.Errorf("cycle detected in graph, nodes not leveled: %v", cycleRelatedNodes)
 	}
 
 	// Step 5: Transform nodeLevels (map[string]int) to levelsToNodes (map[int][]string).
@@ -144,5 +146,5 @@ func sortTraversalOrder(graph map[string][]string) map[int][]string {
 		sort.Strings(levelsToNodes[level])
 	}
 
-	return levelsToNodes
+	return levelsToNodes, nil
 }
