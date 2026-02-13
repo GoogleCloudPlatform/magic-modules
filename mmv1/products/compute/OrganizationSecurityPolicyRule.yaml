@@ -53,7 +53,7 @@ examples:
     primary_resource_id: 'policy'
     min_version: 'beta'
     test_env_vars:
-      folder_id: 'FOLDER_ID'
+      org_id: 'ORG_ID'
 parameters:
   - name: 'policyId'
     type: String
