@@ -307,6 +307,8 @@ fields:
   - api_field: 'placementPolicy.type'
   - field: 'project'
   - api_field: 'queuedProvisioning.enabled'
+  - api_field: 'bestEffortProvisioning.enabled'
+  - api_field: 'bestEffortProvisioning.minProvisionNodes'
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'upgradeSettings.blueGreenSettings.autoscaledRolloutPolicy.waitForDrainDuration'
 {{- end }}

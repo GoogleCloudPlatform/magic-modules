@@ -16791,6 +16791,69 @@ resource "google_container_cluster" "with_kubelet_config" {
 `, clusterName, networkName, subnetworkName, npName, npName)
 }
 
+func TestAccContainerCluster_bestEffortProvisioning(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_bestEffortProvisioning(clusterName, networkName, subnetworkName, true, 1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "node_pool.0.best_effort_provisioning.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "node_pool.0.best_effort_provisioning.0.min_provision_nodes", "1"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_bestEffortProvisioning(clusterName, networkName, subnetworkName, false, 0),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "node_pool.0.best_effort_provisioning.0.enabled", "false"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "node_pool.0.best_effort_provisioning.0.min_provision_nodes", "0"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func testAccContainerCluster_bestEffortProvisioning(clusterName, networkName, subnetworkName string, enabled bool, minProvisionNodes int) string {
+return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  remove_default_node_pool = true
+  network            = "%s"
+  subnetwork         = "%s"
+  deletion_protection = false
+
+  node_pool {
+    name = "default-pool"
+    initial_node_count = 1
+    best_effort_provisioning {
+      enabled             = %t
+      min_provision_nodes = %d
+    }
+  }
+}
+`, clusterName, networkName, subnetworkName, enabled, minProvisionNodes)
+}
 {{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_nodePool_acceleratorNetworkProfile(clusterName string) string {
 	return fmt.Sprintf(`

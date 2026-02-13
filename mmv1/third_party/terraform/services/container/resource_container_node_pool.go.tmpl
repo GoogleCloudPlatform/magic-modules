@@ -401,6 +401,27 @@ var schemaNodePool = map[string]*schema.Schema{
 		},
 	},
 
+	"best_effort_provisioning": {
+		Type:        schema.TypeList,
+		Optional:    true,
+		MaxItems:    1,
+		Description: `Specifies the configuration for best effort provisioning.`,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"enabled": {
+					Type:        schema.TypeBool,
+					Optional:    true,
+					Description: `Whether nodes in this node pool are provisioned ignoring non-fatal errors like stockout.`,
+				},
+				"min_provision_nodes": {
+					Type:        schema.TypeInt,
+					Optional:    true,
+					Description: `Min number of nodes to be provisioned.`,
+				},
+			},
+		},
+	},
+
 	"max_pods_per_node": {
 		Type:        schema.TypeInt,
 		Optional:    true,
@@ -1203,6 +1224,16 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool,
 		}
 	}
 
+	if v, ok := d.GetOk(prefix + "best_effort_provisioning"); ok {
+		if v.([]interface{}) != nil && v.([]interface{})[0] != nil {
+			best_effort_provisioning := v.([]interface{})[0].(map[string]interface{})
+			np.BestEffortProvisioning = &container.BestEffortProvisioning{
+				Enabled: best_effort_provisioning["enabled"].(bool),
+				MinProvisionNodes: int64(best_effort_provisioning["min_provision_nodes"].(int)),
+			}
+		}
+	}
+
 	if v, ok := d.GetOk(prefix + "max_pods_per_node"); ok {
 		np.MaxPodsConstraint = &container.MaxPodsConstraint{
 			MaxPodsPerNode: int64(v.(int)),
@@ -1460,6 +1491,15 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 		nodePool["queued_provisioning"] = []map[string]interface{}{
 			{
 				"enabled": np.QueuedProvisioning.Enabled,
+			},
+		}
+	}
+
+	if np.BestEffortProvisioning != nil {
+		nodePool["best_effort_provisioning"] = []map[string]interface{}{
+			{
+				"enabled": np.BestEffortProvisioning.Enabled,
+				"min_provision_nodes": np.BestEffortProvisioning.MinProvisionNodes,
 			},
 		}
 	}
