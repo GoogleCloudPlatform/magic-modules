@@ -12,6 +12,7 @@
 # limitations under the License.
 
 name: 'Glossary'
+include_in_tgc_next: true
 description: |
   Represents a collection of categories and terms defined by the user. Glossary is a top level resource and is the GCP parent resource of all the categories and terms within it.
 base_url: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}'

@@ -13,6 +13,7 @@
 
 ---
 name: 'VolumeSnapshot'
+include_in_tgc_next: true
 api_resource_type_kind: Snapshot
 description: |
   NetApp Volumes helps you manage your data usage with snapshots that can quickly restore lost data.

@@ -13,6 +13,7 @@
 
 ---
 name: 'SslPolicy'
+include_in_tgc_next: true
 kind: 'compute#sslPolicy'
 description: |
   Represents a SSL policy. SSL policies give you the ability to control the

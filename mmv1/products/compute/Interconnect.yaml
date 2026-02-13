@@ -13,6 +13,7 @@
 
 ---
 name: 'Interconnect'
+include_in_tgc_next: true
 kind: 'compute#Interconnect'
 description: |
   Represents an Interconnect resource. The Interconnect resource is a dedicated connection between

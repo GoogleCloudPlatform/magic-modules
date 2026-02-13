@@ -13,6 +13,7 @@
 
 ---
 name: 'PacketMirroring'
+include_in_tgc_next: true
 description: |
   Packet Mirroring mirrors traffic to and from particular VM instances.
   You can use the collected traffic to help you detect security threats

@@ -13,6 +13,7 @@
 
 ---
 name: 'HttpHealthCheck'
+include_in_tgc_next: true
 kind: 'compute#httpHealthCheck'
 description: |
   An HttpHealthCheck resource. This resource defines a template for how

@@ -13,6 +13,7 @@
 
 ---
 name: 'BackupPolicy'
+include_in_tgc_next: true
 description: |
   A backup policy is used to schedule backups at regular daily, weekly, or monthly intervals.
   Backup policies allow you to attach a backup schedule to a volume.
