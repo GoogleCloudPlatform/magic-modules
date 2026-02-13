@@ -1,0 +1,625 @@
+package dataprocmetastore_test
+
+import (
+	"fmt"
+	"strings"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+)
+
+var (
+	_ = fmt.Sprintf
+	_ = strings.Trim
+	_ = envvar.TestEnvVar
+	_ = tpgresource.SetLabels
+)
+
+func TestAccDataprocMetastoreTableIamBindingGenerated(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"role":          "roles/viewer",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocMetastoreTableIamBinding_basicGenerated(context),
+			},
+			{
+				ResourceName:      "google_dataproc_metastore_table_iam_binding.foo",
+				ImportStateIdFunc: generateDataprocMetastoreTableIAMBindingStateID("google_dataproc_metastore_table_iam_binding.foo"),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// Test Iam Binding update
+				Config: testAccDataprocMetastoreTableIamBinding_updateGenerated(context),
+			},
+			{
+				ResourceName:      "google_dataproc_metastore_table_iam_binding.foo",
+				ImportStateIdFunc: generateDataprocMetastoreTableIAMBindingStateID("google_dataproc_metastore_table_iam_binding.foo"),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccDataprocMetastoreTableIamMemberGenerated(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"role":          "roles/viewer",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				// Test Iam Member creation (no update for member, no need to test)
+				Config: testAccDataprocMetastoreTableIamMember_basicGenerated(context),
+			},
+			{
+				ResourceName:      "google_dataproc_metastore_table_iam_member.foo",
+				ImportStateIdFunc: generateDataprocMetastoreTableIAMMemberStateID("google_dataproc_metastore_table_iam_member.foo"),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccDataprocMetastoreTableIamPolicyGenerated(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"role":          "roles/viewer",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocMetastoreTableIamPolicy_basicGenerated(context),
+				Check:  resource.TestCheckResourceAttrSet("data.google_dataproc_metastore_table_iam_policy.foo", "policy_data"),
+			},
+			{
+				ResourceName:      "google_dataproc_metastore_table_iam_policy.foo",
+				ImportStateIdFunc: generateDataprocMetastoreTableIAMPolicyStateID("google_dataproc_metastore_table_iam_policy.foo"),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccDataprocMetastoreTableIamPolicy_emptyBinding(context),
+			},
+			{
+				ResourceName:      "google_dataproc_metastore_table_iam_policy.foo",
+				ImportStateIdFunc: generateDataprocMetastoreTableIAMPolicyStateID("google_dataproc_metastore_table_iam_policy.foo"),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccDataprocMetastoreTableIamMember_basicGenerated(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dataproc_metastore_service" "dpms_service" {
+  service_id = "tf-test-metastore-srv-%{random_suffix}"
+  location   = "us-central1"
+
+  tier       = "DEVELOPER"
+
+  hive_metastore_config {
+    version = "3.1.2"
+  }
+}
+
+resource "google_dataproc_cluster" "dp_cluster" {
+  name   = "tf-test-dpms-tbl-creator-%{random_suffix}"
+  region = google_dataproc_metastore_service.dpms_service.location
+
+  cluster_config {
+    # Keep the costs down with smallest config we can get away with
+    software_config {
+      override_properties = {
+        "dataproc:dataproc.allow.zero.workers" = "true"
+      }
+    }
+
+    endpoint_config {
+      enable_http_port_access = true
+    }
+
+    master_config {
+      num_instances = 1
+      machine_type  = "e2-standard-2"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
+
+    metastore_config {
+      dataproc_metastore_service = google_dataproc_metastore_service.dpms_service.name
+    }
+  }
+}
+
+resource "google_dataproc_job" "hive" {
+  region = google_dataproc_cluster.dp_cluster.region
+
+  force_delete = true
+  placement {
+    cluster_name = google_dataproc_cluster.dp_cluster.name
+  }
+
+  hive_config {
+    properties = {
+      "database" = "testdb"
+      "table" = "testtbl"
+    }
+    query_list = [
+      "DROP DATABASE IF EXISTS testdb CASCADE",
+      "CREATE DATABASE testdb",
+      "CREATE TABLE testdb.testtbl (bar int)",
+    ]
+  }
+}
+
+# There is no simple way to wait on the Dataproc job to be SUCCESS
+# rather than RUNNING.
+resource "time_sleep" "wait_hive_job" {
+  create_duration = "90s"
+  depends_on      = [google_dataproc_job.hive]
+}
+
+resource "google_dataproc_metastore_table_iam_member" "foo" {
+  project = google_dataproc_metastore_service.dpms_service.project
+  location = google_dataproc_metastore_service.dpms_service.location
+  service_id = google_dataproc_metastore_service.dpms_service.service_id
+  database_id = google_dataproc_job.hive.hive_config[0].properties["database"]
+  table = google_dataproc_job.hive.hive_config[0].properties["table"]
+  role = "%{role}"
+  member = "user:admin@hashicorptest.com"
+  depends_on      = [time_sleep.wait_hive_job]
+}
+`, context)
+}
+
+func testAccDataprocMetastoreTableIamPolicy_basicGenerated(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dataproc_metastore_service" "dpms_service" {
+  service_id = "tf-test-metastore-srv-%{random_suffix}"
+  location   = "us-central1"
+
+  tier       = "DEVELOPER"
+
+  hive_metastore_config {
+    version = "3.1.2"
+  }
+}
+
+resource "google_dataproc_cluster" "dp_cluster" {
+  name   = "tf-test-dpms-tbl-creator-%{random_suffix}"
+  region = google_dataproc_metastore_service.dpms_service.location
+
+  cluster_config {
+    # Keep the costs down with smallest config we can get away with
+    software_config {
+      override_properties = {
+        "dataproc:dataproc.allow.zero.workers" = "true"
+      }
+    }
+
+    endpoint_config {
+      enable_http_port_access = true
+    }
+
+    master_config {
+      num_instances = 1
+      machine_type  = "e2-standard-2"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
+
+    metastore_config {
+      dataproc_metastore_service = google_dataproc_metastore_service.dpms_service.name
+    }
+  }
+}
+
+resource "google_dataproc_job" "hive" {
+  region = google_dataproc_cluster.dp_cluster.region
+
+  force_delete = true
+  placement {
+    cluster_name = google_dataproc_cluster.dp_cluster.name
+  }
+
+  hive_config {
+    properties = {
+      "database" = "testdb"
+      "table" = "testtbl"
+    }
+    query_list = [
+      "DROP DATABASE IF EXISTS testdb CASCADE",
+      "CREATE DATABASE testdb",
+      "CREATE TABLE testdb.testtbl (bar int)",
+    ]
+  }
+}
+
+# There is no simple way to wait on the Dataproc job to be SUCCESS
+# rather than RUNNING.
+resource "time_sleep" "wait_hive_job" {
+  create_duration = "90s"
+  depends_on      = [google_dataproc_job.hive]
+}
+
+data "google_iam_policy" "foo" {
+  binding {
+    role = "%{role}"
+    members = ["user:admin@hashicorptest.com"]
+  }
+}
+
+resource "google_dataproc_metastore_table_iam_policy" "foo" {
+  project = google_dataproc_metastore_service.dpms_service.project
+  location = google_dataproc_metastore_service.dpms_service.location
+  service_id = google_dataproc_metastore_service.dpms_service.service_id
+  database_id = google_dataproc_job.hive.hive_config[0].properties["database"]
+  table = google_dataproc_job.hive.hive_config[0].properties["table"]
+  policy_data = data.google_iam_policy.foo.policy_data
+  depends_on      = [time_sleep.wait_hive_job]
+}
+
+data "google_dataproc_metastore_table_iam_policy" "foo" {
+  project = google_dataproc_metastore_service.dpms_service.project
+  location = google_dataproc_metastore_service.dpms_service.location
+  service_id = google_dataproc_metastore_service.dpms_service.service_id
+  database_id = google_dataproc_job.hive.hive_config[0].properties["database"]
+  table = google_dataproc_job.hive.hive_config[0].properties["table"]
+  depends_on = [
+    google_dataproc_metastore_table_iam_policy.foo
+  ]
+}
+`, context)
+}
+
+func testAccDataprocMetastoreTableIamPolicy_emptyBinding(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dataproc_metastore_service" "dpms_service" {
+  service_id = "tf-test-metastore-srv-%{random_suffix}"
+  location   = "us-central1"
+
+  tier       = "DEVELOPER"
+
+  hive_metastore_config {
+    version = "3.1.2"
+  }
+}
+
+resource "google_dataproc_cluster" "dp_cluster" {
+  name   = "tf-test-dpms-tbl-creator-%{random_suffix}"
+  region = google_dataproc_metastore_service.dpms_service.location
+
+  cluster_config {
+    # Keep the costs down with smallest config we can get away with
+    software_config {
+      override_properties = {
+        "dataproc:dataproc.allow.zero.workers" = "true"
+      }
+    }
+
+    endpoint_config {
+      enable_http_port_access = true
+    }
+
+    master_config {
+      num_instances = 1
+      machine_type  = "e2-standard-2"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
+
+    metastore_config {
+      dataproc_metastore_service = google_dataproc_metastore_service.dpms_service.name
+    }
+  }
+}
+
+resource "google_dataproc_job" "hive" {
+  region = google_dataproc_cluster.dp_cluster.region
+
+  force_delete = true
+  placement {
+    cluster_name = google_dataproc_cluster.dp_cluster.name
+  }
+
+  hive_config {
+    properties = {
+      "database" = "testdb"
+      "table" = "testtbl"
+    }
+    query_list = [
+      "DROP DATABASE IF EXISTS testdb CASCADE",
+      "CREATE DATABASE testdb",
+      "CREATE TABLE testdb.testtbl (bar int)",
+    ]
+  }
+}
+
+# There is no simple way to wait on the Dataproc job to be SUCCESS
+# rather than RUNNING.
+resource "time_sleep" "wait_hive_job" {
+  create_duration = "90s"
+  depends_on      = [google_dataproc_job.hive]
+}
+
+data "google_iam_policy" "foo" {
+}
+
+resource "google_dataproc_metastore_table_iam_policy" "foo" {
+  project = google_dataproc_metastore_service.dpms_service.project
+  location = google_dataproc_metastore_service.dpms_service.location
+  service_id = google_dataproc_metastore_service.dpms_service.service_id
+  database_id = google_dataproc_job.hive.hive_config[0].properties["database"]
+  table = google_dataproc_job.hive.hive_config[0].properties["table"]
+  policy_data = data.google_iam_policy.foo.policy_data
+  depends_on      = [time_sleep.wait_hive_job]
+}
+`, context)
+}
+
+func testAccDataprocMetastoreTableIamBinding_basicGenerated(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dataproc_metastore_service" "dpms_service" {
+  service_id = "tf-test-metastore-srv-%{random_suffix}"
+  location   = "us-central1"
+
+  tier       = "DEVELOPER"
+
+  hive_metastore_config {
+    version = "3.1.2"
+  }
+}
+
+resource "google_dataproc_cluster" "dp_cluster" {
+  name   = "tf-test-dpms-tbl-creator-%{random_suffix}"
+  region = google_dataproc_metastore_service.dpms_service.location
+
+  cluster_config {
+    # Keep the costs down with smallest config we can get away with
+    software_config {
+      override_properties = {
+        "dataproc:dataproc.allow.zero.workers" = "true"
+      }
+    }
+
+    endpoint_config {
+      enable_http_port_access = true
+    }
+
+    master_config {
+      num_instances = 1
+      machine_type  = "e2-standard-2"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
+
+    metastore_config {
+      dataproc_metastore_service = google_dataproc_metastore_service.dpms_service.name
+    }
+  }
+}
+
+resource "google_dataproc_job" "hive" {
+  region = google_dataproc_cluster.dp_cluster.region
+
+  force_delete = true
+  placement {
+    cluster_name = google_dataproc_cluster.dp_cluster.name
+  }
+
+  hive_config {
+    properties = {
+      "database" = "testdb"
+      "table" = "testtbl"
+    }
+    query_list = [
+      "DROP DATABASE IF EXISTS testdb CASCADE",
+      "CREATE DATABASE testdb",
+      "CREATE TABLE testdb.testtbl (bar int)",
+    ]
+  }
+}
+
+# There is no simple way to wait on the Dataproc job to be SUCCESS
+# rather than RUNNING.
+resource "time_sleep" "wait_hive_job" {
+  create_duration = "90s"
+  depends_on      = [google_dataproc_job.hive]
+}
+
+resource "google_dataproc_metastore_table_iam_binding" "foo" {
+  project = google_dataproc_metastore_service.dpms_service.project
+  location = google_dataproc_metastore_service.dpms_service.location
+  service_id = google_dataproc_metastore_service.dpms_service.service_id
+  database_id = google_dataproc_job.hive.hive_config[0].properties["database"]
+  table = google_dataproc_job.hive.hive_config[0].properties["table"]
+  role = "%{role}"
+  members = ["user:admin@hashicorptest.com"]
+  depends_on      = [time_sleep.wait_hive_job]
+}
+`, context)
+}
+
+func testAccDataprocMetastoreTableIamBinding_updateGenerated(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dataproc_metastore_service" "dpms_service" {
+  service_id = "tf-test-metastore-srv-%{random_suffix}"
+  location   = "us-central1"
+
+  tier       = "DEVELOPER"
+
+  hive_metastore_config {
+    version = "3.1.2"
+  }
+}
+
+resource "google_dataproc_cluster" "dp_cluster" {
+  name   = "tf-test-dpms-tbl-creator-%{random_suffix}"
+  region = google_dataproc_metastore_service.dpms_service.location
+
+  cluster_config {
+    # Keep the costs down with smallest config we can get away with
+    software_config {
+      override_properties = {
+        "dataproc:dataproc.allow.zero.workers" = "true"
+      }
+    }
+
+    endpoint_config {
+      enable_http_port_access = true
+    }
+
+    master_config {
+      num_instances = 1
+      machine_type  = "e2-standard-2"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
+
+    metastore_config {
+      dataproc_metastore_service = google_dataproc_metastore_service.dpms_service.name
+    }
+  }
+}
+
+resource "google_dataproc_job" "hive" {
+  region = google_dataproc_cluster.dp_cluster.region
+
+  force_delete = true
+  placement {
+    cluster_name = google_dataproc_cluster.dp_cluster.name
+  }
+
+  hive_config {
+    properties = {
+      "database" = "testdb"
+      "table" = "testtbl"
+    }
+    query_list = [
+      "DROP DATABASE IF EXISTS testdb CASCADE",
+      "CREATE DATABASE testdb",
+      "CREATE TABLE testdb.testtbl (bar int)",
+    ]
+  }
+}
+
+# There is no simple way to wait on the Dataproc job to be SUCCESS
+# rather than RUNNING.
+resource "time_sleep" "wait_hive_job" {
+  create_duration = "90s"
+  depends_on      = [google_dataproc_job.hive]
+}
+
+resource "google_dataproc_metastore_table_iam_binding" "foo" {
+  project = google_dataproc_metastore_service.dpms_service.project
+  location = google_dataproc_metastore_service.dpms_service.location
+  service_id = google_dataproc_metastore_service.dpms_service.service_id
+  database_id = google_dataproc_job.hive.hive_config[0].properties["database"]
+  table = google_dataproc_job.hive.hive_config[0].properties["table"]
+  role = "%{role}"
+  members = ["user:admin@hashicorptest.com", "user:gterraformtest1@gmail.com"]
+  depends_on      = [time_sleep.wait_hive_job]
+}
+`, context)
+}
+
+func generateDataprocMetastoreTableIAMPolicyStateID(iamResourceAddr string) func(*terraform.State) (string, error) {
+	return func(state *terraform.State) (string, error) {
+		var rawState map[string]string
+		for _, m := range state.Modules {
+			if len(m.Resources) > 0 {
+				if v, ok := m.Resources[iamResourceAddr]; ok {
+					rawState = v.Primary.Attributes
+				}
+			}
+		}
+		fmt.Printf("raw state %s\n", rawState)
+		project := tpgresource.GetResourceNameFromSelfLink(rawState["project"])
+		location := tpgresource.GetResourceNameFromSelfLink(rawState["location"])
+		serviceId := tpgresource.GetResourceNameFromSelfLink(rawState["service_id"])
+		databaseId := tpgresource.GetResourceNameFromSelfLink(rawState["database_id"])
+		table := tpgresource.GetResourceNameFromSelfLink(rawState["table"])
+		return acctest.BuildIAMImportId(fmt.Sprintf("projects/%s/locations/%s/services/%s/databases/%s/tables/%s", project, location, serviceId, databaseId, table), "", "", rawState["condition.0.title"]), nil
+	}
+}
+
+func generateDataprocMetastoreTableIAMBindingStateID(iamResourceAddr string) func(*terraform.State) (string, error) {
+	return func(state *terraform.State) (string, error) {
+		var rawState map[string]string
+		for _, m := range state.Modules {
+			if len(m.Resources) > 0 {
+				if v, ok := m.Resources[iamResourceAddr]; ok {
+					rawState = v.Primary.Attributes
+				}
+			}
+		}
+		fmt.Printf("raw state %s\n", rawState)
+		project := tpgresource.GetResourceNameFromSelfLink(rawState["project"])
+		location := tpgresource.GetResourceNameFromSelfLink(rawState["location"])
+		serviceId := tpgresource.GetResourceNameFromSelfLink(rawState["service_id"])
+		databaseId := tpgresource.GetResourceNameFromSelfLink(rawState["database_id"])
+		table := tpgresource.GetResourceNameFromSelfLink(rawState["table"])
+		return acctest.BuildIAMImportId(fmt.Sprintf("projects/%s/locations/%s/services/%s/databases/%s/tables/%s", project, location, serviceId, databaseId, table), rawState["role"], "", rawState["condition.0.title"]), nil
+	}
+}
+
+func generateDataprocMetastoreTableIAMMemberStateID(iamResourceAddr string) func(*terraform.State) (string, error) {
+	return func(state *terraform.State) (string, error) {
+		var rawState map[string]string
+		for _, m := range state.Modules {
+			if len(m.Resources) > 0 {
+				if v, ok := m.Resources[iamResourceAddr]; ok {
+					rawState = v.Primary.Attributes
+				}
+			}
+		}
+		fmt.Printf("raw state %s\n", rawState)
+		project := tpgresource.GetResourceNameFromSelfLink(rawState["project"])
+		location := tpgresource.GetResourceNameFromSelfLink(rawState["location"])
+		serviceId := tpgresource.GetResourceNameFromSelfLink(rawState["service_id"])
+		databaseId := tpgresource.GetResourceNameFromSelfLink(rawState["database_id"])
+		table := tpgresource.GetResourceNameFromSelfLink(rawState["table"])
+		return acctest.BuildIAMImportId(fmt.Sprintf("projects/%s/locations/%s/services/%s/databases/%s/tables/%s", project, location, serviceId, databaseId, table), rawState["role"], rawState["member"], rawState["condition.0.title"]), nil
+	}
+}

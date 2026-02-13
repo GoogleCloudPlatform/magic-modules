@@ -41,6 +41,7 @@ examples:
     primary_resource_id: 'dpms_service'
     primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv-%s", context["random_suffix"]), "testdb"'
     external_providers: ["time"]
+    exclude_test: true
 parameters:
 properties:
   - name: 'name'
