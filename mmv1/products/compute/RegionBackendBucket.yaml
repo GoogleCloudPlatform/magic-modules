@@ -101,7 +101,7 @@ properties:
     description: |
       Cloud Storage bucket name. The bucket must be in the same region as this
       backend bucket.
-    required: true  
+    required: true
   - name: 'creationTimestamp'
     type: Time
     description: 'Creation timestamp in RFC3339 text format.'
