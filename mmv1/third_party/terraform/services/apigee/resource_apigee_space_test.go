@@ -1,6 +1,7 @@
 package apigee_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -32,6 +33,7 @@ func TestAccApigeeSpace_basicTest(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_apigee_space.primary",
+				ImportStateId:     fmt.Sprintf("organizations/%s/spaces/%s", context["org_id"], context["space_id"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},

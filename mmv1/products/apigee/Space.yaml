@@ -32,7 +32,7 @@ custom_code:
 autogen_async: true
 iam_policy:
   method_name_separator: ':'
-  parent_resource_attribute: 'name'
+  parent_resource_attribute: 'space_id'
   fetch_iam_policy_verb: 'GET'
   set_iam_policy_verb: 'POST'
   wrapped_policy_obj: false
