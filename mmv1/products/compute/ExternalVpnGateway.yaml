@@ -124,3 +124,18 @@ properties:
             Engine. Must specify an IPv6 address (not IPV4-mapped) using any format
             described in RFC 4291 (e.g. 2001:db8:0:0:2d9:51:0:0). The output format
             is RFC 5952 format (e.g. 2001:db8::2d9:51:0:0).
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    min_version: 'beta'
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the ExternalVpnGateway. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        ignore_read: true
