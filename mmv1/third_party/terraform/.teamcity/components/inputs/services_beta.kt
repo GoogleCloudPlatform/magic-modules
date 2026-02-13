@@ -91,6 +91,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Biglake",
         "path" to "./google-beta/services/biglake"
     ),
+    "biglakeiceberg" to mapOf(
+        "name" to "biglakeiceberg",
+        "displayName" to "BiglakeIceberg",
+        "path" to "./google-beta/services/biglakeiceberg"
+    ),
     "bigquery" to mapOf(
         "name" to "bigquery",
         "displayName" to "Bigquery",
@@ -225,6 +230,11 @@ var ServicesListBeta = mapOf(
         "name" to "cloudscheduler",
         "displayName" to "Cloudscheduler",
         "path" to "./google-beta/services/cloudscheduler"
+    ),
+    "cloudsecuritycompliance" to mapOf(
+        "name" to "cloudsecuritycompliance",
+        "displayName" to "Cloud Security Compliance",
+        "path" to "./google-beta/services/cloudsecuritycompliance"
     ),
     "cloudtasks" to mapOf(
         "name" to "cloudtasks",
@@ -410,6 +420,11 @@ var ServicesListBeta = mapOf(
         "name" to "firebase",
         "displayName" to "Firebase",
         "path" to "./google-beta/services/firebase"
+    ),
+    "firebaseailogic" to mapOf(
+        "name" to "firebaseailogic",
+        "displayName" to "Firebase AI Logic",
+        "path" to "./google-beta/services/firebaseailogic"
     ),
     "firebaseappcheck" to mapOf(
         "name" to "firebaseappcheck",

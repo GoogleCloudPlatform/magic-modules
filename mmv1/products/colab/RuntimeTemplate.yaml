@@ -30,8 +30,6 @@ immutable: true
 create_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates?notebook_runtime_template_id={{name}}'
 async:
   type: 'OpAsync'
-  operation:
-    full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
   result:
     resource_inside_response: true
 iam_policy:
@@ -87,20 +85,14 @@ properties:
      'The machine configuration of the runtime.'
     properties:
       - name: 'machineType'
-        type: string
+        type: String
         default_from_api: true
         description: |
                 The Compute Engine machine type selected for the runtime.
       - name: 'acceleratorType'
-        type: enum
+        type: String
         description: |
                 The type of hardware accelerator used by the runtime. If specified, acceleratorCount must also be specified.
-        enum_values:
-          - 'NVIDIA_TESLA_V100'
-          - 'NVIDIA_TESLA_T4'
-          - 'NVIDIA_TESLA_A100'
-          - 'NVIDIA_A100_80GB'
-          - 'NVIDIA_L4'
       - name: 'acceleratorCount'
         type: Integer
         default_from_api: true
@@ -111,16 +103,11 @@ properties:
     description: 'The configuration for the data disk of the runtime.'
     properties:
       - name: 'diskType'
-        type: enum
+        type: String
         description: 'The type of the persistent disk.'
         default_from_api: true
-        enum_values:
-          - 'pd-standard'
-          - 'pd-ssd'
-          - 'pd-balanced'
-          - 'pd-extreme'
       - name: 'diskSizeGb'
-        type: int
+        type: String  # Integer
         default_from_api: true
         description: |
                 The disk size of the runtime in GB. If specified, the diskType must also be specified. The minimum size is 10GB and the maximum is 65536GB.
@@ -209,3 +196,20 @@ properties:
                             If a variable cannot be resolved, the reference in the input string will be unchanged.
                             The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped
                             references will never be expanded, regardless of whether the variable exists or not.'
+      - name: 'postStartupScriptConfig'
+        type: NestedObject
+        description: 'Post startup script config.'
+        properties:
+          - name: 'postStartupScript'
+            type: String
+            description: 'Post startup script to run after runtime is started.'
+          - name: 'postStartupScriptUrl'
+            type: String
+            description: 'Post startup script url to download. Example: https://bucket/script.sh.'
+          - name: 'postStartupScriptBehavior'
+            type: Enum
+            description: 'Post startup script behavior that defines download and execution behavior.'
+            enum_values:
+              - 'RUN_ONCE'
+              - 'RUN_EVERY_START'
+              - 'DOWNLOAD_AND_RUN_EVERY_START'

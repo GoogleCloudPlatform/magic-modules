@@ -230,6 +230,21 @@ properties:
     type: String
     description: 'Detailed status message for the VPN tunnel.'
     output: true
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    min_version: 'beta'
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the Vpn Tunnel. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        ignore_read: true
   - name: 'cipherSuite'
     type: NestedObject
     description: |
@@ -242,25 +257,21 @@ properties:
           - name: 'encryption'
             type: Array
             description: 'Encryption algorithms.'
-            is_set: true
             item_type:
               type: String
           - name: 'integrity'
             type: Array
             description: 'Integrity algorithms.'
-            is_set: true
             item_type:
               type: String
           - name: 'prf'
             type: Array
             description: 'Pseudo-random functions.'
-            is_set: true
             item_type:
               type: String
           - name: 'dh'
             type: Array
             description: 'Diffie-Hellman groups.'
-            is_set: true
             item_type:
               type: String
       - name: 'phase2'
@@ -270,18 +281,15 @@ properties:
           - name: 'encryption'
             type: Array
             description: 'Encryption algorithms.'
-            is_set: true
             item_type:
               type: String
           - name: 'integrity'
             type: Array
             description: 'Integrity algorithms.'
-            is_set: true
             item_type:
               type: String
           - name: 'pfs'
             type: Array
             description: 'Perfect forward secrecy groups.'
-            is_set: true
             item_type:
               type: String

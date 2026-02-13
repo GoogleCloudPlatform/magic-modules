@@ -15,17 +15,15 @@
 name: 'Service'
 description: |
   An individual service. A service contains a name and optional metadata.
-min_version: 'beta'
 references:
   guides:
     'Configuring a service': 'https://cloud.google.com/service-directory/docs/configuring-service-directory#configuring_a_service'
-  api: 'https://cloud.google.com/service-directory/docs/reference/rest/v1beta1/projects.locations.namespaces.services'
+  api: 'https://cloud.google.com/service-directory/docs/reference/rest/v1/projects.locations.namespaces.services'
 docs:
 base_url: '{{name}}'
 self_link: '{{name}}'
 create_url: '{{namespace}}/services?serviceId={{service_id}}'
 update_verb: 'PATCH'
-update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}'
 timeouts:
@@ -39,11 +37,14 @@ iam_policy:
   parent_resource_attribute: 'name'
 custom_code:
   custom_import: 'templates/terraform/custom_import/service_directory_service.go.tmpl'
+  encoder: 'templates/terraform/encoders/service_directory_metadata_to_annotations.go.tmpl'
+  decoder: 'templates/terraform/decoders/service_directory_metadata_to_annotations.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/service_directory.go.tmpl'
+
 exclude_sweeper: true
 examples:
   - name: 'service_directory_service_basic'
     primary_resource_id: 'example'
-    min_version: 'beta'
     vars:
       service_id: 'example-service'
       namespace_id: 'example-namespace'
@@ -52,7 +53,6 @@ parameters:
     type: String
     description: |
       The resource name of the namespace this service will belong to.
-    min_version: 'beta'
     url_param_only: true
     required: true
     ignore_read: true
@@ -61,7 +61,6 @@ parameters:
     description: |
       The Resource ID must be 1-63 characters long, including digits,
       lowercase letters or the hyphen character.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -73,7 +72,6 @@ properties:
     description: |
       The resource name for the service in the
       format `projects/*/locations/*/namespaces/*/services/*`.
-    min_version: 'beta'
     output: true
   - name: 'metadata'
     type: KeyValuePairs
@@ -82,4 +80,3 @@ properties:
       by service clients. The entire metadata dictionary may contain
       up to 2000 characters, spread across all key-value pairs.
       Metadata that goes beyond any these limits will be rejected.
-    min_version: 'beta'

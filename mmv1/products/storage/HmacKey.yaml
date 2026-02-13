@@ -26,7 +26,7 @@ references:
 docs:
   warning: |
     All arguments including the `secret` value will be stored in the raw
-    state as plain-text. [Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data).
+    state as plain-text. [Read more about sensitive data in state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data).
     On import, the `secret` value will not be retrieved.
 id_format: 'projects/{{project}}/hmacKeys/{{access_id}}'
 base_url: 'projects/{{project}}/hmacKeys'

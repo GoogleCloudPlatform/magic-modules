@@ -13,7 +13,6 @@
 
 ---
 name: 'Instance'
-# plugin_framework: true
 description: |
   Represents a Data Fusion instance.
 references:
@@ -40,11 +39,12 @@ iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
   import_format:
-    - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
+    - 'projects/{{project}}/locations/{{region}}/instances/{{name}}'
     - '{{name}}'
 custom_code:
   constants: 'templates/terraform/constants/data_fusion_instance_option.go.tmpl'
   pre_update: 'templates/terraform/pre_update/datafusion_instance_update.go.tmpl'
+include_in_tgc_next: true
 sweeper:
   url_substitutions:
     - region: "us-central1"
@@ -58,6 +58,7 @@ examples:
     test_vars_overrides:
       # Mark for testing to avoid service networking connection usage that is not cleaned up
       'prober_test_run': '`options = { prober_test_run = "true" }`'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
   - name: 'data_fusion_instance_full'
     primary_resource_id: 'extended_instance'
     vars:
@@ -68,6 +69,7 @@ examples:
     test_vars_overrides:
       # Mark for testing to avoid service networking connection usage that is not cleaned up
       'prober_test_run': '`options = { prober_test_run = "true" }`'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
   - name: 'data_fusion_instance_psc'
     primary_resource_id: 'psc_instance'
     vars:
@@ -79,10 +81,12 @@ examples:
     test_vars_overrides:
       # Mark for testing to avoid service networking connection usage that is not cleaned up
       'prober_test_run': '`options = { prober_test_run = "true" }`'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
   - name: 'data_fusion_instance_cmek'
     primary_resource_id: 'cmek'
     vars:
       instance_name: 'my-instance'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
   - name: 'data_fusion_instance_enterprise'
     primary_resource_id: 'enterprise_instance'
     vars:
@@ -91,14 +95,29 @@ examples:
     test_vars_overrides:
       # Mark for testing to avoid service networking connection usage that is not cleaned up
       'prober_test_run': '`options = { prober_test_run = "true" }`'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
   - name: 'data_fusion_instance_event'
     primary_resource_id: 'event'
     vars:
       instance_name: 'my-instance'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
   - name: 'data_fusion_instance_zone'
     primary_resource_id: 'zone'
     vars:
       instance_name: 'my-instance'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
+  - name: 'data_fusion_instance_patch_revision'
+    primary_resource_id: 'data_fusion_instance_patch_revision'
+    vars:
+      instance_name: 'my-instance'
+    tgc_skip_test: 'fix it after patch_revision is released in v7.18.0'
+tgc_tests:
+  - name: 'TestAccDatafusionInstance_tags'
+    skip: 'fix it after patch_revision is released in v7.18.0'
+  - name: 'TestAccDataFusionInstance_update'
+    skip: 'fix it after patch_revision is released in v7.18.0'
+  - name: 'TestAccDataFusionInstanceEnterprise_update'
+    skip: 'fix it after patch_revision is released in v7.18.0'
 parameters:
   - name: 'region'
     type: String
@@ -208,6 +227,11 @@ properties:
     type: String
     description: |
       Current version of the Data Fusion.
+    default_from_api: true
+  - name: 'patchRevision'
+    type: String
+    description: |
+      Current patch revision of the Data Fusion.
     default_from_api: true
   - name: 'serviceAccount'
     type: String

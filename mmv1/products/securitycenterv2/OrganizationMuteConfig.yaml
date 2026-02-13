@@ -37,6 +37,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+include_in_tgc_next: true
 examples:
   - name: 'scc_v2_organization_mute_config_basic'
     primary_resource_id: 'default'

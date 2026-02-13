@@ -12,7 +12,7 @@ development environment.
 
 1. [Install the gcloud CLI.](https://cloud.google.com/sdk/docs/install)
 1. In the Google Cloud console, on the project selector page, select or
-   [create a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects).
+   [create a Google Cloud project](https://docs.cloud.google.com/resource-manager/docs/creating-managing-projects).
 
    > [!NOTE]
    > **Note:** If you don't already have a project to use for testing changes to
@@ -34,10 +34,6 @@ development environment.
    # Add Go binaries to PATH
    export PATH=$PATH:$(go env GOPATH)/bin
    ```
-1. Install goimports
-   ```bash
-   go install golang.org/x/tools/cmd/goimports@latest
-   ```
 1. [Install terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
 1. Clone the `magic-modules` repository
    ```bash
@@ -56,8 +52,6 @@ development environment.
  
    ```
    Check for go in path...
-      found!
-   Check for goimports in path...
       found!
    Check for git in path...
       found!

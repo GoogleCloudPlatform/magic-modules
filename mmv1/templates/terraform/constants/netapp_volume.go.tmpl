@@ -20,3 +20,23 @@ func ProjectIDDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	// Compare the extracted suffixes.
 	return suffix1 == suffix2
 }
+
+func SuppressSquashModeDiff(k, old, new string, d *schema.ResourceData) bool {
+    if new == "" {
+        return true
+    }
+    if old != new {
+        return false
+    }
+    return false
+}
+
+func SuppressHasRootAccessDiff(k, old, new string, d *schema.ResourceData) bool {
+    if new == "" {
+        return true
+    }
+    if old != new {
+        return false
+    }
+    return false
+}

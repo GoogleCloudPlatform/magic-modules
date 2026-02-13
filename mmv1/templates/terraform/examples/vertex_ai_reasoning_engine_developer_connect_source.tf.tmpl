@@ -1,0 +1,25 @@
+data "google_project" "project" {}
+
+resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
+  display_name = "{{index $.Vars "name"}}"
+  description  = "A basic reasoning engine"
+  region       = "us-central1"
+
+  spec {
+    source_code_spec {
+      developer_connect_source {
+        config {
+          git_repository_link = "projects/${data.google_project.project.project_id}/locations/us-central1/connections/tpg-test-bot-github/gitRepositoryLinks/tpg-test-vertex-reasoning"
+          dir                 = "source"
+          revision            = "main"
+        }
+      }
+
+      python_spec {
+        version           = "3.14"
+        entrypoint_module = "simple_agent"
+        entrypoint_object = "fixed_name_generator"
+      }
+    }
+  }
+}

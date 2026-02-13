@@ -24,6 +24,7 @@ import (
   "regexp"
   "strconv"
   "strings"
+  "time"
 
   "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
@@ -61,6 +62,7 @@ var (
     _ = retry.Retry
     _ = schema.Noop
     _ = structure.ExpandJsonFromString
+    _ = time.Now
     _ = validation.All
     _ = terraform.State{}
     _ = tgcresource.RemoveTerraformAttributionLabel
@@ -127,10 +129,13 @@ func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, conf
     }
 {{- end}}
 
-{{ if and $.CustomCode.Encoder (not $.TGCIgnoreTerraformEncoder) -}}
+{{ if and $.CustomCode.Encoder (not $.CustomCode.TGCIgnoreTerraformEncoder) -}}
     obj, err = resource{{ $.ResourceName -}}Encoder(d, config, obj)
     if err != nil {
         return nil, err
+    }
+    if obj == nil {
+        obj = make(map[string]interface{})
     }
 {{- end }}
 
@@ -141,15 +146,15 @@ func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, conf
 {{- end}}
 }
 
-{{if and $.CustomCode.Encoder (not $.TGCIgnoreTerraformEncoder) -}}
+{{if and $.CustomCode.Encoder (not $.CustomCode.TGCIgnoreTerraformEncoder) -}}
 func resource{{ $.ResourceName -}}Encoder(d tpgresource.TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-{{ $.CustomTemplate $.CustomCode.Encoder false -}}
+{{ customTemplate $ $.CustomCode.Encoder false -}}
 }
 {{- end}}
 
 {{if $.CustomCode.TgcEncoder -}}
 func resource{{ $.ResourceName -}}TgcEncoder(d tpgresource.TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-{{ $.CustomTemplate $.CustomCode.TgcEncoder false -}}
+{{ customTemplate $ $.CustomCode.TgcEncoder false -}}
 }
 {{- end}}
 

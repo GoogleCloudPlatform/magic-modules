@@ -14,12 +14,17 @@
 ---
 name: MulticastDomain
 description: Create a multicast domain in the current project.
+references:
+  guides:
+    'Create Multicast Domain': 'https://docs.cloud.google.com/vpc/docs/multicast/create-domains#create-domain'
+  api: 'https://docs.cloud.google.com/vpc/docs/multicast/reference/rest/v1/projects.locations.multicastDomains'
 base_url: projects/{{project}}/locations/{{location}}/multicastDomains
 update_mask: true
 self_link:
   projects/{{project}}/locations/{{location}}/multicastDomains/{{multicast_domain_id}}
 create_url:
   projects/{{project}}/locations/{{location}}/multicastDomains?multicastDomainId={{multicast_domain_id}}
+update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/multicastDomains/{{multicast_domain_id}}
 examples:
@@ -29,7 +34,6 @@ examples:
       network_name: test-md-network
       domain_name: test-md-domain
 autogen_async: true
-immutable: true
 async:
   operation:
     timeouts:
@@ -100,7 +104,7 @@ properties:
         immutable: true
   - name: createTime
     type: String
-    description: '[Output only] The timestamp when the multicast domain was created.'
+    description: 'The timestamp when the multicast domain was created.'
     output: true
   - name: description
     type: String
@@ -115,6 +119,15 @@ properties:
       Use the following format:
       `projects/{project}/locations/global/multicastDomainGroups/{multicast_domain_group}`.
     immutable: true
+  - name: ullMulticastDomain
+    type: NestedObject
+    description: Information for an Ultra-Low-Latency multicast domain.
+    immutable: true
+    properties:
+      - name: preconfiguredUllDomain
+        type: String
+        description: The preconfigured Ultra-Low-Latency domain name.
+        immutable: true
   - name: name
     type: String
     description: |-
@@ -125,14 +138,32 @@ properties:
   - name: uniqueId
     type: String
     description: |-
-      [Output only] The Google-generated UUID for the resource. This value is
+      The Google-generated UUID for the resource. This value is
       unique across all multicast domain resources. If a domain is deleted and
       another with the same name is created, the new domain is assigned a
       different unique_id.
     output: true
+  - name: state
+    type: NestedObject
+    description: The multicast resource's state.
+    output: true
+    properties:
+      - name: state
+        type: String
+        description: |-
+          The state of the multicast resource.
+          Possible values:
+          CREATING
+          ACTIVE
+          DELETING
+          DELETE_FAILED
+          UPDATING
+          UPDATE_FAILED
+          INACTIVE
+        output: true
   - name: updateTime
     type: String
     description: |-
-      [Output only] The timestamp when the multicast domain was most recently
+      The timestamp when the multicast domain was most recently
       updated.
     output: true

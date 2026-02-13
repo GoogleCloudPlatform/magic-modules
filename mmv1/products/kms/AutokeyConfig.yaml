@@ -55,14 +55,14 @@ custom_code:
   test_check_destroy: 'templates/terraform/custom_check_destroy/kms_autokey_config.go.tmpl'
 # Using a handwritten sweeper because of pre_delete.
 exclude_sweeper: true
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 examples:
   - name: 'kms_autokey_config_all'
     primary_resource_id: 'example-autokeyconfig'
     # test depends upon google_project_service_identity service which is still in beta, so we need to keep test limited to beta
     min_version: 'beta'
     vars:
-      folder_name: 'my-folder'
+      folder_name: 'folder-cfg'
       key_project_name: 'key-proj'
     test_env_vars:
       org_id: 'ORG_ID'

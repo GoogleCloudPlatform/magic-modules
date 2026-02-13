@@ -26,7 +26,7 @@ description: |-
 {{ $.FormatDocDescription $.Description false }}
 {{ if eq $.MinVersion "beta"}}
 ~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta resources.
+See [Provider Versions](../guides/provider_versions.html.markdown) for more details on beta resources.
 {{- end }}
 {{ if or $.References.Api $.References.Guides }}
 To get more information about {{$.Name}}, see:
@@ -56,11 +56,11 @@ To get more information about {{$.Name}}, see:
 {{- if $.SensitiveProps }}
 ~> **Warning:** All arguments including the following potentially sensitive
 values will be stored in the raw state as plain text: {{ $.SensitivePropsToString }}.
-[Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data).
+[Read more about sensitive data in state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data).
 {{ end }}
 {{- if $.WriteOnlyProps }}
 ~> **Note:**  All arguments marked as write-only values will not be stored in the state: {{ $.WriteOnlyPropsToString }}.
-[Read more about Write-only Attributes](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments).
+[Read more about Write-only Arguments](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments).
 {{ end }}
 {{- if $.Examples }}
 	{{- range $e := $.Examples }}
@@ -110,13 +110,13 @@ The following arguments are supported:
 {{ "" }}
 {{ "" }}
 {{- range $p := $.RootProperties }}
-	{{- if and $p.Required (not $p.WriteOnlyLegacy) (not $p.WriteOnly) }}
+	{{- if $p.Required }}
 {{- trimTemplate "property_documentation.html.markdown.tmpl" $p -}}
 	{{- end }}
 {{- end }}
 {{ "" }}
 {{- range $p := $.RootProperties }}
-	{{- if and (not $p.Required) (not $p.Output) (not $p.WriteOnlyLegacy) (not $p.WriteOnly) }}
+	{{- if and (not $p.Required) (not $p.Output) }}
 {{- trimTemplate "property_documentation.html.markdown.tmpl" $p -}}
 	{{- end }}
 {{- end }}
@@ -146,19 +146,6 @@ The following arguments are supported:
 	{{- end}}
 {{- end }}
 {{- "" }}
-{{- if $.WriteOnlyProps }}
-## Ephemeral Attributes Reference
-
-The following write-only attributes are supported:
-{{ range $p := $.RootProperties }}
-    {{- if or $p.WriteOnlyLegacy $p.WriteOnly }}
-{{- trimTemplate "property_documentation.html.markdown.tmpl" $p }}
-    {{- end}}
-{{- end }}
-{{ range $p := $.AllUserProperties }}
-{{- trimTemplate "nested_property_write_only_documentation.html.markdown.tmpl" $p }}
-{{- end }}
-{{- end }}
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:

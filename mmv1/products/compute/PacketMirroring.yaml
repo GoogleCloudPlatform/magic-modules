@@ -199,3 +199,12 @@ properties:
           - 'mirrored_resources.0.tags'
         item_type:
           type: String
+  - name: 'enable'
+    type: Enum
+    description: |
+      Indicates whether or not this packet mirroring takes effect. If set to FALSE, this packet mirroring
+      policy will not be enforced on the network. The default is TRUE.
+    default_from_api: true
+    enum_values:
+      - 'TRUE'
+      - 'FALSE'

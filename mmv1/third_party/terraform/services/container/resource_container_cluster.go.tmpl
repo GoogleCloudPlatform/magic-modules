@@ -98,9 +98,11 @@ var (
 		"addons_config.0.ray_operator_config",
 		"addons_config.0.parallelstore_csi_driver_config",
 		"addons_config.0.lustre_csi_driver_config",
+		"addons_config.0.slice_controller_config",
 	{{- if ne $.TargetVersionName "ga" }}
 		"addons_config.0.istio_config",
 		"addons_config.0.kalm_config",
+		"addons_config.0.pod_snapshot_config",
 	{{- end }}
 	}
 
@@ -237,6 +239,9 @@ func ResourceContainerCluster() *schema.Resource {
 			containerClusterEnableK8sBetaApisCustomizeDiff,
 			containerClusterNodeVersionCustomizeDiff,
 			tpgresource.SetDiffForLabelsWithCustomizedName("resource_labels"),
+			{{ if ne $.TargetVersionName `ga` }}
+			clusterAcceleratorNetworkProfileCustomizeDiff,
+			{{- end }}
 		),
 
 		Timeouts: &schema.ResourceTimeout{
@@ -557,6 +562,23 @@ func ResourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
+						"pod_snapshot_config": {
+							Type: schema.TypeList,
+							Optional: true,
+							Computed: true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems: 1,
+							Description: `Configuration for the Pod Snapshot feature.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type: schema.TypeBool,
+										Required: true,
+										Description: `Whether the Pod Snapshot feature is enabled for this cluster.`,
+									},
+								},
+							},
+						},
 						{{- end }}
 						"config_connector_config": {
 							Type:         schema.TypeList,
@@ -582,6 +604,22 @@ func ResourceContainerCluster() *schema.Resource {
 							MaxItems:      1,
 							Description:   `The status of the Stateful HA addon, which provides automatic configurable failover for stateful applications. Defaults to disabled; set enabled = true to enable.`,
 							ConflictsWith: []string{"enable_autopilot"},
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Required: true,
+									},
+								},
+							},
+						},
+						"slice_controller_config": {
+							Type:          schema.TypeList,
+							Optional:      true,
+							Computed:      true,
+							AtLeastOneOf:  addonsConfigKeys,
+							MaxItems:      1,
+							Description:   `The status of the Slice Controller addon. It is disabled by default; set enabled = true to enable.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"enabled": {
@@ -661,6 +699,7 @@ func ResourceContainerCluster() *schema.Resource {
 						"resource_limits": {
 							Type:             schema.TypeList,
 							Optional:         true,
+							Computed:         true,
 							ConflictsWith:    []string{"enable_autopilot"},
 							DiffSuppressFunc: suppressDiffForAutopilot,
 							Description:      `Global constraints for machine resources in the cluster. Configuring the cpu and memory types is required if node auto-provisioning is enabled. These limits will apply to node pool autoscaling in addition to node auto-provisioning.`,
@@ -1205,7 +1244,7 @@ func ResourceContainerCluster() *schema.Resource {
 									},
 									"end_time": {
 										Type:         schema.TypeString,
-										Required:     true,
+										Optional:     true,
 										ValidateFunc: verify.ValidateRFC3339Date,
 									},
 									"exclusion_options": {
@@ -1215,6 +1254,12 @@ func ResourceContainerCluster() *schema.Resource {
 										Description: `Maintenance exclusion related options.`,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
+												"end_time_behavior": {
+													Type:         schema.TypeString,
+													Optional:     true,
+													ValidateFunc: validation.StringInSlice([]string{"UNTIL_END_OF_SUPPORT"}, false),
+													Description: `The behavior of the exclusion end time.`,
+												},
 												"scope": {
 													Type:         schema.TypeString,
 													Required:     true,
@@ -1703,7 +1748,46 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-
+{{ if ne $.TargetVersionName `ga` -}}
+			"secret_sync_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: `Configuration for the Sync as k8s secrets feature.`,
+				MaxItems:    1,
+				DiffSuppressFunc: SecretSyncCfgSuppress,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:        schema.TypeBool,
+							Required:    true,
+							Description: `Enable the Sync as k8s secret add-on.`,
+						},
+						"rotation_config" : {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							MaxItems:    1,
+							Description: `Configuration for Secret Sync auto rotation.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: `Enable the Secret sync auto rotation.`,
+									},
+									"rotation_interval": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+										Description: `The interval between two consecutive rotations. Default rotation interval is 2 minutes`,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+{{- end }}
 			"project": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -1853,6 +1937,11 @@ func ResourceContainerCluster() *schema.Resource {
 										Description: `List of secondary ranges names within this subnetwork that can be used for pod IPs.`,
 										Elem: &schema.Schema{Type: schema.TypeString},
 									},
+									"status": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `Status of the subnetwork, If in draining status, subnet will not be selected for new node pools.`,
+									},
 								},
 
 							},
@@ -1893,6 +1982,27 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+
+{{- if ne $.TargetVersionName "ga" }}
+			"managed_opentelemetry_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: "The configuration for the Managed OpenTelemetry pipeline inside the cluster.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"scope": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Description:  "The scope of the Managed OpenTelemetry pipeline. Available options include SCOPE_UNSPECIFIED, NONE, and COLLECTION_AND_INSTRUMENTATION_COMPONENTS.",
+							ValidateFunc: validation.StringInSlice([]string{"SCOPE_UNSPECIFIED", "NONE", "COLLECTION_AND_INSTRUMENTATION_COMPONENTS"}, false),
+							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("SCOPE_UNSPECIFIED"),
+						},
+					},
+				},
+			},
+{{- end }}
 
 			// Defaults to "VPC_NATIVE" during create only
 			"networking_mode": {
@@ -1995,7 +2105,6 @@ func ResourceContainerCluster() *schema.Resource {
 						"enable_private_nodes": {
 							Type:             schema.TypeBool,
 							Optional:         true,
-							ForceNew:         true,
 							AtLeastOneOf:     privateClusterConfigKeys,
 							DiffSuppressFunc: containerClusterPrivateClusterConfigSuppress,
 							Description:      `Enables the private cluster feature, creating a private endpoint on the cluster. In a private cluster, nodes only have RFC 1918 private addresses and communicate with the master's private endpoint via private networking.`,
@@ -2309,8 +2418,8 @@ func ResourceContainerCluster() *schema.Resource {
 			"enable_l4_ilb_subsetting": {
 			   Type: schema.TypeBool,
 			   Optional: true,
+			   Computed: true,
 			   Description: `Whether L4ILB Subsetting is enabled for this cluster.`,
-			   Default: false,
 			},
 			"disable_l4_lb_firewall_reconciliation": {
 				Type:        schema.TypeBool,
@@ -2785,6 +2894,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		MonitoringService:       d.Get("monitoring_service").(string),
 		NetworkPolicy:           expandNetworkPolicy(d.Get("network_policy")),
 		AddonsConfig:            expandClusterAddonsConfig(d.Get("addons_config")),
+{{- if ne $.TargetVersionName "ga" }}
+		ManagedOpentelemetryConfig: expandManagedOpenTelemetryConfig(d.Get("managed_opentelemetry_config")),
+{{- end }}
 		EnableKubernetesAlpha:   d.Get("enable_kubernetes_alpha").(bool),
 		IpAllocationPolicy:      ipAllocationBlock,
 {{- if ne $.TargetVersionName "ga" }}
@@ -2792,6 +2904,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 {{- end }}
 		PodAutoscaling: expandPodAutoscaling(d.Get("pod_autoscaling")),
 		SecretManagerConfig: 	 expandSecretManagerConfig(d.Get("secret_manager_config")),
+{{- if ne $.TargetVersionName "ga" }}
+		SecretSyncConfig: 	 expandSecretSyncConfig(d.Get("secret_sync_config")),
+{{- end }}
 		Autoscaling:             expandClusterAutoscaling(d.Get("cluster_autoscaling"), d),
 		BinaryAuthorization:     expandBinaryAuthorization(d.Get("binary_authorization")),
 		Autopilot: &container.Autopilot{
@@ -3509,6 +3624,11 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("secret_manager_config", flattenSecretManagerConfig(cluster.SecretManagerConfig)); err != nil {
 		return err
 	}
+{{ if ne $.TargetVersionName `ga` -}}
+	if err := d.Set("secret_sync_config", flattenSecretSyncConfig(cluster.SecretSyncConfig)); err != nil {
+		return err
+	}
+{{- end }}
 
 	if err := tpgresource.SetLabels(cluster.ResourceLabels, d, "resource_labels"); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
@@ -3551,6 +3671,12 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("monitoring_config", flattenMonitoringConfig(cluster.MonitoringConfig)); err != nil {
 		return err
 	}
+
+{{ if ne $.TargetVersionName "ga" }}
+	if err := d.Set("managed_opentelemetry_config", flattenManagedOpenTelemetryConfig(cluster.ManagedOpentelemetryConfig)); err != nil {
+		return err
+	}
+{{- end }}
 
 	if err := d.Set("node_pool_auto_config", flattenNodePoolAutoConfig(cluster.NodePoolAutoConfig)); err != nil {
 		return err
@@ -4727,6 +4853,28 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s secret manager csi add-on has been updated", d.Id())
 	}
 
+{{ if ne $.TargetVersionName `ga` -}}
+	if d.HasChange("secret_sync_config") {
+		req := &container.UpdateClusterRequest{}
+		if c, ok := d.GetOk("secret_sync_config"); !ok {
+			req.Update = &container.ClusterUpdate{
+				DesiredSecretSyncConfig: &container.SecretSyncConfig{
+					Enabled: false,
+				},
+			}
+		} else {
+			req.Update = &container.ClusterUpdate{
+				DesiredSecretSyncConfig: expandSecretSyncConfig(c),
+			}
+		}
+		updateF := updateFunc(req, "updating GKE secret sync add-on")
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+		return err
+		}
+	}
+{{- end }}
+
 	if d.HasChange("workload_identity_config") {
 		// Because GKE uses a non-RESTful update function, when removing the
 		// feature you need to specify a fairly full request body or it fails:
@@ -4806,6 +4954,23 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		log.Printf("[INFO] GKE cluster %s monitoring config has been updated", d.Id())
 	}
+
+{{ if ne $.TargetVersionName `ga` -}}
+	if d.HasChange("managed_opentelemetry_config") {
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredManagedOpentelemetryConfig: expandManagedOpenTelemetryConfig(d.Get("managed_opentelemetry_config")),
+			},
+		}
+		updateF := updateFunc(req, "updating GKE cluster managed opentelemetry config")
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s managed opentelemetry config has been updated", d.Id())
+	}
+{{- end }}
 
 	if d.HasChange("effective_labels") {
 		resourceLabels := d.Get("effective_labels").(map[string]interface{})
@@ -5495,6 +5660,14 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 		}
 	}
 
+	if v, ok := config["slice_controller_config"]; ok && len(v.([]interface{})) > 0 {
+		addon := v.([]interface{})[0].(map[string]interface{})
+		ac.SliceControllerConfig = &container.SliceControllerConfig{
+			Enabled:         addon["enabled"].(bool),
+			ForceSendFields: []string{"Enabled"},
+		}
+	}
+
 	if v, ok := config["ray_operator_config"]; ok && len(v.([]interface{})) > 0 {
 		addon := v.([]interface{})[0].(map[string]interface{})
 		ac.RayOperatorConfig = &container.RayOperatorConfig{
@@ -5556,6 +5729,14 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 			ForceSendFields: []string{"Enabled"},
 		}
 	}
+
+	if v, ok := config["pod_snapshot_config"]; ok && len(v.([]interface{})) > 0 {
+		addon := v.([]interface{})[0].(map[string]interface{})
+		ac.PodSnapshotConfig = &container.PodSnapshotConfig{
+			Enabled:         addon["enabled"].(bool),
+			ForceSendFields: []string{"Enabled"},
+		}
+	}
 {{- end }}
 
 	return ac
@@ -5600,6 +5781,7 @@ func expandAdditionalIpRangesConfigs(configured interface{}, d *schema.ResourceD
 		additionalIpRangesConfig = append(additionalIpRangesConfig, &container.AdditionalIPRangesConfig {
 			Subnetwork: subnetwork.RelativeLink(),
 			PodIpv4RangeNames: expandPodIpv4RangeNames(config["pod_ipv4_range_names"]),
+			Status: config["status"].(string),
 		})
 	}
 
@@ -5734,6 +5916,10 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 					Scope:           meo["scope"].(string),
 					ForceSendFields: []string{"Scope"},
 				}
+				if  len(meo["end_time_behavior"].(string)) > 0 {
+					mex.MaintenanceExclusionOptions.EndTimeBehavior =  meo["end_time_behavior"].(string)
+					mex.EndTime = ""
+				}
 				exclusions[exclusion["exclusion_name"].(string)] = mex
 			}
 		}
@@ -5789,12 +5975,6 @@ func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) *c
 
 	config := l[0].(map[string]interface{})
 
-	// Conditionally provide an empty list to preserve a legacy 2.X behaviour
-	// when `enabled` is false and resource_limits is unset, allowing users to
-	// explicitly disable the feature. resource_limits don't work when node
-	// auto-provisioning is disabled at time of writing. This may change API-side
-	// in the future though, as the feature is intended to apply to both node
-	// auto-provisioning and node autoscaling.
 	var resourceLimits []*container.ResourceLimit
 	if limits, ok := config["resource_limits"]; ok {
 		resourceLimits = make([]*container.ResourceLimit, 0)
@@ -5817,13 +5997,17 @@ func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) *c
 	    Enabled: defaultCCEnabled.(bool),
 	  }
 	}
+	var defaults *container.AutoprovisioningNodePoolDefaults
+	if shouldInclude(d, "cluster_autoscaling.0.auto_provisioning_defaults") {
+		defaults = expandAutoProvisioningDefaults(config["auto_provisioning_defaults"], d)
+	}
 	return &container.ClusterAutoscaling{
-		EnableNodeAutoprovisioning: config["enabled"].(bool),
-		ResourceLimits:             resourceLimits,
-		DefaultComputeClassConfig:  defaultCCConfig,
-		AutoscalingProfile: config["autoscaling_profile"].(string),
-		AutoprovisioningNodePoolDefaults: expandAutoProvisioningDefaults(config["auto_provisioning_defaults"], d),
-		AutoprovisioningLocations: 	tpgresource.ConvertStringArr(config["auto_provisioning_locations"].([]interface{})),
+		EnableNodeAutoprovisioning:       config["enabled"].(bool),
+		ResourceLimits:                   resourceLimits,
+		DefaultComputeClassConfig:        defaultCCConfig,
+		AutoscalingProfile:               config["autoscaling_profile"].(string),
+		AutoprovisioningNodePoolDefaults: defaults,
+		AutoprovisioningLocations:        tpgresource.ConvertStringArr(config["auto_provisioning_locations"].([]interface{})),
 	}
 }
 
@@ -5834,15 +6018,23 @@ func expandAutoProvisioningDefaults(configured interface{}, d *schema.ResourceDa
 	}
 	config := l[0].(map[string]interface{})
 
+	var management *container.NodeManagement
+	if shouldInclude(d, "cluster_autoscaling.0.auto_provisioning_defaults.0.management") {
+		management = expandManagement(config["management"])
+	}
+	var upgradeSettings *container.UpgradeSettings
+	if shouldInclude(d, "cluster_autoscaling.0.auto_provisioning_defaults.0.upgrade_settings") {
+		upgradeSettings = expandUpgradeSettings(config["upgrade_settings"], d)
+	}
 	npd := &container.AutoprovisioningNodePoolDefaults{
-		OauthScopes:      tpgresource.ConvertStringArr(config["oauth_scopes"].([]interface{})),
-		ServiceAccount:   config["service_account"].(string),
-		DiskSizeGb:       int64(config["disk_size"].(int)),
-		DiskType:         config["disk_type"].(string),
-		ImageType:        config["image_type"].(string),
-		BootDiskKmsKey:   config["boot_disk_kms_key"].(string),
-		Management:       expandManagement(config["management"]),
-		UpgradeSettings:  expandUpgradeSettings(config["upgrade_settings"]),
+		OauthScopes:     tpgresource.ConvertStringArr(config["oauth_scopes"].([]interface{})),
+		ServiceAccount:  config["service_account"].(string),
+		DiskSizeGb:      int64(config["disk_size"].(int)),
+		DiskType:        config["disk_type"].(string),
+		ImageType:       config["image_type"].(string),
+		BootDiskKmsKey:  config["boot_disk_kms_key"].(string),
+		Management:      management,
+		UpgradeSettings: upgradeSettings,
 	}
 
 	if v, ok := config["shielded_instance_config"]; ok && len(v.([]interface{})) > 0 {
@@ -5863,18 +6055,22 @@ func expandAutoProvisioningDefaults(configured interface{}, d *schema.ResourceDa
 	return npd
 }
 
-func expandUpgradeSettings(configured interface{}) *container.UpgradeSettings {
+func expandUpgradeSettings(configured interface{}, d *schema.ResourceData) *container.UpgradeSettings {
 	l, ok := configured.([]interface{})
 	if !ok || l == nil || len(l) == 0 || l[0] == nil {
 		return &container.UpgradeSettings{}
 	}
 	config := l[0].(map[string]interface{})
 
+	var blueGreenSettings *container.BlueGreenSettings
+	if shouldInclude(d, "cluster_autoscaling.0.auto_provisioning_defaults.0.upgrade_settings.0.blue_green_settings") {
+		blueGreenSettings = expandBlueGreenSettings(config["blue_green_settings"])
+	}
 	upgradeSettings := &container.UpgradeSettings{
 		MaxSurge:          int64(config["max_surge"].(int)),
 		MaxUnavailable:    int64(config["max_unavailable"].(int)),
 		Strategy:          config["strategy"].(string),
-		BlueGreenSettings: expandBlueGreenSettings(config["blue_green_settings"]),
+		BlueGreenSettings: blueGreenSettings,
 	}
 
 	return upgradeSettings
@@ -5940,6 +6136,10 @@ func expandUpgradeOptions(configured interface{}) *container.AutoUpgradeOptions 
 	}
 
 	return upgradeOptions
+}
+
+func shouldInclude(d *schema.ResourceData, key string) bool {
+	return d.IsNewResource() || d.HasChange(key)
 }
 
 func expandAuthenticatorGroupsConfig(configured interface{}) *container.AuthenticatorGroupsConfig {
@@ -6237,6 +6437,30 @@ func expandManCidrBlocks(configured interface{}) []*container.CidrBlock {
 	}
 	return result
 }
+
+{{- if ne $.TargetVersionName "ga" }}
+func expandManagedOpenTelemetryConfig(configured interface{}) *container.ManagedOpenTelemetryConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	config := l[0].(map[string]interface{})
+	return &container.ManagedOpenTelemetryConfig{
+		Scope: config["scope"].(string),
+	}
+}
+
+func flattenManagedOpenTelemetryConfig(c *container.ManagedOpenTelemetryConfig) []map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"scope": c.Scope,
+		},
+	}
+}
+{{- end }}
 
 func expandNetworkPolicy(configured interface{}) *container.NetworkPolicy {
 	result := &container.NetworkPolicy{}
@@ -6542,6 +6766,39 @@ func expandSecretManagerConfig(configured interface{}) *container.SecretManagerC
 	return sc
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
+func expandSecretSyncConfig(configured interface{}) *container.SecretSyncConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+
+	config := l[0].(map[string]interface{})
+	sc := &container.SecretSyncConfig{
+		Enabled:         config["enabled"].(bool),
+		ForceSendFields: []string{"Enabled"},
+	}
+	if autoRotation, ok := config["rotation_config"]; ok {
+		if autoRotationList, ok := autoRotation.([]interface{}); ok {
+			if len(autoRotationList) > 0 {
+				autoRotationConfig := autoRotationList[0].(map[string]interface{})
+				if rotationInterval, ok := autoRotationConfig["rotation_interval"].(string); ok && rotationInterval != "" {
+					sc.RotationConfig = &container.SyncRotationConfig{
+						Enabled:         autoRotationConfig["enabled"].(bool),
+						RotationInterval: rotationInterval,
+					}
+				} else {
+					sc.RotationConfig = &container.SyncRotationConfig{
+						Enabled:         autoRotationConfig["enabled"].(bool),
+					}
+				}
+		    }
+		}
+	}
+	return sc
+}
+{{- end }}
+
 func expandDefaultMaxPodsConstraint(v interface{}) *container.MaxPodsConstraint {
 	if v == nil {
 		return nil
@@ -6846,7 +7103,30 @@ func expandNodePoolAutoConfig(configured interface{}) *container.NodePoolAutoCon
 		npac.ResourceManagerTags = expandResourceManagerTags(v)
 	}
 
+	if v, ok := config["linux_node_config"]; ok {
+		npac.LinuxNodeConfig = expandNodePoolAutoConfigLinuxNodeConfig(v)
+	}
+
 	return npac
+}
+
+func expandNodePoolAutoConfigLinuxNodeConfig(configured interface{}) *container.LinuxNodeConfig {
+	if configured == nil {
+		return nil
+	}
+	ls := configured.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.LinuxNodeConfig{}
+	}
+	config := ls[0].(map[string]interface{})
+	linuxNodeConfig := &container.LinuxNodeConfig{}
+	if v, ok := config["node_kernel_module_loading"]; ok {
+		linuxNodeConfig.NodeKernelModuleLoading = expandNodeKernelModuleLoading(v)
+	}
+	return linuxNodeConfig
 }
 
 func expandNodePoolAutoConfigNetworkTags(configured interface{}) *container.NetworkTags {
@@ -7047,6 +7327,13 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 			},
 		}
 	}
+	if c.SliceControllerConfig != nil {
+		result["slice_controller_config"] = []map[string]interface{}{
+			{
+				"enabled": c.SliceControllerConfig.Enabled,
+			},
+		}
+	}
 	if c.RayOperatorConfig != nil {
 		rayConfig := c.RayOperatorConfig
 		result["ray_operator_config"] = []map[string]interface{}{
@@ -7096,6 +7383,14 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 		result["kalm_config"] = []map[string]interface{}{
 			{
 				"enabled": c.KalmConfig.Enabled,
+			},
+		}
+	}
+
+	if c.PodSnapshotConfig != nil {
+		result["pod_snapshot_config"] = []map[string]interface{}{
+			{
+				"enabled": c.PodSnapshotConfig.Enabled,
 			},
 		}
 	}
@@ -7308,6 +7603,7 @@ func flattenAdditionalIpRangesConfigs(c []*container.AdditionalIPRangesConfig) [
 		outRangeConfig := map[string]interface{} {
 			"subnetwork": rangeConfig.Subnetwork,
 			"pod_ipv4_range_names": rangeConfig.PodIpv4RangeNames,
+			"status": rangeConfig.Status,
 		}
 		outRanges = append(outRanges, outRangeConfig)
 	}
@@ -7386,7 +7682,6 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 		for wName, window := range mp.Window.MaintenanceExclusions {
 			exclusion := map[string]interface{}{
 				"start_time":  window.StartTime,
-				"end_time":    window.EndTime,
 				"exclusion_name": wName,
 			}
 			if window.MaintenanceExclusionOptions != nil {
@@ -7397,10 +7692,26 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 				if window.MaintenanceExclusionOptions.Scope != "" {
 					scope = window.MaintenanceExclusionOptions.Scope
 				}
-				exclusion["exclusion_options"] = []map[string]interface{}{
-					{
-						"scope": scope,
-					},
+				if window.MaintenanceExclusionOptions.EndTimeBehavior != "" {
+					exclusion["exclusion_options"] = []map[string]interface{}{
+						{
+							"scope": scope,
+							"end_time_behavior": window.MaintenanceExclusionOptions.EndTimeBehavior,
+						},
+					}
+				} else {
+					exclusion["exclusion_options"] = []map[string]interface{}{
+						{
+							"scope": scope,
+						},
+					}
+					if window.EndTime != "" {
+						exclusion["end_time"] = window.EndTime
+					}
+				} 
+			} else {
+				if window.EndTime != "" {
+					exclusion["end_time"] = window.EndTime
 				}
 			}
 			exclusions = append(exclusions, exclusion)
@@ -7470,23 +7781,25 @@ func flattenClusterAutoscaling(a *container.ClusterAutoscaling) []map[string]int
 		return []map[string]interface{}{r}
 	}
 
-	if a.EnableNodeAutoprovisioning {
-		resourceLimits := make([]interface{}, 0, len(a.ResourceLimits))
-		for _, rl := range a.ResourceLimits {
-			resourceLimits = append(resourceLimits, map[string]interface{}{
-				"resource_type": rl.ResourceType,
-				"minimum":       rl.Minimum,
-				"maximum":       rl.Maximum,
-			})
+	r["enabled"] = a.EnableNodeAutoprovisioning
+	resourceLimits := make([]interface{}, 0, len(a.ResourceLimits))
+	for _, rl := range a.ResourceLimits {
+		if rl == nil {
+			continue
 		}
-		r["resource_limits"] = resourceLimits
-		r["enabled"] = true
-		r["auto_provisioning_defaults"] = flattenAutoProvisioningDefaults(a.AutoprovisioningNodePoolDefaults)
-		r["auto_provisioning_locations"] = a.AutoprovisioningLocations
-	} else {
-		r["enabled"] = false
+		resourceLimits = append(resourceLimits, map[string]interface{}{
+			"resource_type": rl.ResourceType,
+			"minimum":       rl.Minimum,
+			"maximum":       rl.Maximum,
+		})
 	}
+	r["resource_limits"] = resourceLimits
 	r["autoscaling_profile"] = a.AutoscalingProfile
+	if a.AutoprovisioningNodePoolDefaults != nil {
+		r["auto_provisioning_defaults"] = flattenAutoProvisioningDefaults(a.AutoprovisioningNodePoolDefaults)
+	}
+	r["auto_provisioning_locations"] = a.AutoprovisioningLocations
+
 	if a.DefaultComputeClassConfig != nil {
 	  r["default_compute_class_enabled"] = a.DefaultComputeClassConfig.Enabled
 	}
@@ -7645,6 +7958,35 @@ func flattenSecretManagerConfig(c *container.SecretManagerConfig) []map[string]i
 	result["rotation_config"] = rotationList
 	return []map[string]interface{}{result}
 }
+
+{{ if ne $.TargetVersionName `ga` -}}
+func flattenSecretSyncConfig(c *container.SecretSyncConfig) []map[string]interface{} {
+	if c == nil {
+		return []map[string]interface{}{
+			{
+				"enabled": false,
+			},
+		}
+	}
+
+	result := make(map[string]interface{})
+
+	result["enabled"] = c.Enabled
+
+	rotationList := []map[string]interface{}{}
+	if c.RotationConfig != nil {
+		rotationConfigMap := map[string]interface{}{
+			"enabled": c.RotationConfig.Enabled,
+		}
+		if c.RotationConfig.RotationInterval != "" {
+			rotationConfigMap["rotation_interval"] = c.RotationConfig.RotationInterval
+		}
+		rotationList = append(rotationList, rotationConfigMap)
+	}
+	result["rotation_config"] = rotationList
+	return []map[string]interface{}{result}
+}
+{{- end }}
 
 
 func flattenResourceUsageExportConfig(c *container.ResourceUsageExportConfig) []map[string]interface{} {
@@ -7898,9 +8240,13 @@ func flattenNodePoolAutoConfig(c *container.NodePoolAutoConfig) []map[string]int
 		result["resource_manager_tags"] = flattenResourceManagerTags(c.ResourceManagerTags)
 	}
 	if c.LinuxNodeConfig != nil {
-		result["linux_node_config"] = []map[string]interface{}{
-			{"cgroup_mode": c.LinuxNodeConfig.CgroupMode},
+		linuxNodeConfig := map[string]interface{}{
+			"cgroup_mode": c.LinuxNodeConfig.CgroupMode,
 		}
+		if c.LinuxNodeConfig.NodeKernelModuleLoading != nil {
+			linuxNodeConfig["node_kernel_module_loading"] = flattenNodeKernelModuleLoading(c.LinuxNodeConfig.NodeKernelModuleLoading)
+		}
+		result["linux_node_config"] = []map[string]interface{}{linuxNodeConfig}
 	}
 
 	return []map[string]interface{}{result}
@@ -8151,6 +8497,22 @@ func SecretManagerCfgSuppress(k, old, new string, r *schema.ResourceData) bool {
 	return false
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
+func SecretSyncCfgSuppress(k, old, new string, r *schema.ResourceData) bool {
+	if k == "secret_sync_config.#" && old == "1" && new == "0" {
+		if v, ok := r.GetOk("secret_sync_config"); ok {
+			cfgList := v.([]interface{})
+			if len(cfgList) > 0 {
+				d := cfgList[0].(map[string]interface{})
+				// Suppress if old value was {enabled == false}
+				return !d["enabled"].(bool)
+			}
+		}
+	}
+	return false
+}
+{{- end }}
+
 func containerClusterNetworkPolicyDiffSuppress(k, old, new string, r *schema.ResourceData) bool {
 	// if network_policy configuration is empty, we store it as populated and enabled=false, and
 	// provider=PROVIDER_UNSPECIFIED, in the case that it was previously stored with this state,
@@ -8263,3 +8625,154 @@ func containerClusterNodeVersionCustomizeDiffFunc(diff tpgresource.TerraformReso
 
 	return nil
 }
+
+{{ if ne $.TargetVersionName `ga` }}
+func clusterAcceleratorNetworkProfileCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta any) error {
+	// 1. SKIP ON CREATE
+	if diff.Id() == "" {
+		return nil
+	}
+
+	// 2. PREPARE TO UPDATE THE FULL LIST
+	oldNodePools := diff.Get("node_pool").([]interface{})
+	newNodePools := make([]interface{}, len(oldNodePools))
+	listChanged := false
+
+	// We need Raw Config to check what the user actually wrote
+	rawConfig := diff.GetRawConfig()
+	rawNodePools := rawConfig.GetAttr("node_pool")
+
+	// 3. ITERATE OVER ALL POOLS IN STATE
+	for i, np := range oldNodePools {
+		// Deep copy the node pool map
+		npMap := np.(map[string]interface{})
+		newNpMap := make(map[string]interface{})
+		for k, v := range npMap {
+			newNpMap[k] = v
+		}
+
+		// Check if this specific node pool is actually defined in the Raw Config (Inline).
+		// If it is not in Raw Config, it is a Standalone resource (or API generated).
+		// We must not touch Standalone resources from the Cluster resource.
+		isInline := false
+		currentName := npMap["name"].(string)
+
+		// Iterate over Raw Config to find a match by name
+		if !rawNodePools.IsNull() && rawNodePools.Type().IsCollectionType() {
+			it := rawNodePools.ElementIterator()
+			for it.Next() {
+				_, val := it.Element()
+				rawNameVal := val.GetAttr("name")
+				if !rawNameVal.IsNull() && rawNameVal.AsString() == currentName {
+					isInline = true
+					break
+				}
+			}
+		}
+
+		// If this is NOT an inline pool, copy it as-is and skip logic.
+		if !isInline {
+			newNodePools[i] = newNpMap
+			continue
+		}
+
+		// A. DETECT USER CONFIG (Raw Config Check for this specific pool)
+		userHasAdditionalConfigs := false
+		
+		// Re-find the specific raw block for logic checking
+		if !rawNodePools.IsNull() {
+			it := rawNodePools.ElementIterator()
+			for it.Next() {
+				_, val := it.Element()
+				rawNameVal := val.GetAttr("name")
+				if !rawNameVal.IsNull() && rawNameVal.AsString() == currentName {
+					// We found the matching raw block, now check its network config
+					rawNc := val.GetAttr("network_config")
+					if !rawNc.IsNull() && rawNc.Type().IsCollectionType() {
+						ncIt := rawNc.ElementIterator()
+						for ncIt.Next() {
+							_, ncVal := ncIt.Element()
+							userConfig := ncVal.GetAttr("additional_node_network_configs")
+							if !userConfig.IsNull() && userConfig.LengthInt() > 0 {
+								userHasAdditionalConfigs = true
+							}
+						}
+					}
+					break
+				}
+			}
+		}
+
+		// B. CHECK TRANSITION LOGIC
+		shouldClear := false
+		basePath := fmt.Sprintf("node_pool.%d", i)
+		networkConfigPath := basePath + ".network_config.0"
+		
+		oldProfile, newProfile := diff.GetChange(networkConfigPath + ".accelerator_network_profile")
+		
+		newProfileStr := ""
+		if newProfile != nil { newProfileStr = newProfile.(string) }
+		oldProfileStr := ""
+		if oldProfile != nil { oldProfileStr = oldProfile.(string) }
+
+		anpIsActive := newProfileStr != ""
+		anpIsChanging := oldProfileStr != newProfileStr
+
+		if !userHasAdditionalConfigs {
+			if anpIsActive && anpIsChanging {
+				shouldClear = true
+			}
+			if !anpIsActive {
+				shouldClear = true
+			}
+		}
+
+		// Check if additional configs currently exist to avoid no-op
+		currentCount := 0
+		if c, ok := diff.Get(networkConfigPath + ".additional_node_network_configs.#").(int); ok {
+			currentCount = c
+		}
+		if shouldClear && currentCount == 0 {
+			shouldClear = false
+		}
+
+		// C. APPLY FIX TO THE MAP
+		if shouldClear {
+			log.Printf("[DEBUG] Cluster ANP CustomizeDiff: Clearing additional configs for INLINE pool %s", currentName)
+			
+			var newConfigMap map[string]interface{}
+			
+			if ncList, ok := newNpMap["network_config"].([]interface{}); ok && len(ncList) > 0 {
+				if existingMap, ok := ncList[0].(map[string]interface{}); ok {
+					newConfigMap = make(map[string]interface{})
+					for k, v := range existingMap {
+						newConfigMap[k] = v
+					}
+				}
+			}
+			
+			if newConfigMap == nil {
+				newConfigMap = make(map[string]interface{})
+			}
+
+			newConfigMap["additional_node_network_configs"] = []interface{}{}
+			
+			if !anpIsActive {
+				newConfigMap["accelerator_network_profile"] = ""
+			}
+
+			newNpMap["network_config"] = []interface{}{newConfigMap}
+			listChanged = true
+		}
+
+		newNodePools[i] = newNpMap
+	}
+
+	// 4. WRITE THE FULL LIST BACK
+	if listChanged {
+		return diff.SetNew("node_pool", newNodePools)
+	}
+
+	return nil
+}
+{{- end }}

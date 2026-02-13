@@ -1,7 +1,7 @@
 ---
 subcategory: "Compute Engine"
 description: |-
-  Get information about a Google Compute Engine Reservation Block.
+  Get information about a Google Compute Engine Reservation Block. Currnelty only relevent for B200/A4 + reservetions
 ---
 
 # google_compute_reservation_block
@@ -37,9 +37,9 @@ The following arguments are supported:
 
 * `reservation` - (Required) The name of the parent reservation.
 
-* `zone` - (Required) The zone where the reservation block resides.
-
 - - -
+
+* `zone` - (Optional) The zone where the reservation block resides.
 
 * `project` - (Optional) The project in which the resource belongs. If it
     is not provided, the provider project is used.
@@ -61,6 +61,8 @@ In addition to the arguments listed above, the following computed attributes are
 * `self_link_with_id` - Server-defined URL for this resource with the resource id.
 
 * `block_count` - The number of resources that are allocated in this reservation block.
+
+* `sub_block_names` - A List of all block sub-block names in the parent block. 
 
 * `in_use_count` - The number of instances that are currently in use on this reservation block.
 

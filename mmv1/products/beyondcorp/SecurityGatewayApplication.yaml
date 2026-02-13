@@ -148,7 +148,7 @@ properties:
           description: Network to forward traffic to.
           properties:
             - name: name
-              type: string
+              type: String
               description: |-
                 Required. Network name is of the format:
                 `projects/{project}/global/networks/{network}`
@@ -180,13 +180,15 @@ properties:
               type: Array
               description: The configuration for the proxy.
               item_type:
-                type: string
+                type: String
             - name: contextualHeaders
               type: NestedObject
               description: Configuration for the contextual headers.
               properties:
                 - name: userInfo
                   type: NestedObject
+                  send_empty_value: true
+                  allow_empty_object: true
                   description: User info configuration.
                   properties:
                     - name: outputType
@@ -198,6 +200,8 @@ properties:
                         - 'NONE'
                 - name: groupInfo
                   type: NestedObject
+                  send_empty_value: true
+                  allow_empty_object: true
                   description: Group info configuration.
                   properties:
                     - name: outputType
@@ -209,6 +213,8 @@ properties:
                         - 'NONE'
                 - name: deviceInfo
                   type: NestedObject
+                  send_empty_value: true
+                  allow_empty_object: true
                   description: Device info configuration.
                   properties:
                     - name: outputType
