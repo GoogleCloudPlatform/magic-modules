@@ -107,7 +107,6 @@ properties:
   - name: 'policyProfile'
     type: Enum
     immutable: true
-    # TODO: confirm default behaviour
     description: |
       Defines the type of authorization being performed. `REQUEST_AUTHZ` applies to request authorization. CUSTOM
       authorization policies with Authz extensions will be allowed with ext_authz or ext_proc protocols. Extensions are
