@@ -10,7 +10,7 @@ resource "google_dataproc_metastore_service" "dpms_service" {
 }
 
 resource "google_dataproc_cluster" "dp_cluster" {
-  name   = "tf-test-dpms-tbl-creator-%{random_suffix}"
+  name   = "tf-test-dpms-tbl-creator%{random_suffix}"
   region = google_dataproc_metastore_service.dpms_service.location
 
   cluster_config {
