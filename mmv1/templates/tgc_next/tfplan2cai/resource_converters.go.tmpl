@@ -32,6 +32,7 @@ import (
 	{{- range $object := $.ResourcesForVersion }}
 	  "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/{{ $object.ServiceName }}"
 	{{- end }}
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/container"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/resourcemanager"
 )
 
@@ -39,6 +40,7 @@ var ConverterMap = map[string]cai.Tfplan2caiConverter{
 	// ####### START handwritten resources ###########
 	"google_project":          resourcemanager.ProjectTfplan2caiConverter(),
 	"google_compute_instance": compute.ComputeInstanceTfplan2caiConverter(),
+	"google_container_cluster": container.ContainerClusterTfplan2CaiConverter(),
 	// ####### END handwritten resources ###########
 
 	{{- range $object := $.ResourcesForVersion }}
