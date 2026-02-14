@@ -131,6 +131,27 @@ properties:
         enum_values:
           - 'SEARCH_TIER_STANDARD'
           - 'SEARCH_TIER_ENTERPRISE'
+      - name: 'requiredSubscriptionTier'
+        type: Enum
+        description: |
+          Optional. The required subscription tier of this engine.
+          They cannot be modified after engine creation. If the required subscription tier is search, user with higher license tier like assist can still access the standalone app associated with this engine.
+        immutable: true
+        required: false
+        enum_values:
+          - 'SUBSCRIPTION_TIER_UNSPECIFIED'
+          - 'SUBSCRIPTION_TIER_SEARCH'
+          - 'SUBSCRIPTION_TIER_SEARCH_AND_ASSISTANT'
+          - 'SUBSCRIPTION_TIER_NOTEBOOK_LM'
+          - 'SUBSCRIPTION_TIER_FRONTLINE_WORKER'
+          - 'SUBSCRIPTION_TIER_AGENTSPACE_STARTER'
+          - 'SUBSCRIPTION_TIER_AGENTSPACE_BUSINESS'
+          - 'SUBSCRIPTION_TIER_ENTERPRISE'
+          - 'SUBSCRIPTION_TIER_EDU'
+          - 'SUBSCRIPTION_TIER_EDU_PRO'
+          - 'SUBSCRIPTION_TIER_EDU_EMERGING'
+          - 'SUBSCRIPTION_TIER_EDU_PRO_EMERGING'
+          - 'SUBSCRIPTION_TIER_FRONTLINE_STARTER'
       - name: 'searchAddOns'
         type: Array
         description: |
