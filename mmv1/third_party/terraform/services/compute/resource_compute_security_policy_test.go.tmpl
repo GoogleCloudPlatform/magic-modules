@@ -34,6 +34,28 @@ func TestAccComputeSecurityPolicy_basic(t *testing.T) {
 	})
 }
 
+func TestAccComputeSecurityPolicy_cloudarmoredge(t *testing.T) {
+	t.Parallel()
+
+	spName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSecurityPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeSecurityPolicy_basic(spName, "CLOUD_ARMOR_EDGE"),
+			},
+			{
+				ResourceName:      "google_compute_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccComputeSecurityPolicy_basicUpdate(t *testing.T) {
 	t.Parallel()
 
