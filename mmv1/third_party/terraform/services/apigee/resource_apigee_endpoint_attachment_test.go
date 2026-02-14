@@ -168,7 +168,7 @@ resource "google_compute_subnetwork" "psc_ilb_producer_subnetwork" {
   region = "us-west2"
 
   network       = google_compute_network.psc_ilb_network.id
-  ip_cidr_range = "10.0.1.0/24"
+  ip_cidr_range = "10.0.0.0/16"
 
   project = google_project.project.project_id
 }
@@ -179,7 +179,7 @@ resource "google_compute_subnetwork" "psc_ilb_nat" {
 
   network       = google_compute_network.psc_ilb_network.id
   purpose       =  "PRIVATE_SERVICE_CONNECT"
-  ip_cidr_range = "10.0.1.0/24"
+  ip_cidr_range = "10.1.0.0/16"
 
   project = google_project.project.project_id
 }
