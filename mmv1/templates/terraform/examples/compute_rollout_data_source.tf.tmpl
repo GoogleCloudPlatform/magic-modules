@@ -1,0 +1,9 @@
+data "google_compute_rollout" "default" {
+  provider       = google-beta
+  name    = "my-rollout"
+  project = "{{index $.Vars "provider_project"}}"
+}
+
+output "rollout_state" {
+  value = data.google_compute_rollout.default.state
+}
