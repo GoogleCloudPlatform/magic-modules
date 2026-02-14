@@ -34,6 +34,14 @@ func TestAccNetworkServicesAgentGateway_networkServicesAgentGatewayUpdate(t *tes
 			},
 			{
 				Config: testAccNetworkServicesAgentGateway_networkServicesAgentGatewayFullExample(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(
+							"google_network_services_agent_gateway.default",
+							plancheck.ResourceActionUpdate,
+						),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_network_services_agent_gateway.default",
@@ -43,6 +51,14 @@ func TestAccNetworkServicesAgentGateway_networkServicesAgentGatewayUpdate(t *tes
 			},
 			{
 				Config: testAccNetworkServicesAgentGateway_networkServicesAgentGatewayUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(
+							"google_network_services_agent_gateway.default",
+							plancheck.ResourceActionUpdate,
+						),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_network_services_agent_gateway.default",
@@ -67,7 +83,7 @@ resource "google_network_services_agent_gateway" "default" {
 
   protocols = []
   google_managed {
-    governed_access_path = "CLIENT_TO_AGENT"
+    governed_access_path = "AGENT_TO_ANYWHERE"
   }
 
   registries = [

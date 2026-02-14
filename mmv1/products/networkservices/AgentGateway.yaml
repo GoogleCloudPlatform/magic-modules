@@ -63,14 +63,6 @@ examples:
       name: 'my-self-managed-agent-gateway'
     test_env_vars:
       project: 'PROJECT_NAME'
-  - name: 'network_services_agent_gateway_no_governed_path'
-    skip_docs: true  # temporary b/484137930
-    skip_test: true  # temporary b/484137930
-    primary_resource_id: 'default'
-    vars:
-      name: 'my-no-governed-path-agent-gateway'
-    test_env_vars:
-      project: 'PROJECT_NAME'
 parameters:
   - name: 'name'
     type: String
@@ -119,14 +111,19 @@ properties:
         - 'MCP'
     required: true
   - name: 'googleManaged'
+    immutable: true
+    exactly_one_of:
+      - google_managed
+      - self_managed
     type: NestedObject
     description: |
       Configuration for Google Managed deployment mode.
       Proxy is orchestrated and managed by GoogleCloud in a tenant project.
-    immutable: true
     properties:
       - name: 'governedAccessPath'
         type: Enum
+        immutable: true
+        required: true
         description: |
           Operating Mode of Agent Gateway.
         enum_values:
@@ -134,18 +131,24 @@ properties:
           - 'CLIENT_TO_AGENT'
   - name: 'selfManaged'
     type: NestedObject
+    immutable: true
+    exactly_one_of:
+      - google_managed
+      - self_managed
     description: |
       Configuration for Self Managed deployment mode.
       Attach to existing Application Load Balancers or Secure Web Proxies.
-    immutable: true
     properties:
       - name: 'resourceUri'
         type: String
+        immutable: true
         required: true
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
         description: |
           A supported Google Cloud networking proxy in the Project and Location.
   - name: 'registries'
     type: Array
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
     description: |
       A list of Agent registries containing the agents, MCP servers and tools governed by the Agent Gateway.
       Note: Currently limited to project-scoped registries Must be of format
@@ -167,6 +170,7 @@ properties:
           - name: 'networkAttachment'
             type: String
             required: true
+            diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
             description: |
               The URI of the Network Attachment resource.
   - name: 'agentGatewayCard'
