@@ -283,6 +283,19 @@ properties:
             send_empty_value: true
             description: |
               When true, the output Cloud Storage file will be serialized using the topic schema, if it exists.
+      - name: 'textConfig'
+        type: NestedObject
+        description: |
+          If set, message data will be written to Cloud Storage in text format.
+        send_empty_value: true
+        allow_empty_object: true
+        default_from_api: true
+        properties:
+          - name: 'state'
+            type: String
+            description: |
+              Output only. Placeholder to allow the empty text_config block.
+            output: true
       - name: 'serviceAccountEmail'
         type: String
         description: |
