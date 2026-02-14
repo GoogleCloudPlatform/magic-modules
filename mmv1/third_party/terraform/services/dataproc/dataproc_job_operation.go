@@ -12,11 +12,12 @@ import (
 )
 
 type DataprocJobOperationWaiter struct {
-	Service   *dataproc.Service
-	Region    string
-	ProjectId string
-	JobId     string
-	Status    string
+	Service           *dataproc.Service
+	Region            string
+	ProjectId         string
+	JobId             string
+	Status            string
+	WaitForCompletion bool
 }
 
 func (w *DataprocJobOperationWaiter) State() string {
@@ -66,15 +67,19 @@ func (w *DataprocJobOperationWaiter) PendingStates() []string {
 }
 
 func (w *DataprocJobOperationWaiter) TargetStates() []string {
+	if w.WaitForCompletion {
+		return []string{"CANCELLED", "DONE", "ATTEMPT_FAILURE", "ERROR"}
+	}
 	return []string{"CANCELLED", "DONE", "ATTEMPT_FAILURE", "ERROR", "RUNNING"}
 }
 
-func DataprocJobOperationWait(config *transport_tpg.Config, region, projectId, jobId, activity, userAgent string, timeout time.Duration) error {
+func DataprocJobOperationWait(config *transport_tpg.Config, region, projectId, jobId, activity, userAgent string, timeout time.Duration, waitForCompletion bool) error {
 	w := &DataprocJobOperationWaiter{
-		Service:   config.NewDataprocClient(userAgent),
-		Region:    region,
-		ProjectId: projectId,
-		JobId:     jobId,
+		Service:           config.NewDataprocClient(userAgent),
+		Region:            region,
+		ProjectId:         projectId,
+		JobId:             jobId,
+		WaitForCompletion: waitForCompletion,
 	}
 	return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }
