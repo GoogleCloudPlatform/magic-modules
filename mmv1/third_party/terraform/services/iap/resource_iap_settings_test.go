@@ -33,7 +33,7 @@ func TestAccIapSettings_update(t *testing.T) {
 				ResourceName:            "google_iap_settings.iap_settings",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"access_settings.0.workforce_identity_settings.0.oauth2.0.client_secret"},
+				ImportStateVerifyIgnore: []string{"access_settings.0.oauth_settings.0.client_secret", "access_settings.0.workforce_identity_settings.0.oauth2.0.client_secret"},
 			},
 			{
 				Config: testAccIapSettings_update(context),
@@ -42,7 +42,7 @@ func TestAccIapSettings_update(t *testing.T) {
 				ResourceName:            "google_iap_settings.iap_settings",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"access_settings.0.workforce_identity_settings.0.oauth2.0.client_secret"},
+				ImportStateVerifyIgnore: []string{"access_settings.0.oauth_settings.0.client_secret", "access_settings.0.workforce_identity_settings.0.oauth2.0.client_secret"},
 			},
 		},
 	})
@@ -90,7 +90,9 @@ resource "google_iap_settings" "iap_settings" {
       login_page_uri = "https://test.com/?apiKey=abc"
     }
     oauth_settings {
-      login_hint = "test"
+      login_hint    = "test"
+      client_id     = "test-client-id"
+      client_secret = "test-client-secret"
     }
     workforce_identity_settings {
       workforce_pools = ["wif-pool"]
