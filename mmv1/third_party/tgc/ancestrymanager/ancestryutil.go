@@ -24,8 +24,8 @@ func assetParent(cai *resources.Asset, ancestors []string) (string, error) {
 				return fmt.Sprintf("//cloudresourcemanager.googleapis.com/%s", ancestors[1]), nil
 			}
 		}
-		if len(ancestors) == 1 && strings.HasPrefix(ancestors[0], "organizations/") {
-			// organizations/unknown
+		if len(ancestors) == 1 {
+			// organizations/unknown or folder itself
 			return fmt.Sprintf("//cloudresourcemanager.googleapis.com/%s", ancestors[0]), nil
 		}
 	case "cloudresourcemanager.googleapis.com/Organization":
