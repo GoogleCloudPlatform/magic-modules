@@ -1,9 +1,9 @@
 data "google_project" "project" {
-  provider = google-beta
+  provider = google
 }
 
 resource "google_compute_region_health_aggregation_policy" "{{$.PrimaryResourceId}}" {
-  provider    = google-beta
+  provider    = google
   name        = "{{index $.Vars "name"}}"
   description = "{{index $.Vars "description"}}"
   region      = "us-central1"
