@@ -122,7 +122,7 @@ properties:
       The static external IP address represented by this resource.
       The IP address must be inside the specified subnetwork,
       if any. Set by the API if undefined.
-    default_from_api: true
+    required: true
   - name: 'addressType'
     type: Enum
     description: |
