@@ -1,0 +1,86 @@
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	// This resource manages allowed values for existing attributes (both system and user-defined)
+	// It performs an update operation during "create"
+	attributeId := d.Get("attribute_id").(string)
+	location := d.Get("location").(string)
+	project := config.Project
+	
+	billingProject := ""
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	// First, check if the attribute exists
+	checkUrl := fmt.Sprintf("https://apihub.googleapis.com/v1/projects/%s/locations/%s/attributes/%s", project, location, attributeId)
+	checkRes, checkErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    checkUrl,
+		UserAgent: userAgent,
+		Timeout:   d.Timeout(schema.TimeoutRead),
+	})
+
+	if checkErr != nil {
+		if transport_tpg.IsGoogleApiErrorWithCode(checkErr, 404) {
+			return fmt.Errorf("Attribute '%s' does not exist in location '%s'. The attribute must exist before its allowed values can be managed.", attributeId, location)
+		}
+		return fmt.Errorf("Error checking attribute: %v", checkErr)
+	}
+
+	// Check if it's an ENUM type (only ENUM types have allowed values)
+	dataType, _ := checkRes["dataType"].(string)
+	if dataType != "ENUM" && dataType != "STRING" && dataType != "INT64" && dataType != "BOOL" {
+		return fmt.Errorf("System attribute '%s' is of type '%s'. Only ENUM, STRING, INT64 and BOOL type attributes can have allowed values managed.", attributeId, dataType)
+	}
+
+	// Get the allowed values from the request
+	allowedValuesProp, err := expandApihubAttributeAllowedValuesAllowedValues(d.Get("allowed_values"), d, config)
+	if err != nil {
+		return err
+	}
+	
+	// Convert allowedValuesProp to []interface{} if it's not nil
+	desiredAllowedValues := []interface{}{}
+	if allowedValuesProp != nil {
+		desiredAllowedValues = allowedValuesProp.([]interface{})
+	}
+	
+	// Build the update object with allowed values
+	obj := make(map[string]interface{})
+	
+	// Use shared function to consolidate allowed values
+	mergedValues := consolidateAllowedValues(d, checkRes, desiredAllowedValues)
+	obj["allowedValues"] = mergedValues
+	
+	// Perform the update
+	updateUrl := checkUrl
+	updateMask := "allowed_values"
+	updateUrl = fmt.Sprintf("%s?updateMask=%s", updateUrl, updateMask)
+	
+	log.Printf("[DEBUG] Managing system attribute values for '%s': %#v", attributeId, obj)
+	
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "PATCH",
+		Project:   billingProject,
+		RawURL:    updateUrl,
+		UserAgent: userAgent,
+		Body:      obj,
+		Timeout:   d.Timeout(schema.TimeoutCreate),
+	})
+	if err != nil {
+		return fmt.Errorf("Error managing system attribute values for '%s': %s", attributeId, err)
+	}
+	
+	// Set the ID for the resource
+	id := fmt.Sprintf("projects/%s/locations/%s/attributes/%s", project, location, attributeId)
+	d.SetId(id)
+	
+	log.Printf("[DEBUG] Finished managing system attribute values for '%s': %#v", attributeId, res)
+	
+	return resourceApihubAttributeAllowedValuesRead(d, meta)
