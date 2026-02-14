@@ -33,7 +33,7 @@ func TestAccStorageFolder_storageFolderBasic(t *testing.T) {
 				ResourceName:            "google_storage_folder.folder",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"bucket", "recursive", "force_destroy"},
+				ImportStateVerifyIgnore: []string{"bucket", "recursive", "force_destroy", "custom_headers"},
 			},
 		},
 	})
@@ -170,6 +170,10 @@ resource "google_storage_folder" "folder" {
   bucket        = google_storage_bucket.bucket.name
   name          = "folder/"
   force_destroy = %t
+  custom_headers = {
+    "X-goog-custom-audit-meta-user"= "user"
+    "X-goog-custom-audit-meta-object"= "object"
+  }
 }
 resource "google_storage_folder" "subfolder" {
   bucket        = google_storage_bucket.bucket.name
@@ -203,10 +207,18 @@ resource "google_storage_folder" "folder" {
   bucket        = google_storage_bucket.bucket.name
   name          = "folder/"
   force_destroy = %t
+  custom_headers = {
+    "X-goog-custom-audit-meta-user"= "user"
+    "X-goog-custom-audit-meta-object"= "object"
+  }
 }
 resource "google_storage_folder" "subfolder" {
   bucket        = google_storage_bucket.bucket.name
   name          = "${google_storage_folder.folder.name}subfolder/"
+  custom_headers = {
+    "X-goog-custom-audit-meta-user"= "user"
+    "X-goog-custom-audit-meta-object"= "object"
+  }
 } 
 `, bucketName, forceDestroy)
 }
