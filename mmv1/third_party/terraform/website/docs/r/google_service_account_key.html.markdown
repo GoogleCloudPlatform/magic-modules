@@ -52,6 +52,57 @@ resource "google_service_account_key" "mykey" {
 }
 ```
 
+## Example Usage, uploading a user-managed key with write-only attribute
+
+This example shows how to upload a user-managed public key without storing sensitive data in Terraform state.
+This follows [GCP's recommended approach](https://cloud.google.com/iam/docs/best-practices-for-managing-service-account-keys)
+for high-security environments where you create your own key pair and only upload the public key to GCP.
+
+```hcl
+resource "google_service_account" "myaccount" {
+  account_id   = "myaccount"
+  display_name = "My Service Account"
+}
+
+resource "tls_private_key" "sa_key" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+resource "tls_self_signed_cert" "sa_cert" {
+  private_key_pem = tls_private_key.sa_key.private_key_pem
+
+  subject {
+    common_name = "myaccount"
+  }
+
+  validity_period_hours = 87600 # 10 years
+
+  allowed_uses = [
+    "digital_signature",
+  ]
+}
+
+resource "google_service_account_key" "mykey" {
+  service_account_id         = google_service_account.myaccount.name
+  public_key_data_wo         = base64encode(tls_self_signed_cert.sa_cert.cert_pem)
+  public_key_data_wo_version = 1 # Increment to rotate the key
+}
+
+# Store the private key securely in Secret Manager
+resource "google_secret_manager_secret" "sa_private_key" {
+  secret_id = "my-sa-private-key"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "sa_private_key" {
+  secret      = google_secret_manager_secret.sa_private_key.id
+  secret_data = tls_private_key.sa_key.private_key_pem
+}
+```
+
 ## Example Usage, save key in Kubernetes secret - DEPRECATED
 
 ```hcl
@@ -97,7 +148,11 @@ Valid values are listed at
 
 * `private_key_type` (Optional) The output format of the private key. TYPE_GOOGLE_CREDENTIALS_FILE is the default output format.
 
-* `public_key_data` (Optional) Public key data to create a service account key for given service account. The expected format for this field is a base64 encoded X509_PEM and it conflicts with `public_key_type` and `private_key_type`.
+* `public_key_data` (Optional) Public key data to create a service account key for given service account. The expected format for this field is a base64 encoded X509_PEM and it conflicts with `key_algorithm`, `private_key_type`, and `public_key_data_wo`.
+
+* `public_key_data_wo` (Optional) Write-only version of `public_key_data`. Public key data to create a service account key for given service account, without storing the value in Terraform state. The expected format for this field is a base64 encoded X509_PEM. Conflicts with `key_algorithm`, `private_key_type`, and `public_key_data`. Must be used with `public_key_data_wo_version`. Requires Terraform 1.11+.
+
+* `public_key_data_wo_version` (Optional) Version number for `public_key_data_wo`. Increment this value to trigger recreation of the service account key with the write-only public key data. Must be used with `public_key_data_wo`.
 
 * `keepers` (Optional) Arbitrary map of values that, when changed, will trigger a new key to be generated.
 
