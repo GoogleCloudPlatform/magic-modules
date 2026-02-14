@@ -651,6 +651,30 @@ func TestAccComputeInstance_IPv6(t *testing.T) {
 	})
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
+func TestAccComputeInstance_ipv6OnlyMacAddress(t *testing.T) {
+    t.Parallel()
+
+    instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+    networkName := fmt.Sprintf("tf-test-net-%s", acctest.RandString(t, 10))
+    subnetworkName := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{		
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+        Steps: []resource.TestStep{
+            {
+                Config: testAccComputeInstance_ipv6OnlyMacAddressConfig(instanceName, networkName, subnetworkName),
+                Check: resource.ComposeTestCheckFunc(
+                    resource.TestCheckResourceAttrSet("google_compute_instance.test", "network_interface.0.mac_address"),
+                ),
+            },
+        },
+    })
+}
+{{- end }}
+
 func TestAccComputeInstance_ipv6ExternalReservation(t *testing.T) {
 	t.Parallel()
 
@@ -2298,6 +2322,9 @@ func TestAccComputeInstance_subnet_xpn(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -5151,6 +5178,59 @@ func TestAccComputeInstance_NicStackTypeUpdate(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstance_IgmpQuery_v2(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	suffix := acctest.RandString(t, 10)
+	envRegion := envvar.GetTestRegionFromEnv()
+	context := map[string]interface{}{
+		"instance_name": fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+		"igmp_query": "IGMP_QUERY_V2",
+		"suffix": suffix,
+		"env_region": envRegion,
+	}
+	contextUpdate := map[string]interface{}{
+		"instance_name": instanceName,
+		"igmp_query": "IGMP_QUERY_DISABLED",
+		"suffix": suffix,
+		"env_region": envRegion,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_igmpQuery_v2(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.0.igmp_query", "IGMP_QUERY_V2"),
+				),
+			},
+			{
+				Config: testAccComputeInstance_igmpQuery_v2(contextUpdate),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.0.igmp_query", "IGMP_QUERY_DISABLED"),
+				),
+			},
+			{
+				Config: testAccComputeInstance_igmpQuery_v2(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.0.igmp_query", "IGMP_QUERY_V2"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccComputeInstance_NicStackType_IPV6(t *testing.T) {
 	t.Parallel()
 	context := map[string]interface{}{
@@ -5196,6 +5276,79 @@ func TestAccComputeInstance_guestOsFeatures(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccComputeInstance_dynamicNic(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"instance_name":                fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+		"region":                       "us-central1",
+		"zone":                         "us-central1-a",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_dynamicNic1(context),
+			},
+			computeInstanceImportStep(context["zone"].(string), context["instance_name"].(string), []string{"allow_stopping_for_update"}),
+		},
+	})
+}
+
+func testAccComputeInstance_dynamicNic1(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_network" "network1" {
+  name                    = "%{instance_name}-network1"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnetwork1" {
+  name    = "%{instance_name}-subnetwork1"
+  network = google_compute_network.network1.id
+  region  = "%{region}"
+
+  ip_cidr_range = "10.1.0.0/16"
+}
+
+resource "google_compute_network" "network2" {
+  name                    = "%{instance_name}-network2"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnetwork2" {
+  name    = "%{instance_name}-subnetwork2"
+  network = google_compute_network.network2.id
+  region  = "%{region}"
+
+  ip_cidr_range = "10.2.0.0/16"
+}
+
+resource "google_compute_instance" "foobar" {
+	name         = "%{instance_name}"
+	machine_type = "e2-medium"
+	zone         = "%{zone}"
+
+	boot_disk {
+		initialize_params {
+			image = "debian-cloud/debian-11"
+		}
+	}
+
+	network_interface { # nic0
+		subnetwork = google_compute_subnetwork.subnetwork1.id
+	}
+
+	network_interface { # nic0.2
+		subnetwork      = google_compute_subnetwork.subnetwork2.id
+        vlan            = 2
+	}
+}
+`, context)
 }
 
 func testAccCheckComputeInstanceDestroyProducer(t *testing.T) func(s *terraform.State) error {
@@ -6857,6 +7010,45 @@ resource "google_compute_instance" "foobar" {
 }
 `, instance, instance, ip, instance, record)
 }
+
+{{ if ne $.TargetVersionName `ga` -}}
+func testAccComputeInstance_ipv6OnlyMacAddressConfig(instanceName, networkName, subnetworkName string) string {
+    return fmt.Sprintf(`
+resource "google_compute_network" "ipv6_network" {
+  provider = google-beta
+  name                    = "%s"
+  auto_create_subnetworks = false
+  enable_ula_internal_ipv6 = true
+}
+
+resource "google_compute_subnetwork" "ipv6_subnetwork" {
+  provider = google-beta
+  name                    = "%s"
+  network                 = google_compute_network.ipv6_network.self_link
+  stack_type              = "IPV6_ONLY"
+  ipv6_access_type        = "INTERNAL"
+}
+
+resource "google_compute_instance" "test" {
+  provider = google-beta
+  name         = "%s"
+  machine_type = "e2-micro"
+  zone         = "us-central1-c"
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.ipv6_subnetwork.self_link
+    stack_type = "IPV6_ONLY"
+  }
+}
+`, networkName, subnetworkName, instanceName)
+}
+{{- end }}
 
 func testAccComputeInstance_internalIpv6(ip, instance string) string {
 	return fmt.Sprintf(`
@@ -8816,6 +9008,11 @@ resource "google_project_service" "service_project" {
   service = "compute.googleapis.com"
 }
 
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_project_service.host_project, google_project_service.service_project]
+}
+
 resource "google_compute_shared_vpc_service_project" "service_project" {
   host_project    = google_compute_shared_vpc_host_project.host_project.project
   service_project = google_project_service.service_project.project
@@ -8826,6 +9023,7 @@ resource "google_compute_network" "inst-test-network" {
   project = google_compute_shared_vpc_host_project.host_project.project
 
   auto_create_subnetworks = false
+  depends_on = [time_sleep.wait_120_seconds]
 }
 
 resource "google_compute_subnetwork" "inst-test-subnetwork" {
@@ -12617,6 +12815,45 @@ resource "google_compute_instance" "foobar" {
 
 	network_interface {
 		network = "default"
+	}
+}
+`, context)
+}
+
+func testAccComputeInstance_igmpQuery_v2(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+	family  = "debian-11"
+	project = "debian-cloud"
+}
+
+resource "google_compute_network" "inst-test-network" {
+	name = "tf-test-network-%{suffix}"
+	auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "inst-test-subnetwork" {
+	name          = "tf-test-compute-subnet-%{suffix}"
+	region        = "%{env_region}"
+	network       = google_compute_network.inst-test-network.id
+        ip_cidr_range    = "10.0.0.0/22"
+}
+
+resource "google_compute_instance" "foobar" {
+	name         = "%{instance_name}"
+	machine_type = "e2-medium"
+	zone         = "%{env_region}-a"
+
+	boot_disk {
+		initialize_params {
+			image = data.google_compute_image.my_image.self_link
+		}
+	}
+
+	network_interface {
+		network = google_compute_network.inst-test-network.id
+		subnetwork = google_compute_subnetwork.inst-test-subnetwork.id
+		igmp_query = "%{igmp_query}"
 	}
 }
 `, context)

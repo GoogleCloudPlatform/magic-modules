@@ -104,7 +104,6 @@ properties:
     required: true
     key_name: 'field_id'
     value_type:
-      name: field
       type: NestedObject
       properties:
         - name: 'name'

@@ -1,0 +1,125 @@
+# Use this network for netapp volume
+data "google_compute_network" "np_network" {
+  name = "netapp_nw"
+}
+
+
+resource "google_vmwareengine_network" "cluster-nw" {
+  name        = "{{index $.Vars "network_id"}}"
+  type        = "STANDARD"
+  location    = "global"
+  description = "PC network description."
+}
+
+# Read network peering
+#### This peering is created by netapp volume
+data "google_compute_network_peering" "sn_peering" {
+  name       = "sn-netapp-prod"
+  network    = data.google_compute_network.np_network.id
+}
+
+# Create vmware engine network peering
+#### vmware network peering is required for netapp mount on cluster
+resource "google_vmwareengine_network_peering" "gcnv_network_peering" {
+  name = "tf-test-gcnv-network-peering"
+  description = "test description"
+  vmware_engine_network = google_vmwareengine_network.cluster-nw.id
+  peer_network = trimprefix(data.google_compute_network_peering.sn_peering.peer_network, "https://www.googleapis.com/compute/v1")
+  peer_network_type = "GOOGLE_CLOUD_NETAPP_VOLUMES"
+}
+
+resource "google_vmwareengine_private_cloud" "cluster-pc" {
+  location    = "{{index $.TestEnvVars "zone"}}"
+  name        = "{{index $.Vars "private_cloud_id"}}"
+  description = "Sample test PC."
+  network_config {
+    management_cidr       = "192.168.30.0/24"
+    vmware_engine_network = google_vmwareengine_network.cluster-nw.id
+  }
+  management_cluster {
+    cluster_id = "{{index $.Vars "management_cluster_id"}}"
+    node_type_configs {
+      node_type_id = "standard-72"
+      node_count   = 3
+      custom_core_count = 32
+    }
+  }
+}
+
+# Update service subnet
+####  Service subnet is used by nfs datastore mounts
+#### ip_cidr_range configured on subnet must also be allowed in in netapp volumes's 'export_policy'
+resource "google_vmwareengine_subnet" "cluster-pc-subnet" {
+  name = "service-1"
+  parent =  google_vmwareengine_private_cloud.cluster-pc.id
+  ip_cidr_range = "{{index $.Vars "svc_ip_cidr"}}"
+}
+
+resource "google_netapp_storage_pool" "default" {
+    name = "tf-test-test-pool"
+    location = "{{index $.TestEnvVars "region"}}"
+    service_level = "PREMIUM"
+    capacity_gib = "2048"
+    network = data.google_compute_network.np_network.id
+}
+
+# Create a netapp volume with delete protection enabled
+#### Use ip range of private cloud service subnet in the 'export_policy'
+resource "google_netapp_volume" "test_volume" {
+    location = "{{index $.TestEnvVars "region"}}"
+    name = "tf-test-test-volume"
+    capacity_gib = "100"
+    share_name = "tf-test-test-volume"
+    storage_pool = google_netapp_storage_pool.default.name
+    protocols = ["NFSV3"]
+    export_policy {
+        rules {
+            access_type           = "READ_WRITE"
+            allowed_clients       = "{{index $.Vars "svc_ip_cidr"}}"
+            has_root_access       = "true"
+            kerberos5_read_only   = false
+            kerberos5_read_write  = false
+            kerberos5i_read_only  = false
+            kerberos5i_read_write = false
+            kerberos5p_read_only  = false
+            kerberos5p_read_write = false
+            nfsv3                 = true
+            nfsv4                 = false
+        }
+    }
+    restricted_actions = ["DELETE"]
+}
+
+resource "google_vmwareengine_datastore" "test_fs_datastore" {
+  name        = "{{index $.Vars "datastore_id"}}"
+  location    = "{{index $.TestEnvVars "region"}}"
+  description = "example google_file_service.netapp datastore."
+
+  nfs_datastore {
+    google_file_service {
+      netapp_volume = google_netapp_volume.test_volume.id
+    }
+  }
+}
+
+resource "google_vmwareengine_cluster" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "name"}}"
+  parent   = google_vmwareengine_private_cloud.cluster-pc.id
+  node_type_configs {
+    node_type_id = "standard-72"
+    node_count   = 3
+  }
+  datastore_mount_config {
+    datastore = google_vmwareengine_datastore.test_fs_datastore.id
+    datastore_network {
+      subnet = google_vmwareengine_subnet.cluster-pc-subnet.id
+      connection_count = 4
+      mtu = 1500
+    }
+    nfs_version = "NFS_V3"
+    access_mode = "READ_WRITE"
+    ignore_colocation = true
+  }
+  depends_on = [google_vmwareengine_network_peering.gcnv_network_peering]
+}
+

@@ -1,0 +1,29 @@
+	if d.HasChange("properties") {
+		oldProp, newProp := d.GetChange("properties")
+		oldMap := oldProp.(map[string]interface{})
+		newMap := newProp.(map[string]interface{})
+
+		removals := []string{}
+		for k := range oldMap {
+			if icebergNamespaceIgnoredProperties[k] {
+				continue
+			}
+			if _, ok := newMap[k]; !ok {
+				removals = append(removals, k)
+			}
+		}
+
+		updates := map[string]string{}
+		for k, v := range newMap {
+			if icebergNamespaceIgnoredProperties[k] {
+				continue
+			}
+			updates[k] = v.(string)
+		}
+
+		return map[string]interface{}{
+			"removals": removals,
+			"updates":  updates,
+		}, nil
+	}
+	return nil, nil

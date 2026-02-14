@@ -27,7 +27,7 @@ update_verb: 'PATCH'
 update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
-include_in_tgc_next_DO_NOT_USE: true
+include_in_tgc_next: true
 timeouts:
   insert_minutes: 40
   update_minutes: 20
@@ -435,7 +435,6 @@ properties:
                 external IP address.
               immutable: true
               default_from_api: true
-              custom_tgc_flatten: 'templates/tgc_next/custom_flatten/workbench_instance_access_configs.go.tmpl'
               item_type:
                 type: NestedObject
                 properties:

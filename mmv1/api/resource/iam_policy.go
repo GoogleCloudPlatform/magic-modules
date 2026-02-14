@@ -14,9 +14,10 @@
 package resource
 
 import (
-	"log"
+	"fmt"
 	"slices"
 
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"gopkg.in/yaml.v3"
 )
 
@@ -26,7 +27,7 @@ import (
 // See: https://cloud.google.com/iam/docs/overview
 type IamPolicy struct {
 	// boolean of if this binding should be generated
-	Exclude bool
+	Exclude bool `yaml:"exclude,omitempty"`
 
 	// boolean of if this binding should be generated
 	ExcludeTgc bool `yaml:"exclude_tgc,omitempty"`
@@ -81,7 +82,10 @@ type IamPolicy struct {
 
 	// Resource name may need a custom diff suppress function. Default is to use
 	// CompareSelfLinkOrResourceName
-	CustomDiffSuppress *string `yaml:"custom_diff_suppress"`
+	CustomDiffSuppress *string `yaml:"custom_diff_suppress,omitempty"`
+
+	// ImportStateIDFuncs may use a custom template if default funcs don't work.
+	CustomImportStateIDFuncs string `yaml:"custom_import_state_id_funcs"`
 
 	// Some resources (IAP) use fields named differently from the parent resource.
 	// We need to use the parent's attributes to create an IAM policy, but they may not be
@@ -89,6 +93,8 @@ type IamPolicy struct {
 	// This allows us to specify a file (relative to MM root) containing a partial terraform
 	// config with the test/example attributes of the IAM resource.
 	ExampleConfigBody string `yaml:"example_config_body,omitempty"`
+
+	SampleConfigBody string `yaml:"sample_config_body,omitempty"`
 
 	// How the API supports IAM conditions
 	IamConditionsRequestType string `yaml:"iam_conditions_request_type,omitempty"`
@@ -121,42 +127,70 @@ type IamPolicy struct {
 	DeprecationMessage string `yaml:"deprecation_message,omitempty"`
 }
 
-func (p *IamPolicy) UnmarshalYAML(value *yaml.Node) error {
-	p.MethodNameSeparator = "/"
-	p.FetchIamPolicyVerb = "GET"
-	p.FetchIamPolicyMethod = "getIamPolicy"
-	p.SetIamPolicyVerb = "POST"
-	p.SetIamPolicyMethod = "setIamPolicy"
-	p.WrappedPolicyObj = true
-	p.AllowedIamRole = "roles/viewer"
-	p.ParentResourceAttribute = "id"
-	p.ExampleConfigBody = "templates/terraform/iam/iam_attributes.go.tmpl"
-	p.SubstituteZoneValue = true
+// newIamPolicyWithDefaults returns an IamPolicy object with default values set.
+func newIamPolicyWithDefaults() IamPolicy {
+	return IamPolicy{
+		MethodNameSeparator:     "/",
+		FetchIamPolicyVerb:      "GET",
+		FetchIamPolicyMethod:    "getIamPolicy",
+		SetIamPolicyVerb:        "POST",
+		SetIamPolicyMethod:      "setIamPolicy",
+		WrappedPolicyObj:        true,
+		AllowedIamRole:          "roles/viewer",
+		ParentResourceAttribute: "id",
+		SubstituteZoneValue:     true,
+	}
+}
 
+// UnmarshalYAML implements a custom unmarshaler for the IamPolicy struct.
+// It sets default values and then decodes the YAML over them.
+func (p *IamPolicy) UnmarshalYAML(value *yaml.Node) error {
+	// Start with a struct containing all the default values.
+	*p = newIamPolicyWithDefaults()
+
+	// Use a type alias to prevent recursion when decoding.
 	type iamPolicyAlias IamPolicy
 	aliasObj := (*iamPolicyAlias)(p)
 
-	err := value.Decode(aliasObj)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	// Decode the provided YAML, which will overwrite any default values that are specified.
+	return value.Decode(aliasObj)
 }
 
-func (p *IamPolicy) Validate(rName string) {
+// MarshalYAML implements a custom marshaller for the IamPolicy struct.
+// It uses a generic helper to omit fields that are set to their default values.
+func (p *IamPolicy) MarshalYAML() (interface{}, error) {
+	// Use a type alias to prevent infinite recursion during marshaling.
+	type iamPolicyAlias IamPolicy
+
+	// Create a defaults object and then use the generic helper to create a
+	// clone with default values zeroed out for marshaling.
+	defaults := newIamPolicyWithDefaults()
+	clone, err := utils.OmitDefaultsForMarshaling(*p, defaults)
+	if err != nil {
+		return nil, err
+	}
+
+	// The helper returns an interface{} containing a pointer to the clone.
+	// We cast it to the alias type to ensure the marshaller uses the default
+	// behavior for the struct, but without this custom MarshalYAML method.
+	return (*iamPolicyAlias)(clone.(*IamPolicy)), nil
+}
+
+func (p *IamPolicy) Validate(rName string) (es []error) {
 	allowed := []string{"GET", "POST"}
 	if !slices.Contains(allowed, p.FetchIamPolicyVerb) {
-		log.Fatalf("Value on `fetch_iam_policy_verb` should be one of %#v in resource %s", allowed, rName)
+		es = append(es, fmt.Errorf("value on `fetch_iam_policy_verb` should be one of %#v in resource %s", allowed, rName))
 	}
 
 	allowed = []string{"POST", "PUT"}
 	if !slices.Contains(allowed, p.SetIamPolicyVerb) {
-		log.Fatalf("Value on `set_iam_policy_verb` should be one of %#v in resource %s", allowed, rName)
+		es = append(es, fmt.Errorf("value on `set_iam_policy_verb` should be one of %#v in resource %s", allowed, rName))
 	}
 
 	allowed = []string{"REQUEST_BODY", "QUERY_PARAM", "QUERY_PARAM_NESTED"}
 	if p.IamConditionsRequestType != "" && !slices.Contains(allowed, p.IamConditionsRequestType) {
-		log.Fatalf("Value on `iam_conditions_request_type` should be one of %#v in resource %s", allowed, rName)
+		es = append(es, fmt.Errorf("value on `iam_conditions_request_type` should be one of %#v in resource %s", allowed, rName))
 	}
+
+	return es
 }

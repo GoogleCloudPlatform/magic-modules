@@ -41,9 +41,14 @@ async:
     resource_inside_response: true
 custom_code:
   pre_create: 'templates/terraform/pre_create/filestore_instance.go.tmpl'
-include_in_tgc_next_DO_NOT_USE: true
+  post_create: 'templates/terraform/post_create/filestore_instance.go.tmpl'
+  post_update: 'templates/terraform/post_update/filestore_instance.go.tmpl'
+  constants: 'templates/terraform/constants/filestore_instance.go.tmpl'
+include_in_tgc_next: true
+tgc_tests:
+  - name: 'TestAccFilestoreInstance_directoryServices'
+    skip: 'Test data has mismatched steps'
 error_abort_predicates:
-
   - 'transport_tpg.Is429QuotaError'
 schema_version: 1
 state_upgraders: true
@@ -73,6 +78,15 @@ examples:
       instance_name: 'test-instance'
     # https://github.com/GoogleCloudPlatform/magic-modules/pull/5875#discussion_r844285335
     exclude_test: true
+virtual_fields:
+  - name: 'desired_replica_state'
+    type: Enum
+    enum_values:
+      - 'PAUSED'
+      - 'READY'
+    default_value: 'READY'
+    description: |
+     The desired_replica_state field controls the state of a replica. Terraform will attempt to make the actual state of the replica match the desired state.
 parameters:
   - name: 'zone'
     type: String
@@ -260,6 +274,7 @@ properties:
           # won't match the sent value as the returned value is an IP range
           # from the provided named range.
           custom_flatten: 'templates/terraform/custom_flatten/filestore_instance_networks_reserved_ip_range.go.tmpl'
+          tgc_ignore_terraform_custom_flatten: true
         - name: 'ipAddresses'
           type: Array
           description: |
@@ -439,24 +454,20 @@ properties:
               output: true
   - name: 'directoryServices'
     type: NestedObject
-    min_version: beta
     description: |
       Directory Services configuration.
       Should only be set if protocol is "NFS_V4_1".
-    immutable: true
     properties:
       - name: 'ldap'
         type: NestedObject
         description: |
           Configuration for LDAP servers.
-        immutable: true
         properties:
           - name: 'domain'
             type: String
             required: true
             description: |
               The LDAP domain name in the format of `my-domain.com`.
-            immutable: true
           - name: 'servers'
             required: true
             type: Array
@@ -467,7 +478,6 @@ properties:
               2. IP address, for example: `10.0.0.1`, `10.0.0.2`, `10.0.0.3`.
               All servers names must be in the same format: either all DNS names or all
               IP addresses.
-            immutable: true
             item_type:
               type: String
           - name: 'usersOu'
@@ -476,11 +486,9 @@ properties:
               The users Organizational Unit (OU) is optional. This parameter is a hint
               to allow faster lookup in the LDAP namespace. In case that this parameter
               is not provided, Filestore instance will query the whole LDAP namespace.
-            immutable: true
           - name: 'groupsOu'
             type: String
             description: |
               The groups Organizational Unit (OU) is optional. This parameter is a hint
               to allow faster lookup in the LDAP namespace. In case that this parameter
               is not provided, Filestore instance will query the whole LDAP namespace.
-            immutable: true

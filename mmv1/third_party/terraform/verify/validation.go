@@ -289,14 +289,6 @@ func ValidateBase64String(i interface{}, val string) ([]string, []error) {
 	return nil, nil
 }
 
-func ValidateBase64URLString(i interface{}, val string) ([]string, []error) {
-	_, err := base64.RawURLEncoding.DecodeString(i.(string))
-	if err != nil {
-		return nil, []error{fmt.Errorf("could not decode %q as a valid base64URL value.", val)}
-	}
-	return nil, nil
-}
-
 // StringNotInSlice returns a SchemaValidateFunc which tests if the provided value
 // is of type string and that it matches none of the element in the invalid slice.
 // if ignorecase is true, case is ignored.
@@ -357,6 +349,25 @@ func ValidateADDomainName() schema.SchemaValidateFunc {
 		}
 		return
 	}
+}
+
+// ValidateTagKeyAllowedValuesRegex ensures that TagKey's AllowedValuesRegex field has a valid regex.
+func ValidateTagKeyAllowedValuesRegex(v interface{}, k string) (ws []string, errors []error) {
+	val, ok := v.(string)
+	if !ok {
+		return nil, []error{fmt.Errorf("Expected type of %s to be string", k)}
+	}
+
+	if val == "" {
+		// Allow empty string for an optional field
+		return nil, nil
+	}
+
+	_, err := regexp.Compile(val)
+	if err != nil {
+		return nil, []error{fmt.Errorf("Invalid regular expression for %s: %s", k, err.Error())}
+	}
+	return nil, nil
 }
 
 func TestStringValidationCases(cases []StringValidationTestCase, validationFunc schema.SchemaValidateFunc) []error {
