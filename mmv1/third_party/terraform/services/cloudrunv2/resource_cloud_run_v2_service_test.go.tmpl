@@ -1910,8 +1910,6 @@ resource "google_cloud_run_v2_service" "default" {
 `, context)
 }
 
-
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccCloudRunV2Service_cloudrunv2ServiceIapUpdate(t *testing.T) {
 	t.Parallel()
 
