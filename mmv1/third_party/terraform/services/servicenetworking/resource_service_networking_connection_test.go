@@ -311,3 +311,88 @@ resource "google_service_networking_connection" "foobar" {
 }
 `, addressRangeName, addressRangeName, org_id, billing_account, networkName, addressRangeName, serviceName)
 }
+
+// MODIFIED BY FLOW AI: Fixed test to use default project instead of creating a new one
+func TestAccServiceNetworkingConnection_reorder(t *testing.T) {
+	t.Parallel()
+
+	// Shortened prefix to fit within 30 char limit for Project Name
+	// "tf-test-snc-" (12 chars) + 10 random = 22 chars
+	network := fmt.Sprintf("tf-test-snc-%s", acctest.RandString(t, 10))
+	range1 := fmt.Sprintf("tf-test-range1-%s", acctest.RandString(t, 10))
+	range2 := fmt.Sprintf("tf-test-range2-%s", acctest.RandString(t, 10))
+
+	service := "servicenetworking.googleapis.com"
+	// MODIFIED: Removed org_id and billing_account retrieval as they are not needed for default project
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testServiceNetworkingConnectionDestroy(t, service, network),
+		Steps: []resource.TestStep{
+			// Step 1: Create with Order [Range1, Range2]
+			{
+				// MODIFIED: Removed org_id and billing_account arguments
+				Config: testAccServiceNetworkingConnectionOrder(network, range1, range2, service, "forward"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_service_networking_connection.foobar", "reserved_peering_ranges.#", "2"),
+				),
+			},
+			{
+				ResourceName:      "google_service_networking_connection.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Step 2: Update with Order [Range2, Range1]
+			// We expect an Empty Plan. If the bug exists, this step fails with "Plan not empty".
+			{
+				// MODIFIED: Removed org_id and billing_account arguments
+				Config:   testAccServiceNetworkingConnectionOrder(network, range1, range2, service, "reverse"),
+				PlanOnly: true,
+			},
+		},
+	})
+}
+
+func testAccServiceNetworkingConnectionOrder(networkName, r1, r2, serviceName, order string) string {
+	ranges := fmt.Sprintf(`["%s", "%s"]`, r1, r2)
+	if order == "reverse" {
+		ranges = fmt.Sprintf(`["%s", "%s"]`, r2, r1)
+	}
+
+	return fmt.Sprintf(`
+# MODIFIED: Removed google_project and google_project_service resources.
+# The test now relies on the default provider project which already has APIs enabled.
+
+resource "google_compute_network" "servicenet" {
+  name       = "%s"
+  # MODIFIED: Removed project = google_project.project.project_id
+}
+
+resource "google_compute_global_address" "r1" {
+  name          = "%s"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  # MODIFIED: Removed project = ...
+  network       = google_compute_network.servicenet.self_link
+}
+
+resource "google_compute_global_address" "r2" {
+  name          = "%s"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  # MODIFIED: Removed project = ...
+  network       = google_compute_network.servicenet.self_link
+}
+
+resource "google_service_networking_connection" "foobar" {
+  network                 = google_compute_network.servicenet.self_link
+  service                 = "%s"
+  reserved_peering_ranges = %s
+  # MODIFIED: Removed depends_on for google_project_service
+  depends_on = [google_compute_global_address.r1, google_compute_global_address.r2]
+}
+`, networkName, r1, r2, serviceName, ranges)
+}
