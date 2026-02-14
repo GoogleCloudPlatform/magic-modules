@@ -57,6 +57,12 @@ func ResourceApigeeSharedFlow() *schema.Resource {
 				ForceNew:    true,
 				Description: `The ID of the shared flow.`,
 			},
+			"space": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: `Name of the space.`,
+			},
 			"org_id": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -145,6 +151,7 @@ func resourceApigeeSharedFlowCreate(d *schema.ResourceData, meta interface{}) er
 
 	log.Printf("[DEBUG] resourceApigeeSharedFlowCreate, name=			 	%s", d.Get("name").(string))
 	log.Printf("[DEBUG] resourceApigeeSharedFlowCreate, org_id=, 			%s", d.Get("org_id").(string))
+	log.Printf("[DEBUG] resourceApigeeSharedFlowCreate, space=, 			%s", d.Get("space").(string))
 	log.Printf("[DEBUG] resourceApigeeSharedFlowCreate, config_bundle=, 	%s", d.Get("config_bundle").(string))
 
 	config := meta.(*transport_tpg.Config)
@@ -166,7 +173,12 @@ func resourceApigeeSharedFlowCreate(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error, \"config_bundle\" must be specified")
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/sharedflows?name={{name}}&action=import")
+	var url string
+	if d.Get("space").(string) != "" {
+		url, err = tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/spaces/{{space}}/sharedflows?name={{name}}&action=import")
+	} else {
+		url, err = tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/sharedflows?name={{name}}&action=import")
+	}
 	if err != nil {
 		return err
 	}
@@ -186,7 +198,12 @@ func resourceApigeeSharedFlowCreate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	// Store the ID now
-	id, err := tpgresource.ReplaceVars(d, config, "organizations/{{org_id}}/sharedflows/{{name}}")
+	var id string
+	if d.Get("space").(string) != "" {
+		id, err = tpgresource.ReplaceVars(d, config, "organizations/{{org_id}}/spaces/{{space}}/sharedflows/{{name}}")
+	} else {
+		id, err = tpgresource.ReplaceVars(d, config, "organizations/{{org_id}}/sharedflows/{{name}}")
+	}
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -215,7 +232,12 @@ func resourceApigeeSharedFlowRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/sharedflows/{{name}}")
+	var url string
+	if d.Get("space").(string) != "" {
+		url, err = tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/spaces/{{space}}/sharedflows/{{name}}")
+	} else {
+		url, err = tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/sharedflows/{{name}}")
+	}
 	if err != nil {
 		return err
 	}
@@ -291,7 +313,12 @@ func resourceApigeeSharedFlowDelete(d *schema.ResourceData, meta interface{}) er
 
 	billingProject := ""
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/sharedflows/{{name}}")
+	var url string
+	if d.Get("space").(string) != "" {
+		url, err = tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/spaces/{{space}}/sharedflows/{{name}}")
+	} else {
+		url, err = tpgresource.ReplaceVars(d, config, "{{ApigeeBasePath}}organizations/{{org_id}}/sharedflows/{{name}}")
+	}
 	if err != nil {
 		return err
 	}
@@ -322,8 +349,13 @@ func resourceApigeeSharedFlowDelete(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceApigeeSharedFlowImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+
+	var id string
+	var err error
+
 	config := meta.(*transport_tpg.Config)
 	if err := tpgresource.ParseImportId([]string{
+		"^organizations/(?P<org_id>[^/]+)/spaces/(?P<space>[^/]+)/sharedflows/(?P<name>[^/]+)$",
 		"^organizations/(?P<org_id>[^/]+)/sharedflows/(?P<name>[^/]+)$",
 		"^(?P<org_id>[^/]+)/(?P<name>[^/]+)$",
 	}, d, config); err != nil {
@@ -331,7 +363,11 @@ func resourceApigeeSharedFlowImport(d *schema.ResourceData, meta interface{}) ([
 	}
 
 	// Replace import id for the resource id
-	id, err := tpgresource.ReplaceVars(d, config, "organizations/{{org_id}}/sharedflows/{{name}}")
+	if d.Get("space").(string) != "" {
+		id, err = tpgresource.ReplaceVars(d, config, "organizations/{{org_id}}/spaces/{{space}}/sharedflows/{{name}}")
+	} else {
+		id, err = tpgresource.ReplaceVars(d, config, "organizations/{{org_id}}/sharedflows/{{name}}")
+	}
 
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)

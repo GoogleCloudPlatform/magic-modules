@@ -20,13 +20,15 @@ references:
     "Creating an API product": "https://cloud.google.com/apigee/docs/api-platform/publish/what-api-product"
   api: "https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.apiproducts#ApiProduct"
 docs:
-base_url: "{{org_id}}/apiproducts"
-self_link: "{{org_id}}/apiproducts/{{name}}"
+base_url: "{{org_id}}/{{parent_path}}"
+self_link: "{{org_id}}/{{parent_path}}/{{name}}"
 import_format:
+  - "{{org_id}}/spaces/{{space}}/apiproducts/{{name}}"
   - "{{org_id}}/apiproducts/{{name}}"
   - "{{org_id}}/{{name}}"
 custom_code:
   custom_import: "templates/terraform/custom_import/apigee_api_product.go.tmpl"
+  encoder: "templates/terraform/encoders/apigee_api_product.go.tmpl"
 examples:
   - name: "apigee_api_product_basic"
     vars:
@@ -58,6 +60,18 @@ examples:
       product_name: "my-product"
     exclude_test: true
   - name: "apigee_api_product_with_attributes_test"
+    primary_resource_id: "apigee_api_product"
+    test_env_vars:
+      org_id: "ORG_ID"
+      billing_account: "BILLING_ACCT"
+    exclude_docs: true
+    external_providers: ["time"]
+  - name: "apigee_api_product_space"
+    vars:
+      instance_name: "my-instance"
+      product_name: "my-product"
+      space_display_name: "My Space"
+      space_name: "my-space"
     primary_resource_id: "apigee_api_product"
     test_env_vars:
       org_id: "ORG_ID"
@@ -422,3 +436,10 @@ properties:
     immutable: true
     description: |
       Optional. The resource ID of the parent Space. If not set, the parent resource will be the Organization.
+
+  - name: "parent_path"
+    type: String
+    description: |
+      Internal field to support Spaces.
+    url_param_only: true
+    output: true

@@ -1,0 +1,11 @@
+	// Calculate parent_path based on space
+	if space, ok := d.GetOk("space"); ok {
+		if err := d.Set("parent_path", fmt.Sprintf("spaces/%s/apiproducts", space.(string))); err != nil {
+			return nil, fmt.Errorf("Error setting parent_path: %s", err)
+		}
+	} else {
+		if err := d.Set("parent_path", "apiproducts"); err != nil {
+			return nil, fmt.Errorf("Error setting parent_path: %s", err)
+		}
+	}
+	return obj, nil
