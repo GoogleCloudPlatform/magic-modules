@@ -108,6 +108,12 @@ examples:
     primary_resource_id: 'feature'
     primary_resource_name: 'fmt.Sprint("rbacrolebindingactuation")'
     exclude_test: true
+  - name: 'gkehub_feature_workload_identity'
+    primary_resource_id: 'feature'
+    primary_resource_name: 'fmt.Sprint("workloadidentity")'
+    vars:
+      workload_identity_pool_id: 'example-pool'
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String
@@ -255,6 +261,14 @@ properties:
             description: 'The list of allowed custom roles (ClusterRoles). If a custom role is not part of this list, it cannot be used in a fleet scope RBACRoleBinding. If a custom role in this list is in use, it cannot be removed from the list until the scope RBACRolebindings using it are deleted.'
             item_type:
               type: String
+      - name: 'workloadidentity'
+        type: NestedObject
+        description: Workload Identity feature spec.
+        properties:
+          - name: 'scopeTenancyPool'
+            type: String
+            description: 'Pool to be used for Workload Identity. This pool in trust-domain mode is used with Fleet Tenancy, so that sameness can be enforced. ex: projects/example/locations/global/workloadidentitypools/custompool'
+            required: true
   - name: 'fleetDefaultMemberConfig'
     type: NestedObject
     description: Optional. Fleet Default Membership Configuration.
