@@ -122,6 +122,20 @@ resource "google_storage_bucket" "hns-enabled" {
   }
 }
 ```
+## Example Usage - Send Custom Headers
+
+```hcl
+resource "google_storage_bucket" "hns-enabled" {
+  name          = "hns-enabled-bucket"
+  location      = "US"
+  force_destroy = true
+
+  custom_headers = {
+    "X-goog-custom-audit-meta-job"= "test-job-id-here"
+    "X-goog-custom-audit-meta-user"= "user ID test 1"
+  }
+}
+```
 
 ## Example Usage - IP filter mode enabled
 
@@ -210,6 +224,8 @@ The following arguments are supported:
 * `soft_delete_policy` -  (Optional, Computed) The bucket's soft delete policy, which defines the period of time that soft-deleted objects will be retained, and cannot be permanently deleted. If the block is not provided, Server side value will be kept which means removal of block won't generate any terraform change. Structure is [documented below](#nested_soft_delete_policy).
 
 * `hierarchical_namespace` -  (Optional, ForceNew) The bucket's hierarchical namespace policy, which defines the bucket capability to handle folders in logical structure. Structure is [documented below](#nested_hierarchical_namespace). To use this configuration, `uniform_bucket_level_access` must be enabled on bucket.
+
+* `custom_headers` -  (Optional) Customer can send custom headers like audit headers and predefined headers accepted by google cloud storage.
 
 * `time_created` -  (Computed) The creation time of the bucket in RFC 3339 format.
 
