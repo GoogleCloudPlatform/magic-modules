@@ -192,6 +192,15 @@ properties:
     type: String
     description: |
       Name prefix for the reservations to be created at the time of delivery. The name prefix must comply with RFC1035. Maximum allowed length for name prefix is 20. Automatically created reservations name format will be -date-####.
+  - name: 'protectionTier'
+    type: Enum
+    description: |
+      Protection tier for the workload.
+    enum_values:
+      - 'STANDARD'
+      - 'CAPACITY_OPTIMIZED'
+    default_from_api: true
+    immutable: true
   - name: 'status'
     type: NestedObject
     description: |
@@ -428,6 +437,12 @@ properties:
     type: Boolean
     description: |
       Indicates whether the auto-created reservation can be consumed by VMs with affinity for "any" reservation. If the field is set, then only VMs that target the reservation by name can consume from the delivered reservation.
+  - name: 'enableEmergentMaintenance'
+    type: Boolean
+    description: |
+      Indicates if this group of VMs have emergent maintenance enabled.
+    immutable: true
+    ignore_read: true
   - name: 'reservationName'
     type: String
     description: |
