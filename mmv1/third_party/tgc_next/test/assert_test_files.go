@@ -27,6 +27,9 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+
+	tpg_provider "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/provider"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 var (
@@ -157,7 +160,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	}
 
 	if os.Getenv("WRITE_FILES") != "" {
-		assetFile := fmt.Sprintf("%s.json", testName)
+		assetFile := fmt.Sprintf("%s.json", strings.ReplaceAll(testName, "/", "_"))
 		writeJSONFile(assetFile, assets)
 	}
 
@@ -172,14 +175,14 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	}
 
 	if os.Getenv("WRITE_FILES") != "" {
-		exportTfFile := fmt.Sprintf("%s_export.tf", testName)
+		exportTfFile := fmt.Sprintf("%s_export.tf", strings.ReplaceAll(testName, "/", "_"))
 		err = os.WriteFile(exportTfFile, exportConfigData, 0644)
 		if err != nil {
 			return fmt.Errorf("error writing file %s", exportTfFile)
 		}
 	}
 
-	exportTfFilePath := fmt.Sprintf("%s/%s_export.tf", tfDir, testName)
+	exportTfFilePath := fmt.Sprintf("%s/%s_export.tf", tfDir, strings.ReplaceAll(testName, "/", "_"))
 	defer os.Remove(exportTfFilePath)
 	err = os.WriteFile(exportTfFilePath, exportConfigData, 0644)
 	if err != nil {
@@ -196,7 +199,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	}
 
 	if os.Getenv("WRITE_FILES") != "" {
-		writeJSONFile(fmt.Sprintf("%s_export_attrs", testName), exportResources)
+		writeJSONFile(fmt.Sprintf("%s_export_attrs", strings.ReplaceAll(testName, "/", "_")), exportResources)
 	}
 
 	ignoredFieldSet := make(map[string]any, 0)
@@ -205,7 +208,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	}
 
 	parsedExportConfig := exportResources[0].Attributes
-	missingKeys := compareHCLFields(testData.ParsedRawConfig, parsedExportConfig, ignoredFieldSet)
+	missingKeys := compareHCLFields(testData.ParsedRawConfig, parsedExportConfig, ignoredFieldSet, testData.ResourceType)
 
 	// Sometimes, the reason for missing fields could be CAI asset data issue.
 	if len(missingKeys) > 0 {
@@ -227,7 +230,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		return fmt.Errorf("error when converting the round-trip config: %#v", err)
 	}
 
-	rtTfFile := fmt.Sprintf("%s_roundtrip.tf", testName)
+	rtTfFile := fmt.Sprintf("%s_roundtrip.tf", strings.ReplaceAll(testName, "/", "_"))
 	roundtripTfFilePath := filepath.Join(tfDir, rtTfFile)
 	defer os.Remove(roundtripTfFilePath)
 	err = os.WriteFile(roundtripTfFilePath, roundtripConfigData, 0644)
@@ -242,8 +245,8 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	}
 
 	if diff := cmp.Diff(string(roundtripConfigData), string(exportConfigData)); diff != "" {
-		tfFileName := fmt.Sprintf("%s_roundtrip", testName)
-		jsonFileName := fmt.Sprintf("%s_reexport.json", testName)
+		tfFileName := fmt.Sprintf("%s_roundtrip", strings.ReplaceAll(testName, "/", "_"))
+		jsonFileName := fmt.Sprintf("%s_reexport.json", strings.ReplaceAll(testName, "/", "_"))
 
 		reexportAssets, err := tfplan2caiConvert(t, tfFileName, jsonFileName, tfDir, ancestryCache, defaultProject, logger)
 		if err != nil {
@@ -313,8 +316,9 @@ func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 }
 
 // Compares HCL and finds all of the keys in map1 that are not in map2
-func compareHCLFields(map1, map2, ignoredFields map[string]any) []string {
+func compareHCLFields(map1, map2, ignoredFields map[string]any, resourceType string) []string {
 	var missingKeys []string
+	provider := tpg_provider.Provider()
 	for key, val := range map1 {
 		if isIgnored(key, ignoredFields) {
 			continue
@@ -339,11 +343,113 @@ func compareHCLFields(map1, map2, ignoredFields map[string]any) []string {
 		}
 
 		if _, ok := map2[key]; !ok {
+			if checkDiffSuppressFunc(key, val, resourceType, provider) {
+				continue
+			}
 			missingKeys = append(missingKeys, key)
 		}
 	}
 	sort.Strings(missingKeys)
 	return missingKeys
+}
+
+func checkDiffSuppressFunc(key string, val any, resourceType string, provider *schema.Provider) bool {
+	res, ok := provider.ResourcesMap[resourceType]
+	if !ok {
+		return false
+	}
+
+	// Traverse the schema to find the field
+	parts := strings.Split(key, ".")
+	var currentSchema *schema.Schema
+	var currentResource *schema.Resource = res
+
+	for i, part := range parts {
+		// Check DiffSuppressFunc on the container schema (Map/List/Set) before diving into it
+		if currentSchema != nil && currentSchema.DiffSuppressFunc != nil {
+			if callDiffSuppress(currentSchema, key, val) {
+				return true
+			}
+		}
+
+		if currentSchema != nil {
+			// We are inside a schema (List/Set/Map)
+			if currentSchema.Type == schema.TypeMap {
+				// Any part is a key. Elem is Schema.
+				if elemSchema, ok := currentSchema.Elem.(*schema.Schema); ok {
+					currentSchema = elemSchema
+					continue
+				}
+				return false // Should not happen for valid TF schema
+			} else if currentSchema.Type == schema.TypeList || currentSchema.Type == schema.TypeSet {
+				if _, err := strconv.Atoi(part); err == nil {
+					if elemRes, ok := currentSchema.Elem.(*schema.Resource); ok {
+						currentResource = elemRes
+						currentSchema = nil
+						continue
+					} else if elemSchema, ok := currentSchema.Elem.(*schema.Schema); ok {
+						currentSchema = elemSchema
+						continue
+					}
+				} else {
+					// Handle implicit index 0 for single blocks which might be flattened without index
+					if elemRes, ok := currentSchema.Elem.(*schema.Resource); ok {
+						if s, ok := elemRes.Schema[part]; ok {
+							currentResource = elemRes
+							currentSchema = s
+							continue
+						}
+					}
+				}
+			}
+
+			return false // Invalid path traversal
+		}
+
+		// Lookup in currentResource
+		if currentResource == nil {
+			return false
+		}
+
+		s, ok := currentResource.Schema[part]
+		if !ok {
+			return false
+		}
+		currentSchema = s
+
+		// If this is the last part, we will check DiffSuppressFunc after the loop
+		_ = i
+	}
+
+	if currentSchema == nil {
+		return false
+	}
+
+	// Check DiffSuppressFunc on the leaf schema
+	if currentSchema.DiffSuppressFunc != nil {
+		if callDiffSuppress(currentSchema, key, val) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func callDiffSuppress(s *schema.Schema, key string, val any) bool {
+	// We populate basic ResourceData. Using nil might be risky if function uses it.
+	// But creating a full valid ResourceData is hard.
+	// We handle panic in case the function assumes 'd' is valid.
+	defer func() {
+		if r := recover(); r != nil {
+			// Ignore panic, return false
+		}
+	}()
+
+	valString := fmt.Sprintf("%v", val)
+	// 'valString' is the value from Config (new).
+	// 'old' is empty string because the field is missing in map2 (Export/State).
+	// The signature is func(k, old, new string, d *ResourceData) bool
+	return s.DiffSuppressFunc(key, "", valString, nil)
 }
 
 // Returns true if the given key should be ignored according to the given set of ignored fields.
@@ -380,8 +486,8 @@ func isIgnored(key string, ignoredFields map[string]any) bool {
 
 // Converts a tfplan to CAI asset, and then converts the CAI asset into HCL
 func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCache map[string]string, defaultProject string, logger *zap.Logger) ([]caiasset.Asset, []byte, error) {
-	fileName := fmt.Sprintf("%s_export", testName)
-	roundtripAssetFile := fmt.Sprintf("%s_roundtrip.json", testName)
+	fileName := fmt.Sprintf("%s_export", strings.ReplaceAll(testName, "/", "_"))
+	roundtripAssetFile := fmt.Sprintf("%s_roundtrip.json", strings.ReplaceAll(testName, "/", "_"))
 
 	roundtripAssets, err := tfplan2caiConvert(t, fileName, roundtripAssetFile, tfDir, ancestryCache, defaultProject, logger)
 	if err != nil {

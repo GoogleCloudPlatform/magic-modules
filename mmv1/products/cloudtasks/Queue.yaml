@@ -185,7 +185,6 @@ properties:
           If zero, then the task age is unlimited.
         default_from_api: true
         diff_suppress_func: 'suppressOmittedMaxDuration'
-        custom_tgc_flatten: 'templates/tgc_next/custom_flatten/cloudtasks_queue_max_retry_duration.go.tmpl'
       - name: 'minBackoff'
         type: String
         description: |
