@@ -135,7 +135,7 @@ var (
 )
 
 // This checks if the project provided in subnetwork's self_link matches
-// the project provided in subnetwork_project not to produce a confusing plan diff.
+// the project provided in subnetwork_project not to produce a confusing plan diff
 func validateSubnetworkProject(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	// separate func to allow unit testing
 	return ValidateSubnetworkProjectFunc(d)

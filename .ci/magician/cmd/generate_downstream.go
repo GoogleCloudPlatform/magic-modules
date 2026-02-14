@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"magician/exec"
 	"magician/github"
 	"magician/provider"
@@ -142,6 +143,7 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 		Path: mmCopyPath,
 	}
 
+	log.Printf("cloning repo %s\n", repo)
 	downstreamRepo, scratchRepo, commitMessage, err := cloneRepo(mmRepo, baseBranch, repo, version, command, ref, rnr, ctlr)
 	if err != nil {
 		return fmt.Errorf("error cloning repo: %w", err)
@@ -155,10 +157,12 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 		return fmt.Errorf("error setting config: %w", err)
 	}
 
+	log.Printf("building downstream %s\n", repo)
 	if err := runMake(downstreamRepo, command, rnr); err != nil {
 		return fmt.Errorf("error running make: %w", err)
 	}
 
+	log.Println("build complete")
 	var pullRequest *github.PullRequest
 	if command == "downstream" {
 		pullRequest, err = getPullRequest(baseBranch, ref, gh)
@@ -300,11 +304,6 @@ func runMake(downstreamRepo *source.Repo, command string, rnr ExecRunner) error 
 			return err
 		}
 	case "terraform":
-		// --- legacy -- can be cleaned up after go/mm-pull/13722 is submitted
-		if _, err := rnr.Run("make", []string{"clean-provider", "OUTPUT_PATH=" + downstreamRepo.Path}, nil); err != nil {
-			return err
-		}
-		// -------------------------------------------------------------------
 		if _, err := rnr.Run("make", []string{"provider", "OUTPUT_PATH=" + downstreamRepo.Path, fmt.Sprintf("VERSION=%s", downstreamRepo.Version)}, nil); err != nil {
 			return err
 		}

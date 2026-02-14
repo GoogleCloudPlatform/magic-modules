@@ -1,16 +1,49 @@
-FROM golang:1.25-trixie AS builder
+# STAGE 1: Builder
+FROM golang:1.25-bookworm AS builder
 
-# Set working directory
-WORKDIR /app
+ENV GOPATH=/go
+ENV GOCACHE=/go/cache
+RUN mkdir -p /go/pkg/mod /go/cache
 
-# Download go.mod and go.sum from your repository
-ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/tpgtools/go.mod" go.mod
-ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/tpgtools/go.sum" go.sum
+# Install minimal deps
+RUN apt-get update && apt-get install -y unzip && rm -rf /var/lib/apt/lists/*
 
-# Install the go dependencies
-RUN go mod download
+WORKDIR /app1
+
+# NOTE: This ADD command busts the cache whenever the repo updates.
+# There is no easy fix for this without changing how you supply the source code.
+ADD "https://github.com/GoogleCloudPlatform/magic-modules/archive/refs/heads/main.zip" source.zip
+RUN unzip -q source.zip && rm source.zip
+
+# Silence the build output to keep logs clean, unless debugging
+WORKDIR /app1/magic-modules-main/.ci/magician
+RUN go build -o /dev/null .
+
+# Consolidated dependencies download
+# We group these to reduce layers, though it's mostly aesthetic in a multi-stage build
+RUN cd /app1/magic-modules-main/mmv1 && go mod download -x && \
+    cd /app1/magic-modules-main/tpgtools && go mod download -x && \
+    cd /app1/magic-modules-main/mmv1/third_party/terraform && go mod download -x && \
+    cd /app1/magic-modules-main/mmv1/third_party/tgc_next && go mod download -x
+
+# Set up the Diff Processor directories
+RUN mkdir -p /app1/magic-modules-main/tools/diff-processor/new /app1/magic-modules-main/tools/diff-processor/old && \
+    cp /app1/magic-modules-main/mmv1/third_party/terraform/go.mod /app1/magic-modules-main/tools/diff-processor/new/go.mod && \
+    cp /app1/magic-modules-main/mmv1/third_party/terraform/go.sum /app1/magic-modules-main/tools/diff-processor/new/go.sum && \
+    cp /app1/magic-modules-main/mmv1/third_party/terraform/go.mod /app1/magic-modules-main/tools/diff-processor/old/go.mod && \
+    cp /app1/magic-modules-main/mmv1/third_party/terraform/go.sum /app1/magic-modules-main/tools/diff-processor/old/go.sum && \
+    cd /app1/magic-modules-main/tools/diff-processor/ && go mod download -x 
+
+# Stage 2: Creating the final image
+FROM golang:1.25-bookworm
+SHELL ["/bin/bash", "-c"]
+
+# Copy Go dependencies and Go build cache
+COPY --from=builder /go/pkg/mod /go/pkg/mod
+COPY --from=builder /go/cache /go/cache
 
 ENV GOPATH /go
+ENV GOCACHE=/go/cache
 ENV PATH /usr/local/go/bin:$PATH
 ENV PATH $GOPATH/bin:$PATH
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 1777 "$GOPATH"
@@ -30,5 +63,4 @@ RUN apt-get update && apt-get install -y --no-install-recommends git openssh-cli
 RUN git config --global user.name "Modular Magician"
 RUN git config --global user.email "magic-modules@google.com"
 
-RUN go install golang.org/x/tools/cmd/goimports@d088b475e3360caabc032aaee1dc66351d4e729a
 RUN go install github.com/github/hub@v2.11.2+incompatible
