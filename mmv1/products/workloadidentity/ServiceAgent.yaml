@@ -1,0 +1,95 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: ServiceAgent
+description: A Service Agent resource within the Workload Identity API.
+
+# Disables in-place updates. Any change to a configurable field
+# will force Terraform to destroy (remove from state) and recreate the resource.
+immutable: true
+
+# Prevents Terraform from calling the DELETE API on destroy.
+# The resource will be removed from Terraform state but not from GCP.
+exclude_delete: true
+
+base_url: projects/{{project}}/locations/{{location}}/serviceAgents
+self_link: projects/{{project}}/locations/{{location}}/serviceAgents/{{service_agent_id}}
+create_url: projects/{{project}}/locations/{{location}}/serviceAgents?serviceAgentId={{service_agent_id}}
+
+# Update verb/mask are no longer relevant due to immutable: true
+# update_verb: PATCH
+# update_mask: true
+
+# Import is still possible if needed, but not tested in this version
+import_format:
+  - projects/{{project}}/locations/{{location}}/serviceAgents/{{service_agent_id}}
+
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 20
+      # update_minutes and delete_minutes are not needed
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    # 'update' and 'delete' actions are omitted
+  result:
+    resource_inside_response: true
+autogen_status: U2VydmljZUFnZW50
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: The GCP location for the Service Agent. Currently only 'global' is supported.
+    immutable: true
+    url_param_only: true
+  - name: serviceAgentId
+    type: String
+    required: true
+    description: The unique identifier for the Service Agent.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: '[Output only] The timestamp when the Service Agent was created.'
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: User-defined labels to organize and categorize Service Agents.
+    # Note: Because the resource is immutable: true, labels can only be set at creation.
+  - name: name
+    type: String
+    description: '[Output only] The full resource name of the Service Agent.'
+    output: true
+  - name: updateTime
+    type: String
+    description: '[Output only] The timestamp when the Service Agent was last updated.'
+    output: true
+min_version: beta
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: "workload_identity_service_agent_basic"
+    primary_resource_id: "default"
+    version: beta
+    provider: google-beta
+    vars:
+      service_agent_id: "tf-test-agent-%{random_suffix}"
+      label_val: "tf-test"
+    test_env_vars:
+      project: "{{project}}"
+    # Since exclude_delete is true, Terraform won't call the delete API.
+    # This flag tells the test runner not to expect the resource to be gone after destroy.
+    check_dangling_resources: false
