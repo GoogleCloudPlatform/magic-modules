@@ -118,6 +118,7 @@ var (
 		"settings.0.insights_config.0.record_application_tags",
 		"settings.0.insights_config.0.record_client_address",
 		"settings.0.insights_config.0.query_plans_per_minute",
+		"settings.0.insights_config.0.enhanced_query_insights_enabled",
 	}
 
 	sqlServerAuditConfigurationKeys = []string{
@@ -819,6 +820,12 @@ API (for read pools, effective_availability_type may differ from availability_ty
 										ValidateFunc: validation.IntBetween(0, 200),
 										AtLeastOneOf: insightsConfigKeys,
 										Description:  `Number of query execution plans captured by Insights per minute for all queries combined. Between 0 and 20. Default to 5. For Enterprise Plus instances, from 0 to 200.`,
+									},
+									"enhanced_query_insights_enabled": {
+										Type:         schema.TypeBool,
+										Optional:     true,
+										AtLeastOneOf: insightsConfigKeys,
+										Description:  `True if Query Insights Enhanced feature is enabled. Only supported for Enterprise Plus instances.`,
 									},
 								},
 							},
@@ -2089,11 +2096,12 @@ func expandInsightsConfig(configured []interface{}) *sqladmin.InsightsConfig {
 
 	_insightsConfig := configured[0].(map[string]interface{})
 	return &sqladmin.InsightsConfig{
-		QueryInsightsEnabled:  _insightsConfig["query_insights_enabled"].(bool),
-		QueryStringLength:     int64(_insightsConfig["query_string_length"].(int)),
-		RecordApplicationTags: _insightsConfig["record_application_tags"].(bool),
-		RecordClientAddress:   _insightsConfig["record_client_address"].(bool),
-		QueryPlansPerMinute:   int64(_insightsConfig["query_plans_per_minute"].(int)),
+		QueryInsightsEnabled:         _insightsConfig["query_insights_enabled"].(bool),
+		QueryStringLength:            int64(_insightsConfig["query_string_length"].(int)),
+		RecordApplicationTags:        _insightsConfig["record_application_tags"].(bool),
+		RecordClientAddress:          _insightsConfig["record_client_address"].(bool),
+		QueryPlansPerMinute:          int64(_insightsConfig["query_plans_per_minute"].(int)),
+		EnhancedQueryInsightsEnabled: _insightsConfig["enhanced_query_insights_enabled"].(bool),
 	}
 }
 
@@ -3259,11 +3267,12 @@ func flattenServerCaCerts(caCerts []*sqladmin.SslCert) []map[string]interface{} 
 
 func flattenInsightsConfig(insightsConfig *sqladmin.InsightsConfig) interface{} {
 	data := map[string]interface{}{
-		"query_insights_enabled":  insightsConfig.QueryInsightsEnabled,
-		"query_string_length":     insightsConfig.QueryStringLength,
-		"record_application_tags": insightsConfig.RecordApplicationTags,
-		"record_client_address":   insightsConfig.RecordClientAddress,
-		"query_plans_per_minute":  insightsConfig.QueryPlansPerMinute,
+		"query_insights_enabled":           insightsConfig.QueryInsightsEnabled,
+		"query_string_length":              insightsConfig.QueryStringLength,
+		"record_application_tags":          insightsConfig.RecordApplicationTags,
+		"record_client_address":            insightsConfig.RecordClientAddress,
+		"query_plans_per_minute":           insightsConfig.QueryPlansPerMinute,
+		"enhanced_query_insights_enabled":  insightsConfig.EnhancedQueryInsightsEnabled,
 	}
 
 	return []map[string]interface{}{data}
