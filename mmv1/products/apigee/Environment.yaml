@@ -98,6 +98,7 @@ examples:
   - name: 'apigee_environment_client_ip_resolution_config_test'
     primary_resource_id: 'apigee_environment'
     primary_resource_name: 'fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]), fmt.Sprintf("tf-test%s", context["random_suffix"])'
+    min_version: 'beta'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
@@ -226,6 +227,7 @@ properties:
     type: NestedObject
     description: |
       The algorithm to resolve IP. This will affect Analytics, API Security, and other features that use the client ip. To remove a client ip resolution config, update the field to an empty value. Example: '{ "clientIpResolutionConfig" = {} }' For more information, see: https://cloud.google.com/apigee/docs/api-platform/system-administration/client-ip-resolution
+    required: false
     properties:
       - name: 'headerIndexAlgorithm'
         type: NestedObject
@@ -233,6 +235,7 @@ properties:
           Resolves the client ip based on a custom header.
         exactly_one_of:
           - client_ip_resolution_config.0.header_index_algorithm
+          - header_index_algorithm
         properties:
           - name: ipHeaderName
             type: String
