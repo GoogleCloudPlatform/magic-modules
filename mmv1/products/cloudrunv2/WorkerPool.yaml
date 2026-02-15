@@ -295,6 +295,7 @@ properties:
         type: Enum
         description: |
           The scaling mode for the worker pool. It defaults to MANUAL.
+        default_from_api: true
         enum_values:
           - 'AUTOMATIC'
           - 'MANUAL'
