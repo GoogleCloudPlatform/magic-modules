@@ -67,6 +67,56 @@ resource "google_netapp_backup_vault" "test_backup_vault" {
 `, context)
 }
 
+func TestAccNetappBackupVault_Kms(t *testing.T) {
+	location := "us-east4"
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"location":      location,
+		"kms_key_name":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", location, "tf-test-netapp-bv-key").CryptoKey.Name,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetappBackupVault_withKms(context),
+			},
+			{
+				ResourceName:            "google_netapp_backup_vault.test_backup_vault_kms",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccNetappBackupVault_withKms(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_netapp_kmsconfig" "test_kms_config" {
+  name            = "tf-test-kms-config-%{random_suffix}"
+  location        = "%{location}"
+  crypto_key_name = "%{kms_key_name}"
+  description     = "Test KMS config for Backup Vault"
+}
+
+resource "google_kms_crypto_key_iam_member" "kmsconfig_role" {
+  crypto_key_id = "%{kms_key_name}"
+  role          = "projects/ci-test-project-188019/roles/cmekNetAppVolumesRole"
+  member        = "serviceAccount:${google_netapp_kmsconfig.test_kms_config.service_account}"
+}
+
+resource "google_netapp_backup_vault" "test_backup_vault_kms" {
+  name        = "tf-test-bv-kms-%{random_suffix}"
+  location    = "%{location}"
+  kms_config  = google_netapp_kmsconfig.test_kms_config.id
+  description = "Vault with KMS"
+  depends_on = [google_kms_crypto_key_iam_member.kmsconfig_role]
+}
+	`, context)
+}
+
 func testAccCheckNetappBackupVaultDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {
