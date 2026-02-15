@@ -29,8 +29,9 @@ supports_indirect_user_project_override: true
 base_url: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs'
 self_link: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs/{{name}}'
 immutable: false
-create_url: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs?iceberg-catalog-id={{name}}'
 custom_code:
+  custom_create:
+    templates/terraform/custom_create/biglake_iceberg_catalog_create.go.tmpl
   custom_update:
     templates/terraform/custom_update/biglake_iceberg_catalog_update.go.tmpl
 iam_policy:
@@ -91,19 +92,21 @@ properties:
   - name: 'catalog_type'
     api_name: 'catalog-type'
     type: Enum
-    description: The catalog type of the IcebergCatalog. Currently only supports
-      the type for Google Cloud Storage Buckets.
+    description: The catalog type of the IcebergCatalog.
     required: true
     immutable: true
     output: false
     enum_values:
       - 'CATALOG_TYPE_GCS_BUCKET'
+      - 'CATALOG_TYPE_BIGLAKE'
   - name: 'default_location'
     api_name: 'default-location'
     type: String
-    description: Output only. The default storage location for the catalog, e.g.,
+    description: The default storage location for the catalog, e.g.,
       `gs://my-bucket`.
-    output: true
+      Output only when the catalog type is CATALOG_TYPE_GCS_BUCKET.
+      Required when the catalog type is CATALOG_TYPE_BIGLAKE.
+    required: false
   - name: 'storage_regions'
     api_name: 'storage-regions'
     type: Array
@@ -149,3 +152,14 @@ properties:
             - 'STATE_SECONDARY'
     description: Output only. The replicas for the catalog metadata.
     output: true
+  - name: 'additional_locations'
+    api_name: 'additional-locations'
+    type: Array
+    item_type:
+      type: String
+    description: Additional GCS locations (e.g., `gs://my-other-bucket/...`)
+      that are permitted for use by resources within this catalog. This field
+      can be used to specify either a GCS bucket or a path within it.
+    required: false
+    immutable: false
+    output: false
