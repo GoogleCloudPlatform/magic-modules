@@ -1,0 +1,8 @@
+resource "google_cloud_trace_sink" "default" {
+  provider = google-beta
+
+  name           = "{{index $.Vars "cloud_trace_sink_name"}}"
+  output_config  = {
+    destination = "bigquery.googleapis.com/projects/myProject/datasets/traces"
+  }
+}
