@@ -1,0 +1,25 @@
+resource "google_document_ai_schema_version" "{{$.PrimaryResourceId}}" {
+  display_name = "schema_version"
+  location     = "us"
+  labels = {
+    "label" = "key",
+    "foo" = "bar",
+  }
+  schema {
+    description     = "schema_description"
+    display_name    = "schema_description"
+    document_prompt = "document_prompt"
+    entity_types {
+      base_types   = ["document"]
+      display_name = "entity_display_name"
+      properties {
+        display_name    = "property_display_name"
+        method          = "EXTRACT"
+        name            = "name"
+        occurrence_type = "MULTIPLE_ONCE"
+        value_type      = "string"
+      }
+    }
+  }
+  schema_id = "{{index $.Vars "schema_id"}}"
+}
