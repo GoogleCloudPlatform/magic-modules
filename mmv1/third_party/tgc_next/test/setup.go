@@ -61,7 +61,7 @@ type Resource struct {
 
 const (
 	ymdFormat   = "2006-01-02"
-	maxAttempts = 5
+	maxAttempts = 3
 )
 
 var (
@@ -71,7 +71,7 @@ var (
 
 func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 	if !setupDone {
-		bucketName := "cai_assets_metadata"
+		bucketName := "cai_assets_metadata_test"
 		currentDate := time.Now()
 		ctx := context.Background()
 
