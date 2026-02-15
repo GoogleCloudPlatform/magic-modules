@@ -1,0 +1,30 @@
+resource "google_document_ai_processor_version" "{{$.PrimaryResourceId}}" {
+  display_name = "document_ai_processor_version_eu"
+  location = "eu"
+  document_schema {
+    description     = "schema_description"
+    display_name    = "schema_description"
+    document_prompt = "document_prompt"
+    enum_values {
+      values = ["possible_value_1", "possible_value_2", "possible_value_3"]
+    }
+    entity_types {
+      base_types   = ["document"]
+      display_name = "entity_display_name"
+      properties {
+        display_name    = "property_display_name"
+        method          = "EXTRACT"
+        name            = "name"
+        description = "description"
+        occurrence_type = "OPTIONAL_ONCE"
+        value_type      = "string"
+      }
+    }
+    metadata {
+      document_splitter = false
+      document_allow_multiple_labels = false
+      prefixed_naming_on_properties = false
+      skip_naming_validation = true
+    }
+  }
+}
