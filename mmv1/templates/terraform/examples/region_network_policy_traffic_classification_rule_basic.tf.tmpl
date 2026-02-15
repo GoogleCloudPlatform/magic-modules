@@ -1,0 +1,27 @@
+resource "google_compute_region_network_policy" "basic_regional_network_policy" {
+  name        = "{{index $.Vars "nw_policy"}}"
+  description = "Sample regional network firewall policy"
+  project     = "{{index $.TestEnvVars "project_name"}}"
+  region      = "{{index $.TestEnvVars "region"}}"
+}
+
+resource "google_compute_region_network_policy_traffic_classification_rule" "{{$.PrimaryResourceId}}" {
+  rule_name               = "test-rule"
+  description             = "This is a simple rule description"
+  disabled                = false
+  network_policy          = google_compute_region_network_policy.basic_regional_network_policy.name
+  priority                = 1000
+  region                  = "{{index $.TestEnvVars "region"}}"
+
+  action {
+    traffic_class = "TC1"
+		dscp_mode = "AUTO"
+  }
+  match {
+    src_ip_ranges            = ["10.100.0.1/32"]
+		dest_ip_ranges            = ["11.100.0.1/32"]
+    layer4_configs {
+      ip_protocol = "all"
+    }
+  }
+}
