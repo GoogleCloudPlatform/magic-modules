@@ -7400,6 +7400,15 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 }
 
 func flattenClusterNodePools(d *schema.ResourceData, config *transport_tpg.Config, c []*container.NodePool) ([]map[string]interface{}, error) {
+	// More robust check:
+	// This checks if the "node_pool" attribute is either not present OR if it's an empty list.
+	if v, ok := d.GetOk("node_pool"); !ok || len(v.([]interface{})) == 0 {
+		// Add this log line for debugging
+		log.Printf("[DEBUG] Skipping flattenClusterNodePools because no node_pools are configured in Terraform.")
+		return nil, nil
+	}
+
+	// Original logic
 	nodePools := make([]map[string]interface{}, 0, len(c))
 
 	for i, np := range c {
