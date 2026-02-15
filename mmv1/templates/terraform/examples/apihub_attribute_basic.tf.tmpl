@@ -1,0 +1,7 @@
+resource "google_apihub_attribute" "{{$.PrimaryResourceId}}" {
+  location     = "us-central1"
+  attribute_id = "{{index $.Vars "attribute_id"}}"
+  display_name = "Test Attribute"
+  scope        = "API"
+  data_type    = "STRING"
+}
