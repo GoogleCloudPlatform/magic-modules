@@ -9,6 +9,27 @@ description: |-
 Manages a job resource within a Dataproc cluster within GCE. For more information see
 [the official dataproc documentation](https://cloud.google.com/dataproc/).
 
+## Important Considerations for Dataproc Job APIs
+
+Dataproc jobs, as part of the Google Cloud Dataproc service, leverage internal
+or private APIs for their underlying execution and cluster interaction. These
+APIs are essential for the service's functionality but are **not intended for
+direct customer management or enablement via Terraform**.
+
+* **No Customer Action Required:** You do not need to explicitly enable or
+  attempt to import any internal Dataproc APIs (such as
+  `dataproc-control.googleapis.com`) when submitting jobs with Terraform. Their
+  necessary interactions are handled automatically by Google Cloud.
+
+* **Focus on Public APIs:** When configuring `google_dataproc_job` resources
+  with Terraform, your focus should remain on the publicly documented Dataproc
+  APIs and the configurations available within this resource.
+
+For a comprehensive explanation of how Terraform interacts with different types
+of Google Cloud APIs (public versus private), please refer to the [Understanding
+Google Cloud APIs and Terraform
+Guide](../guides/understanding-apis-and-terraform.md).
+
 !> **Note:** This resource does not support 'update' and changing any attributes will cause the resource to be recreated.
 
 ## Example usage

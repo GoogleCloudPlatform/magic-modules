@@ -22,6 +22,47 @@ To get more information about `google_project_service`, see:
 * Terraform guidance
     * [User Guide - google_project_service](/docs/providers/google/guides/google_project_service.html)
 
+## Understanding API Types and Usage
+
+This `google_project_service` resource is specifically designed to manage the
+**enabled state of publicly documented and accessible Google Cloud APIs** for
+your project. It serves to ensure that the services you intend to use are
+activated and available.
+
+**Important Considerations for API Services:**
+
+* **Public vs. Private APIs:** Google Cloud services often rely on internal,
+  **private APIs** for their operational backbone. These APIs are not exposed
+  for direct customer management via `google_project_service` and are not
+  intended for external interaction. Attempting to manage such private APIs with
+  this resource will result in errors.
+
+    * **Example:** The `dataproc-control.googleapis.com` API is an internal
+      Google Cloud API used by Dataproc for its internal operations. You **do
+      not** need to enable or manage this API with `google_project_service`; its
+      functionality is handled automatically by Google Cloud.
+
+* **Purpose of `google_project_service`:** This resource *enables* a service for
+  your project, making its functionalities available. This is a prerequisite for
+  creating resources that depend on that service.
+
+* **Enabling vs. Importing:** It's critical to distinguish between *enabling* an
+  API and *importing a resource*.
+
+    * **Enabling an API** (using `google_project_service`): Activates a Google
+      Cloud service for your project.
+
+    * **Importing a Resource** (using `terraform import` or `import` blocks):
+      Brings an *existing, deployed cloud resource* (e.g., a Compute Engine
+      instance, a Cloud Storage bucket) under Terraform's management. You
+      typically import *resources*, not APIs themselves. While you can import
+      the `google_project_service` resource to manage an already-enabled public
+      API, you cannot "import" the underlying API's internal functionality.
+
+For a comprehensive explanation of public and private Google Cloud APIs and
+their interaction with Terraform, please refer to the [Understanding Google
+Cloud APIs and Terraform Guide](./understanding-apis-and-terraform.md).
+
 ## Example Usage
 
 ```hcl
