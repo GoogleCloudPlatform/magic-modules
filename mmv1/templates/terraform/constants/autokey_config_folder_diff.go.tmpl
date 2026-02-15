@@ -1,4 +1,58 @@
-func folderPrefixSuppress(_, old, new string, d *schema.ResourceData) bool {
-	prefix := "folders/"
-	return prefix+old == new || prefix+new == old
+const (
+    autokeyFolderPrefix  = "folders/"
+    autokeyProjectPrefix = "projects/"
+    autokeyConfigSuffix  = "/autokeyConfig"
+)
+
+func autokeyHasPrefix(value, prefix string) bool {
+    return len(value) >= len(prefix) && value[:len(prefix)] == prefix
+}
+
+func autokeyTrimPrefix(value, prefix string) string {
+    if autokeyHasPrefix(value, prefix) {
+        return value[len(prefix):]
+    }
+    return value
+}
+
+func autokeyTrimSuffix(value, suffix string) string {
+    if len(value) >= len(suffix) && value[len(value)-len(suffix):] == suffix {
+        return value[:len(value)-len(suffix)]
+    }
+    return value
+}
+
+func autokeyJoin(fields []string) string {
+    result := ""
+    for i, field := range fields {
+        if i > 0 {
+            result += ","
+        }
+        result += field
+    }
+    return result
+}
+
+func normalizeParent(parent, kind string) string {
+    if parent == "" {
+        return parent
+    }
+    switch kind {
+    case "folder":
+        if !autokeyHasPrefix(parent, autokeyFolderPrefix) {
+            return autokeyFolderPrefix + parent
+        }
+    case "project":
+        if !autokeyHasPrefix(parent, autokeyProjectPrefix) {
+            return autokeyProjectPrefix + parent
+        }
+    }
+    return parent
+}
+
+func folderPrefixSuppress(k, old, new string, d *schema.ResourceData) bool {
+    return autokeyTrimPrefix(old, autokeyFolderPrefix) == autokeyTrimPrefix(new, autokeyFolderPrefix)
+}
+func projectPrefixSuppress(k, old, new string, d *schema.ResourceData) bool {
+    return autokeyTrimPrefix(old, autokeyProjectPrefix) == autokeyTrimPrefix(new, autokeyProjectPrefix)
 }
