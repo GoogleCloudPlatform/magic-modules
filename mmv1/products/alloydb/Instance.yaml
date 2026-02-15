@@ -310,8 +310,15 @@ properties:
         send_empty_value: true
         default_from_api: true
       - name: 'assistiveExperiencesEnabled'
+        min_version: beta
         type: Boolean
         description: 'Whether assistive experiences are enabled for this AlloyDB instance.'
+        send_empty_value: true
+        default_from_api: true
+      - name: 'trackClientAddress'
+        type: Boolean
+        min_version: beta
+        description: 'Track client address for an instance.'
         send_empty_value: true
         default_from_api: true
   - name: 'readPoolConfig'
