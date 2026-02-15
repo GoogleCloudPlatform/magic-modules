@@ -1,0 +1,10 @@
+---
+name: 'test1'
+display_name: 'Cloud test1'
+versions:
+  - name: 'ga'
+    base_url: 'https://abc.googleapis.com/v1/'
+  - name: 'beta'
+    base_url: 'https://abc.googleapis.com/v1beta1/'
+scopes:
+  - 'https://www.googleapis.com/auth/abc'
