@@ -806,6 +806,10 @@ resource "google_storage_bucket_object" "object" {
   name   = "%s"
   bucket = google_storage_bucket.bucket.name
   source = "%s"
+  custom_headers = {
+    "X-goog-custom-audit-meta-user"= "user"
+    "X-goog-custom-audit-meta-object"= "object"
+  }
 }
 `, bucketName, objectName, sourceFilename)
 }
