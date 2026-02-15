@@ -323,7 +323,7 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 	if err := vt.rnr.WriteFile(logFileName, allOutput); err != nil {
 		return Result{}, fmt.Errorf("error writing log: %v, test output: %v", err, allOutput)
 	}
-	return collectResult(output), testErr
+	return collectResult(allOutput), testErr
 }
 
 func (vt *Tester) RunParallel(opt RunOptions) (Result, error) {
