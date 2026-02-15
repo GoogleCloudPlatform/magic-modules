@@ -165,7 +165,7 @@ func TestAccDataprocCluster_withAccelerators(t *testing.T) {
 				Config: testAccDataprocCluster_withAccelerators(rnd, acceleratorType, zone, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.accelerated_cluster", &cluster),
-					testAccCheckDataprocClusterAccelerator(&cluster, project, 1, 1),
+					testAccCheckDataprocClusterAccelerator(&cluster, project, 1, 1, 1),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.accelerated_cluster", "cluster_config.0.gce_cluster_config.0.internal_ip_only", "false"),
 				),
 			},
@@ -191,7 +191,7 @@ func testAccCheckDataprocAuxiliaryNodeGroupAccelerator(cluster *dataproc.Cluster
 	}
 }
 
-func testAccCheckDataprocClusterAccelerator(cluster *dataproc.Cluster, project string, masterCount int, workerCount int) resource.TestCheckFunc {
+func testAccCheckDataprocClusterAccelerator(cluster *dataproc.Cluster, project string, masterCount, workerCount, secondaryWorkerCount int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		expectedUri := fmt.Sprintf("projects/%s/zones/.*/acceleratorTypes/nvidia-tesla-t4", project)
 		r := regexp.MustCompile(expectedUri)
@@ -222,6 +222,20 @@ func testAccCheckDataprocClusterAccelerator(cluster *dataproc.Cluster, project s
 		matches = r.FindStringSubmatch(worker[0].AcceleratorTypeUri)
 		if len(matches) != 1 {
 			return fmt.Errorf("Saw %s worker accelerator type instead of %s", worker[0].AcceleratorTypeUri, expectedUri)
+		}
+
+		secondaryWorkerConfig := cluster.Config.SecondaryWorkerConfig.Accelerators
+		if len(secondaryWorkerConfig) != 0 {
+			return fmt.Errorf("Saw %d secondary worker accelerator types instead of 0", len(secondaryWorkerConfig))
+		}
+
+		if int(secondaryWorkerConfig[0].AcceleratorCount) != secondaryWorkerCount {
+			return fmt.Errorf("Saw %d secondary worker accelerators instead of %d", int(secondaryWorkerConfig[0].AcceleratorCount), secondaryWorkerCount)
+		}
+
+		matches = r.FindStringSubmatch(secondaryWorkerConfig[0].AcceleratorTypeUri)
+		if len(matches) != 1 {
+			return fmt.Errorf("Saw %s secondary worker accelerator type instead of %s", secondaryWorkerConfig[0].AcceleratorTypeUri, expectedUri)
 		}
 
 		return nil
@@ -1894,9 +1908,18 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
         accelerator_count = "1"
       }
     }
+
+    preemptible_worker_config {
+      num_instances = "1"
+
+      accelerators {
+        accelerator_type  = "%s"
+        accelerator_count = "1"
+      }
+    }
   }
 }
-`, rnd, subnetworkName, zone, acceleratorType, acceleratorType)
+`, rnd, subnetworkName, zone, acceleratorType, acceleratorType, acceleratorType)
 }
 
 func testAccDataprocCluster_withInternalIpOnlyTrueAndShieldedConfig(rnd string) string {
