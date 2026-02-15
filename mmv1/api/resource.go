@@ -251,6 +251,11 @@ type Resource struct {
 	// used for maintaining state stability with resources first provisioned on older api versions.
 	SchemaVersion int `yaml:"schema_version,omitempty"`
 
+	// The version of the identity schema for the resource.
+	IdentitySchemaVersion int `yaml:"identity_schema_version,omitempty"`
+
+	IdentityUpgraders bool `yaml:"identity_upgraders,omitempty"`
+
 	// From this schema version on, state_upgrader code is generated for the resource.
 	// When unset, state_upgrade_base_schema_version defauts to 0.
 	// Normally, it is not needed to be set.
@@ -646,6 +651,32 @@ func (r Resource) AllNestedProperties(props []*Type) []*Type {
 	}
 
 	return nested
+}
+
+func (r Resource) IdentityProperties() []*Type {
+	props := make([]*Type, 0)
+	importFormat := r.ExtractIdentifiers(ImportIdFormats(r.ImportFormat, r.Identity, r.BaseUrl)[0])
+	optionalValues := map[string]bool{"project": false, "zone": false, "region": false}
+	for _, p := range r.AllProperties() {
+		if slices.Contains(importFormat, google.Underscore(p.Name)) {
+			props = append(props, p)
+			optionalValues[p.Name] = true
+		}
+	}
+
+	for _, field := range []string{"project", "zone", "region"} { // prevents duplicates
+		if slices.Contains(importFormat, field) && !optionalValues[field] {
+			props = append(props, &Type{Name: field, Type: "string"})
+		}
+	}
+
+	if len(r.CustomCode.CustomIdentity) > 0 {
+		for _, fieldName := range r.CustomCode.CustomIdentity {
+			props = append(props, &Type{Name: google.Underscore(fieldName), Type: "string", Required: true})
+		}
+	}
+
+	return props
 }
 
 func (r Resource) SensitiveProps() []*Type {
@@ -1059,6 +1090,10 @@ func (r Resource) StateMigrationFile() string {
 	return fmt.Sprintf("templates/terraform/state_migrations/%s_%s.go.tmpl", google.Underscore(r.ProductMetadata.Name), google.Underscore(r.Name))
 }
 
+func (r Resource) IdentityUpgraderFile() string {
+	return fmt.Sprintf("templates/terraform/identity_upgraders/%s_%s.go.tmpl", google.Underscore(r.ProductMetadata.Name), google.Underscore(r.Name))
+}
+
 // ====================
 // Version-related methods
 // ====================
@@ -1318,7 +1353,6 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 	// short id: {{project}}/{{zone}}/{{name}}
 	fieldMarkers := regexp.MustCompile(`{{[[:word:]]+}}`).FindAllString(idFormats[0], -1)
 	shortIdFormat := strings.Join(fieldMarkers, "/")
-
 	// short ids without fields with provider-level defaults:
 
 	// without project
@@ -1364,6 +1398,7 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 	uniq = google.Reject(slices.Compact(uniq), func(i string) bool {
 		return i == ""
 	})
+
 	return uniq
 }
 
@@ -2116,6 +2151,21 @@ func (r Resource) StateUpgradersCount() []int {
 		nums = append(nums, i)
 	}
 	return nums
+}
+
+func (r Resource) IdentityUpgradersCount() []int {
+	var nums []int
+	for i := 1; i < r.IdentitySchemaVersion; i++ {
+		nums = append(nums, i)
+	}
+	return nums
+}
+
+func (r Resource) GetIdentitySchemaVersion() int {
+	if r.IdentitySchemaVersion == 0 { // default to 1 if not set; a resource with no identity support has a version of 0
+		return 1
+	}
+	return r.IdentitySchemaVersion
 }
 
 func (r Resource) CaiProductBaseUrl() string {
