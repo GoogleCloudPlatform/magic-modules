@@ -460,8 +460,7 @@ func testAccDataplexEntryLink_aspectUpdatePrepare(context map[string]interface{}
 resource "google_bigquery_dataset" "bq_dataset" {
   dataset_id = "tf_test_dataset_%{random_suffix}"
   project    = "%{project_number}"
-  # Update location to us-central1 later
-  location   = "us"
+  location   = "us-central1"
 }
 
 resource "google_bigquery_table" "table1" {
@@ -503,8 +502,7 @@ resource "google_dataplex_entry_link" "full_entry_link_with_aspect" {
   location = "us-central1"
   entry_group_id = "@bigquery"
   entry_link_id = "tf-test-full-entry-link%{random_suffix}"
-  # Update project number later with 655216118709
-  entry_link_type = "projects/418487367933/locations/global/entryLinkTypes/schema-join"
+  entry_link_type = "projects/655216118709/locations/global/entryLinkTypes/schema-join"
   entry_references {
     name = "projects/%{project_number}/locations/us-central1/entryGroups/@bigquery/entries/bigquery.googleapis.com/projects/%{project_id}/datasets/${google_bigquery_dataset.bq_dataset.dataset_id}/tables/${google_bigquery_table.table1.table_id}"
     type = ""
@@ -514,8 +512,7 @@ resource "google_dataplex_entry_link" "full_entry_link_with_aspect" {
     type = ""
   }
   aspects {
-	# Update project number later with 655216118709
-    aspect_key = "418487367933.global.schema-join"
+    aspect_key = "655216118709.global.schema-join"
 	aspect {
 		data = jsonencode({
 			joins       = []
@@ -533,8 +530,7 @@ func testAccDataplexEntryLink_aspectUpdate(context map[string]interface{}) strin
 resource "google_bigquery_dataset" "bq_dataset" {
   dataset_id = "tf_test_dataset_%{random_suffix}"
   project    = "%{project_number}"
-  # Update location to us-central1 later
-  location   = "us"
+  location   = "us-central1"
 }
 
 resource "google_bigquery_table" "table1" {
@@ -576,8 +572,7 @@ resource "google_dataplex_entry_link" "full_entry_link_with_aspect" {
   location = "us-central1"
   entry_group_id = "@bigquery"
   entry_link_id = "tf-test-full-entry-link%{random_suffix}"
-  # Update project number later with 655216118709
-  entry_link_type = "projects/418487367933/locations/global/entryLinkTypes/schema-join"
+  entry_link_type = "projects/655216118709/locations/global/entryLinkTypes/schema-join"
   entry_references {
     name = "projects/%{project_number}/locations/us-central1/entryGroups/@bigquery/entries/bigquery.googleapis.com/projects/%{project_id}/datasets/${google_bigquery_dataset.bq_dataset.dataset_id}/tables/${google_bigquery_table.table1.table_id}"
     type = ""
@@ -587,8 +582,7 @@ resource "google_dataplex_entry_link" "full_entry_link_with_aspect" {
     type = ""
   }
   aspects {
-	# Update project number later with 655216118709
-    aspect_key = "418487367933.global.schema-join"
+    aspect_key = "655216118709.global.schema-join"
 	aspect {
 		data = jsonencode({
 			joins       = []

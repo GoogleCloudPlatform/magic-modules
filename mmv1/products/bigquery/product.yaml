@@ -17,7 +17,7 @@ legacy_name: 'bigquery'
 display_name: 'BigQuery'
 versions:
   - name: 'ga'
-    base_url: 'https://test-bigquery.sandbox.google.com/bigquery/v2/' # Update with actual GA endpoint later
+    base_url: 'https://bigquery.googleapis.com/bigquery/v2/'
   - name: 'beta'
     base_url: 'https://bigquery.googleapis.com/bigquery/v2/'
 scopes:
