@@ -172,7 +172,7 @@ resource "google_storage_bucket" "hns-enabled" {
       restriction_mode = "FullyRestricted"
     }
     customer_supplied_encryption_enforcement_config {
-      restriction_mode = "FullyRestricted"
+      restriction_mode = "NotRestricted"
     }
   }
 }
