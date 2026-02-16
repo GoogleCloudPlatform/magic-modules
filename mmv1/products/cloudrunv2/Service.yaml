@@ -1367,4 +1367,4 @@ properties:
   - name: 'iapEnabled'
     type: Boolean
     description: |
-      Used to enable/disable IAP for the service.
+      Used to enable/disable IAP for the cloud-run service.
