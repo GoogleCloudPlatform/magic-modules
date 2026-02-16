@@ -102,13 +102,20 @@ examples:
   - name: 'kms_autokey_config_folder' # Example for folder
     primary_resource_id: 'example-autokeyconfig-folder'
     min_version: 'beta'
+    vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
     test_env_vars:
-      folder_id: 'KMS_AUTOKEY_TEST_FOLDER_ID'
-      key_project_id: 'KMS_AUTOKEY_TEST_KEY_PROJECT_ID'
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
     external_providers: ["random", "time"]
   - name: 'kms_autokey_config_project' # Example for project
     primary_resource_id: 'example-autokeyconfig-project'
     min_version: 'beta'
+    vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
     test_env_vars:
-      project_id: 'KMS_AUTOKEY_TEST_PROJECT_ID'
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
     external_providers: ["random", "time"]

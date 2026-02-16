@@ -1,14 +1,32 @@
 resource "google_kms_autokey_config" "{{$.PrimaryResourceId}}" {
   provider    = google-beta
-  folder      = "folders/${var.folder_id}"
-  key_project = "projects/${var.key_project_id}"
+  folder      = "folders/${google_folder.autokey_folder.folder_id}"
+  key_project = "projects/${google_project.key_project.project_id}"
   key_project_resolution_mode = "DEDICATED_KEY_PROJECT"
 }
 
-variable "folder_id" {
+resource "random_id" "suffix" {
+  byte_length = 4
+}
+
+resource "google_folder" "autokey_folder" {
+  provider     = google-beta
+  display_name = "tf-test-${random_id.suffix.hex}"
+  parent       = "organizations/${var.org_id}"
+}
+
+resource "google_project" "key_project" {
+  provider        = google-beta
+  name            = "tf-test-${random_id.suffix.hex}"
+  project_id      = "tf-test-${random_id.suffix.hex}"
+  org_id          = var.org_id
+  billing_account = var.billing_account
+}
+
+variable "org_id" {
   type = string
 }
 
-variable "key_project_id" {
+variable "billing_account" {
   type = string
 }
