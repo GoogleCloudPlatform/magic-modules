@@ -32,6 +32,12 @@
 		"{{$varKey}}": envvar.GetTestVmwareengineProjectFromEnv(t),
 		{{- else if eq $varVal "ZONE" }}
 		"{{$varKey}}": envvar.GetTestZoneFromEnv(),
+		{{- else if eq $varVal "KMS_AUTOKEY_TEST_FOLDER_ID" }}
+		"{{$varKey}}": envvar.GetTestKMSAutokeyFolderIDFromEnv(t),
+		{{- else if eq $varVal "KMS_AUTOKEY_TEST_KEY_PROJECT_ID" }}
+		"{{$varKey}}": envvar.GetTestKMSAutokeyKeyProjectIDFromEnv(t),
+		{{- else if eq $varVal "KMS_AUTOKEY_TEST_PROJECT_ID" }}
+		"{{$varKey}}": envvar.GetTestKMSAutokeyProjectIDFromEnv(t),
 		{{- end }}
 	{{- end }}
 	{{- if and $.HasNewLine (gt (len $.TestEnvVars) 0)}}

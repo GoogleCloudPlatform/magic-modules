@@ -125,6 +125,21 @@ var vmwareengineProjectEnvVars = []string{
 	"GOOGLE_VMWAREENGINE_PROJECT",
 }
 
+var KMSAutokeyTestFolderIDEnvVars = []string{
+	"KMS_AUTOKEY_TEST_FOLDER_ID",
+	"GOOGLE_KMS_AUTOKEY_TEST_FOLDER_ID",
+}
+
+var KMSAutokeyTestKeyProjectIDEnvVars = []string{
+	"KMS_AUTOKEY_TEST_KEY_PROJECT_ID",
+	"GOOGLE_KMS_AUTOKEY_TEST_KEY_PROJECT_ID",
+}
+
+var KMSAutokeyTestProjectIDEnvVars = []string{
+	"KMS_AUTOKEY_TEST_PROJECT_ID",
+	"GOOGLE_KMS_AUTOKEY_TEST_PROJECT_ID",
+}
+
 // AccTestPreCheck ensures at least one of the project env variables is set.
 func GetTestProjectNumberFromEnv() string {
 	return transport_tpg.MultiEnvSearch(ProjectNumberEnvVars)
@@ -232,6 +247,21 @@ func GetTestChronicleInstanceIdFromEnv(t *testing.T) string {
 func GetTestVmwareengineProjectFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, vmwareengineProjectEnvVars...)
 	return transport_tpg.MultiEnvSearch(vmwareengineProjectEnvVars)
+}
+
+func GetTestKMSAutokeyFolderIDFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, KMSAutokeyTestFolderIDEnvVars...)
+	return transport_tpg.MultiEnvSearch(KMSAutokeyTestFolderIDEnvVars)
+}
+
+func GetTestKMSAutokeyKeyProjectIDFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, KMSAutokeyTestKeyProjectIDEnvVars...)
+	return transport_tpg.MultiEnvSearch(KMSAutokeyTestKeyProjectIDEnvVars)
+}
+
+func GetTestKMSAutokeyProjectIDFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, KMSAutokeyTestProjectIDEnvVars...)
+	return transport_tpg.MultiEnvSearch(KMSAutokeyTestProjectIDEnvVars)
 }
 
 func SkipIfEnvNotSet(t *testing.T, envs ...string) {

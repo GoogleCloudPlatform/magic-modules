@@ -1,25 +1,5 @@
 resource "google_kms_autokey_config" "{{$.PrimaryResourceId}}" {
   provider    = google-beta
-  project     = "projects/${google_project.test_project.project_id}"
+  project     = "projects/{{index $.TestEnvVars "project_number"}}"
   key_project_resolution_mode = "RESOURCE_PROJECT"
-}
-
-resource "random_id" "suffix" {
-  byte_length = 4
-}
-
-resource "google_project" "test_project" {
-  provider        = google-beta
-  name            = "tf-test-${random_id.suffix.hex}"
-  project_id      = "tf-test-${random_id.suffix.hex}"
-  org_id          = var.org_id
-  billing_account = var.billing_account
-}
-
-variable "org_id" {
-  type = string
-}
-
-variable "billing_account" {
-  type = string
 }
