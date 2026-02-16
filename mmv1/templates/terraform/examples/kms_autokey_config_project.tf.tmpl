@@ -1,6 +1,6 @@
 resource "google_kms_autokey_config" "project_config" {
   provider    = google-beta
-  project     = "projects/${var.project_id}"
+  project     = "projects/${google_project.test_project.project_id}"
   key_project_resolution_mode = "RESOURCE_PROJECT"
 }
 
@@ -13,11 +13,6 @@ resource "google_project" "test_project" {
 
 variable "project_name" {
   type = string
-}
-
-variable "project_id" {
-  type = string
-  default = google_project.test_project.project_id
 }
 
 variable "org_id" {
