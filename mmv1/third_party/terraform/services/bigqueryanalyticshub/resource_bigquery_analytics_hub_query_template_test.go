@@ -20,7 +20,7 @@ func TestAccBigqueryAnalyticsHubQueryTemplate_bigqueryAnalyticshubQuerytemplateU
 		CheckDestroy:             testAccCheckBigqueryAnalyticsHubQueryTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigqueryAnalyticsHubQueryTemplate_bigqueryAnalyticshubQuerytemplateBasicExample(context),
+				Config: testAccBigqueryAnalyticsHubQueryTemplate_bigqueryAnalyticshubQueryTemplateBasicExample(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_bigquery_analytics_hub_query_template.querytemplate", "submit", "false"),
