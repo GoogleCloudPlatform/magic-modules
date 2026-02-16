@@ -9,7 +9,13 @@ import (
 
 func DataSourceGoogleKmsAutokeyConfig() *schema.Resource {
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceKMSAutokeyConfig().Schema)
-	tpgresource.AddRequiredFieldsToSchema(dsSchema, "folder")
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "folder", "project")
+	if folderSchema, ok := dsSchema["folder"]; ok {
+		folderSchema.ExactlyOneOf = []string{"folder", "project"}
+	}
+	if projectSchema, ok := dsSchema["project"]; ok {
+		projectSchema.ExactlyOneOf = []string{"folder", "project"}
+	}
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleKmsAutokeyConfigRead,
@@ -19,11 +25,27 @@ func DataSourceGoogleKmsAutokeyConfig() *schema.Resource {
 }
 
 func dataSourceGoogleKmsAutokeyConfigRead(d *schema.ResourceData, meta interface{}) error {
-	configId := KmsAutokeyConfigId{
-		Folder: d.Get("folder").(string),
+	folder, folderOk := d.GetOk("folder")
+	project, projectOk := d.GetOk("project")
+	if !folderOk && !projectOk {
+		return fmt.Errorf("one of folder or project must be set")
 	}
-	id := configId.AutokeyConfigId()
+
+	folderVal := ""
+	projectVal := ""
+	if folderOk {
+		folderVal = normalizeParent(folder.(string), "folder")
+	}
+	if projectOk {
+		projectVal = normalizeParent(project.(string), "project")
+	}
+	parent := folderVal
+	if parent == "" {
+		parent = projectVal
+	}
+	id := parent + "/autokeyConfig"
 	d.SetId(id)
+	d.Set("name", id)
 	err := resourceKMSAutokeyConfigRead(d, meta)
 	if err != nil {
 		return err
