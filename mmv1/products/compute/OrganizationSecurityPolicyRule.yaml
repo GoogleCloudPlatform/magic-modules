@@ -90,7 +90,7 @@ properties:
           Preconfigured versioned expression. For organization security policy rules,
           the only supported type is "SRC_IPS_V1".
           **NOTE** : 'FIREWALL' type is deprecated. Please use 'google_compute_firewall_policy_rule' resource instead.
-        default_from_api: true
+        default_value: "FIREWALL"
       - name: 'config'
         type: NestedObject
         description: The configuration options for matching the rule.

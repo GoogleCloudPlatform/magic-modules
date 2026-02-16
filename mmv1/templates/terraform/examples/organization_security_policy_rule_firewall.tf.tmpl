@@ -24,7 +24,6 @@ resource "google_compute_organization_security_policy_rule" "{{$.PrimaryResource
         ip_protocol = "icmp"
       }
     }
-    versioned_expr = "FIREWALL"
   }
   priority = 100
 }

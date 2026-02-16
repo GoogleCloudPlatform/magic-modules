@@ -73,7 +73,6 @@ resource "google_compute_organization_security_policy_rule" "policy" {
         ip_protocol = "icmp"
       }
     }
-    versioned_expr = "FIREWALL"
   }
   priority = 100
 }
@@ -109,7 +108,6 @@ resource "google_compute_organization_security_policy_rule" "policy" {
         ports = ["53"]
       }
     }
-    versioned_expr = "FIREWALL"
   }
   priority = 100
 }
