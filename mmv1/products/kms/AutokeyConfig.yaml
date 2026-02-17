@@ -110,6 +110,7 @@ examples:
     primary_resource_id: 'example-autokeyconfig-project'
     min_version: 'beta'
     ignore_read_extra:
+      - 'etag'
       - 'key_project_resolution_mode'
     test_env_vars:
       project_number: 'PROJECT_NUMBER'
