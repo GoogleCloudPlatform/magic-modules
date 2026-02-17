@@ -19,13 +19,11 @@ if d.HasChange("aspects") {
 }
 
 err = FilterEntryLinkAspects(aspectKeysOfInterest, res)
-
 if err != nil {
 	return nil, err
 }
 
 err = InverseTransformEntryLinkAspects(res)
-
 if err != nil {
 	return nil, err
 }
