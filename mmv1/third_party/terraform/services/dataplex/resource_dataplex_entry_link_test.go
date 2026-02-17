@@ -433,7 +433,7 @@ func TestAccDataplexEntryLink_aspectUpdate(t *testing.T) {
 				ResourceName:            "google_dataplex_entry_link.full_entry_link_with_aspect",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"entry_group_id", "entry_link_id", "location"},
+				ImportStateVerifyIgnore: []string{"aspects", "dataset_id", "table_id", "entry_link_id", "location"},
 			},
 
 			{
@@ -448,7 +448,7 @@ func TestAccDataplexEntryLink_aspectUpdate(t *testing.T) {
 				ResourceName:            "google_dataplex_entry_link.full_entry_link_with_aspect",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"dataset_id", "table_id", "entry_id", "location"},
+				ImportStateVerifyIgnore: []string{"aspects", "dataset_id", "table_id", "entry_link_id", "location"},
 			},
 		},
 	})

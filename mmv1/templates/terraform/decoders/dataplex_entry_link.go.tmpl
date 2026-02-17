@@ -18,17 +18,14 @@ if d.HasChange("aspects") {
 	}
 }
 
-// Only filter if we actually have keys from the config.
-// If the set is empty (e.g. during Import), we skip filtering 
-// and keep ALL aspects returned by the API.
-if len(aspectKeysOfInterest) > 0 {
-	err = FilterEntryLinkAspects(aspectKeysOfInterest, res)
-	if err != nil {
-		return nil, err
-	}
+err = FilterEntryLinkAspects(aspectKeysOfInterest, res)
+
+if err != nil {
+	return nil, err
 }
 
 err = InverseTransformEntryLinkAspects(res)
+
 if err != nil {
 	return nil, err
 }

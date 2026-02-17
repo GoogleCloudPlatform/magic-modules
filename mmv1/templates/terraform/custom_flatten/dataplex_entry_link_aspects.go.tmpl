@@ -1,91 +1,44 @@
+// This file is a transposition of mmv1/templates/terraform/flatten_property_method.go.tmpl
+// Most of the code is copied from there, with the exception of sorting logic.
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-    if v == nil {
-        return []interface{}{}
+  if v == nil {
+    return v
+  }
+  l := v.([]interface{})
+  transformed := make([]map[string]interface{}, 0, len(l))
+  for _, raw := range l {
+    original := raw.(map[string]interface{})
+    if len(original) < 1 {
+      // Do not include empty json objects coming back from the api
+      continue
     }
+    transformed = append(transformed, map[string]interface{}{
 
-    l, ok := v.([]interface{})
-    if !ok {
-        return []interface{}{}
-    }
-
-    transformed := make([]map[string]interface{}, 0, len(l))
-
-    for _, raw := range l {
-        original, ok := raw.(map[string]interface{})
-        if !ok {
-            continue
-        }
-
-        // Outer Block: aspect_key
-        item := map[string]interface{}{}
-        
-        if val, ok := original["aspectKey"]; ok {
-            item["aspect_key"] = val
-        }
-
-        // Inner Block: aspect {}
-        rawInner, ok := original["aspect"]
-        innerMap, ok := rawInner.(map[string]interface{})
-        if !ok {
-            continue
-        }
-
-        innerItem := map[string]interface{}{}
-
-        // Handle 'data' from the INNER map
-        if dataVal, ok := innerMap["data"]; ok {
-            if dataMap, ok := dataVal.(map[string]interface{}); ok {
-                // Map -> JSON String
-                b, _ := json.Marshal(dataMap)
-                innerItem["data"] = string(b)
-            } else if dataStr, ok := dataVal.(string); ok {
-                innerItem["data"] = dataStr
-            }
-        }
-
-        // Handle 'aspect_type' from the INNER map
-        if val, ok := innerMap["aspectType"]; ok {
-            innerItem["aspect_type"] = val
-        } else if val, ok := innerMap["type"]; ok {
-            innerItem["aspect_type"] = val
-        }
-
-        // Timestamps from the INNER map
-        if val, ok := innerMap["createTime"]; ok {
-            innerItem["create_time"] = val
-        }
-        if val, ok := innerMap["updateTime"]; ok {
-            innerItem["update_time"] = val
-        }
-
-        // Assign the inner block
-        item["aspect"] = []interface{}{innerItem}
-
-        transformed = append(transformed, item)
-    }
-
-    // Sort Alphabetically by aspect_key (Default / Import Safe)
-    sort.Slice(transformed, func(i, j int) bool {
-        keyA, _ := transformed[i]["aspect_key"].(string)
-        keyB, _ := transformed[j]["aspect_key"].(string)
-        return keyA < keyB
+  {{- range $prop := $.ItemType.UserProperties }}
+    {{- if not (or $prop.IgnoreRead $prop.WriteOnlyLegacy $prop.WriteOnly) }}
+      "{{ underscore $prop.Name }}": flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config),
+    {{- end }}
+  {{- end }}
     })
+  }
 
-    // If Config exists, prefer Config order
-    if d.Get("aspects") != nil {
-        configList := d.Get("aspects").([]interface{})
-        if len(configList) > 0 {
-            configData := []map[string]interface{}{}
-            for _, item := range configList {
-                configData = append(configData, item.(map[string]interface{}))
-            }
-            
-            sorted, err := tpgresource.SortMapsByConfigOrder(configData, transformed, "aspect_key")
-            if err == nil {
-                return sorted
-            }
-        }
-    }
+  configData := []map[string]interface{}{}
 
-    return transformed
+  for _, item := range d.Get("aspects").([]interface{}) {
+    configData = append(configData, item.(map[string]interface{}))
+  }
+
+  sorted, err := tpgresource.SortMapsByConfigOrder(configData, transformed, "aspect_key")
+  if err != nil {
+    log.Printf("[ERROR] Could not sort API response value: %s", err)
+    return v
+  }
+
+  return sorted
 }
+
+{{- if $.NestedProperties }}
+    {{- range $prop := $.NestedProperties }}
+      {{ template "flattenPropertyMethod" $prop -}}
+    {{- end }}
+{{- end }}
