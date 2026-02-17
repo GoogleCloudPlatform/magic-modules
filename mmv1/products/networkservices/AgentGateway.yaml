@@ -13,6 +13,7 @@
 
 ---
 name: 'AgentGateway'
+min_version: beta
 description: |
   AgentGateway represents the agent gateway resource.
 references:

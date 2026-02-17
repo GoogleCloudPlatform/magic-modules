@@ -1,5 +1,9 @@
 package networkservices_test
 
+import "testing"
+
+{{- if ne $.TargetVersionName "ga" }}
+
 import (
 	"testing"
 
@@ -99,3 +103,5 @@ resource "google_network_services_agent_gateway" "default" {
 }
 `, context)
 }
+
+{{ end }}
