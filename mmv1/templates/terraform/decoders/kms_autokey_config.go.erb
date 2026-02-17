@@ -19,12 +19,25 @@ if v, ok := res["keyProject"].(string); ok {
     d.Set("key_project", nil)
 }
 
-if v, ok := res["keyProjectResolutionMode"].(string); ok && v != "" {
-    d.Set("key_project_resolution_mode", v)
-} else if v, ok := d.GetOkExists("key_project_resolution_mode"); ok {
-    // Preserve configured value when the API omits or blanks the field (preview rollouts can be sparse).
-    d.Set("key_project_resolution_mode", v)
-    res["keyProjectResolutionMode"] = v
+apiResolutionMode := ""
+if v, ok := res["keyProjectResolutionMode"].(string); ok {
+    apiResolutionMode = v
+}
+
+stateResolutionMode := ""
+if v, ok := d.GetOkExists("key_project_resolution_mode"); ok {
+    if s, ok := v.(string); ok {
+        stateResolutionMode = s
+    }
+}
+
+if apiResolutionMode != "" {
+    d.Set("key_project_resolution_mode", apiResolutionMode)
+    res["keyProjectResolutionMode"] = apiResolutionMode
+} else if stateResolutionMode != "" {
+    // If one value is empty and the other is non-empty, preserve the non-empty one.
+    d.Set("key_project_resolution_mode", stateResolutionMode)
+    res["keyProjectResolutionMode"] = stateResolutionMode
 } else {
     d.Set("key_project_resolution_mode", nil)
 }
