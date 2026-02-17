@@ -42,7 +42,10 @@ jobs:
           go build .
       - name: Run command
         if: steps.read-comment.outputs.match != ''
-        run: .ci/magician/magician reassign-reviewer ${{ github.event.issue.number }} ${{ github.event.comment.user.login }} ${{ steps.read-comment.outputs.group1 }}
+        run: .ci/magician/magician reassign-reviewer ${{ github.event.issue.number }} ${GITHUB_EVENT_COMMENT_USER_LOGIN} ${STEPS_READ_COMMENT_OUTPUTS_GROUP1}
+        env:
+          GITHUB_EVENT_COMMENT_USER_LOGIN: ${{ github.event.comment.user.login }}
+          STEPS_READ_COMMENT_OUTPUTS_GROUP1: ${{ steps.read-comment.outputs.group1 }}
 
   reassign-reviewer-from-label:
     if: ${{ github.event_name == 'pull_request' && github.event.label.name == 'assign-reviewer' }}
@@ -65,4 +68,6 @@ jobs:
           cd .ci/magician
           go build .
       - name: Run command
-        run: .ci/magician/magician reassign-reviewer ${{ github.event.pull_request.number }} ${{ github.event.sender.login }}
+        run: .ci/magician/magician reassign-reviewer ${{ github.event.pull_request.number }} ${GITHUB_EVENT_SENDER_LOGIN}
+        env:
+          GITHUB_EVENT_SENDER_LOGIN: ${{ github.event.sender.login }}
