@@ -109,6 +109,8 @@ examples:
   - name: 'kms_autokey_config_project' # Example for project
     primary_resource_id: 'example-autokeyconfig-project'
     min_version: 'beta'
+    ignore_read_extra:
+      - 'key_project_resolution_mode'
     test_env_vars:
       project_number: 'PROJECT_NUMBER'
     external_providers: ["random", "time"]
