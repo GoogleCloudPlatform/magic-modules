@@ -407,6 +407,9 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	// Generated products
 	{{- range $product := $.Products }}
 	config.{{ $product.Name }}BasePath = d.Get("{{ underscore $product.Name }}_custom_endpoint").(string)
+	{{- if $product.Version.RepEnabled }}
+	config.{{ $product.Name }}RepBasePath = "{{ $product.Version.RepUrl }}"
+	{{- end -}}
 	{{- end }}
 
 	// Handwritten Products / Versioned / Atypical Entries
