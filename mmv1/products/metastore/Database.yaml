@@ -41,6 +41,7 @@ examples:
     primary_resource_id: 'dpms_service'
     primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv-%s", context["random_suffix"]), "testdb"'
     external_providers: ["time"]
+    # https://github.com/GoogleCloudPlatform/magic-modules/pull/16397#issue-3939594155
     exclude_test: true
 parameters:
 properties:
