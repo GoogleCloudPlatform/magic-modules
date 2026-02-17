@@ -22,12 +22,12 @@ jobs:
           cd repo
           git config user.name "modular-magician"
           git config user.email "magic-modules@google.com"
-          git fetch origin ${{ github.base_ref }} # Fetch the base branch
-          git merge --no-ff origin/${{ github.base_ref }} # Merge with the base branch
+          git fetch origin ${GITHUB_BASE_REF} # Fetch the base branch
+          git merge --no-ff origin/${GITHUB_BASE_REF} # Merge with the base branch
       - name: Check for invalid version guards
         run: |
           cd repo/tools/template-check
-          git diff --name-only --diff-filter=d origin/${{ github.base_ref }} ../../*.tmpl | sed 's=^=../../=g' | go run main.go
+          git diff --name-only --diff-filter=d origin/${GITHUB_BASE_REF} ../../*.tmpl | sed 's=^=../../=g' | go run main.go
   lint-yaml:
     runs-on: ubuntu-22.04
     steps:
@@ -42,9 +42,9 @@ jobs:
           cd repo
           git config user.name "modular-magician"
           git config user.email "magic-modules@google.com"
-          git fetch origin ${{ github.base_ref }} # Fetch the base branch
-          git merge --no-ff origin/${{ github.base_ref }} # Merge with the base branch
-          yamlfiles=$(git diff --name-only origin/${{ github.base_ref }} -- mmv1/products) # Compare with the base branch
+          git fetch origin ${GITHUB_BASE_REF} # Fetch the base branch
+          git merge --no-ff origin/${GITHUB_BASE_REF} # Merge with the base branch
+          yamlfiles=$(git diff --name-only origin/${GITHUB_BASE_REF} -- mmv1/products) # Compare with the base branch
           if [ ! -z "$yamlfiles" ]; then
             echo "yamlfiles=repo/${yamlfiles//$'\n'/ repo/}" >> $GITHUB_OUTPUT
           fi
@@ -53,7 +53,9 @@ jobs:
         run: pip install yamllint==1.32.0 pyyaml==6.0.1 pathspec==0.12.1 --no-deps
       - name: Lint YAML files
         if: ${{ !failure() && steps.pull_request.outputs.yamlfiles != '' }}
-        run: yamllint -c repo/.yamllint ${{steps.pull_request.outputs.yamlfiles}}
+        run: yamllint -c repo/.yamllint ${STEPS_PULL_REQUEST_OUTPUTS_YAMLFILES}
+        env:
+          STEPS_PULL_REQUEST_OUTPUTS_YAMLFILES: ${{steps.pull_request.outputs.yamlfiles}}
   unit-tests:
     runs-on: ubuntu-22.04
     steps:
