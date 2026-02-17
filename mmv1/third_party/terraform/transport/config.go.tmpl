@@ -266,6 +266,9 @@ type Config struct {
 
 	{{ range $product := $.Products }}
 	{{ $product.Name }}BasePath string
+	{{- if $product.Version.RepEnabled }}
+	{{ $product.Name }}RepBasePath string
+	{{- end -}}
 	{{- end }}
 
 	CloudBillingBasePath string
@@ -1631,4 +1634,16 @@ func GetUniverseDomainFromMeta(meta interface{}) string {
 		return "googleapis.com"
 	}
 	return config.UniverseDomain
+}
+
+func ResourceBasePath(basePath, repPath, basePathKey string, useRep bool) string {
+    // If default has been overridden, use override
+    if basePath != DefaultBasePaths[basePathKey] {
+        return basePath
+    }
+    // If REP enabled, default to REP
+    if useRep {
+        return repPath
+    }
+    return basePath
 }
