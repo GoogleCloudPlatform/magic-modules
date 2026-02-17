@@ -1,3 +1,5 @@
+isProjectParent := false
+
 if name, ok := res["name"].(string); ok {
     if autokeyHasPrefix(name, autokeyFolderPrefix) {
         d.Set("folder", autokeyTrimSuffix(name, autokeyConfigSuffix))
@@ -5,6 +7,7 @@ if name, ok := res["name"].(string); ok {
     } else if autokeyHasPrefix(name, autokeyProjectPrefix) {
         d.Set("project", autokeyTrimSuffix(name, autokeyConfigSuffix))
         d.Set("folder", nil)
+        isProjectParent = true
     }
 }
 
@@ -31,9 +34,17 @@ if v, ok := d.GetOkExists("key_project_resolution_mode"); ok {
     }
 }
 
+configState := ""
+if v, ok := res["state"].(string); ok {
+    configState = v
+}
+
 if apiResolutionMode != "" {
     d.Set("key_project_resolution_mode", apiResolutionMode)
     res["keyProjectResolutionMode"] = apiResolutionMode
+} else if isProjectParent && configState == "ACTIVE" {
+    d.Set("key_project_resolution_mode", "RESOURCE_PROJECT")
+    res["keyProjectResolutionMode"] = "RESOURCE_PROJECT"
 } else if stateResolutionMode != "" {
     // If one value is empty and the other is non-empty, preserve the non-empty one.
     d.Set("key_project_resolution_mode", stateResolutionMode)
