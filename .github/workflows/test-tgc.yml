@@ -52,12 +52,16 @@ jobs:
       run: |
         curl -X POST -H "Authorization: token ${{secrets.GITHUB_TOKEN}}" \
         -H "Accept: application/vnd.github.v3+json" \
-        "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/${{github.event.inputs.sha}}" \
+        "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/${GITHUB_EVENT_INPUTS_SHA}" \
         -d '{
-        "context": "${{ github.event.inputs.repo }}${{ env.status_suffix }}",
-        "target_url": "${{ steps.get_job.outputs.url }}",
+        "context": "${GITHUB_EVENT_INPUTS_REPO}${{ env.status_suffix }}",
+        "target_url": "${STEPS_GET_JOB_OUTPUTS_URL}",
         "state": "pending"
         }'
+      env:
+        GITHUB_EVENT_INPUTS_SHA: ${{github.event.inputs.sha}}
+        GITHUB_EVENT_INPUTS_REPO: ${{ github.event.inputs.repo }}
+        STEPS_GET_JOB_OUTPUTS_URL: ${{ steps.get_job.outputs.url }}
     - name: Checkout Repository
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
       with:
@@ -81,9 +85,12 @@ jobs:
     - name: Build Terraform Google Conversion
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
-        go mod edit -replace github.com/hashicorp/terraform-provider-google-beta=github.com/${{ github.event.inputs.owner }}/terraform-provider-google-beta@${{ github.event.inputs.tpgb-branch }}
+        go mod edit -replace github.com/hashicorp/terraform-provider-google-beta=github.com/${GITHUB_EVENT_INPUTS_OWNER}/terraform-provider-google-beta@${GITHUB_EVENT_INPUTS_TPGB_BRANCH}
         go mod tidy
         make build
+      env:
+        GITHUB_EVENT_INPUTS_OWNER: ${{ github.event.inputs.owner }}
+        GITHUB_EVENT_INPUTS_TPGB_BRANCH: ${{ github.event.inputs.tpgb-branch }}
     - name: Run Unit Tests
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
@@ -93,9 +100,14 @@ jobs:
       run: |
         curl -X POST -H "Authorization: token ${{secrets.GITHUB_TOKEN}}" \
         -H "Accept: application/vnd.github.v3+json" \
-        "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/${{github.event.inputs.sha}}" \
+        "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/${GITHUB_EVENT_INPUTS_SHA}" \
         -d '{
-        "context": "${{ github.event.inputs.repo }}${{ env.status_suffix }}",
-        "target_url": "${{ steps.get_job.outputs.url }}",
-        "state": "${{ job.status }}"
+        "context": "${GITHUB_EVENT_INPUTS_REPO}${{ env.status_suffix }}",
+        "target_url": "${STEPS_GET_JOB_OUTPUTS_URL}",
+        "state": "${JOB_STATUS}"
         }'
+      env:
+        GITHUB_EVENT_INPUTS_SHA: ${{github.event.inputs.sha}}
+        GITHUB_EVENT_INPUTS_REPO: ${{ github.event.inputs.repo }}
+        STEPS_GET_JOB_OUTPUTS_URL: ${{ steps.get_job.outputs.url }}
+        JOB_STATUS: ${{ job.status }}
