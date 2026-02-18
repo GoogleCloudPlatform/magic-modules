@@ -250,7 +250,7 @@ func (e *Examples) ValidateExternalProviders() error {
 	}
 
 	if len(unallowedProviders) > 0 {
-		return fmt.Errorf("Providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders)
+		return fmt.Errorf("providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders)
 	}
 
 	return nil

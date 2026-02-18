@@ -172,6 +172,7 @@ properties:
             method, a DataStore is automatically created for each source entity.
           output: true
         - name: 'params'
+          type: String
           description: 'The parameters for the entity to facilitate data ingestion.'
           diff_suppress_func: 'DataConnectorEntitiesFieldsDiffSuppress'
           custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'

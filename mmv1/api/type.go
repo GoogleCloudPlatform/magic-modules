@@ -480,53 +480,59 @@ func (t *Type) SetDefault(r *Resource) {
 }
 
 func (t *Type) Validate(rName string) (es []error) {
+	// Use Lineage to get the full path (e.g. "parent.child.grandchild") for clearer error messages.
+	fullFieldPath := t.Name
+	if lineage := t.Lineage(); len(lineage) > 0 {
+		fullFieldPath = strings.Join(lineage, ".")
+	}
+
 	if t.Name == "" {
-		es = append(es, fmt.Errorf("Missing `name` for property with type %s in resource %s", t.Type, rName))
+		es = append(es, fmt.Errorf("missing `name` for property with type %s in resource %s", t.Type, rName))
 	}
 
 	// Check type is valid. Also allow empty as it's currently used in unit tests.
-	if !slices.Contains([]string{"", "Boolean", "Double", "Integer", "String", "Time", "Enum", "ResourceRef", "NestedObject", "Array", "KeyValuePairs", "KeyValueLabels", "KeyValueTerraformLabels", "KeyValueEffectiveLabels", "KeyValueAnnotations", "Map", "Fingerprint"}, t.Type) {
-		es = append(es, fmt.Errorf("unknown type %q for property %q in resource %s", t.Type, t.Name, rName))
+	if !slices.Contains([]string{"Boolean", "Double", "Integer", "String", "Time", "Enum", "ResourceRef", "NestedObject", "Array", "KeyValuePairs", "KeyValueLabels", "KeyValueTerraformLabels", "KeyValueEffectiveLabels", "KeyValueAnnotations", "Map", "Fingerprint"}, t.Type) {
+		es = append(es, fmt.Errorf("property %s unknown type %q in resource %s", fullFieldPath, t.Type, rName))
 	}
 
 	if t.Output && t.Required {
-		es = append(es, fmt.Errorf("Property %s cannot be output and required at the same time in resource %s.", t.Name, rName))
+		es = append(es, fmt.Errorf("property %s cannot be output and required at the same time in resource %s.", fullFieldPath, rName))
 	}
 
 	if t.DefaultFromApi && t.DefaultValue != nil {
-		es = append(es, fmt.Errorf("'default_value' and 'default_from_api' cannot be both set in resource %s", rName))
+		es = append(es, fmt.Errorf("property %s 'default_value' and 'default_from_api' cannot be both set in resource %s ", fullFieldPath, rName))
 	}
 
 	if (t.WriteOnlyLegacy || t.WriteOnly) && (t.DefaultFromApi || t.Output) {
-		es = append(es, fmt.Errorf("Property %s cannot be write_only and default_from_api or output at the same time in resource %s", t.Name, rName))
+		es = append(es, fmt.Errorf("property %s cannot be write_only and default_from_api or output at the same time in resource %s", fullFieldPath, rName))
 	}
 
 	if (t.WriteOnlyLegacy || t.WriteOnly) && t.Sensitive {
-		es = append(es, fmt.Errorf("Property %s cannot be write_only and sensitive at the same time in resource %s", t.Name, rName))
+		es = append(es, fmt.Errorf("property %s cannot be write_only and sensitive at the same time in resource %s", fullFieldPath, rName))
 	}
 
 	if t.KeyDescription != "" {
-		es = append(es, fmt.Errorf("Property %s key_description can't be set in resource %s; it's deprecated", t.Name, rName))
+		es = append(es, fmt.Errorf("property %s key_description can't be set in resource %s; it's deprecated", fullFieldPath, rName))
 	}
 
 	t.validateLabelsField()
 
 	switch {
 	case t.IsA("Array"):
-		t.ItemType.Validate(rName)
+		es = append(es, t.ItemType.Validate(rName)...)
 	case t.IsA("Map"):
 		// ValueType.Name should be empty (because it's unused) but we require types to have names in all other cases.
 		// This logic allows both to be validated.
 		oldName := t.ValueType.Name
 		t.ValueType.Name = "any_value"
-		t.ValueType.Validate(rName)
+		es = append(es, t.ValueType.Validate(rName)...)
 		t.ValueType.Name = oldName
 		if t.ValueType.Name != "" {
-			log.Fatalf("Property %s value_type.name can't be set in resource %s", t.Name, rName)
+			es = append(es, fmt.Errorf("property %s value_type.name can't be set in resource %s", fullFieldPath, rName))
 		}
 	case t.IsA("NestedObject"):
 		for _, p := range t.Properties {
-			p.Validate(rName)
+			es = append(es, p.Validate(rName)...)
 		}
 	default:
 	}

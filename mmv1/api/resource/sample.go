@@ -143,7 +143,7 @@ func (s *Sample) ValidateExternalProviders() (es []error) {
 	}
 
 	if len(unallowedProviders) > 0 {
-		es = append(es, fmt.Errorf("Providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders))
+		es = append(es, fmt.Errorf("providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders))
 	}
 
 	return es

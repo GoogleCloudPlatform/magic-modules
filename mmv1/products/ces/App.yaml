@@ -562,6 +562,7 @@ properties:
           validation:
            function: 'validation.StringIsJSON'
         - name: default
+          type: String
           description: |-
            Optional. Default value of the data. Represents a dynamically typed value
            which can be either null, a number, a string, a boolean, a struct,
