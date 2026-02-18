@@ -41,7 +41,6 @@ async:
     - delete
   result:
     resource_inside_response: true
-autogen_status: ""
 examples:
   - name: tpu_v2_queued_resource_basic
     primary_resource_id: qr
@@ -92,13 +91,11 @@ properties:
           type: NestedObject
           properties:
             - name: parent
-              type: ""
               required: true
               description: |
                 The parent resource name.
               diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
             - name: nodeId
-              type: ""
               description: |
                 Unqualified node identifier used to identify the node in the project once provisioned.
             - name: node
@@ -108,17 +105,14 @@ properties:
                 The node.
               properties:
                 - name: runtimeVersion
-                  type: ""
                   required: true
                   description: |
                     Runtime version for the TPU.
                 - name: acceleratorType
-                  type: ""
                   description: |
                     TPU accelerator type for the TPU. If not specified, this defaults to 'v2-8'.
                   default_from_api: true
                 - name: description
-                  type: ""
                   description: |
                     Text description of the TPU.
                 - name: networkConfig

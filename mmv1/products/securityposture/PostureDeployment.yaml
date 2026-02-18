@@ -38,7 +38,6 @@ autogen_async: true
 async:
   operation:
     base_url: '{{op_id}}'
-autogen_status: ""
 parameters:
   - name: parent
     type: String

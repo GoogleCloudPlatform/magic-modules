@@ -36,7 +36,6 @@ async:
   actions:
     - create
     - delete
-autogen_status: ""
 examples:
   - name: secure_source_manager_branch_rule_basic
     primary_resource_id: basic

@@ -43,7 +43,6 @@ exclude_import: true
 async:
   operation:
     base_url: '{{op_id}}'
-autogen_status: ""
 examples:
   - name: backend_service_signed_url_key
     primary_resource_id: backend_key

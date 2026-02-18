@@ -43,7 +43,6 @@ error_retry_predicates:
   - transport_tpg.IsCloudRunCreationConflict
 schema_version: 1
 state_upgraders: true
-autogen_status: ""
 custom_code:
   encoder: templates/terraform/encoders/cloud_run_domain_mapping.go.tmpl
   decoder: templates/terraform/decoders/cloud_run.go.tmpl

@@ -40,7 +40,6 @@ async:
   result:
     resource_inside_response: true
 taint_resource_on_failed_create: true
-autogen_status: ""
 examples:
   - name: gkeonprem_vmware_cluster_basic
     primary_resource_id: cluster-basic

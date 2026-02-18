@@ -37,7 +37,6 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-autogen_status: ""
 examples:
   - name: network_management_connectivity_test_instances
     primary_resource_id: instance-test

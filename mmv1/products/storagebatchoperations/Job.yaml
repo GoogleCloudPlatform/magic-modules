@@ -36,7 +36,6 @@ async:
     - create
   result:
     resource_inside_response: true
-autogen_status: ""
 custom_code:
   custom_update: templates/terraform/custom_update/storage_batch_operations_job.go.tmpl
   pre_delete: templates/terraform/pre_delete/storage_batch_operations_job.go.tmpl

@@ -45,7 +45,6 @@ async:
     base_url: '{{op_id}}'
 schema_version: 1
 state_upgraders: true
-autogen_status: ""
 examples:
   - name: network_services_mesh_basic
     primary_resource_id: default

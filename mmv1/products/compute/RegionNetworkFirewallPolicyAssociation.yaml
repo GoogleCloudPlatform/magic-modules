@@ -37,7 +37,6 @@ async:
   operation:
     base_url: '{{op_id}}'
 legacy_long_form_project: true
-autogen_status: ""
 examples:
   - name: region_network_firewall_policy_association
     primary_resource_id: default

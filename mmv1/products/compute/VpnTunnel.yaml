@@ -32,7 +32,6 @@ timeouts:
 async:
   operation:
     base_url: '{{op_id}}'
-autogen_status: ""
 custom_code:
   encoder: templates/terraform/encoders/vpn_tunnel.go.tmpl
   constants: templates/terraform/constants/vpn_tunnel.tmpl

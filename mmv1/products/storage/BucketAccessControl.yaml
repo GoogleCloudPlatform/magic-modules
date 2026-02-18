@@ -50,7 +50,6 @@ timeouts:
   delete_minutes: 20
 mutex: storage/buckets/{{bucket}}
 exclude_sweeper: true
-autogen_status: ""
 examples:
   - name: storage_bucket_access_control_public_bucket
     primary_resource_id: public_rule

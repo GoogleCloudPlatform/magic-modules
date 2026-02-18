@@ -42,7 +42,6 @@ async:
   check_response_func_absence: transport_tpg.PollCheckForAbsence
   suppress_error: true
   target_occurrences: 1
-autogen_status: ""
 custom_code:
   encoder: templates/terraform/encoders/no_send_name.go.tmpl
   update_encoder: templates/terraform/update_encoder/pubsub_subscription.tmpl

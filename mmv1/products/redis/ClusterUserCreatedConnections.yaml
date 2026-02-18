@@ -40,7 +40,6 @@ autogen_async: true
 async:
   operation:
     base_url: '{{op_id}}'
-autogen_status: ""
 custom_code:
   custom_delete: templates/terraform/custom_delete/redis_cluster_user_created_connections.go.tmpl
 examples:

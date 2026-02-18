@@ -51,7 +51,6 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-autogen_status: ""
 custom_code:
   test_check_destroy: templates/terraform/custom_check_destroy/consumer_quota_override.go.tmpl
 examples:

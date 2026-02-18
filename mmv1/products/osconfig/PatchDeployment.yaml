@@ -31,7 +31,6 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_status: ""
 custom_code:
   encoder: templates/terraform/encoders/os_config_patch_deployment.go.tmpl
   decoder: templates/terraform/decoders/os_config_patch_deployment.go.tmpl

@@ -36,7 +36,6 @@ autogen_async: true
 async:
   operation:
     base_url: '{{op_id}}'
-autogen_status: ""
 custom_code:
   decoder: templates/terraform/decoders/cloud_dataproc_batch.go.tmpl
   constants: templates/terraform/constants/cloud_dataproc_batch.go.tmpl

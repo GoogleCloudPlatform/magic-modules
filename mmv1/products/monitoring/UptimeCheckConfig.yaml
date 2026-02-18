@@ -33,7 +33,6 @@ timeouts:
 mutex: stackdriver/groups/{{project}}
 error_retry_predicates:
   - transport_tpg.IsMonitoringConcurrentEditError
-autogen_status: ""
 custom_code:
   encoder: templates/terraform/encoders/uptime_check_config.go.tmpl
   constants: templates/terraform/constants/monitoring_uptime_check_config.go.tmpl

@@ -39,7 +39,6 @@ exclude_sweeper: true
 async:
   operation:
     base_url: '{{op_id}}'
-autogen_status: ""
 custom_code:
   decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl
   constants: templates/terraform/constants/iam_workforce_pool_provider.go.tmpl

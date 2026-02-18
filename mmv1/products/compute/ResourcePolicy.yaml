@@ -39,7 +39,6 @@ sweeper:
 async:
   operation:
     base_url: '{{op_id}}'
-autogen_status: ""
 custom_code:
   constants: templates/terraform/constants/compute_resource_policy.go.tmpl
 examples:

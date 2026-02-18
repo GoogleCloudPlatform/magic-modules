@@ -42,7 +42,6 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-autogen_status: ""
 custom_code:
   constants: templates/terraform/constants/tpu_vm.go.tmpl
 examples:

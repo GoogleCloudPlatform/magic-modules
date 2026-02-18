@@ -32,7 +32,6 @@ autogen_async: true
 async:
   operation:
     base_url: '{{op_id}}'
-autogen_status: ""
 custom_code:
   constants: templates/terraform/constants/vmwareengine_resource.go.tmpl
 examples:

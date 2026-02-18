@@ -75,7 +75,6 @@ sweeper:
 async:
   operation:
     base_url: '{{op_id}}'
-autogen_status: ""
 custom_code:
   extra_schema_entry: templates/terraform/extra_schema_entry/subnetwork.tmpl
   constants: templates/terraform/constants/subnetwork.tmpl

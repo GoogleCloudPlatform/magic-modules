@@ -41,7 +41,6 @@ timeouts:
 async:
   operation:
     base_url: '{{op_id}}'
-autogen_status: ""
 examples:
   - name: machine_image_basic
     primary_resource_id: image

@@ -35,7 +35,7 @@ type Type struct {
 	ApiName string `yaml:"api_name,omitempty"`
 
 	// TODO rewrite: improve the parsing of properties based on type in resource yaml files.
-	Type string
+	Type string `yaml:"type,omitempty"`
 
 	// For nested fields, this only applies within the parent.
 	// For example, an optional parent can contain a required child.

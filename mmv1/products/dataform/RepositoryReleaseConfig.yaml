@@ -29,7 +29,6 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_status: ""
 examples:
   - name: dataform_repository_release_config
     primary_resource_id: release

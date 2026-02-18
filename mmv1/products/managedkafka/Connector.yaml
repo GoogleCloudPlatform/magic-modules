@@ -25,7 +25,6 @@ timeouts:
   insert_minutes: 60
   update_minutes: 30
   delete_minutes: 30
-autogen_status: ""
 examples:
   - name: managedkafka_connector_basic
     primary_resource_id: example

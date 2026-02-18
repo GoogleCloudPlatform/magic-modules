@@ -46,7 +46,6 @@ async:
   operation:
     base_url: '{{op_id}}'
 legacy_long_form_project: true
-autogen_status: ""
 examples:
   - name: cloudbuildv2_connection
     primary_resource_id: my-connection

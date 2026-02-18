@@ -297,7 +297,7 @@ type Resource struct {
 
 	// Tag autogen resources so that we can track them. In the future this will
 	// control if a resource is continuously generated from public OpenAPI docs
-	AutogenStatus string `yaml:"autogen_status"`
+	AutogenStatus string `yaml:"autogen_status,omitempty"`
 
 	// EXPERIMENTAL: this is an incomplete feature and may have several build errors.
 	// If true, this resource generates with the new plugin framework resource template

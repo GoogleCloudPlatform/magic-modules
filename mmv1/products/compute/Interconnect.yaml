@@ -31,7 +31,6 @@ timeouts:
 async:
   operation:
     base_url: '{{op_id}}'
-autogen_status: ""
 custom_code:
   constants: templates/terraform/constants/interconnect.go.tmpl
   post_create: templates/terraform/post_create/labels.tmpl

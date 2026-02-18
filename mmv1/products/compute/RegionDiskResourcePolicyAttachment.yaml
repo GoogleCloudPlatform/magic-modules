@@ -39,7 +39,6 @@ timeouts:
 async:
   operation:
     base_url: '{{op_id}}'
-autogen_status: ""
 custom_code:
   encoder: templates/terraform/encoders/compute_region_disk_resource_policies_attachment.go.tmpl
   decoder: templates/terraform/decoders/compute_disk_resource_policies_attachment.go.tmpl

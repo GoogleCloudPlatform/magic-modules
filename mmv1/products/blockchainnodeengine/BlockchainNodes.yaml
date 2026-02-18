@@ -34,7 +34,6 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-autogen_status: ""
 examples:
   - name: blockchain_nodes_basic
     primary_resource_id: default_node
