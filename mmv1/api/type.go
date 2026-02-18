@@ -513,9 +513,7 @@ func (t *Type) Validate(rName string) (es []error) {
 
 	switch {
 	case t.IsA("Array"):
-		if t.ItemType != nil {
-			es = append(es, t.ItemType.Validate(rName)...)
-		}
+		es = append(es, t.ItemType.Validate(rName)...)
 	case t.IsA("Map"):
 		// ValueType.Name should be empty (because it's unused) but we require types to have names in all other cases.
 		// This logic allows both to be validated.
