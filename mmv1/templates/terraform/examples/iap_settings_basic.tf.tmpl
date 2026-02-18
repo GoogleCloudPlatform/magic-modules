@@ -39,9 +39,7 @@ resource "google_iap_settings" "{{$.PrimaryResourceId}}" {
       login_page_uri = "https://test.com/?apiKey=abc"
     }
     oauth_settings {
-      login_hint    = "test"
-      client_id     = "test-client-id"
-      client_secret = "test-client-secret"
+      login_hint = "test"
     }
     workforce_identity_settings {
       workforce_pools = ["wif-pool"]

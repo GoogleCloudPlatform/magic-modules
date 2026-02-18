@@ -44,6 +44,11 @@ examples:
     vars:
       backend_service_name: 'iap-settings-tf'
       health_check_name: 'iap-bs-health-check'
+  - name: 'iap_settings_oauth_storage'
+    primary_resource_id: 'iap_settings_oauth'
+    vars:
+      backend_service_name: 'iap-settings-oauth'
+      health_check_name: 'iap-bs-health-check-oauth'
 parameters:
 properties:
   - name: 'name'
