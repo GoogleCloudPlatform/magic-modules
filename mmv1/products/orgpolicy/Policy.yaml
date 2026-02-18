@@ -129,6 +129,7 @@ properties:
               custom_flatten: 'templates/terraform/custom_flatten/enum_bool.go.tmpl'
               custom_expand: 'templates/terraform/custom_expand/enum_bool.go.tmpl'
             - name: 'parameters'
+              type: String
               description: 'Optional. Required for Managed Constraints if parameters defined in constraints. Pass parameter values when policy enforcement is enabled. Ensure that parameter value types match those defined in the constraint definition. For example: { \"allowedLocations\" : [\"us-east1\", \"us-west1\"], \"allowAll\" : true }'
               custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
               custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
@@ -213,6 +214,7 @@ properties:
               custom_flatten: 'templates/terraform/custom_flatten/enum_bool.go.tmpl'
               custom_expand: 'templates/terraform/custom_expand/enum_bool.go.tmpl'
             - name: 'parameters'
+              type: String
               description: 'Optional. Required for Managed Constraints if parameters defined in constraints. Pass parameter values when policy enforcement is enabled. Ensure that parameter value types match those defined in the constraint definition. For example: { \"allowedLocations\" : [\"us-east1\", \"us-west1\"], \"allowAll\" : true }'
               custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
               custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'

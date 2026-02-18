@@ -126,6 +126,7 @@ properties:
     validation:
       function: 'verify.ValidateGCEName'
   - name: 'networkId'
+    type: String
     description: |
       The unique identifier for the resource. This identifier is defined by the server.
     api_name: id
