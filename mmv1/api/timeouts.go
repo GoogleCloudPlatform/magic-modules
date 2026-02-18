@@ -13,10 +13,6 @@
 
 package api
 
-import (
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
-)
-
 // Default timeout for all operation types is 20, the Terraform default
 // (https://www.terraform.io/plugin/sdkv2/resources/retries-and-customizable-timeouts)
 // minutes. This can be overridden for each resource.
@@ -47,22 +43,24 @@ func (t *Timeouts) IsZero() bool {
 }
 
 // MarshalYAML implements a custom marshaller for the Timeouts struct.
-// It uses a generic helper to omit fields that are set to their default values.
 func (t *Timeouts) MarshalYAML() (interface{}, error) {
 	// Use a type alias to prevent infinite recursion.
 	type Alias Timeouts
 
 	defaults := NewTimeouts()
-	omitted, err := utils.OmitDefaultsForMarshaling(*t, *defaults)
-	if err != nil {
-		return nil, err
-	}
 
-	// If the resulting struct is empty (all fields match defaults), return nil.
-	// This ensures we get 'null' instead of '{}' if IsZero wasn't used.
-	if utils.IsEmpty(omitted) {
+	// TEMP: Retain legacy behavior where we only strip the block if
+	// ALL values are default. If any value differs, we write the full block.
+	// This prevents partial objects like { insert: 40 } (implicitly update=20)
+	// from being written if the intention is { insert: 40, update: 20, delete: 20 }.
+	//
+	// If it matches defaults exactly, return nil to print 'null' (or omit via IsZero).
+	if *t == *defaults {
 		return nil, nil
 	}
 
-	return (*Alias)(omitted.(*Timeouts)), nil
+	// Return the struct as is (cast to Alias).
+	// Because the fields have `omitempty` but are `int`, they will print
+	// unless they are 0. Since defaults are 20, they will print explicitly.
+	return (*Alias)(t), nil
 }
