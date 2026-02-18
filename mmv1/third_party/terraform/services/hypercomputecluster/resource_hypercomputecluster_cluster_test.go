@@ -74,6 +74,30 @@ func TestAccHypercomputeclusterCluster_existing(t *testing.T) {
 	})
 }
 
+func TestAccHypercomputeclusterCluster_new(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 8),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccHypercomputeclusterCluster_new(context),
+			},
+			{
+				ResourceName:            "google_hypercomputecluster_cluster.cluster",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"cluster_id", "labels", "location", "terraform_labels"},
+			},
+		},
+	})
+}
+
 func testAccHypercomputeclusterCluster_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
