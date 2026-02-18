@@ -34,10 +34,6 @@ iam_policy:
   min_version: beta
 kind: compute#machineImage
 id_format: projects/{{project}}/global/machineImages/{{name}}
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
 async:
   operation:
     base_url: '{{op_id}}'
@@ -59,7 +55,6 @@ examples:
       key_name: key
       keyring_name: keyring
       vm_name: my-vm
-parameters: []
 properties:
   - name: name
     type: String

@@ -30,10 +30,6 @@ update_url: projects/{{project}}/subscriptions/{{name}}
 create_verb: PUT
 update_verb: PATCH
 id_format: projects/{{project}}/subscriptions/{{name}}
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
 async:
   type: PollAsync
   actions:
@@ -139,7 +135,6 @@ examples:
       tag_key: tag_key
       tag_value: tag_value
       topic_name: example-topic
-parameters: []
 properties:
   - name: name
     type: String

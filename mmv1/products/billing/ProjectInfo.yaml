@@ -27,10 +27,6 @@ id_format: projects/{{project}}
 import_format:
   - projects/{{%project}}
   - '{{%project}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
 cai_asset_name_format: projects/{{project}}/billingInfo
 custom_code:
   encoder: templates/terraform/encoders/billing_project_info.go.tmpl
@@ -40,11 +36,9 @@ examples:
   - name: billing_project_info_basic
     primary_resource_id: default
     exclude_import_test: true
-    vars: {}
     test_env_vars:
       billing_account: BILLING_ACCT
       org_id: ORG_ID
-parameters: []
 properties:
   - name: billing_account
     type: String

@@ -52,10 +52,6 @@ iam_policy:
   iam_conditions_request_type: QUERY_PARAM
 kind: compute#subnetwork
 id_format: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
 custom_diff:
   - customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)
   - sendSecondaryIpRangeIfEmptyDiff
@@ -192,7 +188,6 @@ virtual_fields:
       empty list of secondary IP ranges to the API.
       Defaults to false.
     client_side: true
-parameters: []
 properties:
   - name: creationTimestamp
     type: Time

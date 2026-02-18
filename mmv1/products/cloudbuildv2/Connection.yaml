@@ -32,10 +32,6 @@ iam_policy:
 import_format:
   - projects/{{project}}/locations/{{location}}/connections/{{name}}
   - '{{name}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
 autogen_async: true
 sweeper:
   identifier_field: ""
@@ -57,11 +53,9 @@ examples:
   - name: cloudbuildv2_connection_ghe
     primary_resource_id: ""
     exclude_test: true
-    vars: {}
   - name: cloudbuildv2_connection_github
     primary_resource_id: ""
     exclude_test: true
-    vars: {}
 parameters:
   - name: name
     type: String

@@ -30,10 +30,6 @@ create_url: locations/{{location}}/workforcePools/{{workforce_pool_id}}/provider
 update_verb: PATCH
 import_format:
   - locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
 autogen_async: true
 exclude_sweeper: true
 async:
@@ -130,7 +126,6 @@ examples:
       workforce_pool_id: example-pool
     test_env_vars:
       org_id: ORG_ID
-parameters: []
 properties:
   - name: location
     type: String

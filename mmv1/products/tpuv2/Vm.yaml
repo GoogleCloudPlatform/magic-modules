@@ -27,10 +27,6 @@ self_link: projects/{{project}}/locations/{{zone}}/nodes/{{name}}
 create_url: projects/{{project}}/locations/{{zone}}/nodes?nodeId={{name}}
 update_url: projects/{{project}}/locations/{{zone}}/nodes/{{name}}
 update_verb: PATCH
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
 custom_diff:
   - acceleratorTypeCustomizeDiff
 autogen_async: true

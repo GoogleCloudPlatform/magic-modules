@@ -33,10 +33,6 @@ nested_query:
   is_list_of_ids: true
   modify_by_patch: false
 id_format: '{{project}}/{{region}}/{{disk}}/{{name}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
 async:
   operation:
     base_url: '{{op_id}}'

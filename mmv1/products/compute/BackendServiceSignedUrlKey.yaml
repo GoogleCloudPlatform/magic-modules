@@ -35,10 +35,6 @@ nested_query:
   is_list_of_ids: true
   modify_by_patch: false
 kind: compute#BackendServiceSignedUrlKey
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
 mutex: signedUrlKey/{{project}}/backendServices/{{backend_service}}/
 exclude_import: true
 async:

@@ -34,10 +34,6 @@ create_url: '{{parent}}/locations/{{location}}/postureDeployments?postureDeploym
 update_verb: PATCH
 import_format:
   - '{{%parent}}/locations/{{location}}/postureDeployments/{{posture_deployment_id}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
 autogen_async: true
 async:
   operation:

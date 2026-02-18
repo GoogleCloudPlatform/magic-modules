@@ -56,7 +56,6 @@ examples:
     primary_resource_id: endpoints-test
     vars:
       primary_resource_name: conn-test-endpoints
-parameters: []
 properties:
   - name: name
     type: String

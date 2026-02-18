@@ -366,7 +366,7 @@ type Resource struct {
 	// in API payloads are better handled with custom expand/encoder logic.
 	VirtualFields []*Type `yaml:"virtual_fields,omitempty"`
 
-	Parameters []*Type
+	Parameters []*Type `yaml:"parameters,omitempty"`
 
 	Properties []*Type
 }

@@ -27,10 +27,6 @@ update_verb: PATCH
 collection_url_key: items
 kind: compute#NodeGroup
 id_format: projects/{{project}}/zones/{{zone}}/nodeGroups/{{name}}
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
 sweeper:
   identifier_field: ""
   url_substitutions:

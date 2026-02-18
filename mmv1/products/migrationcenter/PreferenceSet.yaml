@@ -25,10 +25,6 @@ create_url: projects/{{project}}/locations/{{location}}/preferenceSets?preferenc
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/preferenceSets/{{preference_set_id}}
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
 autogen_async: true
 async:
   operation:

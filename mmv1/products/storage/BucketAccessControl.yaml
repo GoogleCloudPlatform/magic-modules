@@ -44,10 +44,6 @@ kind: storage#bucketAccessControl
 id_format: '{{bucket}}/{{entity}}'
 import_format:
   - '{{bucket}}/{{entity}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
 mutex: storage/buckets/{{bucket}}
 exclude_sweeper: true
 examples:
@@ -55,7 +51,6 @@ examples:
     primary_resource_id: public_rule
     vars:
       bucket_name: static-content-bucket
-parameters: []
 properties:
   - name: bucket
     type: ResourceRef

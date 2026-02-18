@@ -25,10 +25,6 @@ has_self_link: true
 collection_url_key: items
 kind: compute#vpnTunnel
 id_format: projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
 async:
   operation:
     base_url: '{{op_id}}'

@@ -30,10 +30,6 @@ iam_policy:
     - '{{policy_id}}'
 import_format:
   - projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
 include_in_tgc_next: true
 cai_asset_name_format: projects/{{project}}/regions/{{location}}/autoscalingPolicies/{{policy_id}}
 examples:

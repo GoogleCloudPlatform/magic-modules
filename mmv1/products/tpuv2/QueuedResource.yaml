@@ -24,10 +24,6 @@ min_version: beta
 immutable: true
 self_link: projects/{{project}}/locations/{{zone}}/queuedResources/{{name}}
 create_url: projects/{{project}}/locations/{{zone}}/queuedResources?queuedResourceId={{name}}
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
 autogen_async: true
 sweeper:
   identifier_field: ""

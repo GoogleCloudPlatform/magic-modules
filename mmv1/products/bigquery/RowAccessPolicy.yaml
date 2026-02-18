@@ -18,10 +18,6 @@ base_url: projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}/rowAc
 self_link: projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}/rowAccessPolicies/{{policy_id}}
 import_format:
   - projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}/rowAccessPolicies/{{policy_id}}
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
 custom_code:
   pre_delete: templates/terraform/pre_delete/bigquery_row_access_policy.go.tmpl
 examples:
@@ -31,7 +27,6 @@ examples:
       dataset_id: dataset_id
       policy_id: policy_id
       table_id: table_id
-parameters: []
 properties:
   - name: rowAccessPolicyReference
     type: NestedObject
