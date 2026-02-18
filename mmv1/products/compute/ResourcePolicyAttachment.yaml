@@ -13,6 +13,7 @@
 
 ---
 name: ResourcePolicyAttachment
+api_resource_type_kind: Instance
 description: |
   Adds existing resource policies to a compute instance. You can only add one policy
   which will be applied to this instance for scheduling start/stop operations.
@@ -75,4 +76,3 @@ properties:
     description: |
       The resource policy to be attached to the instance for scheduling start/stop
       operations. Do not specify the self link.
-api_resource_type_kind: Instance

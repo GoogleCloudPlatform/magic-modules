@@ -37,6 +37,7 @@ async:
       update_minutes: 60
       delete_minutes: 60
     base_url: '{{op_id}}'
+include_in_tgc_next: true
 examples:
   - name: database_migration_service_migration_job_mysql_to_mysql
     primary_resource_id: mysqltomysql
@@ -272,4 +273,3 @@ properties:
         type: String
         description: |
           The name of the VPC network to peer with the Cloud SQL private network.
-include_in_tgc_next: true

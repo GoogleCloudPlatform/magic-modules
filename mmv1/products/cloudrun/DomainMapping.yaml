@@ -43,6 +43,7 @@ error_retry_predicates:
   - transport_tpg.IsCloudRunCreationConflict
 schema_version: 1
 state_upgraders: true
+cai_asset_name_format: projects/{{project}}/locations/{{location}}/domainmappings/{{name}}
 custom_code:
   encoder: templates/terraform/encoders/cloud_run_domain_mapping.go.tmpl
   decoder: templates/terraform/decoders/cloud_run.go.tmpl
@@ -220,4 +221,3 @@ properties:
           **Note**: The Cloud Run API may add additional annotations that were not provided in your config.
           If terraform plan shows a diff where a server-side annotation is added, you can add it to your config
           or apply the lifecycle.ignore_changes rule to the metadata.0.annotations field.
-cai_asset_name_format: projects/{{project}}/locations/{{location}}/domainmappings/{{name}}

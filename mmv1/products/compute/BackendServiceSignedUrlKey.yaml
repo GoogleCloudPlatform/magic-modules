@@ -13,6 +13,7 @@
 
 ---
 name: BackendServiceSignedUrlKey
+api_resource_type_kind: BackendService
 description: |
   A key for signing Cloud CDN signed URLs for Backend Services.
 references:
@@ -43,6 +44,7 @@ exclude_import: true
 async:
   operation:
     base_url: '{{op_id}}'
+exclude_tgc: true
 examples:
   - name: backend_service_signed_url_key
     primary_resource_id: backend_key
@@ -85,5 +87,3 @@ properties:
     immutable: true
     sensitive: true
     ignore_read: true
-api_resource_type_kind: BackendService
-exclude_tgc: true

@@ -32,6 +32,7 @@ autogen_async: true
 async:
   operation:
     base_url: '{{op_id}}'
+include_in_tgc_next: true
 custom_code:
   constants: templates/terraform/constants/vmwareengine_resource.go.tmpl
 examples:
@@ -148,4 +149,3 @@ properties:
       The canonical name of the VMware Engine network in the form:
       projects/{project_number}/locations/{location}/vmwareEngineNetworks/{vmwareEngineNetworkId}
     output: true
-include_in_tgc_next: true

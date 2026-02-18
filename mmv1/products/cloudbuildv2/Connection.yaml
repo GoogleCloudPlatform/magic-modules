@@ -46,6 +46,8 @@ async:
   operation:
     base_url: '{{op_id}}'
 legacy_long_form_project: true
+exclude_tgc: true
+include_in_tgc_next: true
 examples:
   - name: cloudbuildv2_connection
     primary_resource_id: my-connection
@@ -358,5 +360,3 @@ properties:
   - name: etag
     type: Fingerprint
     description: This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding.
-exclude_tgc: true
-include_in_tgc_next: true

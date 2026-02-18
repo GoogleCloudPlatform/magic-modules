@@ -13,6 +13,7 @@
 
 ---
 name: RegionTargetTcpProxy
+api_resource_type_kind: TargetTcpProxy
 description: |
   Represents a RegionTargetTcpProxy resource, which is used by one or more
   forwarding rules to route incoming TCP requests to a regional TCP proxy load
@@ -106,4 +107,3 @@ properties:
       This field only applies when the forwarding rule that references
       this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.
     default_from_api: true
-api_resource_type_kind: TargetTcpProxy

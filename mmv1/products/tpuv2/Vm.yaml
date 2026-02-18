@@ -13,6 +13,7 @@
 
 ---
 name: Vm
+api_resource_type_kind: Node
 description: |
   A Cloud TPU VM instance.
 references:
@@ -452,4 +453,3 @@ properties:
             A string used to uniquely distinguish a worker within a TPU node.
           output: true
           min_version: beta
-api_resource_type_kind: Node

@@ -33,6 +33,7 @@ timeouts:
 mutex: stackdriver/groups/{{project}}
 error_retry_predicates:
   - transport_tpg.IsMonitoringConcurrentEditError
+include_in_tgc_next: true
 custom_code:
   encoder: templates/terraform/encoders/uptime_check_config.go.tmpl
   constants: templates/terraform/constants/monitoring_uptime_check_config.go.tmpl
@@ -419,4 +420,3 @@ properties:
             required: true
             description: The fully qualified name of the cloud function resource.
             immutable: true
-include_in_tgc_next: true

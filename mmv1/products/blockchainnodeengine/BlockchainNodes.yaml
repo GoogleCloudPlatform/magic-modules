@@ -13,6 +13,7 @@
 
 ---
 name: BlockchainNodes
+api_resource_type_kind: BlockchainNode
 description: |
   A representation of a blockchain node.
 references:
@@ -34,6 +35,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+include_in_tgc_next: true
 examples:
   - name: blockchain_nodes_basic
     primary_resource_id: default_node
@@ -206,5 +208,3 @@ properties:
     immutable: true
     enum_values:
       - ETHEREUM
-api_resource_type_kind: BlockchainNode
-include_in_tgc_next: true

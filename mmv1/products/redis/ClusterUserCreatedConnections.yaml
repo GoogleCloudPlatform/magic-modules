@@ -13,6 +13,7 @@
 
 ---
 name: ClusterUserCreatedConnections
+api_resource_type_kind: Cluster
 description: |
   Manages user created connections for Redis cluster
 references:
@@ -149,4 +150,3 @@ properties:
                       - CONNECTION_TYPE_READER
                       - CONNECTION_TYPE_PRIMARY
                       - CONNECTION_TYPE_DISCOVERY
-api_resource_type_kind: Cluster

@@ -13,6 +13,8 @@
 
 ---
 name: Batch
+api_variant_patterns:
+  - projects/{project}/locations/{location}/batches/{batch}
 description: |
   Dataproc Serverless Batches lets you run Spark workloads without requiring you to
   provision and manage your own Dataproc cluster.
@@ -36,6 +38,7 @@ autogen_async: true
 async:
   operation:
     base_url: '{{op_id}}'
+include_in_tgc_next: true
 custom_code:
   decoder: templates/terraform/decoders/cloud_dataproc_batch.go.tmpl
   constants: templates/terraform/constants/cloud_dataproc_batch.go.tmpl
@@ -590,6 +593,3 @@ properties:
         description: |
           Mapping of query variable names to values (equivalent to the Spark SQL command: SET name="value";).
         is_missing_in_cai: true
-api_variant_patterns:
-  - projects/{project}/locations/{location}/batches/{batch}
-include_in_tgc_next: true

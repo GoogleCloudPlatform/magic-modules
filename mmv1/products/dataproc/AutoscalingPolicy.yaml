@@ -13,6 +13,8 @@
 
 ---
 name: AutoscalingPolicy
+api_variant_patterns:
+  - projects/{project}/locations/{location}/autoscalingPolicies/{autoscalingPolicy}
 description: |
   Describes an autoscaling policy for Dataproc cluster autoscaler.
 base_url: projects/{{project}}/locations/{{location}}/autoscalingPolicies
@@ -32,6 +34,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+include_in_tgc_next: true
+cai_asset_name_format: projects/{{project}}/regions/{{location}}/autoscalingPolicies/{{policy_id}}
 examples:
   - name: dataproc_autoscaling_policy_basic
     primary_resource_id: basic
@@ -216,7 +220,3 @@ properties:
               means the autoscaler will scale down on any recommended change.
 
               Bounds: [0.0, 1.0]. Default: 0.0.
-api_variant_patterns:
-  - projects/{project}/locations/{location}/autoscalingPolicies/{autoscalingPolicy}
-include_in_tgc_next: true
-cai_asset_name_format: projects/{{project}}/regions/{{location}}/autoscalingPolicies/{{policy_id}}
