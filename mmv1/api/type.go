@@ -35,7 +35,7 @@ type Type struct {
 	ApiName string `yaml:"api_name,omitempty"`
 
 	// TODO rewrite: improve the parsing of properties based on type in resource yaml files.
-	Type string `yaml:"type,omitempty"`
+	Type string `yaml:"type"`
 
 	// For nested fields, this only applies within the parent.
 	// For example, an optional parent can contain a required child.
@@ -152,8 +152,8 @@ type Type struct {
 	// ====================
 	// Array Fields
 	// ====================
-	MinSize string `yaml:"min_size,omitempty"`
-	MaxSize string `yaml:"max_size,omitempty"`
+	MinSize int `yaml:"min_size,omitempty"`
+	MaxSize int `yaml:"max_size,omitempty"`
 	// Adds a ValidateFunc to the item schema
 	ItemValidation resource.Validation `yaml:"item_validation,omitempty"`
 

@@ -94,16 +94,16 @@ properties:
     type: NestedObject
     description: List of buckets and their objects to be transformed. Currently, only one bucket configuration is supported. If multiple buckets are specified, an error will be returned
     immutable: true
-    min_size: "1"
-    max_size: "1"
+    min_size: 1
+    max_size: 1
     properties:
       - name: buckets
         type: Array
         required: true
         description: List of buckets and their objects to be transformed.
         immutable: true
-        min_size: "1"
-        max_size: "1"
+        min_size: 1
+        max_size: 1
         item_type:
           type: NestedObject
           properties:
@@ -119,13 +119,13 @@ properties:
               exactly_one_of:
                 - bucket_list.0.buckets.0.prefix_list
                 - bucket_list.0.buckets.0.manifest
-              min_size: "1"
-              max_size: "1"
+              min_size: 1
+              max_size: 1
               properties:
                 - name: includedObjectPrefixes
                   type: Array
                   immutable: true
-                  min_size: "1"
+                  min_size: 1
                   item_type:
                     type: String
             - name: manifest

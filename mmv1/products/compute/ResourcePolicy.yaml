@@ -202,8 +202,8 @@ properties:
                 required: true
                 description: |
                   May contain up to seven (one for each day of the week) snapshot times.
-                min_size: "1"
-                max_size: "7"
+                min_size: 1
+                max_size: 7
                 is_set: true
                 item_type:
                   type: NestedObject
@@ -268,7 +268,7 @@ properties:
               - snapshot_schedule_policy.0.snapshot_properties.0.labels
               - snapshot_schedule_policy.0.snapshot_properties.0.storage_locations
               - snapshot_schedule_policy.0.snapshot_properties.0.guest_flush
-            max_size: "1"
+            max_size: 1
             is_set: true
             item_type:
               type: String

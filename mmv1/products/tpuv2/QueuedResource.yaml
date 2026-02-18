@@ -91,11 +91,13 @@ properties:
           type: NestedObject
           properties:
             - name: parent
+              type: String
               required: true
               description: |
                 The parent resource name.
               diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
             - name: nodeId
+              type: String
               description: |
                 Unqualified node identifier used to identify the node in the project once provisioned.
             - name: node
@@ -105,14 +107,17 @@ properties:
                 The node.
               properties:
                 - name: runtimeVersion
+                  type: String
                   required: true
                   description: |
                     Runtime version for the TPU.
                 - name: acceleratorType
+                  type: String
                   description: |
                     TPU accelerator type for the TPU. If not specified, this defaults to 'v2-8'.
                   default_from_api: true
                 - name: description
+                  type: String
                   description: |
                     Text description of the TPU.
                 - name: networkConfig

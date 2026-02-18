@@ -71,7 +71,7 @@ properties:
       A list of email addresses to which notifications relating to approval requests should be sent.
       Notifications relating to a resource will be sent to all emails in the settings of ancestor
       resources of that resource. A maximum of 50 email addresses are allowed.
-    max_size: "50"
+    max_size: 50
     is_set: true
     default_from_api: true
     item_type:
