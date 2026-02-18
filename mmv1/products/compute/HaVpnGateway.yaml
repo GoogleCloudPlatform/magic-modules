@@ -188,3 +188,18 @@ properties:
       You must always provide an up-to-date fingerprint hash in order to update or change labels,
       otherwise the request will fail with error 412 conditionNotMet.
     output: true
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    min_version: 'beta'
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the HaVpnGateway. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        ignore_read: true

@@ -39,6 +39,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+  constants: 'templates/terraform/constants/vmwareengine_resource.go.tmpl'
 examples:
   - name: 'vmware_engine_network_peering_ven'
     primary_resource_id: 'vmw-engine-network-peering'
@@ -83,7 +84,7 @@ properties:
     description: |
       The relative resource name of the network to peer with a standard VMware Engine network.
       The provided network can be a consumer VPC network or another standard VMware Engine network.
-
+    diff_suppress_func: 'ResourceVersionDiffSuppress'
     required: true
   - name: 'exportCustomRoutes'
     type: Boolean

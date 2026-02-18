@@ -7,7 +7,7 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/converters/cai"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/container/v1"
@@ -19,7 +19,7 @@ func NodePoolTfplan2caiConverter() cai.Tfplan2caiConverter {
 	}
 }
 
-func GetContainerNodePoolCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]caiasset.Asset, error) {
+func GetContainerNodePoolCaiObject(d tpgresource.TerraformResourceData, config *transport.Config) ([]caiasset.Asset, error) {
 	name, err := cai.AssetName(d, config, "//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}")
 	if err != nil {
 		return []caiasset.Asset{}, err
@@ -40,7 +40,7 @@ func GetContainerNodePoolCaiObject(d tpgresource.TerraformResourceData, config *
 	}
 }
 
-func GetContainerNodePoolApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+func GetContainerNodePoolApiObject(d tpgresource.TerraformResourceData, config *transport.Config) (map[string]interface{}, error) {
 	obj := make(map[string]interface{})
 	nameProp, err := expandContainerNodePoolName(d.Get("name"), d, config)
 	if err != nil {
@@ -94,11 +94,11 @@ func GetContainerNodePoolApiObject(d tpgresource.TerraformResourceData, config *
 	return obj, nil
 }
 
-func expandContainerNodePoolName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolName(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfig(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfig(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -201,19 +201,19 @@ func expandContainerNodePoolNodeConfig(v interface{}, d tpgresource.TerraformRes
 	return transformed, nil
 }
 
-func expandContainerNodePoolNodeConfigMachineType(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigMachineType(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigDiskSizeGb(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigDiskSizeGb(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigServiceAccount(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigServiceAccount(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigMetadata(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
+func expandContainerNodePoolNodeConfigMetadata(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (map[string]string, error) {
 	if v == nil {
 		return map[string]string{}, nil
 	}
@@ -224,11 +224,11 @@ func expandContainerNodePoolNodeConfigMetadata(v interface{}, d tpgresource.Terr
 	return m, nil
 }
 
-func expandContainerNodePoolNodeConfigImageType(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigImageType(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigLabels(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
+func expandContainerNodePoolNodeConfigLabels(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (map[string]string, error) {
 	if v == nil {
 		return map[string]string{}, nil
 	}
@@ -239,19 +239,19 @@ func expandContainerNodePoolNodeConfigLabels(v interface{}, d tpgresource.Terraf
 	return m, nil
 }
 
-func expandContainerNodePoolNodeConfigLocalSsdCount(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigLocalSsdCount(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigTags(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigTags(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigPreemptible(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigPreemptible(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigGuestAccelerator(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigGuestAccelerator(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	l := v.([]interface{})
 	req := make([]interface{}, 0, len(l))
 	for _, raw := range l {
@@ -280,23 +280,23 @@ func expandContainerNodePoolNodeConfigGuestAccelerator(v interface{}, d tpgresou
 	return req, nil
 }
 
-func expandContainerNodePoolNodeConfigGuestAcceleratorCount(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigGuestAcceleratorCount(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigGuestAcceleratorType(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigGuestAcceleratorType(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigDiskType(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigDiskType(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigMinCpuPlatform(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigMinCpuPlatform(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigTaint(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigTaint(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	l := v.([]interface{})
 	req := make([]interface{}, 0, len(l))
 	for _, raw := range l {
@@ -332,27 +332,27 @@ func expandContainerNodePoolNodeConfigTaint(v interface{}, d tpgresource.Terrafo
 	return req, nil
 }
 
-func expandContainerNodePoolNodeConfigTaintKey(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigTaintKey(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigTaintValue(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigTaintValue(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolNodeConfigTaintEffect(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolNodeConfigTaintEffect(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolInitialNodeCount(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolInitialNodeCount(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolVersion(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolVersion(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolAutoscaling(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolAutoscaling(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -385,19 +385,19 @@ func expandContainerNodePoolAutoscaling(v interface{}, d tpgresource.TerraformRe
 	return transformed, nil
 }
 
-func expandContainerNodePoolAutoscalingEnabled(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolAutoscalingEnabled(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolAutoscalingMinNodeCount(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolAutoscalingMinNodeCount(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolAutoscalingMaxNodeCount(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolAutoscalingMaxNodeCount(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolManagement(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolManagement(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -423,15 +423,15 @@ func expandContainerNodePoolManagement(v interface{}, d tpgresource.TerraformRes
 	return transformed, nil
 }
 
-func expandContainerNodePoolManagementAutoUpgrade(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolManagementAutoUpgrade(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolManagementAutoRepair(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolManagementAutoRepair(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandContainerNodePoolCluster(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolCluster(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	f, err := tpgresource.ParseGlobalFieldValue("clusters", v.(string), "project", d, config, true)
 	if err != nil {
 		return nil, fmt.Errorf("Invalid value for cluster: %s", err)
@@ -439,11 +439,11 @@ func expandContainerNodePoolCluster(v interface{}, d tpgresource.TerraformResour
 	return f.RelativeLink(), nil
 }
 
-func expandContainerNodePoolLocation(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandContainerNodePoolLocation(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
 	return v, nil
 }
 
-func expandNodePool(d *schema.ResourceData, prefix string) (*container.NodePool, error) {
+func expandNodePool(d tpgresource.TerraformResourceData, prefix string) (*container.NodePool, error) {
 	var name string
 	if v, ok := d.GetOk(prefix + "name"); ok {
 		if _, ok := d.GetOk(prefix + "name_prefix"); ok {
