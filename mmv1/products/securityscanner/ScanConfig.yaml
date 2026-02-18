@@ -27,6 +27,11 @@ update_verb: PATCH
 import_format:
   - '{{project}} {{name}}'
   - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_status: ""
 custom_code:
   custom_import: templates/terraform/custom_import/self_link_as_name.tmpl
 examples:
@@ -36,11 +41,6 @@ examples:
     vars:
       address_name: scan-basic-static-ip
       scan_config_name: terraform-scan-config
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-autogen_status: ""
 parameters: []
 properties:
   - name: name

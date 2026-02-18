@@ -32,6 +32,14 @@ nested_query:
   is_list_of_ids: true
   modify_by_patch: false
 id_format: '{{project}}/{{region}}/{{disk}}/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  operation:
+    base_url: '{{op_id}}'
+autogen_status: ""
 custom_code:
   encoder: templates/terraform/encoders/compute_region_disk_resource_policies_attachment.go.tmpl
   decoder: templates/terraform/decoders/compute_disk_resource_policies_attachment.go.tmpl
@@ -44,15 +52,6 @@ examples:
       disk_name: my-disk
       policy_name: my-resource-policy
       snapshot_name: my-snapshot
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  operation:
-    timeouts: null
-    base_url: '{{op_id}}'
-autogen_status: ""
 parameters:
   - name: disk
     type: ResourceRef

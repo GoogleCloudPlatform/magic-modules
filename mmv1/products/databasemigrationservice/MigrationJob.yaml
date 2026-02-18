@@ -25,6 +25,19 @@ create_url: projects/{{project}}/locations/{{location}}/migrationJobs?migrationJ
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/migrationJobs/{{migration_job_id}}
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 60
+    base_url: '{{op_id}}'
+autogen_status: ""
 examples:
   - name: database_migration_service_migration_job_mysql_to_mysql
     primary_resource_id: mysqltomysql
@@ -59,19 +72,6 @@ examples:
       source_sqldb_cert: cert
       source_sqldb_pass: password
       source_sqldb_user: username
-autogen_async: true
-timeouts:
-  insert_minutes: 60
-  update_minutes: 60
-  delete_minutes: 60
-async:
-  operation:
-    timeouts:
-      insert_minutes: 60
-      update_minutes: 60
-      delete_minutes: 60
-    base_url: '{{op_id}}'
-autogen_status: ""
 parameters:
   - name: migrationJobId
     type: String

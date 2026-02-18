@@ -26,6 +26,11 @@ update_verb: PATCH
 legacy_name: google_folder_access_approval_settings
 import_format:
   - folders/{{folder_id}}/accessApprovalSettings
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_status: ""
 custom_code:
   constants: templates/terraform/constants/access_approval.go.tmpl
   pre_create: templates/terraform/update_mask.go.tmpl
@@ -47,11 +52,6 @@ examples:
       folder_name: folder-faak
     test_env_vars:
       org_id: ORG_ID
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-autogen_status: ""
 parameters:
   - name: folder_id
     type: String

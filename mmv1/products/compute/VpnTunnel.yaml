@@ -25,6 +25,14 @@ has_self_link: true
 collection_url_key: items
 kind: compute#vpnTunnel
 id_format: projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  operation:
+    base_url: '{{op_id}}'
+autogen_status: ""
 custom_code:
   encoder: templates/terraform/encoders/vpn_tunnel.go.tmpl
   constants: templates/terraform/constants/vpn_tunnel.tmpl
@@ -52,15 +60,6 @@ examples:
       udp500_forwarding_rule_name: fr-udp500
       udp4500_forwarding_rule_name: fr-udp4500
       vpn_tunnel_name: tunnel-cipher
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  operation:
-    timeouts: null
-    base_url: '{{op_id}}'
-autogen_status: ""
 parameters:
   - name: region
     type: ResourceRef

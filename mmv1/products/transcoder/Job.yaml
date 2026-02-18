@@ -25,6 +25,11 @@ create_url: projects/{{project}}/locations/{{location}}/jobs
 import_format:
   - '{{project}} {{name}}'
   - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_status: ""
 custom_code:
   custom_import: templates/terraform/custom_import/self_link_as_name.tmpl
 examples:
@@ -72,11 +77,6 @@ examples:
     vars:
       bucket_name: transcoder-job
       job_template_id: example-job-template
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-autogen_status: ""
 parameters:
   - name: location
     type: String

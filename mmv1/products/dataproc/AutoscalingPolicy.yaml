@@ -28,6 +28,11 @@ iam_policy:
     - '{{policy_id}}'
 import_format:
   - projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_status: ""
 examples:
   - name: dataproc_autoscaling_policy_basic
     primary_resource_id: basic
@@ -39,11 +44,6 @@ examples:
     primary_resource_id: asp
     vars:
       name: dataproc-policy
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-autogen_status: ""
 parameters:
   - name: location
     type: String

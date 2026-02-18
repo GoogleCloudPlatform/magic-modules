@@ -25,6 +25,11 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{region}}/repositories/{{repository}}/releaseConfigs/{{name}}
 import_format:
   - projects/{{project}}/locations/{{region}}/repositories/{{repository}}/releaseConfigs/{{name}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_status: ""
 examples:
   - name: dataform_repository_release_config
     primary_resource_id: release
@@ -35,11 +40,6 @@ examples:
       git_repository_name: my/repository
       release_name: my_release
       secret_name: my_secret
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-autogen_status: ""
 parameters:
   - name: region
     type: String

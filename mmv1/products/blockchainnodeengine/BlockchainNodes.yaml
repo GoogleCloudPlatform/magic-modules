@@ -24,6 +24,17 @@ self_link: projects/{{project}}/locations/{{location}}/blockchainNodes/{{blockch
 create_url: projects/{{project}}/locations/{{location}}/blockchainNodes?blockchain_node_id={{blockchain_node_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/blockchainNodes/{{blockchain_node_id}}
+timeouts:
+  insert_minutes: 45
+  update_minutes: 20
+  delete_minutes: 35
+autogen_async: true
+async:
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+autogen_status: ""
 examples:
   - name: blockchain_nodes_basic
     primary_resource_id: default_node
@@ -33,18 +44,6 @@ examples:
     primary_resource_id: default_node_geth
     vars:
       blockchain_node_id: blockchain_geth_node
-autogen_async: true
-timeouts:
-  insert_minutes: 45
-  update_minutes: 20
-  delete_minutes: 35
-async:
-  operation:
-    timeouts: null
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
-autogen_status: ""
 parameters:
   - name: location
     type: String

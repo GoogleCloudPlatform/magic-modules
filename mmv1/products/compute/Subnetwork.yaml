@@ -52,14 +52,35 @@ iam_policy:
   iam_conditions_request_type: QUERY_PARAM
 kind: compute#subnetwork
 id_format: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_diff:
+  - customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)
+  - sendSecondaryIpRangeIfEmptyDiff
+sweeper:
+  identifier_field: ""
+  url_substitutions:
+    - region: us-west2
+    - region: us-central1
+    - region: us-east1
+    - region: europe-west4
+    - region: europe-west1
+    - region: southamerica-west1
+    - region: us-west1
+    - region: us-south1
+  dependencies:
+    - google_compute_forwarding_rule
+async:
+  operation:
+    base_url: '{{op_id}}'
+autogen_status: ""
 custom_code:
   extra_schema_entry: templates/terraform/extra_schema_entry/subnetwork.tmpl
   constants: templates/terraform/constants/subnetwork.tmpl
   post_update: templates/terraform/post_update/compute_subnetwork.go.tmpl
   tgc_decoder: templates/tgc_next/decoders/compute_subnetwork.go.tmpl
-custom_diff:
-  - customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)
-  - sendSecondaryIpRangeIfEmptyDiff
 examples:
   - name: subnetwork_basic
     primary_resource_id: network-with-private-secondary-ip-ranges
@@ -160,28 +181,6 @@ examples:
     vars:
       network_name: network-ipv6-only
       subnetwork_name: subnet-ipv6-only
-sweeper:
-  identifier_field: ""
-  url_substitutions:
-    - region: us-west2
-    - region: us-central1
-    - region: us-east1
-    - region: europe-west4
-    - region: europe-west1
-    - region: southamerica-west1
-    - region: us-west1
-    - region: us-south1
-  dependencies:
-    - google_compute_forwarding_rule
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  operation:
-    timeouts: null
-    base_url: '{{op_id}}'
-autogen_status: ""
 virtual_fields:
   - name: send_secondary_ip_range_if_empty
     type: Boolean

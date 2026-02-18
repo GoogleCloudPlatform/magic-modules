@@ -34,7 +34,16 @@ nested_query:
   is_list_of_ids: true
   modify_by_patch: false
 kind: compute#BackendServiceSignedUrlKey
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 mutex: signedUrlKey/{{project}}/backendServices/{{backend_service}}/
+exclude_import: true
+async:
+  operation:
+    base_url: '{{op_id}}'
+autogen_status: ""
 examples:
   - name: backend_service_signed_url_key
     primary_resource_id: backend_key
@@ -46,16 +55,6 @@ examples:
     external_providers:
       - random
       - time
-exclude_import: true
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  operation:
-    timeouts: null
-    base_url: '{{op_id}}'
-autogen_status: ""
 parameters:
   - name: backendService
     type: ResourceRef

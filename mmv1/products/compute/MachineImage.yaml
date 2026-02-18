@@ -34,6 +34,14 @@ iam_policy:
   min_version: beta
 kind: compute#machineImage
 id_format: projects/{{project}}/global/machineImages/{{name}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  operation:
+    base_url: '{{op_id}}'
+autogen_status: ""
 examples:
   - name: machine_image_basic
     primary_resource_id: image
@@ -52,15 +60,6 @@ examples:
       key_name: key
       keyring_name: keyring
       vm_name: my-vm
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  operation:
-    timeouts: null
-    base_url: '{{op_id}}'
-autogen_status: ""
 parameters: []
 properties:
   - name: name

@@ -24,6 +24,21 @@ update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/connections/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/connections?connectionId={{name}}
 update_verb: PATCH
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 50
+      update_minutes: 30
+      delete_minutes: 30
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+autogen_status: ""
 custom_code:
   constants: templates/terraform/constants/integration_connectors_connection.go.tmpl
   post_create: templates/terraform/post_create/integration_connectors_connection.go.tmpl
@@ -90,21 +105,6 @@ examples:
     vars:
       connection_name: test-box
       secret_id: test-secret
-autogen_async: true
-timeouts:
-  insert_minutes: 30
-  update_minutes: 30
-  delete_minutes: 30
-async:
-  operation:
-    timeouts:
-      insert_minutes: 50
-      update_minutes: 30
-      delete_minutes: 30
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
-autogen_status: ""
 parameters:
   - name: location
     type: String

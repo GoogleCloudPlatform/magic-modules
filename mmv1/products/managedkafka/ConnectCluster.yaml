@@ -21,6 +21,17 @@ create_url: projects/{{project}}/locations/{{location}}/connectClusters?connectC
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/connectClusters/{{connect_cluster_id}}
+timeouts:
+  insert_minutes: 60
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+autogen_status: ""
 examples:
   - name: managedkafka_connect_cluster_basic
     primary_resource_id: example
@@ -33,18 +44,6 @@ examples:
       org_id: ORG_ID
     external_providers:
       - time
-autogen_async: true
-timeouts:
-  insert_minutes: 60
-  update_minutes: 30
-  delete_minutes: 30
-async:
-  operation:
-    timeouts: null
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
-autogen_status: ""
 parameters:
   - name: location
     type: String

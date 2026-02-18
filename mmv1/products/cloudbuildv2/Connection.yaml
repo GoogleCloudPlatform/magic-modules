@@ -32,6 +32,21 @@ iam_policy:
 import_format:
   - projects/{{project}}/locations/{{location}}/connections/{{name}}
   - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+sweeper:
+  identifier_field: ""
+  url_substitutions:
+    - region: us-central1
+    - region: us-west1
+async:
+  operation:
+    base_url: '{{op_id}}'
+legacy_long_form_project: true
+autogen_status: ""
 examples:
   - name: cloudbuildv2_connection
     primary_resource_id: my-connection
@@ -46,22 +61,6 @@ examples:
     primary_resource_id: ""
     exclude_test: true
     vars: {}
-autogen_async: true
-sweeper:
-  identifier_field: ""
-  url_substitutions:
-    - region: us-central1
-    - region: us-west1
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  operation:
-    timeouts: null
-    base_url: '{{op_id}}'
-legacy_long_form_project: true
-autogen_status: ""
 parameters:
   - name: name
     type: String

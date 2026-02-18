@@ -20,6 +20,11 @@ self_link: projects/{{project}}/locations/{{location}}/unitOperations/{{unit_ope
 create_url: projects/{{project}}/locations/{{location}}/unitOperations?unitOperationId={{unit_operation_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/unitOperations/{{unit_operation_id}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_status: VW5pdE9wZXJhdGlvbg==
 custom_code:
   post_create: templates/terraform/post_create/saas_runtime_unit_operation_wait.go.tmpl
 examples:
@@ -51,11 +56,6 @@ examples:
       org_id: ORG_ID
       project: PROJECT_NAME
       project_number: PROJECT_NUMBER
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-autogen_status: VW5pdE9wZXJhdGlvbg==
 virtual_fields:
   - name: wait_for_completion
     type: Boolean

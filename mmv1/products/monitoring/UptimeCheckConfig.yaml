@@ -26,12 +26,19 @@ id_format: '{{name}}'
 import_format:
   - '{{project}} {{name}}'
   - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+mutex: stackdriver/groups/{{project}}
+error_retry_predicates:
+  - transport_tpg.IsMonitoringConcurrentEditError
+autogen_status: ""
 custom_code:
   encoder: templates/terraform/encoders/uptime_check_config.go.tmpl
   constants: templates/terraform/constants/monitoring_uptime_check_config.go.tmpl
   custom_delete: templates/terraform/custom_delete/monitoring_uptime_check_config.go.tmpl
   custom_import: templates/terraform/custom_import/self_link_as_name.tmpl
-mutex: stackdriver/groups/{{project}}
 examples:
   - name: uptime_check_config_http
     primary_resource_id: http
@@ -73,13 +80,6 @@ examples:
       project_id: PROJECT_NAME
     test_vars_overrides:
       zip_path: '"./test-fixtures/synthetic-fn-source.zip"'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-error_retry_predicates:
-  - transport_tpg.IsMonitoringConcurrentEditError
-autogen_status: ""
 parameters: []
 properties:
   - name: name

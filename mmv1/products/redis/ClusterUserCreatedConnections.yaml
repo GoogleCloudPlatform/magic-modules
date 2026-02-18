@@ -32,6 +32,15 @@ create_url: projects/{{project}}/locations/{{region}}/clusters/{{name}}?updateMa
 update_url: projects/{{project}}/locations/{{region}}/clusters/{{name}}?updateMask=cluster_endpoints
 create_verb: PATCH
 update_verb: PATCH
+timeouts:
+  insert_minutes: 60
+  update_minutes: 120
+  delete_minutes: 30
+autogen_async: true
+async:
+  operation:
+    base_url: '{{op_id}}'
+autogen_status: ""
 custom_code:
   custom_delete: templates/terraform/custom_delete/redis_cluster_user_created_connections.go.tmpl
 examples:
@@ -64,16 +73,6 @@ examples:
       policy_name: scpolicy
       subnet_network1_name: subnet-net1
       subnet_network2_name: subnet-net2
-autogen_async: true
-timeouts:
-  insert_minutes: 60
-  update_minutes: 120
-  delete_minutes: 30
-async:
-  operation:
-    timeouts: null
-    base_url: '{{op_id}}'
-autogen_status: ""
 parameters:
   - name: name
     type: String

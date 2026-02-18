@@ -25,6 +25,18 @@ update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules/{{branch_rule_id}}
   - '{{branch_rule_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+autogen_status: ""
 examples:
   - name: secure_source_manager_branch_rule_basic
     primary_resource_id: basic
@@ -52,19 +64,6 @@ examples:
       deletion_policy: '"DELETE"'
     oics_vars_overrides:
       deletion_policy: '"DELETE"'
-autogen_async: true
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  operation:
-    timeouts: null
-    base_url: '{{op_id}}'
-  actions:
-    - create
-    - delete
-autogen_status: ""
 parameters:
   - name: branch_rule_id
     type: String

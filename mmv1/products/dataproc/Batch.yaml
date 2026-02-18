@@ -28,6 +28,15 @@ delete_url: projects/{{project}}/locations/{{location}}/batches/{{batch_id}}
 collection_url_key: batches
 import_format:
   - projects/{{project}}/locations/{{location}}/batches/{{batch_id}}
+timeouts:
+  insert_minutes: 10
+  update_minutes: 20
+  delete_minutes: 5
+autogen_async: true
+async:
+  operation:
+    base_url: '{{op_id}}'
+autogen_status: ""
 custom_code:
   decoder: templates/terraform/decoders/cloud_dataproc_batch.go.tmpl
   constants: templates/terraform/constants/cloud_dataproc_batch.go.tmpl
@@ -113,16 +122,6 @@ examples:
     test_vars_overrides:
       prevent_destroy: "false"
       subnetwork_name: acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-autotuning-test-network", "dataproc-autotuning-test-subnetwork")
-autogen_async: true
-timeouts:
-  insert_minutes: 10
-  update_minutes: 20
-  delete_minutes: 5
-async:
-  operation:
-    timeouts: null
-    base_url: '{{op_id}}'
-autogen_status: ""
 parameters:
   - name: location
     type: String

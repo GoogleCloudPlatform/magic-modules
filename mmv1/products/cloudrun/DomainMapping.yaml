@@ -25,23 +25,12 @@ kind: DomainMapping
 id_format: locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}
 import_format:
   - locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}
-custom_code:
-  encoder: templates/terraform/encoders/cloud_run_domain_mapping.go.tmpl
-  decoder: templates/terraform/decoders/cloud_run.go.tmpl
-  constants: templates/terraform/constants/cloud_run_domain_mapping.go.tmpl
-custom_diff:
-  - hasMetadata
-examples:
-  - name: cloud_run_domain_mapping_basic
-    primary_resource_id: default
-    vars:
-      cloud_run_service_name: cloudrun-srv
-    test_env_vars:
-      namespace: PROJECT_NAME
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+custom_diff:
+  - hasMetadata
 async:
   type: PollAsync
   actions:
@@ -55,6 +44,17 @@ error_retry_predicates:
 schema_version: 1
 state_upgraders: true
 autogen_status: ""
+custom_code:
+  encoder: templates/terraform/encoders/cloud_run_domain_mapping.go.tmpl
+  decoder: templates/terraform/decoders/cloud_run.go.tmpl
+  constants: templates/terraform/constants/cloud_run_domain_mapping.go.tmpl
+examples:
+  - name: cloud_run_domain_mapping_basic
+    primary_resource_id: default
+    vars:
+      cloud_run_service_name: cloudrun-srv
+    test_env_vars:
+      namespace: PROJECT_NAME
 parameters:
   - name: location
     type: String

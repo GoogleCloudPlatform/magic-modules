@@ -40,6 +40,18 @@ id_format: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metr
 import_format:
   - services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}
   - projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+exclude_sweeper: true
+async:
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+autogen_status: ""
 custom_code:
   test_check_destroy: templates/terraform/custom_check_destroy/consumer_quota_override.go.tmpl
 examples:
@@ -72,19 +84,6 @@ examples:
       project_id: quota
     test_env_vars:
       org_id: ORG_ID
-autogen_async: true
-exclude_sweeper: true
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  operation:
-    timeouts: null
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
-autogen_status: ""
 parameters:
   - name: name
     type: String

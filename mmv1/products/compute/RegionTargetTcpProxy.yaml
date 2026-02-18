@@ -25,6 +25,19 @@ base_url: projects/{{project}}/regions/{{region}}/targetTcpProxies
 immutable: true
 has_self_link: true
 id_format: projects/{{project}}/regions/{{region}}/targetTcpProxies/{{name}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+sweeper:
+  identifier_field: ""
+  url_substitutions:
+    - region: europe-west4
+    - region: us-central1
+async:
+  operation:
+    base_url: '{{op_id}}'
+autogen_status: ""
 examples:
   - name: region_target_tcp_proxy_basic
     primary_resource_id: default
@@ -32,20 +45,6 @@ examples:
       health_check_name: health-check
       region_backend_service_name: backend-service
       region_target_tcp_proxy_name: test-proxy
-sweeper:
-  identifier_field: ""
-  url_substitutions:
-    - region: europe-west4
-    - region: us-central1
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  operation:
-    timeouts: null
-    base_url: '{{op_id}}'
-autogen_status: ""
 parameters:
   - name: region
     type: ResourceRef

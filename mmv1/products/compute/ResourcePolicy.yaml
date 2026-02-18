@@ -25,6 +25,21 @@ update_verb: PATCH
 collection_url_key: items
 kind: compute#resourcePolicy
 id_format: projects/{{project}}/regions/{{region}}/resourcePolicies/{{name}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+sweeper:
+  identifier_field: ""
+  url_substitutions:
+    - region: us-central1
+    - region: europe-west1
+    - region: us-east4
+    - region: europe-west9
+async:
+  operation:
+    base_url: '{{op_id}}'
+autogen_status: ""
 custom_code:
   constants: templates/terraform/constants/compute_resource_policy.go.tmpl
 examples:
@@ -83,22 +98,6 @@ examples:
     min_version: beta
     vars:
       name: gce-policy
-sweeper:
-  identifier_field: ""
-  url_substitutions:
-    - region: us-central1
-    - region: europe-west1
-    - region: us-east4
-    - region: europe-west9
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  operation:
-    timeouts: null
-    base_url: '{{op_id}}'
-autogen_status: ""
 parameters:
   - name: region
     type: ResourceRef

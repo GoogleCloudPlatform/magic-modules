@@ -26,6 +26,17 @@ create_url: projects/{{project}}/locations/{{location}}/bitbucketServerConfigs?b
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+autogen_status: ""
 custom_code:
   encoder: templates/terraform/encoders/cloudbuild_bitbucketserver_config.go.tmpl
   post_create: templates/terraform/post_create/cloudbuild_bitbucketserver_config.go.tmpl
@@ -47,18 +58,6 @@ examples:
       config_id: bbs-config
       global_address_name: private-ip-alloc
       network_name: vpc-network
-autogen_async: true
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  operation:
-    timeouts: null
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
-autogen_status: ""
 parameters:
   - name: config_id
     type: String

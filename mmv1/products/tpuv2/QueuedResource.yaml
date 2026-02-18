@@ -24,6 +24,24 @@ min_version: beta
 immutable: true
 self_link: projects/{{project}}/locations/{{zone}}/queuedResources/{{name}}
 create_url: projects/{{project}}/locations/{{zone}}/queuedResources?queuedResourceId={{name}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+sweeper:
+  identifier_field: ""
+  url_substitutions:
+    - zone: us-central1-c
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+  result:
+    resource_inside_response: true
+autogen_status: ""
 examples:
   - name: tpu_v2_queued_resource_basic
     primary_resource_id: qr
@@ -45,25 +63,6 @@ examples:
     test_env_vars:
       project: PROJECT_NAME
     skip_vcr: true
-autogen_async: true
-sweeper:
-  identifier_field: ""
-  url_substitutions:
-    - zone: us-central1-c
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  operation:
-    timeouts: null
-    base_url: '{{op_id}}'
-  actions:
-    - create
-    - delete
-  result:
-    resource_inside_response: true
-autogen_status: ""
 parameters:
   - name: zone
     type: String

@@ -26,10 +26,25 @@ self_link: projects/{{project}}/locations/{{zone}}/nodes/{{name}}
 create_url: projects/{{project}}/locations/{{zone}}/nodes?nodeId={{name}}
 update_url: projects/{{project}}/locations/{{zone}}/nodes/{{name}}
 update_verb: PATCH
-custom_code:
-  constants: templates/terraform/constants/tpu_vm.go.tmpl
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 custom_diff:
   - acceleratorTypeCustomizeDiff
+autogen_async: true
+sweeper:
+  identifier_field: ""
+  url_substitutions:
+    - zone: us-central1-c
+async:
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+autogen_status: ""
+custom_code:
+  constants: templates/terraform/constants/tpu_vm.go.tmpl
 examples:
   - name: tpu_v2_vm_basic
     primary_resource_id: tpu
@@ -50,22 +65,6 @@ examples:
     external_providers:
       - random
       - time
-autogen_async: true
-sweeper:
-  identifier_field: ""
-  url_substitutions:
-    - zone: us-central1-c
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  operation:
-    timeouts: null
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
-autogen_status: ""
 parameters:
   - name: zone
     type: String

@@ -24,6 +24,14 @@ base_url: projects/{{project}}/global/interconnects
 self_link: projects/{{project}}/global/interconnects/{{name}}
 update_verb: PATCH
 kind: compute#Interconnect
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  operation:
+    base_url: '{{op_id}}'
+autogen_status: ""
 custom_code:
   constants: templates/terraform/constants/interconnect.go.tmpl
   post_create: templates/terraform/post_create/labels.tmpl
@@ -42,15 +50,6 @@ examples:
     exclude_docs: true
     vars:
       interconnect_name: example-interconnect
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  operation:
-    timeouts: null
-    base_url: '{{op_id}}'
-autogen_status: ""
 parameters: []
 properties:
   - name: description

@@ -202,7 +202,7 @@ type Resource struct {
 	//
 	ImportFormat []string `yaml:"import_format,omitempty"`
 
-	CustomCode resource.CustomCode `yaml:"custom_code,omitempty"`
+	Timeouts *Timeouts `yaml:"timeouts,omitempty"`
 
 	// This block inserts entries into the customdiff.All() block in the
 	// resource schema -- the code for these custom diff functions must
@@ -212,13 +212,6 @@ type Resource struct {
 	// Lock name for a mutex to prevent concurrent API calls for a given
 	// resource.
 	Mutex string `yaml:"mutex,omitempty"`
-
-	// Examples in documentation. Backed by generated tests, and have
-	// corresponding OiCS walkthroughs.
-	Examples []*resource.Examples `yaml:"examples,omitempty"`
-
-	// Samples for generating tests and documentation
-	Samples []*resource.Sample `yaml:"samples,omitempty"`
 
 	// If true, generates product operation handling logic.
 	AutogenAsync bool `yaml:"autogen_async,omitempty"`
@@ -234,8 +227,6 @@ type Resource struct {
 
 	// Override sweeper settings
 	Sweeper resource.Sweeper `yaml:"sweeper,omitempty"`
-
-	Timeouts *Timeouts `yaml:"timeouts,omitempty"`
 
 	Async *Async `yaml:"async,omitempty"`
 
@@ -311,6 +302,15 @@ type Resource struct {
 	// EXPERIMENTAL: this is an incomplete feature and may have several build errors.
 	// If true, this resource generates with the new plugin framework resource template
 	FrameworkResource bool `yaml:"plugin_framework_experimental,omitempty"`
+
+	CustomCode resource.CustomCode `yaml:"custom_code,omitempty"`
+
+	// Examples in documentation. Backed by generated tests, and have
+	// corresponding OiCS walkthroughs.
+	Examples []*resource.Examples `yaml:"examples,omitempty"`
+
+	// Samples for generating tests and documentation
+	Samples []*resource.Sample `yaml:"samples,omitempty"`
 
 	// The three groups of []*Type fields are expected to be strictly ordered within a yaml file
 	// in the sequence of Virtual Fields -> Parameters -> Properties

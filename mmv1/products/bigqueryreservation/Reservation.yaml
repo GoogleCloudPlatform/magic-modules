@@ -24,6 +24,12 @@ update_mask: true
 create_url: projects/{{project}}/locations/{{location}}/reservations?reservationId={{name}}
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/reservations/{{name}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+exclude_sweeper: true
+autogen_status: ""
 examples:
   - name: bigquery_reservation_basic
     primary_resource_id: reservation
@@ -34,12 +40,6 @@ examples:
     exclude_docs: true
     vars:
       name: my-reservation
-exclude_sweeper: true
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-autogen_status: ""
 parameters:
   - name: location
     type: String
