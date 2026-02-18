@@ -338,7 +338,7 @@ resource "google_filestore_instance" "filestore_instance" {
     name        = "share"
   }
   networks {
-    network = "existing-net"
+    network = "existing-net-%{random_suffix}"
     modes   = ["MODE_IPV4"]
   }
 }
