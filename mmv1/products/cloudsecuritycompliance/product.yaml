@@ -16,6 +16,7 @@ name: CloudSecurityCompliance
 display_name: Cloud Security Compliance
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
+deletion_policy_opt_in: true
 versions:
   - base_url: https://cloudsecuritycompliance.googleapis.com/v1/
     name: ga
