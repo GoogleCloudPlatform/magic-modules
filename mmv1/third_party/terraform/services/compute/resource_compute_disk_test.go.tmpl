@@ -1137,6 +1137,28 @@ func TestAccComputeDisk_createSnapshotBeforeDestroy(t *testing.T) {
 	})
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
+func TestAccComputeDisk_VSSWindows(t *testing.T) {
+	t.Parallel()
+
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeDisk_VSSWindows(diskName),
+			},
+			{
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+{{- end }}
 
 func testAccComputeDisk_basic(diskName string, diskType string) string {
 	return fmt.Sprintf(`
@@ -2214,3 +2236,20 @@ resource "google_compute_disk" "foobar" {
 }
 `, context)
 }
+
+{{ if ne $.TargetVersionName `ga` -}}
+func testAccComputeDisk_VSSWindows(diskName string) string {
+	return fmt.Sprintf(`
+
+resource "google_compute_disk" "foobar" {
+  provider = google-beta
+
+  name = "%s"
+  size = 10
+  type = "pd-ssd"
+  zone = "us-central1-a"
+  erase_windows_vss_signature  = true
+}
+`, diskName)
+}
+{{- end }}
