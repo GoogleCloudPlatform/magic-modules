@@ -50,6 +50,30 @@ func TestAccHypercomputeclusterCluster_update(t *testing.T) {
 	})
 }
 
+func TestAccHypercomputeclusterCluster_existing(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 8),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccHypercomputeclusterCluster_existing(context),
+			},
+			{
+				ResourceName:            "google_hypercomputecluster_cluster.cluster",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"cluster_id", "labels", "location", "terraform_labels"},
+			},
+		},
+	})
+}
+
 func testAccHypercomputeclusterCluster_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
@@ -234,6 +258,175 @@ resource "google_hypercomputecluster_cluster" "cluster" {
         node_set_ids = ["nodesetnew"]
       }
       default_partition = "partitionnew"
+    }
+  }
+}
+`, context)
+}
+
+func testAccHypercomputeclusterCluster_existing(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+}
+
+locals {
+  project_id = data.google_project.project.name
+}
+
+resource "google_compute_network" "vpc" {
+  name                    = "existing-net-%{random_suffix}"
+  auto_create_subnetworks = false
+  routing_mode            = "REGIONAL"
+}
+
+resource "google_compute_subnetwork" "subnet" {
+  name          = "existing-subnet-%{random_suffix}"
+  ip_cidr_range = "10.0.1.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.vpc.id
+  private_ip_google_access = true
+}
+
+resource "google_compute_firewall" "allow_internal_subnet_communication" {
+  name    = "allow-internal-%{random_suffix}"
+  network = google_compute_network.vpc.id
+  direction = "INGRESS"
+  allow {
+    protocol = "all"
+  }
+  source_ranges = ["10.0.1.0/24"]
+  priority = 1000
+}
+
+resource "google_storage_bucket" "bucket" {
+  name     = "bucket-%{random_suffix}"
+  location = "US"
+  project  = "cloud-hypercomp-dev"
+  uniform_bucket_level_access = true
+}
+
+resource "google_filestore_instance" "filestore_instance" {
+  name     = "filestore-%{random_suffix}"
+  location = "us-central1-b"
+  tier     = "BASIC_HDD"
+  file_shares {
+    capacity_gb = 1024
+    name        = "share"
+  }
+  networks {
+    network = "existing-net"
+    modes   = ["MODE_IPV4"]
+  }
+}
+
+resource "google_compute_global_address" "private_ip_alloc" {
+  name          = "lustre-ip-alloc-%{random_suffix}"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 24
+  network       = google_compute_network.vpc.id
+}
+
+resource "google_service_networking_connection" "servicenetworking_conn" {
+  network                 = google_compute_network.vpc.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+}
+
+resource "google_lustre_instance" "lustre_instance" {
+  instance_id                 = "lustre-%{random_suffix}"
+  location                    = "us-central1-b"
+  filesystem                  = "tffs"
+  capacity_gib                = 18000
+  network                     = google_compute_network.vpc.id
+  per_unit_storage_throughput = 1000
+  timeouts {
+    create = "120m"
+  }
+  depends_on = [google_service_networking_connection.servicenetworking_conn]
+}
+
+resource "google_hypercomputecluster_cluster" "cluster" {
+  cluster_id                  = "tf%{random_suffix}"
+  location                    = "us-central1"
+  description                 = "Cluster Director instance created through Terraform"
+  network_resources {
+    id = "network-existing"
+    config {
+      existing_network {
+        network = google_compute_network.vpc.id
+        subnetwork = google_compute_subnetwork.subnet.id
+      }
+    }
+  }
+  storage_resources {
+    id = "bucket-existing"
+    config {
+      existing_bucket {
+        bucket = google_storage_bucket.bucket.name
+      }
+    }
+  }
+  storage_resources {
+    id = "filestore-existing"
+    config {
+      existing_filestore {
+        filestore = google_filestore_instance.filestore_instance.id
+      }
+    }
+  }
+  storage_resources {
+    id = "lustre-existing"
+    config {
+      existing_lustre {
+        lustre = google_lustre_instance.lustre_instance.id
+      }
+    }
+  }
+  compute_resources {
+    id = "compute1"
+    config {
+      new_on_demand_instances {
+        machine_type = "n2-standard-2"
+        zone = "us-central1-b"
+      }
+    }
+  }
+  orchestrator {
+    slurm {
+      login_nodes {
+        machine_type = "n2-standard-2"        
+        count = 1
+        zone = "us-central1-b"
+        boot_disk {
+          size_gb = "100"
+          type = "pd-balanced"
+        }
+        storage_configs {
+          id = "bucket-existing"
+          local_mount = "/home"
+        }
+      }
+      node_sets {
+        id = "nodeset1"
+        compute_id = "compute1"
+        static_node_count = 1
+        compute_instance {
+          boot_disk {
+            size_gb = "100"
+            type = "pd-balanced"
+          }
+        }
+        storage_configs {
+          id = "bucket-existing"
+          local_mount = "/home"
+        }
+      }
+      partitions {
+        id = "partition1"
+        node_set_ids = ["nodeset1"]
+      }
+      default_partition = "partition1"
     }
   }
 }
