@@ -485,7 +485,7 @@ func (t *Type) Validate(rName string) (es []error) {
 	}
 
 	// Check type is valid. Also allow empty as it's currently used in unit tests.
-	if !slices.Contains([]string{"", "Boolean", "Double", "Integer", "String", "Time", "Enum", "ResourceRef", "NestedObject", "Array", "KeyValuePairs", "KeyValueLabels", "KeyValueTerraformLabels", "KeyValueEffectiveLabels", "KeyValueAnnotations", "Map", "Fingerprint"}, t.Type) {
+	if !slices.Contains([]string{"Boolean", "Double", "Integer", "String", "Time", "Enum", "ResourceRef", "NestedObject", "Array", "KeyValuePairs", "KeyValueLabels", "KeyValueTerraformLabels", "KeyValueEffectiveLabels", "KeyValueAnnotations", "Map", "Fingerprint"}, t.Type) {
 		es = append(es, fmt.Errorf("unknown type %q for property %q in resource %s", t.Type, t.Name, rName))
 	}
 
@@ -513,20 +513,22 @@ func (t *Type) Validate(rName string) (es []error) {
 
 	switch {
 	case t.IsA("Array"):
-		t.ItemType.Validate(rName)
+		if t.ItemType != nil {
+			es = append(es, t.ItemType.Validate(rName)...)
+		}
 	case t.IsA("Map"):
 		// ValueType.Name should be empty (because it's unused) but we require types to have names in all other cases.
 		// This logic allows both to be validated.
 		oldName := t.ValueType.Name
 		t.ValueType.Name = "any_value"
-		t.ValueType.Validate(rName)
+		es = append(es, t.ValueType.Validate(rName)...)
 		t.ValueType.Name = oldName
 		if t.ValueType.Name != "" {
 			log.Fatalf("Property %s value_type.name can't be set in resource %s", t.Name, rName)
 		}
 	case t.IsA("NestedObject"):
 		for _, p := range t.Properties {
-			p.Validate(rName)
+			es = append(es, p.Validate(rName)...)
 		}
 	default:
 	}
