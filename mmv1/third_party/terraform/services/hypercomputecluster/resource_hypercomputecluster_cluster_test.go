@@ -341,6 +341,7 @@ resource "google_filestore_instance" "filestore_instance" {
     network = "existing-net-%{random_suffix}"
     modes   = ["MODE_IPV4"]
   }
+  depends_on = [google_compute_network.vpc] 
 }
 
 resource "google_compute_global_address" "private_ip_alloc" {
