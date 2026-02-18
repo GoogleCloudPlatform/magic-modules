@@ -522,7 +522,7 @@ func (t *Type) Validate(rName string) (es []error) {
 		es = append(es, t.ValueType.Validate(rName)...)
 		t.ValueType.Name = oldName
 		if t.ValueType.Name != "" {
-			log.Fatalf("Property %s value_type.name can't be set in resource %s", t.Name, rName)
+			es = append(es, fmt.Errorf("Property %s value_type.name can't be set in resource %s", t.Name, rName))
 		}
 	case t.IsA("NestedObject"):
 		for _, p := range t.Properties {
