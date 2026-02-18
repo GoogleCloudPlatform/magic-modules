@@ -507,6 +507,7 @@ properties:
               - 'RESERVATION_ANY'
               - 'RESERVATION_SPECIFIC'
           - name: 'key'
+            type: String
             immutable: true
             description: |
               Corresponds to the label key of a reservation resource. To target a
