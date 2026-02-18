@@ -152,8 +152,8 @@ type Type struct {
 	// ====================
 	// Array Fields
 	// ====================
-	MinSize int `yaml:"min_size,omitempty"`
-	MaxSize int `yaml:"max_size,omitempty"`
+	MinSize *int `yaml:"min_size,omitempty"`
+	MaxSize *int `yaml:"max_size,omitempty"`
 	// Adds a ValidateFunc to the item schema
 	ItemValidation resource.Validation `yaml:"item_validation,omitempty"`
 
