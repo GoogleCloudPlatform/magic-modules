@@ -145,8 +145,6 @@ type Type struct {
 	// Can only be overridden - we should never set this ourselves.
 	NewType string `yaml:"-"`
 
-	Properties []*Type `yaml:"properties,omitempty"`
-
 	EnumValues []string `yaml:"enum_values,omitempty"`
 
 	ExcludeDocsValues bool `yaml:"exclude_docs_values,omitempty"`
@@ -154,9 +152,8 @@ type Type struct {
 	// ====================
 	// Array Fields
 	// ====================
-	ItemType *Type  `yaml:"item_type,omitempty"`
-	MinSize  string `yaml:"min_size,omitempty"`
-	MaxSize  string `yaml:"max_size,omitempty"`
+	MinSize string `yaml:"min_size,omitempty"`
+	MaxSize string `yaml:"max_size,omitempty"`
 	// Adds a ValidateFunc to the item schema
 	ItemValidation resource.Validation `yaml:"item_validation,omitempty"`
 
@@ -342,6 +339,9 @@ type Type struct {
 	TGCIgnoreTerraformCustomFlatten bool `yaml:"tgc_ignore_terraform_custom_flatten,omitempty"`
 
 	TGCIgnoreRead bool `yaml:"tgc_ignore_read,omitempty"`
+
+	Properties []*Type `yaml:"properties,omitempty"`
+	ItemType   *Type   `yaml:"item_type,omitempty"`
 }
 
 const MAX_NAME = 20
@@ -364,10 +364,12 @@ func (t *Type) MarshalYAML() (interface{}, error) {
 	defaults.Resource = t.Resource
 	defaults.ParentName = t.ParentName
 	defaults.setShallowDefaults(resourceMetadata)
-	defaults.Name = ""
 	defaults.Type = ""
 	defaults.Resource = ""
-	defaults.ParentName = ""
+	if defaults.ParentName != defaults.Name {
+		defaults.ParentName = ""
+		defaults.Name = ""
+	}
 
 	// OmitDefaultsForMarshaling creates a clone of the struct where any field
 	// matching its default value is set to its zero-value, allowing `omitempty` to work.
