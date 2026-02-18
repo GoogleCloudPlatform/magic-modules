@@ -22,8 +22,8 @@ jobs:
           cd repo
           git config user.name "modular-magician"
           git config user.email "magic-modules@google.com"
-          git fetch origin ${{ github.base_ref }} # Fetch the base branch
-          git merge --no-ff origin/${{ github.base_ref }} # Merge with the base branch
+          git fetch origin ${GITHUB_BASE_REF} # Fetch the base branch
+          git merge --no-ff origin/${GITHUB_BASE_REF} # Merge with the base branch
       - name: Set up Ruby
         uses: ruby/setup-ruby@036ef458ddccddb148a2b9fb67e95a22fdbf728b # v1.160.0
         with:
