@@ -391,6 +391,21 @@ func (t *Type) MarshalYAML() (interface{}, error) {
 		return nil, err
 	}
 
+	// Fix: Ensure float values (like 0.0) are marshaled as floats (0.0) with !!float tag.
+	// If we don't set the tag, it might be emitted as '0' (int) or '!!int 0.0' (invalid).
+	if _, ok := t.DefaultValue.(float64); ok {
+		for i := 0; i < len(node.Content); i += 2 {
+			if node.Content[i].Value == "default_value" {
+				valNode := node.Content[i+1]
+				if !strings.Contains(valNode.Value, ".") && !strings.Contains(strings.ToLower(valNode.Value), "e") {
+					valNode.Value = valNode.Value + ".0"
+				}
+				valNode.Tag = "!!float"
+				break
+			}
+		}
+	}
+
 	// Special handling for `properties` field.
 	// If the original `properties` slice was explicitly empty (`[]`), `omitempty`
 	// would have removed it during the node encoding. We need to add it back in.

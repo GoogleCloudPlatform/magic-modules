@@ -198,7 +198,7 @@ properties:
               Bounds: [0.0, 1.0].
           - name: scaleUpMinWorkerFraction
             type: Double
-            default_value: 0
+            default_value: 0.0
             description: |
               Minimum scale-up threshold as a fraction of total cluster size before scaling
               occurs. For example, in a 20-worker cluster, a threshold of 0.1 means the autoscaler
@@ -208,7 +208,7 @@ properties:
               Bounds: [0.0, 1.0]. Default: 0.0.
           - name: scaleDownMinWorkerFraction
             type: Double
-            default_value: 0
+            default_value: 0.0
             description: |
               Minimum scale-down threshold as a fraction of total cluster size before scaling occurs.
               For example, in a 20-worker cluster, a threshold of 0.1 means the autoscaler must
