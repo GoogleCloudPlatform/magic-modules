@@ -19,9 +19,9 @@ references:
     Managing Migration Preferences: https://cloud.google.com/migration-center/docs/migration-preferences
   api: https://cloud.google.com/migration-center/docs/reference/rest/v1
 base_url: projects/{{project}}/locations/{{location}}/preferenceSets
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/preferenceSets/{{preference_set_id}}
 create_url: projects/{{project}}/locations/{{location}}/preferenceSets?preferenceSetId={{preference_set_id}}
+update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/preferenceSets/{{preference_set_id}}

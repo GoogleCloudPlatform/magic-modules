@@ -19,9 +19,9 @@ references:
     Database Migration: https://cloud.google.com/database-migration/docs/
   api: https://cloud.google.com/database-migration/docs/reference/rest/v1/projects.locations.migrationJobs/create
 base_url: projects/{{project}}/locations/{{location}}/migrationJobs
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/migrationJobs/{{migration_job_id}}
 create_url: projects/{{project}}/locations/{{location}}/migrationJobs?migrationJobId={{migration_job_id}}
+update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/migrationJobs/{{migration_job_id}}

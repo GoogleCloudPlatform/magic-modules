@@ -15,9 +15,9 @@
 name: VpcFlowLogsConfig
 description: VPC Flow Logs Config is a resource that lets you configure Flow Logs for Networks, Subnets, Interconnect attachments or VPN Tunnels.
 base_url: projects/{{project}}/locations/{{location}}/vpcFlowLogsConfigs
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/vpcFlowLogsConfigs/{{vpc_flow_logs_config_id}}
 create_url: projects/{{project}}/locations/{{location}}/vpcFlowLogsConfigs?vpcFlowLogsConfigId={{vpc_flow_logs_config_id}}
+update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/vpcFlowLogsConfigs/{{vpc_flow_logs_config_id}}

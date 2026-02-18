@@ -25,8 +25,8 @@ docs:
     You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding
     by using the `google_project_service_identity` resource.
 base_url: projects/{{project}}/subscriptions
-update_mask: true
 update_url: projects/{{project}}/subscriptions/{{name}}
+update_mask: true
 create_verb: PUT
 update_verb: PATCH
 id_format: projects/{{project}}/subscriptions/{{name}}

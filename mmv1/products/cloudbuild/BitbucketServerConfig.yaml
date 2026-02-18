@@ -20,9 +20,9 @@ references:
     Connect to a Bitbucket Server host: https://cloud.google.com/build/docs/automating-builds/bitbucket/connect-host-bitbucket-server
   api: https://cloud.google.com/build/docs/api/reference/rest/v1/projects.locations.bitbucketServerConfigs
 base_url: projects/{{project}}/locations/{{location}}/bitbucketServerConfigs
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}
 create_url: projects/{{project}}/locations/{{location}}/bitbucketServerConfigs?bitbucketServerConfigId={{config_id}}
+update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/bitbucketServerConfigs/{{config_id}}

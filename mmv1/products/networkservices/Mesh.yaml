@@ -21,9 +21,9 @@ references:
   guides: {}
   api: https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.meshes
 base_url: projects/{{project}}/locations/{{location}}/meshes
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/meshes/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/meshes?meshId={{name}}
+update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/meshes/{{name}}

@@ -20,9 +20,9 @@ references:
     Official Documentation: https://cloud.google.com/integration-connectors/docs/createconnection
   api: https://cloud.google.com/integration-connectors/docs/reference/rest/v1/projects.locations.connections
 base_url: projects/{{project}}/locations/{{location}}/connections
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/connections/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/connections?connectionId={{name}}
+update_mask: true
 update_verb: PATCH
 timeouts:
   insert_minutes: 30

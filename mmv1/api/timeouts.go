@@ -15,7 +15,6 @@ package api
 
 import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
-	"gopkg.in/yaml.v3"
 )
 
 // Default timeout for all operation types is 20, the Terraform default
@@ -66,15 +65,4 @@ func (t *Timeouts) MarshalYAML() (interface{}, error) {
 	}
 
 	return (*Alias)(omitted.(*Timeouts)), nil
-}
-
-func (t *Timeouts) UnmarshalYAML(value *yaml.Node) error {
-	// Start with a struct containing all the default values.
-	*t = *NewTimeouts()
-
-	type Alias Timeouts
-	aliasObj := (*Alias)(t)
-
-	// Decode overrides the defaults with whatever is in the YAML.
-	return value.Decode(aliasObj)
 }

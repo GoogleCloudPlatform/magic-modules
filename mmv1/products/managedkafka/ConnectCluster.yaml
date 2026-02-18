@@ -15,9 +15,9 @@
 name: ConnectCluster
 description: A Managed Service for Kafka Connect cluster.
 base_url: projects/{{project}}/locations/{{location}}/connectClusters
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/connectClusters/{{connect_cluster_id}}
 create_url: projects/{{project}}/locations/{{location}}/connectClusters?connectClusterId={{connect_cluster_id}}
+update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/connectClusters/{{connect_cluster_id}}

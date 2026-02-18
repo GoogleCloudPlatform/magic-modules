@@ -28,9 +28,9 @@ references:
     Create and deploy a posture: https://cloud.google.com/security-command-center/docs/how-to-use-security-posture
   api: https://cloud.google.com/security-command-center/docs/reference/securityposture/rest/v1/organizations.locations.postureDeployments
 base_url: '{{parent}}/locations/{{location}}/postureDeployments'
-update_mask: true
 self_link: '{{parent}}/locations/{{location}}/postureDeployments/{{posture_deployment_id}}'
 create_url: '{{parent}}/locations/{{location}}/postureDeployments?postureDeploymentId={{posture_deployment_id}}'
+update_mask: true
 update_verb: PATCH
 import_format:
   - '{{%parent}}/locations/{{location}}/postureDeployments/{{posture_deployment_id}}'

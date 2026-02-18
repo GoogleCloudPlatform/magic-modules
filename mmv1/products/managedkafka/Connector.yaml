@@ -15,9 +15,9 @@
 name: Connector
 description: A Managed Service for Kafka Connect Connectors.
 base_url: projects/{{project}}/locations/{{location}}/connectClusters/{{connect_cluster}}/connectors
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/connectClusters/{{connect_cluster}}/connectors/{{connector_id}}
 create_url: projects/{{project}}/locations/{{location}}/connectClusters/{{connect_cluster}}/connectors?connectorId={{connector_id}}
+update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/connectClusters/{{connect_cluster}}/connectors/{{connector_id}}

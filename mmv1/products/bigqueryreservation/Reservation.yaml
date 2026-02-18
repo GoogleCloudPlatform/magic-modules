@@ -20,8 +20,8 @@ references:
     Introduction to Reservations: https://cloud.google.com/bigquery/docs/reservations-intro
   api: https://cloud.google.com/bigquery/docs/reference/reservations/rest/v1/projects.locations.reservations/create
 base_url: projects/{{project}}/locations/{{location}}/reservations
-update_mask: true
 create_url: projects/{{project}}/locations/{{location}}/reservations?reservationId={{name}}
+update_mask: true
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/reservations/{{name}}
 exclude_sweeper: true

@@ -21,8 +21,8 @@ references:
   api: https://cloud.google.com/security-scanner/docs/reference/rest/v1beta/projects.scanConfigs
 base_url: projects/{{project}}/scanConfigs
 min_version: beta
-update_mask: true
 self_link: '{{name}}'
+update_mask: true
 update_verb: PATCH
 import_format:
   - '{{project}} {{name}}'

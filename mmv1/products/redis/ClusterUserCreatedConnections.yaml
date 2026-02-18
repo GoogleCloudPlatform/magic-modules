@@ -27,10 +27,10 @@ docs:
     If the corresponding forwarding rule is represented in your terraform configuration it is recommended to delete that
     `google_compute_forwarding_rule` resource at the same time.
 base_url: projects/{{project}}/locations/{{region}}/clusters
-update_mask: true
 self_link: projects/{{project}}/locations/{{region}}/clusters/{{name}}
 create_url: projects/{{project}}/locations/{{region}}/clusters/{{name}}?updateMask=cluster_endpoints
 update_url: projects/{{project}}/locations/{{region}}/clusters/{{name}}?updateMask=cluster_endpoints
+update_mask: true
 create_verb: PATCH
 update_verb: PATCH
 timeouts:

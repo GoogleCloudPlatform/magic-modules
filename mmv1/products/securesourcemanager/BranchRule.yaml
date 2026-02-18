@@ -19,8 +19,8 @@ references:
     Official Documentation: https://cloud.google.com/secure-source-manager/docs/overview
   api: https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.repositories.branchRules
 base_url: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules?branch_rule_id={{branch_rule_id}}
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules/{{branch_rule_id}}
+update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules/{{branch_rule_id}}

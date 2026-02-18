@@ -86,10 +86,6 @@ type Resource struct {
 	// [Optional] If set to true, the resource is not able to be updated.
 	Immutable bool `yaml:"immutable,omitempty"`
 
-	// [Optional] If set to true, this resource uses an update mask to perform
-	// updates. This is typical of newer GCP APIs.
-	UpdateMask bool `yaml:"update_mask,omitempty"`
-
 	// [Optional] If set to true, the object has a `self_link` field. This is
 	// typical of older GCP APIs.
 	HasSelfLink bool `yaml:"has_self_link,omitempty"`
@@ -119,6 +115,11 @@ type Resource struct {
 	// [Optional] The URL used to update the resource. Defaults to the self
 	// link.
 	UpdateUrl string `yaml:"update_url,omitempty"`
+
+	// [Optional] If set to true, this resource uses an update mask to perform
+	// updates. This is typical of newer GCP APIs.
+	UpdateMask bool `yaml:"update_mask,omitempty"`
+
 	// [Optional] The HTTP verb used during create. Defaults to POST.
 	CreateVerb string `yaml:"create_verb,omitempty"`
 

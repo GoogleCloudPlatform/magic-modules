@@ -19,9 +19,9 @@ references:
     Database Migration: https://cloud.google.com/database-migration/docs/
   api: https://cloud.google.com/database-migration/docs/reference/rest/v1/projects.locations.connectionProfiles/create
 base_url: projects/{{project}}/locations/{{location}}/connectionProfiles
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}
 create_url: projects/{{project}}/locations/{{location}}/connectionProfiles?connectionProfileId={{connection_profile_id}}
+update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}

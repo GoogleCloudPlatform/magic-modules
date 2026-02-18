@@ -19,8 +19,8 @@ references:
     Official Documentation: https://cloud.google.com/monitoring/uptime-checks/
   api: https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.uptimeCheckConfigs
 base_url: v3/projects/{{project}}/uptimeCheckConfigs
-update_mask: true
 self_link: v3/{{name}}
+update_mask: true
 update_verb: PATCH
 id_format: '{{name}}'
 import_format:

@@ -22,8 +22,8 @@ references:
   guides: {}
   api: https://cloud.google.com/access-approval/docs/reference/rest/v1/folders
 base_url: folders/{{folder_id}}/accessApprovalSettings
-update_mask: true
 self_link: folders/{{folder_id}}/accessApprovalSettings
+update_mask: true
 create_verb: PATCH
 update_verb: PATCH
 legacy_name: google_folder_access_approval_settings

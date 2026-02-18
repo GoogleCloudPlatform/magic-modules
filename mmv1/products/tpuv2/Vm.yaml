@@ -22,10 +22,10 @@ references:
   api: https://cloud.google.com/tpu/docs/reference/rest/v2/projects.locations.nodes
 base_url: projects/{{project}}/locations/{{zone}}/nodes
 min_version: beta
-update_mask: true
 self_link: projects/{{project}}/locations/{{zone}}/nodes/{{name}}
 create_url: projects/{{project}}/locations/{{zone}}/nodes?nodeId={{name}}
 update_url: projects/{{project}}/locations/{{zone}}/nodes/{{name}}
+update_mask: true
 update_verb: PATCH
 custom_diff:
   - acceleratorTypeCustomizeDiff

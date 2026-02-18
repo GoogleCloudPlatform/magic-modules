@@ -20,9 +20,9 @@ references:
     Sole-Tenant Nodes: https://cloud.google.com/compute/docs/nodes/
   api: https://cloud.google.com/compute/docs/reference/rest/v1/nodeGroups
 base_url: projects/{{project}}/zones/{{zone}}/nodeGroups
-update_mask: true
 has_self_link: true
 create_url: projects/{{project}}/zones/{{zone}}/nodeGroups?initialNodeCount=PRE_CREATE_REPLACE_ME
+update_mask: true
 update_verb: PATCH
 collection_url_key: items
 kind: compute#NodeGroup
