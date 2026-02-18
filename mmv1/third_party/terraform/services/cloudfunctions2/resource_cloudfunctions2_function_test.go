@@ -4,9 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-{{ if ne $.TargetVersionName "ga" }}
-        "github.com/hashicorp/terraform-plugin-testing/plancheck"
-{{ end }}
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -646,72 +644,67 @@ output "binary_authorization_policy_eq" {
 `, context)
 }
 
-{{ if ne $.TargetVersionName "ga" }}
-
 func TestAccCloudfunctions2function_cloudfunctions2DirectvpcExample_update(t *testing.T) {
-        t.Parallel()
+	t.Parallel()
 
-        context := map[string]interface{}{
-                "project":       envvar.GetTestProjectFromEnv(),
-                "location":      "us-central1",
-                "zip_path":      "./test-fixtures/function-source.zip",
-                "random_suffix": acctest.RandString(t, 10),
-        }
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"location":      "us-central1",
+		"zip_path":      "./test-fixtures/function-source.zip",
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-        acctest.VcrTest(t, resource.TestCase{
-                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-                ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-                CheckDestroy:             testAccCheckCloudfunctions2functionDestroyProducer(t),
-                Steps: []resource.TestStep{
-                        {
-                                Config: testAccCloudfunctions2function_cloudfunctions2DirectvpcExample_basic(context),
-                        },
-                        {
-                                ResourceName:            "google_cloudfunctions2_function.function",
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"build_config.0.source.0.storage_source.0.bucket", "build_config.0.source.0.storage_source.0.object", "labels", "location", "terraform_labels"},
-                        },
-                        {
-                                Config: testAccCloudfunctions2function_cloudfunctions2DirectvpcExample_update(context),
-                                ConfigPlanChecks: resource.ConfigPlanChecks{
-                                  PreApply: []plancheck.PlanCheck{
-                                    plancheck.ExpectResourceAction("google_cloudfunctions2_function.function", plancheck.ResourceActionUpdate),
-                                  },
-                                },
-                        },
-                        {
-                                ResourceName:            "google_cloudfunctions2_function.function",
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"build_config.0.source.0.storage_source.0.bucket", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.generation", "labels", "location", "terraform_labels"},
-                        },
-                },
-        })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudfunctions2functionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudfunctions2function_cloudfunctions2DirectvpcExample_basic(context),
+			},
+			{
+				ResourceName:            "google_cloudfunctions2_function.function",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"build_config.0.source.0.storage_source.0.bucket", "build_config.0.source.0.storage_source.0.object", "labels", "location", "terraform_labels"},
+			},
+			{
+				Config: testAccCloudfunctions2function_cloudfunctions2DirectvpcExample_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_cloudfunctions2_function.function", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_cloudfunctions2_function.function",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"build_config.0.source.0.storage_source.0.bucket", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.generation", "labels", "location", "terraform_labels"},
+			},
+		},
+	})
 }
 
 func testAccCloudfunctions2function_cloudfunctions2DirectvpcExample_basic(context map[string]interface{}) string {
-        return acctest.Nprintf(`
+	return acctest.Nprintf(`
 locals {
   project = "%{project}" # Google Cloud Platform Project ID
 }
 
 resource "google_storage_bucket" "bucket" {
-  provider = google-beta
   name     = "${local.project}-tf-test-gcf-source%{random_suffix}"  # Every bucket name must be globally unique
   location = "US"
   uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_object" "object" {
-  provider = google-beta
   name   = "function-source.zip"
   bucket = google_storage_bucket.bucket.name
   source = "%{zip_path}"  # Add path to the zipped function source code
 }
 
 resource "google_cloudfunctions2_function" "function" {
-  provider = google-beta
   name = "tf-test-function-v2%{random_suffix}"
   location = "us-central1"
   description = "a new function"
@@ -743,27 +736,24 @@ resource "google_cloudfunctions2_function" "function" {
 }
 
 func testAccCloudfunctions2function_cloudfunctions2DirectvpcExample_update(context map[string]interface{}) string {
-        return acctest.Nprintf(`
+	return acctest.Nprintf(`
 locals {
   project = "%{project}" # Google Cloud Platform Project ID
 }
 
 resource "google_storage_bucket" "bucket" {
-  provider = google-beta
   name     = "${local.project}-tf-test-gcf-source%{random_suffix}"  # Every bucket name must be globally unique
   location = "US"
   uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_object" "object" {
-  provider = google-beta
   name   = "function-source.zip"
   bucket = google_storage_bucket.bucket.name
   source = "%{zip_path}"  # Add path to the zipped function source code
 }
 
 resource "google_cloudfunctions2_function" "function" {
-  provider = google-beta
   name = "tf-test-function-v2%{random_suffix}"
   location = "us-central1"
   description = "a new function"
@@ -793,4 +783,3 @@ resource "google_cloudfunctions2_function" "function" {
 }
 `, context)
 }
-{{ end }}
