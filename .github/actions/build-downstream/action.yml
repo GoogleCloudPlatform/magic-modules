@@ -37,6 +37,7 @@ runs:
         env:
           BASE_BRANCH: ${{ github.event.pull_request.base.ref || github.ref_name }}
           GITHUB_TOKEN: ${{ inputs.token }}
+          INPUTS_REPO: ${{ inputs.repo  }}
         run: |
           set -e
           set -x
@@ -51,7 +52,7 @@ runs:
             git clone $GITHUB_PATH $OUTPUT_PATH --branch $BASE_BRANCH
           }
 
-          GH_REPO="${{ inputs.repo  }}"
+          GH_REPO="${INPUTS_REPO}"
           if [ "$GH_REPO" == "docs-examples" ] && [ "$BASE_BRANCH" == "main" ]; then
               BASE_BRANCH="master"
           fi

@@ -56,7 +56,7 @@ jobs:
             git clone $GITHUB_PATH $OUTPUT_PATH --branch $BASE_BRANCH
           }
 
-          GH_REPO="${{ inputs.repo  }}"
+          GH_REPO="${INPUTS_REPO}"
           if [ "$GH_REPO" == "docs-examples" ] && [ "$BASE_BRANCH" == "main" ]; then
               BASE_BRANCH="master"
           fi
@@ -87,6 +87,8 @@ jobs:
           fi
 
           (current_dir=$(pwd) && cd $OUTPUT_PATH && zip -r "$current_dir/output.zip" .)
+        env:
+          INPUTS_REPO: ${{ inputs.repo  }}
 
       - name: Upload built artifacts
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0

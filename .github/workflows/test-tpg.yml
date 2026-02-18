@@ -48,12 +48,16 @@ jobs:
       run: |
         curl -X POST -H "Authorization: token ${{secrets.GITHUB_TOKEN}}" \
         -H "Accept: application/vnd.github.v3+json" \
-        "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/${{github.event.inputs.sha}}" \
+        "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/${GITHUB_EVENT_INPUTS_SHA}" \
         -d '{
-        "context": "${{ github.event.inputs.repo }}${{ env.status_suffix }}",
-        "target_url": "${{ steps.get_job.outputs.url }}",
+        "context": "${GITHUB_EVENT_INPUTS_REPO}${{ env.status_suffix }}",
+        "target_url": "${STEPS_GET_JOB_OUTPUTS_URL}",
         "state": "pending"
         }'
+      env:
+        GITHUB_EVENT_INPUTS_SHA: ${{github.event.inputs.sha}}
+        GITHUB_EVENT_INPUTS_REPO: ${{ github.event.inputs.repo }}
+        STEPS_GET_JOB_OUTPUTS_URL: ${{ steps.get_job.outputs.url }}
     - name: Checkout Repository
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
       with:
@@ -95,9 +99,14 @@ jobs:
       run: |
         curl -X POST -H "Authorization: token ${{secrets.GITHUB_TOKEN}}" \
         -H "Accept: application/vnd.github.v3+json" \
-        "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/${{github.event.inputs.sha}}" \
+        "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/${GITHUB_EVENT_INPUTS_SHA}" \
         -d '{
-        "context": "${{ github.event.inputs.repo }}${{ env.status_suffix }}",
-        "target_url": "${{ steps.get_job.outputs.url }}",
-        "state": "${{ job.status }}"
+        "context": "${GITHUB_EVENT_INPUTS_REPO}${{ env.status_suffix }}",
+        "target_url": "${STEPS_GET_JOB_OUTPUTS_URL}",
+        "state": "${JOB_STATUS}"
         }'
+      env:
+        GITHUB_EVENT_INPUTS_SHA: ${{github.event.inputs.sha}}
+        GITHUB_EVENT_INPUTS_REPO: ${{ github.event.inputs.repo }}
+        STEPS_GET_JOB_OUTPUTS_URL: ${{ steps.get_job.outputs.url }}
+        JOB_STATUS: ${{ job.status }}
