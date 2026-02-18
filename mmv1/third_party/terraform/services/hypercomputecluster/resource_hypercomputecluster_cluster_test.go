@@ -432,3 +432,157 @@ resource "google_hypercomputecluster_cluster" "cluster" {
 }
 `, context)
 }
+
+func testAccHypercomputeclusterCluster_new(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+}
+
+locals {
+  project_id = data.google_project.project.name
+}
+
+resource "google_compute_reservation" "gce_reservation" {
+  name = "gce-reservation-%{random_suffix}"
+  zone = "us-central1-a"
+  specific_reservation {
+    count = 1
+    instance_properties {
+      min_cpu_platform = "Intel Cascade Lake"
+      machine_type     = "n2-standard-2"
+    }
+  }
+}
+
+resource "google_hypercomputecluster_cluster" "cluster" {
+  cluster_id                  = "tf%{random_suffix}"
+  location                    = "us-central1"
+  description                 = "Cluster Director instance created through Terraform"
+  network_resources {
+    id = "network1"
+    config {
+      new_network {
+        description = "Network one"
+        network = "projects/${local.project_id}/global/networks/net-%{random_suffix}"
+      }
+    }
+  }
+  storage_resources {
+    id = "bucket-new-1"
+    config {
+      new_bucket {
+        storage_class = "STANDARD"
+        bucket = "bucket-new-1-%{random_suffix}"
+        hierarchical_namespace {
+          enabled = false
+        }
+      }
+    }
+  }
+  storage_resources {
+    id = "bucket-new-2"
+    config {
+      new_bucket {
+        bucket = "bucket-new-2-%{random_suffix}"
+        autoclass {
+          enabled = true
+        }
+        hierarchical_namespace {
+          enabled = false
+        }
+      }
+    }
+  }
+  storage_resources {
+    id = "filestore-new"
+    config {
+      new_filestore {
+        description = "Filestore instance created via Terraform"
+        filestore = "projects/${local.project_id}/locations/us-central1-a/instances/filestore-%{random_suffix}"
+        protocol = "NFSV3"
+        tier = "ZONAL"
+        file_shares {
+          capacity_gb = "1024"
+          file_share = "share"
+        }
+      }
+    }
+  }
+  storage_resources {
+    id = "lustre-new"
+    config {
+      new_lustre {
+        capacity_gb = "18000"
+        description = "Lustre instance created via Terraform"
+        filesystem = "lustrefs"
+        lustre = "projects/${local.project_id}/locations/us-central1-a/instances/lustre-%{random_suffix}"
+      }
+    }
+  }
+  compute_resources {
+    id = "compute1"
+    config {
+      new_on_demand_instances {
+        machine_type = "n2-standard-2"
+        zone = "us-central1-a"
+      }
+    }
+  }
+  compute_resources {
+    id = "compute2"
+    config {
+      new_flex_start_instances {
+        machine_type = "a3-megagpu-8g"
+        max_duration = "6000s"
+        zone = "us-central1-a"
+      }
+    }
+  }
+  compute_resources {
+    id = "compute3"
+    config {
+      new_reserved_instances {
+        reservation = google_compute_reservation.gce_reservation.id
+      }
+    }
+  }
+  orchestrator {
+    slurm {
+      login_nodes {
+        machine_type = "n2-standard-2"        
+        count = 1
+        zone = "us-central1-a"
+        boot_disk {
+          size_gb = "100"
+          type = "pd-balanced"
+        }
+        storage_configs {
+          id = "bucket-new-1"
+          local_mount = "/home"
+        }
+      }
+      node_sets {
+        id = "nodeset1"
+        compute_id = "compute1"
+        static_node_count = 1
+        compute_instance {
+          boot_disk {
+            size_gb = "100"
+            type = "pd-balanced"
+          }
+        }
+        storage_configs {
+          id = "bucket-new-1"
+          local_mount = "/home"
+        }
+      }
+      partitions {
+        id = "partition1"
+        node_set_ids = ["nodeset1"]
+      }
+      default_partition = "partition1"
+    }
+  }
+}
+`, context)
+}

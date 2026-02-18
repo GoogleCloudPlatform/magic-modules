@@ -590,11 +590,6 @@ properties:
                       type: Boolean
                       required: true
                       description: Enables Auto-class feature.
-                    - name: terminalStorageClass
-                      type: String
-                      description: |
-                        Terminal storage class of the autoclass bucket
-                        Possible values:
                 - name: bucket
                   type: String
                   required: true
