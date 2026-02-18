@@ -16,6 +16,7 @@ name: FirebaseAppHosting
 display_name: Firebase App Hosting
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
+deletion_policy_opt_in: true
 versions:
   - base_url: https://firebaseapphosting.googleapis.com/v1beta/
     name: beta

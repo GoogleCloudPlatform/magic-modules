@@ -14,6 +14,7 @@
 ---
 name: 'FirebaseDatabase'
 display_name: 'Firebase Realtime Database'
+deletion_policy_opt_in: true
 versions:
   - name: 'beta'
     base_url: 'https://firebasedatabase.googleapis.com/v1beta/'

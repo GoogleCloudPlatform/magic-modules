@@ -14,6 +14,7 @@
 ---
 name: FirebaseDataConnect
 display_name: Firebase Data Connect
+deletion_policy_opt_in: true
 versions:
   - name: ga
     base_url: https://firebasedataconnect.googleapis.com/v1/
