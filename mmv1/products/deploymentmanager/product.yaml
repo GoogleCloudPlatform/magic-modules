@@ -14,6 +14,7 @@
 ---
 name: 'DeploymentManager'
 display_name: 'Cloud Deployment Manager'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://www.googleapis.com/deploymentmanager/v2/'

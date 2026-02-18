@@ -14,6 +14,7 @@
 ---
 name: 'DataCatalog'
 display_name: 'Data Catalog'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://datacatalog.googleapis.com/v1/'
