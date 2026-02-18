@@ -887,9 +887,21 @@ func TestAccGKEHubFeature_WorkloadIdentity(t *testing.T) {
 
 func testAccGKEHubFeature_WorkloadIdentity(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
-resource "google_iam_workload_identity_pool" "my-pool" {
-  workload_identity_pool_id = "my-pool"
+resource "google_iam_workload_identity_pool" "fleet-pool" {
+  workload_identity_pool_id = "fleet-pool"
   mode                      = "TRUST_DOMAIN"
+}
+
+resource "google_iam_workload_identity_pool_iam_member" "fleet-pool-p4sa-admin" {
+  project = google_project.project.project_id
+  workload_identity_pool_id = google_iam_workload_identity_pool.fleet-pool.workload_identity_pool_id
+  role = "roles/iam.workloadIdentityPoolAdmin"
+  member = "serviceAccount:${google_project.project.number}@gcp-sa-gkehub.iam.gserviceaccount.com"
+}
+
+resource "time_sleep" "wait_for_fleet-pool_binding_propagation" {
+  depends_on = [google_iam_workload_identity_pool_iam_member.fleet-pool-p4sa-admin]
+  create_duration = "45s"
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -897,10 +909,10 @@ resource "google_gke_hub_feature" "feature" {
   location = "global"
   spec {
     workloadidentity {
-	    scope_tenancy_pool = google_iam_workload_identity_pool.my-pool.name
+	    scope_tenancy_pool = google_iam_workload_identity_pool.fleet-pool.name
     }
   }
-  depends_on = [time_sleep.wait_for_gkehub_enablement]
+  depends_on = [time_sleep.wait_for_gkehub_enablement, time_sleep.wait_for_fleet-pool_binding_propagation]
   project = google_project.project.project_id
 }
 `, context)
@@ -908,9 +920,21 @@ resource "google_gke_hub_feature" "feature" {
 
 func testAccGKEHubFeature_WorkloadIdentityUpdate(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
-resource "google_iam_workload_identity_pool" "my-other-pool" {
-  workload_identity_pool_id = "my-other-pool"
+resource "google_iam_workload_identity_pool" "other-fleet-pool" {
+  workload_identity_pool_id = "my-other-fleet-pool"
   mode                      = "TRUST_DOMAIN"
+}
+
+resource "google_iam_workload_identity_pool_iam_member" "other-fleet-pool-p4sa-admin" {
+  project = google_project.project.project_id
+  workload_identity_pool_id = google_iam_workload_identity_pool.other-fleet-pool.workload_identity_pool_id
+  role = "roles/iam.workloadIdentityPoolAdmin"
+  member = "serviceAccount:${google_project.project.number}@gcp-sa-gkehub.iam.gserviceaccount.com"
+}
+
+resource "time_sleep" "wait_for_other-fleet-pool_binding_propagation" {
+  depends_on = [google_iam_workload_identity_pool_iam_member.other-fleet-pool-p4sa-admin]
+  create_duration = "45s"
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -918,10 +942,10 @@ resource "google_gke_hub_feature" "feature" {
   location = "global"
   spec {
     workloadidentity {
-	    scope_tenancy_pool = google_iam_workload_identity_pool.my-other-pool.name
+	    scope_tenancy_pool = google_iam_workload_identity_pool.other-fleet-pool.name
     }
   }
-  depends_on = [time_sleep.wait_for_gkehub_enablement]
+  depends_on = [time_sleep.wait_for_gkehub_enablement, time_sleep.wait_for_other-fleet-pool_binding_propagation]
   project = google_project.project.project_id
 }
 `, context)
