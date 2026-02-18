@@ -113,6 +113,7 @@ examples:
     primary_resource_name: 'fmt.Sprint("workloadidentity")'
     vars:
       workload_identity_pool_id: 'example-pool'
+    min_version: beta
     exclude_test: true
 parameters:
   - name: 'location'
