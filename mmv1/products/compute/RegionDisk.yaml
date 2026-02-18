@@ -419,7 +419,7 @@ properties:
       Specifies whether the disk restored from a source snapshot should erase Windows specific VSS signature.
     min_version: 'beta'
     ignore_read: true
-    default_value: false 
+    default_value: false
 virtual_fields:
   - name: 'create_snapshot_before_destroy'
     type: Boolean
