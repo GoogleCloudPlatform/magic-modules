@@ -740,6 +740,7 @@ resource "google_dataproc_job" "pyspark" {
   labels = {
     one = "1"
   }
+	wait_for_completion = true
 }
 `, rnd, subnetworkName, rnd)
 }
@@ -766,6 +767,7 @@ resource "google_dataproc_job" "spark" {
       }
     }
   }
+	wait_for_completion = false
 }
 `, rnd, subnetworkName)
 

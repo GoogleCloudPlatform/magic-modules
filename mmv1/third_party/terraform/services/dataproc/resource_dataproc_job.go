@@ -350,6 +350,9 @@ func resourceDataprocJobRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("effective_labels", job.Labels); err != nil {
 		return fmt.Errorf("Error setting effective_labels: %s", err)
 	}
+	if err := d.Set("wait_for_completion", d.Get("wait_for_completion")); err != nil {
+		return fmt.Errorf("Error setting wait_for_completion: %s", err)
+	}
 	if err := d.Set("driver_output_resource_uri", job.DriverOutputResourceUri); err != nil {
 		return fmt.Errorf("Error setting driver_output_resource_uri: %s", err)
 	}
@@ -438,7 +441,7 @@ func resourceDataprocJobDelete(d *schema.ResourceData, meta interface{}) error {
 		_, _ = config.NewDataprocClient(userAgent).Projects.Regions.Jobs.Cancel(project, region, jobId, &dataproc.CancelJobRequest{}).Do()
 
 		waitErr := DataprocJobOperationWait(config, region, project, jobId,
-			"Cancelling Dataproc job", userAgent, d.Timeout(schema.TimeoutDelete), false)
+			"Cancelling Dataproc job", userAgent, d.Timeout(schema.TimeoutDelete), true)
 		if waitErr != nil {
 			return waitErr
 		}
