@@ -48,8 +48,10 @@ exclude_sweeper: true
 examples:
   - name: 'apigee_endpoint_attachment_basic'
     primary_resource_id: 'apigee_endpoint_attachment'
-    vars:
-      endpoint_attachment_id: "my-endpoint-attachment"
+    test_env_vars:
+      billing_account: 'BILLING_ACCT'
+      location: 'REGION'
+    external_providers: ["time"]
 parameters:
   - name: 'orgId'
     type: String
