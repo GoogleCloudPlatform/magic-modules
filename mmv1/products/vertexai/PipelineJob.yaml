@@ -93,19 +93,19 @@ properties:
         type: String
   - name: pipelineSpec
     min_version: 'beta'
-    type: Map
+    type: Array
     description: |
       A compiled definition of a pipeline, represented as a JSON object.
       Defines the structure of the pipeline, including its components,
       tasks, and parameters.
+    item_type:
+      type: String
   - name: pscInterfaceConfig
     min_version: 'beta'
-    type: NestedObject
+    type: Array
     description: Optional configuration for PSC-I for PipelineJob.
-    properties:
-      - name: 'networkAttachment'
-        type: String
-        description: The name of the network attachment resource.
+    item_type:
+      type: String
   - name: 'state'
     min_version: 'beta'
     type: Enum
