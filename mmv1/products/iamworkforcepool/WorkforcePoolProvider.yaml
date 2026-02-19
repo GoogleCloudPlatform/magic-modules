@@ -12,174 +12,161 @@
 # limitations under the License.
 
 ---
-name: 'WorkforcePoolProvider'
+name: WorkforcePoolProvider
 description: |
   A configuration for an external identity provider.
 references:
   guides:
-    'Configure a provider within the workforce pool': 'https://cloud.google.com/iam/docs/manage-workforce-identity-pools-providers#configure_a_provider_within_the_workforce_pool'
-  api: 'https://cloud.google.com/iam/docs/reference/rest/v1/locations.workforcePools.providers'
+    Configure a provider within the workforce pool: https://cloud.google.com/iam/docs/manage-workforce-identity-pools-providers#configure_a_provider_within_the_workforce_pool
+  api: https://cloud.google.com/iam/docs/reference/rest/v1/locations.workforcePools.providers
 docs:
   note: |
     Ask your Google Cloud account team to request access to workforce identity federation for your
     billing/quota project. The account team notifies you when the project is granted access.
-base_url: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers'
-self_link: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}'
-create_url: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers?workforcePoolProviderId={{provider_id}}'
-update_verb: 'PATCH'
+base_url: locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers
+self_link: locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}
+create_url: locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers?workforcePoolProviderId={{provider_id}}
 update_mask: true
+update_verb: PATCH
 import_format:
-  - 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-autogen_async: true
+  - locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}
 exclude_sweeper: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-  result:
-    resource_inside_response: false
+autogen_async: true
 custom_code:
-  constants: 'templates/terraform/constants/iam_workforce_pool_provider.go.tmpl'
-  decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
-  post_create: 'templates/terraform/post_create/iam_workforce_pool_provider.go.tmpl'
-  post_update: 'templates/terraform/post_update/iam_workforce_pool_provider.go.tmpl'
+  decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl
+  constants: templates/terraform/constants/iam_workforce_pool_provider.go.tmpl
+  post_create: templates/terraform/post_create/iam_workforce_pool_provider.go.tmpl
+  post_update: templates/terraform/post_update/iam_workforce_pool_provider.go.tmpl
 examples:
-  - name: 'iam_workforce_pool_provider_saml_basic'
-    primary_resource_id: 'example'
+  - name: iam_workforce_pool_provider_saml_basic
+    primary_resource_id: example
     vars:
-      workforce_pool_id: 'example-pool'
-      provider_id: 'example-prvdr'
+      provider_id: example-prvdr
+      workforce_pool_id: example-pool
     test_env_vars:
-      org_id: 'ORG_ID'
-  - name: 'iam_workforce_pool_provider_saml_full'
-    primary_resource_id: 'example'
-    vars:
-      workforce_pool_id: 'example-pool'
-      provider_id: 'example-prvdr'
-    test_env_vars:
-      org_id: 'ORG_ID'
+      org_id: ORG_ID
+  - name: iam_workforce_pool_provider_saml_full
+    primary_resource_id: example
     ignore_read_extra:
-      - 'extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text'
-  - name: 'iam_workforce_pool_provider_oidc_basic'
-    primary_resource_id: 'example'
+      - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
     vars:
-      workforce_pool_id: 'example-pool'
-      provider_id: 'example-prvdr'
+      provider_id: example-prvdr
+      workforce_pool_id: example-pool
     test_env_vars:
-      org_id: 'ORG_ID'
+      org_id: ORG_ID
+  - name: iam_workforce_pool_provider_oidc_basic
+    primary_resource_id: example
     ignore_read_extra:
-      - 'oidc.0.client_secret.0.value.0.plain_text'
-  - name: 'iam_workforce_pool_provider_oidc_full'
-    primary_resource_id: 'example'
+      - oidc.0.client_secret.0.value.0.plain_text
     vars:
-      workforce_pool_id: 'example-pool'
-      provider_id: 'example-prvdr'
+      provider_id: example-prvdr
+      workforce_pool_id: example-pool
     test_env_vars:
-      org_id: 'ORG_ID'
+      org_id: ORG_ID
+  - name: iam_workforce_pool_provider_oidc_full
+    primary_resource_id: example
     ignore_read_extra:
-      - 'oidc.0.client_secret.0.value.0.plain_text'
-      - 'extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text'
-  - name: 'iam_workforce_pool_provider_oidc_upload_key'
-    primary_resource_id: 'example'
+      - oidc.0.client_secret.0.value.0.plain_text
+      - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
     vars:
-      workforce_pool_id: 'example-pool'
-      provider_id: 'example-prvdr'
+      provider_id: example-prvdr
+      workforce_pool_id: example-pool
     test_env_vars:
-      org_id: 'ORG_ID'
+      org_id: ORG_ID
+  - name: iam_workforce_pool_provider_oidc_upload_key
+    primary_resource_id: example
     ignore_read_extra:
-      - 'oidc.0.client_secret.0.value.0.plain_text'
+      - oidc.0.client_secret.0.value.0.plain_text
     exclude_docs: true
-  - name: 'iam_workforce_pool_provider_extra_attributes_oauth2_config_client_basic'
-    primary_resource_id: 'example'
     vars:
-      workforce_pool_id: 'example-pool'
-      provider_id: 'example-prvdr'
+      provider_id: example-prvdr
+      workforce_pool_id: example-pool
     test_env_vars:
-      org_id: 'ORG_ID'
+      org_id: ORG_ID
+  - name: iam_workforce_pool_provider_extra_attributes_oauth2_config_client_basic
+    primary_resource_id: example
     ignore_read_extra:
-      - 'oidc.0.client_secret.0.value.0.plain_text'
-      - 'extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text'
-  - name: 'iam_workforce_pool_provider_extra_attributes_oauth2_config_client_full'
-    primary_resource_id: 'example'
+      - oidc.0.client_secret.0.value.0.plain_text
+      - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
     vars:
-      workforce_pool_id: 'example-pool'
-      provider_id: 'example-prvdr'
+      provider_id: example-prvdr
+      workforce_pool_id: example-pool
     test_env_vars:
-      org_id: 'ORG_ID'
+      org_id: ORG_ID
+  - name: iam_workforce_pool_provider_extra_attributes_oauth2_config_client_full
+    primary_resource_id: example
     ignore_read_extra:
-      - 'oidc.0.client_secret.0.value.0.plain_text'
-      - 'extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text'
-  - name: 'iam_workforce_pool_provider_extended_attributes_oauth2_config_client_basic'
-    primary_resource_id: 'example'
+      - oidc.0.client_secret.0.value.0.plain_text
+      - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
     vars:
-      workforce_pool_id: 'example-pool'
-      provider_id: 'example-prvdr'
+      provider_id: example-prvdr
+      workforce_pool_id: example-pool
     test_env_vars:
-      org_id: 'ORG_ID'
+      org_id: ORG_ID
+  - name: iam_workforce_pool_provider_extended_attributes_oauth2_config_client_basic
+    primary_resource_id: example
     ignore_read_extra:
-      - 'oidc.0.client_secret.0.value.0.plain_text'
-      - 'extended_attributes_oauth2_client.0.client_secret.0.value.0.plain_text'
-  - name: 'iam_workforce_pool_provider_extended_attributes_oauth2_config_client_full'
-    primary_resource_id: 'example'
+      - oidc.0.client_secret.0.value.0.plain_text
+      - extended_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
     vars:
-      workforce_pool_id: 'example-pool'
-      provider_id: 'example-prvdr'
+      provider_id: example-prvdr
+      workforce_pool_id: example-pool
     test_env_vars:
-      org_id: 'ORG_ID'
+      org_id: ORG_ID
+  - name: iam_workforce_pool_provider_extended_attributes_oauth2_config_client_full
+    primary_resource_id: example
     ignore_read_extra:
-      - 'oidc.0.client_secret.0.value.0.plain_text'
-      - 'extended_attributes_oauth2_client.0.client_secret.0.value.0.plain_text'
-parameters:
+      - oidc.0.client_secret.0.value.0.plain_text
+      - extended_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
+    vars:
+      provider_id: example-prvdr
+      workforce_pool_id: example-pool
+    test_env_vars:
+      org_id: ORG_ID
 properties:
-  - name: 'location'
+  - name: location
     type: String
-    description: The location for the resource.
-    url_param_only: true
     required: true
+    description: The location for the resource.
     immutable: true
-  - name: 'workforcePoolId'
+    url_param_only: true
+  - name: workforcePoolId
     type: String
+    required: true
     description: |
       The ID to use for the pool, which becomes the final component of the resource name.
       The IDs must be a globally unique string of 6 to 63 lowercase letters, digits, or hyphens.
       It must start with a letter, and cannot have a trailing hyphen.
       The prefix `gcp-` is reserved for use by Google, and may not be specified.
-    url_param_only: true
-    required: true
     immutable: true
-  - name: 'providerId'
+    url_param_only: true
+  - name: providerId
     type: String
+    required: true
     description: |
       The ID for the provider, which becomes the final component of the resource name.
       This value must be 4-32 characters, and may contain the characters [a-z0-9-].
       The prefix `gcp-` is reserved for use by Google, and may not be specified.
-    url_param_only: true
-    required: true
     immutable: true
+    url_param_only: true
     validation:
-      function: 'ValidateWorkforcePoolProviderId'
-  - name: 'name'
+      function: ValidateWorkforcePoolProviderId
+  - name: name
     type: String
     description: |
       Output only. The resource name of the provider.
       Format: `locations/{location}/workforcePools/{workforcePoolId}/providers/{providerId}`
     output: true
-  - name: 'displayName'
+  - name: displayName
     type: String
-    description:
-      A user-specified display name for the provider. Cannot exceed 32
-      characters.
-  - name: 'description'
+    description: A user-specified display name for the provider. Cannot exceed 32 characters.
+  - name: description
     type: String
-    description:
-      A user-specified description of the provider. Cannot exceed 256
-      characters.
-  - name: 'state'
+    description: A user-specified description of the provider. Cannot exceed 256 characters.
+  - name: state
     type: Enum
     description: |
       The current state of the provider.
@@ -190,15 +177,15 @@ properties:
         [providers.undelete](https://cloud.google.com/iam/docs/reference/rest/v1/locations.workforcePools.providers/undelete#google.iam.admin.v1.WorkforcePools.UndeleteWorkforcePoolProvider).
     output: true
     enum_values:
-      - 'STATE_UNSPECIFIED'
-      - 'ACTIVE'
-      - 'DELETED'
-  - name: 'disabled'
+      - STATE_UNSPECIFIED
+      - ACTIVE
+      - DELETED
+  - name: disabled
     type: Boolean
     description: |
       Whether the provider is disabled. You cannot use a disabled provider to exchange tokens.
       However, existing tokens still grant access.
-  - name: 'attributeMapping'
+  - name: attributeMapping
     type: KeyValuePairs
     description: |
       Maps attributes from the authentication credentials issued by an external identity provider
@@ -252,7 +239,7 @@ properties:
 
       An object containing a list of `"key": value` pairs.
       Example: `{ "name": "wrench", "mass": "1.3kg", "count": "3" }`.
-  - name: 'attributeCondition'
+  - name: attributeCondition
     type: String
     description: |
       A [Common Expression Language](https://github.com/google/cel-spec) expression, in
@@ -274,15 +261,16 @@ properties:
       ```
       "'admins' in google.groups"
       ```
-  - name: 'saml'
+  - name: saml
     type: NestedObject
     description: Represents a SAML identity provider.
     exactly_one_of:
-      - 'saml'
-      - 'oidc'
+      - saml
+      - oidc
     properties:
-      - name: 'idpMetadataXml'
+      - name: idpMetadataXml
         type: String
+        required: true
         description: |
           SAML Identity provider configuration metadata xml doc.
           The xml document should comply with [SAML 2.0 specification](https://docs.oasis-open.org/security/saml/v2.0/saml-metadata-2.0-os.pdf).
@@ -299,88 +287,83 @@ properties:
           When updating the provider's metadata xml, at least one non-expired signing key
           must overlap with the existing metadata. This requirement is skipped if there are
           no non-expired signing keys present in the existing metadata.
-        required: true
-  - name: 'oidc'
+  - name: oidc
     type: NestedObject
     description: Represents an OpenId Connect 1.0 identity provider.
     exactly_one_of:
-      - 'saml'
-      - 'oidc'
+      - saml
+      - oidc
     properties:
-      - name: 'issuerUri'
+      - name: issuerUri
         type: String
-        description:
-          The OIDC issuer URI. Must be a valid URI using the 'https' scheme.
         required: true
-      - name: 'clientId'
+        description: The OIDC issuer URI. Must be a valid URI using the 'https' scheme.
+      - name: clientId
         type: String
-        description:
-          The client ID. Must match the audience claim of the JWT issued by the
-          identity provider.
         required: true
-      - name: 'clientSecret'
+        description: The client ID. Must match the audience claim of the JWT issued by the identity provider.
+      - name: clientSecret
         type: NestedObject
         description: |
           The optional client secret. Required to enable Authorization Code flow for web sign-in.
         properties:
-          - name: 'value'
+          - name: value
             type: NestedObject
             description: |
               The value of the client secret.
             exactly_one_of:
-              - 'oidc.0.client_secret.0.value'
-            custom_flatten: 'templates/terraform/custom_flatten/iam_workforce_pool_provider_oidc_client_secret_value.go.tmpl'
+              - oidc.0.client_secret.0.value
+            custom_flatten: templates/terraform/custom_flatten/iam_workforce_pool_provider_oidc_client_secret_value.go.tmpl
             properties:
-              - name: 'plainText'
+              - name: plainText
                 type: String
+                required: true
                 description: |
                   The plain text of the client secret value.
-                required: true
                 sensitive: true
                 validation:
-                  function: 'validation.StringIsNotEmpty'
-              - name: 'thumbprint'
+                  function: validation.StringIsNotEmpty
+              - name: thumbprint
                 type: String
                 description: |
                   A thumbprint to represent the current client secret value.
                 output: true
-      - name: 'webSsoConfig'
+      - name: webSsoConfig
         type: NestedObject
         description: |
           Configuration for web single sign-on for the OIDC provider. Here, web sign-in refers to console sign-in and gcloud sign-in through the browser.
         default_from_api: true
         properties:
-          - name: 'responseType'
+          - name: responseType
             type: Enum
+            required: true
             description: |
               The Response Type to request for in the OIDC Authorization Request for web sign-in.
 
               The `CODE` Response Type is recommended to avoid the Implicit Flow, for security reasons.
               * CODE: The `response_type=code` selection uses the Authorization Code Flow for web sign-in. Requires a configured client secret.
               * ID_TOKEN: The `response_type=id_token` selection uses the Implicit Flow for web sign-in.
-            required: true
             enum_values:
-              - 'CODE'
-              - 'ID_TOKEN'
-          - name: 'assertionClaimsBehavior'
+              - CODE
+              - ID_TOKEN
+          - name: assertionClaimsBehavior
             type: Enum
+            required: true
             description: |
               The behavior for how OIDC Claims are included in the `assertion` object used for attribute mapping and attribute condition.
               * MERGE_USER_INFO_OVER_ID_TOKEN_CLAIMS: Merge the UserInfo Endpoint Claims with ID Token Claims, preferring UserInfo Claim Values for the same Claim Name. This option is available only for the Authorization Code Flow.
               * ONLY_ID_TOKEN_CLAIMS: Only include ID Token Claims.
-            required: true
             enum_values:
-              - 'MERGE_USER_INFO_OVER_ID_TOKEN_CLAIMS'
-              - 'ONLY_ID_TOKEN_CLAIMS'
-          - name: 'additionalScopes'
+              - MERGE_USER_INFO_OVER_ID_TOKEN_CLAIMS
+              - ONLY_ID_TOKEN_CLAIMS
+          - name: additionalScopes
             type: Array
             description: |
               Additional scopes to request for in the OIDC authentication request on top of scopes requested by default. By default, the `openid`, `profile` and `email` scopes that are supported by the identity provider are requested.
               Each additional scope may be at most 256 characters. A maximum of 10 additional scopes may be configured.
-            required: false
             item_type:
               type: String
-      - name: 'jwksJson'
+      - name: jwksJson
         type: String
         description: |
           OIDC JWKs in JSON String format. For details on definition of a
@@ -406,7 +389,7 @@ properties:
             ]
           }
           ```
-  - name: 'extraAttributesOauth2Client'
+  - name: extraAttributesOauth2Client
     type: NestedObject
     description: |
       The configuration for OAuth 2.0 client used to get the additional user
@@ -414,44 +397,45 @@ properties:
       in authentication credentials. Currently this configuration is only
       supported with SAML and OIDC protocol.
     properties:
-      - name: 'issuerUri'
+      - name: issuerUri
         type: String
+        required: true
         description: |
           The OIDC identity provider's issuer URI. Must be a valid URI using the `https` scheme. Required to get the OIDC discovery document.
-        required: true
-      - name: 'clientId'
+      - name: clientId
         type: String
+        required: true
         description: |
           The OAuth 2.0 client ID for retrieving extra attributes from the identity provider. Required to get the Access Token using client credentials grant flow.
-        required: true
-      - name: 'clientSecret'
+      - name: clientSecret
         type: NestedObject
+        required: true
         description: |
           The OAuth 2.0 client secret for retrieving extra attributes from the identity provider. Required to get the Access Token using client credentials grant flow.
-        required: true
         properties:
-          - name: 'value'
+          - name: value
             type: NestedObject
             description: |
               The value of the client secret.
             exactly_one_of:
-              - 'extraAttributesOauth2Client.0.client_secret.0.value'
-            custom_flatten: 'templates/terraform/custom_flatten/iam_workforce_pool_provider_extra_attributes_oauth2_config_client_secret_value.go.tmpl'
+              - extraAttributesOauth2Client.0.client_secret.0.value
+            custom_flatten: templates/terraform/custom_flatten/iam_workforce_pool_provider_extra_attributes_oauth2_config_client_secret_value.go.tmpl
             properties:
-              - name: 'plainText'
+              - name: plainText
                 type: String
+                required: true
                 description: |
                   The plain text of the client secret value.
-                required: true
                 validation:
-                  function: 'validation.StringIsNotEmpty'
-              - name: 'thumbprint'
+                  function: validation.StringIsNotEmpty
+              - name: thumbprint
                 type: String
                 description: |
                   A thumbprint to represent the current client secret value.
                 output: true
-      - name: 'attributesType'
+      - name: attributesType
         type: Enum
+        required: true
         description: |
           Represents the IdP and type of claims that should be fetched.
           * AZURE_AD_GROUPS_MAIL: Used to get the user's group claims from the Azure AD identity provider using configuration provided
@@ -466,22 +450,21 @@ properties:
           group IDs obtained from Azure AD are present in `assertion.groups` for
           OIDC providers and `assertion.attributes.groups` for SAML providers for
           attribute mapping.
-        required: true
         enum_values:
-          - 'AZURE_AD_GROUPS_MAIL'
-          - 'AZURE_AD_GROUPS_ID'
-      - name: 'queryParameters'
+          - AZURE_AD_GROUPS_MAIL
+          - AZURE_AD_GROUPS_ID
+      - name: queryParameters
         type: NestedObject
         description: |
           Represents the parameters to control which claims are fetched from an IdP.
         properties:
-          - name: 'filter'
+          - name: filter
             type: String
             description: |
               The filter used to request specific records from IdP. In case of attributes type as AZURE_AD_GROUPS_MAIL and AZURE_AD_GROUPS_ID, it represents the
               filter used to request specific groups for users from IdP. By default, all of the groups associated with the user are fetched. The
               groups should be security enabled. See https://learn.microsoft.com/en-us/graph/search-query-parameter for more details.
-  - name: 'extendedAttributesOauth2Client'
+  - name: extendedAttributesOauth2Client
     type: NestedObject
     description: |
       The configuration for OAuth 2.0 client used to get the extended group
@@ -496,42 +479,43 @@ properties:
       active session. Each user identity in the workforce identity pool must map
       to a unique Microsoft Entra ID user.
     properties:
-      - name: 'issuerUri'
+      - name: issuerUri
         type: String
+        required: true
         description: |
           The OIDC identity provider's issuer URI. Must be a valid URI using the `https` scheme. Required to get the OIDC discovery document.
-        required: true
-      - name: 'clientId'
+      - name: clientId
         type: String
+        required: true
         description: |
           The OAuth 2.0 client ID for retrieving extended attributes from the identity provider. Required to get the Access Token using client credentials grant flow.
-        required: true
-      - name: 'clientSecret'
+      - name: clientSecret
         type: NestedObject
+        required: true
         description: |
           The OAuth 2.0 client secret for retrieving extended attributes from the identity provider. Required to get the Access Token using client credentials grant flow.
-        required: true
         properties:
-          - name: 'value'
+          - name: value
             type: NestedObject
             description: |
               The value of the client secret.
-            custom_flatten: 'templates/terraform/custom_flatten/iam_workforce_pool_provider_extended_attributes_oauth2_config_client_secret_value.go.tmpl'
+            custom_flatten: templates/terraform/custom_flatten/iam_workforce_pool_provider_extended_attributes_oauth2_config_client_secret_value.go.tmpl
             properties:
-              - name: 'plainText'
+              - name: plainText
                 type: String
+                required: true
                 description: |
                   The plain text of the client secret value.
-                required: true
                 validation:
-                  function: 'validation.StringIsNotEmpty'
-              - name: 'thumbprint'
+                  function: validation.StringIsNotEmpty
+              - name: thumbprint
                 type: String
                 description: |
                   A thumbprint to represent the current client secret value.
                 output: true
-      - name: 'attributesType'
+      - name: attributesType
         type: Enum
+        required: true
         description: |
           Represents the IdP and type of claims that should be fetched.
           * AZURE_AD_GROUPS_ID:  Used to get the user's group claims from the Azure AD identity provider
@@ -542,21 +526,20 @@ properties:
           group IDs obtained from Azure AD are present in `assertion.groups` for
           OIDC providers and `assertion.attributes.groups` for SAML providers for
           attribute mapping.
-        required: true
         enum_values:
-          - 'AZURE_AD_GROUPS_ID'
-      - name: 'queryParameters'
+          - AZURE_AD_GROUPS_ID
+      - name: queryParameters
         type: NestedObject
         description: |
           Represents the parameters to control which claims are fetched from an IdP.
         properties:
-          - name: 'filter'
+          - name: filter
             type: String
             description: |
               The filter used to request specific records from IdP. In case of attributes type as AZURE_AD_GROUPS_ID, it represents the
               filter used to request specific groups for users from IdP. By default, all of the groups associated with the user are fetched. The
               groups should be security enabled. See https://learn.microsoft.com/en-us/graph/search-query-parameter for more details.
-  - name: 'scimUsage'
+  - name: scimUsage
     type: Enum
     description: |
       Agentspace only. Specifies whether the workforce identity pool
@@ -570,5 +553,5 @@ properties:
       * ENABLED_FOR_GROUPS: Use SCIM-managed groups instead of the `google.groups`
         attribute mapping for authorization checks
     enum_values:
-      - 'SCIM_USAGE_UNSPECIFIED'
-      - 'ENABLED_FOR_GROUPS'
+      - SCIM_USAGE_UNSPECIFIED
+      - ENABLED_FOR_GROUPS
