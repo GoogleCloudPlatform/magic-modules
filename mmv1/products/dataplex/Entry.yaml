@@ -39,6 +39,7 @@ update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entries/{{entry_id}}'
 
+flatten_all_in_method: true
 custom_code:
   constants: templates/terraform/constants/dataplex_entry.go.tmpl
   decoder: templates/terraform/decoders/dataplex_entry.go.tmpl

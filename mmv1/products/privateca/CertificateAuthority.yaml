@@ -45,6 +45,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+flatten_all_in_method: true
 custom_code:
   constants: 'templates/terraform/constants/privateca_certificate_authority.go.tmpl'
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'

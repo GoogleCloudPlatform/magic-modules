@@ -37,6 +37,7 @@ iam_policy:
   allowed_iam_role: 'roles/compute.osLogin'
   parent_resource_attribute: 'instance_name'
   iam_conditions_request_type: 'QUERY_PARAM'
+flatten_all_in_method: true
 custom_code:
 examples:
   - name: 'instance_basic'

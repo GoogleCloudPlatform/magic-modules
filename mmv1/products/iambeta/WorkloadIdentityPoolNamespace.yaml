@@ -29,6 +29,7 @@ update_mask: true
 import_format:
   - 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/namespaces/{{workload_identity_pool_namespace_id}}'
 autogen_async: true
+flatten_all_in_method: true
 custom_code:
   constants: 'templates/terraform/constants/iam_workload_identity_pool_namespace.go.tmpl'
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
