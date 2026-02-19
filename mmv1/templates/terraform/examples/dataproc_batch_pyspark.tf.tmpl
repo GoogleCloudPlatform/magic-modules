@@ -13,7 +13,7 @@ resource "google_dataproc_batch" "{{$.PrimaryResourceId}}" {
     }
 
     pyspark_batch {
-      main_python_file_uri = "https://storage.googleapis.com/terraform-batches/test_util.py"
+      main_python_file_uri = "gs://storage.googleapis.com/terraform-batches/test_util.py"
       args                 = ["10"]
       jar_file_uris        = ["file:///usr/lib/spark/examples/jars/spark-examples.jar"]
       python_file_uris     = ["gs://dataproc-examples/pyspark/hello-world/hello-world.py"]
