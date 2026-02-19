@@ -67,7 +67,6 @@ properties:
     immutable: true
     validation:
       regex: ^[a-z]([-a-z0-9]*[a-z0-9])?$
-      function: ""
   - name: location
     type: ResourceRef
     required: true
@@ -353,7 +352,6 @@ properties:
                  letter, or digit, except the last character, which cannot be a dash.
               validation:
                 regex: ^[a-z]([-a-z0-9]*[a-z0-9])?$
-                function: ""
             - name: startTime
               type: String
               description: |

@@ -29,12 +29,12 @@ timeouts:
   insert_minutes: 45
   update_minutes: 20
   delete_minutes: 35
-autogen_async: true
 async:
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+autogen_async: true
 include_in_tgc_next: true
 examples:
   - name: blockchain_nodes_basic

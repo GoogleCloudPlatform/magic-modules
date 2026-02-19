@@ -56,7 +56,6 @@ custom_diff:
   - customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)
   - sendSecondaryIpRangeIfEmptyDiff
 sweeper:
-  identifier_field: ""
   url_substitutions:
     - region: us-west2
     - region: us-central1
@@ -222,7 +221,6 @@ properties:
     update_verb: POST
     update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/expandIpCidrRange
     validation:
-      regex: ""
       function: verify.ValidateIpCidrRange
     default_from_api: true
   - name: reservedInternalRange
@@ -244,7 +242,6 @@ properties:
       following characters must be a dash, lowercase letter, or digit,
       except the last character, which cannot be a dash.
     validation:
-      regex: ""
       function: verify.ValidateGCEName
   - name: network
     type: ResourceRef
@@ -318,7 +315,6 @@ properties:
             be 1-63 characters long, and comply with RFC1035. The name
             must be unique within the subnetwork.
           validation:
-            regex: ""
             function: verify.ValidateGCEName
         - name: ipCidrRange
           type: String
@@ -329,7 +325,6 @@ properties:
             secondary IP ranges within a network. Only IPv4 is supported.
             Field is optional when `reserved_internal_range` is defined, otherwise required.
           validation:
-            regex: ""
             function: verify.ValidateIpCidrRange
           default_from_api: true
         - name: reservedInternalRange
@@ -486,7 +481,6 @@ properties:
       The internal IPv6 address range that is assigned to this subnetwork.
     diff_suppress_func: IpDiffSuppress
     validation:
-      regex: ""
       function: verify.ValidateIpCidrRange
     default_from_api: true
   - name: externalIpv6Prefix

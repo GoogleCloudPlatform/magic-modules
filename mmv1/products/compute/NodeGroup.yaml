@@ -28,7 +28,6 @@ collection_url_key: items
 kind: compute#NodeGroup
 id_format: projects/{{project}}/zones/{{zone}}/nodeGroups/{{name}}
 sweeper:
-  identifier_field: ""
   url_substitutions:
     - zone: us-central1-f
     - zone: us-central1-a

@@ -34,10 +34,10 @@ update_mask: true
 update_verb: PATCH
 import_format:
   - '{{%parent}}/locations/{{location}}/postureDeployments/{{posture_deployment_id}}'
-autogen_async: true
 async:
   operation:
     base_url: '{{op_id}}'
+autogen_async: true
 parameters:
   - name: parent
     type: String

@@ -25,13 +25,13 @@ update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules/{{branch_rule_id}}
   - '{{branch_rule_id}}'
-autogen_async: true
 async:
   operation:
     base_url: '{{op_id}}'
   actions:
     - create
     - delete
+autogen_async: true
 examples:
   - name: secure_source_manager_branch_rule_basic
     primary_resource_id: basic

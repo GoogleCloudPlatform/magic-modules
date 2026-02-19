@@ -27,7 +27,6 @@ immutable: true
 has_self_link: true
 id_format: projects/{{project}}/regions/{{region}}/targetTcpProxies/{{name}}
 sweeper:
-  identifier_field: ""
   url_substitutions:
     - region: europe-west4
     - region: us-central1

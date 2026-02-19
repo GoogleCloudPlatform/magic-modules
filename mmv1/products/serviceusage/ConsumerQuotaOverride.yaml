@@ -41,13 +41,13 @@ id_format: projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metr
 import_format:
   - services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}
   - projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}
-autogen_async: true
 exclude_sweeper: true
 async:
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+autogen_async: true
 custom_code:
   test_check_destroy: templates/terraform/custom_check_destroy/consumer_quota_override.go.tmpl
 examples:

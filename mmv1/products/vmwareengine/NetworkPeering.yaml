@@ -24,10 +24,10 @@ create_url: projects/{{project}}/locations/global/networkPeerings?networkPeering
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/global/networkPeerings/{{name}}
-autogen_async: true
 async:
   operation:
     base_url: '{{op_id}}'
+autogen_async: true
 include_in_tgc_next: true
 custom_code:
   constants: templates/terraform/constants/vmwareengine_resource.go.tmpl

@@ -24,9 +24,7 @@ min_version: beta
 immutable: true
 self_link: projects/{{project}}/locations/{{zone}}/queuedResources/{{name}}
 create_url: projects/{{project}}/locations/{{zone}}/queuedResources?queuedResourceId={{name}}
-autogen_async: true
 sweeper:
-  identifier_field: ""
   url_substitutions:
     - zone: us-central1-c
 async:
@@ -37,6 +35,7 @@ async:
     - delete
   result:
     resource_inside_response: true
+autogen_async: true
 examples:
   - name: tpu_v2_queued_resource_basic
     primary_resource_id: qr

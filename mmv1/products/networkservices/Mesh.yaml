@@ -31,9 +31,7 @@ timeouts:
   insert_minutes: 30
   update_minutes: 30
   delete_minutes: 30
-autogen_async: true
 sweeper:
-  identifier_field: ""
   url_substitutions:
     - region: global
 async:
@@ -45,6 +43,7 @@ async:
     base_url: '{{op_id}}'
 schema_version: 1
 state_upgraders: true
+autogen_async: true
 examples:
   - name: network_services_mesh_basic
     primary_resource_id: default
@@ -105,4 +104,3 @@ properties:
     url_param_only: true
     validation:
       regex: ^global$
-      function: ""

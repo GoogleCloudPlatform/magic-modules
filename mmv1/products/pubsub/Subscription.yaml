@@ -447,7 +447,6 @@ properties:
     immutable: true
     validation:
       regex: ^[\s\S]{0,256}$
-      function: ""
   - name: deadLetterPolicy
     type: NestedObject
     description: |

@@ -28,7 +28,6 @@ timeouts:
   insert_minutes: 120
   update_minutes: 120
   delete_minutes: 20
-autogen_async: true
 async:
   operation:
     base_url: '{{op_id}}'
@@ -36,6 +35,7 @@ async:
     - create
   result:
     resource_inside_response: true
+autogen_async: true
 custom_code:
   custom_update: templates/terraform/custom_update/storage_batch_operations_job.go.tmpl
   pre_delete: templates/terraform/pre_delete/storage_batch_operations_job.go.tmpl
@@ -63,7 +63,6 @@ parameters:
     url_param_only: true
     validation:
       regex: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?.$
-      function: ""
 properties:
   - name: createTime
     type: String
@@ -281,12 +280,10 @@ properties:
         description: set/unset to update event based hold for objects.
         immutable: true
         validation:
-          regex: ""
           function: validation.StringInSlice([]string{"SET", "UNSET"}, false)
       - name: temporaryHold
         type: String
         description: set/unset to update temporary based hold for objects.
         immutable: true
         validation:
-          regex: ""
           function: validation.StringInSlice([]string{"SET", "UNSET"}, false)

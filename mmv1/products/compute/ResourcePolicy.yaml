@@ -26,7 +26,6 @@ collection_url_key: items
 kind: compute#resourcePolicy
 id_format: projects/{{project}}/regions/{{region}}/resourcePolicies/{{name}}
 sweeper:
-  identifier_field: ""
   url_substitutions:
     - region: us-central1
     - region: europe-west1
@@ -158,7 +157,6 @@ properties:
                   where HH : [00-23] and MM : [00] GMT. eg: 21:00
                 diff_suppress_func: HourlyFormatSuppressDiff
                 validation:
-                  regex: ""
                   function: verify.ValidateHourlyOnly
           - name: dailySchedule
             type: NestedObject
@@ -183,7 +181,6 @@ properties:
                   both 13:00-5 and 08:00 are valid.
                 diff_suppress_func: HourlyFormatSuppressDiff
                 validation:
-                  regex: ""
                   function: verify.ValidateHourlyOnly
           - name: weeklySchedule
             type: NestedObject

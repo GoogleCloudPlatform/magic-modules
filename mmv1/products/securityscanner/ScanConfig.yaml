@@ -58,7 +58,6 @@ properties:
       Defaults to 15.
     min_version: beta
     validation:
-      regex: ""
       function: validation.IntBetween(5, 20)
   - name: startingUrls
     type: Array

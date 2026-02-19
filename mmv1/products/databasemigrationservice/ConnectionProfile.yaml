@@ -29,7 +29,6 @@ timeouts:
   insert_minutes: 60
   update_minutes: 60
   delete_minutes: 60
-autogen_async: true
 async:
   operation:
     timeouts:
@@ -37,6 +36,7 @@ async:
       update_minutes: 60
       delete_minutes: 60
     base_url: '{{op_id}}'
+autogen_async: true
 examples:
   - name: database_migration_service_connection_profile_cloudsql
     primary_resource_id: cloudsqlprofile

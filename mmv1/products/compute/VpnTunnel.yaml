@@ -155,7 +155,6 @@ properties:
     description: |
       IP address of the peer VPN gateway. Only IPv4 is supported.
     validation:
-      regex: ""
       function: validatePeerAddr
     default_from_api: true
   - name: sharedSecret

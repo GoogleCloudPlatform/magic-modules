@@ -30,11 +30,11 @@ update_mask: true
 update_verb: PATCH
 import_format:
   - locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}
-autogen_async: true
 exclude_sweeper: true
 async:
   operation:
     base_url: '{{op_id}}'
+autogen_async: true
 custom_code:
   decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl
   constants: templates/terraform/constants/iam_workforce_pool_provider.go.tmpl
@@ -153,7 +153,6 @@ properties:
     immutable: true
     url_param_only: true
     validation:
-      regex: ""
       function: ValidateWorkforcePoolProviderId
   - name: name
     type: String
@@ -323,7 +322,6 @@ properties:
                   The plain text of the client secret value.
                 sensitive: true
                 validation:
-                  regex: ""
                   function: validation.StringIsNotEmpty
               - name: thumbprint
                 type: String
@@ -429,7 +427,6 @@ properties:
                 description: |
                   The plain text of the client secret value.
                 validation:
-                  regex: ""
                   function: validation.StringIsNotEmpty
               - name: thumbprint
                 type: String
@@ -510,7 +507,6 @@ properties:
                 description: |
                   The plain text of the client secret value.
                 validation:
-                  regex: ""
                   function: validation.StringIsNotEmpty
               - name: thumbprint
                 type: String

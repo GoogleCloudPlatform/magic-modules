@@ -67,7 +67,6 @@ parameters:
     url_param_only: true
     validation:
       regex: (?:(?:[-a-z0-9]{1,63}\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))
-      function: ""
 properties:
   - name: name
     type: String
@@ -779,7 +778,6 @@ properties:
               - recurring_schedule.0.time_of_day.0.seconds
               - recurring_schedule.0.time_of_day.0.nanos
             validation:
-              regex: ""
               function: validation.IntBetween(0,23)
           - name: minutes
             type: Integer
@@ -791,7 +789,6 @@ properties:
               - recurring_schedule.0.time_of_day.0.seconds
               - recurring_schedule.0.time_of_day.0.nanos
             validation:
-              regex: ""
               function: validation.IntBetween(0,59)
           - name: seconds
             type: Integer
@@ -803,7 +800,6 @@ properties:
               - recurring_schedule.0.time_of_day.0.seconds
               - recurring_schedule.0.time_of_day.0.nanos
             validation:
-              regex: ""
               function: validation.IntBetween(0,60)
           - name: nanos
             type: Integer
@@ -815,7 +811,6 @@ properties:
               - recurring_schedule.0.time_of_day.0.seconds
               - recurring_schedule.0.time_of_day.0.nanos
             validation:
-              regex: ""
               function: validation.IntBetween(0,999999999)
       - name: lastExecuteTime
         type: String
@@ -866,7 +861,6 @@ properties:
                 description: |
                   Week number in a month. 1-4 indicates the 1st to 4th week of the month. -1 indicates the last week of the month.
                 validation:
-                  regex: ""
                   function: validation.IntBetween(-1,4)
               - name: dayOfWeek
                 type: Enum
@@ -886,7 +880,6 @@ properties:
                 description: |
                   Represents the number of days before or after the given week day of month that the patch deployment is scheduled for.
                 validation:
-                  regex: ""
                   function: validation.IntBetween(-30,30)
           - name: monthDay
             type: Integer
@@ -898,7 +891,6 @@ properties:
               - recurring_schedule.0.monthly.0.week_day_of_month
               - recurring_schedule.0.monthly.0.month_day
             validation:
-              regex: ""
               function: validation.IntBetween(-1,31)
   - name: rollout
     type: NestedObject
@@ -931,7 +923,6 @@ properties:
               - rollout.0.disruption_budget.0.fixed
               - rollout.0.disruption_budget.0.percentage
             validation:
-              regex: ""
               function: validation.IntAtLeast(1)
           - name: percentage
             api_name: percent
@@ -942,5 +933,4 @@ properties:
               - rollout.0.disruption_budget.0.fixed
               - rollout.0.disruption_budget.0.percentage
             validation:
-              regex: ""
               function: validation.IntBetween(0,100)

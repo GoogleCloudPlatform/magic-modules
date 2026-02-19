@@ -31,7 +31,6 @@ timeouts:
   update_minutes: 60
   delete_minutes: 60
 sweeper:
-  identifier_field: ""
   url_substitutions:
     - region: us-west1
 async:

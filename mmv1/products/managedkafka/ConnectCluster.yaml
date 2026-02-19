@@ -25,12 +25,12 @@ timeouts:
   insert_minutes: 60
   update_minutes: 30
   delete_minutes: 30
-autogen_async: true
 async:
   operation:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+autogen_async: true
 examples:
   - name: managedkafka_connect_cluster_basic
     primary_resource_id: example

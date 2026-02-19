@@ -32,9 +32,7 @@ iam_policy:
 import_format:
   - projects/{{project}}/locations/{{location}}/connections/{{name}}
   - '{{name}}'
-autogen_async: true
 sweeper:
-  identifier_field: ""
   url_substitutions:
     - region: us-central1
     - region: us-west1
@@ -42,6 +40,7 @@ async:
   operation:
     base_url: '{{op_id}}'
 legacy_long_form_project: true
+autogen_async: true
 exclude_tgc: true
 include_in_tgc_next: true
 examples:
