@@ -41,7 +41,6 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-flatten_all_in_method: true
 custom_code:
   constants: 'templates/terraform/constants/spanner_instance_config.go.tmpl'
   encoder: 'templates/terraform/encoders/spanner_instance_config.go.tmpl'
