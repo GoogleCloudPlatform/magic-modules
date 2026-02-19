@@ -24,6 +24,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -41,14 +42,19 @@ type getResult struct {
 
 // Compare to https://github.com/hashicorp/terraform-plugin-sdk/blob/97b4465/helper/schema/resource_data.go#L15
 type FakeResourceData struct {
-	reader schema.FieldReader
-	kind   string
-	schema map[string]*schema.Schema
+	reader   schema.FieldReader
+	kind     string
+	schema   map[string]*schema.Schema
+	identity *schema.IdentityData
 }
 
 // Kind returns the type of resource (i.e. "google_storage_bucket").
 func (d *FakeResourceData) Kind() string {
 	return d.kind
+}
+
+func (d *FakeResourceData) Identity() (*schema.IdentityData, error) {
+	return d.identity, nil
 }
 
 // Id returns the ID of the resource from state.
@@ -126,6 +132,7 @@ func (d *FakeResourceData) Set(string, interface{}) error     { return nil }
 func (d *FakeResourceData) SetId(string)                      {}
 func (d *FakeResourceData) GetProviderMeta(interface{}) error { return nil }
 func (d *FakeResourceData) Timeout(key string) time.Duration  { return time.Duration(1) }
+func (d *FakeResourceData) GetRawConfig() cty.Value           { return cty.NullVal(cty.String) }
 
 func NewFakeResourceData(kind string, resourceSchema map[string]*schema.Schema, values map[string]interface{}) *FakeResourceData {
 	state := map[string]string{}
