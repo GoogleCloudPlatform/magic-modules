@@ -44,6 +44,11 @@ examples:
     vars:
       backend_service_name: 'iap-settings-tf'
       health_check_name: 'iap-bs-health-check'
+  - name: 'iap_settings_oauth_storage'
+    primary_resource_id: 'iap_settings_oauth'
+    vars:
+      backend_service_name: 'iap-settings-oauth'
+      health_check_name: 'iap-bs-health-check-oauth'
 parameters:
 properties:
   - name: 'name'
@@ -116,6 +121,21 @@ properties:
               Note: IAP does not verify that the id token's hd claim matches this value
               since access behavior is managed by IAM policies.
               * loginHint setting is not a replacement for access control. Always enforce an appropriate access policy if you want to restrict access to users outside your domain.
+          - name: 'clientId'
+            type: String
+            description: |
+              OAuth 2.0 client ID used in the OAuth flow to generate an access token. If this field is set, you can skip obtaining the OAuth credentials in this.
+          - name: 'clientSecret'
+            type: String
+            description: |
+              OAuth secret paired with client ID.
+            ignore_read: true
+            sensitive: true
+          - name: 'clientSecretSha256'
+            type: String
+            description: |
+              OAuth secret sha256 paired with client ID.
+            output: true
           - name: 'programmaticClients'
             type: Array
             description: |
