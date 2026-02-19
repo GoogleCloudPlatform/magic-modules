@@ -51,9 +51,9 @@ func TestAccHypercomputeclusterCluster_update(t *testing.T) {
 }
 
 func TestAccHypercomputeclusterCluster_existing(t *testing.T) {
-  // TODO: fix permissions in CI project
-  t.Skip("Skipping test temporarily: pending permission fix") 
-  t.Parallel()
+	// TODO: fix permissions in CI project
+	t.Skip("Skipping test temporarily: pending permission fix")
+	t.Parallel()
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 8),
