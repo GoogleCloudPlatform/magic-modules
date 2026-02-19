@@ -202,7 +202,7 @@ func ResourceDataprocJob() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
-				Description: "If set to true, Terraform will wait for the job to reach a terminal state (DONE, ERROR, CANCELLED). Otherwise, Terraform will consider the job 'created' once it is in the RUNNING state.",
+				Description: "If set to true, Terraform will wait for the job to reach a terminal state (DONE, ERROR, CANCELLED, ATTEMPT_FAILURE). Otherwise, Terraform will consider the job 'created' once it is in the RUNNING state.",
 			},
 
 			"pyspark_config":  pySparkSchema,

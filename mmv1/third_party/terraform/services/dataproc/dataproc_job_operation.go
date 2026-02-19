@@ -63,6 +63,9 @@ func (w *DataprocJobOperationWaiter) OpName() string {
 }
 
 func (w *DataprocJobOperationWaiter) PendingStates() []string {
+	if w.WaitForCompletion {
+		return []string{"PENDING", "CANCEL_PENDING", "CANCEL_STARTED", "SETUP_DONE", "RUNNING"}
+	}
 	return []string{"PENDING", "CANCEL_PENDING", "CANCEL_STARTED", "SETUP_DONE"}
 }
 
