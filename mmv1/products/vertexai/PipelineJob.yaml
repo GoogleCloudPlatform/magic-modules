@@ -91,13 +91,21 @@ properties:
     properties:
       - name: 'gcsOutputDirectory'
         type: String
-  - name: 'pipelineSpec'
+  - name: pipelineSpec
+    min_version: 'beta'
+    type: Map
+    description: |
+      A compiled definition of a pipeline, represented as a JSON object.
+      Defines the structure of the pipeline, including its components,
+      tasks, and parameters.
+  - name: pscInterfaceConfig
     min_version: 'beta'
     type: NestedObject
-    description: The spec of the pipeline. Stored as free-form JSON/object.
+    description: Optional configuration for PSC-I for PipelineJob.
     properties:
-      - name: 'additionalProperties'
-        type: Any
+      - name: 'networkAttachment'
+        type: String
+        description: The name of the network attachment resource.
   - name: 'state'
     min_version: 'beta'
     type: Enum
