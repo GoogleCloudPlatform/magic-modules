@@ -40,7 +40,6 @@ examples:
   - name: 'dataproc_metastore_service_database_iam'
     primary_resource_id: 'dpms_service'
     primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv-%s", context["random_suffix"]), "testdb"'
-    external_providers: ["time"]
 parameters:
 properties:
   - name: 'name'
