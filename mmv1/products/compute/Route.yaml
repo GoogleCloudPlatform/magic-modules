@@ -64,6 +64,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+flatten_all_in_method: true
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/route.tmpl'
   constants: 'templates/terraform/constants/compute_route.go.tmpl'

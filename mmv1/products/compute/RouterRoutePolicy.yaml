@@ -42,6 +42,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+flatten_all_in_method: true
 custom_code:
   decoder: 'templates/terraform/decoders/unwrap_route_policy_resource.go.tmpl'
 examples:

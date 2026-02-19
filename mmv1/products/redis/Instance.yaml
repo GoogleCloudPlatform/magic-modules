@@ -38,6 +38,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+flatten_all_in_method: true
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/redis_instance.tmpl'
   constants: 'templates/terraform/constants/redis_instance.go.tmpl'

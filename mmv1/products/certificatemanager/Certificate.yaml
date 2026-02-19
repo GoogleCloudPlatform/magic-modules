@@ -41,6 +41,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+flatten_all_in_method: true
 custom_code:
   constants: 'templates/terraform/constants/cert_manager.tmpl'
   tgc_encoder: 'templates/tgc_next/encoders/certificatemanager_certificate.go.tmpl'

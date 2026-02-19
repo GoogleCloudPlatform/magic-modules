@@ -36,6 +36,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+flatten_all_in_method: true
 custom_code:
   encoder: 'templates/terraform/encoders/compute_region_target_https_proxy.go.tmpl'
   # update_encoder is usually the same as encoder by default. This resource is an uncommon case where the whole resource

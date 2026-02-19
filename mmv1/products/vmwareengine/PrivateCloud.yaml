@@ -41,6 +41,7 @@ async:
       delete_minutes: 150
   result:
     resource_inside_response: false
+flatten_all_in_method: true
 custom_code:
   constants: 'templates/terraform/constants/vmwareengine_private_cloud.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/private_cloud.go.tmpl'
