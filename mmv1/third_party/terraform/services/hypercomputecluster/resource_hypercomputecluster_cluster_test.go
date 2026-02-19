@@ -608,6 +608,10 @@ resource "google_hypercomputecluster_cluster" "cluster" {
       default_partition = "partition1"
     }
   }
+  timeouts {
+    create = "60m"
+    delete = "60m"
+  }
 }
 `, context)
 }

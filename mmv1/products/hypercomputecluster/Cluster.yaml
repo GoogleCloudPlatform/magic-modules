@@ -267,6 +267,7 @@ properties:
               which case it must match the id of one of the partitions.
           - name: epilogBashScripts
             type: Array
+            default_from_api: true
             description: |-
               Slurm [epilog scripts](https://slurm.schedmd.com/prolog_epilog.html), which
               will be executed by compute nodes whenever a node finishes running a job.
@@ -332,6 +333,7 @@ properties:
                       output: true
               - name: labels
                 type: KeyValuePairs
+                default_from_api: true
                 description: |-
                   [Labels](https://cloud.google.com/compute/docs/labeling-resources) that
                   should be applied to each login node instance.
@@ -420,6 +422,7 @@ properties:
                           immutable: true
                     - name: labels
                       type: KeyValuePairs
+                      default_from_api: true
                       description: |-
                         [Labels](https://cloud.google.com/compute/docs/labeling-resources) that
                         should be applied to each VM instance in the nodeset.
@@ -497,6 +500,7 @@ properties:
                     type: String
           - name: prologBashScripts
             type: Array
+            default_from_api: true
             description: |-
               Slurm [prolog scripts](https://slurm.schedmd.com/prolog_epilog.html), which
               will be executed by compute nodes before a node begins running a new job.
@@ -596,12 +600,16 @@ properties:
                   description: Name of the Cloud Storage bucket to create.
                 - name: hierarchicalNamespace
                   type: NestedObject
+                  default_from_api: true
                   description: Message describing Google Cloud Storage hierarchical namespace configuration
+                  diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
                   properties:
                     - name: enabled
                       type: Boolean
+                      default_from_api: true
                       required: true
                       description: Enables hierarchical namespace setup for the bucket.
+                      diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
                 - name: storageClass
                   type: String
                   description: |-
