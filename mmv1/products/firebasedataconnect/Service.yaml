@@ -29,7 +29,6 @@ import_format:
   - '{{project}}/{{location}}/{{service_id}}'
   - '{{location}}/{{service_id}}'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 examples:
   - name: firebasedataconnect_service_basic
     primary_resource_id: default

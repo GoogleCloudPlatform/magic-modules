@@ -515,6 +515,10 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
    GKE](https://cloud.google.com/kubernetes-engine/docs/add-on/ray-on-gke/how-to/collect-view-logs-metrics)
    for more information.
 
+*  `slice_controller` - (Optional). 
+   The status of the slice controller addon.
+   It is disabled by default. Set `enabled = true` to enable.
+
 *  `parallelstore_csi_driver_config` - (Optional) The status of the Parallelstore CSI driver addon,
    which allows the usage of a Parallelstore instances as volumes.
    It is disabled by default for Standard clusters; set `enabled = true` to enable.
@@ -861,6 +865,11 @@ Structure is [documented below](#nested_additional_ip_ranges_config).
 * `subnetwork` - (Required) Name of the subnetwork. This can be the full path of the subnetwork or just the name.
 
 * `pod_ipv4_range_names`- (Required) List of secondary ranges names within this subnetwork that can be used for pod IPs.
+
+* `status`- (Optional) Status of the subnetwork. Additional subnet with DRAINING status will not be selected during new node pool creation
+    Accepted values are:
+    * `ACTIVE`: ACTIVE status indicates that the subnet is available for new node pool creation.
+    * `DRAINING`: DRAINING status indicates that the subnet is not used for new node pool creation.
 
 <a name="nested_network_tier_config"></a>The `network_tier_config` block supports:
 

@@ -169,7 +169,6 @@ examples:
   - name: 'cloudrunv2_service_iap'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-iap-service%s", context["random_suffix"])'
-    min_version: 'beta'
     vars:
       cloud_run_service_name: 'cloudrun-iap-service'
     ignore_read_extra:
@@ -1368,5 +1367,4 @@ properties:
   - name: 'iapEnabled'
     type: Boolean
     description: |
-      Used to enable/disable IAP for the service.
-    min_version: 'beta'
+      Used to enable/disable IAP for the cloud-run service.

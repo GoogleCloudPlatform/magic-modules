@@ -85,20 +85,14 @@ properties:
      'The machine configuration of the runtime.'
     properties:
       - name: 'machineType'
-        type: string
+        type: String
         default_from_api: true
         description: |
                 The Compute Engine machine type selected for the runtime.
       - name: 'acceleratorType'
-        type: enum
+        type: String
         description: |
                 The type of hardware accelerator used by the runtime. If specified, acceleratorCount must also be specified.
-        enum_values:
-          - 'NVIDIA_TESLA_V100'
-          - 'NVIDIA_TESLA_T4'
-          - 'NVIDIA_TESLA_A100'
-          - 'NVIDIA_A100_80GB'
-          - 'NVIDIA_L4'
       - name: 'acceleratorCount'
         type: Integer
         default_from_api: true
@@ -109,16 +103,11 @@ properties:
     description: 'The configuration for the data disk of the runtime.'
     properties:
       - name: 'diskType'
-        type: enum
+        type: String
         description: 'The type of the persistent disk.'
         default_from_api: true
-        enum_values:
-          - 'pd-standard'
-          - 'pd-ssd'
-          - 'pd-balanced'
-          - 'pd-extreme'
       - name: 'diskSizeGb'
-        type: int
+        type: String  # Integer
         default_from_api: true
         description: |
                 The disk size of the runtime in GB. If specified, the diskType must also be specified. The minimum size is 10GB and the maximum is 65536GB.
