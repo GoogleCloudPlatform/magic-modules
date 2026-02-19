@@ -27,7 +27,7 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.10.0
 	github.com/hashicorp/terraform-plugin-mux v0.20.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.38.2
-	github.com/hashicorp/terraform-plugin-testing v1.14.1-0.20260218172747-2312e91c264e
+	github.com/hashicorp/terraform-plugin-testing v1.14.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/hashstructure v1.1.0
 	github.com/sirupsen/logrus v1.8.3
@@ -134,5 +134,3 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20251202230838-ff82c1b0f217 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/hashicorp/terraform-plugin-testing => github.com/hashicorp/terraform-plugin-testing v1.14.1-0.20260218172747-2312e91c264e
