@@ -768,7 +768,7 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
         return resource{{ $.ResourceName -}}Read(d, meta)
     }
 {{-     end}}
-{{-     if and ($.GetAsync) (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "update")) -}}
+{{     if and ($.GetAsync) (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "update")) -}}
     var project string
 {{-     end}}
     config := meta.(*transport_tpg.Config)
