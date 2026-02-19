@@ -143,13 +143,6 @@ properties:
     description: A list of names for reserved IP ranges under the VPC network.
     item_type:
       type: String
-  - name: 'pscInterfaceConfig'
-    min_version: 'beta'
-    type: NestedObject
-    description: Optional configuration for PSC-I for PipelineJob.
-    properties:
-      - name: 'raw'
-        type: Any
   - name: 'scheduleName'
     min_version: 'beta'
     type: String
