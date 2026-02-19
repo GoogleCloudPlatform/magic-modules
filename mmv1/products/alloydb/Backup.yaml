@@ -41,7 +41,6 @@ async:
 custom_code:
   encoder: 'templates/terraform/encoders/alloydb_backup.tmpl'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 examples:
   - name: 'alloydb_backup_basic'
     primary_resource_id: 'default'

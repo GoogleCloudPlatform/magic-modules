@@ -193,4 +193,3 @@ properties:
       The state details of the Active Directory.
     output: true
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true

@@ -158,6 +158,10 @@ properties:
       This is the application type this engine resource represents.
       The supported values: 'APP_TYPE_UNSPECIFIED', 'APP_TYPE_INTRANET'.
     immutable: true
+  - name: 'disableAnalytics'
+    type: Boolean
+    description: |
+      Whether to disable analytics for searches performed on this engine.
   - name: 'features'
     type: KeyValuePairs
     description: |

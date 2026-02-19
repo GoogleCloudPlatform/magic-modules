@@ -44,7 +44,6 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 custom_code:
 examples:
   - name: 'region_autoscaler_basic'
