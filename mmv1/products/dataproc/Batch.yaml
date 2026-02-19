@@ -39,6 +39,7 @@ async:
     base_url: '{{op_id}}'
 autogen_async: true
 include_in_tgc_next: true
+flatten_all_in_method: true
 custom_code:
   decoder: templates/terraform/decoders/cloud_dataproc_batch.go.tmpl
   constants: templates/terraform/constants/cloud_dataproc_batch.go.tmpl

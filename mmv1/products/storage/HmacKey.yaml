@@ -47,6 +47,7 @@ async:
   suppress_error: false
   target_occurrences: 1
   actions: ['create']
+flatten_all_in_method: true
 custom_code:
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
   post_create: 'templates/terraform/post_create/storage_hmac_key.go.tmpl'

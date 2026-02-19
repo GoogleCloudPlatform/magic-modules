@@ -31,6 +31,7 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+flatten_all_in_method: true
 custom_code:
   constants: 'templates/terraform/constants/firebase_database_instance.go.tmpl'
   decoder: 'templates/terraform/decoders/firebase_database_instance.go.tmpl'

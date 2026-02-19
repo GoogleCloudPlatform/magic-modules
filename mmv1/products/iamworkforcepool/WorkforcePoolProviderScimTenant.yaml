@@ -31,6 +31,7 @@ update_mask: true
 timeouts:
   insert_minutes: 20
   delete_minutes: 20
+flatten_all_in_method: true
 custom_code:
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
   post_create: 'templates/terraform/post_create/sleep.go.tmpl'

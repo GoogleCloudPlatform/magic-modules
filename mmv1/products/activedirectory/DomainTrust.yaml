@@ -51,6 +51,7 @@ nested_query:
     - trusts
   is_list_of_ids: false
   modify_by_patch: false
+flatten_all_in_method: true
 custom_code:
   encoder: 'templates/terraform/encoders/active_directory_domain_trust.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/active_directory_domain_trust.go.tmpl'

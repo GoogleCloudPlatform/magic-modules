@@ -30,6 +30,7 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+flatten_all_in_method: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/service_directory_endpoint.go.tmpl'
   encoder: 'templates/terraform/encoders/service_directory_metadata_to_annotations.go.tmpl'
