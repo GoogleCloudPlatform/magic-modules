@@ -40,6 +40,20 @@ type Resource struct {
 	// same as :name if not overridden in provider
 	ApiName string `yaml:"api_name,omitempty"`
 
+	// The API "resource type kind" used for this resource e.g., "Function".
+	// If this is not set, then :name is used instead, which is strongly
+	// preferred wherever possible. Its main purpose is for supporting
+	// fine-grained resources and legacy resources.
+	ApiResourceTypeKind string `yaml:"api_resource_type_kind,omitempty"`
+
+	// The API URL patterns used by this resource that represent variants e.g.,
+	// "folders/{folder}/feeds/{feed}". Each pattern must match the value
+	// defined in the API exactly. The use of `api_variant_patterns` is only
+	// meaningful when the resource type has multiple parent types available.
+	// This is commonly used for resources that have a project, folder, and
+	// organization variant, however most resources do not need it.
+	ApiVariantPatterns []string `yaml:"api_variant_patterns,omitempty"`
+
 	// [Required] A description of the resource that's surfaced in provider
 	// documentation.
 	Description string
@@ -72,10 +86,6 @@ type Resource struct {
 	// [Optional] If set to true, the resource is not able to be updated.
 	Immutable bool `yaml:"immutable,omitempty"`
 
-	// [Optional] If set to true, this resource uses an update mask to perform
-	// updates. This is typical of newer GCP APIs.
-	UpdateMask bool `yaml:"update_mask,omitempty"`
-
 	// [Optional] If set to true, the object has a `self_link` field. This is
 	// typical of older GCP APIs.
 	HasSelfLink bool `yaml:"has_self_link,omitempty"`
@@ -105,6 +115,11 @@ type Resource struct {
 	// [Optional] The URL used to update the resource. Defaults to the self
 	// link.
 	UpdateUrl string `yaml:"update_url,omitempty"`
+
+	// [Optional] If set to true, this resource uses an update mask to perform
+	// updates. This is typical of newer GCP APIs.
+	UpdateMask bool `yaml:"update_mask,omitempty"`
+
 	// [Optional] The HTTP verb used during create. Defaults to POST.
 	CreateVerb string `yaml:"create_verb,omitempty"`
 
@@ -202,7 +217,7 @@ type Resource struct {
 	//
 	ImportFormat []string `yaml:"import_format,omitempty"`
 
-	CustomCode resource.CustomCode `yaml:"custom_code,omitempty"`
+	Timeouts *Timeouts `yaml:"timeouts,omitempty"`
 
 	// This block inserts entries into the customdiff.All() block in the
 	// resource schema -- the code for these custom diff functions must
@@ -212,16 +227,6 @@ type Resource struct {
 	// Lock name for a mutex to prevent concurrent API calls for a given
 	// resource.
 	Mutex string `yaml:"mutex,omitempty"`
-
-	// Examples in documentation. Backed by generated tests, and have
-	// corresponding OiCS walkthroughs.
-	Examples []*resource.Examples `yaml:"examples,omitempty"`
-
-	// Samples for generating tests and documentation
-	Samples []*resource.Sample `yaml:"samples,omitempty"`
-
-	// If true, generates product operation handling logic.
-	AutogenAsync bool `yaml:"autogen_async,omitempty"`
 
 	// If true, resource is not importable
 	ExcludeImport bool `yaml:"exclude_import,omitempty"`
@@ -234,8 +239,6 @@ type Resource struct {
 
 	// Override sweeper settings
 	Sweeper resource.Sweeper `yaml:"sweeper,omitempty"`
-
-	Timeouts *Timeouts `yaml:"timeouts,omitempty"`
 
 	Async *Async `yaml:"async,omitempty"`
 
@@ -306,11 +309,44 @@ type Resource struct {
 
 	// Tag autogen resources so that we can track them. In the future this will
 	// control if a resource is continuously generated from public OpenAPI docs
-	AutogenStatus string `yaml:"autogen_status"`
+	AutogenStatus string `yaml:"autogen_status,omitempty"`
+
+	// If true, generates product operation handling logic.
+	AutogenAsync bool `yaml:"autogen_async,omitempty"`
 
 	// EXPERIMENTAL: this is an incomplete feature and may have several build errors.
 	// If true, this resource generates with the new plugin framework resource template
 	FrameworkResource bool `yaml:"plugin_framework_experimental,omitempty"`
+
+	ProductMetadata *Product `yaml:"-"`
+
+	// The version name provided by the user through CI
+	TargetVersionName string `yaml:"-"`
+
+	// ApiResourceField indicates what field on the API resource is managed by a resource.
+	// This is generally relevant for fine-grained resources. For example,
+	// google_compute_router_nat manages the `nat` field on the `Router` resource.
+	ApiResourceField string `yaml:"api_resource_field,omitempty"`
+
+	ImportPath     string `yaml:"-"`
+	SourceYamlFile string `yaml:"-"`
+
+	constraintGroupRegistry     map[string]*[]string `yaml:"-"`
+	constraintGroupsInitialized bool                 `yaml:"-"`
+
+	// ====================
+	// TGC
+	// ====================
+	TGCResource `yaml:",inline"`
+
+	CustomCode resource.CustomCode `yaml:"custom_code,omitempty"`
+
+	// Examples in documentation. Backed by generated tests, and have
+	// corresponding OiCS walkthroughs.
+	Examples []*resource.Examples `yaml:"examples,omitempty"`
+
+	// Samples for generating tests and documentation
+	Samples []*resource.Sample `yaml:"samples,omitempty"`
 
 	// The three groups of []*Type fields are expected to be strictly ordered within a yaml file
 	// in the sequence of Virtual Fields -> Parameters -> Properties
@@ -331,44 +367,9 @@ type Resource struct {
 	// in API payloads are better handled with custom expand/encoder logic.
 	VirtualFields []*Type `yaml:"virtual_fields,omitempty"`
 
-	Parameters []*Type
+	Parameters []*Type `yaml:"parameters,omitempty"`
 
 	Properties []*Type
-
-	ProductMetadata *Product `yaml:"-"`
-
-	// The version name provided by the user through CI
-	TargetVersionName string `yaml:"-"`
-
-	// The API "resource type kind" used for this resource e.g., "Function".
-	// If this is not set, then :name is used instead, which is strongly
-	// preferred wherever possible. Its main purpose is for supporting
-	// fine-grained resources and legacy resources.
-	ApiResourceTypeKind string `yaml:"api_resource_type_kind,omitempty"`
-
-	// The API URL patterns used by this resource that represent variants e.g.,
-	// "folders/{folder}/feeds/{feed}". Each pattern must match the value
-	// defined in the API exactly. The use of `api_variant_patterns` is only
-	// meaningful when the resource type has multiple parent types available.
-	// This is commonly used for resources that have a project, folder, and
-	// organization variant, however most resources do not need it.
-	ApiVariantPatterns []string `yaml:"api_variant_patterns,omitempty"`
-
-	// ApiResourceField indicates what field on the API resource is managed by a resource.
-	// This is generally relevant for fine-grained resources. For example,
-	// google_compute_router_nat manages the `nat` field on the `Router` resource.
-	ApiResourceField string `yaml:"api_resource_field,omitempty"`
-
-	ImportPath     string `yaml:"-"`
-	SourceYamlFile string `yaml:"-"`
-
-	constraintGroupRegistry     map[string]*[]string `yaml:"-"`
-	constraintGroupsInitialized bool                 `yaml:"-"`
-
-	// ====================
-	// TGC
-	// ====================
-	TGCResource `yaml:",inline"`
 }
 
 type TestConfig struct {

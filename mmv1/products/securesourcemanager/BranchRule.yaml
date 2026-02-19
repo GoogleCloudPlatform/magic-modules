@@ -12,131 +12,123 @@
 # limitations under the License.
 
 ---
-name: 'BranchRule'
-description: 'BranchRule is the protection rule to enforce pre-defined rules on designated branches within a repository.'
+name: BranchRule
+description: BranchRule is the protection rule to enforce pre-defined rules on designated branches within a repository.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/secure-source-manager/docs/overview'
-  api: 'https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.repositories.branchRules'
-docs:
-id_format: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules/{{branch_rule_id}}'
-base_url: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules?branch_rule_id={{branch_rule_id}}'
-self_link: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules/{{branch_rule_id}}'
-import_format:
-  - 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules/{{branch_rule_id}}'
-  - '{{branch_rule_id}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-autogen_async: true
-update_verb: 'PATCH'
+    Official Documentation: https://cloud.google.com/secure-source-manager/docs/overview
+  api: https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.repositories.branchRules
+base_url: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules?branch_rule_id={{branch_rule_id}}
+self_link: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules/{{branch_rule_id}}
 update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules/{{branch_rule_id}}
+  - '{{branch_rule_id}}'
 async:
-  actions: ['create', 'delete']
-  type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-  result:
-    resource_inside_response: false
-custom_code:
+  actions:
+    - create
+    - delete
+autogen_async: true
 examples:
-  - name: 'secure_source_manager_branch_rule_basic'
-    primary_resource_id: 'basic'
-    vars:
-      branch_rule_id: 'my-basic-branchrule'
-      repository_id: 'my-basic-repository'
-      instance_id: 'my-basic-instance'
-      deletion_policy: 'PREVENT'
-    test_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    oics_vars_overrides:
-      'deletion_policy': '"DELETE"'
+  - name: secure_source_manager_branch_rule_basic
+    primary_resource_id: basic
     ignore_read_extra:
-      - 'deletion_policy'
-  - name: 'secure_source_manager_branch_rule_with_fields'
-    primary_resource_id: 'default'
+      - deletion_policy
     vars:
-      branch_rule_id: 'my-initial-branchrule'
-      repository_id: 'my-initial-repository'
-      instance_id: 'my-initial-instance'
-      deletion_policy: 'PREVENT'
+      branch_rule_id: my-basic-branchrule
+      deletion_policy: PREVENT
+      instance_id: my-basic-instance
+      repository_id: my-basic-repository
     test_vars_overrides:
-      'deletion_policy': '"DELETE"'
+      deletion_policy: '"DELETE"'
     oics_vars_overrides:
-      'deletion_policy': '"DELETE"'
+      deletion_policy: '"DELETE"'
+  - name: secure_source_manager_branch_rule_with_fields
+    primary_resource_id: default
     ignore_read_extra:
-      - 'deletion_policy'
+      - deletion_policy
+    vars:
+      branch_rule_id: my-initial-branchrule
+      deletion_policy: PREVENT
+      instance_id: my-initial-instance
+      repository_id: my-initial-repository
+    test_vars_overrides:
+      deletion_policy: '"DELETE"'
+    oics_vars_overrides:
+      deletion_policy: '"DELETE"'
 parameters:
-  - name: 'branch_rule_id'
+  - name: branch_rule_id
     type: String
+    required: true
     description: |
       The ID for the BranchRule.
     url_param_only: true
-    required: true
-  - name: 'location'
+  - name: location
     type: String
+    required: true
     description: |
       The location for the Repository.
     url_param_only: true
-    required: true
-  - name: 'repository_id'
+  - name: repository_id
     type: String
+    required: true
     description: |
       The ID for the Repository.
     url_param_only: true
-    required: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name for the BranchRule.
     output: true
-  - name: 'uid'
+  - name: uid
     type: String
     description: |
       Unique identifier of the BranchRule.
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: |
       Time the BranchRule was created in UTC.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: |
       Time the BranchRule was updated in UTC.
     output: true
-  - name: 'includePattern'
+  - name: includePattern
     type: String
+    required: true
     description: |
       The BranchRule matches branches based on the specified regular expression. Use .* to match all branches.
-    required: true
-  - name: 'disabled'
+  - name: disabled
     type: Boolean
     description: |
       Determines if the branch rule is disabled or not.
-  - name: 'requirePullRequest'
+  - name: requirePullRequest
     type: Boolean
     description: |
       Determines if the branch rule requires a pull request or not.
-  - name: 'minimumReviewsCount'
+  - name: minimumReviewsCount
     type: Integer
     description: |
       The minimum number of reviews required for the branch rule to be matched.
-  - name: 'minimumApprovalsCount'
+  - name: minimumApprovalsCount
     type: Integer
     description: |
       The minimum number of approvals required for the branch rule to be matched.
-  - name: 'requireCommentsResolved'
+  - name: requireCommentsResolved
     type: Boolean
     description: |
       Determines if require comments resolved before merging to the branch.
-  - name: 'allowStaleReviews'
+  - name: allowStaleReviews
     type: Boolean
     description: |
       Determines if allow stale reviews or approvals before merging to the branch.
-  - name: 'requireLinearHistory'
+  - name: requireLinearHistory
     type: Boolean
     description: |
       Determines if require linear history before merging to the branch.

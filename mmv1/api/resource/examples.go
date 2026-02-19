@@ -106,7 +106,7 @@ type Examples struct {
 	// Vars is a Hash from template variable names to output variable names.
 	// It will use the provided value as a prefix for generated tests, and
 	// insert it into the docs verbatim.
-	Vars map[string]string
+	Vars map[string]string `yaml:"vars,omitempty"`
 
 	// Some variables need to hold special values during tests, and cannot
 	// be inferred by Open in Cloud Shell.  For instance, org_id

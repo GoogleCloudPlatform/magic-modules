@@ -35,7 +35,7 @@ type Type struct {
 	ApiName string `yaml:"api_name,omitempty"`
 
 	// TODO rewrite: improve the parsing of properties based on type in resource yaml files.
-	Type string
+	Type string `yaml:"type"`
 
 	// For nested fields, this only applies within the parent.
 	// For example, an optional parent can contain a required child.
@@ -145,8 +145,6 @@ type Type struct {
 	// Can only be overridden - we should never set this ourselves.
 	NewType string `yaml:"-"`
 
-	Properties []*Type `yaml:"properties,omitempty"`
-
 	EnumValues []string `yaml:"enum_values,omitempty"`
 
 	ExcludeDocsValues bool `yaml:"exclude_docs_values,omitempty"`
@@ -154,9 +152,8 @@ type Type struct {
 	// ====================
 	// Array Fields
 	// ====================
-	ItemType *Type  `yaml:"item_type,omitempty"`
-	MinSize  string `yaml:"min_size,omitempty"`
-	MaxSize  string `yaml:"max_size,omitempty"`
+	MinSize *int `yaml:"min_size,omitempty"`
+	MaxSize *int `yaml:"max_size,omitempty"`
 	// Adds a ValidateFunc to the item schema
 	ItemValidation resource.Validation `yaml:"item_validation,omitempty"`
 
@@ -342,6 +339,9 @@ type Type struct {
 	TGCIgnoreTerraformCustomFlatten bool `yaml:"tgc_ignore_terraform_custom_flatten,omitempty"`
 
 	TGCIgnoreRead bool `yaml:"tgc_ignore_read,omitempty"`
+
+	Properties []*Type `yaml:"properties,omitempty"`
+	ItemType   *Type   `yaml:"item_type,omitempty"`
 }
 
 const MAX_NAME = 20
@@ -364,10 +364,12 @@ func (t *Type) MarshalYAML() (interface{}, error) {
 	defaults.Resource = t.Resource
 	defaults.ParentName = t.ParentName
 	defaults.setShallowDefaults(resourceMetadata)
-	defaults.Name = ""
 	defaults.Type = ""
 	defaults.Resource = ""
-	defaults.ParentName = ""
+	if defaults.ParentName != defaults.Name {
+		defaults.ParentName = ""
+		defaults.Name = ""
+	}
 
 	// OmitDefaultsForMarshaling creates a clone of the struct where any field
 	// matching its default value is set to its zero-value, allowing `omitempty` to work.
@@ -387,6 +389,21 @@ func (t *Type) MarshalYAML() (interface{}, error) {
 	err = node.Encode((*typeAlias)(clonePtr)) // Use the alias to prevent recursion
 	if err != nil {
 		return nil, err
+	}
+
+	// Fix: Ensure float values (like 0.0) are marshaled as floats (0.0) with !!float tag.
+	// If we don't set the tag, it might be emitted as '0' (int) or '!!int 0.0' (invalid).
+	if _, ok := t.DefaultValue.(float64); ok {
+		for i := 0; i < len(node.Content); i += 2 {
+			if node.Content[i].Value == "default_value" {
+				valNode := node.Content[i+1]
+				if !strings.Contains(valNode.Value, ".") && !strings.Contains(strings.ToLower(valNode.Value), "e") {
+					valNode.Value = valNode.Value + ".0"
+				}
+				valNode.Tag = "!!float"
+				break
+			}
+		}
 	}
 
 	// Special handling for `properties` field.

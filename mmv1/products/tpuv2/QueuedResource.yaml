@@ -12,146 +12,146 @@
 # limitations under the License.
 
 ---
-name: 'QueuedResource'
+name: QueuedResource
 description: |
   A Cloud TPU Queued Resource.
-min_version: 'beta'
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/tpu/docs/'
-  api: 'https://cloud.google.com/tpu/docs/reference/rest/v2/projects.locations.queuedResources'
-base_url: 'projects/{{project}}/locations/{{zone}}/queuedResources'
-self_link: 'projects/{{project}}/locations/{{zone}}/queuedResources/{{name}}'
-create_url: 'projects/{{project}}/locations/{{zone}}/queuedResources?queuedResourceId={{name}}'
+    Official Documentation: https://cloud.google.com/tpu/docs/
+  api: https://cloud.google.com/tpu/docs/reference/rest/v2/projects.locations.queuedResources
+base_url: projects/{{project}}/locations/{{zone}}/queuedResources
+min_version: beta
 immutable: true
-autogen_async: true
-async:
-  actions: ['create', 'delete']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
+self_link: projects/{{project}}/locations/{{zone}}/queuedResources/{{name}}
+create_url: projects/{{project}}/locations/{{zone}}/queuedResources?queuedResourceId={{name}}
 sweeper:
   url_substitutions:
-    - zone: "us-central1-c"
+    - zone: us-central1-c
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+  result:
+    resource_inside_response: true
+autogen_async: true
 examples:
-  - name: 'tpu_v2_queued_resource_basic'
-    primary_resource_id: 'qr'
-    min_version: 'beta'
+  - name: tpu_v2_queued_resource_basic
+    primary_resource_id: qr
+    min_version: beta
     vars:
-      qr_name: 'test-qr'
-      tpu_name: 'test-tpu'
+      qr_name: test-qr
+      tpu_name: test-tpu
     test_env_vars:
-      project: 'PROJECT_NAME'
+      project: PROJECT_NAME
     skip_vcr: true
-  - name: 'tpu_v2_queued_resource_full'
-    primary_resource_id: 'qr'
-    min_version: 'beta'
+  - name: tpu_v2_queued_resource_full
+    primary_resource_id: qr
+    min_version: beta
     vars:
-      qr_name: 'test-qr'
-      tpu_name: 'test-tpu'
-      network_name: 'tpu-net'
-      subnet_name: 'tpu-subnet'
+      network_name: tpu-net
+      qr_name: test-qr
+      subnet_name: tpu-subnet
+      tpu_name: test-tpu
     test_env_vars:
-      project: 'PROJECT_NAME'
+      project: PROJECT_NAME
     skip_vcr: true
 parameters:
-  - name: 'zone'
+  - name: zone
     type: String
     description: |
       The GCP location for the Queued Resource. If it is not provided, the provider zone is used.
-    url_param_only: true
     immutable: true
+    url_param_only: true
     default_from_api: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
+    required: true
     description: |
       The immutable name of the Queued Resource.
-    required: true
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-  - name: 'tpu'
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: tpu
     type: NestedObject
     description: |
       Defines a TPU resource.
     properties:
-      - name: 'nodeSpec'
+      - name: nodeSpec
         type: Array
         description: |
           The TPU node(s) being requested.
         item_type:
           type: NestedObject
           properties:
-            - name: 'parent'
+            - name: parent
               type: String
+              required: true
               description: |
                 The parent resource name.
-              required: true
-              diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-            - name: 'nodeId'
+              diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+            - name: nodeId
               type: String
               description: |
                 Unqualified node identifier used to identify the node in the project once provisioned.
-            - name: 'node'
+            - name: node
               type: NestedObject
+              required: true
               description: |
                 The node.
-              required: true
               properties:
-                - name: 'runtimeVersion'
+                - name: runtimeVersion
                   type: String
                   required: true
                   description: |
                     Runtime version for the TPU.
-                - name: 'acceleratorType'
+                - name: acceleratorType
                   type: String
-                  default_from_api: true
                   description: |
                     TPU accelerator type for the TPU. If not specified, this defaults to 'v2-8'.
-                - name: 'description'
+                  default_from_api: true
+                - name: description
                   type: String
                   description: |
                     Text description of the TPU.
-                - name: 'networkConfig'
+                - name: networkConfig
                   type: NestedObject
                   description: |
                     Network configurations for the TPU node.
                   immutable: true
                   default_from_api: true
                   properties:
-                    - name: 'network'
+                    - name: network
                       type: String
                       description: |
                         The name of the network for the TPU node. It must be a preexisting Google Compute Engine
                         network. If none is provided, "default" will be used.
                       immutable: true
                       default_from_api: true
-                    - name: 'subnetwork'
+                    - name: subnetwork
                       type: String
                       description: |
                         The name of the subnetwork for the TPU node. It must be a preexisting Google Compute
                         Engine subnetwork. If none is provided, "default" will be used.
                       immutable: true
                       default_from_api: true
-                    - name: 'enableExternalIps'
+                    - name: enableExternalIps
                       type: Boolean
                       description: |
                         Indicates that external IP addresses would be associated with the TPU workers. If set to
                         false, the specified subnetwork or network should have Private Google Access enabled.
                       immutable: true
                       send_empty_value: true
-                    - name: 'canIpForward'
+                    - name: canIpForward
                       type: Boolean
                       description: |
                         Allows the TPU node to send and receive packets with non-matching destination or source
                         IPs. This is required if you plan to use the TPU workers to forward routes.
                       immutable: true
                       send_empty_value: true
-                    - name: 'queueCount'
+                    - name: queueCount
                       type: Integer
                       description: |
                         Specifies networking queue count for TPU VM instance's network interface.
-                      required: false
                       immutable: true

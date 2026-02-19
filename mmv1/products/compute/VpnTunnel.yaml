@@ -12,83 +12,71 @@
 # limitations under the License.
 
 ---
-name: 'VpnTunnel'
-kind: 'compute#vpnTunnel'
-description: 'VPN tunnel resource.'
+name: VpnTunnel
+description: VPN tunnel resource.
 references:
   guides:
-    'Cloud VPN Overview': 'https://cloud.google.com/vpn/docs/concepts/overview'
-    'Networks and Tunnel Routing': 'https://cloud.google.com/vpn/docs/concepts/choosing-networks-routing'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/vpnTunnels'
-docs:
-base_url: 'projects/{{project}}/regions/{{region}}/vpnTunnels'
-has_self_link: true
+    Cloud VPN Overview: https://cloud.google.com/vpn/docs/concepts/overview
+    Networks and Tunnel Routing: https://cloud.google.com/vpn/docs/concepts/choosing-networks-routing
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/vpnTunnels
+base_url: projects/{{project}}/regions/{{region}}/vpnTunnels
 immutable: true
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
+has_self_link: true
+collection_url_key: items
+kind: compute#vpnTunnel
+id_format: projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-  result:
-    resource_inside_response: false
-collection_url_key: 'items'
 custom_code:
-  constants: 'templates/terraform/constants/vpn_tunnel.tmpl'
-  encoder: 'templates/terraform/encoders/vpn_tunnel.go.tmpl'
-  post_create: 'templates/terraform/post_create/labels.tmpl'
+  encoder: templates/terraform/encoders/vpn_tunnel.go.tmpl
+  constants: templates/terraform/constants/vpn_tunnel.tmpl
+  post_create: templates/terraform/post_create/labels.tmpl
 examples:
-  - name: 'vpn_tunnel_basic'
-    primary_resource_id: 'tunnel1'
+  - name: vpn_tunnel_basic
+    primary_resource_id: tunnel1
     vars:
-      vpn_tunnel_name: 'tunnel-1'
-      target_vpn_gateway_name: 'vpn-1'
-      network_name: 'network-1'
-      address_name: 'vpn-static-ip'
-      esp_forwarding_rule_name: 'fr-esp'
-      udp500_forwarding_rule_name: 'fr-udp500'
-      udp4500_forwarding_rule_name: 'fr-udp4500'
-      route_name: 'route1'
-  - name: 'vpn_tunnel_cipher_suite'
-    primary_resource_id: 'tunnel1'
+      address_name: vpn-static-ip
+      esp_forwarding_rule_name: fr-esp
+      network_name: network-1
+      route_name: route1
+      target_vpn_gateway_name: vpn-1
+      udp500_forwarding_rule_name: fr-udp500
+      udp4500_forwarding_rule_name: fr-udp4500
+      vpn_tunnel_name: tunnel-1
+  - name: vpn_tunnel_cipher_suite
+    primary_resource_id: tunnel1
     vars:
-      vpn_tunnel_name: 'tunnel-cipher'
-      target_vpn_gateway_name: 'vpn-1'
-      network_name: 'network-1'
-      address_name: 'vpn-static-ip'
-      esp_forwarding_rule_name: 'fr-esp'
-      udp500_forwarding_rule_name: 'fr-udp500'
-      udp4500_forwarding_rule_name: 'fr-udp4500'
-      route_name: 'route1'
+      address_name: vpn-static-ip
+      esp_forwarding_rule_name: fr-esp
+      network_name: network-1
+      route_name: route1
+      target_vpn_gateway_name: vpn-1
+      udp500_forwarding_rule_name: fr-udp500
+      udp4500_forwarding_rule_name: fr-udp4500
+      vpn_tunnel_name: tunnel-cipher
 parameters:
-  - name: 'region'
+  - name: region
     type: ResourceRef
-    description:
-      'The region where the tunnel is located. If unset, is set to the region of
-      `target_vpn_gateway`.'
-    required: false
+    description: The region where the tunnel is located. If unset, is set to the region of `target_vpn_gateway`.
+    resource: Region
+    imports: name
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Region'
-    imports: 'name'
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
 properties:
-  - name: 'tunnel_id'
-    type: String
-    description:
-      'The unique identifier for the resource. This identifier is defined by the
-      server.'
+  - name: tunnel_id
     api_name: id
-    output: true
-  - name: 'creationTimestamp'
-    type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
-    output: true
-  - name: 'name'
     type: String
+    description: The unique identifier for the resource. This identifier is defined by the server.
+    output: true
+  - name: creationTimestamp
+    type: Time
+    description: Creation timestamp in RFC3339 text format.
+    output: true
+  - name: name
+    type: String
+    required: true
     description: |
       Name of the resource. The name must be 1-63 characters long, and
       comply with RFC1035. Specifically, the name must be 1-63
@@ -97,53 +85,52 @@ properties:
       must be a lowercase letter, and all following characters must
       be a dash, lowercase letter, or digit,
       except the last character, which cannot be a dash.
-    required: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       An optional description of this resource.
     immutable: true
-  - name: 'targetVpnGateway'
+  - name: targetVpnGateway
     type: ResourceRef
     description: |
       URL of the Target VPN gateway with which this VPN tunnel is
       associated.
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'VpnGateway'
-    imports: 'selfLink'
-  - name: 'vpnGateway'
+    resource: VpnGateway
+    imports: selfLink
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+  - name: vpnGateway
     type: ResourceRef
     description: |
       URL of the VPN gateway with which this VPN tunnel is associated.
       This must be used if a High Availability VPN gateway resource is created.
       This field must reference a `google_compute_ha_vpn_gateway` resource.
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'HaVpnGateway'
-    imports: 'selfLink'
-  - name: 'vpnGatewayInterface'
+    resource: HaVpnGateway
+    imports: selfLink
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+  - name: vpnGatewayInterface
     type: Integer
     description: |
       The interface ID of the VPN gateway with which this VPN tunnel is associated.
     immutable: true
     send_empty_value: true
-  - name: 'peerExternalGateway'
+  - name: peerExternalGateway
     type: ResourceRef
     description: |
       URL of the peer side external VPN gateway to which this VPN tunnel is connected.
     immutable: true
     conflicts:
       - peer_gcp_gateway
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'ExternalVpnGateway'
-    imports: 'selfLink'
-  - name: 'peerExternalGatewayInterface'
+    resource: ExternalVpnGateway
+    imports: selfLink
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+  - name: peerExternalGatewayInterface
     type: Integer
     description: |
       The interface ID of the external VPN gateway to which this VPN tunnel is connected.
     send_empty_value: true
-  - name: 'peerGcpGateway'
+  - name: peerGcpGateway
     type: ResourceRef
     description: |
       URL of the peer side HA GCP VPN gateway to which this VPN tunnel is connected.
@@ -152,45 +139,45 @@ properties:
       This field must reference a `google_compute_ha_vpn_gateway` resource.
     conflicts:
       - peer_external_gateway
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'HaVpnGateway'
-    imports: 'selfLink'
-  - name: 'router'
+    resource: HaVpnGateway
+    imports: selfLink
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+  - name: router
     type: ResourceRef
     description: |
       URL of router resource to be used for dynamic routing.
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/compute_full_url.tmpl'
-    resource: 'Router'
-    imports: 'selfLink'
-  - name: 'peerIp'
+    resource: Router
+    imports: selfLink
+    custom_expand: templates/terraform/custom_expand/compute_full_url.tmpl
+  - name: peerIp
     type: String
     description: |
       IP address of the peer VPN gateway. Only IPv4 is supported.
-    default_from_api: true
     validation:
-      function: 'validatePeerAddr'
-  - name: 'sharedSecret'
+      function: validatePeerAddr
+    default_from_api: true
+  - name: sharedSecret
     type: String
+    required: true
     description: |
       Shared secret used to set the secure session between the Cloud VPN
       gateway and the peer VPN gateway.
-    required: true
-    ignore_read: true
     write_only: true
-  - name: 'sharedSecretHash'
+    ignore_read: true
+  - name: sharedSecretHash
     type: String
     description: |
       Hash of the shared secret.
     output: true
-  - name: 'ikeVersion'
+  - name: ikeVersion
     type: Integer
+    default_value: 2
     description: |
       IKE protocol version to use when establishing the VPN tunnel with
       peer VPN gateway.
       Acceptable IKE versions are 1 or 2. Default version is 2.
-    default_value: 2
-  - name: 'localTrafficSelector'
+  - name: localTrafficSelector
     type: Array
     description: |
       Local traffic selector to use when establishing the VPN tunnel with
@@ -201,7 +188,7 @@ properties:
     default_from_api: true
     item_type:
       type: String
-  - name: 'remoteTrafficSelector'
+  - name: remoteTrafficSelector
     type: Array
     description: |
       Remote traffic selector to use when establishing the VPN tunnel with
@@ -212,84 +199,82 @@ properties:
     default_from_api: true
     item_type:
       type: String
-  - name: 'labels'
+  - name: labels
     type: KeyValueLabels
     description: Labels to apply to this VpnTunnel.
-    update_url: 'projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}/setLabels'
-    update_verb: 'POST'
-  - name: 'labelFingerprint'
+    update_verb: POST
+    update_url: projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}/setLabels
+  - name: labelFingerprint
     type: Fingerprint
     description: |
       The fingerprint used for optimistic locking of this resource.  Used
       internally during updates.
-    output: true
-    update_url: 'projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}/setLabels'
-    update_verb: 'POST'
-    key_expander: ''
-  - name: 'detailedStatus'
+    update_verb: POST
+    update_url: projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}/setLabels
+  - name: detailedStatus
     type: String
-    description: 'Detailed status message for the VPN tunnel.'
+    description: Detailed status message for the VPN tunnel.
     output: true
-  - name: 'params'
+  - name: params
     type: NestedObject
-    ignore_read: true
-    immutable: true
-    min_version: 'beta'
     description: |
-     Additional params passed with the request, but not persisted as part of resource payload
+      Additional params passed with the request, but not persisted as part of resource payload
+    immutable: true
+    min_version: beta
+    ignore_read: true
     properties:
-      - name: 'resourceManagerTags'
+      - name: resourceManagerTags
         type: KeyValuePairs
         description: |
           Resource manager tags to be bound to the Vpn Tunnel. Tag keys and values have the
           same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
           and values are in the format tagValues/456.
         ignore_read: true
-  - name: 'cipherSuite'
+  - name: cipherSuite
     type: NestedObject
     description: |
       User specified list of ciphers to use for the phase 1 and phase 2 of the IKE protocol.
     properties:
-      - name: 'phase1'
+      - name: phase1
         type: NestedObject
-        description: 'Cipher configuration for phase 1 of the IKE protocol.'
+        description: Cipher configuration for phase 1 of the IKE protocol.
         properties:
-          - name: 'encryption'
+          - name: encryption
             type: Array
-            description: 'Encryption algorithms.'
+            description: Encryption algorithms.
             item_type:
               type: String
-          - name: 'integrity'
+          - name: integrity
             type: Array
-            description: 'Integrity algorithms.'
+            description: Integrity algorithms.
             item_type:
               type: String
-          - name: 'prf'
+          - name: prf
             type: Array
-            description: 'Pseudo-random functions.'
+            description: Pseudo-random functions.
             item_type:
               type: String
-          - name: 'dh'
+          - name: dh
             type: Array
-            description: 'Diffie-Hellman groups.'
+            description: Diffie-Hellman groups.
             item_type:
               type: String
-      - name: 'phase2'
+      - name: phase2
         type: NestedObject
-        description: 'Cipher configuration for phase 2 of the IKE protocol.'
+        description: Cipher configuration for phase 2 of the IKE protocol.
         properties:
-          - name: 'encryption'
+          - name: encryption
             type: Array
-            description: 'Encryption algorithms.'
+            description: Encryption algorithms.
             item_type:
               type: String
-          - name: 'integrity'
+          - name: integrity
             type: Array
-            description: 'Integrity algorithms.'
+            description: Integrity algorithms.
             item_type:
               type: String
-          - name: 'pfs'
+          - name: pfs
             type: Array
-            description: 'Perfect forward secrecy groups.'
+            description: Perfect forward secrecy groups.
             item_type:
               type: String

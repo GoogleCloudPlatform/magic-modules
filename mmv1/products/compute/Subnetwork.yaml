@@ -12,8 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'Subnetwork'
-kind: 'compute#subnetwork'
+name: Subnetwork
 description: |
   A VPC network is a virtual version of the traditional physical networks
   that exist within and between physical data centers. A VPC network
@@ -39,152 +38,147 @@ description: |
   of the network, even entire subnets, using firewall rules.
 references:
   guides:
-    'Private Google Access': 'https://cloud.google.com/vpc/docs/configure-private-google-access'
-    'Cloud Networking': 'https://cloud.google.com/vpc/docs/using-vpc'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/subnetworks'
-docs:
-base_url: 'projects/{{project}}/regions/{{region}}/subnetworks'
-has_self_link: true
-include_in_tgc_next: true
+    Cloud Networking: https://cloud.google.com/vpc/docs/using-vpc
+    Private Google Access: https://cloud.google.com/vpc/docs/configure-private-google-access
+  api: https://cloud.google.com/compute/docs/reference/rest/v1/subnetworks
+base_url: projects/{{project}}/regions/{{region}}/subnetworks
 immutable: true
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
+has_self_link: true
+collection_url_key: items
+iam_policy:
+  allowed_iam_role: roles/compute.networkUser
+  parent_resource_attribute: subnetwork
+  custom_import_state_id_funcs: ""
+  iam_conditions_request_type: QUERY_PARAM
+kind: compute#subnetwork
+id_format: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+custom_diff:
+  - customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)
+  - sendSecondaryIpRangeIfEmptyDiff
+sweeper:
+  url_substitutions:
+    - region: us-west2
+    - region: us-central1
+    - region: us-east1
+    - region: europe-west4
+    - region: europe-west1
+    - region: southamerica-west1
+    - region: us-west1
+    - region: us-south1
+  dependencies:
+    - google_compute_forwarding_rule
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-  result:
-    resource_inside_response: false
-collection_url_key: 'items'
-iam_policy:
-  allowed_iam_role: 'roles/compute.networkUser'
-  parent_resource_attribute: 'subnetwork'
-  iam_conditions_request_type: 'QUERY_PARAM'
+include_in_tgc_next: true
 custom_code:
-  extra_schema_entry: 'templates/terraform/extra_schema_entry/subnetwork.tmpl'
-  constants: 'templates/terraform/constants/subnetwork.tmpl'
-  post_update: 'templates/terraform/post_update/compute_subnetwork.go.tmpl'
-  tgc_decoder: 'templates/tgc_next/decoders/compute_subnetwork.go.tmpl'
-custom_diff:
-  - 'customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)'
-  - 'sendSecondaryIpRangeIfEmptyDiff'
-sweeper:
-  dependencies:
-    - "google_compute_forwarding_rule"
-  url_substitutions:
-    - region: "us-west2"
-    - region: "us-central1"
-    - region: "us-east1"
-    - region: "europe-west4"
-    - region: "europe-west1"
-    - region: "southamerica-west1"
-    - region: "us-west1"
-    - region: "us-south1"
+  extra_schema_entry: templates/terraform/extra_schema_entry/subnetwork.tmpl
+  constants: templates/terraform/constants/subnetwork.tmpl
+  post_update: templates/terraform/post_update/compute_subnetwork.go.tmpl
+  tgc_decoder: templates/tgc_next/decoders/compute_subnetwork.go.tmpl
 examples:
-  - name: 'subnetwork_basic'
-    primary_resource_id: 'network-with-private-secondary-ip-ranges'
-    primary_resource_name: 'fmt.Sprintf("tf-test-test-subnetwork%s", context["random_suffix"])'
+  - name: subnetwork_basic
+    primary_resource_id: network-with-private-secondary-ip-ranges
+    primary_resource_name: fmt.Sprintf("tf-test-test-subnetwork%s", context["random_suffix"])
     vars:
-      subnetwork_name: 'test-subnetwork'
-      network_name: 'test-network'
-  - name: 'subnetwork_logging_config'
-    primary_resource_id: 'subnet-with-logging'
+      network_name: test-network
+      subnetwork_name: test-subnetwork
+  - name: subnetwork_logging_config
+    primary_resource_id: subnet-with-logging
     vars:
-      subnetwork_name: 'log-test-subnetwork'
-      network_name: 'log-test-network'
-  - name: 'subnetwork_internal_l7lb'
-    primary_resource_id: 'network-for-l7lb'
-    min_version: 'beta'
+      network_name: log-test-network
+      subnetwork_name: log-test-subnetwork
+  - name: subnetwork_internal_l7lb
+    primary_resource_id: network-for-l7lb
+    min_version: beta
     vars:
-      subnetwork_name: 'l7lb-test-subnetwork'
-      network_name: 'l7lb-test-network'
-  - name: 'subnetwork_ipv6'
-    primary_resource_id: 'subnetwork-ipv6'
+      network_name: l7lb-test-network
+      subnetwork_name: l7lb-test-subnetwork
+  - name: subnetwork_ipv6
+    primary_resource_id: subnetwork-ipv6
     vars:
-      subnetwork_name: 'ipv6-test-subnetwork'
-      network_name: 'ipv6-test-network'
-  - name: 'subnetwork_internal_ipv6'
-    primary_resource_id: 'subnetwork-internal-ipv6'
+      network_name: ipv6-test-network
+      subnetwork_name: ipv6-test-subnetwork
+  - name: subnetwork_internal_ipv6
+    primary_resource_id: subnetwork-internal-ipv6
     vars:
-      subnetwork_name: 'internal-ipv6-test-subnetwork'
-      network_name: 'internal-ipv6-test-network'
-  - name: 'subnetwork_purpose_private_nat'
-    primary_resource_id: 'subnetwork-purpose-private-nat'
-    min_version: 'beta'
+      network_name: internal-ipv6-test-network
+      subnetwork_name: internal-ipv6-test-subnetwork
+  - name: subnetwork_purpose_private_nat
+    primary_resource_id: subnetwork-purpose-private-nat
+    min_version: beta
     vars:
-      subnetwork_name: 'subnet-purpose-test-subnetwork'
-      network_name: 'subnet-purpose-test-network'
-  - name: 'subnetwork_resolve_subnet_mask'
-    primary_resource_id: 'subnetwork-resolve-subnet-mask'
-    min_version: 'beta'
+      network_name: subnet-purpose-test-network
+      subnetwork_name: subnet-purpose-test-subnetwork
+  - name: subnetwork_resolve_subnet_mask
+    primary_resource_id: subnetwork-resolve-subnet-mask
+    min_version: beta
     vars:
-      subnetwork_name: 'subnet-resolve-subnet-mask-test-subnetwork'
-      network_name: 'subnet-resolve-subnet-mask-test-network'
-  - name: 'subnetwork_cidr_overlap'
-    primary_resource_id: 'subnetwork-cidr-overlap'
+      network_name: subnet-resolve-subnet-mask-test-network
+      subnetwork_name: subnet-resolve-subnet-mask-test-subnetwork
+  - name: subnetwork_cidr_overlap
+    primary_resource_id: subnetwork-cidr-overlap
     vars:
-      subnetwork_name: 'subnet-cidr-overlap'
-      network_name: 'net-cidr-overlap'
-  - name: 'subnetwork_reserved_internal_range'
-    primary_resource_id: 'subnetwork-reserved-internal-range'
-    min_version: 'beta'
+      network_name: net-cidr-overlap
+      subnetwork_name: subnet-cidr-overlap
+  - name: subnetwork_reserved_internal_range
+    primary_resource_id: subnetwork-reserved-internal-range
+    min_version: beta
     vars:
-      subnetwork_name: 'subnetwork-reserved-internal-range'
-      network_name: 'network-reserved-internal-range'
-  - name: 'subnetwork_reserved_secondary_range'
-    primary_resource_id: 'subnetwork-reserved-secondary-range'
-    min_version: 'beta'
+      network_name: network-reserved-internal-range
+      subnetwork_name: subnetwork-reserved-internal-range
+  - name: subnetwork_reserved_secondary_range
+    primary_resource_id: subnetwork-reserved-secondary-range
+    min_version: beta
     vars:
-      subnetwork_name: 'subnetwork-reserved-secondary-range'
-      network_name: 'network-reserved-secondary-range'
-      primary_range_name: 'reserved-primary'
-      secondary_range_name: 'reserved-secondary'
-  - name: 'subnetwork_ipv6_only_internal'
-    primary_resource_id: 'subnetwork-ipv6-only'
+      network_name: network-reserved-secondary-range
+      primary_range_name: reserved-primary
+      secondary_range_name: reserved-secondary
+      subnetwork_name: subnetwork-reserved-secondary-range
+  - name: subnetwork_ipv6_only_internal
+    primary_resource_id: subnetwork-ipv6-only
     exclude_docs: true
     vars:
-      subnetwork_name: 'subnet-ipv6-only'
-      network_name: 'network-ipv6-only'
-  - name: 'subnetwork_with_subnet_mode_pdp'
-    primary_resource_id: 'subnetwork-with-subnet-mode-pdp'
+      network_name: network-ipv6-only
+      subnetwork_name: subnet-ipv6-only
+  - name: subnetwork_with_subnet_mode_pdp
+    primary_resource_id: subnetwork-with-subnet-mode-pdp
     exclude_docs: true
     vars:
-      subnetwork_name: 'subnet-mode-pdp-subnet'
-      network_name: 'network-byoipv6-external'
       ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
+      network_name: network-byoipv6-external
+      subnetwork_name: subnet-mode-pdp-subnet
     test_vars_overrides:
       ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
-  - name: 'subnetwork_with_internal_subnet_mode_pdp'
-    primary_resource_id: 'subnetwork-with-internal-subnet-mode-pdp'
+  - name: subnetwork_with_internal_subnet_mode_pdp
+    primary_resource_id: subnetwork-with-internal-subnet-mode-pdp
     exclude_docs: true
     vars:
-      subnetwork_name: 'internal-subnet-mode-pdp-subnet'
-      network_name: 'network-byoipv6-internal'
       ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp"'
+      network_name: network-byoipv6-internal
+      subnetwork_name: internal-subnet-mode-pdp-subnet
     test_vars_overrides:
       ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp"'
-  - name: 'subnetwork_with_internal_subnet_mode_pdp_explicit_ip_prefix'
-    primary_resource_id: 'subnetwork-with-internal-subnet-mode-pdp-explicit-ip-prefix'
+  - name: subnetwork_with_internal_subnet_mode_pdp_explicit_ip_prefix
+    primary_resource_id: subnetwork-with-internal-subnet-mode-pdp-explicit-ip-prefix
     exclude_docs: true
     vars:
-      subnetwork_name: 'subnet-mode-pdp-subnet-internal-prefix'
-      network_name: 'network-byoipv6-internal-prefix'
       internal_ipv6_prefix: '"2001:db8:1::/64"'
       ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp-explicit-prefix"'
+      network_name: network-byoipv6-internal-prefix
+      subnetwork_name: subnet-mode-pdp-subnet-internal-prefix
     test_vars_overrides:
-      internal_ipv6_prefix: 'fmt.Sprintf("2001:db8:1:%d::/64", acctest.RandIntRange(t, 0, 9999))'
+      internal_ipv6_prefix: fmt.Sprintf("2001:db8:1:%d::/64", acctest.RandIntRange(t, 0, 9999))
       ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/internal-ipv6-subnet-mode-test-sub-pdp-explicit-prefix"'
-  - name: 'subnetwork_ipv6_only_external'
-    primary_resource_id: 'subnetwork-ipv6-only'
+  - name: subnetwork_ipv6_only_external
+    primary_resource_id: subnetwork-ipv6-only
     exclude_docs: true
     vars:
-      subnetwork_name: 'subnet-ipv6-only'
-      network_name: 'network-ipv6-only'
+      network_name: network-ipv6-only
+      subnetwork_name: subnet-ipv6-only
 virtual_fields:
-  - name: 'send_secondary_ip_range_if_empty'
+  - name: send_secondary_ip_range_if_empty
+    type: Boolean
     description: |
       Controls the removal behavior of secondary_ip_range.
       When false, removing secondary_ip_range from config will not produce a diff as
@@ -192,32 +186,31 @@ virtual_fields:
       When true, the provider will treat removing secondary_ip_range as sending an
       empty list of secondary IP ranges to the API.
       Defaults to false.
-    type: Boolean
-parameters:
+    client_side: true
 properties:
-  - name: 'creationTimestamp'
+  - name: creationTimestamp
     type: Time
-    description: 'Creation timestamp in RFC3339 text format.'
+    description: Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'description'
+  - name: description
     type: String
     description: |
       An optional description of this resource. Provide this property when
       you create the resource. This field can be set only at resource
       creation time.
-  - name: 'subnetworkId'
+  - name: subnetworkId
+    api_name: id
     type: Integer
     description: |
       The unique identifier number for the resource. This identifier is defined by the server.
-    api_name: id
     output: true
-  - name: 'gatewayAddress'
+  - name: gatewayAddress
     type: String
     description: |
       The gateway address for default routes to reach destination addresses
       outside this subnetwork.
     output: true
-  - name: 'ipCidrRange'
+  - name: ipCidrRange
     type: String
     description: |
       The range of internal addresses that are owned by this subnetwork.
@@ -225,21 +218,21 @@ properties:
       10.0.0.0/8 or 192.168.0.0/16. Ranges must be unique and
       non-overlapping within a network. Only IPv4 is supported.
       Field is optional when `reserved_internal_range` is defined, otherwise required.
-    required: false
-    default_from_api: true
-    update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/expandIpCidrRange'
-    update_verb: 'POST'
+    update_verb: POST
+    update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/expandIpCidrRange
     validation:
-      function: 'verify.ValidateIpCidrRange'
-  - name: 'reservedInternalRange'
+      function: verify.ValidateIpCidrRange
+    default_from_api: true
+  - name: reservedInternalRange
     type: ResourceRef
     description: |
       The ID of the reserved internal range. Must be prefixed with `networkconnectivity.googleapis.com`
       E.g. `networkconnectivity.googleapis.com/projects/{project}/locations/global/internalRanges/{rangeId}`
-    resource: 'InternalRange'
-    imports: 'selfLink'
-  - name: 'name'
+    resource: InternalRange
+    imports: selfLink
+  - name: name
     type: String
+    required: true
     description: |
       The name of the resource, provided by the client when initially
       creating the resource. The name must be 1-63 characters long, and
@@ -248,20 +241,19 @@ properties:
       means the first character must be a lowercase letter, and all
       following characters must be a dash, lowercase letter, or digit,
       except the last character, which cannot be a dash.
-    required: true
     validation:
-      function: 'verify.ValidateGCEName'
-  - name: 'network'
+      function: verify.ValidateGCEName
+  - name: network
     type: ResourceRef
+    required: true
     description: |
       The network this subnet belongs to.
       Only networks that are in the distributed mode can have subnetworks.
-    required: true
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Network'
-    imports: 'selfLink'
-  - name: 'purpose'
+    resource: Network
+    imports: selfLink
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+  - name: purpose
     type: String
     description: |
       The purpose of the resource. This field can be either `PRIVATE`, `REGIONAL_MANAGED_PROXY`, `GLOBAL_MANAGED_PROXY`, `PRIVATE_SERVICE_CONNECT`, `PEER_MIGRATION` or `PRIVATE_NAT`([Beta](../guides/provider_versions.html.markdown)).
@@ -272,12 +264,12 @@ properties:
       A subnetwork with purpose set to `PRIVATE_NAT` is used as source range for Private NAT gateways.
       Note that `REGIONAL_MANAGED_PROXY` is the preferred setting for all regional Envoy load balancers.
       If unspecified, the purpose defaults to `PRIVATE`.
+    update_verb: PATCH
+    update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+    update_id: purpose
+    fingerprint_name: fingerprint
     default_from_api: true
-    update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
-    update_verb: 'PATCH'
-    update_id: 'purpose'
-    fingerprint_name: 'fingerprint'
-  - name: 'role'
+  - name: role
     type: Enum
     description: |
       The role of subnetwork.
@@ -285,14 +277,15 @@ properties:
       The value can be set to `ACTIVE` or `BACKUP`.
       An `ACTIVE` subnetwork is one that is currently being used for Envoy-based load balancers in a region.
       A `BACKUP` subnetwork is one that is ready to be promoted to `ACTIVE` or is currently draining.
-    update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
-    update_verb: 'PATCH'
-    update_id: 'role'
-    fingerprint_name: 'fingerprint'
+    update_verb: PATCH
+    update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+    update_id: role
+    fingerprint_name: fingerprint
     enum_values:
-      - 'ACTIVE'
-      - 'BACKUP'
-  - name: 'secondaryIpRange'
+      - ACTIVE
+      - BACKUP
+  - name: secondaryIpRange
+    api_name: secondaryIpRanges
     type: Array
     description: |
       An array of configurations for secondary IP ranges for VM instances
@@ -303,28 +296,27 @@ properties:
       **Note**: This field uses [attr-as-block mode](https://developer.hashicorp.com/terraform/language/attr-as-blocks) to avoid
       breaking users during the 0.12 upgrade. To explicitly send a list of zero objects,
       set `send_secondary_ip_range_if_empty = true`
-    api_name: secondaryIpRanges
+    update_verb: PATCH
+    update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+    update_id: secondaryIpRanges
+    fingerprint_name: fingerprint
+    send_empty_value: true
     unordered_list: true
     default_from_api: true
-    send_empty_value: true
-    update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
-    update_verb: 'PATCH'
-    update_id: 'secondaryIpRanges'
-    fingerprint_name: 'fingerprint'
     item_type:
       type: NestedObject
       properties:
-        - name: 'rangeName'
+        - name: rangeName
           type: String
+          required: true
           description: |
             The name associated with this subnetwork secondary range, used
             when adding an alias IP range to a VM instance. The name must
             be 1-63 characters long, and comply with RFC1035. The name
             must be unique within the subnetwork.
-          required: true
           validation:
-            function: 'verify.ValidateGCEName'
-        - name: 'ipCidrRange'
+            function: verify.ValidateGCEName
+        - name: ipCidrRange
           type: String
           description: |
             The range of IP addresses belonging to this subnetwork secondary
@@ -332,80 +324,79 @@ properties:
             Ranges must be unique and non-overlapping with all primary and
             secondary IP ranges within a network. Only IPv4 is supported.
             Field is optional when `reserved_internal_range` is defined, otherwise required.
-          required: false
-          default_from_api: true
           validation:
-            function: 'verify.ValidateIpCidrRange'
-        - name: 'reservedInternalRange'
+            function: verify.ValidateIpCidrRange
+          default_from_api: true
+        - name: reservedInternalRange
           type: ResourceRef
           description: |
             The ID of the reserved internal range. Must be prefixed with `networkconnectivity.googleapis.com`
             E.g. `networkconnectivity.googleapis.com/projects/{project}/locations/global/internalRanges/{rangeId}`
-          resource: 'InternalRange'
-          imports: 'selfLink'
-  - name: 'privateIpGoogleAccess'
+          resource: InternalRange
+          imports: selfLink
+  - name: privateIpGoogleAccess
     type: Boolean
     description: |
       When enabled, VMs in this subnetwork without external IP addresses can
       access Google APIs and services by using Private Google Access.
+    update_verb: POST
+    update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/setPrivateIpGoogleAccess
     default_from_api: true
-    update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/setPrivateIpGoogleAccess'
-    update_verb: 'POST'
-  - name: 'privateIpv6GoogleAccess'
+  - name: privateIpv6GoogleAccess
     type: String
     description: The private IPv6 google access type for the VMs in this subnet.
+    update_verb: PATCH
+    update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+    fingerprint_name: fingerprint
     default_from_api: true
-    update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
-    update_verb: 'PATCH'
-    fingerprint_name: 'fingerprint'
-  - name: 'region'
+  - name: region
     type: ResourceRef
     description: |
       The GCP region for this subnetwork.
-    required: false
     immutable: true
+    resource: Region
+    imports: name
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Region'
-    imports: 'name'
-  - name: 'logConfig'
+    custom_expand: templates/terraform/custom_expand/resourceref_with_validation.go.tmpl
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: logConfig
     type: NestedObject
     description: |
       This field denotes the VPC flow logging options for this subnetwork. If
       logging is enabled, logs are exported to Cloud Logging. Flow logging
       isn't supported if the subnet `purpose` field is set to subnetwork is
       `REGIONAL_MANAGED_PROXY` or `GLOBAL_MANAGED_PROXY`.
+    update_verb: PATCH
+    update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+    update_id: logConfig
+    fingerprint_name: fingerprint
     send_empty_value: true
-    update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
-    update_verb: 'PATCH'
-    update_id: 'logConfig'
-    fingerprint_name: 'fingerprint'
-    custom_flatten: 'templates/terraform/custom_flatten/subnetwork_log_config.go.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/subnetwork_log_config.go.tmpl'
+    custom_expand: templates/terraform/custom_expand/subnetwork_log_config.go.tmpl
+    custom_flatten: templates/terraform/custom_flatten/subnetwork_log_config.go.tmpl
     properties:
-      - name: 'aggregationInterval'
+      - name: aggregationInterval
         type: Enum
+        default_value: INTERVAL_5_SEC
         description: |
           Can only be specified if VPC flow logging for this subnetwork is enabled.
           Toggles the aggregation interval for collecting flow logs. Increasing the
           interval time will reduce the amount of generated flow logs for long
           lasting connections. Default is an interval of 5 seconds per connection.
         at_least_one_of:
-          - 'log_config.0.aggregation_interval'
-          - 'log_config.0.flow_sampling'
-          - 'log_config.0.metadata'
-          - 'log_config.0.filterExpr'
-        default_value: "INTERVAL_5_SEC"
+          - log_config.0.aggregation_interval
+          - log_config.0.flow_sampling
+          - log_config.0.metadata
+          - log_config.0.filterExpr
         enum_values:
-          - 'INTERVAL_5_SEC'
-          - 'INTERVAL_30_SEC'
-          - 'INTERVAL_1_MIN'
-          - 'INTERVAL_5_MIN'
-          - 'INTERVAL_10_MIN'
-          - 'INTERVAL_15_MIN'
-      - name: 'flowSampling'
+          - INTERVAL_5_SEC
+          - INTERVAL_30_SEC
+          - INTERVAL_1_MIN
+          - INTERVAL_5_MIN
+          - INTERVAL_10_MIN
+          - INTERVAL_15_MIN
+      - name: flowSampling
         type: Double
+        default_value: 0.5
         description: |
           Can only be specified if VPC flow logging for this subnetwork is enabled.
           The value of the field must be in [0, 1]. Set the sampling rate of VPC
@@ -413,28 +404,27 @@ properties:
           reported and 0.0 means no logs are reported. Default is 0.5 which means
           half of all collected logs are reported.
         at_least_one_of:
-          - 'log_config.0.aggregation_interval'
-          - 'log_config.0.flow_sampling'
-          - 'log_config.0.metadata'
-          - 'log_config.0.filterExpr'
-        default_value: 0.5
-      - name: 'metadata'
+          - log_config.0.aggregation_interval
+          - log_config.0.flow_sampling
+          - log_config.0.metadata
+          - log_config.0.filterExpr
+      - name: metadata
         type: Enum
+        default_value: INCLUDE_ALL_METADATA
         description: |
           Can only be specified if VPC flow logging for this subnetwork is enabled.
           Configures whether metadata fields should be added to the reported VPC
           flow logs.
         at_least_one_of:
-          - 'log_config.0.aggregation_interval'
-          - 'log_config.0.flow_sampling'
-          - 'log_config.0.metadata'
-          - 'log_config.0.filterExpr'
-        default_value: "INCLUDE_ALL_METADATA"
+          - log_config.0.aggregation_interval
+          - log_config.0.flow_sampling
+          - log_config.0.metadata
+          - log_config.0.filterExpr
         enum_values:
-          - 'EXCLUDE_ALL_METADATA'
-          - 'INCLUDE_ALL_METADATA'
-          - 'CUSTOM_METADATA'
-      - name: 'metadataFields'
+          - EXCLUDE_ALL_METADATA
+          - INCLUDE_ALL_METADATA
+          - CUSTOM_METADATA
+      - name: metadataFields
         type: Array
         description: |
           List of metadata fields that should be added to reported logs.
@@ -442,66 +432,64 @@ properties:
         is_set: true
         item_type:
           type: String
-      - name: 'filterExpr'
+      - name: filterExpr
         type: String
+        default_value: "true"
         description: |
           Export filter used to define which VPC flow logs should be logged, as as CEL expression. See
           https://cloud.google.com/vpc/docs/flow-logs#filtering for details on how to format this field.
           The default value is 'true', which evaluates to include everything.
         at_least_one_of:
-          - 'log_config.0.aggregation_interval'
-          - 'log_config.0.flow_sampling'
-          - 'log_config.0.metadata'
-          - 'log_config.0.filterExpr'
-        default_value: "true"
-  - name: 'stackType'
+          - log_config.0.aggregation_interval
+          - log_config.0.flow_sampling
+          - log_config.0.metadata
+          - log_config.0.filterExpr
+  - name: stackType
     type: Enum
     description: |
       The stack type for this subnet to identify whether the IPv6 feature is enabled or not.
       If not specified IPV4_ONLY will be used.
-    default_from_api: true
-    update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
-    update_verb: 'PATCH'
-    fingerprint_name: 'fingerprint'
+    update_verb: PATCH
+    update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+    fingerprint_name: fingerprint
     enum_values:
-      - 'IPV4_ONLY'
-      - 'IPV4_IPV6'
-      - 'IPV6_ONLY'
-  - name: 'ipv6AccessType'
+      - IPV4_ONLY
+      - IPV4_IPV6
+      - IPV6_ONLY
+    default_from_api: true
+  - name: ipv6AccessType
     type: Enum
     description: |
       The access type of IPv6 address this subnet holds. It's immutable and can only be specified during creation
       or the first time the subnet is updated into IPV4_IPV6 dual stack. If the ipv6_type is EXTERNAL then this subnet
       cannot enable direct path.
-    update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
-    update_verb: 'PATCH'
-    fingerprint_name: 'fingerprint'
-    is_missing_in_cai: true
+    update_verb: PATCH
+    update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+    fingerprint_name: fingerprint
     enum_values:
-      - 'EXTERNAL'
-      - 'INTERNAL'
-  - name: 'ipv6CidrRange'
+      - EXTERNAL
+      - INTERNAL
+    is_missing_in_cai: true
+  - name: ipv6CidrRange
     type: String
     description: |
       The range of internal IPv6 addresses that are owned by this subnetwork.
     output: true
-  - name: 'internalIpv6Prefix'
+  - name: internalIpv6Prefix
     type: String
-    diff_suppress_func: 'IpDiffSuppress'
     description: |
       The internal IPv6 address range that is assigned to this subnetwork.
-    default_from_api: true
+    diff_suppress_func: IpDiffSuppress
     validation:
-      function: 'verify.ValidateIpCidrRange'
-  - name: 'externalIpv6Prefix'
+      function: verify.ValidateIpCidrRange
+    default_from_api: true
+  - name: externalIpv6Prefix
     type: String
     description: |
       The range of external IPv6 addresses that are owned by this subnetwork.
     default_from_api: true
-  - name: 'ipCollection'
+  - name: ipCollection
     type: String
-    ignore_read: true
-    is_missing_in_cai: true
     description: |
       Resource reference of a PublicDelegatedPrefix. The PDP must be a sub-PDP
       in EXTERNAL_IPV6_SUBNETWORK_CREATION or INTERNAL_IPV6_SUBNETWORK_CREATION
@@ -512,7 +500,9 @@ properties:
       Partial URL, as in:
         * `projects/{{projectId}}/regions/region/publicDelegatedPrefixes/{{sub-pdp-name}}`
         * `regions/{{region}}/publicDelegatedPrefixes/{{sub-pdp-name}}`
-  - name: 'ipv6GceEndpoint'
+    ignore_read: true
+    is_missing_in_cai: true
+  - name: ipv6GceEndpoint
     type: Enum
     description: |
       Possible endpoints of this subnetwork. It can be one of the following:
@@ -522,37 +512,37 @@ properties:
         IPv6 addresses with both VM and FR endpoint types. Such a subnetwork gets its IPv6 range from Google IP Pool directly.
     output: true
     enum_values:
-      - 'VM_AND_FR'
-      - 'VM_ONLY'
-  - name: 'allowSubnetCidrRoutesOverlap'
+      - VM_AND_FR
+      - VM_ONLY
+  - name: allowSubnetCidrRoutesOverlap
     type: Boolean
     description: |
       Typically packets destined to IPs within the subnetwork range that do not match
       existing resources are dropped and prevented from leaving the VPC.
       Setting this field to true will allow these packets to match dynamic routes injected
       via BGP even if their destinations match existing subnet ranges.
-    default_from_api: true
+    update_verb: PATCH
+    update_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+    fingerprint_name: fingerprint
     send_empty_value: true
-    update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
-    update_verb: 'PATCH'
-    fingerprint_name: 'fingerprint'
+    default_from_api: true
     is_missing_in_cai: true
-  - name: 'state'
+  - name: state
     type: Enum
     description: |
-     'The state of the subnetwork, which can be one of the following values:
-      READY: Subnetwork is created and ready to use DRAINING: only applicable to subnetworks that have the purpose
-      set to INTERNAL_HTTPS_LOAD_BALANCER and indicates that connections to the load balancer are being drained.
-      A subnetwork that is draining cannot be used or modified until it reaches a status of READY'
+      'The state of the subnetwork, which can be one of the following values:
+       READY: Subnetwork is created and ready to use DRAINING: only applicable to subnetworks that have the purpose
+       set to INTERNAL_HTTPS_LOAD_BALANCER and indicates that connections to the load balancer are being drained.
+       A subnetwork that is draining cannot be used or modified until it reaches a status of READY'
     output: true
-  - name: 'params'
+  - name: params
     type: NestedObject
-    ignore_read: true
-    immutable: true
     description: |
-     Additional params passed with the request, but not persisted as part of resource payload
+      Additional params passed with the request, but not persisted as part of resource payload
+    immutable: true
+    ignore_read: true
     properties:
-      - name: 'resourceManagerTags'
+      - name: resourceManagerTags
         type: KeyValuePairs
         description: |
           Resource manager tags to be bound to the subnetwork. Tag keys and values have the
@@ -561,14 +551,14 @@ properties:
           The field is immutable and causes resource replacement when mutated. This field is only
           set at create time and modifying this field after creation will trigger recreation.
           To apply tags to an existing resource, see the google_tags_tag_binding resource.
-        ignore_read: true
         immutable: true
-  - name: 'resolveSubnetMask'
+        ignore_read: true
+  - name: resolveSubnetMask
     type: Enum
     description: |
       'Configures subnet mask resolution for this subnetwork.'
-    enum_values:
-      - 'ARP_ALL_RANGES'
-      - 'ARP_PRIMARY_RANGE'
-    min_version: beta
     immutable: true
+    min_version: beta
+    enum_values:
+      - ARP_ALL_RANGES
+      - ARP_PRIMARY_RANGE
