@@ -95,7 +95,6 @@ func TestAccNetworkSecuritySecurityProfiles_antivirusOverrides(t *testing.T) {
 	})
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func TestAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -106,7 +105,7 @@ func TestAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilt
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkSecuritySecurityProfileDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -158,6 +157,7 @@ func TestAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilt
 	})
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func TestAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileMirroringBrokerUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -276,11 +276,9 @@ resource "google_network_security_security_profile" "foobar" {
 `, randomSuffix, orgId)
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdateEmpty(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_security_security_profile" "default" {
-  provider    = google-beta
   name        = "tf-test-my-security-profile%{random_suffix}"
   parent      = "organizations/%{org_id}"
   description = "my description"
@@ -296,7 +294,6 @@ resource "google_network_security_security_profile" "default" {
 func testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdate1(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_security_security_profile" "default" {
-  provider    = google-beta
   name        = "tf-test-my-security-profile%{random_suffix}"
   parent      = "organizations/%{org_id}"
   description = "my description"
@@ -320,7 +317,6 @@ resource "google_network_security_security_profile" "default" {
 func testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdate2(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_security_security_profile" "default" {
-  provider    = google-beta
   name        = "tf-test-my-security-profile%{random_suffix}"
   parent      = "organizations/%{org_id}"
   description = "my description"
@@ -349,7 +345,6 @@ resource "google_network_security_security_profile" "default" {
 func testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdateDefault(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_security_security_profile" "default" {
-  provider    = google-beta
   name        = "tf-test-my-security-profile%{random_suffix}"
   parent      = "organizations/%{org_id}"
   description = "my description"
@@ -370,6 +365,7 @@ resource "google_network_security_security_profile" "default" {
 `, context)
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileMirroringBroker_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
