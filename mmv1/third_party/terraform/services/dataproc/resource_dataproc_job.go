@@ -437,6 +437,8 @@ func resourceDataprocJobDelete(d *schema.ResourceData, meta interface{}) error {
 
 	}
 
+	time.Sleep(90 * time.Second)
+
 	log.Printf("[DEBUG] Deleting Dataproc job %s", d.Id())
 	_, err = config.NewDataprocClient(userAgent).Projects.Regions.Jobs.Delete(
 		project, region, jobId).Do()
