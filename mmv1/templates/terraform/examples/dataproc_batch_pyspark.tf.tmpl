@@ -18,11 +18,11 @@ resource "google_dataproc_batch" "{{$.PrimaryResourceId}}" {
       jar_file_uris        = ["file:///usr/lib/spark/examples/jars/spark-examples.jar"]
       python_file_uris     = ["gs://dataproc-examples/pyspark/hello-world/hello-world.py"]
       archive_uris         = [
-        "https://storage.googleapis.com/terraform-batches/animals.txt.tar.gz#unpacked",
-        "https://storage.googleapis.com/terraform-batches/animals.txt.jar",
-        "https://storage.googleapis.com/terraform-batches/animals.txt"
+        "gs://storage.googleapis.com/terraform-batches/animals.txt.tar.gz#unpacked",
+        "gs://storage.googleapis.com/terraform-batches/animals.txt.jar",
+        "gs://storage.googleapis.com/terraform-batches/animals.txt"
       ]
-      file_uris            = ["https://storage.googleapis.com/terraform-batches/people.txt"]
+      file_uris            = ["gs://storage.googleapis.com/terraform-batches/people.txt"]
     }
 }
 
