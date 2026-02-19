@@ -755,6 +755,19 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 
 {{if $.Updatable -}}
 func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{}) error {
+{{-     if and (not $.ExcludeDelete) (not $.DeletionPolicyExclude) $.ProductMetadata.DeletionPolicyOptIn }}
+    clientSideFields := map[string]bool{"deletion_policy": true}
+    clientSideOnly := true
+    for field := range Resource{{ $.ResourceName -}}().Schema {
+        if d.HasChange(field) && !clientSideFields[field] {
+            clientSideOnly = false
+            break
+        }
+    }
+    if clientSideOnly {
+        return resource{{ $.ResourceName -}}Read(d, meta)
+    }
+{{-     end}}
 {{-     if and ($.GetAsync) (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "update")) -}}
     var project string
 {{-     end}}
