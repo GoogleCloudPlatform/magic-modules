@@ -197,5 +197,5 @@ properties:
       type: NestedObject
       properties:
         - name: 'name'
-          type: string
+          type: String
           description: 'Output only. Full name of the resource'

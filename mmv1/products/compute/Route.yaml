@@ -73,7 +73,6 @@ error_retry_predicates:
 
   - 'transport_tpg.IsPeeringOperationInProgress'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 examples:
   - name: 'route_basic'
     primary_resource_id: 'default'

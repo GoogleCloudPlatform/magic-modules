@@ -340,9 +340,6 @@ type Resource struct {
 	// The version name provided by the user through CI
 	TargetVersionName string `yaml:"-"`
 
-	// The compiler to generate the downstream files, for example "terraformgoogleconversion-codegen".
-	Compiler string `yaml:"-"`
-
 	// The API "resource type kind" used for this resource e.g., "Function".
 	// If this is not set, then :name is used instead, which is strongly
 	// preferred wherever possible. Its main purpose is for supporting
@@ -398,9 +395,6 @@ type TGCResource struct {
 	// Generally, it shouldn't be set when the identity can be decided.
 	// Otherswise, it should be set.
 	CaiIdentity string `yaml:"cai_identity,omitempty"`
-
-	// If true, create TGC tests automatically for all handwritten provider tests.
-	TGCIncludeHandwrittenTests bool `yaml:"tgc_include_handwritten_tests,omitempty"`
 
 	// Tests for TGC, will automatically be filled with resource's examples
 	// and handwritten tests. Can be specified in order to skip specific tests.
@@ -498,13 +492,13 @@ func (r *Resource) SetDefault(product *Product) {
 	}
 }
 
-func (r *Resource) Validate() {
+func (r *Resource) Validate() (es []error) {
 	if r.Name == "" {
-		log.Fatalf("Missing `name` for resource")
+		es = append(es, fmt.Errorf("missing `name` for resource"))
 	}
 
 	if r.NestedQuery != nil && r.NestedQuery.IsListOfIds && len(r.Identity) != 1 {
-		log.Fatalf("`is_list_of_ids: true` implies resource has exactly one `identity` property")
+		es = append(es, fmt.Errorf("`is_list_of_ids: true` implies resource has exactly one `identity` property"))
 	}
 
 	// Ensures we have all properties defined
@@ -513,61 +507,63 @@ func (r *Resource) Validate() {
 			return p.Name == i
 		})
 		if !hasIdentify {
-			log.Fatalf("Missing property/parameter for identity %s", i)
+			es = append(es, fmt.Errorf("missing property/parameter for identity %s", i))
 		}
 	}
 
 	if r.Description == "" {
-		log.Fatalf("Missing `description` for resource %s", r.Name)
+		es = append(es, fmt.Errorf("missing `description` for resource %s", r.Name))
 	}
 
 	if !r.Exclude {
 		if len(r.Properties) == 0 {
-			log.Fatalf("Missing `properties` for resource %s", r.Name)
+			es = append(es, fmt.Errorf("missing `properties` for resource %s", r.Name))
 		}
 	}
 
 	allowed := []string{"POST", "PUT", "PATCH"}
 	if !slices.Contains(allowed, r.CreateVerb) {
-		log.Fatalf("Value on `create_verb` should be one of %#v", allowed)
+		es = append(es, fmt.Errorf("value on `create_verb` should be one of %#v", allowed))
 	}
 
 	allowed = []string{"GET", "POST"}
 	if !slices.Contains(allowed, r.ReadVerb) {
-		log.Fatalf("Value on `read_verb` should be one of %#v", allowed)
+		es = append(es, fmt.Errorf("value on `read_verb` should be one of %#v", allowed))
 	}
 
 	allowed = []string{"POST", "PUT", "PATCH", "DELETE"}
 	if !slices.Contains(allowed, r.DeleteVerb) {
-		log.Fatalf("Value on `delete_verb` should be one of %#v", allowed)
+		es = append(es, fmt.Errorf("value on `delete_verb` should be one of %#v", allowed))
 	}
 
 	allowed = []string{"POST", "PUT", "PATCH"}
 	if !slices.Contains(allowed, r.UpdateVerb) {
-		log.Fatalf("Value on `update_verb` should be one of %#v", allowed)
+		es = append(es, fmt.Errorf("value on `update_verb` should be one of %#v", allowed))
 	}
 
 	for _, property := range r.AllProperties() {
-		property.Validate(r.Name)
+		es = append(es, property.Validate(r.Name)...)
 	}
 
 	if r.IamPolicy != nil {
-		r.IamPolicy.Validate(r.Name)
+		es = append(es, r.IamPolicy.Validate(r.Name)...)
 	}
 
 	if r.NestedQuery != nil {
-		r.NestedQuery.Validate(r.Name)
+		es = append(es, r.NestedQuery.Validate(r.Name)...)
 	}
 
 	for _, example := range r.Examples {
 		if err := example.Validate(r.Name); err != nil {
-			log.Fatalln(err)
+			es = append(es, err)
 		}
 	}
 
 	for _, sample := range r.Samples {
-		sample.Validate(r.Name)
+		es = append(es, sample.Validate(r.Name)...)
 	}
+
+	return es
 }
 
 // ====================
@@ -880,7 +876,7 @@ func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField
 	requiredWith := strings.ReplaceAll(strings.Join(originalField.Lineage(), ".0."), google.Underscore(originalField.Name), google.Underscore(writeOnlyField.Name))
 
 	options := []func(*Type){
-		propertyWithType("Int"),
+		propertyWithType("String"),
 		propertyWithImmutable(originalField.IsForceNew()),
 		propertyWithDescription(description),
 		propertyWithRequiredWith([]string{requiredWith}),
@@ -896,11 +892,15 @@ func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type)
 	if len(propWithWoConfigured.RequiredWith) > 0 {
 		log.Fatalf("WriteOnly property '%s' in resource '%s' cannot have RequiredWith set. This combination is not supported.", propWithWoConfigured.Name, r.Name)
 	}
-	woFieldName := fmt.Sprintf("%sWo", propWithWoConfigured.Name)
-	woVersionFieldName := fmt.Sprintf("%sVersion", woFieldName)
-	writeOnlyField := buildWriteOnlyField(woFieldName, woVersionFieldName, propWithWoConfigured)
-	writeOnlyVersionField := buildWriteOnlyVersionField(woVersionFieldName, propWithWoConfigured, writeOnlyField)
-	props = append(props, writeOnlyField, writeOnlyVersionField)
+	// Don't add write only fields to tgc, as write only fields don't exist in tfplan json,
+	// the input of tfplan2cai.
+	if !strings.Contains(r.ProductMetadata.Compiler, "terraformgoogleconversion") {
+		woFieldName := fmt.Sprintf("%sWo", propWithWoConfigured.Name)
+		woVersionFieldName := fmt.Sprintf("%sVersion", woFieldName)
+		writeOnlyField := buildWriteOnlyField(woFieldName, woVersionFieldName, propWithWoConfigured)
+		writeOnlyVersionField := buildWriteOnlyVersionField(woVersionFieldName, propWithWoConfigured, writeOnlyField)
+		props = append(props, writeOnlyField, writeOnlyVersionField)
+	}
 	return props
 }
 
@@ -1442,10 +1442,6 @@ func ignoreReadFields(props []*Type) []string {
 		}
 	}
 	return fields
-}
-
-func (r *Resource) SetCompiler(t string) {
-	r.Compiler = fmt.Sprintf("%s-codegen", strings.ToLower(t))
 }
 
 // Returns the id format of an object, or self_link_uri if none is explicitly defined
@@ -2592,5 +2588,5 @@ func (r Resource) CaiResourceName() string {
 }
 
 func (r Resource) IsTgcCompiler() bool {
-	return r.Compiler == "terraformgoogleconversionnext-codegen"
+	return r.ProductMetadata.Compiler == "terraformgoogleconversionnext-codegen"
 }

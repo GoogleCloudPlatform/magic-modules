@@ -37,7 +37,6 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 sweeper:
   dependencies:
     # - "google_network_security_intercept_endpoint_group" (beta only)
@@ -127,6 +126,7 @@ properties:
     validation:
       function: 'verify.ValidateGCEName'
   - name: 'networkId'
+    type: String
     description: |
       The unique identifier for the resource. This identifier is defined by the server.
     api_name: id

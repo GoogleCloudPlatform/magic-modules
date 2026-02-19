@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/transport"
 
 	"google.golang.org/api/container/v1"
 )
@@ -20,7 +20,7 @@ func ContainerClusterTfplan2CaiConverter() cai.Tfplan2caiConverter {
 	}
 }
 
-func GetContainerCluster(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]caiasset.Asset, error) {
+func GetContainerCluster(d tpgresource.TerraformResourceData, config *transport.Config) ([]caiasset.Asset, error) {
 	name, err := cai.AssetName(d, config, "//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{name}}")
 	if err != nil {
 		return []caiasset.Asset{}, err
@@ -45,7 +45,7 @@ func GetContainerCluster(d tpgresource.TerraformResourceData, config *transport_
 	}
 }
 
-func GetContainerClusterData(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+func GetContainerClusterData(d tpgresource.TerraformResourceData, config *transport.Config) (map[string]interface{}, error) {
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return nil, err
@@ -59,7 +59,7 @@ func GetContainerClusterData(d tpgresource.TerraformResourceData, config *transp
 	return cai.JsonMap(cluster)
 }
 
-func expandContainerCluster(project string, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (*container.Cluster, error) {
+func expandContainerCluster(project string, d tpgresource.TerraformResourceData, config *transport.Config) (*container.Cluster, error) {
 	location, err := tpgresource.GetLocation(d, config)
 	if err != nil {
 		return nil, err
@@ -191,18 +191,16 @@ func expandContainerCluster(project string, d tpgresource.TerraformResourceData,
 
 	nodePoolsCount := d.Get("node_pool.#").(int)
 	if nodePoolsCount > 0 {
-		// TODO: implement expandNodePool
-
-		// nodePools := make([]*container.NodePool, 0, nodePoolsCount)
-		// for i := 0; i < nodePoolsCount; i++ {
-		// 	prefix := fmt.Sprintf("node_pool.%d.", i)
-		// 	nodePool, err := expandNodePool(d, prefix)
-		// 	if err != nil {
-		// 		return err
-		// 	}
-		// 	nodePools = append(nodePools, nodePool)
-		// }
-		// cluster.NodePools = nodePools
+		nodePools := make([]*container.NodePool, nodePoolsCount)
+		for i := 0; i < nodePoolsCount; i++ {
+			prefix := fmt.Sprintf("node_pool.%d.", i)
+			nodePool, err := expandNodePool(d, prefix)
+			if err != nil {
+				return nil, err
+			}
+			nodePools[i] = nodePool
+		}
+		cluster.NodePools = nodePools
 	} else {
 		// Node Configs have default values that are set in the expand function,
 		// but can only be set if node pools are unspecified.
@@ -477,7 +475,7 @@ func expandPodIpv4RangeNames(configured interface{}) []string {
 	return ranges
 }
 
-func expandAdditionalIpRangesConfigs(configured interface{}, d tpgresource.TerraformResourceData, c *transport_tpg.Config) ([]*container.AdditionalIPRangesConfig, error) {
+func expandAdditionalIpRangesConfigs(configured interface{}, d tpgresource.TerraformResourceData, c *transport.Config) ([]*container.AdditionalIPRangesConfig, error) {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
@@ -498,7 +496,7 @@ func expandAdditionalIpRangesConfigs(configured interface{}, d tpgresource.Terra
 	return additionalIpRangesConfig, nil
 }
 
-func expandIPAllocationPolicy(configured interface{}, d tpgresource.TerraformResourceData, networkingMode string, autopilot bool, c *transport_tpg.Config) (*container.IPAllocationPolicy, []*container.AdditionalIPRangesConfig, error) {
+func expandIPAllocationPolicy(configured interface{}, d tpgresource.TerraformResourceData, networkingMode string, autopilot bool, c *transport.Config) (*container.IPAllocationPolicy, []*container.AdditionalIPRangesConfig, error) {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		if networkingMode == "VPC_NATIVE" {
@@ -563,7 +561,7 @@ func expandAutoIpamConfig(configured interface{}) *container.AutoIpamConfig {
 	}
 }
 
-func expandMaintenancePolicy(d tpgresource.TerraformResourceData, config *transport_tpg.Config) *container.MaintenancePolicy {
+func expandMaintenancePolicy(d tpgresource.TerraformResourceData, config *transport.Config) *container.MaintenancePolicy {
 	// We have to perform a full Get() as part of this, to get the fingerprint.  We can't do this
 	// at any other time, because the fingerprint update might happen between plan and apply.
 	// We can omit error checks, since to have gotten this far, a project is definitely configured.
