@@ -35,6 +35,8 @@ async:
     - delete
   result:
     resource_inside_response: true
+custom_code:
+  constants: templates/terraform/custom_code/hypercomputecluster_cluster_storage_resources_hash.go.tmpl
 autogen_status: Q2x1c3Rlcg==
 parameters:
   - name: location
@@ -60,6 +62,7 @@ properties:
       compute resource by which it can be referenced elsewhere, and must conform
       to [RFC-1034](https://datatracker.ietf.org/doc/html/rfc1034) (lower-case,
       alphanumeric, and at most 63 characters).
+    set_hash_func: resourceHypercomputeclusterClusterResourceHash
     value_type:
       type: NestedObject
       properties:
@@ -183,6 +186,7 @@ properties:
       elsewhere, and must conform to
       [RFC-1034](https://datatracker.ietf.org/doc/html/rfc1034) (lower-case,
       alphanumeric, and at most 63 characters).
+    set_hash_func: resourceHypercomputeclusterClusterResourceHash
     value_type:
       type: NestedObject
       properties:
@@ -521,6 +525,7 @@ properties:
       storage resource by which it can be referenced elsewhere, and must conform
       to [RFC-1034](https://datatracker.ietf.org/doc/html/rfc1034) (lower-case,
       alphanumeric, and at most 63 characters).
+    set_hash_func: resourceHypercomputeclusterClusterResourceHash
     value_type:
       type: NestedObject
       properties:
