@@ -2042,6 +2042,70 @@ func TestAccSqlDatabaseInstance_PointInTimeRecoveryEnabledForSqlServer(t *testin
 	})
 }
 
+func TestAccSqlDatabaseInstance_withDbAlignedAtomicWritesEnabled(t *testing.T) {
+	t.Parallel()
+
+	masterID := acctest.RandInt(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_EnableDbAlignedAtomicWrites(masterID, true, "db-custom-2-13312"),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_EnableDbAlignedAtomicWrites(masterID, true, "db-custom-2-10240"),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_withoutDbAlignedAtomicWritesEnabled(t *testing.T) {
+	t.Parallel()
+
+	masterID := acctest.RandInt(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_EnableDbAlignedAtomicWrites(masterID, false, "db-custom-2-13312"),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_EnableDbAlignedAtomicWrites(masterID, false, "db-custom-2-10240"),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_EnableGoogleMlIntegration(t *testing.T) {
 	t.Parallel()
 
@@ -7737,6 +7801,24 @@ resource "google_sql_database_instance" "instance" {
   }
 }
 `, masterID, dbVersion, masterID, pointInTimeRecoveryEnabled)
+}
+
+func testGoogleSqlDatabaseInstance_EnableDbAlignedAtomicWrites(masterID int, enableDbAlignedAtomicWrites bool, tier string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "tf-test-%d"
+  region              = "us-central1"
+  database_version    = "MYSQL_8_0"
+  deletion_protection = false
+  root_password		    = "rand-pwd-%d"
+  settings {
+    tier                            = "%s"
+    db_aligned_atomic_writes_config {
+      db_aligned_atomic_writes = %t
+    }
+  }
+}
+`, masterID, masterID, tier, enableDbAlignedAtomicWrites)
 }
 
 func testGoogleSqlDatabaseInstance_EnableGoogleMlIntegration(masterID int, enableGoogleMlIntegration bool, dbVersion string, tier string) string {
