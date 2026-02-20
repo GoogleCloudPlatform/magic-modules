@@ -1656,10 +1656,10 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 		conf := v.([]interface{})[0].(map[string]interface{})
 		nc.SandboxConfig = &container.SandboxConfig{}
 {{ if ne $.TargetVersionName `ga` -}}
-		if v, ok := conf["sandbox_type"]; ok {
-			nc.SandboxConfig.SandboxType = v.(string)
-		} else if v, ok := conf["type"]; ok {
-			nc.SandboxConfig.Type = v.(string)
+		if st, ok := conf["sandbox_type"]; ok && st != "" {
+			nc.SandboxConfig.SandboxType = st.(string)
+		} else if t, ok := conf["type"]; ok {
+			nc.SandboxConfig.Type = t.(string)
 		}
 {{- else -}}
 		if v, ok := conf["type"]; ok {
