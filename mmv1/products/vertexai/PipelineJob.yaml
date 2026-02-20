@@ -97,9 +97,10 @@ properties:
     validation:
       function: 'validation.StringIsJSON'
   - name: pscInterfaceConfig
-    type: NestedObject
-    description: Optional configuration for PSC-I.
-    additional_properties: true
+    type: String
+    description: JSON-encoded PSC interface configuration.
+    validation:
+      function: 'validation.StringIsJSON'
   - name: 'state'
     min_version: 'beta'
     type: Enum
