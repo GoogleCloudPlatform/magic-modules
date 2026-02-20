@@ -570,6 +570,35 @@ properties:
           Defines whether the instance is preemptible. This can only be set
           during instance creation, it cannot be set or changed after the
           instance has been created.
+  - name: 'reservationAffinity'
+    type: NestedObject
+    description: |
+      Specifies the reservation policy.
+    # This block ensures the field is compatible with A3/A4 accelerator types
+    conflicts:
+      - 'guest_accelerators'
+    properties:
+      - name: 'type'
+        type: Enum
+        description: |
+          Specifies the type of reservation from which this instance can consume
+          resources.
+        enum_values:
+          - 'ANY_RESERVATION'
+          - 'SPECIFIC_RESERVATION'
+          - 'NO_RESERVATION'
+      - name: 'key'
+        type: String
+        description: |
+          Corresponds to the label key of a reservation resource. To consume a
+          SPECIFIC_RESERVATION, the key must be compute.googleapis.com/reservation-name
+          and the value must be the name of the reservation.
+      - name: 'values'
+        type: Array
+        description: |
+          Corresponds to the label values of a reservation resource.
+        item_type:
+          type: String
   - name: 'serviceAccounts'
     type: Array
     description: |
