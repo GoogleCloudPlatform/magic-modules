@@ -69,7 +69,7 @@ properties:
     type: String
     required: true
     immutable: true
-    url_param_only: true
+    ignore_read: true
     description: |
       Identifier of the GCP project. For GCP project, this field can be project name or project number.
   - name: 'editionConfig'
