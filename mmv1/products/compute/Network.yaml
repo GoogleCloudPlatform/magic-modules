@@ -207,7 +207,7 @@ properties:
           - 'DEFAULT'
           - 'ADD_COST_TO_MED'
         is_missing_in_cai: true
-      - name: 'delete_bgp_always_compare_med'
+      - name: 'deleteBgpAlwaysCompareMed'
         type: Boolean
         default_value: false
         update_verb: 'PATCH'
