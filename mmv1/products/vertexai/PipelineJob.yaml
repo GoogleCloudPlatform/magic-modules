@@ -22,8 +22,8 @@ references:
     'Vertex AI Pipelines': 'https://cloud.google.com/vertex-ai/docs/pipelines'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.pipelineJobs'
 docs:
-base_url: 'projects/{{project}}/locations/{{region}}/pipelineJobs'
-self_link: 'projects/{{project}}/locations/{{region}}/pipelineJobs'
+base_url: 'projects/{{project}}/locations/{{region}}/operations/{{op_id}}'
+self_link: 'projects/{{project}}/locations/{{region}}/pipelineJobs/{{name}}'
 update_verb: 'PATCH'
 update_mask: true
 timeouts:
@@ -34,7 +34,7 @@ async:
   actions: ['create', 'delete']
   type: 'OpAsync'
   operation:
-    base_url: '{{op_id}}'
+    base_url: 'projects/{{project}}/locations/{{region}}/operations/{{op_id}}'
   result:
     resource_inside_response: true
 custom_code:
@@ -92,20 +92,14 @@ properties:
       - name: 'gcsOutputDirectory'
         type: String
   - name: pipelineSpec
-    min_version: 'beta'
-    type: Array
+    type: NestedObject
     description: |
       A compiled definition of a pipeline, represented as a JSON object.
-      Defines the structure of the pipeline, including its components,
-      tasks, and parameters.
-    item_type:
-      type: String
+    additional_properties: true
   - name: pscInterfaceConfig
-    min_version: 'beta'
-    type: Array
-    description: Optional configuration for PSC-I for PipelineJob.
-    item_type:
-      type: String
+    type: NestedObject
+    description: Optional configuration for PSC-I.
+    additional_properties: true
   - name: 'state'
     min_version: 'beta'
     type: Enum
