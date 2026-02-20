@@ -515,7 +515,7 @@ properties:
           - 'user_credentials'
           - 'oauth2_client_credentials'
         properties:
-          - name: 'client_id'
+          - name: 'clientId'
             type: String
             description: |
               Client ID to use for authentication.
