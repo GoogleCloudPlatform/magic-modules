@@ -64,7 +64,8 @@ custom_code:
   decoder: 'templates/terraform/decoders/disk.tmpl'
   pre_delete: 'templates/terraform/pre_delete/detach_disk.tmpl'
   tgc_encoder: 'templates/tgc_next/encoders/compute_disk.go.tmpl'
-  post_import: 'templates/terraform/post_import/compute_disk.go.tmpl'
+  post_import: 'templates/terraform/post_import/disk.go.tmpl'
+  post_read: 'templates/terraform/post_read/disk.go.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSuppress'
