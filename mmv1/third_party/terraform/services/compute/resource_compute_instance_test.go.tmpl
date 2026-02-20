@@ -1333,7 +1333,7 @@ func TestAccComputeInstance_bootDiskUpdate(t *testing.T) {
 
 	context2 := map[string]interface{}{
 		"instance_name": context1["instance_name"].(string),
-		"disk_size":     10,
+		"disk_size":     20,
 		"labels":        "baz",
 	}
 
@@ -1352,11 +1352,11 @@ func TestAccComputeInstance_bootDiskUpdate(t *testing.T) {
 			{
 				Config: testAccComputeInstance_bootDiskUpdate(context2),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
-          PreApply: []plancheck.PlanCheck{
-            // Check that the update is done in-place
-            plancheck.ExpectResourceAction("google_compute_instance.foobar", plancheck.ResourceActionUpdate),
-          },
-        },
+					PreApply: []plancheck.PlanCheck{
+						// Check that the update is done in-place
+						plancheck.ExpectResourceAction("google_compute_instance.foobar", plancheck.ResourceActionUpdate),
+					},
+        		},
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
