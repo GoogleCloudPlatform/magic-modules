@@ -22,7 +22,7 @@ references:
     'Vertex AI Pipelines': 'https://cloud.google.com/vertex-ai/docs/pipelines'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.pipelineJobs'
 docs:
-base_url: 'projects/{{project}}/locations/{{region}}/operations/{{op_id}}'
+base_url: 'projects/{{project}}/locations/{{region}}/pipelineJobs'
 self_link: 'projects/{{project}}/locations/{{region}}/pipelineJobs/{{name}}'
 update_verb: 'PATCH'
 update_mask: true
@@ -92,10 +92,10 @@ properties:
       - name: 'gcsOutputDirectory'
         type: String
   - name: pipelineSpec
-    type: NestedObject
-    description: |
-      A compiled definition of a pipeline, represented as a JSON object.
-    additional_properties: true
+    type: String
+    description: A compiled definition of a pipeline, represented as a JSON object.
+    validation:
+      function: 'validation.StringIsJSON'
   - name: pscInterfaceConfig
     type: NestedObject
     description: Optional configuration for PSC-I.
