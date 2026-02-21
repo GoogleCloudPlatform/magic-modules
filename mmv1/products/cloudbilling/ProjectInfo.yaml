@@ -27,11 +27,7 @@ id_format: projects/{{project}}
 import_format:
   - projects/{{%project}}
   - '{{%project}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-flatten_all_in_method: true
+cai_asset_name_format: projects/{{project}}/billingInfo
 custom_code:
   encoder: templates/terraform/encoders/billing_project_info.go.tmpl
   decoder: templates/terraform/decoders/billing_project_info.go.tmpl
