@@ -43,14 +43,6 @@ custom_code:
   decoder: 'templates/terraform/decoders/cloud_run.go.tmpl'
 custom_diff:
   - hasMetadata
-async:
-  type: PollAsync
-  actions:
-    - create
-    - update
-  check_response_func_existence: PollCheckKnativeStatusFunc(res)
-  check_response_func_absence: transport_tpg.PollCheckForAbsence
-  target_occurrences: 1
 error_retry_predicates:
   - transport_tpg.IsCloudRunCreationConflict
 schema_version: 1
