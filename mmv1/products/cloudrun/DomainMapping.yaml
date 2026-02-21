@@ -27,6 +27,14 @@ import_format:
   - locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}
 custom_diff:
   - hasMetadata
+async:
+  type: PollAsync
+  actions:
+    - create
+    - update
+  check_response_func_existence: PollCheckKnativeStatusFunc(res)
+  check_response_func_absence: transport_tpg.PollCheckForAbsence
+  target_occurrences: 1
 error_retry_predicates:
   - transport_tpg.IsCloudRunCreationConflict
 schema_version: 1
