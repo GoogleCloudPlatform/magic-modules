@@ -24,23 +24,7 @@ cai_base_url: projects/{{project}}/locations/{{location}}/DomainMappings
 kind: DomainMapping
 id_format: locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}
 import_format:
-  - 'locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-async:
-  type: 'PollAsync'
-  check_response_func_existence: 'PollCheckKnativeStatusFunc(res)'
-  check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
-  suppress_error: false
-  target_occurrences: 1
-  actions: ['create', 'update']
-flatten_all_in_method: true
-custom_code:
-  constants: 'templates/terraform/constants/cloud_run_domain_mapping.go.tmpl'
-  encoder: 'templates/terraform/encoders/cloud_run_domain_mapping.go.tmpl'
-  decoder: 'templates/terraform/decoders/cloud_run.go.tmpl'
+  - locations/{{location}}/namespaces/{{project}}/domainmappings/{{name}}
 custom_diff:
   - hasMetadata
 error_retry_predicates:
