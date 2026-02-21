@@ -17,7 +17,7 @@ import (
 	"google.golang.org/api/servicenetworking/v1"
 )
 
-func isInvalidAuthError(error) (bool, string) {
+func isInvalidAuthError(err error) (bool, string) {
 	if strings.Contains(err.Error(), "Request had invalid authentication credentials") {
 		return true, "Waiting for service account propagation"
 	}
@@ -120,7 +120,7 @@ func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta inte
 		project = bp
 	}
 
-	err := transport_tpg.Retry(transport_tpg.RetryOptions{
+	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
 			createCall := config.NewServiceNetworkingClient(userAgent).Services.Connections.Create(parentService, connection)
 			if config.UserProjectOverride {
