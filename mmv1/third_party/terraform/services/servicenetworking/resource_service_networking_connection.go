@@ -133,8 +133,8 @@ func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta inte
 
 			return ServiceNetworkingOperationWaitTimeHW(config, op, "Create Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutCreate))
 		},
-		Timeout: d.Timeout(schema.TimeoutCreate),
-		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{isInvalidAuthError}
+		Timeout:              d.Timeout(schema.TimeoutCreate),
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{isInvalidAuthError},
 	})
 
 	if err != nil {
