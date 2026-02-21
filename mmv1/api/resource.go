@@ -355,6 +355,9 @@ type Resource struct {
 
 	CustomCode resource.CustomCode `yaml:"custom_code,omitempty"`
 
+	// If true it will generate all flatteners in a flatten{{resourceName}} method instead of generating all flatteners in Read()
+	FlattenAllInMethod bool `yaml:"flatten_all_in_method,omitempty"`
+
 	// Examples in documentation. Backed by generated tests, and have
 	// corresponding OiCS walkthroughs.
 	Examples []*resource.Examples `yaml:"examples,omitempty"`
