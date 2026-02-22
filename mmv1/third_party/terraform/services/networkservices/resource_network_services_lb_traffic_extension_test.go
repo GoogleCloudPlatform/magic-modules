@@ -1388,6 +1388,3 @@ resource "google_compute_instance" "callouts_instance" {
 }
 `, context)
 }
-
-
-
