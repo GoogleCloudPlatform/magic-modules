@@ -1,0 +1,45 @@
+if name, ok := res["name"].(string); ok {
+    if autokeyHasPrefix(name, autokeyFolderPrefix) {
+        d.Set("folder", autokeyTrimSuffix(name, autokeyConfigSuffix))
+        d.Set("project", nil)
+    } else if autokeyHasPrefix(name, autokeyProjectPrefix) {
+        d.Set("project", autokeyTrimSuffix(name, autokeyConfigSuffix))
+        d.Set("folder", nil)
+    }
+}
+
+if v, ok := res["keyProject"].(string); ok {
+    d.Set("key_project", v)
+    res["keyProject"] = v
+} else if v, ok := d.GetOkExists("key_project"); ok {
+    // Preserve configured value when the API omits the field.
+    d.Set("key_project", v)
+    res["keyProject"] = v
+} else {
+    d.Set("key_project", nil)
+}
+
+apiResolutionMode := ""
+if v, ok := res["keyProjectResolutionMode"].(string); ok {
+    apiResolutionMode = v
+}
+
+stateResolutionMode := ""
+if v, ok := d.GetOkExists("key_project_resolution_mode"); ok {
+    if s, ok := v.(string); ok {
+        stateResolutionMode = s
+    }
+}
+
+if apiResolutionMode != "" {
+    d.Set("key_project_resolution_mode", apiResolutionMode)
+    res["keyProjectResolutionMode"] = apiResolutionMode
+} else if stateResolutionMode != "" {
+    // If one value is empty and the other is non-empty, preserve the non-empty one.
+    d.Set("key_project_resolution_mode", stateResolutionMode)
+    res["keyProjectResolutionMode"] = stateResolutionMode
+} else {
+    d.Set("key_project_resolution_mode", nil)
+}
+
+return res, nil
