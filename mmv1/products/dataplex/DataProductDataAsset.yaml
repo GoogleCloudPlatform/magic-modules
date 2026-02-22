@@ -85,17 +85,17 @@ properties:
           description: 'IAM roles granted on the resource.'
 
 examples:
-  - name: 'dataplex_data_asset_basic'
+  - name: 'dataplex_data_product_data_asset_basic'
     primary_resource_id: 'example'
     vars:
       data_product_id: 'data-product'
-      data_asset_id: 'data-asset'
+      data_asset_id: 'data-product-data-asset'
     test_env_vars:
       project_name: 'PROJECT_NAME'
-  - name: 'dataplex_data_asset_full'
+  - name: 'dataplex_data_product_data_asset_full'
     primary_resource_id: 'example'
     vars:
       data_product_id: 'data-product'
-      data_asset_id: 'data-asset'
+      data_asset_id: 'data-product-data-asset'
     test_env_vars:
       project_name: 'PROJECT_NAME'
