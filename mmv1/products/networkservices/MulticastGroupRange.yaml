@@ -26,6 +26,9 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/multicastGroupRanges/{{multicast_group_range_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/multicastGroupRanges/{{multicast_group_range_id}}
+sweeper:
+  url_substitutions:
+    - location: "global"
 examples:
   - name: network_services_multicast_group_range_basic
     primary_resource_id: mgr_test

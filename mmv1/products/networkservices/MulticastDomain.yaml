@@ -27,6 +27,9 @@ create_url:
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/multicastDomains/{{multicast_domain_id}}
+sweeper:
+  url_substitutions:
+    - location: "global"
 examples:
   - name: network_services_multicast_domain_basic
     primary_resource_id: md_test
