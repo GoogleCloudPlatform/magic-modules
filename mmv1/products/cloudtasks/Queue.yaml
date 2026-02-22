@@ -306,6 +306,7 @@ properties:
               URI query.
 
               When specified, replaces the query part of the task URI. Setting the query value to an empty string clears the URI query segment.
+            diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
             properties:
               - name: 'queryParams'
                 type: String

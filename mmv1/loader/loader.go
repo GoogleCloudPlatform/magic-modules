@@ -20,6 +20,7 @@ type Loader struct {
 	// baseDirectory points to mmv1 root, if cwd can be empty as relative paths are used
 	baseDirectory     string
 	overrideDirectory string
+	compilerTarget    string
 	Products          map[string]*api.Product
 	version           string
 	sysfs             google.ReadDirReadFileFS
@@ -30,6 +31,7 @@ type Config struct {
 	OverrideDirectory string                   // optional
 	Version           string                   // required
 	Sysfs             google.ReadDirReadFileFS // required
+	CompilerTarget    string                   // optional
 }
 
 // NewLoader creates a new Loader instance, applying any
@@ -45,17 +47,23 @@ func NewLoader(config Config) *Loader {
 	if config.Sysfs == nil {
 		panic("sysfs is required")
 	}
+
+	if config.CompilerTarget == "" {
+		config.CompilerTarget = "terraform"
+	}
+
 	l := &Loader{
 		baseDirectory:     config.BaseDirectory,
 		overrideDirectory: config.OverrideDirectory,
 		version:           config.Version,
 		sysfs:             config.Sysfs,
+		compilerTarget:    config.CompilerTarget,
 	}
 
 	return l
 }
 
-func (l *Loader) LoadProducts(providerName string) {
+func (l *Loader) LoadProducts() {
 	if l.version == "" {
 		log.Printf("No version specified, assuming ga")
 		l.version = "ga"
@@ -92,10 +100,10 @@ func (l *Loader) LoadProducts(providerName string) {
 		}
 	}
 
-	l.Products = l.batchLoadProducts(allProductFiles, providerName)
+	l.Products = l.batchLoadProducts(allProductFiles)
 }
 
-func (l *Loader) batchLoadProducts(productNames []string, providerName string) map[string]*api.Product {
+func (l *Loader) batchLoadProducts(productNames []string) map[string]*api.Product {
 	products := make(map[string]*api.Product)
 
 	// Create result type for clarity
@@ -117,7 +125,7 @@ func (l *Loader) batchLoadProducts(productNames []string, providerName string) m
 		go func(name string) {
 			defer wg.Done()
 
-			product, err := l.LoadProduct(name, providerName)
+			product, err := l.LoadProduct(name)
 			productChan <- loadResult{
 				name:    name,
 				product: product,
@@ -154,7 +162,7 @@ func (l *Loader) batchLoadProducts(productNames []string, providerName string) m
 
 // Load compiles a product with all its resources from the given path and optional overrides
 // This loads the product configuration and all its resources into memory without generating any files
-func (l *Loader) LoadProduct(productName, providerName string) (*api.Product, error) {
+func (l *Loader) LoadProduct(productName string) (*api.Product, error) {
 	p := &api.Product{}
 	productYamlPath := filepath.Join(productName, "product.yaml")
 
@@ -201,7 +209,7 @@ func (l *Loader) LoadProduct(productName, providerName string) (*api.Product, er
 	p.Version = p.VersionObjOrClosest(l.version)
 
 	p.Objects = resources
-	p.SetCompiler(providerName)
+	p.SetCompiler(l.compilerTarget)
 	p.Validate()
 
 	return p, nil

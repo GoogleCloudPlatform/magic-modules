@@ -12,157 +12,154 @@
 # limitations under the License.
 
 ---
-name: 'Subscription'
+name: Subscription
 description: |
   A named resource representing the stream of messages from a single,
   specific topic, to be delivered to the subscribing application.
 references:
   guides:
-    'Managing Subscriptions': 'https://cloud.google.com/pubsub/docs/admin#managing_subscriptions'
-  api: 'https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.subscriptions'
+    Managing Subscriptions: https://cloud.google.com/pubsub/docs/admin#managing_subscriptions
+  api: https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.subscriptions
 docs:
   note: |
     You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding
     by using the `google_project_service_identity` resource.
-base_url: 'projects/{{project}}/subscriptions'
-create_verb: 'PUT'
-update_url: 'projects/{{project}}/subscriptions/{{name}}'
-update_verb: 'PATCH'
+base_url: projects/{{project}}/subscriptions
+update_url: projects/{{project}}/subscriptions/{{name}}
 update_mask: true
-include_in_tgc_next: true
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
+create_verb: PUT
+update_verb: PATCH
+id_format: projects/{{project}}/subscriptions/{{name}}
 async:
-  type: 'PollAsync'
-  check_response_func_existence: 'transport_tpg.PollCheckForExistence'
-  check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
+  type: PollAsync
+  actions:
+    - create
+  check_response_func_existence: transport_tpg.PollCheckForExistence
+  check_response_func_absence: transport_tpg.PollCheckForAbsence
   suppress_error: true
   target_occurrences: 1
-  actions: ['create']
+include_in_tgc_next: true
 custom_code:
-  pre_update: 'templates/terraform/pre_update/pubsub_subscription.go.tmpl'
-  constants: 'templates/terraform/constants/subscription.go.tmpl'
-  encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/pubsub_subscription.tmpl'
+  encoder: templates/terraform/encoders/no_send_name.go.tmpl
+  update_encoder: templates/terraform/update_encoder/pubsub_subscription.tmpl
+  constants: templates/terraform/constants/subscription.go.tmpl
+  pre_update: templates/terraform/pre_update/pubsub_subscription.go.tmpl
   tgc_ignore_terraform_encoder: true
 examples:
-  - name: 'pubsub_subscription_push'
-    primary_resource_id: 'example'
+  - name: pubsub_subscription_push
+    primary_resource_id: example
     vars:
-      topic_name: 'example-topic'
-      subscription_name: 'example-subscription'
-  - name: 'pubsub_subscription_pull'
-    primary_resource_id: 'example'
+      subscription_name: example-subscription
+      topic_name: example-topic
+  - name: pubsub_subscription_pull
+    primary_resource_id: example
     vars:
-      topic_name: 'example-topic'
-      subscription_name: 'example-subscription'
-  - name: 'pubsub_subscription_pull_filter'
-    primary_resource_id: 'example'
+      subscription_name: example-subscription
+      topic_name: example-topic
+  - name: pubsub_subscription_pull_filter
+    primary_resource_id: example
     vars:
-      topic_name: 'example-topic'
-      subscription_name: 'example-subscription'
-  - name: 'pubsub_subscription_dead_letter'
-    primary_resource_id: 'example'
+      subscription_name: example-subscription
+      topic_name: example-topic
+  - name: pubsub_subscription_dead_letter
+    primary_resource_id: example
     vars:
-      topic_name: 'example-topic'
-      subscription_name: 'example-subscription'
-  - name: 'pubsub_subscription_push_bq'
-    primary_resource_id: 'example'
-    vars:
-      topic_name: 'example-topic'
-      subscription_name: 'example-subscription'
-      dataset_id: 'example_dataset'
-      table_id: 'example_table'
+      subscription_name: example-subscription
+      topic_name: example-topic
+  - name: pubsub_subscription_push_bq
+    primary_resource_id: example
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-        role: "roles/bigquery.dataEditor"
-      - member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-        role: "roles/bigquery.metadataViewer"
-  - name: 'pubsub_subscription_push_bq_table_schema'
-    primary_resource_id: 'example'
+      - member: serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com
+        role: roles/bigquery.dataEditor
+      - member: serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com
+        role: roles/bigquery.metadataViewer
     vars:
-      topic_name: 'example-topic'
-      subscription_name: 'example-subscription'
-      dataset_id: 'example_dataset'
-      table_id: 'example_table'
+      dataset_id: example_dataset
+      subscription_name: example-subscription
+      table_id: example_table
+      topic_name: example-topic
+  - name: pubsub_subscription_push_bq_table_schema
+    primary_resource_id: example
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-        role: "roles/bigquery.dataEditor"
-      - member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-        role: "roles/bigquery.metadataViewer"
-  - name: 'pubsub_subscription_push_bq_service_account'
-    primary_resource_id: 'example'
+      - member: serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com
+        role: roles/bigquery.dataEditor
+      - member: serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com
+        role: roles/bigquery.metadataViewer
     vars:
-      topic_name: 'example-topic'
-      subscription_name: 'example-subscription'
-      dataset_id: 'example_dataset'
-      table_id: 'example_table'
-      service_account_id: 'example-bqw'
-  - name: 'pubsub_subscription_push_cloudstorage'
-    primary_resource_id: 'example'
+      dataset_id: example_dataset
+      subscription_name: example-subscription
+      table_id: example_table
+      topic_name: example-topic
+  - name: pubsub_subscription_push_bq_service_account
+    primary_resource_id: example
     vars:
-      topic_name: 'example-topic'
-      subscription_name: 'example-subscription'
-      bucket_name: 'example-bucket'
-  - name: 'pubsub_subscription_push_cloudstorage_avro'
-    primary_resource_id: 'example'
+      dataset_id: example_dataset
+      service_account_id: example-bqw
+      subscription_name: example-subscription
+      table_id: example_table
+      topic_name: example-topic
+  - name: pubsub_subscription_push_cloudstorage
+    primary_resource_id: example
     vars:
-      topic_name: 'example-topic'
-      subscription_name: 'example-subscription'
-      bucket_name: 'example-bucket'
-  - name: 'pubsub_subscription_push_cloudstorage_service_account'
-    primary_resource_id: 'example'
+      bucket_name: example-bucket
+      subscription_name: example-subscription
+      topic_name: example-topic
+  - name: pubsub_subscription_push_cloudstorage_avro
+    primary_resource_id: example
     vars:
-      topic_name: 'example-topic'
-      subscription_name: 'example-subscription'
-      bucket_name: 'example-bucket'
-      service_account_id: 'example-stw'
-  - name: 'pubsub_subscription_single_smt'
-    primary_resource_id: 'example'
+      bucket_name: example-bucket
+      subscription_name: example-subscription
+      topic_name: example-topic
+  - name: pubsub_subscription_push_cloudstorage_service_account
+    primary_resource_id: example
     vars:
-      topic_name: 'example-topic'
-      subscription_name: 'example-subscription'
-  - name: 'pubsub_subscription_multiple_smts'
-    primary_resource_id: 'example'
+      bucket_name: example-bucket
+      service_account_id: example-stw
+      subscription_name: example-subscription
+      topic_name: example-topic
+  - name: pubsub_subscription_single_smt
+    primary_resource_id: example
     vars:
-      topic_name: 'example-topic'
-      subscription_name: 'example-subscription'
-    tgc_skip_test: 'The dynamic block is in test configuration. The test takes time to fix.'
-  - name: 'pubsub_subscription_tags'
-    primary_resource_id: 'example'
+      subscription_name: example-subscription
+      topic_name: example-topic
+  - name: pubsub_subscription_multiple_smts
+    primary_resource_id: example
     vars:
-      topic_name: 'example-topic'
-      subscription_name: 'example-subscription'
-      tag_key: 'tag_key'
-      tag_value: 'tag_value'
-parameters:
+      subscription_name: example-subscription
+      topic_name: example-topic
+    tgc_skip_test: The dynamic block is in test configuration. The test takes time to fix.
+  - name: pubsub_subscription_tags
+    primary_resource_id: example
+    vars:
+      subscription_name: example-subscription
+      tag_key: tag_key
+      tag_value: tag_value
+      topic_name: example-topic
 properties:
-  - name: 'name'
+  - name: name
     type: String
-    description: 'Name of the subscription.'
     required: true
+    description: Name of the subscription.
     immutable: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
-  - name: 'topic'
+    custom_expand: templates/terraform/custom_expand/shortname_to_url.go.tmpl
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: topic
     type: ResourceRef
+    required: true
     description: |
       A reference to a Topic resource, of the form projects/{project}/topics/{{name}}
       (as in the id property of a google_pubsub_topic), or just a topic name if
       the topic is in the same project as the subscription.
-    required: true
     immutable: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: 'templates/terraform/custom_expand/computed_subscription_topic.tmpl'
-    resource: 'Topic'
-    imports: 'name'
-  - name: 'labels'
+    resource: Topic
+    imports: name
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+    custom_expand: templates/terraform/custom_expand/computed_subscription_topic.tmpl
+  - name: labels
     type: KeyValueLabels
     description: |
       A set of key/value label pairs to assign to this Subscription.
-  - name: 'bigqueryConfig'
+  - name: bigqueryConfig
     type: NestedObject
     description: |
       If delivery to BigQuery is used with this subscription, this field is used to configure it.
@@ -172,20 +169,20 @@ properties:
       - push_config
       - cloud_storage_config
     properties:
-      - name: 'table'
+      - name: table
         type: String
+        required: true
         description: |
           The name of the table to which to write data, of the form {projectId}.{datasetId}.{tableId}
-        required: true
         is_missing_in_cai: true
-      - name: 'useTopicSchema'
+      - name: useTopicSchema
         type: Boolean
         description: |
           When true, use the topic's schema as the columns to write to in BigQuery, if it exists.
           Only one of use_topic_schema and use_table_schema can be set.
         conflicts:
           - use_table_schema
-      - name: 'useTableSchema'
+      - name: useTableSchema
         type: Boolean
         description: |
           When true, use the BigQuery table's schema as the columns to write to in BigQuery. Messages
@@ -193,26 +190,26 @@ properties:
         conflicts:
           - use_topic_schema
         is_missing_in_cai: true
-      - name: 'writeMetadata'
+      - name: writeMetadata
         type: Boolean
         description: |
           When true, write the subscription name, messageId, publishTime, attributes, and orderingKey to additional columns in the table.
           The subscription name, messageId, and publishTime fields are put in their own columns while all other message properties (other than data) are written to a JSON object in the attributes column.
         is_missing_in_cai: true
-      - name: 'dropUnknownFields'
+      - name: dropUnknownFields
         type: Boolean
         description: |
           When true and use_topic_schema or use_table_schema is true, any fields that are a part of the topic schema or message schema that
           are not part of the BigQuery table schema are dropped when writing to BigQuery. Otherwise, the schemas must be kept in sync
           and any messages with extra fields are not written and remain in the subscription's backlog.
-      - name: 'serviceAccountEmail'
+      - name: serviceAccountEmail
         type: String
         description: |
           The service account to use to write to BigQuery. If not specified, the Pub/Sub
           [service agent](https://cloud.google.com/iam/docs/service-agents),
           service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com, is used.
         is_missing_in_cai: true
-  - name: 'cloudStorageConfig'
+  - name: cloudStorageConfig
     type: NestedObject
     description: |
       If delivery to Cloud Storage is used with this subscription, this field is used to configure it.
@@ -223,73 +220,73 @@ properties:
       - bigquery_config
     is_missing_in_cai: true
     properties:
-      - name: 'bucket'
+      - name: bucket
         type: String
+        required: true
         description: |
           User-provided name for the Cloud Storage bucket. The bucket must be created by the user. The bucket name must be without any prefix like "gs://".
-        required: true
-      - name: 'filenamePrefix'
+      - name: filenamePrefix
         type: String
         description: |
           User-provided prefix for Cloud Storage filename.
-      - name: 'filenameSuffix'
+      - name: filenameSuffix
         type: String
         description: |
           User-provided suffix for Cloud Storage filename. Must not end in "/".
-      - name: 'filenameDatetimeFormat'
+      - name: filenameDatetimeFormat
         type: String
         description: |
           User-provided format string specifying how to represent datetimes in Cloud Storage filenames.
-      - name: 'maxDuration'
+      - name: maxDuration
         type: String
+        default_value: 300s
         description: |
           The maximum duration that can elapse before a new Cloud Storage file is created. Min 1 minute, max 10 minutes, default 5 minutes.
           May not exceed the subscription's acknowledgement deadline.
           A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
-        default_value: "300s"
-      - name: 'maxBytes'
+      - name: maxBytes
         type: Integer
         description: |
           The maximum bytes that can be written to a Cloud Storage file before a new file is created. Min 1 KB, max 10 GiB.
           The maxBytes limit may be exceeded in cases where messages are larger than the limit.
-      - name: 'maxMessages'
+      - name: maxMessages
         type: Integer
         description: |
           The maximum messages that can be written to a Cloud Storage file before a new file is created. Min 1000 messages.
-      - name: 'state'
+      - name: state
         type: Enum
         description: |
           An output-only field that indicates whether or not the subscription can receive messages.
         output: true
         enum_values:
-          - 'ACTIVE'
-          - 'PERMISSION_DENIED'
-          - 'NOT_FOUND'
-      - name: 'avroConfig'
+          - ACTIVE
+          - PERMISSION_DENIED
+          - NOT_FOUND
+      - name: avroConfig
         type: NestedObject
-        send_empty_value: true
-        allow_empty_object: true
         description: |
           If set, message data will be written to Cloud Storage in Avro format.
+        send_empty_value: true
+        allow_empty_object: true
         properties:
-          - name: 'writeMetadata'
+          - name: writeMetadata
             type: Boolean
-            send_empty_value: true
             description: |
               When true, write the subscription name, messageId, publishTime, attributes, and orderingKey as additional fields in the output.
-            is_missing_in_cai: true
-          - name: 'useTopicSchema'
-            type: Boolean
             send_empty_value: true
+            is_missing_in_cai: true
+          - name: useTopicSchema
+            type: Boolean
             description: |
               When true, the output Cloud Storage file will be serialized using the topic schema, if it exists.
-      - name: 'serviceAccountEmail'
+            send_empty_value: true
+      - name: serviceAccountEmail
         type: String
         description: |
           The service account to use to write to Cloud Storage. If not specified, the Pub/Sub
           [service agent](https://cloud.google.com/iam/docs/service-agents),
           service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com, is used.
-  - name: 'pushConfig'
+  - name: pushConfig
     type: NestedObject
     description: |
       If push delivery is used with this subscription, this field is used to
@@ -299,21 +296,21 @@ properties:
       - bigquery_config
       - cloud_storage_config
     properties:
-      - name: 'oidcToken'
+      - name: oidcToken
         type: NestedObject
         description: |
           If specified, Pub/Sub will generate and attach an OIDC JWT token as
           an Authorization header in the HTTP request for every pushed message.
         properties:
-          - name: 'serviceAccountEmail'
+          - name: serviceAccountEmail
             type: String
+            required: true
             description: |
               Service account email to be used for generating the OIDC token.
               The caller (for subscriptions.create, subscriptions.patch, and
               subscriptions.modifyPushConfig RPCs) must have the
               iam.serviceAccounts.actAs permission for the service account.
-            required: true
-          - name: 'audience'
+          - name: audience
             type: String
             description: |
               Audience to be used when generating OIDC token. The audience claim
@@ -322,14 +319,14 @@ properties:
               for the audience field is not supported. More info about the OIDC JWT
               token audience here: https://tools.ietf.org/html/rfc7519#section-4.1.3
               Note: if not specified, the Push endpoint URL will be used.
-      - name: 'pushEndpoint'
+      - name: pushEndpoint
         type: String
+        required: true
         description: |
           A URL locating the endpoint to which messages should be pushed.
           For example, a Webhook endpoint might use
           "https://example.com/push".
-        required: true
-      - name: 'attributes'
+      - name: attributes
         type: KeyValuePairs
         description: |
           Endpoint configuration attributes.
@@ -355,25 +352,25 @@ properties:
 
           - v1beta1: uses the push format defined in the v1beta1 Pub/Sub API.
           - v1 or v1beta2: uses the push format defined in the v1 Pub/Sub API.
-        diff_suppress_func: 'IgnoreMissingKeyInMap("x-goog-version")'
+        diff_suppress_func: IgnoreMissingKeyInMap("x-goog-version")
         custom_tgc_expand: templates/tgc_next/custom_expand/pubsub_subscription_attributes.go.tmpl
-      - name: 'noWrapper'
+      - name: noWrapper
         type: NestedObject
         description: |
           When set, the payload to the push endpoint is not wrapped.Sets the
           `data` field as the HTTP body for delivery.
-        custom_flatten: 'templates/terraform/custom_flatten/pubsub_no_wrapper_write_metadata_flatten.go.tmpl'
+        custom_flatten: templates/terraform/custom_flatten/pubsub_no_wrapper_write_metadata_flatten.go.tmpl
         properties:
-          - name: 'writeMetadata'
+          - name: writeMetadata
             type: Boolean
+            required: true
             description: |
               When true, writes the Pub/Sub message metadata to
               `x-goog-pubsub-<KEY>:<VAL>` headers of the HTTP request. Writes the
               Pub/Sub message attributes to `<KEY>:<VAL>` headers of the HTTP request.
-            required: true
             send_empty_value: true
             is_missing_in_cai: true
-  - name: 'ackDeadlineSeconds'
+  - name: ackDeadlineSeconds
     type: Integer
     description: |
       This value is the maximum time after a subscriber receives a message
@@ -395,8 +392,9 @@ properties:
       If the subscriber never acknowledges the message, the Pub/Sub system
       will eventually redeliver the message.
     default_from_api: true
-  - name: 'messageRetentionDuration'
+  - name: messageRetentionDuration
     type: String
+    default_value: 604800s
     description: |
       How long to retain unacknowledged messages in the subscription's
       backlog, from the moment a message is published. If
@@ -407,15 +405,14 @@ properties:
 
       A duration in seconds with up to nine fractional digits, terminated
       by 's'. Example: `"600.5s"`.
-    default_value: "604800s"
-  - name: 'retainAckedMessages'
+  - name: retainAckedMessages
     type: Boolean
     description: |
       Indicates whether to retain acknowledged messages. If `true`, then
       messages are not expunged from the subscription's backlog, even if
       they are acknowledged, until they fall out of the
       messageRetentionDuration window.
-  - name: 'expirationPolicy'
+  - name: expirationPolicy
     type: NestedObject
     description: |
       A policy that specifies the conditions for this subscription's expiration.
@@ -425,33 +422,32 @@ properties:
       policy with ttl of 31 days will be used.  If it is set but ttl is "", the
       resource never expires.  The minimum allowed value for expirationPolicy.ttl
       is 1 day.
-    default_from_api: true
     send_empty_value: true
     allow_empty_object: true
+    default_from_api: true
     properties:
-      - name: 'ttl'
+      - name: ttl
         type: String
+        required: true
         description: |
           Specifies the "time-to-live" duration for an associated resource. The
           resource expires if it is not active for a period of ttl.
           If ttl is set to "", the associated resource never expires.
           A duration in seconds with up to nine fractional digits, terminated by 's'.
           Example - "3.5s".
-        required: true
-        diff_suppress_func: 'comparePubsubSubscriptionExpirationPolicy'
+        diff_suppress_func: comparePubsubSubscriptionExpirationPolicy
         is_missing_in_cai: true
-  - name: 'filter'
+  - name: filter
     type: String
     description: |
       The subscription only delivers the messages that match the filter.
       Pub/Sub automatically acknowledges the messages that don't match the filter. You can filter messages
       by their attributes. The maximum length of a filter is 256 bytes. After creating the subscription,
       you can't modify the filter.
-    required: false
     immutable: true
     validation:
-      regex: '^[\s\S]{0,256}$'
-  - name: 'deadLetterPolicy'
+      regex: ^[\s\S]{0,256}$
+  - name: deadLetterPolicy
     type: NestedObject
     description: |
       A policy that specifies the conditions for dead lettering messages in
@@ -464,7 +460,7 @@ properties:
       permission to Acknowledge() messages on this subscription.
     send_empty_value: true
     properties:
-      - name: 'deadLetterTopic'
+      - name: deadLetterTopic
         type: String
         description: |
           The name of the topic to which dead letter messages should be published.
@@ -478,7 +474,7 @@ properties:
           The operation will fail if the topic does not exist.
           Users should ensure that there is a subscription attached to this topic
           since messages published to a topic with no subscriptions are lost.
-      - name: 'maxDeliveryAttempts'
+      - name: maxDeliveryAttempts
         type: Integer
         description: |
           The maximum number of delivery attempts for any message. The value must be
@@ -493,38 +489,38 @@ properties:
           This field will be honored on a best effort basis.
 
           If this parameter is 0, a default value of 5 is used.
-  - name: 'retryPolicy'
+  - name: retryPolicy
     type: NestedObject
     description: |
       A policy that specifies how Pub/Sub retries message delivery for this subscription.
 
       If not set, the default retry policy is applied. This generally implies that messages will be retried as soon as possible for healthy subscribers.
       RetryPolicy will be triggered on NACKs or acknowledgement deadline exceeded events for a given message
+    send_empty_value: true
+    allow_empty_object: true
     properties:
-      - name: 'minimumBackoff'
+      - name: minimumBackoff
         type: String
         description: |
           The minimum delay between consecutive deliveries of a given message. Value should be between 0 and 600 seconds. Defaults to 10 seconds.
           A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+        diff_suppress_func: tpgresource.DurationDiffSuppress
         default_from_api: true
-        diff_suppress_func: 'tpgresource.DurationDiffSuppress'
-      - name: 'maximumBackoff'
+      - name: maximumBackoff
         type: String
         description: |
           The maximum delay between consecutive deliveries of a given message. Value should be between 0 and 600 seconds. Defaults to 600 seconds.
           A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+        diff_suppress_func: tpgresource.DurationDiffSuppress
         default_from_api: true
-        diff_suppress_func: 'tpgresource.DurationDiffSuppress'
-    send_empty_value: true
-    allow_empty_object: true
-  - name: 'enableMessageOrdering'
+  - name: enableMessageOrdering
     type: Boolean
     description: |
       If `true`, messages published with the same orderingKey in PubsubMessage will be delivered to
       the subscribers in the order in which they are received by the Pub/Sub system. Otherwise, they
       may be delivered in any order.
     immutable: true
-  - name: 'enableExactlyOnceDelivery'
+  - name: enableExactlyOnceDelivery
     type: Boolean
     description: |
       If `true`, Pub/Sub provides the following guarantees for the delivery
@@ -594,7 +590,7 @@ properties:
           description: |
             Controls whether or not to use this transform. If not set or `false`,
             the transform will be applied to messages. Default: `true`.
-  - name: 'tags'
+  - name: tags
     type: KeyValuePairs
     description: |
       Input only. Resource manager tags to be bound to the subscription. Tag
