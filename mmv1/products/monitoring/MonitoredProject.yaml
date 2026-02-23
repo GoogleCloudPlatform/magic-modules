@@ -34,7 +34,6 @@ async:
   actions: ['create', 'delete']
   operation:
     base_url: '{{op_id}}'
-flatten_all_in_method: true
 custom_code:
   constants: 'templates/terraform/constants/monitoring_monitored_project.go.tmpl'
   encoder: 'templates/terraform/encoders/monitoring_monitored_project.go.tmpl'
