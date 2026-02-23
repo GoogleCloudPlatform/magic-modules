@@ -19,3 +19,5 @@ scopes:
 versions:
   - base_url: 'https://container.googleapis.com/v1/'
     name: 'ga'
+  - base_url: 'https://container.googleapis.com/v1beta1/'
+    name: 'beta'
