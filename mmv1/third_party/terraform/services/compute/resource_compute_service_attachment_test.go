@@ -676,10 +676,15 @@ func TestAccComputeServiceAttachment_serviceAttachmentEndpointUrl(t *testing.T) 
 		CheckDestroy:             testAccCheckComputeServiceAttachmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
+				// Step 1: Create without endpoint_url
+				Config: testAccComputeServiceAttachment_serviceAttachmentBasic(context),
+			},
+			{
+				// Step 2: Update with endpoint_url
 				Config: testAccComputeServiceAttachment_serviceAttachmentEndpointUrl(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_service_attachment.psc_ilb_service_attachment", "consumer_accept_lists.0.endpoint_url", "https://www.googleapis.com/compute/v1/projects/project-id/regions/us-west2/forwardingRules/endpoint"),
-					resource.TestCheckResourceAttr("google_compute_service_attachment.psc_ilb_service_attachment", "consumer_accept_lists.0.connection_limit", "4"),
+					resource.TestCheckResourceAttr("google_compute_service_attachment.psc_ilb_service_attachment", "consumer_accept_lists.0.connection_limit", "1"),
 				),
 			},
 			{
