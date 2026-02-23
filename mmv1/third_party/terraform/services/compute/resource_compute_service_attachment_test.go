@@ -692,7 +692,6 @@ func TestAccComputeServiceAttachment_serviceAttachmentEndpointUrl(t *testing.T) 
 	})
 }
 
-
 func testAccComputeServiceAttachment_serviceAttachmentEndpointUrl(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_service_attachment" "psc_ilb_service_attachment" {
