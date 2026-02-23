@@ -5,9 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
-
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccCESToolset_cesToolsetOpenapiServiceAccountAuthConfigExample_update(t *testing.T) {
@@ -781,7 +779,7 @@ func TestAccCESToolset_cesToolsetMcpServiceAccountAuthConfigExample_update(t *te
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10)
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
