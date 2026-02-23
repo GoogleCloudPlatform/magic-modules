@@ -1,0 +1,21 @@
+id := d.Id()
+parent := id
+if autokeyHasPrefix(id, autokeyFolderPrefix) || autokeyHasPrefix(id, autokeyProjectPrefix) {
+    parent = autokeyTrimSuffix(id, autokeyConfigSuffix)
+} else {
+    return nil, fmt.Errorf("invalid import id %q, expected folders/{folder_id}, projects/{project_id}, or */autokeyConfig", id)
+}
+
+if autokeyHasPrefix(parent, autokeyFolderPrefix) {
+    d.Set("folder", parent)
+    d.Set("project", nil)
+} else if autokeyHasPrefix(parent, autokeyProjectPrefix) {
+    d.Set("project", parent)
+    d.Set("folder", nil)
+} else {
+    return nil, fmt.Errorf("invalid import id %q, expected folders/{folder_id}, projects/{project_id}, or */autokeyConfig", id)
+}
+
+d.Set("name", parent+autokeyConfigSuffix)
+d.SetId(parent + autokeyConfigSuffix)
+return []*schema.ResourceData{d}, nil
