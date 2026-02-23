@@ -663,12 +663,47 @@ resource "google_network_services_gateway" "default" {
 `, context)
 }
 
+func TestAccComputeServiceAttachment_serviceAttachmentEndpointUrl(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeServiceAttachmentDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Step 1: Create SA without endpoint_url (Required by API)
+				Config: testAccComputeServiceAttachment_serviceAttachmentEndpointUrl(context, false),
+			},
+			{
+				// Step 2: Update with numerical ID-based endpoint_url
+				Config: testAccComputeServiceAttachment_serviceAttachmentEndpointUrl(context, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_compute_service_attachment.psc_ilb_service_attachment", "consumer_accept_lists.0.endpoint_url"),
+					resource.TestCheckResourceAttr("google_compute_service_attachment.psc_ilb_service_attachment", "consumer_accept_lists.0.connection_limit", "1"),
+				),
+			},
+			{
+				ResourceName:            "google_compute_service_attachment.psc_ilb_service_attachment",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"target_service", "region"},
+			},
+		},
+	})
+}
+
 func testAccComputeServiceAttachment_serviceAttachmentEndpointUrl(context map[string]interface{}, addEndpoint bool) string {
 	context["endpoint_block"] = ""
 	if addEndpoint {
+		// Construct the numerical ID-based URL using Terraform interpolation
 		context["endpoint_block"] = `
   consumer_accept_lists {
-    endpoint_url     = "https://www.googleapis.com/compute/beta/projects/${data.google_project.project.project_id}/regions/us-west2/forwardingRules/${google_compute_forwarding_rule.psc_ilb_consumer.forwarding_rule_id}"
+    endpoint_url     = "https://www.googleapis.com/compute/beta/projects/${data.google_project.project.number}/regions/us-west2/forwardingRules/${google_compute_forwarding_rule.psc_ilb_consumer.forwarding_rule_id}"
     connection_limit = 1
   }
   reconcile_connections = true`
@@ -689,12 +724,12 @@ resource "google_compute_service_attachment" "psc_ilb_service_attachment" {
   %{endpoint_block}
 }
 
-# Consumer Forwarding Rule to reference by ID
+# Consumer Forwarding Rule to reference by numerical ID
 resource "google_compute_forwarding_rule" "psc_ilb_consumer" {
   name                  = "tf-test-consumer-fr-%{random_suffix}"
   region                = "us-west2"
   target                = google_compute_service_attachment.psc_ilb_service_attachment.id
-  load_balancing_scheme = ""
+  load_balancing_scheme = "" 
   network               = "default"
   ip_address            = google_compute_address.psc_ilb_consumer_address.id
 }
