@@ -33,10 +33,24 @@ async:
 autogen_status: Q29ubmVjdGl2aXR5VGVzdA==
 autogen_async: true
 examples:
-  - name: name_of_example_file
-    primary_resource_id: example
+  - name: network_management_connectivity_test_instances
+    primary_resource_id: instance-test
     vars:
-      resource_name: test-resource
+      dest_instance: dest-vm
+      network_name: conn-test-net
+      primary_resource_name: conn-test-instances
+      source_instance: source-vm
+  - name: network_management_connectivity_test_addresses
+    primary_resource_id: address-test
+    vars:
+      dest_addr: dest-addr
+      network: connectivity-vpc
+      primary_resource_name: conn-test-addr
+      source_addr: src-addr
+  - name: network_management_connectivity_test_endpoints
+    primary_resource_id: endpoints-test
+    vars:
+      primary_resource_name: conn-test-endpoints
 parameters:
   - name: testId
     type: String
