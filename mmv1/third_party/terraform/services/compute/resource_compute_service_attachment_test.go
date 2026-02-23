@@ -683,7 +683,7 @@ func TestAccComputeServiceAttachment_serviceAttachmentEndpointUrl(t *testing.T) 
 				// Step 2: Update with endpoint_url
 				Config: testAccComputeServiceAttachment_serviceAttachmentEndpointUrl(context, true),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_compute_service_attachment.psc_ilb_service_attachment", "consumer_accept_lists.0.endpoint_url", "https://www.googleapis.com/compute/v1/projects/project-id/regions/us-west2/forwardingRules/endpoint"),
+					resource.TestCheckResourceAttrSet("google_compute_service_attachment.psc_ilb_service_attachment", "consumer_accept_lists.0.endpoint_url"),
 					resource.TestCheckResourceAttr("google_compute_service_attachment.psc_ilb_service_attachment", "consumer_accept_lists.0.connection_limit", "1"),
 				),
 			},
@@ -702,12 +702,14 @@ func testAccComputeServiceAttachment_serviceAttachmentEndpointUrl(context map[st
 	if addEndpoint {
 		context["endpoint_block"] = `
   consumer_accept_lists {
-    endpoint_url     = "https:/www.googleapis.com/compute/v1/projects/project-id/regions/us-west2/forwardingRules/endpoint"
+    endpoint_url     = "projects/${data.google_project.project.number}/regions/us-west2/forwardingRules/${google_compute_forwarding_rule.psc_ilb_consumer.forwarding_rule_id}"
     connection_limit = 1
   }`
 	}
 
 	return acctest.Nprintf(`
+data "google_project" "project" {}
+
 resource "google_compute_service_attachment" "psc_ilb_service_attachment" {
   name                  = "tf-test-endpoint-url-%{random_suffix}"
   region                = "us-west2"
@@ -718,6 +720,22 @@ resource "google_compute_service_attachment" "psc_ilb_service_attachment" {
   target_service        = google_compute_forwarding_rule.psc_ilb_target_service.id
 
   %{endpoint_block}
+}
+
+resource "google_compute_forwarding_rule" "psc_ilb_consumer" {
+  name                  = "tf-test-consumer-fr-%{random_suffix}"
+  region                = "us-west2"
+  target                = google_compute_service_attachment.psc_ilb_service_attachment.id
+  load_balancing_scheme = ""
+  network               = "default"
+  ip_address            = google_compute_address.psc_ilb_consumer_address.id
+}
+
+resource "google_compute_address" "psc_ilb_consumer_address" {
+  name         = "tf-test-consumer-addr-%{random_suffix}"
+  region       = "us-west2"
+  subnetwork   = "default"
+  address_type = "INTERNAL"
 }
 
 resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
