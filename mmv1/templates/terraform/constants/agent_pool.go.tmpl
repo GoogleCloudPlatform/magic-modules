@@ -1,4 +1,4 @@
-{{- if not (contains $.Compiler "terraformgoogleconversion") }}
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 // waitForAgentPoolReady waits for an agent pool to leave the
 // "CREATING" state and become "CREATED", to indicate that it's ready.
 func waitForAgentPoolReady(d *schema.ResourceData, config *transport_tpg.Config, timeout time.Duration) error {

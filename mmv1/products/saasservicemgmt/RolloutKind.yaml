@@ -15,40 +15,38 @@
 name: RolloutKind
 description: A RolloutKind is a reusable configuration resource that defines the policies, strategies, and targeting for Rollout operations. It acts as a template for repeatable Rollouts, providing guardrails and ensuring that updates are executed in a consistent manner across a fleet of Units.
 base_url: projects/{{project}}/locations/{{location}}/rolloutKinds
-update_mask: true
+min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/rolloutKinds/{{rollout_kind_id}}
 create_url: projects/{{project}}/locations/{{location}}/rolloutKinds?rolloutKindId={{rollout_kind_id}}
+update_mask: true
 update_verb: PATCH
-id_format: projects/{{project}}/locations/{{location}}/rolloutKinds/{{rollout_kind_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/rolloutKinds/{{rollout_kind_id}}
-min_version: beta
+autogen_status: Um9sbG91dEtpbmQ=
 examples:
   - name: saas_runtime_rollout_kind_basic
-    primary_resource_id: "example"
-    min_version: "beta"
+    primary_resource_id: example
+    bootstrap_iam:
+      - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
+        role: roles/saasservicemgmt.serviceAgent
+    min_version: beta
     vars:
+      rolloutkind_name: example-rolloutkind
       saas_name: example-saas
       unitkind_name: example-unitkind
-      rolloutkind_name: example-rolloutkind
-    bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com"
-        role: "roles/saasservicemgmt.serviceAgent"
-autogen_async: false
-autogen_status: Um9sbG91dEtpbmQ=
 parameters:
   - name: location
     type: String
+    required: true
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-    required: true
   - name: rolloutKindId
     type: String
+    required: true
     description: The ID value for the new rollout kind.
     immutable: true
     url_param_only: true
-    required: true
 properties:
   - name: annotations
     type: KeyValueAnnotations
@@ -119,12 +117,12 @@ properties:
       This filter can only reduce, but not expand the scope of the rollout.
   - name: unitKind
     type: String
+    required: true
     description: |-
       UnitKind that this rollout kind corresponds to. Rollouts stemming from this
       rollout kind will target the units of this unit kind. In other words, this
       defines the population of target units to be upgraded by rollouts.
     immutable: true
-    required: true
   - name: updateTime
     type: String
     description: |-
@@ -141,5 +139,5 @@ properties:
       UPDATE_UNIT_KIND_STRATEGY_ON_START
       UPDATE_UNIT_KIND_STRATEGY_NEVER
     enum_values:
-      - "UPDATE_UNIT_KIND_STRATEGY_ON_START"
-      - "UPDATE_UNIT_KIND_STRATEGY_NEVER"
+      - UPDATE_UNIT_KIND_STRATEGY_ON_START
+      - UPDATE_UNIT_KIND_STRATEGY_NEVER

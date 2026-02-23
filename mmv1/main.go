@@ -89,8 +89,11 @@ func GenerateProducts(product, resource, providerName, version, outputPath, base
 		panic(err)
 	}
 
-	loader := loader.NewLoader(loader.Config{Version: version, BaseDirectory: baseDirectory, OverrideDirectory: overrideDirectory, Sysfs: ofs})
-	loadedProducts := loader.LoadProducts()
+	loader := loader.NewLoader(loader.Config{Version: version, BaseDirectory: baseDirectory, OverrideDirectory: overrideDirectory, Sysfs: ofs, CompilerTarget: providerName})
+	loader.LoadProducts()
+	loader.AddExtraFields()
+	loader.Validate()
+	loadedProducts := loader.Products
 
 	var productsToGenerate []string
 	if product == "" {

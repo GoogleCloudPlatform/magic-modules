@@ -18,8 +18,8 @@ description:
   cloud resources for the purpose of controlling them using policies.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing'
-  api: 'https://cloud.google.com/resource-manager/reference/rest/v3/tagValues'
+    'Official Documentation': 'https://docs.cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing'
+  api: 'https://docs.cloud.google.com/resource-manager/reference/rest/v3/tagValues'
 docs:
 id_format: 'tagValues/{{name}}'
 base_url: 'tagValues'

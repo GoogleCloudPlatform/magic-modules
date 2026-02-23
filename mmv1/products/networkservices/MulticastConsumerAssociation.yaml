@@ -27,6 +27,9 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/multicastConsumerAssociations/{{multicast_consumer_association_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/multicastConsumerAssociations/{{multicast_consumer_association_id}}
+sweeper:
+  url_substitutions:
+    - location: "us-central1-b"
 examples:
   - name: network_services_multicast_consumer_association_basic
     primary_resource_id: mca_test

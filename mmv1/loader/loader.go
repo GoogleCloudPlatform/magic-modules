@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/golang/glog"
 	"golang.org/x/exp/slices"
@@ -19,6 +20,8 @@ type Loader struct {
 	// baseDirectory points to mmv1 root, if cwd can be empty as relative paths are used
 	baseDirectory     string
 	overrideDirectory string
+	compilerTarget    string
+	Products          map[string]*api.Product
 	version           string
 	sysfs             google.ReadDirReadFileFS
 }
@@ -28,6 +31,7 @@ type Config struct {
 	OverrideDirectory string                   // optional
 	Version           string                   // required
 	Sysfs             google.ReadDirReadFileFS // required
+	CompilerTarget    string                   // optional
 }
 
 // NewLoader creates a new Loader instance, applying any
@@ -43,17 +47,23 @@ func NewLoader(config Config) *Loader {
 	if config.Sysfs == nil {
 		panic("sysfs is required")
 	}
+
+	if config.CompilerTarget == "" {
+		config.CompilerTarget = "terraform"
+	}
+
 	l := &Loader{
 		baseDirectory:     config.BaseDirectory,
 		overrideDirectory: config.OverrideDirectory,
 		version:           config.Version,
 		sysfs:             config.Sysfs,
+		compilerTarget:    config.CompilerTarget,
 	}
 
 	return l
 }
 
-func (l *Loader) LoadProducts() map[string]*api.Product {
+func (l *Loader) LoadProducts() {
 	if l.version == "" {
 		log.Printf("No version specified, assuming ga")
 		l.version = "ga"
@@ -90,7 +100,7 @@ func (l *Loader) LoadProducts() map[string]*api.Product {
 		}
 	}
 
-	return l.batchLoadProducts(allProductFiles)
+	l.Products = l.batchLoadProducts(allProductFiles)
 }
 
 func (l *Loader) batchLoadProducts(productNames []string) map[string]*api.Product {
@@ -196,7 +206,10 @@ func (l *Loader) LoadProduct(productName string) (*api.Product, error) {
 		return nil, err
 	}
 
+	p.Version = p.VersionObjOrClosest(l.version)
+
 	p.Objects = resources
+	p.SetCompiler(l.compilerTarget)
 	p.Validate()
 
 	return p, nil
@@ -306,10 +319,6 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 	resource.TargetVersionName = l.version
 	// SetDefault before AddExtraFields to ensure relevant metadata is available on existing fields
 	resource.SetDefault(product)
-	resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
-	// SetDefault after AddExtraFields to ensure relevant metadata is available for the newly generated fields
-	resource.SetDefault(product)
-	resource.Validate()
 	resource.TestSampleSetUp(l.sysfs)
 
 	for _, e := range resource.Examples {
@@ -319,4 +328,38 @@ func (l *Loader) loadResource(product *api.Product, baseResourcePath string, ove
 	}
 
 	return resource
+}
+
+func (l *Loader) AddExtraFields() error {
+	if l.Products == nil {
+		return errors.New("products have not been loaded into memory")
+	}
+
+	for _, product := range l.Products {
+		for _, resource := range product.Objects {
+			resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
+			// SetDefault after AddExtraFields to ensure relevant metadata is available for the newly generated fields
+			resource.SetDefault(product)
+		}
+	}
+
+	return nil
+}
+
+func (l *Loader) Validate() {
+	if l.Products == nil {
+		log.Fatalln("products have not been loaded into memory")
+	}
+
+	for _, product := range l.Products {
+		for _, resource := range product.Objects {
+			es := resource.Validate()
+			if len(es) > 0 {
+				es = utils.TransformErrs(func(e error) error {
+					return fmt.Errorf("%s%s%s: %w", utils.ColorRed, resource.SourceYamlFile, utils.ColorReset, e)
+				}, es)
+				log.Fatalf("%v", errors.Join(es...))
+			}
+		}
+	}
 }

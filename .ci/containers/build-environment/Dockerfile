@@ -17,7 +17,7 @@ RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 1777 "$GOPATH"
 WORKDIR $GOPATH
 
 # terraform binary used by tfv/tgc
-COPY --from=hashicorp/terraform:1.11.0 /bin/terraform /bin/terraform
+COPY --from=hashicorp/terraform:1.14.3 /bin/terraform /bin/terraform
 
 SHELL ["/bin/bash", "-c"]
 

@@ -29,17 +29,17 @@ func FromProperties(props []*api.Type) []Field {
 		}
 		lineage := p.Lineage()
 		apiLineage := p.ApiLineage()
+		// For maps (which all have nested children), instead of having an entry for the map field itself,
+		// we want an entry that maps the `key` API field to the key_name of the map field.
+		if p.IsA("Map") {
+			lineage = append(lineage, p.KeyName)
+			apiLineage = append(apiLineage, "key")
+		}
 		if !p.ProviderOnly() {
 			f.ApiField = strings.Join(apiLineage, ".")
 		}
 		if p.ProviderOnly() || !IsDefaultLineage(lineage, apiLineage) {
 			f.Field = strings.Join(lineage, ".")
-		}
-		// For maps (which all have nested children), modify the entry slightly; the map field itself is skipped,
-		// but we need a `key` API field that corresponds to the key_name of the map field.
-		if p.IsA("Map") {
-			f.ApiField += ".key"
-			f.Field = strings.Join(append(lineage, p.KeyName), ".")
 		}
 
 		fields = append(fields, f)

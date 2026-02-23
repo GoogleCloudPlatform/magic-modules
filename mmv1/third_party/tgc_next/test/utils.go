@@ -34,6 +34,25 @@ func terraformWorkflow(t *testing.T, dir, name, project string) {
 	defer os.Remove(filepath.Join(dir, fmt.Sprintf("%s.tf", name)))
 	defer os.Remove(filepath.Join(dir, fmt.Sprintf("%s.tfplan", name)))
 
+	// TODO: remove this when we have a proper google provider
+	// Inject google-beta provider override
+	tfFile := filepath.Join(dir, fmt.Sprintf("%s.tf", name))
+	content, err := os.ReadFile(tfFile)
+	if err == nil {
+		override := `
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google-beta"
+    }
+  }
+}
+`
+		if err := os.WriteFile(tfFile, append(content, []byte(override)...), 0644); err != nil {
+			t.Fatalf("Error writing provider override to %s: %v", tfFile, err)
+		}
+	}
+
 	terraformInit(t, "terraform", dir, project)
 	terraformPlan(t, "terraform", dir, project, name+".tfplan")
 	payload := terraformShow(t, "terraform", dir, project, name+".tfplan")

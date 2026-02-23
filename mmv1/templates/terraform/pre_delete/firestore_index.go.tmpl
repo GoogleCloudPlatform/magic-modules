@@ -1,0 +1,3 @@
+if d.Get("deletion_policy").(string) == "PREVENT"  {
+	return fmt.Errorf("cannot destroy google_firestore_index resource with id : %q  without setting deletion_policy=DELETE and running `terraform apply`", d.Id())
+}
