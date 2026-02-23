@@ -697,7 +697,50 @@ func TestAccComputeServiceAttachment_serviceAttachmentEndpointUrl(t *testing.T) 
 	})
 }
 
-func testAccComputeServiceAttachment_serviceAttachmentEndpointUrl(context map[string]interface{}) string {
+func TestAccComputeServiceAttachment_serviceAttachmentEndpointUrl(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeServiceAttachmentDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Step 1: Create without endpoint_url
+				Config: testAccComputeServiceAttachment_serviceAttachmentEndpointUrl(context, false),
+			},
+			{
+				// Step 2: Update with endpoint_url
+				Config: testAccComputeServiceAttachment_serviceAttachmentEndpointUrl(context, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_service_attachment.psc_ilb_service_attachment", "consumer_accept_lists.0.endpoint_url", "https://www.googleapis.com/compute/v1/projects/project-id/regions/us-west2/forwardingRules/endpoint"),
+					resource.TestCheckResourceAttr("google_compute_service_attachment.psc_ilb_service_attachment", "consumer_accept_lists.0.connection_limit", "1"),
+				),
+			},
+			{
+				ResourceName:            "google_compute_service_attachment.psc_ilb_service_attachment",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"target_service", "region"},
+			},
+		},
+	})
+}
+
+func testAccComputeServiceAttachment_serviceAttachmentEndpointUrl(context map[string]interface{}, addEndpoint bool) string {
+	context["endpoint_block"] = ""
+	if addEndpoint {
+		context["endpoint_block"] = `
+  consumer_accept_lists {
+    endpoint_url     = "https://www.googleapis.com/compute/v1/projects/project-id/regions/us-west2/forwardingRules/endpoint"
+    connection_limit = 1
+  }`
+	}
+
 	return acctest.Nprintf(`
 resource "google_compute_service_attachment" "psc_ilb_service_attachment" {
   name        = "tf-test-endpoint-url-%{random_suffix}"
@@ -709,10 +752,7 @@ resource "google_compute_service_attachment" "psc_ilb_service_attachment" {
   nat_subnets              = [google_compute_subnetwork.psc_ilb_nat.id]
   target_service           = google_compute_forwarding_rule.psc_ilb_target_service.id
 
-  consumer_accept_lists {
-    endpoint_url     = "https://www.googleapis.com/compute/v1/projects/project-id/regions/us-west2/forwardingRules/endpoint"
-    connection_limit = 1
-  }
+  %{endpoint_block}
 }
 
 resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
