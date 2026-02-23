@@ -55,6 +55,8 @@ examples:
       prevent_destroy: 'true'
     test_vars_overrides:
       'prevent_destroy': 'false'
+    ignore_read_extra:
+      - 'update_time'
   - name: 'memorystore_instance_full'
     primary_resource_id: 'instance-full'
     bootstrap_iam:
@@ -82,6 +84,8 @@ examples:
       prevent_destroy: 'true'
     test_vars_overrides:
       'prevent_destroy': 'false'
+    ignore_read_extra:
+      - 'update_time'
   - name: 'memorystore_instance_secondary_instance'
     primary_resource_id: 'secondary_instance'
     vars:
@@ -107,6 +111,8 @@ examples:
       'secondary_instance_deletion_protection_enabled': 'false'
       'primary_instance_prevent_destroy': 'false'
       'secondary_instance_prevent_destroy': 'false'
+    ignore_read_extra:
+      - 'update_time'
 virtual_fields:
   - name: 'desired_psc_auto_connections'
     description: "`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead `terraform import` will only work with desired_auto_created_endpoints`."

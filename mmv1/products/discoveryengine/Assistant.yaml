@@ -35,7 +35,6 @@ examples:
     vars:
       data_store_id: 'example-data-store-id'
       engine_id: 'example-engine-id'
-      assistant_id: 'example-assistant-id'
       template_id: 'example-template-id'
 parameters:
   - name: 'location'

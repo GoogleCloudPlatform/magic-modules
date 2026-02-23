@@ -420,10 +420,8 @@ properties:
                 description: 'Map of deployment configs to deployments ("admission", "audit", "mutation").'
                 default_from_api: true
                 key_name: 'component'
-                key_description: 'Specifies which component to apply the deployment config to. Accepted values are "admission", "audit" and "mutation".'
                 value_type:
                   description: 'Configures deployment-specific options, such as high availability.'
-                  name: deploymentConfig
                   type: NestedObject
                   properties:
                     - name: 'replicaCount'
@@ -504,10 +502,8 @@ properties:
                     type: Map
                     description: 'Configures which bundles to install and their corresponding install specs.'
                     key_name: 'bundle'
-                    key_description: 'A bundle name supported in this version. Values configure the exempted namespaces for this bundle.'
                     value_type:
                       description: 'The specification configuration for a single managed bundle.'
-                      name: bundleInstallSpec
                       type: NestedObject
                       properties:
                         - name: 'exemptedNamespaces'

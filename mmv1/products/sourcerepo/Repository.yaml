@@ -88,12 +88,7 @@ properties:
     key_expander: 'expandSourceRepoRepositoryPubsubConfigsTopic'
     set_hash_func: 'resourceSourceRepoRepositoryPubSubConfigsHash'
     key_name: 'topic'
-    key_description: |
-      A Cloud Pub/Sub topic in this repo's project. Values are of the form
-      `projects/<project>/topics/<topic>` or `<topic>` (where the topic will
-      be inferred).
     value_type:
-      name: pubsubConfig
       type: NestedObject
       properties:
         - name: 'messageFormat'
