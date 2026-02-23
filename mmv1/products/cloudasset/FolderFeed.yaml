@@ -33,7 +33,6 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 collection_url_key: 'feeds'
-flatten_all_in_method: true
 custom_code:
   encoder: 'templates/terraform/encoders/cloud_asset_feed.go.tmpl'
   pre_create: 'templates/terraform/pre_create/cloud_asset_feed.go.tmpl'

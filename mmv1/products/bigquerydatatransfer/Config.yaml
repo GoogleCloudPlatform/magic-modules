@@ -34,7 +34,6 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-flatten_all_in_method: true
 custom_code:
   constants: 'templates/terraform/constants/bigquery_data_transfer.go.tmpl'
   encoder: 'templates/terraform/encoders/bigquery_data_transfer.go.tmpl'

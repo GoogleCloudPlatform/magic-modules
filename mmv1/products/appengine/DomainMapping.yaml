@@ -39,7 +39,6 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-flatten_all_in_method: true
 custom_code:
   decoder: 'templates/terraform/decoders/app_engine_domain_mapping.go.tmpl'
 examples:
