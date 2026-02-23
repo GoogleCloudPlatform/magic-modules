@@ -152,4 +152,3 @@ resource "google_developer_connect_account_connector" "my-account-connector" {
 }
 `, context)
 }
-
