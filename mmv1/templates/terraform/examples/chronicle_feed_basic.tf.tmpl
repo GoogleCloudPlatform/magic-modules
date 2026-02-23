@@ -1,0 +1,19 @@
+resource "google_chronicle_feed" "{{$.PrimaryResourceId}}" {
+  location     = "us"
+
+  # Hardcoded instance ID for the test
+  instance     = "69a58be0-c5f9-4a58-ad56-3c2450e6b76f"
+
+  display_name = "{{index $.Vars "resource_name"}}"
+
+  details {
+    feed_source_type = "HTTPS_PUSH_GOOGLE_CLOUD_PUBSUB"
+
+    # Hardcoded project and instance ID in the log_type string
+    log_type         = "projects/terraform-dev-gurmannat/locations/us/instances/69a58be0-c5f9-4a58-ad56-3c2450e6b76f/logTypes/GCP_CLOUDAUDIT"
+
+    https_push_google_cloud_pubsub_settings {
+      split_delimiter = "\n"
+    }
+  }
+}
