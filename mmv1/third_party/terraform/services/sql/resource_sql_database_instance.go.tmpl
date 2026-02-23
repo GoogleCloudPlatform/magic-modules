@@ -879,6 +879,13 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							ValidateFunc: validation.StringInSlice([]string{"NOT_REQUIRED", "REQUIRED"}, false),
 							Description:  `Enables the enforcement of Cloud SQL Auth Proxy or Cloud SQL connectors for all the connections. If enabled, all the direct connections are rejected.`,
 						},
+						"data_api_access": {
+						    Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							ValidateFunc: validation.StringInSlice([]string{"DISALLOW_DATA_API", "ALLOW_DATA_API"}, false),
+							Description:  `Allows using ExecuteSql API to connect to the instance. Disallowed when unspecified.`,
+						},
 						"deletion_protection_enabled": {
 							Type:        schema.TypeBool,
 							Optional:    true,
@@ -1773,6 +1780,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		AvailabilityType:              _settings["availability_type"].(string),
 		ConnectorEnforcement:          _settings["connector_enforcement"].(string),
 		Collation:                     _settings["collation"].(string),
+		DataApiAccess:                 _settings["data_api_access"].(string),
 		DataDiskSizeGb:                int64(_settings["disk_size"].(int)),
 		DataDiskType:                  _settings["disk_type"].(string),
 {{- if ne $.TargetVersionName "ga" }}
@@ -2843,6 +2851,7 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 		"effective_availability_type":      settings.AvailabilityType,
 		"collation":                        settings.Collation,
 		"connector_enforcement":            settings.ConnectorEnforcement,
+		"data_api_access":                  settings.DataApiAccess,
 		"disk_type":                        settings.DataDiskType,
 		"disk_size":                        settings.DataDiskSizeGb,
 {{- if ne $.TargetVersionName "ga" }}
