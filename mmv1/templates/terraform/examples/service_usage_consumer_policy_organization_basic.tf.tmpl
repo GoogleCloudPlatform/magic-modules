@@ -1,0 +1,10 @@
+resource "google_service_usage_v2_consumer_policy_for_organization" "{{$.PrimaryResourceId}}" {
+  provider     = google-beta
+  organization = "{{index $.TestEnvVars "org_id"}}"
+
+  enable_rules {
+    services = [
+      "services/storage.googleapis.com"
+    ]
+  }
+}
