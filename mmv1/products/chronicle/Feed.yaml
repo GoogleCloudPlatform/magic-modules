@@ -30,17 +30,11 @@ examples:
 - name: 'chronicle_feed_basic'
   primary_resource_id: example
   vars:
-    #   data_access_label_id: label-id
-    #   description: scope-description
     resource_name: test-feeds
-  # test_env_vars:
-  #   chronicle_id: 'ebdc4bb9-878b-11e7-8455-10604b7cb5c1'
-  #   project: '140410331797'
 exclude_delete: false
 delete_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/feeds/{{feed}}
 custom_code:
   custom_update: 'templates/terraform/custom_update/chronicle_feed.go.tmpl'
-  # decoder: 'templates/terraform/decoders/chronicle_feed.go.tmpl'
 autogen_status: RmVlZA==
 parameters:
 - name: location
@@ -57,23 +51,18 @@ parameters:
   url_param_only: true
 - name: feed
   type: String
-  # required: true
-  # output: true
   description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
   immutable: true
-  # url_param_only: true
   default_from_api: true
   custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
 properties:
 - name: state
   type: String
   description: "The state of the feed (e.g., ACTIVE, INACTIVE)."
-  # Mark as output if the API only allows changing it via custom endpoints
   output: true
 - name: enabled
   type: Boolean
   description: "Whether the feed is enabled."
-  # Use a virtual/client-side field to trigger enable/disable calls
 - name: details
   type: NestedObject
   description: |-
