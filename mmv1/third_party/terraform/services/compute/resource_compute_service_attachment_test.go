@@ -676,41 +676,7 @@ func TestAccComputeServiceAttachment_serviceAttachmentEndpointUrl(t *testing.T) 
 		CheckDestroy:             testAccCheckComputeServiceAttachmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				// Step 1: Create without endpoint_url
-				Config: testAccComputeServiceAttachment_serviceAttachmentBasic(context),
-			},
-			{
-				// Step 2: Update with endpoint_url
-				Config: testAccComputeServiceAttachment_serviceAttachmentEndpointUrl(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_compute_service_attachment.psc_ilb_service_attachment", "consumer_accept_lists.0.endpoint_url", "https://www.googleapis.com/compute/v1/projects/project-id/regions/us-west2/forwardingRules/endpoint"),
-					resource.TestCheckResourceAttr("google_compute_service_attachment.psc_ilb_service_attachment", "consumer_accept_lists.0.connection_limit", "1"),
-				),
-			},
-			{
-				ResourceName:            "google_compute_service_attachment.psc_ilb_service_attachment",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"target_service", "region"},
-			},
-		},
-	})
-}
-
-func TestAccComputeServiceAttachment_serviceAttachmentEndpointUrl(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputeServiceAttachmentDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				// Step 1: Create without endpoint_url
+				// Step 1: Create without endpoint_url (required by API)
 				Config: testAccComputeServiceAttachment_serviceAttachmentEndpointUrl(context, false),
 			},
 			{
@@ -736,29 +702,27 @@ func testAccComputeServiceAttachment_serviceAttachmentEndpointUrl(context map[st
 	if addEndpoint {
 		context["endpoint_block"] = `
   consumer_accept_lists {
-    endpoint_url     = "https://www.googleapis.com/compute/v1/projects/project-id/regions/us-west2/forwardingRules/endpoint"
+    endpoint_url     = "https:/www.googleapis.com/compute/v1/projects/project-id/regions/us-west2/forwardingRules/endpoint"
     connection_limit = 1
   }`
 	}
 
 	return acctest.Nprintf(`
 resource "google_compute_service_attachment" "psc_ilb_service_attachment" {
-  name        = "tf-test-endpoint-url-%{random_suffix}"
-  region      = "us-west2"
-  description = "A service attachment with endpoint_url"
-
-  enable_proxy_protocol    = false
-  connection_preference    = "ACCEPT_MANUAL"
-  nat_subnets              = [google_compute_subnetwork.psc_ilb_nat.id]
-  target_service           = google_compute_forwarding_rule.psc_ilb_target_service.id
+  name                  = "tf-test-endpoint-url-%{random_suffix}"
+  region                = "us-west2"
+  description           = "A service attachment with endpoint_url"
+  enable_proxy_protocol = false
+  connection_preference = "ACCEPT_MANUAL"
+  nat_subnets           = [google_compute_subnetwork.psc_ilb_nat.id]
+  target_service        = google_compute_forwarding_rule.psc_ilb_target_service.id
 
   %{endpoint_block}
 }
 
 resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
-  name   = "tf-test-producer-fr-%{random_suffix}"
-  region = "us-west2"
-
+  name                  = "tf-test-producer-fr-%{random_suffix}"
+  region                = "us-west2"
   load_balancing_scheme = "INTERNAL"
   backend_service       = google_compute_region_backend_service.producer_service_backend.id
   all_ports             = true
@@ -767,37 +731,33 @@ resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
 }
 
 resource "google_compute_region_backend_service" "producer_service_backend" {
-  name   = "tf-test-producer-bs-%{random_suffix}"
-  region = "us-west2"
-
+  name          = "tf-test-producer-bs-%{random_suffix}"
+  region        = "us-west2"
   health_checks = [google_compute_health_check.producer_service_health_check.id]
 }
 
 resource "google_compute_health_check" "producer_service_health_check" {
   name = "tf-test-producer-hc-%{random_suffix}"
-
   tcp_health_check {
     port = "80"
   }
 }
 
 resource "google_compute_network" "psc_ilb_network" {
-  name = "tf-test-psc-net-%{random_suffix}"
+  name                    = "tf-test-psc-net-%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "psc_ilb_producer_subnetwork" {
-  name   = "tf-test-prod-sub-%{random_suffix}"
-  region = "us-west2"
-
+  name          = "tf-test-prod-sub-%{random_suffix}"
+  region        = "us-west2"
   network       = google_compute_network.psc_ilb_network.id
   ip_cidr_range = "10.0.0.0/16"
 }
 
 resource "google_compute_subnetwork" "psc_ilb_nat" {
-  name   = "tf-test-nat-sub-%{random_suffix}"
-  region = "us-west2"
-
+  name          = "tf-test-nat-sub-%{random_suffix}"
+  region        = "us-west2"
   network       = google_compute_network.psc_ilb_network.id
   purpose       = "PRIVATE_SERVICE_CONNECT"
   ip_cidr_range = "10.1.0.0/16"
