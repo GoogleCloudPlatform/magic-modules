@@ -121,7 +121,7 @@ func TestAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileMirrori
 				Config: testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileMirroringBroker_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-					plancheck.ExpectResourceAction("google_network_security_security_profile.default", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_network_security_security_profile.default", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
@@ -184,7 +184,7 @@ func TestAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilt
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "name", "parent", "terraform_labels", "url_filtering_profile"},
 			},
-      			{
+			{
 				Config: testAccNetworkSecuritySecurityProfile_networkSecuritySecurityProfileUrlFilteringUpdateEmpty(context),
 			},
 			{
