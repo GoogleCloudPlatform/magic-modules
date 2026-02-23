@@ -87,8 +87,11 @@ func testAccFilestoreInstanceRestore_restore(srcInstancetName, restoreInstanceNa
 func TestAccFilestoreInstance_restoreBackupDR(t *testing.T) {
 	t.Parallel()
 
-	instanceName := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
-	backupName := fmt.Sprintf("tf-test-backup-%d", acctest.RandInt(t))
+	instanceID := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	backupVaultID := "tf-test-backup-vault-filestore"
+	location := "us-central1"
+	backupVault := acctest.BootstrapBackupDRVault(t, backupVaultID, location)
+
 	providerFactories := acctest.ProtoV5ProviderFactories(t)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -99,7 +102,7 @@ func TestAccFilestoreInstance_restoreBackupDR(t *testing.T) {
 		CheckDestroy: testAccCheckFilestoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFilestoreInstance_restoreBackupDR(instanceName, backupName),
+				Config: testAccFilestoreInstance_restoreBackupDR(instanceID, backupVaultID, backupVault, location),
 			},
 			{
 				ResourceName:            "google_filestore_instance.instance",
@@ -111,18 +114,13 @@ func TestAccFilestoreInstance_restoreBackupDR(t *testing.T) {
 	})
 }
 
-func testAccFilestoreInstance_restoreBackupDR(instanceName string, backupName string) string {
-	return fmt.Sprintf(`
+func testAccFilestoreInstance_restoreBackupDR(instanceID string, backupVaultID string, backupVaultName string, location string) string {
+	return acctest.Nprintf(`
 data "google_project" "project" {}
 
-locals {
-  instance_name = "%s"
-  backup_name = "%s"
-}
-
 resource "google_filestore_instance" "source_instance" {
-  name     = "tf-source-instance-${local.instance_name}"
-  location = "us-central1"
+  name     = "tf-source-instance-%{instance_id}"
+  location = "%{location}"
   tier     = "REGIONAL"
 
   file_shares {
@@ -142,21 +140,11 @@ resource "google_filestore_instance" "source_instance" {
   }
 }
 
-resource "google_backup_dr_backup_vault" "backup_vault" {
-   location ="us-central1"
-   backup_vault_id    = "tf-backup-vault-${local.backup_name}"
-   description = "This is a second backup vault built by Terraform."
-   backup_minimum_enforced_retention_duration = "100000s"
-   force_update = "true"
-   force_delete = "true"
-   allow_missing = "true"
-}
-
 resource "google_backup_dr_backup_plan" "backup_plan" {
- location       = "us-central1"
- backup_plan_id = "tf-backup-plan-${local.backup_name}"
+ location       = "%{location}"
+ backup_plan_id = "tf-backup-plan-%{instance_id}"
  resource_type  = "file.googleapis.com/Instance"
- backup_vault   = google_backup_dr_backup_vault.backup_vault.name
+ backup_vault   = "%{backup_vault_name}"
 
  backup_rules {
    rule_id                = "rule-1"
@@ -176,12 +164,12 @@ resource "google_backup_dr_backup_plan" "backup_plan" {
 }
 
 resource "google_backup_dr_backup_plan_association" "bpa" {
- location = "us-central1"
- backup_plan_association_id = "tf-backup-plan-association-${local.backup_name}"
+ location = "%{location}"
+ backup_plan_association_id = "tf-backup-plan-association-%{instance_id}"
  resource = google_filestore_instance.source_instance.id
  resource_type= "file.googleapis.com/Instance"
  backup_plan = google_backup_dr_backup_plan.backup_plan.name
- depends_on = [ google_filestore_instance.source_instance ]
+ depends_on = [ google_filestore_instance.source_instance, google_backup_dr_backup_plan.backup_plan]
 }
 
 // Wait for the first backup to be created
@@ -192,8 +180,8 @@ resource "time_sleep" "wait_10_mins" {
 
 data "google_backup_dr_backup" "filestore_backups" {
   project = data.google_project.project.project_id
-  location      	= "us-central1"
-  backup_vault_id 	= "tf-backup-vault-${local.backup_name}"
+  location      	= "%{location}"
+  backup_vault_id 	= "%{backup_vault_id}"
   data_source_id 	= element(
   	split("/", google_backup_dr_backup_plan_association.bpa.data_source), 
 	length(split("/", google_backup_dr_backup_plan_association.bpa.data_source)) - 1)
@@ -203,8 +191,8 @@ data "google_backup_dr_backup" "filestore_backups" {
 
 
 resource "google_filestore_instance" "instance" {
-  name     = "tf-restored-instance-${local.instance_name}"
-  location = "us-central1"
+  name     = "tf-restored-instance-%{instance_id}"
+  location = "%{location}"
   tier     = "REGIONAL"
 
   file_shares {
@@ -226,5 +214,12 @@ resource "google_filestore_instance" "instance" {
 
   depends_on = [data.google_backup_dr_backup.filestore_backups]  
 }
-`, instanceName, backupName)
+`,
+
+		map[string]interface{}{
+			"backup_vault_name": backupVaultName,
+			"backup_vault_id":   backupVaultID,
+			"location":          location,
+			"instance_id":       instanceID,
+		})
 }
