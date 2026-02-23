@@ -47,6 +47,7 @@ import (
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
     "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
+    "{{ $.ImportPath }}/registry"
     "{{ $.ImportPath }}/tpgresource"
     transport_tpg "{{ $.ImportPath }}/transport"
     "{{ $.ImportPath }}/verify"
@@ -55,7 +56,7 @@ import (
 )
 
 {{if $.CustomCode.Constants -}} 
-    {{- $.CustomTemplate $.CustomCode.Constants true -}}
+    {{- customTemplate $ $.CustomCode.Constants true -}}
 {{- end}}
 
 var (
@@ -90,11 +91,20 @@ var (
     _ = googleapi.Error{}
 )
 
+func init() {
+    registry.Schema{
+        Name: "{{ $.TerraformName }}",
+        ProductName: "{{ lower $.ProductMetadata.Name }}",
+        Type: registry.SchemaTypeResource,
+        Schema: Resource{{ $.ResourceName -}}(),
+    }.Register()
+}
+
 func Resource{{ $.ResourceName -}}() *schema.Resource {
     return &schema.Resource{
         Create: resource{{ $.ResourceName -}}Create,
         Read: resource{{ $.ResourceName -}}Read,
-{{- if or $.Updatable $.RootLabels }}
+{{- if or (or $.Updatable $.RootLabels) $.VirtualFields }}
         Update: resource{{ $.ResourceName -}}Update,
 {{- end}}
         Delete: resource{{ $.ResourceName -}}Delete,
@@ -108,7 +118,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 
         Timeouts: &schema.ResourceTimeout {
             Create: schema.DefaultTimeout({{ $.Timeouts.InsertMinutes -}} * time.Minute),
-{{- if or $.Updatable $.RootLabels }}
+{{- if or (or $.Updatable $.RootLabels) $.VirtualFields }}
             Update: schema.DefaultTimeout({{ $.Timeouts.UpdateMinutes -}} * time.Minute),
 {{- end}}
             Delete: schema.DefaultTimeout({{ $.Timeouts.DeleteMinutes -}} * time.Minute),
@@ -156,7 +166,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{- end}}
 {{- if $.CustomCode.ValidateRawResourceConfigFuncs }}
 		ValidateRawResourceConfigFuncs: []schema.ValidateRawResourceConfigFunc{
-			{{$.CustomTemplate $.CustomCode.ValidateRawResourceConfigFuncs false}},
+			{{customTemplate $ $.CustomCode.ValidateRawResourceConfigFuncs false}},
 		},
 {{- end }}
 {{ if $.DeprecationMessage }}
@@ -171,7 +181,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{template "SchemaFields" $prop -}}
             {{- end }}
 {{- if $.CustomCode.ExtraSchemaEntry }} 
-    {{ $.CustomTemplate $.CustomCode.ExtraSchemaEntry false -}}
+    {{ customTemplate $ $.CustomCode.ExtraSchemaEntry false -}}
 {{- end}}
 {{ if $.HasProject -}}
             "project": {
@@ -208,7 +218,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- end}}
     config := meta.(*transport_tpg.Config)
 {{ if $.CustomCode.CustomCreate -}}
-    {{ $.CustomTemplate $.CustomCode.CustomCreate false -}}
+    {{ customTemplate $ $.CustomCode.CustomCreate false -}}
 {{  else  -}}
     userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
@@ -296,7 +306,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 
     headers := make(http.Header)
 {{- if $.CustomCode.PreCreate }}
-    {{ $.CustomTemplate $.CustomCode.PreCreate false -}}
+    {{ customTemplate $ $.CustomCode.PreCreate false -}}
 {{- end}}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
@@ -388,7 +398,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     {{- $renderedIdFromName := "false" }}
     {{- range $prop := $.GettableProperties }}
     {{- /* Check if prop is potentially computed */}}
-    {{-   if and ($.InPostCreateComputed $prop) (and (or $prop.Output $prop.DefaultFromApi) (not $prop.IgnoreRead)) }}
+    {{-   if and ($.InPostCreateComputed $prop) (or $prop.Output $prop.DefaultFromApi) }}
     {{-     if and (eq $prop.CustomFlatten "templates/terraform/custom_flatten/id_from_name.tmpl") (eq $renderedIdFromName "false") }}
     // Setting `name` field so that `id_from_name` flattener will work properly.
     if err := d.Set("name", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}Name(opRes["name"], d, config)); err != nil {
@@ -396,11 +406,11 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     }
     {{-       $renderedIdFromName = "true" }}
     {{-     end }}
-    {{-     if and $prop.Output (not $prop.IgnoreRead) }}
+    {{-     if $prop.Output }}
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(opRes["{{ $prop.ApiName -}}"], d, config)); err != nil {
         return err
     }
-    {{-     else if and $prop.DefaultFromApi (not $prop.IgnoreRead) }}
+    {{-     else if $prop.DefaultFromApi }}
     // {{ underscore $prop.Name }} is set by API when unset
     if tpgresource.IsEmptyValue(reflect.ValueOf(d.Get("{{ underscore $prop.Name }}"))) {
         if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(opRes["{{ $prop.ApiName -}}"], d, config)); err != nil {
@@ -439,7 +449,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{      end -}}{{/*if ($.GetAsync.IsA "OpAsync")*/}}
 {{    end -}}{{/*if and $.GetAsync ($.GetAsync.Allow "Create")*/}}
 {{if $.CustomCode.PostCreate -}} 
-    {{- $.CustomTemplate $.CustomCode.PostCreate false -}}
+    {{- customTemplate $ $.CustomCode.PostCreate false -}}
 {{- end}}
 
 {{if and ($.GetAsync) ($.GetAsync.Allow "Create") -}}
@@ -596,7 +606,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 
     headers := make(http.Header)
     {{- if $.CustomCode.PreRead }}
-        {{ $.CustomTemplate $.CustomCode.PreRead false -}}
+        {{ customTemplate $ $.CustomCode.PreRead false -}}
     {{- end }}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
@@ -620,7 +630,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 {{- end}}
     }
 {{- if $.CustomCode.PostRead }}
-    {{ $.CustomTemplate $.CustomCode.PostRead false -}}
+    {{ customTemplate $ $.CustomCode.PostRead false -}}
 {{- end }}
 
 {{if $.NestedQuery -}}
@@ -689,7 +699,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return fmt.Errorf("Error reading {{ $.Name -}}: %s", err)
     }
 {{- end}}
-{{ range $prop := $.ReadProperties }}
+{{ range $prop := $.GettableProperties }}
 {{if $prop.FlattenObject -}}
 // Terraform must set the top level schema field, but since this object contains collapsed properties
 // it's difficult to know what the top level should be. Instead we just loop over the map returned from flatten.
@@ -729,7 +739,7 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
 {{-     end}}
     config := meta.(*transport_tpg.Config)
 {{      if $.CustomCode.CustomUpdate -}}
-    {{ $.CustomTemplate $.CustomCode.CustomUpdate false -}}
+    {{ customTemplate $ $.CustomCode.CustomUpdate false -}}
 {{      else  -}}
     userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
@@ -799,10 +809,10 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     log.Printf("[DEBUG] Updating {{ $.Name }} %q: %#v", d.Id(), obj)
 	headers := make(http.Header)
 {{-              if $.UpdateMask }}
-{{ $.CustomTemplate "templates/terraform/update_mask.go.tmpl" false -}}
+{{ customTemplate $ "templates/terraform/update_mask.go.tmpl" false -}}
 {{              end}}
 {{-             if $.CustomCode.PreUpdate -}}{{""}}
-    {{ $.CustomTemplate $.CustomCode.PreUpdate true -}}
+    {{ customTemplate $ $.CustomCode.PreUpdate true -}}
 {{              end}}
 {{              if $.NestedQuery -}}
 {{                  if $.NestedQuery.ModifyByPatch -}}
@@ -975,7 +985,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 
         headers := make(http.Header)
 {{                  if $.CustomCode.PreUpdate -}}
-    {{ $.CustomTemplate $.CustomCode.PreUpdate false -}}
+    {{ customTemplate $ $.CustomCode.PreUpdate false -}}
 {{                  end}}
 {{                  if $.SupportsIndirectUserProjectOverride -}}
         if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
@@ -1036,14 +1046,14 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 {{-         end  }}{{/*if FieldSpecificUpdateMethods*/}}
 
 {{          if $.CustomCode.PostUpdate -}}
-    {{ $.CustomTemplate $.CustomCode.PostUpdate false -}}
+    {{ customTemplate $ $.CustomCode.PostUpdate false -}}
  {{end}}
     return resource{{ $.ResourceName -}}Read(d, meta)
 {{-      end }}{{/*if CustomUpdate*/}}
 }
-{{  else if $.RootLabels -}}{{/*if not immutable*/}}
+{{  else if or $.RootLabels $.VirtualFields -}}{{/*if not immutable*/}}
 func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{}) error {
-    // Only the root field "labels" and "terraform_labels" are mutable
+    // Only the root field "labels", "terraform_labels", and virtual fields are mutable
     return resource{{ $.ResourceName -}}Read(d, meta)
 }
 
@@ -1066,7 +1076,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         return err
     }
 {{ if $.CustomCode.CustomDelete }} 
-{{ $.CustomTemplate $.CustomCode.CustomDelete false -}}
+{{ customTemplate $ $.CustomCode.CustomDelete false -}}
 {{- else }}
 
     billingProject := ""
@@ -1123,7 +1133,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
 
     headers := make(http.Header)
     {{- if $.CustomCode.PreDelete }} 
-        {{ $.CustomTemplate $.CustomCode.PreDelete false -}}
+        {{ customTemplate $ $.CustomCode.PreDelete false -}}
     {{- end }}
 
     log.Printf("[DEBUG] Deleting {{ $.Name }} %q", d.Id())
@@ -1167,7 +1177,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     {{- end }}
 {{- end }}
 {{- if $.CustomCode.PostDelete }}
-    {{ $.CustomTemplate $.CustomCode.PostDelete false -}}
+    {{ customTemplate $ $.CustomCode.PostDelete false -}}
 {{- end }}
 
     log.Printf("[DEBUG] Finished deleting {{ $.Name }} %q: %#v", d.Id(), res)
@@ -1179,7 +1189,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
 {{ if not $.ExcludeImport -}}
 func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
     {{- if $.CustomCode.CustomImport }}
-        {{ $.CustomTemplate $.CustomCode.CustomImport false -}}
+        {{ customTemplate $ $.CustomCode.CustomImport false -}}
     {{- else }}
     config := meta.(*transport_tpg.Config)
     if err := tpgresource.ParseImportId([]string{
@@ -1208,7 +1218,7 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
             {{- end }}
         {{- end }}
         {{- if $.CustomCode.PostImport }}
-            {{ $.CustomTemplate $.CustomCode.PostImport false -}}
+            {{ customTemplate $ $.CustomCode.PostImport false -}}
         {{- end }}
 
     return []*schema.ResourceData{d}, nil
@@ -1216,22 +1226,20 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
 }
 {{ end }}
 {{- range $prop := $.GettableProperties }}
-    {{- if not $prop.IgnoreRead }}
-        {{ template "flattenPropertyMethod" $prop -}}
-    {{- end }}
+    {{ template "flattenPropertyMethod" $prop -}}
 {{- end }}
 {{- range $prop := $.SettableProperties }}
     {{- template "expandPropertyMethod" $prop -}}
 {{- end }}
 {{- if $.CustomCode.Encoder }}
 func resource{{ $.ResourceName -}}Encoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-{{ $.CustomTemplate $.CustomCode.Encoder false -}}
+{{ customTemplate $ $.CustomCode.Encoder false -}}
 }
 {{ end -}}
 {{- if $.CustomCode.UpdateEncoder }}
 
 func resource{{ $.ResourceName -}}UpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-    {{ $.CustomTemplate $.CustomCode.UpdateEncoder false -}}
+    {{ customTemplate $ $.CustomCode.UpdateEncoder false -}}
 }
 {{- end }}
 {{- if $.NestedQuery }}
@@ -1242,17 +1250,17 @@ func resource{{ $.ResourceName -}}UpdateEncoder(d *schema.ResourceData, meta int
 {{ "" }}
 {{- end }}
 func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
-    {{ $.CustomTemplate $.CustomCode.Decoder false -}}
+    {{ customTemplate $ $.CustomCode.Decoder false -}}
 }
 {{- end }}
 {{- if $.CustomCode.PostCreateFailure }}
 func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}) {
-    {{- $.CustomTemplate $.CustomCode.PostCreateFailure false -}}
+    {{- customTemplate $ $.CustomCode.PostCreateFailure false -}}
 }
 {{- end }}
 {{- if and $.SchemaVersion $.StateUpgraders }}
 
-    {{ $.CustomTemplate $.StateMigrationFile false -}}
+    {{ customTemplate $ $.StateMigrationFile false -}}
 {{- end }}
 {{- if and $.HasPostCreateComputedFields (or (or (not $.GetAsync) (not ($.GetAsync.Allow "Create"))) (and $.GetAsync (and ($.GetAsync.IsA "PollAsync") ($.GetAsync.Allow "Create"))))}}
 func resource{{ $.ResourceName -}}PostCreateSetComputedFields(d *schema.ResourceData, meta interface{}, res map[string]interface{}) error {
@@ -1284,7 +1292,7 @@ func resource{{ $.ResourceName -}}PostCreateSetComputedFields(d *schema.Resource
     {{- $renderedIdFromName := "false" }}
     {{- range $prop := $.GettableProperties }}
     {{- /* Check if prop is potentially computed */}}
-    {{-   if and ($.InPostCreateComputed $prop) (and (or $prop.Output $prop.DefaultFromApi) (not $prop.IgnoreRead)) }}
+    {{-   if and ($.InPostCreateComputed $prop) (or $prop.Output $prop.DefaultFromApi) }}
     {{-     if and (eq $prop.CustomFlatten "templates/terraform/custom_flatten/id_from_name.tmpl") (eq $renderedIdFromName "false") }}
     // Setting `name` field so that `id_from_name` flattener will work properly.
     if err := d.Set("name", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}Name(res["name"], d, config)); err != nil {
@@ -1292,11 +1300,11 @@ func resource{{ $.ResourceName -}}PostCreateSetComputedFields(d *schema.Resource
     }
     {{-       $renderedIdFromName = "true" }}
     {{-     end }}
-    {{-     if and $prop.Output (not $prop.IgnoreRead) }}
+    {{-     if $prop.Output }}
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
         return fmt.Errorf(`Error setting computed identity field "{{ underscore $prop.Name }}": %s`, err)
     }
-    {{-     else if and $prop.DefaultFromApi (not $prop.IgnoreRead) }}
+    {{-     else if $prop.DefaultFromApi }}
     // {{ underscore $prop.Name }} is set by API when unset
     if tpgresource.IsEmptyValue(reflect.ValueOf(d.Get("{{ underscore $prop.Name }}"))) {
         if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {

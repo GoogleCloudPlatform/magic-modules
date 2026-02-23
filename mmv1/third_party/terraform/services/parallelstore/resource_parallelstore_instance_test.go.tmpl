@@ -4,66 +4,66 @@
 package parallelstore_test
 
 import (
-	"testing"
+  "testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+  "github.com/hashicorp/terraform-plugin-testing/helper/resource"
   "github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccParallelstoreInstance_parallelstoreInstanceBasicExample_update(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
+  context := map[string]interface{}{
+    "random_suffix": acctest.RandString(t, 10),
+  }
 
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
     {{ if ne $.TargetVersionName `ga` -}}
     ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
     {{ else }}
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
     {{ end }}
     
     CheckDestroy:             testAccCheckParallelstoreInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			
+    Steps: []resource.TestStep{
+      
       {{ if ne $.TargetVersionName `ga` -}}
       {
-				Config: testAccParallelstoreInstance_parallelstoreInstanceBasicExampleBeta_basic(context),
-			},
-			{
-				ResourceName:            "google_parallelstore_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "instance_id", "labels", "terraform_labels"},
-			},
+        Config: testAccParallelstoreInstance_parallelstoreInstanceBasicExampleBeta_basic(context),
+      },
+      {
+        ResourceName:            "google_parallelstore_instance.instance",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"location", "instance_id", "labels", "terraform_labels", "update_time"},
+      },
       {{ else }}
       {
-				Config: testAccParallelstoreInstance_parallelstoreInstanceBasicExample_basic(context),
-			},
-			{
-				ResourceName:            "google_parallelstore_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "instance_id", "labels", "terraform_labels"},
-			},
-			                        {
-                                Config: testAccParallelstoreInstance_parallelstoreInstanceBasicExample_update(context),
-                        },
-                        {
-                                ResourceName:            "google_parallelstore_instance.instance",
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"location", "instance_id", "labels", "terraform_labels"},
-                        },
+        Config: testAccParallelstoreInstance_parallelstoreInstanceBasicExample_basic(context),
+      },
+      {
+        ResourceName:            "google_parallelstore_instance.instance",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        ImportStateVerifyIgnore: []string{"location", "instance_id", "labels", "terraform_labels", "update_time"},
+      },
+      {
+        Config: testAccParallelstoreInstance_parallelstoreInstanceBasicExample_update(context),
+      },
+      {
+          ResourceName:            "google_parallelstore_instance.instance",
+          ImportState:             true,
+          ImportStateVerify:       true,
+          ImportStateVerifyIgnore: []string{"location", "instance_id", "labels", "terraform_labels", "update_time"},
+      },
       {{ end }}
-		},
-	})
+    },
+  })
 }
 
 func testAccParallelstoreInstance_parallelstoreInstanceBasicExample_basic(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 resource "google_parallelstore_instance" "instance" {
   instance_id = "instance%{random_suffix}"
   location = "us-central1-a"
@@ -148,7 +148,7 @@ resource "google_service_networking_connection" "default" {
 
 {{ if ne $.TargetVersionName `ga` -}}
 func testAccParallelstoreInstance_parallelstoreInstanceBasicExampleBeta_basic(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 resource "google_parallelstore_instance" "instance" {
   provider = google-beta
   instance_id = "instance%{random_suffix}"

@@ -68,9 +68,11 @@ custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/route.tmpl'
   constants: 'templates/terraform/constants/compute_route.go.tmpl'
   decoder: 'templates/terraform/decoders/route.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/compute_route.tmpl'
 error_retry_predicates:
 
   - 'transport_tpg.IsPeeringOperationInProgress'
+include_in_tgc_next: true
 examples:
   - name: 'route_basic'
     primary_resource_id: 'default'
@@ -188,6 +190,7 @@ properties:
       - 'next_hop_vpn_tunnel'
       - 'next_hop_ilb'
     custom_expand: 'templates/terraform/custom_expand/route_instance.tmpl'
+    custom_tgc_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Instance'
     imports: 'selfLink'
   - name: 'nextHopIp'

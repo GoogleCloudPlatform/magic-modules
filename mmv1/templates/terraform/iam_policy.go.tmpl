@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License. */ -}}
-{{- if not (contains $.Compiler "terraformgoogleconversion") }}
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 {{ end }}
@@ -29,6 +29,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 
+{{ if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") -}}
+	"{{ $.ImportPath }}/registry"
+{{- end }}
 	"{{ $.ImportPath }}/tpgiamresource"
 	"{{ $.ImportPath }}/tpgresource"
 	transport_tpg "{{ $.ImportPath }}/transport"
@@ -40,6 +43,35 @@ var (
     _ = errwrap.Wrap
     _ = schema.Noop
 )
+
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
+func init() {
+    registry.Schema{
+        Name: "{{ $.TerraformName }}_iam_binding",
+        ProductName: "{{ $.ProductMetadata.Name }}",
+        Type: registry.SchemaTypeIAMResource,
+        Schema: tpgiamresource.ResourceIamBinding({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer, {{ $.ResourceName }}IdParseFunc),
+    }.Register()
+    registry.Schema{
+        Name: "{{ $.TerraformName }}_iam_member",
+        ProductName: "{{ $.ProductMetadata.Name }}",
+        Type: registry.SchemaTypeIAMResource,
+        Schema: tpgiamresource.ResourceIamMember({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer, {{ $.ResourceName }}IdParseFunc),
+    }.Register()
+    registry.Schema{
+        Name: "{{ $.TerraformName }}_iam_policy",
+        ProductName: "{{ $.ProductMetadata.Name }}",
+        Type: registry.SchemaTypeIAMResource,
+        Schema: tpgiamresource.ResourceIamPolicy({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer, {{ $.ResourceName }}IdParseFunc),
+    }.Register()
+    registry.Schema{
+        Name: "{{ $.TerraformName }}_iam_policy",
+        ProductName: "{{ $.ProductMetadata.Name }}",
+        Type: registry.SchemaTypeIAMDataSource,
+        Schema: tpgiamresource.DataSourceIamPolicy({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer),
+    }.Register()
+}
+{{- end }}
 
 var {{ $.ResourceName }}IamSchema = map[string]*schema.Schema{
 {{- range $i, $param := $.IamResourceParams }}
@@ -65,7 +97,7 @@ var {{ $.ResourceName }}IamSchema = map[string]*schema.Schema{
 }
 
 {{- if and $.IamPolicy $.IamPolicy.CustomDiffSuppress }}
-  {{ $.CustomTemplate $.IamPolicy.CustomDiffSuppress true }}
+  {{ customTemplate $ $.IamPolicy.CustomDiffSuppress true }}
 {{- end }}
 
 type {{ $.ResourceName }}IamUpdater struct {

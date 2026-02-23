@@ -11,6 +11,7 @@ require github.com/golang/glog v1.2.0
 
 require (
 	github.com/getkin/kin-openapi v0.127.0
+	github.com/google/go-cmp v0.6.0
 	github.com/otiai10/copy v1.9.0
 )
 

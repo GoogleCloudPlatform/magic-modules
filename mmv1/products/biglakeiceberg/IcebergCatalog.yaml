@@ -1,0 +1,151 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'IcebergCatalog'
+description: |
+  IcebergCatalogs are top-level containers for Apache Iceberg REST Catalog served Namespaces and Tables.
+references:
+  guides:
+    'Use the BigLake metastore Iceberg REST catalog': 'https://docs.cloud.google.com/biglake/docs/blms-rest-catalog'
+docs:
+  warning: |
+    If you are using User ADCs (Application Default Credentials) with this resource's IAM,
+    you must specify a `billing_project` and set `user_project_override` to true
+    in the provider configuration. Otherwise the IAM API will return 403s.
+    Your account must have the `serviceusage.services.use` permission on the
+    `billing_project` you defined.
+supports_indirect_user_project_override: true
+base_url: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs'
+self_link: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs/{{name}}'
+immutable: false
+create_url: 'iceberg/v1/restcatalog/extensions/projects/{{project}}/catalogs?iceberg-catalog-id={{name}}'
+custom_code:
+  custom_update:
+    templates/terraform/custom_update/biglake_iceberg_catalog_update.go.tmpl
+iam_policy:
+  base_url: 'v1/projects/{{project}}/catalogs/{{name}}'
+  parent_resource_attribute: 'name'
+  method_name_separator: ":"
+  fetch_iam_policy_verb: 'GET'
+  import_format:
+    - 'projects/{{project}}/catalogs/{{name}}'
+    - '{{name}}'
+  allowed_iam_role: 'roles/biglake.editor'
+examples:
+  - name: 'biglake_iceberg_catalog'
+    primary_resource_id: 'my_iceberg_catalog'
+    vars:
+      name: 'my_iceberg_catalog'
+    test_env_vars:
+      GOOGLE_BILLING_PROJECT: 'PROJECT'
+      USER_PROJECT_OVERRIDE: 'true'
+parameters:
+  - name: 'name'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The name of the IcebergCatalog.
+      For CATALOG_TYPE_GCS_BUCKET typed catalogs, the name needs to be the
+      exact same value of the GCS bucket's name. For example, for a bucket:
+      gs://bucket-name, the catalog name will be exactly "bucket-name".
+properties:
+  - name: 'credential_mode'
+    api_name: 'credential-mode'
+    type: Enum
+    description: The credential mode used for the catalog.
+      CREDENTIAL_MODE_END_USER - End user credentials, default. The authenticating
+      user must have access to the catalog resources and the corresponding Google
+      Cloud Storage files. CREDENTIAL_MODE_VENDED_CREDENTIALS - Use credential
+      vending. The authenticating user must have access to the catalog resources
+      and the system will provide the caller with downscoped credentials to access
+      the Google Cloud Storage files. All table operations in this mode would
+      require `X-Iceberg-Access-Delegation` header with `vended-credentials` value
+      included. System will generate a service account and the catalog
+      administrator must grant the service account appropriate permissions.
+    required: false
+    immutable: false
+    output: false
+    enum_values:
+      - 'CREDENTIAL_MODE_END_USER'
+      - 'CREDENTIAL_MODE_VENDED_CREDENTIALS'
+    default_from_api: true
+  - name: 'biglake_service_account'
+    api_name: 'biglake-service-account'
+    type: String
+    description: Output only. The service account used for credential vending. It
+      might be empty if credential vending was never enabled for the catalog.
+    output: true
+  - name: 'catalog_type'
+    api_name: 'catalog-type'
+    type: Enum
+    description: The catalog type of the IcebergCatalog. Currently only supports
+      the type for Google Cloud Storage Buckets.
+    required: true
+    immutable: true
+    output: false
+    enum_values:
+      - 'CATALOG_TYPE_GCS_BUCKET'
+  - name: 'default_location'
+    api_name: 'default-location'
+    type: String
+    description: Output only. The default storage location for the catalog, e.g.,
+      `gs://my-bucket`.
+    output: true
+  - name: 'storage_regions'
+    api_name: 'storage-regions'
+    type: Array
+    item_type:
+      type: String
+    description: Output only. The GCP region(s) where the physical metadata for
+      the tables is stored, e.g. `us-central1`, `nam4` or `us`. This will contain
+      one value for all locations, except for the catalogs that are configured to
+      use custom dual region buckets.
+    output: true
+  - name: 'create_time'
+    api_name: 'create-time'
+    type: String
+    description: Output only. The creation time of the IcebergCatalog.
+    output: true
+  - name: 'update_time'
+    api_name: 'update-time'
+    type: String
+    description: Output only. The last modification time of the IcebergCatalog.
+    output: true
+  - name: 'replicas'
+    type: Array
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'region'
+          type: String
+          description: The region of the replica, e.g., `us-east1`.
+          output: true
+        - name: 'state'
+          type: Enum
+          description: If the IcebergCatalog is replicated to multiple regions, this
+            describes the current state of the replica. STATE_UNKNOWN - The replica
+            state is unknown. STATE_PRIMARY - The replica is the writable primary.
+            STATE_PRIMARY_IN_PROGRESS - The replica has been recently assigned as
+            the primary, but not all namespaces are writeable yet. STATE_SECONDARY -
+            The replica is a read-only secondary replica.
+          output: true
+          enum_values:
+            - 'STATE_UNKNOWN'
+            - 'STATE_PRIMARY'
+            - 'STATE_PRIMARY_IN_PROGRESS'
+            - 'STATE_SECONDARY'
+    description: Output only. The replicas for the catalog metadata.
+    output: true

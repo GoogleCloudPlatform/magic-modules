@@ -126,6 +126,7 @@ properties:
     validation:
       function: 'verify.ValidateGCEName'
   - name: 'networkId'
+    type: String
     description: |
       The unique identifier for the resource. This identifier is defined by the server.
     api_name: id
@@ -206,16 +207,15 @@ properties:
           - 'DEFAULT'
           - 'ADD_COST_TO_MED'
         is_missing_in_cai: true
-      - name: 'delete_bgp_always_compare_med'
+      - name: 'deleteBgpAlwaysCompareMed'
         type: Boolean
         default_value: false
         update_verb: 'PATCH'
         update_url: 'projects/{{project}}/global/networks/{{name}}'
-        custom_flatten: 'templates/terraform/custom_flatten/compute_network_delete_bgp_always_compare_med.go.tmpl'
+        client_side: true
         description: |
           If set to `true`, the `bgp_always_compare_med` field will be cleared.
           If set to `false` (the default), `bgp_always_compare_med` will be set to the value specified in the configuration.
-        ignore_read: true
   - name: 'mtu'
     type: Integer
     description: |
@@ -234,7 +234,9 @@ properties:
     description: |
       Enable ULA internal ipv6 on this network. Enabling this feature will assign
       a /48 from google defined ULA prefix fd20::/20.
-    immutable: true
+    update_url: 'projects/{{project}}/global/networks/{{name}}'
+    update_verb: 'PATCH'
+    update_id: 'enableUlaInternalIpv6'
   - name: 'internalIpv6Range'
     type: String
     description: |

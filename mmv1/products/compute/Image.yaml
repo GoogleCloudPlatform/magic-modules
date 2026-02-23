@@ -248,6 +248,7 @@ properties:
           You must provide either this property or the sourceDisk property
           but not both.
         required: true
+        is_missing_in_cai: true
   - name: 'sourceDisk'
     type: ResourceRef
     description: |

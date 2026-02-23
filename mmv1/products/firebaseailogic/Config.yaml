@@ -1,0 +1,117 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Config
+min_version: beta
+description: Configuration for Firebase AI Logic.
+base_url: projects/{{project}}/locations/{{location}}/config
+references:
+  guides:
+    'Official Documentation': 'https://firebase.google.com/docs/ai-logic'
+  api: 'https://firebase.google.com/docs/reference/ai-logic/rest'
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/config
+id_format: projects/{{project}}/locations/{{location}}/config
+create_url: projects/{{project}}/locations/{{location}}/config?update_mask=*
+delete_url: projects/{{project}}/locations/{{location}}/config?update_mask=*
+update_verb: PATCH
+create_verb: PATCH
+delete_verb: PATCH
+# Singleton, can't be deleted
+exclude_sweeper: true
+import_format:
+  - projects/{{project}}/locations/{{location}}/config
+  - '{{project}}/{{location}}'
+custom_code:
+  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
+examples:
+  - name: firebaseailogic_config_basic
+    min_version: beta
+    primary_resource_id: default
+    vars:
+      project_id: 'basic'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    # Need the time_sleep resource
+    external_providers: ["time"]
+  - name: firebaseailogic_config_full
+    min_version: beta
+    primary_resource_id: default
+    vars:
+      project_id: 'full'
+      api_key_id: "gemini-api-key"
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    # Need the time_sleep resource
+    external_providers: ["time"]
+autogen_status: Q29uZmln
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    default_value: 'global'
+properties:
+  - name: generativeLanguageConfig
+    type: NestedObject
+    description: |-
+      Configuration for using the Gemini Developer API via Firebase AI Logic.
+
+      When using the Gemini Developer API via Firebase AI Logic, a separate Gemini
+      API key is stored in this configuration *on the server* so that you do
+      **not** add your Gemini API key directly into your app's codebase.
+    properties:
+      - name: apiKey
+        type: String
+        ignore_read: true
+        write_only: true
+        description: |-
+          The value of the API key. The API key must have
+          `generativelanguage.googleapis.com` in its "API restrictions" allowlist.
+          Note that this API is sometimes called the *Generative Language API* in
+          the Google Cloud console.
+
+          Do **not** add this Gemini API key into your app's codebase
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the config.
+      Format: projects/{project}/locations/{location}/config
+    output: true
+  - name: telemetryConfig
+    type: NestedObject
+    description: |-
+      Configuration for telemetry.
+
+      Telemetry is the collection of metrics, logs, and traces recorded by the
+      Firebase AI Logic backend.
+    properties:
+      - name: mode
+        type: String
+        default_value: 'NONE'
+        description: |-
+          The current monitoring mode used for this project.
+          Possible values:
+          NONE
+          ALL
+      - name: samplingRate
+        type: Double
+        default_value: 1.0
+        description: |-
+          The percentage of requests to be sampled, expressed as a fraction
+          in the range (0,1]. Note that the actual sampling rate may be lower than
+          the specified value if the system is overloaded. Default is 1.0.

@@ -1750,74 +1750,6 @@ func TestAccAlloydbCluster_standardClusterUpdateFailure(t *testing.T) {
 	})
 }
 
-// Ensures cluster throws expected errors for not specifying initial user on create
-func TestAccAlloydbCluster_withoutInitialUserFailure(t *testing.T) {
-	t.Parallel()
-	errorPattern := `New AlloyDB Clusters must have initial_user.password specified`
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config:      testAccAlloydbCluster_withoutInitialUser(context),
-				ExpectError: regexp.MustCompile(errorPattern),
-			},
-		},
-	})
-}
-
-// Ensures cluster update does not throw errors for not specifying initial user after create
-func TestAccAlloydbCluster_withoutInitialUserUpdate(t *testing.T) {
-	t.Parallel()
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccAlloydbCluster_alloydbClusterBasicExample(context),
-			},
-			{
-				Config: testAccAlloydbCluster_withoutInitialUser(context),
-			},
-		},
-	})
-}
-
-func testAccAlloydbCluster_withoutInitialUser(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_alloydb_cluster" "default" {
-  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
-  location   = "us-central1"
-  network_config {
-    network = google_compute_network.default.id
-  }
-
-  deletion_protection = false
-
-  lifecycle {
-    prevent_destroy = false
-  }  
-}
-
-data "google_project" "project" {
-}
-
-resource "google_compute_network" "default" {
-  name = "tf-test-alloydb-cluster%{random_suffix}"
-}
-`, context)
-}
-
 // Ensures cluster update does not throw errors for not specifying initial user after create
 func TestAccAlloydbCluster_randomPassword(t *testing.T) {
 	// Random provider causes VCR to fail
@@ -1870,6 +1802,106 @@ resource "google_alloydb_cluster" "default" {
 
 resource "random_string" "random" {
   length = 16
+}
+
+resource "google_compute_network" "default" {
+  name = "tf-test-alloydb-cluster%{random_suffix}"
+}
+`, context)
+}
+
+func TestAccAlloydbCluster_withPasswordWo(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix":     acctest.RandString(t, 10),
+		"random_password_1": acctest.RandString(t, 16),
+		"random_password_2": acctest.RandString(t, 16),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbCluster_withPasswordWo(context),
+				Check: resource.ComposeTestCheckFunc(
+					// check that password_wo is not stored in state
+					resource.TestCheckNoResourceAttr("google_alloydb_cluster.default", "initial_user.0.password_wo"),
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "initial_user.0.password_wo_version", "1"),
+				),
+			},
+			{
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
+			},
+			{
+				Config: testAccAlloydbCluster_withPasswordWoUpdate(context),
+				Check: resource.ComposeTestCheckFunc(
+					// check that password_wo is not stored in state
+					resource.TestCheckNoResourceAttr("google_alloydb_cluster.default", "initial_user.0.password_wo"),
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "initial_user.0.password_wo_version", "2"),
+				),
+			},
+			{
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
+			},
+		},
+	})
+}
+
+func testAccAlloydbCluster_withPasswordWo(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  subscription_type = "STANDARD"
+  network_config {
+  	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  }
+
+  initial_user {
+    password_wo = "%{random_password_1}"
+		password_wo_version = "1"
+  }
+
+  deletion_protection = false
+}
+
+data "google_project" "project" {
+}
+
+resource "google_compute_network" "default" {
+  name = "tf-test-alloydb-cluster%{random_suffix}"
+}
+`, context)
+}
+
+func testAccAlloydbCluster_withPasswordWoUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  subscription_type = "STANDARD"
+  network_config {
+  	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  }
+
+  initial_user {
+    password_wo = "%{random_password_2}"
+		password_wo_version = "2"
+  }
+
+  deletion_protection = false
+}
+
+data "google_project" "project" {
 }
 
 resource "google_compute_network" "default" {

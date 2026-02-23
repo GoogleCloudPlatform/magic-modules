@@ -18,8 +18,8 @@ description:
   resource.
 references:
   guides:
-    'Create a Lien': 'https://cloud.google.com/resource-manager/docs/project-liens'
-  api: 'https://cloud.google.com/resource-manager/reference/rest'
+    'Create a Lien': 'https://docs.cloud.google.com/resource-manager/docs/project-liens'
+  api: 'https://docs.cloud.google.com/resource-manager/reference/rest'
 docs:
 id_format: '{{name}}'
 base_url: 'liens'

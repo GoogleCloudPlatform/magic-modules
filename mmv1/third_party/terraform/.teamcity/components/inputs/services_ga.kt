@@ -91,6 +91,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Biglake",
         "path" to "./google/services/biglake"
     ),
+    "biglakeiceberg" to mapOf(
+        "name" to "biglakeiceberg",
+        "displayName" to "BiglakeIceberg",
+        "path" to "./google/services/biglakeiceberg"
+    ),
     "bigquery" to mapOf(
         "name" to "bigquery",
         "displayName" to "Bigquery",
@@ -416,6 +421,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Firebase",
         "path" to "./google/services/firebase"
     ),
+    "firebaseailogic" to mapOf(
+        "name" to "firebaseailogic",
+        "displayName" to "Firebase AI Logic",
+        "path" to "./google/services/firebaseailogic"
+    ),
     "firebaseappcheck" to mapOf(
         "name" to "firebaseappcheck",
         "displayName" to "Firebaseappcheck",
@@ -485,6 +495,11 @@ var ServicesListGa = mapOf(
         "name" to "healthcare",
         "displayName" to "Healthcare",
         "path" to "./google/services/healthcare"
+    ),
+    "hypercomputecluster" to mapOf(
+        "name" to "hypercomputecluster",
+        "displayName" to "ClusterDirector",
+        "path" to "./google/services/hypercomputecluster"
     ),
     "iam2" to mapOf(
         "name" to "iam2",
@@ -845,6 +860,11 @@ var ServicesListGa = mapOf(
         "name" to "transcoder",
         "displayName" to "Transcoder",
         "path" to "./google/services/transcoder"
+    ),
+    "vectorsearch" to mapOf(
+        "name" to "vectorsearch",
+        "displayName" to "VectorSearch",
+        "path" to "./google/services/vectorsearch",
     ),
     "vertexai" to mapOf(
         "name" to "vertexai",

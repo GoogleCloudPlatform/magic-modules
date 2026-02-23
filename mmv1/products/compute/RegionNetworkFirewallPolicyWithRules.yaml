@@ -98,6 +98,8 @@ properties:
     enum_values:
       - 'VPC_POLICY'
       - 'RDMA_ROCE_POLICY'
+      - 'RDMA_FALCON_POLICY'
+      - 'ULL_POLICY'
   - name: 'rule'
     type: Array
     description: A list of firewall policy rules.
