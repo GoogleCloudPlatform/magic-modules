@@ -706,7 +706,7 @@ resource "google_compute_service_attachment" "psc_ilb_service_attachment" {
 
   consumer_accept_lists {
     endpoint_url     = "https://www.googleapis.com/compute/v1/projects/project-id/regions/us-west2/forwardingRules/endpoint"
-    connection_limit = 4
+    connection_limit = 1
   }
 }
 
