@@ -700,18 +700,16 @@ func TestAccComputeServiceAttachment_serviceAttachmentEndpointUrl(t *testing.T) 
 func testAccComputeServiceAttachment_serviceAttachmentEndpointUrl(context map[string]interface{}, addEndpoint bool) string {
 	context["endpoint_block"] = ""
 	if addEndpoint {
-		// Construct the numerical ID-based URL using Terraform interpolation
+		// Use a static string with a numerical ID to avoid a Terraform dependency cycle
 		context["endpoint_block"] = `
   consumer_accept_lists {
-    endpoint_url     = "https://www.googleapis.com/compute/beta/projects/${data.google_project.project.number}/regions/us-west2/forwardingRules/${google_compute_forwarding_rule.psc_ilb_consumer.forwarding_rule_id}"
+    endpoint_url     = "projects/psc-endpoint-security-348642/regions/us-west2/forwardingRules/1234567890123456789"
     connection_limit = 1
   }
   reconcile_connections = true`
 	}
 
 	return acctest.Nprintf(`
-data "google_project" "project" {}
-
 resource "google_compute_service_attachment" "psc_ilb_service_attachment" {
   name                  = "tf-test-endpoint-url-%{random_suffix}"
   region                = "us-west2"
@@ -724,7 +722,7 @@ resource "google_compute_service_attachment" "psc_ilb_service_attachment" {
   %{endpoint_block}
 }
 
-# Consumer Forwarding Rule to reference by numerical ID
+# Consumer Infrastructure (independent of SA's accept list to avoid cycles)
 resource "google_compute_forwarding_rule" "psc_ilb_consumer" {
   name                  = "tf-test-consumer-fr-%{random_suffix}"
   region                = "us-west2"
