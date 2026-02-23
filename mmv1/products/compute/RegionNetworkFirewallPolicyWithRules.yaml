@@ -31,7 +31,6 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-flatten_all_in_method: true
 custom_code:
   constants: 'templates/terraform/constants/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
   encoder: 'templates/terraform/encoders/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'

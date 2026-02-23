@@ -40,7 +40,6 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-flatten_all_in_method: true
 custom_code:
   constants: 'templates/terraform/constants/apigee_nat_address.go.tmpl'
   encoder: 'templates/terraform/encoders/apigee_nat_address.go.tmpl'
