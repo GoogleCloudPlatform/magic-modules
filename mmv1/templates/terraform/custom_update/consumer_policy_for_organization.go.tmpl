@@ -3,8 +3,6 @@ if err != nil {
 	return err
 }
 
-billingProject := ""
-
 obj := make(map[string]interface{})
 enableRulesProp, err := expandServiceUsageV2ConsumerPolicyForOrganizationEnableRules(d.Get("enable_rules"), d, config)
 if err != nil {
@@ -32,13 +30,13 @@ headers := make(http.Header)
 
 // err == nil indicates that the billing_project value was found
 if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
-	billingProject = bp
+	project = bp
 }
 
 res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 	Config:    config,
 	Method:    "PATCH",
-	Project:   billingProject,
+	Project:   project,
 	RawURL:    url,
 	UserAgent: userAgent,
 	Body:      obj,
@@ -53,7 +51,7 @@ if err != nil {
 }
 
 err = ServiceUsageV2OperationWaitTime(
-	config, res, billingProject, "Updating ConsumerPolicyForOrganization", userAgent,
+	config, res, project, "Updating ConsumerPolicyForOrganization", userAgent,
 	d.Timeout(schema.TimeoutUpdate))
 
 if err != nil {
