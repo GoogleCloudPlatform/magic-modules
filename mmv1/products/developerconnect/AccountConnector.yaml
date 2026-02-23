@@ -208,4 +208,3 @@ properties:
     type: String
     description: The timestamp when the accountConnector was updated.
     output: true
-
