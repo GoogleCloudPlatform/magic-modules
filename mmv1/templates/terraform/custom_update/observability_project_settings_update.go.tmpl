@@ -60,7 +60,7 @@
 
 	err = ObservabilityOperationWaitTime(
 		config, res, "Updating ProjectSettings", userAgent,
-		project, d.Timeout(schema.TimeoutUpdate))
+		d.Timeout(schema.TimeoutUpdate))
 
 	if err != nil {
 		return err

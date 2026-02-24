@@ -70,7 +70,7 @@
 
 	err = ObservabilityOperationWaitTime(
 		config, res, "Creating ProjectSettings", userAgent,
-		project, d.Timeout(schema.TimeoutCreate))
+		d.Timeout(schema.TimeoutCreate))
 
 	if err != nil {
     d.SetId("") // Clear ID on error

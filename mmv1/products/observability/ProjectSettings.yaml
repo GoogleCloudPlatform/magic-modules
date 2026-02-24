@@ -25,7 +25,7 @@ update_verb: 'PATCH'
 import_format:
   - "projects/{{project}}/locations/{{location}}/settings"
 exclude_delete: true
-autogen_async: true
+autogen_async: false
 
 
 # We can't hardcode the mask into the URL, because the API will reject requests
