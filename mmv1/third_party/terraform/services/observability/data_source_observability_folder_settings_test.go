@@ -15,9 +15,9 @@ func TestAccObservabilityFolderSettings_datasource(t *testing.T) {
 	folderDisplayName := "tf-test-" + acctest.RandString(t, 10)
 
 	context := map[string]interface{}{
-		"org_id":            orgId,
+		"org_id":              orgId,
 		"folder_display_name": folderDisplayName,
-		"location":        "us",
+		"location":            "us",
 	}
 	dataResourceName := "data.google_observability_folder_settings.settings"
 
@@ -43,20 +43,20 @@ func TestAccObservabilityFolderSettings_datasource(t *testing.T) {
 func testAccObservabilityFolderSettings_datasource(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_folder" "test" {
-	display_name = "%{folder_display_name}"
-	parent       = "organizations/%{org_id}"
+	display_name        = "%{folder_display_name}"
+	parent              = "organizations/%{org_id}"
 	deletion_protection = false
 }
 
-	resource "time_sleep" "wait_for_folder" {
-		create_duration = "90s"
-		depends_on = [google_folder.test]
-	}
+resource "time_sleep" "wait_for_folder" {
+	create_duration = "90s"
+	depends_on      = [google_folder.test]
+}
 
-	data "google_observability_folder_settings" "settings" {
-		folder   = google_folder.test.folder_id
-		location = "%{location}"
-		depends_on = [time_sleep.wait_for_folder]
-	}
+data "google_observability_folder_settings" "settings" {
+	folder     = google_folder.test.folder_id
+	location   = "%{location}"
+	depends_on = [time_sleep.wait_for_folder]
+}
 `, context)
 }
