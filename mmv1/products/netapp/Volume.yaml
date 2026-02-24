@@ -746,3 +746,15 @@ properties:
             - 'LINUX'
             - 'WINDOWS'
             - 'ESXI'
+  - name: 'largeCapacityConfig'
+    type: NestedObject
+    description: |
+      Configuration for a Large Capacity Volume. A Large Capacity Volume
+      supports sizes ranging from 12 TiB to 20 PiB, it is composed of multiple
+      internal constituents, and must be created in a large capacity pool.
+    properties:
+      - name: 'constituentCount'
+        type: Integer
+        description: |
+          The number of internal constituents (e.g., FlexVols) for this large volume.
+          The minimum number of constituents is 2.
