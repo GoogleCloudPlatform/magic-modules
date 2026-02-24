@@ -1922,7 +1922,7 @@ func TestAccAlloydbCluster_withDefaultDataplexConfig(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
-			// Create with NO config: Backend should enable by default
+			// Create with NO config: Backend should enable dataplex by default
 			{
 				Config: testAccAlloydbCluster_noDataplexConfig(context),
 				Check: resource.ComposeTestCheckFunc(
@@ -1965,14 +1965,14 @@ func TestAccAlloydbCluster_withDataplexConfigDisabled(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
-			// 1. Create with Dataplex enabled=true
+			// Create with Dataplex enabled=false
 			{
 				Config: testAccAlloydbCluster_dataplexConfigExplicit(context, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "dataplex_config.0.enabled", "false"),
 				),
 			},
-			// 2. Update to Dataplex enabled=false: Verify PATCH works
+			// Update to Dataplex enabled=true: Verify PATCH works
 			{
 				Config: testAccAlloydbCluster_dataplexConfigExplicit(context, true),
 				Check: resource.ComposeTestCheckFunc(
