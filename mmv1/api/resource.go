@@ -1826,17 +1826,7 @@ func (r Resource) IamImportQualifiersForTest() string {
 }
 
 func (r Resource) IamImportQualifiersForTestSample() string {
-	var importFormat string
-	if len(r.IamPolicy.ImportFormat) > 0 {
-		importFormat = r.IamPolicy.ImportFormat[0]
-	} else {
-		importFormat = r.IamPolicy.SelfLink
-		if importFormat == "" {
-			importFormat = r.SelfLinkUrl()
-		}
-	}
-
-	params := r.ExtractIdentifiers(importFormat)
+	params := r.IamImportParams()
 	var importQualifiers []string
 	for i, param := range params {
 		if param == "project" {
