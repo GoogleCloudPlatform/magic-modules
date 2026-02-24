@@ -284,7 +284,7 @@ properties:
               - 'execution_spec.0.trigger.0.one_time'
             properties:
               - name: ttlAfterScanCompletion
-                type: DURATION
+                type: String
                 description: |
                   Time to live for the DataScan and its results after the one-time run completes. Accepts a string with a unit suffix 's' (e.g., '7200s'). Default is 24 hours. Ranges between 0 and 31536000 seconds (1 year).
       - name: 'field'

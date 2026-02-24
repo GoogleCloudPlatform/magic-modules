@@ -4,7 +4,7 @@ func resourceOrgpolicyPolicyRulesConditionExpressionDiffSuppress(_, old, new str
 	return oldReplaced == newReplaced
 }
 
-{{- if not (contains $.Compiler "terraformgoogleconversion") }}
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 func resourceOrgPolicyPolicySpecRulesDiffSuppress(k, o, n string, d *schema.ResourceData) bool {
 	oldCount, newCount := d.GetChange("spec.0.rules.#")
 	var count int

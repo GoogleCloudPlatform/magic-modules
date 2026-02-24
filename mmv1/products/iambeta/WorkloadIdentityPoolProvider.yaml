@@ -27,7 +27,6 @@ update_mask: true
 import_format:
   - 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers/{{workload_identity_pool_provider_id}}'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20

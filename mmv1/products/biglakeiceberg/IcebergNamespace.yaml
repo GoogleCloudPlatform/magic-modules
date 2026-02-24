@@ -1,0 +1,74 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'IcebergNamespace'
+description: |
+  IcebergNamespaces are containers for Apache Iceberg Tables within an IcebergCatalog.
+supports_indirect_user_project_override: true
+base_url: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces'
+self_link: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
+id_format: 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
+import_format:
+  - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
+  - '{{project}}/{{catalog}}/{{namespace_id}}'
+  - '{{catalog}}/{{namespace_id}}'
+immutable: false
+custom_code:
+  constants: 'templates/terraform/constants/biglake_iceberg_namespace.go.tmpl'
+  update_encoder: 'templates/terraform/encoders/biglake_iceberg_namespace.go.tmpl'
+parameters:
+  - name: 'catalog'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The name of the IcebergCatalog.
+properties:
+  - name: 'namespace_id'
+    api_name: 'namespace'
+    type: String
+    description: |
+      The unique identifier of the namespace.
+    required: true
+    immutable: true
+    custom_expand: 'templates/terraform/custom_expand/biglake_iceberg_namespace_id.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/biglake_iceberg_namespace_id.go.tmpl'
+  - name: 'properties'
+    type: KeyValuePairs
+    description: |
+      User-defined properties for the namespace.
+    required: false
+    default_from_api: true
+    diff_suppress_func: 'icebergNamespacePropertiesDiffSuppress'
+update_verb: 'POST'
+update_url: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}/properties'
+iam_policy:
+  base_url: 'v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
+  parent_resource_attribute: 'namespace_id'
+  method_name_separator: ":"
+  fetch_iam_policy_verb: 'GET'
+  import_format:
+    - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
+    - '{{namespace_id}}'
+  allowed_iam_role: 'roles/biglake.editor'
+  sample_config_body: 'templates/terraform/iam/example_config_body/biglake_iceberg_namespace.tf.tmpl'
+examples:
+  - name: 'biglake_iceberg_namespace'
+    primary_resource_id: 'my_iceberg_namespace'
+    vars:
+      bucket_name: 'example-bucket'
+    test_env_vars:
+      GOOGLE_BILLING_PROJECT: 'PROJECT_NAME'
+      USER_PROJECT_OVERRIDE: 'true'
