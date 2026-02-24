@@ -765,6 +765,7 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
         }
     }
     if clientSideOnly {
+        log.Print("[DEBUG] Only client-side changes detected. Cancelling update operation.")
         return resource{{ $.ResourceName -}}Read(d, meta)
     }
 {{-     end}}
