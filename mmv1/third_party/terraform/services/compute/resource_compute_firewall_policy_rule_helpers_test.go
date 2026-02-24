@@ -263,10 +263,10 @@ var cases = map[string]testCase{
 	},
 }
 
-func TestAdjustGlobalNetworkFirewallPolicyRuleNetworkContextFields(t *testing.T) {
+func TestAdjustFirewallPolicyRuleNetworkContextFields(t *testing.T) {
 
 	for tn, tc := range cases {
-		err := adjustGlobalNetworkFirewallPolicyRuleNetworkContextFields(tc.obj, tc.oldMatch, tc.newMatch)
+		err := adjustFirewallPolicyRuleNetworkContextFields(tc.obj, tc.oldMatch, tc.newMatch)
 		if err != nil && !tc.expectErr {
 			t.Errorf("%s: Unexpected error: %v", tn, err)
 		}
@@ -279,34 +279,3 @@ func TestAdjustGlobalNetworkFirewallPolicyRuleNetworkContextFields(t *testing.T)
 	}
 }
 
-func TestAdjustRegionNetworkFirewallPolicyRuleNetworkContextFields(t *testing.T) {
-
-	for tn, tc := range cases {
-		err := adjustRegionNetworkFirewallPolicyRuleNetworkContextFields(tc.obj, tc.oldMatch, tc.newMatch)
-		if err != nil && !tc.expectErr {
-			t.Errorf("%s: Unexpected error: %v", tn, err)
-		}
-		if err != nil {
-			return
-		}
-		if !reflect.DeepEqual(tc.obj, tc.expectObj) {
-			t.Errorf("%s: Incorrect object - want: %v, got: %v", tn, tc.expectObj, tc.obj)
-		}
-	}
-}
-
-func TestAdjustOrgFirewallPolicyRuleNetworkContextFields(t *testing.T) {
-
-	for tn, tc := range cases {
-		err := adjustOrgFirewallPolicyRuleNetworkContextFields(tc.obj, tc.oldMatch, tc.newMatch)
-		if err != nil && !tc.expectErr {
-			t.Errorf("%s: Unexpected error: %v", tn, err)
-		}
-		if err != nil {
-			return
-		}
-		if !reflect.DeepEqual(tc.obj, tc.expectObj) {
-			t.Errorf("%s: Incorrect object - want: %v, got: %v", tn, tc.expectObj, tc.obj)
-		}
-	}
-}
