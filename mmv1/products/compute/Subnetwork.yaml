@@ -223,6 +223,7 @@ properties:
     validation:
       function: verify.ValidateIpCidrRange
     default_from_api: true
+    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/compute_subnetwork_ip_cidr_range.go.tmpl'
   - name: reservedInternalRange
     type: ResourceRef
     description: |
