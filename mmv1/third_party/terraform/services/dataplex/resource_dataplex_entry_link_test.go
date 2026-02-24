@@ -342,81 +342,6 @@ func TestAccDataplexEntryLink_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"project_number": envvar.GetTestProjectNumberFromEnv(),
-		"random_suffix":  acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDataplexEntryLink_dataplexEntryLinkUpdate(context),
-			},
-			{
-				ResourceName:            "google_dataplex_entry_link.basic_entry_link",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"entry_group_id", "entry_link_id", "location"},
-			},
-		},
-	})
-}
-
-func testAccDataplexEntryLink_dataplexEntryLinkUpdate(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_dataplex_entry_group" "entry-group-basic" {
-  location = "us-central1"
-  entry_group_id = "tf-test-entry-group%{random_suffix}"
-  project = "%{project_number}"
-}
-resource "google_dataplex_entry" "source" {
-  location = "us-central1"
-  entry_group_id = google_dataplex_entry_group.entry-group-basic.entry_group_id
-  entry_id = "tf-test-source-entry%{random_suffix}"
-  entry_type = google_dataplex_entry_type.entry-type-basic.name
-  project = "%{project_number}"
-}
-resource "google_dataplex_entry_type" "entry-type-basic" {
-  entry_type_id = "tf-test-entry-type%{random_suffix}"
-  location = "us-central1"
-  project = "%{project_number}"
-}
-resource "google_dataplex_glossary" "term_test_id_full" {
-  glossary_id = "tf-test-glossary%{random_suffix}"
-  location    = "us-central1"
-}
-resource "google_dataplex_glossary_term" "term_test_id_full" {
-  parent = "projects/${google_dataplex_glossary.term_test_id_full.project}/locations/us-central1/glossaries/${google_dataplex_glossary.term_test_id_full.glossary_id}"
-  glossary_id = google_dataplex_glossary.term_test_id_full.glossary_id
-  location = "us-central1"
-  term_id = "tf-test-term-full%{random_suffix}"
-  labels = { "tag": "test-tf" }
-  display_name = "terraform term"
-  description = "term created by Terraform"
-}
-resource "google_dataplex_entry_link" "basic_entry_link" {
-  project = "%{project_number}"
-  location = "us-central1"
-  entry_group_id = google_dataplex_entry_group.entry-group-basic.entry_group_id
-  entry_link_id = "tf-test-entry-link%{random_suffix}"
-  entry_link_type = "projects/655216118709/locations/global/entryLinkTypes/definition"
-  entry_references {
-    name = google_dataplex_entry.source.name
-	type = "SOURCE"
-  }
-  entry_references {
-    name = "projects/${google_dataplex_entry_group.entry-group-basic.project}/locations/us-central1/entryGroups/@dataplex/entries/projects/${google_dataplex_entry_group.entry-group-basic.project}/locations/us-central1/glossaries/${google_dataplex_glossary.term_test_id_full.glossary_id}/terms/${google_dataplex_glossary_term.term_test_id_full.term_id}"
-	type = "TARGET"
-  }
-}
-`, context)
-}
-
-func TestAccDataplexEntryLink_aspectUpdate(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"project_number": envvar.GetTestProjectNumberFromEnv(),
 		"project_id":     envvar.GetTestProjectFromEnv(),
 		"random_suffix":  acctest.RandString(t, 10),
 	}
@@ -427,7 +352,7 @@ func TestAccDataplexEntryLink_aspectUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckDataplexEntryLinkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataplexEntryLink_aspectUpdatePrepare(context),
+				Config: testAccDataplexEntryLink_updatePrepare(context),
 			},
 			{
 				ResourceName:            "google_dataplex_entry_link.full_entry_link_with_aspect",
@@ -437,7 +362,7 @@ func TestAccDataplexEntryLink_aspectUpdate(t *testing.T) {
 			},
 
 			{
-				Config: testAccDataplexEntryLink_aspectUpdate(context),
+				Config: testAccDataplexEntryLink_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_dataplex_entry_link.full_entry_link_with_aspect", plancheck.ResourceActionUpdate),
@@ -454,7 +379,7 @@ func TestAccDataplexEntryLink_aspectUpdate(t *testing.T) {
 	})
 }
 
-func testAccDataplexEntryLink_aspectUpdatePrepare(context map[string]interface{}) string {
+func testAccDataplexEntryLink_updatePrepare(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 
 resource "google_bigquery_dataset" "bq_dataset" {
@@ -524,7 +449,7 @@ resource "google_dataplex_entry_link" "full_entry_link_with_aspect" {
 `, context)
 }
 
-func testAccDataplexEntryLink_aspectUpdate(context map[string]interface{}) string {
+func testAccDataplexEntryLink_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 
 resource "google_bigquery_dataset" "bq_dataset" {
