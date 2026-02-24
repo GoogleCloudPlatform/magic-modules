@@ -300,6 +300,7 @@ properties:
         required: true
       - name: mirroringDeploymentGroups
         type: Array
+        is_missing_in_cai: true
         item_type:
           type: String
         description: |
