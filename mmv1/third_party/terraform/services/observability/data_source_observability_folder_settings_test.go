@@ -43,17 +43,20 @@ func TestAccObservabilityFolderSettings_datasource(t *testing.T) {
 func testAccObservabilityFolderSettings_datasource(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_folder" "test" {
+	provider            = "google-beta"
 	display_name        = "%{folder_display_name}"
 	parent              = "organizations/%{org_id}"
 	deletion_protection = false
 }
 
 resource "time_sleep" "wait_for_folder" {
+	provider        = "google-beta"
 	create_duration = "90s"
 	depends_on      = [google_folder.test]
 }
 
 data "google_observability_folder_settings" "settings" {
+	provider   = "google-beta"
 	folder     = google_folder.test.folder_id
 	location   = "%{location}"
 	depends_on = [time_sleep.wait_for_folder]
