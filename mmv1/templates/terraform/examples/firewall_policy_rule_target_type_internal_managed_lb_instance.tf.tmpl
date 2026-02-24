@@ -1,0 +1,85 @@
+resource "google_compute_network" "net" {
+  provider = google-beta
+
+  name                    = "test-net"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnet" {
+  provider = google-beta
+
+  name          = "test-subnet"
+  region        = "us-central1"
+  network       = google_compute_network.net.id
+  ip_cidr_range = "10.0.0.0/24"
+}
+
+resource "google_compute_subnetwork" "proxy_only_subnet" {
+  provider = google-beta
+
+  name          = "proxy-only-subnet"
+  region        = "us-central1"
+  network       = google_compute_network.net.id
+  ip_cidr_range = "10.129.0.0/23"
+
+  purpose = "INTERNAL_HTTPS_LOAD_BALANCER"
+  role    = "ACTIVE"
+}
+
+resource "google_compute_region_backend_service" "backend" {
+  provider = google-beta
+
+  name                  = "test-backend"
+  region                = "us-central1"
+  protocol              = "HTTP"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+}
+
+resource "google_compute_region_url_map" "url_map" {
+  provider = google-beta
+
+  name            = "test-url-map"
+  region          = "us-central1"
+  default_service = google_compute_region_backend_service.backend.id
+}
+
+resource "google_compute_region_target_http_proxy" "http_proxy" {
+  provider = google-beta
+
+  name   = "test-http-proxy"
+  region = "us-central1"
+  url_map = google_compute_region_url_map.url_map.id
+}
+
+resource "google_compute_network_firewall_policy" "fw_policy" {
+  provider = google-beta
+
+  name = "tf-test-net-fw-%{random_suffix}"
+}
+
+resource "google_compute_network_firewall_policy_association" "assoc" {
+  provider = google-beta
+
+  name              = "fw-policy-assoc"
+  firewall_policy   = google_compute_network_firewall_policy.fw_policy.id
+  attachment_target = google_compute_network.net.self_link
+}
+
+resource "google_compute_network_firewall_policy_rule" "internal_managed_lb_rule" {
+  provider = google-beta
+
+  firewall_policy = google_compute_network_firewall_policy.fw_policy.id
+  priority        = 1000
+  action          = "allow"
+  direction       = "INGRESS"
+
+  target_type = "INTERNAL_MANAGED_LB"
+
+  match {
+    src_ip_ranges = ["10.0.0.0/8"]
+
+    layer4_configs {
+      ip_protocol = "tcp"
+    }
+  }
+}
