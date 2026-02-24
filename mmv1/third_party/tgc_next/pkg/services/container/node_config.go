@@ -1618,34 +1618,6 @@ func expandNodeConfig(d tpgresource.TerraformResourceData, prefix string, v inte
 
 	if v, ok := nodeConfig["kubelet_config"]; ok {
 		nc.KubeletConfig = expandKubeletConfig(v)
-
-		// // start cpu_cfs_quota fix https://github.com/hashicorp/terraform-provider-google/issues/15767
-		// // this makes the field conditional on appearance in configuration. This allows the API `true` default
-		// // to override null, where currently we force-send null as false, which is wrong.
-		// rawConfigNPRoot := d.GetRawConfig()
-		// // if we have a prefix, we're in `node_pool.N.` in GKE Cluster. Traverse the RawConfig object to reach that
-		// // root, at which point local references work going forwards.
-		// if prefix != "" {
-		// 	parts := strings.Split(prefix, ".") // "node_pool.N." -> ["node_pool" "N", ""]
-		// 	npIndex, err := strconv.Atoi(parts[1])
-		// 	if err != nil { // no error return from expander
-		// 		panic(fmt.Errorf("unexpected format for node pool path prefix: %w. value: %v", err, prefix))
-		// 	}
-
-		// 	rawConfigNPRoot = rawConfigNPRoot.GetAttr("node_pool").Index(cty.NumberIntVal(int64(npIndex)))
-		// }
-
-		// if vNC := rawConfigNPRoot.GetAttr("node_config"); vNC.LengthInt() > 0 {
-		// 	if vKC := vNC.Index(cty.NumberIntVal(0)).GetAttr("kubelet_config"); vKC.LengthInt() > 0 {
-		// 		v := vKC.Index(cty.NumberIntVal(0)).GetAttr("cpu_cfs_quota")
-		// 		if v == cty.NullVal(cty.Bool) {
-		// 			nc.KubeletConfig.CpuCfsQuota = true
-		// 		} else if v.False() { // force-send explicit false to API
-		// 			nc.KubeletConfig.ForceSendFields = append(nc.KubeletConfig.ForceSendFields, "CpuCfsQuota")
-		// 		}
-		// 	}
-		// }
-		// end cpu_cfs_quota fix
 	}
 
 	if v, ok := nodeConfig["linux_node_config"]; ok {
@@ -2377,16 +2349,6 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		return config
 	}
 
-	// default to no prior taint state if there are any issues
-	oldTaints := []interface{}{}
-	oldNodeConfigSchemaContainer := v.([]interface{})
-	if len(oldNodeConfigSchemaContainer) != 0 {
-		oldNodeConfigSchema := oldNodeConfigSchemaContainer[0].(map[string]interface{})
-		if vt, ok := oldNodeConfigSchema["taint"]; ok && len(vt.([]interface{})) > 0 {
-			oldTaints = vt.([]interface{})
-		}
-	}
-
 	config = append(config, map[string]interface{}{
 		"machine_type":                       c.MachineType,
 		"containerd_config":                  flattenContainerdConfig(c.ContainerdConfig),
@@ -2413,8 +2375,7 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"spot":                               c.Spot,
 		"min_cpu_platform":                   c.MinCpuPlatform,
 		"shielded_instance_config":           flattenShieldedInstanceConfig(c.ShieldedInstanceConfig),
-		"taint":                              flattenTaints(c.Taints, oldTaints),
-		"effective_taints":                   flattenEffectiveTaints(c.Taints),
+		"taint":                              flattenEffectiveTaints(c.Taints),
 		"workload_metadata_config":           flattenWorkloadMetadataConfig(c.WorkloadMetadataConfig),
 		"confidential_nodes":                 flattenConfidentialNodes(c.ConfidentialNodes),
 		"boot_disk_kms_key":                  c.BootDiskKmsKey,

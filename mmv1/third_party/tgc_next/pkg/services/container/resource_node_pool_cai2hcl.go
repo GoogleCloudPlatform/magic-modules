@@ -63,6 +63,10 @@ func (c *ContainerNodePoolCai2hclConverter) convertResourceData(asset caiasset.A
 
 	hclData := make(map[string]interface{})
 
+	outputFields := map[string]struct{}{}
+	an := strings.Replace(asset.Name, "/zones/", "/locations/", 1)
+	utils.ParseUrlParamValuesFromAssetName(an, "//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}", outputFields, hclData)
+
 	npMap, err := flattenNodePool(d, config, nodePool, "")
 	if err != nil {
 		return nil, err
