@@ -17,7 +17,6 @@ description: |
   An imperative resource that triggers a GCBDR restoration event.
   Creating this resource will initiate a restore operation from a specified backup.
   The resource represents the restore operation and its result.
-min_version: beta
 # Immutable ensures any config change triggers a fresh restore rather than an invalid update
 # TODO: Remove this once update operations are supported.
 immutable: true

@@ -40,7 +40,6 @@ async:
   result:
     resource_inside_response: true
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 custom_code:
   constants: 'templates/terraform/constants/datastream_connection_profile.go.tmpl'
   pre_create: 'templates/terraform/pre_create/datastream_connection_profile.go.tmpl'
@@ -516,7 +515,7 @@ properties:
           - 'user_credentials'
           - 'oauth2_client_credentials'
         properties:
-          - name: 'client_id'
+          - name: 'clientId'
             type: String
             description: |
               Client ID to use for authentication.
