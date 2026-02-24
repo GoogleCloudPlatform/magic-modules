@@ -1,7 +1,8 @@
 package compute
 
 import "fmt"
-//It adjusts obj in case network scope/context fields are used - in beta API both network scope/context fields are available.
+
+// It adjusts obj in case network scope/context fields are used - in beta API both network scope/context fields are available.
 // The GET method returns both of them with the same value (you can think of network scope field as an alias for the network context field).
 // Terraform allows only one of them to be used (using 'conflicts' annotation) but because the terraform state has both of them we have
 // to remove one of them if there's a change so that it's obvious what is the new value and to prevent terraform to report differences
@@ -11,16 +12,16 @@ func adjustFirewallPolicyRuleNetworkContextFields(obj map[string]interface{}, ol
 	match, exists := obj["match"]
 
 	if !exists {
-	  return nil
+		return nil
 	}
 
 	err := adjustFields(match.(map[string]interface{}), oldMatch, newMatch, "src_network_scope", "src_network_context")
 	if err != nil {
-	  return err
+		return err
 	}
 	err = adjustFields(match.(map[string]interface{}), oldMatch, newMatch, "dest_network_scope", "dest_network_context")
 	if err != nil {
-	  return err
+		return err
 	}
 	return nil
 }
@@ -35,14 +36,14 @@ func adjustFields(match map[string]interface{}, oldMatch interface{}, newMatch i
 	field2Changed := newField2 != oldField2
 
 	if field1Changed && field2Changed {
-	// it should not be possible because one cannot use both fields at the same time (using 'conflicts' in schema)
-	  return fmt.Errorf("Cannot change both %s and %s at the same time", fieldName1, fieldName2)
+		// it should not be possible because one cannot use both fields at the same time (using 'conflicts' in schema)
+		return fmt.Errorf("Cannot change both %s and %s at the same time", fieldName1, fieldName2)
 	}
 
 	if field1Changed {
-	  delete(match, fieldName2)
+		delete(match, fieldName2)
 	} else if field2Changed {
-	  delete(match, fieldName1)
+		delete(match, fieldName1)
 	}
 	return nil
 }
@@ -52,7 +53,7 @@ func getFieldValue(match any, fieldName string) string {
 	if valuesList := match.([]interface{}); len(valuesList) > 0 {
 		if data := valuesList[0].(map[string]interface{}); data != nil {
 			if val, ok := data[fieldName].(string); ok {
-			  return val
+				return val
 			}
 		}
 	}

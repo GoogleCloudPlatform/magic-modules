@@ -278,4 +278,3 @@ func TestAdjustFirewallPolicyRuleNetworkContextFields(t *testing.T) {
 		}
 	}
 }
-
