@@ -6986,7 +6986,7 @@ func testAccContainerNodePool_custom_subnet(clusterName string, networkName stri
 	resource "google_container_node_pool" "np" {
 	  name     = "custom-node-pool"
 	  cluster  = google_container_cluster.primary.id
-	  location = "us-central1-c"
+	  location = "us-central1-a"
 	  node_count = 2
   	  max_pods_per_node = 30
 
@@ -6998,7 +6998,7 @@ func testAccContainerNodePool_custom_subnet(clusterName string, networkName stri
 	resource "google_container_node_pool" "np1" {
 	  name     = "custom-node-pool1"
 	  cluster  = google_container_cluster.primary.id
-	  location = "us-central1-c"
+	  location = "us-central1-a"
 	  node_count = 2
   	  max_pods_per_node = 30
 
