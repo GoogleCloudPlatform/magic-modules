@@ -23,7 +23,7 @@ create_verb: 'PATCH'
 update_url: 'folders/{{folder}}/locations/{{location}}/settings'
 update_verb: 'PATCH'
 exclude_delete: true
-autogen_async: true
+autogen_async: false
 
 # We can't hardcode the mask into the URL, because the API will reject requests
 # if the mask contains fields that are not allowed for the location.
