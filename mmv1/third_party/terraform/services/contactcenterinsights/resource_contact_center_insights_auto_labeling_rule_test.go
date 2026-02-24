@@ -15,7 +15,7 @@ func TestAccContactCenterInsightsAutoLabelingRule_update(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix":  acctest.RandString(t, 10),
 		"project_number": envvar.GetTestProjectNumberFromEnv(),
-        "resource_name":  "tf-test-rule-" + acctest.RandString(t, 10),
+		"resource_name":  "tf-test-rule-" + acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -26,10 +26,10 @@ func TestAccContactCenterInsightsAutoLabelingRule_update(t *testing.T) {
 				Config: testAccContactCenterInsightsAutoLabelingRule_basic(context),
 			},
 			{
-				ResourceName:      "google_contact_center_insights_auto_labeling_rule.auto_labeling_rule_basic",
-				ImportState:       true,
-				ImportStateVerify: true,
-                ImportStateVerifyIgnore: []string{"location", "auto_labeling_rule_id"},
+				ResourceName:            "google_contact_center_insights_auto_labeling_rule.auto_labeling_rule_basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "auto_labeling_rule_id"},
 			},
 			{
 				Config: testAccContactCenterInsightsAutoLabelingRule_update(context),
@@ -53,12 +53,13 @@ func testAccContactCenterInsightsAutoLabelingRule_basic(context map[string]inter
 	return acctest.Nprintf(`
 resource "google_contact_center_insights_auto_labeling_rule" "auto_labeling_rule_basic" {
   display_name = "auto-labeling-rule-display-name-%{random_suffix}"
+  auto_labeling_rule_id = "auto-labeling-rule-id-%{random_suffix}"
   location = "us-central1"
   label_key_type = "LABEL_KEY_TYPE_CUSTOM"
   label_key = "%{resource_name}"
   conditions {
     condition = "true"
-    value = ""label_value""
+    value = "\"label_value\""
   }
   active    = true
 }
@@ -69,12 +70,13 @@ func testAccContactCenterInsightsAutoLabelingRule_update(context map[string]inte
 	return acctest.Nprintf(`
 resource "google_contact_center_insights_auto_labeling_rule" "auto_labeling_rule_basic" {
   display_name = "auto-labeling-rule-display-name-%{random_suffix}-updated"
+  auto_labeling_rule_id = "auto-labeling-rule-id-%{random_suffix}"
   location = "us-central1"
   label_key_type = "LABEL_KEY_TYPE_CUSTOM"
   label_key = "%{resource_name}"
   conditions {
     condition = "true"
-    value = ""label_value_updated""
+    value = "\"label_value_updated\""
   }
   active    = false
 }
