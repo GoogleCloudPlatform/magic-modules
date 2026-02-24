@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
+{{ if ne $.TargetVersionName "ga" -}}
 func TestAccObservabilityOrganizationSettings_datasource(t *testing.T) {
 	t.Parallel()
 
@@ -37,11 +38,13 @@ func TestAccObservabilityOrganizationSettings_datasource(t *testing.T) {
 		},
 	})
 }
+{{- else }}
+{{- end }}
 
+{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityOrganizationSettings_datasource(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "time_sleep" "wait_for_org" {
-		provider 	      = "google-beta"
 		create_duration = "60s"
 	}
 
@@ -53,3 +56,5 @@ func testAccObservabilityOrganizationSettings_datasource(context map[string]inte
 	}
 `, context)
 }
+{{- else }}
+{{- end }}

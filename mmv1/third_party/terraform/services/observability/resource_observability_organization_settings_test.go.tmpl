@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
+{{ if ne $.TargetVersionName "ga" -}}
 func TestAccObservabilityOrganizationSettings_update(t *testing.T) {
-	t.Parallel()
 
 	context := map[string]interface{}{
 		"org_id":       envvar.GetTestOrgFromEnv(t),
@@ -52,7 +52,10 @@ func TestAccObservabilityOrganizationSettings_update(t *testing.T) {
 		},
 	})
 }
+{{- else }}
+{{- end }}
 
+{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityOrganizationSettings_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_observability_organization_settings" "settings_data" {
@@ -63,7 +66,6 @@ data "google_observability_organization_settings" "settings_data" {
 
 # Add a delay to allow the service account to propagate
 resource "time_sleep" "wait_for_sa_propagation" {
-  provider        = "google-beta"
   create_duration = "90s"
   depends_on      = [data.google_observability_organization_settings.settings_data]
 }
@@ -85,7 +87,10 @@ resource "google_observability_organization_settings" "primary" {
 }
 `, context)
 }
+{{- else }}
+{{- end }}
 
+{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityOrganizationSettings_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_observability_organization_settings" "settings_data" {
@@ -96,7 +101,6 @@ data "google_observability_organization_settings" "settings_data" {
 
 # Add a delay to allow the service account to propagate
 resource "time_sleep" "wait_for_sa_propagation" {
-  provider        = "google-beta"
   create_duration = "90s"
   depends_on      = [data.google_observability_organization_settings.settings_data]
 }
@@ -118,9 +122,11 @@ resource "google_observability_organization_settings" "primary" {
 }
 `, context)
 }
+{{- else }}
+{{- end }}
 
+{{ if ne $.TargetVersionName "ga" -}}
 func TestAccObservabilityOrganizationSettings_globalUpdate(t *testing.T) {
-	t.Parallel()
 
 	context := map[string]interface{}{
 		"org_id": envvar.GetTestOrgFromEnv(t),
@@ -156,7 +162,10 @@ func TestAccObservabilityOrganizationSettings_globalUpdate(t *testing.T) {
 		},
 	})
 }
+{{- else }}
+{{- end }}
 
+{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityOrganizationSettings_global(context map[string]interface{}, defaultLocation string) string {
 	return acctest.Nprintf(fmt.Sprintf(`
 data "google_observability_organization_settings" "settings_data" {
@@ -174,7 +183,10 @@ resource "google_observability_organization_settings" "primary_global" {
 }
 `, defaultLocation), context)
 }
+{{- else }}
+{{- end }}
 
+{{ if ne $.TargetVersionName "ga" -}}
 func testAccObservabilityOrganizationSettings_globalUpdate(context map[string]interface{}, defaultLocation string) string {
 	return acctest.Nprintf(fmt.Sprintf(`
 data "google_observability_organization_settings" "settings_data" {
@@ -192,3 +204,5 @@ resource "google_observability_organization_settings" "primary_global" {
 }
 `, defaultLocation), context)
 }
+{{- else }}
+{{- end }}
