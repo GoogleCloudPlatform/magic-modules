@@ -1568,7 +1568,7 @@ func flatten{{ $.ResourceName -}}(d *schema.ResourceData, meta interface{}, res 
 
 {{- end}}
 
-{{if and $.CustomCode.Decoder (not $.FlattenAllInMethod)}}
+{{if $.CustomCode.Decoder }}
     res, err = resource{{ $.ResourceName -}}Decoder(d, meta, res)
     if err != nil {
         return err
@@ -1580,7 +1580,7 @@ func flatten{{ $.ResourceName -}}(d *schema.ResourceData, meta interface{}, res 
         d.SetId("")
         return nil
     }
-{{ end}}
+{{ end }}
 {{ range $prop := $.GettableProperties }}
 {{if $prop.FlattenObject -}}
 // Terraform must set the top level schema field, but since this object contains collapsed properties
