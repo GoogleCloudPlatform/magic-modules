@@ -888,6 +888,7 @@ func TestAccGKEHubFeature_WorkloadIdentity(t *testing.T) {
 func testAccGKEHubFeature_WorkloadIdentity(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_iam_workload_identity_pool" "fleet-pool" {
+  project = google_project.project.project_id
   workload_identity_pool_id = "fleet-pool%{random_suffix}"
   mode                      = "TRUST_DOMAIN"
 }
@@ -922,6 +923,7 @@ resource "google_gke_hub_feature" "feature" {
 func testAccGKEHubFeature_WorkloadIdentityUpdate(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_iam_workload_identity_pool" "other-fleet-pool" {
+  project = google_project.project.project_id
   workload_identity_pool_id = "my-other-fleet-pool%{random_suffix}"
   mode                      = "TRUST_DOMAIN"
 }
