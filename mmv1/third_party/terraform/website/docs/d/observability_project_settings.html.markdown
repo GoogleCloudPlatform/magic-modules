@@ -6,7 +6,11 @@ description: |-
 
 # google_observability_project_settings
 
-Describes the Google Cloud Observability settings associated with a project.
+Describes the Google Cloud Observability Settings associated with a project.
+
+To get more information about Observability Settings, see:
+
+* [API documentation](https://docs.cloud.google.com/stackdriver/docs/reference/observability/api/rest)
 
 ## Example Usage - Observability Project Settings Basic
 
