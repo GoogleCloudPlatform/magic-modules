@@ -184,12 +184,12 @@ prepare-temp:
 	@echo "Setting up temporary workspace for conversion at $(TEMP_DIR)..."
 	@rm -rf $(TEMP_DIR)
 	@mkdir -p $(TEMP_DIR)/mmv1 $(TEMP_DIR)/tpgtools $(TEMP_DIR)/tools
-	@cp -R ./mmv1/ $(TEMP_DIR)/mmv1/
-	@cp -R ./tpgtools/ $(TEMP_DIR)/tpgtools/
-	@cp -R ./tools/ $(TEMP_DIR)/tools/
-	@echo "Building and running resource template converter in temp..."
+	@echo "Copying files to $(TEMP_DIR)..."
+	@cp -R ./mmv1/. $(TEMP_DIR)/mmv1/
+	@cp -R ./tpgtools/. $(TEMP_DIR)/tpgtools/
+	@cp -R ./tools/. $(TEMP_DIR)/tools/
 	@echo "Building resource template converter in temp..."
-	cd $(TEMP_DIR)/tools/resource-template-converter && go env -w GO111MODULE=on && go mod tidy && go build -v -o $(TEMP_DIR)/tools/convert-resource-template .
+	cd $(TEMP_DIR)/tools/resource-template-converter && go env -w GO111MODULE=on && go mod tidy && go build -v -o $(TEMP_DIR)/tools/convert-resource-template . && echo "BUILD SUCCEEDED" || (echo "BUILD FAILED"; exit 1)
 	@echo "Build finished, running converter..."
 	@ls -la $(TEMP_DIR)/tools/convert-resource-template
 	@$(TEMP_DIR)/tools/convert-resource-template convert-resource-template $(TEMP_DIR)
