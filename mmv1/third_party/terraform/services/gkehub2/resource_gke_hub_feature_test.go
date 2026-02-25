@@ -887,6 +887,25 @@ func TestAccGKEHubFeature_WorkloadIdentity(t *testing.T) {
 
 func testAccGKEHubFeature_WorkloadIdentity(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
+resource "google_container_cluster" "cluster" {
+  name               = "tf-test%{random_suffix}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  project = google_project.project.project_id
+  deletion_protection = false
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
+}
+
+resource "google_gke_hub_membership" "membership" {
+  membership_id = "tf-test%{random_suffix}"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
+    }
+  }
+  project = google_project.project.project_id
+}
+
 resource "google_project_iam_member" "test-runner-workload-identity-admin" {
   project = google_project.project.project_id
   role = "roles/iam.workloadIdentityPoolAdmin"
@@ -897,6 +916,7 @@ resource "google_project_iam_member" "fleet-p4sa-workload-identity-admin" {
   project = google_project.project.project_id
   role = "roles/iam.workloadIdentityPoolAdmin"
   member = "serviceAccount:service-${google_project.project.number}@gcp-sa-gkehub.iam.gserviceaccount.com"
+  depends_on = [google_gke_hub_membership.membership]
 }
 
 resource "time_sleep" "wait_for_workload_identity_binding_propagation" {
@@ -927,6 +947,25 @@ resource "google_gke_hub_feature" "feature" {
 
 func testAccGKEHubFeature_WorkloadIdentityUpdate(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
+resource "google_container_cluster" "cluster" {
+  name               = "tf-test%{random_suffix}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  project = google_project.project.project_id
+  deletion_protection = false
+  depends_on = [time_sleep.wait_for_gkehub_enablement]
+}
+
+resource "google_gke_hub_membership" "membership" {
+  membership_id = "tf-test%{random_suffix}"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
+    }
+  }
+  project = google_project.project.project_id
+}
+
 resource "google_project_iam_member" "test-runner-workload-identity-admin" {
   project = google_project.project.project_id
   role = "roles/iam.workloadIdentityPoolAdmin"
@@ -937,6 +976,7 @@ resource "google_project_iam_member" "fleet-p4sa-workload-identity-admin" {
   project = google_project.project.project_id
   role = "roles/iam.workloadIdentityPoolAdmin"
   member = "serviceAccount:service-${google_project.project.number}@gcp-sa-gkehub.iam.gserviceaccount.com"
+  depends_on = [google_gke_hub_membership.membership]
 }
 
 resource "time_sleep" "wait_for_workload_identity_binding_propagation" {
