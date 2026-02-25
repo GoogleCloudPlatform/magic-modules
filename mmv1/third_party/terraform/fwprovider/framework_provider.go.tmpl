@@ -164,10 +164,15 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                 Optional:    true,
                 ElementType: types.StringType,
             },
-            "add_terraform_attribution_label": schema.BoolAttribute{
+
+            "terraform_attribution_label_addition_strategy": schema.StringAttribute{
                 Optional: true,
             },
-            "terraform_attribution_label_addition_strategy": schema.StringAttribute{
+            "prefer_global_endpoints": schema.BoolAttribute{
+                Optional: true,
+            },
+
+            "prefer_regional_endpoints": schema.BoolAttribute{
                 Optional: true,
             },
             // Generated Products
