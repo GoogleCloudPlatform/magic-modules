@@ -887,10 +887,22 @@ func TestAccGKEHubFeature_WorkloadIdentity(t *testing.T) {
 
 func testAccGKEHubFeature_WorkloadIdentity(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
+resource "google_project_iam_member" "test-runner-workload-identity-admin" {
+  project = google_project.project.project_id
+  role = "roles/iam.workloadIdentityPoolAdmin"
+  member = "serviceAccount:hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com"
+}
+
+resource "time_sleep" "wait_for_test-runner_binding_propagation" {
+  depends_on = [google_project_iam_member.test-runner-workload-identity-admin]
+  create_duration = "60s"
+}
+
 resource "google_iam_workload_identity_pool" "fleet-pool" {
   project = google_project.project.project_id
   workload_identity_pool_id = "fleet-pool%{random_suffix}"
   mode                      = "TRUST_DOMAIN"
+  depends_on = [time_sleep.wait_for_test-runner_binding_propagation]
 }
 
 resource "google_iam_workload_identity_pool_iam_member" "fleet-pool-p4sa-admin" {
@@ -903,7 +915,7 @@ resource "google_iam_workload_identity_pool_iam_member" "fleet-pool-p4sa-admin" 
 
 resource "time_sleep" "wait_for_fleet-pool_binding_propagation" {
   depends_on = [google_iam_workload_identity_pool_iam_member.fleet-pool-p4sa-admin]
-  create_duration = "45s"
+  create_duration = "60s"
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -922,10 +934,22 @@ resource "google_gke_hub_feature" "feature" {
 
 func testAccGKEHubFeature_WorkloadIdentityUpdate(context map[string]interface{}) string {
 	return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
+resource "google_project_iam_member" "test-runner-workload-identity-admin" {
+  project = google_project.project.project_id
+  role = "roles/iam.workloadIdentityPoolAdmin"
+  member = "serviceAccount:hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com"
+}
+
+resource "time_sleep" "wait_for_test-runner_binding_propagation" {
+  depends_on = [google_project_iam_member.test-runner-workload-identity-admin]
+  create_duration = "60s"
+}
+
 resource "google_iam_workload_identity_pool" "other-fleet-pool" {
   project = google_project.project.project_id
   workload_identity_pool_id = "my-other-fleet-pool%{random_suffix}"
   mode                      = "TRUST_DOMAIN"
+  depends_on = [time_sleep.wait_for_test-runner_binding_propagation]
 }
 
 resource "google_iam_workload_identity_pool_iam_member" "other-fleet-pool-p4sa-admin" {
@@ -938,7 +962,7 @@ resource "google_iam_workload_identity_pool_iam_member" "other-fleet-pool-p4sa-a
 
 resource "time_sleep" "wait_for_other-fleet-pool_binding_propagation" {
   depends_on = [google_iam_workload_identity_pool_iam_member.other-fleet-pool-p4sa-admin]
-  create_duration = "45s"
+  create_duration = "60s"
 }
 
 resource "google_gke_hub_feature" "feature" {
