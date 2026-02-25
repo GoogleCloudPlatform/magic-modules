@@ -26,4 +26,5 @@ resource "google_dataplex_entry" "{{$.PrimaryResourceId}}" {
          EOF
      }
    }
+  depends_on = [google_dataplex_glossary_term.example-glossary-term]
 }
