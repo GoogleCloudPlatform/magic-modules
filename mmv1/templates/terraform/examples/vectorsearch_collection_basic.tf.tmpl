@@ -1,6 +1,4 @@
 resource "google_vector_search_collection" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
-
   location      = "us-central1"
   collection_id = "{{index $.Vars "collection_id"}}"
 

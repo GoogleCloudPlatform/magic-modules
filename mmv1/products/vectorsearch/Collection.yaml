@@ -26,7 +26,6 @@ examples:
     primary_resource_id: "example-collection"
     vars:
       collection_id: "example-collection"
-    min_version: beta
 autogen_async: true
 async:
   operation:
@@ -154,4 +153,3 @@ properties:
           allow_empty_object: true
           send_empty_value: true
           properties: []
-min_version: beta
