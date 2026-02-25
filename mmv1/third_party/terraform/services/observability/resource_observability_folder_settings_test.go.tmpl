@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-
 {{ if ne $.TargetVersionName "ga" -}}
 func TestAccObservabilityFolderSettings_update(t *testing.T) {
 	t.Parallel()
@@ -135,11 +134,7 @@ resource "google_observability_folder_settings" "primary" {
 }
 `, context)
 }
-{{- else }}
-{{- end }}
 
-
-{{ if ne $.TargetVersionName "ga" -}}
 func TestAccObservabilityFolderSettings_globalUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -245,5 +240,4 @@ resource "google_observability_folder_settings" "primary_global" {
 }
 `, defaultLocation), context)
 }
-{{- else }}
 {{- end }}
