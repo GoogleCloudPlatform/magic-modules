@@ -88,6 +88,16 @@ examples:
       connection_name: 'tf-test-connection'
   - name: 'developer_connect_connection_bbdc_doc'
     exclude_test: true
+  - name: 'developer_connect_connection_http_conn_basic'
+    primary_resource_id: 'my-connection'
+    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
+    vars:
+      connection_name: 'tf-test-connection'
+  - name: 'developer_connect_connection_http_conn_bearer'
+    primary_resource_id: 'my-connection'
+    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
+    vars:
+      connection_name: 'tf-test-connection'
 autogen_async: true
 async:
   operation:
@@ -537,6 +547,49 @@ properties:
             type: String
             description: Output only. The username associated with this token.
             output: true
+  - name: httpConfig
+    type: NestedObject
+    description: Configuration for connections to an HTTP service provider.
+    properties:
+      - name: basicAuthentication
+        type: NestedObject
+        description: Basic authentication with username and password.
+        properties:
+          - name: passwordSecretVersion
+            type: String
+            description: The password SecretManager secret version to authenticate as.
+          - name: username
+            type: String
+            required: true
+            description: The username to authenticate as.
+      - name: bearerTokenAuthentication
+        type: NestedObject
+        description: Bearer token authentication with a token.
+        properties:
+          - name: tokenSecretVersion
+            type: String
+            description: The token SecretManager secret version to authenticate as.
+      - name: hostUri
+        type: String
+        required: true
+        description: The service provider's https endpoint.
+        immutable: true
+      - name: serviceDirectoryConfig
+        type: NestedObject
+        description: |-
+          ServiceDirectoryConfig represents Service Directory configuration for a
+          connection.
+        properties:
+          - name: service
+            type: String
+            required: true
+            description: |-
+              The Service Directory service name.
+              Format:
+              projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.
+      - name: sslCaCertificate
+        type: String
+        description: The SSL certificate to use for requests to the HTTP service provider.
   - name: createTime
     type: String
     description: Output only. [Output only] Create timestamp
