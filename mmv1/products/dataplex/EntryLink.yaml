@@ -32,6 +32,9 @@ custom_code:
   decoder: templates/terraform/decoders/dataplex_entry_link.go.tmpl
   encoder: templates/terraform/encoders/dataplex_entry_link.go.tmpl
 
+error_retry_predicates:
+  - 'transport_tpg.IsDataplex1PEntryNotFoundError'
+
 timeouts:
   insert_minutes: 20
   update_minutes: 20
