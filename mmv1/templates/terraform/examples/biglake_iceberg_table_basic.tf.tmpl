@@ -19,6 +19,7 @@ resource "google_biglake_iceberg_table" "my_iceberg_table" {
   catalog   = google_biglake_iceberg_catalog.catalog.name
   namespace = google_biglake_iceberg_namespace.namespace.namespace_id
   name      = "my_table_%{random_suffix}"
+  location  = "gs://${google_storage_bucket.bucket.name}/${google_biglake_iceberg_namespace.namespace.namespace_id}/my_table_%{random_suffix}"
   schema {
     type = "struct"
     fields {
@@ -26,12 +27,21 @@ resource "google_biglake_iceberg_table" "my_iceberg_table" {
       name     = "id"
       type     = "long"
       required = true
+      doc      = "The ID of the record"
     }
     fields {
       id       = 2
       name     = "name"
       type     = "string"
       required = false
+    }
+    identifier_field_ids = [1]
+  }
+  partition_spec {
+    fields {
+      name      = "id_partition"
+      source_id = 1
+      transform = "identity"
     }
   }
 }
