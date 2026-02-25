@@ -15,6 +15,7 @@
 name: 'IAM2'
 legacy_name: 'iam'
 display_name: 'Cloud IAM'
+deletion_policy_opt_in: true
 versions:
   - name: 'beta'
     base_url: 'https://iam.googleapis.com/v2beta/'
