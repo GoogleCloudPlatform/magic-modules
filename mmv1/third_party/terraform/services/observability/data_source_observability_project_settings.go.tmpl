@@ -1,5 +1,6 @@
 package observability
 
+{{if ne $.TargetVersionName "ga" -}}
 import (
 	"fmt"
 
@@ -97,3 +98,4 @@ func dataSourceObservabilityProjectSettingsRead(d *schema.ResourceData, meta int
 
 	return nil
 }
+{{- end }}

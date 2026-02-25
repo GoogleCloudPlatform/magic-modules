@@ -1,5 +1,6 @@
 package observability
 
+{{if ne $.TargetVersionName "ga" -}}
 import (
 	"encoding/json"
 	"errors"
@@ -89,3 +90,4 @@ func ObservabilityOperationWaitTime(config *transport_tpg.Config, op map[string]
 	}
 	return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }
+{{- end }}
