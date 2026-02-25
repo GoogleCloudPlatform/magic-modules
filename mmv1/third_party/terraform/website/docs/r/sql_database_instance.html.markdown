@@ -407,6 +407,13 @@ The `settings` block supports:
 
 * `user_labels` - (Optional) A set of key/value user label pairs to assign to the instance.
 
+* `auto_upgrade_enabled` - (Optional) Enables
+    [Automatic Version Upgrade](https://cloud.google.com/sql/docs/mysql/upgrade-minor-db-version#auto-upgrade)
+    feature. When this field is set to `true`, Automatic Upgrade is enabled for
+    `MYSQL_8_0` based minor versions. The `database_version` must be
+    `MYSQL_8_0_35` or higher. Can be used with MySQL only. Can't be unset or
+    changed if set to `true`.
+
 * `activation_policy` - (Optional) This specifies when the instance should be
     active. Can be either `ALWAYS`, `NEVER` or `ON_DEMAND`.
 
@@ -422,6 +429,8 @@ The `settings` block supports:
 * `collation` - (Optional) The name of server instance collation.
 
 * `connector_enforcement` - (Optional) Control the enforcement of Cloud SQL Auth Proxy or Cloud SQL connectors for all the connections, can be `REQUIRED` or `NOT_REQUIRED`. If enabled, all the direct connections are rejected.
+
+* `data_api_access` - (Optional) Configures ExecuteSql API's access to the instance. connections, can be `ALLOW_DATA_API` or `DISALLOW_DATA_API` (default). `ALLOW_DATA_API` allows using ExecuteSql API to connect to the instance. For private IP instances, this allows authorized users to access the instance from the public internet using ExecuteSql API.
 
 * `deletion_protection_enabled` - (Optional) Enables deletion protection of an instance at the GCP level. Enabling this protection will guard against accidental deletion across all surfaces (API, gcloud, Cloud Console and Terraform) by enabling the [GCP Cloud SQL instance deletion protection](https://cloud.google.com/sql/docs/postgres/deletion-protection). Terraform provider support was introduced in version 4.48.0. Defaults to `false`.
 

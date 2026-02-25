@@ -64,10 +64,8 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time,
 		templateFS:        templateFS,
 	}
 
-	t.Product.SetCompiler(ProviderName(t))
 	t.Product.ImportPath = ImportPathFromVersion(versionName)
 	for _, r := range t.Product.Objects {
-		r.SetCompiler(ProviderName(t))
 		r.ImportPath = t.Product.ImportPath
 	}
 
@@ -147,7 +145,7 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 				targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_fw_%s.go", t.ResourceGoFilename(object)))
 				templateData.GenerateFWResourceFile(targetFilePath, object)
 			} else {
-				log.Fatalf("please remove \"plugin_framework: true\" from the YAML configuration.")
+				log.Fatalf("please remove \"plugin_framework_experimental: true\" from the YAML configuration.")
 			}
 		} else {
 			targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s.go", t.ResourceGoFilename(object)))

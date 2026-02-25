@@ -56,7 +56,6 @@ iam_policy:
   parent_resource_attribute: 'image'
   iam_conditions_request_type: 'QUERY_PARAM'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 custom_code:
 examples:
   - name: 'image_basic'

@@ -83,12 +83,12 @@ properties:
       System generated unique id for the GlossaryTerm. This ID will be different if the GlossaryTerm is deleted and re-created with the same name.
     output: true
   - name: 'createTime'
-    type: Timestamp
+    type: Time
     description: |
       The time at which the GlossaryTerm was created.
     output: true
   - name: 'updateTime'
-    type: Timestamp
+    type: Time
     description: |
       The time at which the GlossaryTerm was last updated.
     output: true

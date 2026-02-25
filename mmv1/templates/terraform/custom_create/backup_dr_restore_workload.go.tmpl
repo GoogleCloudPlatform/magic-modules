@@ -76,9 +76,6 @@ billingProject := project
 obj := make(map[string]interface{})
 
 // ==================== Top-Level Request Fields ====================
-if v, ok := d.GetOk("name"); ok && v.(string) != "" {
-    obj["name"] = v.(string)
-}
 if v, ok := d.GetOk("request_id"); ok && v.(string) != "" {
     obj["requestId"] = v.(string)
 }

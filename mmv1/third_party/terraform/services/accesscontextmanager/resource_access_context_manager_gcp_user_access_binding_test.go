@@ -20,10 +20,6 @@ import (
 func testAccAccessContextManagerGcpUserAccessBinding_basicTest(t *testing.T) {
 	t.Parallel()
 
-	// Skip in VCR until the test issue is resolved
-	// https://github.com/hashicorp/terraform-provider-google/issues/24833
-	acctest.SkipIfVcr(t)
-
 	context := map[string]interface{}{
 		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"org_domain":    envvar.GetTestOrgDomainFromEnv(t),
@@ -105,7 +101,7 @@ resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_acces
     google_access_context_manager_access_level.tf_test_access_level_id_for_user_access_binding%{random_suffix}.name,
   ]
   session_settings {
-    session_length = "1800s"
+    session_length = "3600s"
     session_length_enabled = true
     session_reauth_method = "LOGIN"
     use_oidc_max_age = false
@@ -123,7 +119,7 @@ resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_acces
   		  google_access_context_manager_access_level.tf_test_access_level_id_for_user_access_binding%{random_suffix}.name,
   	  ]
   	  session_settings {
-  		  session_length = "1800s"
+  		  session_length = "3600s"
   		  session_length_enabled = true
   		  session_reauth_method = "LOGIN"
   		  use_oidc_max_age = false
@@ -186,7 +182,7 @@ resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_acces
     google_access_context_manager_access_level.tf_test_access_level_id_for_user_access_binding%{random_suffix}.name,
   ]
   session_settings {
-    session_length = "1800s"
+    session_length = "3600s"
     session_length_enabled = true
     session_reauth_method = "LOGIN"
     use_oidc_max_age = false
@@ -205,7 +201,7 @@ resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_acces
   	  ]
   	  session_settings {
   		  max_inactivity = "400s"
-  		  session_length = "1800s"
+  		  session_length = "3600s"
   		  session_length_enabled = true
   		  session_reauth_method = "LOGIN"
   		  use_oidc_max_age = false

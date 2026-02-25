@@ -22,7 +22,7 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/datastores/{{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/datastores/{{name}}
-datasource:
+datasource_experimental:
   generate: true
   exclude_test: true
 examples:

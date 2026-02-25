@@ -218,6 +218,7 @@ service/compute-l7-load-balancer:
   - google_compute_backend_bucket_signed_url_key
   - google_compute_backend_service
   - google_compute_backend_service_signed_url_key
+  - google_compute_region_backend_bucket.*
   - google_compute_region_backend_service
   - google_compute_global_forwarding_rule
   - google_compute_forwarding_rule.*
