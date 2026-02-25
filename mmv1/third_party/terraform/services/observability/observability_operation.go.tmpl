@@ -42,8 +42,8 @@ func (w *ObservabilityOperationWaiter) QueryOp() (interface{}, error) {
 	url := fmt.Sprintf("%s%s", w.Config.ObservabilityBasePath, w.CommonOperationWaiter.Op.Name)
 
 	return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    w.Config,
-		Method:    "GET",
+		Config: w.Config,
+		Method: "GET",
 
 		RawURL:    url,
 		UserAgent: w.UserAgent,
@@ -54,7 +54,6 @@ func createObservabilityWaiter(config *transport_tpg.Config, op map[string]inter
 	w := &ObservabilityOperationWaiter{
 		Config:    config,
 		UserAgent: userAgent,
-
 	}
 	if err := w.CommonOperationWaiter.SetOp(op); err != nil {
 		return nil, err

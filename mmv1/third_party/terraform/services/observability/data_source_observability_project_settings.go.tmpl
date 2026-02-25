@@ -29,8 +29,8 @@ func DataSourceObservabilityProjectSettings() *schema.Resource {
 				Description: `The default storage location for new resources, e.g. buckets. Only valid for global location.`,
 			},
 			"kms_key_name": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
 				Description: `The default Cloud KMS key to use for new resources. Only valid for regional locations.`,
 			},
 			"name": {
