@@ -896,7 +896,7 @@ resource "google_project_iam_member" "test-runner-workload-identity-admin" {
 resource "google_project_iam_member" "fleet-p4sa-workload-identity-admin" {
   project = google_project.project.project_id
   role = "roles/iam.workloadIdentityPoolAdmin"
-  member = "serviceAccount:${google_project.project.number}@gcp-sa-gkehub.iam.gserviceaccount.com"
+  member = "serviceAccount:service-${google_project.project.number}@gcp-sa-gkehub.iam.gserviceaccount.com"
 }
 
 resource "time_sleep" "wait_for_workload_identity_binding_propagation" {
@@ -936,7 +936,7 @@ resource "google_project_iam_member" "test-runner-workload-identity-admin" {
 resource "google_project_iam_member" "fleet-p4sa-workload-identity-admin" {
   project = google_project.project.project_id
   role = "roles/iam.workloadIdentityPoolAdmin"
-  member = "serviceAccount:${google_project.project.number}@gcp-sa-gkehub.iam.gserviceaccount.com"
+  member = "serviceAccount:service-${google_project.project.number}@gcp-sa-gkehub.iam.gserviceaccount.com"
 }
 
 resource "time_sleep" "wait_for_workload_identity_binding_propagation" {
