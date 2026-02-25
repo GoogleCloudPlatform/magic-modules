@@ -919,7 +919,7 @@ resource "google_gke_hub_feature" "feature" {
 	    scope_tenancy_pool = google_iam_workload_identity_pool.fleet-pool.name
     }
   }
-  depends_on = [time_sleep.wait_for_gkehub_enablement, time_sleep.wait_for_fleet-pool_binding_propagation, google_iam_workload_identity_pool.fleet-pool]
+  depends_on = [time_sleep.wait_for_gkehub_enablement, time_sleep.wait_for_workload_identity_binding_propagation, google_iam_workload_identity_pool.fleet-pool]
   project = google_project.project.project_id
 }
 `, context)
@@ -959,7 +959,7 @@ resource "google_gke_hub_feature" "feature" {
 	    scope_tenancy_pool = google_iam_workload_identity_pool.other-fleet-pool.name
     }
   }
-  depends_on = [time_sleep.wait_for_gkehub_enablement, time_sleep.wait_for_other-fleet-pool_binding_propagation, google_iam_workload_identity_pool.other-fleet-pool]
+  depends_on = [time_sleep.wait_for_gkehub_enablement, time_sleep.wait_for_workload_identity_binding_propagation, google_iam_workload_identity_pool.other-fleet-pool]
   project = google_project.project.project_id
 }
 `, context)
