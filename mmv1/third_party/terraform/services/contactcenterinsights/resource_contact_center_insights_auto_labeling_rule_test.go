@@ -60,7 +60,7 @@ resource "google_contact_center_insights_auto_labeling_rule" "auto_labeling_rule
   label_key = "%{resource_name}"
   conditions {
     condition = "true"
-    value = "\"label_value\""
+    value = "'label_value'"
   }
   active    = true
 }
@@ -78,7 +78,7 @@ resource "google_contact_center_insights_auto_labeling_rule" "auto_labeling_rule
   label_key = "%{resource_name}"
   conditions {
     condition = "true"
-    value = "\"label_value_updated\""
+    value = "'label_value_updated'"
   }
   active    = false
 }
