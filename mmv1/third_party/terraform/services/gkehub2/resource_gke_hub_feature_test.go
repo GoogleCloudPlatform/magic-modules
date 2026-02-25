@@ -893,8 +893,14 @@ resource "google_project_iam_member" "test-runner-workload-identity-admin" {
   member = "serviceAccount:hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com"
 }
 
-resource "time_sleep" "wait_for_test-runner_binding_propagation" {
-  depends_on = [google_project_iam_member.test-runner-workload-identity-admin]
+resource "google_project_iam_member" "fleet-p4sa-workload-identity-admin" {
+  project = google_project.project.project_id
+  role = "roles/iam.workloadIdentityPoolAdmin"
+  member = "serviceAccount:${google_project.project.number}@gcp-sa-gkehub.iam.gserviceaccount.com"
+}
+
+resource "time_sleep" "wait_for_workload_identity_binding_propagation" {
+  depends_on = [google_project_iam_member.test-runner-workload-identity-admin, google_project_iam_member.fleet-p4sa-workload-identity-admin]
   create_duration = "60s"
 }
 
@@ -902,20 +908,7 @@ resource "google_iam_workload_identity_pool" "fleet-pool" {
   project = google_project.project.project_id
   workload_identity_pool_id = "fleet-pool%{random_suffix}"
   mode                      = "TRUST_DOMAIN"
-  depends_on = [time_sleep.wait_for_test-runner_binding_propagation]
-}
-
-resource "google_iam_workload_identity_pool_iam_member" "fleet-pool-p4sa-admin" {
-  project = google_project.project.project_id
-  workload_identity_pool_id = google_iam_workload_identity_pool.fleet-pool.workload_identity_pool_id
-  role = "roles/iam.workloadIdentityPoolAdmin"
-  member = "serviceAccount:${google_project.project.number}@gcp-sa-gkehub.iam.gserviceaccount.com"
-  depends_on = [google_iam_workload_identity_pool.fleet-pool]
-}
-
-resource "time_sleep" "wait_for_fleet-pool_binding_propagation" {
-  depends_on = [google_iam_workload_identity_pool_iam_member.fleet-pool-p4sa-admin]
-  create_duration = "60s"
+  depends_on = [time_sleep.wait_for_workload_identity_binding_propagation]
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -940,8 +933,14 @@ resource "google_project_iam_member" "test-runner-workload-identity-admin" {
   member = "serviceAccount:hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com"
 }
 
-resource "time_sleep" "wait_for_test-runner_binding_propagation" {
-  depends_on = [google_project_iam_member.test-runner-workload-identity-admin]
+resource "google_project_iam_member" "fleet-p4sa-workload-identity-admin" {
+  project = google_project.project.project_id
+  role = "roles/iam.workloadIdentityPoolAdmin"
+  member = "serviceAccount:${google_project.project.number}@gcp-sa-gkehub.iam.gserviceaccount.com"
+}
+
+resource "time_sleep" "wait_for_workload_identity_binding_propagation" {
+  depends_on = [google_project_iam_member.test-runner-workload-identity-admin, google_project_iam_member.fleet-p4sa-workload-identity-admin]
   create_duration = "60s"
 }
 
@@ -949,22 +948,9 @@ resource "google_iam_workload_identity_pool" "other-fleet-pool" {
   project = google_project.project.project_id
   workload_identity_pool_id = "my-other-fleet-pool%{random_suffix}"
   mode                      = "TRUST_DOMAIN"
-  depends_on = [time_sleep.wait_for_test-runner_binding_propagation]
+  depends_on = [time_sleep.wait_for_workload_identity_binding_propagation]
 }
-
-resource "google_iam_workload_identity_pool_iam_member" "other-fleet-pool-p4sa-admin" {
-  project = google_project.project.project_id
-  workload_identity_pool_id = google_iam_workload_identity_pool.other-fleet-pool.workload_identity_pool_id
-  role = "roles/iam.workloadIdentityPoolAdmin"
-  member = "serviceAccount:${google_project.project.number}@gcp-sa-gkehub.iam.gserviceaccount.com"
-  depends_on = [google_iam_workload_identity_pool.other-fleet-pool]
-}
-
-resource "time_sleep" "wait_for_other-fleet-pool_binding_propagation" {
-  depends_on = [google_iam_workload_identity_pool_iam_member.other-fleet-pool-p4sa-admin]
-  create_duration = "60s"
-}
-
+  
 resource "google_gke_hub_feature" "feature" {
   name = "workloadidentity"
   location = "global"
