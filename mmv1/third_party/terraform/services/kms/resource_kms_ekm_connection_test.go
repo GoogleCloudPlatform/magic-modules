@@ -56,7 +56,7 @@ data "google_secret_manager_secret_version" "servicedirectoryservice" {
   project = "315636579862"
 }
 data "google_project" "vpc-project" {
-  project_id = "cloud-ekm-refekm-playground"
+  project_id = "refekm-gdu-prod"
 }
 data "google_project" "project" {
 }
