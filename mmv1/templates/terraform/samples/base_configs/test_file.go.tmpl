@@ -15,14 +15,14 @@
 //
 // ----------------------------------------------------------------------------
 
-package {{ $.Res.PackageName }}_test
-
-{{- $needsPlancheck := false -}}
+{{ $needsPlancheck := false -}}
 {{- range $s := $.Res.TestSamples -}}
   {{- if gt (len $s.TestSteps) 1 -}}
     {{- $needsPlancheck = true -}}
   {{- end -}}
 {{- end -}}
+
+package {{ $.Res.PackageName }}_test
 
 import (
 	"fmt"
