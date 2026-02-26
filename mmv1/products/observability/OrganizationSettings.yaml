@@ -23,14 +23,11 @@ create_verb: 'PATCH'
 update_url: 'organizations/{{organization}}/locations/{{location}}/settings'
 update_verb: 'PATCH'
 exclude_delete: true
-autogen_async: false
+autogen_async: true
 
-# We can't hardcode the mask into the URL, because the API will reject requests
-# if the mask contains fields that are not allowed for the location.
-# So we must inject custom code to dynamically build the mask.
 custom_code:
-  custom_create: templates/terraform/custom_create/observability_organization_settings_create.go.tmpl
-  custom_update: templates/terraform/custom_update/observability_organization_settings_update.go.tmpl
+  pre_create: templates/terraform/pre_create/observability_organization_settings.go.tmpl
+  pre_update: templates/terraform/pre_update/observability_organization_settings.go.tmpl
 import_format:
   - 'organizations/{{organization}}/locations/{{location}}/settings'
 
