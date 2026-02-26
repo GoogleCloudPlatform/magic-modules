@@ -17,8 +17,6 @@ display_name: Vector Search
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 versions:
-  - base_url: https://vectorsearch.googleapis.com/v1/
-    name: ga
   - base_url: https://vectorsearch.googleapis.com/v1beta/
     name: beta
 resourceswithcaiassettype: {}
