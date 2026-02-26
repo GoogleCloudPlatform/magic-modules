@@ -54,10 +54,11 @@ func testAccObservabilityProjectSettings_datasource(context map[string]interface
 	}
 
 	resource "google_observability_project_settings" "settings" {
-		provider   = "google-beta"
-		project    = google_project.default.project_id
-		location   = "%{location}"
-		depends_on = [time_sleep.wait_for_project]
+		provider     = "google-beta"
+		project      = google_project.default.project_id
+		location     = "%{location}"
+		kms_key_name = ""
+		depends_on   = [time_sleep.wait_for_project]
 	}
 
 	data "google_observability_project_settings" "settings" {

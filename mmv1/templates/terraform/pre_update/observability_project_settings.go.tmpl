@@ -1,16 +1,18 @@
 var masks []string
 if d.HasChange("default_storage_location") {
-  masks = append(masks, "defaultStorageLocation")
+	masks = append(masks, "defaultStorageLocation")
+	obj["defaultStorageLocation"] = d.Get("default_storage_location").(string)
 }
 if d.HasChange("kms_key_name") {
-  masks = append(masks, "kmsKeyName")
+	masks = append(masks, "kmsKeyName")
+	obj["kmsKeyName"] = d.Get("kms_key_name").(string)
 }
 
 if len(masks) > 0 {
-  url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(masks, ",")})
-  if err != nil {
-    return err
-  }
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(masks, ",")})
+	if err != nil {
+		return err
+	}
 } else {
-  return fmt.Errorf("Cannot update ProjectSettings: no fields changed")
+	return fmt.Errorf("Cannot update ProjectSettings: no fields changed")
 }
