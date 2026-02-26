@@ -502,8 +502,21 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
     return func() (map[string]interface{}, error) {
         config := meta.(*transport_tpg.Config)
 
+{{- if $.ProductMetadata.Version.RepEnabled }}
+        urlFormatted, err := tpgresource.ReplaceVars(d, config, "{{$.CreateUri}}")
+        if err != nil {
+            return err
+        }
+        loc := tpgresource.LocationFromId(urlFormatted)
+
+        basePath := tpgresource.RepQualifiedBasePath(transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config), loc)
+
+        url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.SelfLinkUri}}")
+        url = fmt.Sprintf("%s%s", basePath, url)
+{{ else }}
 
         url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}")
+{{- end }}
 
         if err != nil {
             return nil, err
@@ -951,7 +964,22 @@ if len(updateMask) > 0 {
 if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $group)) "\") || d.HasChange(\""}}") {
         obj := make(map[string]interface{})
 {{		            if $group.FingerprintName }}
+{{- if $.ProductMetadata.Version.RepEnabled }}
+        urlFormatted, err := tpgresource.ReplaceVars(d, config, "{{$.SelfLinkUri}}")
+        if err != nil {
+            return err
+        }
+        loc := tpgresource.LocationFromId(urlFormatted)
+
+        basePath := tpgresource.RepQualifiedBasePath(transport_tpg.ResourceBasePath(config.{{$.ProductMetadata.Name}}BasePath, config.{{$.ProductMetadata.Name}}RepBasePath, "{{$.ProductMetadata.Name}}", config), loc)
+        
+        getUrl, err := tpgresource.ReplaceVars(d, config, "{{ $.UpdateUri }}")
+        getUrl = fmt.Sprintf("%s%s", basePath, getUrl)
+{{ else }}
+
         getUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}")
+{{- end }}
+        
         if err != nil {
             return err
         }
