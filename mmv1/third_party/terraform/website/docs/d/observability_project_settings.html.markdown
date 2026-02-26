@@ -23,24 +23,4 @@ data "google_observability_project_settings" "settings" {
 
 ## Argument Reference
 
-The following arguments are supported:
-
-- - -
-
-* `project` - (Required) The project for which to retrieve settings.
-
-* `location` - (Required) The location of the settings.
-
-## Attributes Reference
-
-In addition to the arguments listed above, the following computed attributes are exported:
-
-* `id` - an identifier for the resource with format `projects/{{project}}/locations/{{location}}/settings`
-
-* `name` - The resource name of the settings.
-
-* `default_storage_location` - The default storage location for new resources, e.g. buckets. Only valid for global location.
-
-* `kms_key_name` - The default Cloud KMS key to use for new resources. Only valid for regional locations.
-
-* `service_account_id` - The service account used by Cloud Observability for this project.
+See [observability_project_settings](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/observability_project_settings#argument-reference) resource for details of the available attributes.
