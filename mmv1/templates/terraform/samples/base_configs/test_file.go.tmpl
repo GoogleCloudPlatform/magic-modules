@@ -15,6 +15,13 @@
 //
 // ----------------------------------------------------------------------------
 
+{{ $needsPlancheck := false -}}
+{{- range $s := $.Res.TestSamples -}}
+  {{- if gt (len $s.TestSteps) 1 -}}
+    {{- $needsPlancheck = true -}}
+  {{- end -}}
+{{- end -}}
+
 package {{ $.Res.PackageName }}_test
 
 import (
@@ -26,7 +33,9 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+{{- if $needsPlancheck }}
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+{{- end }}
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"{{ $.ImportPath }}/acctest"
