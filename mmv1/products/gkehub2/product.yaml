@@ -15,6 +15,7 @@
 name: 'GKEHub2'
 legacy_name: 'gke_hub'
 display_name: 'GKEHub'
+deletion_policy_opt_in: true
 versions:
   - name: 'beta'
     base_url: 'https://gkehub.googleapis.com/v1beta/'
