@@ -1744,7 +1744,7 @@ func TestAccSqlDatabaseInstance_crossProjectClone(t *testing.T) {
 				Config: testAccSqlDatabaseInstance_crossProjectClone(context),
 			},
 			{
-				ResourceName:            "google_sql_database_instance.cloned_instance",
+				ResourceName:            "google_sql_database_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection", "clone"},
@@ -8297,7 +8297,7 @@ func testAccSqlDatabaseInstance_crossProjectClone(context map[string]interface{}
 			data "google_project" "destination_project" {
 				project_id = "%{cloneDestinationProject}"
 			}
-			resource "google_sql_database_instance" "cloned_instance" {
+			resource "google_sql_database_instance" "instance" {
 				name             = "clone-cpc-testing-via-acc-tests"
 				database_version = "POSTGRES_11"
 				region           = "us-central1"
