@@ -1,4 +1,3 @@
-
 package vertexai_test
 
 import (

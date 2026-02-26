@@ -1,4 +1,3 @@
-
 package firebasedataconnect_test
 
 import (

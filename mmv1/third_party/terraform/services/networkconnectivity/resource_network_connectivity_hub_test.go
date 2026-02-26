@@ -1,4 +1,3 @@
-
 package networkconnectivity_test
 
 import (

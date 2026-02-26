@@ -1,4 +1,3 @@
-
 package firebaseapphosting_test
 
 import (

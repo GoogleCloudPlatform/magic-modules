@@ -1,6 +1,6 @@
 /*
-	This file is a copy of mmv1/third_party/terraform/services/bigquery/iam_bigquery_dataset.go
-	with new functions mergeAccess and GetCurrentResourceAccess
+This file is a copy of mmv1/third_party/terraform/services/bigquery/iam_bigquery_dataset.go
+with new functions mergeAccess and GetCurrentResourceAccess
 */
 package bigquery
 
