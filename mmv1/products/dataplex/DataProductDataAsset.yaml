@@ -12,14 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'DataAsset'
-deprecation_message: >-
-  `google_dataplex_data_asset` is deprecated and will be removed in a future major release. Please use `google_dataplex_data_product_data_asset` resource instead.
+name: 'DataProductDataAsset'
 description: |
   A data asset resource that can be packaged and shared via a data product.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/dataplex/docs'
+    'Official Documentation': 'https://docs.cloud.google.com/dataplex/docs/manage-data-products'
   api: 'https://cloud.google.com/dataplex/docs/reference/rest/v1/projects.locations.dataProducts.dataAssets'
 min_version: beta
 
@@ -87,17 +85,17 @@ properties:
           description: 'IAM roles granted on the resource.'
 
 examples:
-  - name: 'dataplex_data_asset_basic'
+  - name: 'dataplex_data_product_data_asset_basic'
     primary_resource_id: 'example'
     vars:
       data_product_id: 'data-product'
-      data_asset_id: 'data-asset'
+      data_asset_id: 'data-product-data-asset'
     test_env_vars:
       project_name: 'PROJECT_NAME'
-  - name: 'dataplex_data_asset_full'
+  - name: 'dataplex_data_product_data_asset_full'
     primary_resource_id: 'example'
     vars:
       data_product_id: 'data-product'
-      data_asset_id: 'data-asset'
+      data_asset_id: 'data-product-data-asset'
     test_env_vars:
       project_name: 'PROJECT_NAME'
