@@ -906,12 +906,6 @@ resource "google_gke_hub_membership" "membership" {
   project = google_project.project.project_id
 }
 
-resource "google_project_iam_member" "test-runner-workload-identity-admin" {
-  project = google_project.project.project_id
-  role = "roles/iam.workloadIdentityPoolAdmin"
-  member = "serviceAccount:hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com"
-}
-
 resource "google_project_iam_member" "fleet-p4sa-workload-identity-admin" {
   project = google_project.project.project_id
   role = "roles/iam.workloadIdentityPoolAdmin"
@@ -920,7 +914,7 @@ resource "google_project_iam_member" "fleet-p4sa-workload-identity-admin" {
 }
 
 resource "time_sleep" "wait_for_workload_identity_binding_propagation" {
-  depends_on = [google_project_iam_member.test-runner-workload-identity-admin, google_project_iam_member.fleet-p4sa-workload-identity-admin]
+  depends_on = [google_project_iam_member.fleet-p4sa-workload-identity-admin]
   create_duration = "60s"
 }
 
@@ -966,12 +960,6 @@ resource "google_gke_hub_membership" "membership" {
   project = google_project.project.project_id
 }
 
-resource "google_project_iam_member" "test-runner-workload-identity-admin" {
-  project = google_project.project.project_id
-  role = "roles/iam.workloadIdentityPoolAdmin"
-  member = "serviceAccount:hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com"
-}
-
 resource "google_project_iam_member" "fleet-p4sa-workload-identity-admin" {
   project = google_project.project.project_id
   role = "roles/iam.workloadIdentityPoolAdmin"
@@ -980,7 +968,7 @@ resource "google_project_iam_member" "fleet-p4sa-workload-identity-admin" {
 }
 
 resource "time_sleep" "wait_for_workload_identity_binding_propagation" {
-  depends_on = [google_project_iam_member.test-runner-workload-identity-admin, google_project_iam_member.fleet-p4sa-workload-identity-admin]
+  depends_on = [google_project_iam_member.fleet-p4sa-workload-identity-admin]
   create_duration = "60s"
 }
 
