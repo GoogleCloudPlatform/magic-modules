@@ -26,8 +26,8 @@ exclude_delete: true
 autogen_async: true
 
 custom_code:
-  pre_create: templates/terraform/pre_create/observability_settings.go.tmpl
-  pre_update: templates/terraform/pre_update/observability_settings.go.tmpl
+  pre_create: templates/terraform/pre_create/observability_folder_settings.go.tmpl
+  pre_update: templates/terraform/pre_update/observability_folder_settings.go.tmpl
 import_format:
   - 'folders/{{folder}}/locations/{{location}}/settings'
 
