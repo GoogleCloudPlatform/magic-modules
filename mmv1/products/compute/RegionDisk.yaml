@@ -63,6 +63,8 @@ custom_code:
   decoder: 'templates/terraform/decoders/disk.tmpl'
   update_encoder: 'templates/terraform/update_encoder/hyper_disk.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/detach_disk.tmpl'
+  post_import: 'templates/terraform/post_import/disk.go.tmpl'
+  post_read: 'templates/terraform/post_read/disk.go.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSuppress'
@@ -413,6 +415,13 @@ properties:
     default_from_api: true
     update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}?paths=provisionedThroughput'
     update_verb: 'PATCH'
+  - name: 'eraseWindowsVssSignature'
+    type: Boolean
+    description: |
+      Specifies whether the disk restored from a source snapshot should erase Windows specific VSS signature.
+    min_version: 'beta'
+    ignore_read: true
+    default_value: false
 virtual_fields:
   - name: 'create_snapshot_before_destroy'
     type: Boolean
