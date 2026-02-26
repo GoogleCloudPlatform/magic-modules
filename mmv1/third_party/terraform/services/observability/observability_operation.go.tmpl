@@ -77,7 +77,22 @@ func ObservabilityOperationWaitTimeWithResponse(config *transport_tpg.Config, op
 	return json.Unmarshal(rawResponse, response)
 }
 
-func ObservabilityOperationWaitTime(config *transport_tpg.Config, op map[string]interface{}, activity, userAgent string, timeout time.Duration) error {
+func ObservabilityOperationWaitTime(config *transport_tpg.Config, op map[string]interface{}, projectOrActivity interface{}, activityOrUserAgent interface{}, userAgentOrTimeout interface{}, optionalTimeout ...interface{}) error {
+	var activity, userAgent string
+	var timeout time.Duration
+
+	if len(optionalTimeout) == 0 {
+		// 5 arguments total
+		activity = projectOrActivity.(string)
+		userAgent = activityOrUserAgent.(string)
+		timeout = userAgentOrTimeout.(time.Duration)
+	} else {
+		// 6 arguments total (project is projectOrActivity)
+		activity = activityOrUserAgent.(string)
+		userAgent = userAgentOrTimeout.(string)
+		timeout = optionalTimeout[0].(time.Duration)
+	}
+
 	if val, ok := op["name"]; !ok || val == "" {
 		// This was a synchronous call - there is no operation to wait for.
 		return nil

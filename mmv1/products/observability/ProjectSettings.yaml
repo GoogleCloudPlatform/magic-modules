@@ -32,8 +32,8 @@ autogen_async: false
 # if the mask contains fields that are not allowed for the location.
 # So we must inject custom code to dynamically build the mask.
 custom_code:
-  custom_create: templates/terraform/custom_create/observability_project_settings_create.go.tmpl
-  custom_update: templates/terraform/custom_update/observability_project_settings_update.go.tmpl
+  pre_create: templates/terraform/pre_create/observability_project_settings.go.tmpl
+  pre_update: templates/terraform/pre_update/observability_project_settings.go.tmpl
 
 async:
   operation:

@@ -1,0 +1,19 @@
+	var masks []string
+	if d.HasChange("default_storage_location") {
+		masks = append(masks, "defaultStorageLocation")
+	}
+	if d.HasChange("kms_key_name") {
+		masks = append(masks, "kmsKeyName")
+	}
+
+	if len(masks) > 0 {
+		url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(masks, ",")})
+		if err != nil {
+			return err
+		}
+	} else {
+        // Since we are overriding updateMask calculation manually, there is no automatic check natively.
+        // We should skip update if no fields changed. But if the object is sent it will just be a no-op patch.
+        // Returning nil here isn't great, let's keep the existing behaviour:
+        return fmt.Errorf("Cannot update ProjectSettings: no fields changed")
+    }
