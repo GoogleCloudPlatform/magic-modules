@@ -17,3 +17,25 @@ description: Container Cluster
 exclude: true
 include_in_tgc_next: true
 tgc_test_only: true
+tgc_tests:
+  - name: TestAccContainerCluster_cloudDns_nil_scope
+    skip: "Nil value incompatible with test"
+  - name: TestAccContainerCluster_withReleaseChannelEnabledDefaultVersion
+    skip: "Nil value incompatible with test"
+  - name: TestAccContainerCluster_updateMaintenanceExclusionOptions_untilEndOfSupport
+    skip: "maintenancePolicy endTime appears in cai asset when not in config, breaking the test"
+properties:
+  - name: removeDefaultNodePool
+    type: Boolean
+    is_missing_in_cai: true
+  - name: nodePool
+    type: Array
+    item_type:
+      type: NestedObject
+      properties:
+        - name: nodeCount
+          type: Integer
+          is_missing_in_cai: true
+        - name: namePrefix
+          type: String
+          is_missing_in_cai: true
