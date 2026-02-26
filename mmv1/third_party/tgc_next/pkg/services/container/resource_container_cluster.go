@@ -1479,6 +1479,18 @@ func ResourceContainerCluster() *schema.Resource {
 
 			"node_config": schemaNodeConfig(),
 
+			"node_pool": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				ForceNew: true, // TODO: Add ability to add/remove nodePools
+				Elem: &schema.Resource{
+					Schema: schemaNodePool,
+				},
+				Description:   `List of node pools associated with this cluster. See google_container_node_pool for schema. Warning: node pools defined inside a cluster can't be changed (or added/removed) after cluster creation without deleting and recreating the entire cluster. Unless you absolutely need the ability to say "these are the only node pools associated with this cluster", use the google_container_node_pool resource instead of this property.`,
+				ConflictsWith: []string{"enable_autopilot"},
+			},
+
 			"node_pool_defaults": clusterSchemaNodePoolDefaults(),
 
 			"node_pool_auto_config": {

@@ -2917,6 +2917,23 @@ func flattenNodePoolAutoConfigNodeKubeletConfig(v interface{}) []map[string]inte
 	return []map[string]interface{}{transformed}
 }
 
+func flattenNodePoolAutoConfigLinuxNodeConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	transformed := map[string]interface{}{
+		"cgroup_mode":                c["cgroupMode"],
+		"node_kernel_module_loading": flattenNodeKernelModuleLoading(c["nodeKernelModuleLoading"]),
+	}
+
+	return []map[string]interface{}{transformed}
+}
+
 func flattenEvictionSignals(v interface{}) []map[string]interface{} {
 	if v == nil {
 		return nil
