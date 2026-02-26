@@ -39,7 +39,7 @@ added to that resource. You can create a new datasource of this type as follows:
     // Set 'Required' schema elements
     tpgresource.AddRequiredFieldsToSchema(dsSchema, "name")
     // Set 'Optional' schema elements
-    tpgresource.AddOptionalFieldsToSchema(dsSchema, "project", "region")
+    tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
 
     return &schema.Resource{
       Read:   dataSourceMemcacheInstanceRead,
@@ -50,19 +50,11 @@ added to that resource. You can create a new datasource of this type as follows:
    func dataSourceMemcacheInstanceRead(d *schema.ResourceData, meta interface{}) error {
     config := meta.(*transport_tpg.Config)
 
-    region, err := tpgresource.GetRegion(d, config)
-    if err != nil {
-      return err
-    }
-
     id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{region}}/instances/{{name}}")
     if err != nil {
       return fmt.Errorf("Error constructing id: %s", err)
     }
     d.SetId(id)
-
-    // Setting location field, as this is set as a required field in instance resource to build the url
-    d.Set("region", region)
 
     err = resourceMemcacheInstanceRead(d, meta)
     if err != nil {
@@ -200,7 +192,7 @@ the same as for a [handwritten resource]({{< ref "/develop/add-fields" >}}).
    - For resource-based datasources, the "Attribute reference" section should link to the resource documentation so that it doesn't need to be updated as new fields are added. For example:
      ```markdown
      ## Attributes Reference
-     
+
      See [google_memcache_instance](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/memcache_instance) resource for details of all the available attributes.
      ```
 4. [Generate the providers]({{< ref "/develop/generate-providers" >}})
