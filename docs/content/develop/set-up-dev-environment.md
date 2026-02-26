@@ -40,7 +40,12 @@ development environment.
    cd ~
    git clone https://github.com/GoogleCloudPlatform/magic-modules.git
    ```
+1. Clone the `google` and `google-beta` provider repositories with the following commands:
 
+   ```bash
+   git clone https://github.com/hashicorp/terraform-provider-google.git $GOPATH/src/github.com/hashicorp/terraform-provider-google
+   git clone https://github.com/hashicorp/terraform-provider-google-beta.git $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+   ```
 1. Run the following command from the root of your cloned `magic-modules` repository.
   
    ```bash
