@@ -197,5 +197,11 @@ the same as for a [handwritten resource]({{< ref "/develop/add-fields" >}}).
 1. Open the data source documentation in [`magic-modules/third_party/terraform/website/docs/d/`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/d) using an editor of your choice.
    - The name of the file is the name of the data source without a `google_` prefix. For example, for `google_compute_instance`, the file is called `compute_instance.html.markdown`
 2. Modify the documentation as needed according to [Handwritten documentation style guide]({{< ref "/document/handwritten-docs-style-guide" >}}).
+   - For resource-based datasources, the "Attribute reference" section should link to the resource documentation so that it doesn't need to be updated as new fields are added. For example:
+     ```markdown
+     ## Attributes Reference
+     
+     See [google_memcache_instance](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/memcache_instance) resource for details of all the available attributes.
+     ```
 4. [Generate the providers]({{< ref "/develop/generate-providers" >}})
 5. Copy and paste the generated documentation into the Hashicorp Registry's [Doc Preview Tool](https://registry.terraform.io/tools/doc-preview) to see how it is rendered.
