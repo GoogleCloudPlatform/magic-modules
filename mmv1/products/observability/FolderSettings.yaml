@@ -77,7 +77,7 @@ examples:
     external_providers: ["time"]
     vars:
       location: "us"
-      kms_key_name: "example-key" # Placeholder, will be overridden
+      kms_key_name: "example-key"
       folder_name: "tf-test-folder"
     test_env_vars:
       org_id: 'ORG_ID'
