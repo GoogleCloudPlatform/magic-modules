@@ -663,7 +663,7 @@ resource "google_network_services_gateway" "default" {
 `, context)
 }
 
-{{ if ne eq $.MinVersionObj.Name "ga" }}
+{{ if ne $.MinVersion "ga" }}
 func TestAccComputeServiceAttachment_serviceAttachmentEndpointUrl(t *testing.T) {
 	t.Parallel()
 
