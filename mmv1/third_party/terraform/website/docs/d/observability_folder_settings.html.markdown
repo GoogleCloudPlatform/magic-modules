@@ -1,0 +1,46 @@
+---
+subcategory: "Cloud Observability"
+description: |-
+  Describes the Google Cloud Observability settings associated with a folder.
+---
+
+# google_observability_folder_settings
+
+Describes the Google Cloud Observability Settings associated with a folder.
+
+To get more information about Observability Settings, see:
+
+* [API documentation](https://docs.cloud.google.com/stackdriver/docs/reference/observability/api/rest)
+
+## Example Usage - Observability Folder Settings Basic
+
+```hcl
+data "google_observability_folder_settings" "settings" {
+  folder   = "my-folder-name"
+  location = "global"
+}
+```
+
+## Argument Reference
+
+The following arguments are supported:
+
+- - -
+
+* `folder` - (Required) The folder for which to retrieve settings.
+
+* `location` - (Required) The location of the settings.
+
+## Attributes Reference
+
+In addition to the arguments listed above, the following computed attributes are exported:
+
+* `id` - an identifier for the resource with format `folders/{{folder}}/locations/{{location}}/settings`
+
+* `name` - The resource name of the settings.
+
+* `default_storage_location` - The default storage location for new resources, e.g. buckets. Only valid for global location.
+
+* `kms_key_name` - The default Cloud KMS key to use for new resources. Only valid for regional locations.
+
+* `service_account_id` - The service account used by Cloud Observability for this folder.
