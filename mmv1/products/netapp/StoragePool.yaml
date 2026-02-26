@@ -269,3 +269,4 @@ properties:
       - 'SCALE_TIER_ENTERPRISE'
     immutable: true
     min_version: beta
+    default_from_api: true

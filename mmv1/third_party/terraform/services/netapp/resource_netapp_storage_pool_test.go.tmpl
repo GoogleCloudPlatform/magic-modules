@@ -846,54 +846,6 @@ func TestAccNetappStoragePool_ScaleTierEnterprise(t *testing.T) {
 	})
 }
 
-func testAccNetappStoragePool_ontapMode(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-
-data "google_compute_network" "default" {
-  name = "%{network_name}"
-}
-
-resource "google_netapp_storage_pool" "test_pool" {
-  	name           = "tf-test-pool%{random_suffix}"
-  	location       = "us-central1-a"
-	service_level  = "FLEX"
-	type           = "UNIFIED"
-	mode           = "ONTAP"
-	capacity_gib   = "2048"
-	network        = data.google_compute_network.default.id
-	description    = "testing ontap mode"
-	labels         = {
-	    key = "test"
-	    value = "pool"
-	}
-}
-`, context)
-}
-
-func testAccNetappStoragePool_ontapModeUpdate(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-
-data "google_compute_network" "default" {
-	name = "%{network_name}"
-}
-
-resource "google_netapp_storage_pool" "test_pool" {
-	name           = "tf-test-pool%{random_suffix}"
-	location       = "us-central1-a"
-	service_level  = "FLEX"
-	type           = "UNIFIED"
-	mode           = "ONTAP"
-	capacity_gib   = "2048"
-	network        = data.google_compute_network.default.id
-	description    = "updated description"
-	labels                = {
-        key = "test"
-        value = "pool"
-    }
-	total_throughput_mibps = "200"
-}
-`, context)
-}
 func testAccNetappStoragePool_ScaleTierEnterprise(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "test_pool" {
