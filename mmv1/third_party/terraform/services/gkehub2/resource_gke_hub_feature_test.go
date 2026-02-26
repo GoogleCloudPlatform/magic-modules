@@ -893,6 +893,9 @@ resource "google_container_cluster" "cluster" {
   initial_node_count = 1
   project = google_project.project.project_id
   deletion_protection = false
+  workload_identity_config {
+    workload_pool = "${google_project.project.project_id}.svc.id.goog"
+  }
   depends_on = [time_sleep.wait_for_gkehub_enablement]
 }
 
@@ -950,6 +953,9 @@ resource "google_container_cluster" "cluster" {
   initial_node_count = 1
   project = google_project.project.project_id
   deletion_protection = false
+  workload_identity_config {
+    workload_pool = "${google_project.project.project_id}.svc.id.goog"
+  }
   depends_on = [time_sleep.wait_for_gkehub_enablement]
 }
 
