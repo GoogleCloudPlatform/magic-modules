@@ -1,3 +1,4 @@
+// Do NOT include the func signature here. Magic Modules wraps this automatically.
 userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 if err != nil {
 	return err
@@ -8,47 +9,37 @@ if err != nil {
 	return err
 }
 
-// 1. Handle Display Name Update
-if d.HasChange("display_name") {
-	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ChronicleBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/instances/{{"{{"}}instance{{"}}"}}/feeds/{{"{{"}}feed{{"}}"}}?updateMask=display_name")
+// 1. Handle Standard Field Updates (PATCH)
+// If fields like display_name or details changed, we call the standard UpdateFeed method.
+if d.HasChange("display_name") || d.HasChange("details") {
+	// Construct the update URL with the field mask
+	updateMask := []string{}
+	if d.HasChange("display_name") {
+		updateMask = append(updateMask, "display_name")
+	}
+	if d.HasChange("details") {
+		updateMask = append(updateMask, "details")
+	}
+
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ChronicleBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/instances/{{"{{"}}instance{{"}}"}}/feeds/{{"{{"}}feed{{"}}"}}")
+	if err != nil {
+		return err
+	}
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 	if err != nil {
 		return err
 	}
 
-	displayNamePayload := map[string]interface{}{
-		"name":        d.Get("name"),
-		"displayName": d.Get("display_name"),
-	}
-
-	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "PATCH",
-		Project:   project,
-		RawURL:    url,
-		UserAgent: userAgent,
-		Body:      displayNamePayload,
-		Timeout:   d.Timeout(schema.TimeoutUpdate),
-	})
-	if err != nil {
-		return fmt.Errorf("Error updating Feed Display Name: %s", err)
-	}
-}
-
-// 2. Handle Details Update
-if d.HasChange("details") {
-	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ChronicleBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/instances/{{"{{"}}instance{{"}}"}}/feeds/{{"{{"}}feed{{"}}"}}?updateMask=details")
-	if err != nil {
-		return err
-	}
-
+	// Construct the payload
 	expandedDetails, err := expandChronicleFeedDetails(d.Get("details"), d, config)
 	if err != nil {
 		return err
 	}
 
-	detailsPayload := map[string]interface{}{
-		"name":    d.Get("name"),
-		"details": expandedDetails,
+	payload := map[string]interface{}{
+		"name":        d.Get("name"),
+		"displayName": d.Get("display_name"),
+		"details":     expandedDetails,
 	}
 
 	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -57,25 +48,26 @@ if d.HasChange("details") {
 		Project:   project,
 		RawURL:    url,
 		UserAgent: userAgent,
-		Body:      detailsPayload,
+		Body:      payload,
 		Timeout:   d.Timeout(schema.TimeoutUpdate),
 	})
 	if err != nil {
-		return fmt.Errorf("Error updating Feed Details: %s", err)
+		return fmt.Errorf("Error updating Feed fields: %s", err)
 	}
 }
 
-// 3. Handle Enable/Disable
+// 2. Handle Enable/Disable Transitions (POST)
+// If the 'enabled' boolean changed, call the appropriate custom RPC.
 if d.HasChange("enabled") {
 	_, newEnabled := d.GetChange("enabled")
-	var url string
-
+	var action string
 	if newEnabled.(bool) {
-		url, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}ChronicleBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/instances/{{"{{"}}instance{{"}}"}}/feeds/{{"{{"}}feed{{"}}"}}:enable")
+		action = ":enable"
 	} else {
-		url, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}ChronicleBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/instances/{{"{{"}}instance{{"}}"}}/feeds/{{"{{"}}feed{{"}}"}}:disable")
+		action = ":disable"
 	}
 
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ChronicleBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/instances/{{"{{"}}instance{{"}}"}}/feeds/{{"{{"}}feed{{"}}"}}"+action)
 	if err != nil {
 		return err
 	}
@@ -90,8 +82,9 @@ if d.HasChange("enabled") {
 		Timeout:   d.Timeout(schema.TimeoutUpdate),
 	})
 	if err != nil {
-		return fmt.Errorf("Error changing Feed state: %s", err)
+		return fmt.Errorf("Error changing Feed enablement state: %s", err)
 	}
 }
 
+// Always refresh the state after updates
 return resourceChronicleFeedRead(d, meta)

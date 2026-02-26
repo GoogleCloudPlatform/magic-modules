@@ -1,0 +1,24 @@
+# This is an example of a Chronicle feed using the pre_create hook to fetch the service account.
+# Valid for source types: GOOGLE_CLOUD_STORAGE and GOOGLE_CLOUD_STORAGE_EVENT_DRIVEN.
+
+resource "google_chronicle_feed" "{{$.PrimaryResourceId}}" {
+  provider     = google-beta
+  location     = "us"
+  instance     = "{{index $.TestEnvVars "chronicle_id"}}"
+  display_name = "{{index $.Vars "resource_name"}}"
+
+  details {
+    feed_source_type = "GOOGLE_CLOUD_STORAGE_EVENT_DRIVEN"
+    log_type         = "projects/{{index $.TestEnvVars "project_name"}}/locations/us/instances/{{index $.TestEnvVars "chronicle_id"}}/logTypes/GCP_CLOUDAUDIT"
+    google_cloud_storage_event_driven_settings {
+        bucket_uri = "gs://{{index $.TestEnvVars "bucket_uri"}}
+        pubsub_subscription = "projects/{{index $.TestEnvVars "project_name"}}/subscriptions/{{index $.TestEnvVars "subscription"}}"
+        max_lookback_days = 90
+        source_deletion_option = NEVER
+    }
+  }
+}
+
+output "feed_service_account" {
+  value = google_chronicle_feed.{{$.PrimaryResourceId}}.feed_service_account
+}
