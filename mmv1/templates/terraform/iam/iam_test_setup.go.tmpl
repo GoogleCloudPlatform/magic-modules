@@ -1,7 +1,7 @@
 {{- define "IamTestSetupSample" }}
-{{ $config := $.FirstTestConfig }}
-{{ $sample := $config.Sample }}
-{{ $step := $config.Step }}
+{{- $config := $.FirstTestConfig }}
+{{- $sample := $config.Sample }}
+{{- $step := $config.Step }}
 {{- if $sample.BootstrapIam }}
 	acctest.BootstrapIamMembers(t, []acctest.IamMember{
 {{- range $iam := $sample.BootstrapIam }}
