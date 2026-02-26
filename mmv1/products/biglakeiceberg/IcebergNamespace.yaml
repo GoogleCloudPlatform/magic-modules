@@ -63,7 +63,7 @@ iam_policy:
     - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
     - '{{namespace_id}}'
   allowed_iam_role: 'roles/biglake.editor'
-  sample_config_body: 'templates/terraform/iam/example_config_body/biglake_iceberg_namespace.tf.tmpl'
+  example_config_body: 'templates/terraform/iam/example_config_body/biglake_iceberg_namespace.tf.tmpl'
 examples:
   - name: 'biglake_iceberg_namespace'
     primary_resource_id: 'my_iceberg_namespace'
