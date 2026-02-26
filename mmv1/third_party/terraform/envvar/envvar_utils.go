@@ -125,6 +125,12 @@ var vmwareengineProjectEnvVars = []string{
 	"GOOGLE_VMWAREENGINE_PROJECT",
 }
 
+// This value is the destination project used for cross project clone . A separate project is needed
+// to test cross project clone scenarios.
+var cloneDestinationProjectEnvVars = []string{
+	"GOOGLE_CLONE_DESTINATION_PROJECT",
+}
+
 // AccTestPreCheck ensures at least one of the project env variables is set.
 func GetTestProjectNumberFromEnv() string {
 	return transport_tpg.MultiEnvSearch(ProjectNumberEnvVars)
@@ -232,6 +238,11 @@ func GetTestChronicleInstanceIdFromEnv(t *testing.T) string {
 func GetTestVmwareengineProjectFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, vmwareengineProjectEnvVars...)
 	return transport_tpg.MultiEnvSearch(vmwareengineProjectEnvVars)
+}
+
+func GetTestCloneDestinationProjectEnvVars(t *testing.T) string {
+	SkipIfEnvNotSet(t, cloneDestinationProjectEnvVars...)
+	return transport_tpg.MultiEnvSearch(cloneDestinationProjectEnvVars)
 }
 
 func SkipIfEnvNotSet(t *testing.T, envs ...string) {
