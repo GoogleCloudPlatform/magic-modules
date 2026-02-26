@@ -32,9 +32,7 @@ func TestAccObservabilityFolderSettings_datasource(t *testing.T) {
 			{
 				Config: testAccObservabilityFolderSettings_datasource(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(dataResourceName, "name"),
-					resource.TestCheckResourceAttrSet(dataResourceName, "service_account_id"),
-					resource.TestCheckResourceAttrPair(dataResourceName, "folder", "google_folder.test", "folder_id"),
+					acctest.CheckDataSourceStateMatchesResourceState(dataResourceName, "google_observability_folder_settings.settings"),
 				),
 			},
 		},
@@ -53,6 +51,14 @@ resource "google_folder" "test" {
 resource "time_sleep" "wait_for_folder" {
 	create_duration = "90s"
 	depends_on      = [google_folder.test]
+}
+
+resource "google_observability_folder_settings" "settings" {
+	provider     = google-beta
+	folder       = google_folder.test.folder_id
+	location     = "%{location}"
+	kms_key_name = ""
+	depends_on   = [time_sleep.wait_for_folder]
 }
 
 data "google_observability_folder_settings" "settings" {

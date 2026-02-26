@@ -1,14 +1,16 @@
 var masks []string
-if _, ok := obj["defaultStorageLocation"]; ok {
-  masks = append(masks, "defaultStorageLocation")
+if !d.GetRawConfig().GetAttr("default_storage_location").IsNull() {
+	masks = append(masks, "defaultStorageLocation")
+	obj["defaultStorageLocation"] = d.Get("default_storage_location").(string)
 }
-if _, ok := obj["kmsKeyName"]; ok {
-  masks = append(masks, "kmsKeyName")
+if !d.GetRawConfig().GetAttr("kms_key_name").IsNull() {
+	masks = append(masks, "kmsKeyName")
+	obj["kmsKeyName"] = d.Get("kms_key_name").(string)
 }
 
 if len(masks) > 0 {
-  url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(masks, ",")})
-  if err != nil {
-    return err
-  }
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(masks, ",")})
+	if err != nil {
+		return err
+	}
 }

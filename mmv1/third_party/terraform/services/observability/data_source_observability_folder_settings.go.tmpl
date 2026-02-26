@@ -24,8 +24,16 @@ func dataSourceObservabilityFolderSettingsRead(d *schema.ResourceData, meta inte
 	folder := d.Get("folder").(string)
 	location := d.Get("location").(string)
 
-	d.SetId(fmt.Sprintf("folders/%s/locations/%s/settings", folder, location))
+	id := fmt.Sprintf("folders/%s/locations/%s/settings", folder, location)
+	d.SetId(id)
 
-	return resourceObservabilityFolderSettingsRead(d, meta)
+	err := resourceObservabilityFolderSettingsRead(d, meta)
+	if err != nil {
+		return nil
+	}
+	if d.Id() == "" {
+		return fmt.Errorf("%s not found", id)
+	}
+	return nil
 }
 {{- end }}
