@@ -17,3 +17,39 @@ description: Container Cluster
 exclude: true
 include_in_tgc_next: true
 tgc_test_only: true
+tgc_tests:
+  - name: TestAccContainerCluster_cloudDns_nil_scope
+    skip: "Nil value incompatible with test"
+  - name: TestAccContainerCluster_withReleaseChannelEnabledDefaultVersion
+    skip: "Nil value incompatible with test"
+  - name: TestAccContainerCluster_updateMaintenanceExclusionOptions_untilEndOfSupport
+    skip: "maintenancePolicy endTime appears in cai asset when not in config, breaking the test"
+  - name: TestAccContainerCluster_stackType_withDualStack
+    skip: "test uses cluster_ipv4_cidr_block and services_ipv4_cidr_block which conflicts with fields in asset"
+  - name: TestAccContainerCluster_stackType_withSingleStack
+    skip: "test uses cluster_ipv4_cidr_block and services_ipv4_cidr_block which conflicts with fields in asset"
+  - name: TestAccContainerCluster_with_PodCIDROverprovisionDisabled
+    skip: "test uses cluster_ipv4_cidr_block and services_ipv4_cidr_block which conflicts with fields in asset"
+  - name: TestAccContainerCluster_errorCleanDanglingCluster
+    skip: "test uses cluster_ipv4_cidr_block and services_ipv4_cidr_block which conflicts with fields in asset"
+  - name: TestAccContainerCluster_withIPAllocationPolicy_specificSizes
+    skip: "test uses cluster_ipv4_cidr_block and services_ipv4_cidr_block which conflicts with fields in asset"
+  - name: TestAccContainerCluster_withIPAllocationPolicy_specificIPRanges
+    skip: "test uses cluster_ipv4_cidr_block and services_ipv4_cidr_block which conflicts with fields in asset"
+  - name: TestAccContainerCluster_deleteMaintenanceExclusionOptions_untilEndOfSupport
+    skip: "test orders array elements incorrectly for comparison"
+properties:
+  - name: removeDefaultNodePool
+    type: Boolean
+    is_missing_in_cai: true
+  - name: nodePool
+    type: Array
+    item_type:
+      type: NestedObject
+      properties:
+        - name: nodeCount
+          type: Integer
+          is_missing_in_cai: true
+        - name: namePrefix
+          type: String
+          is_missing_in_cai: true

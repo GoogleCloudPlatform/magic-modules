@@ -6,7 +6,6 @@ import (
 	{{- range $object := $.ResourcesForVersion }}
 	  "github.com/hashicorp/terraform-provider-google/google/services/{{ $object.ServiceName }}"
 	{{- end }}
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/container"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/resourcemanager"
 )
 
