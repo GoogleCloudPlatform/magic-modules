@@ -29,7 +29,7 @@ import_format:
 
 examples:
   - name: 'chronicle_feed_basic'
-    primary_resource_id: example
+    primary_resource_id: 'example_feed'
     vars:
       resource_name: test-feeds
   - name: 'chronicle_feed_gcs'
@@ -2681,6 +2681,7 @@ properties:
             description: API hostname.
       - name: feedSourceType
         type: String
+        immutable: true
         description: |-
           Source Type of the feed.
           Possible values:
@@ -6246,6 +6247,7 @@ properties:
             description: SFTP URI.
       - name: stsMigrationReadiness
         type: String
+        output: true
         description: |-
           The status of the feed's migration to STS.
           Possible values:
