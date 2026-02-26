@@ -27,12 +27,7 @@ func TestAccObservabilityProjectSettings_datasource(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccObservabilityProjectSettings_datasource(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(dataResourceName, "name"),
-					resource.TestCheckResourceAttrSet(dataResourceName, "service_account_id"),
-					resource.TestCheckResourceAttr(dataResourceName, "location", context["location"].(string)),
-					resource.TestCheckResourceAttr(dataResourceName, "project", context["project_name"].(string)),
-				),
+				Check: acctest.CheckDataSourceStateMatchesResourceState(dataResourceName, "google_observability_project_settings.settings"),
 			},
 		},
 	})
@@ -58,11 +53,18 @@ func testAccObservabilityProjectSettings_datasource(context map[string]interface
 		depends_on      = [google_project_service.observability_service]
 	}
 
-	data "google_observability_project_settings" "settings" {
+	resource "google_observability_project_settings" "settings" {
 		provider   = "google-beta"
 		project    = google_project.default.project_id
 		location   = "%{location}"
 		depends_on = [time_sleep.wait_for_project]
+	}
+
+	data "google_observability_project_settings" "settings" {
+		provider   = "google-beta"
+		project    = google_project.default.project_id
+		location   = "%{location}"
+		depends_on = [google_observability_project_settings.settings]
 	}
 `, context)
 }
