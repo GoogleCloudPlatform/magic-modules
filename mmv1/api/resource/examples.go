@@ -164,6 +164,9 @@ type Examples struct {
 	// unskipping the test. If this is not empty, the test will be skipped.
 	SkipTest string `yaml:"skip_test,omitempty"`
 
+	// SkipFunc is a function call to a custom skip check
+	SkipFunc string `yaml:"skip_func,omitempty"`
+
 	// Specify which external providers are needed for the testcase.
 	// Think before adding as there is latency and adds an external dependency to
 	// your test so avoid if you can.
