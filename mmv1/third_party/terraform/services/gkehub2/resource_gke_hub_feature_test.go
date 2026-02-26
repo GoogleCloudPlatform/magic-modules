@@ -903,6 +903,9 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
     }
   }
+  authority {
+    issuer = "https://container.googleapis.com/v1/${google_container_cluster.cluster.id}"
+  }
   project = google_project.project.project_id
 }
 
@@ -956,6 +959,9 @@ resource "google_gke_hub_membership" "membership" {
     gke_cluster {
       resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
     }
+  }
+  authority {
+    issuer = "https://container.googleapis.com/v1/${google_container_cluster.cluster.id}"
   }
   project = google_project.project.project_id
 }
