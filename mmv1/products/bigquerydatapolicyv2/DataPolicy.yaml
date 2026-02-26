@@ -46,29 +46,24 @@ custom_code:
 examples:
   - name: 'bigquery_datapolicyv2_datapolicy_basic'
     primary_resource_id: 'basic_data_policy'
-    primary_resource_name: 'fmt.Sprintf("tf_test_basic_data_policy%s", context["random_suffix"])'
     vars:
       data_policy_id: 'basic_data_policy'
   - name: 'bigquery_datapolicyv2_datapolicy_predefined_masking'
     primary_resource_id: 'predefined_masking_data_policy'
-    primary_resource_name: 'fmt.Sprintf("tf_test_predefined_masking_data_policy%s", context["random_suffix"])'
     vars:
       data_policy_id: 'predefined_masking_data_policy'
   - name: 'bigquery_datapolicyv2_datapolicy_routine'
     primary_resource_id: 'routine_data_policy'
-    primary_resource_name: 'fmt.Sprintf("tf_test_routine_data_policy%s", context["random_suffix"])'
     vars:
       data_policy_id: 'routine_data_policy'
       dataset_id: 'dataset_id'
   - name: 'bigquery_datapolicyv2_datapolicy_withgrantees'
     primary_resource_id: 'data_policy_with_grantees'
-    primary_resource_name: 'fmt.Sprintf("tf_test_data_policy_with_grantees%s", context["random_suffix"])'
     exclude_test: true
     vars:
       data_policy_id: 'data_policy_with_grantees'
   - name: 'bigquery_datapolicyv2_datapolicy_withgrantees_test'
     primary_resource_id: 'data_policy_with_grantees'
-    primary_resource_name: 'fmt.Sprintf("tf_test_data_policy_with_grantees%s", context["random_suffix"])'
     exclude_docs: true
     vars:
       data_policy_id: 'data_policy_with_grantees'

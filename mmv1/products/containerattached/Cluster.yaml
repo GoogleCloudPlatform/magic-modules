@@ -48,17 +48,14 @@ custom_code:
 examples:
   - name: 'container_attached_cluster_basic'
     primary_resource_id: 'primary'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
     vars:
       name: 'basic'
   - name: 'container_attached_cluster_full'
     primary_resource_id: 'primary'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
     vars:
       name: 'basic'
   - name: 'container_attached_cluster_ignore_errors'
     primary_resource_id: 'primary'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
     vars:
       name: 'basic'
     ignore_read_extra:
