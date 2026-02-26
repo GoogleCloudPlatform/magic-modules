@@ -1747,10 +1747,21 @@ func TestAccSqlDatabaseInstance_crossProjectClone(t *testing.T) {
 				ResourceName:            "google_sql_database_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
+				ImportStateIdFunc: 		 testAccSqlDatabaseInstanceImportStateIdFunc("google_sql_database_instance.instance"),
 				ImportStateVerifyIgnore: []string{"deletion_protection", "clone"},
 			},
 		},
 	})
+}
+
+func testAccSqlDatabaseInstanceImportStateIdFunc(resourceName string) resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("Not found: %s", resourceName)
+		}
+		return fmt.Sprintf("%s/%s", rs.Primary.Attributes["project"], rs.Primary.Attributes["name"]), nil
+	}
 }
 
 func TestAccSqlDatabaseInstance_cloneWithSettings(t *testing.T) {
