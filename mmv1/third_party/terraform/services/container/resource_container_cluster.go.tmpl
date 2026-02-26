@@ -2648,7 +2648,7 @@ func ResourceContainerCluster() *schema.Resource {
 						},
 						"control_plane_disk_encryption_key_versions": {
 							Type:        schema.TypeSet,
-							Optional:    true,
+							Computed:    true,
 							Description: `The Cloud KMS cryptoKey versions to use for Confidential Hyperdisk on the control plane nodes.`,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
