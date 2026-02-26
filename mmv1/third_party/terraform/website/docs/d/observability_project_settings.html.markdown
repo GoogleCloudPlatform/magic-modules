@@ -12,6 +12,9 @@ To get more information about Observability Settings, see:
 
 * [API documentation](https://docs.cloud.google.com/stackdriver/docs/reference/observability/api/rest)
 
+~> **Warning:** This data source is in beta, and should be used with the terraform-provider-google-beta provider.
+See [Provider Versions](../guides/provider_versions.html.markdown) for more details on beta resources.
+
 ## Example Usage - Observability Project Settings Basic
 
 ```hcl
