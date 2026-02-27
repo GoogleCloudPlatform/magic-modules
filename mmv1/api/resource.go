@@ -491,6 +491,10 @@ func (r *Resource) SetDefault(product *Product) {
 	for _, vf := range r.VirtualFields {
 		vf.SetDefault(r)
 	}
+
+	if r.IamPolicy != nil && r.DeprecationMessage != "" && r.IamPolicy.DeprecationMessage == "" {
+		r.IamPolicy.DeprecationMessage = fmt.Sprintf("The parent resource has been deprecated: %v", r.DeprecationMessage)
+	}
 }
 
 func (r *Resource) Validate() (es []error) {
