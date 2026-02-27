@@ -24,8 +24,16 @@ func dataSourceObservabilityOrganizationSettingsRead(d *schema.ResourceData, met
 	organization := d.Get("organization").(string)
 	location := d.Get("location").(string)
 
-	d.SetId(fmt.Sprintf("organizations/%s/locations/%s/settings", organization, location))
+	id := fmt.Sprintf("organizations/%s/locations/%s/settings", organization, location)
+	d.SetId(id)
 
-	return resourceObservabilityOrganizationSettingsRead(d, meta)
+	err := resourceObservabilityOrganizationSettingsRead(d, meta)
+	if err != nil {
+		return nil
+	}
+	if d.Id() == "" {
+		return fmt.Errorf("%s not found", id)
+	}
+	return nil
 }
 {{- end }}

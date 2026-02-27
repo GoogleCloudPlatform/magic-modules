@@ -48,11 +48,19 @@ func testAccObservabilityOrganizationSettings_datasource(context map[string]inte
 		create_duration = "60s"
 	}
 
+	resource "google_observability_organization_settings" "settings" {
+		provider 	      = "google-beta"
+		organization 	  = "%{org_id}"
+		location 	      = "%{location}"
+		kms_key_name    = ""
+		depends_on 	    = [time_sleep.wait_for_org]
+	}
+
 	data "google_observability_organization_settings" "settings" {
 		provider 	      = "google-beta"
 		organization 	  = "%{org_id}"
 		location 	      = "%{location}"
-		depends_on 	    = [time_sleep.wait_for_org]
+		depends_on 	    = [google_observability_organization_settings.settings]
 	}
 `, context)
 }
