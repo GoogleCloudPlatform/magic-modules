@@ -11,6 +11,8 @@ Describes the Google Cloud Observability Settings associated with a project.
 To get more information about Observability Settings, see:
 
 * [API documentation](https://docs.cloud.google.com/stackdriver/docs/reference/observability/api/rest)
+* How-to Guides
+    * [Official Documentation](https://docs.cloud.google.com/stackdriver/docs/observability/set-defaults-for-observability-buckets)
 
 ~> **Warning:** This data source is in beta, and should be used with the terraform-provider-google-beta provider.
 See [Provider Versions](../guides/provider_versions.html.markdown) for more details on beta resources.
@@ -19,6 +21,7 @@ See [Provider Versions](../guides/provider_versions.html.markdown) for more deta
 
 ```hcl
 data "google_observability_project_settings" "settings" {
+  provider = "google-beta"
   project  = "my-project-name"
   location = "global"
 }
