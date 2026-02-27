@@ -1738,7 +1738,6 @@ func TestAccSqlDatabaseInstance_crossProjectClone(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t, cloneDestinationProject),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSqlDatabaseInstance_crossProjectClone(context),
@@ -8309,7 +8308,7 @@ func testAccSqlDatabaseInstance_crossProjectClone(context map[string]interface{}
 				project_id = "%{cloneDestinationProject}"
 			}
 			resource "google_sql_database_instance" "instance" {
-				name             = "clone-cpc-testing-via-acc-tests"
+				name             = "tf-cpc-test-%{random_suffix}"
 				database_version = "POSTGRES_11"
 				region           = "us-central1"
 				project          = "${data.google_project.destination_project.project_id}"
@@ -8327,10 +8326,8 @@ func testAccSqlDatabaseInstance_crossProjectClone(context map[string]interface{}
 				}
 
 				clone {
-					//source_project = data.google_project.sourceProject
-					source_project =  "sdeekshaa-playground"
+					source_project =  "${data.google_project.source_project.project_id}"
 					source_instance_name = data.google_sql_backup_run.backup.instance
-					//source_instance_name = resource.google_sql_database_instance.source_instance.name
 				}
 
 				deletion_protection = false
