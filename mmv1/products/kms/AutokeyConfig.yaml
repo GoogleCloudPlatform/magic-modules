@@ -90,8 +90,8 @@ properties:
     output: true
   - name: 'keyProjectResolutionMode'
     type: Enum
-    api_name: keyProjectResolutionMode
     description: 'How Autokey determines which project to use when provisioning CMEK keys.'
+    input: true
     enum_values:
       - 'KEY_PROJECT_RESOLUTION_MODE_UNSPECIFIED'
       - 'DEDICATED_KEY_PROJECT'
