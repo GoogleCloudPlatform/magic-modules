@@ -107,6 +107,7 @@ examples:
     test_env_vars:
       org_id: ORG_ID
   - name: iam_workforce_pool_provider_extra_attributes_display_name_oauth2_config_client_basic
+    skip_func: acctest.SkipTestUntil(t, "2026-03-05")  # waiting for rollout
     primary_resource_id: example
     vars:
       workforce_pool_id: example-pool
@@ -117,6 +118,7 @@ examples:
       - oidc.0.client_secret.0.value.0.plain_text
       - extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text
   - name: iam_workforce_pool_provider_extra_attributes_display_name_oauth2_config_client_full
+    skip_func: acctest.SkipTestUntil(t, "2026-03-05")  # waiting for rollout
     primary_resource_id: example
     vars:
       workforce_pool_id: example-pool
