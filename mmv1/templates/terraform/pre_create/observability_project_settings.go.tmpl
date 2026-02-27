@@ -1,8 +1,8 @@
 var masks []string
-if _, ok := d.GetOkExists("default_storage_location"); ok {
+if !d.GetRawConfig().GetAttr("default_storage_location").IsNull() {
 	masks = append(masks, "defaultStorageLocation")
 }
-if _, ok := d.GetOkExists("kms_key_name"); ok {
+if !d.GetRawConfig().GetAttr("kms_key_name").IsNull() {
 	masks = append(masks, "kmsKeyName")
 }
 
