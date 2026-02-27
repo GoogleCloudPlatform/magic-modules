@@ -39,7 +39,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-  
+
 examples:
   - name: "observability_project_settings_basic"
     config_path: "templates/terraform/examples/observability_project_settings_basic.tf.tmpl"
