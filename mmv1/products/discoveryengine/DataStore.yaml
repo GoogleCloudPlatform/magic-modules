@@ -419,6 +419,11 @@ properties:
                   required: false
                   item_type:
                     type: String
+  - name: 'excludeFromGenAiFeatures'
+    type: 'Boolean'
+    description: |
+      If set true, the DataStore will not be used for Generative AI features.
+    required: false
   - name: 'createTime'
     type: Time
     description: |
