@@ -98,7 +98,6 @@ examples:
       dataset_id: 'example_dataset'
   - name: 'bigquery_dataset_resource_tags'
     primary_resource_id: 'dataset'
-    primary_resource_name: 'fmt.Sprintf("tf_test_dataset%s", context["random_suffix"])'
     vars:
       dataset_id: 'dataset'
       tag_key1: 'tag_key1'
