@@ -1897,7 +1897,7 @@ func TestAccSqlDatabaseInstance_pointInTimeRestoreWithSettings(t *testing.T) {
 	})
 }
 
-func testAccSqlDatabaseInstanceDestroyProducer(t *testing.T, projectId ...string) func(s *terraform.State) error {
+func testAccSqlDatabaseInstanceDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
 			config := acctest.GoogleProviderConfig(t)
@@ -1906,9 +1906,6 @@ func testAccSqlDatabaseInstanceDestroyProducer(t *testing.T, projectId ...string
 			}
 
 			project := config.Project
-			if len(projectId) > 0 && projectId[0] != "" {
-				project = projectId[0]
-			}
 
 			_, err := config.NewSqlAdminClient(config.UserAgent).Instances.Get(project,
 				rs.Primary.Attributes["name"]).Do()
