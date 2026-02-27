@@ -38,6 +38,9 @@ type Sample struct {
 	// unskipping the test. If this is not empty, the test will be skipped.
 	SkipTest string `yaml:"skip_test,omitempty"`
 
+	// SkipFunc is a function call to a custom skip check
+	SkipFunc string `yaml:"skip_func,omitempty"`
+
 	// Whether to skip generating tests for this resource
 	ExcludeTest bool `yaml:"exclude_test,omitempty"`
 
