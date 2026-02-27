@@ -164,7 +164,7 @@ func SkipTestUntil(t *testing.T, enableDate string) {
 	format := "2006-01-02" // go string for YYYY-MM-DD.
 	enableDateTime, err := time.Parse(format, enableDate) // With no timezone we will use local time rather than UTC or a fixed TZ.
 	if err != nil {
-		t.Fatalf("failed to parse SkipTestUntil: %q, err: %w", enableDate, err)
+		t.Fatalf("failed to parse SkipTestUntil: %q, err: %v", enableDate, err)
 	}
 
 	if time.Now().Before(enableDateTime) {
