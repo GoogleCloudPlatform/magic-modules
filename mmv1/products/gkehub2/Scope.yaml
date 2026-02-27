@@ -47,14 +47,17 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/global/scopes/{{scope_id}}'
     - '{{scope_id}}'
+samples:
+  - name: gkehub_scope_basic
+    primary_resource_id: scope
+    primary_resource_name: fmt.Sprintf("tf-test-my-scope%s", context["random_suffix"])
+    steps:
+    - name: gkehub_scope_basic
+      prefixed_vars:
+        resource_name: my-scope
+      test_env_vars:
+        project: PROJECT_NAME
 examples:
-  - name: 'gkehub_scope_basic'
-    primary_resource_id: 'scope'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-scope%s", context["random_suffix"])'
-    vars:
-      resource_name: 'my-scope'
-    test_env_vars:
-      project: 'PROJECT_NAME'
 parameters:
 properties:
   - name: 'scopeId'

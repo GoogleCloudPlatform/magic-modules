@@ -30,37 +30,46 @@ async:
   result:
     resource_inside_response: true
 autogen_async: true
-examples:
+samples:
   - name: network_management_vpc_flow_logs_config_interconnect_basic
     primary_resource_id: interconnect-test
-    vars:
-      interconnect_attachment_name: basic-interconnect-test-id
-      network_name: basic-interconnect-test-network
-      router_name: basic-interconnect-test-router
-      vpc_flow_logs_config_id: basic-interconnect-test-id
+    steps:
+    - name: network_management_vpc_flow_logs_config_interconnect_basic
+      prefixed_vars:
+        interconnect_attachment_name: basic-interconnect-test-id
+        network_name: basic-interconnect-test-network
+        router_name: basic-interconnect-test-router
+        vpc_flow_logs_config_id: basic-interconnect-test-id
   - name: network_management_vpc_flow_logs_config_vpn_basic
     primary_resource_id: vpn-test
-    vars:
-      address_name: basic-test-address
-      esp_forwarding_rule_name: basic-test-fresp
-      network_name: basic-test-network
-      route_name: basic-test-route
-      target_vpn_gateway_name: basic-test-gateway
-      udp500_forwarding_rule_name: basic-test-fr500
-      udp4500_forwarding_rule_name: basic-test-fr4500
-      vpc_flow_logs_config_id: basic-test-id
-      vpn_tunnel_name: basic-test-tunnel
+    steps:
+    - name: network_management_vpc_flow_logs_config_vpn_basic
+      prefixed_vars:
+        address_name: basic-test-address
+        esp_forwarding_rule_name: basic-test-fresp
+        network_name: basic-test-network
+        route_name: basic-test-route
+        target_vpn_gateway_name: basic-test-gateway
+        udp500_forwarding_rule_name: basic-test-fr500
+        udp4500_forwarding_rule_name: basic-test-fr4500
+        vpc_flow_logs_config_id: basic-test-id
+        vpn_tunnel_name: basic-test-tunnel
   - name: network_management_vpc_flow_logs_config_network_basic
     primary_resource_id: network-test
-    vars:
-      network_name: basic-network-test-network
-      vpc_flow_logs_config_id: basic-network-test-id
+    steps:
+    - name: network_management_vpc_flow_logs_config_network_basic
+      prefixed_vars:
+        network_name: basic-network-test-network
+        vpc_flow_logs_config_id: basic-network-test-id
   - name: network_management_vpc_flow_logs_config_subnet_basic
     primary_resource_id: subnet-test
-    vars:
-      network_name: basic-subnet-test-network
-      subnetwork_name: basic-subnet-test-subnetwork
-      vpc_flow_logs_config_id: basic-subnet-test-id
+    steps:
+    - name: network_management_vpc_flow_logs_config_subnet_basic
+      prefixed_vars:
+        network_name: basic-subnet-test-network
+        subnetwork_name: basic-subnet-test-subnetwork
+        vpc_flow_logs_config_id: basic-subnet-test-id
+examples:
 parameters:
   - name: location
     type: String

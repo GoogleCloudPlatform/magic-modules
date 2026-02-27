@@ -42,17 +42,22 @@ async:
     resource_inside_response: false
 custom_code:
 include_in_tgc_next: true
+samples:
+  - name: clouddeploy_deploy_policy_basic
+    primary_resource_id: b-deploy-policy
+    steps:
+    - name: clouddeploy_deploy_policy_basic
+      prefixed_vars:
+        delivery_pipeline: cd-pipeline
+        policy: cd-policy
+  - name: clouddeploy_deploy_policy_full
+    primary_resource_id: f-deploy-policy
+    steps:
+    - name: clouddeploy_deploy_policy_full
+      prefixed_vars:
+        delivery_pipeline: cd-pipeline
+        policy: cd-policy
 examples:
-  - name: "clouddeploy_deploy_policy_basic"
-    primary_resource_id: "b-deploy-policy"
-    vars:
-      policy: "cd-policy"
-      delivery_pipeline: "cd-pipeline"
-  - name: "clouddeploy_deploy_policy_full"
-    primary_resource_id: "f-deploy-policy"
-    vars:
-      policy: "cd-policy"
-      delivery_pipeline: "cd-pipeline"
 parameters:
   - name: "location"
     type: String

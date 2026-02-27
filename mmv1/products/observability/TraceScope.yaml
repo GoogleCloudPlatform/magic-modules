@@ -23,14 +23,17 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/traceScopes/{{trace_scope_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/traceScopes/{{trace_scope_id}}
-examples:
+samples:
   - name: observability_trace_scope_basic
-    primary_resource_id: observability_trace_scope
     min_version: beta
-    vars:
-      trace_scope_id: test-scope
-    test_env_vars:
-      org_id: 'ORG_ID'
+    primary_resource_id: observability_trace_scope
+    steps:
+    - name: observability_trace_scope_basic
+      prefixed_vars:
+        trace_scope_id: test-scope
+      test_env_vars:
+        org_id: ORG_ID
+examples:
 timeouts:
   insert_minutes: 20
   update_minutes: 20

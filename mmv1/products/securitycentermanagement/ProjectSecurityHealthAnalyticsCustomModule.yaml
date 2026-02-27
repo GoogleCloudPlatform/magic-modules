@@ -40,17 +40,22 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "global"
+samples:
+  - name: scc_management_organization_project_security_health_analytics_custom_module_basic
+    primary_resource_id: example
+    exclude_test: true
+    steps:
+    - name: scc_management_organization_project_security_health_analytics_custom_module_basic
+      prefixed_vars:
+        display_name: basic_custom_module
+  - name: scc_management_organization_project_security_health_analytics_custom_module_full
+    primary_resource_id: example
+    exclude_test: true
+    steps:
+    - name: scc_management_organization_project_security_health_analytics_custom_module_full
+      prefixed_vars:
+        display_name: full_custom_module
 examples:
-  - name: 'scc_management_organization_project_security_health_analytics_custom_module_basic'
-    primary_resource_id: 'example'
-    vars:
-      display_name: 'basic_custom_module'
-    exclude_test: true
-  - name: 'scc_management_organization_project_security_health_analytics_custom_module_full'
-    primary_resource_id: 'example'
-    vars:
-      display_name: 'full_custom_module'
-    exclude_test: true
 parameters:
   - name: 'location'
     type: String

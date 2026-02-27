@@ -36,14 +36,15 @@ custom_code:
   pre_update: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
   pre_delete: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'dialogflowcx_test_case_full'
-    primary_resource_id: 'basic_test_case'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-    # Skip in VCR until the test issue is resolved
-    # https://github.com/hashicorp/terraform-provider-google/issues/21532
+samples:
+  - name: dialogflowcx_test_case_full
     skip_vcr: true
+    primary_resource_id: basic_test_case
+    steps:
+    - name: dialogflowcx_test_case_full
+      prefixed_vars:
+        agent_name: dialogflowcx-agent
+examples:
 parameters:
   - name: 'parent'
     type: String

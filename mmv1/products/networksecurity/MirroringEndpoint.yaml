@@ -35,15 +35,18 @@ async:
   result:
     resource_inside_response: true
 custom_code:
+samples:
+  - name: network_security_mirroring_endpoint_basic
+    primary_resource_id: default
+    steps:
+    - name: network_security_mirroring_endpoint_basic
+      config_path: templates/terraform/samples/services/networksecurity/network_security_mirroring_endpoint_basic.tf.tmpl
+      prefixed_vars:
+        deployment_group_id: example-dg
+        endpoint_group_id: example-eg
+        endpoint_id: example-endpoint
+        network_name: example-network
 examples:
-  - name: 'network_security_mirroring_endpoint_basic'
-    config_path: 'templates/terraform/examples/network_security_mirroring_endpoint_basic.tf.tmpl'
-    primary_resource_id: 'default'
-    vars:
-      network_name: 'example-network'
-      deployment_group_id: 'example-dg'
-      endpoint_group_id: 'example-eg'
-      endpoint_id: 'example-endpoint'
 parameters:
   - name: 'location'
     type: String

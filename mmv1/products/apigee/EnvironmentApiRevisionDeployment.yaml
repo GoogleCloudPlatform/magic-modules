@@ -29,12 +29,15 @@ id_format: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{api}}/r
 import_format:
   - 'organizations/{{org_id}}/environments/{{environment}}/apis/{{api}}/revisions/{{revision}}'
   - '{{id}}'
-examples:
-  - name: "apigee_environment_api_revision_deployment_basic"
-    primary_resource_id: "proxy_deployment_basic"
-    vars:
-      apigee_org: "my-org"
+samples:
+  - name: apigee_environment_api_revision_deployment_basic
+    primary_resource_id: proxy_deployment_basic
     exclude_test: true
+    steps:
+    - name: apigee_environment_api_revision_deployment_basic
+      prefixed_vars:
+        apigee_org: my-org
+examples:
 parameters:
   - name: 'org_id'
     type: String

@@ -41,13 +41,16 @@ async:
 custom_code:
 schema_version: 1
 state_upgraders: true
+samples:
+  - name: certificate_manager_certificate_issuance_config
+    primary_resource_id: default
+    steps:
+    - name: certificate_manager_certificate_issuance_config
+      prefixed_vars:
+        ca_name: ca-authority
+        issuance_config_name: issuance-config
+        pool_name: ca-pool
 examples:
-  - name: 'certificate_manager_certificate_issuance_config'
-    primary_resource_id: 'default'
-    vars:
-      ca_name: 'ca-authority'
-      pool_name: 'ca-pool'
-      issuance_config_name: 'issuance-config'
 parameters:
   - name: 'name'
     type: String

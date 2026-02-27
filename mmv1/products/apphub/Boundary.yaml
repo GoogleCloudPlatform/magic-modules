@@ -75,9 +75,12 @@ properties:
       - MANUAL
       - MANAGED_AUTOMATIC
 
-examples:
-  - name: 'apphub_boundary_basic'
-    primary_resource_id: 'example'
-    test_env_vars:
-      crm_node_project_number: 'PROJECT_NUMBER'
+samples:
+  - name: apphub_boundary_basic
+    primary_resource_id: example
     exclude_test: true
+    steps:
+    - name: apphub_boundary_basic
+      test_env_vars:
+        crm_node_project_number: PROJECT_NUMBER
+examples:

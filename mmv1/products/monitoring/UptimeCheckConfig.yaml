@@ -35,47 +35,60 @@ custom_code:
   constants: templates/terraform/constants/monitoring_uptime_check_config.go.tmpl
   custom_delete: templates/terraform/custom_delete/monitoring_uptime_check_config.go.tmpl
   custom_import: templates/terraform/custom_import/self_link_as_name.tmpl
-examples:
+samples:
   - name: uptime_check_config_http
     primary_resource_id: http
-    vars:
-      display_name: http-uptime-check
-    test_env_vars:
-      project_id: PROJECT_NAME
+    steps:
+    - name: uptime_check_config_http
+      prefixed_vars:
+        display_name: http-uptime-check
+      test_env_vars:
+        project_id: PROJECT_NAME
   - name: uptime_check_config_http_password_wo
     primary_resource_id: http
-    vars:
-      display_name: http-uptime-check
-    test_env_vars:
-      project_id: PROJECT_NAME
+    steps:
+    - name: uptime_check_config_http_password_wo
+      prefixed_vars:
+        display_name: http-uptime-check
+      test_env_vars:
+        project_id: PROJECT_NAME
   - name: uptime_check_config_status_code
     primary_resource_id: status_code
-    vars:
-      display_name: http-uptime-check
-    test_env_vars:
-      project_id: PROJECT_NAME
+    steps:
+    - name: uptime_check_config_status_code
+      prefixed_vars:
+        display_name: http-uptime-check
+      test_env_vars:
+        project_id: PROJECT_NAME
   - name: uptime_check_config_https
     primary_resource_id: https
-    vars:
-      display_name: https-uptime-check
-    test_env_vars:
-      project_id: PROJECT_NAME
+    steps:
+    - name: uptime_check_config_https
+      prefixed_vars:
+        display_name: https-uptime-check
+      test_env_vars:
+        project_id: PROJECT_NAME
   - name: uptime_check_tcp
     primary_resource_id: tcp_group
-    vars:
-      display_name: tcp-uptime-check
-      group_display_name: uptime-check-group
+    steps:
+    - name: uptime_check_tcp
+      prefixed_vars:
+        display_name: tcp-uptime-check
+        group_display_name: uptime-check-group
   - name: uptime_check_config_synthetic_monitor
     primary_resource_id: synthetic_monitor
-    vars:
-      bucket_name: gcf-source
-      display_name: synthetic_monitor
-      function_name: synthetic_function
-      zip_path: synthetic-fn-source.zip
-    test_env_vars:
-      project_id: PROJECT_NAME
-    test_vars_overrides:
-      zip_path: '"./test-fixtures/synthetic-fn-source.zip"'
+    steps:
+    - name: uptime_check_config_synthetic_monitor
+      prefixed_vars:
+        bucket_name: gcf-source
+        display_name: synthetic_monitor
+        function_name: synthetic_function
+        zip_path: synthetic-fn-source.zip
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        zip_path: '"./test-fixtures/synthetic-fn-source.zip"'
+examples:
 properties:
   - name: name
     type: String

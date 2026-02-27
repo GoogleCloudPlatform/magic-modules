@@ -1,0 +1,4 @@
+resource "google_compute_network_firewall_policy" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.PrefixedVars "policy_name"}}"
+  description = "Terraform test"
+}

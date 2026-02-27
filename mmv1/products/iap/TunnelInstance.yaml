@@ -37,12 +37,15 @@ iam_policy:
   parent_resource_attribute: 'instance'
   iam_conditions_request_type: 'REQUEST_BODY'
 custom_code:
+samples:
+  - name: instance_basic
+    primary_resource_id: tunnelvm
+    primary_resource_name: fmt.Sprintf("tf-test-tunnel-vm%s", context["random_suffix"])
+    steps:
+    - name: instance_basic
+      prefixed_vars:
+        instance_name: tunnel-vm
 examples:
-  - name: 'instance_basic'
-    primary_resource_id: 'tunnelvm'
-    primary_resource_name: 'fmt.Sprintf("tf-test-tunnel-vm%s", context["random_suffix"])'
-    vars:
-      instance_name: 'tunnel-vm'
 parameters:
 properties:
   - name: 'name'

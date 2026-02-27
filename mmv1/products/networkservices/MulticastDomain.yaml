@@ -30,12 +30,15 @@ import_format:
 sweeper:
   url_substitutions:
     - location: "global"
-examples:
+samples:
   - name: network_services_multicast_domain_basic
     primary_resource_id: md_test
-    vars:
-      network_name: test-md-network
-      domain_name: test-md-domain
+    steps:
+    - name: network_services_multicast_domain_basic
+      prefixed_vars:
+        domain_name: test-md-domain
+        network_name: test-md-network
+examples:
 autogen_async: true
 async:
   operation:

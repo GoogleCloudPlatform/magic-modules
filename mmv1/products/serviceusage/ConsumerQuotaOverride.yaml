@@ -50,36 +50,45 @@ async:
 autogen_async: true
 custom_code:
   test_check_destroy: templates/terraform/custom_check_destroy/consumer_quota_override.go.tmpl
-examples:
+samples:
   - name: consumer_quota_override
-    primary_resource_id: override
     min_version: beta
-    vars:
-      project_id: quota
-    test_env_vars:
-      org_id: ORG_ID
+    primary_resource_id: override
+    steps:
+    - name: consumer_quota_override
+      prefixed_vars:
+        project_id: quota
+      test_env_vars:
+        org_id: ORG_ID
   - name: consumer_quota_override_zero_value
-    primary_resource_id: override
     min_version: beta
-    exclude_docs: true
-    vars:
-      project_id: quota
-    test_env_vars:
-      org_id: ORG_ID
+    primary_resource_id: override
+    steps:
+    - name: consumer_quota_override_zero_value
+      prefixed_vars:
+        project_id: quota
+      test_env_vars:
+        org_id: ORG_ID
+      exclude_docs: true
   - name: region_consumer_quota_override
-    primary_resource_id: override
     min_version: beta
-    vars:
-      project_id: quota
-    test_env_vars:
-      org_id: ORG_ID
+    primary_resource_id: override
+    steps:
+    - name: region_consumer_quota_override
+      prefixed_vars:
+        project_id: quota
+      test_env_vars:
+        org_id: ORG_ID
   - name: consumer_quota_override_custom_dimension
-    primary_resource_id: override
     min_version: beta
-    vars:
-      project_id: quota
-    test_env_vars:
-      org_id: ORG_ID
+    primary_resource_id: override
+    steps:
+    - name: consumer_quota_override_custom_dimension
+      prefixed_vars:
+        project_id: quota
+      test_env_vars:
+        org_id: ORG_ID
+examples:
 parameters:
   - name: name
     type: String

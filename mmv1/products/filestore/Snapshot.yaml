@@ -43,17 +43,22 @@ include_in_tgc_next: true
 error_abort_predicates:
 
   - 'transport_tpg.Is429QuotaError'
+samples:
+  - name: filestore_snapshot_basic
+    primary_resource_id: snapshot
+    steps:
+    - name: filestore_snapshot_basic
+      prefixed_vars:
+        instance_name: test-instance-for-snapshot
+        snapshot_name: test-snapshot
+  - name: filestore_snapshot_full
+    primary_resource_id: snapshot
+    steps:
+    - name: filestore_snapshot_full
+      prefixed_vars:
+        instance_name: test-instance-for-snapshot
+        snapshot_name: test-snapshot
 examples:
-  - name: 'filestore_snapshot_basic'
-    primary_resource_id: 'snapshot'
-    vars:
-      snapshot_name: 'test-snapshot'
-      instance_name: 'test-instance-for-snapshot'
-  - name: 'filestore_snapshot_full'
-    primary_resource_id: 'snapshot'
-    vars:
-      snapshot_name: 'test-snapshot'
-      instance_name: 'test-instance-for-snapshot'
 parameters:
   - name: 'location'
     type: String

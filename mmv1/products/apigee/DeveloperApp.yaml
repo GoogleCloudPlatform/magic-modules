@@ -32,28 +32,34 @@ import_format:
 custom_code:
   decoder: "templates/terraform/decoders/apigee_developer_app.go.tmpl"
   custom_import: "templates/terraform/custom_import/apigee_developer_app.go.tmpl"
-examples:
-  - name: "apigee_developer_app_basic"
-    primary_resource_id: "apigee_developer_app"
-    vars:
-      api_product_name: "sample-api"
-      developer_app_name: "sample-app"
-      developer_email: "john.doe@acme.com"
-      instance_name: "instance"
+samples:
+  - name: apigee_developer_app_basic
+    primary_resource_id: apigee_developer_app
     exclude_test: true
-  - name: "apigee_developer_app_basic_test"
-    primary_resource_id: "apigee_developer_app"
-    vars:
-      api_product_name: "sample-api"
-      developer_app_name: "sample-app"
-      developer_email: "john.doe@acme.com"
-      instance_name: "instance"
-      project_name: "prj"
-    test_env_vars:
-      org_id: "ORG_ID"
-      billing_account: "BILLING_ACCT"
+    steps:
+    - name: apigee_developer_app_basic
+      prefixed_vars:
+        api_product_name: sample-api
+        developer_app_name: sample-app
+        developer_email: john.doe@acme.com
+        instance_name: instance
+  - name: apigee_developer_app_basic_test
     skip_vcr: true
-    external_providers: ["time"]
+    external_providers:
+    - time
+    primary_resource_id: apigee_developer_app
+    steps:
+    - name: apigee_developer_app_basic_test
+      prefixed_vars:
+        api_product_name: sample-api
+        developer_app_name: sample-app
+        developer_email: john.doe@acme.com
+        instance_name: instance
+        project_name: prj
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+examples:
 parameters:
   - name: "orgId"
     type: String

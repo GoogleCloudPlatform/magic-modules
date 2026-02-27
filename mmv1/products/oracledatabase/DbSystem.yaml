@@ -23,51 +23,52 @@ timeouts:
   insert_minutes: 120
   update_minutes: 60
   delete_minutes: 60
+samples:
+  - name: oracledatabase_db_system_basic
+    primary_resource_id: my_db_system
+    steps:
+    - name: oracledatabase_db_system_basic
+      prefixed_vars:
+        database_id: mydb
+        db_system_id: my-instance
+        deletion_protection: "true"
+        odb_network: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork
+        odb_subnet: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet
+        project: my-project
+      test_vars_overrides:
+        database_id: fmt.Sprintf("ofake-tf-test-database-basic-%s", acctest.RandString(t,
+          10))
+        db_system_id: fmt.Sprintf("ofake-tf-test-dbsystem-basic-%s", acctest.RandString(t,
+          10))
+        deletion_protection: "false"
+        odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
+        odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+        project: '"oci-terraform-testing-prod"'
+      ignore_read_extra:
+      - deletion_protection
+  - name: oracledatabase_db_system_full
+    primary_resource_id: my_db_system
+    steps:
+    - name: oracledatabase_db_system_full
+      prefixed_vars:
+        database_id: mydb
+        db_system_id: my-instance
+        deletion_protection: "true"
+        odb_network: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork
+        odb_subnet: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet
+        project: my-project
+      test_vars_overrides:
+        database_id: fmt.Sprintf("ofake-tf-test-database-basic-%s", acctest.RandString(t,
+          10))
+        db_system_id: fmt.Sprintf("ofake-tf-test-dbsystem-basic-%s", acctest.RandString(t,
+          10))
+        deletion_protection: "false"
+        odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
+        odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+        project: '"oci-terraform-testing-prod"'
+      ignore_read_extra:
+      - deletion_protection
 examples:
-  - name: 'oracledatabase_db_system_basic'
-    primary_resource_id: 'my_db_system'
-    vars:
-      project: 'my-project'
-      db_system_id: 'my-instance'
-      database_id: 'mydb'
-      odb_network: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork'
-      odb_subnet: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet'
-      deletion_protection: 'true'
-    ignore_read_extra:
-      - 'deletion_protection'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'project': '"oci-terraform-testing-prod"'
-      # ofake- prefix is needed to create a dummy resource for testing purposes only
-      # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
-      # As a result these resources are not sweepable
-      # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-      db_system_id: 'fmt.Sprintf("ofake-tf-test-dbsystem-basic-%s", acctest.RandString(t, 10))'
-      database_id: 'fmt.Sprintf("ofake-tf-test-database-basic-%s", acctest.RandString(t, 10))'
-      odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
-      odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
-  - name: 'oracledatabase_db_system_full'
-    primary_resource_id: 'my_db_system'
-    vars:
-      project: 'my-project'
-      db_system_id: 'my-instance'
-      database_id: 'mydb'
-      odb_network: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork'
-      odb_subnet: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet'
-      deletion_protection: 'true'
-    ignore_read_extra:
-      - 'deletion_protection'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-      'project': '"oci-terraform-testing-prod"'
-      # ofake- prefix is needed to create a dummy resource for testing purposes only
-      # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
-      # As a result these resources are not sweepable
-      # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-      db_system_id: 'fmt.Sprintf("ofake-tf-test-dbsystem-basic-%s", acctest.RandString(t, 10))'
-      database_id: 'fmt.Sprintf("ofake-tf-test-database-basic-%s", acctest.RandString(t, 10))'
-      odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
-      odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
 virtual_fields:
   - name: 'deletion_protection'
     type: Boolean

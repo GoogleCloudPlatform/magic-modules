@@ -27,11 +27,16 @@ id_format: projects/{{project}}/locations/{{location}}/views/{{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/views/{{name}}
 autogen_status: Vmlldw==
+samples:
+  - name: contact_center_insights_view_basic
+    primary_resource_id: basic_view
+    steps:
+    - name: contact_center_insights_view_basic
+  - name: contact_center_insights_view_full
+    primary_resource_id: full_view
+    steps:
+    - name: contact_center_insights_view_full
 examples:
-  - name: 'contact_center_insights_view_basic'
-    primary_resource_id: 'basic_view'
-  - name: 'contact_center_insights_view_full'
-    primary_resource_id: 'full_view'
 parameters:
   - name: location
     type: String

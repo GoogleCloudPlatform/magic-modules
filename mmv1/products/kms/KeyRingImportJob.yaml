@@ -38,13 +38,16 @@ include_in_tgc_next: true
 cai_asset_name_format: '{{key_ring}}/importJobs/{{import_job_id}}'
 custom_code:
   custom_import: templates/terraform/custom_import/kms_key_ring_import_job.go.tmpl
-examples:
+samples:
   - name: kms_key_ring_import_job
     primary_resource_id: import-job
     exclude_test: true
-    vars:
-      cryptokey: cryptokey-example
-      keyring: keyring-example
+    steps:
+    - name: kms_key_ring_import_job
+      prefixed_vars:
+        cryptokey: cryptokey-example
+        keyring: keyring-example
+examples:
 parameters:
   - name: keyRing
     type: String

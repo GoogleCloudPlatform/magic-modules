@@ -25,37 +25,41 @@ import_format:
 datasource_experimental:
   generate: true
   exclude_test: true
-examples:
+samples:
   - name: vmware_engine_datastore_thirdparty
     primary_resource_id: example_thirdparty
-    vars:
-      resource_name: thirdparty-datastore
-    test_env_vars:
-      region: "REGION"
-      project: "PROJECT"
-    # Update tests take care of both create and update - Datastore deletion requires some additional setup
     exclude_test: true
+    steps:
+    - name: vmware_engine_datastore_thirdparty
+      prefixed_vars:
+        resource_name: thirdparty-datastore
+      test_env_vars:
+        project: PROJECT
+        region: REGION
   - name: vmware_engine_datastore_filestore
     primary_resource_id: example_filestore
-    vars:
-      resource_name: filestore-datastore
-      network_name: default
-    test_env_vars:
-      region: "REGION"
-      zone: "ZONE"
-      project: "PROJECT"
-    # Update tests take care of both create and update - Datastore deletion requires some additional setup
     exclude_test: true
+    steps:
+    - name: vmware_engine_datastore_filestore
+      prefixed_vars:
+        network_name: default
+        resource_name: filestore-datastore
+      test_env_vars:
+        project: PROJECT
+        region: REGION
+        zone: ZONE
   - name: vmware_engine_datastore_netapp
     primary_resource_id: example_netapp
-    vars:
-      resource_name: netapp-datastore
-      network_name: default
-    test_env_vars:
-      region: "REGION"
-      project: "PROJECT"
-    # Update tests take care of both create and update - Datastore deletion requires some additional setup
     exclude_test: true
+    steps:
+    - name: vmware_engine_datastore_netapp
+      prefixed_vars:
+        network_name: default
+        resource_name: netapp-datastore
+      test_env_vars:
+        project: PROJECT
+        region: REGION
+examples:
 autogen_async: true
 async:
   operation:

@@ -28,19 +28,24 @@ autogen_async: true
 async:
   operation:
     base_url: '{{op_id}}'
-examples:
-  - name: 'sac_realm_prisma_access'
+samples:
+  - name: sac_realm_prisma_access
     min_version: beta
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'sac-realm-name'
-  - name: 'sac_realm_symantec_cloud_swg'
+    primary_resource_id: default
+    steps:
+    - name: sac_realm_prisma_access
+      prefixed_vars:
+        resource_name: sac-realm-name
+  - name: sac_realm_symantec_cloud_swg
     min_version: beta
+    primary_resource_id: default
     exclude_test: true
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'sac-realm-name'
-      secret_path: 'secret-path'
+    steps:
+    - name: sac_realm_symantec_cloud_swg
+      prefixed_vars:
+        resource_name: sac-realm-name
+        secret_path: secret-path
+examples:
 properties:
   - name: 'name'
     type: String

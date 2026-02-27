@@ -45,96 +45,124 @@ custom_code:
   constants: templates/terraform/constants/subscription.go.tmpl
   pre_update: templates/terraform/pre_update/pubsub_subscription.go.tmpl
   tgc_ignore_terraform_encoder: true
-examples:
+samples:
   - name: pubsub_subscription_push
     primary_resource_id: example
-    vars:
-      subscription_name: example-subscription
-      topic_name: example-topic
+    steps:
+    - name: pubsub_subscription_push
+      prefixed_vars:
+        subscription_name: example-subscription
+        topic_name: example-topic
   - name: pubsub_subscription_pull
     primary_resource_id: example
-    vars:
-      subscription_name: example-subscription
-      topic_name: example-topic
+    steps:
+    - name: pubsub_subscription_pull
+      prefixed_vars:
+        subscription_name: example-subscription
+        topic_name: example-topic
   - name: pubsub_subscription_pull_filter
     primary_resource_id: example
-    vars:
-      subscription_name: example-subscription
-      topic_name: example-topic
+    steps:
+    - name: pubsub_subscription_pull_filter
+      prefixed_vars:
+        subscription_name: example-subscription
+        topic_name: example-topic
   - name: pubsub_subscription_dead_letter
     primary_resource_id: example
-    vars:
-      subscription_name: example-subscription
-      topic_name: example-topic
+    steps:
+    - name: pubsub_subscription_dead_letter
+      prefixed_vars:
+        subscription_name: example-subscription
+        topic_name: example-topic
   - name: pubsub_subscription_push_bq
-    primary_resource_id: example
     bootstrap_iam:
-      - member: serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com
-        role: roles/bigquery.dataEditor
-      - member: serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com
-        role: roles/bigquery.metadataViewer
-    vars:
-      dataset_id: example_dataset
-      subscription_name: example-subscription
-      table_id: example_table
-      topic_name: example-topic
+    - member: serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com
+      role: roles/bigquery.dataEditor
+    - member: serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com
+      role: roles/bigquery.metadataViewer
+    primary_resource_id: example
+    steps:
+    - name: pubsub_subscription_push_bq
+      prefixed_vars:
+        dataset_id: example_dataset
+        subscription_name: example-subscription
+        table_id: example_table
+        topic_name: example-topic
   - name: pubsub_subscription_push_bq_table_schema
-    primary_resource_id: example
     bootstrap_iam:
-      - member: serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com
-        role: roles/bigquery.dataEditor
-      - member: serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com
-        role: roles/bigquery.metadataViewer
-    vars:
-      dataset_id: example_dataset
-      subscription_name: example-subscription
-      table_id: example_table
-      topic_name: example-topic
+    - member: serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com
+      role: roles/bigquery.dataEditor
+    - member: serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com
+      role: roles/bigquery.metadataViewer
+    primary_resource_id: example
+    steps:
+    - name: pubsub_subscription_push_bq_table_schema
+      prefixed_vars:
+        dataset_id: example_dataset
+        subscription_name: example-subscription
+        table_id: example_table
+        topic_name: example-topic
   - name: pubsub_subscription_push_bq_service_account
     primary_resource_id: example
-    vars:
-      dataset_id: example_dataset
-      service_account_id: example-bqw
-      subscription_name: example-subscription
-      table_id: example_table
-      topic_name: example-topic
+    steps:
+    - name: pubsub_subscription_push_bq_service_account
+      prefixed_vars:
+        dataset_id: example_dataset
+        service_account_id: example-bqw
+        subscription_name: example-subscription
+        table_id: example_table
+        topic_name: example-topic
   - name: pubsub_subscription_push_cloudstorage
     primary_resource_id: example
-    vars:
-      bucket_name: example-bucket
-      subscription_name: example-subscription
-      topic_name: example-topic
+    steps:
+    - name: pubsub_subscription_push_cloudstorage
+      prefixed_vars:
+        bucket_name: example-bucket
+        subscription_name: example-subscription
+        topic_name: example-topic
   - name: pubsub_subscription_push_cloudstorage_avro
     primary_resource_id: example
-    vars:
-      bucket_name: example-bucket
-      subscription_name: example-subscription
-      topic_name: example-topic
+    steps:
+    - name: pubsub_subscription_push_cloudstorage_avro
+      prefixed_vars:
+        bucket_name: example-bucket
+        subscription_name: example-subscription
+        topic_name: example-topic
   - name: pubsub_subscription_push_cloudstorage_service_account
     primary_resource_id: example
-    vars:
-      bucket_name: example-bucket
-      service_account_id: example-stw
-      subscription_name: example-subscription
-      topic_name: example-topic
+    steps:
+    - name: pubsub_subscription_push_cloudstorage_service_account
+      prefixed_vars:
+        bucket_name: example-bucket
+        service_account_id: example-stw
+        subscription_name: example-subscription
+        topic_name: example-topic
   - name: pubsub_subscription_single_smt
     primary_resource_id: example
-    vars:
-      subscription_name: example-subscription
-      topic_name: example-topic
+    steps:
+    - name: pubsub_subscription_single_smt
+      prefixed_vars:
+        subscription_name: example-subscription
+        topic_name: example-topic
   - name: pubsub_subscription_multiple_smts
     primary_resource_id: example
-    vars:
-      subscription_name: example-subscription
-      topic_name: example-topic
-    tgc_skip_test: The dynamic block is in test configuration. The test takes time to fix.
+    steps:
+    - name: pubsub_subscription_multiple_smts
+      prefixed_vars:
+        subscription_name: example-subscription
+        topic_name: example-topic
+    tgc_skip_test: The dynamic block is in test configuration. The test takes time to
+      fix.
   - name: pubsub_subscription_tags
     primary_resource_id: example
-    vars:
-      subscription_name: example-subscription
-      tag_key: tag_key
-      tag_value: tag_value
-      topic_name: example-topic
+    steps:
+    - name: pubsub_subscription_tags
+      prefixed_vars:
+        subscription_name: example-subscription
+        tag_key: tag_key
+        tag_value: tag_value
+        topic_name: example-topic
+examples:
 properties:
   - name: name
     type: String

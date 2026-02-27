@@ -34,9 +34,12 @@ timeouts:
   delete_minutes: 20
 custom_code:
 exclude_sweeper: true
+samples:
+  - name: identity_platform_tenant_default_supported_idp_config_basic
+    primary_resource_id: idp_config
+    steps:
+    - name: identity_platform_tenant_default_supported_idp_config_basic
 examples:
-  - name: 'identity_platform_tenant_default_supported_idp_config_basic'
-    primary_resource_id: 'idp_config'
 parameters:
 properties:
   - name: 'name'

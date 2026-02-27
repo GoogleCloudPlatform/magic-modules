@@ -33,32 +33,41 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/dialogflowcx_set_location_skip_default_obj.go.tmpl'
   custom_import: 'templates/terraform/custom_import/dialogflowcx_tool_version.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'dialogflowcx_tool_version_open_api'
-    primary_resource_id: 'open_api_tool_version'
-    vars:
-      agent_name: 'dialogflowcx-agent-open-api'
-      tool_name: 'open-api-tool'
-  - name: 'dialogflowcx_tool_version_data_store'
-    primary_resource_id: 'data_store_tool_version'
-    vars:
-      agent_name: 'dialogflowcx-agent-data-store'
-      data_store: 'datastore-tool-version'
-      tool_name: 'datastore-tool'
-  - name: 'dialogflowcx_tool_version_function'
-    primary_resource_id: 'function_tool_version'
-    vars:
-      agent_name: 'dialogflowcx-agent-fucntion'
-      tool_name: 'function-tool'
-  - name: 'dialogflowcx_tool_version_connector'
-    primary_resource_id: 'connector_tool_version'
-    vars:
-      agent_name: 'dialogflowcx-agent-connector'
-      connection_name: 'example-connection'
-      dataset_id: 'example_dataset'
-      table_id: 'example_table'
-      tool_name: 'connector-tool'
+samples:
+  - name: dialogflowcx_tool_version_open_api
+    primary_resource_id: open_api_tool_version
+    steps:
+    - name: dialogflowcx_tool_version_open_api
+      prefixed_vars:
+        agent_name: dialogflowcx-agent-open-api
+        tool_name: open-api-tool
+  - name: dialogflowcx_tool_version_data_store
+    primary_resource_id: data_store_tool_version
+    steps:
+    - name: dialogflowcx_tool_version_data_store
+      prefixed_vars:
+        agent_name: dialogflowcx-agent-data-store
+        data_store: datastore-tool-version
+        tool_name: datastore-tool
+  - name: dialogflowcx_tool_version_function
+    primary_resource_id: function_tool_version
+    steps:
+    - name: dialogflowcx_tool_version_function
+      prefixed_vars:
+        agent_name: dialogflowcx-agent-fucntion
+        tool_name: function-tool
+  - name: dialogflowcx_tool_version_connector
     min_version: beta
+    primary_resource_id: connector_tool_version
+    steps:
+    - name: dialogflowcx_tool_version_connector
+      prefixed_vars:
+        agent_name: dialogflowcx-agent-connector
+        connection_name: example-connection
+        dataset_id: example_dataset
+        table_id: example_table
+        tool_name: connector-tool
+examples:
 parameters:
   - name: 'parent'
     type: String

@@ -37,25 +37,32 @@ async:
   result:
     resource_inside_response: true
 autogen_async: true
-examples:
+samples:
   - name: network_management_connectivity_test_instances
     primary_resource_id: instance-test
-    vars:
-      dest_instance: dest-vm
-      network_name: conn-test-net
-      primary_resource_name: conn-test-instances
-      source_instance: source-vm
+    steps:
+    - name: network_management_connectivity_test_instances
+      prefixed_vars:
+        dest_instance: dest-vm
+        network_name: conn-test-net
+        primary_resource_name: conn-test-instances
+        source_instance: source-vm
   - name: network_management_connectivity_test_addresses
     primary_resource_id: address-test
-    vars:
-      dest_addr: dest-addr
-      network: connectivity-vpc
-      primary_resource_name: conn-test-addr
-      source_addr: src-addr
+    steps:
+    - name: network_management_connectivity_test_addresses
+      prefixed_vars:
+        dest_addr: dest-addr
+        network: connectivity-vpc
+        primary_resource_name: conn-test-addr
+        source_addr: src-addr
   - name: network_management_connectivity_test_endpoints
     primary_resource_id: endpoints-test
-    vars:
-      primary_resource_name: conn-test-endpoints
+    steps:
+    - name: network_management_connectivity_test_endpoints
+      prefixed_vars:
+        primary_resource_name: conn-test-endpoints
+examples:
 properties:
   - name: name
     type: String

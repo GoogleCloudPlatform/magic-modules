@@ -21,12 +21,15 @@ create_url: projects/{{project}}/locations/{{location}}/collections?collectionId
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/collections/{{collection_id}}
-examples:
+samples:
   - name: vectorsearch_collection_basic
-    primary_resource_id: "example-collection"
-    vars:
-      collection_id: "example-collection"
     min_version: beta
+    primary_resource_id: example-collection
+    steps:
+    - name: vectorsearch_collection_basic
+      prefixed_vars:
+        collection_id: example-collection
+examples:
 autogen_async: true
 async:
   operation:

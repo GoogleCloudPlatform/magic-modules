@@ -25,16 +25,21 @@ update_mask: true
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/reservations/{{name}}
 exclude_sweeper: true
-examples:
+samples:
   - name: bigquery_reservation_basic
     primary_resource_id: reservation
-    vars:
-      name: my-reservation
+    steps:
+    - name: bigquery_reservation_basic
+      prefixed_vars:
+        name: my-reservation
   - name: bigquery_reservation_with_disaster_recovery
     primary_resource_id: reservation
-    exclude_docs: true
-    vars:
-      name: my-reservation
+    steps:
+    - name: bigquery_reservation_with_disaster_recovery
+      prefixed_vars:
+        name: my-reservation
+      exclude_docs: true
+examples:
 parameters:
   - name: location
     type: String

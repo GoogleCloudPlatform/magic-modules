@@ -37,15 +37,18 @@ timeouts:
   delete_minutes: 20
 custom_code:
 exclude_sweeper: true
+samples:
+  - name: dialogflow_agent_full
+    primary_resource_id: full_agent
+    steps:
+    - name: dialogflow_agent_full
+      prefixed_vars:
+        account_id: my-account
+        agent_name: dialogflow-agent
+        project_id: my-project
+      test_env_vars:
+        org_id: ORG_ID
 examples:
-  - name: 'dialogflow_agent_full'
-    primary_resource_id: 'full_agent'
-    vars:
-      project_id: 'my-project'
-      account_id: 'my-account'
-      agent_name: 'dialogflow-agent'
-    test_env_vars:
-      org_id: 'ORG_ID'
 parameters:
 properties:
   - name: 'displayName'

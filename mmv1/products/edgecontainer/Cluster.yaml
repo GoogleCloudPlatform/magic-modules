@@ -45,14 +45,15 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  # Skip the local control plane cluster test as we only have limited machine resources.
-  # Instead the local control plane cluster test will be tested in the node pool test.
-  - name: 'edgecontainer_local_control_plane_cluster'
-    primary_resource_id: 'default'
-    vars:
-      edgecontainer_cluster_name: 'local-control-plane-cluster'
+samples:
+  - name: edgecontainer_local_control_plane_cluster
+    primary_resource_id: default
     exclude_test: true
+    steps:
+    - name: edgecontainer_local_control_plane_cluster
+      prefixed_vars:
+        edgecontainer_cluster_name: local-control-plane-cluster
+examples:
 parameters:
   - name: 'location'
     type: String

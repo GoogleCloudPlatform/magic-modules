@@ -38,11 +38,14 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+samples:
+  - name: certificate_manager_certificate_map_basic
+    primary_resource_id: default
+    steps:
+    - name: certificate_manager_certificate_map_basic
+      prefixed_vars:
+        cert_map_name: cert-map
 examples:
-  - name: 'certificate_manager_certificate_map_basic'
-    primary_resource_id: 'default'
-    vars:
-      cert_map_name: 'cert-map'
 parameters:
   - name: 'name'
     type: String

@@ -21,23 +21,28 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/apps/{{app}}/agents/{{name}}
 import_format:
  - projects/{{project}}/locations/{{location}}/apps/{{app}}/agents/{{name}}
+samples:
+  - name: ces_agent_basic
+    primary_resource_id: ces_agent_basic
+    steps:
+    - name: ces_agent_basic
+      prefixed_vars:
+        agent_display_name: my-agent
+        agent_id: agent-id
+        app_display_name: my-app
+        app_id: app-id
+        child_agent_id: child-agent-id
+        toolset_id: toolset-id
+  - name: ces_agent_remote_dialogflow_agent
+    primary_resource_id: ces_agent_remote_dialogflow_agent
+    steps:
+    - name: ces_agent_remote_dialogflow_agent
+      prefixed_vars:
+        agent_display_name: my-agent
+        agent_id: agent-id
+        app_display_name: my-app
+        app_id: app-id
 examples:
- - name: "ces_agent_basic"
-   primary_resource_id: "ces_agent_basic"
-   vars:
-    agent_display_name: 'my-agent'
-    app_display_name: 'my-app'
-    agent_id: 'agent-id'
-    app_id: 'app-id'
-    child_agent_id: "child-agent-id"
-    toolset_id: "toolset-id"
- - name: "ces_agent_remote_dialogflow_agent"
-   primary_resource_id: "ces_agent_remote_dialogflow_agent"
-   vars:
-    agent_display_name: 'my-agent'
-    app_display_name: 'my-app'
-    agent_id: 'agent-id'
-    app_id: 'app-id'
 parameters:
  - name: location
    type: String

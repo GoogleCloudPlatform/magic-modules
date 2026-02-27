@@ -33,16 +33,19 @@ timeouts:
 custom_code:
   custom_import: 'templates/terraform/custom_import/dialogflowcx_version.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'dialogflow_version_full'
-    primary_resource_id: 'full_version'
-    vars:
-      project_id: 'my-proj'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_acct: 'BILLING_ACCT'
+samples:
+  - name: dialogflow_version_full
     external_providers:
-      - "time"
+    - time
+    primary_resource_id: full_version
+    steps:
+    - name: dialogflow_version_full
+      prefixed_vars:
+        project_id: my-proj
+      test_env_vars:
+        billing_acct: BILLING_ACCT
+        org_id: ORG_ID
+examples:
 parameters:
 properties:
   - name: 'parent'

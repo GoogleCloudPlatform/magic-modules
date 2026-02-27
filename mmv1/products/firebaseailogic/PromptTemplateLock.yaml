@@ -25,14 +25,17 @@ immutable: true
 import_format:
   - projects/{{project}}/locations/{{location}}/templates/{{template_id}}
 exclude_sweeper: true
-examples:
+samples:
   - name: firebaseailogic_prompt_template_lock_basic
     min_version: beta
     primary_resource_id: basic_lock
-    vars:
-      template_id: 'lock-template'
-    test_env_vars:
-      project_id: PROJECT_NAME
+    steps:
+    - name: firebaseailogic_prompt_template_lock_basic
+      prefixed_vars:
+        template_id: lock-template
+      test_env_vars:
+        project_id: PROJECT_NAME
+examples:
 create_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}:modifyLock?locked=true
 create_verb: POST
 delete_url: projects/{{project}}/locations/{{location}}/templates/{{template_id}}:modifyLock?locked=false

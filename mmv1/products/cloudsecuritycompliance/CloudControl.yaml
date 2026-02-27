@@ -24,13 +24,16 @@ update_verb: PATCH
 id_format: organizations/{{organization}}/locations/{{location}}/cloudControls/{{cloud_control_id}}
 import_format:
   - organizations/{{organization}}/locations/{{location}}/cloudControls/{{cloud_control_id}}
+samples:
+  - name: cloudsecuritycompliance_cloudcontrol_basic
+    primary_resource_id: example
+    steps:
+    - name: cloudsecuritycompliance_cloudcontrol_basic
+      prefixed_vars:
+        cloudcontrol_name: example-cloudcontrol
+      test_env_vars:
+        org_id: ORG_ID
 examples:
-  - name: "cloudsecuritycompliance_cloudcontrol_basic"
-    primary_resource_id: "example"
-    vars:
-      cloudcontrol_name: "example-cloudcontrol"
-    test_env_vars:
-      org_id: "ORG_ID"
 autogen_status: Q2xvdWRDb250cm9s
 custom_code:
   encoder: "templates/terraform/encoders/cloudsecuritycompliance_cloudcontrol.go.tmpl"

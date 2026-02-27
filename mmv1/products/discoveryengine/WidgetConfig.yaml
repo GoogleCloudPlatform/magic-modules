@@ -28,12 +28,15 @@ import_format:
 timeouts:
   insert_minutes: 5
   update_minutes: 5
+samples:
+  - name: discoveryengine_widgetconfig_basic
+    primary_resource_id: basic
+    steps:
+    - name: discoveryengine_widgetconfig_basic
+      prefixed_vars:
+        data_store_id: data-store-id
+        engine_id: engine-id
 examples:
-  - name: 'discoveryengine_widgetconfig_basic'
-    primary_resource_id: 'basic'
-    vars:
-      data_store_id: 'data-store-id'
-      engine_id: 'engine-id'
 custom_code:
   pre_create: 'templates/terraform/pre_create/discoveryengine_widget_config.go.tmpl'
 parameters:

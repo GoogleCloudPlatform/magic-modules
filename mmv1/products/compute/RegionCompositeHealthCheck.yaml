@@ -140,12 +140,15 @@ properties:
       CompositeHealthCheck.
     output: true
 
+samples:
+  - name: compute_region_composite_health_check_basic
+    min_version: beta
+    primary_resource_id: example_test_composite_health_check
+    steps:
+    - name: compute_region_composite_health_check_basic
+      prefixed_vars:
+        description: Example composite health check basic
+        name: test-composite-health-check
+      test_env_vars:
+        project: PROJECT_NAME
 examples:
-  - name: "compute_region_composite_health_check_basic"
-    primary_resource_id: "example_test_composite_health_check"
-    vars:
-      name: "test-composite-health-check"
-      description: "Example composite health check basic"
-    min_version: 'beta'
-    test_env_vars:
-      project: 'PROJECT_NAME'

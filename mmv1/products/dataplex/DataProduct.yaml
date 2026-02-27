@@ -45,24 +45,28 @@ async:
 import_format:
   - 'projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}'
 
+samples:
+  - name: dataplex_data_product_basic
+    primary_resource_id: example
+    steps:
+    - name: dataplex_data_product_basic
+      prefixed_vars:
+        data_product_id: data-product-basic
+      test_env_vars:
+        project_name: PROJECT_NAME
+      test_vars_overrides:
+        data_product_id: fmt.Sprintf("tf-test-dp%s", acctest.RandString(t, 10))
+  - name: dataplex_data_product_full
+    primary_resource_id: example
+    steps:
+    - name: dataplex_data_product_full
+      prefixed_vars:
+        data_product_id: data-product-full
+      test_env_vars:
+        project_name: PROJECT_NAME
+      test_vars_overrides:
+        data_product_id: fmt.Sprintf("tf-test-dp%s", acctest.RandString(t, 10))
 examples:
-  - name: 'dataplex_data_product_basic'
-    primary_resource_id: 'example'
-    vars:
-      data_product_id: 'data-product-basic'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-    test_vars_overrides:
-      data_product_id: 'fmt.Sprintf("tf-test-dp%s", acctest.RandString(t, 10))'
-  - name: 'dataplex_data_product_full'
-    primary_resource_id: 'example'
-    vars:
-      data_product_id: 'data-product-full'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-    test_vars_overrides:
-      data_product_id: 'fmt.Sprintf("tf-test-dp%s", acctest.RandString(t, 10))'
-
 parameters:
   - name: 'location'
     type: String

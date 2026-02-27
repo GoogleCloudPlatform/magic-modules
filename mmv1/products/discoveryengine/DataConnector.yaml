@@ -49,11 +49,14 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+samples:
+  - name: discoveryengine_dataconnector_servicenow_basic
+    primary_resource_id: servicenow-basic
+    steps:
+    - name: discoveryengine_dataconnector_servicenow_basic
+      prefixed_vars:
+        collection_id: collection-id
 examples:
-  - name: 'discoveryengine_dataconnector_servicenow_basic'
-    primary_resource_id: 'servicenow-basic'
-    vars:
-      collection_id: 'collection-id'
 parameters:
   - name: 'location'
     type: String

@@ -1,0 +1,19 @@
+resource "google_service_account" "service_account" {
+  account_id   = "{{index $.PrefixedVars "account_id"}}"
+  display_name = "Test Service Account"
+}
+
+resource "google_beyondcorp_app_connector" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.PrefixedVars "app_connector_name"}}"
+  region = "us-central1"
+  display_name = "{{index $.PrefixedVars "display_name"}}"
+  principal_info {
+    service_account {
+     email = google_service_account.service_account.email
+    }
+  }
+  labels = {
+    foo = "bar"
+    bar = "baz"
+  }
+}

@@ -52,13 +52,18 @@ custom_code:
 schema_version: 1
 state_upgraders: true
 supports_indirect_user_project_override: true
+samples:
+  - name: kms_crypto_key_basic
+    primary_resource_id: example-key
+    exclude_test: true
+    steps:
+    - name: kms_crypto_key_basic
+  - name: kms_crypto_key_asymmetric_sign
+    primary_resource_id: example-asymmetric-sign-key
+    exclude_test: true
+    steps:
+    - name: kms_crypto_key_asymmetric_sign
 examples:
-  - name: 'kms_crypto_key_basic'
-    primary_resource_id: 'example-key'
-    exclude_test: true
-  - name: 'kms_crypto_key_asymmetric_sign'
-    primary_resource_id: 'example-asymmetric-sign-key'
-    exclude_test: true
 parameters:
   - name: 'keyRing'
     type: String

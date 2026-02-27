@@ -45,10 +45,12 @@ async:
   result:
     resource_inside_response: false
 
+samples:
+  - name: preview_feature_basic
+    primary_resource_id: gce_preview_feature
+    steps:
+    - name: preview_feature_basic
 examples:
-  - name: 'preview_feature_basic'
-    primary_resource_id: 'gce_preview_feature'
-
 parameters:
   - name: 'name'
     type: String

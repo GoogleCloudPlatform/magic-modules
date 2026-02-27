@@ -23,17 +23,20 @@ update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/rolloutKinds/{{rollout_kind_id}}
 autogen_status: Um9sbG91dEtpbmQ=
-examples:
+samples:
   - name: saas_runtime_rollout_kind_basic
-    primary_resource_id: example
     bootstrap_iam:
-      - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
-        role: roles/saasservicemgmt.serviceAgent
+    - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
+      role: roles/saasservicemgmt.serviceAgent
     min_version: beta
-    vars:
-      rolloutkind_name: example-rolloutkind
-      saas_name: example-saas
-      unitkind_name: example-unitkind
+    primary_resource_id: example
+    steps:
+    - name: saas_runtime_rollout_kind_basic
+      prefixed_vars:
+        rolloutkind_name: example-rolloutkind
+        saas_name: example-saas
+        unitkind_name: example-unitkind
+examples:
 parameters:
   - name: location
     type: String

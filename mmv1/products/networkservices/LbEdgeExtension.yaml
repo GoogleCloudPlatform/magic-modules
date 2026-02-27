@@ -41,20 +41,23 @@ custom_code:
 sweeper:
   url_substitutions:
     - location: 'global'
-examples:
-  - name: 'network_services_lb_edge_extension_basic'
-    primary_resource_id: 'default'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    vars:
-      forwarding_rule_name: 'elb-forwarding-rule'
-      target_http_proxy_name: 'elb-target-http-proxy'
-      url_map_name: 'elb-url-map'
-      backend_service_name: 'elb-backend-subnet'
-      lb_edge_extension_name: 'elb-edge-ext'
-      wasm_plugin_name: 'elb-wasm-plugin-data'
-      repository_name: 'repository-standard'
+samples:
+  - name: network_services_lb_edge_extension_basic
+    primary_resource_id: default
     exclude_test: true
+    steps:
+    - name: network_services_lb_edge_extension_basic
+      prefixed_vars:
+        backend_service_name: elb-backend-subnet
+        forwarding_rule_name: elb-forwarding-rule
+        lb_edge_extension_name: elb-edge-ext
+        repository_name: repository-standard
+        target_http_proxy_name: elb-target-http-proxy
+        url_map_name: elb-url-map
+        wasm_plugin_name: elb-wasm-plugin-data
+      test_env_vars:
+        project: PROJECT_NAME
+examples:
 parameters:
   - name: 'location'
     type: String

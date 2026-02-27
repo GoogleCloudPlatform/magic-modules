@@ -36,15 +36,20 @@ async:
     resource_inside_response: true
 autogen_async: true
 include_in_tgc_next: true
-examples:
+samples:
   - name: blockchain_nodes_basic
     primary_resource_id: default_node
-    vars:
-      blockchain_node_id: blockchain_basic_node
+    steps:
+    - name: blockchain_nodes_basic
+      prefixed_vars:
+        blockchain_node_id: blockchain_basic_node
   - name: blockchain_nodes_geth_details
     primary_resource_id: default_node_geth
-    vars:
-      blockchain_node_id: blockchain_geth_node
+    steps:
+    - name: blockchain_nodes_geth_details
+      prefixed_vars:
+        blockchain_node_id: blockchain_geth_node
+examples:
 parameters:
   - name: location
     type: String

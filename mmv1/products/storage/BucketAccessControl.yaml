@@ -46,11 +46,14 @@ import_format:
   - '{{bucket}}/{{entity}}'
 mutex: storage/buckets/{{bucket}}
 exclude_sweeper: true
-examples:
+samples:
   - name: storage_bucket_access_control_public_bucket
     primary_resource_id: public_rule
-    vars:
-      bucket_name: static-content-bucket
+    steps:
+    - name: storage_bucket_access_control_public_bucket
+      prefixed_vars:
+        bucket_name: static-content-bucket
+examples:
 properties:
   - name: bucket
     type: ResourceRef

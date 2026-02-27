@@ -87,14 +87,19 @@ properties:
     description: Timestamp when the PromptTemplate was last updated.
     output: true
 min_version: beta
-examples:
+samples:
   - name: firebaseailogic_prompt_template_file
     min_version: beta
     primary_resource_id: file
-    vars:
-      template_id: 'file-template'
+    steps:
+    - name: firebaseailogic_prompt_template_file
+      prefixed_vars:
+        template_id: file-template
   - name: firebaseailogic_prompt_template_basic
     min_version: beta
     primary_resource_id: basic
-    vars:
-      template_id: 'basic-template'
+    steps:
+    - name: firebaseailogic_prompt_template_basic
+      prefixed_vars:
+        template_id: basic-template
+examples:

@@ -29,13 +29,16 @@ import_format:
   - '{{name}}'
 custom_code:
   custom_import: templates/terraform/custom_import/self_link_as_name.tmpl
-examples:
+samples:
   - name: scan_config_basic
-    primary_resource_id: scan-config
     min_version: beta
-    vars:
-      address_name: scan-basic-static-ip
-      scan_config_name: terraform-scan-config
+    primary_resource_id: scan-config
+    steps:
+    - name: scan_config_basic
+      prefixed_vars:
+        address_name: scan-basic-static-ip
+        scan_config_name: terraform-scan-config
+examples:
 properties:
   - name: name
     type: String

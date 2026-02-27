@@ -38,13 +38,16 @@ timeouts:
   delete_minutes: 20
 custom_code:
 include_in_tgc_next: true
+samples:
+  - name: scc_v2_organization_mute_config_basic
+    primary_resource_id: default
+    steps:
+    - name: scc_v2_organization_mute_config_basic
+      prefixed_vars:
+        mute_config_id: my-config
+      test_env_vars:
+        org_id: ORG_ID
 examples:
-  - name: 'scc_v2_organization_mute_config_basic'
-    primary_resource_id: 'default'
-    vars:
-      mute_config_id: 'my-config'
-    test_env_vars:
-      org_id: 'ORG_ID'
 parameters:
   - name: 'organization'
     type: String

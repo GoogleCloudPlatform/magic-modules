@@ -63,12 +63,15 @@ iam_policy:
     - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace_id}}'
     - '{{namespace_id}}'
   allowed_iam_role: 'roles/biglake.editor'
-  example_config_body: 'templates/terraform/iam/example_config_body/biglake_iceberg_namespace.tf.tmpl'
+  sample_config_body: 'templates/terraform/iam/example_config_body/biglake_iceberg_namespace.tf.tmpl'
+samples:
+  - name: biglake_iceberg_namespace
+    primary_resource_id: my_iceberg_namespace
+    steps:
+    - name: biglake_iceberg_namespace
+      prefixed_vars:
+        bucket_name: example-bucket
+      test_env_vars:
+        GOOGLE_BILLING_PROJECT: PROJECT_NAME
+        USER_PROJECT_OVERRIDE: "true"
 examples:
-  - name: 'biglake_iceberg_namespace'
-    primary_resource_id: 'my_iceberg_namespace'
-    vars:
-      bucket_name: 'example-bucket'
-    test_env_vars:
-      GOOGLE_BILLING_PROJECT: 'PROJECT_NAME'
-      USER_PROJECT_OVERRIDE: 'true'

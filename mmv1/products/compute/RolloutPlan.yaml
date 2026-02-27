@@ -37,10 +37,12 @@ async:
   operation:
     base_url: 'projects/{{project}}/global/operations/{{op_id}}'
 
+samples:
+  - name: rollout_plan_basic
+    primary_resource_id: default
+    steps:
+    - name: rollout_plan_basic
 examples:
-  - name: 'rollout_plan_basic'
-    primary_resource_id: 'default'
-
 parameters:
   - name: 'name'
     type: String

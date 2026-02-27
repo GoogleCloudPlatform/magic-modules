@@ -24,13 +24,16 @@ update_verb: PATCH
 id_format: organizations/{{organization}}/locations/{{location}}/frameworks/{{framework_id}}
 import_format:
   - organizations/{{organization}}/locations/{{location}}/frameworks/{{framework_id}}
+samples:
+  - name: cloudsecuritycompliance_framework_basic
+    primary_resource_id: example
+    steps:
+    - name: cloudsecuritycompliance_framework_basic
+      prefixed_vars:
+        framework_name: example-framework
+      test_env_vars:
+        org_id: ORG_ID
 examples:
-  - name: "cloudsecuritycompliance_framework_basic"
-    primary_resource_id: "example"
-    vars:
-      framework_name: "example-framework"
-    test_env_vars:
-      org_id: "ORG_ID"
 autogen_status: RnJhbWV3b3Jr
 custom_code:
   encoder: "templates/terraform/encoders/cloudsecuritycompliance_framework.go.tmpl"

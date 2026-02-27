@@ -37,38 +37,49 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+samples:
+  - name: logging_saved_query_basic
+    primary_resource_id: saved_query
+    steps:
+    - name: logging_saved_query_basic
+      prefixed_vars:
+        logging_saved_query_name: my-saved-query
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: logging_saved_query_no_description
+    primary_resource_id: saved_query
+    steps:
+    - name: logging_saved_query_no_description
+      prefixed_vars:
+        logging_saved_query_name: my-saved-query-no-description
+      test_env_vars:
+        project: PROJECT_NAME
+      exclude_docs: true
+  - name: logging_saved_query_private
+    primary_resource_id: saved_query
+    steps:
+    - name: logging_saved_query_private
+      prefixed_vars:
+        logging_saved_query_name: my-saved-query-private
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: logging_saved_query_summary_fields
+    primary_resource_id: saved_query
+    steps:
+    - name: logging_saved_query_summary_fields
+      prefixed_vars:
+        logging_saved_query_name: my-saved-query-summary-fields
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: logging_saved_query_sql_basic
+    primary_resource_id: saved_query
+    steps:
+    - name: logging_saved_query_sql_basic
+      prefixed_vars:
+        logging_saved_query_name: my-saved-query-sql
+      test_env_vars:
+        project: PROJECT_NAME
 examples:
-  - name: 'logging_saved_query_basic'
-    primary_resource_id: 'saved_query'
-    vars:
-      logging_saved_query_name: 'my-saved-query'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'logging_saved_query_no_description'
-    primary_resource_id: 'saved_query'
-    vars:
-      logging_saved_query_name: 'my-saved-query-no-description'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    exclude_docs: true
-  - name: 'logging_saved_query_private'
-    primary_resource_id: 'saved_query'
-    vars:
-      logging_saved_query_name: 'my-saved-query-private'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'logging_saved_query_summary_fields'
-    primary_resource_id: 'saved_query'
-    vars:
-      logging_saved_query_name: 'my-saved-query-summary-fields'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'logging_saved_query_sql_basic'
-    primary_resource_id: 'saved_query'
-    vars:
-      logging_saved_query_name: 'my-saved-query-sql'
-    test_env_vars:
-      project: 'PROJECT_NAME'
 parameters:
   - name: 'parent'
     type: String

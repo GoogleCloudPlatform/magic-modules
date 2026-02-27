@@ -36,20 +36,25 @@ custom_code:
   decoder: 'templates/terraform/decoders/service_directory_metadata_to_annotations.go.tmpl'
   pre_update: 'templates/terraform/pre_update/service_directory_endpoint.go.tmpl'
 exclude_sweeper: true
+samples:
+  - name: service_directory_endpoint_basic
+    primary_resource_id: example
+    steps:
+    - name: service_directory_endpoint_basic
+      prefixed_vars:
+        endpoint_id: example-endpoint
+        namespace_id: example-namespace
+        service_id: example-service
+  - name: service_directory_endpoint_with_network
+    primary_resource_id: example
+    steps:
+    - name: service_directory_endpoint_with_network
+      prefixed_vars:
+        endpoint_id: example-endpoint
+        namespace_id: example-namespace
+        network_name: example-network
+        service_id: example-service
 examples:
-  - name: 'service_directory_endpoint_basic'
-    primary_resource_id: 'example'
-    vars:
-      service_id: 'example-service'
-      namespace_id: 'example-namespace'
-      endpoint_id: 'example-endpoint'
-  - name: 'service_directory_endpoint_with_network'
-    primary_resource_id: 'example'
-    vars:
-      service_id: 'example-service'
-      namespace_id: 'example-namespace'
-      endpoint_id: 'example-endpoint'
-      network_name: 'example-network'
 parameters:
   - name: 'service'
     type: String

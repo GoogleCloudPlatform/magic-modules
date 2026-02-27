@@ -748,10 +748,13 @@ properties:
     type: String
     description: Time that the cluster was most recently updated.
     output: true
-examples:
+samples:
   - name: hypercomputecluster_cluster_basic
-    primary_resource_id: 'cluster'
-    vars:
-      cluster_id: 'my-cluster'
-    test_vars_overrides:
-      cluster_id: 'fmt.Sprintf("tf%s", acctest.RandString(t, 8))'
+    primary_resource_id: cluster
+    steps:
+    - name: hypercomputecluster_cluster_basic
+      prefixed_vars:
+        cluster_id: my-cluster
+      test_vars_overrides:
+        cluster_id: fmt.Sprintf("tf%s", acctest.RandString(t, 8))
+examples:

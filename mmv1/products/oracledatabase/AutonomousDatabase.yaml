@@ -44,84 +44,95 @@ async:
     resource_inside_response: true
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/oracledatabase_autonomous_database.go.tmpl'
+samples:
+  - name: oracledatabase_autonomous_database_basic
+    primary_resource_id: myADB
+    steps:
+    - name: oracledatabase_autonomous_database_basic
+      prefixed_vars:
+        autonomous_database_id: my-instance
+        database_name: mydatabase
+        deletion_protection: "true"
+        project: my-project
+      test_vars_overrides:
+        database_name: fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))
+        deletion_protection: "false"
+        project: '"oci-terraform-testing-prod"'
+      ignore_read_extra:
+      - deletion_protection
+  - name: oracledatabase_autonomous_database_full
+    primary_resource_id: myADB
+    steps:
+    - name: oracledatabase_autonomous_database_full
+      prefixed_vars:
+        autonomous_database_id: my-instance
+        database_name: mydatabase
+        deletion_protection: "true"
+        endpoint_name: myendpoint
+        project: my-project
+      test_vars_overrides:
+        database_name: fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))
+        deletion_protection: "false"
+        endpoint_name: fmt.Sprintf("tftestendpoint%s", acctest.RandString(t, 10))
+        project: '"oci-terraform-testing-prod"'
+      ignore_read_extra:
+      - deletion_protection
+  - name: oracledatabase_autonomous_database_odbnetwork
+    primary_resource_id: myADB
+    steps:
+    - name: oracledatabase_autonomous_database_odbnetwork
+      prefixed_vars:
+        autonomous_database_id: my-instance
+        database_name: mydatabase
+        deletion_protection: "true"
+        odb_network: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork
+        odb_subnet: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet
+        project: my-project
+      test_vars_overrides:
+        database_name: fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))
+        deletion_protection: "false"
+        odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
+        odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+        project: '"oci-terraform-testing-prod"'
+      ignore_read_extra:
+      - deletion_protection
+  - name: oracledatabase_autonomous_database_publicip
+    primary_resource_id: myADB
+    steps:
+    - name: oracledatabase_autonomous_database_publicip
+      prefixed_vars:
+        autonomous_database_id: my-instance
+        database_name: mydatabase
+        deletion_protection: "true"
+        project: my-project
+      test_vars_overrides:
+        database_name: fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))
+        deletion_protection: "false"
+        project: '"oci-terraform-testing-prod"'
+      ignore_read_extra:
+      - deletion_protection
+  - name: oracledatabase_autonomous_database_disaster_recovery
+    primary_resource_id: myADB
+    steps:
+    - name: oracledatabase_autonomous_database_disaster_recovery
+      prefixed_vars:
+        adb_id: my-primary-adb-id
+        autonomous_database_id: my-instance
+        deletion_protection: "true"
+        enable_backup_replication: "false"
+        location: my-location
+        peer_adb_name: '"projects/my-project/locations/us-east4/autonomousDatabases/adb-id"'
+        project: my-project
+      test_vars_overrides:
+        adb_id: '"do-not-delete-dr-adb"'
+        deletion_protection: "false"
+        enable_backup_replication: "true"
+        location: '"us-west3"'
+        peer_adb_name: '"projects/oci-terraform-testing-prod/locations/us-east4/autonomousDatabases/do-not-delete-dr-adb"'
+        project: '"oci-terraform-testing-prod"'
+      ignore_read_extra:
+      - deletion_protection
 examples:
-  - name: 'oracledatabase_autonomous_database_basic'
-    primary_resource_id: 'myADB'
-    vars:
-      project: 'my-project'
-      autonomous_database_id: 'my-instance'
-      database_name: 'mydatabase'
-      deletion_protection: 'true'
-    ignore_read_extra:
-      - 'deletion_protection'
-    test_vars_overrides:
-      deletion_protection: 'false'
-      project: '"oci-terraform-testing-prod"'
-      database_name: 'fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))'
-  - name: 'oracledatabase_autonomous_database_full'
-    primary_resource_id: 'myADB'
-    vars:
-      project: 'my-project'
-      autonomous_database_id: 'my-instance'
-      database_name: 'mydatabase'
-      endpoint_name: 'myendpoint'
-      deletion_protection: 'true'
-    ignore_read_extra:
-      - 'deletion_protection'
-    test_vars_overrides:
-      project: '"oci-terraform-testing-prod"'
-      deletion_protection: 'false'
-      database_name: 'fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))'
-      endpoint_name: 'fmt.Sprintf("tftestendpoint%s", acctest.RandString(t, 10))'
-  - name: 'oracledatabase_autonomous_database_odbnetwork'
-    primary_resource_id: 'myADB'
-    vars:
-      project: 'my-project'
-      autonomous_database_id: 'my-instance'
-      database_name: 'mydatabase'
-      odb_network: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork'
-      odb_subnet: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet'
-      deletion_protection: 'true'
-    ignore_read_extra:
-      - 'deletion_protection'
-    test_vars_overrides:
-      deletion_protection: 'false'
-      project: '"oci-terraform-testing-prod"'
-      database_name: 'fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))'
-      odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
-      odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
-  - name: 'oracledatabase_autonomous_database_publicip'
-    primary_resource_id: 'myADB'
-    vars:
-      project: 'my-project'
-      autonomous_database_id: 'my-instance'
-      database_name: 'mydatabase'
-      deletion_protection: 'true'
-    ignore_read_extra:
-      - 'deletion_protection'
-    test_vars_overrides:
-      deletion_protection: 'false'
-      project: '"oci-terraform-testing-prod"'
-      database_name: 'fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))'
-  - name: 'oracledatabase_autonomous_database_disaster_recovery'
-    primary_resource_id: 'myADB'
-    vars:
-      project: 'my-project'
-      autonomous_database_id: 'my-instance'
-      location: 'my-location'
-      adb_id: 'my-primary-adb-id'
-      peer_adb_name: '"projects/my-project/locations/us-east4/autonomousDatabases/adb-id"'
-      enable_backup_replication: 'false'
-      deletion_protection: 'true'
-    ignore_read_extra:
-      - 'deletion_protection'
-    test_vars_overrides:
-      deletion_protection: 'false'
-      project: '"oci-terraform-testing-prod"'
-      location: '"us-west3"'
-      adb_id: '"do-not-delete-dr-adb"'
-      peer_adb_name: '"projects/oci-terraform-testing-prod/locations/us-east4/autonomousDatabases/do-not-delete-dr-adb"'
-      enable_backup_replication: 'true'
 virtual_fields:
   - name: 'deletion_protection'
     type: Boolean

@@ -53,19 +53,23 @@ custom_code:
   tgc_decoder: 'templates/tgc_next/decoders/spanner_instance.go.tmpl'
   tgc_ignore_terraform_decoder: true
   tgc_ignore_terraform_encoder: true
+samples:
+  - name: spanner_instance_basic
+    skip_vcr: true
+    primary_resource_id: example
+    steps:
+    - name: spanner_instance_basic
+  - name: spanner_instance_processing_units
+    skip_vcr: true
+    primary_resource_id: example
+    steps:
+    - name: spanner_instance_processing_units
+  - name: spanner_instance_multi_regional
+    skip_vcr: true
+    primary_resource_id: example
+    steps:
+    - name: spanner_instance_multi_regional
 examples:
-  - name: 'spanner_instance_basic'
-    primary_resource_id: 'example'
-      # Randomness
-    skip_vcr: true
-  - name: 'spanner_instance_processing_units'
-    primary_resource_id: 'example'
-      # Randomness
-    skip_vcr: true
-  - name: 'spanner_instance_multi_regional'
-    primary_resource_id: 'example'
-      # Randomness
-    skip_vcr: true
 virtual_fields:
   - name: 'force_destroy'
     description: |

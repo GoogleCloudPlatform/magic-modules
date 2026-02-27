@@ -63,10 +63,15 @@ properties:
       Optional. The containing Folder resource name.
       Format: `projects/*/locations/*/folders/*` or `projects/*/locations/*/teamFolders/*`.
     min_version: 'beta'
+samples:
+  - name: dataform_folder_basic
+    min_version: beta
+    primary_resource_id: dataform_folder_basic
+    steps:
+    - name: dataform_folder_basic
+  - name: dataform_folder_full
+    min_version: beta
+    primary_resource_id: dataform_folder_full
+    steps:
+    - name: dataform_folder_full
 examples:
-  - name: 'dataform_folder_basic'
-    primary_resource_id: 'dataform_folder_basic'
-    min_version: 'beta'
-  - name: 'dataform_folder_full'
-    primary_resource_id: 'dataform_folder_full'
-    min_version: 'beta'

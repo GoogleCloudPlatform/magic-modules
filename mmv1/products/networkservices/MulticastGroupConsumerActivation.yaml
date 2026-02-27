@@ -30,18 +30,21 @@ import_format:
 sweeper:
   url_substitutions:
     - location: "us-central1-b"
-examples:
+samples:
   - name: network_services_multicast_group_consumer_activation_basic
     primary_resource_id: mgca_test
-    vars:
-      network_name: test-network-mgca
-      domain_name: test-domain-mgca
-      domain_activation_name: test-domain-activation-mgca
-      consumer_association_name: test-consumer-association-mgca
-      internal_range_name: test-internal-range-mgca
-      group_range_name: test-group-range-mgca
-      group_range_activation_name: test-mgra-mgca
-      group_consumer_activation_name: test-mgca-mgca
+    steps:
+    - name: network_services_multicast_group_consumer_activation_basic
+      prefixed_vars:
+        consumer_association_name: test-consumer-association-mgca
+        domain_activation_name: test-domain-activation-mgca
+        domain_name: test-domain-mgca
+        group_consumer_activation_name: test-mgca-mgca
+        group_range_activation_name: test-mgra-mgca
+        group_range_name: test-group-range-mgca
+        internal_range_name: test-internal-range-mgca
+        network_name: test-network-mgca
+examples:
 autogen_async: true
 async:
   operation:

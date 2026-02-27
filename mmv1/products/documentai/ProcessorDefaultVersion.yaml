@@ -35,11 +35,14 @@ custom_code:
   pre_read: 'templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.tmpl'
   pre_update: 'templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.tmpl'
   pre_delete: 'templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.tmpl'
+samples:
+  - name: documentai_default_version
+    primary_resource_id: processor
+    steps:
+    - name: documentai_default_version
+      prefixed_vars:
+        processor_name: test-processor
 examples:
-  - name: 'documentai_default_version'
-    primary_resource_id: 'processor'
-    vars:
-      processor_name: 'test-processor'
 parameters:
   - name: 'processor'
     type: String

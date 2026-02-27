@@ -33,12 +33,14 @@ custom_code:
   post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project_and_location.go.tmpl'
 
+samples:
+  - name: dialogflow_generator_basic
+    primary_resource_id: summarization_basic_generator
+    steps:
+    - name: dialogflow_generator_basic
+      prefixed_vars:
+        profile_name: dialogflow-profile
 examples:
-  - name: 'dialogflow_generator_basic'
-    primary_resource_id: 'summarization_basic_generator'
-    vars:
-      profile_name: 'dialogflow-profile'
-
 parameters:
   - name: 'location'
     type: String

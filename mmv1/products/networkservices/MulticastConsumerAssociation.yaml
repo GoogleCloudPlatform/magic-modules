@@ -30,14 +30,17 @@ import_format:
 sweeper:
   url_substitutions:
     - location: "us-central1-b"
-examples:
+samples:
   - name: network_services_multicast_consumer_association_basic
     primary_resource_id: mca_test
-    vars:
-      network_name: test-network-mca
-      domain_name: test-domain-mca
-      domain_activation_name: test-domain-activation-mca
-      consumer_association_name: test-consumer-association-mca
+    steps:
+    - name: network_services_multicast_consumer_association_basic
+      prefixed_vars:
+        consumer_association_name: test-consumer-association-mca
+        domain_activation_name: test-domain-activation-mca
+        domain_name: test-domain-mca
+        network_name: test-network-mca
+examples:
 autogen_async: true
 async:
   operation:

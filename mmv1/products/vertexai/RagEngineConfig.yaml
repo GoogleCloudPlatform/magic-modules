@@ -48,13 +48,23 @@ async:
     resource_inside_response: true
 custom_code:
   custom_delete: "templates/terraform/custom_delete/vertex_ai_rag_engine_config.go.tmpl"
+samples:
+  - name: vertex_ai_rag_engine_config_basic
+    primary_resource_id: ""
+    exclude_test: true
+    steps:
+    - name: vertex_ai_rag_engine_config_basic
+  - name: vertex_ai_rag_engine_config_scaled
+    primary_resource_id: ""
+    exclude_test: true
+    steps:
+    - name: vertex_ai_rag_engine_config_scaled
+  - name: vertex_ai_rag_engine_config_unprovisioned
+    primary_resource_id: ""
+    exclude_test: true
+    steps:
+    - name: vertex_ai_rag_engine_config_unprovisioned
 examples:
-  - name: 'vertex_ai_rag_engine_config_basic'
-    exclude_test: true
-  - name: 'vertex_ai_rag_engine_config_scaled'
-    exclude_test: true
-  - name: 'vertex_ai_rag_engine_config_unprovisioned'
-    exclude_test: true
 parameters:
   - name: 'region'
     type: String

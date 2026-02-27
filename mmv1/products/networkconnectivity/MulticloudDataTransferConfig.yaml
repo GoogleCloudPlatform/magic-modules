@@ -33,12 +33,14 @@ async:
   operation:
     base_url: '{{op_id}}'
 
+samples:
+  - name: network_connectivity_multicloud_data_transfer_config_basic
+    primary_resource_id: example
+    steps:
+    - name: network_connectivity_multicloud_data_transfer_config_basic
+      prefixed_vars:
+        config_name: basic_config
 examples:
-  - name: "network_connectivity_multicloud_data_transfer_config_basic"
-    primary_resource_id: "example"
-    vars:
-      config_name: "basic_config"
-
 parameters:
   - name: 'location'
     type: String

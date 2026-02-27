@@ -21,42 +21,53 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/apps/{{app}}/guardrails/{{name}}
 import_format:
  - projects/{{project}}/locations/{{location}}/apps/{{app}}/guardrails/{{name}}
+samples:
+  - name: ces_guardrail_basic
+    primary_resource_id: ces_guardrail_basic
+    steps:
+    - name: ces_guardrail_basic
+      prefixed_vars:
+        app_display_name: my-app
+        app_id: app-id
+        guardrail_display_name: my-guardrail
+        guardrail_id: guardrail-id
+  - name: ces_guardrail_transfer_agent_content_filter
+    primary_resource_id: ces_guardrail_transfer_agent_content_filter
+    steps:
+    - name: ces_guardrail_transfer_agent_content_filter
+      prefixed_vars:
+        app_display_name: my-app
+        app_id: app-id
+        guardrail_display_name: my-guardrail
+        guardrail_id: guardrail-id
+  - name: ces_guardrail_generative_answer_llm_prompt_security
+    primary_resource_id: ces_guardrail_generative_answer_llm_prompt_security
+    steps:
+    - name: ces_guardrail_generative_answer_llm_prompt_security
+      prefixed_vars:
+        app_display_name: my-app
+        app_id: app-id
+        guardrail_display_name: my-guardrail
+        guardrail_id: guardrail-id
+  - name: ces_guardrail_code_callback
+    primary_resource_id: ces_guardrail_code_callback
+    steps:
+    - name: ces_guardrail_code_callback
+      prefixed_vars:
+        app_display_name: my-app
+        app_id: app-id
+        guardrail_display_name: my-guardrail
+        guardrail_id: guardrail-id
+  - name: ces_guardrail_llm_policy
+    primary_resource_id: ces_guardrail_llm_policy
+    steps:
+    - name: ces_guardrail_llm_policy
+      prefixed_vars:
+        app_display_name: my-app
+        app_id: app-id
+        guardrail_display_name: my-guardrail
+        guardrail_id: guardrail-id
 examples:
- - name: "ces_guardrail_basic"
-   primary_resource_id: "ces_guardrail_basic"
-   vars:
-    guardrail_display_name: 'my-guardrail'
-    app_display_name: 'my-app'
-    guardrail_id: 'guardrail-id'
-    app_id: 'app-id'
- - name: "ces_guardrail_transfer_agent_content_filter"
-   primary_resource_id: "ces_guardrail_transfer_agent_content_filter"
-   vars:
-    guardrail_display_name: 'my-guardrail'
-    app_display_name: 'my-app'
-    guardrail_id: 'guardrail-id'
-    app_id: 'app-id'
- - name: "ces_guardrail_generative_answer_llm_prompt_security"
-   primary_resource_id: "ces_guardrail_generative_answer_llm_prompt_security"
-   vars:
-    guardrail_display_name: 'my-guardrail'
-    app_display_name: 'my-app'
-    guardrail_id: 'guardrail-id'
-    app_id: 'app-id'
- - name: "ces_guardrail_code_callback"
-   primary_resource_id: "ces_guardrail_code_callback"
-   vars:
-    guardrail_display_name: 'my-guardrail'
-    app_display_name: 'my-app'
-    guardrail_id: 'guardrail-id'
-    app_id: 'app-id'
- - name: "ces_guardrail_llm_policy"
-   primary_resource_id: "ces_guardrail_llm_policy"
-   vars:
-    guardrail_display_name: 'my-guardrail'
-    app_display_name: 'my-app'
-    guardrail_id: 'guardrail-id'
-    app_id: 'app-id'
 autogen_status: R3VhcmRyYWls
 parameters:
  - name: location

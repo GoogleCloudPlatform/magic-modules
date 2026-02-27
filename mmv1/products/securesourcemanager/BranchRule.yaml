@@ -32,33 +32,38 @@ async:
     - create
     - delete
 autogen_async: true
-examples:
+samples:
   - name: secure_source_manager_branch_rule_basic
     primary_resource_id: basic
-    ignore_read_extra:
+    steps:
+    - name: secure_source_manager_branch_rule_basic
+      prefixed_vars:
+        branch_rule_id: my-basic-branchrule
+        deletion_policy: PREVENT
+        instance_id: my-basic-instance
+        repository_id: my-basic-repository
+      test_vars_overrides:
+        deletion_policy: '"DELETE"'
+      oics_vars_overrides:
+        deletion_policy: '"DELETE"'
+      ignore_read_extra:
       - deletion_policy
-    vars:
-      branch_rule_id: my-basic-branchrule
-      deletion_policy: PREVENT
-      instance_id: my-basic-instance
-      repository_id: my-basic-repository
-    test_vars_overrides:
-      deletion_policy: '"DELETE"'
-    oics_vars_overrides:
-      deletion_policy: '"DELETE"'
   - name: secure_source_manager_branch_rule_with_fields
     primary_resource_id: default
-    ignore_read_extra:
+    steps:
+    - name: secure_source_manager_branch_rule_with_fields
+      prefixed_vars:
+        branch_rule_id: my-initial-branchrule
+        deletion_policy: PREVENT
+        instance_id: my-initial-instance
+        repository_id: my-initial-repository
+      test_vars_overrides:
+        deletion_policy: '"DELETE"'
+      oics_vars_overrides:
+        deletion_policy: '"DELETE"'
+      ignore_read_extra:
       - deletion_policy
-    vars:
-      branch_rule_id: my-initial-branchrule
-      deletion_policy: PREVENT
-      instance_id: my-initial-instance
-      repository_id: my-initial-repository
-    test_vars_overrides:
-      deletion_policy: '"DELETE"'
-    oics_vars_overrides:
-      deletion_policy: '"DELETE"'
+examples:
 parameters:
   - name: branch_rule_id
     type: String

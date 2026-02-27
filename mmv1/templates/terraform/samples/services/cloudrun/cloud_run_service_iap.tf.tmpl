@@ -1,0 +1,19 @@
+resource "google_cloud_run_service" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.PrefixedVars "cloud_run_service_name"}}"
+  location = "us-central1"
+
+  metadata {
+    annotations = {
+      "run.googleapis.com/iap-enabled": true
+    }
+  }
+
+  template {
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+      }
+    }
+  }
+}
+

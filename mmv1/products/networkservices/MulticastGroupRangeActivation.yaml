@@ -30,16 +30,19 @@ import_format:
 sweeper:
   url_substitutions:
     - location: "us-central1-b"
-examples:
+samples:
   - name: network_services_multicast_group_range_activation_basic
     primary_resource_id: mgra_test
-    vars:
-      network_name: test-network-mgra
-      domain_name: test-domain-mgra
-      domain_activation_name: test-domain-activation-mgra
-      internal_range_name: test-internal-range-mgra
-      group_range_name: test-group-range-mgra
-      group_range_activation_name: test-mgra-mgra
+    steps:
+    - name: network_services_multicast_group_range_activation_basic
+      prefixed_vars:
+        domain_activation_name: test-domain-activation-mgra
+        domain_name: test-domain-mgra
+        group_range_activation_name: test-mgra-mgra
+        group_range_name: test-group-range-mgra
+        internal_range_name: test-internal-range-mgra
+        network_name: test-network-mgra
+examples:
 autogen_async: true
 async:
   operation:

@@ -37,24 +37,29 @@ id_format: projects/{{project}}/global/machineImages/{{name}}
 async:
   operation:
     base_url: '{{op_id}}'
-examples:
+samples:
   - name: machine_image_basic
     primary_resource_id: image
     primary_resource_name: fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])
-    vars:
-      image_name: my-image
-      vm_name: my-vm
+    steps:
+    - name: machine_image_basic
+      prefixed_vars:
+        image_name: my-image
+        vm_name: my-vm
   - name: compute_machine_image_kms
-    primary_resource_id: image
     bootstrap_iam:
-      - member: serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com
-        role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    - member: serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com
+      role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    primary_resource_id: image
     primary_resource_name: fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])
-    vars:
-      image_name: my-image
-      key_name: key
-      keyring_name: keyring
-      vm_name: my-vm
+    steps:
+    - name: compute_machine_image_kms
+      prefixed_vars:
+        image_name: my-image
+        key_name: key
+        keyring_name: keyring
+        vm_name: my-vm
+examples:
 properties:
   - name: name
     type: String

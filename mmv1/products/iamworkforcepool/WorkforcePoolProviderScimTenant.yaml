@@ -35,16 +35,19 @@ custom_code:
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
   post_create: 'templates/terraform/post_create/sleep.go.tmpl'
   post_update: 'templates/terraform/post_create/sleep.go.tmpl'
+samples:
+  - name: iam_workforce_pool_provider_scim_tenant_basic
+    primary_resource_id: example
+    steps:
+    - name: iam_workforce_pool_provider_scim_tenant_basic
+      prefixed_vars:
+        hard_delete: "true"
+        provider_id: example-prvdr
+        scim_tenant_id: example-scim-tenant
+        workforce_pool_id: example-pool
+      test_env_vars:
+        org_id: ORG_ID
 examples:
-  - name: 'iam_workforce_pool_provider_scim_tenant_basic'
-    primary_resource_id: "example"
-    vars:
-      workforce_pool_id: 'example-pool'
-      provider_id: 'example-prvdr'
-      scim_tenant_id: 'example-scim-tenant'
-      hard_delete: 'true'
-    test_env_vars:
-      org_id: 'ORG_ID'
 properties:
   - name: 'name'
     type: String

@@ -57,7 +57,10 @@ properties:
     description: Required. The TeamFolder's user-friendly name.
     min_version: 'beta'
     required: true
+samples:
+  - name: dataform_team_folder_basic
+    min_version: beta
+    primary_resource_id: dataform_team_folder_basic
+    steps:
+    - name: dataform_team_folder_basic
 examples:
-  - name: 'dataform_team_folder_basic'
-    primary_resource_id: 'dataform_team_folder_basic'
-    min_version: 'beta'

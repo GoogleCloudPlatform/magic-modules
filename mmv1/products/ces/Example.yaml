@@ -21,17 +21,20 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/apps/{{app}}/examples/{{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{app}}/examples/{{name}}
+samples:
+  - name: ces_example_basic
+    primary_resource_id: my-example
+    steps:
+    - name: ces_example_basic
+      prefixed_vars:
+        app_display_name: my-app
+        app_id: app-id
+        base_agent_id: base-agent-id
+        child_agent_id: child-agent-id
+        example_display_name: my-example
+        example_id: example-id
+        toolset_id: toolset-id
 examples:
-  - name: "ces_example_basic"
-    primary_resource_id: "my-example"
-    vars:
-      example_display_name: 'my-example'
-      app_display_name: 'my-app'
-      example_id: 'example-id'
-      app_id: 'app-id'
-      base_agent_id: 'base-agent-id'
-      child_agent_id: 'child-agent-id'
-      toolset_id: 'toolset-id'
 autogen_status: RXhhbXBsZQ==
 parameters:
   - name: location

@@ -37,17 +37,22 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+samples:
+  - name: scc_project_custom_module_basic
+    primary_resource_id: example
+    exclude_test: true
+    steps:
+    - name: scc_project_custom_module_basic
+      prefixed_vars:
+        display_name: basic_custom_module
+  - name: scc_project_custom_module_full
+    primary_resource_id: example
+    exclude_test: true
+    steps:
+    - name: scc_project_custom_module_full
+      prefixed_vars:
+        display_name: full_custom_module
 examples:
-  - name: 'scc_project_custom_module_basic'
-    primary_resource_id: 'example'
-    vars:
-      display_name: 'basic_custom_module'
-    exclude_test: true
-  - name: 'scc_project_custom_module_full'
-    primary_resource_id: 'example'
-    vars:
-      display_name: 'full_custom_module'
-    exclude_test: true
 parameters:
 properties:
   - name: 'name'

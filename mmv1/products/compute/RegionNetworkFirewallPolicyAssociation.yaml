@@ -35,16 +35,19 @@ async:
     base_url: '{{op_id}}'
 legacy_long_form_project: true
 api_resource_field: associations
-examples:
+samples:
   - name: region_network_firewall_policy_association
     primary_resource_id: default
-    vars:
-      association_name: my-association
-      network_name: my-network
-      policy_name: my-policy
-    test_env_vars:
-      project_name: PROJECT_NAME
-      region: REGION
+    steps:
+    - name: region_network_firewall_policy_association
+      prefixed_vars:
+        association_name: my-association
+        network_name: my-network
+        policy_name: my-policy
+      test_env_vars:
+        project_name: PROJECT_NAME
+        region: REGION
+examples:
 parameters:
   - name: firewallPolicy
     type: ResourceRef

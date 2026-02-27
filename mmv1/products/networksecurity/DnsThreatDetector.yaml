@@ -34,16 +34,18 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: "network_security_dns_threat_detector_basic"
-    primary_resource_id: "default"
-    vars:
-      resource_name: "my-threat-detector"
-      vpc_name: "my-vpc"
-    test_env_vars:
-      project: "PROJECT_NAME"
-    # There can be only one DNS Threat Detector, so disable the test as the written test already covers it
+samples:
+  - name: network_security_dns_threat_detector_basic
+    primary_resource_id: default
     exclude_test: true
+    steps:
+    - name: network_security_dns_threat_detector_basic
+      prefixed_vars:
+        resource_name: my-threat-detector
+        vpc_name: my-vpc
+      test_env_vars:
+        project: PROJECT_NAME
+examples:
 parameters:
   - name: "name"
     type: String
