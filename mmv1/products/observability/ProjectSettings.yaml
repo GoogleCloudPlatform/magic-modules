@@ -26,10 +26,10 @@ import_format:
   - "projects/{{project}}/locations/{{location}}/settings"
 exclude_delete: true
 autogen_async: true
+update_mask: true
 
 custom_code:
   pre_create: templates/terraform/pre_create/observability_project_settings.go.tmpl
-  pre_update: templates/terraform/pre_update/observability_project_settings.go.tmpl
 
 async:
   operation:
@@ -39,31 +39,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-
-parameters:
-  - name: 'location'
-    type: String
-    description: 'The location of the settings.'
-    url_param_only: true
-    required: true
-    immutable: true
-
-properties:
-  - name: 'defaultStorageLocation'
-    type: String
-    description: 'The default storage location for new resources, e.g. buckets. Only valid for global location.'
-  - name: 'kmsKeyName'
-    type: String
-    description: 'The default Cloud KMS key to use for new resources. Only valid for regional locations.'
-  - name: 'name'
-    type: String
-    description: 'The resource name of the settings.'
-    output: true
-  - name: 'serviceAccountId'
-    type: String
-    description: 'The service account used by Cloud Observability for this project.'
-    output: true
-
+  
 examples:
   - name: "observability_project_settings_basic"
     config_path: "templates/terraform/examples/observability_project_settings_basic.tf.tmpl"
@@ -88,3 +64,27 @@ examples:
       org_id: 'ORG_ID'
       project_name: 'PROJECT_NAME'
       billing_account: 'BILLING_ACCOUNT'
+
+parameters:
+  - name: 'location'
+    type: String
+    description: 'The location of the settings.'
+    url_param_only: true
+    required: true
+    immutable: true
+
+properties:
+  - name: 'defaultStorageLocation'
+    type: String
+    description: 'The default storage location for new resources, e.g. buckets. Only valid for global location.'
+  - name: 'kmsKeyName'
+    type: String
+    description: 'The default Cloud KMS key to use for new resources. Only valid for regional locations.'
+  - name: 'name'
+    type: String
+    description: 'The resource name of the settings.'
+    output: true
+  - name: 'serviceAccountId'
+    type: String
+    description: 'The service account used by Cloud Observability for this project.'
+    output: true
