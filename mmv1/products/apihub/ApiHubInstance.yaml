@@ -37,6 +37,11 @@ examples:
     vars:
       instance_id: test-instance-full
     exclude_test: true
+  - name: apihub_api_hub_instance_full_merge_conflict_test
+    primary_resource_id: apihub-instance-search
+    vars:
+      instance_id: test-instance-full
+    exclude_test: true
 autogen_async: true
 exclude_delete: true
 async:
