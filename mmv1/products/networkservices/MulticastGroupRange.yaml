@@ -29,14 +29,16 @@ import_format:
 sweeper:
   url_substitutions:
     - location: "global"
-examples:
+samples:
   - name: network_services_multicast_group_range_basic
     primary_resource_id: mgr_test
-    vars:
-      network_name: test-mgr-network
-      domain_name: test-mgr-domain
-      internal_range_name: test-mgr-internal-range
-      group_range_name: test-mgr-group-range
+    steps:
+    - name: network_services_multicast_group_range_basic
+      prefixed_vars:
+        domain_name: test-mgr-domain
+        group_range_name: test-mgr-group-range
+        internal_range_name: test-mgr-internal-range
+        network_name: test-mgr-network
 autogen_async: true
 async:
   operation:

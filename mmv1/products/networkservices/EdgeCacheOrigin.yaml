@@ -43,27 +43,33 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'network_services_edge_cache_origin_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-origin'
-    ignore_read_extra:
-      - 'timeout'
-  - name: 'network_services_edge_cache_origin_advanced'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-origin'
-      resource_name_2: 'my-fallback'
-    ignore_read_extra:
-      - 'timeout'
-  - name: 'network_services_edge_cache_origin_v4auth'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-origin'
-      secret_name: 'secret-name'
-    ignore_read_extra:
-      - 'timeout'
+samples:
+  - name: network_services_edge_cache_origin_basic
+    primary_resource_id: default
+    steps:
+    - name: network_services_edge_cache_origin_basic
+      prefixed_vars:
+        resource_name: my-origin
+      ignore_read_extra:
+      - timeout
+  - name: network_services_edge_cache_origin_advanced
+    primary_resource_id: default
+    steps:
+    - name: network_services_edge_cache_origin_advanced
+      prefixed_vars:
+        resource_name: my-origin
+        resource_name_2: my-fallback
+      ignore_read_extra:
+      - timeout
+  - name: network_services_edge_cache_origin_v4auth
+    primary_resource_id: default
+    steps:
+    - name: network_services_edge_cache_origin_v4auth
+      prefixed_vars:
+        resource_name: my-origin
+        secret_name: secret-name
+      ignore_read_extra:
+      - timeout
 parameters:
   - name: 'name'
     type: String

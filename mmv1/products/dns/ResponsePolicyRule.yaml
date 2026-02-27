@@ -33,15 +33,17 @@ timeouts:
 identity:
   - ruleName
 custom_code:
-examples:
-  - name: 'dns_response_policy_rule_basic'
-    primary_resource_id: 'example-response-policy-rule'
-    vars:
-      response_policy_name: 'example-response-policy'
-      network_1_name: 'network-1'
-      network_2_name: 'network-2'
-      cluster_1_name: 'cluster-1'
-      response_policy_rule_name: 'example-rule'
+samples:
+  - name: dns_response_policy_rule_basic
+    primary_resource_id: example-response-policy-rule
+    steps:
+    - name: dns_response_policy_rule_basic
+      prefixed_vars:
+        cluster_1_name: cluster-1
+        network_1_name: network-1
+        network_2_name: network-2
+        response_policy_name: example-response-policy
+        response_policy_rule_name: example-rule
 parameters:
   - name: 'response_policy'
     type: ResourceRef

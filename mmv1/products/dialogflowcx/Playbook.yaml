@@ -35,17 +35,20 @@ custom_code:
   pre_delete: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
   custom_import: 'templates/terraform/custom_import/dialogflowcx_playbook.go.tmpl'
 
-examples:
-  - name: "dialogflowcx_playbook_basic"
-    primary_resource_id: "my-playbook"
-    vars:
-      agent_name: 'dialogflowcx-agent-basic'
-  - name: "dialogflowcx_playbook_fulfillment"
-    primary_resource_id: "my-playbook"
-    vars:
-      agent_name: 'dialogflowcx-agent'
-      bucket_name: 'dialogflowcx-bucket'
-
+samples:
+  - name: dialogflowcx_playbook_basic
+    primary_resource_id: my-playbook
+    steps:
+    - name: dialogflowcx_playbook_basic
+      prefixed_vars:
+        agent_name: dialogflowcx-agent-basic
+  - name: dialogflowcx_playbook_fulfillment
+    primary_resource_id: my-playbook
+    steps:
+    - name: dialogflowcx_playbook_fulfillment
+      prefixed_vars:
+        agent_name: dialogflowcx-agent
+        bucket_name: dialogflowcx-bucket
 parameters:
   - name: 'parent'
     type: String

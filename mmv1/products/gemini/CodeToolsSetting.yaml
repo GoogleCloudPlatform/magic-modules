@@ -26,12 +26,14 @@ mutex: projects/{{project}}/locations/{{location}}/codeToolsSettings/{{code_tool
 sweeper:
   url_substitutions:
     - region: "global"
-examples:
+samples:
   - name: gemini_code_tools_setting_basic
     primary_resource_id: example
     exclude_test: true
-    vars:
-      code_tools_setting_id: ls1-tf
+    steps:
+    - name: gemini_code_tools_setting_basic
+      prefixed_vars:
+        code_tools_setting_id: ls1-tf
 autogen_async: false
 autogen_status: RGF0YVNoYXJpbmdXaXRoR29vZ2xlU2V0dGluZw==
 parameters:

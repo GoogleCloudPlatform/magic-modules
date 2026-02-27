@@ -38,20 +38,24 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "global"
-examples:
-  - name: 'dialogflowcx_security_settings_basic'
-    primary_resource_id: 'basic_security_settings'
-    vars:
-      settings_name: 'dialogflowcx-security-settings'
-  - name: 'dialogflowcx_security_settings_full'
-    primary_resource_id: 'basic_security_settings'
-    vars:
-      inspect_name: 'dialogflowcx-inspect-template'
-      deidentify_name: 'dialogflowcx-deidentify-template'
-      settings_name: 'dialogflowcx-security-settings'
-      bucket_name: 'dialogflowcx-bucket'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: dialogflowcx_security_settings_basic
+    primary_resource_id: basic_security_settings
+    steps:
+    - name: dialogflowcx_security_settings_basic
+      prefixed_vars:
+        settings_name: dialogflowcx-security-settings
+  - name: dialogflowcx_security_settings_full
+    primary_resource_id: basic_security_settings
+    steps:
+    - name: dialogflowcx_security_settings_full
+      prefixed_vars:
+        bucket_name: dialogflowcx-bucket
+        deidentify_name: dialogflowcx-deidentify-template
+        inspect_name: dialogflowcx-inspect-template
+        settings_name: dialogflowcx-security-settings
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
 properties:
   - name: 'name'

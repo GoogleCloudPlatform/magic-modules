@@ -38,19 +38,23 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'network_connectivity_regional_endpoint_regional_access'
-    primary_resource_id: 'default'
-    vars:
-      rep_name: 'my-rep'
-      rep_network: 'my-network'
-      rep_subnetwork: 'my-subnetwork'
-  - name: 'network_connectivity_regional_endpoint_global_access'
-    primary_resource_id: 'default'
-    vars:
-      rep_name: 'my-rep'
-      rep_network: 'my-network'
-      rep_subnetwork: 'my-subnetwork'
+samples:
+  - name: network_connectivity_regional_endpoint_regional_access
+    primary_resource_id: default
+    steps:
+    - name: network_connectivity_regional_endpoint_regional_access
+      prefixed_vars:
+        rep_name: my-rep
+        rep_network: my-network
+        rep_subnetwork: my-subnetwork
+  - name: network_connectivity_regional_endpoint_global_access
+    primary_resource_id: default
+    steps:
+    - name: network_connectivity_regional_endpoint_global_access
+      prefixed_vars:
+        rep_name: my-rep
+        rep_network: my-network
+        rep_subnetwork: my-subnetwork
 parameters:
   - name: 'name'
     type: String

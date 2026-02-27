@@ -37,14 +37,16 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'firebasestorage_bucket_basic'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      bucket_id: 'test_bucket'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+samples:
+  - name: firebasestorage_bucket_basic
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: firebasestorage_bucket_basic
+      prefixed_vars:
+        bucket_id: test_bucket
+      test_env_vars:
+        project_id: PROJECT_NAME
 parameters:
   - name: 'bucket_id'
     type: String

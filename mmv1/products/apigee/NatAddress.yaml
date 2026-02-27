@@ -48,27 +48,33 @@ custom_code:
   custom_update: 'templates/terraform/custom_update/apigee_nat_address.go.tmpl'
   custom_import: 'templates/terraform/custom_import/apigee_nat_address.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'apigee_nat_address_basic'
-    vars:
-      nat_address_name: 'my-nat-address'
+samples:
+  - name: apigee_nat_address_basic
+    primary_resource_id: ""
     exclude_test: true
-      # This is a more verbose version of the above that creates all
-      # the resources needed for the acceptance test.
-  - name: 'apigee_nat_address_basic_test'
-    primary_resource_id: 'apigee_nat_address'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-      # Resource creation race
+    steps:
+    - name: apigee_nat_address_basic
+      prefixed_vars:
+        nat_address_name: my-nat-address
+  - name: apigee_nat_address_basic_test
     skip_vcr: true
-    external_providers: ["time"]
-  - name: 'apigee_nat_address_with_activate'
-    vars:
-      nat_address_name: 'my-nat-address'
-      nat_address_activate: 'true'
+    external_providers:
+    - time
+    primary_resource_id: apigee_nat_address
+    steps:
+    - name: apigee_nat_address_basic_test
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
+  - name: apigee_nat_address_with_activate
+    primary_resource_id: ""
     exclude_test: true
+    steps:
+    - name: apigee_nat_address_with_activate
+      prefixed_vars:
+        nat_address_activate: "true"
+        nat_address_name: my-nat-address
 parameters:
   - name: 'instanceId'
     type: String

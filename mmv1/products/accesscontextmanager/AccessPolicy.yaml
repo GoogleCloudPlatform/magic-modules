@@ -61,17 +61,21 @@ iam_policy:
     - '{{name}}'
 # Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
-examples:
-  - name: 'access_context_manager_access_policy_basic'
-    primary_resource_id: 'access-policy'
+samples:
+  - name: access_context_manager_access_policy_basic
+    primary_resource_id: access-policy
     exclude_test: true
-  - name: 'access_context_manager_access_policy_scoped'
-    primary_resource_id: 'access-policy'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      project: 'PROJECT_NAME'
+    steps:
+    - name: access_context_manager_access_policy_basic
+  - name: access_context_manager_access_policy_scoped
+    primary_resource_id: access-policy
     exclude_test: true
-    exclude_import_test: true
+    steps:
+    - name: access_context_manager_access_policy_scoped
+      test_env_vars:
+        org_id: ORG_ID
+        project: PROJECT_NAME
+      exclude_import_test: true
 parameters:
   - name: 'parent'
     type: String

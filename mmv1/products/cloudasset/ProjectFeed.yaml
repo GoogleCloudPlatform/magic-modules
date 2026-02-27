@@ -42,13 +42,15 @@ custom_code:
 include_in_tgc_next: true
 cai_base_url: 'projects/{{project}}/feeds'
 cai_asset_name_format: 'projects/{{project}}/feeds/{{feed_id}}'
-examples:
-  - name: 'cloud_asset_project_feed'
-    primary_resource_id: 'project_feed'
-    vars:
-      feed_id: 'network-updates'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: cloud_asset_project_feed
+    primary_resource_id: project_feed
+    steps:
+    - name: cloud_asset_project_feed
+      prefixed_vars:
+        feed_id: network-updates
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
 properties:
   - name: 'billing_project'

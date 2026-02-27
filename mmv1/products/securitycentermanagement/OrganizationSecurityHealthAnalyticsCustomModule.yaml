@@ -37,25 +37,29 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'scc_management_organization_security_health_analytics_custom_module_basic'
-    primary_resource_id: 'example'
-    vars:
-      display_name: 'basic_custom_module'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    test_vars_overrides:
-      'sleep': 'true'
+samples:
+  - name: scc_management_organization_security_health_analytics_custom_module_basic
+    primary_resource_id: example
     exclude_test: true
-  - name: 'scc_management_organization_security_health_analytics_custom_module_full'
-    primary_resource_id: 'example'
-    vars:
-      display_name: 'full_custom_module'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    test_vars_overrides:
-      'sleep': 'true'
+    steps:
+    - name: scc_management_organization_security_health_analytics_custom_module_basic
+      prefixed_vars:
+        display_name: basic_custom_module
+      test_env_vars:
+        org_id: ORG_ID
+      test_vars_overrides:
+        sleep: "true"
+  - name: scc_management_organization_security_health_analytics_custom_module_full
+    primary_resource_id: example
     exclude_test: true
+    steps:
+    - name: scc_management_organization_security_health_analytics_custom_module_full
+      prefixed_vars:
+        display_name: full_custom_module
+      test_env_vars:
+        org_id: ORG_ID
+      test_vars_overrides:
+        sleep: "true"
 parameters:
   - name: 'organization'
     type: String

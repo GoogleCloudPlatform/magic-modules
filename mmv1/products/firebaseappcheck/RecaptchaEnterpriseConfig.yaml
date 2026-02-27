@@ -36,22 +36,23 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-examples:
-  - name: 'firebase_app_check_recaptcha_enterprise_config_basic'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      # Don't add random suffix
-      token_ttl: '7200s'
-      # A valid key, but is actually unusable
-      site_key: '6LdpMXIpAAAAANkwWQPgEdjEhal7ugkH9RK9ytuw'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'token_ttl': '"7200s"'
-      'site_key': '"6LdpMXIpAAAAANkwWQPgEdjEhal7ugkH9RK9ytuw"'
-    # Need the time_sleep resource
-    external_providers: ["random", "time"]
+samples:
+  - name: firebase_app_check_recaptcha_enterprise_config_basic
+    external_providers:
+    - random
+    - time
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: firebase_app_check_recaptcha_enterprise_config_basic
+      prefixed_vars:
+        site_key: 6LdpMXIpAAAAANkwWQPgEdjEhal7ugkH9RK9ytuw
+        token_ttl: 7200s
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        site_key: '"6LdpMXIpAAAAANkwWQPgEdjEhal7ugkH9RK9ytuw"'
+        token_ttl: '"7200s"'
 parameters:
   - name: 'app_id'
     type: String

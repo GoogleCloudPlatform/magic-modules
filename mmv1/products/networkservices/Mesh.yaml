@@ -44,19 +44,25 @@ async:
 schema_version: 1
 state_upgraders: true
 autogen_async: true
-examples:
+samples:
   - name: network_services_mesh_basic
     primary_resource_id: default
-    vars:
-      resource_name: my-mesh
+    steps:
+    - name: network_services_mesh_basic
+      prefixed_vars:
+        resource_name: my-mesh
   - name: network_services_mesh_no_port
     primary_resource_id: default
-    vars:
-      resource_name: my-mesh-noport
+    steps:
+    - name: network_services_mesh_no_port
+      prefixed_vars:
+        resource_name: my-mesh-noport
   - name: network_services_mesh_location
     primary_resource_id: default
-    vars:
-      resource_name: my-mesh
+    steps:
+    - name: network_services_mesh_location
+      prefixed_vars:
+        resource_name: my-mesh
 parameters:
   - name: name
     type: String

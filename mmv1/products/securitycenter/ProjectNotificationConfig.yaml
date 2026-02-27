@@ -42,16 +42,18 @@ timeouts:
   delete_minutes: 20
 custom_code:
   custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project.go.tmpl'
-examples:
-  - name: 'scc_project_notification_config_basic'
-    primary_resource_id: 'custom_notification_config'
-    vars:
-      topic_name: 'my-topic'
-      config_id: 'my-config'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'project'
+samples:
+  - name: scc_project_notification_config_basic
+    primary_resource_id: custom_notification_config
+    steps:
+    - name: scc_project_notification_config_basic
+      prefixed_vars:
+        config_id: my-config
+        topic_name: my-topic
+      test_env_vars:
+        project: PROJECT_NAME
+      ignore_read_extra:
+      - project
 parameters:
   - name: 'configId'
     type: String

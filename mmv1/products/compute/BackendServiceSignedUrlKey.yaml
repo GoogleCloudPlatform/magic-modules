@@ -41,17 +41,19 @@ async:
   operation:
     base_url: '{{op_id}}'
 exclude_tgc: true
-examples:
+samples:
   - name: backend_service_signed_url_key
+    external_providers:
+    - random
+    - time
     primary_resource_id: backend_key
     exclude_test: true
-    vars:
-      backend_name: my-backend-service
-      igm_name: my-webservers
-      key_name: test-key
-    external_providers:
-      - random
-      - time
+    steps:
+    - name: backend_service_signed_url_key
+      prefixed_vars:
+        backend_name: my-backend-service
+        igm_name: my-webservers
+        key_name: test-key
 parameters:
   - name: backendService
     type: ResourceRef

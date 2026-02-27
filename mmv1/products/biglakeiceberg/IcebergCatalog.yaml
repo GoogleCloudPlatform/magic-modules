@@ -42,14 +42,16 @@ iam_policy:
     - 'projects/{{project}}/catalogs/{{name}}'
     - '{{name}}'
   allowed_iam_role: 'roles/biglake.editor'
-examples:
-  - name: 'biglake_iceberg_catalog'
-    primary_resource_id: 'my_iceberg_catalog'
-    vars:
-      name: 'my_iceberg_catalog'
-    test_env_vars:
-      GOOGLE_BILLING_PROJECT: 'PROJECT'
-      USER_PROJECT_OVERRIDE: 'true'
+samples:
+  - name: biglake_iceberg_catalog
+    primary_resource_id: my_iceberg_catalog
+    steps:
+    - name: biglake_iceberg_catalog
+      prefixed_vars:
+        name: my_iceberg_catalog
+      test_env_vars:
+        GOOGLE_BILLING_PROJECT: PROJECT
+        USER_PROJECT_OVERRIDE: "true"
 parameters:
   - name: 'name'
     type: String

@@ -33,13 +33,15 @@ import_format:
 sweeper:
   url_substitutions:
     - location: "us-central1-b"
-examples:
+samples:
   - name: network_services_multicast_domain_activation_basic
     primary_resource_id: mda_test
-    vars:
-      network_name: test-network-mda
-      domain_name: test-domain-mda
-      domain_activation_name: test-domain-activation-mda
+    steps:
+    - name: network_services_multicast_domain_activation_basic
+      prefixed_vars:
+        domain_activation_name: test-domain-activation-mda
+        domain_name: test-domain-mda
+        network_name: test-network-mda
 autogen_async: true
 async:
   operation:

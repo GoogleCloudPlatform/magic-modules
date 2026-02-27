@@ -42,14 +42,16 @@ async:
 collection_url_key: 'ingressRules'
 custom_code:
 exclude_sweeper: true
-examples:
-  - name: 'app_engine_firewall_rule_basic'
-    primary_resource_id: 'rule'
-    vars:
-      project_id: 'ae-project'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
+samples:
+  - name: app_engine_firewall_rule_basic
+    primary_resource_id: rule
+    steps:
+    - name: app_engine_firewall_rule_basic
+      prefixed_vars:
+        project_id: ae-project
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
 parameters:
   - name: 'priority'
     type: Integer

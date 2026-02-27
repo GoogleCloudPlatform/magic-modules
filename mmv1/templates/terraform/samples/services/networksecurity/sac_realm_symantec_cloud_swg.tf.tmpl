@@ -1,0 +1,11 @@
+resource "google_network_security_sac_realm" "{{$.PrimaryResourceId}}" {
+  provider      = google-beta
+  name          = "{{index $.PrefixedVars "resource_name"}}"
+  labels = {
+    label-one = "value-one"
+  }
+  security_service = "SYMANTEC_CLOUD_SWG"
+  symantecOptions = {
+    secretPath = "{{index $.PrefixedVars "secret_path"}}"
+  }
+}

@@ -38,29 +38,32 @@ timeouts:
   delete_minutes: 20
 identity:
   - guestPolicyId
-examples:
-  - name: 'os_config_guest_policies_basic'
-    primary_resource_id: 'guest_policies'
-    vars:
-      instance_name: 'guest-policy-inst'
-      guest_policy_id: 'guest-policy'
-    ignore_read_extra:
- # project number is returned in rest response
-      - 'project'
-  - name: 'os_config_guest_policies_packages'
-    primary_resource_id: 'guest_policies'
-    vars:
-      guest_policy_id: 'guest-policy'
-    ignore_read_extra:
- # project number is returned in rest response
-      - 'project'
-  - name: 'os_config_guest_policies_recipes'
-    primary_resource_id: 'guest_policies'
-    vars:
-      guest_policy_id: 'guest-policy'
-    ignore_read_extra:
- # project number is returned in rest response
-      - 'project'
+samples:
+  - name: os_config_guest_policies_basic
+    primary_resource_id: guest_policies
+    steps:
+    - name: os_config_guest_policies_basic
+      prefixed_vars:
+        guest_policy_id: guest-policy
+        instance_name: guest-policy-inst
+      ignore_read_extra:
+      - project
+  - name: os_config_guest_policies_packages
+    primary_resource_id: guest_policies
+    steps:
+    - name: os_config_guest_policies_packages
+      prefixed_vars:
+        guest_policy_id: guest-policy
+      ignore_read_extra:
+      - project
+  - name: os_config_guest_policies_recipes
+    primary_resource_id: guest_policies
+    steps:
+    - name: os_config_guest_policies_recipes
+      prefixed_vars:
+        guest_policy_id: guest-policy
+      ignore_read_extra:
+      - project
 parameters:
   - name: 'guestPolicyId'
     type: String

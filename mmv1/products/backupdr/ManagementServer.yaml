@@ -37,15 +37,17 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-examples:
-  - name: 'backup_dr_management_server'
-    primary_resource_id: 'ms-console'
-    vars:
-      network_name: 'vpc-network'
-      managementserver_name: 'ms-console'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: backup_dr_management_server
+    primary_resource_id: ms-console
     exclude_test: true
+    steps:
+    - name: backup_dr_management_server
+      prefixed_vars:
+        managementserver_name: ms-console
+        network_name: vpc-network
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
   - name: 'location'
     type: String

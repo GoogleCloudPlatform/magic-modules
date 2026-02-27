@@ -38,35 +38,47 @@ custom_code:
   post_update: 'templates/terraform/post_update/cloud_scheduler.go.tmpl'
 custom_diff:
   - 'validateAuthHeaders'
-examples:
-  - name: 'scheduler_job_pubsub'
-    primary_resource_id: 'job'
-    vars:
-      job_name: 'test-job'
-      topic_name: 'job-topic'
-  - name: 'scheduler_job_http'
-    primary_resource_id: 'job'
-    vars:
-      job_name: 'test-job'
-  - name: 'scheduler_job_paused'
-    primary_resource_id: 'job'
-    vars:
-      job_name: 'test-job'
-  - name: 'scheduler_job_app_engine'
-    primary_resource_id: 'job'
-    vars:
-      job_name: 'test-job'
-  - name: 'scheduler_job_oauth'
-    primary_resource_id: 'job'
-    vars:
-      job_name: 'test-job'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-      region: 'REGION'
-  - name: 'scheduler_job_oidc'
-    primary_resource_id: 'job'
-    vars:
-      job_name: 'test-job'
+samples:
+  - name: scheduler_job_pubsub
+    primary_resource_id: job
+    steps:
+    - name: scheduler_job_pubsub
+      prefixed_vars:
+        job_name: test-job
+        topic_name: job-topic
+  - name: scheduler_job_http
+    primary_resource_id: job
+    steps:
+    - name: scheduler_job_http
+      prefixed_vars:
+        job_name: test-job
+  - name: scheduler_job_paused
+    primary_resource_id: job
+    steps:
+    - name: scheduler_job_paused
+      prefixed_vars:
+        job_name: test-job
+  - name: scheduler_job_app_engine
+    primary_resource_id: job
+    steps:
+    - name: scheduler_job_app_engine
+      prefixed_vars:
+        job_name: test-job
+  - name: scheduler_job_oauth
+    primary_resource_id: job
+    steps:
+    - name: scheduler_job_oauth
+      prefixed_vars:
+        job_name: test-job
+      test_env_vars:
+        project_name: PROJECT_NAME
+        region: REGION
+  - name: scheduler_job_oidc
+    primary_resource_id: job
+    steps:
+    - name: scheduler_job_oidc
+      prefixed_vars:
+        job_name: test-job
 parameters:
   - name: 'region'
     type: String

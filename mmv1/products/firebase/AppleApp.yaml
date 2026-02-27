@@ -52,36 +52,39 @@ custom_code:
   custom_delete: 'templates/terraform/custom_delete/firebase_app_deletion_policy.tmpl'
 # Sweeper skipped as this resource has customized deletion.
 exclude_sweeper: true
-examples:
-  - name: 'firebase_apple_app_basic'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      display_name: 'Display Name Basic'
-      bundle_id: 'apple.app.12345'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'display_name': '"tf-test Display Name Basic"'
-  - name: 'firebase_apple_app_full'
-    primary_resource_id: 'full'
-    min_version: 'beta'
-    vars:
-      display_name: 'Display Name Full'
-      bundle_id: 'apple.app.12345'
-      app_store_id: '12345'
- # Has to be a 10-digit number.
-      team_id: '9987654321'
-      api_key_name: 'api-key'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'app_store_id': '12345'
-      'team_id': '9987654321'
-      'display_name': '"tf-test Display Name Full"'
-    ignore_read_extra:
-      - 'project'
-      - 'deletion_policy'
+samples:
+  - name: firebase_apple_app_basic
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: firebase_apple_app_basic
+      prefixed_vars:
+        bundle_id: apple.app.12345
+        display_name: Display Name Basic
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        display_name: '"tf-test Display Name Basic"'
+  - name: firebase_apple_app_full
+    min_version: beta
+    primary_resource_id: full
+    steps:
+    - name: firebase_apple_app_full
+      prefixed_vars:
+        api_key_name: api-key
+        app_store_id: "12345"
+        bundle_id: apple.app.12345
+        display_name: Display Name Full
+        team_id: "9987654321"
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        app_store_id: "12345"
+        display_name: '"tf-test Display Name Full"'
+        team_id: "9987654321"
+      ignore_read_extra:
+      - project
+      - deletion_policy
 virtual_fields:
   - name: 'deletion_policy'
     description: |

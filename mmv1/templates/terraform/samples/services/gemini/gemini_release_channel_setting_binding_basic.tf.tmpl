@@ -1,0 +1,13 @@
+resource "google_gemini_release_channel_setting" "basic" {
+    release_channel_setting_id = "{{index $.PrefixedVars "release_channel_setting_id"}}"
+    location = "global"
+    labels = {"my_key": "my_value"}
+    release_channel = "EXPERIMENTAL"
+}
+
+resource "google_gemini_release_channel_setting_binding" "{{$.PrimaryResourceId}}" {
+    release_channel_setting_id = google_gemini_release_channel_setting.basic.release_channel_setting_id
+    setting_binding_id = "{{index $.PrefixedVars "setting_binding_id"}}"
+    location = "global"
+    target = "{{index $.PrefixedVars "target"}}"
+}

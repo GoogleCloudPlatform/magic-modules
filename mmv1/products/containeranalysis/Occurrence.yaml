@@ -37,14 +37,15 @@ custom_code:
   encoder: 'templates/terraform/encoders/containeranalysis_occurrence.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/containeranalysis_occurrence.go.tmpl'
   decoder: 'templates/terraform/decoders/containeranalysis_occurrence.go.tmpl'
-examples:
-  - name: 'container_analysis_occurrence_kms'
-    primary_resource_id: 'occurrence'
-    vars:
-      note_name: 'attestation-note'
-      attestor: 'attestor'
-    # Occurrence requires custom logic for signing payloads.
+samples:
+  - name: container_analysis_occurrence_kms
+    primary_resource_id: occurrence
     exclude_test: true
+    steps:
+    - name: container_analysis_occurrence_kms
+      prefixed_vars:
+        attestor: attestor
+        note_name: attestation-note
 parameters:
 properties:
   - name: 'name'

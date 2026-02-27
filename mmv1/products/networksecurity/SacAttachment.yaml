@@ -28,15 +28,17 @@ autogen_async: true
 async:
   operation:
     base_url: '{{op_id}}'
-examples:
-  - name: 'sac_attachment_prisma_access'
+samples:
+  - name: sac_attachment_prisma_access
     min_version: beta
+    primary_resource_id: default
     exclude_test: true
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'sac-attachment-name'
-      ncc_gateway: 'ncc_gateway_spoke_name'
-      sac_realm: 'sac_realm_name'
+    steps:
+    - name: sac_attachment_prisma_access
+      prefixed_vars:
+        ncc_gateway: ncc_gateway_spoke_name
+        resource_name: sac-attachment-name
+        sac_realm: sac_realm_name
 parameters:
   - name: 'location'
     type: String

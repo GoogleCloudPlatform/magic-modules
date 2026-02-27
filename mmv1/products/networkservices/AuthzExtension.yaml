@@ -47,28 +47,33 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "us-west1"
-examples:
-  - name: 'network_services_authz_extension_basic'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-authz-ext'
-      backend_name: 'authz-service'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'network_services_authz_extension_basic_with_auth_grpc'
-    min_version: 'beta'
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-authz-ext-with-grpc'
-      backend_name: 'authz-service-grpc'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'network_services_authz_extension_iap'
-    skip_docs: true  # temporary b/484137930
-    skip_test: true  # temporary b/484137930
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'my-authz-ext'
+samples:
+  - name: network_services_authz_extension_basic
+    primary_resource_id: default
+    steps:
+    - name: network_services_authz_extension_basic
+      prefixed_vars:
+        backend_name: authz-service
+        resource_name: my-authz-ext
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: network_services_authz_extension_basic_with_auth_grpc
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: network_services_authz_extension_basic_with_auth_grpc
+      prefixed_vars:
+        backend_name: authz-service-grpc
+        resource_name: my-authz-ext-with-grpc
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: network_services_authz_extension_iap
+    skip_test: "true"
+    primary_resource_id: default
+    steps:
+    - name: network_services_authz_extension_iap
+      prefixed_vars:
+        resource_name: my-authz-ext
 parameters:
   - name: 'name'
     type: String

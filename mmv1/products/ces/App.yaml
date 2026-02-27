@@ -21,17 +21,21 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/apps/{{name}}
 import_format:
  - projects/{{project}}/locations/{{location}}/apps/{{name}}
-examples:
- - name: "ces_app_basic"
-   primary_resource_id: "ces_app_basic"
-   vars:
-    display_name: 'my-app'
-    app_id: 'app-id'
- - name: "ces_app_ambient_sound_gcs_uri"
-   primary_resource_id: "ces_app_ambient_sound_gcs_uri"
-   vars:
-    display_name: 'my-app-ambient-sound-gcs-uri'
-    app_id: 'app-id'
+samples:
+ - name: ces_app_basic
+   primary_resource_id: ces_app_basic
+   steps:
+   - name: ces_app_basic
+     prefixed_vars:
+       app_id: app-id
+       display_name: my-app
+ - name: ces_app_ambient_sound_gcs_uri
+   primary_resource_id: ces_app_ambient_sound_gcs_uri
+   steps:
+   - name: ces_app_ambient_sound_gcs_uri
+     prefixed_vars:
+       app_id: app-id
+       display_name: my-app-ambient-sound-gcs-uri
 autogen_async: true
 async:
  operation:

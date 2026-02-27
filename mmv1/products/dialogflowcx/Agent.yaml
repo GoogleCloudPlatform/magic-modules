@@ -43,16 +43,18 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/dialogflowcx_agent.go.tmpl'
   post_delete: 'templates/terraform/post_delete/dialogflowcx_agent.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'dialogflowcx_agent_full'
-    primary_resource_id: 'full_agent'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-      bucket_name: 'dialogflowcx-bucket'
-    ignore_read_extra:
-      - 'git_integration_settings.0.github_settings.0.access_token'
-      - 'enable_stackdriver_logging'
-      - 'advanced_settings.0.logging_settings'
+samples:
+  - name: dialogflowcx_agent_full
+    primary_resource_id: full_agent
+    steps:
+    - name: dialogflowcx_agent_full
+      prefixed_vars:
+        agent_name: dialogflowcx-agent
+        bucket_name: dialogflowcx-bucket
+      ignore_read_extra:
+      - git_integration_settings.0.github_settings.0.access_token
+      - enable_stackdriver_logging
+      - advanced_settings.0.logging_settings
 virtual_fields:
   - name: 'delete_chat_engine_on_destroy'
     description: |

@@ -40,12 +40,14 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-examples:
-  - name: 'vertex_ai_dataset'
-    primary_resource_id: 'dataset'
-    vars:
-      display_name: 'terraform'
-    exclude_import_test: true
+samples:
+  - name: vertex_ai_dataset
+    primary_resource_id: dataset
+    steps:
+    - name: vertex_ai_dataset
+      prefixed_vars:
+        display_name: terraform
+      exclude_import_test: true
 parameters:
   - name: 'region'
     type: String

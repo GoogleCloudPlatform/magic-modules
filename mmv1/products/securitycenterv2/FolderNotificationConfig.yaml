@@ -36,17 +36,21 @@ timeouts:
   delete_minutes: 20
 custom_code:
   post_import: 'templates/terraform/post_import/scc_v2_folder_notification_config.go.tmpl'
-examples:
-  - name: 'scc_v2_folder_notification_config_basic'
-    primary_resource_id: 'custom_notification_config'
-    vars:
-      folder_display_name: 'folder-name'
-      config_id: 'my-config'
-      topic_name: 'my-topic'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    external_providers: ["random", "time"]
+samples:
+  - name: scc_v2_folder_notification_config_basic
+    external_providers:
+    - random
+    - time
+    primary_resource_id: custom_notification_config
     exclude_test: true
+    steps:
+    - name: scc_v2_folder_notification_config_basic
+      prefixed_vars:
+        config_id: my-config
+        folder_display_name: folder-name
+        topic_name: my-topic
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
   - name: 'folder'
     type: String

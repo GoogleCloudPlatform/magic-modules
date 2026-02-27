@@ -153,12 +153,14 @@ properties:
       RegionHealthAggregationPolicy.
     output: true
 
-examples:
-  - name: "compute_region_health_aggregation_policy_basic"
-    primary_resource_id: "example_test_health_aggregation_policy"
-    vars:
-      name: "test-health-aggregation-policy"
-      description: "Example health aggregation policy basic"
-    min_version: 'beta'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: compute_region_health_aggregation_policy_basic
+    min_version: beta
+    primary_resource_id: example_test_health_aggregation_policy
+    steps:
+    - name: compute_region_health_aggregation_policy_basic
+      prefixed_vars:
+        description: Example health aggregation policy basic
+        name: test-health-aggregation-policy
+      test_env_vars:
+        project: PROJECT_NAME

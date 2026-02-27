@@ -46,12 +46,14 @@ async:
     resource_inside_response: false
 # there is only a GET and PATCH endpoint
 exclude_delete: true
-examples:
-  - name: 'snapshot_settings_specific_locations'
+samples:
+  - name: snapshot_settings_specific_locations
+    primary_resource_id: tf-test-snapshot-settings
     exclude_test: true
-    primary_resource_id: 'tf-test-snapshot-settings'
-    vars:
-      policy: 'SPECIFIC_LOCATIONS'
+    steps:
+    - name: snapshot_settings_specific_locations
+      prefixed_vars:
+        policy: SPECIFIC_LOCATIONS
 parameters:
 properties:
   - name: 'storageLocation'

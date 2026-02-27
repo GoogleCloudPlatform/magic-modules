@@ -36,17 +36,21 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}'
     - '{{glossary_id}}'
-examples:
-  - name: 'dataplex_glossary_basic'
-    primary_resource_id: 'glossary_test_id'
-    primary_resource_name: 'fmt.Sprintf("tf-test-glossary-basic%s", context["random_suffix"])'
-    vars:
-      glossary_name: 'glossary-basic'
-  - name: 'dataplex_glossary_full'
-    primary_resource_id: 'glossary_test_id_full'
-    primary_resource_name: 'fmt.Sprintf("tf-test-glossary-full%s", context["random_suffix"])'
-    vars:
-      glossary_name: 'glossary-full'
+samples:
+  - name: dataplex_glossary_basic
+    primary_resource_id: glossary_test_id
+    primary_resource_name: fmt.Sprintf("tf-test-glossary-basic%s", context["random_suffix"])
+    steps:
+    - name: dataplex_glossary_basic
+      prefixed_vars:
+        glossary_name: glossary-basic
+  - name: dataplex_glossary_full
+    primary_resource_id: glossary_test_id_full
+    primary_resource_name: fmt.Sprintf("tf-test-glossary-full%s", context["random_suffix"])
+    steps:
+    - name: dataplex_glossary_full
+      prefixed_vars:
+        glossary_name: glossary-full
 parameters:
   - name: 'location'
     type: String

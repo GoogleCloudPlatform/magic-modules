@@ -41,39 +41,43 @@ async:
   result:
     resource_inside_response: false
 custom_code: null
-examples:
+samples:
   - name: secure_source_manager_hook_basic
     primary_resource_id: basic
-    vars:
-      hook_id: my-basic-hook
-      repository_id: my-basic-repository
-      instance_id: my-basic-instance
-      prevent_destroy: "true"
-      deletion_policy: '"PREVENT"'
-    test_vars_overrides:
-      prevent_destroy: "false"
-      'deletion_policy': '"DELETE"'
-    oics_vars_overrides:
-      prevent_destroy: "false"
-      'deletion_policy': '"DELETE"'
-    ignore_read_extra:
-      - 'deletion_policy'
+    steps:
+    - name: secure_source_manager_hook_basic
+      prefixed_vars:
+        deletion_policy: '"PREVENT"'
+        hook_id: my-basic-hook
+        instance_id: my-basic-instance
+        prevent_destroy: "true"
+        repository_id: my-basic-repository
+      test_vars_overrides:
+        deletion_policy: '"DELETE"'
+        prevent_destroy: "false"
+      oics_vars_overrides:
+        deletion_policy: '"DELETE"'
+        prevent_destroy: "false"
+      ignore_read_extra:
+      - deletion_policy
   - name: secure_source_manager_hook_with_fields
     primary_resource_id: default
-    vars:
-      hook_id: my-initial-hook
-      repository_id: my-initial-repository
-      instance_id: my-initial-instance
-      prevent_destroy: "true"
-      deletion_policy: '"PREVENT"'
-    test_vars_overrides:
-      prevent_destroy: "false"
-      'deletion_policy': '"DELETE"'
-    oics_vars_overrides:
-      prevent_destroy: "false"
-      'deletion_policy': '"DELETE"'
-    ignore_read_extra:
-      - 'deletion_policy'
+    steps:
+    - name: secure_source_manager_hook_with_fields
+      prefixed_vars:
+        deletion_policy: '"PREVENT"'
+        hook_id: my-initial-hook
+        instance_id: my-initial-instance
+        prevent_destroy: "true"
+        repository_id: my-initial-repository
+      test_vars_overrides:
+        deletion_policy: '"DELETE"'
+        prevent_destroy: "false"
+      oics_vars_overrides:
+        deletion_policy: '"DELETE"'
+        prevent_destroy: "false"
+      ignore_read_extra:
+      - deletion_policy
 parameters:
   - name: hook_id
     type: String

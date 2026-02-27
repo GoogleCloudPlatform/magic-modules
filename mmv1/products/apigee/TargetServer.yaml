@@ -36,24 +36,29 @@ autogen_async: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/apigee_target_server.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'apigee_target_server_test_basic'
-    primary_resource_id: 'apigee_target_server'
-    vars:
-      project_id: 'my-project'
-      environment_name: 'my-environment-name'
-      target_server: 'my-target-server'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
+samples:
+  - name: apigee_target_server_test_basic
+    primary_resource_id: apigee_target_server
     exclude_test: true
-  - name: 'apigee_target_server_test'
-    primary_resource_id: 'apigee_target_server'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-    external_providers: ["time"]
+    steps:
+    - name: apigee_target_server_test_basic
+      prefixed_vars:
+        environment_name: my-environment-name
+        project_id: my-project
+        target_server: my-target-server
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+  - name: apigee_target_server_test
+    external_providers:
+    - time
+    primary_resource_id: apigee_target_server
+    steps:
+    - name: apigee_target_server_test
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
 parameters:
   - name: 'envId'
     type: String

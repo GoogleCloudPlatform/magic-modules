@@ -23,31 +23,37 @@ create_url: organizations/{{organization}}/locations/{{location}}/frameworkDeplo
 id_format: organizations/{{organization}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}
 import_format:
   - organizations/{{organization}}/locations/{{location}}/frameworkDeployments/{{framework_deployment_id}}
-examples:
-  - name: "cloudsecuritycompliance_framework_deployment_basic"
-    primary_resource_id: "example"
-    vars:
-      deployment_name: "example-deployment"
-      framework_name: "example-framework"
-    test_env_vars:
-      org_id: "ORG_ID"
-  - name: "cloudsecuritycompliance_framework_deployment_folder_creation"
-    primary_resource_id: "example"
-    vars:
-      deployment_name: "example-deployment-folder"
-      framework_name: "example-framework-folder"
-      folder_display_name: "cm-folder"
-    test_env_vars:
-      org_id: "ORG_ID"
-  - name: "cloudsecuritycompliance_framework_deployment_project_creation"
-    primary_resource_id: "example"
-    vars:
-      deployment_name: "example-deployment-project"
-      framework_name: "example-framework-project"
-      project_display_name: "cm-project"
-    test_env_vars:
-      org_id: "ORG_ID"
-      billing_account: "BILLING_ACCT"
+samples:
+  - name: cloudsecuritycompliance_framework_deployment_basic
+    primary_resource_id: example
+    steps:
+    - name: cloudsecuritycompliance_framework_deployment_basic
+      prefixed_vars:
+        deployment_name: example-deployment
+        framework_name: example-framework
+      test_env_vars:
+        org_id: ORG_ID
+  - name: cloudsecuritycompliance_framework_deployment_folder_creation
+    primary_resource_id: example
+    steps:
+    - name: cloudsecuritycompliance_framework_deployment_folder_creation
+      prefixed_vars:
+        deployment_name: example-deployment-folder
+        folder_display_name: cm-folder
+        framework_name: example-framework-folder
+      test_env_vars:
+        org_id: ORG_ID
+  - name: cloudsecuritycompliance_framework_deployment_project_creation
+    primary_resource_id: example
+    steps:
+    - name: cloudsecuritycompliance_framework_deployment_project_creation
+      prefixed_vars:
+        deployment_name: example-deployment-project
+        framework_name: example-framework-project
+        project_display_name: cm-project
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
 autogen_async: true
 async:
   operation:

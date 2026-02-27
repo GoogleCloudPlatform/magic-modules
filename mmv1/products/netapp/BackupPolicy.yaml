@@ -47,11 +47,13 @@ async:
 custom_code:
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
-examples:
-  - name: 'netapp_backup_policy_full'
-    primary_resource_id: 'test_backup_policy_full'
-    vars:
-      backup_policy_full_name: 'test-backup-policy-full'
+samples:
+  - name: netapp_backup_policy_full
+    primary_resource_id: test_backup_policy_full
+    steps:
+    - name: netapp_backup_policy_full
+      prefixed_vars:
+        backup_policy_full_name: test-backup-policy-full
 parameters:
   - name: 'location'
     type: String

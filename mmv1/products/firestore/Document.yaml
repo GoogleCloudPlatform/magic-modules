@@ -44,23 +44,31 @@ custom_code:
   decoder: 'templates/terraform/decoders/firestore_document.go.tmpl'
   custom_import: 'templates/terraform/custom_import/firestore_document.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'firestore_document_basic'
-    primary_resource_id: 'mydoc'
-    vars:
-      document_id: 'my-doc-id'
-      project_id: 'project-id'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    external_providers: ["random", "time"]
-  - name: 'firestore_document_nested_document'
-    primary_resource_id: 'mydoc'
-    vars:
-      document_id: 'my-doc-id'
-      project_id: 'project-id'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    external_providers: ["random", "time"]
+samples:
+  - name: firestore_document_basic
+    external_providers:
+    - random
+    - time
+    primary_resource_id: mydoc
+    steps:
+    - name: firestore_document_basic
+      prefixed_vars:
+        document_id: my-doc-id
+        project_id: project-id
+      test_env_vars:
+        org_id: ORG_ID
+  - name: firestore_document_nested_document
+    external_providers:
+    - random
+    - time
+    primary_resource_id: mydoc
+    steps:
+    - name: firestore_document_nested_document
+      prefixed_vars:
+        document_id: my-doc-id
+        project_id: project-id
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
   - name: 'database'
     type: String

@@ -46,11 +46,13 @@ timeouts:
   delete_minutes: 20
 custom_code:
 exclude_sweeper: true
-examples:
-  - name: 'storage_default_object_access_control_public'
-    primary_resource_id: 'public_rule'
-    vars:
-      bucket_name: 'static-content-bucket'
+samples:
+  - name: storage_default_object_access_control_public
+    primary_resource_id: public_rule
+    steps:
+    - name: storage_default_object_access_control_public
+      prefixed_vars:
+        bucket_name: static-content-bucket
 parameters:
 properties:
   - name: 'bucket'

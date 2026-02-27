@@ -37,29 +37,35 @@ custom_code:
   pre_create: 'templates/terraform/pre_create/firebasehosting_site.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/firebasehosting_site.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/firebasehosting_default_site.go.tmpl'
-examples:
-  - name: 'firebasehosting_site_basic'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      site_id: 'site-no-app'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firebasehosting_site_full'
-    primary_resource_id: 'full'
-    min_version: 'beta'
-    vars:
-      site_id: 'site-with-app'
-      display_name: 'Test web app for Firebase Hosting'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'display_name': '"tf-test Test web app for Firebase Hosting"'
-  - name: 'firebasehosting_site_default'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+samples:
+  - name: firebasehosting_site_basic
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: firebasehosting_site_basic
+      prefixed_vars:
+        site_id: site-no-app
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firebasehosting_site_full
+    min_version: beta
+    primary_resource_id: full
+    steps:
+    - name: firebasehosting_site_full
+      prefixed_vars:
+        display_name: Test web app for Firebase Hosting
+        site_id: site-with-app
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        display_name: '"tf-test Test web app for Firebase Hosting"'
+  - name: firebasehosting_site_default
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: firebasehosting_site_default
+      test_env_vars:
+        project_id: PROJECT_NAME
 parameters:
   - name: 'site_id'
     type: String

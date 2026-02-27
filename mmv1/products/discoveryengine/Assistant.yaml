@@ -29,13 +29,15 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-examples:
-  - name: 'discoveryengine_assistant_basic'
-    primary_resource_id: 'basic'
-    vars:
-      data_store_id: 'example-data-store-id'
-      engine_id: 'example-engine-id'
-      template_id: 'example-template-id'
+samples:
+  - name: discoveryengine_assistant_basic
+    primary_resource_id: basic
+    steps:
+    - name: discoveryengine_assistant_basic
+      prefixed_vars:
+        data_store_id: example-data-store-id
+        engine_id: example-engine-id
+        template_id: example-template-id
 parameters:
   - name: 'location'
     type: String

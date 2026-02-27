@@ -44,13 +44,15 @@ custom_code:
   encoder: templates/terraform/encoders/cloud_run_domain_mapping.go.tmpl
   decoder: templates/terraform/decoders/cloud_run.go.tmpl
   constants: templates/terraform/constants/cloud_run_domain_mapping.go.tmpl
-examples:
+samples:
   - name: cloud_run_domain_mapping_basic
     primary_resource_id: default
-    vars:
-      cloud_run_service_name: cloudrun-srv
-    test_env_vars:
-      namespace: PROJECT_NAME
+    steps:
+    - name: cloud_run_domain_mapping_basic
+      prefixed_vars:
+        cloud_run_service_name: cloudrun-srv
+      test_env_vars:
+        namespace: PROJECT_NAME
 parameters:
   - name: location
     type: String

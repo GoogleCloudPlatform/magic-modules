@@ -53,118 +53,136 @@ iam_policy:
     - '{{instance_id}}'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/securesourcemanager_deletion_policy.go.tmpl'
-examples:
-  - name: 'secure_source_manager_instance_basic'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
-    vars:
-      instance_id: 'my-instance'
-      deletion_policy: 'PREVENT'
-    test_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    oics_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    ignore_read_extra:
-      - 'update_time'
-      - 'deletion_policy'
-  - name: 'secure_source_manager_instance_cmek'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
-    vars:
-      instance_id: 'my-instance'
-      kms_key_name: 'my-key'
-      deletion_policy: 'PREVENT'
-    test_vars_overrides:
-      'deletion_policy': '"DELETE"'
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-secure-source-manager-key1").CryptoKey.Name'
-    oics_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    ignore_read_extra:
-      - 'update_time'
-      - 'deletion_policy'
-  - name: 'secure_source_manager_instance_private_trusted_cert'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
-    vars:
-      instance_id: 'my-instance'
-    ignore_read_extra:
-      - 'update_time'
-      - 'deletion_policy'
-    exclude_docs: true
-  - name: 'secure_source_manager_instance_private'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
-    vars:
-      instance_id: 'my-instance'
-      ca_pool_id: 'ca-pool'
-      root_ca_id: 'root-ca'
-      deletion_policy: 'PREVENT'
-    test_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    oics_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    external_providers: ["time"]
-    ignore_read_extra:
-      - 'update_time'
-      - 'deletion_policy'
-  - name: 'secure_source_manager_instance_private_psc_backend'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
-    vars:
-      network_id: 'my-network'
-      subnet_id: 'my-subnet'
-      neg_id: 'my-neg'
-      backend_id: 'my-backend-service'
-      proxy_subnet_id: 'my-proxy-subnet'
-      target_proxy_id: 'my-target-proxy'
-      fw_rule_to_target_proxy_id: 'fw-rule-target-proxy'
-      dns_zone_id: 'my-dns-zone'
-      instance_id: 'my-instance'
-      ca_pool_id: 'ca-pool'
-      root_ca_id: 'root-ca'
-      deletion_policy: 'PREVENT'
-    test_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    oics_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    external_providers: ["time"]
-    ignore_read_extra:
-      - 'update_time'
-      - 'deletion_policy'
-  - name: 'secure_source_manager_instance_private_psc_endpoint'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
-    vars:
-      network_id: 'my-network'
-      subnet_id: 'my-subnet'
-      address_id: 'my-address'
-      fw_rule_to_service_attachment_id: 'fw-rule-service-attachment'
-      dns_zone_id: 'my-dns-zone'
-      instance_id: 'my-instance'
-      ca_pool_id: 'ca-pool'
-      root_ca_id: 'root-ca'
-      deletion_policy: 'PREVENT'
-    test_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    oics_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    external_providers: ["time"]
-    ignore_read_extra:
-      - 'update_time'
-      - 'deletion_policy'
-  - name: 'secure_source_manager_instance_workforce_identity_federation'
-    primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
-    vars:
-      instance_id: 'my-instance'
-      deletion_policy: 'PREVENT'
-    test_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    oics_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    ignore_read_extra:
-      - 'update_time'
-      - 'deletion_policy'
+samples:
+  - name: secure_source_manager_instance_basic
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])
+    steps:
+    - name: secure_source_manager_instance_basic
+      prefixed_vars:
+        deletion_policy: PREVENT
+        instance_id: my-instance
+      test_vars_overrides:
+        deletion_policy: '"DELETE"'
+      oics_vars_overrides:
+        deletion_policy: '"DELETE"'
+      ignore_read_extra:
+      - update_time
+      - deletion_policy
+  - name: secure_source_manager_instance_cmek
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])
+    steps:
+    - name: secure_source_manager_instance_cmek
+      prefixed_vars:
+        deletion_policy: PREVENT
+        instance_id: my-instance
+        kms_key_name: my-key
+      test_vars_overrides:
+        deletion_policy: '"DELETE"'
+        kms_key_name: acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT",
+          "us-central1", "tf-bootstrap-secure-source-manager-key1").CryptoKey.Name
+      oics_vars_overrides:
+        deletion_policy: '"DELETE"'
+      ignore_read_extra:
+      - update_time
+      - deletion_policy
+  - name: secure_source_manager_instance_private_trusted_cert
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])
+    steps:
+    - name: secure_source_manager_instance_private_trusted_cert
+      prefixed_vars:
+        instance_id: my-instance
+      ignore_read_extra:
+      - update_time
+      - deletion_policy
+      exclude_docs: true
+  - name: secure_source_manager_instance_private
+    external_providers:
+    - time
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])
+    steps:
+    - name: secure_source_manager_instance_private
+      prefixed_vars:
+        ca_pool_id: ca-pool
+        deletion_policy: PREVENT
+        instance_id: my-instance
+        root_ca_id: root-ca
+      test_vars_overrides:
+        deletion_policy: '"DELETE"'
+      oics_vars_overrides:
+        deletion_policy: '"DELETE"'
+      ignore_read_extra:
+      - update_time
+      - deletion_policy
+  - name: secure_source_manager_instance_private_psc_backend
+    external_providers:
+    - time
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])
+    steps:
+    - name: secure_source_manager_instance_private_psc_backend
+      prefixed_vars:
+        backend_id: my-backend-service
+        ca_pool_id: ca-pool
+        deletion_policy: PREVENT
+        dns_zone_id: my-dns-zone
+        fw_rule_to_target_proxy_id: fw-rule-target-proxy
+        instance_id: my-instance
+        neg_id: my-neg
+        network_id: my-network
+        proxy_subnet_id: my-proxy-subnet
+        root_ca_id: root-ca
+        subnet_id: my-subnet
+        target_proxy_id: my-target-proxy
+      test_vars_overrides:
+        deletion_policy: '"DELETE"'
+      oics_vars_overrides:
+        deletion_policy: '"DELETE"'
+      ignore_read_extra:
+      - update_time
+      - deletion_policy
+  - name: secure_source_manager_instance_private_psc_endpoint
+    external_providers:
+    - time
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])
+    steps:
+    - name: secure_source_manager_instance_private_psc_endpoint
+      prefixed_vars:
+        address_id: my-address
+        ca_pool_id: ca-pool
+        deletion_policy: PREVENT
+        dns_zone_id: my-dns-zone
+        fw_rule_to_service_attachment_id: fw-rule-service-attachment
+        instance_id: my-instance
+        network_id: my-network
+        root_ca_id: root-ca
+        subnet_id: my-subnet
+      test_vars_overrides:
+        deletion_policy: '"DELETE"'
+      oics_vars_overrides:
+        deletion_policy: '"DELETE"'
+      ignore_read_extra:
+      - update_time
+      - deletion_policy
+  - name: secure_source_manager_instance_workforce_identity_federation
+    primary_resource_id: default
+    primary_resource_name: fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])
+    steps:
+    - name: secure_source_manager_instance_workforce_identity_federation
+      prefixed_vars:
+        deletion_policy: PREVENT
+        instance_id: my-instance
+      test_vars_overrides:
+        deletion_policy: '"DELETE"'
+      oics_vars_overrides:
+        deletion_policy: '"DELETE"'
+      ignore_read_extra:
+      - update_time
+      - deletion_policy
 parameters:
   - name: 'location'
     type: String

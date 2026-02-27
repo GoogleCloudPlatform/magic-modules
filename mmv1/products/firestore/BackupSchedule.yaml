@@ -42,25 +42,29 @@ timeouts:
   delete_minutes: 20
 custom_code:
 exclude_sweeper: true
-examples:
-  - name: 'firestore_backup_schedule_daily'
-    primary_resource_id: 'daily-backup'
-    vars:
-      database_id: 'database-id'
-      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
-  - name: 'firestore_backup_schedule_weekly'
-    primary_resource_id: 'weekly-backup'
-    vars:
-      database_id: 'database-id'
-      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
+samples:
+  - name: firestore_backup_schedule_daily
+    primary_resource_id: daily-backup
+    steps:
+    - name: firestore_backup_schedule_daily
+      prefixed_vars:
+        database_id: database-id
+        delete_protection_state: DELETE_PROTECTION_ENABLED
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
+  - name: firestore_backup_schedule_weekly
+    primary_resource_id: weekly-backup
+    steps:
+    - name: firestore_backup_schedule_weekly
+      prefixed_vars:
+        database_id: database-id
+        delete_protection_state: DELETE_PROTECTION_ENABLED
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
 parameters:
   - name: 'database'
     type: String

@@ -1,0 +1,11 @@
+resource "google_firebase_ai_logic_prompt_template" "basic" {
+  provider = google-beta
+  location = "global"
+  template_id = "{{index $.PrefixedVars "template_id"}}"
+  template_string = <<EOF
+---
+model: gemini-2.5-flash
+---
+Hello world!
+EOF
+}

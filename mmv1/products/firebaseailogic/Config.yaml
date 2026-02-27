@@ -35,28 +35,32 @@ import_format:
   - '{{project}}/{{location}}'
 custom_code:
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
-examples:
+samples:
   - name: firebaseailogic_config_basic
+    external_providers:
+    - time
     min_version: beta
     primary_resource_id: default
-    vars:
-      project_id: 'basic'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    # Need the time_sleep resource
-    external_providers: ["time"]
+    steps:
+    - name: firebaseailogic_config_basic
+      prefixed_vars:
+        project_id: basic
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
   - name: firebaseailogic_config_full
+    external_providers:
+    - time
     min_version: beta
     primary_resource_id: default
-    vars:
-      project_id: 'full'
-      api_key_id: "gemini-api-key"
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    # Need the time_sleep resource
-    external_providers: ["time"]
+    steps:
+    - name: firebaseailogic_config_full
+      prefixed_vars:
+        api_key_id: gemini-api-key
+        project_id: full
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
 autogen_status: Q29uZmln
 parameters:
   - name: location

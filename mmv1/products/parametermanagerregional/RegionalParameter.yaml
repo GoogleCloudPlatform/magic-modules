@@ -31,29 +31,37 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-examples:
-  - name: 'regional_parameter_basic'
-    primary_resource_id: 'regional-parameter-basic'
-    vars:
-      parameter_id: 'regional_parameter'
-  - name: 'regional_parameter_with_format'
-    primary_resource_id: 'regional-parameter-with-format'
-    vars:
-      parameter_id: 'regional_parameter'
-  - name: 'regional_parameter_with_labels'
-    primary_resource_id: 'regional-parameter-with-labels'
-    vars:
-      parameter_id: 'regional_parameter'
-  - name: 'regional_parameter_with_kms_key'
-    primary_resource_id: 'regional-parameter-with-kms-key'
-    vars:
-      parameter_id: 'regional_parameter'
-      kms_key: 'kms-key'
-    test_vars_overrides:
-      'kms_key': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+samples:
+  - name: regional_parameter_basic
+    primary_resource_id: regional-parameter-basic
+    steps:
+    - name: regional_parameter_basic
+      prefixed_vars:
+        parameter_id: regional_parameter
+  - name: regional_parameter_with_format
+    primary_resource_id: regional-parameter-with-format
+    steps:
+    - name: regional_parameter_with_format
+      prefixed_vars:
+        parameter_id: regional_parameter
+  - name: regional_parameter_with_labels
+    primary_resource_id: regional-parameter-with-labels
+    steps:
+    - name: regional_parameter_with_labels
+      prefixed_vars:
+        parameter_id: regional_parameter
+  - name: regional_parameter_with_kms_key
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+    - member: serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com
+      role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    primary_resource_id: regional-parameter-with-kms-key
+    steps:
+    - name: regional_parameter_with_kms_key
+      prefixed_vars:
+        kms_key: kms-key
+        parameter_id: regional_parameter
+      test_vars_overrides:
+        kms_key: acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
 parameters:
   - name: 'location'
     type: String

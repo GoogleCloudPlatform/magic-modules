@@ -39,11 +39,13 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-examples:
-  - name: 'migration_group_basic'
-    primary_resource_id: 'default'
-    vars:
-      group_name: 'group-test'
+samples:
+  - name: migration_group_basic
+    primary_resource_id: default
+    steps:
+    - name: migration_group_basic
+      prefixed_vars:
+        group_name: group-test
 parameters:
   - name: 'location'
     type: String

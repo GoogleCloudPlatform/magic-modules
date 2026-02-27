@@ -46,11 +46,13 @@ async:
 custom_code:
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
-examples:
-  - name: 'netapp_host_group'
-    primary_resource_id: 'test_host_group'
-    vars:
-      host_group_name: 'test-host-group'
+samples:
+  - name: netapp_host_group
+    primary_resource_id: test_host_group
+    steps:
+    - name: netapp_host_group
+      prefixed_vars:
+        host_group_name: test-host-group
 parameters:
   - name: 'location'
     type: String

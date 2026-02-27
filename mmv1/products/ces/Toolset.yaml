@@ -25,81 +25,101 @@ id_format:
   projects/{{project}}/locations/{{location}}/apps/{{app}}/toolsets/{{toolset_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{app}}/toolsets/{{toolset_id}}
-examples:
-  - name: "ces_toolset_openapi_service_account_auth_config"
-    primary_resource_id: "ces_toolset_openapi_service_account_auth_config"  # yamllint disable rule:line-length
-    test_env_vars:
-      service_account: 'SERVICE_ACCT'
-    vars:
-      app_display_name: 'my-app'
-      app_id: 'app-id'
-      toolset_id: 'toolset1'
-      location: 'us'
-  - name: "ces_toolset_openapi_oauth_config"
-    primary_resource_id: "ces_toolset_openapi_oauth_config"
-    vars:
-      app_display_name: 'my-app'
-      app_id: 'app-id'
-      toolset_id: 'toolset1'
-      location: 'us'
-  - name: "ces_toolset_openapi_service_agent_id_token_auth_config"
-    primary_resource_id: "ces_toolset_openapi_service_agent_id_token_auth_config"
-    vars:
-      app_display_name: 'my-app'
-      app_id: 'app-id'
-      toolset_id: 'toolset1'
-      location: 'us'
-  - name: "ces_toolset_openapi_api_key_config"
-    primary_resource_id: "ces_toolset_openapi_api_key_config"
-    vars:
-      app_display_name: 'my-app'
-      app_id: 'app-id'
-      toolset_id: 'toolset1'
-      location: 'us'
-  - name: "ces_toolset_bearer_token_config"
-    primary_resource_id: "ces_toolset_bearer_token_config"
-    vars:
-      app_display_name: 'my-app'
-      app_id: 'app-id'
-      toolset_id: 'toolset1'
-      location: 'us'
-  - name: "ces_toolset_mcp_service_account_auth_config"
-    primary_resource_id: "ces_toolset_mcp_service_account_auth_config"
-    test_env_vars:
-      service_account: 'SERVICE_ACCT'
-    vars:
-      app_display_name: 'my-app'
-      app_id: 'app-id'
-      toolset_id: 'toolset1'
-      location: 'us'
-  - name: "ces_toolset_mcp_oauth_config"
-    primary_resource_id: "ces_toolset_mcp_oauth_config"
-    vars:
-      app_display_name: 'my-app'
-      app_id: 'app-id'
-      toolset_id: 'toolset1'
-      location: 'us'
-  - name: "ces_toolset_mcp_service_agent_id_token_auth_config"
-    primary_resource_id: "ces_toolset_mcp_service_agent_id_token_auth_config"
-    vars:
-      app_display_name: 'my-app'
-      app_id: 'app-id'
-      toolset_id: 'toolset1'
-      location: 'us'
-  - name: "ces_toolset_mcp_api_key_config"
-    primary_resource_id: "ces_toolset_mcp_api_key_config"
-    vars:
-      app_display_name: 'my-app'
-      app_id: 'app-id'
-      toolset_id: 'toolset1'
-      location: 'us'
-  - name: "ces_toolset_mcp_bearer_token_config"
-    primary_resource_id: "ces_toolset_mcp_bearer_token_config"
-    vars:
-      app_display_name: 'my-app'
-      app_id: 'app-id'
-      toolset_id: 'toolset1'
-      location: 'us'
+samples:
+  - name: ces_toolset_openapi_service_account_auth_config
+    primary_resource_id: ces_toolset_openapi_service_account_auth_config
+    steps:
+    - name: ces_toolset_openapi_service_account_auth_config
+      prefixed_vars:
+        app_display_name: my-app
+        app_id: app-id
+        location: us
+        toolset_id: toolset1
+      test_env_vars:
+        service_account: SERVICE_ACCT
+  - name: ces_toolset_openapi_oauth_config
+    primary_resource_id: ces_toolset_openapi_oauth_config
+    steps:
+    - name: ces_toolset_openapi_oauth_config
+      prefixed_vars:
+        app_display_name: my-app
+        app_id: app-id
+        location: us
+        toolset_id: toolset1
+  - name: ces_toolset_openapi_service_agent_id_token_auth_config
+    primary_resource_id: ces_toolset_openapi_service_agent_id_token_auth_config
+    steps:
+    - name: ces_toolset_openapi_service_agent_id_token_auth_config
+      prefixed_vars:
+        app_display_name: my-app
+        app_id: app-id
+        location: us
+        toolset_id: toolset1
+  - name: ces_toolset_openapi_api_key_config
+    primary_resource_id: ces_toolset_openapi_api_key_config
+    steps:
+    - name: ces_toolset_openapi_api_key_config
+      prefixed_vars:
+        app_display_name: my-app
+        app_id: app-id
+        location: us
+        toolset_id: toolset1
+  - name: ces_toolset_bearer_token_config
+    primary_resource_id: ces_toolset_bearer_token_config
+    steps:
+    - name: ces_toolset_bearer_token_config
+      prefixed_vars:
+        app_display_name: my-app
+        app_id: app-id
+        location: us
+        toolset_id: toolset1
+  - name: ces_toolset_mcp_service_account_auth_config
+    primary_resource_id: ces_toolset_mcp_service_account_auth_config
+    steps:
+    - name: ces_toolset_mcp_service_account_auth_config
+      prefixed_vars:
+        app_display_name: my-app
+        app_id: app-id
+        location: us
+        toolset_id: toolset1
+      test_env_vars:
+        service_account: SERVICE_ACCT
+  - name: ces_toolset_mcp_oauth_config
+    primary_resource_id: ces_toolset_mcp_oauth_config
+    steps:
+    - name: ces_toolset_mcp_oauth_config
+      prefixed_vars:
+        app_display_name: my-app
+        app_id: app-id
+        location: us
+        toolset_id: toolset1
+  - name: ces_toolset_mcp_service_agent_id_token_auth_config
+    primary_resource_id: ces_toolset_mcp_service_agent_id_token_auth_config
+    steps:
+    - name: ces_toolset_mcp_service_agent_id_token_auth_config
+      prefixed_vars:
+        app_display_name: my-app
+        app_id: app-id
+        location: us
+        toolset_id: toolset1
+  - name: ces_toolset_mcp_api_key_config
+    primary_resource_id: ces_toolset_mcp_api_key_config
+    steps:
+    - name: ces_toolset_mcp_api_key_config
+      prefixed_vars:
+        app_display_name: my-app
+        app_id: app-id
+        location: us
+        toolset_id: toolset1
+  - name: ces_toolset_mcp_bearer_token_config
+    primary_resource_id: ces_toolset_mcp_bearer_token_config
+    steps:
+    - name: ces_toolset_mcp_bearer_token_config
+      prefixed_vars:
+        app_display_name: my-app
+        app_id: app-id
+        location: us
+        toolset_id: toolset1
 autogen_async: true
 autogen_status: VG9vbHNldA==
 parameters:

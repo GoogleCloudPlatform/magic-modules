@@ -35,20 +35,24 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project.go.tmpl'
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
-examples:
-  - name: 'dialogflow_intent_basic'
-    primary_resource_id: 'basic_intent'
-    vars:
-      intent_name: 'basic-intent'
+samples:
+  - name: dialogflow_intent_basic
+    primary_resource_id: basic_intent
     exclude_test: true
-  - name: 'dialogflow_intent_full'
-    primary_resource_id: 'full_intent'
-    vars:
-      project_id: 'my-project'
-      account_id: 'my-account'
-      intent_name: 'full-intent'
-    test_env_vars:
-      org_id: 'ORG_ID'
+    steps:
+    - name: dialogflow_intent_basic
+      prefixed_vars:
+        intent_name: basic-intent
+  - name: dialogflow_intent_full
+    primary_resource_id: full_intent
+    steps:
+    - name: dialogflow_intent_full
+      prefixed_vars:
+        account_id: my-account
+        intent_name: full-intent
+        project_id: my-project
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
 properties:
   - name: 'name'

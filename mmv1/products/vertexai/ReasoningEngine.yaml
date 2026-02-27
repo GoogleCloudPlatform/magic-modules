@@ -36,52 +36,64 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-examples:
-  - name: 'vertex_ai_reasoning_engine_basic'
-    primary_resource_id: 'reasoning_engine'
-    exclude_docs: true
-    vars:
-      name: 'reasoning-engine'
-  - name: 'vertex_ai_reasoning_engine_source_based_deployment'
-    primary_resource_id: 'reasoning_engine'
-    vars:
-      name: 'reasoning-engine'
-  - name: 'vertex_ai_reasoning_engine_developer_connect_source'
-    skip_docs: true  # skip docs until templatized (or decide to skip docs permanently then)
-    primary_resource_id: 'reasoning_engine'
-    vars:
-      name: 'reasoning-engine'
-  - name: 'vertex_ai_reasoning_engine_psc_interface'
-    primary_resource_id: 'reasoning_engine'
-    vars:
-      name: 'reasoning-engine'
-      bucket_name: 'reasoning-engine'
-      network_name: 'network'
-      network_attachment_name: 'network-attachment'
-      subnetwork_name: 'subnetwork'
-    external_providers: ["time"]
+samples:
+  - name: vertex_ai_reasoning_engine_basic
+    primary_resource_id: reasoning_engine
+    steps:
+    - name: vertex_ai_reasoning_engine_basic
+      prefixed_vars:
+        name: reasoning-engine
+      exclude_docs: true
+  - name: vertex_ai_reasoning_engine_source_based_deployment
+    primary_resource_id: reasoning_engine
+    steps:
+    - name: vertex_ai_reasoning_engine_source_based_deployment
+      prefixed_vars:
+        name: reasoning-engine
+  - name: vertex_ai_reasoning_engine_developer_connect_source
+    primary_resource_id: reasoning_engine
+    steps:
+    - name: vertex_ai_reasoning_engine_developer_connect_source
+      prefixed_vars:
+        name: reasoning-engine
+  - name: vertex_ai_reasoning_engine_psc_interface
+    external_providers:
+    - time
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
-        role: "roles/compute.networkAdmin"
-      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
-        role: "roles/dns.peer"
-      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
-        role: "roles/viewer"
+    - member: serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com
+      role: roles/compute.networkAdmin
+    - member: serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com
+      role: roles/dns.peer
+    - member: serviceAccount:service-{project_number}@gcp-sa-aiplatform-re.iam.gserviceaccount.com
+      role: roles/viewer
+    primary_resource_id: reasoning_engine
     exclude_test: true
-  - name: 'vertex_ai_reasoning_engine_full'
-    primary_resource_id: 'reasoning_engine'
-    vars:
-      name: 'reasoning-engine'
-      bucket_name: 'reasoning-engine'
-      kms_key_name: 'example-key'
-      secret_name: 'secret'
-      service_account_id: 'sa'
+    steps:
+    - name: vertex_ai_reasoning_engine_psc_interface
+      prefixed_vars:
+        bucket_name: reasoning-engine
+        name: reasoning-engine
+        network_attachment_name: network-attachment
+        network_name: network
+        subnetwork_name: subnetwork
+  - name: vertex_ai_reasoning_engine_full
+    external_providers:
+    - time
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
-        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-    test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name'
-    external_providers: ["time"]
+    - member: serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com
+      role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    primary_resource_id: reasoning_engine
+    steps:
+    - name: vertex_ai_reasoning_engine_full
+      prefixed_vars:
+        bucket_name: reasoning-engine
+        kms_key_name: example-key
+        name: reasoning-engine
+        secret_name: secret
+        service_account_id: sa
+      test_vars_overrides:
+        kms_key_name: acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT",
+          "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name
 parameters:
   - name: 'region'
     type: String

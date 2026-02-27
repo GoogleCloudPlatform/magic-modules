@@ -27,19 +27,23 @@ create_url: 'projects/{{project}}/databases/{{database}}/userCreds?userCredsId={
 autogen_async: false
 custom_code:
   post_create: templates/terraform/post_create/firestore_user_creds.go.tmpl
-examples:
-  - name: 'firestore_user_creds_basic'
-    primary_resource_id: 'my-user-creds'
-    vars:
-      database_id: 'database-id-mongodb-compatible'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firestore_user_creds_with_secret_manager'
-    primary_resource_id: 'my-user-creds'
-    vars:
-      database_id: 'database-id-mongodb-compatible'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+samples:
+  - name: firestore_user_creds_basic
+    primary_resource_id: my-user-creds
+    steps:
+    - name: firestore_user_creds_basic
+      prefixed_vars:
+        database_id: database-id-mongodb-compatible
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firestore_user_creds_with_secret_manager
+    primary_resource_id: my-user-creds
+    steps:
+    - name: firestore_user_creds_with_secret_manager
+      prefixed_vars:
+        database_id: database-id-mongodb-compatible
+      test_env_vars:
+        project_id: PROJECT_NAME
 parameters:
   - name: 'database'
     type: String

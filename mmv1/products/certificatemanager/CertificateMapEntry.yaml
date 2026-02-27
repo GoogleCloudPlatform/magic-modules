@@ -35,15 +35,17 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'certificate_manager_certificate_map_entry_full'
-    primary_resource_id: 'default'
-    vars:
-      dns_auth_name: 'dns-auth'
-      dns_auth_subdomain: 'subdomain'
-      dns_auth_name2: 'dns-auth2'
-      dns_auth_subdomain2: 'subdomain2'
-      cert_map_entry_name: 'cert-map-entry'
+samples:
+  - name: certificate_manager_certificate_map_entry_full
+    primary_resource_id: default
+    steps:
+    - name: certificate_manager_certificate_map_entry_full
+      prefixed_vars:
+        cert_map_entry_name: cert-map-entry
+        dns_auth_name: dns-auth
+        dns_auth_name2: dns-auth2
+        dns_auth_subdomain: subdomain
+        dns_auth_subdomain2: subdomain2
 parameters:
   - name: 'name'
     type: String

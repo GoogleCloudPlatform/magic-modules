@@ -57,15 +57,17 @@ identity:
   - name
 custom_code:
   custom_import: 'templates/terraform/custom_import/iap_brand.go.tmpl'
-examples:
-  - name: 'iap_brand'
-    primary_resource_id: 'project_brand'
-    vars:
-      project_id: 'my-project'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      org_domain: 'ORG_DOMAIN'
+samples:
+  - name: iap_brand
+    primary_resource_id: project_brand
     exclude_test: true
+    steps:
+    - name: iap_brand
+      prefixed_vars:
+        project_id: my-project
+      test_env_vars:
+        org_domain: ORG_DOMAIN
+        org_id: ORG_ID
 parameters:
   - name: 'name'
     type: String

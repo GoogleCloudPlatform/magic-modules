@@ -44,16 +44,19 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-examples:
-  - name: 'iam_projects_policy_binding'
-    primary_resource_id: 'binding-for-all-project-principals'
-    external_providers: ["time"]
-    test_env_vars:
-      org_id: 'ORG_ID'
-    vars:
-      pab_policy_id: 'my-pab-policy'
-      display_name: 'binding for all principals in the project'
-      project_binding_id: 'binding-for-all-project-principals'
+samples:
+  - name: iam_projects_policy_binding
+    external_providers:
+    - time
+    primary_resource_id: binding-for-all-project-principals
+    steps:
+    - name: iam_projects_policy_binding
+      prefixed_vars:
+        display_name: binding for all principals in the project
+        pab_policy_id: my-pab-policy
+        project_binding_id: binding-for-all-project-principals
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
   - name: 'location'
     type: String

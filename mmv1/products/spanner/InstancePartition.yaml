@@ -44,12 +44,14 @@ import_format:
   - 'projects/{{project}}/instances/{{instance}}/instancePartitions/{{name}}'
   - '{{project}}/{{instance}}/{{name}}'
   - '{{instance}}/{{name}}'
-examples:
-  - name: 'spanner_instance_partition_basic'
-    primary_resource_id: 'partition'
-    vars:
-      instance_name: 'test-instance'
-      partition_name: 'test-partition'
+samples:
+  - name: spanner_instance_partition_basic
+    primary_resource_id: partition
+    steps:
+    - name: spanner_instance_partition_basic
+      prefixed_vars:
+        instance_name: test-instance
+        partition_name: test-partition
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: 'templates/terraform/encoders/spanner_instance_partition.go.tmpl'
   pre_update: 'templates/terraform/pre_update/spanner_instance_partition.go.tmpl'

@@ -29,18 +29,20 @@ create_url: 'organizations/{{org_id}}/environments/{{env_id}}/securityActions?se
 immutable: true
 import_format:
   - 'organizations/{{org_id}}/environments/{{env_id}}/securityActions/{{security_action_id}}'
-examples:
-  - name: 'apigee_security_action_basic'
-    vars:
-      network_name: 'my-network'
-      global_address_name: 'my-address'
-      environment_name: 'my-environment'
-      security_action_id: 'my-security-action'
-    primary_resource_id: 'apigee_security_action'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
+samples:
+  - name: apigee_security_action_basic
+    primary_resource_id: apigee_security_action
     exclude_test: true
+    steps:
+    - name: apigee_security_action_basic
+      prefixed_vars:
+        environment_name: my-environment
+        global_address_name: my-address
+        network_name: my-network
+        security_action_id: my-security-action
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
 parameters:
   - name: 'orgId'
     type: String

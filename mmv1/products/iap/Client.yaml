@@ -49,14 +49,16 @@ exclude_sweeper: true
 error_retry_predicates:
 
   - 'transport_tpg.IapClient409Operation'
-examples:
-  - name: 'iap_client'
-    primary_resource_id: 'project_client'
-    vars:
-      project_id: 'my-project'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      org_domain: 'ORG_DOMAIN'
+samples:
+  - name: iap_client
+    primary_resource_id: project_client
+    steps:
+    - name: iap_client
+      prefixed_vars:
+        project_id: my-project
+      test_env_vars:
+        org_domain: ORG_DOMAIN
+        org_id: ORG_ID
 parameters:
   - name: 'clientId'
     type: String

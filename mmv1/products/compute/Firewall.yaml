@@ -59,18 +59,22 @@ custom_diff:
   - 'resourceComputeFirewallSourceFieldsCustomizeDiff'
 schema_version: 1
 migrate_state: 'resourceComputeFirewallMigrateState'
-examples:
-  - name: 'firewall_basic'
-    primary_resource_id: 'default'
-    vars:
-      firewall_name: 'test-firewall'
-      network_name: 'test-network'
-  - name: 'firewall_with_target_tags'
-    primary_resource_id: 'rules'
-    vars:
-      firewall_name: 'my-firewall-rule'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: firewall_basic
+    primary_resource_id: default
+    steps:
+    - name: firewall_basic
+      prefixed_vars:
+        firewall_name: test-firewall
+        network_name: test-network
+  - name: firewall_with_target_tags
+    primary_resource_id: rules
+    steps:
+    - name: firewall_with_target_tags
+      prefixed_vars:
+        firewall_name: my-firewall-rule
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
 properties:
   # TODO: [nice to have] Make the format here simpler to use, in

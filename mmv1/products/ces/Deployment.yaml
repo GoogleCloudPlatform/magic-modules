@@ -21,13 +21,15 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/apps/{{app}}/deployments/{{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{app}}/deployments/{{name}}
-examples:
-  - name: "ces_deployment_basic"
-    primary_resource_id: "my-deployment"
-    vars:
-      deployment_display_name: 'my-deployment'
-      app_display_name: 'my-app'
-      app_id: 'app-id'
+samples:
+  - name: ces_deployment_basic
+    primary_resource_id: my-deployment
+    steps:
+    - name: ces_deployment_basic
+      prefixed_vars:
+        app_display_name: my-app
+        app_id: app-id
+        deployment_display_name: my-deployment
 autogen_status: RGVwbG95bWVudA==
 parameters:
   - name: location

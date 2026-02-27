@@ -40,21 +40,25 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'wasm_plugin_basic_docker_repository'
-    primary_resource_id: 'wasm_plugin'
-    vars:
-      wasm_plugin_name: 'my-wasm-plugin'
-      plugin_package_name: 'my-wasm-plugin-data'
-      repository_name: 'my-artifact-registry-docker-repository'
+samples:
+  - name: wasm_plugin_basic_docker_repository
+    primary_resource_id: wasm_plugin
     exclude_test: true
-  - name: 'wasm_plugin_basic_generic_repository'
-    primary_resource_id: 'wasm_plugin'
-    vars:
-      wasm_plugin_name: 'my-wasm-plugin'
-      plugin_package_name: 'my-wasm-plugin-data'
-      repository_name: 'my-artifact-registry-generic-repository'
+    steps:
+    - name: wasm_plugin_basic_docker_repository
+      prefixed_vars:
+        plugin_package_name: my-wasm-plugin-data
+        repository_name: my-artifact-registry-docker-repository
+        wasm_plugin_name: my-wasm-plugin
+  - name: wasm_plugin_basic_generic_repository
+    primary_resource_id: wasm_plugin
     exclude_test: true
+    steps:
+    - name: wasm_plugin_basic_generic_repository
+      prefixed_vars:
+        plugin_package_name: my-wasm-plugin-data
+        repository_name: my-artifact-registry-generic-repository
+        wasm_plugin_name: my-wasm-plugin
 parameters:
   - name: 'location'
     type: String

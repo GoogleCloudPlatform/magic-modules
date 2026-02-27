@@ -42,17 +42,21 @@ async:
 custom_code:
 schema_version: 1
 state_upgraders: true
-examples:
-  - name: 'ml_model_basic'
+samples:
+  - name: ml_model_basic
+    primary_resource_id: default
     exclude_test: true
-    primary_resource_id: 'default'
-    vars:
-      model_name: 'default'
-  - name: 'ml_model_full'
+    steps:
+    - name: ml_model_basic
+      prefixed_vars:
+        model_name: default
+  - name: ml_model_full
+    primary_resource_id: default
     exclude_test: true
-    primary_resource_id: 'default'
-    vars:
-      model_name: 'default'
+    steps:
+    - name: ml_model_full
+      prefixed_vars:
+        model_name: default
 parameters:
 properties:
   - name: 'name'

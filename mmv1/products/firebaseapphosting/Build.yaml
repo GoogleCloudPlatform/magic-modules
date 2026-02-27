@@ -30,38 +30,41 @@ import_format:
   - projects/{{project}}/locations/{{location}}/backends/{{backend}}/builds/{{build_id}}
   - "{{project}}/{{location}}/{{backend}}/{{build_id}}"
   - "{{location}}/{{backend}}/{{build_id}}"
-examples:
+samples:
   - name: firebase_app_hosting_build_minimal
     primary_resource_id: example
-    vars:
-      backend_id: "mini"
-      build_id: "mini-build"
-      service_act_id: "firebase-app-hosting-compute"
-    test_env_vars:
-      project_id: "PROJECT_NAME"
-    test_vars_overrides:
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-build-min"'
+    steps:
+    - name: firebase_app_hosting_build_minimal
+      prefixed_vars:
+        backend_id: mini
+        build_id: mini-build
+        service_act_id: firebase-app-hosting-compute
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        service_act_id: '"tf-test-build-min"'
   - name: firebase_app_hosting_build_full
     primary_resource_id: example
-    vars:
-      backend_id: "full"
-      build_id: "full-build"
-      service_act_id: "firebase-app-hosting-compute"
-    test_env_vars:
-      project_id: "PROJECT_NAME"
-    test_vars_overrides:
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-build-full"'
+    steps:
+    - name: firebase_app_hosting_build_full
+      prefixed_vars:
+        backend_id: full
+        build_id: full-build
+        service_act_id: firebase-app-hosting-compute
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        service_act_id: '"tf-test-build-full"'
   - name: firebase_app_hosting_build_github
     primary_resource_id: example
-    vars:
-      backend_id: "mini"
-      build_id: "gh-build"
-    test_env_vars:
-      project_id: "PROJECT_NAME"
-    # Can't establish a Github connection in automated tests.
     exclude_test: true
+    steps:
+    - name: firebase_app_hosting_build_github
+      prefixed_vars:
+        backend_id: mini
+        build_id: gh-build
+      test_env_vars:
+        project_id: PROJECT_NAME
 autogen_async: true
 async:
   operation:

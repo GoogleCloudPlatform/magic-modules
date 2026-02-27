@@ -45,17 +45,20 @@ async:
   result:
     resource_inside_response: true
   include_project: true
-examples:
-  - name: 'iam_folders_policy_binding'
-    primary_resource_id: 'binding-for-all-folder-principals'
-    test_env_vars:
-      org_id: 'ORG_ID'
-    vars:
-      pab_policy_id: 'my-pab-policy'
-      display_name: 'binding for all principals in the folder'
-      folder_binding_id: 'binding-for-all-folder-principals'
-      folder_name: 'my folder'
-    external_providers: ["time"]
+samples:
+  - name: iam_folders_policy_binding
+    external_providers:
+    - time
+    primary_resource_id: binding-for-all-folder-principals
+    steps:
+    - name: iam_folders_policy_binding
+      prefixed_vars:
+        display_name: binding for all principals in the folder
+        folder_binding_id: binding-for-all-folder-principals
+        folder_name: my folder
+        pab_policy_id: my-pab-policy
+      test_env_vars:
+        org_id: ORG_ID
 parameters:
   - name: 'folder'
     type: String

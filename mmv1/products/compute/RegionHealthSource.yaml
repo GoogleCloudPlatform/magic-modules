@@ -62,16 +62,17 @@ async:
   operation:
     base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
 
-examples:
-  - name: "compute_region_health_source_basic"
-    primary_resource_id: "example_test_health_source"
-    vars:
-      name: "test-health-source"
-      description: "Example health source basic"
-    min_version: 'beta'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-
+samples:
+  - name: compute_region_health_source_basic
+    min_version: beta
+    primary_resource_id: example_test_health_source
+    steps:
+    - name: compute_region_health_source_basic
+      prefixed_vars:
+        description: Example health source basic
+        name: test-health-source
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
   - name: 'region'
     type: String

@@ -38,32 +38,38 @@ custom_code:
   pre_update: 'templates/terraform/pre_update/firebase_database_instance.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/firebase_database_instance.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/firebase_database_instance.go.tmpl'
-examples:
-  - name: 'firebase_database_instance_basic'
-    primary_resource_id: 'basic'
-    min_version: 'beta'
-    vars:
-      instance_id: 'active-db'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firebase_database_instance_full'
-    primary_resource_id: 'full'
-    min_version: 'beta'
-    vars:
-      instance_id: 'disabled-db'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'desired_state'
-  - name: 'firebase_database_instance_default_database'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    # Wait for IAM propagation
-    external_providers: ["time"]
-    vars:
-      project_id: 'rtdb-project'
-    test_env_vars:
-      org_id: 'ORG_ID'
+samples:
+  - name: firebase_database_instance_basic
+    min_version: beta
+    primary_resource_id: basic
+    steps:
+    - name: firebase_database_instance_basic
+      prefixed_vars:
+        instance_id: active-db
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firebase_database_instance_full
+    min_version: beta
+    primary_resource_id: full
+    steps:
+    - name: firebase_database_instance_full
+      prefixed_vars:
+        instance_id: disabled-db
+      test_env_vars:
+        project_id: PROJECT_NAME
+      ignore_read_extra:
+      - desired_state
+  - name: firebase_database_instance_default_database
+    external_providers:
+    - time
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: firebase_database_instance_default_database
+      prefixed_vars:
+        project_id: rtdb-project
+      test_env_vars:
+        org_id: ORG_ID
 virtual_fields:
   - name: 'desired_state'
     description: |

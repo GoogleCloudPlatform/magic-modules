@@ -37,91 +37,109 @@ async:
       delete_minutes: 60
     base_url: '{{op_id}}'
 autogen_async: true
-examples:
+samples:
   - name: database_migration_service_connection_profile_cloudsql
     primary_resource_id: cloudsqlprofile
-    ignore_read_extra:
+    steps:
+    - name: database_migration_service_connection_profile_cloudsql
+      prefixed_vars:
+        from_profile: my-fromprofileid
+        sqldb: my-database
+        sqldb_cert: my-cert
+        sqldb_pass: my-password
+        sqldb_user: my-username
+        to_profile: my-toprofileid
+      ignore_read_extra:
       - mysql.0.password
       - mysql.0.ssl.0.ca_certificate
       - mysql.0.ssl.0.client_certificate
       - mysql.0.ssl.0.client_key
-    vars:
-      from_profile: my-fromprofileid
-      sqldb: my-database
-      sqldb_cert: my-cert
-      sqldb_pass: my-password
-      sqldb_user: my-username
-      to_profile: my-toprofileid
   - name: database_migration_service_connection_profile_postgres
     primary_resource_id: postgresprofile
-    ignore_read_extra:
+    steps:
+    - name: database_migration_service_connection_profile_postgres
+      prefixed_vars:
+        profile: my-profileid
+        sqldb: my-database
+        sqldb_cert: my-cert
+        sqldb_pass: my-password
+        sqldb_user: my-username
+      ignore_read_extra:
       - postgresql.0.password
       - postgresql.0.ssl.0.ca_certificate
       - postgresql.0.ssl.0.client_certificate
       - postgresql.0.ssl.0.client_key
-    vars:
-      profile: my-profileid
-      sqldb: my-database
-      sqldb_cert: my-cert
-      sqldb_pass: my-password
-      sqldb_user: my-username
   - name: database_migration_service_connection_profile_postgres_no_ssl
     primary_resource_id: postgresprofile
-    ignore_read_extra:
+    steps:
+    - name: database_migration_service_connection_profile_postgres_no_ssl
+      prefixed_vars:
+        profile: my-profileid
+        sqldb: my-database
+        sqldb_cert: my-cert
+        sqldb_pass: my-password
+        sqldb_user: my-username
+      ignore_read_extra:
       - postgresql.0.password
       - postgresql.0.ssl.0.ca_certificate
       - postgresql.0.ssl.0.client_certificate
       - postgresql.0.ssl.0.client_key
-    vars:
-      profile: my-profileid
-      sqldb: my-database
-      sqldb_cert: my-cert
-      sqldb_pass: my-password
-      sqldb_user: my-username
   - name: database_migration_service_connection_profile_postgres_required_ssl
     primary_resource_id: postgresprofile
-    ignore_read_extra:
+    steps:
+    - name: database_migration_service_connection_profile_postgres_required_ssl
+      prefixed_vars:
+        profile: my-profileid
+        sqldb: my-database
+        sqldb_cert: my-cert
+        sqldb_pass: my-password
+        sqldb_user: my-username
+      ignore_read_extra:
       - postgresql.0.password
       - postgresql.0.ssl.0.ca_certificate
       - postgresql.0.ssl.0.client_certificate
       - postgresql.0.ssl.0.client_key
-    vars:
-      profile: my-profileid
-      sqldb: my-database
-      sqldb_cert: my-cert
-      sqldb_pass: my-password
-      sqldb_user: my-username
   - name: database_migration_service_connection_profile_oracle
     primary_resource_id: oracleprofile
-    ignore_read_extra:
-      - oracle.0.password
     exclude_test: true
-    vars:
-      profile: my-profileid
+    steps:
+    - name: database_migration_service_connection_profile_oracle
+      prefixed_vars:
+        profile: my-profileid
+      ignore_read_extra:
+      - oracle.0.password
   - name: database_migration_service_connection_profile_alloydb
     primary_resource_id: alloydbprofile
-    ignore_read_extra:
-      - alloydb.0.settings.0.initial_user.0.password
     exclude_test: true
-    vars:
-      global_address_name: private-ip-alloc
-      network_name: vpc-network
-      profile: my-profileid
+    steps:
+    - name: database_migration_service_connection_profile_alloydb
+      prefixed_vars:
+        global_address_name: private-ip-alloc
+        network_name: vpc-network
+        profile: my-profileid
+      ignore_read_extra:
+      - alloydb.0.settings.0.initial_user.0.password
   - name: database_migration_service_connection_profile_existing_mysql
     primary_resource_id: existing-mysql
-    vars:
-      destination_cp: destination-cp
-      destination_csql: destination-csql
+    steps:
+    - name: database_migration_service_connection_profile_existing_mysql
+      prefixed_vars:
+        destination_cp: destination-cp
+        destination_csql: destination-csql
   - name: database_migration_service_connection_profile_existing_postgres
     primary_resource_id: existing-psql
-    vars:
-      destination_cp: destination-cp
-      destination_csql: destination-csql
+    steps:
+    - name: database_migration_service_connection_profile_existing_postgres
+      prefixed_vars:
+        destination_cp: destination-cp
+        destination_csql: destination-csql
   - name: database_migration_service_connection_profile_existing_alloydb
     primary_resource_id: existing-alloydb
-    vars:
-      destination_alloydb: destination-alloydb
-      destination_cp: destination-cp
+    steps:
+    - name: database_migration_service_connection_profile_existing_alloydb
+      prefixed_vars:
+        destination_alloydb: destination-alloydb
+        destination_cp: destination-cp
 parameters:
   - name: connectionProfileId
     type: String

@@ -30,31 +30,43 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/global/securityGateways/{{security_gateway_id}}/applications/{{application_id}}'
     - '{{application_id}}'
-examples:
+samples:
   - name: beyondcorp_security_gateway_application_basic
     primary_resource_id: example
-    primary_resource_name: 'fmt.Sprintf("tf-test-default-sg%s", context["random_suffix"]), fmt.Sprintf("tf-test-google-sga%s", context["random_suffix"])'
-    vars:
-      security_gateway_name: default-sg
-      application_name: google-sga
+    primary_resource_name: fmt.Sprintf("tf-test-default-sg%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test-google-sga%s", context["random_suffix"])
+    steps:
+    - name: beyondcorp_security_gateway_application_basic
+      prefixed_vars:
+        application_name: google-sga
+        security_gateway_name: default-sg
   - name: beyondcorp_security_gateway_application_vpc
     primary_resource_id: example
-    primary_resource_name: 'fmt.Sprintf("tf-test-default-sg%s", context["random_suffix"]), fmt.Sprintf("tf-test-google-sga%s", context["random_suffix"])'
-    vars:
-      security_gateway_name: default-sg
-      application_name: my-vm-service2
+    primary_resource_name: fmt.Sprintf("tf-test-default-sg%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test-google-sga%s", context["random_suffix"])
+    steps:
+    - name: beyondcorp_security_gateway_application_vpc
+      prefixed_vars:
+        application_name: my-vm-service2
+        security_gateway_name: default-sg
   - name: beyondcorp_security_gateway_application_spa_api
     primary_resource_id: example-spa
-    primary_resource_name: 'fmt.Sprintf("tf-test-default-sg-spa-api%s", context["random_suffix"]), fmt.Sprintf("tf-test-google-sga%s", context["random_suffix"])'
-    vars:
-      security_gateway_name: default-sg-spa-api
-      application_discovery_name: app-discovery
+    primary_resource_name: fmt.Sprintf("tf-test-default-sg-spa-api%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test-google-sga%s", context["random_suffix"])
+    steps:
+    - name: beyondcorp_security_gateway_application_spa_api
+      prefixed_vars:
+        application_discovery_name: app-discovery
+        security_gateway_name: default-sg-spa-api
   - name: beyondcorp_security_gateway_application_spa_proxy
     primary_resource_id: example-spa
-    primary_resource_name: 'fmt.Sprintf("tf-test-default-sg-spa-proxy%s", context["random_suffix"]), fmt.Sprintf("tf-test-google-sga%s", context["random_suffix"])'
-    vars:
-      security_gateway_name: default-sg-spa-proxy
-      application_proxy_name: app-proxy
+    primary_resource_name: fmt.Sprintf("tf-test-default-sg-spa-proxy%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test-google-sga%s", context["random_suffix"])
+    steps:
+    - name: beyondcorp_security_gateway_application_spa_proxy
+      prefixed_vars:
+        application_proxy_name: app-proxy
+        security_gateway_name: default-sg-spa-proxy
 autogen_async: true
 async:
   operation:

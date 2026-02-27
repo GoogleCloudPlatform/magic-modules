@@ -45,12 +45,14 @@ custom_code:
 error_retry_predicates:
 
   - 'transport_tpg.IsMonitoringConcurrentEditError'
-examples:
-  - name: 'monitoring_service_custom'
-    primary_resource_id: 'custom'
-    vars:
-      service_id: 'custom-srv'
-      resource_name: '//product.googleapis.com/foo/foo/services/test'
+samples:
+  - name: monitoring_service_custom
+    primary_resource_id: custom
+    steps:
+    - name: monitoring_service_custom
+      prefixed_vars:
+        resource_name: //product.googleapis.com/foo/foo/services/test
+        service_id: custom-srv
 parameters:
   - name: 'serviceId'
     type: String

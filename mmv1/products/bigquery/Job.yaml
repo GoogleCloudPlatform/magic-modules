@@ -48,131 +48,153 @@ custom_code:
   encoder: 'templates/terraform/encoders/bigquery_job.go.tmpl'
 schema_version: 1
 state_upgraders: true
-examples:
-  - name: 'bigquery_job_query'
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_query'
-      account_name: 'bqowner'
-    ignore_read_extra:
-      - 'etag'
-      - 'status.0.state'
-  - name: 'bigquery_job_query_continuous'
-    exclude_docs: true
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_query_continuous'
-    ignore_read_extra:
-      - 'etag'
-      - 'status.0.state'
+samples:
+  - name: bigquery_job_query
+    primary_resource_id: job
+    steps:
+    - name: bigquery_job_query
+      prefixed_vars:
+        account_name: bqowner
+        job_id: job_query
+      ignore_read_extra:
+      - etag
+      - status.0.state
+  - name: bigquery_job_query_continuous
     min_version: beta
-  - name: 'bigquery_job_query_table_reference'
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_query'
-      account_name: 'bqowner'
-    ignore_read_extra:
-      - 'etag'
-      - 'query.0.default_dataset.0.dataset_id'
-      - 'query.0.destination_table.0.table_id'
-      - 'status.0.state'
-  - name: 'bigquery_job_load'
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_load'
-    ignore_read_extra:
-      - 'etag'
-      - 'status.0.state'
-  - name: 'bigquery_job_load_geojson'
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_load'
- # Keep small(er) to avoid downstream acctest having too-long a bucket name
-      bucket_name: 'bq-geojson'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'etag'
-      - 'status.0.state'
-  - name: 'bigquery_job_load_parquet'
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_load'
-    ignore_read_extra:
-      - 'etag'
-      - 'status.0.state'
-  - name: 'bigquery_job_load_table_reference'
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_load'
-    ignore_read_extra:
-      - 'etag'
-      - 'load.0.destination_table.0.table_id'
-      - 'status.0.state'
- # there are a lot of examples for this resource, so omitting some that are similar to others
-    exclude_docs: true
-  - name: 'bigquery_job_copy'
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_copy'
-      account_name: 'bqowner'
-      kms_key_name: 'example-key'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key1").CryptoKey.Name'
-    ignore_read_extra:
-      - 'etag'
-      - 'status.0.state'
-  - name: 'bigquery_job_copy_table_reference'
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_copy'
-      account_name: 'bqowner'
-      kms_key_name: 'example-key'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    test_vars_overrides:
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key2").CryptoKey.Name'
-    ignore_read_extra:
-      - 'etag'
-      - 'copy.0.destination_table.0.table_id'
-      - 'copy.0.source_tables.0.table_id'
-      - 'copy.0.source_tables.1.table_id'
-      - 'status.0.state'
- # there are a lot of examples for this resource, so omitting some that are similar to others
-    exclude_docs: true
-  - name: 'bigquery_job_extract'
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_extract'
-      account_name: 'bqowner'
-    ignore_read_extra:
-      - 'etag'
-      - 'status.0.state'
-  - name: 'bigquery_job_extract_table_reference'
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_extract'
-      account_name: 'bqowner'
-    ignore_read_extra:
-      - 'etag'
-      - 'extract.0.source_table.0.table_id'
-      - 'status.0.state'
- # there are a lot of examples for this resource, so omitting some that are similar to others
-    exclude_docs: true
-  - name: 'bigquery_job_query_reservation'
-    exclude_docs: true
-    ignore_read_extra:
-      - 'etag'
-      - 'status.0.state'
+    primary_resource_id: job
+    steps:
+    - name: bigquery_job_query_continuous
+      prefixed_vars:
+        job_id: job_query_continuous
+      ignore_read_extra:
+      - etag
+      - status.0.state
+      exclude_docs: true
+  - name: bigquery_job_query_table_reference
+    primary_resource_id: job
+    steps:
+    - name: bigquery_job_query_table_reference
+      prefixed_vars:
+        account_name: bqowner
+        job_id: job_query
+      ignore_read_extra:
+      - etag
+      - query.0.default_dataset.0.dataset_id
+      - query.0.destination_table.0.table_id
+      - status.0.state
+  - name: bigquery_job_load
+    primary_resource_id: job
+    steps:
+    - name: bigquery_job_load
+      prefixed_vars:
+        job_id: job_load
+      ignore_read_extra:
+      - etag
+      - status.0.state
+  - name: bigquery_job_load_geojson
+    primary_resource_id: job
+    steps:
+    - name: bigquery_job_load_geojson
+      prefixed_vars:
+        bucket_name: bq-geojson
+        job_id: job_load
+      test_env_vars:
+        project: PROJECT_NAME
+      ignore_read_extra:
+      - etag
+      - status.0.state
+  - name: bigquery_job_load_parquet
+    primary_resource_id: job
+    steps:
+    - name: bigquery_job_load_parquet
+      prefixed_vars:
+        job_id: job_load
+      ignore_read_extra:
+      - etag
+      - status.0.state
+  - name: bigquery_job_load_table_reference
+    primary_resource_id: job
+    steps:
+    - name: bigquery_job_load_table_reference
+      prefixed_vars:
+        job_id: job_load
+      ignore_read_extra:
+      - etag
+      - load.0.destination_table.0.table_id
+      - status.0.state
+      exclude_docs: true
+  - name: bigquery_job_copy
+    primary_resource_id: job
+    steps:
+    - name: bigquery_job_copy
+      prefixed_vars:
+        account_name: bqowner
+        job_id: job_copy
+        kms_key_name: example-key
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        kms_key_name: acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT",
+          "global", "tf-bootstrap-bigquery-job-key1").CryptoKey.Name
+      ignore_read_extra:
+      - etag
+      - status.0.state
+  - name: bigquery_job_copy_table_reference
+    primary_resource_id: job
+    steps:
+    - name: bigquery_job_copy_table_reference
+      prefixed_vars:
+        account_name: bqowner
+        job_id: job_copy
+        kms_key_name: example-key
+      test_env_vars:
+        project: PROJECT_NAME
+      test_vars_overrides:
+        kms_key_name: acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT",
+          "global", "tf-bootstrap-bigquery-job-key2").CryptoKey.Name
+      ignore_read_extra:
+      - etag
+      - copy.0.destination_table.0.table_id
+      - copy.0.source_tables.0.table_id
+      - copy.0.source_tables.1.table_id
+      - status.0.state
+      exclude_docs: true
+  - name: bigquery_job_extract
+    primary_resource_id: job
+    steps:
+    - name: bigquery_job_extract
+      prefixed_vars:
+        account_name: bqowner
+        job_id: job_extract
+      ignore_read_extra:
+      - etag
+      - status.0.state
+  - name: bigquery_job_extract_table_reference
+    primary_resource_id: job
+    steps:
+    - name: bigquery_job_extract_table_reference
+      prefixed_vars:
+        account_name: bqowner
+        job_id: job_extract
+      ignore_read_extra:
+      - etag
+      - extract.0.source_table.0.table_id
+      - status.0.state
+      exclude_docs: true
+  - name: bigquery_job_query_reservation
     min_version: beta
-    primary_resource_id: 'job'
-    vars:
-      job_id: 'job_query_reservation'
-      reservation_name: 'my-reservation'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+    primary_resource_id: job
+    steps:
+    - name: bigquery_job_query_reservation
+      prefixed_vars:
+        job_id: job_query_reservation
+        reservation_name: my-reservation
+      test_env_vars:
+        project: PROJECT_NAME
+      ignore_read_extra:
+      - etag
+      - status.0.state
+      exclude_docs: true
 parameters:
 properties:
   - name: 'user_email'

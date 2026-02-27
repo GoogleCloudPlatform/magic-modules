@@ -43,18 +43,20 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "us-central1-a"
-examples:
-  - name: 'network_security_intercept_deployment_basic'
-    config_path: 'templates/terraform/examples/network_security_intercept_deployment_basic.tf.tmpl'
-    primary_resource_id: 'default'
-    vars:
-      network_name: 'example-network'
-      subnetwork_name: 'example-subnet'
-      health_check_name: 'example-hc'
-      backend_service_name: 'example-bs'
-      forwarding_rule_name: 'example-fwr'
-      deployment_group_id: 'example-dg'
-      deployment_id: 'example-deployment'
+samples:
+  - name: network_security_intercept_deployment_basic
+    primary_resource_id: default
+    steps:
+    - name: network_security_intercept_deployment_basic
+      config_path: templates/terraform/samples/services/networksecurity/network_security_intercept_deployment_basic.tf.tmpl
+      prefixed_vars:
+        backend_service_name: example-bs
+        deployment_group_id: example-dg
+        deployment_id: example-deployment
+        forwarding_rule_name: example-fwr
+        health_check_name: example-hc
+        network_name: example-network
+        subnetwork_name: example-subnet
 parameters:
   - name: 'location'
     type: String

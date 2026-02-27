@@ -55,71 +55,89 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/firestore_index.go.tmpl'
 error_retry_predicates:
   - 'transport_tpg.FirestoreIndex409Retry'
-examples:
-  - name: 'firestore_index_basic'
-    primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    external_providers: ["random", "time"]
-  - name: 'firestore_index_datastore_mode'
-    primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-dm'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firestore_index_vector'
-    primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-vector'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firestore_index_name_descending'
-    primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firestore_index_mongodb_compatible_scope'
-    primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-mongodb-compatible'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firestore_index_sparse_any'
-    primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-sparse-any'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firestore_index_unique'
-    primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-unique'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firestore_index_skip_wait'
-    primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-skip-wait'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    ignore_read_extra:
-      - 'skip_wait'
-  - name: 'firestore_index_deletion_policy'
-    primary_resource_id: 'my-index'
-    vars:
-      database_id: 'database-id-deletion-policy'
-      deletion_policy: '"PREVENT"'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    # Example will show delete_protection as true, but in test we will actually set to false
-    # so the test can cleanup after itself.
-    test_vars_overrides:
-      'deletion_policy': '"DELETE"'
-    ignore_read_extra:
-      - 'deletion_policy'
+samples:
+  - name: firestore_index_basic
+    external_providers:
+    - random
+    - time
+    primary_resource_id: my-index
+    steps:
+    - name: firestore_index_basic
+      prefixed_vars:
+        database_id: database-id
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firestore_index_datastore_mode
+    primary_resource_id: my-index
+    steps:
+    - name: firestore_index_datastore_mode
+      prefixed_vars:
+        database_id: database-id-dm
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firestore_index_vector
+    primary_resource_id: my-index
+    steps:
+    - name: firestore_index_vector
+      prefixed_vars:
+        database_id: database-id-vector
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firestore_index_name_descending
+    primary_resource_id: my-index
+    steps:
+    - name: firestore_index_name_descending
+      prefixed_vars:
+        database_id: database-id
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firestore_index_mongodb_compatible_scope
+    primary_resource_id: my-index
+    steps:
+    - name: firestore_index_mongodb_compatible_scope
+      prefixed_vars:
+        database_id: database-id-mongodb-compatible
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firestore_index_sparse_any
+    primary_resource_id: my-index
+    steps:
+    - name: firestore_index_sparse_any
+      prefixed_vars:
+        database_id: database-id-sparse-any
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firestore_index_unique
+    primary_resource_id: my-index
+    steps:
+    - name: firestore_index_unique
+      prefixed_vars:
+        database_id: database-id-unique
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firestore_index_skip_wait
+    primary_resource_id: my-index
+    steps:
+    - name: firestore_index_skip_wait
+      prefixed_vars:
+        database_id: database-id-skip-wait
+      test_env_vars:
+        project_id: PROJECT_NAME
+      ignore_read_extra:
+      - skip_wait
+  - name: firestore_index_deletion_policy
+    primary_resource_id: my-index
+    steps:
+    - name: firestore_index_deletion_policy
+      prefixed_vars:
+        database_id: database-id-deletion-policy
+        deletion_policy: '"PREVENT"'
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        deletion_policy: '"DELETE"'
+      ignore_read_extra:
+      - deletion_policy
 virtual_fields:
   - name: "skip_wait"
     type: Boolean

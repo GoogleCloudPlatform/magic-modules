@@ -42,12 +42,14 @@ async:
   result:
     resource_inside_response: true
 custom_code:
-examples:
-  - name: 'vertex_ai_metadata_store'
-    primary_resource_id: 'store'
-    vars:
-      name: 'test-store'
+samples:
+  - name: vertex_ai_metadata_store
+    primary_resource_id: store
     exclude_test: true
+    steps:
+    - name: vertex_ai_metadata_store
+      prefixed_vars:
+        name: test-store
 parameters:
   - name: 'region'
     type: String

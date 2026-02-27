@@ -44,43 +44,57 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'network_connectivity_internal_ranges_basic'
-    primary_resource_id: 'default'
-    vars:
-      internal_range_name: 'basic'
-      network_name: 'internal-ranges'
-  - name: 'network_connectivity_internal_ranges_automatic_reservation'
-    primary_resource_id: 'default'
-    vars:
-      internal_range_name: 'automatic-reservation'
-      network_name: 'internal-ranges'
-  - name: 'network_connectivity_internal_ranges_external_ranges'
-    primary_resource_id: 'default'
-    vars:
-      internal_range_name: 'external-ranges'
-      network_name: 'internal-ranges'
-  - name: 'network_connectivity_internal_ranges_reserve_with_overlap'
-    primary_resource_id: 'default'
-    vars:
-      internal_range_name: 'overlap-range'
-      network_name: 'internal-ranges'
-  - name: 'network_connectivity_internal_ranges_migration'
-    primary_resource_id: 'default'
-    vars:
-      internal_range_name: 'migration'
-      network_name: 'internal-ranges'
-      source_subnet_name: 'source-subnet'
-  - name: 'network_connectivity_internal_ranges_allocation_algoritms'
-    primary_resource_id: 'default'
-    vars:
-      internal_range_name: 'allocation-algorithms'
-      network_name: 'internal-ranges'
-  - name: 'network_connectivity_internal_ranges_allocation_algoritms_random_first_n'
-    primary_resource_id: 'default'
-    vars:
-      internal_range_name: 'allocation-algorithms-random-first-n'
-      network_name: 'internal-ranges'
+samples:
+  - name: network_connectivity_internal_ranges_basic
+    primary_resource_id: default
+    steps:
+    - name: network_connectivity_internal_ranges_basic
+      prefixed_vars:
+        internal_range_name: basic
+        network_name: internal-ranges
+  - name: network_connectivity_internal_ranges_automatic_reservation
+    primary_resource_id: default
+    steps:
+    - name: network_connectivity_internal_ranges_automatic_reservation
+      prefixed_vars:
+        internal_range_name: automatic-reservation
+        network_name: internal-ranges
+  - name: network_connectivity_internal_ranges_external_ranges
+    primary_resource_id: default
+    steps:
+    - name: network_connectivity_internal_ranges_external_ranges
+      prefixed_vars:
+        internal_range_name: external-ranges
+        network_name: internal-ranges
+  - name: network_connectivity_internal_ranges_reserve_with_overlap
+    primary_resource_id: default
+    steps:
+    - name: network_connectivity_internal_ranges_reserve_with_overlap
+      prefixed_vars:
+        internal_range_name: overlap-range
+        network_name: internal-ranges
+  - name: network_connectivity_internal_ranges_migration
+    primary_resource_id: default
+    steps:
+    - name: network_connectivity_internal_ranges_migration
+      prefixed_vars:
+        internal_range_name: migration
+        network_name: internal-ranges
+        source_subnet_name: source-subnet
+  - name: network_connectivity_internal_ranges_allocation_algoritms
+    primary_resource_id: default
+    steps:
+    - name: network_connectivity_internal_ranges_allocation_algoritms
+      prefixed_vars:
+        internal_range_name: allocation-algorithms
+        network_name: internal-ranges
+  - name: network_connectivity_internal_ranges_allocation_algoritms_random_first_n
+    primary_resource_id: default
+    steps:
+    - name: network_connectivity_internal_ranges_allocation_algoritms_random_first_n
+      prefixed_vars:
+        internal_range_name: allocation-algorithms-random-first-n
+        network_name: internal-ranges
 parameters:
 properties:
   - name: 'name'

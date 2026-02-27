@@ -27,43 +27,61 @@ import_format:
   - "{{org_id}}/{{name}}"
 custom_code:
   custom_import: "templates/terraform/custom_import/apigee_api_product.go.tmpl"
-examples:
-  - name: "apigee_api_product_basic"
-    vars:
-      instance_name: "my-instance"
-      product_name: "my-product"
+samples:
+  - name: apigee_api_product_basic
+    primary_resource_id: ""
     exclude_test: true
-  - name: "apigee_api_product_basic_test"
-    primary_resource_id: "apigee_api_product"
-    test_env_vars:
-      org_id: "ORG_ID"
-      billing_account: "BILLING_ACCT"
-    exclude_docs: true
-    external_providers: ["time"]
-  - name: "apigee_api_product_with_legacy_operation"
-    vars:
-      instance_name: "my-instance"
-      product_name: "my-product"
+    steps:
+    - name: apigee_api_product_basic
+      prefixed_vars:
+        instance_name: my-instance
+        product_name: my-product
+  - name: apigee_api_product_basic_test
+    external_providers:
+    - time
+    primary_resource_id: apigee_api_product
+    steps:
+    - name: apigee_api_product_basic_test
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
+  - name: apigee_api_product_with_legacy_operation
+    primary_resource_id: ""
     exclude_test: true
-  - name: "apigee_api_product_with_legacy_operation_test"
-    primary_resource_id: "apigee_api_product"
-    test_env_vars:
-      org_id: "ORG_ID"
-      billing_account: "BILLING_ACCT"
-    exclude_docs: true
-    external_providers: ["time"]
-  - name: "apigee_api_product_with_attributes"
-    vars:
-      instance_name: "my-instance"
-      product_name: "my-product"
+    steps:
+    - name: apigee_api_product_with_legacy_operation
+      prefixed_vars:
+        instance_name: my-instance
+        product_name: my-product
+  - name: apigee_api_product_with_legacy_operation_test
+    external_providers:
+    - time
+    primary_resource_id: apigee_api_product
+    steps:
+    - name: apigee_api_product_with_legacy_operation_test
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
+  - name: apigee_api_product_with_attributes
+    primary_resource_id: ""
     exclude_test: true
-  - name: "apigee_api_product_with_attributes_test"
-    primary_resource_id: "apigee_api_product"
-    test_env_vars:
-      org_id: "ORG_ID"
-      billing_account: "BILLING_ACCT"
-    exclude_docs: true
-    external_providers: ["time"]
+    steps:
+    - name: apigee_api_product_with_attributes
+      prefixed_vars:
+        instance_name: my-instance
+        product_name: my-product
+  - name: apigee_api_product_with_attributes_test
+    external_providers:
+    - time
+    primary_resource_id: apigee_api_product
+    steps:
+    - name: apigee_api_product_with_attributes_test
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
 parameters:
   - name: "orgId"
     type: String

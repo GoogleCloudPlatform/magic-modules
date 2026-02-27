@@ -25,37 +25,45 @@ id_format:
   projects/{{project}}/locations/{{location}}/apps/{{app}}/tools/{{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{app}}/tools/{{name}}
-examples:
-  - name: "ces_tool_client_function_basic"
-    primary_resource_id: "ces_tool_client_function_basic"
-    vars:
-      tool_display_name: 'ces_tool_client_function_basic'
-      app_display_name: 'my-app'
-      tool_id: 'ces_tool_basic1'
-      app_id: 'app-id'
-  - name: "ces_tool_data_store_tool_engine_source_basic"
-    primary_resource_id: "ces_tool_data_store_tool_engine_source_basic"
-    vars:
-      tool_display_name: 'ces_tool_data_store_tool_engine_source_basic'
-      app_display_name: 'my-app'
-      tool_id: 'ces_tool_basic2'
-      app_id: 'app-id'
-      data_store_id: "tool_data_store_id"
-      engine_id: "tool_engine_id"
-  - name: "ces_tool_google_search_tool_basic"
-    primary_resource_id: "ces_tool_google_search_tool_basic"
-    vars:
-      tool_display_name: 'ces_tool_google_search_tool_basic'
-      app_display_name: 'my-app'
-      tool_id: 'ces_tool_basic3'
-      app_id: 'app-id'
-  - name: "ces_tool_python_function_basic"
-    primary_resource_id: "ces_tool_python_function_basic"
-    vars:
-      tool_display_name: 'ces_tool_python_function_basic'
-      app_display_name: 'my-app'
-      tool_id: 'ces_tool_basic4'
-      app_id: 'app-id'
+samples:
+  - name: ces_tool_client_function_basic
+    primary_resource_id: ces_tool_client_function_basic
+    steps:
+    - name: ces_tool_client_function_basic
+      prefixed_vars:
+        app_display_name: my-app
+        app_id: app-id
+        tool_display_name: ces_tool_client_function_basic
+        tool_id: ces_tool_basic1
+  - name: ces_tool_data_store_tool_engine_source_basic
+    primary_resource_id: ces_tool_data_store_tool_engine_source_basic
+    steps:
+    - name: ces_tool_data_store_tool_engine_source_basic
+      prefixed_vars:
+        app_display_name: my-app
+        app_id: app-id
+        data_store_id: tool_data_store_id
+        engine_id: tool_engine_id
+        tool_display_name: ces_tool_data_store_tool_engine_source_basic
+        tool_id: ces_tool_basic2
+  - name: ces_tool_google_search_tool_basic
+    primary_resource_id: ces_tool_google_search_tool_basic
+    steps:
+    - name: ces_tool_google_search_tool_basic
+      prefixed_vars:
+        app_display_name: my-app
+        app_id: app-id
+        tool_display_name: ces_tool_google_search_tool_basic
+        tool_id: ces_tool_basic3
+  - name: ces_tool_python_function_basic
+    primary_resource_id: ces_tool_python_function_basic
+    steps:
+    - name: ces_tool_python_function_basic
+      prefixed_vars:
+        app_display_name: my-app
+        app_id: app-id
+        tool_display_name: ces_tool_python_function_basic
+        tool_id: ces_tool_basic4
 autogen_status: VG9vbA==
 parameters:
   - name: location

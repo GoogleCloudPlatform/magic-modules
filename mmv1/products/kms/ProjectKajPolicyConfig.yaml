@@ -50,16 +50,19 @@ timeouts:
 custom_code:
   post_create: 'templates/terraform/post_create/sleep_1_min.go.tmpl'
   post_update: 'templates/terraform/post_create/sleep_1_min.go.tmpl'
-examples:
-  - name: 'kms_project_kaj_policy_config_basic'
-    primary_resource_id: 'example'
-    min_version: 'beta'
-    vars:
-      project_id: 'my-project'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    external_providers: ["time"]
+samples:
+  - name: kms_project_kaj_policy_config_basic
+    external_providers:
+    - time
+    min_version: beta
+    primary_resource_id: example
+    steps:
+    - name: kms_project_kaj_policy_config_basic
+      prefixed_vars:
+        project_id: my-project
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
 parameters:
 properties:
   - name: 'defaultKeyAccessJustificationPolicy'

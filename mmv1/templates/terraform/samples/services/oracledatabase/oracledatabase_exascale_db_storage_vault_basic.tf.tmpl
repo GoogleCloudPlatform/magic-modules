@@ -1,0 +1,13 @@
+resource "google_oracle_database_exascale_db_storage_vault" "{{$.PrimaryResourceId}}"{
+  exascale_db_storage_vault_id = "{{index $.PrefixedVars "exascale_db_storage_vault_id"}}"
+  display_name = "{{index $.PrefixedVars "exascale_db_storage_vault_id"}} displayname"
+  location = "us-east4"
+  project = "{{index $.PrefixedVars "project"}}"
+  properties {
+    exascale_db_storage_details {
+        total_size_gbs = 512
+    }
+  }
+
+  deletion_protection = "{{index $.PrefixedVars "deletion_protection"}}"
+}

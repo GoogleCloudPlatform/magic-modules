@@ -26,34 +26,38 @@ import_format:
   - "projects/{{project}}/locations/{{location}}/backends/{{backend_id}}"
   - "{{project}}/{{location}}/{{backend_id}}"
   - "{{location}}/{{backend_id}}"
-examples:
+samples:
   - name: firebase_app_hosting_backend_minimal
     primary_resource_id: example
-    vars:
-      backend_id: "mini"
-      service_act_id: "firebase-app-hosting-compute"
-    test_env_vars:
-      project_id: "PROJECT_NAME"
-    test_vars_overrides:
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-fah-minimal"'
+    steps:
+    - name: firebase_app_hosting_backend_minimal
+      prefixed_vars:
+        backend_id: mini
+        service_act_id: firebase-app-hosting-compute
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        service_act_id: '"tf-test-fah-minimal"'
   - name: firebase_app_hosting_backend_full
     primary_resource_id: example
-    vars:
-      backend_id: "full"
-      service_act_id: "firebase-app-hosting-compute"
-    test_env_vars:
-      project_id: "PROJECT_NAME"
-    test_vars_overrides:
-      # prevent tests from colliding with each other
-      service_act_id: '"tf-test-fah-full"'
+    steps:
+    - name: firebase_app_hosting_backend_full
+      prefixed_vars:
+        backend_id: full
+        service_act_id: firebase-app-hosting-compute
+      test_env_vars:
+        project_id: PROJECT_NAME
+      test_vars_overrides:
+        service_act_id: '"tf-test-fah-full"'
   - name: firebase_app_hosting_backend_github
     primary_resource_id: example
-    vars:
-      backend_id: "my-backend-gh"
-    test_env_vars:
-      project_id: "PROJECT_NAME"
-    exclude_test: true  # Can't establish a Github connection in automated tests.
+    exclude_test: true
+    steps:
+    - name: firebase_app_hosting_backend_github
+      prefixed_vars:
+        backend_id: my-backend-gh
+      test_env_vars:
+        project_id: PROJECT_NAME
 autogen_async: true
 async:
   operation:

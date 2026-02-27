@@ -36,13 +36,14 @@ references:
   api: https://cloud.google.com/eventarc/docs/reference/rest/v1/projects.locations
 description: |
  The Eventarc GoogleChannelConfig resource
-examples:
+samples:
   - name: eventarc_google_channel_config_with_cmek
     primary_resource_id: primary
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
-    # All tests are handwritten to ensure they don't run in parallel.
     exclude_test: true
+    steps:
+    - name: eventarc_google_channel_config_with_cmek
+      test_env_vars:
+        project_name: PROJECT_NAME
 parameters:
   - name: location
     type: String

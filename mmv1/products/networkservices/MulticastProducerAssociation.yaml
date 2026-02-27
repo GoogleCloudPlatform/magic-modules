@@ -30,14 +30,16 @@ import_format:
 sweeper:
   url_substitutions:
     - location: "us-central1-b"
-examples:
+samples:
   - name: network_services_multicast_producer_association_basic
     primary_resource_id: mpa_test
-    vars:
-      network_name: test-network-mpa
-      domain_name: test-domain-mpa
-      domain_activation_name: test-domain-activation-mpa
-      producer_association_name: test-producer-association-mpa
+    steps:
+    - name: network_services_multicast_producer_association_basic
+      prefixed_vars:
+        domain_activation_name: test-domain-activation-mpa
+        domain_name: test-domain-mpa
+        network_name: test-network-mpa
+        producer_association_name: test-producer-association-mpa
 autogen_async: true
 async:
   operation:

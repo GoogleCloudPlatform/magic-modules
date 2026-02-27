@@ -33,17 +33,18 @@ timeouts:
 sweeper:
   url_substitutions:
     - location: "us-central1-a"
-examples:
-
+samples:
   - name: lustre_instance_basic
-    primary_resource_id: 'instance'
-    vars:
-      name: 'my-instance'
-      address_name: 'my-ip-address-name'
-      network_name: 'my-network'
-      subnetwork_name: 'my-subnetwork'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "default-vpc")'
+    primary_resource_id: instance
+    steps:
+    - name: lustre_instance_basic
+      prefixed_vars:
+        address_name: my-ip-address-name
+        name: my-instance
+        network_name: my-network
+        subnetwork_name: my-subnetwork
+      test_vars_overrides:
+        network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "default-vpc")
 autogen_async: true
 async:
   operation:

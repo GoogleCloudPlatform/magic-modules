@@ -35,15 +35,17 @@ autogen_async: true
 async:
   operation:
     base_url: '{{op_id}}'
-examples:
-  - name: 'network_connectivity_gateway_advertised_route_basic'
+samples:
+  - name: network_connectivity_gateway_advertised_route_basic
     min_version: beta
-    primary_resource_id: 'default'
-    vars:
-      resource_name: 'gateway-advertised-route-name'
-      spoke_name: 'spoke-name'
-      network_name: 'net-spoke'
-      hub_name: 'hub'
+    primary_resource_id: default
+    steps:
+    - name: network_connectivity_gateway_advertised_route_basic
+      prefixed_vars:
+        hub_name: hub
+        network_name: net-spoke
+        resource_name: gateway-advertised-route-name
+        spoke_name: spoke-name
 parameters:
   - name: 'location'
     type: String

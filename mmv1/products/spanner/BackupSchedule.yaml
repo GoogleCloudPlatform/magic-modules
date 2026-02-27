@@ -45,29 +45,33 @@ custom_code:
   encoder: 'templates/terraform/encoders/spanner_schedule_backup.go.tmpl'
   decoder: 'templates/terraform/decoders/spanner_schedule_backup.go.tmpl'
   pre_update: 'templates/terraform/pre_update/spanner_schedule_backup.go.tmpl'
-examples:
-  - name: 'spanner_backup_schedule_daily_full'
-    primary_resource_id: 'full-backup'
-    vars:
-      name: 'backup-schedule-id'
-      instance_name: 'instance-id'
-      database_name: 'database-id'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
-  - name: 'spanner_backup_schedule_daily_incremental'
-    primary_resource_id: 'incremental-backup'
-    vars:
-      name: 'backup-schedule-id'
-      instance_name: 'instance-id'
-      database_name: 'database-id'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
+samples:
+  - name: spanner_backup_schedule_daily_full
+    primary_resource_id: full-backup
+    steps:
+    - name: spanner_backup_schedule_daily_full
+      prefixed_vars:
+        database_name: database-id
+        deletion_protection: "true"
+        instance_name: instance-id
+        name: backup-schedule-id
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
+  - name: spanner_backup_schedule_daily_incremental
+    primary_resource_id: incremental-backup
+    steps:
+    - name: spanner_backup_schedule_daily_incremental
+      prefixed_vars:
+        database_name: database-id
+        deletion_protection: "true"
+        instance_name: instance-id
+        name: backup-schedule-id
+      test_vars_overrides:
+        deletion_protection: "false"
+      oics_vars_overrides:
+        deletion_protection: "false"
 parameters:
   - name: 'instance'
     type: ResourceRef

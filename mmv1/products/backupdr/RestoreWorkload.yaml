@@ -34,57 +34,67 @@ async:
 custom_code:
   custom_create: 'templates/terraform/custom_create/backup_dr_restore_workload.go.tmpl'
   custom_delete: 'templates/terraform/custom_delete/backup_dr_restore_workload.go.tmpl'
-examples:
-  - name: 'backup_dr_restore_workload_compute_instance_basic'
-    primary_resource_id: 'restore_compute_basic'
-    skip_test: true
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    vars:
-      backup_vault_id: 'backup-vault'
-      data_source_id: 'data-source'
-      backup_id: 'backup'
-      instance_name: 'restored-instance'
-  - name: 'backup_dr_restore_workload_compute_instance_full'
-    primary_resource_id: 'restore_compute_full'
-    skip_test: true
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    vars:
-      backup_vault_id: 'backup-vault'
-      data_source_id: 'data-source'
-      backup_id: 'backup'
-      instance_name: 'restored-instance-full'
-  - name: 'backup_dr_restore_workload_disk_basic'
-    primary_resource_id: 'restore_disk_basic'
-    skip_test: true
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    vars:
-      backup_vault_id: 'backup-vault'
-      data_source_id: 'data-source'
-      backup_id: 'backup'
-      disk_name: 'restored-disk'
-  - name: 'backup_dr_restore_workload_regional_disk'
-    primary_resource_id: 'restore_regional_disk'
-    skip_test: true
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    vars:
-      backup_vault_id: 'backup-vault'
-      data_source_id: 'data-source'
-      backup_id: 'backup'
-      disk_name: 'restored-regional-disk'
-  - name: 'backup_dr_restore_workload_without_delete'
-    primary_resource_id: 'restore_without_delete'
-    skip_test: true
-    test_env_vars:
-      project: 'PROJECT_NAME'
-    vars:
-      backup_vault_id: 'backup-vault'
-      data_source_id: 'data-source'
-      backup_id: 'backup'
-      disk_name: 'persistent-disk'
+samples:
+  - name: backup_dr_restore_workload_compute_instance_basic
+    skip_test: "true"
+    primary_resource_id: restore_compute_basic
+    steps:
+    - name: backup_dr_restore_workload_compute_instance_basic
+      prefixed_vars:
+        backup_id: backup
+        backup_vault_id: backup-vault
+        data_source_id: data-source
+        instance_name: restored-instance
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: backup_dr_restore_workload_compute_instance_full
+    skip_test: "true"
+    primary_resource_id: restore_compute_full
+    steps:
+    - name: backup_dr_restore_workload_compute_instance_full
+      prefixed_vars:
+        backup_id: backup
+        backup_vault_id: backup-vault
+        data_source_id: data-source
+        instance_name: restored-instance-full
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: backup_dr_restore_workload_disk_basic
+    skip_test: "true"
+    primary_resource_id: restore_disk_basic
+    steps:
+    - name: backup_dr_restore_workload_disk_basic
+      prefixed_vars:
+        backup_id: backup
+        backup_vault_id: backup-vault
+        data_source_id: data-source
+        disk_name: restored-disk
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: backup_dr_restore_workload_regional_disk
+    skip_test: "true"
+    primary_resource_id: restore_regional_disk
+    steps:
+    - name: backup_dr_restore_workload_regional_disk
+      prefixed_vars:
+        backup_id: backup
+        backup_vault_id: backup-vault
+        data_source_id: data-source
+        disk_name: restored-regional-disk
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: backup_dr_restore_workload_without_delete
+    skip_test: "true"
+    primary_resource_id: restore_without_delete
+    steps:
+    - name: backup_dr_restore_workload_without_delete
+      prefixed_vars:
+        backup_id: backup
+        backup_vault_id: backup-vault
+        data_source_id: data-source
+        disk_name: persistent-disk
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
   - name: 'location'
     type: String

@@ -30,14 +30,16 @@ timeouts:
   insert_minutes: 5
   update_minutes: 5
   delete_minutes: 5
-examples:
-  - name: 'discoveryengine_control_basic'
-    primary_resource_id: 'basic'
-    primary_resource_name: 'fmt.Sprintf("tf_test_control%s", context["random_suffix"])'
-    vars:
-      control_id: 'control-id'
-      data_store_id: 'data-store-id'
-      engine_id: 'engine-id'
+samples:
+  - name: discoveryengine_control_basic
+    primary_resource_id: basic
+    primary_resource_name: fmt.Sprintf("tf_test_control%s", context["random_suffix"])
+    steps:
+    - name: discoveryengine_control_basic
+      prefixed_vars:
+        control_id: control-id
+        data_store_id: data-store-id
+        engine_id: engine-id
 parameters:
   - name: 'location'
     type: String

@@ -44,14 +44,16 @@ sweeper:
     - "google_network_security_intercept_endpoint_group"
   url_substitutions:
     - region: "global"
-examples:
-  - name: 'network_security_intercept_deployment_group_basic'
-    config_path: 'templates/terraform/examples/network_security_intercept_deployment_group_basic.tf.tmpl'
-    primary_resource_id: 'default'
-    vars:
-      network_name: 'example-network'
-      subnetwork_name: 'example-subnet'
-      deployment_group_id: 'example-dg'
+samples:
+  - name: network_security_intercept_deployment_group_basic
+    primary_resource_id: default
+    steps:
+    - name: network_security_intercept_deployment_group_basic
+      config_path: templates/terraform/samples/services/networksecurity/network_security_intercept_deployment_group_basic.tf.tmpl
+      prefixed_vars:
+        deployment_group_id: example-dg
+        network_name: example-network
+        subnetwork_name: example-subnet
 parameters:
   - name: 'location'
     type: String

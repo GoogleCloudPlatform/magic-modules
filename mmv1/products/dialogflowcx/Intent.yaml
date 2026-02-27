@@ -37,21 +37,27 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/dialogflowcx_set_location_skip_default_obj.go.tmpl'
   custom_import: 'templates/terraform/custom_import/dialogflowcx_intent.go.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'dialogflowcx_intent_full'
-    primary_resource_id: 'basic_intent'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-  - name: 'dialogflowcx_intent_default_negative_intent'
-    primary_resource_id: 'default_negative_intent'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-    exclude_docs: true
-  - name: 'dialogflowcx_intent_default_welcome_intent'
-    primary_resource_id: 'default_welcome_intent'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-    exclude_docs: true
+samples:
+  - name: dialogflowcx_intent_full
+    primary_resource_id: basic_intent
+    steps:
+    - name: dialogflowcx_intent_full
+      prefixed_vars:
+        agent_name: dialogflowcx-agent
+  - name: dialogflowcx_intent_default_negative_intent
+    primary_resource_id: default_negative_intent
+    steps:
+    - name: dialogflowcx_intent_default_negative_intent
+      prefixed_vars:
+        agent_name: dialogflowcx-agent
+      exclude_docs: true
+  - name: dialogflowcx_intent_default_welcome_intent
+    primary_resource_id: default_welcome_intent
+    steps:
+    - name: dialogflowcx_intent_default_welcome_intent
+      prefixed_vars:
+        agent_name: dialogflowcx-agent
+      exclude_docs: true
 virtual_fields:
   - name: 'is_default_welcome_intent'
     description: |

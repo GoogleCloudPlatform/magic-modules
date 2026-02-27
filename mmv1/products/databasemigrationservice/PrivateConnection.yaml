@@ -40,13 +40,15 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-examples:
-  - name: 'database_migration_service_private_connection'
-    primary_resource_id: 'default'
-    vars:
-      private_connection_id: 'my-connection'
-      network_name: 'my-network'
-      create_without_validation: 'false'
+samples:
+  - name: database_migration_service_private_connection
+    primary_resource_id: default
+    steps:
+    - name: database_migration_service_private_connection
+      prefixed_vars:
+        create_without_validation: "false"
+        network_name: my-network
+        private_connection_id: my-connection
 parameters:
   - name: 'privateConnectionId'
     type: String

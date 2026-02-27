@@ -49,21 +49,25 @@ custom_code:
   encoder: 'templates/terraform/encoders/logging_linked_dataset.go.tmpl'
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
-examples:
-  - name: 'logging_linked_dataset_basic'
-    primary_resource_id: 'logging_linked_dataset'
-    vars:
-      bucket_id: 'my-bucket'
-      link_id: 'mylink'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-  - name: 'logging_linked_dataset_all_params'
-    primary_resource_id: 'logging_linked_dataset'
-    vars:
-      bucket_id: 'my-bucket'
-      link_id: 'mylink'
-    test_env_vars:
-      project: 'PROJECT_NAME'
+samples:
+  - name: logging_linked_dataset_basic
+    primary_resource_id: logging_linked_dataset
+    steps:
+    - name: logging_linked_dataset_basic
+      prefixed_vars:
+        bucket_id: my-bucket
+        link_id: mylink
+      test_env_vars:
+        project: PROJECT_NAME
+  - name: logging_linked_dataset_all_params
+    primary_resource_id: logging_linked_dataset
+    steps:
+    - name: logging_linked_dataset_all_params
+      prefixed_vars:
+        bucket_id: my-bucket
+        link_id: mylink
+      test_env_vars:
+        project: PROJECT_NAME
 parameters:
   - name: 'linkId'
     type: String

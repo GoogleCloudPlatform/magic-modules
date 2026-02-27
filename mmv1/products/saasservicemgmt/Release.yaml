@@ -23,20 +23,22 @@ id_format: projects/{{project}}/locations/{{location}}/releases/{{release_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/releases/{{release_id}}
 min_version: beta
-examples:
+samples:
   - name: saas_runtime_release_basic
-    primary_resource_id: "example"
-    min_version: "beta"
-    vars:
-      saas_name: example-saas
-      unitkind_name: example-unitkind
-      release_name: example-release
-      previous_release_name: previous-release
-    test_env_vars:
-      project: "PROJECT_NAME"
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com"
-        role: "roles/saasservicemgmt.serviceAgent"
+    - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
+      role: roles/saasservicemgmt.serviceAgent
+    min_version: beta
+    primary_resource_id: example
+    steps:
+    - name: saas_runtime_release_basic
+      prefixed_vars:
+        previous_release_name: previous-release
+        release_name: example-release
+        saas_name: example-saas
+        unitkind_name: example-unitkind
+      test_env_vars:
+        project: PROJECT_NAME
 autogen_async: false
 autogen_status: UmVsZWFzZQ==
 parameters:

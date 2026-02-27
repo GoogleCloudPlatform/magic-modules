@@ -40,14 +40,16 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
-examples:
-  - name: 'target_grpc_proxy_basic'
-    primary_resource_id: 'default'
-    vars:
-      proxy_name: 'proxy'
-      urlmap_name: 'urlmap'
-      backend_name: 'backend'
-      healthcheck_name: 'healthcheck'
+samples:
+  - name: target_grpc_proxy_basic
+    primary_resource_id: default
+    steps:
+    - name: target_grpc_proxy_basic
+      prefixed_vars:
+        backend_name: backend
+        healthcheck_name: healthcheck
+        proxy_name: proxy
+        urlmap_name: urlmap
 parameters:
 properties:
   - name: 'creationTimestamp'

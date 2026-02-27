@@ -25,17 +25,23 @@ timeouts:
   delete_minutes: 15
 autogen_async: true
 import_format: ['projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/categories/{{category_id}}']
-examples:
-  - name: 'dataplex_glossary_category_basic'
-    primary_resource_id: 'category_test_id'
-    primary_resource_name: 'fmt.Sprintf("tf-test-category-basic%s", context["random_suffix"]), fmt.Sprintf("tf-test-glossary%s", context["random_suffix"])'
-    vars:
-      category_name: 'category-basic'
-  - name: 'dataplex_glossary_category_full'
-    primary_resource_id: 'category_test_id_full'
-    primary_resource_name: 'fmt.Sprintf("tf-test-category-full%s", context["random_suffix"]), fmt.Sprintf("tf-test-glossary%s", context["random_suffix"])'
-    vars:
-      category_name: 'category-full'
+samples:
+  - name: dataplex_glossary_category_basic
+    primary_resource_id: category_test_id
+    primary_resource_name: fmt.Sprintf("tf-test-category-basic%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test-glossary%s", context["random_suffix"])
+    steps:
+    - name: dataplex_glossary_category_basic
+      prefixed_vars:
+        category_name: category-basic
+  - name: dataplex_glossary_category_full
+    primary_resource_id: category_test_id_full
+    primary_resource_name: fmt.Sprintf("tf-test-category-full%s", context["random_suffix"]),
+      fmt.Sprintf("tf-test-glossary%s", context["random_suffix"])
+    steps:
+    - name: dataplex_glossary_category_full
+      prefixed_vars:
+        category_name: category-full
 parameters:
   - name: 'location'
     type: String

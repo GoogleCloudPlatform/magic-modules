@@ -40,26 +40,30 @@ async:
 autogen_async: true
 custom_code:
   constants: templates/terraform/constants/tpu_vm.go.tmpl
-examples:
+samples:
   - name: tpu_v2_vm_basic
-    primary_resource_id: tpu
-    min_version: beta
-    vars:
-      vm_name: test-tpu
     skip_vcr: true
-  - name: tpu_v2_vm_full
-    primary_resource_id: tpu
     min_version: beta
-    vars:
-      disk_name: tpu-disk
-      network_name: tpu-net
-      sa_id: tpu-sa
-      subnet_name: tpu-subnet
-      vm_name: test-tpu
+    primary_resource_id: tpu
+    steps:
+    - name: tpu_v2_vm_basic
+      prefixed_vars:
+        vm_name: test-tpu
+  - name: tpu_v2_vm_full
     skip_vcr: true
     external_providers:
-      - random
-      - time
+    - random
+    - time
+    min_version: beta
+    primary_resource_id: tpu
+    steps:
+    - name: tpu_v2_vm_full
+      prefixed_vars:
+        disk_name: tpu-disk
+        network_name: tpu-net
+        sa_id: tpu-sa
+        subnet_name: tpu-subnet
+        vm_name: test-tpu
 parameters:
   - name: zone
     type: String

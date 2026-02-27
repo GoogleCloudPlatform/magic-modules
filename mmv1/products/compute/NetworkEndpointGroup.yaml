@@ -54,18 +54,22 @@ custom_code:
 sweeper:
   url_substitutions:
     - zone: "us-central1-a"
-examples:
-  - name: 'network_endpoint_group'
-    primary_resource_id: 'neg'
-    vars:
-      neg_name: 'my-lb-neg'
-      network_name: 'neg-network'
-      subnetwork_name: 'neg-subnetwork'
-  - name: 'network_endpoint_group_non_gcp'
-    primary_resource_id: 'neg'
-    vars:
-      neg_name: 'my-lb-neg'
-      network_name: 'neg-network'
+samples:
+  - name: network_endpoint_group
+    primary_resource_id: neg
+    steps:
+    - name: network_endpoint_group
+      prefixed_vars:
+        neg_name: my-lb-neg
+        network_name: neg-network
+        subnetwork_name: neg-subnetwork
+  - name: network_endpoint_group_non_gcp
+    primary_resource_id: neg
+    steps:
+    - name: network_endpoint_group_non_gcp
+      prefixed_vars:
+        neg_name: my-lb-neg
+        network_name: neg-network
 parameters:
   - name: 'zone'
     type: ResourceRef

@@ -57,54 +57,60 @@ timeouts:
   update_minutes: 5
   delete_minutes: 5
 
-examples:
-  - name: 'dataplex_entry_basic'
-    primary_resource_id: 'test_basic'
-    primary_resource_name: 'fmt.Sprintf("tf-test-entry%s", context["random_suffix"])'
-    vars:
-      entry_id: 'entry-basic'
-      entry_group_name: 'entry-group-basic'
-      aspect_type_name: "aspect-type-basic"
-      entry_type_name: "entry-type-basic"
-    test_env_vars:
-      project_number: 'PROJECT_NUMBER'
-  - name: 'dataplex_entry_full'
-    primary_resource_id: 'test_entry_full'
-    primary_resource_name: 'fmt.Sprintf("tf-test-entry%s", context["random_suffix"])'
-    ignore_read_extra:
-      - 'aspects'
-    vars:
-      entry_id: 'entry-full/has/slashes'
-      entry_group_name: 'entry-group-full'
-      aspect_type_name: "aspect-type-full"
-      entry_type_name: "entry-type-full"
-    test_env_vars:
-      project_number: 'PROJECT_NUMBER'
-  - name: 'dataplex_entry_bigquery_table'
-    primary_resource_id: 'tf_test_table'
-    primary_resource_name: 'fmt.Sprintf("tf_test_table%s", context["random_suffix"])'
-    ignore_read_extra:
-      - 'aspects'
-    vars:
-      table_id: 'table-basic'
-      dataset_id: 'dataset_basic'
-      aspect_type_name: "aspect-type"
-    test_env_vars:
-      project_number: 'PROJECT_NUMBER'
-      project_id: 'PROJECT_NAME'
-  - name: 'dataplex_entry_glossary_term'
-    primary_resource_id: 'tf_test_glossary_term'
-    primary_resource_name: 'fmt.Sprintf("tf_test_glossary_term%s", context["random_suffix"])'
-    ignore_read_extra:
-      - 'aspects'
-    vars:
-      glossary_id: 'glossary-basic'
-      glossary_term_id: 'glossary-term'
-    test_env_vars:
-      project_number: 'PROJECT_NUMBER'
-      project_id: 'PROJECT_NAME'
-
-
+samples:
+  - name: dataplex_entry_basic
+    primary_resource_id: test_basic
+    primary_resource_name: fmt.Sprintf("tf-test-entry%s", context["random_suffix"])
+    steps:
+    - name: dataplex_entry_basic
+      prefixed_vars:
+        aspect_type_name: aspect-type-basic
+        entry_group_name: entry-group-basic
+        entry_id: entry-basic
+        entry_type_name: entry-type-basic
+      test_env_vars:
+        project_number: PROJECT_NUMBER
+  - name: dataplex_entry_full
+    primary_resource_id: test_entry_full
+    primary_resource_name: fmt.Sprintf("tf-test-entry%s", context["random_suffix"])
+    steps:
+    - name: dataplex_entry_full
+      prefixed_vars:
+        aspect_type_name: aspect-type-full
+        entry_group_name: entry-group-full
+        entry_id: entry-full/has/slashes
+        entry_type_name: entry-type-full
+      test_env_vars:
+        project_number: PROJECT_NUMBER
+      ignore_read_extra:
+      - aspects
+  - name: dataplex_entry_bigquery_table
+    primary_resource_id: tf_test_table
+    primary_resource_name: fmt.Sprintf("tf_test_table%s", context["random_suffix"])
+    steps:
+    - name: dataplex_entry_bigquery_table
+      prefixed_vars:
+        aspect_type_name: aspect-type
+        dataset_id: dataset_basic
+        table_id: table-basic
+      test_env_vars:
+        project_id: PROJECT_NAME
+        project_number: PROJECT_NUMBER
+      ignore_read_extra:
+      - aspects
+  - name: dataplex_entry_glossary_term
+    primary_resource_id: tf_test_glossary_term
+    primary_resource_name: fmt.Sprintf("tf_test_glossary_term%s", context["random_suffix"])
+    steps:
+    - name: dataplex_entry_glossary_term
+      prefixed_vars:
+        glossary_id: glossary-basic
+        glossary_term_id: glossary-term
+      test_env_vars:
+        project_id: PROJECT_NAME
+        project_number: PROJECT_NUMBER
+      ignore_read_extra:
+      - aspects
 parameters:
   - name: 'location'
     type: String

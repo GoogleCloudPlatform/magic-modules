@@ -32,17 +32,21 @@ import_format:
   - projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}
 include_in_tgc_next: true
 cai_asset_name_format: projects/{{project}}/regions/{{location}}/autoscalingPolicies/{{policy_id}}
-examples:
+samples:
   - name: dataproc_autoscaling_policy_basic
     primary_resource_id: basic
-    exclude_docs: true
     primary_resource_name: fmt.Sprintf("tf-test-dataproc-policy%s", context["random_suffix"])
-    vars:
-      name: dataproc-policy
+    steps:
+    - name: dataproc_autoscaling_policy_basic
+      prefixed_vars:
+        name: dataproc-policy
+      exclude_docs: true
   - name: dataproc_autoscaling_policy
     primary_resource_id: asp
-    vars:
-      name: dataproc-policy
+    steps:
+    - name: dataproc_autoscaling_policy
+      prefixed_vars:
+        name: dataproc-policy
 parameters:
   - name: location
     type: String

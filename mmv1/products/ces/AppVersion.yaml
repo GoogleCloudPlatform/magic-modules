@@ -20,14 +20,16 @@ create_url: projects/{{project}}/locations/{{location}}/apps/{{app}}/versions?ap
 id_format: projects/{{project}}/locations/{{location}}/apps/{{app}}/versions/{{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/apps/{{app}}/versions/{{name}}
-examples:
-  - name: "ces_app_version_basic"
-    primary_resource_id: "my-app-version"
-    vars:
-      app_version_display_name: 'my-app-version'
-      app_display_name: 'my-app'
-      app_version_id: 'app-version-id'
-      app_id: 'app-id'
+samples:
+  - name: ces_app_version_basic
+    primary_resource_id: my-app-version
+    steps:
+    - name: ces_app_version_basic
+      prefixed_vars:
+        app_display_name: my-app
+        app_id: app-id
+        app_version_display_name: my-app-version
+        app_version_id: app-version-id
 autogen_status: QXBwVmVyc2lvbg==
 parameters:
   - name: location

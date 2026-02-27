@@ -35,53 +35,61 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/alloydb_user.go.tmpl'
 # Skipping the sweeper because instances will be deleted during cluster sweeps
 exclude_sweeper: true
-examples:
-  - name: 'alloydb_user_builtin'
-    primary_resource_id: 'user1'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_cluster_pass: 'cluster_secret'
-      alloydb_instance_name: 'alloydb-instance'
-      alloydb_user_name: 'user1'
-      alloydb_user_pass: 'user_secret'
-      network_name: 'alloydb-network'
-    ignore_read_extra:
-      - 'password'
+samples:
+  - name: alloydb_user_builtin
+    primary_resource_id: user1
     exclude_test: true
-  - name: 'alloydb_user_builtin_test'
-    primary_resource_id: 'user1'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_cluster_pass: 'cluster_secret'
-      alloydb_instance_name: 'alloydb-instance'
-      alloydb_user_name: 'user1'
-      alloydb_user_pass: 'user_secret'
-      network_name: 'alloydb-network'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
-    ignore_read_extra:
-      - 'password'
-    exclude_docs: true
-  - name: 'alloydb_user_iam'
-    primary_resource_id: 'user2'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_instance_name: 'alloydb-instance'
-      alloydb_cluster_pass: 'cluster_secret'
-      alloydb_user_name: 'user2@foo.com'
-      network_name: 'alloydb-network'
+    steps:
+    - name: alloydb_user_builtin
+      prefixed_vars:
+        alloydb_cluster_name: alloydb-cluster
+        alloydb_cluster_pass: cluster_secret
+        alloydb_instance_name: alloydb-instance
+        alloydb_user_name: user1
+        alloydb_user_pass: user_secret
+        network_name: alloydb-network
+      ignore_read_extra:
+      - password
+  - name: alloydb_user_builtin_test
+    primary_resource_id: user1
+    steps:
+    - name: alloydb_user_builtin_test
+      prefixed_vars:
+        alloydb_cluster_name: alloydb-cluster
+        alloydb_cluster_pass: cluster_secret
+        alloydb_instance_name: alloydb-instance
+        alloydb_user_name: user1
+        alloydb_user_pass: user_secret
+        network_name: alloydb-network
+      test_vars_overrides:
+        network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")
+      ignore_read_extra:
+      - password
+      exclude_docs: true
+  - name: alloydb_user_iam
+    primary_resource_id: user2
     exclude_test: true
-  - name: 'alloydb_user_iam_test'
-    primary_resource_id: 'user2'
-    vars:
-      alloydb_cluster_name: 'alloydb-cluster'
-      alloydb_instance_name: 'alloydb-instance'
-      alloydb_cluster_pass: 'cluster_secret'
-      alloydb_user_name: 'user2@foo.com'
-      network_name: 'alloydb-network'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
-    exclude_docs: true
+    steps:
+    - name: alloydb_user_iam
+      prefixed_vars:
+        alloydb_cluster_name: alloydb-cluster
+        alloydb_cluster_pass: cluster_secret
+        alloydb_instance_name: alloydb-instance
+        alloydb_user_name: user2@foo.com
+        network_name: alloydb-network
+  - name: alloydb_user_iam_test
+    primary_resource_id: user2
+    steps:
+    - name: alloydb_user_iam_test
+      prefixed_vars:
+        alloydb_cluster_name: alloydb-cluster
+        alloydb_cluster_pass: cluster_secret
+        alloydb_instance_name: alloydb-instance
+        alloydb_user_name: user2@foo.com
+        network_name: alloydb-network
+      test_vars_overrides:
+        network_name: acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")
+      exclude_docs: true
 parameters:
   - name: 'cluster'
     type: ResourceRef

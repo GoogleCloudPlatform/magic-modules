@@ -29,18 +29,24 @@ import_format:
   - '{{org_id}}/{{feedback_id}}'
 custom_code:
   custom_import: "templates/terraform/custom_import/apigee_security_feedback.go.tmpl"
-examples:
-  - name: 'apigee_security_feedback_basic'
-    vars:
-      security_feedback_id: 'my-feedback'
+samples:
+  - name: apigee_security_feedback_basic
+    primary_resource_id: ""
     exclude_test: true
-  - name: 'apigee_security_feedback_basic_test'
-    primary_resource_id: 'security_feedback'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
-    external_providers: ["time"]
+    steps:
+    - name: apigee_security_feedback_basic
+      prefixed_vars:
+        security_feedback_id: my-feedback
+  - name: apigee_security_feedback_basic_test
+    external_providers:
+    - time
+    primary_resource_id: security_feedback
+    steps:
+    - name: apigee_security_feedback_basic_test
+      test_env_vars:
+        billing_account: BILLING_ACCT
+        org_id: ORG_ID
+      exclude_docs: true
 parameters:
   - name: 'orgId'
     type: String

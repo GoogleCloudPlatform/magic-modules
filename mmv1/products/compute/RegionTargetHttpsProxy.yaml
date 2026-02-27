@@ -43,41 +43,49 @@ custom_code:
   # This causes the encoder logic to not be applied during update.
   update_encoder: 'templates/terraform/encoders/compute_region_target_https_proxy.go.tmpl'
   decoder: 'templates/terraform/decoders/compute_region_target_https_proxy.go.tmpl'
-examples:
-  - name: 'region_target_https_proxy_basic'
-    primary_resource_id: 'default'
-    vars:
-      region_target_https_proxy_name: 'test-proxy'
-      region_ssl_certificate_name: 'my-certificate'
-      region_url_map_name: 'url-map'
-      region_backend_service_name: 'backend-service'
-      region_health_check_name: 'http-health-check'
-  - name: 'region_target_https_proxy_http_keep_alive_timeout'
-    primary_resource_id: 'default'
-    vars:
-      region_target_https_proxy_name: 'test-http-keep-alive-timeout-proxy'
-      region_ssl_certificate_name: 'my-certificate'
-      region_url_map_name: 'url-map'
-      region_backend_service_name: 'backend-service'
-      region_health_check_name: 'http-health-check'
-  - name: 'region_target_https_proxy_mtls'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      target_https_proxy_name: 'test-mtls-proxy'
-      ssl_certificate_name: 'my-certificate'
-      url_map_name: 'url-map'
-      backend_service_name: 'backend-service'
-      http_health_check_name: 'http-health-check'
-      server_tls_policy_name: 'my-tls-policy'
-      trust_config_name: 'my-trust-config'
-  - name: 'region_target_https_proxy_certificate_manager_certificate'
-    primary_resource_id: 'default'
-    vars:
-      region_target_https_proxy_name: 'target-http-proxy'
-      certificate_manager_certificate_name: 'my-certificate'
-      region_url_map_name: 'url-map'
-      region_backend_service_name: 'backend-service'
+samples:
+  - name: region_target_https_proxy_basic
+    primary_resource_id: default
+    steps:
+    - name: region_target_https_proxy_basic
+      prefixed_vars:
+        region_backend_service_name: backend-service
+        region_health_check_name: http-health-check
+        region_ssl_certificate_name: my-certificate
+        region_target_https_proxy_name: test-proxy
+        region_url_map_name: url-map
+  - name: region_target_https_proxy_http_keep_alive_timeout
+    primary_resource_id: default
+    steps:
+    - name: region_target_https_proxy_http_keep_alive_timeout
+      prefixed_vars:
+        region_backend_service_name: backend-service
+        region_health_check_name: http-health-check
+        region_ssl_certificate_name: my-certificate
+        region_target_https_proxy_name: test-http-keep-alive-timeout-proxy
+        region_url_map_name: url-map
+  - name: region_target_https_proxy_mtls
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: region_target_https_proxy_mtls
+      prefixed_vars:
+        backend_service_name: backend-service
+        http_health_check_name: http-health-check
+        server_tls_policy_name: my-tls-policy
+        ssl_certificate_name: my-certificate
+        target_https_proxy_name: test-mtls-proxy
+        trust_config_name: my-trust-config
+        url_map_name: url-map
+  - name: region_target_https_proxy_certificate_manager_certificate
+    primary_resource_id: default
+    steps:
+    - name: region_target_https_proxy_certificate_manager_certificate
+      prefixed_vars:
+        certificate_manager_certificate_name: my-certificate
+        region_backend_service_name: backend-service
+        region_target_https_proxy_name: target-http-proxy
+        region_url_map_name: url-map
 parameters:
   - name: 'region'
     type: ResourceRef

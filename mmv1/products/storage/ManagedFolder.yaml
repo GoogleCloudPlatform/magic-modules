@@ -48,13 +48,15 @@ custom_code:
   custom_update: 'templates/terraform/custom_update/storage_managed_folder.go.tmpl'
  # Skipping sweeper since this is a child resource.
 exclude_sweeper: true
-examples:
-  - name: 'storage_managed_folder_basic'
-    primary_resource_id: 'folder'
-    vars:
-      bucket_name: 'my-bucket'
-    ignore_read_extra:
-      - 'force_destroy'
+samples:
+  - name: storage_managed_folder_basic
+    primary_resource_id: folder
+    steps:
+    - name: storage_managed_folder_basic
+      prefixed_vars:
+        bucket_name: my-bucket
+      ignore_read_extra:
+      - force_destroy
 virtual_fields:
   - name: 'force_destroy'
     description: |

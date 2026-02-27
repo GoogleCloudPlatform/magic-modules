@@ -48,36 +48,40 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-examples:
-  - name: 'memorystore_instance_desired_user_created_endpoints'
-    primary_resource_id: 'instance-user-conn'
-    vars:
-      instance_name: 'instance-user-conn'
-      network1_name: 'net1'
-      subnet_network1_name: 'subnet-net1'
-      ip1_network1_name: 'ip1-net1'
-      ip2_network1_name: 'ip2-net1'
-      forwarding_rule1_network1_name: 'fwd1-net1'
-      forwarding_rule2_network1_name: 'fwd2-net1'
-      network2_name: 'network2'
-      subnet_network2_name: 'subnet-net2'
-      ip1_network2_name: 'ip1-net2'
-      ip2_network2_name: 'ip2-net2'
-      forwarding_rule1_network2_name: 'fwd1-net2'
-      forwarding_rule2_network2_name: 'fwd2-net2'
-  - name: 'memorystore_instance_desired_user_and_auto_created_endpoints'
-    primary_resource_id: 'instance-user-auto-conn'
-    vars:
-      instance_name: 'instance-user-auto-conn'
-      network1_name: 'net1'
-      subnet_network1_name: 'subnet-net1'
-      policy_name: 'scpolicy'
-      network2_name: 'network2'
-      subnet_network2_name: 'subnet-net2'
-      ip1_network2_name: 'ip1-net2'
-      ip2_network2_name: 'ip2-net2'
-      forwarding_rule1_network2_name: 'fwd1-net2'
-      forwarding_rule2_network2_name: 'fwd2-net2'
+samples:
+  - name: memorystore_instance_desired_user_created_endpoints
+    primary_resource_id: instance-user-conn
+    steps:
+    - name: memorystore_instance_desired_user_created_endpoints
+      prefixed_vars:
+        forwarding_rule1_network1_name: fwd1-net1
+        forwarding_rule1_network2_name: fwd1-net2
+        forwarding_rule2_network1_name: fwd2-net1
+        forwarding_rule2_network2_name: fwd2-net2
+        instance_name: instance-user-conn
+        ip1_network1_name: ip1-net1
+        ip1_network2_name: ip1-net2
+        ip2_network1_name: ip2-net1
+        ip2_network2_name: ip2-net2
+        network1_name: net1
+        network2_name: network2
+        subnet_network1_name: subnet-net1
+        subnet_network2_name: subnet-net2
+  - name: memorystore_instance_desired_user_and_auto_created_endpoints
+    primary_resource_id: instance-user-auto-conn
+    steps:
+    - name: memorystore_instance_desired_user_and_auto_created_endpoints
+      prefixed_vars:
+        forwarding_rule1_network2_name: fwd1-net2
+        forwarding_rule2_network2_name: fwd2-net2
+        instance_name: instance-user-auto-conn
+        ip1_network2_name: ip1-net2
+        ip2_network2_name: ip2-net2
+        network1_name: net1
+        network2_name: network2
+        policy_name: scpolicy
+        subnet_network1_name: subnet-net1
+        subnet_network2_name: subnet-net2
 parameters:
   - name: 'name'
     type: String

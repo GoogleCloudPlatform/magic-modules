@@ -21,39 +21,37 @@ create_url: projects/{{project}}/locations/{{location}}/exascaleDbStorageVaults?
 id_format: projects/{{project}}/locations/{{location}}/exascaleDbStorageVaults/{{exascale_db_storage_vault_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/exascaleDbStorageVaults/{{exascale_db_storage_vault_id}}
-examples:
+samples:
   - name: oracledatabase_exascale_db_storage_vault_basic
-    primary_resource_id: "my_storage_vault"
-    vars:
-      project: "my-project"
-      exascale_db_storage_vault_id: "my-instance"
-      deletion_protection: true
-    ignore_read_extra:
-      - "deletion_protection"
-    test_vars_overrides:
-      "deletion_protection": "false"
-      "project": '"oci-terraform-testing-prod"'
-      # ofake- prefix is needed to create a dummy resource for testing purposes only
-      # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
-      # As a result these resources are not sweepable
-      # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-      exascale_db_storage_vault_id: 'fmt.Sprintf("ofake-tf-test-storage-vault-basic-%s", acctest.RandString(t, 10))'
+    primary_resource_id: my_storage_vault
+    steps:
+    - name: oracledatabase_exascale_db_storage_vault_basic
+      prefixed_vars:
+        deletion_protection: "true"
+        exascale_db_storage_vault_id: my-instance
+        project: my-project
+      test_vars_overrides:
+        deletion_protection: "false"
+        exascale_db_storage_vault_id: fmt.Sprintf("ofake-tf-test-storage-vault-basic-%s",
+          acctest.RandString(t, 10))
+        project: '"oci-terraform-testing-prod"'
+      ignore_read_extra:
+      - deletion_protection
   - name: oracledatabase_exascale_db_storage_vault_full
-    primary_resource_id: "my_storage_vault"
-    vars:
-      project: "my-project"
-      exascale_db_storage_vault_id: "my-instance"
-      deletion_protection: true
-    ignore_read_extra:
-      - "deletion_protection"
-    test_vars_overrides:
-      "deletion_protection": "false"
-      "project": '"oci-terraform-testing-prod"'
-      # ofake- prefix is needed to create a dummy resource for testing purposes only
-      # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
-      # As a result these resources are not sweepable
-      # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-      exascale_db_storage_vault_id: 'fmt.Sprintf("ofake-tf-test-storage-vault-full-%s", acctest.RandString(t, 10))'
+    primary_resource_id: my_storage_vault
+    steps:
+    - name: oracledatabase_exascale_db_storage_vault_full
+      prefixed_vars:
+        deletion_protection: "true"
+        exascale_db_storage_vault_id: my-instance
+        project: my-project
+      test_vars_overrides:
+        deletion_protection: "false"
+        exascale_db_storage_vault_id: fmt.Sprintf("ofake-tf-test-storage-vault-full-%s",
+          acctest.RandString(t, 10))
+        project: '"oci-terraform-testing-prod"'
+      ignore_read_extra:
+      - deletion_protection
 virtual_fields:
   - name: "deletion_protection"
     type: Boolean

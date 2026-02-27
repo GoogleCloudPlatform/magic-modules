@@ -31,19 +31,23 @@ autogen_async: true
 include_in_tgc_next: true
 custom_code:
   constants: templates/terraform/constants/vmwareengine_resource.go.tmpl
-examples:
+samples:
   - name: vmware_engine_network_peering_ven
     primary_resource_id: vmw-engine-network-peering
-    vars:
-      name: sample-network-peering
-    test_env_vars:
-      region: REGION
+    steps:
+    - name: vmware_engine_network_peering_ven
+      prefixed_vars:
+        name: sample-network-peering
+      test_env_vars:
+        region: REGION
   - name: vmware_engine_network_peering_standard
     primary_resource_id: vmw-engine-network-peering
-    vars:
-      name: sample-network-peering
-    test_env_vars:
-      region: REGION
+    steps:
+    - name: vmware_engine_network_peering_standard
+      prefixed_vars:
+        name: sample-network-peering
+      test_env_vars:
+        region: REGION
 parameters:
   - name: name
     type: String

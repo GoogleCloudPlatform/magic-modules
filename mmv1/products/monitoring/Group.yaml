@@ -39,16 +39,20 @@ custom_code:
 error_retry_predicates:
 
   - 'transport_tpg.IsMonitoringConcurrentEditError'
-examples:
-  - name: 'monitoring_group_basic'
-    primary_resource_id: 'basic'
-    vars:
-      display_name: 'MonitoringGroup'
-  - name: 'monitoring_group_subgroup'
-    primary_resource_id: 'subgroup'
-    vars:
-      display_name: 'MonitoringParentGroup'
-      display_name2: 'MonitoringSubGroup'
+samples:
+  - name: monitoring_group_basic
+    primary_resource_id: basic
+    steps:
+    - name: monitoring_group_basic
+      prefixed_vars:
+        display_name: MonitoringGroup
+  - name: monitoring_group_subgroup
+    primary_resource_id: subgroup
+    steps:
+    - name: monitoring_group_subgroup
+      prefixed_vars:
+        display_name: MonitoringParentGroup
+        display_name2: MonitoringSubGroup
 parameters:
 properties:
   - name: 'parentName'

@@ -50,18 +50,22 @@ sweeper:
       region: global
     - collection_id: default_collection
       region: eu
-examples:
-  - name: 'discoveryengine_chat_engine_basic'
-    primary_resource_id: 'primary'
-    vars:
-      engine_id: 'chat-engine-id'
-      data_store_id: 'data-store'
-      data_store_2_id: 'data-store-2'
-  - name: 'discoveryengine_chat_engine_existing_dialogflow_agent'
-    primary_resource_id: 'primary'
-    vars:
-      engine_id: 'chat-engine-id'
-      data_store_id: 'data-store'
+samples:
+  - name: discoveryengine_chat_engine_basic
+    primary_resource_id: primary
+    steps:
+    - name: discoveryengine_chat_engine_basic
+      prefixed_vars:
+        data_store_2_id: data-store-2
+        data_store_id: data-store
+        engine_id: chat-engine-id
+  - name: discoveryengine_chat_engine_existing_dialogflow_agent
+    primary_resource_id: primary
+    steps:
+    - name: discoveryengine_chat_engine_existing_dialogflow_agent
+      prefixed_vars:
+        data_store_id: data-store
+        engine_id: chat-engine-id
 parameters:
   - name: 'engineId'
     type: String

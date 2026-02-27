@@ -39,29 +39,35 @@ timeouts:
 custom_code:
   post_create: 'templates/terraform/post_create/firebasehosting_release.tmpl'
 exclude_sweeper: true
-examples:
-  - name: 'firebasehosting_release_in_site'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      site_id: 'site-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firebasehosting_release_in_channel'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      site_id: 'site-with-channel'
-      channel_id: 'channel-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-  - name: 'firebasehosting_release_disable'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      site_id: 'site-id'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
+samples:
+  - name: firebasehosting_release_in_site
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: firebasehosting_release_in_site
+      prefixed_vars:
+        site_id: site-id
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firebasehosting_release_in_channel
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: firebasehosting_release_in_channel
+      prefixed_vars:
+        channel_id: channel-id
+        site_id: site-with-channel
+      test_env_vars:
+        project_id: PROJECT_NAME
+  - name: firebasehosting_release_disable
+    min_version: beta
+    primary_resource_id: default
+    steps:
+    - name: firebasehosting_release_disable
+      prefixed_vars:
+        site_id: site-id
+      test_env_vars:
+        project_id: PROJECT_NAME
 parameters:
   - name: 'site_id'
     type: String

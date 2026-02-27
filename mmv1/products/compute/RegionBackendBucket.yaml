@@ -65,26 +65,32 @@ sweeper:
     - region: "us-central1"
     - region: "us-east1"
     - region: "europe-west1"
-examples:
-  - name: 'region_backend_bucket_basic'
-    primary_resource_id: 'image_backend'
-    primary_resource_name: 'fmt.Sprintf("tf-test-region-image-backend-bucket%s", context["random_suffix"])'
-    vars:
-      backend_bucket_name: 'region-image-backend-bucket'
-      bucket_name: 'region-image-store-bucket'
-      region: 'us-central1'
-  - name: 'region_backend_bucket_internal_lb'
-    primary_resource_id: 'internal_backend'
-    vars:
-      backend_bucket_name: 'regional-internal-backend'
-      bucket_name: 'regional-internal-bucket'
-      region: 'us-central1'
-  - name: 'region_backend_bucket_external_lb'
-    primary_resource_id: 'external_backend'
-    vars:
-      backend_bucket_name: 'regional-external-backend'
-      bucket_name: 'regional-external-bucket'
-      region: 'us-east1'
+samples:
+  - name: region_backend_bucket_basic
+    primary_resource_id: image_backend
+    primary_resource_name: fmt.Sprintf("tf-test-region-image-backend-bucket%s", context["random_suffix"])
+    steps:
+    - name: region_backend_bucket_basic
+      prefixed_vars:
+        backend_bucket_name: region-image-backend-bucket
+        bucket_name: region-image-store-bucket
+        region: us-central1
+  - name: region_backend_bucket_internal_lb
+    primary_resource_id: internal_backend
+    steps:
+    - name: region_backend_bucket_internal_lb
+      prefixed_vars:
+        backend_bucket_name: regional-internal-backend
+        bucket_name: regional-internal-bucket
+        region: us-central1
+  - name: region_backend_bucket_external_lb
+    primary_resource_id: external_backend
+    steps:
+    - name: region_backend_bucket_external_lb
+      prefixed_vars:
+        backend_bucket_name: regional-external-backend
+        bucket_name: regional-external-bucket
+        region: us-east1
 parameters:
   - name: 'region'
     type: ResourceRef
