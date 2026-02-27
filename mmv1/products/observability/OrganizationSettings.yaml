@@ -22,12 +22,12 @@ create_url: 'organizations/{{organization}}/locations/{{location}}/settings'
 create_verb: 'PATCH'
 update_url: 'organizations/{{organization}}/locations/{{location}}/settings'
 update_verb: 'PATCH'
+update_mask: true
 exclude_delete: true
 autogen_async: true
 
 custom_code:
   pre_create: templates/terraform/pre_create/observability_organization_settings.go.tmpl
-  pre_update: templates/terraform/pre_update/observability_organization_settings.go.tmpl
 import_format:
   - 'organizations/{{organization}}/locations/{{location}}/settings'
 
