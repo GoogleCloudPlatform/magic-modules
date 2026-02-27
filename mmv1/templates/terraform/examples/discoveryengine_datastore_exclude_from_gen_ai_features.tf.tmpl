@@ -1,4 +1,4 @@
-resource "google_discovery_engine_data_store" "basic" {
+resource "google_discovery_engine_data_store" "exclude_from_gen_ai_features" {
   location                     = "global"
   data_store_id                = "{{index $.Vars "data_store_id"}}"
   display_name                 = "tf-test-structured-datastore"

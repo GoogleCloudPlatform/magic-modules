@@ -86,6 +86,10 @@ examples:
     primary_resource_id: 'advanced_site_search_config'
     vars:
       data_store_id: 'data-store-id'
+  - name: 'discoveryengine_datastore_exclude_from_gen_ai_features'
+    primary_resource_id: 'exclude_from_gen_ai_features'
+    vars:
+      data_store_id: 'data-store-id'
 parameters:
   - name: 'location'
     type: String
