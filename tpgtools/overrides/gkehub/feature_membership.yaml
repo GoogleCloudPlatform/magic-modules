@@ -33,7 +33,7 @@
   field: policycontroller.policy_controller_hub_config.deployment_configs
   details:
     keyname: component_name
-- type: CUSTOM_DEFAULT
+- type: CUSTOM_SCHEMA_VALUES
   field: policycontroller.policy_controller_hub_config.audit_interval_seconds
   details:
-    default: 60
+    computed: true
