@@ -25,30 +25,9 @@ import_format:
 examples:
   - name: developer_connect_account_connector_github
     primary_resource_id: 'my-account-connector'
-    primary_resource_name: 'fmt.Sprintf("tf-test-account-connector%s", context["random_suffix"])'
     vars:
       account_connector_name: tf-test-ac
   - name: developer_connect_account_connector_gitlab
-    primary_resource_id: 'my-account-connector'
-    vars:
-      account_connector_name: tf-test-ac
-  - name: developer_connect_account_connector_google
-    primary_resource_id: 'my-account-connector'
-    vars:
-      account_connector_name: tf-test-ac
-  - name: developer_connect_account_connector_sentry
-    primary_resource_id: 'my-account-connector'
-    vars:
-      account_connector_name: tf-test-ac
-  - name: developer_connect_account_connector_rovo
-    primary_resource_id: 'my-account-connector'
-    vars:
-      account_connector_name: tf-test-ac
-  - name: developer_connect_account_connector_new_relic
-    primary_resource_id: 'my-account-connector'
-    vars:
-      account_connector_name: tf-test-ac
-  - name: developer_connect_account_connector_datastax
     primary_resource_id: 'my-account-connector'
     vars:
       account_connector_name: tf-test-ac
@@ -99,7 +78,9 @@ properties:
         type: String
         immutable: true
         description: |2-
-          List of providers that are owned by Developer Connect.
+          List of providers that are owned by Developer Connect. Creation of
+          new non-SCM providers Account Connectors is not possible at this
+          time.
 
           Possible values:
           GITHUB

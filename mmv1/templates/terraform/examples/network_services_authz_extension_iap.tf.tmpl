@@ -1,0 +1,8 @@
+resource "google_network_services_authz_extension" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "resource_name"}}"
+  location = "us-west1"
+
+  authority             = "ext11.com"
+  service               = "iap.googleapis.com"
+  timeout               = "0.1s"
+}

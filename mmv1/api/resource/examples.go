@@ -106,7 +106,7 @@ type Examples struct {
 	// Vars is a Hash from template variable names to output variable names.
 	// It will use the provided value as a prefix for generated tests, and
 	// insert it into the docs verbatim.
-	Vars map[string]string
+	Vars map[string]string `yaml:"vars,omitempty"`
 
 	// Some variables need to hold special values during tests, and cannot
 	// be inferred by Open in Cloud Shell.  For instance, org_id
@@ -250,7 +250,7 @@ func (e *Examples) ValidateExternalProviders() error {
 	}
 
 	if len(unallowedProviders) > 0 {
-		return fmt.Errorf("Providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders)
+		return fmt.Errorf("providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders)
 	}
 
 	return nil

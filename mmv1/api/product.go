@@ -77,6 +77,9 @@ type Product struct {
 
 	// The compiler to generate the downstream files, for example "terraformgoogleconversion-codegen".
 	Compiler string `yaml:"-"`
+
+	// ImportPath contains the prefix used for importing packages in generated files.
+	ImportPath string `yaml:"-"`
 }
 
 func (p *Product) UnmarshalYAML(value *yaml.Node) error {
@@ -119,10 +122,6 @@ func (p *Product) Validate() {
 	for _, v := range p.Versions {
 		v.Validate(p.Name)
 	}
-
-	if p.Async != nil {
-		p.Async.Validate()
-	}
 }
 
 // ====================
@@ -143,7 +142,22 @@ func (p *Product) SetDisplayName() {
 }
 
 func (p *Product) SetCompiler(t string) {
-	p.Compiler = fmt.Sprintf("%s-codegen", strings.ToLower(t))
+	switch t {
+	case "tgc":
+		p.Compiler = "terraformgoogleconversion-codegen"
+	case "tgc_next":
+		p.Compiler = "terraformgoogleconversionnext-codegen"
+	case "tgc_cai2hcl":
+		p.Compiler = "caitoterraformconversion-codegen"
+	case "terraform", "oics", "bics":
+		p.Compiler = "terraform-codegen"
+	default:
+		p.Compiler = fmt.Sprintf("%s-codegen", strings.ToLower(t))
+	}
+}
+
+func (p Product) IsTgcCompiler() bool {
+	return p.Compiler == "terraformgoogleconversionnext-codegen"
 }
 
 // ====================

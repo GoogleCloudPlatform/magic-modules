@@ -118,11 +118,13 @@ func (s *Step) TestStepSlug(productName, resourceName string) string {
 	return ret
 }
 
-func (s *Step) Validate(rName, sName string) {
+func (s *Step) Validate(rName, sName string) (es []error) {
 	// TODO: Add check identifier when it's implemented
 	if s.Name == "" {
-		log.Fatalf("Missing `name` for one step in test sample %s in resource %s", sName, rName)
+		es = append(es, fmt.Errorf("missing `name` for one step in test sample %s in resource %s", sName, rName))
 	}
+
+	return es
 }
 
 func validateRegexForContents(r *regexp.Regexp, contents string, configPath string, objName string, vars map[string]string) {
@@ -144,7 +146,7 @@ func validateRegexForContents(r *regexp.Regexp, contents string, configPath stri
 // Executes step configuration templates for documentation and tests
 func (s *Step) SetHCLText(sysfs fs.FS) {
 	originalPrefixedVars := s.PrefixedVars
-	// originalVars := s.Vars
+	originalVars := s.Vars
 	originalTestEnvVars := s.TestEnvVars
 	docTestEnvVars := make(map[string]string)
 	docs_defaults := map[string]string{
@@ -214,6 +216,7 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 
 	s.PrefixedVars = testPrefixedVars
 	s.TestEnvVars = testTestEnvVars
+	s.Vars = testVars
 	s.TestHCLText = s.ExecuteTemplate(sysfs)
 	s.TestHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(s.TestHCLText, "\n")
 	// Remove region tags
@@ -223,6 +226,7 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 
 	// Reset the step
 	s.PrefixedVars = originalPrefixedVars
+	s.Vars = originalVars
 	s.TestEnvVars = originalTestEnvVars
 }
 

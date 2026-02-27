@@ -60,7 +60,6 @@ timeouts:
 examples:
   - name: 'dataplex_entry_basic'
     primary_resource_id: 'test_basic'
-    primary_resource_name: 'fmt.Sprintf("tf-test-entry%s", context["random_suffix"])'
     vars:
       entry_id: 'entry-basic'
       entry_group_name: 'entry-group-basic'
@@ -70,7 +69,6 @@ examples:
       project_number: 'PROJECT_NUMBER'
   - name: 'dataplex_entry_full'
     primary_resource_id: 'test_entry_full'
-    primary_resource_name: 'fmt.Sprintf("tf-test-entry%s", context["random_suffix"])'
     ignore_read_extra:
       - 'aspects'
     vars:
@@ -82,7 +80,6 @@ examples:
       project_number: 'PROJECT_NUMBER'
   - name: 'dataplex_entry_bigquery_table'
     primary_resource_id: 'tf_test_table'
-    primary_resource_name: 'fmt.Sprintf("tf_test_table%s", context["random_suffix"])'
     ignore_read_extra:
       - 'aspects'
     vars:
@@ -94,7 +91,6 @@ examples:
       project_id: 'PROJECT_NAME'
   - name: 'dataplex_entry_glossary_term'
     primary_resource_id: 'tf_test_glossary_term'
-    primary_resource_name: 'fmt.Sprintf("tf_test_glossary_term%s", context["random_suffix"])'
     ignore_read_extra:
       - 'aspects'
     vars:
