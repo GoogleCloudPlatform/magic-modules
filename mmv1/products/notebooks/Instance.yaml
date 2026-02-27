@@ -13,6 +13,9 @@
 
 ---
 name: 'Instance'
+# This resource should not be removed until the 2025 major release or later.
+# Check instance availability first before fully removing.
+deprecation_message: '`google_notebooks_instance` is deprecated and will be removed in a future major release. Use `google_workbench_instance` instead.'
 description: |
   A Cloud AI Platform Notebook instance.
 
@@ -55,9 +58,6 @@ custom_code:
   post_update: 'templates/terraform/post_update/notebooks_instance.go.tmpl'
 schema_version: 1
 state_upgraders: true
-# This resource should not be removed until the 2025 major release or later.
-# Check instance availability first before fully removing.
-deprecation_message: '`google_notebook_instance` is deprecated and will be removed in a future major release. Use `google_workbench_instance` instead.'
 sweeper:
   url_substitutions:
     - region: "us-central1-a"
