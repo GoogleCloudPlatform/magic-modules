@@ -24,10 +24,10 @@ update_url: 'folders/{{folder}}/locations/{{location}}/settings'
 update_verb: 'PATCH'
 exclude_delete: true
 autogen_async: true
+update_mask: true
 
 custom_code:
   pre_create: templates/terraform/pre_create/observability_folder_settings.go.tmpl
-  pre_update: templates/terraform/pre_update/observability_folder_settings.go.tmpl
 import_format:
   - 'folders/{{folder}}/locations/{{location}}/settings'
 
@@ -39,6 +39,28 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+
+examples:
+  - name: "observability_folder_settings_basic"
+    config_path: "templates/terraform/examples/observability_folder_settings_basic.tf.tmpl"
+    primary_resource_id: "primary"
+    external_providers: ["time"]
+    vars:
+      location: "us"
+      kms_key_name: "example-key"
+      folder_name: "tf-test-folder"
+    test_env_vars:
+      org_id: 'ORG_ID'
+    test_vars_overrides:
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
+  - name: "observability_folder_settings_basic_global"
+    config_path: "templates/terraform/examples/observability_folder_settings_basic_global.tf.tmpl"
+    primary_resource_id: "primary_global"
+    external_providers: ["time"]
+    vars:
+      location: "global"
+    test_env_vars:
+      org_id: 'ORG_ID'
 
 parameters:
   - name: 'location'
@@ -69,25 +91,3 @@ properties:
     type: String
     description: 'The service account used by Cloud Observability for this folder.'
     output: true
-
-examples:
-  - name: "observability_folder_settings_basic"
-    config_path: "templates/terraform/examples/observability_folder_settings_basic.tf.tmpl"
-    primary_resource_id: "primary"
-    external_providers: ["time"]
-    vars:
-      location: "us"
-      kms_key_name: "example-key"
-      folder_name: "tf-test-folder"
-    test_env_vars:
-      org_id: 'ORG_ID'
-    test_vars_overrides:
-      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
-  - name: "observability_folder_settings_basic_global"
-    config_path: "templates/terraform/examples/observability_folder_settings_basic_global.tf.tmpl"
-    primary_resource_id: "primary_global"
-    external_providers: ["time"]
-    vars:
-      location: "global"
-    test_env_vars:
-      org_id: 'ORG_ID'
