@@ -520,6 +520,11 @@ properties:
     description: |
       The number of Kubernetes Pods backed up in the last successful Backup created via this BackupPlan.
     output: true
+  - name: 'protectedNamespaceCount'
+    type: Integer
+    description: |
+      The number of Kubernetes Namespaces backed up in the last successful Backup created via this BackupPlan.
+    output: true
   - name: 'state'
     type: String
     description: |
