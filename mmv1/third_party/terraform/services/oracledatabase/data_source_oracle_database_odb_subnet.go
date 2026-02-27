@@ -35,9 +35,8 @@ func dataSourceOracleDatabaseOdbSubnetRead(d *schema.ResourceData, meta interfac
 	}
 
 	if err := tpgresource.SetDataSourceLabels(d); err != nil {
-    	return err
+		return err
 	}
-	
 
 	return nil
 }
