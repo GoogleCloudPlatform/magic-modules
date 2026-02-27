@@ -1,0 +1,6 @@
+_v, ok := res["resource"]
+if !ok || _v == nil {
+  return res, nil
+}
+
+return _v.(map[string]interface{}), nil
