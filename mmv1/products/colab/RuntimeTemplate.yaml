@@ -43,7 +43,6 @@ iam_policy:
 examples:
   - name: 'colab_runtime_template_basic'
     primary_resource_id: 'runtime-template'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime-template%s", context["random_suffix"])'
     vars:
       runtime_template_name: 'colab-runtime-template'
   - name: 'colab_runtime_template_no_name'
@@ -51,7 +50,6 @@ examples:
     exclude_import_test: true
   - name: 'colab_runtime_template_full'
     primary_resource_id: 'runtime-template'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime-template%s", context["random_suffix"])'
     vars:
       runtime_template_name: 'colab-runtime-template'
       network_name: 'colab-test-default'

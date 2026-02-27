@@ -51,12 +51,10 @@ state_upgraders: true
 examples:
   - name: 'beyondcorp_app_gateway_basic'
     primary_resource_id: 'app_gateway'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_app_gateway%s", context["random_suffix"])'
     vars:
       app_gateway_name: 'my-app-gateway'
   - name: 'beyondcorp_app_gateway_full'
     primary_resource_id: 'app_gateway'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_app_gateway%s", context["random_suffix"])'
     vars:
       app_gateway_name: 'my-app-gateway'
       display_name: 'some display name'

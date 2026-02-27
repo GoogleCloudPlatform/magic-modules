@@ -35,13 +35,11 @@ custom_code:
 examples:
   - name: 'colab_runtime_basic'
     primary_resource_id: 'runtime'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime%s", context["random_suffix"])'
     region_override: 'us-central1'
     vars:
       runtime_name: 'colab-runtime'
   - name: 'colab_runtime_stopped'
     primary_resource_id: 'runtime'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime%s", context["random_suffix"])'
     region_override: 'us-central1'
     vars:
       runtime_name: 'colab-runtime'
@@ -49,7 +47,6 @@ examples:
       - 'desired_state'
   - name: 'colab_runtime_full'
     primary_resource_id: 'runtime'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime%s", context["random_suffix"])'
     region_override: 'us-central1'
     vars:
       runtime_name: 'colab-runtime'

@@ -40,7 +40,6 @@ async:
 examples:
   - name: machine_image_basic
     primary_resource_id: image
-    primary_resource_name: fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])
     vars:
       image_name: my-image
       vm_name: my-vm
@@ -49,7 +48,6 @@ examples:
     bootstrap_iam:
       - member: serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com
         role: roles/cloudkms.cryptoKeyEncrypterDecrypter
-    primary_resource_name: fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])
     vars:
       image_name: my-image
       key_name: key

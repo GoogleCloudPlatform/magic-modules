@@ -57,7 +57,6 @@ state_upgraders: true
 examples:
   - name: 'gkehub_membership_regional'
     primary_resource_id: 'membership'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
     vars:
       name: 'basic'
       cluster_name: 'basic-cluster'
@@ -71,7 +70,6 @@ examples:
       'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
   - name: 'gkehub_membership_basic'
     primary_resource_id: 'membership'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
     vars:
       name: 'basic'
       cluster_name: 'basic-cluster'

@@ -25,7 +25,6 @@ import_format:
 examples:
   - name: developer_connect_account_connector_github
     primary_resource_id: 'my-account-connector'
-    primary_resource_name: 'fmt.Sprintf("tf-test-account-connector%s", context["random_suffix"])'
     vars:
       account_connector_name: tf-test-ac
   - name: developer_connect_account_connector_gitlab

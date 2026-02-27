@@ -60,14 +60,10 @@ custom_code:
 examples:
   - name: 'iam_workload_identity_pool_basic'
     primary_resource_id: 'example'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-example-pool%s", context["random_suffix"])'
     vars:
       workload_identity_pool_id: 'example-pool'
   - name: 'iam_workload_identity_pool_full_federation_only_mode'
     primary_resource_id: 'example'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-example-pool%s", context["random_suffix"])'
     vars:
       workload_identity_pool_id: 'example-pool'
     min_version: beta
@@ -75,8 +71,6 @@ examples:
       - 'random'
   - name: 'iam_workload_identity_pool_full_trust_domain_mode'
     primary_resource_id: 'example'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-example-pool%s", context["random_suffix"])'
     vars:
       workload_identity_pool_id: 'example-pool'
     min_version: beta

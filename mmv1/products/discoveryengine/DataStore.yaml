@@ -54,7 +54,6 @@ sweeper:
 examples:
   - name: 'discoveryengine_datastore_basic'
     primary_resource_id: 'basic'
-    primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
     vars:
       data_store_id: 'data-store-id'
   - name: 'discoveryengine_datastore_kms_key_name'
@@ -66,30 +65,25 @@ examples:
       kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
   - name: 'discoveryengine_datastore_document_processing_config'
     primary_resource_id: 'document_processing_config'
-    primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
     vars:
       data_store_id: 'data-store-id'
   - name: 'discoveryengine_datastore_document_processing_config_ocr'
     primary_resource_id: 'document_processing_config_ocr'
-    primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
     vars:
       data_store_id: 'data-store-id'
     exclude_docs: true
   - name: 'discoveryengine_datastore_document_processing_config_layout'
     primary_resource_id: 'document_processing_config_layout'
-    primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
     vars:
       data_store_id: 'data-store-id'
     exclude_docs: true
   - name: 'discoveryengine_datastore_document_processing_config_layout_full'
     primary_resource_id: 'document_processing_config_layout_full'
-    primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
     vars:
       data_store_id: 'data-store-id'
     exclude_docs: true
   - name: 'discoveryengine_datastore_advanced_site_search_config'
     primary_resource_id: 'advanced_site_search_config'
-    primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
     vars:
       data_store_id: 'data-store-id'
 parameters:

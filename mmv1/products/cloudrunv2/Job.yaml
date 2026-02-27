@@ -52,7 +52,6 @@ taint_resource_on_failed_create: true
 examples:
   - name: 'cloudrunv2_job_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
     vars:
       cloud_run_job_name: 'cloudrun-job'
     ignore_read_extra:
@@ -65,7 +64,6 @@ examples:
       - 'deletion_protection'
   - name: 'cloudrunv2_job_sql'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_job_name: 'cloudrun-job'
       secret_id: 'secret'
@@ -79,7 +77,6 @@ examples:
       - 'deletion_protection'
   - name: 'cloudrunv2_job_vpcaccess'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_job_name: 'cloudrun-job'
       vpc_access_connector_name: 'run-vpc'
@@ -89,14 +86,12 @@ examples:
       - 'deletion_protection'
   - name: 'cloudrunv2_job_directvpc'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
     vars:
       cloud_run_job_name: 'cloudrun-job'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_job_secret'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_job_name: 'cloudrun-job'
       secret_id: 'secret'
@@ -104,14 +99,12 @@ examples:
       - 'deletion_protection'
   - name: 'cloudrunv2_job_emptydir'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
     vars:
       cloud_run_job_name: 'cloudrun-job'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_job_run_job'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       cloud_run_job_name: 'cloudrun-job'
@@ -119,14 +112,12 @@ examples:
       - 'deletion_protection'
   - name: 'cloudrunv2_job_multicontainer'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
     vars:
       cloud_run_job_name: 'cloudrun-job'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_job_gpu'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
     vars:
       cloud_run_job_name: 'cloudrun-job'
     ignore_read_extra:

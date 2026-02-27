@@ -40,7 +40,6 @@ sweeper:
 examples:
   - name: 'bigquery_analyticshub_dataexchange_subscription_basic'
     primary_resource_id: 'subscription'
-    primary_resource_name: 'fmt.Sprintf("tf_test_subscription_%s", context["random_suffix"])'
     region_override: 'us'
     ignore_read_extra:
       - 'last_modify_time'

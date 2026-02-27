@@ -57,7 +57,6 @@ custom_code:
 examples:
   - name: 'workstation_config_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workstation-cluster%s", context["random_suffix"]), fmt.Sprintf("tf-test-workstation-config%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       workstation_cluster_name: 'workstation-cluster'

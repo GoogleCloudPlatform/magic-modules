@@ -64,7 +64,6 @@ sweeper:
 examples:
   - name: 'region_backend_service_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-region-service%s", context["random_suffix"])'
     vars:
       region_backend_service_name: 'region-service'
       health_check_name: 'rbs-health-check'

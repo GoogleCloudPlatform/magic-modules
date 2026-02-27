@@ -48,7 +48,6 @@ include_in_tgc_next: true
 examples:
   - name: 'gkebackup_backupplan_basic'
     primary_resource_id: 'basic'
-    primary_resource_name: 'fmt.Sprintf("tf-test-basic-plan%s", context["random_suffix"])'
     vars:
       name: 'basic-plan'
       cluster_name: 'basic-cluster'
@@ -96,7 +95,6 @@ examples:
       'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_nslabels'
     primary_resource_id: 'nslabels'
-    primary_resource_name: 'fmt.Sprintf("tf-test-nslabels-plan%s", context["random_suffix"])'
     vars:
       name: 'nslabels-plan'
       cluster_name: 'nslabels-cluster'

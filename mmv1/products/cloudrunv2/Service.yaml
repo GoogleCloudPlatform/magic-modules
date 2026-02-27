@@ -52,7 +52,6 @@ taint_resource_on_failed_create: true
 examples:
   - name: 'cloudrunv2_service_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
@@ -65,7 +64,6 @@ examples:
       - 'deletion_protection'
   - name: 'cloudrunv2_service_sql'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-service'
       secret_id: 'secret-1'
@@ -79,7 +77,6 @@ examples:
       - 'deletion_protection'
   - name: 'cloudrunv2_service_vpcaccess'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-service'
       vpc_access_connector_name: 'run-vpc'
@@ -89,35 +86,30 @@ examples:
       - 'deletion_protection'
   - name: 'cloudrunv2_service_directvpc'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_service_gpu'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_service_probes'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_service_readiness_probes'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_service_secret'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-service'
       secret_id: 'secret-1'
@@ -125,14 +117,12 @@ examples:
       - 'deletion_protection'
   - name: 'cloudrunv2_service_multicontainer'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_service_mount_gcs'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service-%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
@@ -141,7 +131,6 @@ examples:
     skip_vcr: true
   - name: 'cloudrunv2_service_mount_nfs'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service-%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
@@ -150,7 +139,6 @@ examples:
     skip_vcr: true
   - name: 'cloudrunv2_service_mesh'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service-%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       cloud_run_service_name: 'cloudrun-service'
@@ -160,7 +148,6 @@ examples:
     external_providers: ["time"]
   - name: 'cloudrunv2_service_invokeriam'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       cloud_run_service_name: 'cloudrun-service'
@@ -168,14 +155,12 @@ examples:
       - 'deletion_protection'
   - name: 'cloudrunv2_service_iap'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-iap-service%s", context["random_suffix"])'
     vars:
       cloud_run_service_name: 'cloudrun-iap-service'
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_service_zip_deploy'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       cloud_run_service_name: 'cloudrun-zip-service'

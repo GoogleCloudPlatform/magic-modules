@@ -42,7 +42,6 @@ iam_policy:
 examples:
   - name: "compute_storage_pool_basic"
     primary_resource_id: "test-storage-pool-basic"
-    primary_resource_name: 'fmt.Sprintf("tf-test-storage-pool-basic%s", context["random_suffix"])'
     vars:
       storage_pool_name: "storage-pool-basic"
     ignore_read_extra:
@@ -50,7 +49,6 @@ examples:
     exclude_test: true
   - name: "compute_storage_pool_full"
     primary_resource_id: "test-storage-pool-full"
-    primary_resource_name: 'fmt.Sprintf("tf-test-storage-pool-full%s", context["random_suffix"])'
     vars:
       storage_pool_name: "storage-pool-full"
     ignore_read_extra:

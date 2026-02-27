@@ -65,7 +65,6 @@ sweeper:
 examples:
   - name: 'notebook_instance_basic'
     primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-notebooks-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'notebooks-instance'
@@ -73,7 +72,6 @@ examples:
       - 'update_time'
   - name: 'notebook_instance_basic_stopped'
     primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-notebooks-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'notebooks-instance'
@@ -83,7 +81,6 @@ examples:
     skip_test: https://github.com/hashicorp/terraform-provider-google/issues/17593#issuecomment-2888583933
   - name: 'notebook_instance_basic_container'
     primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-notebooks-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'notebooks-instance'
@@ -91,7 +88,6 @@ examples:
       - 'update_time'
   - name: 'notebook_instance_basic_gpu'
     primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-notebooks-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'notebooks-instance'
@@ -99,7 +95,6 @@ examples:
       - 'update_time'
   - name: 'notebook_instance_full'
     primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-notebooks-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'notebooks-instance'

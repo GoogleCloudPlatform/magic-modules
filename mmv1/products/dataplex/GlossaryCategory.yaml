@@ -28,12 +28,10 @@ import_format: ['projects/{{project}}/locations/{{location}}/glossaries/{{glossa
 examples:
   - name: 'dataplex_glossary_category_basic'
     primary_resource_id: 'category_test_id'
-    primary_resource_name: 'fmt.Sprintf("tf-test-category-basic%s", context["random_suffix"]), fmt.Sprintf("tf-test-glossary%s", context["random_suffix"])'
     vars:
       category_name: 'category-basic'
   - name: 'dataplex_glossary_category_full'
     primary_resource_id: 'category_test_id_full'
-    primary_resource_name: 'fmt.Sprintf("tf-test-category-full%s", context["random_suffix"]), fmt.Sprintf("tf-test-glossary%s", context["random_suffix"])'
     vars:
       category_name: 'category-full'
 parameters:
