@@ -39,7 +39,6 @@ custom_code:
 examples:
   - name: 'queue_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-cloud-tasks-queue-test%s", context["random_suffix"])'
     vars:
       name: 'cloud-tasks-queue-test'
   - name: 'cloud_tasks_queue_advanced'
