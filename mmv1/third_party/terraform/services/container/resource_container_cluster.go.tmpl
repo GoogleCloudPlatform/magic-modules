@@ -6941,13 +6941,6 @@ func expandUserManagedKeysConfig(configured interface{}) *container.UserManagedK
 			umkc.ServiceAccountVerificationKeys = vkss
 		}
 	}
-	if v, ok := config["control_plane_disk_encryption_key_versions"]; ok {
-		ck := v.(*schema.Set)
-		ckss := tpgresource.ConvertStringSet(ck)
-		if len(ckss) > 0 {
-			umkc.ControlPlaneDiskEncryptionKeyVersions = ckss
-		}
-	}
 	return umkc
 }
 
