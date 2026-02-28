@@ -12,7 +12,6 @@ func TestAccDiscoveryEngineSearchEngine_discoveryengineSearchengineBasicExample_
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"kms_key_name":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tftest-shared-key-6").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -74,11 +73,16 @@ resource "google_discovery_engine_search_engine" "basic" {
   common_config {
     company_name = "Example Company Name"
   }
+  app_type = "APP_TYPE_INTRANET"
   search_engine_config {
     search_tier = "SEARCH_TIER_ENTERPRISE"
+    required_subscription_tier = "SUBSCRIPTION_TIER_ENTERPRISE"
     search_add_ons = ["SEARCH_ADD_ON_LLM"]
   }
-  kms_key_name = "%{kms_key_name}"
+  features = {
+    "agent-sharing-without-admin-approval" = "FEATURE_STATE_ON"
+    "disable-agent-sharing"                = "FEATURE_STATE_OFF"
+  }
 }
 `, context)
 }
@@ -113,14 +117,17 @@ resource "google_discovery_engine_search_engine" "basic" {
   common_config {
     company_name = "Updated Example Company Name"
   }
+  app_type = "APP_TYPE_INTRANET"
   search_engine_config {
     search_tier = "SEARCH_TIER_STANDARD"
+    required_subscription_tier = "SUBSCRIPTION_TIER_ENTERPRISE"
     search_add_ons = ["SEARCH_ADD_ON_LLM"]
   }
   features = {
     feedback = "FEATURE_STATE_OFF"
+    "agent-sharing-without-admin-approval" = "FEATURE_STATE_ON"
+    "disable-agent-sharing"                = "FEATURE_STATE_OFF"
   }
-  kms_key_name = "%{kms_key_name}"
 }
 `, context)
 }
