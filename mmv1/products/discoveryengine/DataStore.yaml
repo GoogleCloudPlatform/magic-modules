@@ -177,6 +177,7 @@ properties:
     type: Enum
     description: |
       The content config of the data store.
+    required: false
     immutable: true
     enum_values:
       - 'NO_CONTENT'
