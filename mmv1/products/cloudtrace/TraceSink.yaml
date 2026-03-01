@@ -1,0 +1,69 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'TraceSink'
+description: |
+  Describes a sink used to export traces to a BigQuery dataset. The sink must be created within a project.
+references:
+  guides:
+    'Trace data exports overview': 'https://cloud.google.com/trace/docs/trace-export-overview'
+  api: 'https://cloud.google.com/trace/docs/reference/v2/rest/v2beta1/projects.traceSinks'
+min_version: beta
+base_url: 'projects/{{project}}/traceSinks'
+self_link: 'projects/{{project}}//traceSinks/{{name}}'
+immutable: false
+create_url: 'projects/{{project}/traceSinks'
+update_verb: 'PATCH'
+update_mask: true
+autogen_async: false
+
+examples:
+  - name: 'cloud_trace_sink_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloud-trace-trace-sink-test%s", context["random_suffix"])'
+    vars:
+      cloud_trace_sink_name: 'cloud-trace-trace-sink-test'
+      cloud_trace_sink_output_config_destination: 'fmt.Sprintf("bigquery.googleapis.com/projects/%s/datasets/traces", context["project_id"])'
+    min_version: beta
+
+parameters:
+  - name: 'name'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The name of the sink.
+
+properties:
+  - name: output_config
+    type: NestedObject
+    description: The export destination.
+    required: true
+    properties:
+      - name: destination
+        type: string
+        description: |
+          The destination for writing trace data.
+          Supported formats include: "bigquery.googleapis.com/projects/[PROJECT_ID]/datasets/[DATASET]"
+        required: true
+
+  - name: writer_identity
+    type: string
+    description: |
+      A service account name for exporting the data. This field is set by sinks.create and sinks.update.
+      The service account will need to be granted write access to the destination specified in the output configuration.
+      To create tables and to write data, this account needs the dataEditor role.
+      E.g.: "service-00000001@00000002.iam.gserviceaccount.com"
+    output: true
