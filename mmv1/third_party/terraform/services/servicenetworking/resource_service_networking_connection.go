@@ -464,29 +464,24 @@ func init() {
 	}.Register()
 }
 
+// stringListDiffSuppress suppresses diffs for TypeList fields where the
+// order of elements does not matter. It derives the root key from k by
+// stripping the element index suffix.
 func stringListDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	// The key (k) can be "reserved_peering_ranges", "reserved_peering_ranges.#", or "reserved_peering_ranges.0", etc.
-	// We want to check the *entire* list equality whenever any part of it is questioned.
-	root := "reserved_peering_ranges"
-
-	// If this key doesn't belong to our field, ignore it.
-	if k != root && !strings.HasPrefix(k, root+".") {
-		return false
+	root := k
+	if idx := strings.IndexByte(k, '.'); idx != -1 {
+		root = k[:idx]
 	}
 
-	// Get the full list values (Old and New) from the resource data
 	o, n := d.GetChange(root)
 
-	// Cast to generic lists
 	oldList, ok1 := o.([]interface{})
 	newList, ok2 := n.([]interface{})
 
-	// If casting fails or lengths differ, we definitely have a change, so don't suppress.
 	if !ok1 || !ok2 || len(oldList) != len(newList) {
 		return false
 	}
 
-	// Convert to string slices for sorting
 	oldStrs := make([]string, len(oldList))
 	for i, v := range oldList {
 		oldStrs[i] = fmt.Sprintf("%v", v)
@@ -497,10 +492,8 @@ func stringListDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 		newStrs[i] = fmt.Sprintf("%v", v)
 	}
 
-	// Sort both lists to compare content regardless of order
 	sort.Strings(oldStrs)
 	sort.Strings(newStrs)
 
-	// If the sorted lists are identical, return true to SUPPRESS the diff.
 	return reflect.DeepEqual(oldStrs, newStrs)
 }
