@@ -33,16 +33,6 @@ examples:
     primary_resource_id: 'auto_labeling_rule_basic'
     vars:
       resource_name: 'auto-labeling-rule-basic'
-autogen_async: true
-async:
-  operation:
-    timeouts:
-      insert_minutes: 60
-      update_minutes: 60
-      delete_minutes: 60
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
 autogen_status: QXV0b0xhYmVsaW5nUnVsZQ==
 parameters:
   - name: location
