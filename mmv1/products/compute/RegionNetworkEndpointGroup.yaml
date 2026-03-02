@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionNetworkEndpointGroup'
+
 api_resource_type_kind: NetworkEndpointGroup
 kind: 'compute#networkEndpointGroup'
 description: |
@@ -47,6 +48,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next: true
 custom_code:
 sweeper:
   url_substitutions:

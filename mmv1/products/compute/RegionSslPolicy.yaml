@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionSslPolicy'
+
 api_resource_type_kind: SslPolicy
 kind: 'compute#sslPolicy'
 description: |
@@ -38,6 +39,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/region_ssl_policy.tmpl'
 custom_diff:
