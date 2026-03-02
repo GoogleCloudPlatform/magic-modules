@@ -8336,7 +8336,7 @@ func testAccSqlDatabaseInstance_crossProjectClone(context map[string]interface{}
 				}
 			}
 
-			data "google_sql_backup_run" "backup" {
+			data "google_sql_database_instance" "instance" {
 				instance = "%{original_db_name}"
 				most_recent = true
 			}
