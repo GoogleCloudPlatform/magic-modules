@@ -37,3 +37,4 @@
   field: policycontroller.policy_controller_hub_config.audit_interval_seconds
   details:
     computed: true
+    optional: true
