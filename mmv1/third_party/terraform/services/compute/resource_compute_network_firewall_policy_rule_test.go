@@ -1125,6 +1125,8 @@ resource "google_compute_network_firewall_policy_rule" "fw_policy_rule" {
 
 func testAccComputeNetworkFirewallPolicyRule_withScope(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+provider "google-beta" {
+}
 resource "google_compute_network_firewall_policy" "fw_policy" {
   provider = google-beta
   name     = "tf-test-fw-%{random_suffix}"
@@ -1151,6 +1153,8 @@ resource "google_compute_network_firewall_policy_rule" "test" {
 
 func testAccComputeNetworkFirewallPolicyRule_withoutScope(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+provider "google-beta" {
+}
 resource "google_compute_network_firewall_policy" "fw_policy" {
   provider = google-beta
   name     = "tf-test-fw-%{random_suffix}"
