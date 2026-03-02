@@ -64,6 +64,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+include_in_tgc_next: true
 custom_code:
   pre_update: 'templates/terraform/pre_update/netapp_storagepool.go.tmpl'
 # Skipping the sweeper since we need to sweep multiple regions
