@@ -53,7 +53,7 @@ func TestAccComputeRouterNamedSet_updatePrefixExample(t *testing.T) {
 			{
 				Config: testAccComputeRouterNamedSet_routerNamedSetPrefix(context, "An updated sample prefix named set", true),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_compute_router_named_set.prefix_set", "updated_description", "An updated sample prefix named set"),
+					resource.TestCheckResourceAttr("google_compute_router_named_set.prefix_set", "description", "An updated sample prefix named set"),
 					resource.TestCheckResourceAttr("google_compute_router_named_set.prefix_set", "elements.#", "3"),
 					resource.TestCheckResourceAttr("google_compute_router_named_set.prefix_set", "elements.2.expression", "'192.168.0.0/16'"),
 				),
