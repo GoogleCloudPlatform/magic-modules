@@ -12,76 +12,72 @@
 # limitations under the License.
 
 ---
-name: 'FolderSettings'
+name: FolderSettings
 api_resource_type_kind: AccessApprovalSettings
 api_variant_patterns:
-  - 'folders/{folder}/accessApprovalSettings'
-legacy_name: 'google_folder_access_approval_settings'
+  - folders/{folder}/accessApprovalSettings
 description: |
   Access Approval enables you to require your explicit approval whenever Google support and engineering need to access your customer content.
 references:
-  guides:
-  api: 'https://cloud.google.com/access-approval/docs/reference/rest/v1/folders'
-docs:
-base_url: 'folders/{{folder_id}}/accessApprovalSettings'
-self_link: 'folders/{{folder_id}}/accessApprovalSettings'
-create_verb: 'PATCH'
-update_verb: 'PATCH'
+  guides: {}
+  api: https://cloud.google.com/access-approval/docs/reference/rest/v1/folders
+base_url: folders/{{folder_id}}/accessApprovalSettings
+self_link: folders/{{folder_id}}/accessApprovalSettings
 update_mask: true
+create_verb: PATCH
+update_verb: PATCH
+legacy_name: google_folder_access_approval_settings
 import_format:
-  - 'folders/{{folder_id}}/accessApprovalSettings'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
+  - folders/{{folder_id}}/accessApprovalSettings
 custom_code:
-  constants: 'templates/terraform/constants/access_approval.go.tmpl'
-  pre_create: 'templates/terraform/update_mask.go.tmpl'
-  custom_delete: 'templates/terraform/custom_delete/clear_folder_access_approval_settings.go.tmpl'
-  post_create: 'templates/terraform/post_create/sleep_5_min.go.tmpl'
-  post_update: 'templates/terraform/post_create/sleep_5_min.go.tmpl'
+  constants: templates/terraform/constants/access_approval.go.tmpl
+  pre_create: templates/terraform/update_mask.go.tmpl
+  post_create: templates/terraform/post_create/sleep_5_min.go.tmpl
+  post_update: templates/terraform/post_create/sleep_5_min.go.tmpl
+  custom_delete: templates/terraform/custom_delete/clear_folder_access_approval_settings.go.tmpl
 examples:
-  - name: 'folder_access_approval_full'
-    primary_resource_id: 'folder_access_approval'
-    vars:
-      folder_name: 'folder-faaf'
-    test_env_vars:
-      org_id: 'ORG_ID'
+  - name: folder_access_approval_full
+    primary_resource_id: folder_access_approval
     exclude_test: true
-  - name: 'folder_access_approval_active_key_version'
-    primary_resource_id: 'folder_access_approval'
     vars:
-      folder_name: 'folder-faak'
+      folder_name: folder-faaf
     test_env_vars:
-      org_id: 'ORG_ID'
+      org_id: ORG_ID
+  - name: folder_access_approval_active_key_version
+    primary_resource_id: folder_access_approval
     exclude_test: true
+    vars:
+      folder_name: folder-faak
+    test_env_vars:
+      org_id: ORG_ID
 parameters:
-  - name: 'folder_id'
+  - name: folder_id
     type: String
+    required: true
     description: |
       ID of the folder of the access approval settings.
-    url_param_only: true
-    required: true
     immutable: true
+    url_param_only: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
       The resource name of the settings. Format is "folders/{folder_id}/accessApprovalSettings"
     output: true
-  - name: 'notificationEmails'
+  - name: notificationEmails
     type: Array
     description: |
       A list of email addresses to which notifications relating to approval requests should be sent.
       Notifications relating to a resource will be sent to all emails in the settings of ancestor
       resources of that resource. A maximum of 50 email addresses are allowed.
+    max_size: 50
     is_set: true
     default_from_api: true
     item_type:
       type: String
-    max_size: 50
-  - name: 'enrolledServices'
+  - name: enrolledServices
     type: Array
+    required: true
     description: |
       A list of Google Cloud Services for which the given resource has Access Approval enrolled.
       Access requests for the resource given by name against any of these services contained here will be required
@@ -89,13 +85,13 @@ properties:
 
       A maximum of 10 enrolled services will be enforced, to be expanded as the set of supported services is expanded.
     is_set: true
-    required: true
     set_hash_func: accessApprovalEnrolledServicesHash
     item_type:
       type: NestedObject
       properties:
-        - name: 'cloudProduct'
+        - name: cloudProduct
           type: String
+          required: true
           description: |
             The product for which Access Approval will be enrolled. Allowed values are listed (case-sensitive):
               * all
@@ -121,31 +117,30 @@ properties:
               * iam.googleapis.com
               * pubsub.googleapis.com
               * storage.googleapis.com
-          required: true
-        - name: 'enrollmentLevel'
+        - name: enrollmentLevel
           type: Enum
+          default_value: BLOCK_ALL
           description: |
             The enrollment level of the service.
-          default_value: "BLOCK_ALL"
           enum_values:
-            - 'BLOCK_ALL'
-  - name: 'enrolledAncestor'
+            - BLOCK_ALL
+  - name: enrolledAncestor
     type: Boolean
     description: |
       If the field is true, that indicates that at least one service is enrolled for Access Approval in one or more ancestors of the Folder.
     output: true
-  - name: 'activeKeyVersion'
+  - name: activeKeyVersion
     type: String
     description: |
       The asymmetric crypto key version to use for signing approval requests.
       Empty active_key_version indicates that a Google-managed key should be used for signing.
       This property will be ignored if set by an ancestor of the resource, and new non-empty values may not be set.
-  - name: 'ancestorHasActiveKeyVersion'
+  - name: ancestorHasActiveKeyVersion
     type: Boolean
     description: |
       If the field is true, that indicates that an ancestor of this Folder has set active_key_version.
     output: true
-  - name: 'invalidKeyVersion'
+  - name: invalidKeyVersion
     type: Boolean
     description: |
       If the field is true, that indicates that there is some configuration issue with the active_key_version

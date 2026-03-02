@@ -553,6 +553,40 @@ If you skip a test in VCR mode, include a code comment explaining the reason for
 {{< /tab >}}
 {{% /tabs %}}
 
+## Time-based skips {#skip-until-time}
+
+Acceptance tests can be marked to be skipped until a certain future date, such as the projected date of a launch or
+rollout. This should generally be added after coordinating with your reviewer to capture a successful test run such as
+through a local run with an allowlisted project, against staging, etc.
+
+Please include a comment with context where the skip is defined.
+
+{{% tabs "skipping-tests-until-time" %}}
+{{< tab "Skip a generated test" >}}
+Skipping acceptance tests that are generated from example files can be achieved by adding `skip_func: acctest.SkipTestUntil(t, "YYYY-MM-DD")` in the example's YAML:
+
+```yaml
+examples:
+- name: 'compute_address_basic'
+   ...
+  skip_func: acctest.SkipTestUntil(t, "2026-01-31")  # waiting for rollout
+```
+
+{{< /tab >}}
+{{< tab "Skip a handwritten test" >}}
+Skipping acceptance tests that are handwritten can be achieved by adding `acctest.SkipTestUntil(t, "YYYY-MM-DD")` at the start of the test:
+
+```go
+func TestAccPubsubTopic_update(t *testing.T) {
+      acctest.SkipTestUntil(t, "2026-01-31") // b/1234567890
+      acctest.VcrTest(t, resource.TestCase{ ... })
+}
+```
+
+{{< /tab >}}
+{{% /tabs %}}
+
+
 ### Reasons that tests are skipped in VCR replaying mode
 
 | Problem                                          | How to fix/Other info  | Skip in VCR replaying? |

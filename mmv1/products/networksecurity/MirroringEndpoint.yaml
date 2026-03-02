@@ -18,7 +18,6 @@ description: |-
   enrichment capabilities and support for multiple replica destinations.
   Endpoints are always part of a global endpoint group which represents a
   global "mirroring broker" service.
-min_version: 'beta'
 id_format: 'projects/{{project}}/locations/{{location}}/mirroringEndpoints/{{mirroring_endpoint_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/mirroringEndpoints'
 self_link: 'projects/{{project}}/locations/{{location}}/mirroringEndpoints/{{mirroring_endpoint_id}}'
@@ -58,7 +57,6 @@ parameters:
     description: |-
       The ID to use for the new endpoint, which will become the final
       component of the endpoint's resource name.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -69,7 +67,6 @@ properties:
       The resource name of this endpoint, for example:
       `projects/123456789/locations/us-central1-a/mirroringEndpoints/my-endpoint`.
       See https://google.aip.dev/122 for more details.
-    min_version: 'beta'
     immutable: true
     output: true
   - name: 'createTime'
@@ -77,27 +74,23 @@ properties:
     description: |-
       The timestamp when the resource was created.
       See https://google.aip.dev/148#timestamps.
-    min_version: 'beta'
     output: true
   - name: 'updateTime'
     type: String
     description: |-
       The timestamp when the resource was most recently updated.
       See https://google.aip.dev/148#timestamps.
-    min_version: 'beta'
     output: true
   - name: 'labels'
     type: KeyValueLabels
     description: |-
       Labels are key/value pairs that help to organize and filter resources.
-    min_version: 'beta'
   - name: 'mirroringEndpointGroup'
     type: String
     description: |-
       The endpoint group that this endpoint belongs to.
       Format is:
       `projects/{project}/locations/{location}/mirroringEndpointGroups/{mirroringEndpointGroup}`
-    min_version: 'beta'
     required: true
     immutable: true
   - name: 'state'
@@ -112,7 +105,6 @@ properties:
       DELETING
       DELETE_FAILED
       OUT_OF_SYNC
-    min_version: 'beta'
     output: true
   - name: 'reconciling'
     type: Boolean
@@ -121,11 +113,9 @@ properties:
       and the system is working to reconcile them. This part of the normal
       operation (e.g. linking a new association to the parent group).
       See https://google.aip.dev/128.
-    min_version: 'beta'
     output: true
   - name: 'description'
     type: String
     description: |-
       User-provided description of the endpoint.
       Used as additional context for the endpoint.
-    min_version: 'beta'

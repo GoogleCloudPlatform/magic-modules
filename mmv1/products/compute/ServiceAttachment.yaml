@@ -222,7 +222,6 @@ properties:
     description: |
       The URL of a service serving the endpoint identified by this service attachment.
     required: true
-    immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_expand: 'templates/terraform/custom_expand/service_attachment_target_service.go.tmpl'
   - name: 'natSubnets'
@@ -303,6 +302,13 @@ properties:
             The network that is allowed to connect to this service attachment.
             Only one of project_id_or_num and network_url may be set.
           diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+        - name: 'endpointUrl'
+          type: String
+          description: |
+            The endpoint that is allowed to connect to this service attachment.
+            Only one of project_id_or_num, network_url and endpoint_url may be set.
+          diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+          min_version: beta
         - name: 'connectionLimit'
           type: Integer
           description: |

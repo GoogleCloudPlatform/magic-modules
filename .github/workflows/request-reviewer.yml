@@ -36,11 +36,19 @@ jobs:
         run: |
           cd .ci/magician
           go build .
+      
       - name: Request reviewer
-        if: ${{ (github.event.action == 'created' && github.event.issue.user.login != 'copybara-service') || (github.event.action != 'created' && github.event.pull_request.user.login != 'copybara-service') }}
+        if: ${{ (github.event.action == 'created' && github.event.issue.user.login != 'copybara-service' && github.event.issue.user.login != 'modular-apprentice') || (github.event.action != 'created' && github.event.pull_request.user.login != 'copybara-service' && github.event.pull_request.user.login != 'modular-apprentice') }}
         run: .ci/magician/magician request-reviewer ${{ github.event.pull_request.number || github.event.issue.number }}
+      
       - name: Request reviewer (copybara)
         if: ${{ github.event.issue.user.login == 'copybara-service' || github.event.pull_request.user.login == 'copybara-service' }}
         env:
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: gh pr edit ${{ github.event.pull_request.number || github.event.issue.number }} --add-reviewer "@melinath"
+
+      - name: Request reviewer (modular-apprentice)
+        if: ${{ github.event.issue.user.login == 'modular-apprentice' || github.event.pull_request.user.login == 'modular-apprentice' }}
+        env:
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: gh pr edit ${{ github.event.pull_request.number || github.event.issue.number }} --add-reviewer "ScottSuarez,slevenick"

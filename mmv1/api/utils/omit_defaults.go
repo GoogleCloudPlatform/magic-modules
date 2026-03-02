@@ -29,7 +29,7 @@ func OmitDefaultsForMarshaling(current, defaults interface{}) (interface{}, erro
 
 	// Ensure we are working with a struct.
 	if currentVal.Kind() != reflect.Struct {
-		return nil, fmt.Errorf("OmitDefaultsForMarshaling expects the current object to be a struct")
+		return nil, fmt.Errorf("omitDefaultsForMarshaling expects the current object to be a struct")
 	}
 
 	// Create a new pointer to a struct of the same type as 'current'.
