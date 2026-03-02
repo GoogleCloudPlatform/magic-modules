@@ -173,6 +173,7 @@ examples:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
       - 'deletion_protection'
+    exclude_docs: true
 virtual_fields:
   - name: 'deletion_protection'
     description: |
