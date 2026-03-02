@@ -66,6 +66,10 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 	t.Skip("{{$s.SkipTest}}")
 	{{- end }}
 
+	{{- if $s.SkipFunc }}
+	{{$s.SkipFunc}}
+	{{- end}}
+
 	{{- if $s.SkipVcr }}
 	acctest.SkipIfVcr(t)
 	{{- end }}

@@ -160,6 +160,26 @@ properties:
         type: Boolean
         description: |
           Allows the patch job to run on Managed instance groups (MIGs).
+      - name: skipUnpatchableVms
+        type: Boolean
+        description: |
+          Enables enhanced reporting for the patch job:
+
+          1. The patch job skips instances that cannot be patched and reports them as `SKIPPED`. An instance cannot be patched for two reasons:
+              * The instance runs Container-Optimized OS (COS), which cannot be patched.
+              * The instance is part of a managed instance group (MIG), and patching MIG instances is disabled in the patch job's configuration (`mig_instances_allowed` is false).
+          2. The patch job is reported as `SUCCEEDED` if it completes without errors, even if some instances are `SKIPPED`.
+          3. The patch job is reported as `COMPLETED_WITH_INACTIVE_VMS` if it completes without errors, but does not patch instances that are `INACTIVE`.
+        at_least_one_of:
+          - patch_config.0.reboot_config
+          - patch_config.0.apt
+          - patch_config.0.yum
+          - patch_config.0.goo
+          - patch_config.0.zypper
+          - patch_config.0.windows_update
+          - patch_config.0.pre_step
+          - patch_config.0.post_step
+          - patch_config.0.skip_unpatchable_vms
       - name: rebootConfig
         type: Enum
         description: |
@@ -173,6 +193,7 @@ properties:
           - patch_config.0.windows_update
           - patch_config.0.pre_step
           - patch_config.0.post_step
+          - patch_config.0.skip_unpatchable_vms
         enum_values:
           - DEFAULT
           - ALWAYS
@@ -190,6 +211,7 @@ properties:
           - patch_config.0.windows_update
           - patch_config.0.pre_step
           - patch_config.0.post_step
+          - patch_config.0.skip_unpatchable_vms
         properties:
           - name: type
             type: Enum
@@ -237,6 +259,7 @@ properties:
           - patch_config.0.windows_update
           - patch_config.0.pre_step
           - patch_config.0.post_step
+          - patch_config.0.skip_unpatchable_vms
         properties:
           - name: security
             type: Boolean
@@ -294,6 +317,7 @@ properties:
           - patch_config.0.windows_update
           - patch_config.0.pre_step
           - patch_config.0.post_step
+          - patch_config.0.skip_unpatchable_vms
         properties:
           - name: enabled
             type: Boolean
@@ -313,6 +337,7 @@ properties:
           - patch_config.0.windows_update
           - patch_config.0.pre_step
           - patch_config.0.post_step
+          - patch_config.0.skip_unpatchable_vms
         properties:
           - name: withOptional
             type: Boolean
@@ -402,6 +427,7 @@ properties:
           - patch_config.0.windows_update
           - patch_config.0.pre_step
           - patch_config.0.post_step
+          - patch_config.0.skip_unpatchable_vms
         properties:
           - name: classifications
             type: Array
@@ -465,6 +491,7 @@ properties:
           - patch_config.0.windows_update
           - patch_config.0.pre_step
           - patch_config.0.post_step
+          - patch_config.0.skip_unpatchable_vms
         properties:
           - name: linuxExecStepConfig
             type: NestedObject
@@ -583,6 +610,7 @@ properties:
           - patch_config.0.windows_update
           - patch_config.0.pre_step
           - patch_config.0.post_step
+          - patch_config.0.skip_unpatchable_vms
         properties:
           - name: linuxExecStepConfig
             type: NestedObject

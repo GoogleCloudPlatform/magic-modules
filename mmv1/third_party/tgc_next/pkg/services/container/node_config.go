@@ -2068,6 +2068,7 @@ func expandContainerdConfig(v interface{}) *container.ContainerdConfig {
 	if ls[0] == nil {
 		return &container.ContainerdConfig{}
 	}
+
 	cfg := ls[0].(map[string]interface{})
 
 	cc := &container.ContainerdConfig{}
@@ -2321,148 +2322,173 @@ func expandConfidentialNodes(configured interface{}) *container.ConfidentialNode
 	}
 }
 
-func flattenNodeConfigDefaults(c *container.NodeConfigDefaults) []map[string]interface{} {
-	result := make([]map[string]interface{}, 0, 1)
-
-	if c == nil {
-		return result
+func flattenNodeConfigDefaults(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
 	}
 
-	result = append(result, map[string]interface{}{})
+	transformed := map[string]interface{}{}
+	transformed["containerd_config"] = flattenContainerdConfig(c["containerdConfig"])
+	transformed["insecure_kubelet_readonly_port_enabled"] = flattenInsecureKubeletReadonlyPortEnabled(c["nodeKubeletConfig"])
+	transformed["logging_variant"] = flattenLoggingVariant(c["loggingConfig"])
+	transformed["gcfs_config"] = flattenGcfsConfig(c["gcfsConfig"])
 
-	result[0]["containerd_config"] = flattenContainerdConfig(c.ContainerdConfig)
-
-	result[0]["insecure_kubelet_readonly_port_enabled"] = flattenInsecureKubeletReadonlyPortEnabled(c.NodeKubeletConfig)
-
-	result[0]["logging_variant"] = flattenLoggingVariant(c.LoggingConfig)
-
-	result[0]["gcfs_config"] = flattenGcfsConfig(c.GcfsConfig)
-
-	return result
+	return []map[string]interface{}{transformed}
 }
 
-// v == old state of `node_config`
-func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]interface{} {
-	config := make([]map[string]interface{}, 0, 1)
-
-	if c == nil {
-		return config
+func flattenNodeConfig(v interface{}, _ interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
 	}
 
-	config = append(config, map[string]interface{}{
-		"machine_type":                       c.MachineType,
-		"containerd_config":                  flattenContainerdConfig(c.ContainerdConfig),
-		"disk_size_gb":                       c.DiskSizeGb,
-		"disk_type":                          c.DiskType,
-		"boot_disk":                          flattenBootDiskConfig(c.BootDisk),
-		"guest_accelerator":                  flattenContainerGuestAccelerators(c.Accelerators),
-		"local_ssd_count":                    c.LocalSsdCount,
-		"logging_variant":                    flattenLoggingVariant(c.LoggingConfig),
-		"local_nvme_ssd_block_config":        flattenLocalNvmeSsdBlockConfig(c.LocalNvmeSsdBlockConfig),
-		"gcfs_config":                        flattenGcfsConfig(c.GcfsConfig),
-		"ephemeral_storage_local_ssd_config": flattenEphemeralStorageLocalSsdConfig(c.EphemeralStorageLocalSsdConfig),
-		"gvnic":                              flattenGvnic(c.Gvnic),
-		"reservation_affinity":               flattenGKEReservationAffinity(c.ReservationAffinity),
-		"service_account":                    c.ServiceAccount,
-		"metadata":                           c.Metadata,
-		"image_type":                         c.ImageType,
-		"labels":                             c.Labels,
-		"resource_labels":                    c.ResourceLabels,
-		"tags":                               c.Tags,
-		"preemptible":                        c.Preemptible,
-		"secondary_boot_disks":               flattenSecondaryBootDisks(c.SecondaryBootDisks),
-		"storage_pools":                      c.StoragePools,
-		"spot":                               c.Spot,
-		"min_cpu_platform":                   c.MinCpuPlatform,
-		"shielded_instance_config":           flattenShieldedInstanceConfig(c.ShieldedInstanceConfig),
-		"taint":                              flattenEffectiveTaints(c.Taints),
-		"workload_metadata_config":           flattenWorkloadMetadataConfig(c.WorkloadMetadataConfig),
-		"confidential_nodes":                 flattenConfidentialNodes(c.ConfidentialNodes),
-		"boot_disk_kms_key":                  c.BootDiskKmsKey,
-		"kubelet_config":                     flattenKubeletConfig(c.KubeletConfig),
-		"linux_node_config":                  flattenLinuxNodeConfig(c.LinuxNodeConfig),
-		"windows_node_config":                flattenWindowsNodeConfig(c.WindowsNodeConfig),
-		"node_group":                         c.NodeGroup,
-		"advanced_machine_features":          flattenAdvancedMachineFeaturesConfig(c.AdvancedMachineFeatures),
-		"max_run_duration":                   c.MaxRunDuration,
-		"flex_start":                         c.FlexStart,
-		"sole_tenant_config":                 flattenSoleTenantConfig(c.SoleTenantConfig),
-		"fast_socket":                        flattenFastSocket(c.FastSocket),
-		"resource_manager_tags":              flattenResourceManagerTags(c.ResourceManagerTags),
-		"enable_confidential_storage":        c.EnableConfidentialStorage,
-		"local_ssd_encryption_mode":          c.LocalSsdEncryptionMode,
-	})
-
-	if len(c.OauthScopes) > 0 {
-		config[0]["oauth_scopes"] = schema.NewSet(tpgresource.StringScopeHashcode, tpgresource.ConvertStringArrToInterface(c.OauthScopes))
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
 	}
 
-	return config
+	transformed := map[string]interface{}{
+		"machine_type":                       c["machineType"],
+		"containerd_config":                  flattenContainerdConfig(c["containerdConfig"]),
+		"disk_size_gb":                       c["diskSizeGb"],
+		"disk_type":                          c["diskType"],
+		"boot_disk":                          flattenBootDiskConfig(c["bootDisk"]),
+		"guest_accelerator":                  flattenContainerGuestAccelerators(c["accelerators"]),
+		"local_ssd_count":                    c["localSsdCount"],
+		"logging_variant":                    flattenLoggingVariant(c["loggingConfig"]),
+		"local_nvme_ssd_block_config":        flattenLocalNvmeSsdBlockConfig(c["localNvmeSsdBlockConfig"]),
+		"gcfs_config":                        flattenGcfsConfig(c["gcfsConfig"]),
+		"ephemeral_storage_local_ssd_config": flattenEphemeralStorageLocalSsdConfig(c["ephemeralStorageLocalSsdConfig"]),
+		"gvnic":                              flattenGvnic(c["gvnic"]),
+		"reservation_affinity":               flattenGKEReservationAffinity(c["reservationAffinity"]),
+		"service_account":                    c["serviceAccount"],
+		"metadata":                           c["metadata"],
+		"image_type":                         c["imageType"],
+		"labels":                             c["labels"],
+		"resource_labels":                    c["resourceLabels"],
+		"tags":                               c["tags"],
+		"preemptible":                        c["preemptible"],
+		"secondary_boot_disks":               flattenSecondaryBootDisks(c["secondaryBootDisks"]),
+		"storage_pools":                      c["storagePools"],
+		"spot":                               c["spot"],
+		"min_cpu_platform":                   c["minCpuPlatform"],
+		"shielded_instance_config":           flattenShieldedInstanceConfig(c["shieldedInstanceConfig"]),
+		"taint":                              flattenEffectiveTaints(c["taints"]),
+		"workload_metadata_config":           flattenWorkloadMetadataConfig(c["workloadMetadataConfig"]),
+		"confidential_nodes":                 flattenConfidentialNodes(c["confidentialNodes"]),
+		"boot_disk_kms_key":                  c["bootDiskKmsKey"],
+		"kubelet_config":                     flattenKubeletConfig(c["kubeletConfig"]),
+		"linux_node_config":                  flattenLinuxNodeConfig(c["linuxNodeConfig"]),
+		"windows_node_config":                flattenWindowsNodeConfig(c["windowsNodeConfig"]),
+		"node_group":                         c["nodeGroup"],
+		"advanced_machine_features":          flattenAdvancedMachineFeaturesConfig(c["advancedMachineFeatures"]),
+		"max_run_duration":                   c["maxRunDuration"],
+		"flex_start":                         c["flexStart"],
+		"sole_tenant_config":                 flattenSoleTenantConfig(c["soleTenantConfig"]),
+		"fast_socket":                        flattenFastSocket(c["fastSocket"]),
+		"resource_manager_tags":              flattenResourceManagerTags(c["resourceManagerTags"]),
+		"enable_confidential_storage":        c["enableConfidentialStorage"],
+		"local_ssd_encryption_mode":          c["localSsdEncryptionMode"],
+	}
+
+	if v, ok := c["oauthScopes"].([]interface{}); ok && len(v) > 0 {
+		transformed["oauth_scopes"] = v
+	}
+
+	return []map[string]interface{}{transformed}
 }
 
-func flattenBootDiskConfig(c *container.BootDisk) []map[string]interface{} {
-	config := []map[string]interface{}{}
-
-	if c == nil {
-		return config
+func flattenBootDiskConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
 	}
 
-	config = append(config, map[string]interface{}{
-		"disk_type":              c.DiskType,
-		"size_gb":                c.SizeGb,
-		"provisioned_iops":       c.ProvisionedIops,
-		"provisioned_throughput": c.ProvisionedThroughput,
-	})
+	transformed := map[string]interface{}{
+		"disk_type":              c["diskType"],
+		"size_gb":                c["sizeGb"],
+		"provisioned_iops":       c["provisionedIops"],
+		"provisioned_throughput": c["provisionedThroughput"],
+	}
 
-	return config
+	return []map[string]interface{}{transformed}
 }
 
-func flattenResourceManagerTags(c *container.ResourceManagerTags) map[string]interface{} {
-	if c == nil {
+func flattenResourceManagerTags(v interface{}) map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
 		return nil
 	}
 
 	rmt := make(map[string]interface{})
-
-	for k, v := range c.Tags {
-		rmt[k] = v
+	if tags, ok := c["tags"].(map[string]interface{}); ok {
+		for k, val := range tags {
+			rmt[k] = val
+		}
 	}
 
 	return rmt
 }
 
-func flattenAdvancedMachineFeaturesConfig(c *container.AdvancedMachineFeatures) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"threads_per_core":             c.ThreadsPerCore,
-			"enable_nested_virtualization": c.EnableNestedVirtualization,
-			"performance_monitoring_unit":  c.PerformanceMonitoringUnit,
-		})
+func flattenAdvancedMachineFeaturesConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
 	}
-	return result
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	transformed := map[string]interface{}{
+		"threads_per_core":             c["threadsPerCore"],
+		"enable_nested_virtualization": c["enableNestedVirtualization"],
+		"performance_monitoring_unit":  c["performanceMonitoringUnit"],
+	}
+
+	return []map[string]interface{}{transformed}
 }
 
-func flattenContainerGuestAccelerators(c []*container.AcceleratorConfig) []map[string]interface{} {
+func flattenContainerGuestAccelerators(v interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
-	for _, accel := range c {
-		accelerator := map[string]interface{}{
-			"count":              accel.AcceleratorCount,
-			"type":               accel.AcceleratorType,
-			"gpu_partition_size": accel.GpuPartitionSize,
+	if v == nil {
+		return result
+	}
+	c, ok := v.([]interface{})
+	if !ok {
+		return result
+	}
+
+	for _, item := range c {
+		accel, ok := item.(map[string]interface{})
+		if !ok {
+			continue
 		}
-		if accel.GpuDriverInstallationConfig != nil {
+		accelerator := map[string]interface{}{
+			"count":              accel["acceleratorCount"],
+			"type":               accel["acceleratorType"],
+			"gpu_partition_size": accel["gpuPartitionSize"],
+		}
+		if v, ok := accel["gpuDriverInstallationConfig"].(map[string]interface{}); ok {
 			accelerator["gpu_driver_installation_config"] = []map[string]interface{}{
 				{
-					"gpu_driver_version": accel.GpuDriverInstallationConfig.GpuDriverVersion,
+					"gpu_driver_version": v["gpuDriverVersion"],
 				},
 			}
 		}
-		if accel.GpuSharingConfig != nil {
+		if v, ok := accel["gpuSharingConfig"].(map[string]interface{}); ok {
 			accelerator["gpu_sharing_config"] = []map[string]interface{}{
 				{
-					"gpu_sharing_strategy":       accel.GpuSharingConfig.GpuSharingStrategy,
-					"max_shared_clients_per_gpu": accel.GpuSharingConfig.MaxSharedClientsPerGpu,
+					"gpu_sharing_strategy":       v["gpuSharingStrategy"],
+					"max_shared_clients_per_gpu": v["maxSharedClientsPerGpu"],
 				},
 			}
 		}
@@ -2471,98 +2497,167 @@ func flattenContainerGuestAccelerators(c []*container.AcceleratorConfig) []map[s
 	return result
 }
 
-func flattenShieldedInstanceConfig(c *container.ShieldedInstanceConfig) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"enable_secure_boot":          c.EnableSecureBoot,
-			"enable_integrity_monitoring": c.EnableIntegrityMonitoring,
-		})
+func flattenShieldedInstanceConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
 	}
-	return result
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	transformed := map[string]interface{}{
+		"enable_secure_boot":          c["enableSecureBoot"],
+		"enable_integrity_monitoring": c["enableIntegrityMonitoring"],
+	}
+
+	return []map[string]interface{}{transformed}
 }
 
-func flattenLocalNvmeSsdBlockConfig(c *container.LocalNvmeSsdBlockConfig) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"local_ssd_count": c.LocalSsdCount,
-		})
+func flattenLocalNvmeSsdBlockConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
 	}
-	return result
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	transformed := map[string]interface{}{
+		"local_ssd_count": c["localSsdCount"],
+	}
+
+	return []map[string]interface{}{transformed}
 }
 
-func flattenEphemeralStorageLocalSsdConfig(c *container.EphemeralStorageLocalSsdConfig) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"local_ssd_count":  c.LocalSsdCount,
-			"data_cache_count": c.DataCacheCount,
-		})
+func flattenEphemeralStorageLocalSsdConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
 	}
-	return result
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	transformed := map[string]interface{}{
+		"local_ssd_count":  c["localSsdCount"],
+		"data_cache_count": c["dataCacheCount"],
+	}
+
+	return []map[string]interface{}{transformed}
 }
 
-func flattenSecondaryBootDisks(c []*container.SecondaryBootDisk) []map[string]interface{} {
+func flattenSecondaryBootDisks(v interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
-	if c != nil {
-		for _, disk := range c {
-			secondaryBootDisk := map[string]interface{}{
-				"disk_image": disk.DiskImage,
-				"mode":       disk.Mode,
-			}
-			result = append(result, secondaryBootDisk)
+	if v == nil {
+		return result
+	}
+	c, ok := v.([]interface{})
+	if !ok {
+		return result
+	}
+
+	for _, item := range c {
+		disk, ok := item.(map[string]interface{})
+		if !ok {
+			continue
 		}
+		secondaryBootDisk := map[string]interface{}{
+			"disk_image": disk["diskImage"],
+			"mode":       disk["mode"],
+		}
+		if disk["diskImage"] == "" || disk["diskImage"] == nil { // required field
+			secondaryBootDisk["disk_image"] = ""
+		}
+		result = append(result, secondaryBootDisk)
 	}
 	return result
 }
 
-func flattenInsecureKubeletReadonlyPortEnabled(c *container.NodeKubeletConfig) string {
+func flattenInsecureKubeletReadonlyPortEnabled(v interface{}) string {
 	// Convert bool from the API to the enum values used internally
-	if c != nil && c.InsecureKubeletReadonlyPortEnabled {
+	if v == nil {
+		return "FALSE"
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return "FALSE"
+	}
+	if val, ok := c["insecureKubeletReadonlyPortEnabled"].(bool); ok && val {
 		return "TRUE"
 	}
 	return "FALSE"
 }
 
-func flattenLoggingVariant(c *container.NodePoolLoggingConfig) string {
+func flattenLoggingVariant(v interface{}) string {
 	variant := "DEFAULT"
-	if c != nil && c.VariantConfig != nil && c.VariantConfig.Variant != "" {
-		variant = c.VariantConfig.Variant
+	if v == nil {
+		return variant
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return variant
+	}
+	if vc, ok := c["variantConfig"].(map[string]interface{}); ok {
+		if v, ok := vc["variant"].(string); ok && v != "" {
+			variant = v
+		}
 	}
 	return variant
 }
 
-func flattenGcfsConfig(c *container.GcfsConfig) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"enabled": c.Enabled,
-		})
+func flattenGcfsConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
 	}
-	return result
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	enabled, ok := c["enabled"].(bool)
+	if !ok {
+		enabled = false
+	}
+	transformed := map[string]interface{}{
+		"enabled": enabled,
+	}
+
+	return []map[string]interface{}{transformed}
 }
 
-func flattenGvnic(c *container.VirtualNIC) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"enabled": c.Enabled,
-		})
+func flattenGvnic(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
 	}
-	return result
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	transformed := map[string]interface{}{
+		"enabled": c["enabled"],
+	}
+
+	return []map[string]interface{}{transformed}
 }
 
-func flattenGKEReservationAffinity(c *container.ReservationAffinity) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"consume_reservation_type": c.ConsumeReservationType,
-			"key":                      c.Key,
-			"values":                   c.Values,
-		})
+func flattenGKEReservationAffinity(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
 	}
-	return result
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	transformed := map[string]interface{}{
+		"consume_reservation_type": c["consumeReservationType"],
+		"key":                      c["key"],
+		"values":                   c["values"],
+	}
+
+	return []map[string]interface{}{transformed}
 }
 
 // flattenTaints records the set of taints already present in state.
@@ -2589,27 +2684,42 @@ func flattenTaints(c []*container.NodeTaint, oldTaints []interface{}) []map[stri
 }
 
 // flattenEffectiveTaints records the complete set of taints returned from GKE.
-func flattenEffectiveTaints(c []*container.NodeTaint) []map[string]interface{} {
+func flattenEffectiveTaints(v interface{}) []map[string]interface{} {
 	result := []map[string]interface{}{}
-	for _, taint := range c {
+	if v == nil {
+		return result
+	}
+	c, ok := v.([]interface{})
+	if !ok {
+		return result
+	}
+	for _, raw := range c {
+		taint, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
 		result = append(result, map[string]interface{}{
-			"key":    taint.Key,
-			"value":  taint.Value,
-			"effect": taint.Effect,
+			"key":    taint["key"],
+			"value":  taint["value"],
+			"effect": taint["effect"],
 		})
 	}
 
 	return result
 }
 
-func flattenWorkloadMetadataConfig(c *container.WorkloadMetadataConfig) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"mode": c.Mode,
-		})
+func flattenWorkloadMetadataConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
 	}
-	return result
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	transformed := map[string]interface{}{
+		"mode": c["mode"],
+	}
+	return []map[string]interface{}{transformed}
 }
 
 func containerNodePoolLabelsSuppress(k, old, new string, d *schema.ResourceData) bool {
@@ -2674,355 +2784,502 @@ func containerNodePoolResourceLabelsDiffSuppress(k, old, new string, d *schema.R
 	return false
 }
 
-func flattenKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"cpu_cfs_quota":                          c.CpuCfsQuota,
-			"cpu_cfs_quota_period":                   c.CpuCfsQuotaPeriod,
-			"cpu_manager_policy":                     c.CpuManagerPolicy,
-			"memory_manager":                         flattenMemoryManager(c.MemoryManager),
-			"topology_manager":                       flattenTopologyManager(c.TopologyManager),
-			"insecure_kubelet_readonly_port_enabled": flattenInsecureKubeletReadonlyPortEnabled(c),
-			"pod_pids_limit":                         c.PodPidsLimit,
-			"container_log_max_size":                 c.ContainerLogMaxSize,
-			"container_log_max_files":                c.ContainerLogMaxFiles,
-			"image_gc_low_threshold_percent":         c.ImageGcLowThresholdPercent,
-			"image_gc_high_threshold_percent":        c.ImageGcHighThresholdPercent,
-			"image_minimum_gc_age":                   c.ImageMinimumGcAge,
-			"image_maximum_gc_age":                   c.ImageMaximumGcAge,
-			"allowed_unsafe_sysctls":                 c.AllowedUnsafeSysctls,
-			"single_process_oom_kill":                c.SingleProcessOomKill,
-			"max_parallel_image_pulls":               c.MaxParallelImagePulls,
-			"eviction_max_pod_grace_period_seconds":  c.EvictionMaxPodGracePeriodSeconds,
-			"eviction_soft":                          flattenEvictionSignals(c.EvictionSoft),
-			"eviction_soft_grace_period":             flattenEvictionGracePeriod(c.EvictionSoftGracePeriod),
-			"eviction_minimum_reclaim":               flattenEvictionMinimumReclaim(c.EvictionMinimumReclaim),
-		})
-	}
-	return result
-}
-
-func flattenTopologyManager(c *container.TopologyManager) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"policy": c.Policy,
-			"scope":  c.Scope,
-		})
-	}
-	return result
-}
-
-func flattenMemoryManager(c *container.MemoryManager) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"policy": c.Policy,
-		})
-	}
-	return result
-}
-
-func flattenNodePoolAutoConfigNodeKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"insecure_kubelet_readonly_port_enabled": flattenInsecureKubeletReadonlyPortEnabled(c),
-		})
-	}
-	return result
-}
-
-func flattenEvictionSignals(c *container.EvictionSignals) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"memory_available":    c.MemoryAvailable,
-			"nodefs_available":    c.NodefsAvailable,
-			"nodefs_inodes_free":  c.NodefsInodesFree,
-			"imagefs_available":   c.ImagefsAvailable,
-			"imagefs_inodes_free": c.ImagefsInodesFree,
-			"pid_available":       c.PidAvailable,
-		})
-	}
-	return result
-}
-
-func flattenEvictionGracePeriod(c *container.EvictionGracePeriod) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"memory_available":    c.MemoryAvailable,
-			"nodefs_available":    c.NodefsAvailable,
-			"nodefs_inodes_free":  c.NodefsInodesFree,
-			"imagefs_available":   c.ImagefsAvailable,
-			"imagefs_inodes_free": c.ImagefsInodesFree,
-			"pid_available":       c.PidAvailable,
-		})
-	}
-	return result
-}
-
-func flattenEvictionMinimumReclaim(c *container.EvictionMinimumReclaim) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"memory_available":    c.MemoryAvailable,
-			"nodefs_available":    c.NodefsAvailable,
-			"nodefs_inodes_free":  c.NodefsInodesFree,
-			"imagefs_available":   c.ImagefsAvailable,
-			"imagefs_inodes_free": c.ImagefsInodesFree,
-			"pid_available":       c.PidAvailable,
-		})
-	}
-	return result
-}
-
-func flattenLinuxNodeConfig(c *container.LinuxNodeConfig) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"sysctls":                      c.Sysctls,
-			"cgroup_mode":                  c.CgroupMode,
-			"hugepages_config":             flattenHugepagesConfig(c.Hugepages),
-			"transparent_hugepage_enabled": c.TransparentHugepageEnabled,
-			"transparent_hugepage_defrag":  c.TransparentHugepageDefrag,
-			"node_kernel_module_loading":   flattenNodeKernelModuleLoading(c.NodeKernelModuleLoading),
-		})
-	}
-	return result
-}
-
-func flattenWindowsNodeConfig(c *container.WindowsNodeConfig) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"osversion": c.OsVersion,
-		})
-	}
-	return result
-}
-
-func flattenHugepagesConfig(c *container.HugepagesConfig) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"hugepage_size_2m": c.HugepageSize2m,
-			"hugepage_size_1g": c.HugepageSize1g,
-		})
-	}
-	return result
-}
-
-func flattenNodeKernelModuleLoading(c *container.NodeKernelModuleLoading) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"policy": c.Policy,
-		})
-	}
-	return result
-}
-
-func flattenContainerdConfig(c *container.ContainerdConfig) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c == nil {
-		return result
-	}
-	r := map[string]interface{}{}
-	if c.PrivateRegistryAccessConfig != nil {
-		r["private_registry_access_config"] = flattenPrivateRegistryAccessConfig(c.PrivateRegistryAccessConfig)
-	}
-	if c.WritableCgroups != nil {
-		r["writable_cgroups"] = flattenWritableCgroups(c.WritableCgroups)
-	}
-	if c.RegistryHosts != nil {
-		r["registry_hosts"] = flattenRegistryHosts(c.RegistryHosts)
-	}
-	return append(result, r)
-}
-
-func flattenRegistryHosts(registryHosts []*container.RegistryHostConfig) []map[string]interface{} {
-	items := []map[string]interface{}{}
-	if len(registryHosts) == 0 {
-		return items
-	}
-
-	for _, host := range registryHosts {
-		item := make(map[string]interface{})
-		item["server"] = host.Server
-		item["hosts"] = flattenHostInRegistryHosts(host.Hosts)
-		items = append(items, item)
-	}
-	return items
-}
-
-func flattenHostInRegistryHosts(hosts []*container.HostConfig) []map[string]interface{} {
-	items := make([]map[string]interface{}, 0, len(hosts))
-	if len(hosts) == 0 {
-		return items
-	}
-	for _, h := range hosts {
-		item := make(map[string]interface{})
-		item["host"] = h.Host
-		item["capabilities"] = h.Capabilities
-		item["override_path"] = h.OverridePath
-		item["dial_timeout"] = h.DialTimeout
-
-		if h.Header != nil {
-			tmp := make([]interface{}, len(h.Header))
-			for i, val := range h.Header {
-				tmp[i] = map[string]interface{}{
-					"key":   val.Key,
-					"value": val.Value,
-				}
-			}
-			item["header"] = tmp
-		}
-
-		if h.Ca != nil {
-			tmp := make([]interface{}, len(h.Ca))
-			for i, val := range h.Ca {
-				if val != nil && val.GcpSecretManagerSecretUri != "" {
-					tmp[i] = map[string]interface{}{
-						"gcp_secret_manager_secret_uri": val.GcpSecretManagerSecretUri,
-					}
-				}
-			}
-			item["ca"] = tmp
-		}
-
-		if h.Client != nil {
-			tmp := make([]interface{}, len(h.Client))
-			for i, val := range h.Client {
-				currentClient := map[string]interface{}{}
-				if val != nil && val.Cert != nil && val.Cert.GcpSecretManagerSecretUri != "" {
-					currentClient["cert"] = []interface{}{
-						map[string]interface{}{
-							"gcp_secret_manager_secret_uri": val.Cert.GcpSecretManagerSecretUri,
-						},
-					}
-				}
-				if val != nil && val.Key != nil && val.Key.GcpSecretManagerSecretUri != "" {
-					currentClient["key"] = []interface{}{
-						map[string]interface{}{
-							"gcp_secret_manager_secret_uri": val.Key.GcpSecretManagerSecretUri,
-						},
-					}
-				}
-				tmp[i] = currentClient
-			}
-			item["client"] = tmp
-		}
-		items = append(items, item)
-	}
-	return items
-}
-
-func flattenPrivateRegistryAccessConfig(c *container.PrivateRegistryAccessConfig) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c == nil {
-		return result
-	}
-	r := map[string]interface{}{
-		"enabled": c.Enabled,
-	}
-	if c.CertificateAuthorityDomainConfig != nil {
-		caConfigs := make([]interface{}, len(c.CertificateAuthorityDomainConfig))
-		for i, caCfg := range c.CertificateAuthorityDomainConfig {
-			caConfigs[i] = flattenCADomainConfig(caCfg)
-		}
-		r["certificate_authority_domain_config"] = caConfigs
-	}
-	return append(result, r)
-}
-
-//  func flattenCADomainConfig(c *container.CertificateAuthorityDomainConfig) []map[string]interface{} {
-//  	result := []map[string]interface{}{}
-//  	if c == nil {
-//  		return result
-//  	}
-//  	r := map[string]interface{}{
-//  		"fqdns": c.Fqdns,
-//  	}
-//  	if c.GcpSecretManagerCertificateConfig != nil {
-//  		r["gcp_secret_manager_certificate_config"] = flattenGCPSecretManagerCertificateConfig(c.GcpSecretManagerCertificateConfig)
-//  	}
-//  	return append(result, r)
-//  }
-
-func flattenCADomainConfig(c *container.CertificateAuthorityDomainConfig) map[string]interface{} {
-	if c == nil {
+func flattenKubeletConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
 		return nil
 	}
-	r := map[string]interface{}{
-		"fqdns": c.Fqdns,
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
 	}
-	if c.GcpSecretManagerCertificateConfig != nil {
-		r["gcp_secret_manager_certificate_config"] = flattenGCPSecretManagerCertificateConfig(c.GcpSecretManagerCertificateConfig)
+	transformed := map[string]interface{}{
+		"cpu_cfs_quota":                          c["cpuCfsQuota"],
+		"cpu_cfs_quota_period":                   c["cpuCfsQuotaPeriod"],
+		"cpu_manager_policy":                     c["cpuManagerPolicy"],
+		"memory_manager":                         flattenMemoryManager(c["memoryManager"]),
+		"topology_manager":                       flattenTopologyManager(c["topologyManager"]),
+		"insecure_kubelet_readonly_port_enabled": flattenInsecureKubeletReadonlyPortEnabled(v),
+		"pod_pids_limit":                         c["podPidsLimit"],
+		"container_log_max_size":                 c["containerLogMaxSize"],
+		"container_log_max_files":                c["containerLogMaxFiles"],
+		"image_gc_low_threshold_percent":         c["imageGcLowThresholdPercent"],
+		"image_gc_high_threshold_percent":        c["imageGcHighThresholdPercent"],
+		"image_minimum_gc_age":                   c["imageMinimumGcAge"],
+		"image_maximum_gc_age":                   c["imageMaximumGcAge"],
+		"allowed_unsafe_sysctls":                 c["allowedUnsafeSysctls"],
+		"single_process_oom_kill":                c["singleProcessOomKill"],
+		"max_parallel_image_pulls":               c["maxParallelImagePulls"],
+		"eviction_max_pod_grace_period_seconds":  c["evictionMaxPodGracePeriodSeconds"],
+		"eviction_soft":                          flattenEvictionSignals(c["evictionSoft"]),
+		"eviction_soft_grace_period":             flattenEvictionGracePeriod(c["evictionSoftGracePeriod"]),
+		"eviction_minimum_reclaim":               flattenEvictionMinimumReclaim(c["evictionMinimumReclaim"]),
 	}
-	return r
+
+	return []map[string]interface{}{transformed}
 }
 
-func flattenGCPSecretManagerCertificateConfig(c *container.GCPSecretManagerCertificateConfig) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c == nil {
-		return result
+func flattenTopologyManager(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
 	}
-	r := map[string]interface{}{
-		"secret_uri": c.SecretUri,
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
 	}
-	return append(result, r)
+
+	transformed := map[string]interface{}{
+		"policy": c["policy"],
+		"scope":  c["scope"],
+	}
+
+	return []map[string]interface{}{transformed}
 }
 
-func flattenWritableCgroups(c *container.WritableCgroups) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c == nil {
-		return result
+func flattenMemoryManager(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
 	}
-	r := map[string]interface{}{
-		"enabled": c.Enabled,
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
 	}
-	return append(result, r)
+
+	transformed := map[string]interface{}{
+		"policy": c["policy"],
+	}
+
+	return []map[string]interface{}{transformed}
 }
 
-func flattenConfidentialNodes(c *container.ConfidentialNodes) []map[string]interface{} {
-	result := []map[string]interface{}{}
+func flattenNodePoolAutoConfigNodeKubeletConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	transformed := map[string]interface{}{}
 	if c != nil {
-		result = append(result, map[string]interface{}{
-			"enabled":                    c.Enabled,
-			"confidential_instance_type": c.ConfidentialInstanceType,
-		})
+		transformed["insecure_kubelet_readonly_port_enabled"] = flattenInsecureKubeletReadonlyPortEnabled(c)
 	}
-	return result
+
+	return []map[string]interface{}{transformed}
 }
 
-func flattenSoleTenantConfig(c *container.SoleTenantConfig) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c == nil {
-		return result
+func flattenEvictionSignals(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	transformed := map[string]interface{}{
+		"memory_available":    c["memoryAvailable"],
+		"nodefs_available":    c["nodefsAvailable"],
+		"nodefs_inodes_free":  c["nodefsInodesFree"],
+		"imagefs_available":   c["imagefsAvailable"],
+		"imagefs_inodes_free": c["imagefsInodesFree"],
+		"pid_available":       c["pidAvailable"],
+	}
+
+	return []map[string]interface{}{transformed}
+}
+
+func flattenEvictionGracePeriod(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	transformed := map[string]interface{}{
+		"memory_available":    c["memoryAvailable"],
+		"nodefs_available":    c["nodefsAvailable"],
+		"nodefs_inodes_free":  c["nodefsInodesFree"],
+		"imagefs_available":   c["imagefsAvailable"],
+		"imagefs_inodes_free": c["imagefsInodesFree"],
+		"pid_available":       c["pidAvailable"],
+	}
+
+	return []map[string]interface{}{transformed}
+}
+
+func flattenEvictionMinimumReclaim(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	transformed := map[string]interface{}{
+		"memory_available":    c["memoryAvailable"],
+		"nodefs_available":    c["nodefsAvailable"],
+		"nodefs_inodes_free":  c["nodefsInodesFree"],
+		"imagefs_available":   c["imagefsAvailable"],
+		"imagefs_inodes_free": c["imagefsInodesFree"],
+		"pid_available":       c["pidAvailable"],
+	}
+
+	return []map[string]interface{}{transformed}
+}
+
+func flattenLinuxNodeConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	sysctls := make(map[string]interface{})
+	if rawSysctls, ok := c["sysctls"].(map[string]interface{}); ok {
+		for k, val := range rawSysctls {
+			sysctls[k] = val
+		}
+	}
+
+	transformed := map[string]interface{}{
+		"sysctls":                      sysctls,
+		"cgroup_mode":                  c["cgroupMode"],
+		"hugepages_config":             flattenHugepagesConfig(c["hugepages"]),
+		"transparent_hugepage_enabled": c["transparentHugepageEnabled"],
+		"transparent_hugepage_defrag":  c["transparentHugepageDefrag"],
+		"node_kernel_module_loading":   flattenNodeKernelModuleLoading(c["nodeKernelModuleLoading"]),
+	}
+
+	return []map[string]interface{}{transformed}
+}
+
+func flattenWindowsNodeConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	if len(c) == 0 {
+		return nil
+	}
+	transformed := map[string]interface{}{
+		"osversion": c["osVersion"],
+	}
+
+	return []map[string]interface{}{transformed}
+}
+
+func flattenHugepagesConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	transformed := map[string]interface{}{
+		"hugepage_size_2m": c["hugepageSize2m"],
+		"hugepage_size_1g": c["hugepageSize1g"],
+	}
+
+	return []map[string]interface{}{transformed}
+}
+
+func flattenNodeKernelModuleLoading(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	r := make(map[string]interface{})
+	if val, ok := c["policy"]; ok {
+		r["policy"] = val
+	}
+	return []map[string]interface{}{r}
+}
+
+func flattenContainerdConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	r := map[string]interface{}{}
+	if c["privateRegistryAccessConfig"] != nil {
+		r["private_registry_access_config"] = flattenPrivateRegistryAccessConfig(c["privateRegistryAccessConfig"])
+	}
+	if c["writableCgroups"] != nil {
+		r["writable_cgroups"] = flattenWritableCgroups(c["writableCgroups"])
+	}
+	if c["registryHosts"] != nil {
+		r["registry_hosts"] = flattenRegistryHosts(c["registryHosts"])
+	}
+	return []map[string]interface{}{r}
+}
+
+func flattenRegistryHosts(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	ls, ok := v.([]interface{})
+	if !ok {
+		return nil
+	}
+	if len(ls) == 0 {
+		return nil
+	}
+
+	items := []map[string]interface{}{}
+	for _, raw := range ls {
+		host, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		item := make(map[string]interface{})
+		item["server"] = host["server"]
+		if host["hosts"] != nil {
+			item["hosts"] = flattenHostInRegistryHosts(host["hosts"])
+		}
+		items = append(items, item)
+	}
+	if len(items) == 0 {
+		return nil
+	}
+	return items
+}
+
+func flattenHostInRegistryHosts(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return []map[string]interface{}{}
+	}
+	ls, ok := v.([]interface{})
+	if !ok {
+		return []map[string]interface{}{}
+	}
+	items := make([]map[string]interface{}, 0, len(ls))
+	for _, raw := range ls {
+		h, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		item := make(map[string]interface{})
+		item["host"] = h["host"]
+		item["capabilities"] = h["capabilities"]
+		item["override_path"] = h["overridePath"]
+		item["dial_timeout"] = h["dialTimeout"]
+
+		if h["header"] != nil {
+			if headers, ok := h["header"].([]interface{}); ok {
+				tmp := make([]interface{}, len(headers))
+				for i, rawVal := range headers {
+					if val, ok := rawVal.(map[string]interface{}); ok {
+						tmp[i] = map[string]interface{}{
+							"key":   val["key"],
+							"value": val["value"],
+						}
+					}
+				}
+				item["header"] = tmp
+			}
+		}
+
+		if h["ca"] != nil {
+			if cas, ok := h["ca"].([]interface{}); ok {
+				tmp := make([]interface{}, len(cas))
+				for i, rawVal := range cas {
+					if val, ok := rawVal.(map[string]interface{}); ok {
+						if uri, ok := val["gcpSecretManagerSecretUri"].(string); ok && uri != "" {
+							tmp[i] = map[string]interface{}{
+								"gcp_secret_manager_secret_uri": uri,
+							}
+						}
+					}
+				}
+				item["ca"] = tmp
+			}
+		}
+
+		if h["client"] != nil {
+			if clients, ok := h["client"].([]interface{}); ok {
+				tmp := make([]interface{}, len(clients))
+				for i, rawVal := range clients {
+					if val, ok := rawVal.(map[string]interface{}); ok {
+						currentClient := map[string]interface{}{}
+						if certRaw, ok := val["cert"].(map[string]interface{}); ok && certRaw["gcpSecretManagerSecretUri"] != "" {
+							currentClient["cert"] = []interface{}{
+								map[string]interface{}{
+									"gcp_secret_manager_secret_uri": certRaw["gcpSecretManagerSecretUri"],
+								},
+							}
+						}
+
+						if keyRaw, ok := val["key"].(map[string]interface{}); ok && keyRaw["gcpSecretManagerSecretUri"] != "" {
+							currentClient["key"] = []interface{}{
+								map[string]interface{}{
+									"gcp_secret_manager_secret_uri": keyRaw["gcpSecretManagerSecretUri"],
+								},
+							}
+						}
+						tmp[i] = currentClient
+					}
+				}
+				item["client"] = tmp
+			}
+		}
+		items = append(items, item)
+	}
+	return items
+}
+
+func flattenPrivateRegistryAccessConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return []map[string]interface{}{}
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return []map[string]interface{}{}
+	}
+	enabled, ok := c["enabled"].(bool)
+	if !ok {
+		enabled = false
+	}
+	r := map[string]interface{}{
+		"enabled": enabled,
+	}
+	if c["certificateAuthorityDomainConfig"] != nil {
+		if caConfigs, ok := c["certificateAuthorityDomainConfig"].([]interface{}); ok {
+			flattenedCaConfigs := make([]interface{}, 0, len(caConfigs))
+			for _, caCfg := range caConfigs {
+				flattened := flattenCADomainConfig(caCfg)
+				if len(flattened) > 0 {
+					flattenedCaConfigs = append(flattenedCaConfigs, flattened[0])
+				}
+			}
+			r["certificate_authority_domain_config"] = flattenedCaConfigs
+		}
+	}
+	return []map[string]interface{}{r}
+}
+
+func flattenCADomainConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return []map[string]interface{}{}
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return []map[string]interface{}{}
+	}
+	r := map[string]interface{}{
+		"fqdns": c["fqdns"],
+	}
+	if c["gcpSecretManagerCertificateConfig"] != nil {
+		r["gcp_secret_manager_certificate_config"] = flattenGCPSecretManagerCertificateConfig(c["gcpSecretManagerCertificateConfig"])
+	}
+	return []map[string]interface{}{r}
+}
+
+func flattenGCPSecretManagerCertificateConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return []map[string]interface{}{}
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return []map[string]interface{}{}
+	}
+	r := map[string]interface{}{
+		"secret_uri": c["secretUri"],
+	}
+	return []map[string]interface{}{r}
+}
+
+func flattenWritableCgroups(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	enabled, ok := c["enabled"].(bool)
+	if !ok {
+		enabled = false
+	}
+	transformed := map[string]interface{}{
+		"enabled": enabled,
+	}
+
+	return []map[string]interface{}{transformed}
+}
+
+func flattenConfidentialNodes(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	enabled, ok := c["enabled"].(bool)
+	if !ok {
+		enabled = false
+	}
+	transformed := map[string]interface{}{
+		"enabled":                    enabled,
+		"confidential_instance_type": c["confidentialInstanceType"],
+	}
+
+	return []map[string]interface{}{transformed}
+}
+
+func flattenSoleTenantConfig(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
 	}
 	affinities := []map[string]interface{}{}
-	for _, affinity := range c.NodeAffinities {
-		affinities = append(affinities, map[string]interface{}{
-			"key":      affinity.Key,
-			"operator": affinity.Operator,
-			"values":   affinity.Values,
-		})
+	if rawAffinities, ok := c["nodeAffinities"].([]interface{}); ok {
+		for _, raw := range rawAffinities {
+			affinity, ok := raw.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			affinities = append(affinities, map[string]interface{}{
+				"key":      affinity["key"],
+				"operator": affinity["operator"],
+				"values":   affinity["values"],
+			})
+		}
 	}
-	return append(result, map[string]interface{}{
+	transformed := map[string]interface{}{
 		"node_affinity": affinities,
-		"min_node_cpus": c.MinNodeCpus,
-	})
+		"min_node_cpus": c["minNodeCpus"],
+	}
+
+	return []map[string]interface{}{transformed}
 }
 
-func flattenFastSocket(c *container.FastSocket) []map[string]interface{} {
-	result := []map[string]interface{}{}
-	if c != nil {
-		result = append(result, map[string]interface{}{
-			"enabled": c.Enabled,
-		})
+func flattenFastSocket(v interface{}) []map[string]interface{} {
+	if v == nil {
+		return nil
 	}
-	return result
+	c, ok := v.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	transformed := map[string]interface{}{
+		"enabled": c["enabled"],
+	}
+
+	return []map[string]interface{}{transformed}
 }
