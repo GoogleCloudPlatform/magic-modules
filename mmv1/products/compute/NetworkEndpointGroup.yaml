@@ -13,6 +13,7 @@
 
 ---
 name: 'NetworkEndpointGroup'
+
 kind: 'compute#networkEndpointGroup'
 description: |
   Network endpoint groups (NEGs) are zonal resources that represent
@@ -54,6 +55,7 @@ custom_code:
 sweeper:
   url_substitutions:
     - zone: "us-central1-a"
+include_in_tgc_next: true
 examples:
   - name: 'network_endpoint_group'
     primary_resource_id: 'neg'

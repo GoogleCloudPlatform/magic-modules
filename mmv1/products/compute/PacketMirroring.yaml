@@ -13,6 +13,7 @@
 
 ---
 name: 'PacketMirroring'
+
 description: |
   Packet Mirroring mirrors traffic to and from particular VM instances.
   You can use the collected traffic to help you detect security threats
@@ -37,6 +38,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+include_in_tgc_next: true
 examples:
   - name: 'compute_packet_mirroring_full'
     primary_resource_id: 'foobar'

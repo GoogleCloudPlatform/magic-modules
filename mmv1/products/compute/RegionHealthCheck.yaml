@@ -48,11 +48,11 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next: true
 custom_code:
   encoder: 'templates/terraform/encoders/health_check_type.tmpl'
 custom_diff:
   - 'healthCheckCustomizeDiff'
-include_in_tgc_next: true
 tgc_tests:
   - name: 'TestAccComputeRegionHealthCheck_typeTransition'
     skip: 'Test data has mismatched steps'
