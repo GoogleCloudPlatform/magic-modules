@@ -44,7 +44,6 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 iam_policy:
   allowed_iam_role: 'roles/compute.admin'
   parent_resource_attribute: 'name'
@@ -61,7 +60,6 @@ schema_version: 1
 examples:
   - name: 'backend_service_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-backend-service%s", context["random_suffix"])'
     vars:
       backend_service_name: 'backend-service'
       http_health_check_name: 'health-check'

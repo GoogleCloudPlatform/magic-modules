@@ -106,7 +106,7 @@ type Examples struct {
 	// Vars is a Hash from template variable names to output variable names.
 	// It will use the provided value as a prefix for generated tests, and
 	// insert it into the docs verbatim.
-	Vars map[string]string
+	Vars map[string]string `yaml:"vars,omitempty"`
 
 	// Some variables need to hold special values during tests, and cannot
 	// be inferred by Open in Cloud Shell.  For instance, org_id
@@ -163,6 +163,9 @@ type Examples struct {
 	// The reason to skip a test. For example, a link to a ticket explaining the issue that needs to be resolved before
 	// unskipping the test. If this is not empty, the test will be skipped.
 	SkipTest string `yaml:"skip_test,omitempty"`
+
+	// SkipFunc is a function call to a custom skip check
+	SkipFunc string `yaml:"skip_func,omitempty"`
 
 	// Specify which external providers are needed for the testcase.
 	// Think before adding as there is latency and adds an external dependency to
@@ -250,7 +253,7 @@ func (e *Examples) ValidateExternalProviders() error {
 	}
 
 	if len(unallowedProviders) > 0 {
-		return fmt.Errorf("Providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders)
+		return fmt.Errorf("providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders)
 	}
 
 	return nil

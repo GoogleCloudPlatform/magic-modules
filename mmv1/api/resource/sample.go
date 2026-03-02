@@ -15,7 +15,6 @@ package resource
 
 import (
 	"fmt"
-	"log"
 	"slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
@@ -38,6 +37,9 @@ type Sample struct {
 	// The reason to skip a test. For example, a link to a ticket explaining the issue that needs to be resolved before
 	// unskipping the test. If this is not empty, the test will be skipped.
 	SkipTest string `yaml:"skip_test,omitempty"`
+
+	// SkipFunc is a function call to a custom skip check
+	SkipFunc string `yaml:"skip_func,omitempty"`
 
 	// Whether to skip generating tests for this resource
 	ExcludeTest bool `yaml:"exclude_test,omitempty"`
@@ -115,18 +117,20 @@ func (s *Sample) ResourceType(terraformName string) string {
 	return terraformName
 }
 
-func (s *Sample) Validate(rName string) {
+func (s *Sample) Validate(rName string) (es []error) {
 	if s.Name == "" {
-		log.Fatalf("Missing `name` for one sample in resource %s", rName)
+		es = append(es, fmt.Errorf("missing `name` for one sample in resource %s", rName))
 	}
-	s.ValidateExternalProviders()
+	es = append(es, s.ValidateExternalProviders()...)
 
 	for _, step := range s.Steps {
-		step.Validate(rName, s.Name)
+		es = append(es, step.Validate(rName, s.Name)...)
 	}
+
+	return es
 }
 
-func (s *Sample) ValidateExternalProviders() {
+func (s *Sample) ValidateExternalProviders() (es []error) {
 	// Official providers supported by HashiCorp
 	// https://registry.terraform.io/search/providers?namespace=hashicorp&tier=official
 	HASHICORP_PROVIDERS := []string{"aws", "random", "null", "template", "azurerm", "kubernetes", "local",
@@ -142,6 +146,8 @@ func (s *Sample) ValidateExternalProviders() {
 	}
 
 	if len(unallowedProviders) > 0 {
-		log.Fatalf("Providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders)
+		es = append(es, fmt.Errorf("providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders))
 	}
+
+	return es
 }
