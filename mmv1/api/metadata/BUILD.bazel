@@ -1,0 +1,30 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "metadata",
+    srcs = [
+        "field.go",
+        "metadata.go",
+    ],
+    importpath = "github.com/GoogleCloudPlatform/magic-modules/mmv1/api/metadata",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//mmv1/api",
+        "//mmv1/google",
+    ],
+)
+
+go_test(
+    name = "metadata_test",
+    srcs = [
+        "field_test.go",
+        "metadata_test.go",
+    ],
+    embed = [":metadata"],
+    deps = [
+        "//mmv1/api",
+        "//mmv1/api/product",
+        "//mmv1/google",
+        "@com_github_google_go_cmp//cmp",
+    ],
+)

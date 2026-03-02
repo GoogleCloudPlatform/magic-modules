@@ -1,0 +1,67 @@
+load("//build_defs:product.bzl", "mm_product", "tpg_product")
+load("//build_defs:resource.bzl", "mm_resource", "tpg_resource")
+
+mm_product(
+    name = "alloydb",
+    src = "product.yaml",
+)
+
+tpg_product(
+    name = "tpg_alloydb",
+    product = ":alloydb",
+    resources = [
+        ":tpg_backup",
+        ":tpg_cluster",
+        ":tpg_instance",
+        ":tpg_user",
+    ],
+)
+
+mm_resource(
+    name = "backup",
+    product = ":alloydb",
+    src = "Backup.yaml",
+    has_operation = True,
+    has_sweeper = True,
+)
+
+tpg_resource(
+    name = "tpg_backup",
+    resource = ":backup",
+)
+
+mm_resource(
+    name = "cluster",
+    product = ":alloydb",
+    src = "Cluster.yaml",
+    has_operation = True,
+)
+
+tpg_resource(
+    name = "tpg_cluster",
+    resource = ":cluster",
+)
+
+mm_resource(
+    name = "instance",
+    product = ":alloydb",
+    src = "Instance.yaml",
+    has_operation = True,
+)
+
+tpg_resource(
+    name = "tpg_instance",
+    resource = ":instance",
+)
+
+mm_resource(
+    name = "user",
+    product = ":alloydb",
+    src = "User.yaml",
+    has_operation = True,
+)
+
+tpg_resource(
+    name = "tpg_user",
+    resource = ":user",
+)
