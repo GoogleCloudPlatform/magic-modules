@@ -1718,6 +1718,7 @@ func TestAccSqlDatabaseInstance_basicClone(t *testing.T) {
 	})
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func TestAccSqlDatabaseInstance_crossProjectClone(t *testing.T) {
 	// Sqladmin client
 	//acctest.SkipIfVcr(t)
@@ -1751,6 +1752,7 @@ func TestAccSqlDatabaseInstance_crossProjectClone(t *testing.T) {
 		},
 	})
 }
+{{- end }}
 
 func testAccSqlDatabaseInstanceImportStateIdFunc(resourceName string) resource.ImportStateIdFunc {
 	return func(s *terraform.State) (string, error) {
@@ -8304,7 +8306,7 @@ func testAccSqlDatabaseInstance_crossProjectClone(context map[string]interface{}
 				project_id = "%{cloneDestinationProject}"
 			}
 			resource "google_sql_database_instance" "instance" {
-				name             = "tf-cpc-test-%{random_suffix}"
+				name             = "tf-test-cpc-%{random_suffix}"
 				database_version = "POSTGRES_11"
 				region           = "us-central1"
 				project          = "${data.google_project.destination_project.project_id}"
