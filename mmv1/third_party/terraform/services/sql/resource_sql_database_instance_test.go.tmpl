@@ -1720,7 +1720,7 @@ func TestAccSqlDatabaseInstance_basicClone(t *testing.T) {
 
 func TestAccSqlDatabaseInstance_crossProjectClone(t *testing.T) {
 	// Sqladmin client
-	acctest.SkipIfVcr(t)
+	//acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	cloneSourceProject := envvar.GetTestProjectFromEnv()
