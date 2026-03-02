@@ -34,7 +34,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 examples:
-  - name: 'bigquery_analyticshub_querytemplate_basic'
+  - name: 'bigquery_analyticshub_query_template_basic'
     primary_resource_id: 'querytemplate'
     primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_query_template%s", context["random_suffix"])'
     region_override: 'us'
