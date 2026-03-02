@@ -37,9 +37,9 @@ autogen_async: true
 async:
   operation:
     timeouts:
-      insert_minutes: 20
-      update_minutes: 20
-      delete_minutes: 20
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 60
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
