@@ -343,6 +343,7 @@ func TestAccComputeNetworkFirewallPolicyRule_srcNetworkScopeUnset(t *testing.T) 
 				Config: testAccComputeNetworkFirewallPolicyRule_withoutScope(context),
 			},
 			{
+				Config:                  testAccComputeNetworkFirewallPolicyRule_withoutScope(context),
 				ResourceName:            "google_compute_network_firewall_policy_rule.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
