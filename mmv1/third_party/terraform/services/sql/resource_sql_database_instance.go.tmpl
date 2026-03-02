@@ -1381,11 +1381,13 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Required:    true,
 							Description: `The name of the instance from which the point in time should be restored.`,
 						},
+						{{- if ne $.TargetVersionName "ga" }}
 						"source_project": {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: `The project ID of the source project`,
                         },
+						{{- end }}
 						"point_in_time": {
 							Type:             schema.TypeString,
 							Optional:         true,
