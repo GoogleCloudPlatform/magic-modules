@@ -17,6 +17,7 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl"
 	cai2hclconverters "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/converters"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/provider"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai"
 	tfplan2caiconverters "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/converters"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tgcresource"
@@ -27,6 +28,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 var (
@@ -205,7 +207,15 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	}
 
 	parsedExportConfig := exportResources[0].Attributes
-	missingKeys := compareHCLFields(testData.ParsedRawConfig, parsedExportConfig, ignoredFieldSet)
+
+	// Get the resource schema to check for default values
+	provider := provider.Provider()
+	var resourceSchema *schema.Resource
+	if res, ok := provider.ResourcesMap[resourceType]; ok {
+		resourceSchema = res
+	}
+
+	missingKeys := compareHCLFields(testData.ParsedRawConfig, parsedExportConfig, ignoredFieldSet, resourceSchema)
 
 	// Sometimes, the reason for missing fields could be CAI asset data issue.
 	if len(missingKeys) > 0 {
@@ -313,7 +323,7 @@ func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 }
 
 // Compares HCL and finds all of the keys in map1 that are not in map2
-func compareHCLFields(map1, map2, ignoredFields map[string]any) []string {
+func compareHCLFields(map1, map2, ignoredFields map[string]any, resourceSchema *schema.Resource) []string {
 	var missingKeys []string
 	for key, val := range map1 {
 		if isIgnored(key, ignoredFields) {
@@ -339,6 +349,17 @@ func compareHCLFields(map1, map2, ignoredFields map[string]any) []string {
 		}
 
 		if _, ok := map2[key]; !ok {
+			// Check if the missing key has a default value in schema and the value in map1 matches it
+			if resourceSchema != nil {
+				defaultValue := getSchemaDefault(resourceSchema, key)
+				// If default value is found, compare it with val
+				if defaultValue != nil {
+					// Handle type conversion for comparison
+					if reflect.DeepEqual(val, defaultValue) {
+						continue
+					}
+				}
+			}
 			missingKeys = append(missingKeys, key)
 		}
 	}

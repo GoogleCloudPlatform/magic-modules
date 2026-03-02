@@ -126,7 +126,8 @@ func flattenNodePoolUpgradeSettings(v interface{}) []map[string]interface{} {
 	upgradeSettings["max_unavailable"] = us["maxUnavailable"]
 
 	// "SHORT_LIVED" strategy is not supported by the Terraform provider yet.
-	if strategy, ok := us["strategy"].(string); ok && strategy != "SHORT_LIVED" {
+	// Suppress Default Value "SURGE"
+	if strategy, ok := us["strategy"].(string); ok && strategy != "SHORT_LIVED" && strategy != "SURGE" {
 		upgradeSettings["strategy"] = strategy
 	}
 
@@ -227,11 +228,18 @@ func flattenNodePool(d *schema.ResourceData, config *transport.Config, np map[st
 	}
 
 	if v, ok := np["management"].(map[string]interface{}); ok {
-		nodePool["management"] = []map[string]interface{}{
-			{
-				"auto_repair":  v["autoRepair"],
-				"auto_upgrade": v["autoUpgrade"],
-			},
+		mgmt := map[string]interface{}{}
+
+		// Suppress Default Value
+		if val, ok := v["autoRepair"].(bool); ok && !val {
+			mgmt["auto_repair"] = val
+		}
+		// Suppress Default Value
+		if val, ok := v["autoUpgrade"].(bool); ok && !val {
+			mgmt["auto_upgrade"] = val
+		}
+		if len(mgmt) > 0 {
+			nodePool["management"] = []map[string]interface{}{mgmt}
 		}
 	}
 
