@@ -1724,12 +1724,12 @@ func TestAccSqlDatabaseInstance_crossProjectClone(t *testing.T) {
 	t.Parallel()
 
 	cloneSourceProject := envvar.GetTestProjectFromEnv()
-	cloneDestinationProject := envvar.GetTestCloneDestinationProjectEnvVars(t)
-	destinationNetwork := acctest.BootstrapSharedServiceNetworkingConnection(t, "test-cross-project-clone", acctest.ServiceNetworkWithProjectID(cloneDestinationProject))
+	cloneDestinationProject := acctest.BootstrapProject(t, "tf-cpc-", envvar.GetTestBillingAccountFromEnv(t), []string{"sqladmin.googleapis.com"})
 
 	context := map[string]interface{}{
 		"random_suffix":           acctest.RandString(t, 10),
 		"original_db_name":        acctest.BootstrapSharedSQLInstanceBackupRun(t, cloneSourceProject),
+		"destinationNetwork":	   acctest.BootstrapSharedServiceNetworkingConnection(t, "test-cross-project-clone", acctest.ServiceNetworkWithProjectID(cloneDestinationProject)),
 		"cloneSourceProject":      cloneSourceProject,
 		"cloneDestinationProject": cloneDestinationProject,
 		"destinationNetwork":      destinationNetwork,
