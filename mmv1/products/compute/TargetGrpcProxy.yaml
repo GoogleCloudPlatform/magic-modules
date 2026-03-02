@@ -13,6 +13,7 @@
 
 ---
 name: 'TargetGrpcProxy'
+
 kind: 'compute#targetGrpcProxy'
 description: |
   Represents a Target gRPC Proxy resource. A target gRPC proxy is a component
@@ -39,6 +40,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next: true
 custom_code:
 examples:
   - name: 'target_grpc_proxy_basic'

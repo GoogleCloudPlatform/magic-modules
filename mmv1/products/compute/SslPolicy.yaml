@@ -13,6 +13,7 @@
 
 ---
 name: 'SslPolicy'
+
 kind: 'compute#sslPolicy'
 description: |
   Represents a SSL policy. SSL policies give you the ability to control the
@@ -37,6 +38,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/ssl_policy.tmpl'
   update_encoder: 'templates/terraform/update_encoder/ssl_policy.tmpl'
