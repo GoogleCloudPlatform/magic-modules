@@ -41,7 +41,7 @@ func TestAccComputeRouterNamedSet_updatePrefixExample(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckComputeRouterNamedSetDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeRouterNamedSetsDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRouterNamedSet_routerNamedSetPrefix(context, "A sample prefix named set", false),
@@ -116,4 +116,43 @@ resource "google_compute_router_named_set" "prefix_set" {
 }
 `)
 	return b.String()
+}
+
+func testAccCheckComputeRouterNamedSetsDestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_compute_router_named_set" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/routers/{{router}}/getNamedSet?namedSet={{name}}")
+			if err != nil {
+				return err
+			}
+
+			billingProject := ""
+
+			if config.BillingProject != "" {
+				billingProject = config.BillingProject
+			}
+
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
+			if err == nil {
+				return fmt.Errorf("ComputeRouterNamedSet still exists at %s", url)
+			}
+		}
+
+		return nil
+	}
 }
