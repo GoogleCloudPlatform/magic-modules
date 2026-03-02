@@ -31,7 +31,7 @@ var (
 	_ = googleapi.Error{}
 )
 
-func TestAccComputeRouterNamedSet_updatePrefixExample(t *testing.T) {
+func TestAccComputeRouterNamedSet_updatePrefix(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
