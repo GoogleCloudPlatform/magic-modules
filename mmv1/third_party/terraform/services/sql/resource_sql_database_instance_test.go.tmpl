@@ -8325,7 +8325,7 @@ func testAccSqlDatabaseInstance_crossProjectClone(context map[string]interface{}
 
 				clone {
 					source_project =  "${data.google_project.source_project.project_id}"
-					source_instance_name = data.google_sql_backup_run.backup.instance
+					source_instance_name = data.google_sql_database_instance.source_instance.name
 				}
 
 				deletion_protection = false
@@ -8336,9 +8336,8 @@ func testAccSqlDatabaseInstance_crossProjectClone(context map[string]interface{}
 				}
 			}
 
-			data "google_sql_database_instance" "instance" {
-				instance = "%{original_db_name}"
-				most_recent = true
+			data "google_sql_database_instance" "source_instance" {
+				name = "%{original_db_name}"
 			}
 
 			data "google_compute_network" "servicenet" {
