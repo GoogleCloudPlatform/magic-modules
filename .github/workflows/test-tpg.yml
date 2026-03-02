@@ -1,6 +1,6 @@
 name: Provider Build and Unit Test
 
-permissions: read-all
+permissions: 
 
 env:
   status_suffix: "-build-and-unit-tests"
