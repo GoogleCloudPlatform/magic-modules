@@ -161,3 +161,10 @@ func Base64DiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 func CaseInsensitiveHash(v interface{}) int {
 	return Hashcode(strings.ToLower(v.(string)))
 }
+
+func SuppressFirewallPolicyRuleSrcNetworkScopeDiff(k, old, new string, d *schema.ResourceData) bool {
+	if new == "" && old != "" {
+		return true
+	}
+	return false
+}

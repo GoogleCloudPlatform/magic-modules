@@ -324,6 +324,34 @@ func TestAccComputeNetworkFirewallPolicyRule_disable_enable(t *testing.T) {
 	})
 }
 
+func TestAccComputeNetworkFirewallPolicyRule_srcNetworkScopeUnset(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeNetworkFirewallPolicyRuleDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeNetworkFirewallPolicyRule_withScope(context),
+			},
+			{
+				Config: testAccComputeNetworkFirewallPolicyRule_withoutScope(context),
+			},
+			{
+				ResourceName:            "google_compute_network_firewall_policy_rule.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"firewall_policy"},
+			},
+		},
+	})
+}
+
 func testAccComputeNetworkFirewallPolicyRule_secureTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_security_address_group" "basic_global_networksecurity_address_group" {
@@ -1089,6 +1117,57 @@ resource "google_compute_network_firewall_policy_rule" "fw_policy_rule" {
     layer4_configs {
       ip_protocol = "tcp"
       ports       = [22]
+    }
+  }
+}
+`, context)
+}
+
+func testAccComputeNetworkFirewallPolicyRule_withScope(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_network_firewall_policy" "fw_policy" {
+  provider = google-beta
+  name     = "tf-test-fw-%{random_suffix}"
+}
+
+resource "google_compute_network_firewall_policy_rule" "test" {
+  provider        = google-beta
+  firewall_policy = google_compute_network_firewall_policy.fw_policy.id
+  priority        = 20000
+  action          = "deny"
+  direction       = "INGRESS"
+
+  match {
+    src_network_scope = "INTERNET"
+    src_region_codes  = ["KP", "RU", "CN"]
+
+    layer4_configs {
+      ip_protocol = "all"
+    }
+  }
+}
+`, context)
+}
+
+func testAccComputeNetworkFirewallPolicyRule_withoutScope(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_network_firewall_policy" "fw_policy" {
+  provider = google-beta
+  name     = "tf-test-fw-%{random_suffix}"
+}
+
+resource "google_compute_network_firewall_policy_rule" "test" {
+  provider        = google-beta
+  firewall_policy = google_compute_network_firewall_policy.fw_policy.id
+  priority        = 20000
+  action          = "deny"
+  direction       = "INGRESS"
+
+  match {
+    src_region_codes = ["KP", "RU", "CN"]
+
+    layer4_configs {
+      ip_protocol = "all"
     }
   }
 }

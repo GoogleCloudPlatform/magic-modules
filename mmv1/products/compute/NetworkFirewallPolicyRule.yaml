@@ -154,6 +154,7 @@ properties:
         description: |
           Network scope of the traffic source.
         min_version: beta
+        diff_suppress_func: 'tpgresource.SuppressFirewallPolicyRuleSrcNetworkScopeDiff'
         default_from_api: true
         enum_values:
           - 'UNSPECIFIED'
