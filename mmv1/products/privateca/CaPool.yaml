@@ -52,7 +52,6 @@ custom_code:
 examples:
   - name: 'privateca_capool_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-pool%s", context["random_suffix"])'
     vars:
       name: 'my-pool'
   - name: 'privateca_capool_all_fields'

@@ -491,6 +491,10 @@ func (r *Resource) SetDefault(product *Product) {
 	for _, vf := range r.VirtualFields {
 		vf.SetDefault(r)
 	}
+
+	if r.IamPolicy != nil && r.DeprecationMessage != "" && r.IamPolicy.DeprecationMessage == "" {
+		r.IamPolicy.DeprecationMessage = fmt.Sprintf("The parent resource has been deprecated: %v", r.DeprecationMessage)
+	}
 }
 
 func (r *Resource) Validate() (es []error) {
@@ -1826,17 +1830,7 @@ func (r Resource) IamImportQualifiersForTest() string {
 }
 
 func (r Resource) IamImportQualifiersForTestSample() string {
-	var importFormat string
-	if len(r.IamPolicy.ImportFormat) > 0 {
-		importFormat = r.IamPolicy.ImportFormat[0]
-	} else {
-		importFormat = r.IamPolicy.SelfLink
-		if importFormat == "" {
-			importFormat = r.SelfLinkUrl()
-		}
-	}
-
-	params := r.ExtractIdentifiers(importFormat)
+	params := r.IamImportParams()
 	var importQualifiers []string
 	for i, param := range params {
 		if param == "project" {

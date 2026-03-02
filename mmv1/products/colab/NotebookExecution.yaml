@@ -67,7 +67,6 @@ examples:
   - name: 'colab_notebook_execution_dataform'
     min_version: beta
     primary_resource_id: 'notebook-execution'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-notebook-execution%s", context["random_suffix"])'
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-dataform.iam.gserviceaccount.com"
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"

@@ -1,0 +1,13 @@
+resource "google_developer_connect_connection" "{{$.PrimaryResourceId}}" {
+  location = "us-central1"
+  connection_id = "{{index $.Vars "connection_name"}}"
+
+  http_config {
+    host_uri = "https://devconnectprober.atlassian.net"
+    
+    bearer_token_authentication {
+      token_secret_version = "projects/devconnect-terraform-creds/secrets/http-bearer-token/versions/latest"
+    }
+    
+  }
+}

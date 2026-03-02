@@ -146,7 +146,7 @@ func validateRegexForContents(r *regexp.Regexp, contents string, configPath stri
 // Executes step configuration templates for documentation and tests
 func (s *Step) SetHCLText(sysfs fs.FS) {
 	originalPrefixedVars := s.PrefixedVars
-	// originalVars := s.Vars
+	originalVars := s.Vars
 	originalTestEnvVars := s.TestEnvVars
 	docTestEnvVars := make(map[string]string)
 	docs_defaults := map[string]string{
@@ -216,6 +216,7 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 
 	s.PrefixedVars = testPrefixedVars
 	s.TestEnvVars = testTestEnvVars
+	s.Vars = testVars
 	s.TestHCLText = s.ExecuteTemplate(sysfs)
 	s.TestHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(s.TestHCLText, "\n")
 	// Remove region tags
@@ -225,6 +226,7 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 
 	// Reset the step
 	s.PrefixedVars = originalPrefixedVars
+	s.Vars = originalVars
 	s.TestEnvVars = originalTestEnvVars
 }
 

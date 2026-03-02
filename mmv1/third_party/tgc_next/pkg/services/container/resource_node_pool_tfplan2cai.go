@@ -3,6 +3,7 @@ package container
 import (
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tfplan2cai/converters/cai"
@@ -13,7 +14,7 @@ import (
 	"google.golang.org/api/container/v1"
 )
 
-func NodePoolTfplan2caiConverter() cai.Tfplan2caiConverter {
+func ContainerNodePoolTfplan2caiConverter() cai.Tfplan2caiConverter {
 	return cai.Tfplan2caiConverter{
 		Convert: GetContainerNodePoolCaiObject,
 	}
@@ -21,6 +22,9 @@ func NodePoolTfplan2caiConverter() cai.Tfplan2caiConverter {
 
 func GetContainerNodePoolCaiObject(d tpgresource.TerraformResourceData, config *transport.Config) ([]caiasset.Asset, error) {
 	name, err := cai.AssetName(d, config, "//container.googleapis.com/projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}")
+	if v, ok := d.GetOk("location"); ok && tpgresource.IsZone(v.(string)) {
+		name = strings.Replace(name, "/locations/", "/zones/", 1)
+	}
 	if err != nil {
 		return []caiasset.Asset{}, err
 	}
@@ -281,7 +285,7 @@ func expandContainerNodePoolNodeConfigGuestAccelerator(v interface{}, d tpgresou
 }
 
 func expandContainerNodePoolNodeConfigGuestAcceleratorCount(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
-	return v, nil
+	return fmt.Sprintf("%d", v.(int)), nil
 }
 
 func expandContainerNodePoolNodeConfigGuestAcceleratorType(v interface{}, d tpgresource.TerraformResourceData, config *transport.Config) (interface{}, error) {
