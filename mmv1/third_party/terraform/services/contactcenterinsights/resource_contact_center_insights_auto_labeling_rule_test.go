@@ -54,7 +54,7 @@ func testAccContactCenterInsightsAutoLabelingRule_basic(context map[string]inter
 resource "google_contact_center_insights_auto_labeling_rule" "auto_labeling_rule_basic" {
   display_name = "auto-labeling-rule-display-name-%{random_suffix}"
   description = "Example auto labeling rule"
-  auto_labeling_rule_id = "rule-%{random_suffix}"
+  auto_labeling_rule_id = "rule%{random_suffix}"
   location = "us-central1"
   label_key_type = "LABEL_KEY_TYPE_CUSTOM"
   label_key = "%{resource_name}"
@@ -72,7 +72,7 @@ func testAccContactCenterInsightsAutoLabelingRule_update(context map[string]inte
 resource "google_contact_center_insights_auto_labeling_rule" "auto_labeling_rule_basic" {
   display_name = "auto-labeling-rule-display-name-%{random_suffix}-updated"
   description = "Example auto labeling rule"
-  auto_labeling_rule_id = "rule-%{random_suffix}"
+  auto_labeling_rule_id = "rule%{random_suffix}"
   location = "us-central1"
   label_key_type = "LABEL_KEY_TYPE_CUSTOM"
   label_key = "%{resource_name}"
