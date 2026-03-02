@@ -2370,10 +2370,8 @@ func flattenNodeConfig(v interface{}, _ interface{}) []map[string]interface{} {
 		"labels":                             c["labels"],
 		"resource_labels":                    c["resourceLabels"],
 		"tags":                               c["tags"],
-		"preemptible":                        c["preemptible"],
 		"secondary_boot_disks":               flattenSecondaryBootDisks(c["secondaryBootDisks"]),
 		"storage_pools":                      c["storagePools"],
-		"spot":                               c["spot"],
 		"min_cpu_platform":                   c["minCpuPlatform"],
 		"shielded_instance_config":           flattenShieldedInstanceConfig(c["shieldedInstanceConfig"]),
 		"taint":                              flattenEffectiveTaints(c["taints"]),
@@ -2392,6 +2390,16 @@ func flattenNodeConfig(v interface{}, _ interface{}) []map[string]interface{} {
 		"resource_manager_tags":              flattenResourceManagerTags(c["resourceManagerTags"]),
 		"enable_confidential_storage":        c["enableConfidentialStorage"],
 		"local_ssd_encryption_mode":          c["localSsdEncryptionMode"],
+	}
+
+	// Suppress Default Value
+	if v, ok := c["preemptible"].(bool); ok && v {
+		transformed["preemptible"] = v
+	}
+
+	// Suppress Default Value
+	if v, ok := c["spot"].(bool); ok && v {
+		transformed["spot"] = v
 	}
 
 	if v, ok := c["oauthScopes"].([]interface{}); ok && len(v) > 0 {
@@ -2506,9 +2514,18 @@ func flattenShieldedInstanceConfig(v interface{}) []map[string]interface{} {
 		return nil
 	}
 
-	transformed := map[string]interface{}{
-		"enable_secure_boot":          c["enableSecureBoot"],
-		"enable_integrity_monitoring": c["enableIntegrityMonitoring"],
+	transformed := map[string]interface{}{}
+	// Suppress Default Value
+	if v, ok := c["enableSecureBoot"].(bool); ok && v {
+		transformed["enable_secure_boot"] = v
+	}
+	// Suppress Default Value
+	if v, ok := c["enableIntegrityMonitoring"].(bool); ok && !v {
+		transformed["enable_integrity_monitoring"] = v
+	}
+
+	if len(transformed) == 0 {
+		return nil
 	}
 
 	return []map[string]interface{}{transformed}
@@ -2966,11 +2983,17 @@ func flattenWindowsNodeConfig(v interface{}) []map[string]interface{} {
 	if len(c) == 0 {
 		return nil
 	}
-	transformed := map[string]interface{}{
-		"osversion": c["osVersion"],
+
+	// Suppress Default Value "OS_VERSION_UNSPECIFIED"
+	if osVersion, ok := c["osVersion"].(string); ok && osVersion != "OS_VERSION_UNSPECIFIED" {
+		return []map[string]interface{}{
+			{
+				"osversion": c["osVersion"],
+			},
+		}
 	}
 
-	return []map[string]interface{}{transformed}
+	return nil
 }
 
 func flattenHugepagesConfig(v interface{}) []map[string]interface{} {
