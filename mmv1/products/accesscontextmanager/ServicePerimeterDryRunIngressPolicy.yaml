@@ -14,6 +14,7 @@
 ---
 name: 'ServicePerimeterDryRunIngressPolicy'
 api_resource_type_kind: ServicePerimeter
+api_resource_field: status.ingressPolicies
 description: |
   Manage a single IngressPolicy in the spec (dry-run) configuration for a service perimeter.
   IngressPolicies match requests based on ingressFrom and ingressTo stanzas. For an ingress policy to match,
@@ -231,6 +232,7 @@ properties:
       The name of the Access Policy this resource belongs to.
     ignore_read: true
     output: true
+    client_side: true
   - name: 'etag'
     type: String
     output: true
