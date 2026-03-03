@@ -114,7 +114,7 @@ type Step struct {
 }
 
 func (s *Step) TestStepSlug(productName, resourceName string) string {
-	ret := fmt.Sprintf("%s%s_%sExample", productName, resourceName, google.Camelize(s.Name, "lower"))
+	ret := fmt.Sprintf("%s%s_%s", productName, resourceName, google.Camelize(s.Name, "lower"))
 	return ret
 }
 
