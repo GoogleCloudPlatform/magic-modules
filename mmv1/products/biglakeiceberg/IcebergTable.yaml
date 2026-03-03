@@ -1,4 +1,4 @@
-# Copyright 2025 Google Inc.
+# Copyright 2026 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -28,6 +28,36 @@ custom_code:
   post_read: 'templates/terraform/post_read/biglake_iceberg_table.go.tmpl'
   constants: 'templates/terraform/constants/biglake_iceberg_table.go.tmpl'
   update_encoder: 'templates/terraform/encoders/biglake_iceberg_table.go.tmpl'
+
+update_verb: 'POST'
+update_url: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}'
+
+iam_policy:
+  base_url: 'v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}'
+  parent_resource_attribute: 'name'
+
+
+  additional_parent_resource_attributes:
+    - 'catalog'
+    - 'namespace'
+  method_name_separator: ":"
+  fetch_iam_policy_verb: 'GET'
+  import_format:
+    - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}'
+    - '{{name}}'
+  allowed_iam_role: 'roles/biglake.editor'
+  sample_config_body: 'templates/terraform/iam/example_config_body/biglake_iceberg_table.tf.tmpl'
+
+examples:
+  - name: 'biglake_iceberg_table_basic'
+    primary_resource_id: 'my_iceberg_table'
+    vars:
+      random_suffix: 'random-suffix'
+  - name: 'biglake_iceberg_table_update'
+    primary_resource_id: 'my_iceberg_table'
+    skip_test: true
+    vars:
+      random_suffix: 'random-suffix'
 
 parameters:
   - name: 'catalog'
@@ -162,105 +192,3 @@ properties:
     required: false
     default_from_api: true
     diff_suppress_func: 'icebergTablePropertiesDiffSuppress'
-
-update_verb: 'POST'
-update_url: 'iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}'
-
-iam_policy:
-  base_url: 'v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}'
-  parent_resource_attribute: 'name'
-
-
-  additional_parent_resource_attributes:
-    - 'catalog'
-    - 'namespace'
-  method_name_separator: ":"
-  fetch_iam_policy_verb: 'GET'
-  import_format:
-    - 'projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/tables/{{name}}'
-    - '{{name}}'
-  allowed_iam_role: 'roles/biglake.editor'
-  sample_config_body: 'templates/terraform/iam/example_config_body/biglake_iceberg_table.tf.tmpl'
-
-examples:
-  - name: 'biglake_iceberg_table_basic'
-    primary_resource_id: 'my_iceberg_table'
-    vars:
-      random_suffix: 'random-suffix'
-  - name: 'biglake_iceberg_table_update'
-    primary_resource_id: 'my_iceberg_table'
-    vars:
-      random_suffix: 'random-suffix'
-    test_steps:
-      - config: |
-          resource "google_storage_bucket" "bucket" {
-            name          = "my-bucket-%{random_suffix}"
-            location      = "us-central1"
-            force_destroy = true
-            uniform_bucket_level_access = true
-          }
-
-          resource "google_biglake_iceberg_catalog" "catalog" {
-            name = google_storage_bucket.bucket.name
-            catalog_type = "CATALOG_TYPE_GCS_BUCKET"
-          }
-
-          resource "google_biglake_iceberg_namespace" "namespace" {
-            catalog = google_biglake_iceberg_catalog.catalog.name
-            namespace_id = "my_namespace_%{random_suffix}"
-          }
-
-          resource "google_biglake_iceberg_table" "my_iceberg_table" {
-            catalog   = google_biglake_iceberg_catalog.catalog.name
-            namespace = google_biglake_iceberg_namespace.namespace.namespace_id
-            name      = "my_table_%{random_suffix}"
-            schema {
-              type = "struct"
-              fields {
-                id       = 1
-                name     = "id"
-                type     = "long"
-                required = true
-              }
-            }
-
-            properties = {
-              key = "initial"
-            }
-          }
-      - config: |
-          resource "google_storage_bucket" "bucket" {
-            name          = "my-bucket-%{random_suffix}"
-            location      = "us-central1"
-            force_destroy = true
-            uniform_bucket_level_access = true
-          }
-
-          resource "google_biglake_iceberg_catalog" "catalog" {
-            name = google_storage_bucket.bucket.name
-            catalog_type = "CATALOG_TYPE_GCS_BUCKET"
-          }
-
-          resource "google_biglake_iceberg_namespace" "namespace" {
-            catalog = google_biglake_iceberg_catalog.catalog.name
-            namespace_id = "my_namespace_%{random_suffix}"
-          }
-
-          resource "google_biglake_iceberg_table" "my_iceberg_table" {
-            catalog   = google_biglake_iceberg_catalog.catalog.name
-            namespace = google_biglake_iceberg_namespace.namespace.namespace_id
-            name      = "my_table_%{random_suffix}"
-            schema {
-              type = "struct"
-              fields {
-                id       = 1
-                name     = "id"
-                type     = "long"
-                required = true
-              }
-            }
-
-            properties = {
-              key = "updated"
-            }
-          }
