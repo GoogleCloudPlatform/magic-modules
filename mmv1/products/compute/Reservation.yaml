@@ -17,6 +17,7 @@ api_resource_type_kind: Allocation
 description: |
   Represents a reservation resource. A reservation ensures that capacity is
   held in a specific zone even if the reserved VMs are not running.
+
   Reservations apply only to Compute Engine, Cloud Dataproc, and Google
   Kubernetes Engine VM usage.Reservations do not apply to `f1-micro` or
   `g1-small` machine types, preemptible VMs, sole tenant nodes, or other
@@ -256,6 +257,7 @@ properties:
                     The full or partial URL of the accelerator type to
                     attach to this instance. For example:
                     `projects/my-project/zones/us-central1-c/acceleratorTypes/nvidia-tesla-p100`
+
                     If you are creating an instance template, specify only the accelerator name.
                   required: true
                   immutable: true

@@ -21,6 +21,7 @@ description: |
   operation is marked as DONE when the group is created even if the
   instances in the group have not yet been created. You must separately
   verify the status of the individual instances.
+
   A managed instance group can have up to 1000 VM instances per group.
 # Used as a resource reference
 exclude: true
@@ -90,6 +91,7 @@ properties:
           scheduled to be created or are currently being created. If the
           group fails to create any of these instances, it tries again until
           it creates the instance successfully.
+
           If you have disabled creation retries, this field will not be
           populated; instead, the creatingWithoutRetries field will be
           populated.

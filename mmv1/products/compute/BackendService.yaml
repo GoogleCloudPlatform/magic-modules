@@ -19,7 +19,9 @@ description: |
   traffic for load balancing. This resource is a global backend service,
   appropriate for external load balancing or self-managed internal load balancing.
   For managed internal load balancing, use a regional backend service instead.
+
   Currently self-managed internal load balancing is only available in beta.
+
   ~> **Note:** Recreating a `google_compute_backend_service` that references other dependent resources like `google_compute_url_map` will give a `resourceInUseByAnotherResource` error, when modifying the number of other dependent resources.
   Use `lifecycle.create_before_destroy` on the dependent resources to avoid this type of error as shown in the Dynamic Backends example.
 references:
@@ -159,6 +161,7 @@ properties:
       GENERATED_COOKIE. If set to 0, the cookie is non-persistent and lasts
       only until the end of the browser session (or equivalent). The
       maximum allowed value for TTL is one day.
+
       When the load balancing scheme is INTERNAL, this field is not used.
     include_empty_value_in_cai: true
   - name: 'backend'
@@ -175,9 +178,11 @@ properties:
           type: Enum
           description: |
             Specifies the balancing mode for this backend.
+
             For global HTTP(S) or TCP/SSL load balancing, the default is
             UTILIZATION. Valid values are UTILIZATION, RATE (for HTTP(S)),
             CUSTOM_METRICS (for HTTP(s)) and CONNECTION (for TCP/SSL).
+
             See the [Backend Services Overview](https://cloud.google.com/load-balancing/docs/backend-service#balancing-mode)
             for an explanation of load balancing modes.
           default_value: "UTILIZATION"
@@ -192,6 +197,7 @@ properties:
           description: |
             A multiplier applied to the group's maximum servicing capacity
             (based on UTILIZATION, RATE or CONNECTION).
+
             Default value is 1, which means the group will serve up to 100%
             of its configured capacity (depending on balancingMode). A
             setting of 0 means the group is completely drained, offering
@@ -224,11 +230,14 @@ properties:
             instances from each instance group must live in the same zone as
             the instance group itself. No two backends in a backend service
             are allowed to use same Instance Group resource.
+
             For Network Endpoint Groups this defines list of endpoints. All
             endpoints of Network Endpoint Group must be hosted on instances
             located in the same zone as the Network Endpoint Group.
+
             Backend services cannot mix Instance Group and
             Network Endpoint Group backends.
+
             Note that you must specify an Instance Group or Network Endpoint
             Group resource using the fully-qualified URL, rather than a
             partial URL.
@@ -240,6 +249,7 @@ properties:
           description: |
             The max number of simultaneous connections for the group. Can
             be used with either CONNECTION or UTILIZATION balancing modes.
+
             For CONNECTION mode, either maxConnections or one
             of maxConnectionsPerInstance or maxConnectionsPerEndpoint,
             as appropriate for group type, must be set.
@@ -251,6 +261,7 @@ properties:
             backend instance can handle. This is used to calculate the
             capacity of the group. Can be used in either CONNECTION or
             UTILIZATION balancing modes.
+
             For CONNECTION mode, either maxConnections or
             maxConnectionsPerInstance must be set.
           default_from_api: true
@@ -261,6 +272,7 @@ properties:
             network endpoint can handle. This is used to calculate the
             capacity of the group. Can be used in either CONNECTION or
             UTILIZATION balancing modes.
+
             For CONNECTION mode, either
             maxConnections or maxConnectionsPerEndpoint must be set.
           default_from_api: true
@@ -268,6 +280,7 @@ properties:
           type: Integer
           description: |
             The max requests per second (RPS) of the group.
+
             Can be used with either RATE or UTILIZATION balancing modes,
             but required if RATE mode. For RATE mode, either maxRate or one
             of maxRatePerInstance or maxRatePerEndpoint, as appropriate for
@@ -604,6 +617,7 @@ properties:
               according to query_string_whitelist and
               query_string_blacklist. If neither is set, the entire query
               string will be included.
+
               If false, the query string will be excluded from the cache
               key entirely.
             send_empty_value: true
@@ -619,6 +633,7 @@ properties:
             type: Array
             description: |
               Names of query string parameters to exclude in cache keys.
+
               All other parameters will be included. Either specify
               query_string_whitelist or query_string_blacklist, not both.
               '&' and '=' will be percent encoded and not treated as
@@ -640,6 +655,7 @@ properties:
             type: Array
             description: |
               Names of query string parameters to include in cache keys.
+
               All other parameters will be excluded. Either specify
               query_string_whitelist or query_string_blacklist, not both.
               '&' and '=' will be percent encoded and not treated as
@@ -695,6 +711,7 @@ properties:
           will be considered fresh, defaults to 1hr (3600s). After this
           time period, the response will be revalidated before
           being served.
+
           When serving responses to signed URL requests, Cloud CDN will
           internally behave as though all responses from this backend had a
           "Cache-Control: public, max-age=[TTL]" header, regardless of any
@@ -830,8 +847,10 @@ properties:
       The set of URLs to the HttpHealthCheck or HttpsHealthCheck resource
       for health checking this BackendService. Currently at most one health
       check can be specified.
+
       A health check must be specified unless the backend service uses an internet
       or serverless NEG as a backend.
+
       For internal load balancing, a URL to a HealthCheck resource must be specified instead.
     is_set: true
     set_hash_func: 'tpgresource.SelfLinkRelativePathHash'
@@ -907,10 +926,12 @@ properties:
     description: |
       Specifies the canary migration state. Possible values are PREPARE, TEST_BY_PERCENTAGE, and
       TEST_ALL_TRAFFIC.
+
       To begin the migration from EXTERNAL to EXTERNAL_MANAGED, the state must be changed to
       PREPARE. The state must be changed to TEST_ALL_TRAFFIC before the loadBalancingScheme can be
       changed to EXTERNAL_MANAGED. Optionally, the TEST_BY_PERCENTAGE state can be used to migrate
       traffic by percentage using externalManagedMigrationTestingPercentage.
+
       Rolling back a migration requires the states to be set in reverse order. So changing the
       scheme from EXTERNAL_MANAGED to EXTERNAL requires the state to be set to TEST_ALL_TRAFFIC at
       the same time. Optionally, the TEST_BY_PERCENTAGE state can be used to migrate some traffic
@@ -924,9 +945,12 @@ properties:
     description: |
       Determines the fraction of requests that should be processed by the Global external
       Application Load Balancer.
+
       The value of this field must be in the range [0, 100].
+
       Session affinity options will slightly affect this routing behavior, for more details,
       see: Session Affinity.
+
       This value can only be set if the loadBalancingScheme in the backend service is set to
       EXTERNAL (when using the Classic ALB) and the migration state is TEST_BY_PERCENTAGE.
   - name: 'localityLbPolicy'
@@ -934,24 +958,31 @@ properties:
     description: |
       The load balancing algorithm used within the scope of the locality.
       The possible values are:
+
       * `ROUND_ROBIN`: This is a simple policy in which each healthy backend
                        is selected in round robin order.
+
       * `LEAST_REQUEST`: An O(1) algorithm which selects two random healthy
                          hosts and picks the host which has fewer active requests.
+
       * `RING_HASH`: The ring/modulo hash load balancer implements consistent
                      hashing to backends. The algorithm has the property that the
                      addition/removal of a host from a set of N hosts only affects
                      1/N of the requests.
+
       * `RANDOM`: The load balancer selects a random healthy host.
+
       * `ORIGINAL_DESTINATION`: Backend host is selected based on the client
                                 connection metadata, i.e., connections are opened
                                 to the same address as the destination address of
                                 the incoming connection before the connection
                                 was redirected to the load balancer.
+
       * `MAGLEV`: used as a drop in replacement for the ring hash load balancer.
                   Maglev is not as stable as ring hash but has faster table lookup
                   build times and host selection times. For more information about
                   Maglev, refer to https://ai.google/research/pubs/pub44824
+
       * `WEIGHTED_MAGLEV`: Per-instance weighted Load Balancing via health check
                            reported weights. Only applicable to loadBalancingScheme
                            EXTERNAL. If set, the Backend Service must
@@ -965,21 +996,26 @@ properties:
                            instance either reported a valid weight or had
                            UNAVAILABLE_WEIGHT. Otherwise, Load Balancing remains
                            equal-weight.
+
       * `WEIGHTED_ROUND_ROBIN`: Per-endpoint weighted round-robin Load Balancing using weights computed
                                 from Backend reported Custom Metrics. If set, the Backend Service
                                 responses are expected to contain non-standard HTTP response header field
                                 X-Endpoint-Load-Metrics. The reported metrics
                                 to use for computing the weights are specified via the
                                 backends[].customMetrics fields.
+
       locality_lb_policy is applicable to either:
+
       * A regional backend service with the service_protocol set to HTTP, HTTPS, HTTP2 or H2C,
         and loadBalancingScheme set to INTERNAL_MANAGED.
       * A global backend service with the load_balancing_scheme set to INTERNAL_SELF_MANAGED.
       * A regional backend service with loadBalancingScheme set to EXTERNAL (External Network
         Load Balancing). Only MAGLEV and WEIGHTED_MAGLEV values are possible for External
         Network Load Balancing. The default is MAGLEV.
+
       If session_affinity is not NONE, and locality_lb_policy is not set to MAGLEV, WEIGHTED_MAGLEV,
       or RING_HASH, session affinity settings will not take effect.
+
       Only ROUND_ROBIN and RING_HASH are supported when the backend service is referenced
       by a URL map that is bound to target gRPC proxy that has validate_for_proxyless
       field set to true.
@@ -998,6 +1034,7 @@ properties:
       A list of locality load balancing policies to be used in order of
       preference. Either the policy or the customPolicy field should be set.
       Overrides any value set in the localityLbPolicy field.
+
       localityLbPolicies is only supported when the BackendService is referenced
       by a URL Map that is referenced by a target gRPC proxy that has the
       validateForProxyless field set to true.
@@ -1021,25 +1058,34 @@ properties:
                 The name of a locality load balancer policy to be used. The value
                 should be one of the predefined ones as supported by localityLbPolicy,
                 although at the moment only ROUND_ROBIN is supported.
+
                 This field should only be populated when the customPolicy field is not
                 used.
+
                 Note that specifying the same policy more than once for a backend is
                 not a valid configuration and will be rejected.
+
                 The possible values are:
+
                 * `ROUND_ROBIN`: This is a simple policy in which each healthy backend
                                 is selected in round robin order.
+
                 * `LEAST_REQUEST`: An O(1) algorithm which selects two random healthy
                                   hosts and picks the host which has fewer active requests.
+
                 * `RING_HASH`: The ring/modulo hash load balancer implements consistent
                               hashing to backends. The algorithm has the property that the
                               addition/removal of a host from a set of N hosts only affects
                               1/N of the requests.
+
                 * `RANDOM`: The load balancer selects a random healthy host.
+
                 * `ORIGINAL_DESTINATION`: Backend host is selected based on the client
                                           connection metadata, i.e., connections are opened
                                           to the same address as the destination address of
                                           the incoming connection before the connection
                                           was redirected to the load balancer.
+
                 * `MAGLEV`: used as a drop in replacement for the ring hash load balancer.
                             Maglev is not as stable as ring hash but has faster table lookup
                             build times and host selection times. For more information about
@@ -1065,10 +1111,12 @@ properties:
               type: String
               description: |
                 Identifies the custom policy.
+
                 The value should match the type the custom implementation is registered
                 with on the gRPC clients. It should follow protocol buffer
                 message naming conventions and include the full path (e.g.
                 myorg.CustomLbPolicy). The maximum length is 256 characters.
+
                 Note that specifying the same custom policy more than once for a
                 backend is not a valid configuration and will be rejected.
               required: true

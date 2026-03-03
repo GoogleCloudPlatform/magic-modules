@@ -164,6 +164,7 @@ properties:
             IPsec-encrypted Cloud Interconnect; all Egress or Ingress
             traffic for this VPN Gateway interface will go through the
             specified interconnect attachment resource.
+
             Not currently available publicly.
           immutable: true
           custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'

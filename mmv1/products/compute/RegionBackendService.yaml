@@ -18,6 +18,7 @@ kind: 'compute#backendService'
 description: |
   A Region Backend Service defines a regionally-scoped group of virtual
   machines that will serve traffic for load balancing.
+
   ~> **Note:** Recreating a `google_compute_region_backend_service` that references other dependent resources like `google_compute_instance_group` will give a `resourceInUseByAnotherResource` error, when decreasing the number of other dependent resources.
   Use `lifecycle.create_before_destroy` on the dependent resources to avoid this type of error as shown in the Dynamic Backend Count example.
 references:
@@ -180,6 +181,7 @@ properties:
       GENERATED_COOKIE. If set to 0, the cookie is non-persistent and lasts
       only until the end of the browser session (or equivalent). The
       maximum allowed value for TTL is one day.
+
       When the load balancing scheme is INTERNAL, this field is not used.
   - name: 'backend'
     type: Array
@@ -195,6 +197,7 @@ properties:
           type: Enum
           description: |
             Specifies the balancing mode for this backend.
+
             See the [Backend Services Overview](https://cloud.google.com/load-balancing/docs/backend-service#balancing-mode)
             for an explanation of load balancing modes.
           default_value: "UTILIZATION"
@@ -208,10 +211,12 @@ properties:
           description: |
             A multiplier applied to the group's maximum servicing capacity
             (based on UTILIZATION, RATE or CONNECTION).
+
             ~>**NOTE**: This field cannot be set for
             INTERNAL region backend services (default loadBalancingScheme),
             but is required for non-INTERNAL backend service. The total
             capacity_scaler for all backends must be non-zero.
+
             A setting of 0 means the group is completely drained, offering
             0% of its available Capacity. Valid range is [0.0,1.0].
           send_empty_value: true
@@ -235,13 +240,17 @@ properties:
             instances from each instance group must live in the same zone as
             the instance group itself. No two backends in a backend service
             are allowed to use same Instance Group resource.
+
             For Network Endpoint Groups this defines list of endpoints. All
             endpoints of Network Endpoint Group must be hosted on instances
             located in the same zone as the Network Endpoint Group.
+
             Backend services cannot mix Instance Group and
             Network Endpoint Group backends.
+
             When the `load_balancing_scheme` is INTERNAL, only instance groups
             are supported.
+
             Note that you must specify an Instance Group or Network Endpoint
             Group resource using the fully-qualified URL, rather than a
             partial URL.
@@ -254,6 +263,7 @@ properties:
             The max number of simultaneous connections for the group. Can
             be used with either CONNECTION or UTILIZATION balancing modes.
             Cannot be set for INTERNAL backend services.
+
             For CONNECTION mode, either maxConnections or one
             of maxConnectionsPerInstance or maxConnectionsPerEndpoint,
             as appropriate for group type, must be set.
@@ -263,6 +273,7 @@ properties:
             The max number of simultaneous connections that a single
             backend instance can handle. Cannot be set for INTERNAL backend
             services.
+
             This is used to calculate the capacity of the group.
             Can be used in either CONNECTION or UTILIZATION balancing modes.
             For CONNECTION mode, either maxConnections or
@@ -273,6 +284,7 @@ properties:
             The max number of simultaneous connections that a single backend
             network endpoint can handle. Cannot be set
             for INTERNAL backend services.
+
             This is used to calculate the capacity of the group. Can be
             used in either CONNECTION or UTILIZATION balancing modes. For
             CONNECTION mode, either maxConnections or
@@ -282,6 +294,7 @@ properties:
           description: |
             The max requests per second (RPS) of the group. Cannot be set
             for INTERNAL backend services.
+
             Can be used with either RATE or UTILIZATION balancing modes,
             but required if RATE mode. Either maxRate or one
             of maxRatePerInstance or maxRatePerEndpoint, as appropriate for
@@ -602,6 +615,7 @@ properties:
               according to query_string_whitelist and
               query_string_blacklist. If neither is set, the entire query
               string will be included.
+
               If false, the query string will be excluded from the cache
               key entirely.
             send_empty_value: true
@@ -616,6 +630,7 @@ properties:
             type: Array
             description: |
               Names of query string parameters to exclude in cache keys.
+
               All other parameters will be included. Either specify
               query_string_whitelist or query_string_blacklist, not both.
               '&' and '=' will be percent encoded and not treated as
@@ -635,6 +650,7 @@ properties:
             type: Array
             description: |
               Names of query string parameters to include in cache keys.
+
               All other parameters will be excluded. Either specify
               query_string_whitelist or query_string_blacklist, not both.
               '&' and '=' will be percent encoded and not treated as
@@ -671,6 +687,7 @@ properties:
           will be considered fresh, defaults to 1hr (3600s). After this
           time period, the response will be revalidated before
           being served.
+
           When serving responses to signed URL requests, Cloud CDN will
           internally behave as though all responses from this backend had a
           "Cache-Control: public, max-age=[TTL]" header, regardless of any
@@ -735,6 +752,7 @@ properties:
         type: Integer
         description: |
           Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
+
         default_from_api: true
         send_empty_value: true
   - name: 'connectionDraining'
@@ -826,6 +844,7 @@ properties:
       The set of URLs to HealthCheck resources for health checking
       this RegionBackendService. Currently at most one health
       check can be specified.
+
       A health check must be specified unless the backend service uses an internet
       or serverless NEG as a backend.
     is_set: true
@@ -899,24 +918,31 @@ properties:
     description: |
       The load balancing algorithm used within the scope of the locality.
       The possible values are:
+
       * `ROUND_ROBIN`: This is a simple policy in which each healthy backend
                        is selected in round robin order.
+
       * `LEAST_REQUEST`: An O(1) algorithm which selects two random healthy
                          hosts and picks the host which has fewer active requests.
+
       * `RING_HASH`: The ring/modulo hash load balancer implements consistent
                      hashing to backends. The algorithm has the property that the
                      addition/removal of a host from a set of N hosts only affects
                      1/N of the requests.
+
       * `RANDOM`: The load balancer selects a random healthy host.
+
       * `ORIGINAL_DESTINATION`: Backend host is selected based on the client
                                 connection metadata, i.e., connections are opened
                                 to the same address as the destination address of
                                 the incoming connection before the connection
                                 was redirected to the load balancer.
+
       * `MAGLEV`: used as a drop in replacement for the ring hash load balancer.
                   Maglev is not as stable as ring hash but has faster table lookup
                   build times and host selection times. For more information about
                   Maglev, refer to https://ai.google/research/pubs/pub44824
+
       * `WEIGHTED_MAGLEV`: Per-instance weighted Load Balancing via health check
                            reported weights. Only applicable to loadBalancingScheme
                            EXTERNAL. If set, the Backend Service must
@@ -930,21 +956,26 @@ properties:
                            instance either reported a valid weight or had
                            UNAVAILABLE_WEIGHT. Otherwise, Load Balancing remains
                            equal-weight.
+
       * `WEIGHTED_ROUND_ROBIN`: Per-endpoint weighted round-robin Load Balancing using weights computed
                                 from Backend reported Custom Metrics. If set, the Backend Service
                                 responses are expected to contain non-standard HTTP response header field
                                 X-Endpoint-Load-Metrics. The reported metrics
                                 to use for computing the weights are specified via the
                                 backends[].customMetrics fields.
+
       locality_lb_policy is applicable to either:
+
       * A regional backend service with the service_protocol set to HTTP, HTTPS, HTTP2 or H2C,
         and loadBalancingScheme set to INTERNAL_MANAGED.
       * A global backend service with the load_balancing_scheme set to INTERNAL_SELF_MANAGED.
       * A regional backend service with loadBalancingScheme set to EXTERNAL (External Network
         Load Balancing). Only MAGLEV and WEIGHTED_MAGLEV values are possible for External
         Network Load Balancing. The default is MAGLEV.
+
       If session_affinity is not NONE, and locality_lb_policy is not set to MAGLEV, WEIGHTED_MAGLEV,
       or RING_HASH, session affinity settings will not take effect.
+
       Only ROUND_ROBIN and RING_HASH are supported when the backend service is referenced
       by a URL map that is bound to target gRPC proxy that has validate_for_proxyless
       field set to true.
@@ -1364,7 +1395,9 @@ properties:
         description: |
           Specifies how long to keep a Connection Tracking entry while there is
           no matching traffic (in seconds).
+
           For L4 ILB the minimum(default) is 10 minutes and maximum is 16 hours.
+
           For NLB the minimum(default) is 60 seconds and the maximum is 16 hours.
         default_from_api: true
       - name: 'trackingMode'
@@ -1373,6 +1406,7 @@ properties:
           Specifies the key used for connection tracking. There are two options:
           `PER_CONNECTION`: The Connection Tracking is performed as per the
           Connection Key (default Hash Method) for the specific protocol.
+
           `PER_SESSION`: The Connection Tracking is performed as per the
           configured Session Affinity. It matches the configured Session Affinity.
         default_value: "PER_CONNECTION"
@@ -1383,15 +1417,18 @@ properties:
         type: Enum
         description: |
           Specifies connection persistence when backends are unhealthy.
+
           If set to `DEFAULT_FOR_PROTOCOL`, the existing connections persist on
           unhealthy backends only for connection-oriented protocols (TCP and SCTP)
           and only if the Tracking Mode is PER_CONNECTION (default tracking mode)
           or the Session Affinity is configured for 5-tuple. They do not persist
           for UDP.
+
           If set to `NEVER_PERSIST`, after a backend becomes unhealthy, the existing
           connections on the unhealthy backend are never persisted on the unhealthy
           backend. They are always diverted to newly selected healthy backends
           (unless all backends are unhealthy).
+
           If set to `ALWAYS_PERSIST`, existing connections always persist on
           unhealthy backends regardless of protocol and session affinity. It is
           generally not recommended to use this mode overriding the default.
@@ -1536,8 +1573,10 @@ properties:
         description: |
           Specifies whether fast IP move is enabled, and if so, the mechanism to achieve it.
           Supported values are:
+
           * `DISABLED`: Fast IP Move is disabled. You can only use the haPolicy.leader API to
                         update the leader.
+
           * `GARP_RA`: Provides a method to very quickly define a new network endpoint as the
                        leader. This method is faster than updating the leader using the
                        haPolicy.leader API. Fast IP move works as follows: The VM hosting the

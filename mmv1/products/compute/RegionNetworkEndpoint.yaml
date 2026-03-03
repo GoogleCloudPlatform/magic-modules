@@ -18,6 +18,7 @@ kind: 'compute#networkEndpoint'
 description: |
   A Region network endpoint represents a IP address/FQDN and port combination that is
   part of a specific network endpoint group (NEG).
+
   ~> **NOTE**: Network endpoints cannot be created outside of a network endpoint group.
 references:
   guides:
@@ -117,6 +118,7 @@ properties:
     type: String
     description: |
       IPv4 address external endpoint.
+
       This can only be specified when network_endpoint_type of the NEG is INTERNET_IP_PORT.
   - name: 'networkEndpointId'
     type: Integer
@@ -128,6 +130,7 @@ properties:
     type: String
     description: |
       Fully qualified domain name of network endpoint.
+
       This can only be specified when network_endpoint_type of the NEG is INTERNET_FQDN_PORT.
     at_least_one_of:
       - 'fqdn'

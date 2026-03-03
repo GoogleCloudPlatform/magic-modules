@@ -24,6 +24,7 @@ references:
     'Health checks overview': 'https://cloud.google.com/load-balancing/docs/health-check-concepts'
   api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionHealthSources'
 min_version: beta
+
 # URL for the resource's standard List method. https://google.aip.dev/132
 # Terraform field names enclosed in double curly braces are replaced with
 # the field values from the resource at runtime.
@@ -32,11 +33,13 @@ base_url: 'projects/{{project}}/regions/{{region}}/healthSources'
 # Terraform field names enclosed in double curly braces are replaced with
 # the field values from the resource at runtime.
 self_link: 'projects/{{project}}/regions/{{region}}/healthSources/{{name}}'
+
 # URL for the resource's standard Create method, including query parameters.
 # https://google.aip.dev/133
 # Terraform field names enclosed in double curly braces are replaced with
 # the field values from the resource at runtime.
 create_url: 'projects/{{project}}/regions/{{region}}/healthSources'
+
 # Overrides the URL for the resource's standard Update method. (If unset, the
 # self_link URL is used by default.) https://google.aip.dev/134
 # Terraform field names enclosed in double curly braces are replaced with
@@ -47,6 +50,7 @@ update_verb: 'PATCH'
 # If true, the resource sets an `updateMask` query parameter listing modified
 # fields when updating the resource. If false, it does not.
 update_mask: true
+
 # If true, code for handling long-running operations is generated along with
 # the resource. If false, that code is not generated.
 autogen_async: true
@@ -57,6 +61,7 @@ async:
   # actions: ['create', 'update', 'delete']
   operation:
     base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+
 examples:
   - name: "compute_region_health_source_basic"
     primary_resource_id: "example_test_health_source"
@@ -66,6 +71,7 @@ examples:
     min_version: 'beta'
     test_env_vars:
       project: 'PROJECT_NAME'
+
 parameters:
   - name: 'region'
     type: String
@@ -86,6 +92,7 @@ parameters:
       character must be a lowercase letter, and all following characters must
       be a dash, lowercase letter, or digit, except the last character, which
       cannot be a dash.
+
 properties:
   - name: 'description'
     type: String

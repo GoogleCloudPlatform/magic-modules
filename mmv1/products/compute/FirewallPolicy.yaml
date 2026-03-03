@@ -16,7 +16,9 @@ name: 'FirewallPolicy'
 api_resource_type_kind: FirewallPolicy
 description: |
   Hierarchical firewall policy rules let you create and enforce a consistent firewall policy across your organization. Rules can explicitly allow or deny connections or delegate evaluation to lower level policies. Policies can be created within organizations or folders.
+
   This resource should be generally be used with `google_compute_firewall_policy_association` and `google_compute_firewall_policy_rule`
+
   For more information see the [official documentation](https://cloud.google.com/vpc/docs/firewall-policies)
 references:
   guides:

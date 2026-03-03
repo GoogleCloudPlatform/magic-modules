@@ -18,6 +18,7 @@ api_variant_patterns:
 kind: 'compute#autoscaler'
 description: |
   Represents an Autoscaler resource.
+
   Autoscalers allow you to automatically scale virtual machine instances in
   managed instance groups according to an autoscaling policy that you
   define.
@@ -112,6 +113,7 @@ properties:
       The configuration parameters for the autoscaling algorithm. You can
       define one or more of the policies for an autoscaler: cpuUtilization,
       customMetricUtilizations, and loadBalancingUtilization.
+
       If none of these are specified, the default will be to autoscale based
       on cpuUtilization to 0.6 or 60%.
     required: true
@@ -144,6 +146,7 @@ properties:
           the autoscaler from collecting information when the instance is
           initializing, during which the collected usage would not be
           reliable. The default time autoscaler waits is 60 seconds.
+
           Virtual machine initialization times might vary because of
           numerous factors. We recommend that you test how long an
           instance may take to initialize. To do this, create an instance
@@ -244,10 +247,12 @@ properties:
               The target CPU utilization that the autoscaler should maintain.
               Must be a float value in the range (0, 1]. If not specified, the
               default is 0.6.
+
               If the CPU level is below the target utilization, the autoscaler
               scales down the number of instances until it reaches the minimum
               number of instances you specified or until the average CPU of
               your instances reaches the target utilization.
+
               If the average CPU is above the target utilization, the autoscaler
               scales up until it reaches the maximum number of instances you
               specified or until the average utilization reaches the target
@@ -258,7 +263,9 @@ properties:
             type: String
             description: |
               Indicates whether predictive autoscaling based on CPU metric is enabled. Valid values are:
+
               - NONE (default). No predictive method is used. The autoscaler scales the group to meet current demand based on real-time metrics.
+
               - OPTIMIZE_AVAILABILITY. Predictive autoscaling improves availability by monitoring daily and weekly load patterns and scaling out ahead of anticipated demand.
             custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
             default_value: "NONE"
@@ -275,6 +282,7 @@ properties:
               description: |
                 The identifier (type) of the Stackdriver Monitoring metric.
                 The metric cannot have negative values.
+
                 The metric must have a value type of INT64 or DOUBLE.
               api_name: metric
               required: true
@@ -287,10 +295,12 @@ properties:
                 The autoscaler will keep the number of instances proportional to the
                 value of this metric, the metric itself should not change value due
                 to group resizing.
+
                 For example, a good metric to use with the target is
                 `pubsub.googleapis.com/subscription/num_undelivered_messages`
                 or a custom metric exporting the total number of requests coming to
                 your instances.
+
                 A bad example would be a metric exporting an average or median
                 latency, since this value can't include a chunk assignable to a
                 single instance, it could be better used with utilization_target
@@ -302,6 +312,7 @@ properties:
                 maintain. This must be a positive value. A utilization
                 metric scales number of virtual machines handling requests
                 to increase or decrease proportionally to the metric.
+
                 For example, a good metric to use as a utilizationTarget is
                 www.googleapis.com/compute/instance/network/received_bytes_count.
                 The autoscaler will work to keep this value constant for each
@@ -325,23 +336,28 @@ properties:
                 This filter is used to select a specific TimeSeries for
                 the purpose of autoscaling and to determine whether the metric
                 is exporting per-instance or per-group data.
+
                 You can only use the AND operator for joining selectors.
                 You can only use direct equality comparison operator (=) without
                 any functions for each selector.
                 You can specify the metric in both the filter string and in the
                 metric field. However, if specified in both places, the metric must
                 be identical.
+
                 The monitored resource type determines what kind of values are
                 expected for the metric. If it is a gce_instance, the autoscaler
                 expects the metric to include a separate TimeSeries for each
                 instance in a group. In such a case, you cannot filter on resource
                 labels.
+
                 If the resource type is any other value, the autoscaler expects
                 this metric to contain values that apply to the entire autoscaled
                 instance group and resource label filtering can be performed to
                 point autoscaler at the correct TimeSeries to scale upon.
                 This is called a per-group metric for the purpose of autoscaling.
+
                 If not specified, the type defaults to gce_instance.
+
                 You should provide a filter that is selective enough to pick just
                 one TimeSeries for the autoscaled group or for each of the instances
                 (if you are using gce_instance resource type). If multiple

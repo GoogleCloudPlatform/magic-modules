@@ -17,6 +17,7 @@ description: |
   Represents a future reservation resource in Compute Engine. Future reservations allow users
   to reserve capacity for a specified time window, ensuring that resources are available
   when needed.
+
   Reservations apply only to Compute Engine, Cloud Dataproc, and Google
   Kubernetes Engine VM usage.Reservations do not apply to `f1-micro` or
   `g1-small` machine types, preemptible VMs, sole tenant nodes, or other

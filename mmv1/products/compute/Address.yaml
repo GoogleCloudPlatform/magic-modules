@@ -16,11 +16,13 @@ name: 'Address'
 kind: 'compute#address'
 description: |
   Represents an Address resource.
+
   Each virtual machine instance has an ephemeral internal IP address and,
   optionally, an external IP address. To communicate between instances on
   the same network, you can use an instance's internal IP address. To
   communicate with the Internet and instances outside of the same network,
   you must specify the instance's external IP address.
+
   Internal IP addresses are ephemeral and only belong to an instance for
   the lifetime of the instance; if the instance is deleted and recreated,
   the instance is assigned a new internal IP address, either by Compute
@@ -154,17 +156,23 @@ properties:
     type: String
     description: |
       The purpose of this resource, which can be one of the following values.
+
       * GCE_ENDPOINT for addresses that are used by VM instances, alias IP
       ranges, load balancers, and similar resources.
+
       * SHARED_LOADBALANCER_VIP for an address that can be used by multiple
       internal load balancers.
+
       * VPC_PEERING for addresses that are reserved for VPC peer networks.
+
       * IPSEC_INTERCONNECT for addresses created from a private IP range that
       are reserved for a VLAN attachment in an HA VPN over Cloud Interconnect
       configuration. These addresses are regional resources.
+
       * PRIVATE_SERVICE_CONNECT for a private network address that is used to
       configure Private Service Connect. Only global internal addresses can use
       this purpose.
+
       This should only be set when using an Internal address.
     default_from_api: true
   - name: 'networkTier'

@@ -17,7 +17,9 @@ api_resource_type_kind: InstanceGroupManagerResizeRequest
 min_version: beta
 description: |
   Represents a Regional Managed Instance Group Resize Request
+
   Resize Requests are the Managed Instance Group implementation of Dynamic Workload Scheduler Flex Start.
+
   With Dynamic Workload Scheduler in Flex Start mode, you submit a GPU capacity request for your AI/ML jobs by indicating how many you need, a duration, and your preferred region. Dynamic Workload Scheduler intelligently persists the request; once the capacity becomes available, it automatically provisions your VMs enabling your workloads to run continuously for the entire duration of the capacity allocation.
 references:
   guides:
@@ -40,6 +42,7 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
+
 custom_code:
   custom_delete: 'templates/terraform/custom_delete/compute_rmig_resize_request_delete.go.tmpl'
 # Examples for testing

@@ -16,12 +16,15 @@ name: 'Image'
 kind: 'compute#image'
 description: |
   Represents an Image resource.
+
   Google Compute Engine uses operating system images to create the root
   persistent disks for your instances. You specify an image when you create
   an instance. Images contain a boot loader, an operating system, and a
   root file system. Linux operating system images are also capable of
   running containers on Compute Engine.
+
   Images can be either public or custom.
+
   Public images are provided and maintained by Google, open-source
   communities, and third-party vendors. By default, all projects have
   access to these images and can use them to create instances.  Custom
@@ -144,6 +147,7 @@ properties:
     type: NestedObject
     description: |
       Encrypts the image using a customer-supplied encryption key.
+
       After you encrypt an image with a customer-supplied key, you must
       provide the same key if you use the image later (e.g. to create a
       disk from the image)
@@ -294,6 +298,7 @@ properties:
     description: |
       URL of the source image used to create this image. In order to create an image, you must provide the full or partial
       URL of one of the following:
+
       * The selfLink URL
       * This property
       * The rawDisk.source URL
@@ -342,7 +347,9 @@ properties:
     type: ResourceRef
     description: |
       URL of the source snapshot used to create this image.
+
       In order to create an image, you must provide the full or partial URL of one of the following:
+
       * The selfLink URL
       * This property
       * The sourceImage URL
@@ -364,6 +371,7 @@ properties:
             type: String
             description: |
               The raw content in the secure keys file.
+
               A base64-encoded string.
             required: true
             diff_suppress_func: 'tpgresource.Base64DiffSuppress'
@@ -380,6 +388,7 @@ properties:
               type: String
               description: |
                 The raw content in the secure keys file.
+
                 A base64-encoded string.
               required: true
               diff_suppress_func: 'tpgresource.Base64DiffSuppress'
@@ -396,6 +405,7 @@ properties:
               type: String
               description: |
                 The raw content in the secure keys file.
+
                 A base64-encoded string.
               required: true
               diff_suppress_func: 'tpgresource.Base64DiffSuppress'
@@ -412,6 +422,7 @@ properties:
               type: String
               description: |
                 The raw content in the secure keys file.
+
                 A base64-encoded string.
               required: true
               diff_suppress_func: 'tpgresource.Base64DiffSuppress'

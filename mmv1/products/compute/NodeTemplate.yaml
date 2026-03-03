@@ -135,6 +135,7 @@ properties:
           Type of server binding policy. If `RESTART_NODE_ON_ANY_SERVER`,
           nodes using this template will restart on any physical server
           following a maintenance event.
+
           If `RESTART_NODE_ON_MINIMAL_SERVER`, nodes using this template
           will restart on the same physical server following a maintenance
           event, instead of being live migrated to or restarted on a new

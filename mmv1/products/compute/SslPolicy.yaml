@@ -79,6 +79,7 @@ properties:
       load balancer when negotiating SSL with clients. If using `CUSTOM`,
       the set of SSL features to enable must be specified in the
       `customFeatures` field.
+
       See the [official documentation](https://cloud.google.com/compute/docs/load-balancing/ssl-policies#profilefeaturesupport)
       for information on what cipher suites each profile provides. If
       `CUSTOM` is used, the `custom_features` attribute **must be set**.
@@ -118,6 +119,7 @@ properties:
       `COMPATIBLE`, `MODERN`, `RESTRICTED`, or `CUSTOM`. If using `CUSTOM`,
       the set of SSL features to enable must be specified in the
       `customFeatures` field.
+
       See the [official documentation](https://cloud.google.com/compute/docs/load-balancing/ssl-policies#profilefeaturesupport)
       for which ciphers are available to use. **Note**: this argument
       *must* be present when using the `CUSTOM` profile. This argument

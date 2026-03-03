@@ -129,6 +129,7 @@ properties:
     description: |
       If you use sole-tenant nodes for your workloads, you can use the node
       group autoscaler to automatically manage the sizes of your node groups.
+
       One of `initial_size` or `autoscaling_policy` must be configured on resource creation.
     default_from_api: true
     properties:

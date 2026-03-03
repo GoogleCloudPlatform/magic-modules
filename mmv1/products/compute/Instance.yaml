@@ -88,6 +88,7 @@ properties:
             Specifies whether the disk will be auto-deleted when the
             instance is deleted (but not when the disk is detached from
             the instance).
+
             Tip: Disks should be set to autoDelete=true
             so that leftover disks are not left behind on machine
             deletion.
@@ -204,6 +205,7 @@ properties:
                 The customer-supplied encryption key of the source
                 image. Required if the source image is protected by a
                 customer-supplied encryption key.
+
                 Instance templates do not store customer-supplied
                 encryption keys, so you cannot create disks for
                 instances in a managed instance group if the source
@@ -260,6 +262,7 @@ properties:
           description: |
             Reference to a disk. When creating a new instance,
             one of initializeParams.sourceImage or disks.source is required.
+
             If desired, you can also attach existing non-root
             persistent disks using this property. This field is only
             applicable for persistent disks.
@@ -330,6 +333,7 @@ properties:
     update_url: 'projects/{{project}}/zones/{{zone}}/instances/{{name}}/setLabels'
     update_verb: 'POST'
   # TODO: Implement updating metadata *after* resource is created.
+
   # Expose instance 'metadata' as a simple name/value pair hash. However the API
   # defines metadata as a NestedObject with the following layout:
   #
@@ -671,6 +675,7 @@ properties:
       The status of the instance. One of the following values:
       PROVISIONING, STAGING, RUNNING, STOPPING, SUSPENDING, SUSPENDED,
       and TERMINATED.
+
       As a user, use RUNNING to keep a machine "on" and TERMINATED to
       turn a machine off
     # GCP API shows this as output: true.

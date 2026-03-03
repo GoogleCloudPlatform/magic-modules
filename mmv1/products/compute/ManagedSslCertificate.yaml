@@ -19,6 +19,7 @@ description: |
   An SslCertificate resource, used for HTTPS load balancing.  This resource
   represents a certificate for which the certificate secrets are created and
   managed by Google.
+
   For a resource where you provide the key, see the
   SSL Certificate resource.
 references:
@@ -37,6 +38,7 @@ docs:
     points at the certificate.  Depending on your DNS provider, this may take
     some time, and migrating from self-managed certificates to Google-managed
     certificates may entail some downtime while the certificate provisions.
+
     In conclusion: Be extremely cautious.
 base_url: 'projects/{{project}}/global/sslCertificates'
 has_self_link: true
@@ -103,6 +105,7 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
+
       These are in the same namespace as the managed SSL certificates.
   - name: 'managed'
     type: NestedObject

@@ -17,8 +17,10 @@ kind: 'compute#firewall'
 description: |
   Each network has its own firewall controlling access to and from the
   instances.
+
   All traffic to instances, even from other instances, is blocked by the
   firewall unless firewall rules are created to allow it.
+
   The default network has automatically created firewall rules that are
   shown in default firewall rules. No manually created network has
   automatically created firewall rules except for a default "allow" rule for
@@ -109,6 +111,7 @@ properties:
             is only applicable for UDP or TCP protocol. Each entry must be
             either an integer or a range. If not specified, this rule
             applies to connections through any port.
+
             Example inputs include: [22], [80, 443], and
             ["12345-12349"].
           item_type:
@@ -150,6 +153,7 @@ properties:
             is only applicable for UDP or TCP protocol. Each entry must be
             either an integer or a range. If not specified, this rule
             applies to connections through any port.
+
             Example inputs include: [22], [80, 443], and
             ["12345-12349"].
           item_type:

@@ -26,6 +26,7 @@ base_url: 'projects/{{project}}'
 create_url: 'projects/{{project}}/setCloudArmorTier'
 update_url: 'projects/{{project}}/setCloudArmorTier'
 update_verb: 'POST'
+
 read_query_params: '?fields=cloudArmorTier'
 import_format:
   - 'projects/{{project}}'
