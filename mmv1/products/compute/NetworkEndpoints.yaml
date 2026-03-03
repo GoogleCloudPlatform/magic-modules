@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 ---
 name: 'NetworkEndpoints'
 api_resource_type_kind: NetworkEndpointGroup
@@ -21,10 +20,8 @@ description: |
   part of a specific network endpoint group  (NEG). NEGs are zonal collections
   of these endpoints for GCP resources within a single subnet. **NOTE**:
   Network endpoints cannot be created outside of a network endpoint group.
-
   This resource is authoritative for a single NEG. Any endpoints not specified
   by this resource will be deleted when the resource configuration is applied.
-
   -> **NOTE** In case the Endpoint's Instance is recreated, it's needed to
   perform `apply` twice. To avoid situations like this, please use this resource
   with the lifecycle `replace_triggered_by` method, with the passed Instance's ID.

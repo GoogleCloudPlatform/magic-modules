@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 ---
 name: 'RegionHealthCheck'
 api_resource_type_kind: HealthCheck
@@ -21,7 +20,6 @@ description: |
   Health Checks determine whether instances are responsive and able to do work.
   They are an important part of a comprehensive load balancing configuration,
   as they enable monitoring instances behind load balancers.
-
   Health Checks poll instances at a specified interval. Instances that
   do not respond successfully to some number of probes in a row are marked
   as unhealthy. No new connections are sent to unhealthy instances,
@@ -310,16 +308,12 @@ properties:
         description: |
           Specifies how port is selected for health checking, can be one of the
           following values:
-
             * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
-
             * `USE_NAMED_PORT`: The `portName` is used for health checking.
-
             * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
             network endpoint is used for health checking. For other backends, the
             port or named port specified in the Backend Service is used for health
             checking.
-
           If not specified, HTTP health check follows behavior specified in `port` and
           `portName` fields.
         at_least_one_of:
@@ -436,16 +430,12 @@ properties:
         description: |
           Specifies how port is selected for health checking, can be one of the
           following values:
-
             * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
-
             * `USE_NAMED_PORT`: The `portName` is used for health checking.
-
             * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
             network endpoint is used for health checking. For other backends, the
             port or named port specified in the Backend Service is used for health
             checking.
-
           If not specified, HTTPS health check follows behavior specified in `port` and
           `portName` fields.
         at_least_one_of:
@@ -544,16 +534,12 @@ properties:
         description: |
           Specifies how port is selected for health checking, can be one of the
           following values:
-
             * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
-
             * `USE_NAMED_PORT`: The `portName` is used for health checking.
-
             * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
             network endpoint is used for health checking. For other backends, the
             port or named port specified in the Backend Service is used for health
             checking.
-
           If not specified, TCP health check follows behavior specified in `port` and
           `portName` fields.
         at_least_one_of:
@@ -651,16 +637,12 @@ properties:
         description: |
           Specifies how port is selected for health checking, can be one of the
           following values:
-
             * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
-
             * `USE_NAMED_PORT`: The `portName` is used for health checking.
-
             * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
             network endpoint is used for health checking. For other backends, the
             port or named port specified in the Backend Service is used for health
             checking.
-
           If not specified, SSL health check follows behavior specified in `port` and
           `portName` fields.
         at_least_one_of:
@@ -776,16 +758,12 @@ properties:
         description: |
           Specifies how port is selected for health checking, can be one of the
           following values:
-
             * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
-
             * `USE_NAMED_PORT`: The `portName` is used for health checking.
-
             * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
             network endpoint is used for health checking. For other backends, the
             port or named port specified in the Backend Service is used for health
             checking.
-
           If not specified, HTTP2 health check follows behavior specified in `port` and
           `portName` fields.
         at_least_one_of:
@@ -838,16 +816,12 @@ properties:
         description: |
           Specifies how port is selected for health checking, can be one of the
           following values:
-
             * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
-
             * `USE_NAMED_PORT`: The `portName` is used for health checking.
-
             * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
             network endpoint is used for health checking. For other backends, the
             port or named port specified in the Backend Service is used for health
             checking.
-
           If not specified, gRPC health check follows behavior specified in `port` and
           `portName` fields.
         at_least_one_of:
@@ -864,10 +838,8 @@ properties:
         description: |
           The gRPC service name for the health check.
           The value of grpcServiceName has the following meanings by convention:
-
           * Empty serviceName means the overall status of all services at the backend.
           * Non-empty serviceName means the health of that gRPC service, as defined by the owner of the service.
-
           The grpcServiceName can only be ASCII.
         at_least_one_of:
           - 'grpc_health_check.0.port'
@@ -901,16 +873,12 @@ properties:
         description: |
           Specifies how port is selected for health checking, can be one of the
           following values:
-
             * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
-
             * `USE_NAMED_PORT`: Not supported for GRPC with TLS health checking.
-
             * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
             network endpoint is used for health checking. For other backends, the
             port or named port specified in the Backend Service is used for health
             checking.
-
           If not specified, gRPC health check follows behavior specified in the `port` field.
         at_least_one_of:
           - 'grpc_tls_health_check.0.port'
@@ -925,10 +893,8 @@ properties:
         description: |
           The gRPC service name for the health check.
           The value of grpcServiceName has the following meanings by convention:
-
           * Empty serviceName means the overall status of all services at the backend.
           * Non-empty serviceName means the health of that gRPC service, as defined by the owner of the service.
-
           The grpcServiceName can only be ASCII.
         at_least_one_of:
           - 'grpc_tls_health_check.0.port'

@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 ---
 name: 'OrganizationSecurityPolicy'
 api_resource_type_kind: SecurityPolicy
@@ -85,7 +84,6 @@ properties:
     type: Enum
     description: |
       The type indicates the intended use of the security policy. This field can be set only at resource creation time.
-
       **NOTE** : 'FIREWALL' type is deprecated and will be removed in a future major release. Please use 'google_compute_firewall_policy' instead."
     immutable: true
     default_from_api: true

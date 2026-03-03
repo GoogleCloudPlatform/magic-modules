@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 ---
 name: MachineImage
 description: |
@@ -89,7 +88,6 @@ properties:
     type: NestedObject
     description: |
       Encrypts the machine image using a customer-supplied encryption key.
-
       After you encrypt a machine image with a customer-supplied key, you must
       provide the same key if you use the machine image later (e.g. to create a
       instance from the image)

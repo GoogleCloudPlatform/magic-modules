@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 ---
 name: 'RegionInstanceGroupManager'
 api_variant_patterns:
@@ -23,7 +22,6 @@ description: |
   operation is marked as DONE when the group is created even if the
   instances in the group have not yet been created. You must separately
   verify the status of the individual instances.
-
   A managed instance group can have up to 1000 VM instances per group.
 exclude: true
 references:
@@ -96,7 +94,6 @@ properties:
           scheduled to be created or are currently being created. If the
           group fails to create any of these instances, it tries again until
           it creates the instance successfully.
-
           If you have disabled creation retries, this field will not be
           populated; instead, the creatingWithoutRetries field will be
           populated.

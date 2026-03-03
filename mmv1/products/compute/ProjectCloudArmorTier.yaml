@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 ---
 name: 'ProjectCloudArmorTier'
 api_resource_type_kind: Project
@@ -26,7 +25,6 @@ base_url: 'projects/{{project}}'
 create_url: 'projects/{{project}}/setCloudArmorTier'
 update_url: 'projects/{{project}}/setCloudArmorTier'
 update_verb: 'POST'
-
 read_query_params: '?fields=cloudArmorTier'
 import_format:
   - 'projects/{{project}}'

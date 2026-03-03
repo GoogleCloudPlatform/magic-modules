@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 ---
 name: NodeGroup
 description: |
@@ -129,7 +128,6 @@ properties:
     description: |
       If you use sole-tenant nodes for your workloads, you can use the node
       group autoscaler to automatically manage the sizes of your node groups.
-
       One of `initial_size` or `autoscaling_policy` must be configured on resource creation.
     default_from_api: true
     properties:

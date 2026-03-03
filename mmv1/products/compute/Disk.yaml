@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 ---
 name: 'Disk'
 kind: 'compute#disk'
@@ -20,14 +19,12 @@ description: |
   hardware behind these devices to ensure data redundancy and optimize
   performance for you. Persistent disks are available as either standard
   hard disk drives (HDD) or solid-state drives (SSD).
-
   Persistent disks are located independently from your virtual machine
   instances, so you can detach or move persistent disks to keep your data
   even after you delete your instances. Persistent disk performance scales
   automatically with size, so you can resize your existing persistent disks
   or add more persistent disks to an instance to meet your performance and
   storage space requirements.
-
   Add a persistent disk to your instance when you need reliable and
   affordable storage with consistent performance characteristics.
 references:
@@ -100,7 +97,6 @@ parameters:
       a partial or full URL to the resource. If the snapshot is in another
       project than this disk, you must supply a full URL. For example, the
       following are valid values:
-
       * `https://www.googleapis.com/compute/v1/projects/project/global/snapshots/snapshot`
       * `projects/project/global/snapshots/snapshot`
       * `global/snapshots/snapshot`
@@ -149,7 +145,6 @@ properties:
     description: |
       The source instant snapshot used to create this disk. You can provide this as a partial or full URL to the resource.
       For example, the following are valid values:
-
       * `https://www.googleapis.com/compute/v1/projects/project/zones/zone/instantSnapshots/instantSnapshot`
       * `projects/project/zones/zone/instantSnapshots/instantSnapshot`
       * `zones/zone/instantSnapshots/instantSnapshot`
@@ -178,14 +173,11 @@ properties:
     type: NestedObject
     description: |
       Encrypts the disk using a customer-supplied encryption key.
-
       After you encrypt a disk with a customer-supplied key, you must
       provide the same key if you use the disk later (e.g. to create a disk
       snapshot or an image, or to attach the disk to a virtual machine).
-
       Customer-supplied encryption keys do not protect access to metadata of
       the disk.
-
       If you do not provide an encryption key when creating the disk, then
       the disk will be encrypted using an automatically generated key and
       you do not need to provide a key to use the disk later.
@@ -334,11 +326,9 @@ properties:
       field when creating a persistent disk using the `image` or
       `snapshot` parameter, or specify it alone to create an empty
       persistent disk.
-
       If you specify this field along with `image` or `snapshot`,
       the value must not be less than the size of the image
       or the size of the snapshot.
-
       ~>**NOTE** If you change the size, Terraform updates the disk size
       if upsizing is detected but recreates the disk if downsizing is requested.
       You can add `lifecycle.prevent_destroy` in the config to prevent destroying
@@ -385,7 +375,6 @@ properties:
     description: |
       The source disk used to create this disk. You can provide this as a partial or full URL to the resource.
       For example, the following are valid values:
-
       * https://www.googleapis.com/compute/v1/projects/{project}/zones/{zone}/disks/{disk}
       * https://www.googleapis.com/compute/v1/projects/{project}/regions/{region}/disks/{disk}
       * projects/{project}/zones/{zone}/disks/{disk}
@@ -436,7 +425,6 @@ properties:
     type: Array
     description: |
       Resource policies applied to this disk for automatic snapshot creations.
-
       ~>**NOTE** This value does not support updating the
       resource policy, as resource policies can not be updated more than
       one at a time. Use

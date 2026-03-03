@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 ---
 name: Subnetwork
 description: |
@@ -19,19 +18,16 @@ description: |
   provides connectivity for your Compute Engine virtual machine (VM)
   instances, Container Engine containers, App Engine Flex services, and
   other network-related resources.
-
   Each GCP project contains one or more VPC networks. Each VPC network is a
   global entity spanning all GCP regions. This global VPC network allows VM
   instances and other resources to communicate with each other via internal,
   private IP addresses.
-
   Each VPC network is subdivided into subnets, and each subnet is contained
   within a single region. You can have more than one subnet in a region for
   a given VPC network. Each subnet has a contiguous private RFC1918 IP
   space. You create instances, containers, and the like in these subnets.
   When you create an instance, you must create it in a subnet, and the
   instance draws its internal IP address from that subnet.
-
   Virtual machine (VM) instances in a VPC network can communicate with
   instances in all other subnets of the same VPC network, regardless of
   region, using their RFC1918 private IP addresses. You can isolate portions
@@ -292,7 +288,6 @@ properties:
       contained in this subnetwork. The primary IP of such VM must belong
       to the primary ipCidrRange of the subnetwork. The alias IPs may belong
       to either primary or secondary ranges.
-
       **Note**: This field uses [attr-as-block mode](https://developer.hashicorp.com/terraform/language/attr-as-blocks) to avoid
       breaking users during the 0.12 upgrade. To explicitly send a list of zero objects,
       set `send_secondary_ip_range_if_empty = true`

@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 ---
 name: 'NodeTemplate'
 kind: 'compute#nodeTemplate'
@@ -135,7 +134,6 @@ properties:
           Type of server binding policy. If `RESTART_NODE_ON_ANY_SERVER`,
           nodes using this template will restart on any physical server
           following a maintenance event.
-
           If `RESTART_NODE_ON_MINIMAL_SERVER`, nodes using this template
           will restart on the same physical server following a maintenance
           event, instead of being live migrated to or restarted on a new

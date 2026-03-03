@@ -10,23 +10,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 ---
 name: 'RegionBackendBucket'
 kind: 'compute#backendBucket'
 description: |
   Regional backend buckets allow you to use Google Cloud Storage buckets with
   regional HTTP(S) load balancing.
-
   A regional HTTP(S) load balancer can direct traffic to specified URLs to a
   backend bucket rather than a backend service. It can send requests for
   static content to a Cloud Storage bucket and requests for dynamic content
   to a virtual machine instance.
-
   Regional backend buckets are used with:
   - Regional internal Application Load Balancers
   - Regional external Application Load Balancers
-
   ~> **Note:** Regional backend buckets have important limitations:
   - Cloud CDN cannot be enabled
   - Only public buckets are supported (private bucket access is not available)
@@ -128,11 +124,9 @@ properties:
     type: Enum
     description: |
       Specifies the load balancer type this backend bucket will be used with.
-
       Possible values:
       - 'INTERNAL_MANAGED': for regional internal Application Load Balancers
       - 'EXTERNAL_MANAGED': for regional external Application Load Balancers
-
       This field is required for regional backend buckets.
     enum_values:
       - 'INTERNAL_MANAGED'

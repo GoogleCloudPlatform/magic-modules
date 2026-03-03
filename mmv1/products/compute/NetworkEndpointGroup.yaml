@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 ---
 name: 'NetworkEndpointGroup'
 kind: 'compute#networkEndpointGroup'
@@ -19,13 +18,11 @@ description: |
   collections of IP address and port combinations for GCP resources within a
   single subnet. Each IP address and port combination is called a network
   endpoint.
-
   Network endpoint groups can be used as backends in backend services for
   HTTP(S), TCP proxy, and SSL proxy load balancers. You cannot use NEGs as a
   backend with internal load balancers. Because NEG backends allow you to
   specify IP addresses and ports, you can distribute traffic in a granular
   fashion among applications or containers running within VM instances.
-
   Recreating a network endpoint group that's in use by another resource will give a
   `resourceInUseByAnotherResource` error. Use `lifecycle.create_before_destroy`
   to avoid this type of error.
@@ -106,7 +103,6 @@ properties:
       that 1) have the following load balancing schemes: EXTERNAL, EXTERNAL_MANAGED,
       INTERNAL_MANAGED, and INTERNAL_SELF_MANAGED and 2) support the RATE or
       CONNECTION balancing modes.
-
       Possible values include: GCE_VM_IP, GCE_VM_IP_PORT, NON_GCP_PRIVATE_IP_PORT, INTERNET_IP_PORT, INTERNET_FQDN_PORT, SERVERLESS, and PRIVATE_SERVICE_CONNECT.
     default_value: "GCE_VM_IP_PORT"
     enum_values:

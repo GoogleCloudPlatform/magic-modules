@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 ---
 name: 'InstantSnapshot'
 api_variant_patterns:
@@ -18,9 +17,7 @@ api_variant_patterns:
 kind: 'compute#instantSnapshot'
 description: |
   Represents an instant snapshot resource.
-
   An instant snapshot is an in-place backup of a disk that can be used to rapidly create a new disk in minutes.
-
   Instant snapshots capture data at a specific point in time. They are optimized for rapidly restoring captured
   data to a new disk. Use instant snapshots to quickly recover data in cases where the zone and disk are still intact
   but the data on the disk has been lost or corrupted

@@ -10,15 +10,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 ---
 name: 'ResizeRequest'
 api_resource_type_kind: InstanceGroupManagerResizeRequest
 description: |
   Represents a Managed Instance Group Resize Request
-
   Resize Requests are the Managed Instance Group implementation of Dynamic Workload Scheduler Flex Start.
-
   With Dynamic Workload Scheduler in Flex Start mode, you submit a GPU capacity request for your AI/ML jobs by indicating how many you need, a duration, and your preferred zone. Dynamic Workload Scheduler intelligently persists the request; once the capacity becomes available, it automatically provisions your VMs enabling your workloads to run continuously for the entire duration of the capacity allocation.
 references:
   guides:
@@ -45,7 +42,6 @@ async:
     resource_inside_response: false
 ### Update method ###
 # Resize requests are currently not update-able
-
 ### Delete Method ###
 # Custom delete method to handle resize request cancellations vs. deletions.
 # If a resize request is in the ACCEPTED state, it must be canceled before it can be

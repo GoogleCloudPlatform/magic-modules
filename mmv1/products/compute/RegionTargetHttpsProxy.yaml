@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 ---
 name: 'RegionTargetHttpsProxy'
 api_resource_type_kind: TargetHttpsProxy
@@ -211,7 +210,6 @@ properties:
       INTERNAL_SELF_MANAGED and which with EXTERNAL, EXTERNAL_MANAGED
       loadBalancingScheme consult ServerTlsPolicy documentation.
       If left blank, communications are not encrypted.
-
       If you remove this field from your configuration at the same time as
       deleting or recreating a referenced ServerTlsPolicy resource, you will
       receive a resourceInUseByAnotherResource error. Use lifecycle.create_before_destroy

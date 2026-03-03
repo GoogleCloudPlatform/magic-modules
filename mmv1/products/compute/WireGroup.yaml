@@ -10,13 +10,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 ---
 name: 'WireGroup'
 kind: 'compute#wireGroup'
 description: |
   The WireGroup resource represents a group of redundant wires between interconnects in two different metros. Each WireGroup belongs to a CrossSiteNetwork. A wire group defines endpoints and the wires which exist between them.
-
 references:
   guides:
     'Create a WireGroup': 'https://cloud.google.com/network-connectivity/docs/interconnect/how-to/cross-site/modify-network#add-wire-group'

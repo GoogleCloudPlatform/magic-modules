@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 ---
 name: 'RolloutPlan'
 kind: 'compute#rolloutPlan'
@@ -25,22 +24,18 @@ references:
 base_url: 'projects/{{project}}/global/rolloutPlans'
 has_self_link: true
 immutable: true
-
 create_url: 'projects/{{project}}/global/rolloutPlans'
 create_verb: 'POST'
 delete_url: 'projects/{{project}}/global/rolloutPlans/{{name}}'
-
 autogen_async: true
 async:
   actions: ['create', 'delete']
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/global/operations/{{op_id}}'
-
 examples:
   - name: 'rollout_plan_basic'
     primary_resource_id: 'default'
-
 parameters:
   - name: 'name'
     type: String
@@ -49,7 +44,6 @@ parameters:
     description: |
       Name of the resource. Provided by the client when the resource is created.
       The name must be 1-63 characters long, and comply with RFC1035.
-
 properties:
   - name: 'description'
     type: String
