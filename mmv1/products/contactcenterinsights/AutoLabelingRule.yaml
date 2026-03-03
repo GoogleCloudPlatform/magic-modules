@@ -33,6 +33,8 @@ examples:
     primary_resource_id: 'auto_labeling_rule_basic'
     vars:
       resource_name: 'auto-labeling-rule-basic'
+    test_vars_overrides:
+      'random_suffix': 'strings.ToLower(acctest.RandString(t, 10))'
 autogen_status: QXV0b0xhYmVsaW5nUnVsZQ==
 parameters:
   - name: location
