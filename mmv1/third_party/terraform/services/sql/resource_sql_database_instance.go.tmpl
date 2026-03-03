@@ -1568,7 +1568,8 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		ReplicaConfiguration: expandReplicaConfiguration(d.Get("replica_configuration").([]interface{})),
 	}
 
-	cloneContext, cloneSourceInstance, cloneSourceProject := expandCloneContext(d.Get("clone").([]interface{}))
+	cloneContext, cloneSourceInstance,  := expandCloneContext(d.Get("clone").([]interface{}))
+	cloneSourceProject := fetchSourceProjectForCloneContext(d.Get("clone").([]interface{}))
 	if cloneSourceProject == "" {
 		cloneSourceProject = project
 	}
@@ -1633,10 +1634,14 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		RetryFunc: func() (operr error) {
 			if cloneContext != nil {
 				cloneContext.DestinationInstanceName = name
+				{{- if ne $.TargetVersionName "ga" }}
 				cloneContext.DestinationProject = project
 				cloneContext.DestinationNetwork = network
+				{{- end }}
 				clodeReq := sqladmin.InstancesCloneRequest{CloneContext: cloneContext}
+				{{- if ne $.TargetVersionName "ga" }}
 				op, operr = config.NewSqlAdminClient(userAgent).Instances.Clone(cloneSourceProject, cloneSourceInstance, &clodeReq).Do()
+				{{- end }}
 			} else if pointInTimeRestoreContext != nil {
 				parent := fmt.Sprintf("projects/%s", project)
 				op, operr = config.NewSqlAdminClient(userAgent).Instances.PointInTimeRestore(parent, pointInTimeRestoreContext).Do()
@@ -1862,9 +1867,9 @@ func expandReplicaConfiguration(configured []interface{}) *sqladmin.ReplicaConfi
 	}
 }
 
-func expandCloneContext(configured []interface{}) (*sqladmin.CloneContext, string, string) {
+func expandCloneContext(configured []interface{}) (*sqladmin.CloneContext, string) {
 	if len(configured) == 0 || configured[0] == nil {
-		return nil, "", ""
+		return nil, ""
 	}
 
 	_cloneConfiguration := configured[0].(map[string]interface{})
@@ -1881,8 +1886,18 @@ func expandCloneContext(configured []interface{}) (*sqladmin.CloneContext, strin
 		DatabaseNames:    databaseNames,
 		AllocatedIpRange: _cloneConfiguration["allocated_ip_range"].(string),
 		SourceInstanceDeletionTime: _cloneConfiguration["source_instance_deletion_time"].(string),
-	}, _cloneConfiguration["source_instance_name"].(string), _cloneConfiguration["source_project"].(string)
+	}, _cloneConfiguration["source_instance_name"].(string)
 }
+
+{{- if ne $.TargetVersionName "ga" }}
+func fetchSourceProjectForCloneContext(configured []interface{}) (string) {
+	if len(configured) == 0 || configured[0] == nil {
+		return ""
+	}
+	_cloneConfiguration := configured[0].(map[string]interface{})
+	return _cloneConfiguration["source_project"].(string)
+}
+{{- end }}
 
 func expandMaintenanceWindow(configured []interface{}) *sqladmin.MaintenanceWindow {
 	if len(configured) == 0 || configured[0] == nil {
