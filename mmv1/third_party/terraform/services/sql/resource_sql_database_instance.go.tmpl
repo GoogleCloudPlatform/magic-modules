@@ -1568,7 +1568,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		ReplicaConfiguration: expandReplicaConfiguration(d.Get("replica_configuration").([]interface{})),
 	}
 
-	cloneContext, cloneSourceInstance,  := expandCloneContext(d.Get("clone").([]interface{}))
+	cloneContext, cloneSourceInstance := expandCloneContext(d.Get("clone").([]interface{}))
 	cloneSourceProject := fetchSourceProjectForCloneContext(d.Get("clone").([]interface{}))
 	if cloneSourceProject == "" {
 		cloneSourceProject = project
