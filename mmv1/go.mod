@@ -10,7 +10,6 @@ require (
 require github.com/golang/glog v1.2.5
 
 require (
-	github.com/bazelbuild/rules_go v0.60.0
 	github.com/getkin/kin-openapi v0.127.0
 	github.com/google/go-cmp v0.7.0
 	github.com/otiai10/copy v1.9.0
