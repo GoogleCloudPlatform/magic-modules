@@ -13,7 +13,6 @@
 
 ---
 name: 'ManagedSslCertificate'
-
 api_resource_type_kind: SslCertificate
 kind: 'compute#sslCertificate'
 description: |
