@@ -113,6 +113,12 @@ examples:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
       bucket_name: 'example-bucket'
+  - name: 'pubsub_subscription_push_cloudstorage_text'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+      subscription_name: 'example-subscription'
+      bucket_name: 'example-bucket'
   - name: 'pubsub_subscription_push_cloudstorage_service_account'
     primary_resource_id: 'example'
     vars:
