@@ -1059,9 +1059,6 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
 
 {{ end}}
 func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}) error {
-{{- if and ($.GetAsync) (and (and ($.GetAsync.IsA "OpAsync") $.GetAsync.IncludeProject) ($.GetAsync.Allow "delete")) }}
-    var project string
-{{- end }}
 {{- if $.ExcludeDelete }}
     log.Printf("[WARNING] {{ $.ProductMetadata.Name }}{{" "}}{{ $.Name }} resources" +
     " cannot be deleted from Google Cloud. The resource %s will be removed from Terraform" +
@@ -1070,6 +1067,9 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
 
     return nil
 {{- else }}
+{{- if and ($.GetAsync) (and (and ($.GetAsync.IsA "OpAsync") $.GetAsync.IncludeProject) ($.GetAsync.Allow "delete")) }}
+    var project string
+{{- end }}
     config := meta.(*transport_tpg.Config)
     userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
