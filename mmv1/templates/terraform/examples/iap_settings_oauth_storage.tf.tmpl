@@ -1,0 +1,30 @@
+data "google_project" "project" {
+}
+
+resource "google_compute_region_backend_service" "default" {
+  name                            = "{{index $.Vars "backend_service_name"}}"
+  region                          = "us-central1"
+  health_checks                   = [google_compute_health_check.default.id]
+  connection_draining_timeout_sec = 10
+  session_affinity                = "CLIENT_IP"
+}
+
+resource "google_compute_health_check" "default" {
+  name               = "{{index $.Vars "health_check_name"}}"
+  check_interval_sec = 1
+  timeout_sec        = 1
+
+  tcp_health_check {
+    port = "80"
+  }
+}
+
+resource "google_iap_settings" "{{$.PrimaryResourceId}}" {
+  name = "projects/${data.google_project.project.number}/iap_web/compute-us-central1/services/${google_compute_region_backend_service.default.name}"
+  access_settings {
+    oauth_settings {
+      client_id     = "test-client-id"
+      client_secret = "test-client-secret"
+    }
+  }
+}

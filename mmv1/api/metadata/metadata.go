@@ -14,10 +14,13 @@ func FromResource(r api.Resource) Metadata {
 		ApiServiceName:      r.ProductMetadata.ServiceName(),
 		ApiVersion:          r.ProductMetadata.ServiceVersion(),
 		ApiResourceTypeKind: r.ApiResourceTypeKind,
-		CaiAssetNameFormat:  r.CAIFormatOverride(),
 		ApiVariantPatterns:  r.ApiVariantPatterns,
 		AutogenStatus:       r.AutogenStatus != "",
 		Fields:              FromProperties(r.AllNestedProperties(google.Concat(r.RootProperties(), r.UserVirtualFields()))),
+	}
+
+	if r.CAIFormatOverride() != "" {
+		m.CaiAssetNameFormats = []string{r.CAIFormatOverride()}
 	}
 
 	if m.ApiVersion == "" {
@@ -55,9 +58,9 @@ type Metadata struct {
 	// The API "resource type kind" used for this resource. For example, "Function".
 	ApiResourceTypeKind string `yaml:"api_resource_type_kind"`
 
-	// The custom CAI asset name format for this resource is typically specified (for example, //cloudsql.googleapis.com/projects/{{project}}/instances/{{name}}).
-	// This will only have a value if it's different than the Terraform resource ID format.
-	CaiAssetNameFormat string `yaml:"cai_asset_name_format,omitempty"`
+	// The custom CAI asset name formats for this resource is typically specified (for example, //cloudsql.googleapis.com/projects/{{project}}/instances/{{name}}).
+	// This will only have values if they are different than the Terraform resource ID format.
+	CaiAssetNameFormats []string `yaml:"cai_asset_name_formats,omitempty"`
 
 	// The API URL patterns used by this resource that represent variants. For example, "folders/{folder}/feeds/{feed}". Each pattern must match the value defined
 	// in the API exactly. The use of `api_variant_patterns` is only meaningful when the resource type has multiple parent types available.

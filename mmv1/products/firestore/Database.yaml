@@ -151,6 +151,28 @@ examples:
       - 'project'
       - 'etag'
       - 'deletion_policy'
+  - name: 'firestore_database_data_access'
+    exclude_test: true
+    primary_resource_id: 'firestore_access_database'
+    vars:
+      database_id: 'data-access-database-id'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'project'
+      - 'etag'
+      - 'deletion_policy'
+  - name: 'firestore_database_data_access_test'
+    exclude_docs: true
+    primary_resource_id: 'firestore_access_database_test'
+    vars:
+      database_id: 'data-access-database-id'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'project'
+      - 'etag'
+      - 'deletion_policy'
 virtual_fields:
   - name: 'deletion_policy'
     description: |
@@ -199,7 +221,8 @@ properties:
   - name: 'databaseEdition'
     type: Enum
     description: |
-      The database edition.
+      The database edition. When set to 'ENTERPRISE', then type must be set to
+      'FIRESTORE_NATIVE'.
     required: false
     default_from_api: true
     # Picking a database edition is an irreversible decision
@@ -207,6 +230,36 @@ properties:
     enum_values:
       - 'STANDARD'
       - 'ENTERPRISE'
+  - name: 'firestoreDataAccessMode'
+    type: Enum
+    description: |
+      The Firestore API data access mode to use for this database. Can only be
+      specified for 'ENTERPRISE' edition databases.
+    default_from_api: true
+    immutable: true
+    enum_values:
+      - 'DATA_ACCESS_MODE_ENABLED'
+      - 'DATA_ACCESS_MODE_DISABLED'
+  - name: 'mongodbCompatibleDataAccessMode'
+    type: Enum
+    description: |
+      The MongoDB compatible API data access mode to use for this database. Can
+      only be specified for 'ENTERPRISE' edition databases.
+    default_from_api: true
+    immutable: true
+    enum_values:
+      - 'DATA_ACCESS_MODE_ENABLED'
+      - 'DATA_ACCESS_MODE_DISABLED'
+  - name: 'realtimeUpdatesMode'
+    type: Enum
+    description: |
+      The Realtime Updates mode to use for this database. Can only be specified
+      for 'ENTERPRISE' edition databases.
+    default_from_api: true
+    immutable: true
+    enum_values:
+      - 'REALTIME_UPDATES_MODE_ENABLED'
+      - 'REALTIME_UPDATES_MODE_DISABLED'
   - name: 'concurrencyMode'
     type: Enum
     description: |

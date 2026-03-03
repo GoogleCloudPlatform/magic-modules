@@ -31,12 +31,12 @@ jobs:
           cd repo 
           git config user.name "modular-magician"
           git config user.email "magic-modules@google.com"
-          git fetch origin ${{ github.base_ref }} # Fetch the base branch
-          git merge --no-ff origin/${{ github.base_ref }} # Merge with the base branch
+          git fetch origin ${GITHUB_BASE_REF} # Fetch the base branch
+          git merge --no-ff origin/${GITHUB_BASE_REF} # Merge with the base branch
       - name: Check for invalid version guards
         run: |
           cd repo/tools/template-check
-          tmpls=$(git diff --name-only --diff-filter=d origin/${{ github.base_ref }} ../../*.tmpl | sed 's=^=../../=g')
+          tmpls=$(git diff --name-only --diff-filter=d origin/${GITHUB_BASE_REF} ../../*.tmpl | sed 's=^=../../=g')
           tmpls=${tmpls//$'\n'/,}
           echo $tmpls
           if [[ -n "$tmpls" ]]; then
@@ -57,13 +57,13 @@ jobs:
           cd repo
           git config user.name "modular-magician"
           git config user.email "magic-modules@google.com"
-          git fetch origin ${{ github.base_ref }} # Fetch the base branch
-          git merge --no-ff origin/${{ github.base_ref }} # Merge with the base branch
+          git fetch origin ${GITHUB_BASE_REF} # Fetch the base branch
+          git merge --no-ff origin/${GITHUB_BASE_REF} # Merge with the base branch
       - name: Check new product templates are linked
         id: new_templates
         run: |
           cd repo/tools/template-check
-          newtmplfiles=$(git diff --name-only --diff-filter=A origin/${{ github.base_ref }} HEAD -- ../../mmv1 | grep .tmpl | sed 's=^=../../=g')
+          newtmplfiles=$(git diff --name-only --diff-filter=A origin/${GITHUB_BASE_REF} HEAD -- ../../mmv1 | grep .tmpl | sed 's=^=../../=g')
           if [ ! -z "$newtmplfiles" ]; then
             newtmplfiles=${newtmplfiles//$'\n'/,}
             echo $newtmplfiles
@@ -83,15 +83,15 @@ jobs:
           cd repo
           git config user.name "modular-magician"
           git config user.email "magic-modules@google.com"
-          git fetch origin ${{ github.base_ref }}
-          git merge --no-ff origin/${{ github.base_ref }}
+          git fetch origin ${GITHUB_BASE_REF}
+          git merge --no-ff origin/${GITHUB_BASE_REF}
       - name: Find YAML files to lint
         id: yaml_files
         run: |
           cd repo
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             # For PRs, get only changed files
-            yamlfiles=$(git diff --name-only origin/${{ github.base_ref }} -- mmv1/products)
+            yamlfiles=$(git diff --name-only origin/${GITHUB_BASE_REF} -- mmv1/products)
             if [ ! -z "$yamlfiles" ]; then
               echo "yamlfiles=${yamlfiles//$'\n'/ }" >> $GITHUB_OUTPUT
             fi
@@ -109,7 +109,9 @@ jobs:
         if: ${{ !failure() && steps.yaml_files.outputs.yamlfiles != '' }}
         run: |
           cd repo
-          yamllint -c .yamllint ${{ steps.yaml_files.outputs.yamlfiles }}  
+          yamllint -c .yamllint ${STEPS_YAML_FILES_OUTPUTS_YAMLFILES}
+        env:
+          STEPS_YAML_FILES_OUTPUTS_YAMLFILES: ${{ steps.yaml_files.outputs.yamlfiles }}  
   unit-tests:
     runs-on: ubuntu-22.04
     steps:
@@ -124,8 +126,8 @@ jobs:
           cd repo
           git config user.name "modular-magician"
           git config user.email "magic-modules@google.com"
-          git fetch origin ${{ github.base_ref }} # Fetch the base branch
-          git merge --no-ff origin/${{ github.base_ref }} # Merge with the base branch
+          git fetch origin ${GITHUB_BASE_REF} # Fetch the base branch
+          git merge --no-ff origin/${GITHUB_BASE_REF} # Merge with the base branch
       - name: Set up Go
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:

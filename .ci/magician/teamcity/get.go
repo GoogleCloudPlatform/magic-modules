@@ -18,8 +18,8 @@ package teamcity
 import (
 	"fmt"
 
-	// "regexp"
 	utils "magician/utility"
+	"net/url"
 )
 
 type Build struct {
@@ -54,12 +54,14 @@ type FirstFailed struct {
 	Href string `json:"href"`
 }
 
-func (tc *Client) GetBuilds(state, project, finishCut, startCut string) (Builds, error) {
-	url := fmt.Sprintf("https://hashicorp.teamcity.com/app/rest/builds?locator=state:%s,count:500,tag:cron-trigger,project:%s,branch:refs/heads/nightly-test,queuedDate:(date:%s,condition:before),queuedDate:(date:%s,condition:after)&fields=build(id,buildTypeId,buildConfName,webUrl,number,queuedDate,startDate,finishDate)", state, project, finishCut, startCut)
+func (tc *Client) GetBuilds(params url.Values) (Builds, error) {
+	u, _ := url.Parse("https://hashicorp.teamcity.com/app/rest/builds")
+
+	u.RawQuery = params.Encode()
 
 	var builds Builds
 
-	err := utils.RequestCall(url, "GET", tc.token, &builds, nil)
+	err := utils.RequestCall(u.String(), "GET", tc.token, &builds, nil)
 
 	return builds, err
 }

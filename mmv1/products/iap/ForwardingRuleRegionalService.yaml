@@ -25,7 +25,6 @@ exclude_tgc: true
 examples:
   - name: 'forwarding_rule_region_service_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-forwarding-rule-region-service%s", context["random_suffix"])'
     vars:
       forwarding_rule_region_service_name: 'forwarding-rule-region-service'
       regional_health_check_name: 'tf-test-region-health-check'
