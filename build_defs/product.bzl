@@ -1,3 +1,6 @@
+"""
+Product-related custom build rules for Magic Modules.
+"""
 load("//build_defs:providers.bzl", "ProductInfo", "ResourceInfo", "TpgResourceInfo")
 
 def _mm_product_impl(ctx):
@@ -39,7 +42,8 @@ def _tpg_product_impl(ctx):
         "--output", outputs[0].path
     ],
     inputs = depset([i for i in inputs]),
-    outputs = outputs
+    outputs = outputs,
+    mnemonic = "TpgGenerateProduct"
   )
   if operations:
     operation_go = ctx.actions.declare_file("{}/{}_operation.go".format(product.version, product.name))
@@ -55,7 +59,8 @@ def _tpg_product_impl(ctx):
             "--output", operation_go.path
         ],
         inputs = depset([i for i in inputs]),
-        outputs = [operation_go]
+        outputs = [operation_go],
+        mnemonic = "TpgGenerateProductOperation"
     )
     outputs.append(operation_go)
 

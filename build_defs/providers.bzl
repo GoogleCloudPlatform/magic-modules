@@ -1,3 +1,7 @@
+"""
+Provider definitions for Magic Modules custom build rules.
+"""
+
 ProductInfo = provider(
   "Provider for Magic Modules products.",
   fields = {

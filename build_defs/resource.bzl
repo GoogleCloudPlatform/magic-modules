@@ -1,3 +1,6 @@
+"""
+Resource-related custom build rules for Magic Modules.
+"""
 load("//build_defs:providers.bzl", "ProductInfo", "ResourceInfo", "TpgResourceInfo")
 
 def _mm_resource_impl(ctx):
@@ -49,7 +52,8 @@ def _tpg_resource_impl(ctx):
         "--output", outputs[0].path
     ],
     inputs = depset([i for i in inputs]),
-    outputs = [outputs[0]]
+    outputs = [outputs[0]],
+    mnemonic = "TpgGenerateResource"
   )
   ctx.actions.run(
     executable = ctx.executable._compiler,
@@ -63,7 +67,8 @@ def _tpg_resource_impl(ctx):
         "--output", outputs[1].path
     ],
     inputs = depset([i for i in inputs]),
-    outputs = [outputs[1]]
+    outputs = [outputs[1]],
+    mnemonic = "TpgGenerateResourceMetadata"
   )
   if resource.has_sweeper:
     sweeper_go = ctx.actions.declare_file("{}/{}_sweeper.go".format(product.version, resource_name))
@@ -79,7 +84,8 @@ def _tpg_resource_impl(ctx):
             "--output", sweeper_go.path
         ],
         inputs = depset([i for i in inputs]),
-        outputs = [sweeper_go]
+        outputs = [sweeper_go],
+        mnemonic = "TpgGenerateResourceSweeper"
     )
     outputs.append(sweeper_go)
   return [
