@@ -13,7 +13,6 @@
 
 ---
 name: 'RegionSslPolicy'
-
 api_resource_type_kind: SslPolicy
 kind: 'compute#sslPolicy'
 description: |
