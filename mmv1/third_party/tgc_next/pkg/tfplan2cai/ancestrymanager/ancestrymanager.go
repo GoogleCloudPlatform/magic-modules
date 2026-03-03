@@ -407,7 +407,6 @@ func (*NoOpAncestryManager) SetAncestors(d tpgresource.TerraformResourceData, co
 	return nil
 }
 
-
 func ensurePrefix(s, pre string) string {
 	if strings.HasPrefix(s, pre) {
 		return s

@@ -12,10 +12,10 @@ import (
 
 func NewConfig(ctx context.Context, project, zone, region string, offline bool, userAgent string, client *http.Client) (*transport_tpg.Config, error) {
 	cfg := &transport_tpg.Config{
-		Project:    project,
-		Zone:       zone,
-		Region:     region,
-		UserAgent:  userAgent,
+		Project:   project,
+		Zone:      zone,
+		Region:    region,
+		UserAgent: userAgent,
 	}
 
 	if cfg.Project == "" {
