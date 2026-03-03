@@ -1,6 +1,7 @@
 package contactcenterinsights_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -13,9 +14,9 @@ func TestAccContactCenterInsightsAutoLabelingRule_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":  acctest.RandString(t, 10),
+		"random_suffix":  strings.ToLower(acctest.RandString(t, 10)),
 		"project_number": envvar.GetTestProjectNumberFromEnv(),
-		"resource_name":  "tf-test-rule-" + acctest.RandString(t, 10),
+		"resource_name":  "tf-test-rule-" + strings.ToLower(acctest.RandString(t, 10)),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
