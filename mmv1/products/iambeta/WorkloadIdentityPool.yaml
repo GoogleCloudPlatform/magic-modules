@@ -144,10 +144,18 @@ properties:
       format: `ns/<namespace>/sa/<workload_identifier>`.
       `google_iam_workload_identity_pool_provider`s cannot be created within `TRUST_DOMAIN`
       mode pools.
+      * `SYSTEM_TRUST_DOMAIN`: Pools are managed by Google Cloud services. Neither
+      `google_iam_workload_identity_pool_namespace`s nor `google_iam_workload_identity_pool_provider`s
+      can be created within `SYSTEM_TRUST_DOMAIN` mode pools. All identities within a
+      `SYSTEM_TRUST_DOMAIN` mode pool are in one of the following formats:
+
+          * `spiffe://<trust-domain>/ns/<kubernetes-namespace>/sa/<kubernetes-service-account>`
+          * `spiffe://<trust-domain>/resources/<resource-scope>/<resource-name>`
     min_version: beta
     enum_values:
       - 'FEDERATION_ONLY'
       - 'TRUST_DOMAIN'
+      - 'SYSTEM_TRUST_DOMAIN'
   - name: 'inlineCertificateIssuanceConfig'
     type: NestedObject
     description: |
