@@ -13,7 +13,6 @@
 
 ---
 name: 'InterconnectAttachment'
-
 kind: 'compute#interconnectAttachment'
 description: |
   Represents an InterconnectAttachment (VLAN attachment) resource. For more

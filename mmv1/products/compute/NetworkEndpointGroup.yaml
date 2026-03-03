@@ -13,7 +13,6 @@
 
 ---
 name: 'NetworkEndpointGroup'
-
 kind: 'compute#networkEndpointGroup'
 description: |
   Network endpoint groups (NEGs) are zonal resources that represent
