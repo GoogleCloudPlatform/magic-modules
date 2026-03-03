@@ -1561,11 +1561,11 @@ resource "google_dataproc_cluster" "type_cluster" {
     }
 
     gce_cluster_config {
-      subnetwork = "default-auto"
+      subnetwork = "%s"
     }
   }
 }
-`, bucketName, clusterName, typeConfig,bucketName)
+`, bucketName, clusterName, typeConfig,bucketName,subnetworkName)
 }
 
 func testAccCheckDataprocClusterDestroy(t *testing.T) resource.TestCheckFunc {
@@ -2637,10 +2637,6 @@ resource "google_dataproc_cluster" "master_instance_flexibility_policy" {
   region = "us-central1"
 
   cluster_config {
-    gce_cluster_config {
-      subnetwork = "default-auto"
-    }
-
 
     master_config {
       num_instances = "1"
