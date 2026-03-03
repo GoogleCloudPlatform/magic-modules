@@ -32,6 +32,7 @@ import_format:
   - 'organizations/{{organization}}/locations/{{location}}/settings'
 
 async:
+  include_project: true
   operation:
     timeouts:
       insert_minutes: 10
