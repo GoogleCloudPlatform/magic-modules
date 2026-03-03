@@ -8336,6 +8336,7 @@ func testAccSqlDatabaseInstance_crossProjectClone(context map[string]interface{}
 
 			data "google_sql_database_instance" "source_instance" {
 				name = "%{original_db_name}"
+				project = "${data.google_project.source_project.project_id}"
 			}
 
 			data "google_compute_network" "servicenet" {
