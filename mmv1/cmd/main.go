@@ -2,14 +2,14 @@ package main
 
 import (
 	"flag"
-	"io/fs"
 	"log"
+	"os"
+	"path/filepath"
 	"reflect"
 	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/provider"
-	"github.com/bazelbuild/rules_go/go/runfiles"
 )
 
 var versionFlag = flag.String("version", "", "provider version to generate")
@@ -94,14 +94,11 @@ func main() {
 
 	product.Validate()
 
-	r, err := runfiles.New()
+	wd, err := os.Getwd()
 	if err != nil {
-		log.Fatalf("could not find runfiles: %v", err)
+		log.Fatalf("could not find wd: %v", err)
 	}
-	fsys, err := fs.Sub(r, "_main/mmv1")
-	if err != nil {
-		log.Fatalf("could not open runfiles subdirectory: %v", err)
-	}
+	fsys := os.DirFS(filepath.Join(wd, "mmv1"))
 
 	switch *providerFlag {
 	case "tgc", "tgc_cai2hcl", "tgc_next", "oics":

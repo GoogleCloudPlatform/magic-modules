@@ -32,7 +32,7 @@ def _tpg_resource_impl(ctx):
   product = ctx.attr.resource[ProductInfo]
   resource = ctx.attr.resource[ResourceInfo]
   resource_name = "resource_{}_{}".format(product.name, resource.name)
-  inputs = [product.yaml, resource.yaml]
+  inputs = [product.yaml, resource.yaml] + [f for f in ctx.files._templates]
   outputs = [
     ctx.actions.declare_file("{}/{}.go".format(product.version, resource_name)),
     ctx.actions.declare_file("{}/{}_generated_meta.yaml".format(product.version, resource_name)),
@@ -106,6 +106,9 @@ tpg_resource = rule(
       allow_single_file = True,
       executable = True,
       cfg = "exec",
+    ),
+    "_templates": attr.label(
+      default = Label("//mmv1/templates"),
     ),
   },
 )

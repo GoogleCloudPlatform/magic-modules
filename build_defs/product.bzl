@@ -23,7 +23,8 @@ def _tpg_product_impl(ctx):
   resources = [res[ResourceInfo] for res in ctx.attr.resources]
   tpg_resources = [res[TpgResourceInfo] for res in ctx.attr.resources]
   operations = [res for res in resources if res.has_operation]
-  inputs = [product.yaml] + [res.metadata for res in tpg_resources] + [res.src for res in tpg_resources] + [res.yaml for res in resources]
+  inputs = [product.yaml] + [res.metadata for res in tpg_resources] + [res.src for res in tpg_resources] + [res.yaml for res in resources] + [f for f in ctx.files._templates]
+
   outputs = [
     ctx.actions.declare_file("{}/product.go".format(product.version)),
   ]
@@ -60,7 +61,7 @@ def _tpg_product_impl(ctx):
 
   return [
     ctx.attr.product[ProductInfo],
-    DefaultInfo(files = depset([out for out in outputs])),
+    DefaultInfo(files = depset([out for out in outputs]))
   ]
 
 tpg_product = rule(
@@ -79,6 +80,9 @@ tpg_product = rule(
       allow_single_file = True,
       executable = True,
       cfg = "exec",
+    ),
+    "_templates": attr.label(
+      default = Label("//mmv1/templates"),
     ),
   },
 )
