@@ -47,7 +47,7 @@ jobs:
             export OUTPUT_PATH=$GOPATH/src/github.com/$UPSTREAM_OWNER/$GH_REPO
             GITHUB_PATH=https://x-access-token:$GITHUB_TOKEN@github.com/$UPSTREAM_OWNER/$GH_REPO
             mkdir -p "$(dirname $OUTPUT_PATH)"
-            git clone $GITHUB_PATH $OUTPUT_PATH --branch $BASE_BRANCH
+            git clone --depth 1 $GITHUB_PATH $OUTPUT_PATH --branch $BASE_BRANCH
           }
 
           GH_REPO="${INPUTS_REPO}"
@@ -80,7 +80,7 @@ jobs:
             exit 1
           fi
 
-          (current_dir=$(pwd) && cd $OUTPUT_PATH && zip -r "$current_dir/output.zip" .)
+          (current_dir=$(pwd) && cd $OUTPUT_PATH && zip -r -q "$current_dir/output.zip" . -x "*.git/*")
         env:
           INPUTS_REPO: ${{ inputs.repo  }}
 
