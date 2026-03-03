@@ -46,7 +46,7 @@ examples:
     ignore_read_extra:
       - 'submit'
 custom_code:
-  post_update: 'templates/terraform/post_update/bigquery_analytics_hub_query_template.go.tmpl'
+  post_update: 'templates/terraform/post_create/bigquery_analytics_hub_query_template.go.tmpl'
   pre_update: 'templates/terraform/pre_update/bigquery_analytics_hub_query_template.go.tmpl'
   post_create: 'templates/terraform/post_create/bigquery_analytics_hub_query_template.go.tmpl'
 virtual_fields:
