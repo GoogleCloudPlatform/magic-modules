@@ -1,5 +1,5 @@
 package bigqueryanalyticshub_test
-
+{{- if ne $.TargetVersionName "ga" }}
 import (
 	"testing"
 
@@ -77,3 +77,4 @@ resource "google_bigquery_analytics_hub_query_template" "querytemplate" {
 } 
 `, context)
 }
+{{- end }}
