@@ -1724,8 +1724,8 @@ func TestAccSqlDatabaseInstance_crossProjectClone(t *testing.T) {
 	//acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	cloneSourceProject := envvar.GetTestProjectFromEnv()
-	cloneDestinationProject := acctest.BootstrapProject(t, "tf-cpc-", envvar.GetTestBillingAccountFromEnv(t), []string{"sqladmin.googleapis.com"}).ProjectId
+	cloneDestinationProject := envvar.GetTestProjectFromEnv()
+	cloneSourceProject := acctest.BootstrapProject(t, "tf-cpc-", envvar.GetTestBillingAccountFromEnv(t), []string{"sqladmin.googleapis.com"}).ProjectId
 
 	context := map[string]interface{}{
 		"random_suffix":           acctest.RandString(t, 10),
