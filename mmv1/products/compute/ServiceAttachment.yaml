@@ -13,7 +13,6 @@
 
 ---
 name: 'ServiceAttachment'
-
 kind: 'compute#ServiceAttachment'
 description: |
   Represents a ServiceAttachment resource.

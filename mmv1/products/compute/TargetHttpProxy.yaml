@@ -13,7 +13,6 @@
 
 ---
 name: 'TargetHttpProxy'
-
 kind: 'compute#targetHttpProxy'
 description: |
   Represents a TargetHttpProxy resource, which is used by one or more global

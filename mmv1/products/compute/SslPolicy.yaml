@@ -13,7 +13,6 @@
 
 ---
 name: 'SslPolicy'
-
 kind: 'compute#sslPolicy'
 description: |
   Represents a SSL policy. SSL policies give you the ability to control the

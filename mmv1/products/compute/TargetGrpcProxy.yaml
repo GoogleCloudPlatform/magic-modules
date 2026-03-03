@@ -13,7 +13,6 @@
 
 ---
 name: 'TargetGrpcProxy'
-
 kind: 'compute#targetGrpcProxy'
 description: |
   Represents a Target gRPC Proxy resource. A target gRPC proxy is a component
