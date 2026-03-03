@@ -85,6 +85,63 @@ examples:
       chronicle_id: 'CHRONICLE_ID'
       project_name: 'PROJECT_NAME'
     exclude_import_test: true
+  - name: 'chronicle_feed_basic_manual_update'
+    primary_resource_id: 'example_feed'
+    vars:
+      resource_name: test-feeds
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+      project_name: 'PROJECT_NAME'
+  - name: 'chronicle_feed_gcs_manual_update'
+    primary_resource_id: 'example_feed'
+    vars:
+      resource_name: test-feeds
+      description: test-feeds-description
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+      project_name: 'PROJECT_NAME'
+      project_number: 'PROJECT_NUMBER'
+    ignore_read_extra:
+      - 'feed_service_account'
+  - name: 'chronicle_feed_https_push_manual_update'
+    primary_resource_id: 'example_feed'
+    vars:
+      resource_name: test-feeds
+      description: test-feeds-description
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+      project_name: 'PROJECT_NAME'
+    exclude_import_test: true
+  - name: 'chronicle_feed_basic_manual_update_fail'
+    primary_resource_id: 'example_feed'
+    vars:
+      resource_name: test-feeds
+      chronicle_id_failure: 00000000-0000-0000-0000-000000000000
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+      project_name: 'PROJECT_NAME'
+  - name: 'chronicle_feed_gcs_manual_update_fail'
+    primary_resource_id: 'example_feed'
+    vars:
+      resource_name: test-feeds
+      description: test-feeds-description
+      chronicle_id_failure: 00000000-0000-0000-0000-000000000000
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+      project_name: 'PROJECT_NAME'
+      project_number: 'PROJECT_NUMBER'
+    ignore_read_extra:
+      - 'feed_service_account'
+  - name: 'chronicle_feed_https_push_manual_update_fail'
+    primary_resource_id: 'example_feed'
+    vars:
+      resource_name: test-feeds
+      description: test-feeds-description
+      chronicle_id_failure: 00000000-0000-0000-0000-000000000000
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+      project_name: 'PROJECT_NAME'
+    exclude_import_test: true
 
 exclude_delete: false
 delete_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/feeds/{{feed}}
