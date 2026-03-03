@@ -1,0 +1,1 @@
+sed -i '' -e 's|"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/resourcemanager"|"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/resourcemanager"\n        "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/container"|' mmv1/templates/tgc_next/tfplan2cai/resource_converters.go.tmpl

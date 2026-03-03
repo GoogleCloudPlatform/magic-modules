@@ -10,6 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 ---
 name: "StoragePool"
 description: |
@@ -188,6 +189,7 @@ properties:
     description: |
       Type of the storage pool. For example, the
       following are valid values:
+
       * `https://www.googleapis.com/compute/v1/projects/{project_id}/zones/{zone}/storagePoolTypes/hyperdisk-balanced`
       * `hyperdisk-throughput`
     required: true
@@ -286,6 +288,6 @@ virtual_fields:
       When the field is set to true or unset in Terraform state, a `terraform apply`
       or `terraform destroy` that would delete the StoragePool will fail.
       When the field is set to false, deleting the StoragePool is allowed.
-include_in_tgc_next: true
 custom_code:
   pre_delete: templates/terraform/pre_delete/compute_storage_pool.go.tmpl
+include_in_tgc_next: true
