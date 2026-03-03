@@ -204,6 +204,10 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 		testPrefixedVars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
 	}
 
+	for key := range originalVars {
+		testVars[key] = fmt.Sprintf("%%{%s}", key)
+	}
+
 	// Apply overrides from YAML
 	for key := range s.TestVarsOverrides {
 		testPrefixedVars[key] = fmt.Sprintf("%%{%s}", key)

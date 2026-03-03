@@ -85,6 +85,7 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 	{{- end}}
 	})
 	{{- end }}
+	randomSuffix := acctest.RandString(t, 10)
 
 	{{- range $i, $st := $s.TestSteps }}
 	{{- if eq $i 0 }}
@@ -94,10 +95,13 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 	context_{{ $i }} := map[string]interface{}{
 	{{- end }}
 		{{- template "EnvVarContext" dict "TestEnvVars" $st.TestEnvVars "HasNewLine" false}}
+		{{- range $varKey, $varVal := $st.Vars }}
+		"{{$varKey}}": {{$varVal}},
+		{{- end }}
 		{{- range $varKey, $varVal := $st.TestVarsOverrides }}
 		"{{$varKey}}": {{$varVal}},
 		{{- end }}
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix": randomSuffix,
 	}
 	{{- end }}
 
