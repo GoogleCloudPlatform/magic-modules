@@ -33,7 +33,6 @@ func TestAccApigeeSpace_basicTest(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_apigee_space.primary",
-				ImportStateId:     fmt.Sprintf("organizations/%s/spaces/%s", context["org_id"], context["space_id"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
