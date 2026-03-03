@@ -14,6 +14,7 @@
 ---
 name: 'AccessLevelCondition'
 api_resource_type_kind: AccessLevel
+api_resource_field: basic.conditions
 description: |
   Allows configuring a single access level condition to be appended to an access level's conditions.
   This resource is intended to be used in cases where it is not possible to compile a full list
@@ -255,3 +256,4 @@ properties:
       The name of the Access Policy this resource belongs to.
     ignore_read: true
     output: true
+    client_side: true
