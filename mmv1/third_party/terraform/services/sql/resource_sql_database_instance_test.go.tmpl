@@ -1906,9 +1906,7 @@ func testAccSqlDatabaseInstanceDestroyProducer(t *testing.T) func(s *terraform.S
 				continue
 			}
 
-			project := config.Project
-
-			_, err := config.NewSqlAdminClient(config.UserAgent).Instances.Get(project,
+			_, err := config.NewSqlAdminClient(config.UserAgent).Instances.Get(config.Project,
 				rs.Primary.Attributes["name"]).Do()
 			if err == nil {
 				return fmt.Errorf("Database Instance still exists")
