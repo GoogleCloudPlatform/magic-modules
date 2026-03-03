@@ -10,6 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 ---
 name: "StoragePool"
 description: |
@@ -188,6 +189,7 @@ properties:
     description: |
       Type of the storage pool. For example, the
       following are valid values:
+
       * `https://www.googleapis.com/compute/v1/projects/{project_id}/zones/{zone}/storagePoolTypes/hyperdisk-balanced`
       * `hyperdisk-throughput`
     required: true
