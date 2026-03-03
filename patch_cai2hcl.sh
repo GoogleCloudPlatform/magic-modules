@@ -1,1 +1,0 @@
-sed -i '' -e 's|"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/compute"|"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/compute"\n        "github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/services/container"|' mmv1/templates/tgc_next/cai2hcl/resource_converters.go.tmpl
