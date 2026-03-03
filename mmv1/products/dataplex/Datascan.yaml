@@ -59,7 +59,6 @@ custom_code:
 examples:
   - name: 'dataplex_datascan_basic_profile'
     primary_resource_id: 'basic_profile'
-    primary_resource_name: 'fmt.Sprintf("tf-test-dataprofile-basic%s", context["random_suffix"])'
     vars:
       datascan_name: 'dataprofile-basic'
     test_env_vars:
@@ -81,7 +80,6 @@ examples:
     exclude_docs: true
   - name: 'dataplex_datascan_onetime_profile'
     primary_resource_id: 'onetime_profile'
-    primary_resource_name: 'fmt.Sprintf("tf-test-dataprofile-onetime%s", context["random_suffix"])'
     vars:
       datascan_name: 'dataprofile-onetime'
     test_env_vars:

@@ -1,0 +1,22 @@
+// 1. Check if policy_query exists in the state
+// (It should, because it's required/immutable)
+if v, ok := d.GetOk("policy_query"); ok {
+	// 2. We need to convert the Terraform schema format back to the API map format.
+	// Since 'policy_query' is a nested object, we can use the generated expander function.
+	// Magic Modules generates functions named expand<Resource><Field>.
+	// For 'google_cloud_identity_policy' and field 'policy_query':
+	expandedQuery, err := expandCloudIdentityPolicyPolicyQuery(v, d, meta.(*transport_tpg.Config))
+	if err != nil {
+		return nil, err
+	}
+
+	// 3. Inject it into the request body
+	obj["policyQuery"] = expandedQuery
+}
+
+// 4. Also ensure 'name' is in the body if the API requires it (some do)
+if name, ok := d.GetOk("name"); ok {
+	obj["name"] = name
+}
+
+return obj, nil

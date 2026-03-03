@@ -1937,6 +1937,11 @@ func ResourceContainerCluster() *schema.Resource {
 										Description: `List of secondary ranges names within this subnetwork that can be used for pod IPs.`,
 										Elem: &schema.Schema{Type: schema.TypeString},
 									},
+									"status": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: `Status of the subnetwork, If in draining status, subnet will not be selected for new node pools.`,
+									},
 								},
 
 							},
@@ -2640,6 +2645,14 @@ func ResourceContainerCluster() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Description:      `The Cloud KMS cryptoKey to use for Confidential Hyperdisk on the control plane nodes.`,
+						},
+						"control_plane_disk_encryption_key_versions": {
+							Type:        schema.TypeSet,
+							Computed:    true,
+							Description: `The Cloud KMS cryptoKey versions to use for Confidential Hyperdisk on the control plane nodes.`,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
 						},
 						"gkeops_etcd_backup_encryption_key": {
 							Type:             schema.TypeString,
@@ -5776,6 +5789,7 @@ func expandAdditionalIpRangesConfigs(configured interface{}, d *schema.ResourceD
 		additionalIpRangesConfig = append(additionalIpRangesConfig, &container.AdditionalIPRangesConfig {
 			Subnetwork: subnetwork.RelativeLink(),
 			PodIpv4RangeNames: expandPodIpv4RangeNames(config["pod_ipv4_range_names"]),
+			Status: config["status"].(string),
 		})
 	}
 
@@ -7597,6 +7611,7 @@ func flattenAdditionalIpRangesConfigs(c []*container.AdditionalIPRangesConfig) [
 		outRangeConfig := map[string]interface{} {
 			"subnetwork": rangeConfig.Subnetwork,
 			"pod_ipv4_range_names": rangeConfig.PodIpv4RangeNames,
+			"status": rangeConfig.Status,
 		}
 		outRanges = append(outRanges, outRangeConfig)
 	}
@@ -8133,6 +8148,10 @@ func flattenUserManagedKeysConfig(c *container.UserManagedKeysConfig) []map[stri
 	}
 	if len(c.ServiceAccountVerificationKeys) != 0 {
 		f["service_account_verification_keys"] = schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(c.ServiceAccountVerificationKeys))
+		allEmpty = false
+	}
+	if len(c.ControlPlaneDiskEncryptionKeyVersions) != 0 {
+		f["control_plane_disk_encryption_key_versions"] = schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(c.ControlPlaneDiskEncryptionKeyVersions))
 		allEmpty = false
 	}
 	if allEmpty {

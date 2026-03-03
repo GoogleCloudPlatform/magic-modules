@@ -41,7 +41,6 @@ sweeper:
 examples:
   - name: 'bigquery_analyticshub_listing_subscription_basic'
     primary_resource_id: 'subscription'
-    primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
     region_override: 'US'
     vars:
       data_exchange_id: 'my_data_exchange'

@@ -40,7 +40,6 @@ exclude_tgc: true
 examples:
   - name: 'forwarding_rule_service_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-forwarding-rule-service%s", context["random_suffix"])'
     vars:
       forwarding_rule_service_name: 'forwarding-rule-service'
       target_http_proxy_name: 'target-http-proxy-name'
