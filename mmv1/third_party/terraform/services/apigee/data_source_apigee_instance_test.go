@@ -14,6 +14,7 @@ func TestAccDataSourceApigeeInstance_basic(t *testing.T) {
 
 	context := map[string]interface{}{
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"instance_name":   "tf-test-" + acctest.RandString(t, 10),
 		"location":        envvar.GetTestRegionFromEnv(),
 		"random_suffix":   acctest.RandString(t, 10),
@@ -50,6 +51,7 @@ resource "google_project" "project" {
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"
   billing_account = "%{billing_account}"
+  org_id          = "%{org_id}"
   deletion_policy = "DELETE"
 }
 
