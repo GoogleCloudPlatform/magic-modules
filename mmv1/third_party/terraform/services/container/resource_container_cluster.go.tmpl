@@ -62,6 +62,30 @@ func validateDuration(v interface{}, k string) (ws []string, errors []error) {
 	return
 }
 
+func durationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if old == "" || new == "" {
+		return false
+	}
+	oldDuration, err := time.ParseDuration(old)
+	if err != nil {
+		return false
+	}
+	newDuration, err := time.ParseDuration(new)
+	if err != nil {
+		return false
+	}
+	return oldDuration == newDuration
+}
+
+func validateDuration(v interface{}, k string) (ws []string, errors []error) {
+	s := v.(string)
+	_, err := time.ParseDuration(s)
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q is not a valid duration: %s", k, err))
+	}
+	return
+}
+
 var (
 	instanceGroupManagerURL = regexp.MustCompile(fmt.Sprintf("projects/(%s)/zones/([a-z0-9-]*)/instanceGroupManagers/([^/]*)", verify.ProjectRegex))
 
@@ -163,15 +187,15 @@ var (
 			return true
 		}
 		// Suppress the addition of a fleet block (count changes 0 -> 1) if the "project" field being added is null or empty.
-                if k == "fleet.#" && oldValue == "0" && newValue == "1" { 
-                        // When transitioning from 0->1 blocks, d.Get/d.GetOk effectively reads the 'new' config value.
-                        projectVal, projectIsSet := d.GetOk("fleet.0.project")
-                        if !projectIsSet || projectVal.(string) == "" {
-                                log.Printf("[DEBUG] Suppressing diff for 'fleet.#' (0 -> 1) because fleet.0.project is null or empty in config.\n")
-                                return true
-                        }
-                }
-                return false
+		if k == "fleet.#" && oldValue == "0" && newValue == "1" {
+			// When transitioning from 0->1 blocks, d.Get/d.GetOk effectively reads the 'new' config value.
+			projectVal, projectIsSet := d.GetOk("fleet.0.project")
+			if !projectIsSet || projectVal.(string) == "" {
+				log.Printf("[DEBUG] Suppressing diff for 'fleet.#' (0 -> 1) because fleet.0.project is null or empty in config.\n")
+				return true
+			}
+		}
+		return false
 	})
 
 	suppressDiffForConfidentialNodes = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
@@ -1925,6 +1949,7 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+{{ if ne $.TargetVersionName `ga` -}}
 			"secret_sync_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1963,6 +1988,7 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+{{- end }}
 			"project": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -6384,122 +6410,6 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 		}
 		return policy
 	}
-	if recurringMaintenanceWindow, ok := maintenancePolicy["recurring_maintenance_window"]; ok && len(recurringMaintenanceWindow.([]interface{})) > 0 {
-		rmw := recurringMaintenanceWindow.([]interface{})[0].(map[string]interface{})
-		duration, _ := time.ParseDuration(rmw["window_duration"].(string))
-
-		policy := &container.MaintenancePolicy{
-			Window: &container.MaintenanceWindow{
-				MaintenanceExclusions: exclusions,
-				RecurringMaintenanceWindow: &container.RecurringMaintenanceWindow{
-					WindowStartTime: &container.TimeOfDay{
-						Hours:   int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["hours"].(int)),
-						Minutes: int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["minutes"].(int)),
-						Seconds: int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["seconds"].(int)),
-					},
-					WindowDuration: fmt.Sprintf("%ds", int(duration.Seconds())),
-					Recurrence:     rmw["recurrence"].(string),
-				},
-			},
-			ResourceVersion: resourceVersion,
-		}
-
-		if _, ok := rmw["delay_until"]; ok && len(rmw["delay_until"].([]interface{})) == 1 {
-			policy.Window.RecurringMaintenanceWindow.DelayUntil = &container.Date{
-				Year:  int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["year"].(int)),
-				Month: int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["month"].(int)),
-				Day:   int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["day"].(int)),
-			}
-		}
-		return policy
-	}
-	if recurringMaintenanceWindow, ok := maintenancePolicy["recurring_maintenance_window"]; ok && len(recurringMaintenanceWindow.([]interface{})) > 0 {
-		rmw := recurringMaintenanceWindow.([]interface{})[0].(map[string]interface{})
-		duration, _ := time.ParseDuration(rmw["window_duration"].(string))
-
-		policy := &container.MaintenancePolicy{
-			Window: &container.MaintenanceWindow{
-				MaintenanceExclusions: exclusions,
-				RecurringMaintenanceWindow: &container.RecurringMaintenanceWindow{
-					WindowStartTime: &container.TimeOfDay{
-						Hours:   int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["hours"].(int)),
-						Minutes: int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["minutes"].(int)),
-						Seconds: int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["seconds"].(int)),
-					},
-					WindowDuration: fmt.Sprintf("%ds", int(duration.Seconds())),
-					Recurrence:     rmw["recurrence"].(string),
-				},
-			},
-			ResourceVersion: resourceVersion,
-		}
-
-		if _, ok := rmw["delay_until"]; ok && len(rmw["delay_until"].([]interface{})) == 1 {
-			policy.Window.RecurringMaintenanceWindow.DelayUntil = &container.Date{
-				Year:  int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["year"].(int)),
-				Month: int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["month"].(int)),
-				Day:   int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["day"].(int)),
-			}
-		}
-		return policy
-	}
-	if recurringMaintenanceWindow, ok := maintenancePolicy["recurring_maintenance_window"]; ok && len(recurringMaintenanceWindow.([]interface{})) > 0 {
-		rmw := recurringMaintenanceWindow.([]interface{})[0].(map[string]interface{})
-		duration, _ := time.ParseDuration(rmw["window_duration"].(string))
-
-		policy := &container.MaintenancePolicy{
-			Window: &container.MaintenanceWindow{
-				MaintenanceExclusions: exclusions,
-				RecurringMaintenanceWindow: &container.RecurringMaintenanceWindow{
-					WindowStartTime: &container.TimeOfDay{
-						Hours:   int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["hours"].(int)),
-						Minutes: int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["minutes"].(int)),
-						Seconds: int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["seconds"].(int)),
-					},
-					WindowDuration: fmt.Sprintf("%ds", int(duration.Seconds())),
-					Recurrence:     rmw["recurrence"].(string),
-				},
-			},
-			ResourceVersion: resourceVersion,
-		}
-
-		if _, ok := rmw["delay_until"]; ok && len(rmw["delay_until"].([]interface{})) == 1 {
-			policy.Window.RecurringMaintenanceWindow.DelayUntil = &container.Date{
-				Year:  int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["year"].(int)),
-				Month: int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["month"].(int)),
-				Day:   int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["day"].(int)),
-			}
-		}
-		return policy
-	}
-	if recurringMaintenanceWindow, ok := maintenancePolicy["recurring_maintenance_window"]; ok && len(recurringMaintenanceWindow.([]interface{})) > 0 {
-		rmw := recurringMaintenanceWindow.([]interface{})[0].(map[string]interface{})
-		duration, _ := time.ParseDuration(rmw["window_duration"].(string))
-
-		policy := &container.MaintenancePolicy{
-			Window: &container.MaintenanceWindow{
-				MaintenanceExclusions: exclusions,
-				RecurringMaintenanceWindow: &container.RecurringMaintenanceWindow{
-					WindowStartTime: &container.TimeOfDay{
-						Hours:   int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["hours"].(int)),
-						Minutes: int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["minutes"].(int)),
-						Seconds: int64(rmw["window_start_time"].([]interface{})[0].(map[string]interface{})["seconds"].(int)),
-					},
-					WindowDuration: fmt.Sprintf("%ds", int(duration.Seconds())),
-					Recurrence:     rmw["recurrence"].(string),
-				},
-			},
-			ResourceVersion: resourceVersion,
-		}
-
-		if _, ok := rmw["delay_until"]; ok && len(rmw["delay_until"].([]interface{})) == 1 {
-			policy.Window.RecurringMaintenanceWindow.DelayUntil = &container.Date{
-				Year:  int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["year"].(int)),
-				Month: int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["month"].(int)),
-				Day:   int64(rmw["delay_until"].([]interface{})[0].(map[string]interface{})["day"].(int)),
-			}
-		}
-		return policy
-	}
 	return nil
 }
 
@@ -8383,6 +8293,37 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 				"disruption_budget": budget,
 			},
 		}
+	}
+	if mp.Window.RecurringMaintenanceWindow != nil {
+		window := []map[string]interface{}{
+			{
+				"recurring_maintenance_window": []map[string]interface{}{
+					{
+						"window_start_time": []map[string]interface{}{
+							{
+								"hours":   mp.Window.RecurringMaintenanceWindow.WindowStartTime.Hours,
+								"minutes": mp.Window.RecurringMaintenanceWindow.WindowStartTime.Minutes,
+								"seconds": mp.Window.RecurringMaintenanceWindow.WindowStartTime.Seconds,
+							},
+						},
+						"window_duration": mp.Window.RecurringMaintenanceWindow.WindowDuration,
+						"recurrence":      mp.Window.RecurringMaintenanceWindow.Recurrence,
+					},
+				},
+				"maintenance_exclusion": exclusions,
+			},
+		}
+
+		if mp.Window.RecurringMaintenanceWindow.DelayUntil != nil {
+			window[0]["recurring_maintenance_window"].([]map[string]interface{})[0]["delay_until"] = []map[string]interface{}{
+				{
+					"year":  mp.Window.RecurringMaintenanceWindow.DelayUntil.Year,
+					"month": mp.Window.RecurringMaintenanceWindow.DelayUntil.Month,
+					"day":   mp.Window.RecurringMaintenanceWindow.DelayUntil.Day,
+				},
+			}
+		}
+		return window
 	}
 	if mp.Window.RecurringMaintenanceWindow != nil {
 		window := []map[string]interface{}{
