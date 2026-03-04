@@ -11134,12 +11134,15 @@ resource "google_container_cluster" "with_node_pool_node_drain_config" {
 func testAccContainerCluster_withClusterDisruptionBudget(clusterName, interval, networkName, subnetworkName string) string {
 	maintenancePolicy := ""
 	if len(interval) > 0 {
-	        maintenancePolicy = fmt.Sprintf(`
+		maintenancePolicy = fmt.Sprintf(`
 	maintenance_policy {
-	        disruption_budget {
-	                minor_version_disruption_interval = "%s"
-	                patch_version_disruption_interval = "%s"
-	        }
+		daily_maintenance_window {
+			start_time = "03:00"
+		}
+		disruption_budget {
+			minor_version_disruption_interval = "%s"
+			patch_version_disruption_interval = "%s"
+		}
 	}`, interval, interval)
 	}
 	
