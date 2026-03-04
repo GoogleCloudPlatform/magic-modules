@@ -217,6 +217,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_netblock_ip_ranges":                        resourcemanager.DataSourceGoogleNetblockIpRanges(),
 	{{- if ne $.TargetVersionName "ga" }}
 	"google_observability_folder_settings":             observability.DataSourceObservabilityFolderSettings(),
+	"google_observability_project_settings":            observability.DataSourceObservabilityProjectSettings(),
 	"google_observability_organization_settings":       observability.DataSourceObservabilityOrganizationSettings(),
 	{{- end }}
 	"google_oracle_database_autonomous_database":       oracledatabase.DataSourceOracleDatabaseAutonomousDatabase(),

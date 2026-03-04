@@ -2,7 +2,6 @@ package container
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/converters/utils"
@@ -163,7 +162,6 @@ func flattenEnterpriseConfig(v interface{}) []map[string]interface{} {
 		return nil
 	}
 	transformed := map[string]interface{}{
-		"cluster_tier": ec["clusterTier"],
 		"desired_tier": ec["desiredTier"],
 	}
 
@@ -511,9 +509,7 @@ func flattenPrivateClusterConfig(cpec, pcc, nc interface{}) []map[string]interfa
 				if v, ok := ipEndpointsConfig["enablePublicEndpoint"].(bool); ok {
 					r["enable_private_endpoint"] = !v
 				}
-				r["private_endpoint"] = ipEndpointsConfig["privateEndpoint"]
 				r["private_endpoint_subnetwork"] = ipEndpointsConfig["privateEndpointSubnetwork"]
-				r["public_endpoint"] = ipEndpointsConfig["publicEndpoint"]
 				if v, ok := ipEndpointsConfig["globalAccess"].(bool); ok {
 					r["master_global_access_config"] = []map[string]interface{}{
 						{
@@ -527,7 +523,6 @@ func flattenPrivateClusterConfig(cpec, pcc, nc interface{}) []map[string]interfa
 	// This is the only field that is canonically still in the PrivateClusterConfig message.
 	if pcc != nil {
 		if c, ok := pcc.(map[string]interface{}); ok {
-			r["peering_name"] = c["peeringName"]
 			r["master_ipv4_cidr_block"] = c["masterIpv4CidrBlock"]
 		}
 	}
@@ -864,11 +859,7 @@ func flattenMasterAuth(v interface{}) []map[string]interface{} {
 		return nil
 	}
 
-	transformed := map[string]interface{}{
-		"client_certificate":     a["clientCertificate"],
-		"client_key":             a["clientKey"],
-		"cluster_ca_certificate": a["clusterCaCertificate"],
-	}
+	transformed := make(map[string]interface{}, 0)
 
 	// No version of the GKE API returns the client_certificate_config value.
 	// Instead, we need to infer whether or not it was set based on the
@@ -1020,7 +1011,6 @@ func flattenManagement(v interface{}) []map[string]interface{} {
 	transformed := make(map[string]interface{})
 	transformed["auto_upgrade"] = a["autoUpgrade"]
 	transformed["auto_repair"] = a["autoRepair"]
-	transformed["upgrade_options"] = flattenUpgradeOptions(a["upgradeOptions"])
 
 	return []map[string]interface{}{transformed}
 }
@@ -1268,23 +1258,11 @@ func flattenFleet(v interface{}) []map[string]interface{} {
 		return nil
 	}
 
-	membership, _ := c["membership"].(string)
-
-	// Parse membership_id and membership_location from full membership name.
-	var membership_id, membership_location string
-	membershipRE := regexp.MustCompile(`^(//[a-zA-Z0-9\.\-]+)?/?projects/([^/]+)/locations/([a-zA-Z0-9\-]+)/memberships/([^/]+)$`)
-	if match := membershipRE.FindStringSubmatch(membership); match != nil {
-		membership_id = match[4]
-		membership_location = match[3]
-	}
-
 	transformed := map[string]interface{}{
-		"project":             c["project"],
-		"membership":          membership,
-		"membership_id":       membership_id,
-		"membership_location": membership_location,
-		"pre_registered":      c["preRegistered"],
-		"membership_type":     c["membershipType"],
+		"project":         c["project"],
+		"membership":      c["membership"],
+		"pre_registered":  c["preRegistered"],
+		"membership_type": c["membershipType"],
 	}
 
 	return []map[string]interface{}{transformed}
