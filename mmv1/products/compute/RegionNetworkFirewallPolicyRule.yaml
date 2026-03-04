@@ -102,7 +102,7 @@ examples:
       project_name: 'PROJECT_NAME'
       region: 'REGION'
   - name: 'firewall_policy_rule_target_type_internal_managed_lb_instance_regional'
-    primary_resource_id: 'primary'
+    primary_resource_id: 'internal_managed_lb_rule'
     min_version: "beta"
     vars:
       folder: 'folder'
