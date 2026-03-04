@@ -1571,10 +1571,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	cloneContext, cloneSourceInstance := expandCloneContext(d.Get("clone").([]interface{}))
 	
 	{{- if ne $.TargetVersionName "ga" }}
-	cloneSourceProject := fetchSourceProjectForCloneContext(d.Get("clone").([]interface{}))
-	if cloneSourceProject != "" {
-		project = cloneSourceProject
-	}
+	cloneSourceProject := expandCloneSourceProject(d.Get("clone").([]interface{}))
 	{{- end }}
 	pointInTimeRestoreContext := expandPointInTimeRestoreContext(d.Get("point_in_time_restore_context").([]interface{}))
 
@@ -1642,7 +1639,11 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 				cloneContext.DestinationNetwork = network
 				{{- end }}
 				clodeReq := sqladmin.InstancesCloneRequest{CloneContext: cloneContext}
+				{{- if ne $.TargetVersionName "ga" }}
+				op, operr = config.NewSqlAdminClient(userAgent).Instances.Clone(cloneSourceProject, cloneSourceInstance, &clodeReq).Do()
+				{{- else }}
 				op, operr = config.NewSqlAdminClient(userAgent).Instances.Clone(project, cloneSourceInstance, &clodeReq).Do()
+				{{- end }}
 			} else if pointInTimeRestoreContext != nil {
 				parent := fmt.Sprintf("projects/%s", project)
 				op, operr = config.NewSqlAdminClient(userAgent).Instances.PointInTimeRestore(parent, pointInTimeRestoreContext).Do()
@@ -1891,7 +1892,7 @@ func expandCloneContext(configured []interface{}) (*sqladmin.CloneContext, strin
 }
 
 {{- if ne $.TargetVersionName "ga" }}
-func fetchSourceProjectForCloneContext(configured []interface{}) (string) {
+func expandCloneSourceProject(configured []interface{}) (string) {
 	if len(configured) == 0 || configured[0] == nil {
 		return ""
 	}
