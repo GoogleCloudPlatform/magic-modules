@@ -117,6 +117,7 @@ properties:
           the specified value if the system is overloaded. Default is 1.0.
   - name: trafficFilter
     type: NestedObject
+    custom_flatten: 'templates/terraform/custom_flatten/firebase_ai_logic_traffic_filter.go.tmpl'
     description: Configuration for traffic filtering.
     properties:
       - name: templateOnly
