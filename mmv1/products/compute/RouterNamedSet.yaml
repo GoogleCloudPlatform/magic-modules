@@ -45,8 +45,9 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-custom_code:
-  decoder: 'templates/terraform/decoders/unwrap_router_named_set_resource.go.tmpl'
+nested_query:
+  keys:
+    - resource
 examples:
   - name: 'router_named_set_route_policy'
     primary_resource_id: 'my_prefix_set'
