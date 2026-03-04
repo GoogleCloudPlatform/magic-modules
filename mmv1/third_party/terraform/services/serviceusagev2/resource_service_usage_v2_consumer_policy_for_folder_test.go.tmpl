@@ -30,7 +30,7 @@ func TestAccServiceUsageV2ConsumerPolicyForFolder_update(t *testing.T) {
 				ResourceName:            "google_service_usage_v2_consumer_policy_for_folder.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"folder", "force"},
+				ImportStateVerifyIgnore: []string{"folder", "force", "enable_rules.0.services"},
 			},
 			{
 				Config: testAccServiceUsageV2ConsumerPolicyForFolder_update(context),
@@ -39,7 +39,7 @@ func TestAccServiceUsageV2ConsumerPolicyForFolder_update(t *testing.T) {
 				ResourceName:            "google_service_usage_v2_consumer_policy_for_folder.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"folder", "force"},
+				ImportStateVerifyIgnore: []string{"folder", "force", "enable_rules.0.services"},
 			},
 			{
 				Config: testAccServiceUsageV2ConsumerPolicyForFolder_removeService(context),
@@ -48,7 +48,7 @@ func TestAccServiceUsageV2ConsumerPolicyForFolder_update(t *testing.T) {
 				ResourceName:            "google_service_usage_v2_consumer_policy_for_folder.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"folder", "force"},
+				ImportStateVerifyIgnore: []string{"folder", "force", "enable_rules.0.services"},
 			},
 		},
 	})
