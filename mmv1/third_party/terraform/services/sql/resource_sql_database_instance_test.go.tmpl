@@ -1724,8 +1724,9 @@ func TestAccSqlDatabaseInstance_crossProjectClone(t *testing.T) {
 	//acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	cloneDestinationProject := envvar.GetTestProjectFromEnv()
-	cloneSourceProject := acctest.BootstrapProject(t, "tf-cpc-", envvar.GetTestBillingAccountFromEnv(t), []string{"sqladmin.googleapis.com"}).ProjectId //"sdeekshaa-playground"
+	// cloneDestinationProject := envvar.GetTestProjectFromEnv()
+	cloneSourceProject := envvar.GetTestProjectFromEnv()
+	cloneDestinationProject := acctest.BootstrapProject(t, "tf-cpc-", envvar.GetTestBillingAccountFromEnv(t), []string{"sqladmin.googleapis.com"}).ProjectId //"sdeekshaa-playground"
 
 	context := map[string]interface{}{
 		"random_suffix":           acctest.RandString(t, 10),
@@ -8301,9 +8302,11 @@ data "google_sql_backup_run" "backup" {
 func testAccSqlDatabaseInstance_crossProjectClone(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 			data "google_project" "destination_project" {
+			    provider = google-beta
 				project_id = "%{cloneDestinationProject}"
 			}
 			resource "google_sql_database_instance" "instance" {
+			    provider = google-beta
 				name             = "tf-test-cpc-%{random_suffix}"
 				database_version = "POSTGRES_11"
 				region           = "us-central1"
@@ -8335,6 +8338,7 @@ func testAccSqlDatabaseInstance_crossProjectClone(context map[string]interface{}
 			}
 
 			data "google_sql_database_instance" "source_instance" {
+			    provider = google-beta
 				name = "%{original_db_name}"
 				project = "${data.google_project.source_project.project_id}"
 			}
@@ -8345,6 +8349,7 @@ func testAccSqlDatabaseInstance_crossProjectClone(context map[string]interface{}
 			//}
 
 			data "google_project" "source_project" {
+			    provider = google-beta
 				project_id = "%{cloneSourceProject}"
 			}
 		`, context)
