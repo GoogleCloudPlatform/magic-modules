@@ -139,6 +139,7 @@ properties:
           They cannot be modified after engine creation. If the required subscription tier is search, user with higher license tier like assist can still access the standalone app associated with this engine.
         default_from_api: true
         required: false
+        immutable: true
         enum_values:
           - 'SUBSCRIPTION_TIER_UNSPECIFIED'
           - 'SUBSCRIPTION_TIER_SEARCH'
