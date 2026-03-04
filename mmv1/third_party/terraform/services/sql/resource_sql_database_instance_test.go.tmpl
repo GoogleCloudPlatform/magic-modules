@@ -1725,12 +1725,12 @@ func TestAccSqlDatabaseInstance_crossProjectClone(t *testing.T) {
 	t.Parallel()
 
 	cloneDestinationProject := envvar.GetTestProjectFromEnv()
-	cloneSourceProject := acctest.BootstrapProject(t, "tf-cpc-", envvar.GetTestBillingAccountFromEnv(t), []string{"sqladmin.googleapis.com"}).ProjectId
+	cloneSourceProject := acctest.BootstrapProject(t, "tf-cpc-", envvar.GetTestBillingAccountFromEnv(t), []string{"sqladmin.googleapis.com"}).ProjectId //"sdeekshaa-playground"
 
 	context := map[string]interface{}{
 		"random_suffix":           acctest.RandString(t, 10),
 		"original_db_name":        acctest.BootstrapSharedSQLInstanceBackupRun(t, cloneSourceProject),
-		"destinationNetwork":	   acctest.BootstrapSharedServiceNetworkingConnection(t, "test-cross-project-clone", acctest.ServiceNetworkWithProjectID(cloneDestinationProject)),
+		//"destinationNetwork":	   acctest.BootstrapSharedServiceNetworkingConnection(t, "test-cross-project-clone", acctest.ServiceNetworkWithProjectID(cloneDestinationProject)),
 		"cloneSourceProject":      cloneSourceProject,
 		"cloneDestinationProject": cloneDestinationProject,
 	}
@@ -8313,7 +8313,7 @@ func testAccSqlDatabaseInstance_crossProjectClone(context map[string]interface{}
 					tier = "db-custom-2-3840"
 					edition = "ENTERPRISE"
 					ip_configuration {
-						private_network = data.google_compute_network.servicenet.self_link
+						private_network = "projects/%{cloneDestinationProject}/global/networks/default" //data.google_compute_network.servicenet.self_link
 					}
 					backup_configuration {
 						enabled                        = true
@@ -8339,10 +8339,10 @@ func testAccSqlDatabaseInstance_crossProjectClone(context map[string]interface{}
 				project = "${data.google_project.source_project.project_id}"
 			}
 
-			data "google_compute_network" "servicenet" {
-				name = "%{destinationNetwork}"
-				project = "${data.google_project.destination_project.project_id}"
-			}
+			//data "google_compute_network" "servicenet" {
+			//	name = "%{destinationNetwork}"
+			//	project = "${data.google_project.destination_project.project_id}"
+			//}
 
 			data "google_project" "source_project" {
 				project_id = "%{cloneSourceProject}"
