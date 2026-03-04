@@ -63,6 +63,8 @@ examples:
       # No vars needed, uses default project
     test_env_vars:
       project: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'enable_rules.0.services'
 parameters:
   - name: 'force'
     type: Boolean
@@ -115,5 +117,6 @@ properties:
             The names of the services that are enabled.
             Example: `services/storage.googleapis.com`
           min_version: 'beta'
+          custom_flatten: 'templates/terraform/custom_flatten/consumer_policy_enable_rules_services.go.tmpl'
           item_type:
             type: String

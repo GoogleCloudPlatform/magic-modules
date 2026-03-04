@@ -30,7 +30,7 @@ func TestAccServiceUsageV2ConsumerPolicy_update(t *testing.T) {
 				ResourceName:            "google_service_usage_v2_consumer_policy.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force"},
+				ImportStateVerifyIgnore: []string{"force", "enable_rules.0.services"},
 			},
 			{
 				Config: testAccServiceUsageV2ConsumerPolicy_update(context),
@@ -39,7 +39,7 @@ func TestAccServiceUsageV2ConsumerPolicy_update(t *testing.T) {
 				ResourceName:            "google_service_usage_v2_consumer_policy.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force"},
+				ImportStateVerifyIgnore: []string{"force", "enable_rules.0.services"},
 			},
 			{
 				Config: testAccServiceUsageV2ConsumerPolicy_removeService(context),
@@ -48,7 +48,7 @@ func TestAccServiceUsageV2ConsumerPolicy_update(t *testing.T) {
 				ResourceName:            "google_service_usage_v2_consumer_policy.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force"},
+				ImportStateVerifyIgnore: []string{"force", "enable_rules.0.services"},
 			},
 		},
 	})
