@@ -88,6 +88,8 @@ examples:
     exclude_import_test: true
 
 custom_code:
+  update_encoder: 'templates/terraform/encoders/chronicle_feed_update.go.tmpl'
+  post_update: 'templates/terraform/post_update/chronicle_feed_state.go.tmpl'
   pre_create: 'templates/terraform/pre_create/chronicle_feed_service_account.go.tmpl'
   post_create: 'templates/terraform/post_create/chronicle_feed_generate_secret.go.tmpl'
 virtual_fields:
