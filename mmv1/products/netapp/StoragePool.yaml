@@ -258,3 +258,17 @@ properties:
     immutable: true
     min_version: beta
     default_from_api: true
+  - name: 'mode'
+    type: Enum
+    description: |
+      Mode of the storage pool.
+      The operational mode of the storage pool. ONTAP mode enables operations
+      via ONTAP Mode APIs, while DEFAULT mode enables operations via NetApp Volumes APIs.
+      If not specified during creation, the mode defaults to DEFAULT.
+    enum_values:
+      - 'MODE_UNSPECIFIED'
+      - 'DEFAULT'
+      - 'ONTAP'
+    immutable: true
+    min_version: beta
+    default_from_api: true
