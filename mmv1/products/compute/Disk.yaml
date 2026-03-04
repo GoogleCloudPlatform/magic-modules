@@ -50,13 +50,13 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
-include_in_tgc_next: true
 iam_policy:
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
   import_format:
     - 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
     - '{{name}}'
+include_in_tgc_next: true
 custom_code:
   constants: 'templates/terraform/constants/disk.tmpl'
   encoder: 'templates/terraform/encoders/disk.tmpl'
