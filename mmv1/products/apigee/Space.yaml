@@ -41,13 +41,18 @@ iam_policy:
     - "{{org_id}}/spaces/{{space_id}}"
     - "{{org_id}}/{{space_id}}"
 examples:
-  - name: "apigee_space_basic"
+  - name: "apigee_space_basic_test"
     primary_resource_id: "space"
     vars:
-      name: "my-space"
-      display_name: "My Space"
+      space_id: "tf-test-space"
     test_env_vars:
       org_id: "ORG_ID"
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
+  - name: "apigee_space_basic"
+    exclude_test: true
+  # This is a more verbose version of the above that creates all
+  # the resources needed for the acceptance test.
 parameters:
   - name: "orgId"
     type: String
