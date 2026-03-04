@@ -33,7 +33,6 @@ timeouts:
 examples:
   - name: 'discoveryengine_control_basic'
     primary_resource_id: 'basic'
-    primary_resource_name: 'fmt.Sprintf("tf_test_control%s", context["random_suffix"])'
     vars:
       control_id: 'control-id'
       data_store_id: 'data-store-id'

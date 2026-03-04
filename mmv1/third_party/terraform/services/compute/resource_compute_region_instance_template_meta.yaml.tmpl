@@ -236,6 +236,10 @@ fields:
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'properties.scheduling.skipGuestOsShutdown'
     field: 'scheduling.skip_guest_os_shutdown'
+  - field: 'scheduling.preemption_notice_duration.nanos'
+    api_field: 'properties.scheduling.preemptionNoticeDuration.nanos'
+  - field: 'scheduling.preemption_notice_duration.seconds'
+    api_field: 'properties.scheduling.preemptionNoticeDuration.seconds'
 {{- end }}
   - api_field: 'properties.scheduling.terminationTime'
     field: 'scheduling.termination_time'
