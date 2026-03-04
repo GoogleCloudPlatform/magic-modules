@@ -1565,7 +1565,7 @@ resource "google_dataproc_cluster" "type_cluster" {
     }
   }
 }
-`, bucketName, clusterName, typeConfig,bucketName,subnetworkName)
+`, bucketName, clusterName, typeConfig, bucketName, subnetworkName)
 }
 
 func testAccCheckDataprocClusterDestroy(t *testing.T) resource.TestCheckFunc {
