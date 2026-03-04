@@ -1,0 +1,119 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'UllMirroringCollector'
+description: |-
+  A Mirroring Collector is a logical representation of an appliance that collects
+  mirrored traffic.
+min_version: 'beta'
+id_format: 'projects/{{project}}/locations/{{location}}/ullMirroringCollectors/{{ull_mirroring_collector_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/ullMirroringCollectors'
+self_link: 'projects/{{project}}/locations/{{location}}/ullMirroringCollectors/{{ull_mirroring_collector_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/ullMirroringCollectors?ullMirroringCollectorId={{ull_mirroring_collector_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/ullMirroringCollectors/{{ull_mirroring_collector_id}}'
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+examples:
+  - name: 'network_security_ull_mirroring_collector_basic'
+    config_path: 'templates/terraform/examples/network_security_ull_mirroring_collector_basic.tf.tmpl'
+    primary_resource_id: 'default'
+    vars:
+      network_name: 'example-network'
+      subnetwork_name: 'example-subnet'
+      health_check_name: 'example-hc'
+      backend_service_name: 'example-bs'
+      forwarding_rule_name: 'example-fwr'
+      ull_mirroring_engine_id: 'example-ull-eng'
+      ull_mirroring_collector_id: 'example-ull-col'
+    exclude_test: true
+parameters:
+  - name: 'location'
+    type: String
+    description: |-
+      The cloud location of the collector, e.g. `us-south1-d` or `us-south1-e`.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'ullMirroringCollectorId'
+    type: String
+    description: |-
+      The ID to use for the new collector, which will become the final
+      component of the collector's resource name.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: 'name'
+    type: String
+    description: |-
+      The resource name of this collector, for example:
+      `projects/123456789/locations/us-south1-d/ullMirroringCollectors/my-collector`.
+      See https://google.aip.dev/122 for more details.
+    output: true
+  - name: 'createTime'
+    type: String
+    description: |-
+      The timestamp when the resource was created.
+      See https://google.aip.dev/148#timestamps.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |-
+      The timestamp when the resource was most recently updated.
+      See https://google.aip.dev/148#timestamps.
+    output: true
+  - name: 'engine'
+    type: String
+    description: |-
+      The engine resource to which this collector points to, for example:
+      `projects/123456789/locations/us-south1-d/ullMirroringEngines/my-engine`.
+    immutable: true
+    required: true
+  - name: 'forwardingRule'
+    type: String
+    description: |-
+      The regional load balancer which the mirrored traffic should be forwarded
+      to, for example:
+      `projects/123456789/regions/us-south1/forwardingRules/my-fr`.
+    immutable: true
+    required: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |-
+      Labels are key/value pairs that help to organize and filter resources.
+  - name: 'reconciling'
+    type: Boolean
+    description: |-
+      The current state of the resource does not match the user's intended state,
+      and the system is working to reconcile them. This is part of the normal
+      operation. See https://google.aip.dev/128.
+    output: true
+  - name: 'state'
+    type: String
+    description: |-
+      The current state of the collector.
+      See https://google.aip.dev/216.
+      Possible values:
+      ACTIVE
+      CREATING
+      DELETING
+    output: true
