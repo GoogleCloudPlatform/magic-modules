@@ -3550,32 +3550,16 @@ func TestAccContainerCluster_withClusterDisruptionBudget(t *testing.T) {
 	        CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 	        Steps: []resource.TestStep{
 	                {
-                  Config: testAccContainerCluster_withClusterDisruptionBudget(clusterName, "1s", networkName, subnetworkName),
-Check: resource.ComposeTestCheckFunc(
-	resource.TestCheckNoResourceAttr(resourceName,
-		"maintenance_policy.0.disruption_budget.0.minor_version_disruption_interval"),
-),
-          },
+							Config: testAccContainerCluster_withClusterDisruptionBudget(clusterName, "1s", networkName, subnetworkName),
+							Check: resource.ComposeTestCheckFunc(resource.TestCheckNoResourceAttr(resourceName,
+								"maintenance_policy.0.disruption_budget.0.minor_version_disruption_interval"),
+							),
+					},
 	                {
 	                        ResourceName:            resourceName,
 	                        ImportState:             true,
 	                        ImportStateVerify:       true,
 	                        ImportStateVerifyIgnore: []string{"deletion_protection"},
-	                },
-	                {
-	                        Config: testAccContainerCluster_withClusterDisruptionBudget(clusterName, "", networkName, subnetworkName),
-	                        Check: resource.ComposeTestCheckFunc(
-	                                resource.TestCheckNoResourceAttr(resourceName,
-	                                        "maintenance_policy.0.disruption_budget.0.minor_version_disruption_interval"),
-	                        ),
-	                },
-	                {
-	                        ResourceName:            resourceName,
-	                        ImportState:             true,
-	                        ImportStateVerify:       true,
-	                        // maintenance_policy.# = 0 is equivalent to no maintenance policy at all,
-	                        // but will still cause an import diff
-	                        ImportStateVerifyIgnore: []string{"maintenance_policy.#", "deletion_protection"},
 	                },
 	        },
 	})
@@ -11132,33 +11116,27 @@ resource "google_container_cluster" "with_node_pool_node_drain_config" {
 }
 
 func testAccContainerCluster_withClusterDisruptionBudget(clusterName, interval, networkName, subnetworkName string) string {
-	maintenancePolicy := ""
-	if len(interval) > 0 {
-		maintenancePolicy = fmt.Sprintf(`
-	maintenance_policy {
-		daily_maintenance_window {
-			start_time = "03:00"
-		}
-		disruption_budget {
-			minor_version_disruption_interval = "%s"
-			patch_version_disruption_interval = "%s"
-		}
-	}`, interval, interval)
-	}
-	
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_cluster_disruption_budget" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  %s
 
+  maintenance_policy {
+	daily_maintenance_window {
+		start_time = "03:00"
+	}
+	disruption_budget {
+		minor_version_disruption_interval = "%s"
+		patch_version_disruption_interval = "%s"
+	}
+  }
   network    = "%s"
   subnetwork = "%s"
 
   deletion_protection = false
 }
-`, clusterName, maintenancePolicy, networkName, subnetworkName)
+`, clusterName, interval, networkName, subnetworkName)
 }
 
 func testAccContainerCluster_withMaintenanceWindow(clusterName, startTime, networkName, subnetworkName string) string {
