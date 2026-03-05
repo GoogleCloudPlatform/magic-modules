@@ -1723,7 +1723,7 @@ func TestAccSqlDatabaseInstance_crossProjectClone(t *testing.T) {
 	t.Parallel()
 
 	cloneDestinationProject := envvar.GetTestProjectFromEnv()
-	cloneSourceProject := envvar.GetTestDestinationProjectFromEnv()
+	cloneSourceProject := envvar.GetTestDestinationProjectFromEnv(t)
 
 	context := map[string]interface{}{
 		"random_suffix":           acctest.RandString(t, 10),
