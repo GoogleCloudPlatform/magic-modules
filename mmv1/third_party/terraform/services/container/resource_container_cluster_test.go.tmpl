@@ -11136,7 +11136,7 @@ resource "google_container_cluster" "with_cluster_disruption_budget" {
 
   deletion_protection = false
 }
-`, clusterName, interval, networkName, subnetworkName)
+`, clusterName, interval, interval, networkName, subnetworkName)
 }
 
 func testAccContainerCluster_withMaintenanceWindow(clusterName, startTime, networkName, subnetworkName string) string {
