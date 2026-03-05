@@ -35,6 +35,7 @@ async:
     base_url: 'projects/{{project}}/operations/{{op_id}}'
   result:
     resource_inside_response: false
+flatten_all_in_method: true
 custom_code:
   encoder: 'templates/terraform/encoders/sql_source_representation_instance.go.tmpl'
   decoder: 'templates/terraform/decoders/sql_source_representation_instance.go.tmpl'
