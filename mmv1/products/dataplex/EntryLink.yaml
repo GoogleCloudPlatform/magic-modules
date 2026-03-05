@@ -17,7 +17,7 @@ description: |
   EntryLink represents a link between two Entries.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/dataplex/docs' # Update with specific EntryLink docs when available
+    'Official Documentation': 'https://cloud.google.com/dataplex/docs'  # Update with specific EntryLink docs when available
   api: 'https://cloud.google.com/dataplex/docs/reference/rest/v1/projects.locations.entryGroups.entryLinks'
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}/entryLinks/{{entry_link_id}}'
@@ -62,7 +62,7 @@ examples:
     test_env_vars:
       project_number: 'PROJECT_NUMBER'
       project_id: 'PROJECT_NAME'
-  
+
 parameters:
   - name: 'entryGroupId'
     type: String
@@ -114,6 +114,7 @@ properties:
     description: |
       Specifies the Entries referenced in the Entry Link. There should be exactly two entry references.
     required: true
+    immutable: true
     item_type:
       type: NestedObject
       properties:
@@ -147,7 +148,7 @@ properties:
           type: String
           required: true
           description: |
-              The map keys of the Aspects which the service should modify. 
+              The map keys of the Aspects which the service should modify.
               It should be the aspect type reference in the format `{project_number}.{location_id}.{aspect_type_id}`.
         - name: 'aspect'
           type: NestedObject
