@@ -14,6 +14,7 @@
 ---
 name: 'PrivilegedAccessManager'
 display_name: 'Privileged Access Manager'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://privilegedaccessmanager.googleapis.com/v1/'

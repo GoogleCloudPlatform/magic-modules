@@ -14,6 +14,7 @@
 ---
 name: 'ResourceManager'
 display_name: 'Resource Manager'
+deletion_policy_opt_in: true
 versions:
   - name: 'ga'
     base_url: 'https://cloudresourcemanager.googleapis.com/v1/'
