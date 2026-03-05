@@ -64,10 +64,8 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time,
 		templateFS:        templateFS,
 	}
 
-	t.Product.SetCompiler(ProviderName(t))
 	t.Product.ImportPath = ImportPathFromVersion(versionName)
 	for _, r := range t.Product.Objects {
-		r.SetCompiler(ProviderName(t))
 		r.ImportPath = t.Product.ImportPath
 	}
 
@@ -147,7 +145,7 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 				targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_fw_%s.go", t.ResourceGoFilename(object)))
 				templateData.GenerateFWResourceFile(targetFilePath, object)
 			} else {
-				log.Fatalf("please remove \"plugin_framework: true\" from the YAML configuration.")
+				log.Fatalf("please remove \"plugin_framework_experimental: true\" from the YAML configuration.")
 			}
 		} else {
 			targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s.go", t.ResourceGoFilename(object)))
@@ -165,6 +163,20 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 	}
 }
 
+// GenerateResourceFile is the Bazel counterpart to GenerateResource(), generating *only() the .go file and
+// taking the full path to the output file to generate rather than implicitly generating the path.
+func (t *Terraform) GenerateResourceFile(object api.Resource, targetFilePath string) {
+	if object.FrameworkResource {
+		log.Fatalf("Framework resources are currently unsupported")
+	}
+	targetFolder := path.Dir(targetFilePath)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	templateData := NewTemplateData("", t.TargetVersionName, t.templateFS)
+	templateData.GenerateResourceFile(targetFilePath, object)
+}
+
 func (t *Terraform) GenerateResourceMetadata(object api.Resource, templateData TemplateData, outputFolder string) {
 	productName := t.Product.ApiName
 	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
@@ -172,6 +184,17 @@ func (t *Terraform) GenerateResourceMetadata(object api.Resource, templateData T
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_meta.yaml", t.FullResourceName(object)))
+	templateData.GenerateMetadataFile(targetFilePath, object)
+}
+
+// GenerateResourceMetadataFile is used by the Bazel version of the MM compiler to generate the specified
+// resource's `generated_meta.yaml` file.
+func (t *Terraform) GenerateResourceMetadataFile(object api.Resource, targetFilePath string) {
+	targetFolder := path.Dir(targetFilePath)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	templateData := NewTemplateData("", t.TargetVersionName, t.templateFS)
 	templateData.GenerateMetadataFile(targetFilePath, object)
 }
 
@@ -243,6 +266,20 @@ func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData Te
 	templateData.GenerateSweeperFile(targetFilePath, object)
 }
 
+// GenerateResourceMetadataFile is used by the Bazel version of the MM compiler to generate the sweeper for
+// the specified resource. It panics if the resource does not use a sweeper.
+func (t *Terraform) GenerateResourceSweeperFile(object api.Resource, targetFilePath string) {
+	if !object.ShouldGenerateSweepers() {
+		log.Fatalf("attempting to generate a sweeper for unswept resource %q", object.Name)
+	}
+	targetFolder := path.Dir(targetFilePath)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	templateData := NewTemplateData("", t.TargetVersionName, t.templateFS)
+	templateData.GenerateSweeperFile(targetFilePath, object)
+}
+
 func (t *Terraform) GenerateSingularDataSource(object api.Resource, templateData TemplateData, outputFolder string) {
 	if !object.ShouldGenerateSingularDataSource() {
 		return
@@ -309,6 +346,17 @@ func (t *Terraform) GenerateProduct(outputFolder string) {
 	templateData.GenerateProductFile(targetFilePath, *t.Product)
 }
 
+// GenerateProduct creates the product.go file for the bazel version of the MM compiler.
+func (t *Terraform) GenerateProductFile(targetFilePath string) {
+	targetFolder := path.Dir(targetFilePath)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+
+	templateData := NewTemplateData("", t.TargetVersionName, t.templateFS)
+	templateData.GenerateProductFile(targetFilePath, *t.Product)
+}
+
 func (t *Terraform) GenerateOperation(outputFolder string) {
 	asyncObjects := google.Select(t.Product.Objects, func(o *api.Resource) bool {
 		return o.AutogenAsync
@@ -325,6 +373,16 @@ func (t *Terraform) GenerateOperation(outputFolder string) {
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_operation.go", google.Underscore(t.Product.Name)))
 	templateData := NewTemplateData(outputFolder, t.TargetVersionName, t.templateFS)
 	templateData.GenerateOperationFile(targetFilePath, *asyncObjects[0])
+}
+
+// GenerateProduct creates the operation.go file for the bazel version of the MM compiler.
+func (t *Terraform) GenerateOperationFile(object api.Resource, targetFilePath string) {
+	targetFolder := path.Dir(targetFilePath)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	templateData := NewTemplateData("", t.TargetVersionName, t.templateFS)
+	templateData.GenerateOperationFile(targetFilePath, object)
 }
 
 // Generate the IAM policy for this object. This is used to query and test

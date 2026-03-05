@@ -17,10 +17,9 @@ api_resource_type_kind: SecurityPolicy
 api_resource_field: 'rules'
 description: |
   A rule for the OrganizationSecurityPolicy.
-min_version: 'beta'
 references:
   guides:
-    'Creating firewall rules': 'https://cloud.google.com/vpc/docs/using-firewall-policies#create-rules'
+    'Configure hierarchical security policies': 'https://docs.cloud.google.com/armor/docs/hierarchical-policies-using'
   api: 'https://cloud.google.com/compute/docs/reference/rest/beta/organizationSecurityPolicies/addRule'
 docs:
 id_format: '{{policy_id}}/priority/{{priority}}'
@@ -46,7 +45,11 @@ custom_code:
 examples:
   - name: 'organization_security_policy_rule_basic'
     primary_resource_id: 'policy'
+    test_env_vars:
+      org_id: 'ORG_ID'
+  - name: 'organization_security_policy_rule_firewall'
     min_version: 'beta'
+    primary_resource_id: 'policy'
     test_env_vars:
       org_id: 'ORG_ID'
 parameters:
@@ -54,7 +57,6 @@ parameters:
     type: String
     description: |
       The ID of the OrganizationSecurityPolicy this rule applies to.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -63,14 +65,12 @@ properties:
     type: String
     description: |
       A description of the rule.
-    min_version: 'beta'
   - name: 'priority'
     type: Integer
     description: |
       An integer indicating the priority of a rule in the list. The priority must be a value
       between 0 and 2147483647. Rules are evaluated from highest to lowest priority where 0 is the
       highest priority and 2147483647 is the lowest prority.
-    min_version: 'beta'
     required: true
     immutable: true
   - name: 'match'
@@ -78,27 +78,22 @@ properties:
     description:
       A match condition that incoming traffic is evaluated against. If it
       evaluates to true, the corresponding 'action' is enforced.
-    min_version: 'beta'
     required: true
     properties:
       - name: 'description'
         type: String
         description: |
           A description of the rule.
-        min_version: 'beta'
       - name: 'versionedExpr'
-        type: Enum
+        type: String
         description: |
           Preconfigured versioned expression. For organization security policy rules,
-          the only supported type is "FIREWALL".
-        min_version: 'beta'
+          the only supported type is "SRC_IPS_V1".
+          **NOTE** : 'FIREWALL' type is deprecated. Please use 'google_compute_firewall_policy_rule' resource instead.
         default_value: "FIREWALL"
-        enum_values:
-          - 'FIREWALL'
       - name: 'config'
         type: NestedObject
         description: The configuration options for matching the rule.
-        min_version: 'beta'
         required: true
         properties:
           - name: 'srcIpRanges'
@@ -106,7 +101,6 @@ properties:
             description: |
               Source IP address range in CIDR format. Required for
               INGRESS rules.
-            min_version: 'beta'
             exactly_one_of:
               - 'match.0.config.0.src_ip_ranges'
               - 'match.0.config.0.dest_ip_ranges'
@@ -115,8 +109,8 @@ properties:
           - name: 'destIpRanges'
             type: Array
             description: |
-              Destination IP address range in CIDR format. Required for
-              EGRESS rules.
+              Destination IP address range in CIDR format. Required for EGRESS rules.
+              This field may only be specified when versionedExpr is set to FIREWALL.
             min_version: 'beta'
             exactly_one_of:
               - 'match.0.config.0.src_ip_ranges'
@@ -127,9 +121,9 @@ properties:
             type: Array
             description: |
               Pairs of IP protocols and ports that the rule should match.
+              This field may only be specified when versionedExpr is set to FIREWALL.
             api_name: layer4Configs
             min_version: 'beta'
-            required: true
             item_type:
               type: NestedObject
               properties:
@@ -141,7 +135,6 @@ properties:
                     This value can either be one of the following well
                     known protocol strings (tcp, udp, icmp, esp, ah, ipip, sctp),
                     or the IP protocol number.
-                  min_version: 'beta'
                   required: true
                 - name: 'ports'
                   type: Array
@@ -153,7 +146,6 @@ properties:
 
                     Example inputs include: ["22"], ["80","443"], and
                     ["12345-12349"].
-                  min_version: 'beta'
                   item_type:
                     type: String
   - name: 'action'
@@ -161,17 +153,16 @@ properties:
     description: |
       The Action to perform when the client connection triggers the rule. Can currently be either
       "allow", "deny" or "goto_next".
-    min_version: 'beta'
     required: true
   - name: 'preview'
     type: Boolean
     description: |
       If set to true, the specified action is not enforced.
-    min_version: 'beta'
   - name: 'direction'
     type: Enum
     description: |
       The direction in which this rule applies. If unspecified an INGRESS rule is created.
+      This field may only be specified when the versionedExpr is set to FIREWALL.
     min_version: 'beta'
     enum_values:
       - 'INGRESS'
@@ -192,6 +183,7 @@ properties:
       Denotes whether to enable logging for a particular rule.
       If logging is enabled, logs will be exported to the
       configured export destination in Stackdriver.
+      This field may only be specified when the versionedExpr is set to FIREWALL.
     min_version: 'beta'
     send_empty_value: true
   - name: 'targetServiceAccounts'

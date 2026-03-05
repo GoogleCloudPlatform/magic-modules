@@ -45,11 +45,9 @@ iam_policy:
     - '{{name}}'
 custom_code:
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 examples:
   - name: 'gkebackup_restoreplan_all_namespaces'
     primary_resource_id: 'all_ns'
-    primary_resource_name: 'fmt.Sprintf("tf-test-restore-all-ns%s", context["random_suffix"])'
     vars:
       name: 'restore-all-ns'
       network_name: 'default'

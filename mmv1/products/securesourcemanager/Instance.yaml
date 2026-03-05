@@ -14,7 +14,6 @@
 ---
 name: 'Instance'
 include_in_tgc_next: true
-tgc_include_handwritten_tests: true
 kind: 'securesourcemanager#instance'
 description: 'Instances are deployed to an available Google Cloud region and are accessible via their web interface.'
 references:
@@ -58,7 +57,6 @@ deletion_policy_exclude: true
 examples:
   - name: 'secure_source_manager_instance_basic'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_id: 'my-instance'
       deletion_policy: 'PREVENT'
@@ -71,7 +69,6 @@ examples:
       - 'deletion_policy'
   - name: 'secure_source_manager_instance_cmek'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_id: 'my-instance'
       kms_key_name: 'my-key'
@@ -86,7 +83,6 @@ examples:
       - 'deletion_policy'
   - name: 'secure_source_manager_instance_private_trusted_cert'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_id: 'my-instance'
     ignore_read_extra:
@@ -95,7 +91,6 @@ examples:
     exclude_docs: true
   - name: 'secure_source_manager_instance_private'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_id: 'my-instance'
       ca_pool_id: 'ca-pool'
@@ -111,7 +106,6 @@ examples:
       - 'deletion_policy'
   - name: 'secure_source_manager_instance_private_psc_backend'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       network_id: 'my-network'
       subnet_id: 'my-subnet'
@@ -135,7 +129,6 @@ examples:
       - 'deletion_policy'
   - name: 'secure_source_manager_instance_private_psc_endpoint'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       network_id: 'my-network'
       subnet_id: 'my-subnet'
@@ -156,7 +149,6 @@ examples:
       - 'deletion_policy'
   - name: 'secure_source_manager_instance_workforce_identity_federation'
     primary_resource_id: 'default'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_id: 'my-instance'
       deletion_policy: 'PREVENT'

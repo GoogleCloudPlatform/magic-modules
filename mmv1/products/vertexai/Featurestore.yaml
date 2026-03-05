@@ -50,7 +50,6 @@ exclude_sweeper: true
 examples:
   - name: 'vertex_ai_featurestore'
     primary_resource_id: 'featurestore'
-    primary_resource_name: 'fmt.Sprintf("terraform%s", context["random_suffix"])'
     vars:
       name: 'terraform'
       project: 'appeng-flex'
@@ -64,7 +63,6 @@ examples:
       - 'force_destroy'
   - name: 'vertex_ai_featurestore_with_beta_fields'
     primary_resource_id: 'featurestore'
-    primary_resource_name: 'fmt.Sprintf("terraform%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       name: 'terraform2'
@@ -79,7 +77,6 @@ examples:
       - 'force_destroy'
   - name: 'vertex_ai_featurestore_scaling'
     primary_resource_id: 'featurestore'
-    primary_resource_name: 'fmt.Sprintf("terraform%s", context["random_suffix"])'
     vars:
       name: 'terraform3'
       project: 'appeng-flex'
