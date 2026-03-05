@@ -748,8 +748,6 @@ FeatureMembership can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{feature}}/{{membership}}`
 * `{{location}}/{{feature}}/{{membership}}`
 
-When the `membership_location` is omitted from the import ID, it will default to `global`.
-
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import FeatureMembership using one of the formats above. For example:
 
 ```tf
