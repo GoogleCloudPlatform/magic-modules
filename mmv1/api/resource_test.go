@@ -204,123 +204,6 @@ func TestResourceServiceVersion(t *testing.T) {
 	}
 }
 
-func TestLeafProperties(t *testing.T) {
-	t.Parallel()
-
-	cases := []struct {
-		description string
-		obj         Resource
-		expected    Type
-	}{
-		{
-			description: "non-nested type",
-			obj: Resource{
-				BaseUrl: "test",
-				Properties: []*Type{
-					{
-						Name: "basic",
-						Type: "String",
-					},
-				},
-			},
-			expected: Type{
-				Name: "basic",
-			},
-		},
-		{
-			description: "nested type",
-			obj: Resource{
-				BaseUrl: "test",
-				Properties: []*Type{
-					{
-						Name: "root",
-						Type: "NestedObject",
-						Properties: []*Type{
-							{
-								Name: "foo",
-								Type: "NestedObject",
-								Properties: []*Type{
-									{
-										Name: "bars",
-										Type: "Array",
-										ItemType: &Type{
-											Type: "NestedObject",
-											Properties: []*Type{
-												{
-													Name: "fooBar",
-													Type: "String",
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			expected: Type{
-				Name: "fooBar",
-			},
-		},
-		{
-			description: "nested virtual",
-			obj: Resource{
-				BaseUrl: "test",
-				VirtualFields: []*Type{
-					{
-						Name: "root",
-						Type: "NestedObject",
-						Properties: []*Type{
-							{
-								Name: "foo",
-								Type: "String",
-							},
-						},
-					},
-				},
-			},
-			expected: Type{
-				Name: "foo",
-			},
-		},
-		{
-			description: "nested param",
-			obj: Resource{
-				BaseUrl: "test",
-				Parameters: []*Type{
-					{
-						Name: "root",
-						Type: "NestedObject",
-						Properties: []*Type{
-							{
-								Name: "foo",
-								Type: "String",
-							},
-						},
-					},
-				},
-			},
-			expected: Type{
-				Name: "foo",
-			},
-		},
-	}
-
-	for _, tc := range cases {
-		tc := tc
-
-		t.Run(tc.description, func(t *testing.T) {
-			t.Parallel()
-
-			tc.obj.SetDefault(nil)
-			if got, want := tc.obj.LeafProperties(), tc.expected; got[0].Name != want.Name {
-				t.Errorf("expected %q to be %q", got[0].Name, want.Name)
-			}
-		})
-	}
-}
-
 // TestMagicianLocation verifies that the current package is being executed from within
 // the RELATIVE_MAGICIAN_LOCATION ("mmv1/") directory structure. This ensures that references
 // to files relative to this location will remain valid even if the repository structure
@@ -340,6 +223,11 @@ func TestMagicianLocation(t *testing.T) {
 	for {
 		// Check if we're in the directory containing mmv1
 		if _, err := os.Stat(filepath.Join(dir, "mmv1")); err == nil {
+			break
+		}
+
+		// When running under bazel runtime paths are relative
+		if dir == "." {
 			break
 		}
 
@@ -510,13 +398,15 @@ func TestHasPostCreateComputedFields(t *testing.T) {
 func TestResourceAddExtraFields(t *testing.T) {
 	t.Parallel()
 
-	createTestResource := func(name string) *Resource {
-		return &Resource{
+	createTestResource := func(name, pn string) *Resource {
+		r := &Resource{
 			Name: name,
 			ProductMetadata: &Product{
 				Name: "testproduct",
 			},
 		}
+		r.ProductMetadata.SetCompiler(pn)
+		return r
 	}
 
 	createTestType := func(name, typeStr string, options ...func(*Type)) *Type {
@@ -551,7 +441,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("WriteOnly property adds companion fields", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 		writeOnlyProp := createTestType("password", "String",
 			withWriteOnly(true),
 			withRequired(true),
@@ -596,10 +486,32 @@ func TestResourceAddExtraFields(t *testing.T) {
 		}
 	})
 
+	t.Run("WriteOnly property doesn't add companion fields for tgc", func(t *testing.T) {
+		t.Parallel()
+
+		resource := createTestResource("testresource", "terraformgoogleconversionnext")
+		writeOnlyProp := createTestType("password", "String",
+			withWriteOnly(true),
+			withRequired(true),
+			withDescription("A password field"),
+		)
+
+		props := []*Type{writeOnlyProp}
+		result := resource.AddExtraFields(props, nil)
+
+		if len(result) != 1 {
+			t.Errorf("Expected 1 property as WriteOnly fields should not be added, got %d", len(result))
+		}
+
+		if writeOnlyProp.WriteOnly {
+			t.Error("Original WriteOnly property should have WriteOnly set to false after processing")
+		}
+	})
+
 	t.Run("KeyValueLabels property adds terraform and effective labels", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 		labelsType := &Type{
 			Name:        "labels",
 			Type:        "KeyValueLabels",
@@ -652,7 +564,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("KeyValueLabels with ExcludeAttributionLabel adds different CustomDiff", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 		resource.ExcludeAttributionLabel = true
 
 		labelsType := &Type{
@@ -672,7 +584,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("KeyValueLabels with metadata parent adds metadata CustomDiff", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 		parent := &Type{Name: "metadata"}
 
 		labelsType := &Type{
@@ -692,7 +604,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("KeyValueAnnotations property adds effective annotations", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 		annotationsType := &Type{
 			Name:        "annotations",
 			Type:        "KeyValueAnnotations",
@@ -733,7 +645,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("NestedObject with properties processes recursively", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 
 		nestedWriteOnly := createTestType("nestedPassword", "String", withWriteOnly(true))
 		nestedObject := createTestType("config", "NestedObject", withProperties([]*Type{nestedWriteOnly}))
@@ -757,7 +669,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("Empty NestedObject properties are not processed", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 		emptyNestedObject := createTestType("config", "NestedObject", withProperties([]*Type{}))
 
 		props := []*Type{emptyNestedObject}
@@ -774,7 +686,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("WriteOnly property already ending with Wo is skipped", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 		woProperty := createTestType("passwordWo", "String", withWriteOnly(true))
 
 		props := []*Type{woProperty}
@@ -792,7 +704,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("Regular properties are passed through unchanged", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 		regularProp := createTestType("name", "String", withRequired(true))
 
 		props := []*Type{regularProp}
@@ -813,7 +725,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 	t.Run("Multiple property types processed correctly", func(t *testing.T) {
 		t.Parallel()
 
-		resource := createTestResource("testresource")
+		resource := createTestResource("testresource", "terraform")
 
 		regularProp := createTestType("name", "String")
 		writeOnlyProp := createTestType("password", "String", withWriteOnly(true))

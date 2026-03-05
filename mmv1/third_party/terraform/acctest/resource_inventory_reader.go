@@ -4,49 +4,64 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 
 	"gopkg.in/yaml.v2"
 )
 
-// ResourceYAMLMetadata represents the structure of the metadata files
-type ResourceYAMLMetadata struct {
-	Resource           string `yaml:"resource"`
-	ApiServiceName     string `yaml:"api_service_name"`
-	CaiAssetNameFormat string `yaml:"cai_asset_name_format"`
-	SourceFile         string `yaml:"source_file"`
-}
-
-// Cache structures to avoid repeated file system operations
 var (
-	// Cache for API service names (resourceName -> apiServiceName)
-	ApiServiceNameCache = NewGenericCache("unknown")
-	// Cache for CAI resource name format (resourceName -> CaiAssetNameFormat)
-	CaiAssetNameFormatCache = NewGenericCache("")
-	// Cache for service packages (resourceType -> servicePackage)
-	ServicePackageCache = NewGenericCache("unknown")
-	// Flag to track if cache has been populated
-	cachePopulated = false
-	// Mutex to protect cache access
-	cacheMutex sync.RWMutex
-
-	iamSuffixes = []string{
-		"_iam_member",
-		"_iam_binding",
-		"_iam_policy",
+	// The GlobalMetadataCache is used by VCR tests to avoid loading metadata once per test run.
+	// Because of the way VCR tests are run, it's difficult to avoid a global variable.
+	GlobalMetadataCache = MetadataCache{
+		mutex: &sync.Mutex{},
 	}
 )
 
-// PopulateMetadataCache walks through all metadata files once and populates
-// both the API service name and service package caches for improved performance
-func PopulateMetadataCache() error {
-	cacheMutex.Lock()
-	defer cacheMutex.Unlock()
+// Metadata represents the structure of the metadata files
+type Metadata struct {
+	Resource            string          `yaml:"resource"`
+	GenerationType      string          `yaml:"generation_type"`
+	SourceFile          string          `yaml:"source_file"`
+	ApiServiceName      string          `yaml:"api_service_name"`
+	ApiVersion          string          `yaml:"api_version"`
+	ApiResourceTypeKind string          `yaml:"api_resource_type_kind"`
+	CaiAssetNameFormats []string        `yaml:"cai_asset_name_formats"`
+	ApiVariantPatterns  []string        `yaml:"api_variant_patterns"`
+	AutogenStatus       bool            `yaml:"autogen_status,omitempty"`
+	Fields              []MetadataField `yaml:"fields"`
 
-	// If cache is already populated, we can skip
-	if cachePopulated {
-		return nil
+	// These keys store information about the metadata file itself.
+
+	// Path is the absolute path of the loaded metadata file
+	Path string
+	// ServicePackage is the folder within services/ that the metadata file is in, for example compute
+	ServicePackage string
+	// FileName is the filename of the metadata file, for example resource_compute_instance_meta.yaml
+	FileName string
+}
+
+type MetadataField struct {
+	ApiField     string `yaml:"api_field"`
+	Field        string `yaml:"field"`
+	ProviderOnly bool   `yaml:"provider_only"`
+	Json         bool   `yaml:"json"`
+}
+
+type MetadataCache struct {
+	mutex          *sync.Mutex
+	cache          map[string]Metadata
+	populated      bool
+	populatedError error
+}
+
+func (mc *MetadataCache) Populate() error {
+	mc.mutex.Lock()
+	defer mc.mutex.Unlock()
+
+	if mc.populated {
+		return mc.populatedError
 	}
 
 	baseDir, err := getServicesDir()
@@ -54,154 +69,124 @@ func PopulateMetadataCache() error {
 		return fmt.Errorf("failed to find services directory: %v", err)
 	}
 
-	// Count for statistics
-	apiNameCount := 0
-	servicePkgCount := 0
+	mc.cache = make(map[string]Metadata)
+
+	var malformed_yaml_errs []string
 
 	// Walk through all service directories once
 	err = filepath.Walk(baseDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			return nil // Skip files with errors but continue walking
+			return err // Fail immediately if there's an OS error.
 		}
 
-		// Look for metadata files
-		if !info.IsDir() && strings.HasPrefix(info.Name(), "resource_") && strings.HasSuffix(info.Name(), "_meta.yaml") {
-			// Read the file
-			content, err := os.ReadFile(path)
-			if err != nil {
-				return nil // Continue to next file
-			}
-
-			// Parse YAML
-			var metadata ResourceYAMLMetadata
-			if err := yaml.Unmarshal(content, &metadata); err != nil {
-				return nil // Continue to next file
-			}
-
-			// Skip if resource is empty
-			if metadata.Resource == "" {
-				return nil
-			}
-
-			iamResources := make([]string, 0)
-			for _, suffix := range iamSuffixes {
-				iamResources = append(iamResources, fmt.Sprintf("%s%s", metadata.Resource, suffix))
-			}
-
-			// Store API service name in cache
-			if metadata.ApiServiceName != "" {
-				ApiServiceNameCache.Set(metadata.Resource, metadata.ApiServiceName)
-				for _, iamResource := range iamResources {
-					ApiServiceNameCache.Set(iamResource, metadata.ApiServiceName)
-				}
-				apiNameCount++
-			}
-
-			if metadata.CaiAssetNameFormat != "" {
-				CaiAssetNameFormatCache.Set(metadata.Resource, metadata.CaiAssetNameFormat)
-				for _, iamResource := range iamResources {
-					CaiAssetNameFormatCache.Set(iamResource, metadata.CaiAssetNameFormat)
-				}
-			}
-
-			// Extract and store service package in cache
-			pathParts := strings.Split(path, string(os.PathSeparator))
-			servicesIndex := -1
-			for i, part := range pathParts {
-				if part == "services" {
-					servicesIndex = i
-					break
-				}
-			}
-
-			if servicesIndex >= 0 && len(pathParts) > servicesIndex+1 {
-				servicePackage := pathParts[servicesIndex+1] // The part after "services"
-				ServicePackageCache.Set(metadata.Resource, servicePackage)
-				for _, iamResource := range iamResources {
-					ServicePackageCache.Set(iamResource, servicePackage)
-				}
-				servicePkgCount++
-			}
+		// Skip non-metadata files
+		if info.IsDir() || !strings.HasPrefix(info.Name(), "resource_") || !strings.HasSuffix(info.Name(), "_meta.yaml") {
+			return nil
 		}
+
+		// Read the file
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return err // Fail immediately if there's an OS error.
+		}
+
+		// Parse YAML
+		var metadata Metadata
+		if err := yaml.Unmarshal(content, &metadata); err != nil {
+			// note but keep walking
+			malformed_yaml_errs = append(malformed_yaml_errs, fmt.Sprintf("%s: %v", path, err.Error()))
+			return nil
+		}
+
+		if _, ok := mc.cache[metadata.Resource]; ok {
+			return fmt.Errorf("duplicate resource: %s in %s", metadata.Resource, path)
+		}
+
+		metadata.Path = path
+		metadata.FileName = filepath.Base(path)
+		pathParts := strings.Split(path, string(os.PathSeparator))
+		servicesIndex := slices.Index(pathParts, "services")
+		if servicesIndex == -1 {
+			return fmt.Errorf("no service found for %s (%s)", metadata.Resource, path)
+		}
+		metadata.ServicePackage = pathParts[servicesIndex+1]
+		mc.cache[metadata.Resource] = metadata
 		return nil
 	})
 
 	if err != nil {
-		return fmt.Errorf("error walking directory: %v", err)
+		mc.populatedError = fmt.Errorf("error walking directory: %v", err)
+	}
+
+	if len(malformed_yaml_errs) > 0 {
+		mc.populatedError = fmt.Errorf("YAML parsing errors encountered:\n%v", strings.Join(malformed_yaml_errs, "\n"))
 	}
 
 	// Mark cache as populated
-	cachePopulated = true
+	mc.populated = true
 
-	return nil
+	return mc.populatedError
 }
 
-type GenericCache struct {
-	mu           sync.RWMutex
-	data         map[string]string
-	defaultValue string
+// Get takes a resource name (like google_compute_instance) and returns
+// the metadata for that resource and an `ok` bool of whether the metadata
+// exisxts in the cache.
+func (mc *MetadataCache) Get(key string) (Metadata, bool) {
+	// For IAM resources, return the parent resource's metadata. This could change if we
+	// start generating separate IAM metadata in the future. This is primarily for
+	// backwards-compatibility with the previous cache behavior and a workaround for _not_
+	// generating IAM resource metadata.
+	key, _ = strings.CutSuffix(key, "_iam_member")
+	key, _ = strings.CutSuffix(key, "_iam_binding")
+	key, _ = strings.CutSuffix(key, "_iam_policy")
+	m, ok := mc.cache[key]
+	return m, ok
 }
 
-// NewGenericCache initializes a new GenericCache with a default value.
-func NewGenericCache(defaultValue string) *GenericCache {
-	return &GenericCache{
-		data:         make(map[string]string),
-		defaultValue: defaultValue,
-	}
-}
-
-// Get retrieves a value from the cache, returning the default if not found.
-func (c *GenericCache) Get(key string) string {
-	// Make sure cache is populated
-	if !cachePopulated {
-		if err := PopulateMetadataCache(); err != nil {
-			return "failed_to_populate_metadata_cache"
-		}
-	}
-
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	value, ok := c.data[key]
-	if !ok {
-		return c.defaultValue
-	}
-	return value
-}
-
-func (c *GenericCache) Set(key, value string) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.data[key] = value
+func (mc *MetadataCache) Cache() map[string]Metadata {
+	return mc.cache
 }
 
 // getServicesDir returns the path to the services directory
 // It will attempt to find the project root relative to cwd
 func getServicesDir() (string, error) {
+	var startingDirs []string
 	// Try to find project root
 	root, err := findProjectRoot()
-	if err == nil {
-		servicesDir := filepath.Join(root, "google-beta", "services")
-		if _, err := os.Stat(servicesDir); err == nil {
-			return servicesDir, nil
-		}
-	}
-
-	// Last resort: try relative to current directory
-	currentDir, err := os.Getwd()
 	if err != nil {
-		return "", fmt.Errorf("failed to determine current directory: %v", err)
+		fmt.Printf("Error finding project root: %v", err)
+		// Fall back to dirs relative the current directory
+		currentDir, err := os.Getwd()
+		if err != nil {
+			return "", fmt.Errorf("failed to determine current directory: %v", err)
+		}
+		startingDirs = []string{
+			filepath.Join(currentDir),
+			filepath.Join(currentDir, ".."),
+			filepath.Join(currentDir, "..", ".."),
+		}
+	} else {
+		startingDirs = append(startingDirs, root)
 	}
 
-	// Try a few common relative paths
-	potentialPaths := []string{
-		filepath.Join(currentDir, "google-beta", "services"),
-		filepath.Join(currentDir, "..", "google-beta", "services"),
-		filepath.Join(currentDir, "..", "..", "google-beta", "services"),
-	}
+	for _, dir := range startingDirs {
+		files, err := os.ReadDir(dir)
+		if err != nil {
+			return "", fmt.Errorf("Failed reading dir %q: %v", dir, err)
+		}
 
-	for _, path := range potentialPaths {
-		if _, err := os.Stat(path); err == nil {
-			return path, nil
+		for _, file := range files {
+			fi, err := file.Info()
+			if err != nil {
+				return "", fmt.Errorf("Failed getting info for file %q: %v", filepath.Join(dir, file.Name()), err)
+			}
+
+			if fi.Mode().IsDir() && strings.HasPrefix(file.Name(), "google") {
+				servicesDir := filepath.Join(dir, file.Name(), "services")
+				if _, err := os.Stat(servicesDir); err == nil {
+					return servicesDir, nil
+				}
+			}
 		}
 	}
 

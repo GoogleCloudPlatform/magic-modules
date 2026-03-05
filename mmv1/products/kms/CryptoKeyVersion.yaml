@@ -33,6 +33,8 @@ delete_url: '{{name}}:destroy'
 delete_verb: 'POST'
 import_format:
   - '{{name}}'
+include_in_tgc_next: true
+cai2hcl_name_format: '{{crypto_key}}/cryptoKeyVersions/'
 timeouts:
   insert_minutes: 20
   update_minutes: 20

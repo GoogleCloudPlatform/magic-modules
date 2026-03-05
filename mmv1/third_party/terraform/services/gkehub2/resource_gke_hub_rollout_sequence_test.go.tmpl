@@ -1,0 +1,114 @@
+package gkehub2_test
+{{ if ne $.TargetVersionName "ga" }}
+import (
+	"fmt"
+	"log"
+	"strconv"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
+	"google.golang.org/api/googleapi"
+)
+
+var (
+	_ = fmt.Sprintf
+	_ = log.Print
+	_ = strconv.Atoi
+	_ = strings.Trim
+	_ = time.Now
+	_ = resource.TestMain
+	_ = terraform.NewState
+	_ = envvar.TestEnvVar
+	_ = tpgresource.SetLabels
+	_ = transport_tpg.Config{}
+	_ = googleapi.Error{}
+)
+
+// Since there can only be a single rollout sequence in a given host project,
+// create and update tests need to run sequentially, as a single test function.
+func TestAccGKEHub2RolloutSequence(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project_id":    envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccGKEHub2RolloutSequence_basic(context),
+			},
+			{
+				ResourceName:            "google_gke_hub_rollout_sequence.rollout_sequence",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "rollout_sequence_id", "terraform_labels"},
+			},
+			{
+				Config: testAccGKEHub2RolloutSequence_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_gke_hub_rollout_sequence.rollout_sequence", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_gke_hub_rollout_sequence.rollout_sequence",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "rollout_sequence_id", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccGKEHub2RolloutSequence_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_gke_hub_rollout_sequence" "rollout_sequence" {
+  provider = google-beta
+  rollout_sequence_id = "tf-test-rs-basic-%{random_suffix}"
+  display_name        = "Basic Rollout Sequence"
+  stages {
+    fleet_projects = ["projects/%{project_id}"]
+    soak_duration  = "60s"
+  }
+}
+`, context)
+}
+
+func testAccGKEHub2RolloutSequence_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_gke_hub_rollout_sequence" "rollout_sequence" {
+  provider = google-beta
+  rollout_sequence_id = "tf-test-rs-basic-%{random_suffix}"
+  display_name        = "Modified Rollout Sequence"
+  stages {
+		fleet_projects = ["projects/%{project_id}"]
+		cluster_selector {
+		  label_selector = "resource.labels.canary=='true'"
+		}
+		soak_duration  = "30s"
+  }
+  stages {
+		fleet_projects = ["projects/%{project_id}"]
+		soak_duration  = "60s"
+  }
+  labels = {
+    some_key = "some_value"
+  }
+}
+`, context)
+}
+{{ end }}

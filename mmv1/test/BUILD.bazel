@@ -1,0 +1,6 @@
+load("@rules_go//go:def.bzl", "go_test")
+
+go_test(
+    name = "test_test",
+    srcs = ["validate_third_party_test.go"],
+)

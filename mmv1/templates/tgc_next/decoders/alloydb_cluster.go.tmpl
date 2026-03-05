@@ -1,8 +1,0 @@
-// password is missing in CAI asset, but password is required in Terraform
-if res["initialUser"] == nil && res["clusterType"] == "PRIMARY" {
-    res["initialUser"] = map[string]interface{}{
-        "password": "hidden",
-    }
-}
-
-return res, hclData, nil

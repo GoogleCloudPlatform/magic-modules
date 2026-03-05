@@ -48,9 +48,10 @@ After applying this configuration:
 - Enroll in Cloud Armor Managed Protection Plus tier
 - Add Cloud Identity Premium Plan to the Google Workspace domain
 - Perform the Privileged Access Manager set-up https://pantheon.corp.google.com/iam-admin/pam/setup
-- (Org only) Enroll the org in the Premium tier of Security Control Center
 - Upload a model with the name `tf-static-1` to the Vertex AI model registry
   - This should only be necessary until uploading new models is supported in the provider.
+- (Org only) Enroll the org in the Premium tier of Security Control Center
+- (Org only) Enable Compliance Manager https://cloud.google.com/security-command-center/docs/compliance-manager-enable
 
 Quotas that will need to be adjusted to support all tests:
 - Project quota for the new service account

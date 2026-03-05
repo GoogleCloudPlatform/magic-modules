@@ -93,6 +93,14 @@ func main() {
 
 	generatedResources := make([]*Resource, 0, len(resourcesForVersion))
 	for _, resource := range resourcesForVersion {
+		// Never include serialization-only resources in the list of DCL resources
+		if resource.SerializationOnly {
+			continue
+		}
+
+		// Always add the resource to the list of generated resources so that provider_dcl_resources includes them,
+		// even if we're only generating one product.
+		generatedResources = append(generatedResources, resource)
 		if skipResource(resource) {
 			continue
 		}
@@ -101,7 +109,6 @@ func main() {
 		generateResourceFile(resource)
 		generateSweeperFile(resource)
 		generateResourceTestFile(resource)
-		generatedResources = append(generatedResources, resource)
 	}
 
 	generateProviderResourcesFile(generatedResources)
@@ -149,8 +156,7 @@ func skipResource(r *Resource) bool {
 		return true
 	}
 
-	// skip if set to SerializationOnly
-	return r.SerializationOnly
+	return false
 }
 
 func loadAndModelResources() (map[Version][]*Resource, map[Version][]*ProductMetadata, error) {

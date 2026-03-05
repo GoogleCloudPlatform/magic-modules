@@ -52,7 +52,6 @@ sweeper:
 examples:
   - name: 'bigquery_connection_cloud_resource'
     primary_resource_id: 'connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-connection%s", context["random_suffix"])'
     region_override: 'US'
     vars:
       connection_id: 'my-connection'
@@ -147,7 +146,7 @@ properties:
       The resource name of the connection in the form of:
       "projects/{project_id}/locations/{location_id}/connections/{connectionId}"
     output: true
-  - name: 'connection_id'
+  - name: 'connectionId'
     type: String
     description: |
       Optional connection id that should be assigned to the created connection.

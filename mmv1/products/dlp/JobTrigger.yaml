@@ -1064,7 +1064,7 @@ properties:
       - name: 'actions'
         type: Array
         description: |
-          Configuration block for the actions to execute on the completion of a job. Can be specified multiple times, but only one for each type. Each action block supports fields documented below. This argument is processed in [attribute-as-blocks mode](https://www.terraform.io/docs/configuration/attr-as-blocks.html).
+          Configuration block for the actions to execute on the completion of a job. Can be specified multiple times, but only one for each type. Each action block supports fields documented below. This argument is processed in [attribute-as-blocks mode](https://developer.hashicorp.com/terraform/language/attr-as-blocks).
         item_type:
           type: NestedObject
           properties:
@@ -1075,7 +1075,6 @@ properties:
               #   - save_findings
               #   - pub_sub
               #   - publish_findings_to_dataplex_catalog
-              #   - publish_findings_to_cloud_data_catalog
               #   - publish_summary_to_cscc
               #   - job_notification_emails
               #   - deidentify
@@ -1149,7 +1148,6 @@ properties:
               #   - save_findings
               #   - pub_sub
               #   - publish_findings_to_dataplex_catalog
-              #   - publish_findings_to_cloud_data_catalog
               #   - publish_summary_to_cscc
               #   - job_notification_emails
               #   - deidentify
@@ -1172,7 +1170,6 @@ properties:
               #   - save_findings
               #   - pub_sub
               #   - publish_findings_to_dataplex_catalog
-              #   - publish_findings_to_cloud_data_catalog
               #   - publish_summary_to_cscc
               #   - job_notification_emails
               #   - deidentify
@@ -1190,7 +1187,6 @@ properties:
               #   - save_findings
               #   - pub_sub
               #   - publish_findings_to_dataplex_catalog
-              #   - publish_findings_to_cloud_data_catalog
               #   - publish_summary_to_cscc
               #   - job_notification_emails
               #   - deidentify
@@ -1202,13 +1198,13 @@ properties:
               type: NestedObject
               description: |
                 Publish findings of a DlpJob to Data Catalog.
+              deprecation_message: '`publish_findings_to_cloud_data_catalog` is deprecated and will be removed in a future major release. To publish findings to Dataplex Catalog, use `publish_findings_to_dataplex_catalog` instead.'
               send_empty_value: true
               # TODO: uncomment here once they are supported(github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # exactly_one_of:
               #   - save_findings
               #   - pub_sub
               #   - publish_findings_to_dataplex_catalog
-              #   - publish_findings_to_cloud_data_catalog
               #   - publish_summary_to_cscc
               #   - job_notification_emails
               #   - deidentify
@@ -1226,7 +1222,6 @@ properties:
               #   - save_findings
               #   - pub_sub
               #   - publish_findings_to_dataplex_catalog
-              #   - publish_findings_to_cloud_data_catalog
               #   - publish_summary_to_cscc
               #   - job_notification_emails
               #   - deidentify
@@ -1241,7 +1236,6 @@ properties:
               #   - save_findings
               #   - pub_sub
               #   - publish_findings_to_dataplex_catalog
-              #   - publish_findings_to_cloud_data_catalog
               #   - publish_summary_to_cscc
               #   - job_notification_emails
               #   - deidentify
@@ -1334,7 +1328,6 @@ properties:
               #   - save_findings
               #   - pub_sub
               #   - publish_findings_to_dataplex_catalog
-              #   - publish_findings_to_cloud_data_catalog
               #   - publish_summary_to_cscc
               #   - job_notification_emails
               #   - deidentify

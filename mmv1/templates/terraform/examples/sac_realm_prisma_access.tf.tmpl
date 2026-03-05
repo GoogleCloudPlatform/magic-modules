@@ -1,0 +1,8 @@
+resource "google_network_security_sac_realm" "{{$.PrimaryResourceId}}" {
+  provider      = google-beta
+  name          = "{{index $.Vars "resource_name"}}"
+  labels = {
+    label-one = "value-one"
+  }
+  security_service = "PALO_ALTO_PRISMA_ACCESS"
+}

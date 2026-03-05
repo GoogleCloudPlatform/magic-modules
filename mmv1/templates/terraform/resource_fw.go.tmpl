@@ -71,7 +71,7 @@ import (
 )
 
 {{if $.CustomCode.Constants -}} 
-    {{- $.CustomTemplate $.CustomCode.Constants true -}}
+    {{- customTemplate $ $.CustomCode.Constants true -}}
 {{- end}}
 
 var (
@@ -158,7 +158,7 @@ func (d *{{$.ResourceName}}FWResource) Schema(ctx context.Context, _ resource.Sc
     {{template "SchemaFieldsFW" $prop -}}
 {{- end }}
 {{- if $.CustomCode.ExtraSchemaEntry }} 
-    {{ $.CustomTemplate $.CustomCode.ExtraSchemaEntry false -}}
+    {{ customTemplate $ $.CustomCode.ExtraSchemaEntry false -}}
 {{- end}}
 {{ if $.HasProject -}}
 			"project": schema.StringAttribute{
@@ -204,7 +204,7 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
 	var data {{$.ResourceName}}FWModel
 	var metaData *fwmodels.ProviderMetaModel
 {{ if $.CustomCode.CustomCreate -}}
-    {{ $.CustomTemplate $.CustomCode.CustomCreate false -}}
+    {{ customTemplate $ $.CustomCode.CustomCreate false -}}
 {{  else  -}}
 
     // Read Provider meta into the meta model
@@ -287,7 +287,7 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
 
     headers := make(http.Header)
 {{- if $.CustomCode.PreCreate }}
-    {{ $.CustomTemplate $.CustomCode.PreCreate false -}}
+    {{ customTemplate $ $.CustomCode.PreCreate false -}}
 {{- end}}
     res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
@@ -368,7 +368,7 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
 {{  end -}}{{/*if ($.GetAsync.IsA "OpAsync")*/}}
 {{end -}}{{/*if and $.GetAsync ($.GetAsync.Allow "Create")*/}}
 {{if $.CustomCode.PostCreate -}} 
-    {{- $.CustomTemplate $.CustomCode.PostCreate false -}}
+    {{- customTemplate $ $.CustomCode.PostCreate false -}}
 {{- end}}
 
 
@@ -503,11 +503,11 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
     headers := make(http.Header)
 
 {{- if $.UpdateMask }}
-{{ $.CustomTemplate "templates/terraform/update_mask_fw.go.tmpl" false -}}
+{{ customTemplate $ "templates/terraform/update_mask_fw.go.tmpl" false -}}
 {{  end}}
 
 {{- if $.CustomCode.PreUpdate }}
-    {{ $.CustomTemplate $.CustomCode.PreUpdate false -}}
+    {{ customTemplate $ $.CustomCode.PreUpdate false -}}
 {{- end}}
     res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
@@ -642,11 +642,11 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
 
 	var err error
 {{ if $.CustomCode.CustomDelete }} 
-{{ $.CustomTemplate $.CustomCode.CustomDelete false -}}
+{{ customTemplate $ $.CustomCode.CustomDelete false -}}
 {{- else }}
     headers := make(http.Header)
     {{- if $.CustomCode.PreDelete }} 
-        {{ $.CustomTemplate $.CustomCode.PreDelete false -}}
+        {{ customTemplate $ $.CustomCode.PreDelete false -}}
     {{- end }}
 
     log.Printf("[DEBUG] Deleting {{ $.Name }} %q", data.Id.ValueString())
@@ -694,7 +694,7 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
 {{- end }}{{/* if and $.GetAsync ($.GetAsync.Allow "Delete") */}}
 
 {{- if $.CustomCode.PostDelete }}
-    {{ $.CustomTemplate $.CustomCode.PostDelete false -}}
+    {{ customTemplate $ $.CustomCode.PostDelete false -}}
 {{- end }}
 
     log.Printf("[DEBUG] Finished deleting {{ $.Name }} %q: %#v", data.Id.ValueString(), res)
@@ -781,7 +781,7 @@ func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.C
 
     headers := make(http.Header)
 {{- if $.CustomCode.PreRead }}
-    {{ $.CustomTemplate $.CustomCode.PreRead false -}}
+    {{ customTemplate $ $.CustomCode.PreRead false -}}
 {{- end}}
     res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
@@ -805,7 +805,7 @@ func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.C
 		}
     }
 
-{{ range $prop := $.ReadProperties }}
+{{ range $prop := $.GettableProperties }}
 	data.{{camelize $prop.Name "upper"}} = res["{{ $prop.ApiName -}}"]
     {{$prop.ApiName}}Prop, d := data.{{camelize $prop.Name "upper"}}.To{{$prop.GetFWType}}Value(ctx)
 	diags.Append(d...)

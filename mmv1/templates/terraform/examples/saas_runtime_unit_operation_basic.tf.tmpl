@@ -1,0 +1,181 @@
+locals {
+  location          = "us-east1"
+  tenant_project_id = "{{index $.Vars "tenant_project_name"}}"
+}
+
+resource "google_saas_runtime_saas" "example_saas" {
+  provider = google-beta
+  saas_id  = "{{index $.Vars "saas_name"}}"
+  location = local.location
+
+  locations {
+    name = local.location
+  }
+}
+
+resource "google_saas_runtime_unit_kind" "cluster_unit_kind" {
+  provider        = google-beta
+  location        = local.location
+  unit_kind_id    = "{{index $.Vars "unitkind_name"}}"
+  saas            = google_saas_runtime_saas.example_saas.id
+  default_release = "projects/{{index $.TestEnvVars "project"}}/locations/${local.location}/releases/{{index $.Vars "release_name"}}"
+}
+
+resource "google_saas_runtime_release" "example_release" {
+  provider   = google-beta
+  location   = local.location
+  release_id = "{{index $.Vars "release_name"}}"
+  unit_kind  = google_saas_runtime_unit_kind.cluster_unit_kind.id
+  blueprint {
+    package = "us-central1-docker.pkg.dev/ci-test-project-188019/test-repo/tf-test-easysaas-alpha-image@sha256:7992fdbaeaf998ecd31a7f937bb26e38a781ecf49b24857a6176c1e9bfc299ee"
+  }
+}
+
+resource "google_saas_runtime_unit" "example_unit" {
+  provider  = google-beta
+  location  = local.location
+  unit_id   = "{{index $.Vars "unit_name"}}"
+  unit_kind = google_saas_runtime_unit_kind.cluster_unit_kind.id
+}
+
+resource "google_project" "tenant_project" {
+  provider        = google-beta
+  project_id      = local.tenant_project_id
+  name            = local.tenant_project_id
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_project_service" "saas_services" {
+  provider                   = google-beta
+  project                    = google_project.tenant_project.project_id
+  service                    = "compute.googleapis.com"
+  disable_dependent_services = true
+}
+
+resource "google_service_account" "actuation_service_account" {
+  provider     = google-beta
+  account_id   = "{{index $.Vars "actuation_service_account"}}"
+  display_name = "SaaS Actuation Service Account"
+}
+
+resource "google_project_iam_member" "tenant_config_admin" {
+  provider = google-beta
+  project  = google_project.tenant_project.project_id
+  role     = "roles/config.admin"
+  member   = "serviceAccount:${google_service_account.actuation_service_account.email}"
+}
+
+resource "google_project_iam_member" "tenant_storage_admin" {
+  provider = google-beta
+  project  = google_project.tenant_project.project_id
+  role     = "roles/storage.admin"
+  member   = "serviceAccount:${google_service_account.actuation_service_account.email}"
+}
+
+resource "google_project_iam_member" "tenant_compute_admin" {
+  provider = google-beta
+  project  = google_project.tenant_project.project_id
+  role     = "roles/compute.admin"
+  member   = "serviceAccount:${google_service_account.actuation_service_account.email}"
+}
+
+resource "google_service_account_iam_member" "actuation_token_creator" {
+  provider           = google-beta
+  service_account_id = google_service_account.actuation_service_account.name
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "serviceAccount:service-{{index $.TestEnvVars "project_number"}}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com"
+}
+
+resource "google_saas_runtime_unit_operation" "{{$.PrimaryResourceId}}" {
+  provider          = google-beta
+  depends_on        = [google_project_iam_member.tenant_config_admin, google_project_iam_member.tenant_storage_admin, google_project_iam_member.tenant_compute_admin, google_service_account_iam_member.actuation_token_creator, google_project_service.saas_services]
+  location          = local.location
+  unit_operation_id = "{{index $.Vars "provision_operation_name"}}"
+  unit              = google_saas_runtime_unit.example_unit.id
+  wait_for_completion = true
+
+  provision {
+    release = google_saas_runtime_release.example_release.id
+    input_variables {
+      variable = "tenant_project_id"
+      value    = google_project.tenant_project.project_id
+      type     = "STRING"
+    }
+    input_variables {
+      variable = "tenant_project_number"
+      value    = google_project.tenant_project.number
+      type     = "INT"
+    }
+    input_variables {
+      variable = "zone"
+      value    = "us-central1-a"
+      type     = "STRING"
+    }
+    input_variables {
+      variable = "instance_name"
+      value    = "terraform-test-instance"
+      type     = "STRING"
+    }
+    input_variables {
+      variable = "actuation_sa"
+      value    = google_service_account.actuation_service_account.email
+      type     = "STRING"
+    }
+  }
+  labels = {
+    "label-one" : "foo"
+  }
+  annotations = {
+    "annotation-one" : "bar"
+  }
+}
+
+resource "google_saas_runtime_unit_operation" "noop_upgrade_unit_operation" {
+  provider          = google-beta
+  depends_on        = [google_saas_runtime_unit_operation.{{$.PrimaryResourceId}}]
+  location          = local.location
+  unit_operation_id = "{{index $.Vars "upgrade_operation_name"}}"
+  unit              = google_saas_runtime_unit.example_unit.id
+  wait_for_completion = true
+
+  upgrade {
+    release = google_saas_runtime_release.example_release.id
+    input_variables {
+      variable = "tenant_project_id"
+      value    = google_project.tenant_project.project_id
+      type     = "STRING"
+    }
+    input_variables {
+      variable = "tenant_project_number"
+      value    = google_project.tenant_project.number
+      type     = "INT"
+    }
+    input_variables {
+      variable = "zone"
+      value    = "us-central1-a"
+      type     = "STRING"
+    }
+    input_variables {
+      variable = "instance_name"
+      value    = "terraform-test-instance"
+      type     = "STRING"
+    }
+    input_variables {
+      variable = "actuation_sa"
+      value    = google_service_account.actuation_service_account.email
+      type     = "STRING"
+    }
+  }
+}
+
+resource "google_saas_runtime_unit_operation" "deprovision_operation" {
+  provider          = google-beta
+  depends_on        = [google_saas_runtime_unit_operation.noop_upgrade_unit_operation]
+  location          = local.location
+  unit_operation_id = "{{index $.Vars "deprovision_operation_name"}}"
+  unit              = google_saas_runtime_unit.example_unit.id
+  wait_for_completion = true
+  deprovision {}
+}

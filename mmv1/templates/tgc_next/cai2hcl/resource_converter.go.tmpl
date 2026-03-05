@@ -18,9 +18,12 @@ package {{ lower $.ProductMetadata.Name }}
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 	"regexp"
 	"strings"
+	"crypto/sha256"
+	"encoding/hex"
 
 {{/* We list all the v2 imports here and unstable imports, because we run 'goimports' to guess the correct
      set of imports, which will never guess the major version correctly. */ -}}
@@ -54,6 +57,7 @@ var (
     _ = customdiff.All
     _ = id.UniqueId
     _ = logging.LogLevel
+	_ = log.Printf
     _ = retry.Retry
     _ = schema.Noop
     _ = structure.ExpandJsonFromString
@@ -111,8 +115,12 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 
 	hclBlockName := assetNameParts[len(assetNameParts)-1]
 	digitRegex := regexp.MustCompile(`^\d+$`)
-	if digitRegex.MatchString(hclBlockName) {
-		hclBlockName = fmt.Sprintf("resource%s", utils.RandString(8))
+	nameValidator := regexp.MustCompile("^[a-zA-Z_][a-zA-Z0-9_-]*$")
+	if digitRegex.MatchString(hclBlockName) || !nameValidator.MatchString(hclBlockName) {
+		hasher := sha256.New()
+		hasher.Write([]byte(hclBlockName))
+		fullHash := hex.EncodeToString(hasher.Sum(nil))
+		hclBlockName = fmt.Sprintf("resource%s", fullHash[:8])
 	}
 	hclData := make(map[string]interface{})
 
@@ -123,7 +131,7 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 	}
 {{ end}}
 
-{{ if and $.CustomCode.Decoder (not $.TGCIgnoreTerraformDecoder) -}}
+{{ if and $.CustomCode.Decoder (not $.CustomCode.TGCIgnoreTerraformDecoder) -}}
 	res, err = resource{{ $.ResourceName -}}Decoder(d, config, res)
 	if err != nil {
 		return nil, err
@@ -137,7 +145,7 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 
 {{/* Attempt to parse all self-link parameters from asset name. */}}
 	outputFields := {{ $.OutputFieldSetStr }}
-	utils.ParseUrlParamValuesFromAssetName(asset.Name, "{{ $.GetCaiAssetNameTemplate }}", outputFields, hclData)
+	utils.ParseUrlParamValuesFromAssetName(asset.Name, "{{ $.Cai2hclAssetNameTemplate }}", outputFields, hclData)
 {{ range $prop := $.ReadPropertiesForTgc }}
 	{{ if $prop.FlattenObject -}}
 	if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config); flattenedProp != nil {
@@ -166,12 +174,12 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 
 {{- if $.CustomCode.TgcDecoder }}
 func resource{{ $.ResourceName -}}TgcDecoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}, hclData map[string]interface{}) (map[string]interface{}, map[string]interface{}, error) {
-	{{ $.CustomTemplate $.CustomCode.TgcDecoder false -}}
+	{{ customTemplate $ $.CustomCode.TgcDecoder false -}}
 }
 {{- end }}
 
-{{- if and $.CustomCode.Decoder (not $.TGCIgnoreTerraformDecoder) }}
+{{- if and $.CustomCode.Decoder (not $.CustomCode.TGCIgnoreTerraformDecoder) }}
 func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
-	{{ $.CustomTemplate $.CustomCode.Decoder false -}}
+	{{ customTemplate $ $.CustomCode.Decoder false -}}
 }
 {{- end }}

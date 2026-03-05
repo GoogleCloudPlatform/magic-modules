@@ -16,11 +16,10 @@ name: 'OrganizationSecurityPolicy'
 api_resource_type_kind: SecurityPolicy
 description: |
   Organization security policies are used to control incoming/outgoing traffic.
-min_version: 'beta'
 references:
   guides:
     'Creating a firewall policy': 'https://cloud.google.com/vpc/docs/using-firewall-policies#create-policy'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/organizationSecurityPolicies'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/organizationSecurityPolicies'
 docs:
 id_format: 'locations/global/securityPolicies/{{policy_id}}'
 base_url: 'locations/global/securityPolicies?parentId={{parent}}'
@@ -37,12 +36,13 @@ custom_code:
   post_create: 'templates/terraform/post_create/org_security_policy.go.tmpl'
   post_delete: 'templates/terraform/post_delete/org_security_policy.go.tmpl'
   post_update: 'templates/terraform/post_update/org_security_policy.go.tmpl'
-    # TODO: Remove once b/154369201 is closed.
+  # TODO: Remove once b/154369201 is closed.
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
 examples:
   - name: 'organization_security_policy_basic'
     primary_resource_id: 'policy'
-    min_version: 'beta'
+    vars:
+      short_name: "my-short-name"
     test_env_vars:
       org_id: 'ORG_ID'
 parameters:
@@ -51,7 +51,6 @@ parameters:
     description: |
       The parent of this OrganizationSecurityPolicy in the Cloud Resource Hierarchy.
       Format: organizations/{organization_id} or folders/{folder_id}
-    min_version: 'beta'
     required: true
     immutable: true
 properties:
@@ -59,41 +58,37 @@ properties:
     type: String
     description: |
       User-provided name of the organization security policy. The name should be unique in the organization in which the security policy is created. This should only be used when SecurityPolicyType is FIREWALL.
-    min_version: 'beta'
     immutable: true
     ignore_read: true
   - name: 'description'
     type: String
     description: |
       A textual description for the organization security policy.
-    min_version: 'beta'
   - name: 'shortName'
     type: String
     description: |
       User-provided name of the organization security policy. The name should be unique in the organization in which the security policy is created. This should only be used when SecurityPolicyType is CLOUD_ARMOR.
-    min_version: 'beta'
     immutable: true
   - name: 'fingerprint'
     type: Fingerprint
     description: |
       Fingerprint of this resource. This field is used internally during
       updates of this resource.
-    min_version: 'beta'
     output: true
   - name: 'policy_id'
     type: String
     description: |
       The unique identifier for the resource. This identifier is defined by the server.
     api_name: id
-    min_version: 'beta'
     output: true
   - name: 'type'
     type: Enum
     description: |
       The type indicates the intended use of the security policy. This field can be set only at resource creation time.
-    min_version: 'beta'
+
+      **NOTE** : 'FIREWALL' type is deprecated and will be removed in a future major release. Please use 'google_compute_firewall_policy' instead."
     immutable: true
-    default_value: "FIREWALL"
+    default_from_api: true
     enum_values:
       - 'FIREWALL'
       - 'CLOUD_ARMOR'

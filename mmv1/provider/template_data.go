@@ -17,18 +17,22 @@ import (
 	"bytes"
 	"fmt"
 	"go/format"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"text/template"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/metadata"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/golang/glog"
+	"gopkg.in/yaml.v3"
 )
 
 type TemplateData struct {
 	OutputFolder string
 	VersionName  string
+	templateFS   fs.FS
 
 	// TODO rewrite: is this needed?
 	//     # Information about the local environment
@@ -41,8 +45,8 @@ var BETA_VERSION = "beta"
 var ALPHA_VERSION = "alpha"
 var PRIVATE_VERSION = "private"
 
-func NewTemplateData(outputFolder string, versionName string) *TemplateData {
-	td := TemplateData{OutputFolder: outputFolder, VersionName: versionName}
+func NewTemplateData(outputFolder string, versionName string, templateFS fs.FS) *TemplateData {
+	td := TemplateData{OutputFolder: outputFolder, VersionName: versionName, templateFS: templateFS}
 	return &td
 }
 
@@ -73,11 +77,15 @@ func (td *TemplateData) GenerateFWResourceFile(filePath string, resource api.Res
 }
 
 func (td *TemplateData) GenerateMetadataFile(filePath string, resource api.Resource) {
-	templatePath := "templates/terraform/metadata.yaml.tmpl"
-	templates := []string{
-		templatePath,
+	metadata := metadata.FromResource(resource)
+	bytes, err := yaml.Marshal(metadata)
+	if err != nil {
+		glog.Exit("error marshalling yaml %v: %v", filePath)
 	}
-	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+	err = os.WriteFile(filePath, bytes, 0644)
+	if err != nil {
+		glog.Exit(err)
+	}
 }
 
 func (td *TemplateData) GenerateDataSourceFile(filePath string, resource api.Resource) {
@@ -319,11 +327,11 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 	funcMap := template.FuncMap{
 		"TemplatePath": func() string { return templatePath },
 	}
-	for k, v := range google.TemplateFunctions {
+	for k, v := range google.TemplateFunctions(td.templateFS) {
 		funcMap[k] = v
 	}
 
-	tmpl, err := template.New(templateFileName).Funcs(funcMap).ParseFiles(templates...)
+	tmpl, err := template.New(templateFileName).Funcs(funcMap).ParseFS(td.templateFS, templates...)
 	if err != nil {
 		glog.Exit(fmt.Sprintf("error parsing %s for filepath %s ", templateFileName, filePath), err)
 	}
